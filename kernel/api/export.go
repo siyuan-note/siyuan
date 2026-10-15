@@ -370,6 +370,8 @@ var exportSY = contractHandler(apicontract.ExportSY, func(c *gin.Context, reques
 })
 
 var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.Context, request apicontract.ExportMarkdownContentRequest) apicontract.Response[apicontract.ExportMarkdownContentData] {
+	confExportSnapshot := model.Conf.LoadExport()
+
 	ret := gulu.Ret.NewResult()
 
 	id := request.ID
@@ -385,7 +387,7 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.ExportMarkdownContentData](ret)
 	}
-	refMode, embedMode, yfm := model.Conf.Export.BlockRefMode, model.Conf.Export.BlockEmbedMode, true
+	refMode, embedMode, yfm := confExportSnapshot.BlockRefMode, confExportSnapshot.BlockEmbedMode, true
 	if request.RefMode != nil {
 		refMode = int(*request.RefMode)
 	}
@@ -396,12 +398,23 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 		yfm = *request.YFM
 	}
 	fillCSSVar, adjustHeadingLevel, imgTag := request.FillCSSVar, request.AdjustHeadingLevel, request.ImgTag
-	addTitle := model.Conf.Export.AddTitle
+	addTitle := confExportSnapshot.AddTitle
 	if request.AddTitle != nil {
 		addTitle = *request.AddTitle
 	}
 
-	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar, adjustHeadingLevel, imgTag, addTitle)
+	hPath, content := model.ExportMarkdownContent(id, &model.ExportOptions{
+		BlockRefMode:   new(refMode),
+		BlockEmbedMode: new(embedMode),
+		MarkdownYFM:    new(yfm),
+		AddTitle:       new(addTitle),
+		Render: model.ExportRenderOptions{
+			FillCSSVar:          fillCSSVar,
+			AdjustHeadingLevel:  adjustHeadingLevel,
+			ImgTag:              imgTag,
+			PreserveTaskMarkers: request.PreserveTaskMarkers,
+		},
+	})
 	return apicontract.Success(apicontract.ExportMarkdownContentData{HPath: hPath, Content: content})
 })
 
@@ -665,7 +678,7 @@ var exportHTML = contractHandler(apicontract.ExportHTML, func(c *gin.Context, re
 })
 
 func exportTitleOptions(options apicontract.ExportTitleOptions) (addTitle bool, customTitle string) {
-	addTitle = model.Conf.Export.AddTitle
+	addTitle = model.Conf.Export.Load().AddTitle
 	if options.AddTitle != nil {
 		addTitle = *options.AddTitle
 	}
@@ -687,12 +700,21 @@ func exportMarkdownOptions(options apicontract.ExportMarkdownOptions) *model.Exp
 		result := int(*value)
 		return &result
 	}
-	return &model.ExportOptions{AddTitle: options.AddTitle, InlineMemo: options.InlineMemo,
-		BlockRefMode: integer(options.BlockRefMode), BlockEmbedMode: integer(options.BlockEmbedMode),
-		FileAnnotationRefMode: integer(options.FileAnnotationRefMode), BlockRefTextLeft: options.BlockRefTextLeft,
-		BlockRefTextRight: options.BlockRefTextRight, TagOpenMarker: options.TagOpenMarker, TagCloseMarker: options.TagCloseMarker,
-		IncludeSubDocs: options.IncludeSubDocs, IncludeRelatedDocs: options.IncludeRelatedDocs,
-		MarkdownYFM: options.MarkdownYFM, RemoveAssetsID: options.RemoveAssetsID}
+	return &model.ExportOptions{
+		AddTitle:              options.AddTitle,
+		InlineMemo:            options.InlineMemo,
+		BlockRefMode:          integer(options.BlockRefMode),
+		BlockEmbedMode:        integer(options.BlockEmbedMode),
+		FileAnnotationRefMode: integer(options.FileAnnotationRefMode),
+		BlockRefTextLeft:      options.BlockRefTextLeft,
+		BlockRefTextRight:     options.BlockRefTextRight,
+		TagOpenMarker:         options.TagOpenMarker,
+		TagCloseMarker:        options.TagCloseMarker,
+		IncludeSubDocs:        options.IncludeSubDocs,
+		IncludeRelatedDocs:    options.IncludeRelatedDocs,
+		MarkdownYFM:           options.MarkdownYFM,
+		RemoveAssetsID:        options.RemoveAssetsID,
+	}
 }
 
 func holdEncryptedExportRequest(c *gin.Context, id string, ret *gulu.Result) bool {

@@ -60,9 +60,9 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	util.BlockTreeDBPath = filepath.Join(tempDir, "blocktree.db")
 	Conf = NewAppConf()
 	Conf.Lang = testLang
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 
 	box := &Box{ID: "20260718000000-abcdefg"}
 	boxConf := conf.NewBoxConf()
@@ -85,6 +85,10 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	}
 
 	t.Cleanup(func() {
+		FlushTxQueue()
+		backgroundRefreshWaitGroup.Wait()
+		// 测试文档即将删除，其待处理索引不能留给后续用例刷新。
+		sql.ClearQueue()
 		cache.RemoveTreeData(sourceTree.ID)
 		cache.RemoveTreeData(targetTree.ID)
 		cache.RemoveDocIAL(sourceTree.Path)
@@ -133,7 +137,10 @@ func addFileOperationTestDoc(t *testing.T, fixture *fileOperationTestFixture, id
 
 func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	ial := filesys.DocIAL(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath))
+	ial, err := filesys.DocIAL(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath))
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []struct {
 		name string
 		id   string
@@ -178,7 +185,7 @@ func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 
 func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeSizeDESC
+	Conf.FileTree.Load().Sort = util.SortModeSizeDESC
 	boxConf := fixture.box.GetConf()
 	boxConf.SortMode = util.SortModeCreatedASC
 	if err := fixture.box.SaveConf(boxConf); nil != err {
@@ -257,8 +264,8 @@ func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 
 func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
-	Conf.FileTree.MaxListCount = 1
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
+	Conf.FileTree.Load().MaxListCount = 1
 	boxConf := fixture.box.GetConf()
 	boxConf.SortMode = util.SortModeFileTree
 	if err := fixture.box.SaveConf(boxConf); nil != err {
@@ -294,8 +301,8 @@ func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 	if nil != err {
 		t.Fatalf("read custom sort after append failed: %v", err)
 	}
-	if 4 != sorts[maxID] {
-		t.Fatalf("append used effective display mode instead of complete custom order: got %d, want 4", sorts[maxID])
+	if 31 != sorts[maxID] || sorts[extraID] != 30 {
+		t.Fatalf("append did not preserve existing custom values: %v", sorts)
 	}
 
 	minID := "20260718000005-abcdefg"
@@ -305,7 +312,7 @@ func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 	if nil != err {
 		t.Fatalf("read custom sort after prepend failed: %v", err)
 	}
-	if 1 != sorts[minID] || 5 != sorts[maxID] {
+	if 9 != sorts[minID] || 31 != sorts[maxID] {
 		t.Fatalf("prepend did not preserve the complete custom order: prepend=%d, trailing=%d", sorts[minID], sorts[maxID])
 	}
 
@@ -324,7 +331,7 @@ func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 
 func TestReorderDocsUsesCompleteSiblingOrder(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.FileTree.MaxListCount = 2
+	Conf.FileTree.Load().MaxListCount = 2
 	hiddenTree := addFileOperationTestDoc(t, fixture, "20260718000003-abcdefg", "Hidden", true)
 	unlistedTree := addFileOperationTestDoc(t, fixture, "20260718000004-abcdefg", "Unlisted", false)
 	confPath := filepath.Join(util.DataDir, fixture.box.ID, ".siyuan", "sort.json")
@@ -464,8 +471,8 @@ func assertNotebookCustomOrder(t *testing.T, expected []string) {
 
 func TestGetDocOptionallyIncludesDocInfo(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	expected, err := GetDocInfo(fixture.sourceID)
 	if nil != err {
 		t.Fatalf("get standalone document info failed: %v", err)

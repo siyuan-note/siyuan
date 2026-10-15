@@ -172,6 +172,16 @@ func CheckAssetContentReadonlyStatement(stmt string) error {
 	return checkReadonlyStatement(stmt, assetContentDB)
 }
 
+// CheckHistoryReadonlyStatement 在历史数据库连接上检查 SQL 为「单条 + 只读」。
+// 历史查询语句只引用 history.db 中的表，必须在该连接上 prepare 才能通过校验。
+// 见 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4hjx-84f6-gr7c
+func CheckHistoryReadonlyStatement(stmt string) error {
+	if err := CheckSingleStatement(stmt); nil != err {
+		return err
+	}
+	return checkReadonlyStatement(stmt, historyDB)
+}
+
 // CheckReadonlyBlockQueryStatement 校验原始块查询语句为「单条 + 只读」，boxID 为空或普通笔记本时
 // 在全局库上校验，加密笔记本在其独立加密库上校验。
 //

@@ -82,8 +82,9 @@ const getUnsafeRemoteChromiumSwitchName = (arg) => {
     const name = arg.slice(2).split("=", 1)[0].toLowerCase();
     if (name === "disable-features") {
         const disabledFeatures = arg.slice(arg.indexOf("=") + 1).toLowerCase().split(",");
+        // 去除 Chromium 功能名后的试验名称，防止绕过远程模式的安全限制。
         if (disabledFeatures.some((feature) => ["isolateorigins", "site-per-process", "siteperprocess"]
-            .includes(feature.trim()))) {
+            .includes(feature.split("<", 1)[0].trim()))) {
             return name;
         }
     }
@@ -128,6 +129,7 @@ const localDocumentPaths = new Set([
     "/check-auth",
     "/stage/build/app/",
     "/stage/build/app/window.html",
+    "/stage/build/app/settings.html",
 ]);
 const webRequestDestinations = new Map([
     ["mainframe", "document"],

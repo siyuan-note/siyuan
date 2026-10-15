@@ -7,10 +7,10 @@ const sources = () => {
     const ts = require("typescript");
     const preprocess = require("ifdef-loader/preprocessor").parse;
     const modules = {};
-    for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
+    for (const name of ["menus/menuToggle", "layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/GlobalBacklinkList", "layout/dock/globalBacklinkPaging",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
-        "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
+        "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
         "util/escape", "util/zIndex", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
         "layout/dock/backlinkMentionCache", "layout/dock/bottomBacklinkScroll"]) {
         modules[name] = ts.transpileModule(preprocess(
@@ -29,6 +29,9 @@ const runCases = async (sources) => {
     const requests = [];
     const tick = () => new Promise(resolve => setTimeout(resolve, 10));
     const stubs = {
+        "config/util/configApi": {config: {set: (_path, value) => stubs["util/fetch"].fetchSyncPost("/api/setting/patch", {editor: value})}},
+        "dialog/anchoredInput": {getAnchoredInputMask: () => null},
+        "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "editor/assetOpen": {normalizeAssetOpenConfig: value => value},
         "layout/dock/backlinkRefFilterMenu": {loadBacklinkRefFilterMenu: noop},
         "protyle/render/av/editorSession": {hasAVEditorSession: () => false},
@@ -136,6 +139,7 @@ const runCases = async (sources) => {
     assert.deepEqual(registry.getMobileSecondaryEditors(), [editor]);
     panel.markIndexDirty({backlinkChanged: true, backlinkFull: true});
     panel.refreshAfterIndex();
+    await new Promise(resolve => setTimeout(resolve, 1100));
     const inFlight = requests.shift();
     editor.protyle.wysiwyg.element.focus();
     assert.equal(registry.getActiveMobileSecondaryEditor(), editor);
@@ -285,7 +289,7 @@ const runCases = async (sources) => {
     sheet.editors.push(sheetEditor);
     registry.registerMobileSecondaryEditor(sheetEditor, noop);
     sheetEditor.protyle.wysiwyg.flushPendingInput = () => save;
-    const closing = panels.closeMobileBacklinkSheets();
+    const closing = load("mobile/util/MobileEditorDialog").closeMobileEditorSheets();
     await tick();
     assert.equal(sheetEditor.destroyed, undefined, "sheet must remain mounted until pending input completes");
     finishSave();

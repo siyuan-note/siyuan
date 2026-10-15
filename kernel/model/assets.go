@@ -56,10 +56,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func GetAssetImgSize(assetPath string) (width, height int) {
-	return GetAssetImgSizeInBox(assetPath, "")
-}
-
 func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 	absPath, resolveErr := GetAssetAbsPathInBox(assetPath, boxID)
 	if resolveErr != nil || !filelock.IsExist(absPath) {
@@ -520,10 +516,12 @@ func PrepareAgentMessageImage(assetPath string) (PreparedDocumentImage, error) {
 
 // GenerateImage 使用全局图片生成配置创建图片字节，可供文档资源、编辑器和其他图片入口复用。
 func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateImageResult, error) {
-	if Conf == nil || Conf.AI == nil {
+	confAIReadSnapshot := Conf.LoadAI()
+
+	if Conf == nil || confAIReadSnapshot == nil {
 		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
-	provider, generationModel := Conf.AI.GetImageGenerationModel()
+	provider, generationModel := confAIReadSnapshot.GetImageGenerationModel()
 	if err := validateImageModel(provider, generationModel); err != nil {
 		return GenerateImageResult{}, err
 	}
@@ -531,14 +529,14 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 	if prompt == "" {
 		return GenerateImageResult{}, errors.New("prompt is required for image generation")
 	}
-	size := multimodalValueOrDefault(request.Size, Conf.AI.ImageGeneration.Size)
-	quality := multimodalValueOrDefault(request.Quality, Conf.AI.ImageGeneration.Quality)
-	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, Conf.AI.ImageGeneration.OutputFormat))
+	size := multimodalValueOrDefault(request.Size, confAIReadSnapshot.ImageGeneration.Size)
+	quality := multimodalValueOrDefault(request.Quality, confAIReadSnapshot.ImageGeneration.Quality)
+	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, confAIReadSnapshot.ImageGeneration.OutputFormat))
 	if outputFormat != "png" && outputFormat != "jpeg" && outputFormat != "webp" {
 		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
+		provider.APIKey, provider.BaseURL, generationModel.Name, confAIReadSnapshot.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
 	).Generate(ctx, util.GenerateImageRequest{
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})
@@ -889,6 +887,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				return
 			}
+			invalidateDocumentHistory(tree.ID)
 			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files, humanize.BytesCustomCeil(uint64(size), 2)), 5000)
 
 			if 0 < forbiddenCount {
@@ -918,14 +917,16 @@ type AssetSearchMatch struct {
 }
 
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
-	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Limit)
+	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Load().Limit, false)
 	return
 }
 
-// SearchAssetsByNamePage 根据文件名、路径和扩展名筛选资源，并按稳定顺序返回指定页。
-func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int) (ret []*cache.Asset, err error) {
+// SearchAssetsByNamePage 筛选资源，可合并图片元数据命中，并按稳定顺序返回指定页。
+func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int, includeMetadata bool) (ret []*cache.Asset, err error) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []*cache.Asset{}
-	if page < 1 || pageSize < 1 || pageSize > Conf.Search.Limit {
+	if page < 1 || pageSize < 1 || pageSize > confSearchSnapshot.Limit {
 		return nil, errors.New("invalid asset search page")
 	}
 	allowedExts := map[string]bool{}
@@ -957,6 +958,14 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	keywords = append(keywords, keyword)
 	if "" != keyword {
 		keywords = append(keywords, strings.Split(keyword, " ")...)
+	}
+	metadataHits := map[string]int{}
+	if includeMetadata && strings.TrimSpace(keyword) != "" {
+		markdowns, queryErr := sql.QueryImageSpanMarkdowns()
+		if queryErr != nil {
+			return nil, queryErr
+		}
+		metadataHits = imageAssetMetadataHits(markdowns, keywords)
 	}
 	pathHitCount := map[string]int{}
 	filterAsset := func(path string, asset *cache.Asset) bool {
@@ -1012,12 +1021,16 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 		}
 
 		// 只返回有匹配的资源
-		if 1 > hitNameCount+hitPathCount {
+		metadataHitCount := metadataHits[asset.Path]
+		if includeMetadata && strings.TrimSpace(keyword) != "" {
+			metadataHitCount += assetMetadataTextHits(util.GetAssetText(asset.Path), keywords)
+		}
+		if 1 > hitNameCount+hitPathCount+metadataHitCount {
 			return false
 		}
 
 		// 记录命中次数用于排序
-		pathHitCount[asset.Path] = hitNameCount + hitPathCount
+		pathHitCount[asset.Path] = hitNameCount + hitPathCount + metadataHitCount
 		return true
 	}
 	matchedAssets := cache.FilterAssets(filterAsset)
@@ -1083,7 +1096,7 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	highlightKeyword := strings.Join(keywords, search.TermSep)
 	for _, asset := range ret {
 		if pathHitCount[asset.Path] > 0 {
-			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, Conf.Search.CaseSensitive)
+			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, confSearchSnapshot.CaseSensitive)
 		}
 	}
 	return
@@ -1182,10 +1195,24 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 	return
 }
 
-// ResolveUnusedDataAssetPath 解析 data 相对资源路径，并确认目标当前未被引用。
+// ResolveUnusedDataAssetPath 解析可单独删除的资源路径，允许显式关闭 Android 保活通知。
 func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string, err error) {
 	relativePath, absPath, err = ResolveDataAssetPath(assetPath)
 	if err != nil {
+		return
+	}
+
+	if relativePath == "assets/android-notification-texts.txt" {
+		// 保活开关不参与批量清理，但可显式删除普通文件；目录和符号链接不能使用该例外。
+		info, statErr := os.Lstat(absPath)
+		if statErr != nil {
+			err = statErr
+			return
+		}
+		if info.Mode().IsRegular() {
+			return
+		}
+		err = fmt.Errorf("Android notification texts must be a regular file: %s", relativePath)
 		return
 	}
 
@@ -1425,7 +1452,8 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 	return deferredAssetPath(relativePath, "", includeEncrypted)
 }
 
-func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
+// UploadAssets2CloudWithApp 将块资源上传提示限定到发起实例；空标识保留广播。
+func UploadAssets2CloudWithApp(id string, ignorePushMsg bool, app string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
@@ -1452,19 +1480,20 @@ func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
 		assets = append(assets, getQueryEmbedNodesAssetsLinkDests(n)...)
 	}
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
-	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets, ignorePushMsg)
+	count, err = uploadAssets2CloudWithApp(assets, bizTypeUploadAssets, ignorePushMsg, app)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func UploadAssets2CloudByAssetsPaths(assetPaths []string, ignorePushMsg bool) (count int, err error) {
+// UploadAssets2CloudByAssetsPathsWithApp 在同一实例显示、更新和清除本次上传的提示。
+func UploadAssets2CloudByAssetsPathsWithApp(assetPaths []string, ignorePushMsg bool, app string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
-	count, err = uploadAssets2Cloud(assetPaths, bizTypeUploadAssets, ignorePushMsg)
+	count, err = uploadAssets2CloudWithApp(assetPaths, bizTypeUploadAssets, ignorePushMsg, app)
 	return
 }
 
@@ -1475,6 +1504,10 @@ const (
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
 func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool) (count int, err error) {
+	return uploadAssets2CloudWithApp(assetPaths, bizType, ignorePushMsg, "")
+}
+
+func uploadAssets2CloudWithApp(assetPaths []string, bizType string, ignorePushMsg bool, app string) (count int, err error) {
 	var uploadAbsAssets []string
 	for _, assetPath := range assetPaths {
 		var absPath string
@@ -1500,10 +1533,11 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 
 	var msgId string
 	if !ignorePushMsg {
-		msgId = util.PushMsg(fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
+		msgId = util.PushMsgWithApp(app, fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
+		defer util.PushClearMsgWithApp(app, msgId)
 	}
 	if loadErr := LoadUploadToken(); nil != loadErr {
-		util.PushMsg(loadErr.Error(), 5000)
+		util.PushMsgWithApp(app, loadErr.Error(), 5000)
 		return
 	}
 
@@ -1539,7 +1573,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", absAsset, humanize.IBytes(limitSize))
 			if 3 > pushErrMsgCount {
 				msg := fmt.Sprintf(Conf.Language(247), filepath.Base(absAsset), humanize.IBytes(limitSize))
-				util.PushErrMsg(msg, 30000)
+				util.PushErrMsgWithApp(app, msg, 30000)
 			}
 			pushErrMsgCount++
 			continue
@@ -1548,7 +1582,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 		if !ignorePushMsg {
 			msg := fmt.Sprintf(Conf.Language(27), html.EscapeString(absAsset))
 			util.PushStatusBar(msg)
-			util.PushUpdateMsg(msgId, msg, 3000)
+			util.PushUpdateMsgWithApp(app, msgId, msg, 3000)
 		}
 
 		requestResult := gulu.Ret.NewResult()
@@ -1581,10 +1615,6 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 		completedUploadAssets = append(completedUploadAssets, relAsset)
 		logging.LogInfof("uploaded asset [%s]", relAsset)
 		count++
-	}
-
-	if !ignorePushMsg {
-		util.PushClearMsg(msgId)
 	}
 
 	if 0 < len(completedUploadAssets) {
@@ -1730,14 +1760,33 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
+	oldPath = strings.TrimSpace(oldPath)
+	suffix := ""
+	if idx := strings.IndexAny(oldPath, "?#"); idx >= 0 {
+		suffix = oldPath[idx:]
+	}
+	defer func() {
+		if err != nil {
+			newPath = ""
+		} else if newPath != "" {
+			newPath += suffix
+		}
+	}()
+	// 片段不参与磁盘路径解析，查询参数中的 box 仍用于定位笔记本。
+	if idx := strings.Index(oldPath, "#"); idx >= 0 {
+		oldPath = oldPath[:idx]
+	}
 	oldCleanPath := AssetPathWithoutQuery(oldPath)
 
+	oldAbsPath, err := GetAssetAbsPathInBox(oldPath, "")
+	if err != nil {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, err)
+		return
+	}
 	// 加密笔记本的资源磁盘文件名参与 AAD，重命名需要重新封装密文，当前不支持。
-	if absPath, absErr := GetAssetAbsPathInBox(oldPath, ""); absErr == nil {
-		if IsEncryptedAssetPath(absPath) {
-			err = errors.New("renaming assets in encrypted notebooks is not supported")
-			return
-		}
+	if IsEncryptedAssetPath(oldAbsPath) {
+		err = errors.New("renaming assets in encrypted notebooks is not supported")
+		return
 	}
 
 	newName = strings.TrimSpace(newName)
@@ -1757,11 +1806,6 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	newName = util.AssetName(newName+filepath.Ext(oldCleanPath), ast.NewNodeID())
 	parentDir := path.Dir(oldCleanPath)
 	newPath = path.Join(parentDir, newName)
-	oldAbsPath, getErr := GetAssetAbsPathInBox(oldPath, "")
-	if getErr != nil {
-		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, getErr)
-		return
-	}
 	if err = ensureReadableAssetLocal(oldAbsPath); err != nil {
 		return
 	}
@@ -1776,11 +1820,11 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	}
 	filelock.Unlock(oldAbsPath)
 
-	oldSya := filepath.Join(util.DataDir, oldPath+".sya")
+	oldSya := oldAbsPath + ".sya"
 	filelock.Lock(oldSya)
 	if gulu.File.IsExist(oldSya) {
 		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
-		newSya := filepath.Join(util.DataDir, newPath+".sya")
+		newSya := newAbsPath + ".sya"
 		if err = os.Rename(oldSya, newSya); err != nil {
 			if err = gulu.File.Copy(oldSya, newSya); err != nil {
 				filelock.Unlock(oldSya)
@@ -1791,7 +1835,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	}
 	filelock.Unlock(oldSya)
 
-	oldName := path.Base(oldPath)
+	oldName := path.Base(oldCleanPath)
+	oldNameBytes := []byte(oldName)
+	escapedOldNameBytes := []byte((&url.URL{Path: oldName}).EscapedPath())
+	nameReplacer := newAssetRenameReplacer(oldName, newName)
 
 	notebooks, err := ListNotebooks()
 	if err != nil {
@@ -1820,11 +1867,11 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					return
 				}
 
-				if !bytes.Contains(data, []byte(oldName)) {
+				if !bytes.Contains(data, oldNameBytes) && !bytes.Contains(data, escapedOldNameBytes) {
 					continue
 				}
 
-				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
+				data = []byte(nameReplacer.Replace(string(data)))
 				if writeErr := filelock.WriteFile(treeAbsPath, data); nil != writeErr {
 					logging.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					err = writeErr
@@ -1865,7 +1912,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 			}
 
 			avJSONPath := filepath.Join(storageAvDir, entry.Name())
-			if _, replaceErr := replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath); nil != replaceErr {
+			if _, replaceErr := replaceAttributeViewAssetPath(avJSONPath, avID, oldCleanPath, newPath); nil != replaceErr {
 				logging.LogErrorf("replace asset path in attribute view [%s] failed: %s", entry.Name(), replaceErr)
 				err = replaceErr
 				return
@@ -1875,7 +1922,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		}
 	}
 
-	if ocrText := util.GetAssetText(oldPath); "" != ocrText {
+	if ocrText := util.GetAssetText(oldCleanPath); "" != ocrText {
 		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
 		util.SetAssetText(newPath, ocrText)
 	}
@@ -1884,13 +1931,31 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	return
 }
 
+// newAssetRenameReplacer 同时替换字面量和百分号编码形式，保留引用的路径前缀、查询参数和片段。
+func newAssetRenameReplacer(oldValue, newValue string) *strings.Replacer {
+	pairs := []string{oldValue, newValue}
+	if escapedOld := (&url.URL{Path: oldValue}).EscapedPath(); escapedOld != oldValue {
+		pairs = append(pairs, escapedOld, (&url.URL{Path: newValue}).EscapedPath())
+	}
+	return strings.NewReplacer(pairs...)
+}
+
 func replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath string) (updated bool, err error) {
 	data, err := filelock.ReadFile(avJSONPath)
-	if nil != err || !bytes.Contains(data, []byte(oldPath)) {
+	if nil != err {
 		return
 	}
 
-	data = bytes.ReplaceAll(data, []byte(oldPath), []byte(newPath))
+	oldPath = strings.SplitN(AssetPathWithoutQuery(oldPath), "#", 2)[0]
+	newPath = strings.SplitN(AssetPathWithoutQuery(newPath), "#", 2)[0]
+	if oldPath == "" || oldPath == newPath {
+		return
+	}
+	replacedData := []byte(newAssetRenameReplacer(oldPath, newPath).Replace(string(data)))
+	if bytes.Equal(data, replacedData) {
+		return
+	}
+	data = replacedData
 	if err = filelock.WriteFile(avJSONPath, data); nil != err {
 		return
 	}
@@ -2063,6 +2128,42 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 		return nil, readAgentSessionsErr
 	}
 	removeReferencedAssetPaths(assetsPathMap, agentSessionDests)
+	templateDests := map[string]bool{}
+	templateDir := filepath.Join(util.DataDir, "templates")
+	if resolved, resolveErr := filepath.EvalSymlinks(templateDir); resolveErr == nil {
+		templateDir = resolved
+	} else if !os.IsNotExist(resolveErr) {
+		return nil, fmt.Errorf("resolve template directory failed: %w", resolveErr)
+	}
+	err = filepath.WalkDir(templateDir, func(filename string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			if filename == templateDir && os.IsNotExist(walkErr) {
+				return nil
+			}
+			return walkErr
+		}
+		if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".md") {
+			return nil
+		}
+		data, readErr := filelock.ReadFile(filename)
+		if readErr != nil {
+			return readErr
+		}
+		// 只解析模板里的静态引用，不执行模板函数或查询。
+		tree := parse.Parse("", data, luteEngine.ParseOptions)
+		for _, dest := range getAssetsLinkDests(tree.Root, false, normalizeAssetScanLinkDest) {
+			templateDests[dest] = true
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("read template asset references failed: %w", err)
+	}
+	for _, dest := range removeReferencedAssetPaths(assetsPathMap, templateDests) {
+		if strings.HasSuffix(dest, ".pdf") {
+			delete(assetsPathMap, dest+".sya")
+		}
+	}
 
 	var toRemoves []string
 	for asset := range assetsPathMap {
@@ -2449,7 +2550,7 @@ func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool, normalize ..
 
 func emojisInTree(tree *parse.Tree) (ret []string) {
 	if icon := tree.Root.IALAttr("icon"); "" != icon {
-		if !strings.Contains(icon, "://") && !strings.HasPrefix(icon, "api/icon/") && !util.NativeEmojiChars[icon] {
+		if !strings.Contains(icon, "://") && !strings.HasPrefix(icon, "api/icon/") && !util.IsNativeEmoji(icon) {
 			ret = append(ret, "/emojis/"+icon)
 		}
 	}
@@ -2489,7 +2590,7 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 		stmt := n.TokensStr()
 		stmt = html.UnescapeString(stmt)
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Load().Limit)
 		for _, sqlBlock := range sqlBlocks {
 			subtree, _ := LoadTreeByBlockID(sqlBlock.ID)
 			if nil == subtree {

@@ -72,7 +72,7 @@ func TestSetDocSortModeValidationAndPersistence(t *testing.T) {
 		treenode.UpsertBlockTree(tree)
 	}
 	t.Cleanup(func() {
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir
@@ -131,7 +131,7 @@ func TestSetDocSortModeValidationAndPersistence(t *testing.T) {
 	if nil != err {
 		t.Fatalf("remove document sort mode failed: %v", err)
 	}
-	if nil != clearResult.SortMode || Conf.FileTree.Sort != clearResult.EffectiveSortMode {
+	if nil != clearResult.SortMode || Conf.FileTree.Load().Sort != clearResult.EffectiveSortMode {
 		t.Fatalf("cleared document sort mode did not inherit the global mode: %#v", clearResult)
 	}
 	tree, err = LoadTreeByBlockID(fixture.sourceID)

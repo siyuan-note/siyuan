@@ -18,7 +18,7 @@ import (
 func TestBazaarMCPPagination(t *testing.T) {
 	oldConf, oldDataDir := model.Conf, util.DataDir
 	model.Conf = model.NewAppConf()
-	model.Conf.Bazaar = &conf.Bazaar{}
+	model.Conf.Bazaar.Store(&conf.Bazaar{})
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() { model.Conf, util.DataDir = oldConf, oldDataDir })
 	for i := 0; i < 23; i++ {

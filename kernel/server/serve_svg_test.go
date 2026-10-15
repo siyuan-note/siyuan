@@ -24,7 +24,7 @@ import (
 func TestServeSVGSanitizesAndSetsSecurityHeaders(t *testing.T) {
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	t.Cleanup(func() {
 		model.Conf = oldConf
 	})
@@ -59,8 +59,8 @@ func TestServeSVGSanitizesAndSetsSecurityHeaders(t *testing.T) {
 func TestServeSVGPreservesAllowSVGScriptBehavior(t *testing.T) {
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Editor.AllowSVGScript = true
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Editor.Load().AllowSVGScript = true
 	t.Cleanup(func() {
 		model.Conf = oldConf
 	})

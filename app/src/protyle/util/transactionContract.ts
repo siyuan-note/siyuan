@@ -1,6 +1,7 @@
 import type {Transaction, TransactionOperation, UnknownTransactionAction} from "../../types/api";
 
 const transactionActions: Record<IOperation["action"], true> = {
+    "setAttrViewAutomations": true,
     "setAttrViewConditionalColors": true,
     "setAttrViewCalendar": true,
     "updateAttrs": true,
@@ -12,6 +13,7 @@ const transactionActions: Record<IOperation["action"], true> = {
     "delete": true,
     "move": true,
     "swapBlockRef": true,
+    "convertList": true,
     "moveOutlineHeading": true,
     "append": true,
     "appendInsert": true,
@@ -38,6 +40,7 @@ const transactionActions: Record<IOperation["action"], true> = {
     "setAttrViewColPin": true,
     "setAttrViewColIcon": true,
     "setAttrViewColDesc": true,
+    "setAttrViewColAttributePanelVisibility": true,
     "insertAttrViewBlock": true,
     "removeAttrViewBlock": true,
     "addAttrViewCol": true,

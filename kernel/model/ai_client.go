@@ -1,0 +1,17 @@
+package model
+
+import (
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+// NewAIProviderClient 按认证方式和协议创建生成客户端，账户凭证不进入提供商配置，本机命令行提供方不走 HTTP 端点。
+func NewAIProviderClient(provider *conf.Provider, model string) *util.AIClient {
+	if util.IsClaudeCodeProtocol(provider.Protocol) {
+		return util.NewClaudeCodeAIClient(claudeCodeRuntime(provider, model))
+	}
+	if provider.AuthType == "chatgpt" {
+		return util.NewChatGPTClient(provider.AccountID)
+	}
+	return util.NewAIClientWithModel(provider.APIKey, provider.BaseURL, model, ResolveAIProviderHeaders(provider))
+}

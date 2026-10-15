@@ -28,9 +28,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+var iconHanPattern = regexp.MustCompile(`[\p{Han}]`)
 
 type ColorScheme struct {
 	Primary   string
@@ -114,7 +117,9 @@ func darkenColor(hexColor string, factor float64) string {
 	return fmt.Sprintf("#%02X%02X%02X", r, g, b)
 }
 
-var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Context, request apicontract.DynamicIconRequest) apicontract.Response[apicontract.BinaryContent] {
+var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.BinaryContent] {
+	confAppearanceSnapshot := model.Conf.LoadAppearance()
+
 	// Add internal kernel API `/api/icon/getDynamicIcon` https://github.com/siyuan-note/siyuan/pull/12939
 
 	iconType := c.Query("type")
@@ -179,7 +184,13 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 		svg = generateTypeOneSVG(color, dateInfo)
 	}
 
-	if !model.Conf.Editor.AllowSVGScript {
+	var fonts []*conf.EditorFont
+	if "8" == iconType && nil != confAppearanceSnapshot {
+		fonts = confAppearanceSnapshot.GlobalFontFamilies
+	}
+	svg = applyDynamicIconFont(svg, fonts)
+
+	if !model.Conf.Editor.Load().AllowSVGScript {
 		var err error
 		svg, err = util.SanitizeSVG(svg)
 		if err != nil {
@@ -196,6 +207,36 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 	c.Header("Pragma", "no-cache")
 	return apicontract.SuccessBinary("image/svg+xml", []byte(svg))
 })
+
+// applyDynamicIconFont 将全局字体和首选字重应用到 SVG 根节点，供所有文本继承。
+func applyDynamicIconFont(svg string, fonts []*conf.EditorFont) string {
+	const fallback = "-apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'"
+	families := make([]string, 0, len(fonts)+1)
+	weight := 400
+	for _, font := range fonts {
+		if nil == font || "" == font.Family {
+			continue
+		}
+		if 0 == len(families) && 1 <= font.Weight && font.Weight <= 1000 {
+			weight = font.Weight
+		}
+		// 字体名称作为 CSS 字符串编码，再对整个属性进行 XML 转义。
+		var family strings.Builder
+		family.WriteByte('"')
+		for _, char := range font.Family {
+			if '\\' == char || '"' == char || char < 0x20 || 0x7f == char {
+				fmt.Fprintf(&family, "\\%x ", char)
+			} else {
+				family.WriteRune(char)
+			}
+		}
+		family.WriteByte('"')
+		families = append(families, family.String())
+	}
+	families = append(families, fallback)
+	attributes := fmt.Sprintf(`<svg font-family="%s" font-weight="%d" `, html.EscapeString(strings.Join(families, ", ")), weight)
+	return strings.Replace(svg, "<svg ", attributes, 1)
+}
 
 // dynamicIconContentAccessable 判断调用方是否可读取动态图标模板内容所引用的块。
 // 管理员与编辑者拥有工作区读权限，只读角色则需要通过发布访问控制（禁用、密码与加密笔记本门禁）。
@@ -351,10 +392,10 @@ func generateTypeOneSVG(color string, dateInfo map[string]any) string {
     <svg id="dynamic_icon_type1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
-    <text transform="translate(22 146.5)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 100px;">%s</text>
-    <text x="50%%" y="392.5" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 240px; text-anchor: middle">%d</text>
-    <text x="50%%" y="472.5" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 64px; text-anchor: middle">%s</text>
-    <text transform="translate(331.03 148.44)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 71.18px;">%d</text>
+    <text transform="translate(22 146.5)" style="fill: #fff; font-size: 100px;">%s</text>
+    <text x="50%%" y="392.5" style="fill: #66757f; font-size: 240px; text-anchor: middle">%d</text>
+    <text x="50%%" y="472.5" style="fill: #66757f; font-size: 64px; text-anchor: middle">%s</text>
+    <text transform="translate(331.03 148.44)" style="fill: #fff; font-size: 71.18px;">%d</text>
     </svg>
     `, colorScheme.Primary, dateInfo["month"], dateInfo["day"], dateInfo["weekday"], dateInfo["year"])
 }
@@ -367,9 +408,9 @@ func generateTypeTwoSVG(color string, dateInfo map[string]any) string {
     <svg id="dynamic_icon_type2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
-    <text transform="translate(22 146.5)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 100px;">%s</text>
-    <text x="50%%" y="420.5"  style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 256px;text-anchor: middle">%d</text>
-    <text transform="translate(331.03 148.44)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 71.18px;">%d</text>
+    <text transform="translate(22 146.5)" style="fill: #fff; font-size: 100px;">%s</text>
+    <text x="50%%" y="420.5"  style="fill: #66757f; font-size: 256px;text-anchor: middle">%d</text>
+    <text transform="translate(331.03 148.44)" style="fill: #fff; font-size: 71.18px;">%d</text>
     </svg>
     `, colorScheme.Primary, dateInfo["month"], dateInfo["day"], dateInfo["year"])
 }
@@ -390,8 +431,8 @@ func generateTypeThreeSVG(color string, dateInfo map[string]any) string {
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%s</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"], dateInfo["month"])
 }
@@ -412,7 +453,7 @@ func generateTypeFourSVG(color string, dateInfo map[string]any) string {
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%d</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"])
 }
@@ -433,8 +474,8 @@ func generateTypeFiveSVG(color string, dateInfo map[string]any) string {
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%s</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["isoYear"], dateInfo["week"])
 }
@@ -488,7 +529,7 @@ func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo 
         <circle cx="382.5" cy="113.5" r="14"/>
         <circle cx="382.5" cy="71.5" r="14"/>
     </g>
-    <text id="weekday" x="50%%"  y="65%%" style="fill: %s; font-size: %.2fpx; text-anchor: middle; dominant-baseline:middle; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
+    <text id="weekday" x="50%%"  y="65%%" style="fill: %s; font-size: %.2fpx; text-anchor: middle; dominant-baseline:middle;">%s</text>
     </svg>`, colorScheme.Primary, colorScheme.Secondary, colorScheme.Primary, fontSize, weekday)
 }
 
@@ -557,11 +598,11 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]any) st
     <svg id="dynamic_icon_type7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path id="bottom" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
         <path id="top" d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
-        <text id="year" transform="translate(46.1 78.92)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 60px;">%d</text>
-        <text id="day" transform="translate(43.58 148.44)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 60px;">%s</text>
-        <text id="passStr" transform="translate(400 148.44)" style="fill: #fff; text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 71.18px;">%s</text>
-        <text id="diffDays" x="50%%" y="65%%" style="font-size: %.0fpx; fill: #66757f; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
-        <text id="dayStr" x="50%%" y="472.5" style="font-size: 64px; text-anchor: middle; fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
+        <text id="year" transform="translate(46.1 78.92)" style="fill: #fff; font-size: 60px;">%d</text>
+        <text id="day" transform="translate(43.58 148.44)" style="fill: #fff; font-size: 60px;">%s</text>
+        <text id="passStr" transform="translate(400 148.44)" style="fill: #fff; text-anchor: middle;font-size: 71.18px;">%s</text>
+        <text id="diffDays" x="50%%" y="65%%" style="font-size: %.0fpx; fill: #66757f; text-anchor: middle; dominant-baseline:middle;">%s</text>
+        <text id="dayStr" x="50%%" y="472.5" style="font-size: 64px; text-anchor: middle; fill: #66757f;">%s</text>
     </svg>`, colorScheme.Primary, dateInfo["year"], dateInfo["date"], tipText, fontSize, diffDaysText, dayStr)
 }
 
@@ -580,7 +621,7 @@ func generateTypeEightSVG(color, content string) string {
 	}
 
 	// 动态变化字体大小
-	isChinese := regexp.MustCompile(`[\p{Han}]`).MatchString(content)
+	isChinese := iconHanPattern.MatchString(content)
 	var fontSize float64
 	if isChinese {
 		switch {
@@ -618,7 +659,7 @@ func generateTypeEightSVG(color, content string) string {
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path d="M39,0h434c20.97,0,38,17.03,38,38v412c0,33.11-26.89,60-60,60H60c-32.56,0-59-26.44-59-59V38C1,17.03,18.03,0,39,0Z" style="fill: %s;"/>
-        <text x="50%%" y="55%%" dy="%s" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text x="50%%" y="55%%" dy="%s" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;">%s</text>
 	</svg>
     `, colorScheme.Primary, dy, fontSize, escapedContent)
 }

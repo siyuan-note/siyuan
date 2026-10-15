@@ -1,4 +1,53 @@
 .b3-dialog {
+  &--window {
+    & > .b3-dialog__container {
+      transform: none;
+      opacity: 1;
+      transition: none;
+      border-radius: 0;
+      border: 0;
+    }
+
+    .config__panel,
+    .config__tab-wrap,
+    .config__view {
+      border-radius: 0;
+    }
+
+    & > .b3-dialog__container > .toolbar {
+      flex-shrink: 0;
+    }
+
+    .toolbar--settings {
+      position: relative;
+      border-bottom: 1px solid var(--b3-border-color);
+
+      #drag {
+        position: absolute;
+        inset: 0;
+        min-width: 0;
+        padding-inline: var(--settings-window-title-inset, var(--b3-toolbar-left-mac));
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #windowControls {
+        margin-left: auto;
+        -webkit-app-region: no-drag;
+
+        .toolbar__item {
+          align-self: stretch;
+          align-items: center;
+          height: auto;
+        }
+      }
+    }
+
+    & > .b3-dialog__scrim,
+    & > .b3-dialog__container > [class^="resize__"] {
+      display: none;
+    }
+  }
   position: fixed;
   top: 0;
   left: 0;

@@ -17,6 +17,7 @@ type AIClient struct {
 	baseURL       string
 	anthropicHTTP *http.Client
 	claudeCode    *ClaudeCodeRuntime
+	ChatGPT       bool
 }
 
 // NewClaudeCodeAIClient 创建本机 Claude Code 命令行客户端，请求不再经过 HTTP 端点。

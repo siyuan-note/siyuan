@@ -1,6 +1,24 @@
+import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {getLegacyMobileToolbarEntryPath, isMobileToolbarContextPath} from "./mobileToolbarContext";
+
 export const getProfileEntryVisibility = (profile: Pick<Config.IEntryVisibilityProfile, "entries"> | undefined,
-                                           path: string, defaultVisible = true) =>
-    typeof profile?.entries[path] === "boolean" ? profile.entries[path] : defaultVisible;
+                                           path: string, defaultVisible = true) => {
+    if (typeof profile?.entries[path] === "boolean") {
+        return profile.entries[path];
+    }
+    const legacyPath = getLegacyMobileToolbarEntryPath(path);
+    return legacyPath && typeof profile?.entries[legacyPath] === "boolean" ? profile.entries[legacyPath] : defaultVisible;
+};
+
+export const getSavedEntryOrder = (profile: Pick<Config.IEntryVisibilityProfile, "orders"> | undefined,
+                                   path: string, defaultOrder: string[]) => {
+    if (profile?.orders?.[path] || !isMobileToolbarContextPath(path)) {
+        return profile?.orders?.[path];
+    }
+    // 新上下文沿用已有顺序，同时保留暂未加载的插件位置。
+    return profile?.orders?.[TOOLBAR_ENTRY_ROOT_PATH]?.filter(key => defaultOrder.includes(key) ||
+        key.startsWith("plugin:") || key.startsWith("plugin-separator:"));
+};
 
 export const getBuiltinProfileEntryVisibility = (
     profile: "simple" | "full",
@@ -11,9 +29,22 @@ export const getBuiltinProfileEntryVisibility = (
     ? defaultVisible
     : (simpleDefaultVisible ?? defaultVisible) && simple;
 
+export const resetEntryProfileOrder = (profile: Pick<Config.IEntryVisibilityProfile, "orders">, parentPath?: string) => {
+    if (parentPath) {
+        if (isMobileToolbarContextPath(parentPath)) {
+            profile.orders[parentPath] = [];
+        } else {
+            delete profile.orders[parentPath];
+        }
+    } else {
+        profile.orders = {};
+    }
+};
+
 export type TEntryVisibilityImportProfile = {
     name?: unknown;
     base?: unknown;
+    defaults?: unknown;
     entries?: unknown;
     orders?: unknown;
 };
@@ -86,10 +117,11 @@ export const normalizeEntryVisibilityImportProfile = (
     profile: TEntryVisibilityImportProfile,
     version: number,
     defaultOrders: Record<string, string[]>,
-): Pick<Config.IEntryVisibilityProfile, "name" | "entries" | "orders"> | undefined => {
+): Pick<Config.IEntryVisibilityProfile, "name" | "defaults" | "entries" | "orders"> | undefined => {
     if (!profile || typeof profile.name !== "string" || !profile.name.trim() || !profile.entries ||
         typeof profile.entries !== "object" || Array.isArray(profile.entries) ||
-        (version < 3 && profile.base !== "simple" && profile.base !== "full")) {
+        (version < 3 && profile.base !== "simple" && profile.base !== "full") ||
+        (version >= 7 && profile.defaults !== undefined && profile.defaults !== "simple" && profile.defaults !== "full")) {
         return;
     }
     const entries = Object.entries(profile.entries)
@@ -145,5 +177,10 @@ export const normalizeEntryVisibilityImportProfile = (
         migrateTaskStatusMenu({entries, orders});
     }
     migrateChartHeightMenu({entries, orders});
-    return {name: profile.name, entries, orders};
+    const defaults = version >= 7 && (profile.defaults === "simple" || profile.defaults === "full")
+        ? profile.defaults : undefined;
+    if (!defaults) {
+        entries["editor.slash.menu.frequent"] ??= true;
+    }
+    return {name: profile.name, ...(defaults ? {defaults} : {}), entries, orders};
 };

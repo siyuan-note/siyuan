@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {normalizeSiYuanUri} from "../../../util/normalizeSiYuanUri";
 
 const compile = (path: string) => transpileModule(readFileSync(path, "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
@@ -95,7 +96,7 @@ describe("standalone database item links", () => {
 
     it("parses only an explicit 1 as standalone for both supported protocols", () => {
         const exports = {} as typeof import("../../../util/pathName");
-        runInNewContext(compile("src/util/pathName.ts"), {exports, URL, require: () => ({})});
+        runInNewContext(compile("src/util/pathName.ts"), {exports, URL, require: () => ({normalizeSiYuanUri})});
         for (const protocol of ["siyuan", "web+siyuan"]) {
             for (const value of ["", "0", "1", "true"]) {
                 const info = exports.parseSiYuanUriInfo(`${protocol}://blocks/20240416133402-4ev0xph?avItemID=20250320010128-npql7i1&avStandalone=${value}`);

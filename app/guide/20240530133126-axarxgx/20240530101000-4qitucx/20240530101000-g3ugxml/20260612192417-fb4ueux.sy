@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260914195107"
+		"updated": "20261006133358"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123956-rq5ibw3",
-				"updated": "20260618123956"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260618123956-6xjq4tq",
-				"updated": "20260618123956"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 					},
 					"Properties": {
 						"id": "20260618123956-69ywnmy",
-						"updated": "20260618123956"
+						"updated": "20261006133358"
 					},
 					"Children": [
 						{
@@ -134,7 +134,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260618123956-8m4ikg3",
-								"updated": "20260618123956"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -166,25 +166,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "。Microsoft Store 版は MSIX サンドボックスで実行されるため "
+									"Data": "。Microsoft Store 版（3.8.7 以降）は Windows 10 1607（ビルド 14393）以降で "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "PATH"
+									"TextMarkTextContent": "siyuan.exe"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を自動的に変更できません。"
+									"Data": "​ アプリ実行エイリアスを登録します。インストールまたは更新後、新しいターミナルを開いて "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "siyuan.cmd"
+									"TextMarkTextContent": "siyuan --help"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ シム（一回のデプロイでストア更新後も有効）を配置できます"
+									"Data": "​ を実行します"
 								}
 							]
 						},
@@ -194,7 +194,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20260708123000-jastore1",
-								"updated": "20260708123000"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -207,7 +207,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "# Microsoft Store 版のみ — PowerShell で一度実行\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # デフォルトで PATH に含まれる\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: Microsoft Store 版が見つかりません'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+									"Data": "siyuan --help\n\n# 実際に使用されるコマンドを確認\nGet-Command siyuan -All\nwhere.exe siyuan\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -216,16 +216,75 @@
 							]
 						},
 						{
-							"ID": "20260708130000-jauninst",
+							"ID": "20261006133358-x1oqbhv",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260708130000-jauninst",
-								"updated": "20260708130000"
+								"id": "20261006133358-x1oqbhv",
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "アンインストール時に削除する場合: "
+									"Data": "コマンドが見つからない場合は、Windows で SiYuan のアプリ実行エイリアスが有効になっていることと、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "%LOCALAPPDATA%\\Microsoft\\WindowsApps"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " が "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " に含まれていることを確認してください。上記のコマンドで解決先を確認できます。複数の SiYuan エディションのインストールや "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " の順序により、別の実行ファイルが選択される場合があります"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-jauninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-jauninst",
+								"updated": "20261006133358"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以前に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " シムを作成した場合は、まず "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "& \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.exe\" --help"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " でストア版のエイリアスが動作することを確認し、必要に応じてシムを削除してください："
 								},
 								{
 									"Type": "NodeTextMark",

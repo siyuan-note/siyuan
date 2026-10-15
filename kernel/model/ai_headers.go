@@ -19,7 +19,7 @@ func ResolveAIProviderHeaders(provider *conf.Provider) map[string]string {
 	headers := make(map[string]string, len(provider.Headers))
 	for name, value := range provider.Headers {
 		if Conf != nil {
-			value = conf.ResolveSecretsVarsForHost(Conf.Secrets, Conf.Variables, host, value)
+			value = conf.ResolveSecretsVarsForHost(Conf.Secrets.Load(), Conf.Variables.Load(), host, value)
 		}
 		headers[name] = value
 	}

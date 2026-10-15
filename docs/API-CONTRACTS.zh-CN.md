@@ -8,15 +8,17 @@
 
 ## 接口维护流程
 
-1. 在契约包中定义或更新传输类型与端点，明确请求体、错误码、空值、默认值和历史输入兼容规则
-2. 用 `contractHandler` 绑定业务入口，保持路由中间件顺序、授权和租约范围
+1. 在契约包中定义或更新传输类型与端点，显式声明公开或已鉴权访问、管理员和写入要求，以及请求体、错误码、空值、默认值和历史输入兼容规则
+2. 用 `contractHandler` 绑定业务入口，并用 `contractRouteHandlers` 注册处理函数，保持路由中间件顺序和租约范围
 3. 保持 `legacy_routes.json` 为空；删除接口时同步移除路由注册和契约定义
 4. 更新实际响应、兼容输入和严格类型测试，运行生成器，再修正编译器指出的调用问题
 5. 同步 `petal` 的生成声明和相关公共声明；公开接口同步更新接口文档
 
-生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数和契约适配器的对应关系。CI 对照变更前的清单阻止增加存量记录。不得通过 `any`、类型断言或修改存量清单规避契约检查。
+生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数、契约适配器和鉴权中间件的对应关系。`define` 要求显式传入访问策略：公开端点使用 `PublicAccess`，已鉴权端点可叠加 `AdminAccess` 和 `WritableAccess`。分域注册函数保留字面量方法与路径，`contractRouteHandlers` 从绑定端点派生中间件。生成检查拒绝缺少策略、端点绑定不匹配，以及显式中间件遗漏或顺序改变。鉴权元数据不替代资源权限或全局笔记本租约中间件。CI 对照变更前的清单阻止增加存量记录。不得通过 `any`、类型断言或修改存量清单规避契约检查。
 
 ## 契约与实现
+
+对于受 `ControlConcurrency` 控制的 JSON 接口，请求先通过鉴权和准入检查，再由 `contractHandler` 完成解码并接收剩余请求体，之后才获取按路径划分的业务锁，避免排队请求耗尽 HTTP/2 连接的接收窗口。外层中间件在响应处理和笔记本租约清理完成后释放锁。新增适配器必须保持这一顺序；原始数据流和表单上传保留既有的并发控制路径。
 
 `kernel/apicontract/` 下的各模块文件定义请求、响应和端点，`contracts.go` 将其汇总到端点注册表。契约包独立于内核启动、数据库和持久化模型，因此生成器可以单独运行。API 入口通过 `contractHandler` 绑定端点，请求参数和成功返回值受到 Go 泛型签名约束；响应载荷通过构造函数设置，不能直接给通用 `ret.Data` 赋值。业务校验继续使用现有辅助函数，`contractFailure` 保留其错误码、消息和已支持的错误载荷。
 
@@ -176,6 +178,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 ## 生成与验证
 
+生成器读取 `kernel/apicontract/contracts.go` 中接口声明的前置注释，并在前端和 Petal 声明中将其输出为对应 `APIGETRoutes`、`APIPOSTRoutes` 条目的 JSDoc。接口行为、默认值、约束和兼容性在该声明处维护；使用分组 `var` 声明时，将注释放在具体接口前，分组注释不会复制到每个条目。请求工具函数的注释只说明传输行为，并通过路由类型链接到接口详情；不要手工修改生成的声明。
+
 `/api/block/migrateLegacyMindmaps` 是要求管理员身份的写入端点，保留只读保护及加密笔记本请求租约。请求必须提供文档 `id` 和 `notebook`；保存历史后，在一次可撤销事务中转换能够完整解析的旧 `mindmap` 列表，返回 `converted` 数量和文档脑图的权威 `blocks`（`id`、`dom`）。重复请求返回当前块内容，不重复转换；不完整的原文保持不变。回归命令为 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(LegacyMindmap|MigrateLegacyMindmaps|APIContractHeadingTransactions|APIContractRouterCoverage|RouteCoverage)' -count=1`，前端覆盖位于 `listMindmap/migrate.test.ts` 和 `listMindmap/model.test.ts`，均由现有持续集成规则发现。
 
 在 `app/` 下运行：
@@ -189,6 +193,8 @@ pnpm test
 
 上述生成命令同时更新本仓库与 `petal`，无须再单独执行不带 `--petal` 的生成命令。`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，而本地跨仓库同步须使用该参数核对插件声明。
 
+同一生成器还读取 `kernel/av/capabilities.go` 中的字段能力声明，输出 `app/src/protyle/render/av/capabilities.generated.ts`、`app/src/types/av/index.d.ts` 和对应的 `petal/types/av/index.d.ts`。字段能力和筛选算子清单在内核维护，修改后重新生成产物，不手工编辑生成的字段类型或算子联合类型。测试枚举 Go 类型常量，拒绝遗漏声明，并通过现有生成检查命令和内核全量测试核对生成产物。
+
 在 `kernel/` 下运行：
 
 ```text
@@ -199,4 +205,4 @@ go test -tags "fts5 sqlcipher" ./... -count=1
 
 导入和静态文件测试数据使用 `internal/testutil.PublicDataDir` 创建并清理经过显式验证的非敏感目录，不依赖 `TMPDIR` 和 `GOTMPDIR`。该辅助函数依次尝试用户主目录、当前目录和文件系统根目录；若没有安全且可写的位置，则报告测试数据准备失败。CI 还会将 `TMPDIR` 设为 `/tmp`，并使用独立的 `GOTMPDIR` 重新运行受影响的路径测试，以覆盖环境变量覆盖的情况。
 
-CI 在 Linux 上运行所有内核包的测试，在 Windows 上运行所有前端、Electron 和打包脚本测试。前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件串行执行，以避免 Electron 进程启动争用。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。
+CI 在 Linux 上运行所有内核包的测试，在 Windows 上运行所有前端、Electron 和打包脚本测试。前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件在独立进程中运行，根据可用 CPU 核心数选择并发度，上限为 4，以限制 Electron 进程启动争用。通过 `pnpm test --test-concurrency=1` 可串行执行。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。

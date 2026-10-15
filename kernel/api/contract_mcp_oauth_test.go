@@ -25,7 +25,13 @@ func oauthTestRouter(t *testing.T) *gin.Engine {
 	previousConf, previousDir, previousReadonly := model.Conf, util.ConfDir, util.ReadOnly
 	gin.SetMode(gin.TestMode)
 	model.Conf = model.NewAppConf()
-	model.Conf.AccessAuthCode, model.Conf.CookieKey, model.Conf.Lang, model.Conf.Api = "password", "cookie-key", "en", &conf.API{Token: "api-token"}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2, confSectionValue3 := "password", "cookie-key", "en", &conf.API{Token: "api-token"}
+		model.Conf.AccessAuthCode = confSectionValue0
+		model.Conf.CookieKey = confSectionValue1
+		model.Conf.Lang = confSectionValue2
+		model.Conf.Api.Store(confSectionValue3)
+	}
 	util.ConfDir, util.ReadOnly = t.TempDir(), false
 	t.Cleanup(func() { model.Conf, util.ConfDir, util.ReadOnly = previousConf, previousDir, previousReadonly })
 	r := gin.New()

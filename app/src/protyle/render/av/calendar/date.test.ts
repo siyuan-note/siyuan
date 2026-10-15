@@ -1,6 +1,8 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {addCalendarDays, calendarDayDistance, getCalendarInterval, getCalendarRange, getISOWeek,
+import {readFileSync, readdirSync} from "node:fs";
+import {join} from "node:path";
+import {addCalendarDays, calendarDayDistance, getCalendarDate, getCalendarInterval, getCalendarRange, getISOWeek, isCalendarDateEditable,
     getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday, moveCalendarDate,
     packCalendarWeek, resizeCalendarDate} from "./date";
 
@@ -151,4 +153,61 @@ test("drag preserves wall-clock times and supports either endpoint", () => {
     const endOnly = {hasEndDate: true, isNotEmpty2: true, content2: end};
     assert.equal(moveCalendarDate(endOnly, 2).content, undefined);
     assert.equal(calendarDayDistance(end, moveCalendarDate(endOnly, 2).content2), 2);
+});
+
+test("calendar template dates match kernel parsing without changing stored values", () => {
+    const cases = JSON.parse(readFileSync(join(__dirname, "../../../../../..", "kernel/av/testdata/calendar_template_dates.json"), "utf8"));
+    const originalZone = process.env.TZ;
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const languageDir = join(__dirname, "../../../../../appearance/langs");
+    const setLanguage = (lang: string) => Object.defineProperty(globalThis, "window", {configurable: true,
+        value: {siyuan: {languages: JSON.parse(readFileSync(join(languageDir, `${lang}.json`), "utf8"))}}});
+    try {
+        for (const fixture of cases) {
+            process.env.TZ = fixture.zone;
+            setLanguage(fixture.lang || "en");
+            const value = {type: "date" as const, hasRenderTemplate: true, renderedContent: fixture.content,
+                date: {content: 1, isNotEmpty: true, content2: 9999999999999, hasEndDate: true, isNotEmpty2: true}};
+            const before = JSON.stringify(value);
+            const interval = getCalendarInterval(value, fixture.format);
+            if (fixture.start) {
+                assert.equal(interval?.start, Date.parse(fixture.start), fixture.name);
+                assert.equal(interval?.end, Date.parse(fixture.end), fixture.name);
+                assert.equal(getCalendarDate(value, fixture.format)?.isNotTime, fixture.end !== fixture.start, fixture.name);
+            } else {
+                assert.equal(interval, undefined, fixture.name);
+            }
+            assert.equal(JSON.stringify(value), before);
+            assert.equal(isCalendarDateEditable(value), false);
+        }
+        process.env.TZ = "UTC";
+        for (const file of readdirSync(languageDir).filter(name => name.endsWith(".json"))) {
+            setLanguage(file.slice(0, -5));
+            const language = window.siyuan.languages._attrView;
+            language.dateMonths.split("|").forEach((month: string, index: number) => {
+                const content = language.dateFormatFullTemplate.replace("${year}", "2026").replace("${month}", month).replace("${day}", "2");
+                for (const suffix of ["", " 09:30:15"]) {
+                    const date = getCalendarDate({type: "date", hasRenderTemplate: true, renderedContent: content + suffix}, "full");
+                    assert.equal(date?.content, Date.UTC(2026, index, 2, suffix ? 9 : 0, suffix ? 30 : 0, suffix ? 15 : 0), file + content + suffix);
+                    assert.equal(date.isNotTime, suffix === "");
+                }
+            });
+        }
+        assert.equal(isCalendarDateEditable({type: "date", renderTemplate: "2026-09-30"}), false);
+        assert.equal(isCalendarDateEditable({type: "date", renderTemplate: " "}), true);
+        assert.equal(isCalendarDateEditable({type: "created"}), false);
+        assert.equal(getCalendarInterval({type: "created", hasRenderTemplate: true, renderedContent: "2026-09-30",
+            created: {content: 123, isNotEmpty: true}}).start, 123);
+    } finally {
+        if (originalWindow) {
+            Object.defineProperty(globalThis, "window", originalWindow);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+        if (originalZone === undefined) {
+            delete process.env.TZ;
+        } else {
+            process.env.TZ = originalZone;
+        }
+    }
 });

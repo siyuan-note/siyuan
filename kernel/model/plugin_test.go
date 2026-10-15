@@ -29,8 +29,8 @@ func TestSetPetalPublishEnabled(t *testing.T) {
 	originalConf := Conf
 	originalDataDir := util.DataDir
 	Conf = NewAppConf()
-	Conf.Sync = conf.NewSync()
-	Conf.Bazaar = &conf.Bazaar{Trust: true}
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() {
 		Conf = originalConf
@@ -105,9 +105,9 @@ func TestIsPetalsEnabled(t *testing.T) {
 	})
 
 	Conf = NewAppConf()
-	Conf.Bazaar = conf.NewBazaar()
-	Conf.Bazaar.PetalDisabled = false
-	Conf.Bazaar.Trust = false
+	Conf.Bazaar.Store(conf.NewBazaar())
+	Conf.Bazaar.Load().PetalDisabled = false
+	Conf.Bazaar.Load().Trust = false
 
 	for _, container := range []string{util.ContainerAndroid, util.ContainerIOS, util.ContainerHarmony} {
 		util.Container = container
@@ -123,12 +123,12 @@ func TestIsPetalsEnabled(t *testing.T) {
 		}
 	}
 
-	Conf.Bazaar.Trust = true
+	Conf.Bazaar.Load().Trust = true
 	if !IsPetalsEnabled() {
 		t.Fatal("petals should be enabled after bazaar trust")
 	}
 
-	Conf.Bazaar.PetalDisabled = true
+	Conf.Bazaar.Load().PetalDisabled = true
 	if IsPetalsEnabled() {
 		t.Fatal("petals should be disabled explicitly")
 	}

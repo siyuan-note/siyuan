@@ -1,3 +1,4 @@
+import * as capabilities from "../capabilities";
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {readFileSync} from "node:fs";
@@ -14,7 +15,7 @@ const setup = () => {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
     }).outputText, {
         exports, window, Lute: {NewNodeID: () => "new-field"},
-        require: (id: string) => ({
+        require: (id: string) => id === "./capabilities" || id === "../capabilities" ? capabilities : (({
             "../../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) =>
                 transactions.push({do: perform, undo})},
             "../../../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
@@ -26,7 +27,7 @@ const setup = () => {
                 addItem(item: {label: string; checked: boolean; click: () => void}) { this.items.push(item); }
                 open() { return; }
             }},
-        })[id],
+        })[id]),
     });
     return {methods: exports as typeof import("./settings"), transactions, window, menus};
 };

@@ -1,17 +1,20 @@
+import {switchWorkspace, importConfiguration} from "../util/resourceConfig";
+import {config as configApi} from "../util/configApi";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
+import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
 /// #if !MOBILE
-import {exportLayout} from "../../layout/util";
+import {reloadUI} from "../../layout/util";
 /// #endif
-import {exitSiYuan} from "../../dialog/processSystem";
 import {showMessage} from "../../dialog/message";
 import {isMac, saveExportFile} from "../../protyle/util/compatibility";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 /// #if MOBILE
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
@@ -109,9 +112,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                             return;
                         }
                         confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`, () => {
-                            fetchPost("/api/system/setWorkspaceDir", {path: openPath}, () => {
-                                void exitSiYuan(false);
-                            });
+                            switchWorkspace(openPath);
                         });
                     });
                 });
@@ -162,9 +163,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                     break;
                 }
                 confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(workspacePath))}?`, () => {
-                    fetchPost("/api/system/setWorkspaceDir", {path: workspacePath}, () => {
-                        void exitSiYuan(false);
-                    });
+                    switchWorkspace(workspacePath);
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -186,6 +185,13 @@ const genImportUploadButtonHtml = (inputId: string, label: string): string =>
 const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("general", window.siyuan.languages.configGroupGeneral);
 
+    /// #if !BROWSER && !MOBILE
+    group.switch("system.settingsWindow", {
+        title: window.siyuan.languages.settingsWindowMode,
+        desc: window.siyuan.languages.settingsWindowModeTip,
+        save: (value) => sendAppSetting("system.settingsWindow", value),
+    });
+    /// #endif
     /// #if !BROWSER
     if (!window.siyuan.config.system.isMicrosoftStore && window.siyuan.config.system.container === "std" && window.siyuan.config.system.os !== "linux") {
         group.select("system.autoLaunch2", {
@@ -353,9 +359,9 @@ const genNetworkProxyHtml = (): string => {
             <option value="http" ${proxy.scheme === "http" ? "selected" : ""}>HTTP</option>
         </select>
         <span class="fn__space"></span>
-        <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.host)}"/>
+        <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${escapeHtmlTextAndAttr(proxy.host)}"/>
         <span class="fn__space"></span>
-        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.port)}" type="number"/>
+        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${escapeHtmlTextAndAttr(proxy.port)}" type="number"/>
         <span class="fn__space"></span>
         <button id="networkProxyConfirm" class="b3-button fn__size200 b3-button--outline">${window.siyuan.languages.confirm}</button>
     </div>
@@ -377,7 +383,7 @@ const mountNetworkProxy = (root: HTMLElement) => {
         const scheme = schemeElement.value as Config.TSystemNetworkProxyScheme;
         const host = hostElement.value;
         const port = portElement.value;
-        fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, async () => {
+        configApi.set("system.networkProxy", {scheme, host, port}, async () => {
             Object.assign(window.siyuan.config.system.networkProxy, {scheme, host, port});
             /// #if !BROWSER
             ipcRenderer.invoke(Constants.SIYUAN_GET, {
@@ -385,12 +391,7 @@ const mountNetworkProxy = (root: HTMLElement) => {
                 proxyMode: scheme === "system" ? "system" : scheme === "" ? "direct" : "fixed_servers",
                 proxyURL: scheme === "system" ? "://" : `${scheme}://${host}:${port}`,
             }).then(() => {
-                exportLayout({
-                    errorExit: false,
-                    cb() {
-                        window.location.reload();
-                    },
-                });
+                void reloadUI();
             });
             /// #endif
         });
@@ -452,22 +453,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#importConf")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
-                const formData = new ContractFormData({file: [target.files[0]]});
-                fetchPost("/api/system/importConf", formData, (response) => {
-                    if (response.code !== 0) {
-                        showMessage(response.msg);
-                        return;
-                    }
-                    showMessage(window.siyuan.languages.imported);
-                    /// #if MOBILE
-                    void exitSiYuan();
-                    /// #else
-                    void exportLayout({
-                        errorExit: true,
-                        cb: exitSiYuan,
-                    });
-                    /// #endif
-                });
+                void importConfiguration(target.files[0], true);
             });
         },
     });
@@ -559,6 +545,20 @@ const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
             root.querySelector("#clearTempFiles")?.addEventListener("click", () => {
                 fetchPost("/api/system/clearTempFiles", {});
             });
+        },
+    });
+    group.button({
+        id: "resetSettings",
+        title: window.siyuan.languages.resetSettings,
+        desc: window.siyuan.languages.resetSettingsTip,
+        label: window.siyuan.languages.reset,
+        icon: "iconUndo",
+        afterMount: root => {
+            const button = root.querySelector<HTMLButtonElement>("#resetSettings");
+            if (button) {
+                button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
+                button.addEventListener("click", confirmResetSettings);
+            }
         },
     });
     if (getHostCapabilities().importExport) {

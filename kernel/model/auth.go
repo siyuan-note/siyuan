@@ -244,18 +244,18 @@ func countPublishSessionsByUsername(username string) int {
 }
 
 func InitPublishAccounts() {
-	if nil == Conf.Publish {
-		Conf.Publish = conf.NewPublish()
+	if nil == Conf.Publish.Load() {
+		Conf.Publish.Store(conf.NewPublish())
 	}
-	if nil == Conf.Publish.Auth {
+	if nil == Conf.Publish.Load().Auth {
 		// 防御 conf.json 中 auth 为 null 的历史坏配置，避免启动时解引用空指针崩溃
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
-		Conf.Publish.Auth = conf.NewPublish().Auth
+		UpdatePublishConf(func(s *conf.Publish) { s.Auth = conf.NewPublish().Auth })
 	}
 	accounts := AccountsMap{
 		"": &Account{}, // 匿名用户
 	}
-	for _, account := range Conf.Publish.Auth.Accounts {
+	for _, account := range Conf.Publish.Load().Auth.Accounts {
 		accounts[account.Username] = &Account{
 			Username: account.Username,
 			Password: account.Password,

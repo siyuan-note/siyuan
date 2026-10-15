@@ -125,7 +125,7 @@ var updateBazaarPackage = contractHandler(apicontract.UpdateBazaarPackage, func(
 	if err := model.UpdateBazaarPackage(request.PackageType, request.PackageName, request.Frontend); err != nil {
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
-	util.PushMsg(model.Conf.Language(69), 3000)
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
 	data := apicontract.BazaarPackagesData{Packages: bazaarPackages(model.GetBazaarPackages(request.PackageType, request.Frontend, request.Keyword))}
 
 	return apicontract.Success(data)
@@ -251,7 +251,7 @@ var installBazaarPlugin = contractHandler(apicontract.InstallBazaarPlugin, func(
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
 
-	util.PushMsg(model.Conf.Language(69), 3000)
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
 	data := apicontract.BazaarPackagesData{Packages: bazaarPackages(model.GetBazaarPackages("plugins", request.Frontend, request.Keyword))}
 
 	return apicontract.Success(data)
@@ -291,7 +291,7 @@ var installBazaarWidget = contractHandler(apicontract.InstallBazaarWidget, func(
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
 
-	util.PushMsg(model.Conf.Language(69), 3000)
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
 	data := apicontract.BazaarPackagesData{Packages: bazaarPackages(model.GetBazaarPackages("widgets", "", request.Keyword))}
 
 	return apicontract.Success(data)
@@ -325,9 +325,9 @@ var installBazaarIcon = contractHandler(apicontract.InstallBazaarIcon, func(c *g
 	if err != nil {
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](1, err.Error())
 	}
-	util.PushMsg(model.Conf.Language(69), 3000)
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
 
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })
@@ -338,7 +338,7 @@ var uninstallBazaarIcon = contractHandler(apicontract.UninstallBazaarIcon, func(
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](-1, err.Error())
 	}
 
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })
@@ -363,7 +363,7 @@ var installBazaarTemplate = contractHandler(apicontract.InstallBazaarTemplate, f
 
 	data := apicontract.BazaarPackagesData{Packages: bazaarPackages(model.GetBazaarPackages("templates", "", request.Keyword))}
 
-	util.PushMsg(model.Conf.Language(69), 3000)
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
 
 	return apicontract.Success(data)
 })
@@ -402,8 +402,8 @@ var installBazaarTheme = contractHandler(apicontract.InstallBazaarTheme, func(c 
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](1, err.Error())
 	}
 
-	util.PushMsg(model.Conf.Language(69), 3000)
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })
@@ -414,7 +414,7 @@ var uninstallBazaarTheme = contractHandler(apicontract.UninstallBazaarTheme, fun
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](-1, err.Error())
 	}
 
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })

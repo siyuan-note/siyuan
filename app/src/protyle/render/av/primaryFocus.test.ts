@@ -32,3 +32,20 @@ test("database items focus once without replacing existing text or stealing focu
     }
     assert.equal(focused, 1);
 });
+
+test("opening an item for binding shows primary candidates only once", () => {
+    const field = {} as HTMLElement;
+    const root = {isConnected: true, querySelector: () => field} as unknown as Element;
+    const calls: unknown[][] = [];
+    const exports = {} as typeof import("./primaryFocus");
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "primaryFocus.ts"), "utf8"), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
+    }).outputText, {exports, window: {siyuan: {}}, require: () => ({
+        openAVBindBlock: (...args: unknown[]) => calls.push(args),
+    })});
+    const request = {avID: "av", itemID: "row", bindPrimary: true};
+    const protyle = {options: {}} as IProtyle;
+    exports.focusDatabasePrimary(root, protyle, request);
+    exports.focusDatabasePrimary(root, protyle, request);
+    assert.deepEqual(calls, [[protyle, field]]);
+});

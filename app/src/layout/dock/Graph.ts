@@ -5,7 +5,7 @@ import {getDockByType} from "../tabUtil";
 import {Model} from "../Model";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openFileById} from "../../editor/util";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
@@ -14,7 +14,10 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {GraphEngine} from "./graph/GraphEngine";
-import {IGraphNodeClick, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
+import {IGraphNodeClick, IGraphNodeContextMenu, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
+import {openDocumentMenu} from "../../protyle/header/documentMenu";
+import {Constants} from "../../constants";
+import {config as configApi} from "../../config/util/configApi";
 
 interface IGraphSearchOptions {
     id?: string;
@@ -31,6 +34,7 @@ export class Graph extends Model {
     private element: HTMLElement;
     private saveTimeout: number;
     private searchTimeout: number;
+    private settingsSavingSuspended = false;
     private pendingGraphConf: IGraphCommon & {dailyNote: boolean, minRefs?: number};
     public blockId: string; // "local" / "pin" 必填
     public rootId: string; // "local" 必填
@@ -42,6 +46,8 @@ export class Graph extends Model {
     };
     private renderedGraphData: Graph["graphData"];
     private requestVersion = 0;
+    private menuRequestVersion = 0;
+    private menuAbort?: AbortController;
     public type: "local" | "pin" | "global";
 
     constructor(options: {
@@ -445,6 +451,7 @@ export class Graph extends Model {
     }
 
     public searchGraph(options: IGraphSearchOptions = {}) {
+        if (this.settingsSavingSuspended) return;
         const refresh = options.refresh || false;
         const resetLayout = options.resetLayout ?? refresh;
         const id = options.id;
@@ -457,9 +464,7 @@ export class Graph extends Model {
             this.searchTimeout = 0;
         }
         if (this.saveTimeout) {
-            window.clearTimeout(this.saveTimeout);
-            this.saveTimeout = 0;
-            this.persistGraphConf();
+            this.flushPendingSettings();
         }
         const requestVersion = ++this.requestVersion;
         element.classList.add("fn__rotate");
@@ -530,14 +535,12 @@ export class Graph extends Model {
 
     public destroy() {
         this.requestVersion++;
+        this.menuRequestVersion++;
+        this.menuAbort?.abort();
         if (this.searchTimeout) {
             window.clearTimeout(this.searchTimeout);
         }
-        if (this.saveTimeout) {
-            window.clearTimeout(this.saveTimeout);
-            this.saveTimeout = 0;
-        }
-        this.persistGraphConf();
+        this.flushPendingSettings();
         this.graphEngine?.destroy();
         this.graphEngine = undefined;
         this.renderedGraphData = undefined;
@@ -601,19 +604,34 @@ export class Graph extends Model {
         }
         this.pendingGraphConf = conf;
         this.saveTimeout = window.setTimeout(() => {
-            this.saveTimeout = 0;
-            this.persistGraphConf();
+            this.flushPendingSettings();
         }, 300);
     }
 
-    private persistGraphConf() {
+    // 重置期间暂停会保存配置的查询，取消重置后恢复面板刷新。
+    public suspendSettingsSaving() {
+        if (this.searchTimeout) {
+            window.clearTimeout(this.searchTimeout);
+            this.searchTimeout = 0;
+            this.pendingGraphConf = this.getGraphConf();
+        }
+        this.flushPendingSettings();
+        this.settingsSavingSuspended = true;
+        return () => {
+            this.settingsSavingSuspended = false;
+            this.searchGraph();
+        };
+    }
+
+    private flushPendingSettings() {
+        if (this.saveTimeout) {
+            window.clearTimeout(this.saveTimeout);
+            this.saveTimeout = 0;
+        }
         if (!this.pendingGraphConf) {
             return;
         }
-        fetchPost("/api/graph/setGraphConf", {
-            type: this.type === "global" ? "global" : "local",
-            conf: this.pendingGraphConf,
-        });
+        void configApi.set(`graph.${this.type === "global" ? "global" : "local"}`, this.pendingGraphConf);
         this.pendingGraphConf = undefined;
     }
 
@@ -667,7 +685,15 @@ export class Graph extends Model {
     private ensureGraphEngine() {
         if (!this.graphEngine) {
             this.graphEngine = new GraphEngine(this.graphElement, {
+                onPointerDown: () => window.siyuan.menus.menu.remove(),
                 onNodeClick: (details) => this.openGraphNode(details),
+                onNodeContextMenu: (details) => {
+                    if (details.node.type !== "NodeDocument") {
+                        return false;
+                    }
+                    void this.openGraphNodeMenu(details);
+                    return true;
+                },
             });
             this.renderedGraphData = undefined;
         }
@@ -727,6 +753,56 @@ export class Graph extends Model {
                     zoomIn
                 });
             });
+        }
+    }
+
+    private async openGraphNodeMenu(details: IGraphNodeContextMenu) {
+        this.menuAbort?.abort();
+        const abort = new AbortController();
+        this.menuAbort = abort;
+        const request = ++this.menuRequestVersion;
+        const cancel = () => {
+            this.menuRequestVersion++;
+            abort.abort();
+        };
+        document.addEventListener("pointerdown", cancel, true);
+        document.addEventListener("keydown", cancel, true);
+        window.siyuan.menus.menu.remove();
+        try {
+            const [info, doc] = await Promise.all([
+                fetchSyncPost("/api/block/getBlockInfo", {id: details.node.id}, undefined, false, abort.signal),
+                fetchSyncPost("/api/block/getDocInfo", {id: details.node.id}, undefined, false, abort.signal),
+            ]);
+            if (request !== this.menuRequestVersion || info.code !== 0 || doc.code !== 0 || !info.data || !doc.data ||
+                !info.data.box || !info.data.path || doc.data.rootID !== details.node.id) {
+                return;
+            }
+            if (!this.graphElement.isConnected) {
+                return;
+            }
+            const position = {x: details.x, y: details.y};
+            openDocumentMenu({
+                app: this.app,
+                id: details.node.id,
+                notebookId: info.data.box,
+                path: info.data.path,
+                docInfo: doc.data,
+                target: this.graphElement,
+                position,
+                from: "graph",
+                disabled: window.siyuan.config.readonly || window.siyuan.config.editor.readOnly ||
+                    doc.data.ial?.[Constants.CUSTOM_SY_READONLY] === "true",
+            });
+        } catch (error) {
+            if (!abort.signal.aborted) {
+                console.warn("Unable to open graph document menu", error);
+            }
+        } finally {
+            document.removeEventListener("pointerdown", cancel, true);
+            document.removeEventListener("keydown", cancel, true);
+            if (this.menuAbort === abort) {
+                this.menuAbort = undefined;
+            }
         }
     }
 }

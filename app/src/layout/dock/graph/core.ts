@@ -422,11 +422,6 @@ export const createInitialPositions = (
     return positions;
 };
 
-export const graphToScreen = (x: number, y: number, camera: IGraphCamera) => ({
-    x: x * camera.scale + camera.x,
-    y: y * camera.scale + camera.y,
-});
-
 export const screenToGraph = (x: number, y: number, camera: IGraphCamera) => ({
     x: (x - camera.x) / camera.scale,
     y: (y - camera.y) / camera.scale,

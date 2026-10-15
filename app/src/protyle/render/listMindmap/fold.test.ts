@@ -3,12 +3,36 @@ import {readFileSync} from "node:fs";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isPropertyAssignment, ScriptTarget, transpileModule} from "typescript";
-import {getListMindmapFoldStates} from "./fold";
+import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
 import type {ListMindmapNode} from "./model";
+const {loadMenuToggle} = require("../../../../tests/menu-toggle-fixture.cjs");
 
 const node = (id: string, children: ListMindmapNode[] = [], collapsed = false): ListMindmapNode => ({
     id, children, collapsed, virtual: false, contentBlocks: [],
+});
+
+test("sibling folding follows the list toggle rule within one parent and preserves deeper states", () => {
+    const deep = node("deep", [node("leaf")], true);
+    const a = {...node("a", [deep], true), parentId: "parent"};
+    const b = {...node("b", [node("child")]), parentId: "parent"};
+    const leaf = {...node("leafSibling"), parentId: "parent"};
+    const other = {...node("other", [node("otherChild")]), parentId: "otherParent"};
+    const parent = node("parent", [a, b, leaf]);
+    const model = {nodes: new Map([parent, a, b, leaf, other, deep].map(item => [item.id, item]))};
+    assert.deepEqual([...getListMindmapSiblingFoldStates(model, a.id)], [[a.id, true], [b.id, true]]);
+    b.collapsed = true;
+    assert.deepEqual([...getListMindmapSiblingFoldStates(model, a.id)], [[a.id, false], [b.id, false]]);
+    assert.deepEqual([...getListMindmapSiblingFoldStates(model, a.id, new Map([[a.id, false]]))],
+        [[a.id, true], [b.id, true]]);
+    assert.equal(deep.collapsed, true);
+    assert.equal(other.collapsed, false);
+    assert.equal(leaf.collapsed, false);
+    assert.equal(getListMindmapSiblingFoldStates(model, "missing").size, 0);
+    assert.deepEqual([...getListMindmapSiblingFoldStates(model, parent.id)], [[parent.id, true]]);
+    parent.virtual = true;
+    assert.deepEqual([...getListMindmapSiblingFoldStates(model, parent.id)], [[parent.id, true]]);
+    assert.equal(getListMindmapSiblingFoldStates({nodes: new Map([["leaf", node("leaf")]])}, "leaf").size, 0);
 });
 
 test("the selected level expands inclusively and either kind of center counts as level one", () => {
@@ -60,12 +84,14 @@ test("desktop and mobile menus offer six levels without icon placeholders follow
                 open(position: unknown) { positions.push(position); }
             },
             isMobile: () => mobile,
-            window: {siyuan: {languages: {listMindmapExpandToLevel: "Level ${level}", expandAll: "Expand", foldAll: "Collapse"}}},
+            window: {siyuan: {menus: {menu: {element: {classList: {contains: () => true}}, remove() {}}},
+                languages: {listMindmapExpandToLevel: "Level ${level}", expandAll: "Expand", foldAll: "Collapse"}}},
         };
+        Object.assign(context, loadMenuToggle(context));
         const open = runInNewContext(transpileModule(`(${callback})`, {
             compilerOptions: {target: ScriptTarget.ES2021},
         }).outputText, context);
-        open({getBoundingClientRect: () => ({left: 10, bottom: 30, height: 20})},
+        open({closest: (): null => null, setAttribute() {}, getBoundingClientRect: () => ({left: 10, bottom: 30, height: 20})},
             (level: ListMindmapFoldTarget) => selected.push(level));
         assert.deepEqual(entries.map(item => item.id), [...Array.from({length: 6}, (_, i) => `level${i + 1}`),
             "separator_all", "expandAll", "foldAll"]);
@@ -84,19 +110,23 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     const controller = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
     assert.ok(controller && isClassDeclaration(controller));
     let callback = "";
+    let siblingCallback = "";
     const visit = (item: import("typescript").Node) => {
         if (isPropertyAssignment(item) && item.name.getText(source) === "onFoldLevel") {
             callback = item.initializer.getText(source);
+        } else if (isPropertyAssignment(item) && item.name.getText(source) === "onFoldSiblings") {
+            siblingCallback = item.initializer.getText(source);
         }
         item.forEachChild(visit);
     };
     visit(controller);
     assert.ok(callback);
+    assert.ok(siblingCallback);
     const change = controller.members.find(item => item.name?.getText(source) === "change");
     assert.ok(change);
     const compiled = transpileModule(`class Controller {
         ${change.getText(source)}
-        constructor(list) { this.list = list; this.onFoldLevel = ${callback}; }
+        constructor(list) { this.list = list; this.onFoldLevel = ${callback}; this.onFoldSiblings = ${siblingCallback}; }
     }
     globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const root = node("root", [node("a", [node("b", [node("leaf")])]), node("c", [node("d")])]);
@@ -104,11 +134,14 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     const collect = (current: ListMindmapNode) => {
         nodes.set(current.id, current);
         current.element = {setAttribute: (_name: string, value: string) => current.collapsed = value === "1"} as unknown as HTMLElement;
-        current.children.forEach(collect);
+        current.children.forEach(child => {
+            child.parentId = current.id;
+            collect(child);
+        });
     };
     collect(root);
     const snapshot = () => JSON.stringify([...nodes].map(([id, current]) => [id, current.collapsed]));
-    const list = {isConnected: true, get outerHTML() { return snapshot(); }};
+    const list = {isConnected: true, dataset: {nodeId: "map-fold"}, get outerHTML() { return snapshot(); }};
     const transactions: {before: string, after: string}[] = [];
     let allowed = true;
     const context: any = {
@@ -117,8 +150,12 @@ test("batch folding saves a single undo snapshot and reads the source after fini
         getListMindmapSiblingIDs: () => new Map(),
         normalizeListMindmapSummaryMetadata: () => {},
         getListMindmapFoldStates,
+        getListMindmapSiblingFoldStates,
         cleanListMindmapHTML: (html: string) => html,
-        updateTransaction: (_owner: unknown, _list: unknown, before: string) => {
+        updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
+                            additional: {context: Record<string, string>}) => {
+            assert.equal(undoContext.mindmapSnapshotId, list.dataset.nodeId);
+            assert.equal(additional.context.mindmapSnapshotId, list.dataset.nodeId);
             if (before !== snapshot()) {
                 transactions.push({before, after: snapshot()});
             }
@@ -147,7 +184,26 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     assert.ok(JSON.parse(transactions[1].before).some(([id, collapsed]: [string, boolean]) => id === "b" && collapsed));
     assert.equal(transactions[1].after, before, "one redo snapshot contains the complete expanded state");
     target.activeEditor = undefined;
+    nodes.get("a").collapsed = true;
+    nodes.get("b").collapsed = true;
+    const siblingBefore = snapshot();
+    assert.equal(await target.onFoldSiblings("a"), true);
+    assert.equal(transactions.length, 3);
+    assert.equal(transactions[2].before, siblingBefore);
+    assert.equal(nodes.get("c").collapsed, true, "a mixed sibling group folds together");
+    assert.equal(nodes.get("root").collapsed, false);
+    assert.equal(nodes.get("b").collapsed, true, "descendant state is retained");
+    assert.equal(await target.onFoldSiblings("a"), true);
+    assert.equal(transactions.length, 4);
+    assert.equal(nodes.get("a").collapsed, false);
+    assert.equal(nodes.get("c").collapsed, false);
+    assert.equal(nodes.get("b").collapsed, true);
+    target.activeEditor = {finish: async () => false};
+    assert.equal(await target.onFoldSiblings("a"), false);
+    assert.equal(transactions.length, 4);
+    target.activeEditor = undefined;
     allowed = false;
     assert.equal(await target.onFoldLevel(1), false);
-    assert.equal(transactions.length, 2);
+    assert.equal(await target.onFoldSiblings("a"), false);
+    assert.equal(transactions.length, 4);
 });

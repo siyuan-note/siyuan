@@ -3,6 +3,7 @@
 @use "wysiwyg" as *;
 @use "attr" as *;
 @use "mindmap-view" as *;
+@use "block-resize" as *;
 
 .protyle-lite-fragment .protyle-action__menu {
   display: none;
@@ -36,8 +37,23 @@
 
   &__down,
   &__up,
-  &__bar {
+  &__bar,
+  &__page {
     pointer-events: auto;
+  }
+
+  &__page {
+    position: absolute;
+    left: 50%;
+    bottom: 12%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__page-up {
+    transform: rotate(180deg);
   }
 
   svg {
@@ -116,6 +132,14 @@
   }
 }
 
+.protyle--page-scroll {
+  --b3-protyle-page-scroll-gutter: 64px;
+
+  @media (pointer: coarse) {
+    --b3-protyle-page-scroll-gutter: 84px;
+  }
+}
+
 .protyle-gutters {
   cursor: pointer;
   user-select: none;
@@ -123,6 +147,8 @@
   box-sizing: border-box;
   z-index: 1;
   text-align: center;
+  // 块标会随指针重新定位，使用自身悬停反馈，避免系统触摸高亮留在原位置。
+  -webkit-tap-highlight-color: transparent;
 
   // 横向超级块的块标需高于分栏宽度调节杆，避免重叠区域被调节杆截获点击
   &--sb-column {
@@ -140,6 +166,11 @@
     padding: 4px 3px;
     cursor: pointer;
     position: relative;
+
+    // 块标自身区域优先接收点击，插入框线和加号的扩展命中区仅在外侧生效。
+    &:not(.protyle-gutters__line):not(.protyle-gutters__plus) {
+      z-index: 5;
+    }
 
     &:hover svg {
       color: var(--b3-theme-on-surface);
@@ -191,7 +222,7 @@
 }
 
 // 块标边缘框线（悬浮块标显示），与 .protyle-gutters 同为 fixed 坐标系，由 JS 贴块标边缘定位
-// 选择器带 button 标签提升特异性，覆盖 .protyle-gutters button 的 position:relative；z-index 高于块标 span 覆盖层
+// 选择器带 button 标签提升特异性，覆盖 .protyle-gutters button 的 position:relative；块标自身位于框线上方
 .protyle-gutters button.protyle-gutters__line {
   position: fixed;
   z-index: 3;
@@ -282,6 +313,10 @@
     &:disabled {
       opacity: .38;
     }
+  }
+
+  &__navigation .block__icon:first-child {
+    margin-left: 0;
   }
 
   &__space {
@@ -477,7 +512,7 @@
   > .protyle-wysiwyg,
   > .sy__backlink--bottom {
     padding-left: var(--b3-protyle-padding-left);
-    padding-right: var(--b3-protyle-padding-right);
+    padding-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
   }
 
   > .protyle-top {
@@ -485,7 +520,7 @@
     .protyle-background__ia,
     .protyle-db-attr {
       margin-left: var(--b3-protyle-padding-left);
-      margin-right: var(--b3-protyle-padding-right);
+      margin-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
     }
   }
 }
@@ -1081,8 +1116,20 @@
   text-align: inherit;
 }
 
-.table__cell-rich > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6)[data-table-cell-node],
-.table__cell-editor .protyle-wysiwyg > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6) {
+.table__cell-rich > .p[data-table-cell-node],
+.table__cell-rich > .h1[data-table-cell-node],
+.table__cell-rich > .h2[data-table-cell-node],
+.table__cell-rich > .h3[data-table-cell-node],
+.table__cell-rich > .h4[data-table-cell-node],
+.table__cell-rich > .h5[data-table-cell-node],
+.table__cell-rich > .h6[data-table-cell-node],
+.table__cell-editor .protyle-wysiwyg > .p,
+.table__cell-editor .protyle-wysiwyg > .h1,
+.table__cell-editor .protyle-wysiwyg > .h2,
+.table__cell-editor .protyle-wysiwyg > .h3,
+.table__cell-editor .protyle-wysiwyg > .h4,
+.table__cell-editor .protyle-wysiwyg > .h5,
+.table__cell-editor .protyle-wysiwyg > .h6 {
   // 单元格已提供侧边留白，多段落和标题与普通文本使用相同的对齐边界。
   padding-inline: 0;
 }
@@ -1398,5 +1445,49 @@ table + .protyle-action__table {
     z-index: 3;
     background-color: var(--b3-theme-primary);
     pointer-events: none;
+  }
+}
+.image-ocr {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+
+  &__preview {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+
+    &__text {
+      min-height: 160px;
+    }
+  }
+}
+
+.img__name,
+.img__alt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow-wrap: anywhere;
+  white-space: break-spaces;
+
+  > span {
+    flex: 1;
+    width: 0;
   }
 }

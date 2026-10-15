@@ -84,11 +84,11 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 	onboardingLock.Lock()
 	defer onboardingLock.Unlock()
 
-	if nil == Conf.Onboarding {
-		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
-		Conf.Save()
+	if nil == Conf.Onboarding.Load() {
+		UpdateOnboardingConf(func(value *conf.Onboarding) {})
 	}
-	onboarding := Conf.Onboarding
+	onboarding := cloneOnboarding(Conf.Onboarding.Load())
+	save := func() { UpdateOnboardingConf(func(value *conf.Onboarding) { *value = *onboarding }) }
 	if !onboarding.NewUser || onboarding.Dismissed {
 		return cloneOnboarding(onboarding), false, nil
 	}
@@ -100,12 +100,12 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 	documentExists := onboarding.NotebookID != "" && onboarding.DocumentID != "" && filelock.IsExist(filepath.Join(
 		util.DataDir, onboarding.NotebookID, onboarding.DocumentID+".sy"))
 	if reconcileOnboarding(onboarding, boxes, documentExists) {
-		Conf.Save()
+		save()
 	}
 	if !onboarding.NewUser || onboarding.State == conf.OnboardingCompleted {
 		return cloneOnboarding(onboarding), false, nil
 	}
-	if util.ReadOnly || Conf.Publish.Enable {
+	if util.ReadOnly || Conf.Publish.Load().Enable {
 		return cloneOnboarding(onboarding), false, errors.New(Conf.Language(34))
 	}
 
@@ -114,11 +114,11 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 			if len(boxes) == 1 && boxes[0].Name == Conf.Language(342) {
 				onboarding.NotebookID = boxes[0].ID
 				onboarding.State = conf.OnboardingNotebookCreated
-				Conf.Save()
+				save()
 			} else {
 				onboarding.State = conf.OnboardingCompleted
 				onboarding.NewUser = false
-				Conf.Save()
+				save()
 				return cloneOnboarding(onboarding), false, nil
 			}
 		}
@@ -129,7 +129,7 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 				return cloneOnboarding(onboarding), false, err
 			}
 			onboarding.State = conf.OnboardingNotebookCreated
-			Conf.Save()
+			save()
 			notebookCreated = true
 		}
 	}
@@ -139,7 +139,7 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 	}
 	if onboarding.DocumentID == "" {
 		onboarding.DocumentID = ast.NewNodeID()
-		Conf.Save()
+		save()
 	}
 
 	docPath := "/" + onboarding.DocumentID + ".sy"
@@ -150,7 +150,7 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 		}
 	}
 	onboarding.State = conf.OnboardingCompleted
-	Conf.Save()
+	save()
 	return cloneOnboarding(onboarding), notebookCreated, nil
 }
 
@@ -159,21 +159,23 @@ func TriggerOnboardingIfEmpty() {
 	onboardingLock.Lock()
 	defer onboardingLock.Unlock()
 
-	if nil == Conf.Onboarding {
-		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
+	if nil == Conf.Onboarding.Load() {
+		UpdateOnboardingConf(func(value *conf.Onboarding) {})
 	}
 	boxes, err := ListNotebooks()
 	if err != nil {
 		logging.LogErrorf("list notebooks before triggering onboarding failed: %s", err)
 		return
 	}
-	publishEnabled := Conf.Publish != nil && Conf.Publish.Enable
-	if !prepareOnboardingForEmptyWorkspace(Conf.Onboarding, util.ReadOnly || publishEnabled, len(boxes)) {
+	publish := Conf.Publish.Load()
+	publishEnabled := publish != nil && publish.Enable
+	onboarding := cloneOnboarding(Conf.Onboarding.Load())
+	if !prepareOnboardingForEmptyWorkspace(onboarding, util.ReadOnly || publishEnabled, len(boxes)) {
 		return
 	}
-	Conf.Save()
+	UpdateOnboardingConf(func(value *conf.Onboarding) { *value = *onboarding })
 	evt := util.NewCmdResult("onboarding", 0, util.PushModeBroadcast)
-	evt.Data = cloneOnboarding(Conf.Onboarding)
+	evt.Data = cloneOnboarding(Conf.Onboarding.Load())
 	util.PushEvent(evt)
 }
 
@@ -181,12 +183,8 @@ func DismissOnboarding() *conf.Onboarding {
 	onboardingLock.Lock()
 	defer onboardingLock.Unlock()
 
-	if nil == Conf.Onboarding {
-		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
-	}
-	Conf.Onboarding.Dismissed = true
-	Conf.Save()
-	return cloneOnboarding(Conf.Onboarding)
+	UpdateOnboardingConf(func(s *conf.Onboarding) { s.Dismissed = true })
+	return cloneOnboarding(Conf.Onboarding.Load())
 }
 
 func cloneOnboarding(onboarding *conf.Onboarding) *conf.Onboarding {

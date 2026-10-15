@@ -40,15 +40,15 @@ func TestSyncProviderCompletionPreservesHistory(t *testing.T) {
 				t.Fatal(err)
 			}
 			// 保留缺失历史内容的状态，覆盖配置恢复后已经显示全部下载的情况。
-			Conf.Sync.AssetDownloadMode = mode
-			key := append([]byte(nil), Conf.Repo.Key...)
+			Conf.Sync.Load().AssetDownloadMode = mode
+			key := append([]byte(nil), Conf.Repo.Load().Key...)
 			if err = SetSyncProvider(conf.ProviderS3, false); err == nil {
 				t.Fatal("legacy request unexpectedly downloaded missing content")
 			}
 			if err = SetSyncProvider(conf.ProviderS3, true); err != nil {
 				t.Fatal(err)
 			}
-			if Conf.Sync.Provider != conf.ProviderS3 || Conf.Sync.AssetDownloadMode != mode || !bytes.Equal(Conf.Repo.Key, key) {
+			if Conf.Sync.Load().Provider != conf.ProviderS3 || Conf.Sync.Load().AssetDownloadMode != mode || !bytes.Equal(Conf.Repo.Load().Key, key) {
 				t.Fatal("completion changed the mode or recovery key")
 			}
 			if incomplete, err := partial.HasIncompleteSnapshots(); err != nil || incomplete {
@@ -73,14 +73,14 @@ func TestSyncProviderCompletionFailurePreservesSource(t *testing.T) {
 				t.Fatal(err)
 			}
 			if failure == "offline" {
-				Conf.Sync.Enabled = false
+				Conf.Sync.Load().Enabled = false
 			} else if failure == "missing-current-chunk" {
 				files, err := deferredSyncAssets()
 				if err != nil || len(files) != 1 {
 					t.Fatalf("expected deferred asset: %v %v", files, err)
 				}
 				chunk := files[0].Chunks[0]
-				if err = os.Remove(filepath.Join(Conf.Sync.Local.Endpoint, "main", "objects", chunk[:2], chunk[2:])); err != nil {
+				if err = os.Remove(filepath.Join(Conf.Sync.Load().Local.Endpoint, "main", "objects", chunk[:2], chunk[2:])); err != nil {
 					t.Fatal(err)
 				}
 			} else {
@@ -97,11 +97,11 @@ func TestSyncProviderCompletionFailurePreservesSource(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			key := append([]byte(nil), Conf.Repo.Key...)
+			key := append([]byte(nil), Conf.Repo.Load().Key...)
 			if err = SetSyncProvider(conf.ProviderS3, true); err == nil {
 				t.Fatal("failed completion allowed source change")
 			}
-			if Conf.Sync.Provider != conf.ProviderLocal || Conf.Sync.AssetDownloadMode != 1 || !bytes.Equal(Conf.Repo.Key, key) {
+			if Conf.Sync.Load().Provider != conf.ProviderLocal || Conf.Sync.Load().AssetDownloadMode != 1 || !bytes.Equal(Conf.Repo.Load().Key, key) {
 				t.Fatal("failed completion changed source, mode or key")
 			}
 			remaining, err := os.ReadFile(assetDownloadStatePath())
@@ -172,7 +172,7 @@ func TestSyncProviderCompletionHistoricalDocument(t *testing.T) {
 				t.Fatal(err)
 			}
 			if !available {
-				if err = os.Remove(filepath.Join(Conf.Sync.Local.Endpoint, "main", "objects", chunk[:2], chunk[2:])); err != nil {
+				if err = os.Remove(filepath.Join(Conf.Sync.Load().Local.Endpoint, "main", "objects", chunk[:2], chunk[2:])); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -189,7 +189,7 @@ func TestSyncProviderCompletionHistoricalDocument(t *testing.T) {
 					t.Fatalf("historical document unavailable: %q %v", data, err)
 				}
 			}
-			if Conf.Sync.Provider != provider || Conf.Sync.AssetDownloadMode != 0 {
+			if Conf.Sync.Load().Provider != provider || Conf.Sync.Load().AssetDownloadMode != 0 {
 				t.Fatal("unexpected provider or download mode")
 			}
 			if data, err := os.ReadFile(filepath.Join(util.DataDir, "history.txt")); err != nil || string(data) != "current document contents are different" {
@@ -204,7 +204,7 @@ func TestSyncProviderCompletionOfflineCompleteRepo(t *testing.T) {
 	if err := SetSyncAssetDownloadMode(0); err != nil {
 		t.Fatal(err)
 	}
-	Conf.Sync.Enabled = false
+	Conf.Sync.Load().Enabled = false
 	if err := SetSyncProvider(conf.ProviderS3, true); err != nil {
 		t.Fatalf("complete repository should switch without cloud access: %v", err)
 	}

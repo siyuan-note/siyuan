@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20260929000700"
+		"updated": "20261010225402"
 	},
 	"Children": [
 		{
@@ -36,6 +36,114 @@
 				{
 					"Type": "NodeText",
 					"Data": "全局搜索支持查询语法进行高级搜索，包括 AND/OR/NOT 逻辑组合、类型过滤、字段筛选等。同时提供数据库表直查、忽略索引和忽略搜索等进阶功能，满足从简单关键词到复杂条件的各类搜索需求。以下子文档将逐一介绍这些功能的详细用法。"
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-ljls7op",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261009182324-ljls7op",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各搜索方式的控件范围"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261009182324-wscenpu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-wscenpu",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "关键字与查询语法搜索支持块类型、笔记本和文档路径筛选、包含子文档，以及排序、分组和替换。按内容顺序排序仅在按文档分组时可用。"
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-4yld8po",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-4yld8po",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正则搜索支持相同的筛选、分组和替换，以及按类型、创建时间和更新时间排序。不支持按相关度排序；按内容顺序仅用于文档分组内的结果。"
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-i0gjmmp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-i0gjmmp",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL 搜索使用语句中指定的筛选条件和结果顺序。面板中的块类型、路径筛选，包括当前文档范围与包含子文档选项，不会生效，也不支持替换。仍可按文档分组；分组后可按类型、创建时间、更新时间与内容顺序整理结果，但不支持按相关度排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010113646-r0h5r0j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-r0h5r0j",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端和移动端的 SQL 搜索支持粘贴多行语句并保留注释。SQL 模式下按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 换行；请保留 -- 行注释后的换行，避免后续语句被视为注释。搜索窗口需要完整块字段，例如 SELECT b.* FROM blocks b；仅选择部分字段或统计结果应交给智能体的 sql.query。"
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-mayn7w7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-mayn7w7",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "语义搜索支持块类型、笔记本和文档路径筛选，以及包含子文档。结果按语义相关性排列，不支持面板中的排序、分组和替换。"
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-o78o1c9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-o78o1c9",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "当前搜索方式不支持的控件会禁用并显示说明提示。SQL 与语义搜索会隐藏替换输入行，但保留已输入文本和展开状态，切回支持替换的方式时恢复显示。保存和重置查询条件仍可使用。"
 				}
 			]
 		},
@@ -251,7 +359,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613193351-ucgzev5",
-				"updated": "20260809232000"
+				"updated": "20261010225402"
 			},
 			"Children": [
 				{
@@ -447,7 +555,7 @@
 					},
 					"Properties": {
 						"id": "20260613193351-2ykewgm",
-						"updated": "20260809232000"
+						"updated": "20261010225402"
 					},
 					"Children": [
 						{
@@ -455,7 +563,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193351-0iq5ns5",
-								"updated": "20260809232000"
+								"updated": "20261010225402"
 							},
 							"Children": [
 								{
@@ -484,6 +592,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 撤销，执行前系统会自动生成数据历史，如需恢复请通过数据历史回滚"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。普通和加密文档都会保留替换期间的编辑。保存前文档发生修改或被删除时，替换会停止并报错，保留该文档的当前内容；此前已保存的文档仍保留替换结果。完成编辑后可重新执行替换"
 								}
 							]
 						}

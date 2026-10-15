@@ -1,3 +1,5 @@
+@use "../component/counter";
+
 /*
 .status: 2
 
@@ -17,6 +19,10 @@ window.siyuan.zIndex: 10
 
 .b3-tooltips: 1000000
 */
+
+.app-loading {
+  z-index: 10;
+}
 
 html {
   position: fixed;
@@ -69,6 +75,11 @@ html[data-frontend="browser-desktop"] {
     padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 8px);
     height: calc(env(titlebar-area-height, 31px) + 1px);
   }
+}
+
+// 移动设备的桌面布局不预留 macOS 窗口按钮空间，iPad 窗口控件按原生上报的宽度避让。
+:root:is([data-backend="android"], [data-backend="ios"], [data-backend="harmony"]) .fullscreen {
+  --b3-toolbar-left-mac: calc(var(--ios-window-controls-left, 0px) + 8px);
 }
 
 // 仅顶部工具栏避让原生窗口控件，正文与侧栏不增加横向留白。
@@ -138,12 +149,20 @@ html[data-frontend="browser-desktop"] {
     }
   }
 
-  &__title-icon {
+  &__title-content {
     display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    gap: 4px;
+    vertical-align: top;
+    pointer-events: none;
+  }
+
+  &__title-icon {
+    display: flex;
+    flex-shrink: 0;
     width: 16px;
     height: 16px;
-    margin-right: 4px;
-    vertical-align: middle;
     align-items: center;
     justify-content: center;
     pointer-events: none;
@@ -405,28 +424,26 @@ html[data-frontend="browser-desktop"] {
   }
 }
 
-.body--windows .sy__file .b3-list-item__icon {
-  font-size: 16px;
+// 触摸操作直接显示文档面板按钮，避免悬停显现动画延迟点击。
+.body--touch-input .sy__file {
+  .block__icons:not(.protyle-wysiwyg *) .block__icon:not(.backlinkList__toggle) {
+    display: flex;
+    opacity: 1;
+    transition: none;
+  }
+
+  .block__icons:not(.protyle-wysiwyg *) .block__icon[disabled]:not(.backlinkList__toggle) {
+    opacity: .38;
+  }
+
+  .block__icons:not(.protyle-wysiwyg *) .fn__space {
+    display: block;
+    transition: none;
+  }
 }
 
-.counter {
-  margin-left: 4px;
-  line-height: 22px;
-  padding: 0 8px;
-  color: var(--b3-theme-on-surface-light);
-  border-radius: var(--b3-border-radius);
-  font-size: 12px;
-  user-select: none;
-  height: 22px;
-
-  &--right {
-    width: 32px;
-    text-align: right;
-  }
-
-  &--bg {
-    background-color: var(--b3-theme-surface);
-  }
+.body--windows .sy__file .b3-list-item__icon {
+  font-size: 16px;
 }
 
 .reveal {

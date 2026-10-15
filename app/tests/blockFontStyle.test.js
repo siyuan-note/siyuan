@@ -90,6 +90,7 @@ const runElectron = async () => {
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    win.webContents.on("console-message", event => console.error(event.message));
     let exitCode = 0;
     try {
         const ts = require("typescript");
@@ -106,10 +107,12 @@ const runElectron = async () => {
         const modules = {
             "toolbar/fontFamilyCore": read("toolbar/fontFamilyCore"),
             "util/hasClosest": read("util/hasClosest"),
+            "render/blockDirection": read("render/blockDirection"),
             "toolbar/fontFamilyMenu": 'import {FONT_FAMILY_EXCLUDED_BLOCK_TYPES, getInlineFontFamilySelection, hasInlineFontFamilyExcludedType} from "./fontFamilyCore";\n' +
                 'import {hasClosestBlock} from "../util/hasClosest"; const Constants = {ZWSP:"\\u200b"};\n' +
                 extract("toolbar/fontFamilyMenu", ["getNodeFontFamily", "getFontFamilyState", "getInlineFontFamilyState"]),
-            "wysiwyg/transaction": 'const Constants = {ATTRIBUTE_EDITING:"data-editing"}; const cleanHeadingNumberHTML = html => html;\n' +
+            "wysiwyg/transaction": 'import {renderBlockDirection} from "../render/blockDirection";\n' +
+                'const Constants = {ATTRIBUTE_EDITING:"data-editing"}; const cleanHeadingNumberHTML = html => html;\n' +
                 "const transaction = (protyle, operations, undoOperations) => window.batches.push({operations, undoOperations});\n" +
                 extract("wysiwyg/transaction", ["updateBatchTransaction"]),
             "toolbar/Font": 'import {updateBatchTransaction} from "../wysiwyg/transaction";\n' +

@@ -142,6 +142,9 @@ func extractGuardedArchive(zipAbs, destAbs string) error {
 // authorizeArchiveEntry 校验归档成员的最终输出路径：必须位于目标目录内（含符号链接解析后），
 // 且通过最终路径授权（工作区包含、加密笔记本、symlink 逃逸、敏感文件黑名单）。
 func authorizeArchiveEntry(destAbs, entryAbs, display string) error {
+	if util.IsPluginDevelopmentRawWriteForbidden(entryAbs) {
+		return fmt.Errorf("managed plugin development output cannot be overwritten: %s", display)
+	}
 	rel, err := filepath.Rel(destAbs, entryAbs)
 	if err != nil || !filepath.IsLocal(rel) {
 		return fmt.Errorf("archive entry escapes destination [%s]", display)

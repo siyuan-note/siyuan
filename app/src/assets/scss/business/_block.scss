@@ -112,7 +112,8 @@
     transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
     line-height: 16px;
 
-    &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning),
+    &--tap:active:not([disabled]),
+    &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning):not(.block__icon--subtle),
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);
@@ -134,6 +135,32 @@
 
     &--emoji {
       font-variant-emoji: emoji;
+    }
+
+    &--menu-back {
+      padding: 8px;
+      margin-left: -4px;
+    }
+
+    &--touch {
+      @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+      }
+    }
+
+    &--tap {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    &--subtle {
+      color: var(--b3-border-color);
+
+      &:hover:not([disabled]),
+      &:focus-visible:not([disabled]) {
+        color: var(--b3-theme-on-surface);
+      }
     }
 
     svg {

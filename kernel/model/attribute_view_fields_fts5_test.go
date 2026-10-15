@@ -23,7 +23,7 @@ import (
 
 func TestAttributeViewFieldsUndoRedo(t *testing.T) {
 	for _, typ := range []av.KeyType{av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect,
-		av.KeyTypeMSelect, av.KeyTypeMAsset, av.KeyTypeCheckbox, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone} {
+		av.KeyTypeMSelect, av.KeyTypeMAsset, av.KeyTypeCheckbox, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeLocation} {
 		t.Run(string(typ), func(t *testing.T) {
 			fixture, before, tx := setupAttributeViewFieldsTest(t, typ)
 			if err := PerformTxSync(tx); err != nil {

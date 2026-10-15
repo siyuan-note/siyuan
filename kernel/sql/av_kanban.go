@@ -10,13 +10,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Kanban) {
-	context := NewAttributeViewRenderContext()
-	ret = renderAttributeViewKanban(attrView, view, query, depth, cachedAttrViews, ignoreRows, false, context)
-	context.PushTemplateErrors()
-	return
-}
-
 func renderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query string, depth *int,
 	cachedAttrViews map[string]*av.AttributeView, ignoreRows, deferTemplateValues bool,
 	renderContext *AttributeViewRenderContext) (ret *av.Kanban) {

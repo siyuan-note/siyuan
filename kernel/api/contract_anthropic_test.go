@@ -55,8 +55,8 @@ func TestAPIContractAnthropicGenerationAndModels(t *testing.T) {
 	provider := &conf.Provider{ID: "provider", Enabled: true, BaseURL: upstream.URL + "/v1",
 		Protocol: util.AnthropicProtocolMessages, APIKey: "key", RequestTimeout: 5,
 		Headers: map[string]string{"X-Custom": "configured"}, Models: []*conf.Model{{ID: "model", Name: "test", Enabled: true}}}
-	model.Conf.AI.Providers = []*conf.Provider{provider}
-	model.Conf.AI.Editing.ModelID = "model"
+	model.Conf.AI.Load().Providers = []*conf.Provider{provider}
+	model.Conf.AI.Load().Editing.ModelID = "model"
 	engine := gin.New()
 	engine.POST("/api/ai/editor/chat", aiEditorChat)
 	engine.POST("/api/ai/chatGPT", chatGPT)

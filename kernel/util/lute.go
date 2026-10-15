@@ -26,18 +26,23 @@ import (
 )
 
 // MarkdownSettings 运行时 Markdown 配置。
-var MarkdownSettings = &Markdown{
-	InlineAsterisk:               true,
-	InlineUnderscore:             true,
-	InlineSup:                    true,
-	InlineSub:                    true,
-	InlineTag:                    true,
-	InlineMath:                   true,
-	InlineStrikethrough:          true,
-	InlineFullWidthStrikethrough: false,
-	BlockFullWidthTaskList:       new(true),
-	InlineMark:                   true,
-	CodeBlockMiddleDot:           new(true),
+var MarkdownSettings = NewAtomicValue(NewMarkdown())
+
+// NewMarkdown 返回独立的默认语法配置，不引用运行时设置。
+func NewMarkdown() *Markdown {
+	return &Markdown{
+		InlineAsterisk:               true,
+		InlineUnderscore:             true,
+		InlineSup:                    true,
+		InlineSub:                    true,
+		InlineTag:                    true,
+		InlineMath:                   true,
+		InlineStrikethrough:          true,
+		InlineFullWidthStrikethrough: false,
+		BlockFullWidthTaskList:       new(true),
+		InlineMark:                   true,
+		CodeBlockMiddleDot:           new(true),
+	}
 }
 
 type Markdown struct {
@@ -68,15 +73,16 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetCustomBlock(true)
 	ret.SetImgPathAllowSpace(true)
 	ret.SetGitConflict(true)
-	ret.SetInlineAsterisk(MarkdownSettings.InlineAsterisk)
-	ret.SetInlineUnderscore(MarkdownSettings.InlineUnderscore)
-	ret.SetSup(MarkdownSettings.InlineSup)
-	ret.SetSub(MarkdownSettings.InlineSub)
-	ret.SetTag(MarkdownSettings.InlineTag)
-	ret.SetInlineMath(MarkdownSettings.InlineMath)
-	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
-	ret.SetFullWidthStrikethrough(MarkdownSettings.InlineFullWidthStrikethrough)
-	ret.SetMark(MarkdownSettings.InlineMark)
+	markdown := MarkdownSettings.Load()
+	ret.SetInlineAsterisk(markdown.InlineAsterisk)
+	ret.SetInlineUnderscore(markdown.InlineUnderscore)
+	ret.SetSup(markdown.InlineSup)
+	ret.SetSub(markdown.InlineSub)
+	ret.SetTag(markdown.InlineTag)
+	ret.SetInlineMath(markdown.InlineMath)
+	ret.SetGFMStrikethrough(markdown.InlineStrikethrough)
+	ret.SetFullWidthStrikethrough(markdown.InlineFullWidthStrikethrough)
+	ret.SetMark(markdown.InlineMark)
 	ret.SetInlineMathAllowDigitAfterOpenMarker(true)
 	ret.SetGFMStrikethrough1(false)
 	ret.SetFootnotes(false)
@@ -117,14 +123,15 @@ func NewStdLute() (ret *lute.Lute) {
 
 	// 导入 Markdown 时遵循编辑器 Markdown 语法设置
 	// Follow editor Markdown syntax settings when importing Markdown https://github.com/siyuan-note/siyuan/issues/14731
-	ret.SetInlineAsterisk(MarkdownSettings.InlineAsterisk)
-	ret.SetInlineUnderscore(MarkdownSettings.InlineUnderscore)
-	ret.SetSup(MarkdownSettings.InlineSup)
-	ret.SetSub(MarkdownSettings.InlineSub)
-	ret.SetTag(MarkdownSettings.InlineTag)
-	ret.SetInlineMath(MarkdownSettings.InlineMath)
-	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
-	ret.SetFullWidthStrikethrough(MarkdownSettings.InlineFullWidthStrikethrough)
+	markdown := MarkdownSettings.Load()
+	ret.SetInlineAsterisk(markdown.InlineAsterisk)
+	ret.SetInlineUnderscore(markdown.InlineUnderscore)
+	ret.SetSup(markdown.InlineSup)
+	ret.SetSub(markdown.InlineSub)
+	ret.SetTag(markdown.InlineTag)
+	ret.SetInlineMath(markdown.InlineMath)
+	ret.SetGFMStrikethrough(markdown.InlineStrikethrough)
+	ret.SetFullWidthStrikethrough(markdown.InlineFullWidthStrikethrough)
 	ret.SetGFMStrikethrough1(false)
 	return
 }

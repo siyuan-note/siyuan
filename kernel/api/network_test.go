@@ -147,7 +147,7 @@ func TestEventSourceProxyResponseSecurityHeaders(t *testing.T) {
 }
 
 func TestForwardProxyResponseSizeLimit(t *testing.T) {
-	const limit int64 = 64
+	const limit int64 = 1024
 	body := bytes.Repeat([]byte("a"), int(limit)+1)
 	var compressed bytes.Buffer
 	gzipWriter := gzip.NewWriter(&compressed)

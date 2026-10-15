@@ -114,8 +114,8 @@ func TestFillThemeStyleVarUsesBuiltinOverrides(t *testing.T) {
 		--b3-card-error-color: #020202;
 		--b3-card-error-background: #030303;
 	}`)
-	Conf.Appearance.Mode = 0
-	Conf.Appearance.ThemeLight = "daylight"
+	Conf.Appearance.Load().Mode = 0
+	Conf.Appearance.Load().ThemeLight = "daylight"
 
 	if _, _, err := SetInlineStylesData(&InlineStyles{
 		Version: InlineStylesVersion,
@@ -146,7 +146,7 @@ func TestFillThemeStyleVarUsesBuiltinOverrides(t *testing.T) {
 		t.Fatalf("unexpected builtin inline style export: %s", actual)
 	}
 	for _, mode := range []int{0, 1} {
-		Conf.Appearance.Mode = mode
+		Conf.Appearance.Load().Mode = mode
 		for _, source := range []string{
 			"color: var(--b3-card-error-color); background-color: var(--b3-card-error-background);",
 			"color: var(--b3-inline-builtin-error-color, var(--b3-card-error-color)); " +
@@ -167,8 +167,8 @@ func TestFillThemeStyleVarUsesBuiltinOverrides(t *testing.T) {
 
 func TestFillThemeStyleVarUsesCurrentInlineStyleMode(t *testing.T) {
 	setupThemeTest(t, "midnight", `:root {}`)
-	Conf.Appearance.Mode = 1
-	Conf.Appearance.ThemeDark = "midnight"
+	Conf.Appearance.Load().Mode = 1
+	Conf.Appearance.Load().ThemeDark = "midnight"
 
 	const id = "20260821000000-abcdefg"
 	if _, _, err := SetInlineStyles([]*InlineStyle{{
@@ -190,8 +190,8 @@ func TestFillThemeStyleVarUsesCurrentInlineStyleMode(t *testing.T) {
 
 func TestFillThemeStyleVarFallsBackForInvalidInlineStyles(t *testing.T) {
 	setupThemeTest(t, "daylight", `:root { --theme-background: #112233; }`)
-	Conf.Appearance.Mode = 0
-	Conf.Appearance.ThemeLight = "daylight"
+	Conf.Appearance.Load().Mode = 0
+	Conf.Appearance.Load().ThemeLight = "daylight"
 
 	if err := os.MkdirAll(filepath.Dir(inlineStylesPath()), 0755); err != nil {
 		t.Fatal(err)
@@ -224,8 +224,8 @@ func setupThemeTest(t *testing.T, theme, css string) {
 	util.ThemesPath = filepath.Join(tempDir, "themes")
 	util.AppearancePath, util.Mode = filepath.Join(tempDir, "appearance"), "prod"
 	Conf = NewAppConf()
-	Conf.Appearance = conf.NewAppearance()
-	Conf.Sync = conf.NewSync()
+	Conf.Appearance.Store(conf.NewAppearance())
+	Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		util.DataDir, util.ThemesPath, Conf = oldDataDir, oldThemesPath, oldConf
 		util.AppearancePath, util.Mode = oldAppearancePath, oldMode

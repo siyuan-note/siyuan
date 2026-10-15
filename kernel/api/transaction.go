@@ -47,6 +47,23 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 	}
 	timestamp := int64(request.ReqID)
 	var err error
+	convertList := false
+	for _, transaction := range transactions {
+		if transaction == nil {
+			continue
+		}
+		for _, operation := range transaction.DoOperations {
+			if operation != nil && operation.Action == "convertList" {
+				convertList = true
+			}
+		}
+	}
+	if convertList {
+		if len(transactions) != 1 || len(transactions[0].DoOperations) != 1 {
+			return apicontract.Failure[[]*apicontract.Transaction](-1, "list conversion requires a separate transaction")
+		}
+		model.FlushTxQueue()
+	}
 
 	if err = model.ValidateFlashcardTransactions(transactions); err != nil {
 		return apicontract.Failure[[]*apicontract.Transaction](-1, err.Error())
@@ -69,7 +86,7 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
 	}
 
-	if templateDocTreeAttached {
+	if templateDocTreeAttached || convertList {
 		if err = model.PerformTxSync(transactions[0]); nil != err {
 			return apicontract.Failure[[]*apicontract.Transaction](-1, util.EscapeHTML(err.Error()))
 		}
@@ -168,10 +185,13 @@ func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.T
 }
 
 func pushTransactions(app, session string, transactions []*model.Transaction) {
+	// 等待本批事务执行完毕，再读取变更文档和撤销状态并广播。
+	for _, tx := range transactions {
+		tx.WaitForCommit()
+	}
+
 	pushMode := util.PushModeBroadcastExcludeSelf
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
-		model.FlushTxQueue() // 等待文件写入完成，后续渲染才能读取到最新的数据
-
 		if shouldBroadcastAttrViewTransactions(transactions) {
 			pushMode = util.PushModeBroadcast
 		}
@@ -187,10 +207,6 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 		rootIDs = append(rootIDs, tx.GetChangedRootIDs()...)
 	}
 	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
-
-	for _, tx := range transactions {
-		tx.WaitForCommit()
-	}
 
 	// 附带每个 rootID 的撤销/重做可用状态，供前端本地镜像同步（多窗口/多端按钮态）
 	// 必须在 WaitForCommit 之后读取，确保 Record 已完成，状态含最新条目
@@ -375,7 +391,7 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 
 func holdBlockSwapReplayRequests(c *gin.Context, tx *model.Transaction, rootIDs []string) error {
 	for _, operation := range tx.DoOperations {
-		if operation != nil && operation.Action == "swapBlockRef" {
+		if operation != nil && (operation.Action == "swapBlockRef" || operation.Action == "convertList") {
 			return holdEncryptedBlockRequests(c, "", rootIDs, false)
 		}
 	}

@@ -7,6 +7,7 @@ import {isMobileMenuSearchMatch} from "./searchFilter";
 import {getSettingTabFromMenuTarget} from "./mainMenu";
 import {unmountSettingTab} from "./settingPanel";
 import {activeBlur} from "../util/keyboardToolbar";
+import {syncMainMenuGroupCollapse} from "./mainMenuCollapse";
 
 export interface IMainMenuSearch {
     /** 搜索框当前关键字，已归一化；空串表示未处于搜索态 */
@@ -72,6 +73,8 @@ const createSettingSearchMountQueue = (app: App) => {
 
 /** 按关键字过滤主菜单项，返回命中的设置页及其扫描结果 */
 const filterMainMenu = (element: HTMLElement, keywords: string) => {
+    // 搜索时临时展开分组，清空搜索后恢复用户保存的折叠状态。
+    syncMainMenuGroupCollapse(element, !!keywords);
     const matchedSettings = new Map<TSettingTab, SettingTabSearchResult>();
     let hasMatches = false;
     element.querySelectorAll<HTMLElement>(".mobile-main-menu__groups > .b3-menu__group").forEach((group) => {

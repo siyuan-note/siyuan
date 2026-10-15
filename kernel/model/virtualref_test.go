@@ -27,9 +27,9 @@ import (
 func TestProcessVirtualRefDoesNotMatchHTMLEntity(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Search = conf.NewSearch()
-	Conf.Editor.VirtualBlockRef = true
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Editor.Load().VirtualBlockRef = true
 	t.Cleanup(func() {
 		Conf = previousConf
 	})
@@ -73,7 +73,7 @@ func TestProcessVirtualRefDoesNotMatchHTMLEntity(t *testing.T) {
 func TestMarkReplaceSpanWithSplitReportsFinalMatch(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() {
 		Conf = previousConf
 	})

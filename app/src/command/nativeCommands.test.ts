@@ -49,3 +49,45 @@ it("hides publish write commands and rejects their shortcut execution", async ()
         }
     }
 });
+
+it("database entry commands honor navigation boundaries and loading on every frontend", async () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const commands = ["previousDatabaseRow", "nextDatabaseRow"];
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {
+        config: {keymap: {general: Object.fromEntries(commands.map(key => [key, {}])), editor: {general: {}}}},
+    }}});
+    try {
+        const app = {};
+        const executed: string[] = [];
+        const previous = {disabled: true};
+        const next = {disabled: false};
+        const element = {
+            isConnected: true,
+            closest: (): null => null,
+            querySelector: (selector: string) => selector.includes('"previous"') ? previous : next,
+        } as unknown as HTMLElement;
+        ensureNativeCommands(app, command => executed.push(command));
+        const registry = getCommandRegistry(app);
+        for (const environment of ["desktop", "desktop-window", "browser-desktop", "mobile", "browser-mobile"] as const) {
+            const context: ICommandContextSnapshot = {
+                app, source: "shortcut", environment, focus: "editor", selectedBlocks: [], activeTab: {element},
+            };
+            const previousID = getNativeCommandId(commands[0]);
+            const nextID = getNativeCommandId(commands[1]);
+            assert.equal((await registry.execute(previousID, context)).status, "disabled");
+            assert.equal((await registry.execute(nextID, context)).status, "executed");
+            next.disabled = true;
+            assert.equal((await registry.execute(nextID, context)).status, "disabled");
+            next.disabled = false;
+            assert.equal((await registry.execute(nextID, {...context, focus: "fileTree"})).status, "disabled");
+            assert.equal((await registry.execute(nextID, {...context, activeTab: undefined})).status, "disabled");
+        }
+        assert.deepEqual(executed, Array(5).fill("nextDatabaseRow"));
+    } finally {
+        if (original) {
+            Object.defineProperty(globalThis, "window", original);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});

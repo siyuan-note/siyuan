@@ -1,3 +1,4 @@
+import {isAVTimestampType} from "./capabilities";
 import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
@@ -21,7 +22,7 @@ import {clearSelect} from "../../util/clear";
 import {isCustomAttr} from "./blockAttr";
 import {getColIconByType, getColNameByType} from "./col";
 import {unicode2Emoji} from "../../../emoji";
-import {escapeAriaLabel, escapeAttr} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
 import {
     getAVSelectStat,
@@ -115,7 +116,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             if (galleryData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
-        ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
+        ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${escapeHtmlTextAndAttr(galleryData.fields[fieldsIndex].name)}
         ${galleryData.fields[fieldsIndex].desc ? `<svg aria-label="${escapeAriaLabel(galleryData.fields[fieldsIndex].desc)}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
     </div>
     ${cellHTML}
@@ -123,7 +124,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             } else {
                 html += `<div class="av__gallery-field${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-tip">
-        ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
+        ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${escapeHtmlTextAndAttr(galleryData.fields[fieldsIndex].name)}
     </div>
     ${cellHTML}
 </div>`;
@@ -184,7 +185,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             if (kanbanData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
-        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${escapeHtmlTextAndAttr(kanbanData.fields[fieldsIndex].name)}
         ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${escapeAriaLabel(kanbanData.fields[fieldsIndex].desc)}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
     </div>
     ${cellHTML}
@@ -192,7 +193,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             } else {
                 html += `<div class="av__gallery-field${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-tip">
-        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${escapeHtmlTextAndAttr(kanbanData.fields[fieldsIndex].name)}
     </div>
     ${cellHTML}
 </div>`;
@@ -433,7 +434,7 @@ export const insertAttrViewBlockAnimation = (options: {
         previousElement = getPreviousTableRow(options.blockElement.querySelector(groupQuery + ".av__row--util"));
     }
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
-    if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
+    if (bodyElement && isAVTimestampType(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
         previousElement = getPreviousTableRow(
             options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util'));
@@ -559,11 +560,14 @@ const addFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass: st
     item.insertAdjacentElement("afterend", placeholder);
 };
 
-const addFixedViews = (item: HTMLElement, height: number) => {
+const addFixedViews = (item: HTMLElement, height: number, width: number) => {
     item.classList.add("av__views--fixed");
     const placeholder = document.createElement("div");
     placeholder.className = "av__views-placeholder";
     placeholder.style.height = height + "px";
+    // 保留工具栏对容器宽度的支撑，并允许占位随可用空间收缩。
+    placeholder.style.width = width + "px";
+    placeholder.style.maxWidth = "100%";
     item.insertAdjacentElement("afterend", placeholder);
 };
 
@@ -644,9 +648,9 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             ? viewsElement.nextElementSibling as HTMLElement
             : viewsElement;
         const viewsRect = placeholderElement.getBoundingClientRect();
-        // 吸顶栏按当前可用宽度换行，并同步占位高度，保持表头位置与文档布局一致。
+        // 吸顶栏保留可用宽度的小数精度，并同步换行后的占位高度，保持表头位置与文档布局一致。
         if (placeholderElement !== viewsElement) {
-            const width = Math.round(viewsRect.width) + "px";
+            const width = viewsRect.width + "px";
             if (viewsElement.style.width !== width) {
                 viewsElement.style.width = width;
             }
@@ -663,7 +667,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             height,
             left: Math.round(viewsRect.left),
             top,
-            width: Math.round(viewsRect.width),
+            width: viewsRect.width,
             shouldFix,
         };
         if (shouldFix) {
@@ -731,7 +735,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
     if (viewsTask) {
         if (viewsTask.shouldFix) {
             if (!viewsTask.element.classList.contains("av__views--fixed")) {
-                addFixedViews(viewsTask.element, viewsTask.height);
+                addFixedViews(viewsTask.element, viewsTask.height, viewsTask.width);
             }
             viewsTask.element.style.left = viewsTask.left + "px";
             viewsTask.element.style.top = viewsTask.top + "px";

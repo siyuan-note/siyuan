@@ -1,6 +1,31 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {escapeSearchHighlight, stripSearchMark} from "./escape";
+import {escapeHtmlTextAndAttr, escapeSearchHighlight, stripSearchMark} from "./escape";
+
+describe("escape HTML strings", () => {
+    it("matches the bundled Lute engine for text and double-quoted attributes", () => {
+        require("../../stage/protyle/js/lute/lute.min.js");
+        for (const value of ["", "plain text", "&<>\"'", "&amp; &#39; &quot;", "</textarea><img src=\"x\">",
+            "中文、日本語、😀\n\t'quoted'"]) {
+            assert.equal(escapeHtmlTextAndAttr(value), Lute.EscapeHTMLStr(value));
+        }
+        assert.equal(escapeHtmlTextAndAttr("&<>\"'"), "&amp;&lt;&gt;&quot;'");
+    });
+
+    it("preserves Lute string conversion for non-string values", () => {
+        require("../../stage/protyle/js/lute/lute.min.js");
+        for (const value of [undefined, null, 0, 123, NaN, false, true, ["<&", 1],
+            {toString: () => '<"&>'}]) {
+            assert.equal(escapeHtmlTextAndAttr(value), Reflect.apply(Lute.EscapeHTMLStr, Lute, [value]));
+        }
+    });
+
+    it("preserves lone surrogates while escaping HTML characters", () => {
+        assert.equal(escapeHtmlTextAndAttr("\ud800&<\udc00>\"'"), "\ud800&amp;&lt;\udc00&gt;&quot;'");
+        assert.equal(escapeHtmlTextAndAttr("\ud800"), "\ud800");
+        assert.equal(escapeHtmlTextAndAttr("\udc00"), "\udc00");
+    });
+});
 
 describe("strip search mark", () => {
     it("removes search highlights without decoding escaped block names", () => {

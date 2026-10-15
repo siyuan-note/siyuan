@@ -98,7 +98,8 @@ const (
 	ModeThumbnail Mode = "thumb"
 )
 
-func convert(ctx context.Context, source []byte, mode Mode) ([]byte, error) {
+// Convert 将 HEIF 转换为 JPEG，复用预览的尺寸、内存和并发限制，不写入缓存。
+func Convert(ctx context.Context, source []byte, mode Mode) ([]byte, error) {
 	if len(source) == 0 {
 		return nil, errors.New("empty HEIF image")
 	}

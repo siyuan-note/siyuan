@@ -16,8 +16,8 @@ func prepareEmbeddingQueueTest(t *testing.T) {
 	t.Helper()
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.AI = conf.NewAI()
-	Conf.AI.Embedding = &conf.Embedding{Enabled: true, APIKey: "test"}
+	Conf.AI.Store(conf.NewAI())
+	Conf.AI.Load().Embedding = &conf.Embedding{Enabled: true, APIKey: "test"}
 	embeddingIgnoreLock.Lock()
 	loaded, matcher := embeddingIgnoreLoaded, embeddingIgnoreMatcher
 	embeddingIgnoreLoaded, embeddingIgnoreMatcher = true, nil
@@ -122,8 +122,8 @@ func TestEmbeddingRebuildDiscardsInflightFailure(t *testing.T) {
 		http.Error(w, `{"error":{"message":"failed"}}`, http.StatusInternalServerError)
 	}))
 	defer server.Close()
-	Conf.AI.Embedding.BaseURL = server.URL
-	Conf.AI.Embedding.Timeout = 5
+	Conf.AI.Load().Embedding.BaseURL = server.URL
+	Conf.AI.Load().Embedding.Timeout = 5
 	embeddingResultMu.Lock()
 	generation := embeddingGeneration
 	embeddingResultMu.Unlock()

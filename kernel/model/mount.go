@@ -32,6 +32,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -64,6 +65,8 @@ func CreateBox(name string) (id string, err error) {
 }
 
 func createBox(name string, initializeBoxDoc bool) (id string, err error) {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -95,7 +98,7 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	box := &Box{ID: id, Name: name}
 	boxConf := box.GetConf()
 	boxConf.Name = name
-	boxConf.Sort = newBoxSort(boxes, nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop)
+	boxConf.Sort = newBoxSort(boxes, nil != confFileTreeSnapshot.CreateDocAtTop && *confFileTreeSnapshot.CreateDocAtTop)
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
 	}
@@ -299,6 +302,16 @@ func RemoveBox(boxID string) (err error) {
 
 	// 删目录前固定加密状态，确保后续历史、资源和索引清理始终使用同一个安全边界。
 	isEncrypted := IsEncryptedBox(boxID)
+	boundDeletion := &Transaction{}
+	defer func() { boundDeletion.finishAttributeViewMutation(err != nil) }()
+	var before, after map[string]*av.AttributeView
+	if !isEncrypted {
+		// 普通数据库跨笔记本共享，删除目录前校验全部关联，避免删除成功后留下失效绑定。
+		before, after, err = boundDeletion.prepareDeletedBoundAttributeViewBlocks(deletedAttrViewBlockIDs, "")
+		if err != nil {
+			return
+		}
+	}
 	if !isUserGuide {
 		if err = EnsureAssetPrefixLocal(localPath); err != nil {
 			return
@@ -313,6 +326,9 @@ func RemoveBox(boxID string) (err error) {
 	defer databaseIndexDataLock.Unlock()
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
+	if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+		return
+	}
 	if !isEncrypted {
 		unmount0(boxID)
 	}
@@ -335,6 +351,23 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
+		if !isEncrypted {
+			pages, walkErr := pagedPathsWithError(localPath, 32)
+			if walkErr != nil {
+				return walkErr
+			}
+			for _, paths := range pages {
+				for _, filename := range paths {
+					tree, loadErr := loadTree(filename, util.NewLute())
+					if loadErr != nil {
+						return loadErr
+					}
+					if err = backupBoundAttributeViewHistory(tree, historyDir); err != nil {
+						return err
+					}
+				}
+			}
+		}
 
 		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
 		if !isEncrypted {
@@ -354,13 +387,17 @@ func RemoveBox(boxID string) (err error) {
 		RevokeManagedEncryptedExportsForBox(boxID)
 	}
 
+	if !isEncrypted {
+		if err = boundDeletion.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{}, before, after); err != nil {
+			return
+		}
+	}
 	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	boundDeletion.finishAttributeViewMutation(false)
 	removeHPathRefreshBox(boxID)
 	maintainPinnedDocs(nil, boxID, "")
-	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
-	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
 	if isEncrypted {
 		sql.RemoveEncryptedDBFile(boxID)
@@ -469,6 +506,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 }
 
 func mountBox(boxID string) (alreadyMount bool, err error) {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
 		return
@@ -498,7 +537,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 		}
 
 		boxes, _ := ListNotebooks()
-		sort := newBoxSort(boxes, nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop)
+		sort := newBoxSort(boxes, nil != confFileTreeSnapshot.CreateDocAtTop && *confFileTreeSnapshot.CreateDocAtTop)
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {
@@ -566,7 +605,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 	}
 
 	// 缓存根一级的文档树展开
-	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, confFileTreeSnapshot.MaxListCount)
 	box = Conf.Box(boxID)
 	if 0 < len(files) || (nil != box && box.Exist(boxDocPath(box.ID))) {
 		box.Index()

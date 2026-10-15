@@ -19,7 +19,9 @@ package util
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -45,11 +47,18 @@ type mcpParams struct {
 }
 
 type mcpResponse struct {
-	Result *mcpResult `json:"result,omitempty"`
+	Result *mcpResult        `json:"result,omitempty"`
+	Error  *mcpResponseError `json:"error,omitempty"`
+}
+
+type mcpResponseError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 type mcpResult struct {
 	Content []mcpContent `json:"content"`
+	IsError bool         `json:"isError,omitempty"`
 }
 
 type mcpContent struct {
@@ -82,7 +91,14 @@ func WebSearch(query, exaApiKey string) (string, error) {
 	if err != nil {
 		return "", errors.New("web search failed: " + err.Error())
 	}
+	return parseWebSearchResponse(resp.Response)
+}
+
+func parseWebSearchResponse(resp *http.Response) (string, error) {
 	defer resp.Body.Close()
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return "", fmt.Errorf("web search failed: HTTP %d", resp.StatusCode)
+	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -96,7 +112,10 @@ func WebSearch(query, exaApiKey string) (string, error) {
 	}
 	logging.LogInfof("websearch response: status=%d, len=%d, preview=%s", resp.StatusCode, len(body), preview)
 
-	text := parseMcpResponse(body)
+	text, err := parseMcpResponse(body)
+	if err != nil {
+		return "", err
+	}
 	if text == "" {
 		return "No search results found. Please try a different query.", nil
 	}
@@ -104,41 +123,54 @@ func WebSearch(query, exaApiKey string) (string, error) {
 	return truncateRunes(text, maxWebSearchChars), nil
 }
 
-func parseMcpResponse(body string) string {
-	if text := parseMcpJSON(body); text != "" {
-		return text
+func parseMcpResponse(body string) (string, error) {
+	if text, err := parseMcpJSON(body); text != "" || err != nil {
+		return text, err
 	}
 
 	for line := range strings.SplitSeq(body, "\n") {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "data:") {
 			payload := strings.TrimSpace(line[5:])
-			if text := parseMcpJSON(payload); text != "" {
-				return text
+			if text, err := parseMcpJSON(payload); text != "" || err != nil {
+				return text, err
 			}
 		}
 	}
 
-	return ""
+	return "", nil
 }
 
-func parseMcpJSON(payload string) string {
+func parseMcpJSON(payload string) (string, error) {
 	payload = strings.TrimSpace(payload)
 	if !strings.HasPrefix(payload, "{") {
-		return ""
+		return "", nil
 	}
 
 	var resp mcpResponse
 	if err := json.Unmarshal([]byte(payload), &resp); err != nil {
-		return ""
+		return "", fmt.Errorf("web search invalid response: %w", err)
+	}
+	if resp.Error != nil {
+		return "", fmt.Errorf("web search RPC error %d: %s", resp.Error.Code, resp.Error.Message)
 	}
 	if resp.Result == nil {
-		return ""
+		return "", nil
+	}
+	if resp.Result.IsError {
+		message := ""
+		for _, item := range resp.Result.Content {
+			if item.Text != "" {
+				message = item.Text
+				break
+			}
+		}
+		return "", fmt.Errorf("web search tool failed: %s", message)
 	}
 	for _, item := range resp.Result.Content {
 		if item.Text != "" {
-			return item.Text
+			return item.Text, nil
 		}
 	}
-	return ""
+	return "", nil
 }

@@ -248,6 +248,8 @@ type Tag struct {
 type Tags []*Tag
 
 func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags) {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	FlushTxQueue()
 	sql.FlushQueue()
 
@@ -265,9 +267,9 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags)
 	for _, tag := range tags {
 		*tmp = append(*tmp, tag)
 		countTag(tag, &total)
-		if Conf.FileTree.MaxListCount < total && !ignoreMaxListHintArg {
-			if nil == util.NotificationsCfg || util.NotificationsCfg.TagMaxList {
-				util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+		if confFileTreeSnapshot.MaxListCount < total && !ignoreMaxListHintArg {
+			if nil == util.NotificationsCfg.Load() || util.NotificationsCfg.Load().TagMaxList {
+				util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), confFileTreeSnapshot.MaxListCount), 7000)
 			}
 			break
 		}
@@ -326,7 +328,7 @@ func SearchTags(keyword string) (ret []string) {
 			continue
 		}
 
-		_, t := search.MarkText(label, keyword, 1024, Conf.Search.CaseSensitive)
+		_, t := search.MarkText(label, keyword, 1024, Conf.Search.Load().CaseSensitive)
 		ret = append(ret, t)
 	}
 	sort.Strings(ret)
@@ -336,7 +338,7 @@ func SearchTags(keyword string) (ret []string) {
 func labelBlocksByKeyword(keyword string) (ret map[string]TagBlocks) {
 	ret = map[string]TagBlocks{}
 
-	tags := sql.QueryTagSpansByKeyword(keyword, Conf.Search.Limit)
+	tags := sql.QueryTagSpansByKeyword(keyword, Conf.Search.Load().Limit)
 	set := hashset.New()
 	for _, tag := range tags {
 		set.Add(tag.BlockID)

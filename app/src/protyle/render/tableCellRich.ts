@@ -2,6 +2,7 @@ import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
 import {getTableCellRichBlockDOM, updateTableCellContentLayout} from "../util/tableCellRich";
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
+import {renderBlockDirection} from "./blockDirection";
 
 export const renderTableCellRichElements = (root: Element) => {
     const elements = [...root.querySelectorAll<HTMLElement>(".table__cell-rich")];
@@ -31,6 +32,7 @@ export const renderTableCellRichElements = (root: Element) => {
             }
         });
         element.replaceChildren(template.content);
+        renderBlockDirection(element);
         element.classList.remove("b3-typography");
         element.dataset.protyleLiteRender = "safe";
         mathRender(element);

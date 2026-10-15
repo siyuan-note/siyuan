@@ -59,6 +59,8 @@ func init() {
 }
 
 func httpRequestHandler(args map[string]any) (CallToolResult, error) {
+	confVariablesReadSnapshot := model.Conf.LoadVariables()
+
 	action, _ := args["action"].(string)
 	rawURL, _ := args["url"].(string)
 
@@ -74,13 +76,13 @@ func httpRequestHandler(args map[string]any) (CallToolResult, error) {
 	// 智能体/MCP 客户端控制，插值密钥会让明文被发送到任意公网主机。
 	// headers/body 中的密钥插值按目标主机限定（见 ResolveSecretsVarsForHost），
 	// 只有目标主机在密钥的允许主机列表内才插值，密钥明文只进入出站请求，不进入 LLM 上下文。
-	rawURL = model.Conf.Variables.Resolve(rawURL)
+	rawURL = confVariablesReadSnapshot.Resolve(rawURL)
 	host := ""
 	if u, err := url.Parse(rawURL); err == nil {
 		host = u.Hostname()
 	}
 	resolve := func(s string) string {
-		return conf.ResolveSecretsVarsForHost(model.Conf.Secrets, model.Conf.Variables, host, s)
+		return conf.ResolveSecretsVarsForHost(model.Conf.Secrets.Load(), confVariablesReadSnapshot, host, s)
 	}
 	for k, v := range headers {
 		headers[k] = resolve(v)

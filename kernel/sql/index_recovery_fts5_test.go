@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -55,7 +56,9 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 	newTree := func() *parse.Tree {
 		id := ast.NewNodeID()
 		tree := treenode.NewTree(box, "/"+id+".sy", "/Recovery", "Recovery")
-		tree.Root.AppendChild(treenode.NewParagraph("recovery content"))
+		paragraph := treenode.NewParagraph("")
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("recovery content")})
+		tree.Root.AppendChild(paragraph)
 		if _, err := filesys.WriteTree(tree); err != nil {
 			t.Fatal(err)
 		}
@@ -164,6 +167,66 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		FlushQueue()
 		assertRows(first)
 		assertRows(second)
+	})
+
+	t.Run("embed content is recalculated and searchable after restart", func(t *testing.T) {
+		ClearQueue()
+		tree := newTree()
+		source := tree.Root.LastChild
+		embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+		embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + source.ID + "'")})
+		tree.Root.AppendChild(embed)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.IndexBlockTree(tree)
+		IndexTreeQueue(tree)
+		FlushQueue()
+		block, _ := buildBlockFromNode(embed, tree)
+		var sourceContent string
+		if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", source.ID).Scan(&sourceContent); err != nil || sourceContent != "recovery content" {
+			t.Fatalf("missing recovery query source: id=%s content=%q err=%v", source.ID, sourceContent, err)
+		}
+		if content, supported := CalculateEmbedBlockContent(block); !supported || content != sourceContent {
+			t.Fatalf("query calculation failed before recovery: markdown=%q content=%q supported=%v", block.Markdown, content, supported)
+		}
+		block.Content = "old stale result"
+		UpdateBlockContentQueue(block)
+		FlushQueue()
+		block.Content = "uncommitted result"
+		UpdateBlockContentQueue(block)
+		restartQueue()
+		FlushQueue()
+		var content string
+		if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != "recovery content" {
+			t.Fatalf("embed recovery indexed script or stale content: %q, %v", content, err)
+		}
+		var matches int
+		if err := db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'recovery' AND id = ?", embed.ID).Scan(&matches); err != nil || matches != 1 {
+			t.Fatalf("recovered embed is not searchable: %d, %v", matches, err)
+		}
+		if len(loadIndexQueue()) != 0 {
+			t.Fatal("completed embed recovery was not checkpointed")
+		}
+
+		for _, script := range []string{"//!js return [];", "select * from blocks where id='missing'"} {
+			embed.FirstChild.Tokens = []byte(script)
+			cache.RemoveTreeDataInBox(tree.ID, box)
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			block.Content = "stale result"
+			UpdateBlockContentQueue(block)
+			restartQueue()
+			FlushQueue()
+			want := "no query result"
+			if strings.HasPrefix(script, "//!js") {
+				want = ""
+			}
+			if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != want {
+				t.Fatalf("unsupported or empty embed recovery: %q, %v", content, err)
+			}
+		}
 	})
 
 	t.Run("locked notebook recovery does not block ordinary documents", func(t *testing.T) {

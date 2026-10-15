@@ -5,6 +5,8 @@ import {
     installPluginStorageFetchAppId,
     isPluginStorageWriteRequest,
     SIYUAN_APP_ID_HEADER,
+    isSameOriginAPIRequest,
+    withAPIAppId,
 } from "./fetchAppId";
 
 const baseURL = "http://127.0.0.1:6806/stage/build/app/";
@@ -103,5 +105,74 @@ describe("plugin storage fetch app id", () => {
         await target.fetch("/api/file/putFile", {method: "POST"});
         assert.equal(calls.length, 1);
         assert.equal(getHeader(calls[0].init, SIYUAN_APP_ID_HEADER), "app-current");
+    });
+});
+
+
+describe("host API app id", () => {
+    const origin = new URL(baseURL).origin;
+
+    it("resolves document-relative URLs but compares the window origin", () => {
+        for (const input of ["/api/test", "../../../api/test?q=1", new URL("/api/test", baseURL),
+            new Request(new URL("/api/test", baseURL))]) {
+            assert.equal(isSameOriginAPIRequest(input, baseURL, origin), true);
+        }
+        for (const input of ["/api", "/apis/test", "/assets/test", "https://example.com/api/test", "http://["]) {
+            assert.equal(isSameOriginAPIRequest(input, baseURL, origin), false);
+        }
+        assert.equal(isSameOriginAPIRequest("/api/test", "https://example.com/", origin), false);
+        assert.equal(isSameOriginAPIRequest(`${origin}/api/test`, "https://example.com/", origin), true);
+    });
+
+    it("preserves Request body, signal and init header override semantics", async () => {
+        const controller = new AbortController();
+        const request = new Request(`${origin}/api/test`, {method: "POST", body: "request-body",
+            headers: {Authorization: "request-auth"}, signal: controller.signal});
+        const inherited = withAPIAppId(request, undefined, "caller", baseURL, origin);
+        assert.equal(getHeader(inherited, "Authorization"), "request-auth");
+        const effective = new Request(request, inherited);
+        assert.equal(await effective.text(), "request-body");
+        assert.equal(effective.method, "POST");
+        assert.equal(request.headers.has(SIYUAN_APP_ID_HEADER), false);
+        controller.abort();
+        assert.equal(effective.signal.aborted, true);
+
+        const headers = new Headers({Accept: "text/event-stream", [SIYUAN_APP_ID_HEADER]: "other"});
+        const init = Object.freeze({headers, cache: "no-store" as RequestCache});
+        const overridden = withAPIAppId(request, init, "caller", baseURL, origin);
+        assert.equal(getHeader(overridden, "Authorization"), null);
+        assert.equal(getHeader(overridden, "Accept"), "text/event-stream");
+        assert.equal(getHeader(overridden, SIYUAN_APP_ID_HEADER), "caller");
+        assert.equal(headers.get(SIYUAN_APP_ID_HEADER), "other");
+        assert.equal(overridden.cache, "no-store");
+    });
+
+    it("preserves FormData without setting its content type and leaves external init untouched", () => {
+        const body = new FormData();
+        body.append("file", "data");
+        const signal = new AbortController().signal;
+        const init: RequestInit = {method: "POST", body, signal, credentials: "include", keepalive: true,
+            headers: [["Accept", "application/json"]]};
+        const updated = withAPIAppId("/api/asset/upload", init, "caller", baseURL, origin);
+        assert.equal(updated.body, body);
+        assert.equal(updated.signal, signal);
+        assert.equal(updated.credentials, "include");
+        assert.equal(updated.keepalive, true);
+        assert.equal(getHeader(updated, "Content-Type"), null);
+        assert.equal(getHeader(init, SIYUAN_APP_ID_HEADER), null);
+        assert.equal(withAPIAppId("https://example.com/api/upload", init, "caller", baseURL, origin), init);
+        assert.equal(withAPIAppId("/assets/test", undefined, "caller", baseURL, origin), undefined);
+    });
+
+    it("does not expand the global plugin wrapper to other APIs or external document bases", async () => {
+        const {calls, fetcher} = createMockFetch();
+        const wrapped = injectPluginStorageAppId(fetcher, "caller", "https://example.com/", origin);
+        const init = {method: "POST"};
+        await wrapped("/api/file/putFile", init);
+        await wrapped(`${origin}/api/transactions`, init);
+        await wrapped(`${origin}/api/file/putFile`, init);
+        assert.equal(calls[0].init, init);
+        assert.equal(calls[1].init, init);
+        assert.equal(getHeader(calls[2].init, SIYUAN_APP_ID_HEADER), "caller");
     });
 });

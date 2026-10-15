@@ -1,0 +1,66 @@
+// 日历和地图条目列表共享标题与搜索布局，内边距可适配外层菜单。
+@mixin header-search($prefix, $inset: 16px) {
+  .#{$prefix}-head {
+    display: flex;
+    align-items: center;
+    padding: 0 $inset 8px;
+
+    .b3-menu__label {
+      min-width: 0;
+      margin-right: auto;
+    }
+  }
+
+  .#{$prefix}-search {
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+    margin-bottom: 8px;
+    padding: 0 $inset;
+
+    .b3-text-field {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}
+
+// 日历无日期列表内容布局，标题与搜索样式由地图菜单复用。
+@mixin content($prefix, $list-max-height: min(45vh, 360px)) {
+  @include header-search($prefix);
+
+  .#{$prefix}-hint {
+    padding: 0 16px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .#{$prefix}-list {
+    min-height: 36px;
+    max-height: $list-max-height;
+    overflow-y: auto;
+  }
+
+  .#{$prefix}-item {
+    min-width: 0;
+
+    .b3-menu__label {
+      min-width: 0;
+      flex: 1;
+    }
+
+    &--selected {
+      background-color: var(--b3-theme-primary-lightest);
+    }
+  }
+
+  .#{$prefix}-empty {
+    padding: 8px;
+  }
+
+  .#{$prefix}-more,
+  .#{$prefix}-retry {
+    align-self: stretch;
+    margin: 4px 8px 0;
+  }
+}

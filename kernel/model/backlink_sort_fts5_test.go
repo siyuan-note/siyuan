@@ -28,7 +28,7 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fixture := setupStructureTransactionTest(t)
 			setupFoldTransactionDatabase(t, fixture)
-			Conf.Search = conf.NewSearch()
+			Conf.Search.Store(conf.NewSearch())
 			var trees []*parse.Tree
 			for _, id := range []string{fixture.sourceID, fixture.targetID} {
 				tree, err := LoadTreeByBlockID(id)

@@ -8,12 +8,12 @@ const source = createSourceFile("index.ts", readFileSync("src/protyle/render/lis
     ScriptTarget.ES2021, true);
 const controller = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
 assert.ok(controller && isClassDeclaration(controller));
-const methods = controller.members.filter(item => item.name && ["add", "change", "undo", "focusNode"].includes(item.name.getText(source)));
-assert.equal(methods.length, 4);
+const methods = controller.members.filter(item => item.name && ["add", "change", "undo", "focusNode", "edit"].includes(item.name.getText(source)));
+assert.equal(methods.length, 5);
 let editorUndo = "";
 const visit = (item: import("typescript").Node) => {
     if (isPropertyAssignment(item) && item.name.getText(source) === "onUndo" &&
-        item.initializer.getText(source).includes("this.undo(redo, id)")) {
+        item.initializer.getText(source).includes("this.undo(redo, id,")) {
         editorUndo = item.initializer.getText(source);
     }
     item.forEachChild(visit);
@@ -57,17 +57,18 @@ test("undo from a node editor restores that node or its previous sibling", async
     ]);
     const selected: string[] = [];
     let removeNew = false;
-    const owner = {undo: {undo: async () => {
+    const owner = {wysiwyg: {element: {isConnected: true}}, block: {rootID: "document"}, undo: {undo: async () => {
         if (removeNew) {
             nodes.delete("new");
         }
     }}};
     const roots = new WeakMap();
-    const context: any = {canEdit: () => true, roots};
+    const context: any = {canEdit: () => true, roots, cleanListMindmapHTML: (html: string) => html,
+        hasMindmapFocusOverlay: () => false};
     runInNewContext(compiled, context);
     const target = new context.Controller();
     Object.assign(target, {
-        owner, list: {dataset: {nodeId: "map"}}, model: {nodes, root},
+        owner, list: {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "map"}, model: {nodes, root},
         view: {getSelectedId: () => "root", focusNode: (id: string) => selected.push(id)},
     });
     roots.set(owner, {restoreFocus: (_listID: string, ids: string[]) => target.focusNode(ids)});
@@ -77,6 +78,31 @@ test("undo from a node editor restores that node or its previous sibling", async
     removeNew = true;
     await onEditorUndo(false);
     assert.equal(selected.pop(), "existing", "undoing node insertion focuses the previous sibling");
+});
+
+test("text history records the edited node even when selection changes before its save", async () => {
+    const nodes = new Map([["root", {id: "root", children: [{id: "child"}]}],
+        ["child", {id: "child", parentId: "root", children: []}]]);
+    const list = {isConnected: true, dataset: {nodeId: "map"}, outerHTML: "before"};
+    const operations: {undo: Record<string, string>, redo: Record<string, string>}[] = [];
+    const context: any = {
+        canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root")}),
+        cleanListMindmapHTML: (html: string) => html, getListMindmapSiblingIDs: () => new Map(),
+        normalizeListMindmapSummaryMetadata: () => {},
+        updateTransaction: (_owner: unknown, _list: unknown, _before: string, undo: Record<string, string>,
+                            additional: {context: Record<string, string>}) => operations.push({undo, redo: additional.context}),
+        console, showMessage: assert.fail, window: {siyuan: {languages: {listMindmapInvalid: "save failed"}}},
+    };
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {owner: {}, list, refresh() {},
+        view: {getSelectedId: () => "root"}});
+    const undo = {undoFocusId: "paragraph", undoFocusStart: "2", undoFocusEnd: "2"};
+    const redo = {...undo, undoFocusStart: "5", undoFocusEnd: "5"};
+    assert.equal(await target.change(() => { list.outerHTML = "after"; }, true, "child", {undo, redo}), true);
+    assert.equal(operations[0].undo.undoFocusId, "child", "undo must reopen the edited child instead of the selected root");
+    assert.equal(operations[0].redo.undoFocusId, "child");
+    assert.deepEqual(JSON.parse(operations[0].undo.undoFocusMindmapSelection), undo);
+    assert.deepEqual(JSON.parse(operations[0].redo.undoFocusMindmapSelection), redo);
 });
 
 test("mind map transaction focus survives insertion, deletion and repeated undo/redo", async () => {
@@ -112,7 +138,7 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
         selectedID = "root";
         root.restoreFocus("map", [(redo ? operation.redo : operation.undo).undoFocusId]);
     };
-    const owner = {undo: {
+    const owner = {wysiwyg: {element: {isConnected: true}}, block: {rootID: "document"}, undo: {
         undo: async () => {
             const operation = operations.pop();
             if (operation) {
@@ -131,6 +157,7 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     roots.set(owner, root);
     const context: any = {
         roots, canEdit: () => true, readListMindmap: getModel, cleanListMindmapHTML: (html: string) => html,
+        hasMindmapFocusOverlay: () => false,
         getListMindmapSiblingIDs: () => new Map(), normalizeListMindmapSummaryMetadata: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, before: string, undo: FocusContext,
                             additional: {context: FocusContext}) => {
@@ -171,4 +198,63 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     const count = operations.length;
     await target.change(() => {});
     assert.equal(operations.length, count, "unchanged content must not add a focus-only transaction");
+});
+
+test("empty or canceled history restores the current text selection unless a newer interaction took over", async () => {
+    const selection = {undoFocusId: "body", undoFocusStart: "2", undoFocusEnd: "5"};
+    const opened: unknown[] = [];
+    const body = {getAttribute: () => "body", querySelectorAll: (): Element[] => []};
+    const node = {id: "item", contentBlocks: [body]};
+    const nodes = new Map([["item", node]]);
+    let release: () => void;
+    const owner = {block: {rootID: "document"}, wysiwyg: {element: {isConnected: true}},
+        undo: {undo: async () => {}}};
+    const roots = new WeakMap();
+    const context: any = {roots, canEdit: () => true, cleanListMindmapHTML: (html: string) => html,
+        hasMindmapFocusOverlay: () => false};
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {
+        owner, list: {dataset: {nodeId: "map"}, outerHTML: "same", isConnected: true}, model: {root: node, nodes},
+        view: {getSelectedId: () => "item", focusNode: () => {}, getContentHost: () => ({isConnected: true})},
+        edit: async (...args: unknown[]) => opened.push(args[4]),
+    });
+    const state = {focusRevision: 0, interactionRevision: 0,
+        restoreFocus: (_id: string, ids: string[], saved: unknown) => target.focusNode(ids, saved)};
+    roots.set(owner, state);
+    await target.undo(false, "item", selection);
+    assert.deepEqual(opened, [selection]);
+    owner.undo.undo = () => new Promise<void>(resolve => { release = resolve; });
+    const pending = target.undo(false, "item", selection);
+    state.interactionRevision++;
+    release();
+    await pending;
+    assert.equal(opened.length, 1, "late history completion must not steal focus after a click or new edit");
+    assert.equal(roots.get(owner).undoPending, false);
+});
+
+test("history reopening does not invalidate its own guard and stale editor cleanup cannot clear a newer editor", async () => {
+    const owner = {};
+    const roots = new WeakMap([[owner, {interactionRevision: 0}]]);
+    const options: any[] = [];
+    const editors: any[] = [];
+    const context: any = {roots, canEdit: () => true, openListMindmapEditor: (value: unknown) => {
+        options.push(value);
+        const editor = {finish: async () => true};
+        editors.push(editor);
+        return editor;
+    }};
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {
+        owner, editRequest: 0, list: {}, model: {nodes: new Map([["item", {id: "item"}]])},
+        view: {setEditing: () => {}, update: () => {}},
+    });
+    const saved = {undoFocusId: "body", undoFocusStart: "1", undoFocusEnd: "1"};
+    await target.edit("item", {isConnected: true}, undefined, undefined, saved,
+        () => roots.get(owner).interactionRevision === 0);
+    assert.equal(editors.length, 1);
+    assert.equal(options[0].selection, saved);
+    const newer = {finish: async () => true};
+    target.activeEditor = newer;
+    options[0].onFinish();
+    assert.equal(target.activeEditor, newer);
 });

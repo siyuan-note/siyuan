@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260926163337"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -1136,6 +1136,91 @@
 			]
 		},
 		{
+			"ID": "20261010113646-gmbl8rw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010113646-gmbl8rw",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL 查詢、搜尋與動態嵌入"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261010113646-6398erx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-6398erx",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可讓智能體依內容區塊類型、行內格式、父子層級或多個條件查詢筆記，並統計結果。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-kw70ky7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-kw70ky7",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如：「統計最近一週更新的任務」，或「尋找專案文檔中未完成的任務列表項」。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-evbp7ng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-evbp7ng",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "需要查看和定位結果時，可以要求在搜尋視窗中顯示；需要在文檔中持續顯示符合條件的內容時，可以要求建立動態 SQL 嵌入。統計結果用於回答，不能直接作為嵌入區塊顯示。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-d86vd45",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-d86vd45",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改既有嵌入時，說明要調整的查詢條件，並要求保留原有內容區塊及顯示設定。"
+				}
+			]
+		},
+		{
+			"ID": "20261010173100-2229ah9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010173100-2229ah9",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查詢加密筆記本前需先解鎖，並明確指定筆記本；其中的嵌入只能查詢該筆記本的內容。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170109-gephumz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1175,6 +1260,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "快照涵蓋工作空間資料，但不涵蓋外部 MCP 服務或外掛對外部系統所做的修改。重新回答、停止任務或刪除會話也不會自動撤銷已完成的寫入操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-aa8twuc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261008115720-aa8twuc",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "CSS/JS 程式碼片段"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-xmyh0qv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-xmyh0qv",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以讓智能體列出、讀取、建立、修改、啟用、停用或刪除 CSS/JS 程式碼片段。例如：「建立一個增大介面字級的 CSS 程式碼片段，先保持停用，供我檢查。」"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-a91sfqt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-a91sfqt",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每次修改程式碼片段都需要確認，即使已開啟工作階段允許或自動核准。請檢查確認卡片中的擬寫入程式碼和目前片段。新建片段預設停用，並且不在發佈服務中載入。智能體保留 CSS/JS 總開關及既有片段的發佈設定。"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-xz9amjt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-xz9amjt",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用 JS 或修改已啟用的 JS 片段，可能在已連線的視窗中執行程式碼。停用或刪除片段不會撤銷已經執行的程式碼，可能需要重新啟動前端。如果片段在確認期間發生變化，操作會被拒絕，智能體需要重新讀取並請求確認。"
+				}
+			]
+		},
+		{
+			"ID": "20261008125238-2p6cqc1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008125238-2p6cqc1",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以同時搜尋片段名稱和程式碼內容，也可重新命名或局部修改片段。如果管理對話框開啟期間片段發生變化，儲存會被拒絕並保留草稿；請複製目前的修改，重新開啟對話框後與最新片段合併。"
 				}
 			]
 		},

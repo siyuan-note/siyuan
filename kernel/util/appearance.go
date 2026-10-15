@@ -56,7 +56,7 @@ func NormalizeStatusBar(statusBar *StatusBar, mobile bool) *StatusBar {
 	return statusBar
 }
 
-var StatusBarCfg *StatusBar
+var StatusBarCfg = NewAtomicValue[*StatusBar](nil)
 
 // Notifications 外观通知开关配置。https://github.com/siyuan-note/siyuan/issues/17797
 // Appearance.Notifications 为 nil 时表示旧配置尚未迁移，整体按默认启用处理。
@@ -83,4 +83,4 @@ func NewNotifications() *Notifications {
 	}
 }
 
-var NotificationsCfg *Notifications
+var NotificationsCfg = NewAtomicValue[*Notifications](nil)

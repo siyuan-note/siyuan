@@ -37,9 +37,12 @@ const fixture = (geometryAvailable = true) => {
             calls.push({action: url, value});
             callback?.();
         },
+        saveUILayout: (layout: unknown, errorExit?: boolean, callback?: () => void) =>
+            dependencies.fetchPost("/api/system/setUILayout", {layout, ...(errorExit === undefined ? {} : {errorExit})}, callback),
         getAllLayout: () => ({current: true}),
         suspendLayoutSaving: () => util.suspendLayoutSaving(),
         isWindow: () => false,
+        getSettingsWindowHost: (): undefined => undefined,
         getAllEditor: (): unknown[] => [],
         withFetchTimeout: async (callback: () => Promise<void>) => callback(),
         captureWindowGeometry: async () => geometryAvailable ? geometry : undefined,

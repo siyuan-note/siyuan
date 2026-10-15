@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260914195107"
+		"updated": "20261006133358"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618124055-rle3i8e",
-				"updated": "20260618124055"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260618124055-ksybbk0",
-				"updated": "20260618124055"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 					},
 					"Properties": {
 						"id": "20260618124055-fh52ukj",
-						"updated": "20260618124055"
+						"updated": "20261006133358"
 					},
 					"Children": [
 						{
@@ -134,7 +134,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260618124055-mo52pph",
-								"updated": "20260618124055"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -166,25 +166,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ". The Microsoft Store edition runs in an MSIX sandbox and cannot modify "
+									"Data": ". The Microsoft Store edition (3.8.7+) registers the "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "PATH"
+									"TextMarkTextContent": "siyuan.exe"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​; deploy a "
+									"Data": "​ app execution alias on Windows 10 1607 (build 14393) or later. After installing or updating, open a new terminal and run "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "siyuan.cmd"
+									"TextMarkTextContent": "siyuan --help"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ shim once (survives Store updates)"
+									"Data": "​"
 								}
 							]
 						},
@@ -194,7 +194,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20260708120000-enstore1",
-								"updated": "20260708120000"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -207,7 +207,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "# Microsoft Store edition only — run once in PowerShell\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # already in PATH by default\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: Microsoft Store edition not found'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+									"Data": "siyuan --help\n\n# Check which command is being used\nGet-Command siyuan -All\nwhere.exe siyuan\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -216,16 +216,75 @@
 							]
 						},
 						{
-							"ID": "20260708130000-enuninst",
+							"ID": "20261006133358-auz3ewz",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260708130000-enuninst",
-								"updated": "20260708130000"
+								"id": "20261006133358-auz3ewz",
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "To remove on uninstall: "
+									"Data": "If the command is unavailable, check that the SiYuan app execution alias is enabled in Windows and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "%LOCALAPPDATA%\\Microsoft\\WindowsApps"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " is in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". The commands above show command resolution; multiple SiYuan editions or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " order may select another executable"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-enuninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-enuninst",
+								"updated": "20261006133358"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If you created the old "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " shim, first verify the Store alias directly with "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "& \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.exe\" --help"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", then optionally remove the shim: "
 								},
 								{
 									"Type": "NodeTextMark",

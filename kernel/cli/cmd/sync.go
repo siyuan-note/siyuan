@@ -31,7 +31,7 @@ var syncCmd = &cobra.Command{
 	Use:   "sync",
 	Short: "Sync data with cloud",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if model.Conf.Sync.Mode == 3 {
+		if model.Conf.Sync.Load().Mode == 3 {
 			return fmt.Errorf("full-manual mode requires 'push' or 'pull' subcommand")
 		}
 
@@ -84,7 +84,7 @@ var syncStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show sync status",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := model.Conf.Sync
+		s := model.Conf.Sync.Load()
 		switch outputFormat {
 		case "json":
 			data, _ := json.MarshalIndent(map[string]any{

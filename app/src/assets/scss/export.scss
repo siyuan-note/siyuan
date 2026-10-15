@@ -1,6 +1,6 @@
 @use "util/mixin" as *;
 @use "component/tooltips" as *;
-@use "protyle/wysiwyg" as *;
+@use "protyle/wysiwyg" as * with ($block-rtl-selector: '[style*="direction: rtl"]');
 @use "component/typography" as *;
 @use "protyle/attr" as *;
 @use "protyle/mindmap-view" as *;

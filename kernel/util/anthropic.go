@@ -509,7 +509,7 @@ func anthropicFinishReason(reason string, tools bool) (openai.FinishReason, erro
 			return "", errors.New("Anthropic tool_use stop reason has no tool calls")
 		}
 		return openai.FinishReasonToolCalls, nil
-	case "max_tokens":
+	case "max_tokens", "model_context_window_exceeded":
 		return openai.FinishReasonLength, nil
 	case "refusal":
 		return openai.FinishReasonContentFilter, nil

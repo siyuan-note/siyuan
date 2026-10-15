@@ -18,6 +18,7 @@ import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 import {Protyle} from "../../protyle";
 import {getKeysByLiElement} from "../../search/menu";
+import {getSearchAVMatches} from "../../search/avPreview";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
@@ -61,14 +62,18 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const unRefElement = element.querySelector("#searchUnRefPanel");
     const searchType = assetsElement.classList.contains("fn__none") ? (unRefElement.classList.contains("fn__none") ? "doc" : "unRef") : "asset";
     const listElement = searchType === "asset" ? assetsElement.querySelector("#searchAssetList") : (searchType === "doc" ? element.querySelector("#searchList") : unRefElement.querySelector("#searchUnRefList"));
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
+    const targetId = (event.target as HTMLElement).id;
+    if (targetId === "searchInput" && config.method === 2 && !event.altKey && !event.ctrlKey && !event.metaKey &&
+        (event.key === "Enter" || event.key.startsWith("Arrow"))) {
+        return false;
+    }
     if (searchType === "doc" && matchHotKey(window.siyuan.config.keymap.general.newFile, event)) {
         if (config.method === 0) {
             newFile(app, searchInputElement.value);
         }
         return true;
     }
-    const targetId = (event.target as HTMLElement).id;
     if (event.key === "ArrowDown" && event.altKey) {
         if (searchType === "asset") {
             toggleAssetHistory(assetsElement);
@@ -85,6 +90,10 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         // 不能返回 true，否则历史菜单无法使用快捷键
         return false;
+    }
+    if (searchType === "doc" && targetId === "replaceInput" && event.key === "Enter") {
+        replace(element, config, edit, false);
+        return true;
     }
     let currentList: HTMLElement = listElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
@@ -275,6 +284,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 config,
                 value: searchInputElement.value,
                 edit,
+                matches: getSearchAVMatches(currentList),
             });
         } else {
             getArticle({
@@ -312,6 +322,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 config,
                 value: searchInputElement.value,
                 edit,
+                matches: getSearchAVMatches(currentList),
             });
         } else if (searchType === "unRef") {
             getArticle({

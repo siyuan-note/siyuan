@@ -18,11 +18,25 @@ package tools
 
 var QuestionTool = &Tool{
 	Name:        "question",
-	Description: "Ask the user questions to clarify needs/preferences (do NOT use for plain-text option lists). questions[]: each {header (short label), question, options[] {label, description}, multiple?, custom?}.",
+	Description: "Ask the user questions to clarify needs/preferences (do NOT use for plain-text option lists). questions[]: each {header, question, options[] {label, description}, multiple?, custom?}. For official plugin development use workflow.action=choose with questions=[]; the server supplies the exact Yes/No question. After successful official skill load, workflow.action=plan freezes and displays the proposed scope for confirmation. Workflow answers never authorize installation or enabling.",
 	AgentOnly:   true,
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
+			"workflow": {Type: "object", Description: "Reserved official plugin workflow; actual consent is recorded only from the user's answer", Properties: map[string]Property{
+				"action":         {Type: "string", Enum: []string{"choose", "plan", "recover", "cancel"}},
+				"taskId":         {Type: "string", Description: "Server taskId returned by choose; required for plan/cancel"},
+				"newTask":        {Type: "boolean", Description: "choose only: a separate plugin requested by the user"},
+				"reconsider":     {Type: "boolean", Description: "choose only: the user explicitly changed the earlier workflow choice"},
+				"proposal":       {Type: "string", Description: "Short complete proposal, at most 2000 characters"},
+				"packageName":    {Type: "string", Description: "Exact plugin package name"},
+				"frontend":       {Type: "string", Enum: []string{"desktop", "desktop-window", "browser-desktop", "mobile", "browser-mobile"}},
+				"dataEffects":    {Type: "string", Description: "Data reads/writes and repeated-action semantics, at most 1000 characters"},
+				"deliverables":   {Type: "string", Description: "Source/build/package deliverables and unverified steps; installation is separate"},
+				"sourcePath":     {Type: "string", Description: "Optional exact existing workspace-relative source directory to import read-only"},
+				"sourceRevision": {Type: "string", Description: "Exact source tree revision from project_status; required with sourcePath"},
+				"files":          {Type: "array", Items: &Property{Type: "string"}, Description: "1-200 exact relative source/output file paths, including plugin.json and index.js"},
+			}, Required: []string{"action"}},
 			"questions": {
 				Type: "array", Description: "Array of questions to ask the user",
 				Items: &Property{

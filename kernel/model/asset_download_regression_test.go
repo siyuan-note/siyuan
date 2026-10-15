@@ -18,8 +18,13 @@ import (
 func prepareAssetDownloadDocumentTest(t *testing.T) (*fileOperationTestFixture, *dejavu.Repo, *dejavu.Repo, string) {
 	fixture := setupFileOperationTest(t)
 	full, partial, fullData := prepareAssetDownloadRepoTest(t)
-	Conf.Export, Conf.Editor, Conf.Appearance = conf.NewExport(), conf.NewEditor(), conf.NewAppearance()
-	Conf.FileTree = conf.NewFileTree()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewExport(), conf.NewEditor(), conf.NewAppearance()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+		Conf.Appearance.Store(confSectionValue2)
+	}
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	for i := 0; i < 3; i++ {
 		writeAssetDownloadDocumentTest(t, treenode.NewTree(fixture.box.ID, "/"+ast.NewNodeID()+".sy", "/Seed", "Seed"))
@@ -50,8 +55,8 @@ func TestAssetDownloadCrossNotebookExport(t *testing.T) {
 	source := treenode.NewTree(fixture.box.ID, "/20260905210002-abcdefg.sy", "/Source", "Source")
 	source.Root.FirstChild.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: other.Root.FirstChild.ID, TextMarkBlockRefSubtype: "d", TextMarkTextContent: "Other"})
 	writeAssetDownloadDocumentTest(t, source)
-	Conf.Export.IncludeRelatedDocs = true
-	_, paths := prepareExportTrees([]string{source.Path}, source.Box)
+	Conf.Export.Load().IncludeRelatedDocs = true
+	_, paths := prepareExportTreesWithConfig([]string{source.Path}, resolveExportOptions(nil), source.Box)
 	if len(paths) != 2 {
 		t.Fatalf("expected two export documents, got %v", paths)
 	}
@@ -69,16 +74,32 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 	source := treenode.NewTree(fixture.box.ID, "/20260905210004-abcdefg.sy", "/Source", "Source")
 	source.Root.FirstChild.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: target.Root.FirstChild.ID, TextMarkBlockRefSubtype: "d", TextMarkTextContent: "Target"})
 	writeAssetDownloadDocumentTest(t, source)
-	Conf.Export.IncludeRelatedDocs = false
-	Conf.Export.BlockRefMode = 4
+	Conf.Export.Load().IncludeRelatedDocs = false
+	Conf.Export.Load().BlockRefMode = 4
 	if err := prepareExportBlockAssets(source.ID, false); err != nil {
 		t.Fatal(err)
 	}
-	exported, prepareErr := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
-		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
-		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
-		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, nil)
+	exported, prepareErr := exportTree(prepareExportTree(getExportBlockTree(source.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          Conf.Export.Load().BlockRefMode,
+			BlockEmbedMode:        Conf.Export.Load().BlockEmbedMode,
+			FileAnnotationRefMode: Conf.Export.Load().FileAnnotationRefMode,
+			TagOpenMarker:         Conf.Export.Load().TagOpenMarker,
+			TagCloseMarker:        Conf.Export.Load().TagCloseMarker,
+			BlockRefTextLeft:      Conf.Export.Load().BlockRefTextLeft,
+			BlockRefTextRight:     Conf.Export.Load().BlockRefTextRight,
+			AddTitle:              Conf.Export.Load().AddTitle,
+			InlineMemo:            Conf.Export.Load().InlineMemo,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if prepareErr != nil {
 		t.Fatal(prepareErr)
 	}
@@ -96,12 +117,12 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 	t.Cleanup(func() { util.AppearancePath = appearancePath })
 	util.AppearancePath = t.TempDir()
 	writeAppearanceTestEmojiFont(t)
-	for _, theme := range []string{Conf.Appearance.ThemeLight, Conf.Appearance.ThemeDark} {
+	for _, theme := range []string{Conf.Appearance.Load().ThemeLight, Conf.Appearance.Load().ThemeDark} {
 		if err := os.MkdirAll(filepath.Join(util.AppearancePath, "themes", theme), 0755); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := os.MkdirAll(filepath.Join(util.AppearancePath, "icons", Conf.Appearance.Icon), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(util.AppearancePath, "icons", Conf.Appearance.Load().Icon), 0755); err != nil {
 		t.Fatal(err)
 	}
 	_, _, exportErr := exportMarkdownHTML(source.ID, exportDir, false, false)

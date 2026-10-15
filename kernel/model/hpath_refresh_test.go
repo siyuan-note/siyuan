@@ -304,10 +304,20 @@ func prepareHPathRefreshTest(t *testing.T) {
 		}
 	}
 	Conf = NewAppConf()
-	Conf.FileTree, Conf.NotebookCrypto, Conf.Sync = conf.NewFileTree(), conf.NewNotebookCrypto(), conf.NewSync()
-	Conf.Editor, Conf.Export, Conf.Search = conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewFileTree(), conf.NewNotebookCrypto(), conf.NewSync()
+		Conf.FileTree.Store(confSectionValue0)
+		Conf.NotebookCrypto = confSectionValue1
+		Conf.Sync.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+		Conf.Editor.Store(confSectionValue0)
+		Conf.Export.Store(confSectionValue1)
+		Conf.Search.Store(confSectionValue2)
+	}
 	Conf.Lang, util.Lang = "en", "en"
-	util.StatusBarCfg = util.NewStatusBar(false)
+	util.StatusBarCfg.Store(util.NewStatusBar(false))
 	util.WorkingDir, _ = filepath.Abs(filepath.Join("..", "..", "app"))
 	initLang()
 	sql.InitDatabase(true)

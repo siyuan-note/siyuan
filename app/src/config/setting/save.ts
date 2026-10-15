@@ -1,4 +1,5 @@
 import {getSettingItem} from "./item";
+import {watchSettingTabInteractions} from "./mount";
 
 const settingSaveBoundWraps = new WeakSet<HTMLElement>();
 
@@ -7,6 +8,7 @@ export const bindSettingSaveDelegation = (tabWrap: HTMLElement) => {
         return;
     }
     settingSaveBoundWraps.add(tabWrap);
+    watchSettingTabInteractions();
     tabWrap.addEventListener("input", onSettingTabWrapInput);
     tabWrap.addEventListener("change", onSettingTabWrapChange);
 };

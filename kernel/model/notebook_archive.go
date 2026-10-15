@@ -117,6 +117,8 @@ func listNotebookArchiveCandidates() ([]NotebookArchiveCandidate, error) {
 }
 
 func walkNotebookArchiveSnapshots(visit func(*dejavu.Repo, *entity.Index, []*entity.File) error) error {
+	confRepoSnapshot := Conf.LoadRepo()
+
 	if util.RepoDir == "" {
 		return nil
 	}
@@ -127,7 +129,7 @@ func walkNotebookArchiveSnapshots(visit func(*dejavu.Repo, *entity.Index, []*ent
 	if err != nil {
 		return err
 	}
-	if Conf.Repo == nil || len(Conf.Repo.Key) == 0 {
+	if confRepoSnapshot == nil || len(confRepoSnapshot.Key) == 0 {
 		return ErrNotebookArchiveBusy
 	}
 	assetDownloadSourceMu.RLock()
@@ -162,8 +164,8 @@ func notebookArchiveKeys() (map[string][]byte, error) {
 		return nil, err
 	}
 	keys["keys/conf.json"] = data
-	data, err = os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
-	if err == nil {
+	// 持久化形态取自本进程最近一次生成的配置字节，与打包时磁盘文件的写入时机无关。
+	if data = lastPersistedConf(); data != nil {
 		var persisted struct {
 			NotebookCrypto json.RawMessage `json:"notebookCrypto"`
 		}
@@ -173,8 +175,9 @@ func notebookArchiveKeys() (map[string][]byte, error) {
 		if len(persisted.NotebookCrypto) != 0 {
 			keys["keys/persisted-conf.json"] = persisted.NotebookCrypto
 		}
-	} else if !os.IsNotExist(err) {
-		return nil, err
+	}
+	if len(keys["keys/persisted-conf.json"]) == 0 {
+		keys["keys/persisted-conf.json"] = append([]byte(nil), keys["keys/conf.json"]...)
 	}
 	for name, source := range map[string]string{"keys/backup.json": dataCryptoBackupPath(), "keys/migration.json": masterPasswordMigrationPath()} {
 		data, err = os.ReadFile(source)
@@ -303,6 +306,9 @@ func PrepareNotebookArchive(ids []string) (archiveID, downloadPath string, err e
 	}
 	defer release()
 	for _, id := range ids {
+		if err = recoverSortConfAppend(filepath.Join(util.DataDir, id, ".siyuan", "sort.json")); err != nil {
+			return
+		}
 		if err = EnsureAssetPrefixLocal(filepath.Join(util.DataDir, id)); err != nil {
 			return
 		}

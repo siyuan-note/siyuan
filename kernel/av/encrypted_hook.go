@@ -199,33 +199,6 @@ func ReadAttributeViewDataInBox(avID, boxID string) ([]byte, error) {
 	return data, nil
 }
 
-// writeAttributeViewData 写入 AV 定义数据（自动加密）。
-// boxID 为空时写全局路径（普通 box），非空时写加密笔记本路径并加密。
-func writeAttributeViewData(avID, boxID string, data []byte) error {
-	if !ast.IsNodeIDPattern(avID) {
-		return ErrInvalidAttributeViewID
-	}
-	if boxID != "" && !ast.IsNodeIDPattern(boxID) {
-		return ErrInvalidBoxID
-	}
-
-	path := attributeViewDataPathByBox(avID, boxID)
-	// 确保目录存在
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
-	}
-	// 加密笔记本的数据需加密
-	if boxID != "" {
-		var err error
-		data, err = encryptAVData(boxID, avID, data)
-		if err != nil {
-			return err
-		}
-	}
-	return filelock.WriteFile(path, data)
-}
-
 // mirrorBlocksPath 返回镜像索引文件的路径。
 // 加密 box：<DataDir>/<boxID>/storage/av/blocks.msgpack
 // 普通 box：<DataDir>/storage/av/blocks.msgpack
@@ -234,14 +207,6 @@ func mirrorBlocksPath(boxID string) string {
 		return filepath.Join(util.DataDir, boxID, "storage", "av", "blocks.msgpack")
 	}
 	return filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-}
-
-// mirrorBlocksPathByAvID 通过 AV 定义的归属 box 返回镜像索引路径。
-// 先查 findAttributeViewPath（含 pendingAVBox fallback），找到则返回对应 box 的镜像路径。
-// 找不到则返回全局路径。
-func mirrorBlocksPathByAvID(avID string) string {
-	_, boxID := FindAttributeViewPath(avID)
-	return mirrorBlocksPath(boxID)
 }
 
 // readMirrorBlocks 按路径读取镜像索引（boxID 为空读全局，非空读加密 box）。

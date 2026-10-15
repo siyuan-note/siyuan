@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -413,7 +414,7 @@ export class Background {
                     break;
                 } else if (type === "asset" && !protyle.disabled) {
                     const rect = target.getBoundingClientRect();
-                    assetMenu(protyle, {
+                    assetMenu(protyle, {target: target,
                         x: target.parentElement.getBoundingClientRect().right,
                         y: rect.bottom + 8,
                         isLeft: true,
@@ -815,120 +816,125 @@ export class Background {
     }
 
     private openTag(protyle: IProtyle, target: HTMLElement) {
-        window.siyuan.menus.menu.remove();
-        const menu = new Menu();
-        menu.addItem({
-            iconHTML: "",
-            type: "empty",
-            label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
-    <div class="fn__hr"></div>
-    <div class="b3-list fn__flex-1 b3-list--background">
-        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
-    </div>
-</div>`,
-            bind: (element) => {
-                const listElement = element.querySelector(".b3-list--background");
-                const renderTagList = (html: string) => {
-                    if (!listElement.isConnected || !menu.element.contains(listElement)) {
-                        return;
-                    }
-                    listElement.innerHTML = html;
-                    const filterElement = listElement.parentElement;
-                    filterElement.style.maxHeight = "";
-                    // 异步列表更新后重新计算菜单高度，避免沿用加载占位的高度限制。
-                    window.siyuan.menus.menu.resetPosition();
-                    const maxHeight = (menu.element.lastElementChild as HTMLElement).style.maxHeight;
-                    if (maxHeight) {
-                        filterElement.style.maxHeight = `min(50vh, ${maxHeight})`;
-                    }
-                };
-                fetchPost("/api/search/searchTag", {
-                    k: "",
-                }, (response) => {
-                    if (!listElement.isConnected) {
-                        return;
-                    }
-                    let html = "";
-                    const currentTags = this.getTags();
-                    response.data.tags.forEach((item: string, index: number) => {
-                        html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
-    <div class="fn__flex-1">${item}</div>
-    ${currentTags.includes(Lute.UnEscapeHTMLStr(item)) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
-</div>`;
-                    });
-                    renderTagList(html);
-                });
-                const inputElement = element.querySelector("input");
-                inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                    event.stopPropagation();
-                    if (event.isComposing) {
-                        return;
-                    }
-                    upDownHint(listElement, event);
-                    if (event.key === "Enter") {
-                        const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
-                        this.addTags(currentElement ?
-                            (currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim()) :
-                            inputElement.value.trim(), protyle, () => {
-                            inputElement.value = "";
-                            inputElement.dispatchEvent(new CustomEvent("input"));
+        toggleMenu({
+            target: target,
+            build: (_menu, session) => {
+                const menu = new Menu();
+                menu.addItem({
+                    iconHTML: "",
+                    type: "empty",
+                    label: `<div class="fn__flex-column b3-menu__filter">
+            <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
+            <div class="fn__hr"></div>
+            <div class="b3-list fn__flex-1 b3-list--background">
+                <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+            </div>
+        </div>`,
+                    bind: (element) => {
+                        const listElement = element.querySelector(".b3-list--background");
+                        const renderTagList = (html: string) => {
+                            if (!listElement.isConnected || !menu.element.contains(listElement)) {
+                                return;
+                            }
+                            listElement.innerHTML = html;
+                            const filterElement = listElement.parentElement;
+                            filterElement.style.maxHeight = "";
+                            // 异步列表更新后重新计算菜单高度，避免沿用加载占位的高度限制。
+                            window.siyuan.menus.menu.resetPosition();
+                            const maxHeight = (menu.element.lastElementChild as HTMLElement).style.maxHeight;
+                            if (maxHeight) {
+                                filterElement.style.maxHeight = `min(50vh, ${maxHeight})`;
+                            }
+                        };
+                        fetchPost("/api/search/searchTag", {
+                            k: "",
+                        }, (response) => {
+                            if (!listElement.isConnected) {
+                                return;
+                            }
+                            let html = "";
+                            const currentTags = this.getTags();
+                            response.data.tags.forEach((item: string, index: number) => {
+                                html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
+            <div class="fn__flex-1">${item}</div>
+            ${currentTags.includes(Lute.UnEscapeHTMLStr(item)) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+        </div>`;
+                            });
+                            renderTagList(html);
                         });
-                    } else if (event.key === "Escape") {
-                        window.siyuan.menus.menu.remove();
-                    }
-                });
-                inputElement.addEventListener("input", (event) => {
-                    event.stopPropagation();
-                    fetchPost("/api/search/searchTag", {
-                        k: inputElement.value.trim(),
-                    }, (response) => {
-                        if (!listElement.isConnected) {
-                            return;
-                        }
-                        let searchHTML = "";
-                        let hasKey = false;
-                        const currentTags = this.getTags();
-                        response.data.tags.forEach((item: string, index: number) => {
-                            searchHTML += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
-    <div class="fn__flex-1">${item}</div>
-    ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g, "").replace(/<\/mark>/g, ""))) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
-</div>`;
-                            if (item === `<mark>${response.data.k}</mark>`) {
-                                hasKey = true;
+                        const inputElement = element.querySelector("input");
+                        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                            event.stopPropagation();
+                            if (event.isComposing) {
+                                return;
+                            }
+                            upDownHint(listElement, event);
+                            if (event.key === "Enter") {
+                                const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                                this.addTags(currentElement ?
+                                    (currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim()) :
+                                    inputElement.value.trim(), protyle, () => {
+                                        inputElement.value = "";
+                                        inputElement.dispatchEvent(new CustomEvent("input"));
+                                    });
+                            } else if (event.key === "Escape") {
+                                window.siyuan.menus.menu.remove();
                             }
                         });
-                        if (!hasKey && response.data.k) {
-                            searchHTML = `<div data-type="new" class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
-                        }
-                        renderTagList(searchHTML);
-                    });
-                });
-                listElement.addEventListener("click", (event) => {
-                    const target = event.target as HTMLElement;
-                    const listItemElement = hasClosestByClassName(target, "b3-list-item");
-                    if (!listItemElement) {
-                        return;
-                    }
-                    this.addTags(listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim(),
-                        protyle, () => {
-                            inputElement.value = "";
-                            inputElement.dispatchEvent(new CustomEvent("input"));
-                            inputElement.focus();
+                        inputElement.addEventListener("input", (event) => {
+                            event.stopPropagation();
+                            fetchPost("/api/search/searchTag", {
+                                k: inputElement.value.trim(),
+                            }, (response) => {
+                                if (!listElement.isConnected) {
+                                    return;
+                                }
+                                let searchHTML = "";
+                                let hasKey = false;
+                                const currentTags = this.getTags();
+                                response.data.tags.forEach((item: string, index: number) => {
+                                    searchHTML += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
+            <div class="fn__flex-1">${item}</div>
+            ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g, "").replace(/<\/mark>/g, ""))) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+        </div>`;
+                                    if (item === `<mark>${response.data.k}</mark>`) {
+                                        hasKey = true;
+                                    }
+                                });
+                                if (!hasKey && response.data.k) {
+                                    searchHTML = `<div data-type="new" class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
+                                }
+                                renderTagList(searchHTML);
+                            });
                         });
+                        listElement.addEventListener("click", (event) => {
+                            const target = event.target as HTMLElement;
+                            const listItemElement = hasClosestByClassName(target, "b3-list-item");
+                            if (!listItemElement) {
+                                return;
+                            }
+                            this.addTags(listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim(),
+                                protyle, () => {
+                                    inputElement.value = "";
+                                    inputElement.dispatchEvent(new CustomEvent("input"));
+                                    inputElement.focus();
+                                });
+                        });
+                    }
                 });
-            }
+                const itemsElement = menu.element.querySelector(".b3-menu__items");
+                itemsElement.setAttribute("style", "overflow: initial");
+                /// #if MOBILE
+                session.show(() => menu.fullscreen("bottom"));
+                itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");
+                /// #else
+                const rect = target.getBoundingClientRect();
+                session.show(() => menu.open({x: rect.left, y: rect.top + rect.height, h: rect.height}));
+                menu.element.querySelector("input").focus();
+                /// #endif
+
+            },
         });
-        const itemsElement = menu.element.querySelector(".b3-menu__items");
-        itemsElement.setAttribute("style", "overflow: initial");
-        /// #if MOBILE
-        menu.fullscreen("bottom");
-        itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");
-        /// #else
-        const rect = target.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.top + rect.height, h: rect.height});
-        menu.element.querySelector("input").focus();
-        /// #endif
     }
 
     private getTags(removeTag?: string) {

@@ -8,14 +8,14 @@ export const DESKTOP_COMMAND_PANEL_GENERAL_KEYS = [
     "splitLR", "splitMoveB", "splitMoveR", "splitTB", "switchLeftDock", "switchRightDock", "switchBottomDock",
     "tabToWindow", "stickSearch", "toggleDock", "toggleLeftDockPanel", "toggleRightDockPanel",
     "toggleBottomDockPanel", "unsplitAll", "unsplit", "recentClosed", "increaseEditorFontSize",
-    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin", "switchTab",
+    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin", "switchTab", "previousDatabaseRow", "nextDatabaseRow",
 ] as const;
 
 export const MOBILE_COMMAND_PANEL_GENERAL_KEYS = [
     "addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
     "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "lockScreen", "mainMenu", "move",
     "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow", "increaseEditorFontSize",
-    "decreaseEditorFontSize", "resetEditorFontSize",
+    "decreaseEditorFontSize", "resetEditorFontSize", "previousDatabaseRow", "nextDatabaseRow",
 ] as const;
 
 export const COMMAND_PANEL_EDITOR_KEYS = ["switchReadonly", "switchAdjust"] as const;

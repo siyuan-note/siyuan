@@ -312,11 +312,6 @@ func GetSessionState(id string, includeRuntime bool) (map[string]any, error) {
 	return session, nil
 }
 
-func SaveSession(data []byte) (int64, error) {
-	revision, _, err := SaveSessionState(data)
-	return revision, err
-}
-
 func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	var meta sessionMeta
 	if err := gulu.JSON.UnmarshalJSON(data, &meta); err != nil || meta.ID == "" || !isValidSessionID(meta.ID) {
@@ -340,6 +335,7 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	delete(newData, "recoveryRevision")
 	delete(newData, "agentRunning")
 	delete(newData, "lastCommittedTurnID")
+	delete(newData, "pluginWorkflow")
 	commitTurnID := meta.CommitTurnID
 	if commitTurnID == "" {
 		commitTurnID = meta.RecoveryTurnID
@@ -371,7 +367,7 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 					// messages 是已废弃的旧会话字段，不再带入新格式；其他未知字段原样保留，
 					// 避免前后端版本不一致时擦除较新版本写入的数据。
 					if k != "messages" && k != "expectedRevision" && k != "commitTurnID" &&
-						k != "recoveryTurnID" && k != "recoveryState" && k != "recoveryRevision" && k != "agentRunning" {
+						k != "recoveryTurnID" && k != "recoveryState" && k != "recoveryRevision" && k != "agentRunning" && k != "pluginWorkflow" {
 						newData[k] = v
 					}
 				}

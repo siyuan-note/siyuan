@@ -1,3 +1,4 @@
+import {getAVDefaultFilterOperator, getAVOfferedFilterOperators, hasAVCapability, hasAVScalarContent, isAVDateType, isAVNumericFilterCalcOperator, isAVTextType} from "./capabilities";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
@@ -36,18 +37,7 @@ const getSetFiltersOperation = (avID: string, blockID: string, data: IAVFilter[]
 };
 
 export const getDefaultOperatorByType = (type: TAVCol, isRollup = false) => {
-    if (type === "relation" && !isRollup) {
-        return "Contains any item";
-    }
-    if (["select", "number", "date", "created", "updated"].includes(type)) {
-        return "=";
-    }
-    if (["checkbox"].includes(type)) {
-        return "=";
-    }
-    if (["rollup", "relation", "mAsset", "text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
-        return "Contains";
-    }
+    return getAVDefaultFilterOperator(type, isRollup);
 };
 
 // getEditableFilters 返回可直接增删改的叶子/分组数组。
@@ -189,7 +179,7 @@ export const addFilter = (options: {
     }
     getFieldsByData(options.data).forEach((column) => {
         // 行号类型列不可筛选
-        if (column.type !== "lineNumber") {
+        if (hasAVCapability(column.type, "filterable")) {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
@@ -295,7 +285,7 @@ export const getFiltersHTML = (data: IAV, single = false) => {
         const iconHTML = colData.icon
             ? unicode2Emoji(colData.icon, "b3-menu__icon", true)
             : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`;
-        const fieldOptions = fields.filter((f: IAVColumn) => f.type !== "lineNumber").map((f: IAVColumn) =>
+        const fieldOptions = fields.filter((f: IAVColumn) => hasAVCapability(f.type, "filterable")).map((f: IAVColumn) =>
             `<option value="${f.id}" ${f.id === node.column ? "selected" : ""}>${escapeHtml(f.name)}</option>`
         ).join("");
         const fieldSelect = `<select class="b3-select fn__flex-1 av__filter-field" data-type="fieldSelect" data-path="${path}">${fieldOptions}</select>`;
@@ -325,7 +315,7 @@ export const getFiltersHTML = (data: IAV, single = false) => {
 
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
+    <span class="block__icon block__icon--menu-back" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.filter}</span>
@@ -389,63 +379,46 @@ export const convertGroupToFilter = (nodes: IAVFilter[], path: string): boolean 
 // getOperatorSelectByType 按值类型生成操作符 <select> 的 option HTML，标记当前 operator 为 selected。
 const getOperatorSelectByType = (type: TAVCol, currentOperator: string, isRollup: boolean): string => {
     const opt = (value: string, label: string) => `<option ${value === currentOperator ? "selected" : ""} value="${value}">${label}</option>`;
-    switch (type) {
-        case "checkbox":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot);
-        case "block":
-        case "mAsset":
-        case "text":
-        case "url":
-        case "phone":
-        case "email":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot) +
-                opt("Contains", window.siyuan.languages.filterOperatorContains) + opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Starts with", window.siyuan.languages.filterOperatorStartsWith) + opt("Ends with", window.siyuan.languages.filterOperatorEndsWith) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "template":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot) +
-                opt("Contains", window.siyuan.languages.filterOperatorContains) + opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Starts with", window.siyuan.languages.filterOperatorStartsWith) + opt("Ends with", window.siyuan.languages.filterOperatorEndsWith) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty) +
-                opt(">", "&gt;") + opt("<", "&lt;") + opt(">=", "&GreaterEqual;") + opt("<=", "&le;");
-        case "date":
-        case "created":
-        case "updated":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt(">", window.siyuan.languages.filterOperatorIsAfter) +
-                opt("<", window.siyuan.languages.filterOperatorIsBefore) + opt(">=", window.siyuan.languages.filterOperatorIsOnOrAfter) +
-                opt("<=", window.siyuan.languages.filterOperatorIsOnOrBefore) + opt("Is between", window.siyuan.languages.filterOperatorIsBetween) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "number":
-            return opt("=", "=") + opt("!=", "!=") + opt(">", "&gt;") + opt("<", "&lt;") +
-                opt(">=", "&GreaterEqual;") + opt("<=", "&le;") +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "mSelect":
-            return opt("Contains", window.siyuan.languages.filterOperatorContains) + opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "relation":
-            if (isRollup) {
-                return opt("Contains", window.siyuan.languages.filterOperatorContains) +
-                    opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                    opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) +
-                    opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-            }
-            return opt("Contains any item", window.siyuan.languages.filterOperatorContainsAnyItem) +
-                opt("Does not contain any item", window.siyuan.languages.filterOperatorDoesNotContainAnyItem) +
-                opt("Contains", window.siyuan.languages.filterOperatorContainsKeyword) +
-                opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContainKeyword) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) +
-                opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "select":
-            return opt("=", isRollup ? window.siyuan.languages.filterOperatorIs : window.siyuan.languages.filterOperatorContains) +
-                opt("!=", isRollup ? window.siyuan.languages.filterOperatorIsNot : window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        default:
-            return "";
+    const languages = window.siyuan.languages;
+    const labels: Partial<Record<TAVFilterOperator, string>> = {
+        "=": languages.filterOperatorIs,
+        "!=": languages.filterOperatorIsNot,
+        "Contains": languages.filterOperatorContains,
+        "Does not contains": languages.filterOperatorDoesNotContain,
+        "Starts with": languages.filterOperatorStartsWith,
+        "Ends with": languages.filterOperatorEndsWith,
+        "Is empty": languages.filterOperatorIsEmpty,
+        "Is not empty": languages.filterOperatorIsNotEmpty,
+        "Contains any item": languages.filterOperatorContainsAnyItem,
+        "Does not contain any item": languages.filterOperatorDoesNotContainAnyItem,
+        "Is between": languages.filterOperatorIsBetween,
+        ">": isAVDateType(type) ? languages.filterOperatorIsAfter : "&gt;",
+        "<": isAVDateType(type) ? languages.filterOperatorIsBefore : "&lt;",
+        ">=": isAVDateType(type) ? languages.filterOperatorIsOnOrAfter : "&GreaterEqual;",
+        "<=": isAVDateType(type) ? languages.filterOperatorIsOnOrBefore : "&le;",
+    };
+    if (type === "number") {
+        labels["="] = "=";
+        labels["!="] = "!=";
+    } else if (type === "select" && !isRollup) {
+        labels["="] = languages.filterOperatorContains;
+        labels["!="] = languages.filterOperatorDoesNotContain;
+    } else if (type === "relation" && !isRollup) {
+        labels.Contains = languages.filterOperatorContainsKeyword;
+        labels["Does not contains"] = languages.filterOperatorDoesNotContainKeyword;
     }
+    return getAVOfferedFilterOperators(type, isRollup).map(operator => opt(operator, labels[operator])).join("");
 };
 
 const rollupTargetColumns = new WeakMap<IAVColumn, IAVColumn>();
 const relationFilterLabelCache = new Map<string, string>();
+
+const isRelationRollupColumn = (column: IAVColumn, target = rollupTargetColumns.get(column)) =>
+    column?.type === "rollup" && target?.type === "relation" && !!target.relation?.avID &&
+    (!column.rollup?.calc?.operator || column.rollup.calc.operator === "Unique values");
+
+const wrapFilterCellValue = (filter: IAVFilter, value: IAVCellValue): IAVCellValue =>
+    filter.value?.type === "rollup" ? {type: "rollup", rollup: {contents: [value]}} as IAVCellValue : value;
 
 const getRelationFilterCacheKey = (avID: string, blockID: string) => `${avID}\n${blockID}`;
 
@@ -474,6 +447,7 @@ export const prepareFilterColumns = async (data: IAV) => {
     const fields = getFieldsByData(data);
     const avRequests = new Map<string, Promise<IAVColumn[]>>();
     const tasks = fields.filter((column) => column.type === "rollup" && column.rollup?.relationKeyID && column.rollup?.keyID).map(async (column) => {
+        rollupTargetColumns.delete(column);
         const relationColumn = fields.find((item) => item.id === column.rollup.relationKeyID);
         const targetAVID = relationColumn?.relation?.avID;
         if (!targetAVID) {
@@ -492,6 +466,7 @@ export const prepareFilterColumns = async (data: IAV) => {
             rollupTargetColumns.set(column, targetColumn);
         }
     });
+    await Promise.all(tasks);
     const relationSelections = new Map<string, Set<string>>();
     const collectRelationSelections = (filters: IAVFilter[]) => {
         filters.forEach((filter) => {
@@ -503,7 +478,8 @@ export const prepareFilterColumns = async (data: IAV) => {
                 return;
             }
             const column = fields.find((item) => item.id === filter.column);
-            const targetAVID = column?.type === "relation" ? column.relation?.avID : "";
+            const targetAVID = column?.type === "relation" ? column.relation?.avID :
+                isRelationRollupColumn(column) ? rollupTargetColumns.get(column).relation.avID : "";
             if (!targetAVID) {
                 return;
             }
@@ -512,7 +488,7 @@ export const prepareFilterColumns = async (data: IAV) => {
                 blockIDs = new Set<string>();
                 relationSelections.set(targetAVID, blockIDs);
             }
-            filter.value?.relation?.blockIDs?.forEach((blockID) => blockIDs.add(blockID));
+            getFilterCellValue(filter)?.relation?.blockIDs?.forEach((blockID) => blockIDs.add(blockID));
         });
     };
     collectRelationSelections(getRootFilters(data));
@@ -530,7 +506,7 @@ export const prepareFilterColumns = async (data: IAV) => {
             // 候选显示名加载失败不应阻止筛选面板打开，控件会保留行 ID 并允许重新搜索。
         }
     });
-    await Promise.all([...tasks, ...relationTasks]);
+    await Promise.all(relationTasks);
 };
 
 // resolveFilterValueType 解析 filter 实际的值类型。
@@ -547,12 +523,7 @@ const resolveFilterValueType = (filter: IAVFilter, colData: IAVColumn): { type: 
     const rollup = filter.value?.rollup;
     const contentType = rollup?.contents?.[0]?.type as TAVCol;
     const calcOperator = colData.rollup?.calc?.operator;
-    const numberOperators = [
-        "Count all", "Count values", "Count unique values", "Count empty", "Count not empty",
-        "Percent empty", "Percent not empty", "Percent unique values", "Sum", "Average", "Median", "Min", "Max",
-        "Checked", "Unchecked", "Percent checked", "Percent unchecked",
-    ];
-    const resolvedType = numberOperators.includes(calcOperator)
+    const resolvedType = isAVNumericFilterCalcOperator(calcOperator)
         ? "number"
         : targetColumn?.type || contentType || "text";
     return {type: resolvedType, colData: targetColumn || colData, isRollup: true};
@@ -584,7 +555,7 @@ export const genEmptyFilterValue = (column: IAVColumn, valueSource: "stored" | "
     const emptyRollup = {type: "rollup", rollup: {contents: []}} as IAVCellValue;
     const {type} = resolveFilterValueType({value: emptyRollup} as IAVFilter, column);
     return {
-        operator: getDefaultOperatorByType(type, true),
+        operator: getDefaultOperatorByType(type, !isRelationRollupColumn(column)),
         value: {
             type: "rollup",
             rollup: {contents: [genEmptyCellValue(type)]},
@@ -601,10 +572,11 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const valueHidden = isEmptyOp ? " fn__none" : "";
 
     // 操作符 select
-    const operatorSelect = `<select class="b3-select" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator, isRollup)}</select>`;
+    const relationRollup = isRelationRollupColumn(colData);
+    const operatorSelect = `<select class="b3-select" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator, isRollup && !relationRollup)}</select>`;
 
     // 量化器 select（rollup/mAsset 才有）
-    const quantifierSelect = (isRollup || valueType === "mAsset")
+    const quantifierSelect = ((isRollup && !(relationRollup && isExactRelationOperator(operator))) || valueType === "mAsset")
         ? `<select class="b3-select" data-type="quantifier" data-path="${path}">
 <option ${(!filter.quantifier || filter.quantifier === "Any") ? "selected" : ""} value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
 <option ${filter.quantifier === "All" ? "selected" : ""} value="All">${window.siyuan.languages.filterQuantifierAll}</option>
@@ -616,10 +588,12 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     let valueHTML = "";
     let extraHTML = ""; // 放在 valueContainer 外的附加 HTML（如 select 下拉面板，避免影响行宽）
     const filterValue = getFilterCellValue(filter);
-    if (["text", "url", "block", "email", "phone", "template"].includes(valueType)) {
+    if (isAVTextType(valueType)) {
         const content = valueType === "template" && filterValue && filterValue.type !== "template" ?
             getCellValueText(filterValue) : filterValue?.[valueType as "text"]?.content || "";
         valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(content)}" data-type="filterValue" data-path="${path}">`;
+    } else if (valueType === "location") {
+        valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(filterValue?.text?.content || "")}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "mAsset") {
         const content = filterValue?.mAsset?.[0]?.content || "";
         valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(content)}" data-type="filterValue" data-path="${path}">`;
@@ -629,7 +603,7 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     } else if (valueType === "checkbox") {
         const isChecked = filterValue?.checkbox?.checked;
         valueHTML = `<select class="b3-select" data-type="filterValue" data-path="${path}"><option value="true" ${isChecked ? "selected" : ""}>${window.siyuan.languages.checked}</option><option value="false" ${!isChecked ? "selected" : ""}>${window.siyuan.languages.unchecked}</option></select>`;
-    } else if (["date", "created", "updated"].includes(valueType)) {
+    } else if (isAVDateType(valueType)) {
         const dateHTML = genInlineDateHTML(filter, valueType, path);
         valueHTML = dateHTML.valueHTML;
         const endpointSelect = valueType === "date"
@@ -644,7 +618,7 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         const {trigger, dropdown} = genInlineSelectHTML(filter, valueColumn, path, valueType, allowMultiple);
         valueHTML = trigger;
         extraHTML = dropdown; // 下拉面板放 valueContainer 外，fixed 定位不影响行宽
-    } else if (valueType === "relation" && !isRollup && isExactRelationOperator(operator)) {
+    } else if (valueType === "relation" && (!isRollup || relationRollup) && isExactRelationOperator(operator)) {
         const {trigger, dropdown} = genInlineRelationHTML(filter, valueColumn, path);
         valueHTML = trigger;
         extraHTML = dropdown;
@@ -825,11 +799,14 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
             const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
             newValue = input?.value ? genCellValue("relation", input.value) : genEmptyCellValue("relation");
         }
-    } else if (["text", "url", "block", "email", "phone", "template", "mAsset", "number"].includes(valueType)) {
+    } else if (valueType === "location") {
+        const input = rowElement.querySelector<HTMLInputElement>('[data-type="filterValue"]');
+        newValue = {type: "location", text: {content: input?.value || ""}};
+    } else if (hasAVScalarContent(valueType)) {
         const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
         const val = input?.value || "";
         newValue = val ? genCellValue(valueType, val) : genEmptyCellValue(valueType);
-    } else if (["date", "created", "updated"].includes(valueType)) {
+    } else if (isAVDateType(valueType)) {
         // 修正点①：用 data-type 精确定位绝对日期 input
         const dateTypeSel = rowElement.querySelector('[data-type="dateType"]') as HTMLSelectElement;
         const isRelative = dateTypeSel?.value === "custom";
@@ -885,9 +862,7 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
     }
 
     // rollup 包装
-    if (filter.value?.type === "rollup") {
-        newValue = {type: "rollup", rollup: {contents: [newValue]}} as IAVCellValue;
-    }
+    newValue = wrapFilterCellValue(filter, newValue);
 
     return {newValue, relativeDate, relativeDate2};
 };
@@ -1039,10 +1014,10 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         }
         const newFilter: IAVFilter = {
             ...filter,
-            value: {
+            value: wrapFilterCellValue(filter, {
                 type: "relation",
                 relation: {blockIDs: selectedBlockIDs, contents: []},
-            },
+            } as IAVCellValue),
         };
         commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, false, filterOperation);
         renderRelationFilterSelection(path, dropdown, selectedBlockIDs);
@@ -1139,10 +1114,10 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             const {type: valueType, isRollup} = resolveFilterValueType(filter, colData);
             const newOp = (target as HTMLSelectElement).value;
             const oldOp = filter.operator;
-            const structureChange = (["date", "created", "updated"].includes(valueType) &&
+            const structureChange = (isAVDateType(valueType) &&
                 ((newOp === "Is between") !== (oldOp === "Is between"))) ||
                 ((newOp === "Is empty" || newOp === "Is not empty") !== (oldOp === "Is empty" || oldOp === "Is not empty")) ||
-                (valueType === "relation" && !isRollup &&
+                (valueType === "relation" && (!isRollup || isRelationRollupColumn(colData)) &&
                     (isExactRelationOperator(newOp) !== isExactRelationOperator(oldOp)));
             saveRow(row, path, structureChange);
         } else if (type === "quantifier" || type === "dateEndpoint" || type?.startsWith("dataDirection") || type === "dateType") {

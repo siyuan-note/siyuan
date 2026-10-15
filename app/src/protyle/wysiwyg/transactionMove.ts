@@ -32,6 +32,3 @@ export const getVisibleMoveElements = (sourceElement: Element, blockIDs?: string
     }
     return elements;
 };
-
-export const cloneMoveElements = (elements: Element[]) =>
-    elements.map(item => item.cloneNode(true) as Element);

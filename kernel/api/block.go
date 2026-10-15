@@ -344,7 +344,18 @@ var checkBlocksExist = contractHandler(apicontract.CheckBlocksExist, func(c *gin
 		return apicontract.Failure[map[string]bool](-1, err.Error())
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
-	return apicontract.Success(treenode.ExistBlockTreesInBox(ids, boxID))
+	existing := treenode.ExistBlockTreesInBox(ids, boxID)
+	if boxID == "" {
+		// 隐式批量查询仅合并已持有响应租约的加密库，避免读取随后解锁但未取得租约的笔记本。
+		for _, leasedBoxID := range requestBoxLeases(c) {
+			for id, exists := range treenode.ExistBlockTreesInBox(ids, leasedBoxID) {
+				if exists {
+					existing[id] = true
+				}
+			}
+		}
+	}
+	return apicontract.Success(existing)
 })
 
 var getDocInfo = contractHandler(apicontract.GetDocInfo, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[*apicontract.DocInfo] {
@@ -957,36 +968,6 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 
 	return apicontract.Success(doms)
 })
-
-func encryptedNotebookFromArg(arg map[string]any) string {
-	notebook, _ := arg["notebook"].(string)
-	if notebook != "" && model.IsEncryptedBox(notebook) {
-		return notebook
-	}
-	return ""
-}
-
-func holdBlockRequest(c *gin.Context, ret *gulu.Result, boxID string, arg map[string]any, allowMissingIDs ...bool) bool {
-	var ids []string
-	if id, ok := arg["id"].(string); ok {
-		ids = append(ids, id)
-	}
-	if values, ok := arg["ids"].([]any); ok {
-		for _, value := range values {
-			if id, ok := value.(string); ok {
-				ids = append(ids, id)
-			}
-		}
-	}
-	// 存在性与状态检查需要接受已删除的块 ID；输出块内容的接口必须在准入时确定全部归属。
-	allowMissing := len(allowMissingIDs) > 0 && allowMissingIDs[0]
-	if err := holdEncryptedBlockRequests(c, boxID, ids, allowMissing); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return false
-	}
-	return true
-}
 
 func isEncryptedNotebookDeniedForPublish(c *gin.Context, notebook string) bool {
 	return notebook != "" && model.IsReadOnlyRoleContext(c) && model.IsEncryptedBoxDeniedByPublishAccess(notebook)

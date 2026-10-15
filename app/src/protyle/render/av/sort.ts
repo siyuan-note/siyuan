@@ -1,4 +1,5 @@
 import {Menu} from "../../../plugin/Menu";
+import {hasAVCapability} from "./capabilities";
 import {getColIconByType} from "./col";
 import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
@@ -21,8 +22,8 @@ export const addSort = (options: {
     fields.forEach((column) => {
         let hasSort = false;
 
-        // 如果该列是行号类型列，不允许添加排序
-        if (column.type === "lineNumber") {
+        // 根据字段能力排除不支持排序的列。
+        if (!hasAVCapability(column.type, "sortable")) {
             hasSort = true;
         } else {
             options.data.view.sorts.find((sort) => {
@@ -163,7 +164,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
+    <span class="block__icon block__icon--menu-back" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.sort}</span>

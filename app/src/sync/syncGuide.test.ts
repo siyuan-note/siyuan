@@ -26,7 +26,7 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
         s3: {endpoint: "https://s3.example.com", accessKey: "test-key", secretKey: "test-secret",
             bucket: "notes.backup", region: "us-east-1"},
     };
-    const requests: {url: string, data: {name?: string}, reply: (response: ListResponse) => void}[] = [];
+    const requests: {url: string, data: {name?: string; sync?: {cloudName: unknown}}, reply: (response: ListResponse) => void}[] = [];
     const moduleExports = {} as {
         renderSyncCloudList: (element: Element, reload: boolean, cb: (ready: boolean) => void) => void;
         bindSyncCloudListEvent: (element: Element, cb?: (ready: boolean) => void) => void;
@@ -35,6 +35,14 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
         exports: moduleExports,
         window: {siyuan: {config: {sync}, languages: {emptyContent: "Empty", cloudConfigTip: "Configure storage"}}},
         require: (name: string) => {
+            if (name === "../config/util/configApi") {
+                return {config: {set: (_path: string, value: unknown, applied?: () => void) => {
+                    requests.push({url: "/api/setting/patch", data: {sync: {cloudName: value}}, reply: (response: ListResponse) => {
+                        if (response.code === 0) { sync.cloudName = String(value); applied?.(); }
+                    }});
+                    return Promise.resolve();
+                }}};
+            }
             if (name === "../util/fetch") {
                 return {fetchPost: (url: string, data: {name?: string}, reply: (response: ListResponse) => void) => {
                     requests.push({url, data, reply});
@@ -117,8 +125,8 @@ for (const mobile of [false, true]) {
             assert.equal(guide.list.innerHTML.includes("data-type=\"addCloud\""), provider !== 3);
             assert.deepEqual(guide.readiness, [false, true]);
             guide.select();
-            assert.equal(guide.requests[1].url, "/api/sync/setCloudSyncDir");
-            assert.equal(guide.requests[1].data.name, "chosen");
+            assert.equal(guide.requests[1].url, "/api/setting/patch");
+            assert.equal(guide.requests[1].data.sync.cloudName, "chosen");
             guide.requests[1].reply({code: 0});
             assert.equal(guide.sync.cloudName, "chosen");
             assert.equal(guide.requests[2].url, "/api/sync/listCloudSyncDir");

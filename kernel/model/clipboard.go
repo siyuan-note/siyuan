@@ -162,7 +162,7 @@ func cleanupRichClipboardGroups(batch string, groups map[string]struct{}) {
 		os.RemoveAll(dir)
 		parent := filepath.Dir(dir)
 		if util.IsEmptyDir(parent) {
-			os.Remove(parent)
+			util.RemoveEmptyDir(parent)
 		}
 	}
 }

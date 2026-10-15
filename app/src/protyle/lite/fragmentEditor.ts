@@ -45,7 +45,7 @@ export interface ProtyleLiteFragment {
 }
 
 const isEmptyContent = (element: HTMLElement) =>
-    (element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
+    (element.textContent || "").replaceAll(Constants.ZWSP, "").trim() === "";
 
 export const mountProtyleLiteFragment = (host: HTMLElement,
                                          options: ProtyleLiteFragmentOptions = {}): ProtyleLiteFragment => {

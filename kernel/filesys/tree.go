@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"os"
 	"path/filepath"
@@ -226,7 +227,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
-	data, needFix, err = fixTreeJSONData(boxID, p, data, luteEngine, dek, encrypted)
+	data, needFix, err = fixTreeJSONData(boxID, p, data, luteEngine, dek, encrypted, true)
 	if nil != err {
 		return
 	}
@@ -395,14 +396,16 @@ func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 	return doc.Properties, nil
 }
 
-func DocIAL(absPath string) (ret map[string]string) {
+var ErrInvalidDocIAL = errors.New("invalid document properties")
+
+func DocIAL(absPath string) (ret map[string]string, err error) {
 	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
 	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密笔记本走原流式逻辑。
 	boxID := docIALBoxID(absPath)
 	if boxID != "" && DEKProvider != nil {
 		dek, encrypted, releaseCryptoLease, leaseErr := acquireCryptoLease(boxID)
 		if leaseErr != nil {
-			return map[string]string{}
+			return nil, leaseErr
 		}
 		defer releaseCryptoLease()
 		if encrypted {
@@ -413,42 +416,49 @@ func DocIAL(absPath string) (ret map[string]string) {
 				if !errors.Is(readErr, os.ErrNotExist) {
 					logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
 				}
-				return nil
+				return nil, readErr
 			}
 			relPath := filepath.ToSlash(strings.TrimPrefix(absPath, filepath.Join(util.DataDir, boxID)+string(os.PathSeparator)))
 			plain, decErr := decryptDataWithDEK(boxID, relPath, raw, dek)
 			if decErr != nil {
 				// 属性查询不返回未认证的数据；需要区分缺失与错误的补树流程使用 readParentDocIAL。
 				logging.LogErrorf("decrypt doc [%s] for IAL failed: %s", absPath, decErr)
-				return map[string]string{}
+				return nil, decErr
 			}
-			iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, bytes.NewReader(plain), 512)
-			for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
-				if field == "Properties" {
-					iter.ReadVal(&ret)
-					break
-				} else {
-					iter.Skip()
-				}
-			}
-			for k, v := range ret {
-				ret[k] = html.UnescapeAttrVal(v)
-			}
-			return
+			return parseDocIAL(bytes.NewReader(plain))
 		}
 	}
 
 	filelock.Lock(absPath)
+	defer filelock.Unlock(absPath)
 	file, err := os.Open(absPath)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			logging.LogErrorf("open file [%s] failed: %s", absPath, err)
 		}
-		filelock.Unlock(absPath)
-		return nil
+		return nil, err
 	}
+	defer file.Close()
+	return parseDocIAL(file)
+}
 
-	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, file, 512)
+// docIALReader 保留底层读取错误，避免将临时 I/O 失败当成 JSON 损坏。
+type docIALReader struct {
+	io.Reader
+	err error
+}
+
+func (r *docIALReader) Read(p []byte) (int, error) {
+	n, err := r.Reader.Read(p)
+	if err != nil && err != io.EOF {
+		r.err = err
+	}
+	return n, err
+}
+
+func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
+	r := &docIALReader{Reader: reader}
+	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, r, 512)
 	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
 		if field == "Properties" {
 			iter.ReadVal(&ret)
@@ -457,8 +467,12 @@ func DocIAL(absPath string) (ret map[string]string) {
 			iter.Skip()
 		}
 	}
-	file.Close()
-	filelock.Unlock(absPath)
+	if r.err != nil {
+		return nil, r.err
+	}
+	if (iter.Error != nil && iter.Error != io.EOF) || len(ret) == 0 {
+		return nil, ErrInvalidDocIAL
+	}
 
 	for k, v := range ret {
 		ret[k] = html.UnescapeAttrVal(v)
@@ -520,7 +534,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
-		msg := fmt.Sprintf(util.Langs[util.Lang][268], tree.Root.IALAttr("title")+" "+filepath.Base(filePath), util.LargeFileWarningSize)
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], tree.Root.IALAttr("title")+" "+filepath.Base(filePath), util.LargeFileWarningSize.Load())
 		util.PushErrMsg(msg, 7000)
 	}
 
@@ -569,7 +583,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
 	data, _ = removeUnescapedUnicodeNull(data)
-	if !util.UseSingleLineSave {
+	if !util.UseSingleLineSave.Load() {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
 		if err = json.Indent(&buf, data, "", "\t"); err != nil {
@@ -640,7 +654,7 @@ func afterWriteTree(tree *parse.Tree) {
 }
 
 // fixTreeJSONData 订正树 JSON 数据。
-func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted bool) (data []byte, needFix bool, err error) {
+func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted, persist bool) (data []byte, needFix bool, err error) {
 	if err = validateTreePath(boxID, p); err != nil {
 		return
 	}
@@ -707,7 +721,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
 
-	if !util.UseSingleLineSave {
+	if !util.UseSingleLineSave.Load() {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
 		if err = json.Indent(&buf, data, "", "\t"); err != nil {
@@ -716,6 +730,9 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 		data = buf.Bytes()
 	}
 
+	if !persist {
+		return
+	}
 	filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 		return

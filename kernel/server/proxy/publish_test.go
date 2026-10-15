@@ -156,14 +156,14 @@ func TestPublishSessionCookieAttributes(t *testing.T) {
 	defer func() { model.Conf = previousConf }()
 
 	model.Conf = model.NewAppConf()
-	model.Conf.Publish = &conf.Publish{
+	model.Conf.Publish.Store(&conf.Publish{
 		Enable: true,
 		Port:   6808,
 		Auth: &conf.BasicAuth{
 			Enable:   true,
 			Accounts: []*conf.BasicAuthAccount{{Username: username, Password: password}},
 		},
-	}
+	})
 	// 构建账户及其 token，Basic Auth 成功后由会话认证路径转发
 	model.InitPublishAccounts()
 

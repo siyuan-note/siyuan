@@ -17,6 +17,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
         return {ok: true, json: async () => manifest};
     };
     const stubs = {
+        "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "util/functions": {isMobile: () => mobile},
         "util/genID": {genUUID: () => "cover-picker"},
         "util/zIndex": {isAbove: () => false},

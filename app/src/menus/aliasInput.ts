@@ -12,6 +12,7 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     removeLabel: string,
     placeholder: string,
     spellcheck: boolean,
+    readonly?: boolean,
     dragThreshold?: number,
     save: (value: string) => Promise<boolean>,
 }) => {
@@ -32,6 +33,8 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     input.placeholder = options.placeholder;
     input.setAttribute("aria-label", options.placeholder);
     input.spellcheck = options.spellcheck;
+    input.readOnly = Boolean(options.readonly);
+    add.classList.toggle("fn__none", Boolean(options.readonly));
     list.addEventListener("click", event => {
         if (suppressClick && event.detail !== 0) {
             event.preventDefault();
@@ -45,6 +48,9 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
         }
     }, {passive: true});
     list.addEventListener("pointerdown", event => {
+        if (options.readonly) {
+            return;
+        }
         suppressClick = false;
         // 点击标签时由点击处理器先提交草稿，避免失焦重绘移除正在点击的元素。
         if (document.activeElement === input) {
@@ -164,6 +170,13 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
         aliases.forEach(alias => {
             const chip = document.createElement("div");
             chip.className = "b3-chip b3-chip--middle";
+            if (options.readonly) {
+                const text = document.createElement("span");
+                text.textContent = alias;
+                chip.append(text);
+                list.append(chip);
+                return;
+            }
             chip.innerHTML = "<span class=\"b3-chip--pointer\" role=\"button\" tabindex=\"0\"></span><svg class=\"b3-chip__close\" role=\"button\" tabindex=\"0\"><use xlink:href=\"#iconClose\"></use></svg>";
             const text = chip.querySelector("span");
             const remove = chip.querySelector("svg");
@@ -236,12 +249,18 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
         return persist(next, restoreFocus);
     };
     const open = () => {
+        if (options.readonly) {
+            return;
+        }
         add.classList.add("fn__none");
         input.classList.remove("fn__none");
         input.focus();
         input.select();
     };
     const activate = (action: () => Promise<void>) => {
+        if (options.readonly) {
+            return;
+        }
         // 标签操作依次提交，避免失焦保存和连续删除互相覆盖。
         activeActions++;
         actions = actions.then(async () => {

@@ -418,6 +418,9 @@ func setupAttributeViewItemsTest(t *testing.T, bound bool) (*fileOperationTestFi
 	GlobalUndoLog = newUndoLog(64)
 	cache.ClearAVCache()
 	t.Cleanup(func() {
+		// 等待事务和后台分组刷新结束，再恢复测试语言及工作区状态。
+		FlushTxQueue()
+		backgroundRefreshWaitGroup.Wait()
 		util.Lang, util.AttrViewLangs, GlobalUndoLog = oldLang, oldAVLangs, oldUndoLog
 		cache.ClearAVCache()
 	})
@@ -453,6 +456,7 @@ func setupAttributeViewItemsTest(t *testing.T, bound bool) (*fileOperationTestFi
 		`{"type":"url","url":{"content":"https://example.com"}}`,
 		`{"type":"email","email":{"content":"test@example.com"}}`,
 		`{"type":"phone","phone":{"content":"12345"}}`,
+		`{"type":"location","location":{"name":"Home","latitude":0,"longitude":120,"originalInput":"source"}}`,
 	} {
 		var value av.Value
 		if err := json.Unmarshal([]byte(payload), &value); err != nil {

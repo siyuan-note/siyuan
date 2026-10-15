@@ -8,9 +8,112 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261002224424"
 	},
 	"Children": [
+		{
+			"ID": "20261002224424-iojgoju",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261002224424-iojgoju",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定をリセットするには？"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-9vrcu1f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-9vrcu1f",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アプリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メンテナンス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定をリセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、現在のワークスペースの一般設定、標準ショートカット、メニューとモバイルツールバーの設定、現在のウィンドウレイアウトを初期値に戻せます。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-ed1bsg7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-ed1bsg7",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノート、アセット、履歴、スナップショット、フラッシュカードの学習状況、現在の履歴保持日数は保持されます。アカウント、認証、同期と暗号化の鍵、AI/MCP 接続、シークレット、変数、言語、ネットワーク設定も保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-d865u2u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-d865u2u",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "インストール済みのテーマとアイコンは削除されませんが、外観は標準に戻ります。プラグイン、コードスニペットとその有効状態、プラグインのショートカット、保存済みのレイアウトは保持されます。更新チャンネル、アクセシビリティ、Linux 入力メソッド、ログイン時の起動など、アプリ全体の設定も変更されません。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-60ib6si",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-60ib6si",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リセット前に、このワークスペースに接続中のすべてのクライアントで保存を完了する必要があります。保存に失敗するとリセットは中止されます。その後、クライアントは再読み込みされます。ローカルのデスクトップアプリから実行した場合、再読み込み後にアプリが終了するので再起動してください。モバイルとブラウザーでは再読み込みのみ行われます。"
+				}
+			]
+		},
 		{
 			"ID": "20240530101000-8up071z",
 			"Type": "NodeHeading",

@@ -18,7 +18,7 @@
 import { PasswordResponses } from "./pdfjs";
 
 /**
- * @typedef {Object} PasswordPromptOptions
+ * @typedef {object} PasswordPromptOptions
  * @property {HTMLDialogElement} dialog - The overlay's DOM element.
  * @property {HTMLParagraphElement} label - Label containing instructions for
  *                                          entering the password.
@@ -57,6 +57,7 @@ class PasswordPrompt {
     this.input.addEventListener("keydown", e => {
       if (e.keyCode === /* Enter = */ 13) {
         this.#verify();
+        e.preventDefault();
       }
     });
 
@@ -91,9 +92,7 @@ class PasswordPrompt {
   }
 
   async close() {
-    if (this.overlayManager.active === this.dialog) {
-      this.overlayManager.close(this.dialog);
-    }
+    this.overlayManager.closeIfActive(this.dialog);
   }
 
   #verify() {

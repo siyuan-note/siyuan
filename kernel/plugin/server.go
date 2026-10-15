@@ -17,6 +17,7 @@
 package plugin
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,6 +28,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -150,6 +152,7 @@ type ResponseBody struct {
 	Raw      *ResponseRawData        `json:"raw"`      // if the response is raw data, Raw will be non-nil.
 	Redirect *ResponseRedirect       `json:"redirect"` // if the response is a redirect, Redirect will be non-nil.
 	Proxy    *ResponseProxy          `json:"proxy"`    // if the response is a streaming proxy, Proxy will be non-nil.
+	Stream   *ResponseStream         `json:"stream"`   // if the response body is a ReadableStream, Stream will be non-nil.
 }
 
 type ResponseSerializedData struct {
@@ -180,6 +183,13 @@ type ResponseProxy struct {
 	URL     string              `json:"url"`     // target http/https URL
 	Method  string              `json:"method"`  // optional, defaults to the incoming request method, only GET/HEAD are supported
 	Headers map[string][]string `json:"headers"` // request headers forwarded to the target
+}
+
+// ResponseStream 对应插件处理函数返回的 response.body.stream：Stream 字段在 handleHttpRequest 里从脚本对象上
+// 单独取出赋值，不经过 JSON 编解码（ReadableStream 实例无法序列化），其余字段走正常的 JSON 转换。
+type ResponseStream struct {
+	ContentType string       `json:"contentType"` // e.g. "text/event-stream"
+	Stream      *goja.Object `json:"-"`           // the ReadableStream<Uint8Array | ArrayBuffer | string> providing the response body
 }
 
 // isSseRequest checks if the incoming HTTP request is a Server-Sent Events (SSE) request by inspecting the "Accept" header for the "text/event-stream" value.
@@ -298,6 +308,125 @@ func writeProxyResponse(c *gin.Context, proxy *ResponseProxy) {
 	if _, err = io.Copy(c.Writer, resp.Body); err != nil {
 		logging.LogWarnf("plugin proxy copy response failed: %s", err.Error())
 	}
+}
+
+// streamChunk 是从拉取一块数据的 Go 回调传给响应写入循环的一条消息：done 为真时表示流已经结束（err 非 nil
+// 说明是异常结束），否则 data 是这一块要写入响应体的字节。
+type streamChunk struct {
+	data []byte
+	done bool
+	err  error
+}
+
+// writeStreamResponse 把插件处理函数返回的 response.body.stream 逐块写入 HTTP 响应，statusCode 是插件在
+// HttpResponse.statusCode 中指定的状态码（而不是固定 200）：写入循环每写完一块、Flush 之后才向事件循环请求
+// 下一块，不提前拉取——这是背压的关键，避免插件在没有人消费数据的情况下把响应体生产得远远超前；一块数据的
+// 请求与到达都经由 p.worker.Run 异步完成，不占用事件循环线程等待任何 I/O，不会因为写入循环暂时写不出数据
+// （例如客户端读取缓慢）而卡住插件的其它脚本任务。chunk 必须是 BufferSource（ArrayBuffer 或其视图，如
+// Uint8Array）或字符串（按 UTF-8 写入），和 siyuan.client.fetch 的 response.body 用同一套鸭子类型。客户端
+// 提前断开连接时取消 reader，不再继续向一个没有人读的响应体生产数据。
+func (p *KernelPlugin) writeStreamResponse(c *gin.Context, statusCode int, response *ResponseStream) {
+	c.Writer.WriteHeader(statusCode)
+	if response.ContentType != "" {
+		c.Header("Content-Type", response.ContentType)
+	}
+
+	chunks := make(chan streamChunk, 1)
+	var consumer *streams.StreamConsumer
+
+	// pullNext 在事件循环线程上请求下一块数据，调用方必须等上一次请求的结果（通过 chunks 收到）之后才能
+	// 再次调用，不能连续发起多次拉取。
+	pullNext := func() {
+		if runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+			consumer.PullOnVMThread(func(chunk goja.Value) error {
+				data, convertErr := streamChunkBytes(p, rt, chunk)
+				if convertErr != nil {
+					return convertErr
+				}
+				select {
+				case chunks <- streamChunk{data: data}:
+				case <-c.Request.Context().Done():
+				case <-p.context.Done():
+				}
+				return nil
+			}, func(doneErr error) {
+				select {
+				case chunks <- streamChunk{done: true, err: doneErr}:
+				case <-c.Request.Context().Done():
+				case <-p.context.Done():
+				}
+			})
+			return nil, nil
+		}, nil); runErr != nil {
+			select {
+			case chunks <- streamChunk{done: true, err: runErr}:
+			case <-c.Request.Context().Done():
+			case <-p.context.Done():
+			}
+		}
+	}
+
+	_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (_ any, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("panic while starting response stream: %v", r)
+			}
+		}()
+		consumer, err = p.streamsHost.OpenReadableStreamConsumer(response.Stream)
+		return
+	})
+	if runErr != nil {
+		logging.LogErrorf("[plugin:%s] start response stream: %v", p.Name, runErr)
+		return
+	}
+
+	// cancelConsumer 让 reader 取消，不必等它自然读完，避免插件继续为无人读取的响应体生产数据；
+	// 写入循环的每一条退出路径（流自然结束之外）都要走这里，不止客户端断开连接那一条。
+	cancelConsumer := func(reason string) {
+		p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+			consumer.CancelOnVMThread(rt.NewTypeError(reason))
+			return nil, nil
+		}, nil)
+	}
+
+	pullNext()
+	for {
+		select {
+		case chunk := <-chunks:
+			if chunk.done {
+				if chunk.err != nil {
+					logging.LogWarnf("[plugin:%s] response stream ended with an error: %s", p.Name, chunk.err)
+				}
+				return
+			}
+			if _, writeErr := c.Writer.Write(chunk.data); writeErr != nil {
+				logging.LogWarnf("[plugin:%s] write response stream chunk failed: %s", p.Name, writeErr)
+				cancelConsumer("failed to write the response stream chunk")
+				return
+			}
+			c.Writer.Flush()
+			pullNext()
+		case <-c.Request.Context().Done():
+			cancelConsumer("client disconnected")
+			return
+		case <-p.context.Done():
+			cancelConsumer("plugin stopped")
+			return
+		}
+	}
+}
+
+// streamChunkBytes 把 response.body.stream 的一个 chunk 转换为要写入响应体的字节：接受 ArrayBuffer、
+// ArrayBuffer 视图（如 Uint8Array）或字符串（按 UTF-8 编码），与 siyuan.client.fetch 的 response.body
+// 的 chunk 形态保持一致；返回的切片是独立拷贝，不与引擎内存共享。
+func streamChunkBytes(p *KernelPlugin, rt *goja.Runtime, chunk goja.Value) ([]byte, error) {
+	if object, ok := chunk.(*goja.Object); ok && p.formDataHost.IsBufferSource(chunk) {
+		return bytes.Clone(p.formDataHost.BufferSourceBytes(rt, object)), nil
+	}
+	if goja.IsString(chunk) {
+		return []byte(chunk.String()), nil
+	}
+	return nil, fmt.Errorf("stream chunk must be a BufferSource or a string, got %T", chunk.Export())
 }
 
 func parseRequest(c *gin.Context) (request *Request, err error) {

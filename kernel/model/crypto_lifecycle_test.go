@@ -331,7 +331,7 @@ func TestMissingEncryptedIdentityNeverFallsBackToNormalNotebook(t *testing.T) {
 	oldConf := Conf
 	util.DataDir = t.TempDir()
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	boxID := "20260731160100-abcdefg"
 	defer func() {
 		forgetRuntimeEncryptedBox(boxID)
@@ -380,7 +380,7 @@ func TestMissingEncryptedIdentityNeverFallsBackToNormalNotebook(t *testing.T) {
 func TestNotebookBackupPreventsNormalIdentityDowngrade(t *testing.T) {
 	oldConf := Conf
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	defer func() {
 		Conf = oldConf
 	}()
@@ -513,7 +513,7 @@ func TestEncryptedBoxMetadataIsNotStoredInPlaintext(t *testing.T) {
 func TestListNotebooksDoesNotInheritEncryptedOpenState(t *testing.T) {
 	oldConf := Conf
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	defer func() {
 		Conf = oldConf
 	}()

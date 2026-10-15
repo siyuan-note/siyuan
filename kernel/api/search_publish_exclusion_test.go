@@ -90,12 +90,12 @@ func TestPublishSearchCountExclusion(t *testing.T) {
 
 	model.Conf = model.NewAppConf()
 	model.Conf.Lang = "en"
-	model.Conf.FileTree = conf.NewFileTree()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Export = conf.NewExport()
-	model.Conf.Search = conf.NewSearch()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Export.Store(conf.NewExport())
+	model.Conf.Search.Store(conf.NewSearch())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 
 	const boxID = "20260823000000-b0xb0x1"
 	const publicID = "20260823000001-aabbccd"

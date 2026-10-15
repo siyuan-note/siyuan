@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute/ast"
 	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -242,26 +243,176 @@ func TestSyncIgnoreCache(t *testing.T) {
 	}
 }
 
-func BenchmarkSyncIgnoreRules(b *testing.B) {
-	oldData, oldWorking := util.DataDir, util.WorkingDir
-	util.DataDir, util.WorkingDir = b.TempDir(), b.TempDir()
-	b.Cleanup(func() { util.DataDir, util.WorkingDir = oldData, oldWorking })
-	getSyncIgnoreRules()
-	getSyncIgnoreRules()
-	b.Run("cached", func(b *testing.B) {
-		for b.Loop() {
-			getSyncIgnoreRules()
-		}
-	})
-	b.Run("uncached", func(b *testing.B) {
-		for b.Loop() {
-			lines, err := loadSyncIgnoreLines()
-			if err != nil {
-				b.Fatal(err)
+func TestSyncIgnoreCacheDetectsGuideEntriesWithUnchangedMetadata(t *testing.T) {
+	for _, operation := range []string{"remove", "rename", "add"} {
+		t.Run(operation, func(t *testing.T) {
+			oldData, oldWorking := util.DataDir, util.WorkingDir
+			util.DataDir, util.WorkingDir = t.TempDir(), t.TempDir()
+			t.Cleanup(func() { util.DataDir, util.WorkingDir = oldData, oldWorking })
+			const oldName = "20260913123456-abcdefg.json"
+			const newName = "20260913123457-abcdefg.json"
+			avDir := filepath.Join(util.WorkingDir, "guide", userGuideIDs[0], "storage", "av")
+			oldPath, newPath := filepath.Join(avDir, oldName), filepath.Join(avDir, newName)
+			writeSyncPathTestFile(t, oldPath)
+			mustSyncIgnoreRules(t)
+			_, before := mustSyncIgnoreRules(t)
+			if !before.MatchesPath("/storage/av/" + oldName) {
+				t.Fatal("guide fixture was not ignored")
 			}
-			ignore.CompileIgnoreLines(lines...)
+			switch operation {
+			case "remove":
+				if err := os.Remove(oldPath); err != nil {
+					t.Fatal(err)
+				}
+			case "rename":
+				if err := os.Rename(oldPath, newPath); err != nil {
+					t.Fatal(err)
+				}
+			case "add":
+				writeSyncPathTestFile(t, newPath)
+			}
+			// 模拟目录变更后大小和时间戳没有变化，保留缓存中的旧文件列表与规则。
+			current, valid := syncIgnoreStamps()
+			if !valid {
+				t.Fatal("guide fixture metadata could not be read")
+			}
+			syncIgnoreCache.Lock()
+			for i := range syncIgnoreCache.stamps {
+				syncIgnoreCache.stamps[i].size = current[i].size
+				syncIgnoreCache.stamps[i].modified = current[i].modified
+			}
+			syncIgnoreCache.Unlock()
+			_, after := mustSyncIgnoreRules(t)
+			if after == before {
+				t.Fatal("guide entry change reused stale rules when directory metadata matched")
+			}
+			if got, want := after.MatchesPath("/storage/av/"+oldName), operation == "add"; got != want {
+				t.Fatalf("old guide file ignored = %v, want %v", got, want)
+			}
+			if got, want := after.MatchesPath("/storage/av/"+newName), operation != "remove"; got != want {
+				t.Fatalf("new guide file ignored = %v, want %v", got, want)
+			}
+			_, reused := mustSyncIgnoreRules(t)
+			if reused != after {
+				t.Fatal("unchanged guide entries did not reuse the refreshed rules")
+			}
+		})
+	}
+}
+
+func TestSyncIgnoreGuideFingerprintUsesRuleNames(t *testing.T) {
+	oldData, oldWorking := util.DataDir, util.WorkingDir
+	util.DataDir, util.WorkingDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() { util.DataDir, util.WorkingDir = oldData, oldWorking })
+	const first = "20260913123456-abcdefg.json"
+	const second = "20260913123457-abcdefg.json"
+	for _, id := range userGuideIDs[:2] {
+		avDir := filepath.Join(util.WorkingDir, "guide", id, "storage", "av")
+		for _, name := range []string{second, "unrelated.txt", "invalid.json", first} {
+			writeSyncPathTestFile(t, filepath.Join(avDir, name))
 		}
-	})
+	}
+	stamps, valid := syncIgnoreStamps()
+	if !valid {
+		t.Fatal("guide fixture could not be read")
+	}
+	for _, stamp := range stamps {
+		if stamp.path == filepath.Join(util.WorkingDir, "guide") {
+			if want := first + "\x00" + second; stamp.entries != want {
+				t.Fatalf("guide fingerprint = %q, want sorted unique rule names %q", stamp.entries, want)
+			}
+			return
+		}
+	}
+	t.Fatal("guide fingerprint missing")
+}
+
+func TestSyncIgnoreCachedGuideReadFailureRecovers(t *testing.T) {
+	oldData, oldWorking := util.DataDir, util.WorkingDir
+	util.DataDir, util.WorkingDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() { util.DataDir, util.WorkingDir = oldData, oldWorking })
+	avDir := filepath.Join(util.WorkingDir, "guide", userGuideIDs[0], "storage", "av")
+	if err := os.MkdirAll(avDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	mustSyncIgnoreRules(t)
+	_, cached := mustSyncIgnoreRules(t)
+	_, reused := mustSyncIgnoreRules(t)
+	if cached != reused {
+		t.Fatal("guide fixture did not cache its rules")
+	}
+	if err := os.Remove(avDir); err != nil {
+		t.Fatal(err)
+	}
+	writeSyncPathTestFile(t, avDir)
+	if _, matcher, err := getSyncIgnoreRules(); err == nil || matcher != nil {
+		t.Fatalf("unreadable guide returned cached rules: error=%v, matcher=%v", err, matcher)
+	}
+	if err := os.Remove(avDir); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(avDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	mustSyncIgnoreRules(t)
+}
+
+func BenchmarkSyncIgnoreRules(b *testing.B) {
+	for _, fixture := range []string{"empty", "bundled-guides"} {
+		b.Run(fixture, func(b *testing.B) {
+			oldData, oldWorking := util.DataDir, util.WorkingDir
+			util.DataDir, util.WorkingDir = b.TempDir(), b.TempDir()
+			b.Cleanup(func() { util.DataDir, util.WorkingDir = oldData, oldWorking })
+			guideFiles := 0
+			if fixture == "bundled-guides" {
+				for _, id := range userGuideIDs {
+					source := filepath.Join("..", "..", "app", "guide", id, "storage", "av")
+					entries, err := os.ReadDir(source)
+					if err != nil {
+						b.Fatal(err)
+					}
+					destination := filepath.Join(util.WorkingDir, "guide", id, "storage", "av")
+					if err = os.MkdirAll(destination, 0755); err != nil {
+						b.Fatal(err)
+					}
+					for _, entry := range entries {
+						name := entry.Name()
+						if entry.IsDir() || !strings.HasSuffix(name, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(name, ".json")) {
+							continue
+						}
+						// 只复用随包指南的文件名与目录规模，不读取或复制文档内容。
+						if err = os.WriteFile(filepath.Join(destination, name), nil, 0644); err != nil {
+							b.Fatal(err)
+						}
+						guideFiles++
+					}
+				}
+			}
+			mustSyncIgnoreRules(b)
+			_, cached := mustSyncIgnoreRules(b)
+			b.Run("cached", func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					_, matcher := mustSyncIgnoreRules(b)
+					if matcher != cached {
+						b.Fatal("unchanged benchmark fixture did not hit the cache")
+					}
+				}
+				b.ReportMetric(float64(guideFiles), "guide-files")
+			})
+			b.Run("uncached", func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					lines, err := loadSyncIgnoreLines()
+					if err != nil {
+						b.Fatal(err)
+					}
+					ignore.CompileIgnoreLines(lines...)
+				}
+				b.ReportMetric(float64(guideFiles), "guide-files")
+			})
+		})
+	}
 }
 
 func TestSyncIgnoreRepoCompatibility(t *testing.T) {
@@ -278,7 +429,7 @@ func TestSyncIgnoreRepoCompatibility(t *testing.T) {
 		".hidden/file", "box/.hidden/file", "assets/file.tmp", "assets/tracked.txt",
 		"storage/local.json", "storage/recent-doc.json", "storage/ref-used.json", "storage/view-state.json",
 		"storage/view-state-corrupted-20260913000000.json", "nested/data/storage/local.json",
-		"filesys_status_check/file", "nested/filesys_status_check/file", "20210808180117-6v0mkxr/file.sy",
+		"filesys_status_check/file", ".siyuan/filesys_status_check/file", "20210808180117-6v0mkxr/file.sy",
 	}
 	for _, path := range paths {
 		writeSyncPathTestFile(t, filepath.Join(util.DataDir, path))

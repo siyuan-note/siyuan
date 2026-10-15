@@ -4,20 +4,25 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {createSectionRuntime} from "../util/sectionRuntime";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [true, false]) {
-    for (const change of ["gradient", "duplicate", "theme", "initial"] as const) {
+    for (const change of ["gradient", "duplicate", "theme", "initial", "font", "font-reset"] as const) {
         test(`appearance updates preserve gradient controls without skipping theme initialization (${change}, mobile=${mobile})`, async () => {
             const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceRuntime.ts"), "utf8");
             const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
             const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-            const appearance = {lang: "en_US", mode: 0, bodyGradient: {mode: "auto"}};
+            const appearance = {
+                lang: "en_US", mode: 0, bodyGradient: {mode: "auto"},
+                globalFontFamilies: change === "font-reset" ? [{family: "Arial", weight: 700}] : [],
+            };
             const next = change === "initial" ? appearance : {
                 ...appearance,
                 mode: change === "theme" ? 1 : 0,
                 bodyGradient: {mode: change === "duplicate" ? "auto" : "custom"},
+                globalFontFamilies: change === "font" ? [{family: "Arial", weight: 700}] : [],
             };
             const siyuan = {config: {appearance}};
             const calls: string[] = [];
@@ -28,6 +33,7 @@ for (const mobile of [true, false]) {
                 window: {siyuan},
                 document: {getElementById: (): HTMLElement | null => null},
                 require: (name: string) => {
+                    if (name === "../util/sectionRuntime") return {createSectionRuntime};
                     if (name === "../util/namespaceApi") {
                         return {createConfigNamespaceApi: (options: {setConfig: (data: unknown) => void}) => ({apply: options.setConfig})};
                     }
@@ -49,6 +55,7 @@ for (const mobile of [true, false]) {
             assert.equal(calls.includes("setBodyHighlight"), updatesInPlace);
             assert.equal(calls.includes("loadAssets"), !updatesInPlace);
             assert.equal(calls.includes("remountOpenSettingTab"), !updatesInPlace && !mobile);
+            assert.equal(calls.includes("refreshDynamicIcons"), change === "font" || change === "font-reset");
         });
     }
 }
@@ -74,6 +81,7 @@ for (const mobile of [true, false]) {
                 window: {siyuan, location: {reload: () => calls.push("reload")}},
                 document: {getElementById: (): HTMLElement | null => null},
                 require: (name: string) => {
+                    if (name === "../util/sectionRuntime") return {createSectionRuntime};
                     if (name === "../util/namespaceApi") {
                         return {createConfigNamespaceApi: () => ({})};
                     }
@@ -106,7 +114,10 @@ for (const mobile of [true, false]) {
                         }});
                     }
                     if (name === "../../layout/util") {
-                        return {exportLayout: (options: {cb: () => void}) => options.cb()};
+                        return {reloadUI: () => calls.push("reload")};
+                    }
+                    if (name === "../setting/windowContext") {
+                        return {isSettingsWindow: () => false, closeSettingsWindow: () => false};
                     }
                     return new Proxy({}, {get: (_, key) => () => calls.push(String(key))});
                 },

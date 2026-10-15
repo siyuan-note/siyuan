@@ -29,7 +29,7 @@ import (
 func TestMarkReplaceSpanMatchesRawText(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() {
 		Conf = previousConf
 	})
@@ -114,7 +114,7 @@ func TestMarkReplaceSpanMatchesRawText(t *testing.T) {
 func TestExtractedMarkContentsMatchRawText(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() {
 		Conf = previousConf
 	})

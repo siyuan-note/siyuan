@@ -1,3 +1,10 @@
+.window-loading {
+  // 覆盖独立窗口控件，标题栏和内容在初始化完成后统一显示。
+  z-index: 503;
+  background-color: var(--b3-theme-background);
+  -webkit-app-region: drag;
+}
+
 .window-workspace {
   &__list {
     width: min(256px, 70vw);

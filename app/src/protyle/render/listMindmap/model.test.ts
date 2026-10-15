@@ -42,7 +42,7 @@ test("mindmap metadata rejects unknown formats and invalid values without replac
         '"relations":[{"id":"r","from":"a","to":"b","label":"label","dash":true}],"extension":42}';
     assert.equal(JSON.stringify(parseListMindmapMetadata(value)), value);
     assert.deepEqual(parseListMindmapMetadata(null).relations, []);
-    for (const invalid of ["", "null", "[]", "{", '{"version":2,"nodes":{},"relations":[]}',
+    for (const invalid of ["", "null", "[]", "{", '{"version":3,"nodes":{},"relations":[]}',
         '{"version":1,"nodes":{"a":{"fontSize":"18"}},"relations":[]}',
         '{"version":1,"nodes":{"a":{"lineWidth":-1}},"relations":[]}',
         '{"version":1,"nodes":{},"relations":[],"viewLocked":"true"}',
@@ -67,6 +67,22 @@ test("manual relation routes are optional, versioned and validated without dropp
     }
 });
 
+test("relation arrow directions are optional and validated without dropping metadata", () => {
+    const relation = {id: "r", from: "a", to: "b", label: "Keep", color: "red", extension: "keep",
+        route: {version: 1, points: [{x: 10, y: 20, t: .5}]}};
+    const metadata = {version: 1, nodes: {}, relations: [relation]};
+    const original = JSON.stringify(metadata);
+    assert.equal(JSON.stringify(parseListMindmapMetadata(original)), original);
+    for (const arrowDirection of ["forward", "reverse", "both", "none"]) {
+        const value = JSON.stringify({...metadata, relations: [{...relation, arrowDirection}]});
+        assert.equal(JSON.stringify(parseListMindmapMetadata(value)), value);
+    }
+    for (const arrowDirection of [null, "", "backward", 0, false, {}, []]) {
+        const value = JSON.stringify({...metadata, relations: [{...relation, arrowDirection}]});
+        assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+    }
+});
+
 test("summary metadata is optional and rejects damaged groups while retaining extension fields", () => {
     const old = '{"version":1,"rootTitle":"Root","nodes":{},"relations":[]}';
     assert.equal(JSON.stringify(parseListMindmapMetadata(old)), old);
@@ -77,6 +93,20 @@ test("summary metadata is optional and rejects damaged groups while retaining ex
         [{...summary, nodeIds: ["root"]}], [{...summary, label: 1}], [{...summary, color: 1}],
         [summary, {...summary, id: "other"}], [summary, {...summary, nodeIds: ["c"]}]]) {
         assert.throws(() => parseListMindmapMetadata(JSON.stringify({...value, summaries})), /Invalid list mindmap metadata/);
+    }
+});
+
+test("versioned nested summaries retain legacy fixtures and reject crossing or damaged configurations", () => {
+    const fixture = readFileSync(path.resolve(__dirname, "../../../../../kernel/model/testdata/list_mindmap_summary_v1.json"), "utf8").trim();
+    assert.equal(JSON.stringify(parseListMindmapMetadata(fixture)), fixture);
+    const data = JSON.parse(fixture);
+    data.summaries.push({...data.summaries[0], id: "inner", nodeIds: ["a"]});
+    assert.throws(() => parseListMindmapMetadata(JSON.stringify(data)), /Invalid list mindmap metadata/);
+    data.version = 2;
+    assert.equal(JSON.stringify(parseListMindmapMetadata(JSON.stringify(data))), JSON.stringify(data));
+    for (const nodes of [["b", "c"], ["a", "a"]]) {
+        data.summaries[1].nodeIds = nodes;
+        assert.throws(() => parseListMindmapMetadata(JSON.stringify(data)), /Invalid list mindmap metadata/);
     }
 });
 
@@ -150,9 +180,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
-        "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, " +
+        "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, getListMindmapSiblingFoldStates, " +
+        "addListMindmapSummaryRanges, getListMindmapSummarySnapshot, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
-        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock};")(
+        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock, getListMindmapElements, registerListMindmapRoot, restoreListMindmapFocus};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -539,7 +570,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(inserted.dataset.marker, "1.");
 
     // 未知版本或损坏配置在任何编辑之前报错，原内容保持不变。
-    list.setAttribute("custom-sy-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
+    list.setAttribute("custom-sy-list-mindmap-data", '{"version":3,"nodes":{},"relations":[]}');
     const corrupt = list.outerHTML;
     check.throws(() => api.moveListMindmapNode(list, inserted.dataset.nodeId, first.id, "after"), /metadata/);
     check.throws(() => api.deleteListMindmapNode(list, inserted.dataset.nodeId), /metadata/);
@@ -676,7 +707,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const sourceList = source.firstElementChild;
         sourceList.setAttribute("custom-sy-list-mindmap", "1");
         sourceList.setAttribute("data-mindmap-view-rendered", "true");
-        const metadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
+        const metadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: ""});
         sourceList.setAttribute("custom-sy-list-mindmap-data", metadata);
         sourceList.classList.add("protyle-wysiwyg--select");
         sourceList.querySelector('[contenteditable="true"]').insertAdjacentHTML("afterbegin", "<wbr>");
@@ -702,7 +733,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     typedSource.innerHTML = lute.Md2BlockDOM("* Alpha\n  * Nested\n* Beta\n");
     const typedList = typedSource.firstElementChild as HTMLElement;
     const typedIDs = ids(typedList);
-    const typedMetadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
+    const typedMetadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: ""});
     typedList.setAttribute("custom-sy-list-mindmap-data", typedMetadata);
     api.retagMindmapBranch(typedList, true);
     typedList.classList.add("protyle-wysiwyg--select");
@@ -754,13 +785,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const copiedRoute = {version: 1, points: [{x: -35, y: 20, t: .5}], extension: "keep"};
     list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
         nodes: {a: {bold: true}, b: {italic: true}, deleted: {bold: true}},
-        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute},
+        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute, arrowDirection: "both"},
             {id: "orphan", from: "a", to: "deleted", label: "remove"}]}));
     const copiedItems = list.querySelectorAll('[data-type="NodeListItem"]');
     copiedItems[0].setAttribute("data-node-id", "new-a");
     copiedItems[1].setAttribute("data-node-id", "new-b");
     const child = list.querySelector('[data-type="NodeList"]');
-    child.setAttribute("custom-sy-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
+    child.setAttribute("custom-sy-list-mindmap-data", '{"version":3,"nodes":{},"relations":[]}');
     const beforeRemap = list.outerHTML;
     check.throws(() => api.remapListMindmapIDs(list, new Map([["a", "new-a"], ["b", "new-b"]])), /metadata/);
     check.equal(list.outerHTML, beforeRemap);
@@ -768,7 +799,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     api.remapListMindmapIDs(list, new Map([["a", "new-a"], ["b", "new-b"]]));
     const remapped = JSON.parse(list.getAttribute("custom-sy-list-mindmap-data"));
     check.deepEqual(remapped.nodes, {"new-a": {bold: true}, "new-b": {italic: true}});
-    check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep", route: copiedRoute}]);
+    check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep",
+        route: copiedRoute, arrowDirection: "both"}]);
     check.equal(remapped.extension, "keep");
     check.equal(list.querySelector(".mindmap-view"), null);
     check.equal(list.hasAttribute("data-mindmap-view-rendered"), false);
@@ -1250,12 +1282,19 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     select(beta);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("mindmap-view__inspector--node"), true);
-    check.equal(getComputedStyle(inspector).bottom, "0px");
+    check.equal(getComputedStyle(inspector).bottom, "8px");
     check.equal(host.querySelector(".mindmap-view__status"), null);
     const nodeMenuBounds = inspector.getBoundingClientRect();
     const panelBounds = host.getBoundingClientRect();
     check.ok(Math.abs(nodeMenuBounds.left + nodeMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(nodeMenuBounds.width < panelBounds.width / 2);
+    check.ok(panelBounds.bottom - nodeMenuBounds.bottom >= 8);
+    for (const borderColor of ["#d4d4d4", "#484848"]) {
+        host.style.setProperty("--b3-border-color", borderColor);
+        check.equal(getComputedStyle(inspector).boxShadow,
+            getComputedStyle(host).borderTopColor + " 0px 0px 0px 1px");
+    }
+    host.style.removeProperty("--b3-border-color");
     check.equal(inspector.querySelectorAll('input[type="number"]').length, 0);
     check.equal(inspector.querySelectorAll('input[type="checkbox"]').length, 0);
     check.equal(inspector.querySelector('input[type="color"]'), null);
@@ -1499,11 +1538,48 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(relationElement.classList.contains("mindmap-view__relation--hover"), false);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("mindmap-view__inspector--line"), true);
-    check.equal(getComputedStyle(inspector).bottom, "0px");
+    check.equal(getComputedStyle(inspector).bottom, "8px");
     const lineMenuBounds = inspector.getBoundingClientRect();
     check.ok(Math.abs(lineMenuBounds.left + lineMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(lineMenuBounds.width < panelBounds.width / 2);
+    const routeStatus = host.querySelector<HTMLElement>(".mindmap-view__route-status");
+    const statusHidden = routeStatus.hidden;
+    routeStatus.hidden = false;
+    check.ok(routeStatus.getBoundingClientRect().bottom < lineMenuBounds.top);
+    routeStatus.hidden = statusHidden;
+    hostParent.style.width = "320px";
+    const narrowInspectorBounds = inspector.getBoundingClientRect();
+    const narrowPanelBounds = host.getBoundingClientRect();
+    check.ok(narrowInspectorBounds.left > narrowPanelBounds.left);
+    check.ok(narrowInspectorBounds.right < narrowPanelBounds.right);
+    check.ok(inspector.scrollWidth > inspector.clientWidth);
+    inspector.scrollLeft = inspector.scrollWidth;
+    check.ok(inspector.scrollLeft > 0);
+    inspector.scrollLeft = 0;
+    hostParent.style.width = "760px";
     check.equal(inspector.querySelector(".mindmap-view__section"), null);
+    const arrowSelector = () => inspector.querySelector<HTMLSelectElement>('[aria-label="listMindmapArrowDirection"]');
+    check.ok(arrowSelector().classList.contains("b3-select"));
+    check.equal(arrowSelector().value, "forward", "old relations show the default arrow direction");
+    check.equal(arrowSelector().options.length, 4);
+    for (const arrowDirection of ["forward", "reverse", "both", "none"]) {
+        const selector = arrowSelector();
+        selector.focus();
+        const keyboard = new KeyboardEvent("keydown", {key: "ArrowDown", bubbles: true, cancelable: true});
+        selector.dispatchEvent(keyboard);
+        check.equal(keyboard.defaultPrevented, false, "direction keys belong to the shared select control");
+        selector.value = arrowDirection;
+        selector.dispatchEvent(new Event("change", {bubbles: true}));
+        check.deepEqual(relationChanges.pop(), ["relation-test", {arrowDirection}]);
+        model.metadata.relations[0].arrowDirection = arrowDirection;
+        view.update(model);
+        await settle();
+        check.equal(arrowSelector().value, arrowDirection);
+        check.equal(document.activeElement, arrowSelector(), "changing direction preserves keyboard focus");
+    }
+    delete model.metadata.relations[0].arrowDirection;
+    view.update(model);
+    await settle();
     host.querySelector(".mindmap-view__relation").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const relationLabel = host.querySelector<HTMLInputElement>(".mindmap-view__relation-editor");
     check.equal(document.activeElement, relationLabel);
@@ -1601,7 +1677,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         view.scale = scale;
         view.draw();
         for (const id of ["forward", "reverse"]) {
-            const end = view.linePaths.find((line: any) => line.id === id).end;
+            const end = view.linePaths.find((line: any) => line.id === id).arrows[0];
             const bounds = viewport.getBoundingClientRect();
             const x = bounds.left + view.offsetX + end.x * scale;
             const y = bounds.top + view.offsetY + end.y * scale;
@@ -1777,7 +1853,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.selectedRelation = "drag-route";
     view.updateSelection();
     await settle();
-    const resetEnd = view.linePaths.find((line: any) => line.id === "drag-route").end;
+    const resetEnd = view.linePaths.find((line: any) => line.id === "drag-route").arrows[0];
     const resetBounds = viewport.getBoundingClientRect();
     viewport.dispatchEvent(new MouseEvent("dblclick", {clientX: resetBounds.left + view.offsetX + resetEnd.x * view.scale,
         clientY: resetBounds.top + view.offsetY + resetEnd.y * view.scale, bubbles: true}));
@@ -1815,7 +1891,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     HTMLElement.prototype.hasPointerCapture = originalHasCapture;
     HTMLElement.prototype.releasePointerCapture = originalReleaseCapture;
     relationChanges.length = 0;
-    const nativeHandle = centerPoint(host.querySelector<HTMLElement>(".mindmap-view__route-handle:not(.mindmap-view__route-endpoint)"));
+    // 使用远离端点的手动路由，保留触屏设备的大触摸目标及真实命中测试。
+    model.metadata.relations[0].route = savedRoute;
+    view.update(model);
+    await settle();
+    const nativeRouteHandle = view.routeHandles.get(`drag-route:${returningSegment}`);
+    check.ok(nativeRouteHandle);
+    const nativeHandle = centerPoint(nativeRouteHandle);
+    check.equal(document.elementFromPoint(nativeHandle.x, nativeHandle.y), nativeRouteHandle);
     await nativeInput([
         {type: "mouseMove", ...nativeHandle},
         {type: "mouseDown", ...nativeHandle, button: "left", clickCount: 1},
@@ -1989,6 +2072,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.getBoundingClientRect().left, 0);
     check.equal(host.getBoundingClientRect().width, window.innerWidth);
     check.equal(getComputedStyle(host).zIndex, "8");
+    select(beta);
+    check.equal(inspector.hidden, false);
+    check.ok(host.getBoundingClientRect().bottom - inspector.getBoundingClientRect().bottom >= 8);
     check.deepEqual(fullscreenChanges, [true]);
     view.setReadOnly(true);
     check.ok(host.querySelector('[aria-label="exitFullscreen"]'));
@@ -2130,6 +2216,94 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.equal(nodeElement(alpha).hidden, false, "level selection expands a previously folded virtual center");
     levelView.destroy();
+
+    // Alt 点击只切换同一父节点下的分支，普通点击和只读视图沿用各自的折叠行为。
+    const siblingHolder = document.createElement("div");
+    siblingHolder.innerHTML = lute.Md2BlockDOM("* First\n  * A\n    * A child\n      * A grandchild\n  * B\n    * B child\n  * Leaf\n* Second\n  * C\n    * C child\n");
+    const siblingList = siblingHolder.firstElementChild as HTMLElement;
+    const siblingHost = document.createElement("div");
+    siblingHost.className = "mindmap-view";
+    hostParent.append(siblingHost);
+    let siblingModel = api.readListMindmap(siblingList);
+    const [a, b, leaf] = siblingModel.root.children[0].children;
+    const c = siblingModel.root.children[1].children[0];
+    const deep = a.children[0];
+    deep.element.setAttribute("fold", "1");
+    siblingModel = api.readListMindmap(siblingList);
+    const siblingSource = siblingList.outerHTML;
+    let siblingFinishAllowed: boolean | Promise<boolean> = true;
+    let siblingSaveAllowed = true;
+    let siblingSaves = 0;
+    const siblingView = new api.ListMindmapView({host: siblingHost, model: siblingModel, readOnly: true,
+        finishEdit: () => siblingFinishAllowed,
+        onFoldSiblings: async (id: string) => {
+            if (!siblingSaveAllowed) {
+                return false;
+            }
+            api.getListMindmapSiblingFoldStates(siblingModel, id).forEach((collapsed: boolean, siblingID: string) => {
+                siblingModel.nodes.get(siblingID).element?.setAttribute("fold", collapsed ? "1" : "0");
+            });
+            siblingSaves++;
+            siblingModel = api.readListMindmap(siblingList);
+            siblingView.update(siblingModel);
+            return true;
+        },
+    });
+    const siblingElement = (id: string) => siblingHost.querySelector<HTMLElement>(`[data-mindmap-id="${id}"]`);
+    const clickSiblingFold = async (id: string, altKey = true) => {
+        siblingElement(id).querySelector(".mindmap-view__fold").dispatchEvent(new MouseEvent("click", {
+            bubbles: true, altKey,
+        }));
+        await settle();
+    };
+    await settle();
+    await clickSiblingFold(a.id, false);
+    check.equal(siblingElement(deep.id).hidden, true, "ordinary clicks only fold the clicked node");
+    check.equal(siblingElement(b.children[0].id).hidden, false);
+    await clickSiblingFold(b.id);
+    check.equal(siblingElement(b.children[0].id).hidden, true, "mixed sibling states fold together");
+    check.equal(siblingElement(c.children[0].id).hidden, false, "branches under other parents are untouched");
+    check.equal(siblingElement(leaf.id).hidden, false);
+    await clickSiblingFold(a.id);
+    check.equal(siblingElement(deep.id).hidden, false);
+    check.equal(siblingElement(deep.children[0].id).hidden, true, "deeper folding states survive sibling expansion");
+    check.equal(siblingElement(b.children[0].id).hidden, false);
+    check.equal(siblingList.outerHTML, siblingSource, "read-only sibling folding never writes source attributes");
+    check.equal(siblingSaves, 0);
+    siblingModel.metadata.viewLocked = true;
+    siblingView.update(siblingModel);
+    await clickSiblingFold(a.id);
+    check.equal(siblingElement(deep.id).hidden, false, "locked views ignore Alt folding");
+    siblingModel.metadata.viewLocked = false;
+    siblingView.update(siblingModel);
+    siblingView.setReadOnly(false);
+    siblingSaveAllowed = false;
+    await clickSiblingFold(a.id);
+    check.equal(siblingElement(deep.id).hidden, false, "failed saves do not change sibling visibility");
+    check.equal(siblingList.outerHTML, siblingSource);
+    siblingSaveAllowed = true;
+    siblingFinishAllowed = false;
+    await clickSiblingFold(a.id);
+    check.equal(siblingSaves, 0, "failed editor completion blocks sibling folding");
+    siblingFinishAllowed = Promise.resolve(true);
+    siblingView.selectNode(deep.id);
+    await clickSiblingFold(b.id);
+    check.equal(siblingSaves, 1);
+    check.equal(siblingView.selectedId, a.id, "hidden selections move to the visible ancestor");
+    check.equal(siblingElement(deep.id).hidden, true);
+    check.equal(siblingElement(b.children[0].id).hidden, true);
+    check.equal(siblingModel.nodes.get(c.id).collapsed, false);
+    await clickSiblingFold(a.id);
+    check.equal(siblingSaves, 2);
+    check.equal(siblingElement(deep.id).hidden, false);
+    check.equal(siblingElement(deep.children[0].id).hidden, true);
+    siblingView.setReadOnly(true);
+    await clickSiblingFold(siblingModel.root.id);
+    check.equal(siblingElement(a.id).hidden, true, "a virtual center folds locally even without a parent");
+    await clickSiblingFold(siblingModel.root.id);
+    check.equal(siblingElement(a.id).hidden, false);
+    siblingView.destroy();
+    siblingHost.remove();
     list.outerHTML = persistedBeforeFold;
     list = holder.querySelector<HTMLElement>('[data-type="NodeList"]');
     model = api.readListMindmap(list);
@@ -2180,6 +2354,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const single = new api.ListMindmapView({...options, model: api.readListMindmap(singleList)});
     await settle();
     check.equal(single.scale, 1, "initial layout keeps a single node at its normal size");
+    const initialTransform = [single.scale, single.offsetX, single.offsetY];
     const panButton = host.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
     const panViewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
     check.equal(getComputedStyle(panViewport).cursor, "default");
@@ -2203,8 +2378,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(panButton.getAttribute("aria-pressed"), "false");
     check.equal(getComputedStyle(panViewport).cursor, "default");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
-    single.fit();
-    check.ok(single.scale > 1 && single.scale <= 2.5, "fit enlarges small maps within the zoom limit");
+    single.zoomAt(2.5);
+    check.equal(single.scale, 2.5, "manual zoom can still enlarge a small map");
+    host.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]').click();
+    check.deepEqual([single.scale, single.offsetX, single.offsetY], initialTransform,
+        "fit restores the initial position and scale after panning and zooming");
     const fitViewport = host.querySelector<HTMLElement>(".mindmap-view__viewport").getBoundingClientRect();
     const fitNode = host.querySelector<HTMLElement>(".mindmap-view__node").getBoundingClientRect();
     check.ok(Math.abs((fitNode.left + fitNode.right) / 2 - (fitViewport.left + fitViewport.right) / 2) < 1,
@@ -2766,6 +2944,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     tabContent.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nOne\n@tab Second\n\nTwo\n:::\n{: tabs-task=\"true\"}\n");
     tabNode.querySelector(".p").replaceWith(tabContent.firstElementChild);
     const tabSource = tabNode.querySelector<HTMLElement>(".tabs");
+    tabSource.querySelector(".tab-item-title").textContent = "";
+    const nestedSource = document.createElement("div");
+    nestedSource.innerHTML = lute.Md2BlockDOM("- Nested parent\n  - Nested child\n");
+    const nestedList = nestedSource.firstElementChild as HTMLElement;
+    api.retagMindmapBranch(nestedList, true);
+    tabSource.querySelectorAll(".tab-item-content")[1].append(nestedList);
     const sourceActiveTab = tabSource.getAttribute("tabs-active-id");
     const tabItemIDs = Array.from(tabSource.querySelectorAll<HTMLElement>(":scope > .tab-item"))
         .map(item => item.dataset.nodeId);
@@ -2775,6 +2959,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         taskChanges: Promise.resolve(), refresh: () => tabView.update(api.readListMindmap(tabList))});
     let tabMenus = 0;
     const tabView = new api.ListMindmapView({host: tabHost, model: api.readListMindmap(tabList), onExit: () => {},
+        labels: {tabItem: "页签项块"},
         onTabTaskToggle: (id: string, itemID: string) => tabController.setTabTask(id, itemID, taskAPI.nextTaskListMarker),
         onTabTaskMenu: (id: string, itemID: string, anchor: HTMLElement) => {
             check.equal(id, tabNodeID);
@@ -2783,11 +2968,74 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             tabMenus++;
         }});
     tabController.view = tabView;
+    check.equal(tabHost.querySelector(".tabs-tab-label").textContent, "页签项块");
+    const tabButton = tabHost.querySelector<HTMLElement>(".tabs-tab");
+    tabButton.dispatchEvent(new MouseEvent("pointerover", {bubbles: true}));
+    check.equal(tabHost.querySelector<HTMLElement>('[role="tooltip"]').hidden, true,
+        "tab buttons do not trigger the mindmap toolbar tooltip");
+    tabButton.dispatchEvent(new FocusEvent("focusin", {bubbles: true}));
+    check.equal(tabHost.querySelector<HTMLElement>('[role="tooltip"]').hidden, true);
+    const fragmentHost = document.createElement("div");
+    fragmentHost.className = "mindmap-view";
+    const fragmentRoot = document.createElement("div");
+    fragmentRoot.className = "protyle-wysiwyg";
+    fragmentRoot.innerHTML = api.cleanListMindmapHTML(nestedList.outerHTML);
+    fragmentHost.append(fragmentRoot);
+    document.body.append(fragmentHost);
+    const fragmentList = fragmentRoot.firstElementChild as HTMLElement;
+    const localLists = api.getListMindmapElements(fragmentRoot);
+    check.equal(localLists.length, 1);
+    check.equal(localLists[0], fragmentList);
+    const previewHost = document.createElement("div");
+    previewHost.className = "mindmap-view";
+    previewHost.append(fragmentList.cloneNode(true));
+    fragmentList.append(previewHost);
+    check.equal(api.getListMindmapElements(fragmentRoot).length, 1, "preview copies are never editable source maps");
+    let restored = "";
+    const unregisterFragment = api.registerListMindmapRoot(fragmentRoot, () => {}, (id: string) => restored = id);
+    check.equal(api.restoreListMindmapFocus(fragmentRoot, fragmentList.firstElementChild), true);
+    check.equal(restored, fragmentList.dataset.nodeId);
+    fragmentHost.classList.add("mindmap-view__node--editing");
+    previewHost.replaceChildren();
+    let nestedEdited = "";
+    const editableNestedView = new api.ListMindmapView({host: previewHost, model: api.readListMindmap(fragmentList),
+        onExit: () => {}, onEdit: (id: string) => nestedEdited = id});
+    const nestedNode = previewHost.querySelector<HTMLElement>(".mindmap-view__node");
+    nestedNode.querySelector(".mindmap-view__content").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.equal(nestedEdited, nestedNode.dataset.mindmapId, "an outer editing node must not disable inner double-clicks");
+    nestedEdited = "";
+    editableNestedView.setEditing(undefined);
+    editableNestedView.focusNode(nestedNode.dataset.mindmapId);
+    nestedNode.dispatchEvent(new KeyboardEvent("keydown", {key: "x", bubbles: true}));
+    check.equal(nestedEdited, nestedNode.dataset.mindmapId, "inner keyboard editing remains available");
+    editableNestedView.destroy();
+    unregisterFragment();
+    fragmentHost.remove();
     const outerOptions = {readonly: () => false, task: () => check.fail("Outer editor claimed a preview task")};
     api.tabsRender(taskParent, outerOptions);
+    const tabSnapshot = api.cleanListMindmapHTML(tabList.outerHTML);
+    api.destroyTabsRender(taskParent);
+    api.tabsRender(taskParent, outerOptions);
+    check.equal(api.cleanListMindmapHTML(tabList.outerHTML), tabSnapshot,
+        "recreating tab navigation must not change the mindmap content snapshot");
+    const savedTabs = document.createElement("div");
+    savedTabs.innerHTML = tabSnapshot;
+    check.equal(savedTabs.querySelector(".tabs-header, .tabs-divider, [data-tabs-hidden]"), null);
+    check.equal(savedTabs.querySelectorAll(".tab-item").length, 2, "hidden tab content is retained");
+    check.equal(savedTabs.querySelector(".tabs").getAttribute("tabs-task"), "true");
+    check.equal(lute.BlockDOM2StdMd(savedTabs.querySelector(".tabs").outerHTML), lute.BlockDOM2StdMd(tabSource.outerHTML));
     const previewTask = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-task")[index];
     const previewTab = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-tab")[index];
     previewTab().click();
+    const nestedPreview = () => tabHost.querySelector<HTMLElement>(".mindmap-view--nested");
+    check.ok(nestedPreview());
+    check.equal(nestedPreview().querySelectorAll(".mindmap-view__node").length, 2);
+    check.equal(nestedPreview().getAttribute("role"), "img");
+    check.ok(nestedPreview().getAttribute("aria-label").includes("Nested child"));
+    check.ok(Array.from(nestedPreview().children).every((child: HTMLElement) => child.inert),
+        "nested previews leave editing to their owner node");
+    check.ok(nestedPreview().textContent.includes("Nested child"));
+    const previousNestedView = (tabView as any).nestedViews.get(tabNodeID)[0];
     operations.length = 0;
     previewTask().click();
     await tabController.taskChanges;
@@ -2795,6 +3043,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(operations[0].id, tabList.dataset.nodeId);
     check.equal(api.getTabTask(api.getListMindmapTabItem(tabList, tabNodeID, tabItemIDs[1])), "X");
     check.equal(previewTask().getAttribute("data-task"), "X");
+    check.equal(previousNestedView.destroyed, true, "refresh disposes the nested view and its observers");
+    check.ok(nestedPreview());
     check.equal(previewTab().getAttribute("aria-selected"), "true", "saving a task preserves the visible preview tab");
     check.equal(tabHost.querySelector(".tabs-control"), null, "preview only exposes supported writes");
     check.equal(tabHost.querySelector("[data-node-id]"), null);
@@ -2838,7 +3088,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     removedTab.remove();
     await tabController.setTabTask(tabNodeID, tabItemIDs[1], () => "X");
     check.equal(operations.length, savedCount, "removed tab IDs never produce an update");
+    const lastNestedView = (tabView as any).nestedViews.get(tabNodeID)[0];
+    tabView.setEditing(tabNodeID);
+    check.equal(lastNestedView.destroyed, true, "entering the fragment editor disposes its nested previews");
+    tabView.setEditing(undefined);
+    tabSource.append(removedTab);
+    tabView.update(api.readListMindmap(tabList));
+    const finalNestedViews = Array.from((tabView as any).nestedViews.values()).flat();
+    check.equal(finalNestedViews.length, 1);
     tabView.destroy();
+    check.ok(finalNestedViews.every((view: any) => view.destroyed));
     api.destroyTabsRender(taskParent);
     taskParent.remove();
 
@@ -3023,15 +3282,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const bracketCenter = summaryViewport.getBoundingClientRect().top + summaryView.offsetY +
         (summaryPosition.top + summaryPosition.bottom) / 2 * summaryView.scale;
     check.ok(Math.abs((summaryBounds.top + summaryBounds.bottom) / 2 - bracketCenter) < 1);
-    const memberCenters = [summaryIds[0], summaryIds[2]].map(id => {
-        const rect = summaryHost.querySelector(`[data-mindmap-id="${id}"]`).getBoundingClientRect();
-        return (rect.top + rect.bottom) / 2;
-    });
+    const memberBounds = [...summaryView.positions.values()].filter((position: {id: string}) => position.id !== summaryModel.root.id)
+        .map((position: {id: string}) => summaryHost.querySelector(`[data-mindmap-id="${position.id}"]`).getBoundingClientRect());
     const summaryOriginY = summaryViewport.getBoundingClientRect().top + summaryView.offsetY;
-    check.ok(Math.abs(summaryOriginY + summaryPosition.top * summaryView.scale - memberCenters[0]) < 1);
-    check.ok(Math.abs(summaryOriginY + summaryPosition.bottom * summaryView.scale - memberCenters[1]) < 1);
-    check.ok(Math.abs((memberCenters[0] + memberCenters[1]) / 2 - bracketCenter) < 1,
-        "summary brackets connect the displayed first and last member centers");
+    check.ok(summaryOriginY + summaryPosition.top * summaryView.scale < Math.min(...memberBounds.map(rect => rect.top)));
+    check.ok(summaryOriginY + summaryPosition.bottom * summaryView.scale > Math.max(...memberBounds.map(rect => rect.bottom)),
+        "summary brackets enclose all visible descendants");
     summaryView.clearSelection();
     summaryLabel.focus();
     check.equal(document.activeElement, summaryLabel);
@@ -3197,6 +3453,189 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, [summaryIds[2]]);
     api.deleteListMindmapNode(summaryList, summaryIds[2]);
     check.deepEqual(api.readListMindmap(summaryList).metadata.summaries, []);
+
+    // 多层概要在折叠、复制、列表往返和窄幅打印中保留成员与内外层边界。
+    {
+        const nestedList = reset("- Root\n  - First\n    - A\n    - B\n  - Second\n  - Third\n");
+        const nestedModel = api.readListMindmap(nestedList);
+        const nestedFirst = nestedModel.root.children[0];
+        const nestedRanges = [
+            {parentId: nestedList.dataset.nodeId, nodeIds: [nestedModel.root.id]},
+            {parentId: nestedModel.root.id, nodeIds: nestedModel.root.children.slice(0, 2).map((node: ListMindmapNode) => node.id)},
+            {parentId: nestedModel.root.id, nodeIds: [nestedFirst.id]},
+            {parentId: nestedFirst.id, nodeIds: nestedFirst.children.map((node: ListMindmapNode) => node.id)},
+        ];
+        let nestedID = 0;
+        check.deepEqual(api.addListMindmapSummaryRanges(nestedModel, nestedRanges, () => `nested-${++nestedID}`,
+            "Nested summary ".repeat(20)), ["nested-1", "nested-2", "nested-3", "nested-4"]);
+        check.equal(nestedModel.metadata.version, 2);
+        api.writeListMindmapMetadata(nestedList, nestedModel.metadata);
+        const nestedHost = document.createElement("div");
+        nestedHost.style.width = "900px";
+        nestedHost.style.fontSize = "32px";
+        document.body.append(nestedHost);
+        let nestedView = new api.ListMindmapView({host: nestedHost, model: api.readListMindmap(nestedList), onExit: () => {}});
+        await settle();
+        const checkNestedBounds = () => {
+            ["nested-1", "nested-2", "nested-3"].forEach((id, index) => {
+                const outer = nestedView.summaryPositions.get(id);
+                const inner = nestedView.summaryPositions.get(`nested-${index + 2}`);
+                check.ok(outer.x > inner.labelX + inner.width, `${id} encloses the inner label horizontally`);
+                check.ok(outer.top < inner.top && outer.top < inner.labelY);
+                check.ok(outer.bottom > inner.bottom && outer.bottom > inner.labelY + inner.height);
+            });
+            const inner = nestedView.summaryPositions.get("nested-3");
+            const next = nestedView.positions.get(nestedModel.root.children[1].id);
+            check.ok(inner.labelY + inner.height < next.y, "tall inner labels do not overlap the next sibling branch");
+        };
+        checkNestedBounds();
+        const expandedOuterX = nestedView.summaryPositions.get("nested-2").x;
+        nestedFirst.children.forEach((node: ListMindmapNode) => check.ok(nestedView.positions.has(node.id)));
+        nestedModel.nodes.get(nestedFirst.id).element.setAttribute("fold", "1");
+        nestedView.update(api.readListMindmap(nestedList));
+        await settle();
+        check.equal(nestedView.summaryPositions.has("nested-4"), false);
+        check.ok(nestedView.summaryPositions.get("nested-2").x < expandedOuterX);
+        nestedModel.nodes.get(nestedFirst.id).element.removeAttribute("fold");
+        nestedView.update(api.readListMindmap(nestedList));
+        await settle();
+        checkNestedBounds();
+        const nestedCopy = nestedList.cloneNode(true) as HTMLElement;
+        const nestedCopiedIDs = new Map<string, string>();
+        [nestedCopy, ...Array.from(nestedCopy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(element => {
+            const id = Lute.NewNodeID();
+            nestedCopiedIDs.set(element.dataset.nodeId, id);
+            element.dataset.nodeId = id;
+        });
+        api.remapListMindmapIDs(nestedCopy, nestedCopiedIDs);
+        check.deepEqual(api.readListMindmap(nestedCopy).metadata.summaries.map((entry: {nodeIds: string[]}) => entry.nodeIds),
+            nestedRanges.map(range => range.nodeIds.map((id: string) => nestedCopiedIDs.get(id))));
+        api.retagMindmapBranch(nestedList, true);
+        const nestedConverted = document.createElement("div");
+        nestedConverted.innerHTML = api.convertListMindmapToList(nestedList, "UL2OL", lute);
+        check.deepEqual(api.readListMindmap(nestedConverted.firstElementChild).metadata.summaries, nestedModel.metadata.summaries);
+        nestedView.destroy();
+        nestedHost.style.width = "280px";
+        nestedView = new api.ListMindmapView({host: nestedHost, model: api.readListMindmap(nestedList),
+            readOnly: true, printLayout: true, onExit: () => {}});
+        await settle();
+        const nestedPrintBounds = nestedHost.querySelector(".mindmap-view__viewport").getBoundingClientRect();
+        nestedHost.querySelectorAll(".mindmap-view__summary").forEach(label => {
+            const rect = label.getBoundingClientRect();
+            check.ok(rect.left >= nestedPrintBounds.left - 1 && rect.right <= nestedPrintBounds.right + 1);
+            check.ok(rect.top >= nestedPrintBounds.top - 1 && rect.bottom <= nestedPrintBounds.bottom + 1);
+        });
+        check.equal(api.readListMindmap(nestedList).metadata.version, 2);
+        nestedView.destroy();
+        nestedHost.remove();
+    }
+
+    const batchList = reset("- Root\n  - First\n    - A\n    - B\n  - Second\n    - C\n    - D\n");
+    const batchHost = document.createElement("div");
+    batchHost.style.width = "700px";
+    document.body.append(batchHost);
+    const batchHistory: {before: string, after: string}[] = [];
+    let batchID = 0;
+    const batchLabels: Record<string, string> = {
+        listMindmapSummaryBatch: "创建 ${count} 个概要", confirm: "确定", cancel: "取消",
+    };
+    const batchView = new api.ListMindmapView({host: batchHost, model: api.readListMindmap(batchList), onExit: () => {},
+        labels: new Proxy(batchLabels, {get: (target, key) => target[String(key)] || String(key)}),
+        onSummaryBatchAdd: async (ranges: any[], expected: string) => {
+            const model = api.readListMindmap(batchList);
+            check.equal(api.getListMindmapSummarySnapshot(model), expected);
+            const before = batchList.outerHTML;
+            const added = api.addListMindmapSummaryRanges(model, ranges, () => `batch-${++batchID}`, "Summary");
+            check.ok(added);
+            api.writeListMindmapMetadata(batchList, model.metadata);
+            batchHistory.push({before, after: batchList.outerHTML});
+            batchView.update(api.readListMindmap(batchList));
+            return added;
+        }});
+    await settle();
+    const batchButton = batchHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    const batchViewport = batchHost.querySelector<HTMLElement>(".mindmap-view__viewport");
+    batchView.clearSelection();
+    check.equal(batchButton.disabled, false, "batch selection can start without choosing a parent");
+    batchButton.click();
+    const batchModel = api.readListMindmap(batchList);
+    const leafIDs = batchModel.root.children.flatMap((node: ListMindmapNode) => node.children.map(child => child.id));
+    const leafRects = leafIDs.map((id: string) => batchHost.querySelector(`[data-mindmap-id="${id}"]`).getBoundingClientRect());
+    const left = Math.min(...leafRects.map((rect: DOMRect) => rect.left)) - 1;
+    const top = Math.min(...leafRects.map((rect: DOMRect) => rect.top)) - 1;
+    const right = Math.max(...leafRects.map((rect: DOMRect) => rect.right)) + 1;
+    const bottom = Math.max(...leafRects.map((rect: DOMRect) => rect.bottom)) + 1;
+    sendPointer(batchViewport, "pointerdown", left, top);
+    sendPointer(batchViewport, "pointermove", right, bottom);
+    sendPointer(batchViewport, "pointerup", right, bottom);
+    check.equal(batchView.summaryRanges.length, 2);
+    check.equal(batchHistory.length, 0, "dragging only previews the groups");
+    check.equal(batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls").hidden, false);
+    const controls = batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls");
+    const actions = [...controls.querySelectorAll("button")];
+    const checkButtonRow = () => {
+        check.equal(actions[0].getBoundingClientRect().top, actions[1].getBoundingClientRect().top,
+            "cancel and confirm stay on one row");
+    };
+    checkButtonRow();
+    const countBounds = controls.querySelector("span").getBoundingClientRect();
+    const actionBounds = actions[0].getBoundingClientRect();
+    check.ok(Math.abs(countBounds.top + countBounds.height / 2 - actionBounds.top - actionBounds.height / 2) < 1,
+        "compact localized labels do not force actions onto a separate row");
+    check.equal(actions[0].textContent, batchLabels.cancel);
+    check.equal(actions[1].textContent, batchLabels.confirm);
+    actions[0].focus();
+    const cancelKey = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+    actions[0].dispatchEvent(cancelKey);
+    check.equal(cancelKey.defaultPrevented, false, "focused cancel keeps native keyboard activation");
+    check.equal(batchHistory.length, 0, "Enter on cancel never confirms the batch");
+    batchHost.style.width = "280px";
+    batchHost.style.fontSize = "32px";
+    await settle();
+    const controlsBounds = controls.getBoundingClientRect();
+    checkButtonRow();
+    check.ok(controlsBounds.width <= batchHost.offsetWidth - 16);
+    controls.querySelectorAll("button").forEach(button => {
+        const rect = button.getBoundingClientRect();
+        check.ok(rect.left >= controlsBounds.left && rect.right <= controlsBounds.right);
+        check.ok(rect.top >= controlsBounds.top && rect.bottom <= controlsBounds.bottom);
+        check.ok(button.classList.contains("b3-button"));
+    });
+    batchHost.style.width = "700px";
+    batchHost.style.fontSize = "";
+    await settle();
+    batchHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    await settle();
+    check.equal(batchHistory.length, 1, "all groups use a single submission");
+    check.equal(api.readListMindmap(batchList).metadata.summaries.length, 2);
+    const restoreBatch = (html: string) => {
+        const restored = document.createElement("div");
+        restored.innerHTML = html;
+        return restored.firstElementChild;
+    };
+    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].before)).metadata.summaries, undefined);
+    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].after)).metadata.summaries.length, 2);
+    batchButton.click();
+    const batchBlank = batchViewport.getBoundingClientRect();
+    sendPointer(batchViewport, "pointerdown", batchBlank.left + 1, batchBlank.top + 1);
+    sendPointer(batchViewport, "pointerup", batchBlank.left + 1, batchBlank.top + 1);
+    for (const id of leafIDs.slice(0, 2)) {
+        batchHost.querySelector(`[data-mindmap-id="${id}"]`).dispatchEvent(new PointerEvent("pointerdown", {
+            bubbles: true, pointerId: 81, pointerType: "touch", isPrimary: true, button: 0,
+        }));
+    }
+    check.equal(batchView.summarySelected.size, 2, "touch taps build a batch selection");
+    check.equal(batchView.summaryRanges.length, 0, "existing groups are not duplicated");
+    batchView.update(api.readListMindmap(batchList));
+    check.equal(batchView.summarySelecting, false, "external updates invalidate pending selections");
+    batchButton.click();
+    sendPointer(batchViewport, "pointerdown", left, top);
+    sendPointer(batchViewport, "pointermove", right, bottom);
+    batchHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    check.equal(batchView.summarySelecting, false);
+    check.equal(batchHistory.length, 1, "canceling never submits a second batch");
+    batchView.destroy();
+    batchHost.remove();
     style.remove();
     return "List mindmap DOM cases passed";
 };
@@ -3218,12 +3657,17 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         "../../util/hasClosest.ts", "../../wysiwyg/getBlock.ts", "../../util/selection.ts",
         "../../wysiwyg/taskListMarker.ts", "../../wysiwyg/turnIntoList.ts", "../../wysiwyg/input.ts"];
     let inputSource = inputModules.map(file => {
-        const filename = path.join(__dirname, file);
-        const module = typescript.createSourceFile(file, readFileSync(filename, "utf8"), typescript.ScriptTarget.ES2021, true);
-        const names = module.statements.filter(typescript.isVariableStatement).filter(statement =>
-            statement.modifiers?.some(modifier => modifier.kind === typescript.SyntaxKind.ExportKeyword))
-            .flatMap(statement => statement.declarationList.declarations.map(declaration => declaration.name.getText(module)));
-        return `const {${names.join(", ")}} = (() => {${compile(filename)}\nreturn {${names.join(", ")}};})();\n`;
+        // 选区计算与编辑器选区操作共用模块作用域，保留拆分函数之间的调用关系。
+        const files = file === "../../util/selection.ts" ? ["../../util/selectionOffsets.ts", file] : [file];
+        const names = files.flatMap(file => {
+            const module = typescript.createSourceFile(file, readFileSync(path.join(__dirname, file), "utf8"),
+                typescript.ScriptTarget.ES2021, true);
+            return module.statements.filter(typescript.isVariableStatement).filter(statement =>
+                statement.modifiers?.some(modifier => modifier.kind === typescript.SyntaxKind.ExportKeyword))
+                .flatMap(statement => statement.declarationList.declarations.map(declaration => declaration.name.getText(module)));
+        });
+        const code = files.map(file => compile(path.join(__dirname, file))).join("\n");
+        return `const {${names.join(", ")}} = (() => {${code}\nreturn {${names.join(", ")}};})();\n`;
     }).join("\n");
     const editorSource = typescript.createSourceFile("editor.ts", readFileSync(path.join(__dirname, "editor.ts"), "utf8"),
         typescript.ScriptTarget.ES2021, true);
@@ -3245,7 +3689,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const findShortcut = (node: import("typescript").Node) => {
         if ((typescript.isVariableStatement(node) && node.declarationList.declarations.some(item =>
             ["isMatchList", "isMatchOList", "isMatchCheck", "isMatchQuote"].includes(item.name.getText(keydownSource)))) ||
-            (typescript.isIfStatement(node) && node.expression.getText(keydownSource).includes("isProtyleListItemFragment("))) {
+            (typescript.isIfStatement(node) && ["isProtyleListItemFragment(", "isMatchList", "isMatchOList", "isMatchCheck"]
+                .every(name => node.expression.getText(keydownSource).includes(name)))) {
             shortcutStatements.push(node);
         }
         typescript.forEachChild(node, findShortcut);
@@ -3273,6 +3718,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_button.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_select.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_tooltips.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_mindmap-view.scss")).css;

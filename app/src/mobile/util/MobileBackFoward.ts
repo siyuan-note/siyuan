@@ -3,14 +3,10 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {getCurrentEditor} from "../editor";
 import {closePanel} from "./closePanel";
 import {backModel, destroyModel} from "../menu/model";
-
-export const clearMobileBackForward = (notebookId?: string) => {
-    if (notebookId) {
-        window.siyuan.mobile.tabs?.removeNotebook(notebookId);
-    } else {
-        window.siyuan.backStack = [];
-    }
-};
+import {destroyAVRichTextEditor} from "../../protyle/render/av/richTextEditor";
+import {isAbove} from "../../util/zIndex";
+import {getMobileSelectMenuElement} from "./nativeSelect";
+import {closeAnchoredInput, getAnchoredInputMask} from "../../dialog/anchoredInput";
 
 export const pushBack = () => {
     window.siyuan.mobile.tabs?.pushCurrent();
@@ -23,12 +19,30 @@ export const goForward = () => {
 export const goBack = () => {
     const editor = getCurrentEditor();
     const menuElement = document.getElementById("menu");
-    if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
+    const richTextElement = document.querySelector<HTMLElement>(".av__richtext-mask");
+    const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+    const selectMenuElement = getMobileSelectMenuElement();
+    const inputMask = getAnchoredInputMask();
+    const activeMenu = window.siyuan.menus.menu.element;
+    if (inputMask && (!topDialog || isAbove(inputMask, topDialog.element.querySelector(".b3-dialog"))) &&
+        (!selectMenuElement || isAbove(inputMask, selectMenuElement)) &&
+        (activeMenu.classList.contains("fn__none") || isAbove(inputMask, activeMenu))) {
+        closeAnchoredInput(true);
+        return;
+    } else if (selectMenuElement && (!topDialog ||
+        isAbove(selectMenuElement, topDialog.element.querySelector(".b3-dialog")))) {
+        selectMenuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+        return;
+    } else if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
     } else if (window.siyuan.viewer && !window.siyuan.viewer.destroyed) {
         window.siyuan.viewer.destroy();
+        return;
+    } else if (richTextElement && (!topDialog ||
+        isAbove(richTextElement, topDialog.element.querySelector(".b3-dialog")))) {
+        destroyAVRichTextEditor(true);
         return;
     } else if (window.siyuan.dialogs.length !== 0) {
         window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();

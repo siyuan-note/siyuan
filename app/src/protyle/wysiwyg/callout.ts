@@ -1,7 +1,7 @@
 import {transaction} from "./transaction";
 import {Constants} from "../../constants";
 import {openInputDialog} from "../../dialog/inputDialog";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 
 export interface ICalloutPreset {
     id: string;

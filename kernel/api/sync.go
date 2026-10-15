@@ -146,7 +146,7 @@ func importSyncProviderWebDAVContract(c *gin.Context, request apicontract.SyncPr
 		return
 	}
 
-	result := apicontract.SyncWebDAVData{WebDAV: (*apicontract.SyncWebDAV)(model.Conf.Sync.WebDAV)}
+	result := apicontract.SyncWebDAVData{WebDAV: (*apicontract.SyncWebDAV)(model.Conf.Sync.Load().WebDAV)}
 	if copyError != nil {
 		return apicontract.ImportSyncProviderWebDAV.FailureWithData(-1, copyError.Error(), result)
 	}
@@ -157,6 +157,7 @@ func importSyncProviderWebDAVContract(c *gin.Context, request apicontract.SyncPr
 var exportSyncProviderWebDAV = contractHandler(apicontract.ExportSyncProviderWebDAV, exportSyncProviderWebDAVContract)
 
 func exportSyncProviderWebDAVContract(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SyncProviderExportData]) {
+	confSyncSnapshot := model.Conf.LoadSync()
 
 	name := "siyuan-webdav-" + time.Now().Format("20060102150405") + ".json"
 	tmpDir := filepath.Join(util.TempDir, "export")
@@ -166,12 +167,12 @@ func exportSyncProviderWebDAVContract(c *gin.Context, request apicontract.EmptyR
 		return
 	}
 
-	webdav := model.Conf.Sync.WebDAV
+	webdav := confSyncSnapshot.WebDAV
 	if nil == webdav {
 		webdav = &conf.WebDAV{}
 	}
 
-	data, err := gulu.JSON.MarshalJSON(model.Conf.Sync.WebDAV)
+	data, err := gulu.JSON.MarshalJSON(confSyncSnapshot.WebDAV)
 	if err != nil {
 		logging.LogErrorf("export WebDAV provider failed: %s", err)
 		ret = apicontract.Failure[apicontract.SyncProviderExportData](-1, err.Error())
@@ -307,7 +308,7 @@ func importSyncProviderS3Contract(c *gin.Context, request apicontract.SyncProvid
 		return
 	}
 
-	result := apicontract.SyncS3Data{S3: (*apicontract.SyncS3)(model.Conf.Sync.S3)}
+	result := apicontract.SyncS3Data{S3: (*apicontract.SyncS3)(model.Conf.Sync.Load().S3)}
 	if copyError != nil {
 		return apicontract.ImportSyncProviderS3.FailureWithData(-1, copyError.Error(), result)
 	}
@@ -318,6 +319,7 @@ func importSyncProviderS3Contract(c *gin.Context, request apicontract.SyncProvid
 var exportSyncProviderS3 = contractHandler(apicontract.ExportSyncProviderS3, exportSyncProviderS3Contract)
 
 func exportSyncProviderS3Contract(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SyncProviderExportData]) {
+	confSyncSnapshot := model.Conf.LoadSync()
 
 	name := "siyuan-s3-" + time.Now().Format("20060102150405") + ".json"
 	tmpDir := filepath.Join(util.TempDir, "export")
@@ -327,12 +329,12 @@ func exportSyncProviderS3Contract(c *gin.Context, request apicontract.EmptyReque
 		return
 	}
 
-	s3 := model.Conf.Sync.S3
+	s3 := confSyncSnapshot.S3
 	if nil == s3 {
 		s3 = &conf.S3{}
 	}
 
-	data, err := gulu.JSON.MarshalJSON(model.Conf.Sync.S3)
+	data, err := gulu.JSON.MarshalJSON(confSyncSnapshot.S3)
 	if err != nil {
 		logging.LogErrorf("export S3 provider failed: %s", err)
 		ret = apicontract.Failure[apicontract.SyncProviderExportData](-1, err.Error())
@@ -374,9 +376,10 @@ func exportSyncProviderS3Contract(c *gin.Context, request apicontract.EmptyReque
 var getSyncInfo = contractHandler(apicontract.GetSyncInfo, getSyncInfoContract)
 
 func getSyncInfoContract(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SyncInfoData]) {
+	confSyncSnapshot := model.Conf.LoadSync()
 
-	stat := model.Conf.Sync.Stat
-	if !model.Conf.Sync.Enabled {
+	stat := confSyncSnapshot.Stat
+	if !confSyncSnapshot.Enabled {
 		stat = model.Conf.Language(53)
 	}
 
@@ -385,7 +388,7 @@ func getSyncInfoContract(c *gin.Context, request apicontract.EmptyRequest) (ret 
 	for i, item := range kernels {
 		items[i] = (*apicontract.SyncOnlineKernel)(item)
 	}
-	ret = apicontract.Success(apicontract.SyncInfoData{Synced: model.Conf.Sync.Synced, Stat: stat, Kernels: items, Kernel: model.KernelID})
+	ret = apicontract.Success(apicontract.SyncInfoData{Synced: confSyncSnapshot.Synced, Stat: stat, Kernels: items, Kernel: model.KernelID})
 	return
 }
 
@@ -398,7 +401,7 @@ func getBootSyncContract(c *gin.Context, request apicontract.EmptyRequest) (ret 
 		return
 	}
 
-	if model.Conf.Sync.Enabled && 1 == model.BootSyncSucc.Load() {
+	if model.Conf.Sync.Load().Enabled && 1 == model.BootSyncSucc.Load() {
 		ret = apicontract.Failure[apicontract.Null](1, model.Conf.Language(17))
 		return
 	}
@@ -408,6 +411,8 @@ func getBootSyncContract(c *gin.Context, request apicontract.EmptyRequest) (ret 
 var performSync = contractHandler(apicontract.PerformSync, performSyncContract)
 
 func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest) (ret apicontract.Response[apicontract.Null]) {
+	confSyncSnapshot := model.Conf.LoadSync()
+
 	ret = apicontract.Success(apicontract.Null{})
 
 	// Android 端前后台切换时自动触发同步 https://github.com/siyuan-note/siyuan/issues/7122
@@ -416,12 +421,12 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 		if !util.IsBooted() {
 			return
 		}
-		if nil == model.Conf.GetUser() || !model.Conf.Sync.Enabled {
+		if nil == model.Conf.GetUser() || !confSyncSnapshot.Enabled {
 			return
 		}
 	}
 
-	if 3 != model.Conf.Sync.Mode {
+	if 3 != confSyncSnapshot.Mode {
 		model.SyncData(true)
 		return
 	}
@@ -453,6 +458,7 @@ func performBootSyncContract(c *gin.Context, request apicontract.EmptyRequest) (
 var listCloudSyncDir = contractHandler(apicontract.ListCloudSyncDir, listCloudSyncDirContract)
 
 func listCloudSyncDirContract(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.CloudSyncDirsData]) {
+	confSyncSnapshot := model.Conf.LoadSync()
 
 	syncDirs, hSize, err := model.ListCloudSyncDir()
 	if err != nil {
@@ -460,8 +466,8 @@ func listCloudSyncDirContract(c *gin.Context, request apicontract.EmptyRequest) 
 		return
 	}
 
-	checkedSyncDir := model.Conf.Sync.CloudName
-	if conf.ProviderS3 == model.Conf.Sync.Provider {
+	checkedSyncDir := confSyncSnapshot.CloudName
+	if conf.ProviderS3 == confSyncSnapshot.Provider {
 		checkedSyncDir = ""
 	}
 	var items []*apicontract.CloudSyncDir
@@ -480,13 +486,17 @@ var removeCloudSyncDir = contractHandler(apicontract.RemoveCloudSyncDir, removeC
 func removeCloudSyncDirContract(c *gin.Context, request apicontract.SyncNameRequest) (ret apicontract.Response[string]) {
 
 	name := request.Name
+	// 删除云端目录是网络操作，不持有配置互斥锁；删除当前目录时回退的目录名在完成后统一通知
 	err := model.RemoveCloudSyncDir(name)
 	if err != nil {
 		ret = apicontract.FailureWithTimeout[string](-1, err.Error(), 5000)
 		return
 	}
+	settingMutationMu.Lock()
+	model.NotifyConfChanged("sync")
+	settingMutationMu.Unlock()
 
-	ret = apicontract.Success(model.Conf.Sync.CloudName)
+	ret = apicontract.Success(model.Conf.Sync.Load().CloudName)
 	return
 }
 
@@ -602,7 +612,26 @@ func setSyncProviderContract(c *gin.Context, request apicontract.SyncProviderReq
 
 var setSyncProviderS3 = contractHandler(apicontract.SetSyncProviderS3, setSyncProviderS3Contract)
 
+var clearSyncProviderConfig = contractHandler(apicontract.ClearSyncProviderConfig, func(c *gin.Context, request apicontract.ClearSyncProviderConfigRequest) apicontract.Response[apicontract.ClearSyncProviderConfigData] {
+
+	if err := model.ClearSyncProviderConfig(request.Provider); err != nil {
+		return apicontract.Failure[apicontract.ClearSyncProviderConfigData](-1, err.Error())
+	}
+	confSyncSnapshot := model.Conf.LoadSync()
+	data := apicontract.ClearSyncProviderConfigData{Enabled: confSyncSnapshot.Enabled}
+	switch request.Provider {
+	case conf.ProviderS3:
+		data.S3 = (*apicontract.SyncS3)(confSyncSnapshot.S3)
+	case conf.ProviderWebDAV:
+		data.WebDAV = (*apicontract.SyncWebDAV)(confSyncSnapshot.WebDAV)
+	case conf.ProviderLocal:
+		data.Local = (*apicontract.SyncLocal)(confSyncSnapshot.Local)
+	}
+	return apicontract.Success(data)
+})
+
 func setSyncProviderS3Contract(c *gin.Context, request apicontract.SetSyncS3Request) (ret apicontract.Response[apicontract.SyncS3Data]) {
+	confSyncSnapshot := model.Conf.LoadSync()
 
 	if err := request.ConfigError(); err != nil {
 		return apicontract.FailureWithTimeout[apicontract.SyncS3Data](-1, err.Error(), 5000)
@@ -610,7 +639,7 @@ func setSyncProviderS3Contract(c *gin.Context, request apicontract.SetSyncS3Requ
 	s3 := (*conf.S3)(&request.S3)
 
 	newBucket := strings.TrimSpace(s3.Bucket)
-	prevBucket := strings.TrimSpace(model.Conf.Sync.S3.Bucket)
+	prevBucket := strings.TrimSpace(confSyncSnapshot.S3.Bucket)
 	if newBucket != prevBucket && !cloud.IsValidCloudDirName(newBucket) {
 		ret = apicontract.FailureWithTimeout[apicontract.SyncS3Data](-1, model.Conf.Language(37), 5000)
 		return
@@ -622,7 +651,7 @@ func setSyncProviderS3Contract(c *gin.Context, request apicontract.SetSyncS3Requ
 		return
 	}
 
-	ret = apicontract.Success(apicontract.SyncS3Data{S3: (*apicontract.SyncS3)(model.Conf.Sync.S3)})
+	ret = apicontract.Success(apicontract.SyncS3Data{S3: (*apicontract.SyncS3)(model.Conf.LoadSync().S3)})
 	return
 }
 
@@ -641,7 +670,7 @@ func setSyncProviderWebDAVContract(c *gin.Context, request apicontract.SetSyncWe
 		return
 	}
 
-	ret = apicontract.Success(apicontract.SyncWebDAVData{WebDAV: (*apicontract.SyncWebDAV)(model.Conf.Sync.WebDAV)})
+	ret = apicontract.Success(apicontract.SyncWebDAVData{WebDAV: (*apicontract.SyncWebDAV)(model.Conf.Sync.Load().WebDAV)})
 	return
 }
 
@@ -660,7 +689,7 @@ func setSyncProviderLocalContract(c *gin.Context, request apicontract.SetSyncLoc
 		return
 	}
 
-	ret = apicontract.Success(apicontract.SyncLocalData{Local: (*apicontract.SyncLocal)(model.Conf.Sync.Local)})
+	ret = apicontract.Success(apicontract.SyncLocalData{Local: (*apicontract.SyncLocal)(model.Conf.Sync.Load().Local)})
 	return
 }
 

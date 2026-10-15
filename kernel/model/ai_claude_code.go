@@ -23,21 +23,10 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// NewAIClientForProvider 按提供方协议创建生成客户端，本机命令行提供方不走 HTTP 端点。
-func NewAIClientForProvider(provider *conf.Provider, model *conf.Model) *util.AIClient {
-	if nil == provider || nil == model {
-		return util.NewAIClientWithModel("", "", "")
-	}
-	if util.IsClaudeCodeProtocol(provider.Protocol) {
-		return util.NewClaudeCodeAIClient(claudeCodeRuntime(provider, model))
-	}
-	return util.NewAIClientWithModel(provider.APIKey, provider.BaseURL, model.Name, ResolveAIProviderHeaders(provider))
-}
-
 // claudeCodeRuntime 组装本机命令行运行期配置，含工作空间 MCP 服务凭据与只读标记。
-func claudeCodeRuntime(provider *conf.Provider, model *conf.Model) util.ClaudeCodeRuntime {
+func claudeCodeRuntime(provider *conf.Provider, model string) util.ClaudeCodeRuntime {
 	runtime := claudeCodeBaseRuntime(provider, util.ClaudeCodePermissionReadOnly)
-	runtime.Model = model.Name
+	runtime.Model = model
 	runtime.MCPServers = claudeCodeMCPServers(runtime.PermissionMode)
 	if util.ClaudeCodePermissionFull == runtime.PermissionMode {
 		// 完全放行模式下允许命令行直接处理工作空间文件
@@ -76,7 +65,7 @@ func ResolveClaudeCodeEnv(env map[string]string) map[string]string {
 	}
 	resolved := make(map[string]string, len(env))
 	for name, value := range env {
-		resolved[name] = conf.ResolveSecretsVars(Conf.Secrets, Conf.Variables, value)
+		resolved[name] = conf.ResolveSecretsVars(Conf.Secrets.Load(), Conf.Variables.Load(), value)
 	}
 	return resolved
 }
@@ -84,10 +73,14 @@ func ResolveClaudeCodeEnv(env map[string]string) map[string]string {
 // claudeCodeMCPServers 生成命令行挂载的 MCP 服务器配置。
 // 只读模式携带只读请求头，由内核的 MCP 服务拒绝写入动作。
 func claudeCodeMCPServers(permissionMode string) string {
-	if nil == Conf || nil == Conf.Api || "" == Conf.Api.Token {
+	if nil == Conf {
 		return ""
 	}
-	headers := map[string]string{"Authorization": "Bearer " + Conf.Api.Token}
+	apiConf := Conf.Api.Load()
+	if nil == apiConf || "" == apiConf.Token {
+		return ""
+	}
+	headers := map[string]string{"Authorization": "Bearer " + apiConf.Token}
 	if util.ClaudeCodePermissionReadOnly == permissionMode {
 		headers[util.MCPReadOnlyHeader] = "1"
 	}

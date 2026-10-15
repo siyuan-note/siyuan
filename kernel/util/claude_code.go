@@ -144,7 +144,7 @@ func ResolveClaudeCodeCLI(customPath string) (path, version string, err error) {
 			return candidate, cliVersion, nil
 		}
 	}
-	return "", "", errors.New(BootL10n(411, "Claude Code CLI was not found, please set the claude executable path in the provider settings"))
+	return "", "", errors.New(BootL10n(422, "Claude Code CLI was not found, please set the claude executable path in the provider settings"))
 }
 
 // claudeCodeCandidates 返回候选命令行路径，用户指定的路径优先。
@@ -524,7 +524,7 @@ func resolveClaudeCodeEnvValue(value string) (string, error) {
 		return match
 	})
 	if "" != missing {
-		return "", fmt.Errorf(BootL10n(414,
+		return "", fmt.Errorf(BootL10n(424,
 			"Environment variable %s is not set, please fill in the credential in the provider settings or set the environment variable first"), missing)
 	}
 	return resolved, nil
@@ -542,7 +542,7 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 			// 命令行长时间没有任何事件输出时终止本次生成，避免界面一直停留在思考中
 			if claudeCodeSilentLimit <= time.Since(e.lastEventAt) {
 				return ret, claudeCodeRunError{attachStderr: true, message: fmt.Sprintf("%s (%s)",
-					BootL10n(415, "The local Claude Code command line produced no output for a long time, please check the credentials, network proxy and command line configuration"),
+					BootL10n(425, "The local Claude Code command line produced no output for a long time, please check the credentials, network proxy and command line configuration"),
 					time.Since(e.lastEventAt).Round(time.Second))}
 			}
 			// 其余情况返回空分片，重置上层空闲计时器
@@ -771,7 +771,7 @@ func TestClaudeCodeModel(runtime ClaudeCodeRuntime, model string) (*ClaudeCodePr
 				break
 			}
 			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-				return nil, fmt.Errorf("%s (%s)", BootL10n(415,
+				return nil, fmt.Errorf("%s (%s)", BootL10n(425,
 					"The local Claude Code command line produced no output for a long time, please check the credentials, network proxy and command line configuration"),
 					claudeCodeProbeTimeout)
 			}

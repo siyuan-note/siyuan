@@ -140,13 +140,15 @@ func RefreshToolExposure() {
 }
 
 func externalMCPToolAllowed(tool *tools.Tool) bool {
+	confAIReadSnapshot := model.Conf.LoadAI()
+
 	if tool == nil || tool.AgentOnly || tool.Source == "mcp" || tool.Runtime == "mcp" {
 		return false
 	}
-	if model.Conf == nil || model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+	if model.Conf == nil || confAIReadSnapshot == nil || confAIReadSnapshot.MCP == nil {
 		return true
 	}
-	return model.Conf.AI.MCP.ExposurePolicy.Allows(tools.CapabilityIDForTool(tool))
+	return confAIReadSnapshot.MCP.ExposurePolicy.Allows(tools.CapabilityIDForTool(tool))
 }
 
 func newServer() *mcpsdk.Server {

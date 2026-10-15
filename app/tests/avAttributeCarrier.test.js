@@ -21,6 +21,7 @@ const runCases = async () => {
             }
         },
         renderAVRichTextElements: () => {},
+        preserveAVBindingRange: () => () => {},
         getColIconByType: () => "iconDatabase",
         genAVAttributeRowHTML: ({value}) => `<div data-row-id="${value.blockID}" data-col-id="${value.keyID}"></div>`,
         getPageSize: () => ({unGroupPageSize: 20, groupPageSize: {}}),
@@ -126,6 +127,7 @@ const runCases = async () => {
             constructor(_app, _element, options) {
                 initialize = () => options.after({protyle: {
                     id: "row-editor", highlight: {styleElement: document.createElement("style")},
+                    hint: {element: document.createElement("div")},
                 }});
             }
             destroy() {}
@@ -211,7 +213,7 @@ const runElectron = async () => {
         const extract = (name, names) => {
             const text = readFileSync(path.join(root, name + ".ts"), "utf8");
             if (!names) {
-                return text;
+                return text.replace(/^import [\s\S]*?;\r?\n/gm, "");
             }
             const source = ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true);
             const statements = source.statements.filter(statement => ts.isVariableStatement(statement) &&
@@ -220,11 +222,13 @@ const runElectron = async () => {
             return statements.map(statement => "export " + statement.getText(source).replace(/^export /, "")).join("\n");
         };
         // 执行实际渲染、菜单请求和事务组装函数，仅隔离网络、富文本显示与编辑器外壳。
-        const sources = [extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
+        const sources = [extract("capabilities.generated"), extract("capabilities"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
             extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),
             extract("primaryFocus", ["focusDatabasePrimary"]),
-            extract("../../../editor/databaseRow", ["newDatabaseRowModel"]),
+            extract("rowReadonly", ["inheritDatabaseRowReadonly"]),
+            extract("../../../editor/databaseRow", ["rowReady", "rowSwitchers", "newDatabaseRowModel"]),
+            extract("databaseRowNavigation", ["clearDatabaseRowNavigation", "mountDatabaseRowNavigation"]),
             extract("openDatabaseRow", ["closeMobileDatabaseRow", "openMobileDatabaseRow"])].map(source =>
             ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText);
         await win.loadURL("data:text/html,<html><body></body></html>");
@@ -235,7 +239,9 @@ const runElectron = async () => {
                 Object.assign(window, exports);
             }
         })()`);
-        await win.webContents.executeJavaScript(`(${runCases.toString()})()`);
+        const failure = await win.webContents.executeJavaScript(`Promise.resolve().then(() =>
+            (${runCases.toString()})()).then(() => null, error => error.stack || String(error))`);
+        assert.equal(failure, null);
         console.log("Attribute carrier cases passed");
     } catch (error) {
         console.error(error);

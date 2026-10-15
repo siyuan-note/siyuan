@@ -425,8 +425,8 @@ func TestValidateTemplateCallGraphRejectsCyclesAndExcessiveDepth(t *testing.T) {
 
 func TestRenderTemplateDocTreeNodesLimitsAggregateOutput(t *testing.T) {
 	setupFileOperationTest(t)
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	rootTemplate, err := template.New("").Delims(".action{", "}").Parse(
 		`.action{define "one-byte"}x.action{end}`,
 	)
@@ -734,11 +734,11 @@ func newTemplateDocTreeInsertTransaction(planID, parentID string) (*Transaction,
 
 func writeTemplateDocTreeTestFile(t *testing.T, content string) string {
 	t.Helper()
-	if nil == Conf.Editor {
-		Conf.Editor = conf.NewEditor()
+	if nil == Conf.Editor.Load() {
+		Conf.Editor.Store(conf.NewEditor())
 	}
-	if nil == Conf.Export {
-		Conf.Export = conf.NewExport()
+	if nil == Conf.Export.Load() {
+		Conf.Export.Store(conf.NewExport())
 	}
 	templateDir := filepath.Join(util.DataDir, "templates")
 	if err := os.MkdirAll(templateDir, 0755); nil != err {

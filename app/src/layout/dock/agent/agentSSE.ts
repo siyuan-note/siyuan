@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../../../util/fetchWithAppId";
 import {buildAgentConfirmEvent, IToolEffects} from "./agentConfirmEvent";
 
 export type {IToolEffects} from "./agentConfirmEvent";
@@ -150,7 +151,7 @@ export async function fetchAgentSSE(
         if (typeof contentRevision === "number") { body.contentRevision = contentRevision; }
         if (blockHTML !== undefined) { body.blockHTML = blockHTML; }
 
-        const response = await fetch("/api/ai/agent/chat", {
+        const response = await fetchWithAppId("/api/ai/agent/chat", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

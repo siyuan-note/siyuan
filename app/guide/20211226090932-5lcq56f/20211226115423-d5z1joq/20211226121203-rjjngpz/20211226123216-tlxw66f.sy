@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260925230000"
+		"updated": "20261007101500"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-3a8f750",
-				"updated": "20260925230000"
+				"updated": "20261007101500"
 			},
 			"Children": [
 				{
@@ -789,7 +789,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-cvaq88b",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -803,7 +803,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-4dgh9o5",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -848,7 +848,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中設定版面配置按鈕和置頂按鈕的顯示與排序。"
+					"Data": " 中設定版面配置按鈕和置頂視窗按鈕的顯示與排序。"
 				}
 			]
 		},
@@ -857,12 +857,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-ez4wspy",
-				"updated": "20260923114823"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "建立：在新視窗中安排好分頁，點擊釘選按鈕旁的 "
+					"Data": "建立：在新視窗中安排好分頁，點擊置頂視窗按鈕旁的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -912,7 +912,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-j375giy",
-				"updated": "20260923114823"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -989,7 +989,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，可將目前的主視窗儲存至該項目；新視窗版面配置會自動儲存。兩類版面配置的子選單末尾均顯示最近儲存時間。也可點擊釘選按鈕旁的版面配置圖示重新命名新視窗版面配置。重新命名對話方塊分別以 "
+					"Data": "，可將目前的主視窗儲存至該項目；新視窗版面配置會自動儲存。兩類版面配置的子選單末尾均顯示最近儲存時間。也可點擊置頂視窗按鈕旁的版面配置圖示重新命名新視窗版面配置。重新命名對話方塊分別以 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1228,6 +1228,84 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930192450-1xrty7u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260930192450-1xrty7u",
+				"updated": "20261007101500"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "設定視窗"
+				}
+			]
+		},
+		{
+			"ID": "20260930192450-635bol5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930192450-635bol5",
+				"updated": "20261007101500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面用戶端預設在主視窗中開啟設定。透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "應用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在獨立視窗中開啟設定介面"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開關可控制是否在獨立視窗中開啟設定介面，開啟後可以移動、調整大小及最小化；下次開啟設定介面時生效。文件新視窗也支援使用已設定的設定快捷鍵開啟設定。保持設定視窗開啟時，仍可捲動、切換及編輯文件。再次開啟設定會聚焦已有視窗。設定變更會同步至目前工作空間的其他視窗；批次清理未引用附件、清理未引用資料庫及匯入設定期間會暫時阻擋操作。瀏覽器版使用設定對話框，行動版使用設定頁面。舊版外掛程式的設定會在其所屬視窗中開啟，並將該視窗切到前景；支援獨立視窗的外掛程式則在新視窗中開啟。在獨立設定視窗中，可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（Windows/Linux）或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Option+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS）切換開發者工具。"
 				}
 			]
 		},

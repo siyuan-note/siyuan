@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260927123058"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-fnv59m7",
-				"updated": "20260920084445"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -40,12 +40,109 @@
 			]
 		},
 		{
+			"ID": "20261012014537-bs9zanm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014537-bs9zanm",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261009034010-6kd9rk5",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Location field"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260930175958-jgqkczm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260930175958-jgqkczm",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Database panel field visibility"
+				}
+			]
+		},
+		{
+			"ID": "20260930175958-sqtxjcl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930175958-sqtxjcl",
+				"updated": "20261001060000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a database attribute panel at the top of a document, on a database entry page, or in a block attribute dialog, click a field name to set Database panel field visibility to Always show, Hide when empty, or Always hide. Default preserves the panel's existing display settings; the panel at the top of a document follows the global setting for hiding empty fields. Rules apply to attribute panels of that database and do not change field visibility in its views. Click the panel's edit button to temporarily reveal hidden fields and edit their values or visibility rules."
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-jav2qb7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260929105001-jav2qb7",
+				"updated": "20260929105001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Entry icons"
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-d3q9qik",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929105001-d3q9qik",
+				"updated": "20260930140000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unbound entries can have their own icons. Click the icon beside the primary-key value, in the entry details, or in a relation field to change or remove it. Item templates can preset icons for both unbound and document entries. Unbound entries without a custom icon show a short horizontal line, and the view's icon visibility setting still applies."
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-pdids8d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929105001-pdids8d",
+				"updated": "20260930140000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When binding or rebinding to a regular block without a custom icon, the block inherits the entry's icon. If the block already has an icon, or is an existing document, its own icon is used. A document created during binding inherits the entry's custom icon; if none is set, the document template's icon is used. Bound entries share icons with their bound blocks. Unbinding preserves the last displayed icon, which can then be changed independently."
+				}
+			]
+		},
+		{
 			"ID": "20251224101749-zybcbjk",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20260923103343"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -687,7 +784,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260924110133"
+				"updated": "20260929123717"
 			},
 			"Children": [
 				{
@@ -716,7 +813,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260927113016"
+				"updated": "20260929123717"
 			},
 			"Children": [
 				{
@@ -788,6 +885,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "Date field: Choose one date, created time, or updated time field in the layout settings. If no suitable field exists, the calendar prompts you to choose or create one. It does not fill ordinary dates for existing entries; entries without a date stay out of the grid. With an ordinary date field, they remain available in the undated list"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260929122307-2ixnrxo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260929122307-2ixnrxo",
+						"updated": "20260929123717"
+					},
+					"Children": [
+						{
+							"ID": "20260929122307-ftq006m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260929122307-ftq006m",
+								"updated": "20260929123717"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Template dates: When a date field has a display template, the calendar places entries on the calculated date without changing the stored date. Output a plain text date in YYYY-MM-DD, the field's selected numeric date format, or the current language's local date format (such as October 2, 2026). An optional HH:mm or HH:mm:ss time can follow a space or T. Dates use the current device's local time zone; slash-separated dates follow the field format without guessing the month/day order. Empty results, invalid dates, and other formats appear neither on the calendar nor in the undated list. Calculated dates cannot be dragged, cleared, or assigned when creating an entry on a day; change the source field or template to adjust the date. Use YYYY-MM-DD for templates shared across languages"
 								}
 							]
 						}
@@ -1414,10 +1539,10 @@
 		{
 			"ID": "20260927112821-dmce6cp",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260927112821-dmce6cp",
-				"updated": "20260927121828"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -1525,7 +1650,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20260920084445"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -1554,7 +1679,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-5zjv62o",
-				"updated": "20260904121106"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1583,7 +1708,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-438l9c3",
-				"updated": "20260904121106"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1868,34 +1993,20 @@
 					},
 					"Properties": {
 						"id": "20260904022100-t3p2t45",
-						"updated": "20260904121106"
+						"updated": "20261012014859"
 					},
 					"Children": [
 						{
-							"ID": "20260904022100-h1drat7",
+							"ID": "20261012014537-jjsv2yc",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260904022100-h1drat7",
-								"updated": "20260904121106"
+								"id": "20261012014537-jjsv2yc",
+								"updated": "20261012014859"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Context filter"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Open "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Context filter"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " from the database block toolbar and select a configured Relation field. The panel lists all configured Relation fields in the database, but only one can be enabled at a time. Select another field to switch to it; select the checked field again to turn off the context filter. Once enabled, the fixed condition “Contains any item - Current document” applies to every view in this database block. Each view’s ordinary filters remain independent and are combined with the context filter using AND. When you add an item from this database block, the current document is automatically added to the selected Relation field. For filtering and adding items to work, the current document must already be bound to an item in the selected Relation field’s target database; otherwise, no matching items are shown and you cannot add items from this database block"
+									"Data": "Rollup: When targeting a Relation field with Show original values or Show unique values, ordinary filters support Contains any item and Does not contain any item: search and select items from the final related database to match the entire rolled-up item set. Items with identical names are distinguished by item ID. Existing keyword filters and their Any, All, and None quantifiers keep their existing behavior"
 								}
 							]
 						}
@@ -1999,6 +2110,72 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-jtpgxzc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-jtpgxzc",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Context filter"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
+			"ID": "20260904022100-h1drat7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260904022100-h1drat7",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Context filter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from the database block toolbar and select a configured Relation field, or a Rollup targeting a Relation field with Show original values or Show unique values. The panel lists all eligible fields in the database, but only one can be enabled at a time. Select another field to switch to it; select the checked field again to turn off the context filter. "
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-oo845s9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-oo845s9",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Once enabled, the fixed condition “Contains any item - Current document” applies to every view in this database block. Each view’s ordinary filters remain independent and are combined with the context filter using AND. "
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-507hutv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-507hutv",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The current document must already be bound to an item in the final related database; otherwise, no matching items are shown and you cannot add items from this database block. With a direct Relation field, new items automatically relate to the current document. With a Rollup, new items do not fill the computed value or change relations in the intermediate database, and may be hidden by the filter. "
 				}
 			]
 		},
@@ -2893,6 +3070,20 @@
 			]
 		},
 		{
+			"ID": "20261007101857-8yrn5q5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261007101857-8yrn5q5",
+				"updated": "20261007101857"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The desktop and mobile relation selection panels always offer a new-item action using the related database’s default template. When the input differs from the name generated by the primary key template, two actions show the actual names: create with the default template, or create with the input name. The input-name action overrides only the primary key; field defaults, icon, content template and save location still apply. Empty input, no primary key template, or identical names produce only one action. Without a default template, creation produces a detached item. Creating the item and updating the relation can be undone together"
+				}
+			]
+		},
+		{
 			"ID": "20240208172555-la22eum",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -3606,6 +3797,141 @@
 				{
 					"Type": "NodeText",
 					"Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display. Relation fields follow the display template of the target database's primary key, including empty results, while preserving the original primary key value and relation."
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-n5wvv5s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261002224707-n5wvv5s",
+				"updated": "20261010222552"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automations"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-5by05dc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-5by05dc",
+				"updated": "20261010222552"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a database view, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Automations"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to add a rule. Changes are saved automatically; text is saved when the field loses focus or Enter is pressed. New rules are disabled by default. Incomplete rules are automatically disabled and show what is missing; enable them manually after completing the configuration. Rules are shared by the entire database and can be triggered by item changes in any view or mirror"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". If a referenced field is deleted or its type changes, or a target database is deleted, the next item write automatically pauses the affected rule and identifies the rule and missing reference. The source edit is saved and the rule configuration is retained; repair it and enable the rule manually. Locked databases, authentication failures, corrupt data, and write failures still roll back the edit and automatic actions"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-ayryj7q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-ayryj7q",
+				"updated": "20261002224707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Triggers support added items and changed fields. A field-change trigger can watch one field or any editable field; writing the same value again does not trigger it. Add filter conditions to run actions only for matching items"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-hrqksxn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-hrqksxn",
+				"updated": "20261002224707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each rule can run several actions in order: edit the triggering item, edit related items, edit items matching filters in a database, or add an unbound item to this or another database. Empty target filters match all items"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-x0qa1o9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-x0qa1o9",
+				"updated": "20261002224707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, or a relation to the triggering item. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-s9ne4gk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-s9ne4gk",
+				"updated": "20261002224707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, create a two-way relation between a task database and a time-log database. When a task status changes to In progress, add a log with its start date set to the trigger time and its relation set to the triggering task. When the status changes to Done, edit related logs whose end date is empty and set that date to the trigger time"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-ri3sf0d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-ri3sf0d",
+				"updated": "20261002224707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic actions and the original edit are undone and redone together, and both roll back if execution fails. Redo retains the original item IDs and timestamps. Automatic actions do not trigger other rules. Imports, sync, history restoration, and undo replay do not trigger rules again; ordinary API writes trigger rules but do not create editor undo entries"
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-cvkf5jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-cvkf5jx",
+				"updated": "20261002224707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them"
 				}
 			]
 		},

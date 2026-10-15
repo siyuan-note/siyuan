@@ -18,7 +18,7 @@ import (
 
 func TestAPIContractAISkillManagement(t *testing.T) {
 	aiContractConfiguration(t)
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	engine := gin.New()
 	engine.POST("/api/ai/agent/manageSkills", manageSkills)
 	call := func(body string, code int) apicontract.AISkillFileData {

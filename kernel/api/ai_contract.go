@@ -12,7 +12,7 @@ import (
 )
 
 func aiProviderAdmission(c *gin.Context) *apicontract.Response[apicontract.Null] {
-	if model.Conf.AI.HasAnyProvider() {
+	if model.Conf.AI.Load().HasAnyProvider() {
 		return nil
 	}
 	response := apicontract.Failure[apicontract.Null](-1, model.Conf.Language(193))
@@ -88,6 +88,14 @@ func aiUserSkillsContract(values []util.UserSkillInfo) []apicontract.AIUserSkill
 	result := make([]apicontract.AIUserSkillInfo, len(values))
 	for i, value := range values {
 		result[i] = apicontract.AIUserSkillInfo(value)
+	}
+	return result
+}
+
+func aiBuiltinSkillsContract(values []util.BuiltinSkillInfo) []apicontract.AIBuiltinSkillInfo {
+	result := make([]apicontract.AIBuiltinSkillInfo, len(values))
+	for i, value := range values {
+		result[i] = apicontract.AIBuiltinSkillInfo(value)
 	}
 	return result
 }

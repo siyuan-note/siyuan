@@ -119,6 +119,51 @@ const createHarness = (overrides: Partial<IPluginLifecycleAdapter<ITestPluginDat
 };
 
 describe("plugin lifecycle coordinator", () => {
+    it("a reconnect snapshot cannot unload or replace a newer plugin instance", async () => {
+        const {coordinator} = createHarness();
+        coordinator.start();
+        await coordinator.setLayoutReady();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+        const snapshot = coordinator.beginLoadBatch();
+        await coordinator.requestReload("sample", async () => ({name: "sample", revision: 2}));
+        const latest = coordinator.getInstance("sample");
+        await coordinator.requestBatchUnload("sample", snapshot);
+        await coordinator.requestBatchLoad("sample", {name: "sample", revision: 0}, snapshot, true);
+        assert.equal(coordinator.getInstance("sample"), latest);
+        assert.equal(latest.revision, 2);
+    });
+    it("window disposal invalidates pending loads and tears down its own instances exactly once", async () => {
+        const loading = deferred<void>();
+        const {coordinator, events} = createHarness({onload: () => loading.promise});
+        coordinator.start();
+        await coordinator.setLayoutReady();
+        const loaded = coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+        await new Promise(resolve => setImmediate(resolve));
+        coordinator.dispose();
+        coordinator.dispose();
+        assert.equal(coordinator.getInstance("sample"), undefined);
+        assert.equal(events.filter(item => item === "onunload:sample").length, 1);
+        assert.equal(events.filter(item => item === "dispose:sample:false").length, 1);
+        loading.resolve();
+        await loaded;
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 2}));
+        assert.equal(events.filter(item => item.startsWith("create:")).length, 1);
+        assert.equal(events.includes("mount:sample"), false);
+    });
+
+    it("disposal during asynchronous teardown does not duplicate cleanup or invoke uninstall", async () => {
+        const unloading = deferred<void>();
+        const {coordinator, events} = createHarness({onunload: () => unloading.promise});
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+        const removed = coordinator.requestUninstall("sample");
+        await new Promise(resolve => setImmediate(resolve));
+        coordinator.dispose();
+        unloading.resolve();
+        await removed;
+        assert.equal(events.filter(item => item.startsWith("dispose:")).length, 1);
+        assert.equal(events.includes("uninstall:sample"), false);
+    });
     it("keeps one instance and one layout hook for repeated loads", async () => {
         const {coordinator, events, instances} = createHarness();
         coordinator.start();

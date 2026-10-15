@@ -442,8 +442,8 @@ func runTemplateDocTreeTransactionTestInSubprocess(t *testing.T) bool {
 func setupTemplateDocTreeTransactionTest(t *testing.T) *fileOperationTestFixture {
 	t.Helper()
 	fixture := setupStructureTransactionTest(t)
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	originalTempDir := util.TempDir
 	originalQueueDir := util.QueueDir
 	originalConfDir := util.ConfDir
@@ -478,7 +478,7 @@ func setupTemplateDocTreeTransactionTest(t *testing.T) *fileOperationTestFixture
 		sql.FlushQueue()
 		sql.FlushHistoryQueue()
 		sql.FlushAssetContentQueue()
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir

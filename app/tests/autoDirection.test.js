@@ -25,6 +25,50 @@ const runCases = async () => {
     const english = text(paragraphs[1]);
     const hebrew = text(paragraphs[2]);
     const direction = element => getComputedStyle(element).direction;
+    const {setTitleAutoDirection} = window.direction;
+    const title = document.createElement("div");
+    title.className = "protyle-title__input";
+    title.contentEditable = "true";
+    container.prepend(title);
+    setTitleAutoDirection(undefined, true);
+    for (const globalRTL of [false, true]) {
+        container.classList.toggle("rtl", globalRTL);
+        title.textContent = "English";
+        setTitleAutoDirection(title, false);
+        assert.equal(direction(title), globalRTL ? "rtl" : "ltr");
+        setTitleAutoDirection(title, true);
+        assert.equal(direction(title), "ltr");
+        const titleText = title.firstChild;
+        title.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+        titleText.data = "123 😀 عنوان English";
+        assert.equal(direction(title), "rtl");
+        titleText.data = "English عنوان";
+        assert.equal(direction(title), "ltr");
+        title.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+        title.textContent = "";
+        title.textContent = "שלום";
+        assert.equal(direction(title), "rtl");
+        setTitleAutoDirection(title, false);
+        assert.equal(title.hasAttribute("dir"), false);
+        assert.equal(direction(title), globalRTL ? "rtl" : "ltr");
+        assert.equal(title.textContent, "שלום");
+    }
+    title.dir = "ltr";
+    setTitleAutoDirection(title, true);
+    assert.equal(direction(title), "ltr");
+    setTitleAutoDirection(title, false);
+    assert.equal(title.dir, "ltr");
+    const mobileTitle = document.createElement("input");
+    mobileTitle.id = "toolbarName";
+    document.body.append(mobileTitle);
+    setTitleAutoDirection(mobileTitle, true);
+    mobileTitle.value = "عنوان";
+    assert.equal(direction(mobileTitle), "rtl");
+    mobileTitle.value = "English عنوان";
+    assert.equal(direction(mobileTitle), "ltr");
+    setTitleAutoDirection(mobileTitle, false);
+    assert.equal(mobileTitle.hasAttribute("dir"), false);
+    assert.equal(mobileTitle.value, "English عنوان");
     setAutoDirection(root, false);
     assert.equal(root.innerHTML, original);
     assert.equal(direction(english), "rtl");
@@ -35,7 +79,7 @@ const runCases = async () => {
     assert.equal(direction(hebrew), "rtl");
     assert.equal(root.querySelector('[data-type="NodeCodeBlock"] [dir]'), null);
     assert.equal(root.querySelector(".protyle-attr[dir]"), null);
-    assert.equal(root.querySelector('[data-type="NodeListItem"]').hasAttribute("dir"), false);
+    assert.equal(root.querySelector('[data-type="NodeListItem"]').dir, "rtl");
     assert.equal(lute.BlockDOM2StdMd(root.innerHTML), markdown, "automatic direction must not change stored content");
     assert.doesNotMatch(lute.SpinBlockDOM(root.innerHTML), /data-auto-direction|dir="auto"/);
 
@@ -116,6 +160,259 @@ const runCases = async () => {
     assert.equal(root.querySelector("[data-auto-direction]"), null);
 };
 
+const runListCases = async () => {
+    const assert = require("node:assert/strict");
+    const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+    const {setAutoDirection, destroyAutoDirection, getAutoListDirection} = window.direction;
+    const lute = window.Lute.New();
+    lute.SetProtyleWYSIWYG(true);
+    document.body.innerHTML = '<div class="protyle"><div class="protyle-wysiwyg"></div></div>';
+    const container = document.querySelector(".protyle");
+    const root = container.firstElementChild;
+    const markdown = "- [ ] سلام task\n  - [ ] English child\n  - [ ] שלום child\n- [ ] English task\n\n" +
+        "1. عنوان numbered\n2. English numbered\n\n- שלום bullet\n- English bullet\n";
+    const original = lute.Md2BlockDOM(markdown);
+    const expectedMarkdown = lute.BlockDOM2StdMd(original);
+    const items = () => [...root.querySelectorAll('[data-type="NodeListItem"]')];
+    const content = item => item.querySelector(':scope > [data-type="NodeParagraph"]');
+    const editable = item => content(item).querySelector("[contenteditable]");
+    const check = (item, direction) => {
+        assert.equal(getComputedStyle(item).direction, direction, editable(item).textContent);
+        const action = item.querySelector(":scope > .protyle-action");
+        const itemRect = item.getBoundingClientRect();
+        const actionRect = action.getBoundingClientRect();
+        assert.ok(Math.abs(direction === "rtl" ? actionRect.right - itemRect.right :
+            actionRect.left - itemRect.left) < 1, `marker ${direction}: ${editable(item).textContent}`);
+        const style = getComputedStyle(content(item));
+        assert.equal(style.marginLeft, direction === "rtl" ? "0px" : "34px");
+        assert.equal(style.marginRight, direction === "rtl" ? "34px" : "0px");
+        assert.equal(getAutoListDirection(action), direction);
+    };
+    for (const rtl of [false, true]) {
+        container.classList.toggle("rtl", rtl);
+        root.innerHTML = original;
+        setAutoDirection(root, true);
+        for (const [width, fontSize] of [[640, 16], [260, 28]]) {
+            root.style.width = `${width}px`;
+            root.style.fontSize = `${fontSize}px`;
+            items().forEach((item, index) => check(item, ["rtl", "ltr", "rtl", "ltr", "rtl", "ltr", "rtl", "ltr"][index]));
+        }
+        assert.equal(lute.BlockDOM2StdMd(root.innerHTML), expectedMarkdown);
+        assert.doesNotMatch(lute.SpinBlockDOM(root.innerHTML), /data-auto-(?:list-)?direction|dir="(?:auto|ltr|rtl)"/);
+
+        const [parent, child, sibling] = items();
+        editable(parent).firstChild.data = "English parent";
+        await settle();
+        check(parent, "ltr");
+        check(child, "ltr");
+        check(sibling, "rtl");
+        editable(child).textContent = "123 😀 مرحبا";
+        await settle();
+        check(child, "rtl");
+        check(parent, "ltr");
+        editable(parent).textContent = "سلام parent";
+        editable(child).textContent = "English child";
+        await settle();
+        const drag = window.listDrag.createListDragTarget();
+        let rect = child.getBoundingClientRect();
+        const childTarget = drag(child, {clientX: rect.left + 60, clientY: rect.bottom - 1});
+        assert.equal(childTarget.isChild, true);
+        childTarget.apply();
+        assert.ok(parseFloat(child.style.getPropertyValue("--drag-guides")) > 0,
+            "LTR child keeps its RTL parent's guide on the right");
+        assert.equal(getComputedStyle(child, "::after").left, "34px");
+        window.listDrag.cleanupDragIndicators(root);
+        editable(child).firstChild.data = "שלום child";
+        await settle();
+        rect = child.getBoundingClientRect();
+        const rtlChildTarget = drag(child, {clientX: rect.right - 60, clientY: rect.bottom - 1});
+        assert.equal(rtlChildTarget.isChild, true);
+        rtlChildTarget.apply();
+        assert.equal(getComputedStyle(child, "::after").right, "34px");
+        window.listDrag.cleanupDragIndicators(root);
+        assert.equal(drag(child, {clientX: rect.right - 5, clientY: rect.bottom - 1}).isChild, false);
+
+        parent.style.direction = "ltr";
+        await settle();
+        check(parent, "ltr");
+        check(child, "ltr");
+        sibling.style.direction = "rtl";
+        await settle();
+        check(sibling, "rtl");
+        parent.style.direction = "";
+        sibling.style.direction = "";
+        await settle();
+        check(parent, "rtl");
+        const list = parent.parentElement;
+        list.style.direction = "rtl";
+        child.style.direction = "ltr";
+        await settle();
+        check(child, "ltr");
+        check(items()[3], "rtl");
+        list.style.direction = "";
+        child.style.direction = "";
+        content(parent).style.direction = "ltr";
+        await settle();
+        check(parent, "ltr");
+        content(parent).style.direction = "";
+
+        root.innerHTML = original;
+        await settle();
+        check(items()[0], "rtl");
+        check(items()[1], "ltr");
+        root.insertAdjacentHTML("beforeend", lute.Md2BlockDOM("- [ ] مرحبا new\n"));
+        await settle();
+        check(items().at(-1), "rtl");
+        setAutoDirection(root, false);
+        assert.equal(root.querySelector("[data-auto-direction]"), null);
+        assert.equal(root.querySelector("[data-auto-list-direction]"), null);
+        assert.equal(root.querySelector("[dir]"), null);
+        const first = items()[0];
+        const box = first.getBoundingClientRect();
+        const marker = first.querySelector(".protyle-action").getBoundingClientRect();
+        assert.ok(Math.abs(rtl ? marker.right - box.right : marker.left - box.left) < 1);
+        first.style.direction = "rtl";
+        await settle();
+        const manualMarker = first.querySelector(".protyle-action").getBoundingClientRect();
+        assert.ok(Math.abs(manualMarker.right - box.right) < 1);
+        setAutoDirection(root, true);
+        setAutoDirection(root, false);
+        assert.equal(first.style.direction, "rtl");
+    }
+    destroyAutoDirection(root);
+    const preview = document.createElement("div");
+    preview.className = "b3-typography";
+    preview.innerHTML = "<ul><li><p>سلام</p><ul><li>English child</li></ul></li><li>English</li></ul>";
+    document.body.append(preview);
+    setAutoDirection(preview, true);
+    const nativeItems = preview.querySelectorAll("li");
+    assert.equal(getComputedStyle(nativeItems[0]).direction, "rtl");
+    assert.equal(getComputedStyle(nativeItems[1]).direction, "ltr");
+    assert.equal(getComputedStyle(nativeItems[2]).direction, "ltr");
+    assert.equal(getComputedStyle(nativeItems[0]).marginLeft, "0px");
+    assert.equal(getComputedStyle(nativeItems[2]).marginRight, "0px");
+    setAutoDirection(preview, false);
+    assert.equal(preview.querySelector("[data-auto-direction]"), null);
+    destroyAutoDirection(preview);
+};
+
+const runManualDirectionCases = async (staticExport) => {
+    const assert = require("node:assert/strict");
+    const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+    const {setAutoDirection, destroyAutoDirection} = window.direction;
+    const {renderBlockDirection} = window.blockDirection;
+    const lute = window.Lute.New();
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetKramdownIAL(true);
+    const html = lute.Md2BlockDOM("- Parent\n  - Child\n- Sibling\n");
+    const rtlClass = "protyle-block--rtl";
+    for (const rich of [false, true]) {
+        document.body.innerHTML = '<div class="protyle"><div></div></div>';
+        const root = document.body.firstElementChild.firstElementChild;
+        root.className = rich ? "table__cell-rich" : "protyle-wysiwyg";
+        root.innerHTML = html;
+        if (rich) {
+            root.querySelectorAll("[data-node-id]").forEach(element => {
+                element.removeAttribute("data-node-id");
+                element.setAttribute("data-table-cell-node", "");
+            });
+        }
+        let list = root.querySelector(".list");
+        list.setAttribute("style", "direction: rtl; color: rgb(1, 2, 3)");
+        const original = root.innerHTML;
+        const markdown = lute.BlockDOM2Md(original);
+        const check = (rtl) => {
+            root.querySelectorAll(".li").forEach(item => {
+                const content = item.querySelector(":scope > .p");
+                const style = getComputedStyle(content);
+                assert.equal(style.marginLeft, rtl ? "0px" : "34px");
+                assert.equal(style.marginRight, rtl ? "34px" : "0px");
+                const marker = item.querySelector(":scope > .protyle-action").getBoundingClientRect();
+                const rect = item.getBoundingClientRect();
+                assert.ok(Math.abs(rtl ? marker.right - rect.right : marker.left - rect.left) < 1);
+            });
+        };
+        if (!staticExport) {
+            setAutoDirection(root, false);
+            assert.ok(list.classList.contains(rtlClass));
+        }
+        for (const [width, fontSize] of [[720, 16], [280, 32]]) {
+            root.style.width = `${width}px`;
+            root.style.fontSize = `${fontSize}px`;
+            check(true);
+        }
+        assert.equal(list.getAttribute("style"), "direction: rtl; color: rgb(1, 2, 3)");
+        assert.equal(lute.BlockDOM2Md(root.innerHTML), markdown);
+        assert.doesNotMatch(lute.SpinBlockDOM(root.innerHTML), /protyle-block--rtl/);
+        if (staticExport) {
+            list.style.direction = "ltr";
+            check(false);
+            continue;
+        }
+
+        // 属性更新及删除不依赖自动方向开关，也不重写原始样式。
+        list.style.direction = "ltr";
+        await settle();
+        check(false);
+        assert.equal(list.classList.contains(rtlClass), false);
+        list.setAttribute("style", "direction:rtl!important");
+        await settle();
+        check(true);
+        assert.equal(list.getAttribute("style"), "direction:rtl!important");
+        list.removeAttribute("style");
+        await settle();
+        check(false);
+
+        // 菜单和快捷键共用的事务入口在调用返回前同步布局。
+        if (!rich) {
+            window.updateBatchTransaction([list], {}, element => { element.style.direction = "rtl"; });
+            check(true);
+            const transaction = window.directionTransactions.at(-1);
+            assert.doesNotMatch(lute.SpinBlockDOM(transaction.operations[0].data), /protyle-block--rtl/);
+            list.outerHTML = transaction.undoOperations[0].data;
+            await settle();
+            check(false);
+            root.querySelector(".list").outerHTML = transaction.operations[0].data;
+            await settle();
+            check(true);
+        }
+
+        // 模拟重载、撤销重做和克隆粘贴；已有标记必须按恢复后的 style 重新推导。
+        root.innerHTML = original;
+        await settle();
+        check(true);
+        list = root.querySelector(".list");
+        const clone = list.cloneNode(true);
+        clone.style.direction = "ltr";
+        list.replaceWith(clone);
+        await settle();
+        check(false);
+        assert.equal(clone.classList.contains(rtlClass), false);
+        clone.style.direction = "rtl";
+        renderBlockDirection(clone);
+        check(true);
+        setAutoDirection(root, true);
+        check(true);
+        setAutoDirection(root, false);
+        check(true);
+
+        // 重复渲染及无关样式更新不能反复写入类名或造成观察器循环。
+        let classChanges = 0;
+        const observer = new MutationObserver(records => { classChanges += records.length; });
+        observer.observe(root, {subtree: true, attributes: true, attributeFilter: ["class"]});
+        renderBlockDirection(root);
+        renderBlockDirection(root);
+        root.style.outlineWidth = "1px";
+        clone.style.color = "red";
+        await settle();
+        assert.equal(classChanges, 0);
+        observer.disconnect();
+        destroyAutoDirection(root);
+        assert.equal(root.querySelector(`.${rtlClass}`), null);
+        assert.equal(clone.style.direction, "rtl");
+    }
+};
+
 const runElectron = async () => {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -134,11 +431,55 @@ const runElectron = async () => {
             path.join(__dirname, "../src/assets/scss/protyle/_content.scss")).css);
         await win.webContents.executeJavaScript(readFileSync(path.join(__dirname, "../stage/protyle/js/lute/lute.min.js"), "utf8"));
         await win.webContents.executeJavaScript(`(() => {
+            const module = {exports: {}};
+            new Function("exports", ${JSON.stringify(ts.transpileModule(
+                readFileSync(path.join(__dirname, "../src/protyle/render/blockDirection.ts"), "utf8"), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+                }).outputText)})(module.exports);
             const exports = {};
-            ${compiled}
+            new Function("exports", "require", ${JSON.stringify(compiled)})(exports, name => {
+                if (name === "./blockDirection") return module.exports;
+                throw new Error(name);
+            });
+            window.blockDirection = module.exports;
             window.direction = exports;
         })()`);
         await win.webContents.executeJavaScript(`(${runCases.toString()})()`);
+        for (const file of ["protyle/_wysiwyg.scss", "component/_typography.scss"]) {
+            await win.webContents.insertCSS(require("sass").compile(path.join(__dirname, "../src/assets/scss", file)).css);
+        }
+        const dragSource = ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/util/listDragTarget.ts"), "utf8"), {
+            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+        }).outputText;
+        await win.webContents.executeJavaScript(`(() => {const exports = {}; ${dragSource}; window.listDrag = exports;})()`);
+        await win.webContents.executeJavaScript(`(${runListCases.toString()})()`);
+        const transactionSource = ts.createSourceFile("transaction.ts", readFileSync(
+            path.join(__dirname, "../src/protyle/wysiwyg/transaction.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+        const batch = transactionSource.statements.find(statement => ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(declaration => declaration.name.getText() === "updateBatchTransaction"));
+        const batchJS = ts.transpileModule(batch.getText(), {
+            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+        }).outputText;
+        await win.webContents.executeJavaScript(`(() => {
+            window.directionTransactions = [];
+            window.updateBatchTransaction = new Function("renderBlockDirection", "Constants", "cleanHeadingNumberHTML", "transaction",
+                "const exports = {}; " + ${JSON.stringify(batchJS)} + "; return exports.updateBatchTransaction;")(
+                window.blockDirection.renderBlockDirection, {ATTRIBUTE_EDITING: "data-editing"}, html => html,
+                (protyle, operations, undoOperations) => window.directionTransactions.push({operations, undoOperations}));
+        })()`);
+        for (const entry of ["base", "mobile", "export"]) {
+            const css = require("sass").compile(path.join(__dirname, "../src/assets/scss", `${entry}.scss`), {
+                logger: require("sass").Logger.silent,
+            }).css;
+            const key = await win.webContents.insertCSS(css);
+            for (const theme of ["daylight", "midnight"]) {
+                const themeKey = await win.webContents.insertCSS(readFileSync(
+                    path.join(__dirname, "../appearance/themes", theme, "theme.css"), "utf8"));
+                await win.webContents.executeJavaScript(`(${runManualDirectionCases.toString()})(${entry === "export"})`);
+                await win.webContents.removeInsertedCSS(themeKey);
+            }
+            await win.webContents.removeInsertedCSS(key);
+        }
         console.log("Automatic direction cases passed");
     } catch (error) {
         console.error(error);

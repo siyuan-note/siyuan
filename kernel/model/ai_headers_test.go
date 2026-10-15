@@ -17,8 +17,8 @@ func TestResolveAIProviderHeaders(t *testing.T) {
 	previousConf := Conf
 	t.Cleanup(func() { Conf = previousConf })
 	Conf = &AppConf{
-		Secrets:   &conf.Secrets{Items: []*conf.Secret{{Name: "TOKEN", Value: "private-token", AllowedHosts: []string{"127.0.0.1"}}}},
-		Variables: &conf.Variables{Items: []*conf.Variable{{Name: "ROUTE", Value: "route-a"}}},
+		Secrets:   NewConfSection(&conf.Secrets{Items: []*conf.Secret{{Name: "TOKEN", Value: "private-token", AllowedHosts: []string{"127.0.0.1"}}}}),
+		Variables: NewConfSection(&conf.Variables{Items: []*conf.Variable{{Name: "ROUTE", Value: "route-a"}}}),
 	}
 	requests := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -48,8 +48,8 @@ func TestResolveAIProviderHeaders(t *testing.T) {
 	}
 	provider.BaseURL = server.URL + "/v1"
 	endpoint, _ := url.Parse(server.URL)
-	Conf.Secrets.Items[0].AllowedHosts = []string{endpoint.Hostname()}
-	Conf.Secrets.Items[0].Value = "private-token\r\ninjected: true"
+	Conf.Secrets.Load().Items[0].AllowedHosts = []string{endpoint.Hostname()}
+	Conf.Secrets.Load().Items[0].Value = "private-token\r\ninjected: true"
 	client = util.NewOpenAIClient("", provider.BaseURL, ResolveAIProviderHeaders(provider))
 	if _, err := client.ListModels(context.Background()); err == nil || strings.Contains(err.Error(), "private-token") {
 		t.Fatal("invalid resolved header must fail without exposing its value")

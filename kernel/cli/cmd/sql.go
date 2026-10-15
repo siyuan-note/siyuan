@@ -45,7 +45,7 @@ var sqlCmd = &cobra.Command{
 		if err := sql.CheckReadonlyStatement(stmt); err != nil {
 			return err
 		}
-		rows, err := sql.Query(stmt, limit)
+		rows, info, err := sql.QueryWithRowLimitInfo(stmt, limit)
 		if err != nil {
 			return err
 		}
@@ -56,6 +56,9 @@ var sqlCmd = &cobra.Command{
 			fmt.Println(string(data))
 		default:
 			printSQLResult(rows)
+		}
+		if info.Truncated {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Results truncated to %d rows; use LIMIT and OFFSET to paginate.\n", info.Limit)
 		}
 		return nil
 	},

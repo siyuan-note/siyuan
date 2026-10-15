@@ -1,6 +1,7 @@
 import {isTableLikeView} from "./viewType";
 import {Constants} from "../../../constants";
 import {applyPublishAVFolds, getPublishAVView, setPublishAVView} from "./publishState";
+import {applyReadonlyAVFolds} from "./readonlyState";
 import {getCardWidth} from "./gallery/style";
 import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
@@ -208,7 +209,12 @@ export const setAVLocateRequest = (blockElement: HTMLElement, request: IAVLocate
 };
 
 const getAVLocateRequest = (blockElement: HTMLElement) => {
-    return locateRequests.get(blockElement);
+    const request = locateRequests.get(blockElement);
+    if (request?.isValid && !request.isValid()) {
+        locateRequests.delete(blockElement);
+        return;
+    }
+    return request;
 };
 
 const clearAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {
@@ -237,6 +243,7 @@ export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => 
 };
 
 export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
+    applyReadonlyAVFolds(blockElement, data);
     if (window.siyuan.isPublish) {
         setPublishAVView(blockElement, data.viewID);
         applyPublishAVFolds(blockElement, data);

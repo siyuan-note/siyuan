@@ -120,8 +120,17 @@ func TestAPIContractHandlers(t *testing.T) {
 	for _, key := range []string{"albl", "blbl", "now", "1s", "xs", "1m", "xm", "1h", "xh", "1d", "xd", "1w", "xw", "1M", "xM", "1y", "2y", "xy", "max"} {
 		util.TimeLangs["en"][key] = "time"
 	}
-	model.Conf.FileTree, model.Conf.Sync = conf.NewFileTree(), conf.NewSync()
-	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewFileTree(), conf.NewSync()
+		model.Conf.FileTree.Store(confSectionValue0)
+		model.Conf.Sync.Store(confSectionValue1)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	const boxID, docID = "20260912000000-boxapi1", "20260912000001-docapi1"
 	box := &model.Box{ID: boxID}

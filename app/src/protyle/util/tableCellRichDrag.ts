@@ -83,7 +83,7 @@ export const bindTableCellRichDrag = (owner: IProtyle, cell: HTMLTableCellElemen
                 const key = drop.listTarget.isChild ? "dragTipListItemChild" :
                     drop.before ? "dragTipListItemBefore" : "dragTipListItemAfter";
                 showDragTip(window.siyuan.dragTitle || "", event.ctrlKey ? window.siyuan.languages.duplicateCopy :
-                    window.siyuan.languages[key].replace("${x}", targetText), event.clientX, event.clientY);
+                    window.siyuan.languages[key], event.clientX, event.clientY, targetText);
             }
         }
     }, {capture: true, signal});

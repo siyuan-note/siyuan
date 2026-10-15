@@ -47,9 +47,19 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 		}
 	}
 	model.Conf = model.NewAppConf()
-	model.Conf.NotebookCrypto, model.Conf.Sync, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
-	model.Conf.Editor, model.Conf.Export, model.Conf.Search = conf.NewEditor(), conf.NewExport(), conf.NewSearch()
-	*model.Conf.FileTree.BoxDocEnabled = true
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
+		model.Conf.NotebookCrypto = confSectionValue0
+		model.Conf.Sync.Store(confSectionValue1)
+		model.Conf.FileTree.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+		model.Conf.Editor.Store(confSectionValue0)
+		model.Conf.Export.Store(confSectionValue1)
+		model.Conf.Search.Store(confSectionValue2)
+	}
+	*model.Conf.FileTree.Load().BoxDocEnabled = true
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
@@ -68,7 +78,7 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	}
 	treenode.UpsertBlockTree(tree)
 	engine := gin.New()
-	engine.Use(boxLeaseMiddleware)
+	engine.Use(model.ControlConcurrency, boxLeaseMiddleware)
 	engine.POST("/api/export/exportTempContent", exportTempContent)
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var release sync.Once

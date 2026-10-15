@@ -32,6 +32,10 @@ func TestBuildTypeFilterSubTypes(t *testing.T) {
 		alias    string
 		want     string
 	}{
+		{"document", map[string]bool{"document": true}, nil, "", "(type = 'd')"},
+		{"documentAlias", map[string]bool{"document": true}, map[string]bool{"h2": true}, "b.", "(b.type = 'd')"},
+		{"documentAndParagraph", map[string]bool{"document": true, "paragraph": true}, nil, "", "(type IN ('d','p'))"},
+		{"documentAndHeading", map[string]bool{"document": true, "heading": true}, map[string]bool{"h2": true}, "", "(type IN ('d') OR (type = 'h' AND subtype IN ('h2')))"},
 		{"heading", map[string]bool{"heading": true}, map[string]bool{"h2": true}, "", "((type = 'h' AND subtype IN ('h2')))"},
 		{"list", map[string]bool{"list": true, "listItem": true}, map[string]bool{"list:o": true}, "", "(type IN ('i') OR (type = 'l' AND subtype IN ('o')))"},
 		{"listItem", map[string]bool{"list": true, "listItem": true}, map[string]bool{"listItem:t": true}, "", "(type IN ('l') OR (type = 'i' AND subtype IN ('t')))"},

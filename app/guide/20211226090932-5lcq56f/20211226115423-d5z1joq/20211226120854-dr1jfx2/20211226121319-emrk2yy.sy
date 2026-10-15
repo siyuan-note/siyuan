@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260928143000"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -1912,12 +1912,37 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20260928143000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "心智圖區塊"
+				}
+			]
+		},
+		{
+			"ID": "20261012014859-fnjexa9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014859-fnjexa9",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "定義與列表轉換說明見"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260921215916-cfx2ewc",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "心智圖區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -1932,6 +1957,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "點擊思維導圖工具列中的「鎖定視圖」後，禁止編輯、縮放和平移，在導圖上滑動或滾動滑鼠滾輪將捲動文件。點擊「解鎖視圖」可恢復操作。鎖定狀態隨區塊儲存。"
+				}
+			]
+		},
+		{
+			"ID": "20261003225941-6yr63oi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003225941-6yr63oi",
+				"updated": "20261003225941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）並點擊節點的摺疊按鈕，可統一摺疊或展開同一父節點下的兄弟分支。只要還有兄弟分支展開，就統一摺疊；全部摺疊時，則統一展開。更深層節點的摺疊狀態保持不變。一般點擊只切換目前節點。"
 				}
 			]
 		},
@@ -3096,6 +3153,227 @@
 			]
 		},
 		{
+			"ID": "20260930234403-vfgciw1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-vfgciw1",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯節點時，輸入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 並選擇「插入圖片或檔案」，即可上傳本機圖片，也可以直接貼上剪貼簿圖片。圖片會儲存為文件附件。多個頂層節點形成的虛擬中心標題仍為純文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-0kuzxlx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-0kuzxlx",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取關係線後，使用底部設定中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "箭頭方向"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "正向箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（從起點指向終點，預設）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反向箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（從終點指向起點）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雙向箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "無箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。切換方向會保留連接節點、關係文字與手動路徑，支援復原與重做，不影響父子節點之間的連線。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-wjlw51s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-wjlw51s",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取關係線後，空心圓表示連接起點，實心圓表示連接終點，與箭頭方向無關。沿對應節點的任一邊緣拖曳圓形控制點，可連續調整連接位置；拖到其他有效節點上則變更連接節點，支援滑鼠與觸控操作。放開後儲存一次可復原的修改。落在空白處、無效目標、另一端節點或既有的同向連線上時取消修改；無法避開節點或控制項的位置也不會儲存。未調整的連接點維持自動選擇；已調整的位置會隨節點文字尺寸與配置變化而移動。"
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-o2ih74q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-o2ih74q",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在關係線底部設定中點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢復自動接入"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可同時恢復兩端的自動連接點，並保留手動調整的中間路徑。按兩下線段上的拖曳控制點，只會恢復自動中間路徑，保留連接點設定。關係文字、樣式與箭頭方向不變。"
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-myqk0fn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-myqk0fn",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置變化導致已儲存的手動路徑無法使用時，會先保留指定連接點並暫時使用自動路徑；指定連接點也無法使用時，才暫時使用自動連接點，並提示具體是哪項設定無法使用。已儲存的設定不會刪除，配置恢復可用後會重新使用。唯讀視圖與匯出使用相同的繪製規則，不顯示調整控制點；唯讀視圖也會顯示回退提示。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-x8m40zw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-x8m40zw",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將滑鼠移到心智圖外框上即可顯示邊框外的小尺寸控制點：拖曳右側中間的控制點調整寬度，拖曳底部中間的控制點調整高度，拖曳右下角的圓角控制點同時調整寬高；觸控螢幕可直接拖曳控制點。此操作調整心智圖區塊在文件中的尺寸，不改變畫布縮放比例。放開後儲存一次可復原的修改；按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或取消觸控操作可恢復原尺寸。仍可透過區塊選單設定寬度和高度。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-ytql4qf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-ytql4qf",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "唯讀、鎖定視圖與全螢幕狀態下不顯示尺寸控制點。心智圖作為超級區塊的直接子區塊時，只顯示底部高度控制點；寬度透過超級區塊的分欄分隔線調整。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-6pycwgr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-6pycwgr",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取範圍的第一個節點，點選心智圖工具列中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "概要"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再選擇末端同層節點，即可新增方括號與概要文字。範圍必須連續，支援單節點概要和範圍巢狀包含，範圍可以相互包含，但不能交叉。括號包圍可見子樹及內層概要。批次建立時，點選概要按鈕後在畫布空白處框選；也可以先點選空白處，再逐一選取節點。預覽依父節點和連續範圍分組，同時選取父子節點時以最外層節點為準。既有相同概要會略過，交叉範圍會阻止建立。點選確認按鈕或按 Enter 一次建立全部預覽概要，並可一次復原；Esc 取消。文件更新會取消待確認的選取範圍。行動端也可依相同步驟操作。選擇範圍時也可使用上下方向鍵選擇末端節點，Enter 確認範圍，Esc 取消。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-nenflr8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-nenflr8",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按兩下概要文字，或選取概要後點選底部的編輯按鈕，即可修改文字；Enter 儲存，Esc 取消。可以透過底部工具列修改顏色或刪除概要，也可以按 Delete 刪除選取的概要。這些操作皆支援復原與重做。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-99amoq6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-99amoq6",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "轉成列表後，概要隱藏但資料保留，轉回心智圖後恢復顯示。範圍內插入的節點自動納入概要，刪除成員或將成員移出範圍會縮小範圍；剩一個成員仍保留概要，全部刪除時一併刪除概要。概要文字屬於附加說明，不作為可獨立搜尋或引用的正文區塊。思源格式的 HTML 與 PDF 預覽會顯示概要。 刪除內層概要會保留節點和外層概要。巢狀配置需要新版用戶端，舊版用戶端會保留配置並顯示來源列表。"
+				}
+			]
+		},
+		{
 			"ID": "20211226122008-81ngeqd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -3293,7 +3571,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-9j816g5",
-				"updated": "20260905124213"
+				"updated": "20261003234156"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3327,7 +3605,39 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使用頁籤右側的選單新增、複製、刪除或排序頁籤，切換頂部或左側版面配置。選取的頁籤與版面配置會隨文件儲存、同步；唯讀頁面的切換僅於本次檢視生效。取消頁籤版面配置會依序保留所有標題與內文。"
+					"Data": "使用頁籤右側的選單新增、複製、刪除或排序頁籤，切換頂部或左側版面配置。選取的頁籤與版面配置會隨文件儲存、同步；鎖定編輯的文件會在本機工作空間記住最後檢視的頁籤，不修改文件預設頁籤；發佈頁面、核心唯讀模式及加密筆記本僅於目前工作階段記住。取消頁籤版面配置會依序保留所有標題與內文。"
+				}
+			]
+		},
+		{
+			"ID": "20261003234156-6krnh0y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003234156-6krnh0y",
+				"updated": "20261003234156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在頁籤項選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "聚焦"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，只顯示該項及其標題，反向鏈接也限定於該項；是否包含子區塊沿用現有設定。選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "退出聚焦"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後恢復完整頁籤群組，聚焦項內部的巢狀頁籤仍可正常切換。"
 				}
 			]
 		},
@@ -3727,7 +4037,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-8glkpvq",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -3755,12 +4065,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0002",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點擊儲存格即可編輯；新增表格後可直接輸入，無需再次點擊。儲存格僅含一個普通段落時，"
+					"Data": "點擊儲存格即可編輯；新增表格後可直接輸入，無需再次點擊。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3769,16 +4079,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 移到下一列的同欄；表格末列則在表格後插入段落。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 切換儲存格，"
+					"Data": " 依正文編輯規則建立新段落、繼續列表項目或在程式碼區塊內換行。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3787,7 +4088,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 在儲存格內換行。包含標題、多個段落等內容時，Enter 依目前內容類型在儲存格內編輯；列表和程式碼區塊使用對應的換行與縮排操作。關閉提示後按 "
+					"Data": " 在段落內插入軟換行。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切換儲存格；列表和程式碼區塊保留對應的縮排與取消縮排操作。關閉提示後按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3796,7 +4115,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或點擊儲存格外結束編輯，內容自動儲存。"
+					"Data": " 或點擊儲存格外結束編輯，內容自動儲存。將表格複製為文字時，會保留儲存格內段落之間的空行。"
 				}
 			]
 		},
@@ -4055,7 +4374,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-zl8npgo",
-				"updated": "20211226122008"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -4072,6 +4391,20 @@
 				"id": "20220909095422-c32trma",
 				"updated": "20220909095422"
 			}
+		},
+		{
+			"ID": "20261002002136-cjh38oq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002002136-cjh38oq",
+				"updated": "20261002002136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將滑鼠移到區塊上即可顯示邊框外的小尺寸控制點：拖曳右側中間的控制點調整寬度，拖曳底部中間的控制點調整高度，拖曳右下角的圓角控制點同時調整寬高。觸控螢幕可直接拖曳控制點，單獨調整寬度或高度時會保留另一項尺寸。"
+				}
+			]
 		},
 		{
 			"ID": "20211226122008-je7yc30",
@@ -5349,7 +5682,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260928090424-testof8",
-				"updated": "20260928090424"
+				"updated": "20260929221400"
 			},
 			"Children": [
 				{
@@ -5381,7 +5714,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中啟用此功能，開關位於「從右到左（RTL）」下方，預設關閉。段落和標題根據首個具有強方向性的字元自動選擇從右到左或從左到右，開頭的數字、標點和表情不決定方向。手動設定的區塊層級和行內方向優先。清單標記位置和表格欄位順序維持原有設定。預覽及 HTML、PDF 匯出也會套用自動文字方向。"
+					"Data": " 中啟用此功能，開關位於「從右到左（RTL）」下方，預設關閉。段落和標題根據首個具有強方向性的字元自動選擇從右到左或從左到右，開頭的數字、標點和表情不決定方向。手動設定的區塊層級和行內方向優先。各清單項目（包含子清單項目）獨立跟隨自身首個正文區塊的方向，覈取方塊、項目符號、編號及縮排同步調整到對應一側，手動設定的清單方向優先。表格欄位順序維持原有設定。預覽及 HTML、PDF 匯出也會套用自動文字方向。"
 				}
 			]
 		}

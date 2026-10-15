@@ -6,6 +6,7 @@ import codecs
 from contextlib import contextmanager, nullcontext, redirect_stderr, redirect_stdout
 from datetime import datetime
 import importlib.util
+import getpass
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import warnings
 import zipfile
 
 
@@ -179,6 +181,9 @@ def run(command, cwd, env=None, capture=False, interactive=False):
         if any(re.search(r'[\r\n"&|<>^%!]', value) for value in command):
             raise BuildError("批处理参数包含不支持的 shell 特殊字符")
         invocation = subprocess.list2cmdline(command)
+        # Windows 批处理依赖此标识启用局部变量和延迟展开，自动启动环境可能未提供。
+        env = dict(os.environ if env is None else env)
+        env.setdefault("OS", "Windows_NT")
     else:
         invocation = command
     if not capture:
@@ -259,6 +264,43 @@ def verify_signature(path, thumbprint):
     powershell(script, {"SIYUAN_SIGNED_FILE": str(path), "SIYUAN_SIGNING_SHA1": thumbprint})
 
 
+def read_signing_pin(value=None):
+    if value is None:
+        try:
+            # 禁止 getpass 在没有可隐藏输入的终端时退回明文输入。
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", getpass.GetPassWarning)
+                value = getpass.getpass("Windows 签名 PIN（不回显）：")
+        except (EOFError, getpass.GetPassWarning):
+            raise BuildError("无法隐藏输入签名 PIN，请从终端运行或通过 SIYUAN_SIGNING_PIN 提供") from None
+    if not value or any(character in value for character in ("\0", "\r", "\n")):
+        raise BuildError("签名 PIN 不能为空或包含换行、空字符")
+    return value
+
+
+def check_signing_pin(pin, thumbprint):
+    # 认证请求仅通过标准输入传递，不经命令行、配置文件或发布日志。
+    env = dict(os.environ)
+    for key in ("SIYUAN_SIGNING_PIN", "SIYUAN_RELEASE_SIGN_PIN", "PSModulePath"):
+        env.pop(key, None)
+    command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
+               str(ROOT / "scripts/release-sign-windows.ps1")]
+    request = json.dumps({"pin": pin, "thumbprint": thumbprint, "files": []}) + "\n"
+    for attempt in range(2):
+        try:
+            result = subprocess.run(command, cwd=ROOT, env=env, input=request, encoding="utf-8", errors="replace",
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120,
+                                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except (OSError, subprocess.TimeoutExpired):
+            raise BuildError("Windows 签名认证未完成，请检查签名设备和 Windows PowerShell") from None
+        if result.returncode == 0:
+            return
+        if result.returncode != 20 or attempt:
+            raise BuildError("Windows 签名认证失败，请检查 PIN、设备和证书；PIN 错误不会自动重试")
+        # 仅重试已识别的设备通信中断，不重试 PIN 错误。
+        time.sleep(1)
+
+
 def copy_verified(source, destination, allowed_root):
     source, destination, allowed_root = Path(source), Path(destination), Path(allowed_root).resolve()
     if not destination.resolve().is_relative_to(allowed_root) or destination.resolve() == allowed_root:
@@ -325,6 +367,7 @@ def source_preflight(args, version):
 
 
 def create_mobile_assets(destination, version):
+    run([sys.executable, ROOT / "scripts/prepare-ocr.py"], ROOT)
     destination.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
         for group in VERIFY.GROUPS:
@@ -340,6 +383,8 @@ def create_mobile_assets(destination, version):
                 if path.is_symlink() or not path.is_file() or any(
                         part in {".git", ".idea", ".gitignore", ".DS_Store"} for part in relative.parts):
                     continue
+                if relative.parts[:3] == ("stage", "ocr", "runtime"):
+                    continue
                 archive.write(path, relative.as_posix())
         for filename in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
             archive.write(ROOT / filename, filename)
@@ -352,6 +397,7 @@ class Builder:
         self.artifacts = []
         self.thumbprint = None
         self.wsl_root = None
+        self.signing_pin = None
 
     def wsl(self, command, directory=None, capture=False):
         prefix = ["wsl.exe"]
@@ -359,9 +405,11 @@ class Builder:
             prefix += ["--distribution", self.args.wsl_distro]
         prefix += ["--user", self.args.wsl_user, "--cd", directory or self.args.wsl_repo,
                    "--exec", "bash", "-lc", "exec " + shlex.join([str(item) for item in command])]
+        # WSL 诊断输出统一为 UTF-8，与日志解码一致。
+        env = dict(os.environ, WSL_UTF8="1")
         if command[:2] == ["git", "fetch"]:
-            return run(prefix, ROOT, capture=capture, interactive=True)
-        return run(prefix, ROOT, capture=capture)
+            return run(prefix, ROOT, env=env, capture=capture, interactive=True)
+        return run(prefix, ROOT, env=env, capture=capture)
 
     def stage(self, key):
         return self.record.stage(key) if self.record else nullcontext()
@@ -392,7 +440,11 @@ class Builder:
         source_preflight(self.args, self.version)
         if "windows" in self.args.platforms:
             self.thumbprint = certificate_thumbprint(self.args.certificate_subject, self.args.certificate_sha1)
-            print(f"Windows 签名证书：{self.thumbprint}；签名时请按系统提示输入 YubiKey PIN", flush=True)
+            if self.signing_pin is not None:
+                check_signing_pin(self.signing_pin, self.thumbprint)
+                print(f"Windows 签名证书：{self.thumbprint}；PIN 已验证，后续自动签名", flush=True)
+            else:
+                print(f"Windows 签名证书：{self.thumbprint}；签名时请按系统提示输入 YubiKey PIN", flush=True)
         if {"linux", "harmony"} & set(self.args.platforms):
             remote_head = self.wsl(["git", "rev-parse", "HEAD"], capture=True)
             if local_head != remote_head:
@@ -459,11 +511,17 @@ class Builder:
         self.check_kernel(kernel, arch)
         copy_verified(ROOT / "app/elevator" / f"elevator-{arch}.exe", kernel.parent / "elevator.exe", self.work)
         generated_config = self.work / f"windows-{arch}.json"
-        run(["node", ROOT / "scripts/release-windows-config.cjs", ROOT / "app" / config,
-             kernel.parent, output, self.thumbprint, generated_config], ROOT / "app")
+        config_command = ["node", ROOT / "scripts/release-windows-config.cjs", ROOT / "app" / config,
+                          kernel.parent, output, self.thumbprint, generated_config]
+        if self.signing_pin is not None:
+            config_command.append(ROOT / "scripts/release-sign-windows.cjs")
+        run(config_command, ROOT / "app")
         signing_env = dict(os.environ)
+        signing_env.setdefault("ELECTRON_MIRROR", "https://npmmirror.com/mirrors/electron/")
         for key in ("CSC_LINK", "CSC_KEY_PASSWORD", "WIN_CSC_LINK", "WIN_CSC_KEY_PASSWORD"):
             signing_env.pop(key, None)
+        if self.signing_pin is not None:
+            signing_env["SIYUAN_RELEASE_SIGN_PIN"] = self.signing_pin
         run(["pnpm", "exec", "electron-builder", "--config", generated_config, "--win",
              "--arm64" if arch == "arm64" else "--x64", "--publish=never"], ROOT / "app", signing_env)
         suffix = "-arm64" if arch == "arm64" else ""
@@ -570,10 +628,12 @@ class Builder:
         env["PATH"] = str(self.args.deveco / "tools/node") + os.pathsep + env.get("PATH", "")
         run([self.args.deveco / "tools/ohpm/bin/ohpm.bat", "install", "--all"], self.args.harmony_dir, env)
         command = [self.args.deveco / "tools/node/node.exe", self.args.deveco / "tools/hvigor/bin/hvigorw.js",
-                   "--mode", "project", "-p", "product=default", "-p", "buildMode=release", "--no-daemon"]
-        run(command + ["clean"], self.args.harmony_dir, env)
+                   "-p", "product=default", "-p", "buildMode=release", "--no-daemon"]
+        # 模块级清理移除 CMake 中间库，项目级清理移除 APP 输出。
+        run(command + ["--mode", "module", "-p", "module=entry@default", "clean"], self.args.harmony_dir, env)
+        run(command + ["--mode", "project", "clean"], self.args.harmony_dir, env)
         started = time.time()
-        run(command + ["assembleApp"], self.args.harmony_dir, env)
+        run(command + ["--mode", "project", "assembleApp"], self.args.harmony_dir, env)
         app = self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app"
         self.collect([app], "鸿蒙", started)
 
@@ -596,6 +656,7 @@ def parser():
                         help="持久化发布记录根目录，默认主仓库同级 release-records；每次执行创建独立子目录")
     result.add_argument("--certificate-subject", default="Yunnan Liandi Technology Co., Ltd.", help="Windows 证书主题，可用指纹替代")
     result.add_argument("--certificate-sha1", help="Windows 签名证书的 40 位公开指纹，不是密码")
+    result.add_argument("--signing-ui", action="store_true", help="Windows 签名沿用系统 PIN 弹窗，不使用自动签名")
     result.add_argument("--arm64-cc", type=Path, default=Path("D:/Program Files/llvm-mingw-20240518-ucrt-x86_64/bin/aarch64-w64-mingw32-gcc.exe"))
     result.add_argument("--wsl-distro", help="WSL 发行版名称，默认当前默认发行版")
     result.add_argument("--wsl-user", default="d")
@@ -612,6 +673,8 @@ def main():
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     args = parser().parse_args()
+    # 读取后立即移出父进程环境，避免后续无关构建命令继承输入 PIN。
+    signing_pin = os.environ.pop("SIYUAN_SIGNING_PIN", None)
     args.platforms = list(dict.fromkeys(args.platforms.split(",")))
     if not args.platforms or set(args.platforms) - set(PLATFORMS):
         raise BuildError(f"平台只能是：{', '.join(PLATFORMS)}")
@@ -640,23 +703,29 @@ def main():
         return 0
     if os.name != "nt":
         raise BuildError("此编排脚本需要在 Windows 上执行，Linux 和鸿蒙内核通过 WSL 构建")
+    signing_pin = read_signing_pin(signing_pin) if "windows" in args.platforms and not args.signing_ui else None
     record = create_record(args, version)
-    with record.session():
-        print(f"版本：{version}；平台：{', '.join(args.platforms)}；收集目录：{args.output}")
-        execute_build(args, version, record)
+    try:
+        with record.session():
+            print(f"版本：{version}；平台：{', '.join(args.platforms)}；收集目录：{args.output}")
+            execute_build(args, version, record, signing_pin)
+    finally:
+        signing_pin = None
     return 0
 
 
-def execute_build(args, version, record):
+def execute_build(args, version, record, signing_pin=None):
     with record.stage("preflight"):
         with tempfile.TemporaryDirectory(prefix="siyuan-release-preflight-") as temporary:
             probe = Builder(args, version, Path(temporary), record)
+            probe.signing_pin = signing_pin
             probe.preflight()
     work = Path(tempfile.mkdtemp(prefix=f"siyuan-release-{version}-{datetime.now():%Y%m%d}-"))
     record.data["work_directory"] = str(work)
     record.save()
     builder = Builder(args, version, work, record)
     builder.thumbprint, builder.wsl_root = probe.thumbprint, probe.wsl_root
+    builder.signing_pin = probe.signing_pin
     print(f"本次构建目录：{work}；失败时保留产物供检查", flush=True)
     if set(args.platforms) & {"windows", "android", "harmony"}:
         with record.stage("frontend"):

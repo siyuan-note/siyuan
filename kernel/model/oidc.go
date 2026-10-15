@@ -230,11 +230,8 @@ func OIDCStart(c *gin.Context, request apicontract.SystemOIDCStartRequest) (ret 
 	return apicontract.Success(data)
 }
 
-func OIDCCallback(c *gin.Context, request apicontract.SystemOIDCCallbackRequest) apicontract.Response[apicontract.BinaryContent] {
-	request.State = c.Query("state")
-	request.Code = c.Query("code")
-	request.Error = c.Query("error")
-	state := request.State
+func OIDCCallback(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.BinaryContent] {
+	state := c.Query("state")
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, repeated, err := claimOIDCTransaction(c.Request.Context(), state, workspaceSession.OIDCBinding, true)
 	if err != nil {
@@ -255,13 +252,13 @@ func OIDCCallback(c *gin.Context, request apicontract.SystemOIDCCallbackRequest)
 			return writeOIDCCallbackPage(c, false, oidcUserMessage())
 		}
 	}
-	if providerError := request.Error; providerError != "" {
+	if providerError := c.Query("error"); providerError != "" {
 		logging.LogWarnf("OIDC provider rejected the login: %s", providerError)
 		message := oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, message)
 		return writeOIDCCallbackPage(c, false, message)
 	}
-	if err = finishOIDCExchange(c, transaction, request.Code); err != nil {
+	if err = finishOIDCExchange(c, transaction, c.Query("code")); err != nil {
 		logging.LogErrorf("finish OIDC authorization code exchange failed: %s", err)
 		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
 		return writeOIDCCallbackPage(c, false, oidcUserMessage())

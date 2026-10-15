@@ -10,6 +10,7 @@ export interface IProviderPreset {
     responsesSupport: AIResponsesSupport;
     region?: "china" | "international";
     icon?: string;
+    authType?: "chatgpt";
 }
 
 // 本机命令行提供方不使用 HTTP 端点，此地址仅作为标识，便于识别提供方类型。
@@ -17,6 +18,7 @@ export const CLAUDE_CODE_BASE_URL = "claude-code://local";
 
 export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/openai.svg"},
+    {id: "chatgpt", name: "ChatGPT", baseURL: "https://api.openai.com/v1", authType: "chatgpt", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/openai.svg"},
     {id: "anthropic", name: "Anthropic", baseURL: "https://api.anthropic.com/v1", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/anthropic.svg"},
     {
         id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", responsesSupport: "supported",
@@ -52,6 +54,10 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "zhipu-coding", name: "Zhipu AI (GLM Coding Plan)", baseURL: "https://open.bigmodel.cn/api/coding/paas/v4", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/zhipu.svg"},
     {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/gemini.svg"},
     {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/mistral.svg"},
+    {
+        id: "xiaomi-mimo", name: "Xiaomi MiMo", baseURL: "https://api.xiaomimimo.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/xiaomi-mimo.png",
+        protocolBaseURLs: {"anthropic-messages": "https://api.xiaomimimo.com/anthropic"},
+    },
     {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/siliconflow.svg"},
     {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", responsesSupport: "supported", icon: "/stage/images/ai-providers/openrouter.svg"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator", responsesSupport: "experimental", icon: "/stage/images/ai-providers/groq.svg"},
@@ -84,7 +90,7 @@ export const getResponsesSupport = (baseURL: string): AIResponsesSupport =>
     findProviderPreset(baseURL)?.responsesSupport || "experimental";
 
 export const getDefaultProviderProtocol = (presetId: string) =>
-    presetId === "anthropic" ? "anthropic-messages" : presetId === "openai" ? "openai-responses" :
+    presetId === "anthropic" ? "anthropic-messages" : ["openai", "chatgpt"].includes(presetId) ? "openai-responses" :
         presetId === "claude-code" ? "claude-code" : "openai";
 
 // 本机命令行协议由本机 Claude Code 可执行文件提供服务，移动端内核没有对应可执行文件。

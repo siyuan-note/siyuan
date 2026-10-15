@@ -163,7 +163,14 @@ if (!process.versions.electron) {
             dialogHost = new BrowserWindow({show: false, width: 900, height: 700,
                 webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true}});
             await dialogHost.loadURL("data:text/html,<html><body></body></html>");
-            const runDialog = code => dialogHost.webContents.executeJavaScript(code);
+            const runDialog = async code => {
+                const result = await dialogHost.webContents.executeJavaScript(`(async () => {
+                    try { return {value: await (0, eval)(${JSON.stringify(code)})}; }
+                    catch (error) { return {error: error.stack || String(error)}; }
+                })()`);
+                if (result.error) throw new Error(result.error);
+                return result.value;
+            };
             const ts = require("typescript");
             const compile = name => ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
@@ -173,6 +180,7 @@ if (!process.versions.electron) {
                 window.siyuan = {languages: ${JSON.stringify(strings)}, config: {lang: "en"}, dialogs: [], zIndex: 1,
                     menus: {menu: {element: document.createElement("div"), remove() {}}}};
                 const modules = {
+                    "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
                     electron: require("electron"),
                     "../util/genID": {genUUID: () => "test-dialog"},
                     "./moveResize": {moveResize() {}},
@@ -190,7 +198,7 @@ if (!process.versions.electron) {
                 };
                 modules["../util/escape"] = load(${JSON.stringify(compile("util/escape.ts"))});
                 modules["../util/zIndex"] = load(${JSON.stringify(compile("util/zIndex.ts"))});
-                modules["./index"] = load(${JSON.stringify(compile("dialog/index.ts"))});
+                modules["./index"] = load(${JSON.stringify(require("../tests/fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(compile("dialog/index.ts")))});
                 window.openRemoteConnection = load(${JSON.stringify(compile("dialog/remoteConnection.ts"))}).openRemoteConnection;
                 window.openRemoteConnection(${JSON.stringify(origin)});
             })()`);

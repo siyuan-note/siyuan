@@ -6,7 +6,7 @@
 		"id": "20260903150000-3qa6edk",
 		"title": "連線至遠端內核",
 		"type": "doc",
-		"updated": "20260914195107"
+		"updated": "20260929104942"
 	},
 	"Children": [
 		{"ID": "20260903150000-jrf9aw4", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-jrf9aw4", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
@@ -26,15 +26,85 @@
 		{"ID": "20260908082237-rkm8fy4", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-rkm8fy4", "updated": "20260908110648"}, "Children": [{"Type": "NodeText", "Data": "使用命令列時，完全結束桌面用戶端後，可使用參數 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port] --trust-remote-extensions"}, {"Type": "NodeText", "Data": " 啟動。此命令列參數僅信任本次指定的伺服器，不會修改圖形介面儲存的信任設定，也不會自動加入開機啟動參數。命令列啟動不會讀取圖形介面的信任設定。執行中的實例不會因再次啟動而改變信任狀態；如需撤銷，請完全結束後移除此參數重新啟動。"}]},
 		{"ID": "20260908082237-q1w5tx8", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-q1w5tx8", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "啟用後，遠端工作空間中的外掛程式、佈景主題指令碼、圖示指令碼和 JavaScript 程式碼片段會在本機桌面環境中執行，能夠透過 Node.js 讀寫本機檔案和執行程式。請僅在信任伺服器及其提供的擴充程式碼（包括後續更新）時使用。"}]},
 		{"ID": "20260908082237-hz1tyvi", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-hz1tyvi", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "此選項開放外掛程式、集市、自訂佈景主題、圖示、字型和程式碼片段。內建前端、佈景主題和圖示仍由用戶端提供，小工具及其他遠端模式限制維持不變。外掛程式碼在用戶端執行，工作空間位於伺服器；依賴本機工作空間路徑、原生模組或外部程式的外掛程式可能需要調整，無法保證所有桌面外掛程式都相容。"}]},
-		{"ID": "20260903150000-uleg2f1", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-uleg2f1", "updated": "20260914195107"}, "Children": [{"Type": "NodeText", "Data": "功能限制"}]},
+		{
+			"ID": "20260929104942-6kzfymp",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260929104942-6kzfymp",
+				"updated": "20260929104942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件匯入匯出"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260929104942-lg6he5t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929104942-lg6he5t",
+				"updated": "20260929104942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "遠端模式支援匯入 SiYuan .sy.zip 和 Markdown ZIP 壓縮檔，以及將文件匯出為 SiYuan .sy.zip、Markdown ZIP、圖片和 HTML ZIP 壓縮檔。選擇本機壓縮檔後，檔案會上傳至遠端核心；匯出檔案透過目前的連線下載，並儲存至你在本機選擇的位置。可以使用文件樹中的匯入匯出選單，新增筆記本和資料遷移對話框也提供壓縮檔匯入入口。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-uleg2f1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-uleg2f1",
+				"updated": "20260929104942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "功能限制"
+				}
+			]
+		},
 		{"ID": "20260903150000-ovlxdje", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-ovlxdje", "updated": "20260903205342"}, "Children": [{"Type": "NodeText", "Data": "遠端模式不支援以下功能，本機模式不受影響："}]},
 		{
 			"ID": "20260903150000-lw8m6qj",
 			"Type": "NodeList",
 			"ListData": {},
-			"Properties": {"id": "20260903150000-lw8m6qj", "updated": "20260914195107"},
+			"Properties": {"id": "20260903150000-lw8m6qj", "updated": "20260929104942"},
 			"Children": [
-				{"ID": "20260903150000-iaab0bj", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-iaab0bj", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-rj4jvo4", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-rj4jvo4", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "匯入和匯出"}]}]},
+				{
+					"ID": "20260903150000-iaab0bj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-iaab0bj",
+						"updated": "20260929104942"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-rj4jvo4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-rj4jvo4",
+								"updated": "20260929104942"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "直接匯入 Markdown 檔案或資料夾、Obsidian 儲存庫；匯出 Word 和 PDF；完整資料、設定和備份的匯入匯出"
+								}
+							]
+						}
+					]
+				},
 				{"ID": "20260903150000-o4d17am", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-o4d17am", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-uqpqmld", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-uqpqmld", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "檔案剪貼簿操作"}]}]},
 				{"ID": "20260903150000-7489c2g", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-7489c2g", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-gopw68q", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-gopw68q", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "依賴用戶端本機路徑或伺服器絕對路徑的操作，例如在檔案管理器中顯示，以及透過路徑拖入或開啟檔案；透過檔案選擇器進行一般資源上傳仍可使用"}]}]},
 				{"ID": "20260903150000-yn3mxw7", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-yn3mxw7", "updated": "20260908082237"}, "Children": [{"ID": "20260903150000-m8ot8ql", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-m8ot8ql", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "預設不支援桌面端外掛程式、集市和自訂外觀；可透過上述信任參數啟用遠端外掛程式、集市、自訂佈景主題、圖示、字型和程式碼片段，小工具仍不可用"}]}]},

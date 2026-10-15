@@ -16,6 +16,7 @@ func TestNewAIAddsKeylessProviderFromEnvironment(t *testing.T) {
 	t.Setenv("SIYUAN_OPENAI_API_BASE_URL", "http://127.0.0.1:8080/v1")
 
 	ai := NewAI()
+	ApplyAIEnvironment(ai)
 	if len(ai.Providers) != 1 {
 		t.Fatalf("provider count = %d, want 1", len(ai.Providers))
 	}

@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -26,6 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/chatgpt"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -82,7 +84,7 @@ func resolveAIProvider(request apicontract.AIProviderRequest) (*conf.Provider, e
 	}
 
 	providerID := request.Provider
-	for _, provider := range model.Conf.AI.Providers {
+	for _, provider := range model.Conf.AI.Load().Providers {
 		if provider != nil && provider.ID == providerID {
 			return provider, nil
 		}
@@ -241,8 +243,14 @@ func testModelContract(c *gin.Context, req apicontract.AIModelRequest) apicontra
 		return testClaudeCodeModel(provider, req.Model)
 	}
 
-	available, matched, err := util.TestModel(
-		provider.APIKey, provider.BaseURL, provider.Protocol, req.Model, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	var available []string
+	var matched bool
+	if provider.AuthType == "chatgpt" {
+		available, matched, err = testChatGPTModel(c.Request.Context(), provider, req.Model)
+	} else {
+		available, matched, err = util.TestModel(
+			provider.APIKey, provider.BaseURL, provider.Protocol, req.Model, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	}
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]
@@ -301,7 +309,7 @@ func aiTestModelFailureMessage(baseURL string, err error) string {
 	if !util.IsZhipuCodingPlanBillingError(baseURL, err) {
 		return message
 	}
-	if hint := model.Conf.Language(410); "" != hint {
+	if hint := model.Conf.Language(421); "" != hint {
 		message += " " + hint
 	}
 	return message
@@ -313,7 +321,7 @@ var testEmbeddingModel = contractHandler(apicontract.AITestEmbeddingModel, testE
 
 func testEmbeddingModelContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[apicontract.AIEmbeddingTestData] {
 
-	embedding := model.Conf.AI.Embedding
+	embedding := model.Conf.AI.Load().Embedding
 	if nil == embedding || "" == embedding.APIKey || "" == embedding.BaseURL || "" == embedding.Name {
 		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
 		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
@@ -339,7 +347,7 @@ var testRerankModel = contractHandler(apicontract.AITestRerankModel, testRerankM
 
 func testRerankModelContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[apicontract.AIRerankTestData] {
 
-	rerank := model.Conf.AI.Rerank
+	rerank := model.Conf.AI.Load().Rerank
 	if nil == rerank || "" == rerank.APIKey || "" == rerank.Endpoint || "" == rerank.Name {
 		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
 		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
@@ -380,11 +388,24 @@ func listModelsContract(c *gin.Context, req apicontract.AIProviderRequest) apico
 
 	if util.IsClaudeCodeProtocol(provider.Protocol) {
 		// 本机命令行的可用模型由命令行自身管理，不提供服务端清单
-		message := model.Conf.Language(413)
+		message := model.Conf.Language(423)
 		return apicontract.Success(apicontract.AIModelsData{Models: []string{}, ContextLengths: map[string]int{}, Msg: &message})
 	}
 
-	metadata, err := util.ListProviderModels(provider.APIKey, provider.BaseURL, provider.Protocol, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	var metadata []util.AvailableModel
+	displayNames := map[string]string{}
+	if provider.AuthType == "chatgpt" {
+		var catalog []chatgpt.Model
+		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Duration(provider.RequestTimeout)*time.Second)
+		defer cancel()
+		catalog, err = util.ChatGPTService().Models(ctx, provider.AccountID)
+		for _, item := range catalog {
+			metadata = append(metadata, util.AvailableModel{ID: item.ID})
+			displayNames[item.ID] = item.DisplayName
+		}
+	} else {
+		metadata, err = util.ListProviderModels(provider.APIKey, provider.BaseURL, provider.Protocol, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	}
 	models := make([]string, 0, len(metadata))
 	contextLengths := map[string]int{}
 	for _, item := range metadata {
@@ -395,7 +416,7 @@ func listModelsContract(c *gin.Context, req apicontract.AIProviderRequest) apico
 			}
 		}
 	}
-	result := apicontract.AIModelsData{Models: models, ContextLengths: contextLengths}
+	result := apicontract.AIModelsData{Models: models, ContextLengths: contextLengths, DisplayNames: displayNames}
 	if nil != err {
 		message := err.Error()
 		result.Msg = &message
@@ -428,17 +449,19 @@ func mcpEnvironmentVariablesContract(c *gin.Context, req apicontract.EmptyReques
 var mcpOAuthAuthorize = contractHandler(apicontract.AIMCPOAuthAuthorize, mcpOAuthAuthorizeContract)
 
 func mcpOAuthAuthorizeContract(c *gin.Context, req apicontract.AIMCPIDRequest) apicontract.Response[apicontract.Null] {
+	confAISnapshot := model.Conf.LoadAI()
+
 	ret := gulu.Ret.NewResult()
 
 	serverID := req.ID
-	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+	if confAISnapshot == nil || confAISnapshot.MCP == nil {
 		ret.Code = -1
 		ret.Msg = "MCP server not found"
 		return contractFailure[apicontract.Null](ret)
 	}
-	for _, server := range model.Conf.AI.MCP.Servers {
+	for _, server := range confAISnapshot.MCP.Servers {
 		if server.ID == serverID && server.Enabled && server.Type == "http" {
-			mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, []string{serverID})
+			mcpclient.ReconnectMCPAsync(confAISnapshot.MCP.Servers, []string{serverID}, []string{serverID})
 			return contractFailure[apicontract.Null](ret)
 		}
 	}
@@ -450,6 +473,8 @@ func mcpOAuthAuthorizeContract(c *gin.Context, req apicontract.AIMCPIDRequest) a
 var mcpOAuthDisconnect = contractHandler(apicontract.AIMCPOAuthDisconnect, mcpOAuthDisconnectContract)
 
 func mcpOAuthDisconnectContract(c *gin.Context, req apicontract.AIMCPIDRequest) apicontract.Response[apicontract.Null] {
+	confAISnapshot := model.Conf.LoadAI()
+
 	ret := gulu.Ret.NewResult()
 
 	serverID := req.ID
@@ -457,8 +482,8 @@ func mcpOAuthDisconnectContract(c *gin.Context, req apicontract.AIMCPIDRequest) 
 		ret.Code = -1
 		ret.Msg = err.Error()
 	}
-	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
-		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, nil)
+	if confAISnapshot != nil && confAISnapshot.MCP != nil {
+		mcpclient.ReconnectMCPAsync(confAISnapshot.MCP.Servers, []string{serverID}, nil)
 	}
 	return contractFailure[apicontract.Null](ret)
 }

@@ -30,6 +30,7 @@ type EndpointSchema struct {
 	Method                  string                   `json:"method"`
 	Path                    string                   `json:"path"`
 	Handler                 string                   `json:"handler"`
+	Authorization           []string                 `json:"authorization"`
 	Body                    BodyMode                 `json:"body"`
 	Request                 *Schema                  `json:"request"`
 	Response                *Schema                  `json:"response"`
@@ -551,6 +552,9 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		if !definition.Authorization.Valid() {
+			return nil, fmt.Errorf("contract needs explicit authorization: %s", definition.Name)
+		}
 		if err := validatePluginServiceDefinition(definition); err != nil {
 			return nil, err
 		}
@@ -703,7 +707,7 @@ func BuildBundle() (*Bundle, error) {
 		failure.AdditionalProperties = true
 		response := &Schema{AnyOf: []*Schema{success, failure}}
 		for _, method := range ExpandMethods(definition.Methods) {
-			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
+			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name, Authorization: definition.Authorization.Policies(),
 				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket,
 				AdditionalErrorStatuses: definition.AdditionalErrorStatuses, SSE: sse, Proxy: definition.Proxy, PluginService: definition.PluginService, ContentVariants: definition.ContentVariants, EmptyResponseStatuses: definition.EmptyResponseStatuses})
 		}

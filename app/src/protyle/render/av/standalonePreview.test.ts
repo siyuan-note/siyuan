@@ -19,13 +19,19 @@ for (const layout of ["table", "gallery", "kanban"]) {
                 return {code: 0};
             },
         };
+        const cards: Record<string, unknown> = {};
+        const dependencies = () => new Proxy(imports, {get: (target, key: string) =>
+            target[key] || ((): undefined => undefined)});
+        runInNewContext(transpileModule(readFileSync("src/protyle/render/av/cardLayout.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+        }).outputText, {exports: cards, require: dependencies, document: {activeElement: null}});
         runInNewContext(transpileModule(readFileSync(
             `src/protyle/render/av/${layout === "table" ? "" : layout + "/"}render.ts`, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText, {
             exports: methods,
             window: {siyuan: {}},
-            require: () => new Proxy(imports, {get: (target, key: string) => target[key] || ((): undefined => undefined)}),
+            require: (name: string) => name === "../cardLayout" ? cards : dependencies(),
         });
         const block = {
             style: {}, firstElementChild: {innerHTML: "loading"},

@@ -28,6 +28,7 @@ func TestAPIContractAIDisabled(t *testing.T) {
 	engine := gin.New()
 	for path, handler := range map[string]gin.HandlerFunc{
 		"/api/ai/chatGPT":            chatGPT,
+		"/api/ai/ocr":                aiOCR,
 		"/api/ai/editor/chat":        aiEditorChat,
 		"/api/ai/agent/chat":         agentChat,
 		"/api/ai/testModel":          testModel,
@@ -35,6 +36,14 @@ func TestAPIContractAIDisabled(t *testing.T) {
 		"/api/ai/testRerankModel":    testRerankModel,
 		"/api/ai/testDecisionModel":  testDecisionModel,
 		"/api/ai/listModels":         listModels,
+		"/api/ai/chatgpt/accounts":   chatGPTAccounts,
+		"/api/ai/chatgpt/start":      chatGPTStart,
+		"/api/ai/chatgpt/status":     chatGPTStatus,
+		"/api/ai/chatgpt/cancel":     chatGPTCancel,
+		"/api/ai/chatgpt/logout":     chatGPTLogout,
+		"/api/ai/chatgpt/remove":     chatGPTRemove,
+		"/api/ai/chatgpt/import":     chatGPTImport,
+		"/api/ai/chatgpt/export":     chatGPTExport,
 		"/api/ai/mcpOAuthAuthorize":  mcpOAuthAuthorize,
 		"/api/ai/reindexEmbedding":   reindexEmbedding,
 		"/api/ai/agent/saveSession":  saveSession,

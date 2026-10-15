@@ -1,0 +1,130 @@
+.protyle-block-resize {
+  position: absolute;
+  z-index: 6;
+  touch-action: none;
+  user-select: none;
+  box-sizing: border-box;
+  opacity: 0;
+  color: var(--b3-theme-on-surface-light);
+
+  &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    box-sizing: border-box;
+  }
+
+  &[data-resize-axis="width"] {
+    width: 12px;
+    height: min(40px, 50%);
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+
+    &::after {
+      width: 3px;
+      height: min(24px, 100%);
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 2px;
+      background-color: currentColor;
+    }
+  }
+
+  &[data-resize-axis="height"] {
+    height: 12px;
+    width: min(40px, 50%);
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ns-resize;
+
+    &::after {
+      height: 3px;
+      width: min(24px, 100%);
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+      background-color: currentColor;
+    }
+  }
+
+  &[data-resize-axis="both"] {
+    width: 24px;
+    height: 24px;
+    right: -16px;
+    bottom: -16px;
+    cursor: nwse-resize;
+
+    &::after {
+      width: 16px;
+      height: 16px;
+      right: 9px;
+      bottom: 9px;
+      border-right: 3px solid currentColor;
+      border-bottom: 3px solid currentColor;
+      border-bottom-right-radius: 10px;
+    }
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--b3-theme-on-surface);
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 1px solid var(--b3-theme-primary);
+    outline-offset: -2px;
+  }
+
+  &.touch-resize-active {
+    opacity: 1;
+    color: var(--b3-theme-primary);
+    background-color: transparent;
+  }
+}
+
+@media (any-pointer: coarse) {
+  // 外侧命中区域为触屏加宽，装饰尺寸保持不变。
+  .protyle-block-resize {
+    &[data-resize-axis="width"] {
+      width: 20px;
+      right: -20px;
+      height: min(48px, 50%);
+    }
+
+    &[data-resize-axis="height"] {
+      height: 20px;
+      bottom: -20px;
+      width: min(48px, 50%);
+    }
+
+    &[data-resize-axis="both"] {
+      width: 32px;
+      height: 32px;
+      right: -24px;
+      bottom: -24px;
+
+      &::after {
+        right: 17px;
+        bottom: 17px;
+      }
+    }
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .protyle-block-resize {
+    opacity: 1;
+  }
+}
+
+@media print {
+  .protyle-block-resize {
+    display: none;
+  }
+}

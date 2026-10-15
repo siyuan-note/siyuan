@@ -18,7 +18,7 @@ import (
 
 func TestExportFootnotesAcrossNotebooksFormats(t *testing.T) {
 	setupExportPublishTest(t)
-	Conf.Appearance = conf.NewAppearance()
+	Conf.Appearance.Store(conf.NewAppearance())
 	oldAppearance := util.AppearancePath
 	util.AppearancePath = t.TempDir()
 	t.Cleanup(func() { util.AppearancePath = oldAppearance })
@@ -81,8 +81,13 @@ func TestExportFootnotesAfterEmbedExpansion(t *testing.T) {
 
 func TestExportFootnotesAfterMerge(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor, Conf.Appearance = conf.NewExport(), conf.NewEditor(), conf.NewAppearance()
-	Conf.Search = conf.NewSearch()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewExport(), conf.NewEditor(), conf.NewAppearance()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+		Conf.Appearance.Store(confSectionValue2)
+	}
+	Conf.Search.Store(conf.NewSearch())
 	oldAppearance := util.AppearancePath
 	util.AppearancePath = t.TempDir()
 	t.Cleanup(func() { util.AppearancePath = oldAppearance })
@@ -134,8 +139,12 @@ func TestExportFootnotesPruneAfterAbbreviation(t *testing.T) {
 func TestExportBlockAssetsEmbeddedScopes(t *testing.T) {
 	setupExportPublishTest(t)
 	prepareAssetDownloadRepoTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
-	Conf.FileTree = conf.NewFileTree()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	const boxID = "20260918000003-box0004"
 	source := newFootnoteTestDoc(t, boxID, "source")

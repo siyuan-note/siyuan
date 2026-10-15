@@ -58,9 +58,19 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 	}
 	model.Conf = model.NewAppConf()
 	model.Conf.Lang = "en"
-	model.Conf.NotebookCrypto, model.Conf.Sync, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
-	model.Conf.Editor, model.Conf.Export, model.Conf.Search = conf.NewEditor(), conf.NewExport(), conf.NewSearch()
-	model.Conf.Api = &conf.API{Token: "duplicate-tree-test"}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
+		model.Conf.NotebookCrypto = confSectionValue0
+		model.Conf.Sync.Store(confSectionValue1)
+		model.Conf.FileTree.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+		model.Conf.Editor.Store(confSectionValue0)
+		model.Conf.Export.Store(confSectionValue1)
+		model.Conf.Search.Store(confSectionValue2)
+	}
+	model.Conf.Api.Store(&conf.API{Token: "duplicate-tree-test"})
 	model.Conf.AccessAuthCode = "application-password"
 	langData, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
 	if err != nil {

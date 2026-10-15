@@ -70,26 +70,30 @@ func DeferredSyncAssets() ([]*entity.File, error) {
 }
 
 func deferredSyncAssets() ([]*entity.File, error) {
+	confRepoSnapshot := Conf.LoadRepo()
+
 	exists, err := assetDownloadStateExists()
 	if err != nil || !exists {
 		return nil, err
 	}
-	if Conf.Repo == nil || len(Conf.Repo.Key) == 0 {
+	if confRepoSnapshot == nil || len(confRepoSnapshot.Key) == 0 {
 		return nil, errors.New(Conf.Language(377))
 	}
-	return dejavu.ReadDeferredAssets(assetDownloadStatePath(), Conf.Repo.Key)
+	return dejavu.ReadDeferredAssets(assetDownloadStatePath(), confRepoSnapshot.Key)
 }
 
 // validateAssetDownloadSourceScope 在公布新的账号身份前保留未完成的资源与历史恢复来源。
 func validateAssetDownloadSourceScope(scope string) error {
+	confRepoSnapshot := Conf.LoadRepo()
+
 	exists, err := assetDownloadStateExists()
 	if err != nil || !exists {
 		return err
 	}
-	if Conf.Repo == nil || len(Conf.Repo.Key) == 0 {
+	if confRepoSnapshot == nil || len(confRepoSnapshot.Key) == 0 {
 		return errors.New(Conf.Language(377))
 	}
-	stored, err := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Key)
+	stored, err := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), confRepoSnapshot.Key)
 	if err != nil || stored == scope {
 		return err
 	}
@@ -97,10 +101,12 @@ func validateAssetDownloadSourceScope(scope string) error {
 }
 
 func checkAssetDownloadAccess() error {
-	if Conf.Sync == nil || !Conf.Sync.Enabled || Conf.GetUser() == nil {
+	confSyncSnapshot := Conf.LoadSync()
+
+	if confSyncSnapshot == nil || !confSyncSnapshot.Enabled || Conf.GetUser() == nil {
 		return errors.New(Conf.Language(376))
 	}
-	switch Conf.Sync.Provider {
+	switch confSyncSnapshot.Provider {
 	case conf.ProviderSiYuan:
 		if !IsSubscriber() {
 			return errors.New(Conf.Language(376))
@@ -383,8 +389,7 @@ func SetSyncAssetDownloadMode(mode int) error {
 			return err
 		}
 	}
-	Conf.Sync.AssetDownloadMode = mode
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.AssetDownloadMode = mode })
 	return nil
 }
 
@@ -419,9 +424,11 @@ func openRepoFileWithAssets(repo *dejavu.Repo, file *entity.File) ([]byte, error
 
 // readRepoFileWithAssets 将仓库实例的创建和历史分块补齐纳入来源读锁。
 func readRepoFileWithAssets(fileID string) ([]byte, *entity.File, error) {
+	confRepoSnapshot := Conf.LoadRepo()
+
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
-	if Conf.Repo == nil || len(Conf.Repo.Key) == 0 {
+	if confRepoSnapshot == nil || len(confRepoSnapshot.Key) == 0 {
 		return nil, nil, errors.New(Conf.Language(26))
 	}
 	repo, err := newRepositoryWithAssetSourceLocked()

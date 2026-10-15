@@ -31,7 +31,7 @@ func TestIOSBootSyncPerception(t *testing.T) {
 	util.SetBooted()
 	util.IsUILoaded.Store(true)
 	lastAutoPurgeRepo = time.Now()
-	Conf.Sync.Perception = true
+	Conf.Sync.Load().Perception = true
 	getPetals()
 
 	// 使用本地仓库和独立感知连接，验证完整启动同步流程而不访问云服务。
@@ -87,7 +87,7 @@ func TestIOSBootSyncPerception(t *testing.T) {
 					}
 					return
 				}
-				if msg.Cmd != "synced" || msg.Synced != Conf.Sync.Synced {
+				if msg.Cmd != "synced" || msg.Synced != Conf.Sync.Load().Synced {
 					t.Fatalf("unexpected sync notification: %+v", msg)
 				}
 				count++
@@ -105,7 +105,7 @@ func TestIOSBootSyncPerception(t *testing.T) {
 	assertResult := func(want int32) {
 		t.Helper()
 		if result := BootSyncSucc.Load(); result != want {
-			t.Fatalf("boot sync result = %d, want %d: %s", result, want, Conf.Sync.Stat)
+			t.Fatalf("boot sync result = %d, want %d: %s", result, want, Conf.Sync.Load().Stat)
 		}
 	}
 	assertPublished := func(name string) {
@@ -120,23 +120,23 @@ func TestIOSBootSyncPerception(t *testing.T) {
 	}
 
 	writeLocal("ios-local-edit.txt")
-	Conf.Sync.Enabled = false
+	Conf.Sync.Load().Enabled = false
 	BootSyncData()
 	assertResult(-1)
 	assertNotifications(0)
-	Conf.Sync.Enabled = true
-	Conf.Sync.Mode = 3
+	Conf.Sync.Load().Enabled = true
+	Conf.Sync.Load().Mode = 3
 	BootSyncData()
 	assertResult(-1)
 	assertNotifications(0)
-	Conf.Sync.Mode = 1
+	Conf.Sync.Load().Mode = 1
 
-	key := Conf.Repo.Key
-	Conf.Repo.Key = nil
+	key := Conf.Repo.Load().Key
+	Conf.Repo.Load().Key = nil
 	BootSyncData()
 	assertResult(1)
 	assertNotifications(0)
-	Conf.Repo.Key = key
+	Conf.Repo.Load().Key = key
 	BootSyncData()
 	assertResult(0)
 	assertNotifications(1)
@@ -146,14 +146,14 @@ func TestIOSBootSyncPerception(t *testing.T) {
 	assertResult(0)
 	assertNotifications(0)
 
-	Conf.Sync.Mode = 2
+	Conf.Sync.Load().Mode = 2
 	writeLocal("manual-mode-edit.txt")
 	BootSyncData()
 	assertResult(0)
 	assertNotifications(0)
 	assertPublished("manual-mode-edit.txt")
 
-	Conf.Sync.Mode = 1
+	Conf.Sync.Load().Mode = 1
 	writeLocal("normal-sync-edit.txt")
 	BootSyncSucc.Store(1)
 	SyncData(false)

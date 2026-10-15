@@ -156,21 +156,41 @@ func TestFileAnnotationExportEncryptedCompatibility(t *testing.T) {
 func TestFileAnnotationExportRejectsInvalidData(t *testing.T) {
 	originalConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	t.Cleanup(func() { Conf = originalConf })
 	oldWorkspace, oldDataDir := util.WorkspaceDir, util.DataDir
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	t.Cleanup(func() { util.WorkspaceDir, util.DataDir = oldWorkspace, oldDataDir })
-	for _, data := range []string{"invalid", "{}", `{"` + testFileAnnotationID + `":{"pages":[]}}`,
+	for _, data := range []string{"invalid", `{"` + testFileAnnotationID + `":{}}`, `{"` + testFileAnnotationID + `":{"pages":[]}}`,
 		`{"` + testFileAnnotationID + `":{"pages":[{"index":-1}]}}`} {
 		writeFileAnnotationTestAsset(t, filepath.Join(util.DataDir, "assets/a.pdf"), []byte(data))
 		node := newFileAnnotationTestNode("assets/a.pdf/" + testFileAnnotationID)
 		root := &ast.Node{Type: ast.NodeDocument, ID: "20260912000000-root001"}
 		root.AppendChild(node.Parent)
 		tree := &parse.Tree{Root: root, ID: root.ID}
-		if _, err := exportTree(tree, false, false, false, false, 0, 0, 0, "#", "#", "", "", false, "", false, false, true, nil); err == nil {
+		if _, err := exportTree(tree, treeExportOptions{
+			Config: conf.Export{
+				BlockRefMode:          0,
+				BlockEmbedMode:        0,
+				FileAnnotationRefMode: 0,
+				TagOpenMarker:         "#",
+				TagCloseMarker:        "#",
+				BlockRefTextLeft:      "",
+				BlockRefTextRight:     "",
+				AddTitle:              false,
+				InlineMemo:            false,
+			},
+			WYSIWYG:          false,
+			RichTableCells:   false,
+			KeepFold:         false,
+			AVHiddenCol:      false,
+			CustomTitle:      "",
+			AddDocAnchorSpan: false,
+			References:       nil,
+			AVPublishFilter:  nil,
+		}); err == nil {
 			t.Fatalf("invalid annotation data exported: %s", data)
 		}
 		if node.Parent == nil || node.Previous != nil {

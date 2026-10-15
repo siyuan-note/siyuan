@@ -7,7 +7,7 @@
 		"id": "20230429115206-ob8nl8t",
 		"title": "術語表",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260930224728"
 	},
 	"Children": [
 		{
@@ -824,7 +824,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115527-imhpeay",
-				"updated": "20230429115527"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -1042,7 +1042,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115527-fa5g1fg",
-				"updated": "20230429115527"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -1070,12 +1070,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115527-aflpo8c",
-				"updated": "20230429115527"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過釘住窗口還可以實現該窗口位於所有應用程序之上，以便用戶更好的利用有限的螢幕空間。"
+					"Data": "透過置頂視窗還可以讓該視窗位於所有應用程式之上，以便使用者更有效地利用有限的螢幕空間。"
 				}
 			]
 		},

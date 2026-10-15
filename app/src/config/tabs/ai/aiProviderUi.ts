@@ -1,3 +1,5 @@
+import {toggleMenu} from "../../../menus/menuToggle";
+import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import type {AIModelTestData} from "../../../types/api";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
 import {confirmDialog} from "../../../dialog/confirmDialog";
@@ -11,6 +13,7 @@ import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
 import {parseClaudeCodeEnv, stringifyClaudeCodeEnv} from "./aiProviderEnv";
 import {resolveProviderTestResult} from "./aiProviderTestResult";
 import {isMobile} from "../../../util/functions";
+import {genChatGPTAccountHTML, mountChatGPTAccount} from "./chatGPTAccount";
 import {
     CLAUDE_CODE_BASE_URL,
     findProviderPreset,
@@ -37,17 +40,19 @@ export interface IGroupedModelPicker {
 
 const PROVIDER_CATEGORIES = ["official", "aggregator", "local", "custom"] as const;
 
-const escapeHTML = (value: string) => Lute.EscapeHTMLStr(value ?? "");
+const escapeHTML = (value: string) => escapeHtmlTextAndAttr(value ?? "");
 
 const cloneProvider = (provider: Config.IProvider): Config.IProvider =>
     JSON.parse(JSON.stringify(provider)) as Config.IProvider;
 
-const findPreset = (provider: Config.IProvider) => findProviderPreset(provider.baseURL);
+const findPreset = (provider: Config.IProvider) => provider.authType === "chatgpt"
+    ? PROVIDER_PRESETS.find(preset => preset.id === "chatgpt") : findProviderPreset(provider.baseURL);
 
 // 本机命令行提供方的默认执行配置：自动探测 claude 路径，默认只读
 const defaultClaudeCodeConfig = (): Config.IClaudeCodeProvider => ({cliPath: "", permissionMode: "readonly"});
 
 const requiresAPIKey = (provider: Config.IProvider) => {
+    if (provider.authType === "chatgpt") { return false; }
     const preset = findPreset(provider);
     return preset?.category === "official" || preset?.category === "aggregator";
 };
@@ -101,20 +106,30 @@ const getProviderViews = (root: HTMLElement) => {
         element instanceof HTMLElement && element.classList.contains("config-ai-provider__view"));
 };
 
-const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
-    const views = view ? [view] : getProviderViews(root);
+export const removeProviderView = (root: HTMLElement, view?: HTMLElement, onRemoved?: () => void) => {
+    // 暂停的决策详情保留未保存草稿，只有显式关闭该详情时才销毁。
+    const views = view ? [view] : getProviderViews(root).filter(item =>
+        !item.hasAttribute("data-decision-profile-view") || !item.classList.contains("fn__none"));
     views.forEach((item) => {
+        let removed = false;
+        const remove = () => {
+            if (removed) { return; }
+            removed = true;
+            item.remove();
+            onRemoved?.();
+            root.dispatchEvent(new CustomEvent("siyuan-setting-detail-closed", {bubbles: true}));
+        };
         item.classList.remove("config__view--show");
         item.addEventListener("transitionend", (event) => {
             if (event.propertyName === "opacity") {
-                item.remove();
+                remove();
             }
         });
-        window.setTimeout(() => item.remove(), 300);
+        window.setTimeout(remove, 300);
     });
 };
 
-const createProviderView = (root: HTMLElement, backLabel: string, stacked = false) => {
+export const createProviderView = (root: HTMLElement, backLabel: string, stacked = false) => {
     if (!stacked) {
         removeProviderView(root);
     }
@@ -206,12 +221,13 @@ const openProviderCatalog = (root: HTMLElement) => {
                 displayName: preset.name,
                 baseURL: preset.baseURL,
                 apiKey: "",
+                authType: preset.authType,
                 protocol: getDefaultProviderProtocol(preset.id),
                 requestTimeout: 120,
                 models: [],
             };
             const description = preset.baseURL
-                ? escapeHTML(preset.baseURL)
+                ? escapeHTML(preset.authType === "chatgpt" ? window.siyuan.languages.chatGPTAccount : preset.baseURL)
                 : window.siyuan.languages.apiBaseURLTip;
             return `<div class="b3-card" data-preset-id="${preset.id}">
     <div class="b3-card__img">${getProviderAvatarHTML(provider, preset)}</div>
@@ -275,82 +291,90 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
 </div>`).join("");
 };
 
-const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) => {
-    const menu = new Menu();
-    menu.addItem({
-        iconHTML: "",
-        type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter">
-    <input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
-    <div class="fn__hr"></div>
-    <div class="b3-list fn__flex-1 b3-list--background">
-        ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${escapeHTML(model)}">
-    <span class="b3-list-item__text">${escapeHTML(model)}</span>
-    ${model === modelInput.value ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
-</div>`).join("")}
-        <div class="b3-list--empty fn__none" data-type="empty">${window.siyuan.languages.emptyContent}</div>
-    </div>
-</div>`,
-        bind(element) {
-            const listElement = element.querySelector<HTMLElement>(".b3-list");
-            const searchInput = element.querySelector<HTMLInputElement>("input");
-            const emptyElement = element.querySelector<HTMLElement>("[data-type='empty']");
-            const selectModel = (item: HTMLElement) => {
-                modelInput.value = item.dataset.model;
-                modelInput.dispatchEvent(new InputEvent("input", {bubbles: true}));
-                menu.close();
-                modelInput.focus();
-            };
-            const filterModels = () => {
-                const keyword = searchInput.value.toLowerCase().trim();
-                let firstVisibleItem: HTMLElement;
-                listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
-                    item.classList.remove("b3-list-item--focus");
-                    const hidden = !item.dataset.model.toLowerCase().includes(keyword);
-                    item.classList.toggle("fn__none", hidden);
-                    if (!hidden && !firstVisibleItem) {
-                        firstVisibleItem = item;
-                    }
-                });
-                firstVisibleItem?.classList.add("b3-list-item--focus");
-                emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
-            };
-            filterModels();
-            searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
-                event.stopPropagation();
-                if (event.isComposing) {
-                    return;
-                }
-                upDownHint(listElement, event);
-                if (event.key === "Enter") {
-                    const item = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
-                    if (item) {
-                        selectModel(item);
-                    }
-                    event.preventDefault();
-                } else if (event.key === "Escape") {
-                    menu.close();
-                    modelInput.focus();
-                    event.preventDefault();
-                }
-            });
-            searchInput.addEventListener("input", (event: InputEvent) => {
-                if (!event.isComposing) {
+const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], displayNames: Record<string, string> = {},
+                                toggle = true) => {
+    toggleMenu({
+        target: modelInput,
+        toggle,
+        build: (_menu, session) => {
+            const menu = new Menu();
+            menu.addItem({
+                iconHTML: "",
+                type: "empty",
+                label: `<div class="fn__flex-column b3-menu__filter">
+            <input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
+            <div class="fn__hr"></div>
+            <div class="b3-list fn__flex-1 b3-list--background">
+                ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${escapeHTML(model)}">
+            <span class="b3-list-item__text">${escapeHTML(displayNames[model] || model)}</span>
+            ${model === modelInput.value ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+        </div>`).join("")}
+                <div class="b3-list--empty fn__none" data-type="empty">${window.siyuan.languages.emptyContent}</div>
+            </div>
+        </div>`,
+                bind(element) {
+                    const listElement = element.querySelector<HTMLElement>(".b3-list");
+                    const searchInput = element.querySelector<HTMLInputElement>("input");
+                    const emptyElement = element.querySelector<HTMLElement>("[data-type='empty']");
+                    const selectModel = (item: HTMLElement) => {
+                        modelInput.value = item.dataset.model;
+                        modelInput.dispatchEvent(new InputEvent("input", {bubbles: true}));
+                        menu.close();
+                        modelInput.focus();
+                    };
+                    const filterModels = () => {
+                        const keyword = searchInput.value.toLowerCase().trim();
+                        let firstVisibleItem: HTMLElement;
+                        listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
+                            item.classList.remove("b3-list-item--focus");
+                            const hidden = !item.dataset.model.toLowerCase().includes(keyword);
+                            item.classList.toggle("fn__none", hidden);
+                            if (!hidden && !firstVisibleItem) {
+                                firstVisibleItem = item;
+                            }
+                        });
+                        firstVisibleItem?.classList.add("b3-list-item--focus");
+                        emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
+                    };
                     filterModels();
-                }
+                    searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
+                        event.stopPropagation();
+                        if (event.isComposing) {
+                            return;
+                        }
+                        upDownHint(listElement, event);
+                        if (event.key === "Enter") {
+                            const item = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
+                            if (item) {
+                                selectModel(item);
+                            }
+                            event.preventDefault();
+                        } else if (event.key === "Escape") {
+                            menu.close();
+                            modelInput.focus();
+                            event.preventDefault();
+                        }
+                    });
+                    searchInput.addEventListener("input", (event: InputEvent) => {
+                        if (!event.isComposing) {
+                            filterModels();
+                        }
+                    });
+                    searchInput.addEventListener("compositionend", filterModels);
+                    listElement.addEventListener("click", (event) => {
+                        const item = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item");
+                        if (item) {
+                            selectModel(item);
+                        }
+                    });
+                },
             });
-            searchInput.addEventListener("compositionend", filterModels);
-            listElement.addEventListener("click", (event) => {
-                const item = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item");
-                if (item) {
-                    selectModel(item);
-                }
-            });
+            const rect = modelInput.getBoundingClientRect();
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput}));
+            menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+
         },
     });
-    const rect = modelInput.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput});
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
 };
 
 const showTestResult = (data: AIModelTestData) => {
@@ -375,8 +399,22 @@ const showTestResult = (data: AIModelTestData) => {
             ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", escapeHTML(result.message))
             : window.siyuan.languages.testConnectionFail,
         undefined,
-        "error",
+        data.matched ? "info" : "error",
     );
+};
+
+export const openChatGPTProvider = () => {
+    const open = () => {
+        const root = document.querySelector<HTMLElement>("#aiProviderCardsBlock");
+        if (!root || root.closest(".fn__none")) { return false; }
+        const existing = window.siyuan.config.ai.providers.find(provider => provider.authType === "chatgpt");
+        openProviderDetail(root.parentElement, existing?.id, PROVIDER_PRESETS.find(preset => preset.id === "chatgpt"));
+        return true;
+    };
+    if (open()) { return; }
+    const observer = new MutationObserver(() => { if (open()) { observer.disconnect(); } });
+    observer.observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ["class"]});
+    window.setTimeout(() => observer.disconnect(), 5000);
 };
 
 const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IProviderPreset) => {
@@ -392,6 +430,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         displayName: preset?.name || "",
         baseURL: preset?.baseURL || "",
         apiKey: "",
+        authType: preset?.authType,
         protocol: getDefaultProviderProtocol(preset?.id || "custom"),
         requestTimeout: 120,
         models: [],
@@ -414,6 +453,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     <div class="config-group">
         <div class="config-title">${window.siyuan.languages.aiProviderSettings}</div>
         <div class="config-items">
+            ${draft.authType === "chatgpt" ? genChatGPTAccountHTML() : ""}
             <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.customDisplayName)}
                 <span class="fn__space"></span>
@@ -520,6 +560,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
     const headersInput = view.querySelector<HTMLTextAreaElement>("[data-type='providerHeaders']");
     const validateHeaders = () => {
+        if (draft.authType === "chatgpt") { delete draft.headers; return true; }
         const headers = parseProviderHeaders(headersInput.value);
         if (headers === null) {
             headersInput.focus();
@@ -538,9 +579,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
     const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
     let availableModels: string[] = [];
+    let availableModelDisplayNames: Record<string, string> = {};
     let availableModelContextLengths: Record<string, number> = {};
     let hasFetchedModels = false;
     let fetchingModels = false;
+    let chatGPTAccountReady = false;
     let draggingModelIndex: number | undefined;
     let dropModelTarget: {index: number; after: boolean} | undefined;
     const updateResponsesCompatibility = () => {
@@ -556,6 +599,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             : window.siyuan.languages.experimentalFeature;
     };
     const validateAPIKey = () => {
+        if (draft.authType === "chatgpt" && !draft.accountID) {
+            showMessage(window.siyuan.languages.chatGPTConnect);
+            return false;
+        }
         if (!validateHeaders() || !validateClaudeCodeEnv()) {
             return false;
         }
@@ -569,7 +616,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const getAvailableModelContextLength = (name: string) =>
         availableModelContextLengths[name] || availableModelContextLengths[name.toLowerCase()] || 0;
     const updateModelActionButtons = () => {
-        const disabled = fetchingModels || !draft.baseURL.trim();
+        const disabled = fetchingModels || !draft.baseURL.trim() || (draft.authType === "chatgpt" && !draft.accountID);
         addModelButton.disabled = disabled;
         fetchModelsButton.disabled = disabled;
     };
@@ -709,7 +756,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         modelInput.focus();
         if (availableModels.length > 0) {
-            openAvailableModelMenu(modelInput, availableModels);
+            openAvailableModelMenu(modelInput, availableModels, availableModelDisplayNames, false);
         }
     };
 
@@ -727,18 +774,20 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         hasFetchedModels = true;
         fetchingModels = true;
+        const requestedAccountID = draft.accountID;
         const icon = fetchModelsButton.querySelector<SVGSVGElement>(".b3-button__icon");
         updateModelActionButtons();
         confirmButton.disabled = true;
         icon?.classList.add("fn__rotate");
         fetchPost("/api/ai/listModels", {providerConfig: draft}, (response) => {
-            if (!view.isConnected) {
+            if (!view.isConnected || draft.accountID !== requestedAccountID) {
                 return;
             }
             if (response.code !== 0) {
                 return;
             }
             const data = response.data;
+            availableModelDisplayNames = data.displayNames || {};
             const responseModels: unknown[] = Array.isArray(data.models) ? data.models : [];
             const models = responseModels
                 .filter((name): name is string => typeof name === "string" && name.trim() !== "")
@@ -763,7 +812,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 );
                 return;
             }
-            availableModels = [...new Set(models)].sort((first, second) => first.localeCompare(second));
+            availableModels = [...new Set(models)];
+            if (draft.authType !== "chatgpt") { availableModels.sort((first, second) => first.localeCompare(second)); }
             draft.models.forEach((model) => {
                 const contextLength = getAvailableModelContextLength(model.name);
                 if (contextLength > 0) {
@@ -775,7 +825,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     id: "",
                     enabled: true,
                     name: availableModels[0],
-                    displayName: "",
+                    displayName: data.displayNames?.[availableModels[0]] || "",
                 };
                 const contextLength = getAvailableModelContextLength(model.name);
                 if (contextLength > 0) {
@@ -798,9 +848,30 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             updateModelActionButtons();
             confirmButton.disabled = false;
             icon?.classList.remove("fn__rotate");
-            onFinished?.();
+            if (draft.authType === "chatgpt" && draft.accountID !== requestedAccountID) {
+                if (chatGPTAccountReady) { fetchModels(); }
+            } else { onFinished?.(); }
         });
     };
+
+    if (draft.authType === "chatgpt") {
+        for (const selector of ["[data-provider-field='baseURL']", "[data-provider-field='apiKey']",
+            "[data-provider-field='protocol']", "[data-type='providerHeaders']"]) {
+            view.querySelector(selector)?.closest(".config-item")?.classList.add("fn__none");
+        }
+        mountChatGPTAccount(view, draft, (ready, refreshModels) => {
+            chatGPTAccountReady = ready;
+            if (refreshModels) {
+                availableModels = [];
+                availableModelDisplayNames = {};
+                availableModelContextLengths = {};
+                hasFetchedModels = false;
+            }
+            updateModelActionButtons();
+            renderDraftModels(modelsContainer, draft.models, availableModels);
+            if (ready && refreshModels && draft.models.length === 0 && !fetchingModels) { fetchModels(); }
+        });
+    }
 
     const leaveDetail = () => {
         removeProviderView(root, view);
@@ -863,8 +934,15 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                         : 0;
                 return;
             }
+            const previousName = draft.models[modelIndex].name;
             draft.models[modelIndex][modelField] = target.value;
             if (modelField === "name") {
+                const model = draft.models[modelIndex];
+                if (!model.displayName || model.displayName === availableModelDisplayNames[previousName]) {
+                    model.displayName = availableModelDisplayNames[target.value] || "";
+                    const displayInput = target.closest("[data-model-index]")?.querySelector<HTMLInputElement>("[data-model-field='displayName']");
+                    if (displayInput) { displayInput.value = model.displayName; }
+                }
                 const contextLength = getAvailableModelContextLength(target.value);
                 if (contextLength > 0) {
                     draft.models[modelIndex].contextLength = contextLength;
@@ -912,7 +990,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         event.preventDefault();
-        openAvailableModelMenu(target, availableModels);
+        openAvailableModelMenu(target, availableModels, availableModelDisplayNames, false);
     });
 
     view.addEventListener("click", (event) => {
@@ -944,7 +1022,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         const modelIndex = Number(actionElement.closest<HTMLElement>("[data-model-index]")?.dataset.modelIndex);
         if (action === "selectModel" && availableModels.length > 0) {
-            openAvailableModelMenu(actionElement as HTMLInputElement, availableModels);
+            openAvailableModelMenu(actionElement as HTMLInputElement, availableModels, availableModelDisplayNames);
             return;
         }
         if (action === "deleteModel" && draft.models[modelIndex]) {
@@ -1052,10 +1130,11 @@ export const mountProviderCards = (root: HTMLElement) => {
     });
 };
 
-// 本机命令行不提供图片生成能力，图片生成场景不列出其模型
+// 本机命令行与套餐账户都不提供图片生成能力，图片生成场景不列出其模型
 const getEnabledModelGroups = (group?: ModelPickerGroup) => window.siyuan.config.ai.providers
     .filter((provider) => provider.enabled)
-    .filter((provider) => group !== "imageGeneration" || !isClaudeCodeProtocol(provider.protocol))
+    .filter((provider) => group !== "imageGeneration" ||
+        (!isClaudeCodeProtocol(provider.protocol) && provider.authType !== "chatgpt"))
     .map((provider) => ({
         provider,
         models: provider.models.filter((model) => model.enabled),
@@ -1118,60 +1197,66 @@ const openGroupedModelMenu = (
     options: IGroupedModelPickerOptions,
     update: () => void,
 ) => {
-    if (element.disabled) {
-        return;
-    }
-    const modelGroups = getEnabledModelGroups(group);
-    const selectedModelId = options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group);
-    const menu = new Menu(getGroupedModelMenuId(group, options));
-    if (menu.isOpen) {
-        return;
-    }
-    const selectModel = (modelId: string, label: string) => {
-        if (modelId === selectedModelId) {
-            return;
-        }
-        if (options.onSelect) {
-            options.onSelect(modelId);
-            update();
-            return;
-        }
-        element.dataset.modelId = modelId;
-        setGroupedModelPickerLabel(element, label);
-        aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
-    };
-    const optional = group === "imageGeneration";
-    if (optional) {
-        menu.addItem({
-            iconHTML: "",
-            label: window.siyuan.languages.noModelConfigured,
-            current: selectedModelId === "",
-            click: () => selectModel("", window.siyuan.languages.noModelConfigured),
-        });
-        menu.addSeparator();
-    }
-    modelGroups.forEach(({provider, models}, index) => {
-        if (index > 0) {
-            menu.addSeparator();
-        }
-        menu.addItem({
-            iconHTML: "",
-            type: "readonly",
-            label: escapeHTML(getProviderTitle(provider)),
-        });
-        models.forEach((model) => {
-            const label = model.displayName || model.name;
-            menu.addItem({
-                iconHTML: "",
-                label: escapeHTML(label),
-                current: model.id === selectedModelId,
-                click: () => selectModel(model.id, label),
+    toggleMenu({
+        target: element,
+        build: (_menu, session) => {
+            if (element.disabled) {
+                return;
+            }
+            const modelGroups = getEnabledModelGroups(group);
+            const selectedModelId = options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group);
+            const menu = new Menu(getGroupedModelMenuId(group, options));
+            if (menu.isOpen) {
+                return;
+            }
+            const selectModel = (modelId: string, label: string) => {
+                if (modelId === selectedModelId) {
+                    return;
+                }
+                if (options.onSelect) {
+                    options.onSelect(modelId);
+                    update();
+                    return;
+                }
+                element.dataset.modelId = modelId;
+                setGroupedModelPickerLabel(element, label);
+                aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
+            };
+            const optional = group === "imageGeneration";
+            if (optional) {
+                menu.addItem({
+                    iconHTML: "",
+                    label: window.siyuan.languages.noModelConfigured,
+                    current: selectedModelId === "",
+                    click: () => selectModel("", window.siyuan.languages.noModelConfigured),
+                });
+                menu.addSeparator();
+            }
+            modelGroups.forEach(({provider, models}, index) => {
+                if (index > 0) {
+                    menu.addSeparator();
+                }
+                menu.addItem({
+                    iconHTML: "",
+                    type: "readonly",
+                    label: escapeHTML(getProviderTitle(provider)),
+                });
+                models.forEach((model) => {
+                    const label = model.displayName || model.name;
+                    menu.addItem({
+                        iconHTML: "",
+                        label: escapeHTML(label),
+                        current: model.id === selectedModelId,
+                        click: () => selectModel(model.id, label),
+                    });
+                });
             });
-        });
+            const rect = element.getBoundingClientRect();
+            menu.element.style.minWidth = `${rect.width}px`;
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: element}));
+
+        },
     });
-    const rect = element.getBoundingClientRect();
-    menu.element.style.minWidth = `${rect.width}px`;
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: element});
 };
 
 const syncGroupedModelPickers = (root: HTMLElement) => {

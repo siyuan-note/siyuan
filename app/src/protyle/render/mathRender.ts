@@ -7,6 +7,7 @@ import {looseJsonParse} from "../../util/functions";
 import {genRenderFrame} from "./util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getMathRenderSecurity} from "./mathRenderSecurity";
+import {isFoldedRenderContent} from "./foldedContent";
 
 const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | false, isBlock: boolean) => {
     return new Promise<void>((resolve) => {
@@ -25,19 +26,20 @@ const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | fals
 };
 
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
-    const mathElements = element.getAttribute("data-subtype") === "math" ?
-        [element] : Array.from(element.querySelectorAll('[data-subtype="math"]'));
+    const mathElements = (element.getAttribute("data-subtype") === "math" ?
+        [element] : Array.from(element.querySelectorAll('[data-subtype="math"]')))
+        .filter(item => !isFoldedRenderContent(item));
     if (mathElements.length === 0) {
         return;
     }
-    addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.9`, "protyleKatexStyle");
+    addStyle(`${cdn}/js/katex/katex.min.css?v=0.19.0`, "protyleKatexStyle");
     const unrenderedMathElements = mathElements.filter(mathElement =>
         mathElement.getAttribute("data-render") !== "true");
     if (unrenderedMathElements.length === 0) {
         return;
     }
-    return addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
-        return addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
+    return addScript(`${cdn}/js/katex/katex.min.js?v=0.19.0`, "protyleKatexScript").then(() => {
+        return addScript(`${cdn}/js/katex/mhchem.min.js?v=0.19.0`, "protyleKatexMhchemScript").then(() => {
             const resizePromises: Promise<void>[] = [];
             unrenderedMathElements.forEach((mathElement: HTMLElement) => {
                 mathElement.setAttribute("data-render", "true");
@@ -69,12 +71,12 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         mathElement.firstElementChild.firstElementChild.setAttribute("contenteditable", "false");
                         mathElement.firstElementChild.firstElementChild.innerHTML = mathHTML;
                         // https://github.com/siyuan-note/siyuan/issues/3541
-                        const baseElements = mathElement.querySelectorAll(".base");
+                        const baseElements = mathElement.querySelectorAll(".katex-html > .katex-base");
                         if (baseElements.length > 0) {
                             baseElements[baseElements.length - 1].insertAdjacentHTML("afterend", "<span class='fn__flex-1'></span>");
                         }
                         // https://github.com/siyuan-note/siyuan/issues/4334
-                        const newlineElement = mathElement.querySelector(".katex-html > .newline");
+                        const newlineElement = mathElement.querySelector(".katex-html > .katex-newline");
                         if (newlineElement) {
                             newlineElement.parentElement.style.display = "block";
                         }
@@ -111,11 +113,12 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                             // 相邻的数学公式删除或光标移动有问题
                             mathElement.after(document.createTextNode(Constants.ZWSP));
                         } else if (nextSibling &&
-                            !nextSibling.textContent.startsWith("\n") && // https://github.com/siyuan-note/insider/issues/1089
+                            !/^[\u200B\uFEFF]*\n/.test(nextSibling.textContent) && // https://github.com/siyuan-note/insider/issues/1089
                             // 输入 $a$ 后，光标移动到其他块，再点击 a 后，光标不显示 https://github.com/siyuan-note/insider/issues/1076#issuecomment-1253215515
                             nextSibling.textContent !== Constants.ZWSP) {
                             // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974
-                            // 数学公式后有 \n 不能再添加 &#xFEFF; https://ld246.com/article/1647329437541
+                            // 公式后的换行可能带有零宽边界字符，此时不添加内部占位符，避免划选被截断。
+                            // https://ld246.com/article/1647329437541
                             mathElement.insertAdjacentHTML("beforeend", "&#xFEFF;");
                         }
                         // 光标无法移动到段首 https://ld246.com/article/1623551823742

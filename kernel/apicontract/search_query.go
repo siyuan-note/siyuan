@@ -55,6 +55,8 @@ type SearchBlockRequest struct {
 }
 
 type FullTextSearchBlockRequest struct {
+	// method=2 保留 SQL 原文的换行、注释和字面量大小写，结果需要返回完整块字段。
+	// 支持 SELECT * 和带别名的完整块投影；普通类型与路径筛选不作用于 SQL。
 	SearchBlockRequest
 	Notebook    string `json:"notebook" api:"optional,nullable,ignoretype"`
 	SearchHPath *bool  `json:"searchHPath" api:"optional"`
@@ -66,6 +68,10 @@ type FullTextSearchBlockData struct {
 }
 
 type FindReplaceRequest struct {
+	// Method 缺省或为 null 时使用文本替换；支持文本（0）、查询语法（1）和正则表达式（3）。
+	// SQL（2）和语义搜索（4）返回 code=1 与提示信息，不执行替换；IDs 为空时表示替换全部。
+	// 文本与查询语法替换的所有启用类型遵循搜索配置的 CaseSensitive，替换串按字面量写入。
+	// 正则模式的大小写匹配由表达式决定，替换串保留捕获组展开语义。
 	SearchBlockRequest
 	K            string          `json:"k"`
 	R            string          `json:"r"`

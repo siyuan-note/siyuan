@@ -9,8 +9,9 @@ import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget,
 
 const browserCases = async (source: string, hintSource: string) => {
     const check: typeof assert = require("node:assert/strict");
-    const {mount, render, paddingElement} = new Function(source + hintSource +
-        "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")() as {
+    const {mount, render, paddingElement} = new Function("getFrequentSlashItems", "getSlashEntryKey", "escapeAttr", source + hintSource +
+        "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")(
+        (): IHintData[] => [], (item: {entryKey?: string}) => item.entryKey || "", (value: string) => value) as {
         mount: typeof import("./liteSlashMenu").mountLiteSlashMenu,
         render: (data: IHintData[]) => string,
         paddingElement: typeof import("../../protyle/lite/mobileToolbar").getMobileToolbarPaddingElement,
@@ -81,8 +82,11 @@ const browserCases = async (source: string, hintSource: string) => {
         element.textContent = "Loading";
         finishRequest = () => {
             if (hint.enableExtend && !element.classList.contains("fn__none")) {
-                hint.genHTML([{value: "skill", html: itemHTML("Skill") +
-                    '<div class="b3-list-item__meta b3-list-item__showall">Skill description</div>'}]);
+                hint.genHTML([{value: "skill", html: itemHTML("Skill").replace('class="b3-list-item__first"',
+                    'class="b3-list-item__first" data-type="agent-skill"') +
+                    '<div class="b3-list-item__meta b3-list-item__showall">Skill description</div>'},
+                {value: "shortSkill", html: itemHTML("Short skill").replace('class="b3-list-item__first"',
+                    'class="b3-list-item__first" data-type="agent-skill"')}]);
             }
         };
         return [];
@@ -91,9 +95,22 @@ const browserCases = async (source: string, hintSource: string) => {
     check.equal(panel.textContent, "Loading");
     await Promise.resolve();
     finishRequest();
-    check.equal(panel.querySelector('[data-value="skill"]').className, "keyboard__slash-item");
+    check.equal(panel.querySelector('[data-value="skill"]').className, "keyboard__slash-item keyboard__slash-item--full");
     check.equal(panel.querySelector(".keyboard__slash-description").textContent, "Skill description");
     check.equal(panel.querySelector(".b3-list-item"), null);
+    for (const width of [320, 390, 768]) {
+        toolbar.style.width = `${width}px`;
+        for (const fontSize of [16, 32]) {
+            panel.style.fontSize = `${fontSize}px`;
+            const first = panel.querySelector('[data-value="skill"]').getBoundingClientRect();
+            const second = panel.querySelector('[data-value="shortSkill"]').getBoundingClientRect();
+            check.ok(first.width > width * 0.9);
+            check.equal(first.left, second.left);
+            check.ok(second.top >= first.bottom);
+            check.equal(panel.scrollWidth, panel.clientWidth);
+        }
+    }
+    panel.style.fontSize = "";
     unmount();
     unmount = mount(protyle, panel);
     unmount();
@@ -145,7 +162,8 @@ test("mobile slash panel retains synchronous and asynchronous candidates and rel
 }, async () => {
     const source = transpileModule((readFileSync(path.join(__dirname, "liteSlashMenu.ts"), "utf8") + "\n" +
         readFileSync(path.join(__dirname, "../../protyle/lite/mobileToolbar.ts"), "utf8"))
-        .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+        .replace(/^import type .*;\n/gm, "").replace(/^export /gm, ""),
+    {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const hintFile = createSourceFile("hint.ts", readFileSync(path.join(__dirname, "../../protyle/hint/index.ts"), "utf8"),
         ScriptTarget.Latest, true);
     const hintClass = hintFile.statements.find(isClassDeclaration);

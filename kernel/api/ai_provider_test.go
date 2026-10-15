@@ -59,7 +59,7 @@ func TestAITestModelFailureMessageHintsCodingPlanEndpoint(t *testing.T) {
 	previousConf, previousLangs := model.Conf, util.Langs
 	t.Cleanup(func() { model.Conf, util.Langs = previousConf, previousLangs })
 	model.Conf = &model.AppConf{}
-	util.Langs = map[string]map[int]string{"en": {410: "set the API address to the coding endpoint"}}
+	util.Langs = map[string]map[int]string{"en": {421: "set the API address to the coding endpoint"}}
 	billing := &openai.APIError{Message: "余额不足或无可用资源包,请充值", HTTPStatusCode: http.StatusTooManyRequests}
 
 	// 按量端点用编码套餐 Key 时补充地址提示，其余情况原样返回服务端错误

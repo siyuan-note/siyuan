@@ -2,6 +2,7 @@
 *.exe
 !app/elevator/elevator-*.exe
 *.dll
+!app/nsis-resources/x86-unicode/nsProcess.dll
 *.so
 *.dylib
 *.aar
@@ -49,3 +50,7 @@ muslbin/
 
 # Workflows
 **/__pycache__
+# OCR 模型和运行时由固定版本、校验摘要的发布准备脚本生成
+/.cache/ocr/
+/app/stage/ocr/models/
+/app/stage/ocr/runtime/

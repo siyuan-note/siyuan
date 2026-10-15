@@ -30,7 +30,7 @@ func TestExportFootnotesAcrossNotebooks(t *testing.T) {
 	const sourceBox = "20260927000000-box0001"
 	const targetBox = "20260927000001-box0002"
 	setupExportRelatedTest(t, sourceBox, targetBox)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	source := newFootnoteTestDoc(t, sourceBox, "source")
 	target := newFootnoteTestDoc(t, targetBox, "cross notebook content")
 	nested := newFootnoteTestDoc(t, sourceBox, "nested content")
@@ -40,8 +40,27 @@ func TestExportFootnotesAcrossNotebooks(t *testing.T) {
 	for _, tree := range []*parse.Tree{source, target, nested} {
 		writeExportRelatedTestTree(t, tree)
 	}
-	exported, err := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+	exported, err := exportTree(prepareExportTree(getExportBlockTree(source.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          4,
+			BlockEmbedMode:        0,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "#",
+			TagCloseMarker:        "#",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +79,7 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 	const sourceBox = "20260927000002-box0003"
 	const targetBox = "20260927000003-box0004"
 	setupExportRelatedTest(t, sourceBox, targetBox)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	source := newFootnoteTestDoc(t, sourceBox, "source")
 	target := newFootnoteTestDoc(t, targetBox, "private content")
 	nested := newFootnoteTestDoc(t, sourceBox, "unreachable content")
@@ -74,7 +93,7 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 	var order []string
 	refs := map[string]*refAsFootnotes{}
 	depth := 0
-	collectFootnotesDefs0(source, source.Root, &order, refs, &depth)
+	collectFootnotesDefs0(source, source.Root, &order, refs, &depth, nil)
 	if len(order) != 1 || order[0] != target.Root.FirstChild.ID {
 		t.Fatalf("collected references beyond the crypto boundary: %v", order)
 	}
@@ -89,7 +108,11 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 
 func TestExportFootnotesStayWithinBlockScope(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	a := newFootnoteTestDoc(t, fixture.box.ID, "selected paragraph")
 	b := newFootnoteTestDoc(t, fixture.box.ID, "unrelated B")
 	c := newFootnoteTestDoc(t, fixture.box.ID, "unrelated C")
@@ -112,8 +135,27 @@ func TestExportFootnotesStayWithinBlockScope(t *testing.T) {
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			tree := prepareExportTree(getExportBlockTree(scenario.id))
-			exported, err := exportTree(tree, true, true, false, true,
-				4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+			exported, err := exportTree(tree, treeExportOptions{
+				Config: conf.Export{
+					BlockRefMode:          4,
+					BlockEmbedMode:        0,
+					FileAnnotationRefMode: 0,
+					TagOpenMarker:         "#",
+					TagCloseMarker:        "#",
+					BlockRefTextLeft:      "",
+					BlockRefTextRight:     "",
+					AddTitle:              false,
+					InlineMemo:            false,
+				},
+				WYSIWYG:          true,
+				RichTableCells:   true,
+				KeepFold:         false,
+				AVHiddenCol:      true,
+				CustomTitle:      "",
+				AddDocAnchorSpan: true,
+				References:       nil,
+				AVPublishFilter:  nil,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -139,7 +181,7 @@ func TestExportBlockAssetsExcludeUnrelatedContent(t *testing.T) {
 	for _, tree := range []*parse.Tree{a, b} {
 		writeAssetDownloadDocumentTest(t, tree)
 	}
-	Conf.Export.IncludeRelatedDocs = true
+	Conf.Export.Load().IncludeRelatedDocs = true
 	if err := prepareExportBlockAssets(a.Root.FirstChild.ID, false); err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +241,11 @@ func TestExportFootnotesPruneUnreachable(t *testing.T) {
 
 func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	source := newFootnoteTestDoc(t, fixture.box.ID, "source")
 	target := newFootnoteTestDoc(t, fixture.box.ID, "target")
 	heading := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeHeading, HeadingLevel: 1}
@@ -230,8 +276,27 @@ func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 		{"container retains local anchor", container.ID, 0},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
-			tree, err := exportTree(prepareExportTree(getExportBlockTree(scenario.id)), true, true, false, true,
-				4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+			tree, err := exportTree(prepareExportTree(getExportBlockTree(scenario.id)), treeExportOptions{
+				Config: conf.Export{
+					BlockRefMode:          4,
+					BlockEmbedMode:        0,
+					FileAnnotationRefMode: 0,
+					TagOpenMarker:         "#",
+					TagCloseMarker:        "#",
+					BlockRefTextLeft:      "",
+					BlockRefTextRight:     "",
+					AddTitle:              false,
+					InlineMemo:            false,
+				},
+				WYSIWYG:          true,
+				RichTableCells:   true,
+				KeepFold:         false,
+				AVHiddenCol:      true,
+				CustomTitle:      "",
+				AddDocAnchorSpan: true,
+				References:       nil,
+				AVPublishFilter:  nil,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -250,7 +315,11 @@ func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 
 func TestExportFootnotesUseMaterializedTableContent(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	source := newFootnoteTestDoc(t, fixture.box.ID, "source")
 	target := newFootnoteTestDoc(t, fixture.box.ID, "target")
 	parsed := parse.Parse("", []byte("| Header |\n| --- |\n| value |"), util.NewLute().ParseOptions)
@@ -264,8 +333,27 @@ func TestExportFootnotesUseMaterializedTableContent(t *testing.T) {
 	for _, tree := range []*parse.Tree{source, target} {
 		writeAssetDownloadDocumentTest(t, tree)
 	}
-	exported, err := exportTree(prepareExportTree(getExportBlockTree(table.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+	exported, err := exportTree(prepareExportTree(getExportBlockTree(table.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          4,
+			BlockEmbedMode:        0,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "#",
+			TagCloseMarker:        "#",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -51,7 +51,6 @@ const fakeElement = () => ({
 // 大纲条目会调用全局 Lute 生成 aria-label，这里提供最小替身
 (globalThis as any).Lute = {
     BlockDOM2Content: (value: string) => value,
-    EscapeHTMLStr: (value: string) => value,
 };
 
 type TreeInstance = { createTopLevelItem: (item: IBlockTree) => unknown };

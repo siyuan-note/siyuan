@@ -29,6 +29,7 @@ type syncIgnoreStamp struct {
 	size     int64
 	modified time.Time
 	mode     os.FileMode
+	entries  string
 }
 
 var syncIgnoreCache struct {
@@ -39,13 +40,21 @@ var syncIgnoreCache struct {
 }
 
 func syncIgnoreStamps() (ret []syncIgnoreStamp, valid bool) {
-	paths := []string{filepath.Join(util.DataDir, syncIgnoreRulePath), filepath.Join(util.WorkingDir, "guide")}
+	guidePath := filepath.Join(util.WorkingDir, "guide")
+	paths := []string{filepath.Join(util.DataDir, syncIgnoreRulePath), guidePath}
 	for _, id := range userGuideIDs {
 		paths = append(paths, filepath.Join(util.WorkingDir, "guide", id, "storage", "av"))
 	}
-	valid = true
+	// 目录时间戳与大小可能保持不变，另外比较实际生成忽略规则的文件名集合。
+	avNames, readErr := getAllUserGuideAVJSONFiles()
+	valid = readErr == nil
+	slices.Sort(avNames)
+	avNames = slices.Compact(avNames)
 	for _, path := range paths {
 		stamp := syncIgnoreStamp{path: path}
+		if path == guidePath {
+			stamp.entries = strings.Join(avNames, "\x00")
+		}
 		info, err := os.Stat(path)
 		if err == nil {
 			stamp.size, stamp.modified, stamp.mode = info.Size(), info.ModTime(), info.Mode()
@@ -128,7 +137,7 @@ func syncPathFilter(dataDir string, info os.FileInfo, absPath string) (bool, err
 		return true, nil
 	}
 	if info != nil && info.IsDir() {
-		if info.Name() == "filesys_status_check" {
+		if rel == "/.siyuan/filesys_status_check" || rel == "/filesys_status_check" {
 			return true, filepath.SkipDir
 		}
 		return true, nil

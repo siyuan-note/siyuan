@@ -13,8 +13,8 @@ func TestExportPreviewJSEmbed(t *testing.T) {
 	const boxID = "20260924010000-box0001"
 	const docID = "20260924010001-doc0001"
 	setupExportRelatedTest(t, boxID)
-	Conf.Editor = conf.NewEditor()
-	Conf.Search = conf.NewSearch()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Search.Store(conf.NewSearch())
 	tree := treenode.NewTree(boxID, "/"+docID+".sy", "/Export", "Export")
 	script := "//!js\nitem.innerHTML = '<b>&amp; content</b>';"
 	for range 2 {

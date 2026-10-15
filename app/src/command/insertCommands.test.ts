@@ -37,7 +37,7 @@ test("insert commands search and execute existing insertion actions at the saved
             {id: "template", value: "template-value"}, {id: "ref", value: "(("},
         ]},
         "../protyle/toolbar/inlineStyle": {isBuiltinInlineStyleVisible: () => true},
-        "../protyle/util/selection": {focusByRange: (range: unknown) => focused.push(range)},
+        "../protyle/util/selectionOffsets": {focusByRange: (range: unknown) => focused.push(range)},
         "../protyle/util/compatibility": {isDisabledFeature: () => false, isInAndroid: () => false},
         "../util/hostCapabilities": {getHostCapabilities: () => ({widgets: true, remoteKernel: false})},
         "../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => keyboards++},
@@ -53,7 +53,12 @@ test("insert commands search and execute existing insertion actions at the saved
     const protyle = {
         lite: false, disabled: false, wysiwyg: {element: {contains: (node: unknown) => node === container}},
         options: {upload: {accept: "image/*"}}, toolbar: {range: undefined as unknown},
-        hint: {splitChar: "", lastIndex: 2, fill: (value: string) => fills.push(value),
+        hint: {fillCommand: (value: string, target: unknown, updateRange: boolean) => {
+            assert.equal(target, protyle);
+            assert.equal(updateRange, false);
+            assert.ok(protyle.toolbar.range);
+            fills.push(value);
+        },
             bindUploadEvent: (_protyle: unknown, host: unknown) => { uploadBound = host === uploadHost; }},
     };
     const context = {
@@ -67,6 +72,7 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.ok(registry.list({...context, environment: "browser-mobile"}).some(command => command.id === "core.mobile.insert.template"));
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.heading1")?.keymapPath || []), ["editor", "heading", "heading1"]);
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.orderedList")?.keymapPath || []), ["editor", "insert", "ordered-list"]);
+    assert.deepEqual(Array.from(registry.get("core.mobile.insert.mindmap")?.keymapPath || []), ["editor", "insert", "mindmap"]);
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.ref")?.keymapPath || []), ["editor", "insert", "ref"]);
     assert.equal(registry.get("core.mobile.insert.template")?.keymapPath, undefined);
     assert.equal(queryCommandPalette(registry, context, "模板")[0].id, "core.mobile.insert.template");
@@ -74,8 +80,6 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.equal(queryCommandPalette(registry, context, "", recent)[0].id, "core.mobile.insert.assets");
     assert.equal((await registry.execute("core.mobile.insert.template", context)).status, "executed");
     assert.deepEqual(fills, ["template-value"]);
-    assert.equal(protyle.hint.splitChar, "/");
-    assert.equal(protyle.hint.lastIndex, -1);
     assert.equal(focused.length, 1);
     assert.ok(protyle.toolbar.range);
     await registry.execute("core.mobile.insert.ref", context);

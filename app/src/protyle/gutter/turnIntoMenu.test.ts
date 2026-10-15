@@ -47,6 +47,18 @@ test("partial paragraph and heading menus keep their candidates and callbacks", 
     }
 });
 
+test("tabs expose direct mind map conversion through the existing configurable entry", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
+    const tabsMenu = source.slice(source.indexOf('} else if (type === "NodeTabs" && allowStructuralMutation)'),
+        source.indexOf('} else if (type === "NodeBlockquote" && allowStructuralMutation)'));
+    assert.match(tabsMenu, /menuId: "listMindmap", icon: "iconMindmap", label: "mindmap", type: "Tabs2Mindmap"/);
+    const catalog = getEntryCatalogChildren("gutter.single.turnInto");
+    assert.equal(catalog.filter(item => item.key === "listMindmap").length, 1);
+    assert.equal(catalog.find(item => item.key === "listMindmap").simple, true);
+    assert.deepEqual(orderGutterTurnIntoItems(["superBlock", "listMindmap", "check", "list", "orderedList"], key => key),
+        ["list", "orderedList", "check", "listMindmap", "superBlock"]);
+});
+
 test("blockquote callout types retain existing catalog identities and saved orders", () => {
     const path = "gutter.single.turnInto";
     const types = [...CALLOUT_PRESETS.map(item => item.id), "calloutCustom"];

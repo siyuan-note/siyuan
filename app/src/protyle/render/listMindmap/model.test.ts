@@ -801,6 +801,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(convertedTabs.getAttribute("data-type"), "NodeTabs");
     check.equal(convertedTabs.querySelectorAll(':scope > [data-type="NodeTabItem"]').length, 2);
     check.ok(convertedTabs.textContent.includes("Nested"));
+    const tabsBefore = convertedTabs.outerHTML;
+    const tabsIDs = ids(convertedTabs).filter(id =>
+        convertedTabs.querySelector(`[data-node-id="${id}"]`).getAttribute("tabs-placeholder") !== "true");
+    const directMindmap = api.convertTabsList(convertedTabs, "Tabs2Mindmap", lute);
+    check.equal(directMindmap.getAttribute("data-type"), "NodeMindmap");
+    check.equal(directMindmap.getAttribute("data-node-id"), convertedTabs.getAttribute("data-node-id"));
+    check.equal(directMindmap.querySelectorAll(':scope > [data-type="NodeMindmapItem"]').length, 2);
+    check.ok(directMindmap.querySelector('[data-type="NodeMindmapItem"] [data-type="NodeMindmap"]'));
+    check.deepEqual(ids(directMindmap), tabsIDs);
+    check.equal(directMindmap.querySelector('[data-type="NodeTabs"], [data-type="NodeTabItem"]'), null);
+    check.equal(directMindmap.getAttribute("tabs-active-id"), null);
+    check.ok(directMindmap.textContent.includes("Alpha") && directMindmap.textContent.includes("Nested") &&
+        directMindmap.textContent.includes("Beta"));
+    check.equal(lute.BlockDOM2Md(directMindmap.outerHTML).includes("Nested"), true);
+    check.equal(convertedTabs.outerHTML, tabsBefore, "direct conversion preserves the undo source");
     check.equal(typedList.outerHTML, typedBefore);
     check.equal(cleaned.includes("Derived editor"), false);
     check.equal(cleaned.includes("data-mindmap-view-rendered"), false);
@@ -3736,10 +3751,10 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         ${shortcutStatements.map(item => item.getText(keydownSource)).join("\n")}
     };
     class ListHint {${fill.getText(hintSource)}}`, {compilerOptions: {target: typescript.ScriptTarget.ES2021}}).outputText;
-    const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget} = (() => {" +
+    const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask, getTabTitle, getTabTitleBlock, revealTabsForTarget} = (() => {" +
         ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsVisibility.ts", "../tabsRender.ts"]
             .map(file => compile(path.join(__dirname, file))).join("\n") +
-        "return {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget};})();\n";
+        "return {tabsRender, destroyTabsRender, getTabTask, getTabTitle, getTabTitleBlock, revealTabsForTarget};})();\n";
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +

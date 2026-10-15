@@ -1967,6 +1967,7 @@ export class Gutter {
                 {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},
                 {menuId: "orderedList", icon: "iconOrderedList", label: "ordered-list", type: "Tabs2OL"},
                 {menuId: "check", icon: "iconCheck", label: "check", type: "Tabs2TL"},
+                {menuId: "listMindmap", icon: "iconMindmap", label: "mindmap", type: "Tabs2Mindmap"},
             ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
                 ...target,
                 id,

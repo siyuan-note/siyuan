@@ -1025,7 +1025,7 @@ export class Gutter {
         }));
         menus.push({
             id: "calloutCustom",
-            icon: "iconEdit",
+            icon: "iconCallout",
             label: `${window.siyuan.languages.callout} - ${window.siyuan.languages.custom}...`,
             current: !!currentType && !CALLOUT_PRESETS.some(item => item.type === currentType),
             click() {

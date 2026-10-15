@@ -14,6 +14,7 @@ import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
+import {bindListMarkerCaret} from "./listMarkerCaret";
 import {clearTouchBlockSelection} from "./touchBlockSelection";
 import {isDirectMathClick} from "../util/mathClick";
 import {
@@ -419,6 +420,7 @@ export class WYSIWYG {
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private disposeListMarkerCaret?: () => void;
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
@@ -551,6 +553,9 @@ export class WYSIWYG {
         this.bindCommonEvent(protyle);
         this.imageTitleEditor = bindImageTitleEditor(protyle, this.element);
         this.bindEvent(protyle);
+        this.disposeListMarkerCaret = bindListMarkerCaret(this.element, () => !protyle.disabled &&
+            !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
+            !getBlockSelectionModeElement(this.element));
         this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
         if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
@@ -605,6 +610,7 @@ export class WYSIWYG {
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
         this.disposeTouchCaret?.();
+        this.disposeListMarkerCaret?.();
         this.largeListVirtualizer?.destroy();
         this.largeTableVirtualizer?.destroy();
     }

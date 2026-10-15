@@ -74,7 +74,7 @@ def request(base, endpoint, token, payload=None):
     return result["data"]
 
 
-def verify_notebook(image, platform, version, timeout, fail_ocr):
+def verify_notebook(image, platform, version, timeout, fail_ocr, diagnostics=None):
     # 只使用本次测试创建的容器和卷，所有读写均发生在临时工作空间。
     name = "siyuan-docker-smoke-" + uuid.uuid4().hex
     volume, token = name + "-workspace", uuid.uuid4().hex
@@ -91,17 +91,19 @@ def verify_notebook(image, platform, version, timeout, fail_ocr):
         bindings = json.loads(run(["docker", "inspect", name]).stdout)[0]["NetworkSettings"]["Ports"]["6806/tcp"]
         base = "http://127.0.0.1:" + bindings[0]["HostPort"]
         deadline = time.monotonic() + timeout
+        last_error = ""
         while True:
             try:
                 progress = request(base, "/api/system/bootProgress", token)
                 if progress["progress"] == 100:
                     break
-            except (urllib.error.URLError, TimeoutError, ValueError):
-                pass
+            except (urllib.error.URLError, TimeoutError, ConnectionError, ValueError) as error:
+                # 端口转发已建立但内核尚未就绪时，HTTP 请求可能被重置或提前断开。
+                last_error = str(error)
             if time.monotonic() >= deadline:
-                raise TimeoutError(f"Kernel did not boot: {platform}\n" + run(["docker", "logs", name]).stdout)
+                raise TimeoutError(f"Kernel did not boot: {platform}; last response: {last_error}")
             if run(["docker", "inspect", "--format", "{{.State.Running}}", name]).stdout.strip() != "true":
-                raise RuntimeError("Kernel stopped before booting\n" + run(["docker", "logs", name]).stdout)
+                raise RuntimeError("Kernel stopped before booting")
             time.sleep(2)
         if request(base, "/api/system/version", token) != version:
             raise ValueError("HTTP kernel version differs from release version")
@@ -112,12 +114,26 @@ def verify_notebook(image, platform, version, timeout, fail_ocr):
         data = request(base, "/api/block/getBlockKramdown", token, {"id": block})
         if "Docker OCR smoke 123" not in data["kramdown"]:
             raise ValueError("Notebook write/read verification failed")
+    except Exception:
+        # 删除临时容器前保留启动日志和退出状态，采集失败不能覆盖原始验收错误。
+        for filename, command in (("kernel.log", ["docker", "logs", name]),
+                                  ("kernel-state.json", ["docker", "inspect", "--format", "{{json .State}}", name])):
+            try:
+                result = run(command, check=False, timeout=30)
+                output = result.stdout + result.stderr
+                print(f"{platform} {filename}:\n{output}", flush=True)
+                if diagnostics is not None:
+                    diagnostics.mkdir(parents=True, exist_ok=True)
+                    (diagnostics / filename).write_text(output, encoding="utf-8")
+            except Exception as error:
+                print(f"Unable to collect {filename}: {error}", flush=True)
+        raise
     finally:
         run(["docker", "rm", "-f", name], check=False)
         run(["docker", "volume", "rm", volume], check=False)
 
 
-def verify_platform(repository, digest, platform, version, fixtures, timeout):
+def verify_platform(repository, digest, platform, version, fixtures, timeout, diagnostics=None):
     started = time.monotonic()
     image = repository + "@" + digest
     architecture = platform.split("/")[1]
@@ -154,7 +170,7 @@ def verify_platform(repository, digest, platform, version, fixtures, timeout):
                 raise ValueError("Missing OCR runtime did not produce the expected failure")
             checks.append("worker-failure")
 
-        verify_notebook(image, platform, version, timeout, fail_ocr)
+        verify_notebook(image, platform, version, timeout, fail_ocr, diagnostics)
         checks.append("notebook")
     finally:
         run(["docker", "rm", "-f", worker_name], check=False)
@@ -174,7 +190,9 @@ def verify(image, version, fixtures, report_path, timeout, *, platform=None, pro
     try:
         for platform in expected:
             print(f"Verifying {platform} in Docker", flush=True)
-            report["platforms"].append(verify_platform(repository, index[platform], platform, version, fixtures, timeout))
+            diagnostics = report_path.parent / "diagnostics" / platform.replace("/", "-")
+            report["platforms"].append(verify_platform(repository, index[platform], platform, version, fixtures, timeout,
+                                                       diagnostics=diagnostics))
         report["status"] = "passed"
     except Exception as error:
         report.update(status="failed", error=str(error))

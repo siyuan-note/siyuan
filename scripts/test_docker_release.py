@@ -1,7 +1,10 @@
 """Docker 发布验收、manifest 校验和缓存日志的回归测试，不构建镜像。"""
 
 import copy
+import contextlib
+import http.client
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -9,7 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 def module(name, file):
@@ -164,6 +167,85 @@ class PublishTests(unittest.TestCase):
         self.assertEqual(len(cleanup), 1)
         self.assertTrue(cleanup[0][-1].startswith("siyuan-docker-smoke-"))
         self.assertEqual(commands.call_args_list[-1].args[0][-1], cleanup[0][-1] + "-workspace")
+
+
+class NotebookStartupTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.diagnostics = Path(self.temp.name) / "diagnostics"
+        self.running = "true"
+
+    def command(self, arguments, **kwargs):
+        output = ""
+        if arguments[:2] == ["docker", "logs"]:
+            output = "kernel startup log\n"
+        elif arguments[:2] == ["docker", "inspect"]:
+            if "{{.State.Running}}" in arguments:
+                output = self.running
+            elif "{{json .State}}" in arguments:
+                output = json.dumps({"Running": self.running == "true", "ExitCode": 1})
+            else:
+                output = json.dumps([{"NetworkSettings": {"Ports": {"6806/tcp": [{"HostPort": "12345"}]}}}])
+        return subprocess.CompletedProcess(arguments, 0, output, "")
+
+    def test_startup_reset_and_early_disconnect_are_retried_until_ready(self):
+        responses = [ConnectionResetError("reset before ready"), http.client.RemoteDisconnected("not ready"),
+                     {"progress": 40}, {"progress": 100}, "3.8.7", {"notebook": {"id": "box"}},
+                     "block", {"kramdown": "Docker OCR smoke 123"}]
+        fail_ocr = Mock()
+        with patch.object(release, "run", side_effect=self.command), \
+                patch.object(release, "request", side_effect=responses) as request, patch.object(release.time, "sleep") as sleep:
+            release.verify_notebook(IMAGE, "linux/amd64", "3.8.7", 240, fail_ocr, self.diagnostics)
+        self.assertEqual(sleep.call_count, 3)
+        fail_ocr.assert_called_once()
+        endpoints = [call.args[1] for call in request.call_args_list]
+        self.assertEqual(endpoints[:4], ["/api/system/bootProgress"] * 4)
+        self.assertEqual(endpoints.count("/api/notebook/createNotebook"), 1)
+        self.assertFalse(self.diagnostics.exists())
+
+    def test_persistent_reset_times_out_with_diagnostics_and_never_writes_notebook(self):
+        fail_ocr = Mock()
+        with patch.object(release, "run", side_effect=self.command) as run, \
+                patch.object(release, "request", side_effect=ConnectionResetError("still resetting")) as request, \
+                patch.object(release.time, "monotonic", side_effect=[0, 0, 11]), \
+                patch.object(release.time, "sleep"), contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(TimeoutError, "still resetting"):
+                release.verify_notebook(IMAGE, "linux/amd64", "3.8.7", 10, fail_ocr, self.diagnostics)
+        fail_ocr.assert_not_called()
+        self.assertTrue(all(call.args[1] == "/api/system/bootProgress" for call in request.call_args_list))
+        self.assertEqual(self.diagnostics.joinpath("kernel.log").read_text(encoding="utf-8"), "kernel startup log\n")
+        self.assertTrue(self.diagnostics.joinpath("kernel-state.json").is_file())
+        self.assertEqual(run.call_args_list[-1].args[0][:3], ["docker", "volume", "rm"])
+
+    def test_exited_kernel_fails_immediately_and_keeps_exit_state(self):
+        self.running = "false"
+        with patch.object(release, "run", side_effect=self.command), \
+                patch.object(release, "request", side_effect=ConnectionResetError("reset")), \
+                patch.object(release.time, "sleep") as sleep, contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(RuntimeError, "stopped before booting"):
+                release.verify_notebook(IMAGE, "linux/amd64", "3.8.7", 240, Mock(), self.diagnostics)
+        sleep.assert_not_called()
+        self.assertFalse(json.loads(self.diagnostics.joinpath("kernel-state.json").read_text())["Running"])
+
+    def test_connection_failure_after_ready_does_not_retry_notebook_mutations(self):
+        responses = [{"progress": 100}, "3.8.7", ConnectionResetError("write failed")]
+        with patch.object(release, "run", side_effect=self.command), \
+                patch.object(release, "request", side_effect=responses) as request, contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(ConnectionResetError, "write failed"):
+                release.verify_notebook(IMAGE, "linux/amd64", "3.8.7", 240, Mock(), self.diagnostics)
+        self.assertEqual([call.args[1] for call in request.call_args_list].count("/api/notebook/createNotebook"), 1)
+
+    def test_diagnostic_collection_failure_preserves_original_verification_error(self):
+        def command(arguments, **kwargs):
+            if arguments[:2] == ["docker", "logs"] or "{{json .State}}" in arguments:
+                raise OSError("diagnostic unavailable")
+            return self.command(arguments, **kwargs)
+        with patch.object(release, "run", side_effect=command), \
+                patch.object(release, "request", side_effect=[{"progress": 100}, "wrong version"]), \
+                contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(ValueError, "version differs"):
+                release.verify_notebook(IMAGE, "linux/amd64", "3.8.7", 240, Mock(), self.diagnostics)
 
 
 class PlatformReleaseTests(unittest.TestCase):

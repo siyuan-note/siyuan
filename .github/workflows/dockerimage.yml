@@ -231,6 +231,7 @@ jobs:
             ${{ runner.temp }}/docker-build.log
             ${{ runner.temp }}/docker-metadata.json
             ${{ runner.temp }}/docker-verification/report.json
+            ${{ runner.temp }}/docker-verification/diagnostics
           if-no-files-found: ignore
 
   cache:

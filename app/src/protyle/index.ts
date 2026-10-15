@@ -594,7 +594,8 @@ export class Protyle {
                 focus: false,
                 pushBackStack: false,
                 reload: false,
-                resize: false
+                resize: false,
+                outlineId: mergedOptions.action?.includes(Constants.CB_GET_OUTLINE) ? mergedOptions.blockId : undefined,
             });
             /// #endif
         }

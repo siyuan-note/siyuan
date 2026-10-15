@@ -134,6 +134,7 @@ export class Outline extends Model {
                         });
                     }
                 } else {
+                    this.invalidateCurrent();
                     checkFold(id, (zoomIn) => {
                         const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                         openFileById({
@@ -652,7 +653,8 @@ export class Outline extends Model {
         }
     }
 
-    private setCurrentById(id: string, scroll = true) {
+    public setCurrentById(id: string, scroll = true) {
+        this.invalidateCurrent();
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
         });

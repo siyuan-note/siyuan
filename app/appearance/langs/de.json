@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Überschriften",
+	"configGroupBadges": "Kennzeichnungen",
 	"workspaceLockWaiting": "Der Arbeitsbereich wird verwendet. Warten auf erneuten Versuch...",
 	"clearOCRText": "OCR-Text löschen",
 	"clearOCRTextDone": "OCR-Text gelöscht",

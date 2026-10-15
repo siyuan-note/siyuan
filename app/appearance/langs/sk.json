@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Nadpisy",
+	"configGroupBadges": "Odznaky",
 	"workspaceLockWaiting": "Pracovný priestor sa používa. Čaká sa na opätovný pokus...",
 	"clearOCRText": "Vymazať text OCR",
 	"clearOCRTextDone": "Text OCR bol vymazaný",

@@ -9,7 +9,7 @@ const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [true, false]) {
-    test(`appearance registration includes toolbar settings on first load (mobile=${mobile})`, () => {
+    test(`appearance settings expose toolbar controls and all color managers (mobile=${mobile})`, () => {
         const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceTab.ts"), "utf8");
         const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
         const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -20,26 +20,51 @@ for (const mobile of [true, false]) {
                 mounted = true;
             },
         };
+        const openedColors: string[] = [];
+        const colorMenuItems: Array<{label: string; click: () => void}> = [];
+        let menuTarget: unknown;
+        let menuPosition: unknown;
+        const windowContext = {siyuan: {
+            languages: new Proxy({}, {get: (_, key) => String(key)}),
+            config: {langs: [] as unknown[], readonly: false},
+            isPublish: false,
+        }};
         const moduleExports: {registerAppearanceTab?: (tab: unknown) => void} = {};
         runInNewContext(code, {
             exports: moduleExports,
-            window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {langs: []}}},
+            window: windowContext,
             require: (name: string) => name === "./compactMode" ? {
                 isCompactModeAvailable: () => !mobile,
                 isCompactModeEnabled: () => false,
                 setCompactModeEnabled: () => {},
             } : name === "../entryVisibility/ui" ? toolbarSettings :
+                name === "../../protyle/toolbar/inlineStyleDialog" ? {
+                    openInlineStyleDialog: (type: string) => openedColors.push(type),
+                } : name === "../../menus/menuToggle" ? {toggleMenu: (options: {
+                    target: unknown;
+                    build: (menu: unknown, session: {show: (render: () => void) => void}) => void;
+                }) => {
+                    menuTarget = options.target;
+                    options.build(undefined, {show: render => render()});
+                }} : name === "../../plugin/Menu" ? {Menu: class {
+                    addItem(item: typeof colorMenuItems[number]) { colorMenuItems.push(item); }
+                    open(position: unknown) { menuPosition = position; }
+                }} :
                 new Proxy({}, {get: () => () => ({})}),
         });
         const groups: string[] = [];
         const slots: Array<{key: string; html: () => string; afterMount: () => void}> = [];
         const switches: Array<{id: string; spec: {title: string; readConfig?: () => boolean; save?: unknown}}> = [];
+        const buttons: Array<{id: string; title: string; keywords: string[];
+            afterMount: (root: unknown) => void}> = [];
         const group = new Proxy({}, {
             get: (_, method) => (...args: unknown[]) => {
                 if (method === "slot") {
                     slots.push(args[0] as typeof slots[number]);
                 } else if (method === "switch") {
                     switches.push({id: args[0] as string, spec: args[1] as typeof switches[number]["spec"]});
+                } else if (method === "button") {
+                    buttons.push(args[0] as typeof buttons[number]);
                 }
             },
         });
@@ -62,6 +87,32 @@ for (const mobile of [true, false]) {
         assert.equal(typeof pageScrollSwitch.spec.readConfig, "function");
         assert.equal(typeof pageScrollSwitch.spec.save, "function");
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
+        const colors = buttons.find(item => item.id === "manageColors");
+        assert.ok(colors);
+        assert.equal(colors.title, "manageColors");
+        assert.equal(colors.keywords.join(","), "color,colorFont,colorPrimary");
+        let clickColors: (event: {stopPropagation: () => void}) => void;
+        const button = {
+            disabled: true,
+            addEventListener: (_name: string, listener: typeof clickColors) => { clickColors = listener; },
+            getBoundingClientRect: () => ({left: 100, bottom: 200, height: 28}),
+        };
+        const root = {querySelector: (selector: string) => selector === "#manageColors" ? button : undefined};
+        colors.afterMount(root);
+        assert.equal(button.disabled, false);
+        clickColors({stopPropagation() {}});
+        assert.equal(menuTarget, button);
+        assert.equal(colorMenuItems.map(item => item.label).join(","), "color,colorFont,colorPrimary");
+        colorMenuItems.forEach(item => item.click());
+        assert.deepEqual(openedColors, ["style1", "color", "backgroundColor"]);
+        assert.equal((menuPosition as {target: unknown}).target, button);
+        windowContext.siyuan.config.readonly = true;
+        colors.afterMount(root);
+        assert.equal(button.disabled, true);
+        windowContext.siyuan.config.readonly = false;
+        windowContext.siyuan.isPublish = true;
+        colors.afterMount(root);
+        assert.equal(button.disabled, true);
     });
 }
 

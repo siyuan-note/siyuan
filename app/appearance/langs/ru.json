@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Заголовки",
+	"configGroupBadges": "Значки",
 	"workspaceLockWaiting": "Рабочее пространство используется. Ожидание повторной попытки...",
 	"clearOCRText": "Очистить текст OCR",
 	"clearOCRTextDone": "Текст OCR очищен",

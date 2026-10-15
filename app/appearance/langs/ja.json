@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "見出し",
+	"configGroupBadges": "バッジ",
 	"workspaceLockWaiting": "ワークスペースは使用中です。再試行を待機しています...",
 	"clearOCRText": "OCR テキストを消去",
 	"clearOCRTextDone": "OCR テキストを消去しました",

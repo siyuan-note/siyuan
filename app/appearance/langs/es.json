@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Encabezados",
+	"configGroupBadges": "Indicadores",
 	"workspaceLockWaiting": "El espacio de trabajo está en uso. Esperando para reintentar...",
 	"clearOCRText": "Borrar texto OCR",
 	"clearOCRTextDone": "Texto OCR borrado",

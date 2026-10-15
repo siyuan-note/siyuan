@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "العناوين",
+	"configGroupBadges": "شارات",
 	"workspaceLockWaiting": "مساحة العمل قيد الاستخدام. في انتظار إعادة المحاولة...",
 	"clearOCRText": "مسح نص OCR",
 	"clearOCRTextDone": "تم مسح نص OCR",

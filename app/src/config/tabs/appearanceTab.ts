@@ -54,6 +54,8 @@ import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/u
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
 import {isCompactModeAvailable, isCompactModeEnabled, setCompactModeEnabled} from "./compactMode";
 import {isPageScrollButtonsEnabled, setPageScrollButtonsEnabled} from "../../protyle/scroll/pageButtons";
+import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
+import type {TInlineStyleType} from "../../protyle/toolbar/inlineStyle";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -135,6 +137,37 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         step: 1,
         save: (value) => {
             setEditorFontSize(value as number);
+        },
+    });
+    group.button({
+        id: "manageColors",
+        title: window.siyuan.languages.manageColors,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
+        keywords: [window.siyuan.languages.color, window.siyuan.languages.colorFont, window.siyuan.languages.colorPrimary],
+        afterMount: (root) => {
+            const button = root.querySelector<HTMLButtonElement>("#manageColors");
+            button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
+            button.addEventListener("click", (event) => {
+                event.stopPropagation();
+                toggleMenu({
+                    target: button,
+                    build: (_menu, session) => {
+                        const menu = new Menu();
+                        const options: {type: TInlineStyleType; label: string}[] = [
+                            {type: "style1", label: window.siyuan.languages.color},
+                            {type: "color", label: window.siyuan.languages.colorFont},
+                            {type: "backgroundColor", label: window.siyuan.languages.colorPrimary},
+                        ];
+                        options.forEach(({type, label}) => menu.addItem({
+                            label,
+                            click: () => { openInlineStyleDialog(type); },
+                        }));
+                        const rect = button.getBoundingClientRect();
+                        session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, target: button}));
+                    },
+                });
+            });
         },
     });
     group.switch("editor.fullWidth", {

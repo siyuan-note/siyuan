@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "제목",
+	"configGroupBadges": "배지",
 	"workspaceLockWaiting": "작업 공간이 사용 중입니다. 재시도 대기 중...",
 	"clearOCRText": "OCR 텍스트 지우기",
 	"clearOCRTextDone": "OCR 텍스트를 지웠습니다",

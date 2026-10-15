@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "标题",
+	"configGroupBadges": "角标",
 	"workspaceLockWaiting": "工作空间正在被使用，等待重试...",
 	"clearOCRText": "清空 OCR 文本",
 	"clearOCRTextDone": "已清空 OCR 文本",

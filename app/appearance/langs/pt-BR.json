@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Títulos",
+	"configGroupBadges": "Indicadores",
 	"workspaceLockWaiting": "O espaço de trabalho está em uso. Aguardando para tentar novamente...",
 	"clearOCRText": "Limpar texto OCR",
 	"clearOCRTextDone": "Texto OCR limpo",

@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "כותרות",
+	"configGroupBadges": "סימונים",
 	"workspaceLockWaiting": "מקום העבודה נמצא בשימוש. ממתין לניסיון חוזר...",
 	"clearOCRText": "נקה טקסט OCR",
 	"clearOCRTextDone": "טקסט OCR נוקה",

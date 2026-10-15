@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Titres",
+	"configGroupBadges": "Indicateurs",
 	"workspaceLockWaiting": "L’espace de travail est en cours d’utilisation. En attente d’une nouvelle tentative...",
 	"clearOCRText": "Effacer le texte OCR",
 	"clearOCRTextDone": "Texte OCR effacé",

@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Headings",
+	"configGroupBadges": "Badges",
 	"workspaceLockWaiting": "Workspace is in use. Waiting to retry...",
 	"clearOCRText": "Clear OCR text",
 	"clearOCRTextDone": "OCR text cleared",

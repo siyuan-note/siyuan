@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "หัวเรื่อง",
+	"configGroupBadges": "ป้ายกำกับ",
 	"workspaceLockWaiting": "พื้นที่ทำงานกำลังถูกใช้งาน กำลังรอเพื่อลองอีกครั้ง...",
 	"clearOCRText": "ล้างข้อความ OCR",
 	"clearOCRTextDone": "ล้างข้อความ OCR แล้ว",

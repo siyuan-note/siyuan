@@ -1,4 +1,6 @@
 {
+	"configGroupHeadings": "Başlıklar",
+	"configGroupBadges": "Rozetler",
 	"workspaceLockWaiting": "Çalışma alanı kullanımda. Yeniden denemek için bekleniyor...",
 	"clearOCRText": "OCR metnini temizle",
 	"clearOCRTextDone": "OCR metni temizlendi",

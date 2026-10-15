@@ -1,5 +1,6 @@
 ARG ALPINE_IMAGE=alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
 ARG GO_IMAGE=golang:1.26-alpine@sha256:3082400e369fa24d5fc60bca20edab3f6d604e0c5a690ec66b295eff4dd87ade
+ARG ONNX_VERSION=1.24.3
 
 FROM --platform=$BUILDPLATFORM node:22@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8 AS node-build
 
@@ -51,6 +52,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM --platform=$BUILDPLATFORM ${ALPINE_IMAGE} AS onnx-source
 ARG ONNX_COMMIT=3a728b75062256951b6e19ce718907cf1a1d4cf0
+ARG ONNX_VERSION
 RUN apk add --no-cache git
 # 固定提交的源码在构建机上下载一次，网络中断时重试；子模块保持各自锁定的提交。
 RUN <<EORUN
@@ -71,13 +73,15 @@ git config http.version HTTP/1.1
 retry git fetch --depth=1 --no-tags origin "${ONNX_COMMIT}"
 git checkout --detach FETCH_HEAD
 test "$(git rev-parse HEAD)" = "${ONNX_COMMIT}"
+# 源码版本不匹配时，在下载子模块和编译各平台之前停止。
+test "$(cat VERSION_NUMBER)" = "${ONNX_VERSION}"
 retry git -c http.version=HTTP/1.1 submodule update --init --recursive --depth=1
 EORUN
 
 FROM ${ALPINE_IMAGE} AS onnx-build
 ARG TARGETARCH
 ARG TARGETPLATFORM
-ARG ONNX_VERSION=1.24.3
+ARG ONNX_VERSION
 ARG ONNX_TOOLCHAIN_REV=1
 # ONNX 阶段只依赖 C++ 工具链和固定源码；更新工具链时递增修订号以刷新安装层。
 RUN echo "${TARGETPLATFORM} toolchain revision ${ONNX_TOOLCHAIN_REV}" \

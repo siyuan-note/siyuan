@@ -490,7 +490,7 @@ class CacheTests(unittest.TestCase):
 
 
 class SourceDownloadTests(unittest.TestCase):
-    def execute(self, fetch_failures=0, submodule_failures=0, actual_commit=None):
+    def execute(self, fetch_failures=0, submodule_failures=0, actual_commit=None, source_version=None, missing_version=False):
         shell = shutil.which("sh")
         if shell is None:
             git = shutil.which("git")
@@ -502,6 +502,7 @@ class SourceDownloadTests(unittest.TestCase):
         stage = dockerfile.split("AS onnx-source\n", 1)[1].split("\nFROM ", 1)[0]
         script = stage.split("RUN <<EORUN\n", 1)[1].split("\nEORUN", 1)[0]
         commit = stage.split("ARG ONNX_COMMIT=", 1)[1].splitlines()[0]
+        version = dockerfile.split("ARG ONNX_VERSION=", 1)[1].splitlines()[0]
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             trace = root / "trace"
@@ -510,7 +511,9 @@ submodule_calls=0
 git() {
     printf '%s\n' "$*" >> "$TRACE"
     case "$1" in
-        init) mkdir -p "$2" ;;
+        init)
+            mkdir -p "$2"
+            if [ "$MISSING_VERSION" != 1 ]; then printf '%s\n' "$SOURCE_VERSION" > "$2/VERSION_NUMBER"; fi ;;
         fetch)
             fetch_calls=$((fetch_calls + 1))
             if [ "$fetch_calls" -le "$FETCH_FAILURES" ]; then return 1; fi ;;
@@ -531,6 +534,8 @@ sleep() { printf 'sleep %s\n' "$*" >> "$TRACE"; }
                             encoding="utf-8", newline="\n")
             env = dict(os.environ, TRACE=trace.as_posix(), FETCH_FAILURES=str(fetch_failures),
                        SUBMODULE_FAILURES=str(submodule_failures), ONNX_COMMIT=commit,
+                       ONNX_VERSION=version, SOURCE_VERSION=source_version if source_version is not None else version,
+                       MISSING_VERSION="1" if missing_version else "0",
                        ACTUAL_COMMIT=actual_commit or commit)
             result = subprocess.run([shell, "-e", str(path)], env=env, capture_output=True, text=True, timeout=20)
             return result.returncode, trace.read_text(encoding="utf-8").splitlines(), commit
@@ -556,6 +561,21 @@ sleep() { printf 'sleep %s\n' "$*" >> "$TRACE"; }
         self.assertEqual(code, 0)
         self.assertEqual(sum(line.startswith("fetch ") for line in trace), 1)
         self.assertEqual(trace.count("-c http.version=HTTP/1.1 submodule update --init --recursive --depth=1"), 3)
+
+    def test_wrong_or_missing_source_version_stops_before_submodules(self):
+        for options in ({"source_version": "0.0.0"}, {"source_version": ""}, {"missing_version": True}):
+            with self.subTest(options=options):
+                code, trace, _ = self.execute(**options)
+                self.assertNotEqual(code, 0)
+                self.assertFalse(any("submodule update" in line for line in trace))
+
+    def test_source_and_build_stages_share_the_global_version_argument(self):
+        dockerfile = Path(__file__).resolve().parents[1].joinpath("Dockerfile").read_text(encoding="utf-8")
+        self.assertEqual(dockerfile.count("ARG ONNX_VERSION="), 1)
+        self.assertIn("ARG ONNX_VERSION=", dockerfile.split("\nFROM ", 1)[0])
+        for name in ("onnx-source", "onnx-build"):
+            stage = dockerfile.split("AS " + name + "\n", 1)[1].split("\nFROM ", 1)[0]
+            self.assertIn("\nARG ONNX_VERSION\n", "\n" + stage)
 
 
 if __name__ == "__main__":

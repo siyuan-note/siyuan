@@ -7,9 +7,10 @@ import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget,
 const source = createSourceFile("util.ts", readFileSync("src/editor/util.ts", "utf8"), ScriptTarget.ES2021, true);
 const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
     statement.declarationList.declarations.some(item =>
-        ["outlineRequests", "syncOutlineCurrent", "updateOutline"].includes(item.name.getText(source))));
+        ["outlineRequests", "invalidateOutlineRequest", "syncOutlineCurrent", "updateOutline"].includes(item.name.getText(source))));
 const compiled = transpileModule(declarations.map(item => item.getText(source).replace(/^export /, "")).join("\n") +
-    "\nglobalThis.update = updateOutline;", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    "\nglobalThis.update = updateOutline; globalThis.invalidateOutlineRequest = invalidateOutlineRequest;",
+    {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const makeProtyle = (rootID = "doc") => {
     const block = {id: rootID + "-heading"};
@@ -167,6 +168,19 @@ test("a newer outline navigation invalidates a pending reload's target", () => {
     assert.deepEqual(fixture.updates, []);
     assert.deepEqual(fixture.currents, []);
     assert.deepEqual(fixture.explicitCurrents, [{id: "latest-heading", scroll: false}]);
+});
+
+test("invalidating a reload before navigation starts removes its listeners and rejects its response", () => {
+    const fixture = setup();
+    const protyle = makeProtyle("other");
+    fixture.update(protyle, false, "previous-heading");
+    assert.equal(protyle.activeListeners(), 3);
+    fixture.context.invalidateOutlineRequest(fixture.outline);
+    assert.equal(protyle.activeListeners(), 0);
+    fixture.requests[0].callback({data: []});
+    assert.deepEqual(fixture.updates, []);
+    assert.deepEqual(fixture.currents, []);
+    assert.deepEqual(fixture.explicitCurrents, []);
 });
 
 test("a selection in another editor falls back to the target editor's saved range", () => {

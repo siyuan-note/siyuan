@@ -789,6 +789,11 @@ export const isCurrentEditor = (blockId: string) => {
 
 const outlineRequests = new WeakMap<Outline, AbortController>();
 
+export const invalidateOutlineRequest = (outline: Outline) => {
+    outlineRequests.get(outline)?.abort();
+    outlineRequests.delete(outline);
+};
+
 const syncOutlineCurrent = (outline: Outline, protyle: IProtyle, outlineId?: string) => {
     if (!protyle || outline.isPreview || !protyle.preview.element.classList.contains("fn__none") ||
         outline.blockId !== protyle.block?.rootID) {
@@ -813,7 +818,7 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
         if (!reload && item.type === "local" && item.blockId !== protyle?.block?.rootID) {
             return;
         }
-        outlineRequests.get(item)?.abort();
+        invalidateOutlineRequest(item);
         const request = new AbortController();
         outlineRequests.set(item, request);
         item.invalidateCurrent();

@@ -17,7 +17,7 @@ import {
     updateHotkeyAfterTip,
     writeBlockDOMClipboard
 } from "../../protyle/util/compatibility";
-import {openFileById} from "../../editor/util";
+import {invalidateOutlineRequest, openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {escapeHtml} from "../../util/escape";
@@ -134,7 +134,7 @@ export class Outline extends Model {
                         });
                     }
                 } else {
-                    this.invalidateCurrent();
+                    this.selectHeading(id);
                     checkFold(id, (zoomIn) => {
                         const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                         openFileById({
@@ -573,6 +573,12 @@ export class Outline extends Model {
                 }
             });
         }
+    }
+
+    private selectHeading(id: string) {
+        // 导航准备期间禁止旧的大纲重载和光标定位覆盖手动选择。
+        invalidateOutlineRequest(this);
+        this.setCurrentById(id, false);
     }
 
     public invalidateCurrent() {
@@ -1054,6 +1060,7 @@ export class Outline extends Model {
                     }
 
                     // 带子标题转换
+                    this.selectHeading(id);
                     checkFold(id, (zoomIn) => {
                         const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                         openFileById({
@@ -1063,7 +1070,6 @@ export class Outline extends Model {
                             action: zoomIn ? [action, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [action, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
-                    this.setCurrentById(id, false);
                     const headingSubMenu = [];
                     if (currentLevel !== 1) {
                         headingSubMenu.push(this.genHeadingTransform(id, 1));

@@ -1017,6 +1017,7 @@ export class Gutter {
         const menus: IMenu[] = CALLOUT_PRESETS.map(item => ({
             id: item.id,
             iconHTML: `<span class="b3-menu__icon">${item.icon}</span>`,
+            accelerator: window.siyuan.config.keymap.editor.insert[item.id]?.custom,
             label: `<span style="color: ${item.color}">${window.siyuan.languages.callout} - ${item.title}</span>`,
             current: currentType === item.type,
             click() {

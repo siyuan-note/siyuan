@@ -83,6 +83,8 @@ import {isEmptyParagraph} from "./emptyTextBlock";
 import {isListHeadingContainer} from "./headingConversion";
 import {turnParagraphIntoCode} from "./turnIntoCode";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
+import {CALLOUT_PRESETS} from "./calloutType";
+import {handleCalloutShortcut} from "./calloutShortcut";
 import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
 import {formatPainter} from "../toolbar/FormatPainter";
@@ -2256,6 +2258,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 protyle.hint.fillCommand(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, protyle);
             }
+            return;
+        }
+        const calloutPreset = CALLOUT_PRESETS.find(item =>
+            matchHotKey(window.siyuan.config.keymap.editor.insert[item.id], event));
+        if (calloutPreset && !isInEmbedBlock(nodeElement)) {
+            event.preventDefault();
+            event.stopPropagation();
+            await handleCalloutShortcut(protyle, nodeElement, range, calloutPreset, blockSelectionModeElement);
             return;
         }
         const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list, event);

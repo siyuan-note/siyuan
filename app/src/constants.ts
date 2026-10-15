@@ -675,6 +675,11 @@ export abstract class Constants {
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
                 quote: {default: "", custom: ""},
+                calloutNote: {default: "", custom: ""},
+                calloutTip: {default: "", custom: ""},
+                calloutImportant: {default: "", custom: ""},
+                calloutWarning: {default: "", custom: ""},
+                calloutCaution: {default: "", custom: ""},
                 clearInline: {default: "⌘\\", custom: "⌘\\"},
             },
             heading: {

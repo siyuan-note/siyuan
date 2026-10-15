@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261015193140"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-t67pljp",
-				"updated": "20261002013053"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -61,6 +61,52 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20261015193140-d0uhm3q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015193140-d0uhm3q",
+				"updated": "20261015193140"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "要素"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、Note、Tip、Important、Warning、Caution の各コールアウトブロックに個別のショートカットを設定できます。初期状態ではすべて未割り当てで、モバイル端末でも外付けキーボードで使用できます。引用ブロックと同様に、現在または選択中のブロックを変換し、変換できない場合は空のコールアウトを挿入します。コールアウト内で別の種類のショートカットを押すと種類を切り替えます。同じ種類の場合、折りたたまれていない子ブロックが一つだけならコールアウトを解除し、子ブロックが複数あるか折りたたまれている場合は現在の子ブロックの後に空のコールアウトを挿入します。"
 				}
 			]
 		},

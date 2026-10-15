@@ -14,7 +14,8 @@ const browserCases = async (sources: string[], luteSource: string) => {
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
     lute.SetCallout(true);
-    Object.assign(window, {siyuan: {languages: {callout: "Callout", custom: "Custom", type: "Type"}}});
+    Object.assign(window, {siyuan: {languages: {callout: "Callout", custom: "Custom", type: "Type"},
+        config: {editor: {spellcheck: false}, keymap: {editor: {insert: {}}}}}});
     const root = document.createElement("div");
     root.dataset.nodeId = "document";
     document.body.append(root);
@@ -22,13 +23,15 @@ const browserCases = async (sources: string[], luteSource: string) => {
     let transactions: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
     let inputOptions: Parameters<typeof import("../../dialog/inputDialog").openInputDialog>[0];
     let destroyed = false;
+    let selectedBlocks: HTMLElement[] = [];
+    let rangeBlocks: HTMLElement[] = [];
     const dialog = {destroy: () => {
         destroyed = true;
         inputOptions.destroyCallback?.();
     }} as Parameters<typeof inputOptions.onConfirm>[1];
     const identity = (html: string) => html;
     const dependencies = {
-        Constants: {ATTRIBUTE_EDITING: "data-editing"},
+        Constants: {ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b"},
         transaction: (_protyle: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
             transactions.push({doOperations, undoOperations});
         },
@@ -36,7 +39,17 @@ const browserCases = async (sources: string[], luteSource: string) => {
         isListMindmapListConversion: () => false,
         getPreviousBlockSibling: (element: Element) => element.previousElementSibling,
         getEmbedChildOperationParentID: (): undefined => undefined,
-        getParentBlock: (element: Element) => element.parentElement,
+        getParentBlock: (element: Element) => element.parentElement.classList.contains("callout-content") ?
+            element.parentElement.parentElement : element.parentElement,
+        getNextBlockSibling: (element: Element) => element.nextElementSibling,
+        getBlockOperationElements: () => [...selectedBlocks],
+        getBlockElementsByRange: () => rangeBlocks,
+        getUndoFocusContext: (): undefined => undefined,
+        restoreFocusContext: () => {},
+        isInEmbedBlock: (element: Element) => !!element.closest('[data-type="NodeBlockQueryEmbed"]'),
+        setFold: () => ({}),
+        unfoldListHeadings: (): IOperation[] => [],
+        focusBlock: () => {}, hideElements: () => {},
         isTabsListConversion: () => false,
         convertListMindmapToList: (): undefined => undefined,
         cleanListMindmapHTML: identity,
@@ -54,12 +67,15 @@ const browserCases = async (sources: string[], luteSource: string) => {
         },
         focusByRange: () => {},
     };
-    const conversions = new Function(...Object.keys(dependencies), sources[0] + "\nreturn {turnsOneInto};")(
-        ...Object.values(dependencies));
     const presets = {} as typeof import("./calloutType");
     new Function("exports", sources[1])(presets);
+    const conversions = new Function(...Object.keys(dependencies), "CALLOUT_PRESETS", sources[0] +
+        "\nreturn {turnsOneInto, turnsIntoOneTransaction, turnsIntoGroupsTransaction, insertEmptyCallout};")(
+        ...Object.values(dependencies), presets.CALLOUT_PRESETS);
     const callouts = {} as typeof import("./callout");
     new Function("exports", "require", sources[2])(callouts, () => ({...dependencies, ...conversions, ...presets}));
+    const shortcuts = {} as typeof import("./calloutShortcut");
+    new Function("exports", "require", sources[4])(shortcuts, () => ({...dependencies, ...conversions, ...callouts}));
     const menu = new Function("CALLOUT_PRESETS", "updateCalloutType", "updateCustomCalloutType",
         sources[3] + "\nreturn new CalloutMenu();")(presets.CALLOUT_PRESETS,
         callouts.updateCalloutType, callouts.updateCustomCalloutType) as {
@@ -167,6 +183,72 @@ const browserCases = async (sources: string[], luteSource: string) => {
     check.equal(root.querySelector(".callout-title").textContent, "My title");
     check.equal(root.querySelector(".callout-icon").textContent, icon);
     check.equal((root.firstElementChild as HTMLElement).dataset.subtype, "CUSTOM");
+
+    const shortcut = async (preset: typeof presets.CALLOUT_PRESETS[number], target: HTMLElement) => {
+        const range = document.createRange();
+        range.selectNodeContents(target.querySelector('[contenteditable="true"]') || target);
+        range.collapse(true);
+        await shortcuts.handleCalloutShortcut(protyle, target, range, preset);
+    };
+    for (const preset of presets.CALLOUT_PRESETS) {
+        // 转换保留原块 ID，类型、标题和图标在同一次事务内生成。
+        setup("text\n");
+        const paragraph = root.firstElementChild as HTMLElement;
+        paragraph.removeAttribute("fold");
+        const id = paragraph.dataset.nodeId;
+        await shortcut(preset, paragraph);
+        const callout = root.firstElementChild as HTMLElement;
+        check.equal(callout.dataset.subtype, preset.type);
+        check.equal(callout.querySelector(".callout-icon").textContent, preset.icon);
+        check.equal(callout.querySelector(".callout-title").textContent, preset.title);
+        check.equal(callout.querySelector(".callout-content").firstElementChild.getAttribute("data-node-id"), id);
+        check.equal(transactions.length, 1);
+        check.equal(transactions[0].undoOperations.at(-1).action, "delete");
+        transactions = [];
+        await shortcut(preset, paragraph);
+        check.equal(root.firstElementChild.getAttribute("data-type"), "NodeParagraph");
+        check.ok(root.querySelector(`[data-node-id="${id}"]`));
+        check.equal(transactions.length, 1);
+
+        // 多子块和折叠子块沿用引述块的插入规则，插入锚点指向提示块而非内容包装元素。
+        for (const folded of [false, true]) {
+            const block = setup(`> [!${preset.type}]\n> first\n${folded ? "" : ">\n> second\n"}`);
+            block.removeAttribute("fold");
+            const child = block.querySelector<HTMLElement>(".callout-content > [data-node-id]");
+            if (folded) {
+                child.setAttribute("fold", "1");
+            }
+            await shortcut(preset, child);
+            check.equal(transactions.length, 1);
+            check.equal(transactions[0].doOperations[0].action, "insert");
+            check.equal(transactions[0].doOperations[0].parentID, block.dataset.nodeId);
+            check.equal(child.nextElementSibling.getAttribute("data-subtype"), preset.type);
+        }
+    }
+    const existing = setup("> [!NOTE] Custom title\n> content\n");
+    existing.removeAttribute("fold");
+    await shortcut(presets.CALLOUT_PRESETS[1], existing.querySelector(".callout-content > [data-node-id]"));
+    check.equal(existing.dataset.subtype, "TIP");
+    check.equal(existing.querySelector(".callout-title").textContent, "Custom title");
+    check.equal(transactions.length, 1);
+
+    setup("first\n\nsecond\n");
+    selectedBlocks = Array.from(root.children) as HTMLElement[];
+    await shortcut(presets.CALLOUT_PRESETS[2], selectedBlocks[0]);
+    check.equal(transactions.length, 1);
+    check.equal(root.firstElementChild.getAttribute("data-subtype"), "IMPORTANT");
+    check.equal(root.querySelector(".callout-content").childElementCount, 2);
+    selectedBlocks = [];
+
+    setup("first\n\n> second\n");
+    rangeBlocks = [root.firstElementChild as HTMLElement, root.querySelector(".bq > [data-node-id]")];
+    const crossRange = document.createRange();
+    crossRange.setStart(rangeBlocks[0].firstElementChild.firstChild, 0);
+    crossRange.setEnd(rangeBlocks[1].firstElementChild.firstChild, 3);
+    await shortcuts.handleCalloutShortcut(protyle, rangeBlocks[0], crossRange, presets.CALLOUT_PRESETS[3]);
+    check.equal(transactions.length, 1);
+    check.equal(root.querySelectorAll('[data-subtype="WARNING"]').length, 2);
+    rangeBlocks = [];
     return "Callout conversion cases passed";
 };
 
@@ -177,14 +259,16 @@ test("shared block menus convert blockquotes to callout types in a single undoab
     const source = createSourceFile("transaction.ts", readFileSync(path.join(__dirname, "transaction.ts"), "utf8"),
         ScriptTarget.ES2021, true);
     const conversionSource = source.statements.filter(statement => isVariableStatement(statement) &&
-        statement.declarationList.declarations.some(item => ["turnsOneInto", "updateTransaction"].includes(item.name.getText(source))))
+        statement.declarationList.declarations.some(item => ["turnsOneInto", "updateTransaction", "turnsIntoOneTransaction",
+            "turnsIntoGroupsTransaction", "insertEmptyQuoteBlock", "insertEmptyCallout"].includes(item.name.getText(source))))
         .map(statement => statement.getText(source).replace(/^export /, "")).join("\n");
     const gutter = createSourceFile("index.ts", readFileSync(path.join(__dirname, "../gutter/index.ts"), "utf8"),
         ScriptTarget.ES2021, true);
     const menuSource = gutter.statements.filter(isClassDeclaration).find(item => item.name?.text === "Gutter")
         .members.find(item => item.name?.getText(gutter) === "calloutTypeMenus").getText(gutter);
     const sources = [conversionSource, readFileSync(path.join(__dirname, "calloutType.ts"), "utf8"),
-        readFileSync(path.join(__dirname, "callout.ts"), "utf8"), `class CalloutMenu { ${menuSource} }`]
+        readFileSync(path.join(__dirname, "callout.ts"), "utf8"), `class CalloutMenu { ${menuSource} }`,
+        readFileSync(path.join(__dirname, "calloutShortcut.ts"), "utf8")]
         .map(text => transpileModule(text, {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText);
     const luteSource = readFileSync("stage/protyle/js/lute/lute.min.js", "utf8");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-callout-test-"));

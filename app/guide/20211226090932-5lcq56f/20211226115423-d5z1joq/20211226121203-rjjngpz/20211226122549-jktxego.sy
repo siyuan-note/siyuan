@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261015193140"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-a3qlogr",
-				"updated": "20261002013053"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -63,6 +63,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20261015193140-98at8pv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015193140-98at8pv",
+				"updated": "20261015193140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "元素"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中為 Note、Tip、Important、Warning、Caution 五種提示區塊分別設定快捷鍵，預設均未綁定，行動端連接外接鍵盤後也可使用。行為參考引述區塊快捷鍵：轉換目前區塊或選取的區塊，無法轉換時插入空提示區塊。在提示區塊內，使用不同類型的快捷鍵會切換類型；使用相同類型的快捷鍵時，若僅有一個未摺疊子區塊則取消提示區塊，若有多個子區塊或子區塊已摺疊則在目前子區塊後插入空提示區塊。"
 				}
 			]
 		},

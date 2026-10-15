@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261015193140"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20261002013053"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -63,6 +63,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20261015193140-bd3r41i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015193140-bd3r41i",
+				"updated": "20261015193140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Element"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " you can assign separate shortcuts to the Note, Tip, Important, Warning, and Caution callout blocks. All five are unassigned by default and also work with an external keyboard on mobile. Like the blockquote shortcut, they convert the current or selected blocks, or insert an empty callout when conversion is unavailable. Inside a callout, a different type changes its type; the same type removes the wrapper when it has one unfolded child, or inserts an empty callout after the current child when it has multiple children or a folded child."
 				}
 			]
 		},

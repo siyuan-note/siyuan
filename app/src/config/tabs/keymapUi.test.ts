@@ -3,6 +3,23 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
+
+test("callout shortcut rows use localized labels without requiring separate translation keys", () => {
+    const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);
+    const declaration = source.statements.find(statement => isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(item => item.name.getText(source) === "getKeymapLabel"));
+    assert.ok(declaration);
+    const code = transpileModule(declaration.getText(source) + "\nexports.label = getKeymapLabel;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const exports = {} as {label: (key: string) => string};
+    runInNewContext(code, {exports, CALLOUT_PRESETS, window: {siyuan: {languages: {callout: "提示块", quote: "引述块"}}}});
+    for (const preset of CALLOUT_PRESETS) {
+        assert.equal(exports.label(preset.id), `提示块 - ${preset.title}`);
+    }
+    assert.equal(exports.label("quote"), "引述块");
+});
 
 test("settings keymap search keeps undeclared owner plugins visible", () => {
     const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);

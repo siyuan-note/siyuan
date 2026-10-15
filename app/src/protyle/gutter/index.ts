@@ -108,6 +108,9 @@ import {
     isGutterInsertStateMatched
 } from "./multiSelect";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
+/// #if MOBILE
+import {openMobileFileById} from "../../mobile/editor";
+/// #endif
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 import {getDockByType} from "../../layout/tabUtil";
@@ -132,6 +135,7 @@ import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
     getFixedGutterPosition,
+    getGutterFixedContainerRect,
     getGutterMarginHeight,
     getListGutterAnchorLeft
 } from "./layout";
@@ -198,14 +202,6 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeWidget: "widgetBlock",
     NodeAttributeView: "databaseBlock",
     NodeCustomBlock: "custom",
-};
-
-const getGutterFixedContainerRect = (protyle: IProtyle) => {
-    const floatLayoutElement = protyle.element.closest(".layout--float");
-    if (!floatLayoutElement || getComputedStyle(floatLayoutElement).transform === "none") {
-        return;
-    }
-    return floatLayoutElement.getBoundingClientRect();
 };
 
 // 根据块 data-type 返回本地化的类型名，用于块标拖拽提示「拖拽 ${x} 移动位置」
@@ -731,7 +727,7 @@ export class Gutter {
             if (protyle.disabled || !lineBefore || !lineAfter || !plusBefore || !plusAfter) {
                 return;
             }
-            const fixedContainerRect = getGutterFixedContainerRect(protyle);
+            const fixedContainerRect = getGutterFixedContainerRect(protyle.element);
             // 多选或跨块文本选择时不显示插入框线与加号 https://github.com/siyuan-note/siyuan/issues/18592
             if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length > 1 ||
                 getCrossBlockTextRange(protyle)) {
@@ -2800,24 +2796,28 @@ export class Gutter {
                 }
             }).element);
         } else {
-            /// #if !MOBILE
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
                 icon: "iconEnter",
+                /// #if !MOBILE
                 accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘" + window.siyuan.languages.click)}`,
+                /// #endif
                 label: window.siyuan.languages.openBy,
                 click: () => {
                     checkFold(id, (zoomIn, action) => {
+                        /// #if MOBILE
+                        openMobileFileById(protyle.app, id, action, undefined, protyle.notebookId);
+                        /// #else
                         openFileById({
                             app: protyle.app,
                             id,
                             action,
                             zoomIn
                         });
+                        /// #endif
                     });
                 }
             }).element);
-            /// #endif
         }
         if (allowStructuralMutation && nodeElement.getAttribute("data-type") !== "NodeTabItem") {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -4044,7 +4044,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             }
         }
         const foldElement = hasClosestByAttribute(element.parentElement, "fold", "1") as HTMLElement;
-        const fixedContainerRect = getGutterFixedContainerRect(protyle);
+        const fixedContainerRect = getGutterFixedContainerRect(protyle.element);
         const top = Math.max(rect.top + marginHeight, contentTop, foldElement ? foldElement.getBoundingClientRect().top : 0);
         this.element.style.top = `${getFixedGutterPosition(top, fixedContainerRect?.top)}px`;
         // 压缩模式需加 2，否则和折叠标题无法对齐

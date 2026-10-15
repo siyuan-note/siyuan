@@ -15,6 +15,14 @@ export const getFixedGutterPosition = (viewportPosition: number, fixedContainerP
     return viewportPosition - (fixedContainerPosition ?? 0);
 };
 
+// 位移变换会让浮动面板和移动端抽屉成为固定定位块标的坐标参照。
+export const getGutterFixedContainerRect = (element: HTMLElement) => {
+    const container = element.closest(".layout--float, .mobile-bottom-sheet");
+    if (container && getComputedStyle(container).transform !== "none") {
+        return container.getBoundingClientRect();
+    }
+};
+
 export const getContainerGutterSpace = (type: string, usesContainerRect: boolean) =>
     !usesContainerRect && ["NodeBlockquote", "NodeCallout"].includes(type) ? 10 : 0;
 

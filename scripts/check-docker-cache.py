@@ -32,7 +32,7 @@ def cache_bytes(manifest):
     return sum(sizes.values())
 
 
-def onnx_steps(log):
+def onnx_steps(log, expected=PLATFORMS):
     steps, result = {}, {}
     for line in log.splitlines():
         match = re.match(r"^#(\d+) \[(linux/[a-z0-9/]+) onnx-build \d+/\d+\] RUN python3 /onnxruntime/tools/ci_build/build.py", line)
@@ -42,12 +42,12 @@ def onnx_steps(log):
         if status and status[1] in steps:
             platform = steps[status[1]]
             result[platform] = result.get(platform, False) or status[2] == "CACHED"
-    if set(result) != PLATFORMS:
+    if set(result) != set(expected):
         raise ValueError(f"Incomplete ONNX build log: {tuple(result)}")
     return result
 
 
-def build_case(context, cache, directory, name, *, import_cache, revision=None):
+def build_case(context, cache, directory, name, *, import_cache, revision=None, platforms=PLATFORMS):
     builder = "siyuan-cache-check-" + uuid.uuid4().hex
     started = time.monotonic()
     log_path = directory / (name + ".log")
@@ -78,7 +78,7 @@ def build_case(context, cache, directory, name, *, import_cache, revision=None):
         subprocess.run(["docker", "buildx", "create", "--name", builder, "--driver", "docker-container"], check=True)
         monitor.start()
         command = ["docker", "buildx", "build", "--builder", builder, "--target", "onnx-build",
-                   "--platform", ",".join(sorted(PLATFORMS)), "--progress", "plain", "--output", "type=cacheonly",
+                   "--platform", ",".join(sorted(platforms)), "--progress", "plain", "--output", "type=cacheonly",
                    "--cache-to", "type=registry,ref=" + cache + ",mode=max"]
         if import_cache:
             command += ["--cache-from", "type=registry,ref=" + cache]
@@ -88,7 +88,7 @@ def build_case(context, cache, directory, name, *, import_cache, revision=None):
         # 将完整日志留在验收目录，终端只显示当前轮次和最后的缓存命中结果。
         with log_path.open("w", encoding="utf-8") as log:
             subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
-        hits = onnx_steps(log_path.read_text(encoding="utf-8"))
+        hits = onnx_steps(log_path.read_text(encoding="utf-8"), platforms)
         exported = subprocess.run(["docker", "buildx", "imagetools", "inspect", cache, "--raw"],
                                   capture_output=True, text=True, check=True)
         return {"case": name, "cached": hits, "seconds": round(time.monotonic() - started, 3),
@@ -105,12 +105,14 @@ def main():
     parser.add_argument("--dockerfile", type=Path, required=True)
     parser.add_argument("--cache-repository", required=True)
     parser.add_argument("--records", type=Path, required=True)
+    parser.add_argument("--platform", choices=sorted(PLATFORMS))
     args = parser.parse_args()
     if not re.fullmatch(r"[a-z0-9][a-z0-9./_-]*", args.cache_repository):
         parser.error("Expected a registry repository without a tag or digest")
     args.records.mkdir(parents=True, exist_ok=False)
+    platforms = {args.platform} if args.platform else PLATFORMS
     cache = args.cache_repository + ":buildcache-check-" + uuid.uuid4().hex
-    report = {"cache": cache, "status": "running", "cases": [],
+    report = {"cache": cache, "platforms": sorted(platforms), "status": "running", "cases": [],
               "dockerfile_sha256": hashlib.sha256(args.dockerfile.read_bytes()).hexdigest()}
     try:
         with tempfile.TemporaryDirectory(prefix="siyuan-onnx-cache-") as directory:
@@ -123,7 +125,8 @@ def main():
                 if changed:
                     (context / "app/cache-probe.txt").write_text("changed application source\n", encoding="utf-8")
                 revision = uuid.uuid4().hex if name == "onnx-input-change" else None
-                result = build_case(context, cache, args.records, name, import_cache=imported, revision=revision)
+                result = build_case(context, cache, args.records, name, import_cache=imported, revision=revision,
+                                    platforms=platforms)
                 report["cases"].append(result)
                 expected = name in ("warm", "application-change")
                 if any(cached != expected for cached in result["cached"].values()):

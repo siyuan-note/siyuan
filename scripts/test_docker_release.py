@@ -107,19 +107,32 @@ class PublishTests(unittest.TestCase):
         response = subprocess.CompletedProcess([], 0, json.dumps(manifest()), "")
         with patch.object(release, "run", return_value=response) as run:
             release.promote(IMAGE, "3.8.7", self.path)
-        command = run.call_args_list[0].args[0]
+        command = run.call_args_list[1].args[0]
         self.assertEqual(command[-1], IMAGE)
         self.assertIn("b3log/siyuan:v3.8.7", command)
         self.assertIn("b3log/siyuan:latest", command)
-        self.assertEqual(run.call_count, 3)
+        self.assertEqual(run.call_count, 4)
 
     def test_remote_manifest_difference_is_reported(self):
         self.save(report())
         changed = manifest()
         changed["manifests"][0]["digest"] = "sha256:" + "f" * 64
-        with patch.object(release, "run", return_value=subprocess.CompletedProcess([], 0, json.dumps(changed), "")):
+        responses = [subprocess.CompletedProcess([], 0, json.dumps(manifest()), ""),
+                     subprocess.CompletedProcess([], 0, "", ""),
+                     subprocess.CompletedProcess([], 0, json.dumps(changed), "")]
+        with patch.object(release, "run", side_effect=responses):
             with self.assertRaisesRegex(ValueError, "differs"):
                 release.promote(IMAGE, "3.8.7", self.path)
+
+    def test_candidate_mismatch_blocks_all_release_tag_writes(self):
+        self.save(report())
+        changed = manifest()
+        changed["manifests"][0]["digest"] = "sha256:" + "f" * 64
+        with patch.object(release, "run", return_value=subprocess.CompletedProcess([], 0, json.dumps(changed), "")) as run:
+            with self.assertRaisesRegex(ValueError, "differs"):
+                release.promote(IMAGE, "3.8.7", self.path)
+        self.assertEqual(run.call_count, 1)
+        self.assertEqual(run.call_args.args[0][3], "inspect")
 
     def test_smoke_failure_preserves_failed_report_and_blocks_promotion(self):
         fixtures = Path(self.temp.name) / "fixtures"
@@ -153,6 +166,125 @@ class PublishTests(unittest.TestCase):
         self.assertEqual(commands.call_args_list[-1].args[0][-1], cleanup[0][-1] + "-workspace")
 
 
+class PlatformReleaseTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.reports = self.root / "reports"
+        self.reports.mkdir()
+        self.output = self.root / "assembled.json"
+        self.provenance = {"source_commit": "b" * 40, "configuration_commit": "c" * 40, "run_id": "123"}
+        self.sources = {}
+        self.paths = []
+        for index, entry in enumerate(report()["platforms"]):
+            image = "b3log/siyuan@sha256:" + str(index + 5) * 64
+            value = {**report(), **self.provenance, "image": image, "platforms": [entry]}
+            directory = self.reports / str(index)
+            directory.mkdir()
+            path = directory / "report.json"
+            path.write_text(json.dumps(value), encoding="utf-8")
+            self.paths.append(path)
+            self.sources[image] = {"manifests": [manifest()["manifests"][index]]}
+
+    def command(self, arguments, **kwargs):
+        if arguments[3] == "create":
+            return subprocess.CompletedProcess(arguments, 0, "", "")
+        if "--format" in arguments:
+            value = {"digest": IMAGE.partition("@")[2]}
+        else:
+            value = self.sources.get(arguments[4], manifest())
+        return subprocess.CompletedProcess(arguments, 0, json.dumps(value), "")
+
+    def assemble(self):
+        release.assemble("b3log/siyuan", "build-123-2-verified", "3.8.7", self.reports, self.output, self.provenance)
+
+    def test_only_four_verified_current_run_candidates_are_assembled(self):
+        with patch.object(release, "run", side_effect=self.command) as run:
+            self.assemble()
+        commands = [call.args[0] for call in run.call_args_list if call.args[0][3] == "create"]
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0][5], "b3log/siyuan:build-123-2-verified")
+        self.assertEqual(set(commands[0][6:]), set(self.sources))
+        value = json.loads(self.output.read_text(encoding="utf-8"))
+        self.assertEqual(value["status"], "passed")
+        self.assertEqual(value["image"], IMAGE)
+        self.assertEqual(release.verified_platforms(value, IMAGE, "3.8.7"), release.manifests(manifest()))
+        self.assertEqual(value["run_id"], "123")
+
+    def test_old_source_configuration_run_failed_or_incomplete_reports_block_assembly(self):
+        original = json.loads(self.paths[0].read_text(encoding="utf-8"))
+        changes = [lambda value: value.update(source_commit="d" * 40),
+                   lambda value: value.update(configuration_commit="d" * 40),
+                   lambda value: value.update(run_id="122"), lambda value: value.update(status="failed"),
+                   lambda value: value.update(version="3.8.8"),
+                   lambda value: value["platforms"][0]["checks"].remove("chinese"),
+                   lambda value: value["platforms"][0].update(platform="linux/arm64"),
+                   lambda value: value.update(image=value["image"].replace("b3log/siyuan", "other/repo"))]
+        for change in changes:
+            value = copy.deepcopy(original)
+            change(value)
+            self.paths[0].write_text(json.dumps(value), encoding="utf-8")
+            with self.subTest(change=change), patch.object(release, "run", side_effect=self.command) as run:
+                with self.assertRaises(ValueError):
+                    self.assemble()
+                self.assertFalse(any(call.args[0][3] == "create" for call in run.call_args_list))
+                self.assertFalse(self.output.exists())
+
+    def test_missing_platform_report_blocks_assembly(self):
+        self.paths[-1].unlink()
+        with patch.object(release, "run") as run:
+            with self.assertRaisesRegex(ValueError, "four"):
+                self.assemble()
+            run.assert_not_called()
+
+    def test_report_digest_must_match_its_platform_candidate(self):
+        source = next(iter(self.sources.values()))
+        source["manifests"][0]["digest"] = "sha256:" + "f" * 64
+        with patch.object(release, "run", side_effect=self.command) as run:
+            with self.assertRaisesRegex(ValueError, "digest differs"):
+                self.assemble()
+        self.assertFalse(any(call.args[0][3] == "create" for call in run.call_args_list))
+
+    def test_assembled_digest_mismatch_never_creates_successful_report(self):
+        def mismatched(arguments, **kwargs):
+            response = self.command(arguments, **kwargs)
+            if arguments[3] == "inspect" and arguments[4] == IMAGE:
+                value = manifest()
+                value["manifests"].pop()
+                response.stdout = json.dumps(value)
+            return response
+        with patch.object(release, "run", side_effect=mismatched) as run:
+            with self.assertRaises(ValueError):
+                self.assemble()
+        self.assertFalse(self.output.exists())
+        for call in run.call_args_list:
+            self.assertNotIn("b3log/siyuan:latest", call.args[0])
+            self.assertNotIn("b3log/siyuan:v3.8.7", call.args[0])
+
+    def test_single_platform_verification_keeps_every_smoke_check_and_provenance(self):
+        fixtures = self.root / "fixtures"
+        fixtures.mkdir()
+        for name in ("chinese", "latin", "blank"):
+            (fixtures / (name + ".png")).write_bytes(b"fixture")
+        entry = report()["platforms"][3]
+        response = subprocess.CompletedProcess([], 0, json.dumps({"manifests": [manifest()["manifests"][3]]}), "")
+        with patch.object(release, "run", return_value=response), \
+                patch.object(release, "verify_platform", return_value=entry) as verify:
+            release.verify(IMAGE, "3.8.7", fixtures, self.output, 240,
+                           platform="linux/arm/v8", provenance=self.provenance)
+        self.assertEqual(verify.call_count, 1)
+        self.assertEqual(verify.call_args.args[2], "linux/arm/v8")
+        value = json.loads(self.output.read_text(encoding="utf-8"))
+        self.assertEqual(value["source_commit"], self.provenance["source_commit"])
+        self.assertEqual(set(value["platforms"][0]["checks"]), release.CHECKS)
+
+    def test_wrong_or_extra_platform_in_single_candidate_is_rejected(self):
+        for value in (manifest(), {"manifests": [manifest()["manifests"][0]]}):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                release.manifests(value, ("linux/arm/v8",))
+
+
 class CacheTests(unittest.TestCase):
     def test_resource_measurements_use_binary_units_and_deduplicate_cache_layers(self):
         self.assertEqual(cache.memory_bytes("1.5GiB"), 1610612736)
@@ -175,6 +307,29 @@ class CacheTests(unittest.TestCase):
                     self.log(True).replace("RUN python3 /onnxruntime/tools/ci_build/build.py", "RUN apk add cmake")):
             with self.assertRaises(ValueError):
                 cache.onnx_steps(log)
+
+    def test_per_platform_cache_acceptance_does_not_accept_other_arm_variants(self):
+        line = "#1 [linux/arm/v8 onnx-build 5/5] RUN python3 /onnxruntime/tools/ci_build/build.py --build\n#1 CACHED"
+        self.assertEqual(cache.onnx_steps(line, {"linux/arm/v8"}), {"linux/arm/v8": True})
+        with self.assertRaises(ValueError):
+            cache.onnx_steps(line, {"linux/arm64"})
+
+    def test_selected_platform_is_used_for_all_four_cache_acceptance_cases(self):
+        def build(context, cache_ref, directory, name, *, platforms, **kwargs):
+            self.assertEqual(platforms, {"linux/arm64"})
+            return {"cached": {"linux/arm64": name in ("warm", "application-change")}}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dockerfile = root / "Dockerfile"
+            dockerfile.write_text("FROM alpine AS onnx-build\n", encoding="utf-8")
+            with patch("sys.argv", ["check-docker-cache.py", "--dockerfile", str(dockerfile),
+                                    "--cache-repository", "b3log/siyuan", "--records", str(root / "records"),
+                                    "--platform", "linux/arm64"]), patch.object(cache, "build_case", side_effect=build) as run:
+                cache.main()
+            self.assertEqual(run.call_count, 4)
+            value = json.loads(root.joinpath("records/report.json").read_text(encoding="utf-8"))
+            self.assertEqual(value["status"], "passed")
+            self.assertEqual(value["platforms"], ["linux/arm64"])
 
 
 class SourceDownloadTests(unittest.TestCase):

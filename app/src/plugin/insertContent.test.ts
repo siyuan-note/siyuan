@@ -154,6 +154,9 @@ const browserCases = async (sources: Record<string, string>, insertionSource: st
     older.element.classList.add("fn__none");
     check.equal(insertEditorContent({data: "bad", editor: older.editor}, []).status, "no-editor");
     older.element.classList.remove("fn__none");
+    older.root.classList.add("fn__none");
+    check.equal(insertEditorContent({data: "bad", editor: older.editor}, []).status, "no-editor");
+    older.root.classList.remove("fn__none");
     check.equal(older.root.innerHTML, unchanged);
 
     const stale = fixture("stale");

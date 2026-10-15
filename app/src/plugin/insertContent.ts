@@ -22,9 +22,10 @@ export interface IInsertContentResult {
         "unsupported-content" | "empty-content";
 }
 
-const isVisible = (editor: Protyle) => editor?.protyle.element.ownerDocument === document &&
-    editor.protyle.element.isConnected &&
-    !editor.protyle.element.closest(".fn__none, [inert]") && editor.protyle.element.getClientRects().length > 0;
+const isVisible = (editor: Protyle) => editor?.protyle.wysiwyg.element.ownerDocument === document &&
+    editor.protyle.wysiwyg.element.isConnected &&
+    !editor.protyle.wysiwyg.element.closest(".fn__none, [inert]") &&
+    editor.protyle.wysiwyg.element.getClientRects().length > 0;
 
 const getInsertionEditor = (editors: Protyle[], range?: Range) => {
     const visible = editors.filter(isVisible);

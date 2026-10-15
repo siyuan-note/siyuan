@@ -92,14 +92,18 @@ body {
       padding: 0 0 0 5px;
     }
 
-    .fullscreen {
-      & > .protyle-breadcrumb,
-      & > .block__icons {
-        padding-right: 126px;
-      }
+    // 前端形态条件不增加优先级，独立窗口继续使用自身的窗口控件占位。
+    :where(html[data-frontend="desktop"]) &,
+    :where(html[data-frontend="desktop-window"]) & {
+      .fullscreen {
+        & > .protyle-breadcrumb,
+        & > .block__icons {
+          padding-right: 126px;
+        }
 
-      & > .block__icons > .search__label {
-        right: 108px;
+        & > .block__icons > .search__label {
+          right: 108px;
+        }
       }
     }
   }

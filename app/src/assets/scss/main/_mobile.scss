@@ -15,7 +15,7 @@ body {
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
 }
 
-body.body--android {
+html[data-frontend="mobile"] body.body--android {
   --mobile-top-safe-area: 0px;
 
   .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {

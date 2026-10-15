@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Définissez un mémo pour ce bloc, seul le texte brut est pris en charge",
 	"switchDirect": "Changer le sens de comparaison",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> rechercher uniquement les documents",
-	"onlySearchForDocTip": "Après l'activation, [[ ou 【【 pour rechercher des références de bloc uniquement dans les noms de documents",
+	"onlySearchForDocTip": "Après l'activation, <code class='fn__code'>[[</code> ou <code class='fn__code'>【【</code> pour rechercher des références de bloc uniquement dans les noms de documents",
 	"pasteURLAutoConvert": "Convertir automatiquement les URL collées en liens",
 	"pasteURLAutoConvertTip": "Lorsque cette option est activée, coller une URL commençant par http:// ou https:// la convertit automatiquement en lien cliquable",
 	"ocrResult": "Texte OCR",

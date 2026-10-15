@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "ตั้งค่าบันทึกย่อสำหรับบล็อกนี้ รองรับเฉพาะข้อความธรรมดา",
 	"switchDirect": "สลับทิศทางเปรียบเทียบ",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> ค้นหาเฉพาะเอกสาร",
-	"onlySearchForDocTip": "เมื่อเปิดใช้งาน [[ หรือ 【【 จะค้นหาการอ้างอิงบล็อกเฉพาะในชื่อเอกสาร",
+	"onlySearchForDocTip": "เมื่อเปิดใช้งาน <code class='fn__code'>[[</code> หรือ <code class='fn__code'>【【</code> จะค้นหาการอ้างอิงบล็อกเฉพาะในชื่อเอกสาร",
 	"pasteURLAutoConvert": "แปลง URL เป็นลิงก์อัตโนมัติ",
 	"pasteURLAutoConvertTip": "เมื่อเปิดใช้งาน การวาง URL ที่ขึ้นต้นด้วย http:// หรือ https:// จะแปลงเป็นลิงก์ที่คลิกได้โดยอัตโนมัติ",
 	"ocrResult": "ข้อความ OCR",

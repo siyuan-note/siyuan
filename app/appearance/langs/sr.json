@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Postavi belešku za ovaj blok; podržan je samo običan tekst",
 	"switchDirect": "Promeni smer poređenja",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> pretražuje samo dokumente",
-	"onlySearchForDocTip": "Kada je omogućeno, [[ ili 【【 za pretragu referenci bloka pretražuju samo nazive dokumenata",
+	"onlySearchForDocTip": "Kada je omogućeno, <code class='fn__code'>[[</code> ili <code class='fn__code'>【【</code> za pretragu referenci bloka pretražuju samo nazive dokumenata",
 	"pasteURLAutoConvert": "Automatski pretvori nalepljeni URL u vezu",
 	"pasteURLAutoConvertTip": "Kada je omogućeno, lepljenje URL-a koji počinje sa http:// ili https:// automatski se pretvara u vezu na koju se može kliknuti",
 	"ocrResult": "OCR текст",

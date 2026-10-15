@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Stel een memo in voor dit blok; alleen platte tekst wordt ondersteund",
 	"switchDirect": "Vergelijkingsrichting wisselen",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> alleen documenten doorzoeken",
-	"onlySearchForDocTip": "Indien ingeschakeld doorzoekt [[ of 【【 bij het zoeken naar blokverwijzingen alleen documentnamen",
+	"onlySearchForDocTip": "Indien ingeschakeld doorzoekt <code class='fn__code'>[[</code> of <code class='fn__code'>【【</code> bij het zoeken naar blokverwijzingen alleen documentnamen",
 	"pasteURLAutoConvert": "Geplakte URL automatisch omzetten naar link",
 	"pasteURLAutoConvertTip": "Indien ingeschakeld wordt een geplakte URL die begint met http:// of https:// automatisch omgezet naar een klikbare link",
 	"ocrResult": "OCR-tekst",

@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Tetapkan memo untuk blok ini, hanya teks biasa yang didukung",
 	"switchDirect": "Alihkan arah perbandingan",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> hanya mencari dokumen",
-	"onlySearchForDocTip": "Saat diaktifkan, [[ atau 【【 untuk mencari referensi blok hanya dalam nama dokumen",
+	"onlySearchForDocTip": "Saat diaktifkan, <code class='fn__code'>[[</code> atau <code class='fn__code'>【【</code> untuk mencari referensi blok hanya dalam nama dokumen",
 	"pasteURLAutoConvert": "Konversi otomatis URL yang ditempel menjadi tautan",
 	"pasteURLAutoConvertTip": "Saat diaktifkan, menempelkan URL yang dimulai dengan http:// atau https:// akan secara otomatis mengonversinya menjadi tautan yang dapat diklik",
 	"ocrResult": "Teks OCR",

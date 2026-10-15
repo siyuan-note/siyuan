@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "為該區塊設置備註，僅支持純文字",
 	"switchDirect": "交換對比方向",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> 僅搜索文件",
-	"onlySearchForDocTip": "啟用後使用 [[ 或 【【 搜索區塊引用時將只在文件名中搜索",
+	"onlySearchForDocTip": "啟用後使用 <code class='fn__code'>[[</code> 或 <code class='fn__code'>【【</code> 搜索區塊引用時將只在文件名中搜索",
 	"pasteURLAutoConvert": "貼上網址時自動轉為連結",
 	"pasteURLAutoConvertTip": "啟用後貼上 http:// 或 https:// 開頭的網址時將自動轉為可點擊的連結",
 	"ocrResult": "OCR 文字",

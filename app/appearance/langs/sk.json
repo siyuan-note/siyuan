@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Nastaviť poznámku (iba čistý text)",
 	"switchDirect": "Prepnúť smer porovnávania",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> vyhľadáva iba dokumenty",
-	"onlySearchForDocTip": "Ak je povolené, hľadanie cez [[ sa obmedzí len na názvy dokumentov",
+	"onlySearchForDocTip": "Ak je povolené, hľadanie cez <code class='fn__code'>[[</code> alebo <code class='fn__code'>【【</code> sa obmedzí len na názvy dokumentov",
 	"pasteURLAutoConvert": "Automaticky previesť vloženú URL na odkaz",
 	"pasteURLAutoConvertTip": "Ak je povolené, vloženie URL začínajúcej na http:// alebo https:// ju automaticky prevedie na klikateľný odkaz",
 	"ocrResult": "Text OCR",

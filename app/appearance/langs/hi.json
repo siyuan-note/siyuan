@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "इस ब्लॉक के लिए एक मेमो सेट करें, केवल सादा पाठ समर्थित है",
 	"switchDirect": "तुलना दिशा स्विच करें",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> केवल दस्तावेज़ खोजें",
-	"onlySearchForDocTip": "सक्षम होने पर, [[ या 【【 केवल दस्तावेज़ नामों में ब्लॉक संदर्भ खोजने के लिए",
+	"onlySearchForDocTip": "सक्षम होने पर, <code class='fn__code'>[[</code> या <code class='fn__code'>【【</code> केवल दस्तावेज़ नामों में ब्लॉक संदर्भ खोजने के लिए",
 	"pasteURLAutoConvert": "पेस्ट किए गए URL को स्वचालित रूप से लिंक में बदलें",
 	"pasteURLAutoConvertTip": "सक्षम होने पर, http:// या https:// से शुरू होने वाला URL पेस्ट करने पर यह स्वचालित रूप से क्लिक करने योग्य लिंक में बदल जाएगा",
 	"ocrResult": "OCR पाठ",

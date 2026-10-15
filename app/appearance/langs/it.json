@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Imposta un memo per questo blocco, è supportato solo testo normale",
 	"switchDirect": "Cambia direzione di confronto",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> cerca solo nei documenti",
-	"onlySearchForDocTip": "Dopo l'abilitazione, [[ o 【【 per cercare riferimenti di blocchi solo nei nomi dei documenti",
+	"onlySearchForDocTip": "Dopo l'abilitazione, <code class='fn__code'>[[</code> o <code class='fn__code'>【【</code> per cercare riferimenti di blocchi solo nei nomi dei documenti",
 	"pasteURLAutoConvert": "Converti automaticamente URL incollato in link",
 	"pasteURLAutoConvertTip": "Quando abilitato, incollando un URL che inizia con http:// o https:// verrà automaticamente convertito in un link cliccabile",
 	"ocrResult": "Testo OCR",

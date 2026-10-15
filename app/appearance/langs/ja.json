@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "このブロックのメモを設定します。プレーンテキストのみがサポートされています",
 	"switchDirect": "比較方向の切り替え",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> ドキュメント名のみを検索",
-	"onlySearchForDocTip": "<code class='fn__code'>[[</code> を使用したブロック参照の検索でドキュメント名のみを検索します",
+	"onlySearchForDocTip": "<code class='fn__code'>[[</code> または <code class='fn__code'>【【</code> を使用したブロック参照の検索でドキュメント名のみを検索します",
 	"pasteURLAutoConvert": "貼り付けたURLを自動でリンクに変換",
 	"pasteURLAutoConvertTip": "有効にすると、http:// または https:// で始まるURLを貼り付けた際に自動的にクリック可能なリンクに変換します",
 	"ocrResult": "OCR テキスト",

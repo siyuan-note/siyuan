@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Set a memo for this block, only plain text is supported",
 	"switchDirect": "Switch comparison direction",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> only search documents",
-	"onlySearchForDocTip": "When enabled, [[ or 【【 to search for block references only in doc names",
+	"onlySearchForDocTip": "When enabled, <code class='fn__code'>[[</code> or <code class='fn__code'>【【</code> to search for block references only in doc names",
 	"pasteURLAutoConvert": "Auto-convert pasted URL to link",
 	"pasteURLAutoConvertTip": "When enabled, pasting a URL starting with http:// or https:// will automatically convert it to a clickable link",
 	"ocrResult": "OCR text",

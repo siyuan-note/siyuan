@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "Establece una nota para este bloque, solo se admite texto sin formato",
 	"switchDirect": "Cambiar dirección de comparación",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> solo buscar documentos",
-	"onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en nombres de documentos",
+	"onlySearchForDocTip": "Después de habilitar, <code class='fn__code'>[[</code> o <code class='fn__code'>【【</code> para buscar referencias de bloque solo en nombres de documentos",
 	"pasteURLAutoConvert": "Convertir automáticamente la URL pegada en enlace",
 	"pasteURLAutoConvertTip": "Cuando está habilitado, pegar una URL que comience con http:// o https:// la convertirá automáticamente en un enlace clicable",
 	"ocrResult": "Texto OCR",

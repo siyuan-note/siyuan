@@ -1765,7 +1765,7 @@
 	"attrMemoTip": "为该块设置备注，仅支持纯文本",
 	"switchDirect": "交换对比方向",
 	"onlySearchForDoc": "<code class='fn__code'>[[</code> 仅搜索文档",
-	"onlySearchForDocTip": "启用后使用 [[ 或 【【 搜索块引用时将只在文档名中搜索",
+	"onlySearchForDocTip": "启用后使用 <code class='fn__code'>[[</code> 或 <code class='fn__code'>【【</code> 搜索块引用时将只在文档名中搜索",
 	"pasteURLAutoConvert": "粘贴网址时自动转为链接",
 	"pasteURLAutoConvertTip": "启用后粘贴 http:// 或 https:// 开头的网址时将自动转为可点击的链接",
 	"ocrResult": "OCR 文本",

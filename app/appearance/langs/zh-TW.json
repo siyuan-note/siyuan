@@ -33,7 +33,6 @@
 	"ocrFailed": "OCR 辨識失敗",
 	"autoCloseRefBrackets": "自動閉合 <code class='fn__code'>[[ / 【【</code>",
 	"autoCloseRefBracketsTip": "輸入 [[ / 【【 時自動補上 ]] / 】】，輸入 ]] / 】】 時引用標題完全相同的文件，沒有則新建文件",
-	"currentTime": "目前時間",
 	"exitWaiting": "正在退出，請稍候...",
 	"exitWaitFailed": "暫時無法確認是否已結束。可以重試，或關閉此提示繼續等待。",
 	"previousExitWaiting": "正在等待上次結束作業完成...",

@@ -33,7 +33,6 @@
 	"ocrFailed": "Pengenalan OCR gagal",
 	"autoCloseRefBrackets": "Tutup <code class='fn__code'>[[ / 【【</code> otomatis",
 	"autoCloseRefBracketsTip": "Mengetik [[ / 【【 otomatis menyisipkan ]] / 】】; mengetik ]] / 】】 melengkapi referensi ke dokumen dengan judul yang sama persis, atau membuat dokumen baru",
-	"currentTime": "Waktu Saat Ini",
 	"exitWaiting": "Menutup aplikasi, harap tunggu...",
 	"exitWaitFailed": "Tidak dapat memastikan bahwa proses penutupan telah selesai. Anda dapat mencoba lagi atau menutup dialog ini dan terus menunggu.",
 	"previousExitWaiting": "Menunggu proses penutupan sebelumnya selesai...",

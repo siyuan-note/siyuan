@@ -33,7 +33,6 @@
 	"ocrFailed": "Échec de la reconnaissance OCR",
 	"autoCloseRefBrackets": "Fermeture automatique de <code class='fn__code'>[[ / 【【</code>",
 	"autoCloseRefBracketsTip": "Saisir [[ / 【【 insère automatiquement ]] / 】】 ; saisir ]] / 】】 complète la référence vers le document dont le titre correspond exactement ou crée un nouveau document",
-	"currentTime": "Heure actuelle",
 	"exitWaiting": "Fermeture en cours, veuillez patienter...",
 	"exitWaitFailed": "Impossible de confirmer la fin de la fermeture. Vous pouvez réessayer ou fermer cette boîte de dialogue et continuer à patienter.",
 	"previousExitWaiting": "En attente de la fin de la fermeture précédente...",

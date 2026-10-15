@@ -33,7 +33,6 @@
 	"ocrFailed": "OCR tanıma başarısız oldu",
 	"autoCloseRefBrackets": "<code class='fn__code'>[[ / 【【</code> otomatik kapat",
 	"autoCloseRefBracketsTip": "[[ / 【【 yazıldığında ]] / 】】 otomatik eklenir; ]] / 】】 yazmak, başlığı tam olarak eşleşen belgeye başvuruyu tamamlar veya yeni bir belge oluşturur",
-	"currentTime": "Geçerli Saat",
 	"exitWaiting": "Kapatılıyor, lütfen bekleyin...",
 	"exitWaitFailed": "Kapanmanın tamamlandığı doğrulanamadı. Yeniden deneyebilir veya bu iletişim kutusunu kapatıp beklemeye devam edebilirsiniz.",
 	"previousExitWaiting": "Önceki kapanma işleminin tamamlanması bekleniyor...",

@@ -226,27 +226,31 @@ type BazaarPackageRating struct {
 	Count        int64    `json:"count"`
 	Distribution [5]int64 `json:"distribution"`
 }
+type BazaarPackageChoice struct {
+	PackageType string `json:"packageType"`
+	Name        string `json:"name"`
+}
 type BazaarPackage struct {
-	Author            string              `json:"author"`
-	URL               string              `json:"url"`
-	Version           string              `json:"version"`
-	MinAppVersion     string              `json:"minAppVersion"`
-	DisabledInPublish bool                `json:"disabledInPublish"`
-	Kernels           []string            `json:"kernels"`
-	Backends          []string            `json:"backends"`
-	Frontends         []string            `json:"frontends"`
-	SettingsWindow    bool                `json:"settingsWindow,omitempty"` // 声明支持在独立设置窗口运行
-	BootAppearances   []string            `json:"bootAppearances,omitempty"`
-	DisplayName       BazaarLocaleStrings `json:"displayName"`
-	Description       BazaarLocaleStrings `json:"description"`
-	Readme            BazaarLocaleStrings `json:"readme"`
-	Icon              *string             `json:"icon,omitempty"`
-	Preview           *string             `json:"preview,omitempty"`
-	Funding           *BazaarFunding      `json:"funding"`
-	Keywords          []string            `json:"keywords"`
-	Deprecated        bool                `json:"deprecated,omitempty"`
-	DeprecatedReason  BazaarLocaleStrings `json:"deprecatedReason,omitempty"`
-	Alternatives      []string            `json:"alternatives,omitempty"`
+	Author            string                `json:"author"`
+	URL               string                `json:"url"`
+	Version           string                `json:"version"`
+	MinAppVersion     string                `json:"minAppVersion"`
+	DisabledInPublish bool                  `json:"disabledInPublish"`
+	Kernels           []string              `json:"kernels"`
+	Backends          []string              `json:"backends"`
+	Frontends         []string              `json:"frontends"`
+	SettingsWindow    bool                  `json:"settingsWindow,omitempty"` // 声明支持在独立设置窗口运行
+	BootAppearances   []string              `json:"bootAppearances,omitempty"`
+	DisplayName       BazaarLocaleStrings   `json:"displayName"`
+	Description       BazaarLocaleStrings   `json:"description"`
+	Readme            BazaarLocaleStrings   `json:"readme"`
+	Icon              *string               `json:"icon,omitempty"`
+	Preview           *string               `json:"preview,omitempty"`
+	Funding           *BazaarFunding        `json:"funding"`
+	Keywords          []string              `json:"keywords"`
+	Deprecated        bool                  `json:"deprecated,omitempty"`
+	DeprecatedReason  BazaarLocaleStrings   `json:"deprecatedReason,omitempty"`
+	Choices           []BazaarPackageChoice `json:"choices,omitempty"` // 替代包及其类型，可跨类型
 
 	PreferredFunding          string `json:"preferredFunding"`
 	PreferredName             string `json:"preferredName"`

@@ -16921,12 +16921,6 @@
     "BazaarPackage": {
       "type": "object",
       "properties": {
-        "alternatives": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "author": {
           "type": "string"
         },
@@ -16950,6 +16944,12 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BazaarPackageChoice"
           }
         },
         "current": {
@@ -17238,6 +17238,22 @@
         "updated",
         "url",
         "version"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackageChoice": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "packageType"
       ],
       "additionalProperties": false
     },

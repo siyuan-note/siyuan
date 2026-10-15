@@ -1059,6 +1059,11 @@ interface IBazaarRating {
     distribution: TBazaarRatingDistribution;
 }
 
+interface IBazaarPackageChoice {
+    packageType: string;
+    name: string;
+}
+
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
@@ -1073,7 +1078,7 @@ interface IBazaarItem {
     deprecated?: boolean;
     deprecatedReason?: Record<string, string>;
     preferredDeprecatedReason?: string;
-    alternatives?: string[];
+    choices?: IBazaarPackageChoice[];
     iconURL: string;
     stars: number;
     author: string;

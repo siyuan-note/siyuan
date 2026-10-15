@@ -8,6 +8,7 @@ import {
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
+    getBazaarDeprecationChoices,
     getBazaarDeprecationData,
     getBazaarFrontendLabels,
     getBazaarFundingItems,
@@ -70,22 +71,23 @@ describe("bazaar package deprecation metadata", () => {
             deprecated?: boolean;
             deprecatedReason?: Record<string, string>;
             preferredDeprecatedReason?: string;
-            alternatives?: string[];
+            choices?: IBazaarPackageChoice[];
         } = {};
         const deprecatedReason = {default: "No longer maintained"};
-        const alternatives = ["replacement"];
+        const choices = [{packageType: "widgets", name: "replacement"}, {packageType: "plugins", name: "plugin"}];
         applyBazaarPackageDeprecation(installed, {
             deprecated: true,
             deprecatedReason,
             preferredDeprecatedReason: "No longer maintained",
-            alternatives,
+            choices,
         });
         assert.equal(installed.deprecated, true);
         assert.deepEqual(installed.deprecatedReason, deprecatedReason);
         assert.notEqual(installed.deprecatedReason, deprecatedReason);
         assert.equal(installed.preferredDeprecatedReason, "No longer maintained");
-        assert.deepEqual(installed.alternatives, alternatives);
-        assert.notEqual(installed.alternatives, alternatives);
+        assert.deepEqual(installed.choices, choices);
+        assert.notEqual(installed.choices, choices);
+        assert.notEqual(installed.choices?.[0], choices[0]);
     });
 
     it("clears stale fields when the online package is active or missing", () => {
@@ -93,13 +95,36 @@ describe("bazaar package deprecation metadata", () => {
             deprecated: true as boolean | undefined,
             deprecatedReason: {default: "Stale"} as Record<string, string> | undefined,
             preferredDeprecatedReason: "Stale" as string | undefined,
-            alternatives: ["stale"] as string[] | undefined,
+            choices: [{packageType: "widgets", name: "stale"}] as IBazaarPackageChoice[] | undefined,
         };
         applyBazaarPackageDeprecation(installed, {deprecated: false});
         assert.equal(installed.deprecated, undefined);
         assert.equal(installed.deprecatedReason, undefined);
         assert.equal(installed.preferredDeprecatedReason, undefined);
-        assert.equal(installed.alternatives, undefined);
+        assert.equal(installed.choices, undefined);
+    });
+});
+
+describe("getBazaarDeprecationChoices", () => {
+    it("keeps the package type of every choice so cross-type targets stay reachable", () => {
+        assert.deepEqual(getBazaarDeprecationChoices({
+            choices: [{packageType: "plugins", name: "plugin"}, {packageType: "widgets", name: "widget"}],
+        }), [{packageType: "plugins", name: "plugin"}, {packageType: "widgets", name: "widget"}]);
+    });
+
+    it("drops choices with an unknown package type or an invalid package name", () => {
+        assert.deepEqual(getBazaarDeprecationChoices({
+            choices: [
+                {packageType: "plugins", name: "plugin"},
+                {packageType: "unknown", name: "plugin"},
+                {packageType: "themes", name: ""},
+            ],
+        }), [{packageType: "plugins", name: "plugin"}]);
+    });
+
+    it("returns no alternative when the index has no choices", () => {
+        assert.deepEqual(getBazaarDeprecationChoices({choices: []}), []);
+        assert.deepEqual(getBazaarDeprecationChoices({}), []);
     });
 });
 

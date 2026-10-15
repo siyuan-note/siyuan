@@ -151,7 +151,8 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
 5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
    - When moving or extracting a symbol into another module, update all affected imports to reference its defining module directly. Do not leave forwarding re-exports in the original module merely to avoid updating callers
-6. **CSS:** Do not use the `:has()` selector because of its performance impact
+6. **CSS:** Do not use the `:has()` selector because of its performance impact, and prefer a comma-separated selector list over `:is()`, whose extra matching layer adds measurable cost
+   - Expand selector groups instead of grouping them with `:is()` or `:where()`; use `:where()` only to drop specificity from a single selector
    - Before adding or styling a basic control, inspect and reuse the existing component, markup pattern, and shared styles in `app/src/assets/scss/component/` (for example, `b3-button`, `b3-select`, and `b3-text-field`), including existing modifiers; use `block__icon` for established icon-button patterns
    - Apply the same reuse-first rule to menus, dialogs, tooltips, and drag interactions: inspect existing implementations and APIs before adding a feature-specific replacement
    - For single-choice enumerations in menus, use submenu items with the current option checked rather than embedding a select control. Show a right-arrow indicator on the parent item, open its submenu on hover on desktop, and support tapping on mobile. Reuse the existing menu implementation and positioning behavior
@@ -169,6 +170,12 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 9. **Frontend preference storage:** Do not use browser `localStorage` directly, including `window.localStorage` and `globalThis.localStorage`
    - Read preferences from `window.siyuan.storage`; when changing a preference, update its in-memory value and persist it with `setStorageVal` from `app/src/protyle/util/compatibility.ts`
    - SiYuan persists these values in the workspace's `data/storage/local.json`; do not use browser `storage` events to observe changes to this store
+
+10. **Frontend platform identification:**
+   - Use the mutually exclusive `body` class names written by `applyPlatformClasses()` in `app/src/protyle/util/compatibility.ts`: `body--mac`, `body--windows`, `body--linux`, `body--ios`, `body--android`, and `body--harmony`
+   - `body--win32` and `body--win32-browser` are retained only for existing third-party themes; use neither in new code, and do not add consumers when changing related styles
+   - Do not derive the frontend platform from the kernel reported container or from `data-backend`: a remote kernel reports its own host, so both differ from the platform of the current frontend
+   - `data-frontend` on the root element reports the frontend form (`desktop`, `desktop-window`, `mobile`, `browser-desktop`, `browser-mobile`) and may be used by built-in styles and third-party theme CSS; `data-backend` on the root element is for third-party JavaScript only and must not appear in built-in CSS
 
 ---
 

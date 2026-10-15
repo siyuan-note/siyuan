@@ -1,6 +1,6 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initWindowOpenOverride, isMac, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {applyPlatformClasses, initWindowOpenOverride, isMac, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -71,7 +71,7 @@ export const initDesktopHost = async () => {
 
 export const onGetConfig = async (isStart: boolean, app: App) => {
     correctHotkey(app);
-    document.body.classList.toggle("body--windows", isWindows());
+    applyPlatformClasses();
     /// #if !BROWSER
     await initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
@@ -386,8 +386,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     }
 
     if (!isMac()) {
-        document.body.classList.add("body--win32");
-
         const controls = isWindow() ? document.querySelector<HTMLElement>(".toolbar__window") : document.getElementById("windowControls");
         if (!isWindow()) controls.replaceChildren();
         initWindowControls(controls, () => {
@@ -401,9 +399,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
-    }
-    if (isWindows()) {
-        document.body.classList.add("body--win32-browser");
     }
     /// #endif
 };

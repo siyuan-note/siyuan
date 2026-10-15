@@ -40,10 +40,10 @@ import {
     showKeyboardToolbar,
 } from "./util/keyboardToolbar";
 import {
+    applyPlatformClasses,
     getLocalStorage,
     initWindowOpenOverride,
     isChromeBrowser,
-    isInAndroid,
     isInIOS,
     isInMobileApp,
     isIOSDevice,
@@ -217,7 +217,7 @@ class App {
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(confResponse.data.conf);
             window.siyuan.isPublish = confResponse.data.isPublish;
-            document.body.classList.toggle("body--android", Boolean(isInAndroid()));
+            applyPlatformClasses();
             correctHotkey(siyuanApp);
             await loadPlugins(this);
             getLocalStorage(() => {

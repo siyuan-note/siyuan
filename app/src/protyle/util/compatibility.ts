@@ -8,7 +8,7 @@ import {ipcRenderer} from "electron";
 import {getDefaultSubType, getDefaultType, normalizeSearchTypes} from "../../search/getDefault";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isEncryptedBox, isSiYuanUriProtocol} from "../../util/pathName";
-import {isBrowser} from "../../util/functions";
+import {getFrontend, isBrowser} from "../../util/functions";
 import type {App} from "../../index";
 import {genUUID} from "../../util/genID";
 import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
@@ -650,6 +650,47 @@ export function isChromeBrowser(): boolean {
 
     return isChromium && !isEdge && !isOpera;
 }
+
+// 鸿蒙 WebView 用 OpenHarmony 标识操作系统，部分浏览器 UA 还会带上兼容的操作系统名
+// 因此该判断必须先于 Android 等平台判断，老版本 Android 内核鸿蒙不含此标识，按 Android 处理
+const isHarmonyOS = () => {
+    return /OpenHarmony/i.test(navigator.userAgent);
+};
+
+const PLATFORM_CLASSES = ["body--mac", "body--windows", "body--linux", "body--ios", "body--android", "body--harmony"];
+
+// 当前前端所在平台，取值互斥；只依据前端自身信息判断，不受内核上报的运行容器影响
+export const resolvePlatformClass = () => {
+    if (isHarmonyOS()) {
+        return "body--harmony";
+    }
+    if (isIOSDevice()) {
+        return "body--ios";
+    }
+    if (isAndroid()) {
+        return "body--android";
+    }
+    if (isMac()) {
+        return "body--mac";
+    }
+    if (isWindows()) {
+        return "body--windows";
+    }
+    return "body--linux";
+};
+
+// 平台类名集中在此写入，主窗口、独立窗口、设置窗口与移动端四个入口均需调用
+export const applyPlatformClasses = () => {
+    const platformClass = resolvePlatformClass();
+    PLATFORM_CLASSES.forEach(item => {
+        document.body.classList.toggle(item, item === platformClass);
+    });
+    // 前端形态标记供内置样式与第三方主题使用，在此提前写入，避免平台相关样式在首帧按浏览器端判断
+    document.documentElement.setAttribute("data-frontend", getFrontend());
+    // 下面两个类名仅供旧第三方主题使用，内置样式已改用上方平台类名，待主题迁移完成后移除
+    document.body.classList.toggle("body--win32", !isBrowser() && !isMac());
+    document.body.classList.toggle("body--win32-browser", isBrowser() && isWindows());
+};
 
 export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
     if (hotkey) {

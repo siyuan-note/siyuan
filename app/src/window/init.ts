@@ -12,7 +12,7 @@ import {initDesktopHost, initWindow} from "../boot/onGetConfig";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
-import {initWindowOpenOverride} from "../protyle/util/compatibility";
+import {applyPlatformClasses, initWindowOpenOverride} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -23,6 +23,7 @@ import {Wnd} from "../layout/Wnd";
 
 
 export const init = async (app: App) => {
+    applyPlatformClasses();
     await initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;

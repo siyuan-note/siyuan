@@ -69,17 +69,23 @@ body {
 }
 
 html[data-frontend="browser-desktop"] {
-  .fullscreen > .protyle-breadcrumb,
-  .fullscreen > .block__icons {
-    padding-left: calc(env(titlebar-area-x, 0px) + 8px);
-    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 8px);
-    height: calc(env(titlebar-area-height, var(--b3-ui-browser-titlebar-height, 31px)) + 1px);
+  .fullscreen {
+    > .protyle-breadcrumb,
+    > .block__icons {
+      padding-left: calc(env(titlebar-area-x, 0px) + 8px);
+      padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 8px);
+      height: calc(env(titlebar-area-height, var(--b3-ui-browser-titlebar-height, 31px)) + 1px);
+    }
   }
 }
 
 // 移动设备的桌面布局不预留 macOS 窗口按钮空间，iPad 窗口控件按原生上报的宽度避让。
-:root:is([data-backend="android"], [data-backend="ios"], [data-backend="harmony"]) .fullscreen {
-  --b3-toolbar-left-mac: calc(var(--ios-window-controls-left, 0px) + 8px);
+body.body--android,
+body.body--ios,
+body.body--harmony {
+  .fullscreen {
+    --b3-toolbar-left-mac: calc(var(--ios-window-controls-left, 0px) + 8px);
+  }
 }
 
 // 仅顶部工具栏避让原生窗口控件，正文与侧栏不增加横向留白。

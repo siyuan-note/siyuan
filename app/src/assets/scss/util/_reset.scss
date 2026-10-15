@@ -20,7 +20,7 @@ html {
 
 // iOS 使用固定蓝色光标，改善系统与应用明暗模式不同组合下的输入法候选字对比度。
 // https://github.com/siyuan-note/siyuan/issues/20005
-:root[data-ios] {
+body.body--ios {
   caret-color: #3575f0;
 }
 
@@ -83,9 +83,12 @@ body {
     }
   }
 
-  &.body--win32 {
+  // 非 macOS 平台不预留 macOS 窗口按钮空间，浏览器端工具栏的标题栏避让由 .toolbar--browser 处理
+  &.body--windows,
+  &.body--linux {
     --b3-toolbar-left-mac: 8px;
-    .toolbar {
+
+    .toolbar:not(.toolbar--browser) {
       padding: 0 0 0 5px;
     }
 
@@ -109,7 +112,7 @@ body {
       }
     }
 
-    &.body--win32 .fullscreen {
+    &:not(.body--mac) .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
         padding-right: 168px;

@@ -75,7 +75,7 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
         },
         require: (name: string) => {
             if (name === "../constants") {
-                return {Constants: {SIYUAN_VERSION: "3.8.5", LOCAL_PDFTHEME: "pdf", ATTRIBUTE_IOS: "data-ios"}};
+                return {Constants: {SIYUAN_VERSION: "3.8.5", LOCAL_PDFTHEME: "pdf"}};
             }
             if (name === "./hostCapabilities") {
                 return {getHostCapabilities: () => ({customAppearance: true})};
@@ -110,24 +110,24 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
     return {assets: moduleExports, appearance, elements, html, errors, scriptURLs, removedElements};
 };
 
-test("appearance identifies the iOS client independently of the backend and layout", async () => {
+test("appearance exposes the kernel backend and the browser frontend independently", async () => {
     const cases = [
-        {name: "Windows client with iOS backend", backend: "ios", mobile: false, ios: false,
+        {name: "Windows client with iOS backend", backend: "ios", mobile: false,
             navigator: {userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", platform: "Win32", maxTouchPoints: 0}},
-        {name: "macOS client with iOS backend", backend: "ios", mobile: false, ios: false,
+        {name: "macOS client with iOS backend", backend: "ios", mobile: false,
             navigator: {userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", platform: "MacIntel", maxTouchPoints: 0}},
-        {name: "Android client with iOS backend", backend: "ios", mobile: true, ios: false,
+        {name: "Android client with iOS backend", backend: "ios", mobile: true,
             navigator: {userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9)", platform: "Linux armv8l", maxTouchPoints: 5}},
-        {name: "iPhone client with Linux backend", backend: "linux", mobile: true, ios: true,
+        {name: "iPhone client with Linux backend", backend: "linux", mobile: true,
             navigator: {userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5}},
-        {name: "iPad desktop client with Linux backend", backend: "linux", mobile: false, ios: true,
+        {name: "iPad desktop client with Linux backend", backend: "linux", mobile: false,
             navigator: {userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15)", platform: "MacIntel", maxTouchPoints: 5}},
     ];
     for (const scenario of cases) {
         const {assets, appearance, html} = createAssets(undefined, scenario);
         await assets.loadAssets(appearance);
         assert.equal(html.getAttribute("data-backend"), scenario.backend, scenario.name);
-        assert.equal("data-ios" in html.attributes, scenario.ios, scenario.name);
+        assert.equal(html.getAttribute("data-frontend"), scenario.mobile ? "browser-mobile" : "browser-desktop", scenario.name);
     }
 });
 

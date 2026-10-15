@@ -183,12 +183,13 @@ func toContractAVValueBlock(value *av.ValueBlock) *apicontract.AVValueBlock {
 		return nil
 	}
 	return &apicontract.AVValueBlock{
-		ID:         value.ID,
-		Icon:       value.Icon,
-		Content:    value.Content,
-		RefSubtype: string(value.RefSubtype),
-		Created:    value.Created,
-		Updated:    value.Updated,
+		CollectionRuleID: value.CollectionRuleID,
+		ID:               value.ID,
+		Icon:             value.Icon,
+		Content:          value.Content,
+		RefSubtype:       string(value.RefSubtype),
+		Created:          value.Created,
+		Updated:          value.Updated,
 	}
 }
 func fromContractAVValueBlock(value *apicontract.AVValueBlock) *av.ValueBlock {

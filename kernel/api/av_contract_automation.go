@@ -1,9 +1,23 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
+
+var previewAttributeViewCollection = contractHandler(apicontract.PreviewAttributeViewCollection,
+	func(c *gin.Context, request apicontract.AVBlockCollectionPreviewRequest) apicontract.Response[*apicontract.AVBlockCollectionPreview] {
+		if err := holdAttributeViewRequest(c, "", request.AvID); err != nil {
+			return apicontract.Failure[*apicontract.AVBlockCollectionPreview](-1, err.Error())
+		}
+		data, err := model.PreviewAttributeViewCollection(request.AvID, request.RuleID, request.Page)
+		if err != nil {
+			return apicontract.Failure[*apicontract.AVBlockCollectionPreview](-1, err.Error())
+		}
+		return apicontract.Success(data)
+	})
 
 func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAutomationConfig {
 	if value == nil {
@@ -14,7 +28,8 @@ func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAut
 			return nil
 		}
 		return &apicontract.AVAutomationRule{ID: rule.ID, Name: rule.Name, Enabled: rule.Enabled, Trigger: rule.Trigger,
-			KeyID: rule.KeyID, Conditions: avContractSlice(rule.Conditions, toContractAVViewFilter),
+			BlockSource: toContractAVAutomationBlockSource(rule.BlockSource),
+			KeyID:       rule.KeyID, Conditions: avContractSlice(rule.Conditions, toContractAVViewFilter),
 			Actions: avContractSlice(rule.Actions, func(action *av.AutomationAction) *apicontract.AVAutomationAction {
 				if action == nil {
 					return nil
@@ -29,4 +44,17 @@ func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAut
 					})}
 			})}
 	})}
+}
+
+func toContractAVAutomationBlockSource(source *av.AutomationBlockSource) *apicontract.AVAutomationBlockSource {
+	if source == nil {
+		return nil
+	}
+	return &apicontract.AVAutomationBlockSource{NotebookIDs: source.NotebookIDs, DocumentIDs: source.DocumentIDs,
+		Types: source.Types, Tags: source.Tags, Attributes: avContractSlice(source.Attributes, func(attr *av.AutomationBlockAttribute) *apicontract.AVAutomationBlockAttribute {
+			if attr == nil {
+				return nil
+			}
+			return &apicontract.AVAutomationBlockAttribute{Name: attr.Name, Operator: attr.Operator, Value: attr.Value}
+		})}
 }

@@ -79,7 +79,8 @@ type AVValue struct {
 }
 
 type AVValueBlock struct {
-	ID string `json:"id,omitempty" api:"optional,nullable"`
+	CollectionRuleID string `json:"collectionRuleID,omitempty" api:"optional"`
+	ID               string `json:"id,omitempty" api:"optional,nullable"`
 	// 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。
 	Icon       string `json:"icon,omitempty" api:"optional,nullable"`
 	Content    string `json:"content" api:"optional,nullable"`

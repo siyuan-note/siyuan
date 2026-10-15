@@ -75,6 +75,55 @@ func TestGeminiInteractionsStreamNativeHistory(t *testing.T) {
 	}
 }
 
+func TestGeminiInteractionsStreamOptionalInteractionID(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		created   string
+		completed string
+		wantID    string
+	}{
+		{name: "empty", created: `"id":"",`, completed: `"id":"",`},
+		{name: "omitted"},
+		{name: "created-only", created: `"id":"i1",`, wantID: "i1"},
+		{name: "completed-only", completed: `"id":"i1",`, wantID: "i1"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			stream := geminiTestStream(
+				`{"event_type":"interaction.created","interaction":{`+test.created+`"status":"in_progress","object":"interaction","model":"gemini-4-argon"}}`,
+				`{"event_type":"step.start","index":0,"step":{"type":"thought"}}`,
+				`{"event_type":"step.delta","index":0,"delta":{"type":"thought_summary","content":{"type":"text","text":"reason"}}}`,
+				`{"event_type":"step.delta","index":0,"delta":{"type":"thought_signature","signature":"opaque"}}`,
+				`{"event_type":"step.stop","index":0}`,
+				`{"event_type":"step.start","index":1,"step":{"type":"function_call","id":"call1","name":"lookup","arguments":{}}}`,
+				`{"event_type":"step.stop","index":1}`,
+				`{"event_type":"interaction.completed","interaction":{`+test.completed+`"status":"requires_action"}}`)
+			defer stream.Close()
+			reasoning, calls := "", 0
+			for {
+				chunk, err := stream.Recv()
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, choice := range chunk.Choices {
+					reasoning += choice.Delta.ReasoningContent
+					calls += len(choice.Delta.ToolCalls)
+					if len(choice.Delta.ToolCalls) > 0 && (choice.FinishReason != openai.FinishReasonToolCalls || chunk.ID != test.wantID) {
+						t.Fatalf("invalid terminal tool response: %+v", chunk)
+					}
+				}
+			}
+			native := stream.NativeContent()
+			if reasoning != "reason" || calls != 1 || native == nil || len(native.Blocks) != 2 ||
+				!strings.Contains(string(native.Blocks[0]), "opaque") {
+				t.Fatalf("lost stateless output: reasoning=%q calls=%d native=%+v", reasoning, calls, native)
+			}
+		})
+	}
+}
+
 func TestGeminiInteractionsParallelToolsAndReplay(t *testing.T) {
 	stream := geminiTestStream(geminiTestCreated,
 		`{"event_type":"step.start","index":0,"step":{"type":"thought","signature":"opaque"}}`,
@@ -148,6 +197,12 @@ func TestGeminiInteractionsParallelToolsAndReplay(t *testing.T) {
 
 func TestGeminiInteractionsRejectIncompleteStreams(t *testing.T) {
 	for name, events := range map[string][]string{
+		"null-created":          {`{"event_type":"interaction.created","interaction":null}`},
+		"missing-created-body":  {`{"event_type":"interaction.created"}`},
+		"duplicate-created":     {geminiTestCreated, geminiTestCreated},
+		"created-with-output":   {`{"event_type":"interaction.created","interaction":{"id":"i1","steps":[{"type":"thought"}]}}`},
+		"null-completed":        {geminiTestCreated, `{"event_type":"interaction.completed","interaction":null}`},
+		"mismatched-id":         {geminiTestCreated, `{"event_type":"interaction.completed","interaction":{"id":"different","status":"completed"}}`},
 		"eof":                   {geminiTestCreated},
 		"done-without-terminal": {geminiTestCreated, `[DONE]`},
 		"missing-start":         {geminiTestCompleted},

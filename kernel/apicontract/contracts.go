@@ -1222,6 +1222,10 @@ var SearchAttributeViewRelationKey = define[SearchAttributeViewRelationKeyReques
 // 返回数据库级 automations，所有视图共享；缺省表示没有自动化规则。
 // 规则通过 `/api/transactions` 的 setAttrViewAutomations 操作整体保存。
 var GetAttributeView = define[GetAttributeViewRequest, AVData]("getAttributeView", "/api/av/getAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// PreviewAttributeViewCollection 预览已保存且启用的普通块收集规则，不修改文档或数据库。
+// 仅在目标数据库的加密边界内查询；page 从 1 开始，每页最多 100 个，hasMore 表示还有下一页。
+var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AVBlockCollectionPreview]("previewAttributeViewCollection", "/api/av/previewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")

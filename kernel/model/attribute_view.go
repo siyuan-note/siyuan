@@ -6151,7 +6151,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 		return
 	}
 	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID,
-		operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.attributeViewAutomation)
+		operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.attributeViewAutomation, operation.attributeViewCollectionRuleID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -6170,7 +6170,7 @@ type insertAttrViewBlockResult struct {
 }
 
 func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string,
-	ignoreDefaultFill, databaseScope bool) (result *insertAttrViewBlockResult, err error) {
+	ignoreDefaultFill, databaseScope bool, collectionRuleIDs ...string) (result *insertAttrViewBlockResult, err error) {
 	result = &insertAttrViewBlockResult{}
 	if 0 == len(srcs) {
 		return
@@ -6245,7 +6245,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, databaseScope, tree, tx, result); nil != avErr {
+		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, databaseScope, tree, tx, result, collectionRuleIDs...); nil != avErr {
 			err = avErr
 			return
 		}
@@ -6268,7 +6268,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	return
 }
 
-func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill, databaseScope bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
+func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill, databaseScope bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult, collectionRuleIDs ...string) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		if err = validateAttributeViewBinding(avID, tree); err != nil {
@@ -6335,6 +6335,9 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, RefSubtype: blockRefSubtype, Created: now, Updated: now}}
 	if !isDetached {
 		blockValue.Block.ID = addingBoundBlockID
+		if len(collectionRuleIDs) > 0 {
+			blockValue.Block.CollectionRuleID = collectionRuleIDs[0]
+		}
 	}
 
 	blockValues.Values = append(blockValues.Values, blockValue)
@@ -8013,6 +8016,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 				}
 			}
 			blockVal.IsDetached = isDetached
+			blockVal.Block.CollectionRuleID = ""
 			if !isDetached {
 				if "" != blockVal.Block.ID && blockVal.Block.ID != newNodeID {
 					unbindBlockAv(tx, avID, blockVal.Block.ID)
@@ -8234,6 +8238,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	now := time.Now().UnixMilli()
 	oldIsDetached := blockVal.IsDetached
 	oldBoundBlockID := blockVal.Block.ID
+	oldCollectionRuleID := blockVal.Block.CollectionRuleID
 	if nil == context {
 		for _, value := range keyValues.Values {
 			if itemID == value.BlockID {
@@ -8291,6 +8296,12 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	updatedVal.BlockID = itemID
 	updatedVal.Type = valueType
 	updatedVal.CreatedAt = valueCreatedAt
+	if av.KeyTypeBlock == valueType && updatedVal.Block != nil {
+		updatedVal.Block.CollectionRuleID = ""
+		if !updatedVal.IsDetached && !oldIsDetached && updatedVal.Block.ID == oldBoundBlockID {
+			updatedVal.Block.CollectionRuleID = oldCollectionRuleID
+		}
+	}
 	if av.KeyTypeBlock == valueType && !updatedVal.IsDetached {
 		if updatedVal.Block == nil {
 			return nil, ErrBlockNotFound

@@ -3139,3 +3139,8 @@ img.av__cellassetimg {
     max-width: 100%;
   }
 }
+
+.av__collection-preview {
+  max-height: 60vh;
+  overflow: auto;
+}

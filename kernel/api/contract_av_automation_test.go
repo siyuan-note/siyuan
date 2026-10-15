@@ -146,4 +146,54 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		"values": []map[string]any{{"keyID": fixture.textKeyID, "itemID": itemID,
 			"value": map[string]any{"text": map[string]any{"content": "later batch"}}}},
 	}, batchSetAttributeViewBlockAttrs)
+
+	collection := &av.AutomationRule{ID: ast.NewNodeID(), Name: "Collect blocks", Enabled: true, Trigger: "block",
+		BlockSource: &av.AutomationBlockSource{DocumentIDs: []string{tree.ID}, Types: []string{"p"}, Tags: []string{"collect"}},
+		Actions: []*av.AutomationAction{{Type: "collect", Target: "current", Fields: map[string]*av.AutomationValue{
+			fixture.textKeyID: {Mode: "static", Value: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "collected"}}},
+		}}}}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	call("/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+	call("/api/av/previewAttributeViewCollection", map[string]any{"avID": database.ID, "ruleID": collection.ID}, previewAttributeViewCollection)
+	call("/api/block/appendBlock", map[string]any{"parentID": tree.ID, "dataType": "markdown", "data": "Source #collect#"}, appendBlock)
+	stored, err = av.ParseAttributeView(database.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var collected *av.Value
+	for _, row := range stored.GetBlockKeyValues().Values {
+		if row.Block.CollectionRuleID == collection.ID {
+			collected = row
+			break
+		}
+	}
+	if collected == nil || stored.GetValue(fixture.textKeyID, collected.BlockID).Text.Content != "collected" {
+		t.Fatal("block append API did not collect and initialize its source")
+	}
+	call("/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+	call("/api/av/previewAttributeViewCollection", map[string]any{"avID": database.ID, "ruleID": collection.ID, "page": 1}, previewAttributeViewCollection)
+	call("/api/block/updateBlock", map[string]any{"id": collected.Block.ID, "dataType": "markdown", "data": "Source without tag"}, updateBlock)
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValue(collected.BlockID) != nil {
+		t.Fatal("block update API left an unmatched collected row")
+	}
+	collection.BlockSource.Tags = nil
+	collection.BlockSource.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-collect", Operator: "equals", Value: "yes"}}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	call("/api/attr/setBlockAttrs", map[string]any{"id": collected.Block.ID, "attrs": map[string]string{"custom-collect": "yes"}}, setBlockAttrs)
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(collected.Block.ID) == nil {
+		t.Fatal("attribute API did not collect a matching block")
+	}
+	call("/api/attr/batchSetBlockAttrs", map[string]any{"blockAttrs": []map[string]any{{"id": collected.Block.ID, "attrs": map[string]string{"custom-collect": ""}}}}, batchSetBlockAttrs)
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(collected.Block.ID) != nil {
+		t.Fatal("batch attribute API left an unmatched row")
+	}
 }

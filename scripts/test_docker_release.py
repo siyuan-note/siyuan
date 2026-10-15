@@ -83,6 +83,81 @@ class OCRTests(unittest.TestCase):
                 release.validate_rows(output, expected)
 
 
+class WorkerVerificationTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.fixtures = Path(self.temp.name)
+        self.library_failure = False
+        self.worker_failure = False
+        self.recognitions = []
+
+    def command(self, arguments, **kwargs):
+        output, error, code = "", "", 0
+        if "--entrypoint" in arguments:
+            entrypoint = arguments[arguments.index("--entrypoint") + 1]
+            if entrypoint == "/bin/sh":
+                shell = arguments[-1]
+                if "ldd /opt/siyuan/stage/ocr/runtime/linux-arm/siyuan-ocr" in shell:
+                    raise RuntimeError("Not a valid dynamic program")
+                if self.library_failure and "ldd /opt/siyuan/stage/ocr/runtime/linux-arm/libonnxruntime.so" in shell:
+                    raise RuntimeError("libstdc++.so.6: not found")
+            elif entrypoint == "/opt/siyuan/kernel":
+                output = "SiYuan Kernel version 3.8.7"
+            else:
+                payload = json.loads(kwargs["input"])
+                self.recognitions.append(payload["image"])
+                if "missing-onnxruntime.so" in payload["config"]["library"]:
+                    error, code = "missing-onnxruntime.so: not found", 1
+                elif self.worker_failure:
+                    raise RuntimeError("Worker could not load ONNX runtime")
+                elif payload["image"].endswith("chinese.png"):
+                    output = json.dumps([{"text": "思源笔记"}])
+                elif payload["image"].endswith("latin.png"):
+                    output = json.dumps([{"text": "SiYuan OCR 123"}])
+                else:
+                    output = "[]"
+        return subprocess.CompletedProcess(arguments, code, output, error)
+
+    def verify(self, platform):
+        def notebook(image, target, version, timeout, fail_ocr, diagnostics):
+            fail_ocr()
+
+        with patch.object(release, "run", side_effect=self.command), \
+                patch.object(release, "verify_notebook", side_effect=notebook) as verify_notebook:
+            result = release.verify_platform("b3log/siyuan", IMAGE.partition("@")[2], platform,
+                                             "3.8.7", self.fixtures, 240)
+        self.assertEqual(verify_notebook.call_count, 1)
+        return result
+
+    def test_arm32_worker_is_verified_by_real_requests_without_ldd_precheck(self):
+        for platform in ("linux/arm/v7", "linux/arm/v8"):
+            with self.subTest(platform=platform):
+                self.recognitions.clear()
+                result = self.verify(platform)
+                self.assertEqual(set(result["checks"]), release.CHECKS)
+                self.assertEqual(self.recognitions, ["", "/fixtures/chinese.png", "/fixtures/latin.png",
+                                                      "/fixtures/blank.png", ""])
+
+    def test_failed_model_load_still_blocks_verification(self):
+        self.worker_failure = True
+        with patch.object(release, "verify_notebook") as notebook:
+            with patch.object(release, "run", side_effect=self.command):
+                with self.assertRaisesRegex(RuntimeError, "could not load ONNX"):
+                    release.verify_platform("b3log/siyuan", IMAGE.partition("@")[2], "linux/arm/v7",
+                                            "3.8.7", self.fixtures, 240)
+            notebook.assert_not_called()
+        self.assertEqual(self.recognitions, [""])
+
+    def test_missing_shared_library_still_blocks_before_worker_execution(self):
+        self.library_failure = True
+        with patch.object(release, "run", side_effect=self.command):
+            with self.assertRaisesRegex(RuntimeError, "libstdc"):
+                release.verify_platform("b3log/siyuan", IMAGE.partition("@")[2], "linux/arm/v8",
+                                        "3.8.7", self.fixtures, 240)
+        self.assertEqual(self.recognitions, [])
+
+
 class PublishTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

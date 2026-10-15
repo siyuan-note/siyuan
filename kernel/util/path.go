@@ -746,6 +746,10 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 				}
 			}
 		}
+		// 仅豁免工作空间所在的平台应用数据目录，私有目录和凭据规则仍然生效。
+		if inWorkspace {
+			continue
+		}
 		for _, entry := range platformSensitiveHomeEntries[runtime.GOOS] {
 			prefix := strings.ToLower(filepath.Join(homeDir, entry.name))
 			for _, checkPath := range homeCheckPaths {

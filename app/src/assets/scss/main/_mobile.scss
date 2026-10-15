@@ -1768,6 +1768,11 @@ body.mobile-topbar--merged {
 }
 
 .protyle {
+  &--page-scroll {
+    // 翻页键悬浮显示，保持移动端正文的原有宽度。
+    --b3-protyle-page-scroll-gutter: 0px;
+  }
+
   &-font {
     font-size: 14px;
   }

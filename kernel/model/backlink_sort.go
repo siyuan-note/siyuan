@@ -59,7 +59,7 @@ func backlinkAnchorSortKeys(blocks []*Block, tree *parse.Tree, refs []*sql.Ref, 
 		nodes, _ := getBacklinkRenderNodes(node, originalRefBlockIDs)
 		found := false
 		for _, root := range nodes {
-			ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			treenode.WalkWithInlineTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering || !treenode.IsBlockRef(n) {
 					return ast.WalkContinue
 				}

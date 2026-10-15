@@ -3294,8 +3294,8 @@ func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExpo
 		logging.LogErrorf("prepare Markdown export failed: %s", exportTreeErr)
 		return ""
 	}
-	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
-	defer finishTabTitles()
+	finishInlineTitles := treenode.MaterializeInlineTitlesForExport(tree.Root)
+	defer finishInlineTitles()
 	if exportOpts.AdjustHeadingLevel {
 		bt := treenode.GetBlockTreeInBox(id, tree.Box)
 		adjustHeadingLevel(bt, tree, exportOpts.Config.AddTitle)
@@ -3415,7 +3415,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExpo
 	luteEngine.SetUnorderedListMarker("-")
 	luteEngine.SetImgTag(exportOpts.ImgTag)
 	prepareMarkdownFontFamilyTextMarks(tree.Root)
-	finishTabTitles()
+	finishInlineTitles()
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return
@@ -3432,7 +3432,7 @@ func exportMarkdownRelativePath(currentDocDir, href string) string {
 	sameDir := path.Dir(href) == currentDocDir || strings.HasPrefix(href, "#")
 	href = util.FilterFilePath(href)
 	if sameDir {
-		return strings.TrimPrefix(href, currentDocDir+"/")
+		return strings.TrimPrefix(href, strings.TrimRight(currentDocDir, "/")+"/")
 	}
 	relative, err := filepath.Rel(currentDocDir, href)
 	if nil != err {
@@ -3455,8 +3455,8 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 			return nil, err
 		}
 	}
-	finishTabTitles := treenode.MaterializeTabTitles(ret.Root)
-	defer finishTabTitles()
+	finishInlineTitles := treenode.MaterializeInlineTitlesForExport(ret.Root)
+	defer finishInlineTitles()
 
 	// 将当前文档的块超链接转换为引用
 	blockLink2Ref(ret)
@@ -4402,7 +4402,7 @@ func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string,
 }
 
 func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -4825,8 +4825,8 @@ func setExportAssetLinkDest(node *ast.Node, oldDest, dest string) {
 }
 
 func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]string, enabled bool) {
-	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
-	defer finishTabTitles()
+	finishInlineTitles := treenode.MaterializeInlineTitles(tree.Root)
+	defer finishInlineTitles()
 	assetNodes := getAssetsLinkDestsInTree(tree, false)
 	for _, node := range assetNodes {
 		dests := getAssetsLinkDests(node, false)
@@ -4945,7 +4945,7 @@ func exportRefTreesWithConfig(tree *parse.Tree, defBlockIDs *[]string, retTrees 
 	}
 	retTrees[tree.ID] = tree
 
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

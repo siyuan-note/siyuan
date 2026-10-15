@@ -2057,23 +2057,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 					// 剔除空白的行级公式
 					unlinks = append(unlinks, n)
 				}
-			} else if n.IsTextMarkType("block-ref") {
-				if "" == n.TextMarkBlockRefID {
-					// 已被 degradeCrossBoundaryBlockRefs 降级为纯文本，跳过引用处理
-					return ast.WalkContinue
-				}
-
-				sql.CacheRef(subTree, n)
-
-				if "d" == n.TextMarkBlockRefSubtype {
-					// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
-					// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
-					if dRefText := treenode.GetDynamicRefText(n.TextMarkBlockRefID, tree.Box); "" != dRefText {
-						n.TextMarkTextContent = dRefText
-					}
-				}
-
-				newDefIDs = append(newDefIDs, n.TextMarkBlockRefID)
 			}
 		}
 		return ast.WalkContinue
@@ -2081,6 +2064,30 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	for _, n := range unlinks {
 		n.Unlink()
 	}
+	treenode.WalkWithInlineTitles(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
+			if "" == n.TextMarkBlockRefID {
+				// 已被 degradeCrossBoundaryBlockRefs 降级为纯文本，跳过引用处理
+				return ast.WalkContinue
+			}
+
+			sql.CacheRef(subTree, n)
+
+			if "d" == n.TextMarkBlockRefSubtype {
+				// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
+				// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
+				if dRefText := treenode.GetDynamicRefText(n.TextMarkBlockRefID, tree.Box); "" != dRefText {
+					n.TextMarkTextContent = dRefText
+				}
+			}
+
+			newDefIDs = append(newDefIDs, n.TextMarkBlockRefID)
+		}
+		return ast.WalkContinue
+	})
 
 	oldDefIDs = gulu.Str.RemoveDuplicatedElem(oldDefIDs)
 	newDefIDs = gulu.Str.RemoveDuplicatedElem(newDefIDs)
@@ -2195,7 +2202,7 @@ func unfoldHeading(heading, currentNode *ast.Node) {
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
-	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2239,7 +2246,7 @@ func degradeCrossBoundaryBlockRefsWithAllowed(root *ast.Node, srcBox string, res
 		}
 		return ast.WalkContinue
 	})
-	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2258,6 +2265,7 @@ func degradeCrossBoundaryBlockRefsWithAllowed(root *ast.Node, srcBox string, res
 				logging.LogWarnf("block ref crosses encrypted boundary, src box [%s] -> def block [%s], degrade to text", srcBox, n.TextMarkBlockRefID)
 				n.TextMarkBlockRefID = ""
 				n.TextMarkBlockRefSubtype = ""
+				n.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", ""))
 				n.TextMarkTextContent = strings.TrimSpace(n.TextMarkTextContent)
 				degraded++
 			}
@@ -3343,7 +3351,7 @@ type changedDefNode struct {
 }
 
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
-	treenode.WalkWithTabTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

@@ -214,7 +214,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			if err := treenode.MaterializeTableCellRichExport(tree.Root); err != nil {
 				return err
 			}
-			defer treenode.MaterializeTabTitles(tree.Root)()
+			defer treenode.MaterializeInlineTitles(tree.Root)()
 		}
 		if includeFootnotes && confExportSnapshot.BlockRefMode == 4 && tree.Root.Type == ast.NodeDocument {
 			// 按单文件导出的脚注展开规则收集资源，不受是否另行导出关联文档影响
@@ -234,7 +234,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 				trees[footnoteTree.ID] = &footnoteTree
 			}
 		}
-		treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			confSearchSnapshot := Conf.LoadSearch()
 
 			if !entering || node.Type != ast.NodeBlockQueryEmbedScript {
@@ -274,7 +274,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			avBoxID = tree.Box
 		}
 		avIDs := hashset.New()
-		treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			if entering && node.Type == ast.NodeAttributeView && node.AttributeViewID != "" {
 				walkRelationAvs(node.AttributeViewID, avBoxID, avIDs)
 			}

@@ -7,6 +7,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 func TestBacklinkAnchorSort(t *testing.T) {
@@ -26,6 +27,44 @@ func TestBacklinkAnchorSort(t *testing.T) {
 		if !reflect.DeepEqual(got, want) {
 			t.Fatalf("mode %d: got %v, want %v", mode, got, want)
 		}
+	}
+}
+
+func TestBacklinkAnchorSortInlineTitles(t *testing.T) {
+	const defID = "20261015120000-ref0001"
+	for _, typ := range []ast.NodeType{ast.NodeCallout, ast.NodeTabItem} {
+		t.Run(typ.String(), func(t *testing.T) {
+			root := &ast.Node{Type: ast.NodeDocument, ID: ast.NewNodeID()}
+			tree := &parse.Tree{Root: root, ID: root.ID}
+			var blocks []*Block
+			var refs []*sql.Ref
+			for _, text := range []string{"A10", "A2"} {
+				title := `<span data-type="block-ref" data-id="` + defID + `" data-subtype="s">` + text + `</span>`
+				node := &ast.Node{Type: typ, ID: ast.NewNodeID(), CalloutTitle: title, TabItemTitle: title}
+				body := treenode.NewParagraph("")
+				body.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: defID,
+					TextMarkBlockRefSubtype: "s", TextMarkTextContent: "Body"})
+				node.AppendChild(body)
+				root.AppendChild(node)
+				blocks = append(blocks, &Block{ID: node.ID})
+				refs = append(refs, &sql.Ref{BlockID: node.ID, DefBlockID: defID}, &sql.Ref{BlockID: body.ID, DefBlockID: defID})
+			}
+			for _, mode := range []int{1, 2} {
+				keys := backlinkAnchorSortKeys(blocks, tree, refs, nil, mode)
+				if keys[blocks[0].ID] != "A10" || keys[blocks[1].ID] != "A2" {
+					t.Fatalf("title must supply the first matching anchor: %v", keys)
+				}
+				items := []*Backlink{{ID: blocks[0].ID}, {ID: blocks[1].ID}}
+				sortBacklinksByAnchor(items, keys, mode)
+				wantFirst := blocks[0].ID
+				if mode == 1 {
+					wantFirst = blocks[1].ID
+				}
+				if items[0].ID != wantFirst {
+					t.Fatalf("mode %d did not sort title anchors naturally", mode)
+				}
+			}
+		})
 	}
 }
 

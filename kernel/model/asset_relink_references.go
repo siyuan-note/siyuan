@@ -185,7 +185,7 @@ func (r *assetRelinker) html(raw []byte, location apicontract.AssetReference) []
 }
 
 func (r *assetRelinker) tree(tree *parse.Tree, location apicontract.AssetReference) {
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

@@ -669,8 +669,8 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 }
 
 func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, assetsDirPath string, needWriteTree bool) (err error) {
-	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
-	defer finishTabTitles()
+	finishInlineTitles := treenode.MaterializeInlineTitles(tree.Root)
+	defer finishInlineTitles()
 	var files int
 	var size int64
 	msgId := gulu.Rand.String(7)
@@ -880,7 +880,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 
 	util.PushClearMsg(msgId)
 
-	finishTabTitles()
+	finishInlineTitles()
 	if needWriteTree {
 		if 0 < files {
 			msgId = util.PushMsg(Conf.Language(113), 7000)
@@ -2555,7 +2555,7 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 		}
 	}
 
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2620,7 +2620,7 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	normalize ...func(string) string,
 ) (ret []string) {
 	ret = []string{}
-	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {
 			// 以 custom-data-assets 开头的块属性值可能是多个资源文件链接，需要计入
 			// Ignore assets associated with the `custom-data-assets` block attribute when cleaning unreferenced assets https://github.com/siyuan-note/siyuan/issues/12574

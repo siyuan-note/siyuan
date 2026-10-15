@@ -227,7 +227,7 @@ func remapDuplicateDocTreeReferences(root *ast.Node, ids map[string]string) {
 		}
 		return link
 	}
-	treenode.WalkWithTabTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

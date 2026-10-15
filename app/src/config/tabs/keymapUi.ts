@@ -406,6 +406,7 @@ const bindKeymapList = (root: HTMLElement) => {
         cancelRecording();
         keymapListElement.dataset.keymapFilter = button.dataset.keymapFilterValue;
         refreshBindings();
+        searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap || "");
     });
     const saveRow = (row: HTMLElement, keys: string[], reset = false) => {
         renderRowBindings(row, keys);
@@ -710,19 +711,14 @@ const refreshKeymapBindings = (root: HTMLElement) => {
     });
     const list = root.querySelector<HTMLElement>("#keymapList");
     const hasConflict = Boolean(list.querySelector('[data-conflict="true"]'));
-    if (!hasConflict && list.dataset.keymapFilter === "conflict") {
-        list.dataset.keymapFilter = "all";
-    }
     list.querySelectorAll<HTMLElement>("[data-keymap-filter-value]").forEach(button => {
         const active = button.dataset.keymapFilterValue === list.dataset.keymapFilter;
         button.classList.toggle("b3-chip--current", active);
         button.setAttribute("aria-pressed", String(active));
         if (button.dataset.keymapFilterValue === "conflict") {
-            button.classList.toggle("fn__none", !hasConflict);
+            button.classList.toggle("fn__none", !hasConflict && !active);
         }
     });
-    searchKeymapList(list, list.querySelector<HTMLInputElement>("#keymapInput").value,
-        list.querySelector<HTMLInputElement>("#searchByKey").dataset.keymap || "");
 };
 
 let keymapSaveQueue = Promise.resolve();

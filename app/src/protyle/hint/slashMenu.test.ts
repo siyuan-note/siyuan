@@ -78,6 +78,22 @@ test("slash menu keeps a plugin item whose ID matches the conditional built-in i
     assert.deepEqual(resolve([builtin, plugin], {hideConfiguredCreate: true}), [plugin]);
 });
 
+test("slash menu ranks exact matches above prefix and prefix above substring", () => {
+    const items = [entry("database", ["database", "数据库"]), entry("tabs", ["tabs", "页签"]),
+        entry("table", ["table", "表格"]), entry("code", ["code"]), entry("codeBlock", ["code block"])];
+    // database 只在中间包含 tab，不能盖过以 tab 开头的页签和表格
+    assert.deepEqual(resolve(items, {key: "tab"}).map((item) => item.entryKey), ["tabs", "table", "database"]);
+    assert.deepEqual(resolve(items, {key: "code"}).map((item) => item.entryKey), ["code", "codeBlock"]);
+});
+
+test("slash menu keeps configured order for matches of equal rank", () => {
+    const items = [separator("separator_1"), entry("database", ["database"]), entry("tabs", ["tabs"]),
+        entry("table", ["table"])];
+    assert.deepEqual(resolve(items, {key: "tab", order: ["table", "separator_1", "tabs", "database"]})
+        .map((item) => item.entryKey), ["table", "tabs", "database"]);
+    assert.deepEqual(resolve(items, {key: "页签"}).map((item) => item.entryKey), []);
+});
+
 test("slash menu separator normalization removes leading, trailing, and consecutive separators", () => {
     const items = [separator("s1"), entry("a"), separator("s2"), separator("s3"), entry("b"), separator("s4")];
     assert.deepEqual(normalizeSlashMenuSeparators(items).map((item) => item.entryKey), ["a", "s2", "b"]);

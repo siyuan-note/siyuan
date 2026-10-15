@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Koppen op een nieuwe pagina beginnen",
+	"pdfHeadingPageBreaksTip": "Meerdere kopniveaus kunnen worden geselecteerd; zonder selectie blijft de indeling doorlopend; opeenvolgende koppen zonder inhoud ertussen blijven bij elkaar",
 	"configGroupHeadings": "Koppen",
 	"configGroupBadges": "Badges",
 	"workspaceLockWaiting": "De werkruimte is in gebruik. Wachten op een nieuwe poging...",

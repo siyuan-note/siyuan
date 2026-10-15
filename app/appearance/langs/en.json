@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Start headings on a new page",
+	"pdfHeadingPageBreaksTip": "Select any heading levels; leave all unchecked for continuous layout; consecutive headings without body content stay together",
 	"configGroupHeadings": "Headings",
 	"configGroupBadges": "Badges",
 	"workspaceLockWaiting": "Workspace is in use. Waiting to retry...",

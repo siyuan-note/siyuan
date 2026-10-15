@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Inizia i titoli su una nuova pagina",
+	"pdfHeadingPageBreaksTip": "È possibile selezionare più livelli; senza selezioni il contenuto resta continuo; i titoli consecutivi senza contenuto intermedio restano insieme",
 	"configGroupHeadings": "Titoli",
 	"configGroupBadges": "Indicatori",
 	"workspaceLockWaiting": "L'area di lavoro è in uso. In attesa di riprovare...",

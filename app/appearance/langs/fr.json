@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Commencer les titres sur une nouvelle page",
+	"pdfHeadingPageBreaksTip": "Plusieurs niveaux peuvent être sélectionnés ; sans sélection, la mise en page reste continue ; les titres consécutifs sans contenu intermédiaire restent ensemble",
 	"configGroupHeadings": "Titres",
 	"configGroupBadges": "Indicateurs",
 	"workspaceLockWaiting": "L’espace de travail est en cours d’utilisation. En attente d’une nouvelle tentative...",

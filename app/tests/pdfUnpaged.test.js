@@ -55,6 +55,8 @@ const runElectron = async () => {
                             mergeSubdocsElement = {}, mergeDocHeadingModeElement = {},
                             mergeContentHeadingModeElement = {}, watermarkElement = {}, removeAssetsElement = {};
                         const response = {data: {name: "test"}};
+                        const getHeadingPageBreakLevels = () => [];
+                        const updateHeadingPageBreaks = () => {};
                         ${prepare}
                         actionElement.remove();
                         return exportConfig.pdfOptions;

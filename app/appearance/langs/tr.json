@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Başlıkları yeni sayfada başlat",
+	"pdfHeadingPageBreaksTip": "Birden fazla başlık düzeyi seçilebilir; seçim yapılmazsa düzen kesintisiz kalır; aralarında içerik olmayan ardışık başlıklar birlikte kalır",
 	"configGroupHeadings": "Başlıklar",
 	"configGroupBadges": "Rozetler",
 	"workspaceLockWaiting": "Çalışma alanı kullanımda. Yeniden denemek için bekleniyor...",

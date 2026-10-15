@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "התחלת כותרות בעמוד חדש",
+	"pdfHeadingPageBreaksTip": "ניתן לבחור כמה רמות כותרת; ללא בחירה הפריסה רציפה; כותרות עוקבות ללא תוכן ביניהן נשארות יחד",
 	"configGroupHeadings": "כותרות",
 	"configGroupBadges": "סימונים",
 	"workspaceLockWaiting": "מקום העבודה נמצא בשימוש. ממתין לניסיון חוזר...",

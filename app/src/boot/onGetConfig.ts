@@ -258,6 +258,7 @@ export const initWindow = async (app: App) => {
             marginBottom: ipcData.pdfOptions.margins.bottom,
             marginLeft: ipcData.pdfOptions.margins.left,
             paged: ipcData.paged,
+            headingPageBreakLevels: ipcData.headingPageBreakLevels,
         };
         setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
         try {

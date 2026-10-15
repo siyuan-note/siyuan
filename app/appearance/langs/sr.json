@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Започни наслове на новој страници",
+	"pdfHeadingPageBreaksTip": "Могуће је изабрати више нивоа наслова; без избора распоред остаје непрекидан; узастопни наслови без садржаја између њих остају заједно",
 	"configGroupHeadings": "Наслови",
 	"configGroupBadges": "Ознаке",
 	"workspaceLockWaiting": "Radni prostor je u upotrebi. Čekanje na ponovni pokušaj...",

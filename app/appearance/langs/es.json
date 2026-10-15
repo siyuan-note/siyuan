@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Iniciar encabezados en una página nueva",
+	"pdfHeadingPageBreaksTip": "Permite seleccionar varios niveles; sin selección, el contenido fluye de forma continua; los encabezados consecutivos sin contenido intermedio permanecen juntos",
 	"configGroupHeadings": "Encabezados",
 	"configGroupBadges": "Indicadores",
 	"workspaceLockWaiting": "El espacio de trabajo está en uso. Esperando para reintentar...",

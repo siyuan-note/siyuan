@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "見出しを新しいページから開始",
+	"pdfHeadingPageBreaksTip": "見出しレベルは複数選択できます。未選択の場合は連続して配置され、本文を挟まない連続した見出しは同じページに配置されます",
 	"configGroupHeadings": "見出し",
 	"configGroupBadges": "バッジ",
 	"workspaceLockWaiting": "ワークスペースは使用中です。再試行を待機しています...",

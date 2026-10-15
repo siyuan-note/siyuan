@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Začínať nadpisy na novej strane",
+	"pdfHeadingPageBreaksTip": "Možno vybrať viacero úrovní; bez výberu zostane rozloženie plynulé; po sebe idúce nadpisy bez obsahu medzi nimi zostanú spolu",
 	"configGroupHeadings": "Nadpisy",
 	"configGroupBadges": "Odznaky",
 	"workspaceLockWaiting": "Pracovný priestor sa používa. Čaká sa na opätovný pokus...",

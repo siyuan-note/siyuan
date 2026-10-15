@@ -771,7 +771,8 @@ export const getLocalStorage = (cb: () => void) => {
             mergeDocHeadingMode: "flat",
             mergeContentHeadingMode: "preserve",
             watermark: false,
-            paged: true
+            paged: true,
+            headingPageBreakLevels: [],
         };
         defaultStorage[Constants.LOCAL_EXPORTIMG] = {
             keepFold: false,

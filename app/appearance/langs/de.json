@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Überschriften auf einer neuen Seite beginnen",
+	"pdfHeadingPageBreaksTip": "Mehrere Überschriftenebenen auswählbar; ohne Auswahl bleibt das Layout fortlaufend; aufeinanderfolgende Überschriften ohne Text dazwischen bleiben zusammen",
 	"configGroupHeadings": "Überschriften",
 	"configGroupBadges": "Kennzeichnungen",
 	"workspaceLockWaiting": "Der Arbeitsbereich wird verwendet. Warten auf erneuten Versuch...",

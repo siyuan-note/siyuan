@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "标题另起一页",
+	"pdfHeadingPageBreaksTip": "可多选标题级别；全部不选时连续排版，连续标题之间没有正文时不额外分页",
 	"configGroupHeadings": "标题",
 	"configGroupBadges": "角标",
 	"workspaceLockWaiting": "工作空间正在被使用，等待重试...",

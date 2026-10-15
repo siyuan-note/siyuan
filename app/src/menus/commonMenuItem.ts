@@ -6,6 +6,7 @@ import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, 
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
+import {openHeadingPageBreakDialog} from "../protyle/export/headingPageBreaksUI";
 import {
     isInAndroid,
     isInHarmony,
@@ -914,7 +915,7 @@ ${databaseOptions}`,
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
                 ignore: !isInMobileApp() || !getHostCapabilities().importExport,
-                click: () => {
+                click: () => openHeadingPageBreakDialog(() => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
@@ -938,7 +939,7 @@ ${databaseOptions}`,
                             hideMessage(msgId);
                         }, 3000);
                     });
-                }
+                })
             }, {
                 id: "exportHTML_SiYuan",
                 label: "HTML (SiYuan)",

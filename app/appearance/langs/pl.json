@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "Rozpoczynaj nagłówki na nowej stronie",
+	"pdfHeadingPageBreaksTip": "Można wybrać wiele poziomów nagłówków; bez wyboru układ pozostaje ciągły; kolejne nagłówki bez treści pomiędzy nimi pozostają razem",
 	"configGroupHeadings": "Nagłówki",
 	"configGroupBadges": "Oznaczenia",
 	"workspaceLockWaiting": "Obszar roboczy jest używany. Oczekiwanie na ponowną próbę...",

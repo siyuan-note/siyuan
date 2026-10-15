@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "بدء العناوين في صفحة جديدة",
+	"pdfHeadingPageBreaksTip": "يمكن اختيار عدة مستويات للعناوين؛ اتركها جميعًا دون تحديد لتخطيط متصل؛ تبقى العناوين المتتالية دون محتوى بينها معًا",
 	"configGroupHeadings": "العناوين",
 	"configGroupBadges": "شارات",
 	"workspaceLockWaiting": "مساحة العمل قيد الاستخدام. في انتظار إعادة المحاولة...",

@@ -1,4 +1,6 @@
 {
+	"pdfHeadingPageBreaks": "제목을 새 페이지에서 시작",
+	"pdfHeadingPageBreaksTip": "제목 수준을 여러 개 선택할 수 있습니다. 선택하지 않으면 연속 배치되며, 본문 없이 이어지는 제목 사이에는 페이지를 나누지 않습니다",
 	"configGroupHeadings": "제목",
 	"configGroupBadges": "배지",
 	"workspaceLockWaiting": "작업 공간이 사용 중입니다. 재시도 대기 중...",

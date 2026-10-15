@@ -21,6 +21,9 @@ type SetAssetOCRTextRequest struct {
 	Text string `json:"text"`
 }
 
+// RenameAssetRequest 重命名普通笔记本资源，并同步字面量及百分号编码的文档、数据库引用。
+// 引用及成功返回的 newPath 保留查询参数和片段；源资源解析失败返回 -1 和 5000 毫秒错误提示。
+// 加密笔记本资源仍拒绝重命名；空名称或与原文件名相同的名称保留成功但 newPath 为空的响应。
 type RenameAssetRequest struct {
 	OldPath string `json:"oldPath"`
 	NewName string `json:"newName"`
@@ -50,6 +53,9 @@ type AssetPathsCloudUploadRequest struct {
 	IgnorePushMsg bool     `json:"ignorePushMsg" api:"optional,nullable"`
 }
 
+// InsertLocalAssetsRequest 在 fromHTMLPaste 为 true 时上传剪贴板引用的本地资源。
+// 允许系统临时目录及用户文档中的普通文件，仍拒绝凭据、工作空间私有路径及加密笔记本原始文件。
+// 单个文件失败通过 failedFiles 返回，其他文件的成功结果保留在 succFiles 中。
 type InsertLocalAssetsRequest struct {
 	AssetPaths    []string `json:"assetPaths"`
 	IsUpload      *bool    `json:"isUpload" api:"optional"`
@@ -82,7 +88,8 @@ type AssetTextData struct {
 	Text string `json:"text"`
 }
 
-// AssetOCRData 的列名来自识别工具的 TSV 表头，单元格均为文本。
+// AssetOCRData 的列名沿用 Tesseract TSV 表头，所有提供商的单元格均为文本。
+// AI 提供商仅返回原样 text，ocrJSON 为空数组，不生成坐标或置信度。
 type AssetOCRData struct {
 	Text    string              `json:"text"`
 	OCRJSON []map[string]string `json:"ocrJSON"`

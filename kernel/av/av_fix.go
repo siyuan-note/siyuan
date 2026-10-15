@@ -19,6 +19,7 @@ package av
 import (
 	"time"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -26,9 +27,11 @@ import (
 )
 
 const (
-	CurrentSpec   = 10
+	CurrentSpec   = 13
 	PlainTextSpec = 8
 	RichTextSpec  = 9
+	// 单一 WGS84 位置使用独立版本，防止其他格式的内核重写坐标含义。
+	LocationSpec = 13
 )
 
 const MaxFilterNestingDepth = 3
@@ -48,6 +51,9 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec8(av)
 	upgradeSpec9(av)
 	upgradeSpec10(av)
+	if av.Spec < LocationSpec && av.HasLocation() {
+		av.Spec = LocationSpec
+	}
 }
 
 // upgradeSpec10 仅为包含列表或日历配置的数据库升级，保留其他数据库的旧版兼容性。
@@ -83,6 +89,9 @@ func CheckSpec(av *AttributeView) (err error) {
 		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew
 		return
+	}
+	if av.Spec < LocationSpec && av.HasLocation() {
+		return ErrLocationSpecMismatch
 	}
 	if av.Spec < RichTextSpec && av.HasRichText() {
 		logging.LogErrorf("attribute view [%s] rich text requires spec [%d], current is [%d]", av.ID, RichTextSpec, av.Spec)
@@ -126,13 +135,17 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 		richContent string
 	}
 	var normalized []normalizedText
+	var luteEngine *lute.Lute
 	av.visitPersistedValues(func(value *Value) {
 		if nil != err || nil == value.Text || !value.Text.IsRich() {
 			return
 		}
 		rich := *value.Text.Rich
+		if luteEngine == nil {
+			luteEngine = newValueTextRichLute()
+		}
 		var tree *parse.Tree
-		if tree, err = NormalizeValueTextRich(&rich); nil == err {
+		if tree, err = normalizeValueTextRichWithLute(&rich, luteEngine); nil == err {
 			normalized = append(normalized, normalizedText{
 				value:       value.Text,
 				content:     valueTextRichPlainContent(tree),

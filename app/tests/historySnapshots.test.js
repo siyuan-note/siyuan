@@ -26,6 +26,7 @@ const runCases = async (sources, css, mobile, dark) => {
     const files = [{id: "doc-file", path: "/notebook/project/document.sy"}, ...Array.from({length: 20}, (_, i) => ({id: "file-" + i, path: "/notebook/project/note-" + i + ".sy"}))];
     let nextID = 0;
     const stubs = {
+        "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "util/genID": {genUUID: () => String(++nextID)},
         "util/zIndex": {isAbove: () => false},
         "dialog/moveResize": {moveResize() {}},
@@ -168,6 +169,7 @@ if (process.versions.electron && process.type === "browser") {
             for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/notebookDialogs", "history/repoFile"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }
+            sources["dialog/index"] = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources["dialog/index"]);
             for (const mobile of [false, true]) {
                 const styles = sass.compile(path.join(__dirname, `../src/assets/scss/${mobile ? "mobile" : "base"}.scss`), {logger: sass.Logger.silent}).css;
                 for (const dark of [false, true]) {

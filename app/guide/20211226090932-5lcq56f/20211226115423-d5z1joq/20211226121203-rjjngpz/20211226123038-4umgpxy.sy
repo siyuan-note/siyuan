@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260820133158"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -103,7 +103,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20260809232000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -340,6 +340,190 @@
 			]
 		},
 		{
+			"ID": "20260930085927-6il5688",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930085927-6il5688",
+				"updated": "20260930085927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入已有資源時，關鍵字也會比對圖片標題、提示文字及已有的 OCR 文字。同一圖片在不同文件中的標題或提示文字可以不同，任一引用符合即可找到該資源。此全域搜尋不包含加密筆記本的資源。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092043-i4ib04g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092043-i4ib04g",
+				"updated": "20260930092043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示圖片檔名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，本機圖片上方會顯示檔名，隱藏資源路徑和隨機碼，保留副檔名。按一下檔名開啟重新命名對話框，確認後會更新所有引用此資源檔案的連結，取消則保留原名稱。唯讀檢視和加密筆記本不支援透過圖片檔名重新命名。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092955-yhn9ixh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092955-yhn9ixh",
+				"updated": "20260930092955"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示圖片提示文字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，圖片描述會顯示在標題下方。即使關閉此選項，滑鼠懸停圖片時也會同時顯示標題和提示文字。描述仍使用圖片原有的提示文字，插入資源時可以搜尋。"
+				}
+			]
+		},
+		{
+			"ID": "20260930093600-c7ee53e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930093600-c7ee53e",
+				"updated": "20260930093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "滑鼠懸停圖片可查看檔名、格式、已載入圖片的原始尺寸、標題和提示文字，無標題的圖片也會顯示這些資訊。本機工作空間圖片還會顯示可取得的檔案大小。網路圖片和加密筆記本圖片不顯示檔案大小。"
+				}
+			]
+		},
+		{
+			"ID": "20261010134815-lhna2cb",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010134815-lhna2cb",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "圖片標題"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261010134815-mtfjptp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010134815-mtfjptp",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊圖片下方的標題可透過浮動輸入框編輯，行動裝置可輕觸標題。輸入框顯示時有全域遮罩，不影響正文版面。標題取得焦點時，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開始編輯；編輯時按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 儲存，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 取消。點擊輸入框外部或離開輸入框也會儲存，行動裝置返回時會先儲存並關閉輸入框。修改僅作用於目前的圖片引用，不會重新命名資源文件。唯讀文檔不支援編輯標題。"
+				}
+			]
+		},
+		{
 			"ID": "20211226123051-5250xg7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -369,7 +553,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+					"TextMarkTextContent": "&lt;img&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -378,7 +562,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "&lt;iframe&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -855,7 +1039,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20230117003901"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -869,21 +1053,72 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003901-5pfzttc",
-				"updated": "20230820185516"
+				"updated": "20261005192208"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "該特性僅在桌面端支持，並且需要先手動安裝 "
+					"Data": "在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "em",
-					"TextMarkTextContent": "Tesseract OCR"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 程序。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇 Tesseract、PaddleOCR 或 AI，並設定是否自動辨識。本機提供商由核心離線執行，無須開啟介面。使用 Tesseract 時，須在桌面端自行安裝該程式。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-w0zyvyj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-w0zyvyj",
+				"updated": "20261003234011"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PaddleOCR 僅內建 PP-OCRv6 Tiny 模型，無需下載即可離線使用，桌面端和行動端均預設選擇 Tiny。Small、Medium 等其他相容的 PP-OCRv6 模型可自行匯入：分別選取偵測、辨識 ONNX 檔案及對應的 inference.yml。匯入模型隨工作空間同步，提供者和目前模型的選擇依裝置儲存。新使用者預設使用 PaddleOCR，自動 OCR 預設關閉。既有使用者保留原提供者、自動 OCR 和閾值設定；舊的內建 Small 選擇移轉為 Tiny，自行匯入的模型不受影響。從尚無 OCR 提供者設定的版本升級時，繼續使用 Tesseract。"
+				}
+			]
+		},
+		{
+			"ID": "20261003073646-hpqqxqx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003073646-hpqqxqx",
+				"updated": "20261006114009"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇 PaddleOCR 後，可以在辨識閾值群組中直接調整偵測閾值、文字框信心閾值和辨識信心閾值，編輯完成後自動儲存。偵測與文字框閾值須大於 0 且小於 1，辨識閾值為 0 到 1。留空時，偵測使用目前模型參數，辨識使用預設值 0.5。無效輸入會保留在原處供修改，不會儲存。提高閾值可以減少圖示誤判，但也可能遺漏模糊或較淡的文字。閾值按裝置儲存，適用於手動與自動辨識；不會重新處理已有結果，可透過圖片選單重新辨識。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-hc489un",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-hc489un",
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動辨識和自動辨識均使用所選提供者。切換後保留已有結果，可透過圖片選單主動重新辨識。辨識失敗時保留上次結果，也不會自動切換提供者。文字繼續用於圖片文字搜尋和結果編輯。加密筆記本不參與 OCR。"
 				}
 			]
 		},
@@ -916,7 +1151,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231516-o6k9mj1",
-				"updated": "20231110112927"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -928,7 +1163,7 @@
 					},
 					"Properties": {
 						"id": "20230202231516-pwj2ndg",
-						"updated": "20231110112927"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -936,7 +1171,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231516-8trf08t",
-								"updated": "20231110112927"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
@@ -968,7 +1203,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​；如果要停用 OCR，請設定環境變量 "
+									"Data": "​；如果要停用 Tesseract，請設定環境變量 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -992,7 +1227,7 @@
 					},
 					"Properties": {
 						"id": "20230202231519-x47s7he",
-						"updated": "20230211103203"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1000,12 +1235,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231519-04f6dh6",
-								"updated": "20230211103203"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "思源並不會啟用所有已安裝的語言包，因為語言包太多的話會導致 OCR 緩慢甚至超時返回空結果，並且佔用過多的系統資源，所以預設最多只會啟用 "
+									"Data": "思源並不會啟用所有已安裝的語言包，因為語言包太多的話會導致 OCR 緩慢甚至逾時，並且佔用過多的系統資源，所以預設最多只會啟用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1100,7 +1335,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230211102853-w8ykvqx"
+						"id": "20230211102853-w8ykvqx",
+						"updated": "20261012014859"
 					},
 					"Children": [
 						{
@@ -1108,12 +1344,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102853-4lc4az0",
-								"updated": "20230211102856"
+								"updated": "20261012014859"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "僅支持 png 和 jpg 格式的圖片"
+									"Data": "Tesseract 和 PaddleOCR 均支援 PNG、JPEG、TIFF、BMP、GIF 和 WebP 圖片，Tesseract 還支援 PBM、PGM、PPM 和 PNM"
 								}
 							]
 						}
@@ -1128,7 +1364,7 @@
 					},
 					"Properties": {
 						"id": "20230211102858-0lgz6pc",
-						"updated": "20230211102910"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1136,12 +1372,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102858-mfhvy7x",
-								"updated": "20230211102910"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "預設只對 2MB 以下的圖片進行處理，如果需要調整，可以通過環境變量 "
+									"Data": "Tesseract 預設只對 2MB 以下的圖片進行處理，如果需要調整，可以通過環境變量 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1159,7 +1395,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 將上限調整為 4MB"
+									"Data": "​ 將上限調整為 4MB；PaddleOCR 支援不超過 32 MiB、2400 萬像素的圖片"
 								}
 							]
 						}
@@ -1172,12 +1408,128 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003901-j7r2o7f",
-				"updated": "20230117003901"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "圖片 OCR 提取文字過程是自動在後台進行的，目前僅支持 PNG、JPG 圖片。提取的文字會被用於搜索功能，這樣就能通過文字關鍵字來定位圖片。"
+					"Data": "啟用自動 OCR 後，核心會處理尚無 OCR 結果的圖片，提取的文字用於搜尋，可透過文字關鍵字定位圖片。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-6y5wu61",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-6y5wu61",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI OCR"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261003224949-qe1gsny",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-qe1gsny",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在圖片選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用 AI 進行 OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，將本機圖片傳送給獨立選擇的 OCR AI 模型進行文字辨識。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇 AI 和模型；啟用 AI 功能且有已啟用的提供商和模型時，才顯示 AI 選項。模型須支援圖片輸入，系統不會自動驗證此能力。手動與自動 OCR 均使用該模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-bwwb619",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-bwwb619",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "從本機提供商切換到 AI 時關閉自動辨識；明確開啟後，背景會將尚未辨識的非加密筆記本圖片傳送給提供商，可能產生費用。所選模型被停用或刪除後，不會自動換模型或提供商。使用本機提供商且未設定獨立 AI 模型時，單獨的 AI 手動入口相容沿用智能體模型。結果沿用現有 OCR 文字、編輯、複製與搜尋索引，失敗時保留原結果。加密筆記本圖片不支援此功能。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-gs71n5p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-gs71n5p",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支援 PNG、JPEG、GIF 和 WebP；BMP、TIFF 轉為 PNG，HEIC/HEIF 轉為 JPEG，保留原圖解析度。原始圖片和轉換後的圖片均不得超過 20 MiB，轉換後的圖片不得超過四千萬像素。網路圖片隱藏辨識入口，加密筆記本圖片隱藏 OCR 選單；AVIF、SVG、ICO 等不支援的格式隱藏 AI OCR 入口。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-yzo82d1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-yzo82d1",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "思考強度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 獨立設定手動與自動 AI OCR 的推理等級。預設沿用模型行為，無表示關閉或盡量減少思考，是否支援取決於提供商和模型。不支援時回傳錯誤並保留原 OCR 結果。"
 				}
 			]
 		},
@@ -1187,7 +1539,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20230414203058"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -1300,12 +1652,92 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203058-pvk5pnz",
-				"updated": "20260720201253"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "調整完以後需要手動重建資源檔案索引。"
+					"Data": "透過圖片結果編輯視窗儲存後會自動更新搜尋索引；在思源外部修改 JSON 檔案後，需手動重建資源檔案索引"
+				}
+			]
+		},
+		{
+			"ID": "20260930090802-ffpq13r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930090802-ffpq13r",
+				"updated": "20261010140118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按一下圖片上的 OCR 圖示可複製辨識文字，按兩下可開啟可拖曳的編輯視窗，對照旁邊的原圖修改文字。也可透過圖片選單複製 OCR 文字或開啟結果編輯視窗。按儲存確認修改，按取消放棄修改；按視窗外不會關閉編輯視窗。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 圖片有 OCR 文字且外觀方案允許顯示時，才會顯示 OCR 按鈕。簡潔方案預設隱藏此按鈕，自訂外觀方案中可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR 文字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 設定顯示或隱藏。也可繼續透過圖片選單複製和編輯 OCR 文字。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "懸浮在本機圖片上可查看 OCR 文字，無辨識結果時會顯示空內容提示。文字辨識圖示表示 OCR 操作，圖片圖示則將圖片複製為 PNG，無 OCR 文字時也可複製圖片。在自訂外觀方案中，可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複製為 PNG"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 顯示或隱藏圖片複製按鈕；該按鈕在簡潔方案中預設隱藏。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "OCR 懸浮預覽最多顯示 200 個字元、6 行，超出部分以三個點標記。按兩下 OCR 圖示可查看完整文字。"
 				}
 			]
 		}

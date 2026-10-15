@@ -73,10 +73,10 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	}
 
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
-	*Conf.FileTree.BoxDocEnabled = true
+	Conf.FileTree.Store(conf.NewFileTree())
+	*Conf.FileTree.Load().BoxDocEnabled = true
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

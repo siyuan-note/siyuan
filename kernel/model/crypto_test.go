@@ -389,7 +389,7 @@ func TestRestoreNotebookCryptoConfigFromExistingBackup(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	defer func() {
 		Conf = originalConf
 		util.DataDir = originalDataDir
@@ -1122,7 +1122,7 @@ func TestEnableEncryptedNotebookRestoresConfigWhenBackupWriteFails(t *testing.T)
 	}
 	Conf = NewAppConf()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	util.DataDir = dataDir
 	util.HistoryDir = filepath.Join(dataDir, "history")
 	defer func() {

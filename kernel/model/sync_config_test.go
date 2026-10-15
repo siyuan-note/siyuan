@@ -25,8 +25,8 @@ import (
 func TestCheckSyncPreservesEnabledWithoutUser(t *testing.T) {
 	originalConf := Conf
 	Conf = NewAppConf()
-	Conf.Sync = conf.NewSync()
-	Conf.Sync.Enabled = true
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Sync.Load().Enabled = true
 	t.Cleanup(func() {
 		Conf = originalConf
 	})
@@ -34,7 +34,7 @@ func TestCheckSyncPreservesEnabledWithoutUser(t *testing.T) {
 	if checkSync(false, false, true) {
 		t.Fatal("sync must not start without a user")
 	}
-	if !Conf.Sync.Enabled {
+	if !Conf.Sync.Load().Enabled {
 		t.Fatal("sync configuration must remain enabled without a user")
 	}
 }

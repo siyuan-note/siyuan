@@ -284,11 +284,13 @@ func flattenTemplateDocTreeNodes0(nodes []*TemplateDocTreeNode) (ret []*Template
 }
 
 func (collector *templateDocTreeCollector) validateLocations() error {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	box := Conf.Box(collector.boxID)
 	if nil == box {
 		return ErrBoxNotFound
 	}
-	allowCreateDeeper := nil != Conf.FileTree && Conf.FileTree.AllowCreateDeeper
+	allowCreateDeeper := nil != confFileTreeSnapshot && confFileTreeSnapshot.AllowCreateDeeper
 	for _, node := range flattenTemplateDocTreeNodes0(collector.nodes) {
 		if depth := strings.Count(node.path, "/"); 7 < depth && !allowCreateDeeper {
 			return errors.New(Conf.Language(118))

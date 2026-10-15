@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"math"
@@ -104,7 +105,29 @@ func TestRPCContractHTTPCompatibility(t *testing.T) {
 			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/plugin/rpc/contract-rpc", strings.NewReader(body)))
 			return recorder
 		}
-		legacy := call(HandleRpcHttp)
+		parsed := parseRpcRequests([]byte(body))
+		var expected any = parsed.GlobalError
+		if parsed.GlobalError == nil {
+			responses := filterRpcResponses(p.dispatchRpcRequests(context.Background(), parsed.Requests))
+			expected = nil
+			if len(responses) > 0 {
+				if parsed.Batch {
+					expected = responses
+				} else {
+					expected = responses[0]
+				}
+			}
+		}
+		expectedStatus := 200
+		var expectedBody []byte
+		if expected == nil {
+			expectedStatus = 204
+		} else {
+			expectedBody, err = json.Marshal(expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 		actual := call(func(c *gin.Context) {
 			var response apicontract.Response[apicontract.PluginRPCResponse]
 			if early := PrepareRPCContract(c); early != nil {
@@ -123,8 +146,8 @@ func TestRPCContractHTTPCompatibility(t *testing.T) {
 				c.JSON(status, response)
 			}
 		})
-		if legacy.Code != actual.Code || !bytes.Equal(legacy.Body.Bytes(), actual.Body.Bytes()) {
-			t.Fatalf("RPC HTTP changed for %s:\n%d %s\n%d %s", body, legacy.Code, legacy.Body, actual.Code, actual.Body)
+		if expectedStatus != actual.Code || !bytes.Equal(expectedBody, actual.Body.Bytes()) {
+			t.Fatalf("RPC HTTP changed for %s:\n%d %s\n%d %s", body, expectedStatus, expectedBody, actual.Code, actual.Body)
 		}
 		if err := bundle.ValidateHTTPResponse("POST", "/api/plugin/rpc/:name", actual.Code, actual.Header().Get("Content-Type"), actual.Body.Bytes()); err != nil {
 			t.Fatalf("RPC response violates contract: %s, %v", actual.Body, err)

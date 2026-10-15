@@ -60,6 +60,10 @@ type skillRecord struct {
 // SkillLoadResult 描述技能正文激活或单个资源读取的结果。
 type SkillLoadResult struct {
 	Name               string
+	Source             string
+	ID                 string
+	Version            string
+	Digest             string
 	Content            string
 	ResourcePath       string
 	Resources          []string

@@ -56,11 +56,6 @@ export const DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS = [
 
 const LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS = ["documents", "search", "newDoc", "tabs"];
 
-export const DEFAULT_MOBILE_BOTTOM_BAR_CONFIG: IMobileBottomBarConfig = {
-    version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-    actions: DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS,
-};
-
 const mobileBottomBarActionSet = new Set<string>(MOBILE_BOTTOM_BAR_ACTIONS);
 
 export const isMobileBottomBarBuiltInAction = (value: unknown): value is MobileBottomBarBuiltInAction => {

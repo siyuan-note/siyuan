@@ -12,21 +12,22 @@ import {copyTableCellContent} from "./tableCellRich";
 import {
     fixAdjacentTags,
     getContenteditableElement,
+    getNextBlockSibling,
     getParentBlock,
     getPreviousBlockSibling
 } from "../wysiwyg/getBlock";
 import {
     fixTableRange,
     focusBlock,
-    focusByRange,
     focusByWbr,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
-    setLastNodeRange,
 } from "./selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "./selectionOffsets";
 import {Constants} from "../../constants";
+import {showMessage} from "../../dialog/message";
+import {createAVLocationFromText, createAVLocationReplacement} from "../render/av/locationValue";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
@@ -41,7 +42,6 @@ import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
 import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
-    AV_PASTE_READONLY_TYPES,
     compactAVCellOperations,
     getAVPasteCellValue,
     getAVPasteContentRowCount,
@@ -54,6 +54,7 @@ import {
     shouldShowAVPasteSkeleton,
     showAVPasteSkeleton,
 } from "../render/av/paste";
+import {isAVReadonlyType} from "../render/av/capabilities";
 import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
 import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
 import {Dialog} from "../../dialog";
@@ -65,6 +66,9 @@ import {getAVSelectedTableCells} from "../render/av/virtualScroll";
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
+import {renderIFrameResize} from "../render/iframeResize";
+import {genEmptyElement} from "../../block/util";
+import {resumeMobileEditorAfterInsertion} from "../../mobile/util/keyboardToolbar";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -356,6 +360,25 @@ const pasteAVMatrix = async (options: {
         return;
     }
     const availableColumns = visibleColumns.slice(startColumnIndex);
+    const invalidLocationInput = availableColumns.some((column, index) => column.type === "location" &&
+        !(options.header && inferableKeyIDs.has(column.id)) && options.values.some(row => {
+            const value = row[index];
+            if (typeof value === "undefined") {
+                return false;
+            }
+            const pasteValue = getAVPasteValueForType(value, "location");
+            const text = typeof pasteValue === "string" ? pasteValue : pasteValue.type === "text" ? pasteValue.text?.content : "";
+            try {
+                createAVLocationFromText(text || "");
+                return false;
+            } catch {
+                return true;
+            }
+        }));
+    if (invalidLocationInput) {
+        showMessage(window.siyuan.languages.locationPasteInEditor, 6000, "error");
+        return;
+    }
     const usedNames = new Set(options.columns.map(column => column.name));
     const changedCellColumnIDs = new Set<string>();
     const targetColumns: IAVPasteTargetColumn[] = [];
@@ -378,7 +401,7 @@ const pasteAVMatrix = async (options: {
         const inferredType = options.header ? inferAVPasteColumnType(sourceCellValues) : "text";
         const currentColumn = availableColumns[sourceIndex];
         if (currentColumn) {
-            const readonly = AV_PASTE_READONLY_TYPES.has(currentColumn.type);
+            const readonly = isAVReadonlyType(currentColumn.type);
             const oldColumn = {...currentColumn};
             const nextName = options.header && headerName && !readonly ? headerName : currentColumn.name;
             const nextType = options.header && inferableKeyIDs.has(currentColumn.id) &&
@@ -586,6 +609,9 @@ const pasteAVMatrix = async (options: {
                     if (hasCellUpdate && !isNewRow && !targetColumn.isNew) {
                         const originalValue = originalCellValues.get(`${pasteRows[i].id}:${targetColumn.column.id}`);
                         if (originalValue) {
+                            if (originalValue.type === "location") {
+                                originalValue.location = createAVLocationReplacement(originalValue.location);
+                            }
                             cellUndoOperations.push({
                                 action: "updateAttrViewCell",
                                 id: originalValue.id || cellElement.dataset.id,
@@ -1396,6 +1422,19 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     normalizeHTMLAssetIFrameSources(tempElement.content);
     markFoldHeadingChildren(tempElement.content);
+    let mobileVideoFocus: Element;
+    if (isMobile() && !templateDocTreePlanID &&
+        tempElement.content.lastElementChild?.getAttribute("data-type") === "NodeVideo") {
+        // 视频插入后在同一容器内继续编辑，新增段落与视频共用一次撤销事务。
+        const nextElement = insertBefore ? blockElement : getNextBlockSibling(blockElement);
+        if (nextElement?.getAttribute("data-type") === "NodeParagraph" &&
+            nextElement.getAttribute("fold") !== "1" && !nextElement.hasAttribute("parent-heading")) {
+            mobileVideoFocus = nextElement;
+        } else {
+            mobileVideoFocus = genEmptyElement(false, false);
+            tempElement.content.appendChild(mobileVideoFocus);
+        }
+    }
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");
@@ -1448,6 +1487,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             } else {
                 blockElement.after(item);
             }
+            renderIFrameResize(item);
         }
         if (!lastElement && !hasParentHeading) {
             lastElement = item;
@@ -1489,7 +1529,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         blockElement.remove();
     }
-    if (lastElement) {
+    if (mobileVideoFocus) {
+        const focusRange = focusBlock(mobileVideoFocus);
+        if (focusRange) {
+            resumeMobileEditorAfterInsertion(protyle, focusRange);
+        }
+    } else if (lastElement) {
         // https://github.com/siyuan-note/siyuan/issues/5591
         focusBlock(lastElement, undefined, false);
     }

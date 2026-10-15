@@ -75,9 +75,9 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 	}
 
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.Lang = "en"
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 
 	boxConf := conf.NewBoxConf()
 	boxConf.Name = "Dynamic icon publish access"

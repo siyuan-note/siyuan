@@ -53,7 +53,7 @@ func setupAssetUploadTest(t *testing.T) string {
 	t.Helper()
 	originalConf, originalDataDir := Conf, util.DataDir
 	Conf = NewAppConf()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() {
 		Conf = originalConf

@@ -6,16 +6,19 @@ import (
 	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"net"
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -62,6 +65,99 @@ func TestNetworkEchoStandardJSON(t *testing.T) {
 		if err = (&Bundle{Definitions: builder.definitions}).validate(schema, value, "$"); err != nil {
 			t.Fatalf("%s: %v", tt.typ, err)
 		}
+	}
+}
+
+func TestAPIContractNetworkEchoStableSchema(t *testing.T) {
+	builder := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
+	for _, typ := range []reflect.Type{reflect.TypeFor[NetworkEchoTLS](), reflect.TypeFor[NetworkEchoURL](), reflect.TypeFor[NetworkEchoCookies]()} {
+		if _, err := networkEchoSchema(builder, typ); err != nil {
+			t.Fatal(err)
+		}
+	}
+	baseline := map[string]*Schema{}
+	for name := range networkEchoDefinitions() {
+		definition := *builder.definitions[name]
+		definition.AdditionalProperties = false
+		baseline[name] = &definition
+	}
+	data, err := json.Marshal(baseline)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var canonical map[string]any
+	if err = json.Unmarshal(data, &canonical); err != nil {
+		t.Fatal(err)
+	}
+	data, err = json.Marshal(canonical)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 已发布 Go 1.26 契约的摘要，不包含额外诊断字段的扩展声明。
+	const expected = "ff57eab17cce50d147a984e1ce23268394d0dcd84584df64928ee98d3be4bf18"
+	if actual := fmt.Sprintf("%x", sha256.Sum256(data)); actual != expected {
+		t.Fatalf("published diagnostic fields changed: %s", actual)
+	}
+	for name, field := range map[string]string{"NetworkEchoConnectionState": "LocalCertificate", "NetworkEchoCertificate": "RawSignatureAlgorithm"} {
+		definition := builder.definitions[name]
+		if definition.Properties[field] != nil || slices.Contains(definition.Required, field) {
+			t.Fatalf("toolchain field %s.%s leaked into generated declarations", name, field)
+		}
+	}
+}
+
+func TestAPIContractNetworkEchoAdditionalDiagnostics(t *testing.T) {
+	builder := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
+	schema, err := networkEchoSchema(builder, reflect.TypeFor[NetworkEchoTLS]())
+	if err != nil {
+		t.Fatal(err)
+	}
+	certificate, err := json.Marshal(&x509.Certificate{SerialNumber: new(big.Int).Lsh(big.NewInt(1), 2048)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var certFields map[string]json.RawMessage
+	if err = json.Unmarshal(certificate, &certFields); err != nil {
+		t.Fatal(err)
+	}
+	certFields["RawSignatureAlgorithm"] = json.RawMessage(`{"Tag":16,"Bytes":"AA==","Nested":[null,true,123]}`)
+	certificate, err = json.Marshal(certFields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err := json.Marshal(&tls.ConnectionState{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stateFields map[string]json.RawMessage
+	if err = json.Unmarshal(state, &stateFields); err != nil {
+		t.Fatal(err)
+	}
+	stateFields["LocalCertificate"] = certificate
+	stateFields["PeerCertificates"] = append(append([]byte("["), certificate...), ']')
+	validate := func() error {
+		encoded, err := json.Marshal(stateFields)
+		if err != nil {
+			return err
+		}
+		decoder := json.NewDecoder(strings.NewReader(string(encoded)))
+		decoder.UseNumber()
+		var value any
+		if err = decoder.Decode(&value); err != nil {
+			return err
+		}
+		return (&Bundle{Definitions: builder.definitions}).validate(schema, value, "$")
+	}
+	if err = validate(); err != nil {
+		t.Fatalf("additional diagnostics rejected: %v", err)
+	}
+	stateFields["Version"] = json.RawMessage(`"invalid"`)
+	if err = validate(); err == nil {
+		t.Fatal("invalid published field accepted")
+	}
+	delete(stateFields, "Version")
+	if err = validate(); err == nil {
+		t.Fatal("missing published field accepted")
 	}
 }
 

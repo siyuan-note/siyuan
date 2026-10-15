@@ -21,8 +21,8 @@ import (
 const DecisionMaxBytes = 1024 * 1024
 
 type DecisionOptions struct {
-	Endpoint, APIKey, Model string
-	Timeout                 int
+	Provider, Endpoint, APIKey, Model string
+	Timeout                           int
 }
 
 type DecisionState struct {
@@ -69,6 +69,11 @@ var decisionHTTPClient = func() *http.Client {
 }()
 
 func ValidateDecisionQuestions(questions map[string]DecisionQuestion) error {
+	_, err := normalizeDecisionQuestions(questions)
+	return err
+}
+
+func validateDecisionQuestions(questions map[string]DecisionQuestion) error {
 	if len(questions) == 0 || len(questions) > 32 {
 		return errors.New("decision requires 1 to 32 questions")
 	}
@@ -110,7 +115,12 @@ func ValidateDecisionQuestions(questions map[string]DecisionQuestion) error {
 
 // EvaluateDecision 发送一次判断请求，不重试、不截断原文，也不将缺失或无效答案转换为分数。
 func EvaluateDecision(ctx context.Context, options DecisionOptions, state DecisionState, questions map[string]DecisionQuestion) (*DecisionResult, error) {
-	if err := ValidateDecisionQuestions(questions); err != nil {
+	plan, err := normalizeDecisionQuestions(questions)
+	if err != nil {
+		return nil, err
+	}
+	provider, err := decisionProviderFor(options.Provider)
+	if err != nil {
 		return nil, err
 	}
 	endpoint, err := url.Parse(options.Endpoint)
@@ -121,11 +131,7 @@ func EvaluateDecision(ctx context.Context, options DecisionOptions, state Decisi
 	if strings.TrimSpace(options.APIKey) == "" || strings.TrimSpace(options.Model) == "" {
 		return nil, errors.New("decision model not configured")
 	}
-	payload, err := json.Marshal(struct {
-		Model     string                      `json:"model"`
-		State     DecisionState               `json:"state"`
-		Questions map[string]DecisionQuestion `json:"questions"`
-	}{options.Model, state, questions})
+	payload, err := provider.encode(options.Model, state, plan)
 	if err != nil || len(payload) > DecisionMaxBytes {
 		return nil, errors.New("decision request exceeds 1 MiB; reduce the input without silently truncating it")
 	}
@@ -165,15 +171,19 @@ func EvaluateDecision(ctx context.Context, options DecisionOptions, state Decisi
 	if len(data) > DecisionMaxBytes {
 		return nil, errors.New("decision response exceeds 1 MiB")
 	}
-	var result DecisionResult
-	if err = json.Unmarshal(data, &result); err != nil || !validDecisionResult(result, questions) {
+	result, err := provider.decode(data, plan)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil || !validDecisionResult(*result, questions) {
 		return nil, errors.New("decision API returned incomplete or invalid answers")
 	}
-	return &result, nil
+	return result, nil
 }
 
 func validDecisionResult(result DecisionResult, questions map[string]DecisionQuestion) bool {
-	if result.Model == "" || len(result.Answers) != len(questions) {
+	if strings.TrimSpace(result.Model) == "" || len(result.Answers) != len(questions) ||
+		result.Usage.InputTokens < 0 || result.Usage.OutputTokens < 0 {
 		return false
 	}
 	for id, question := range questions {

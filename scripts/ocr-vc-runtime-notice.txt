@@ -1,0 +1,19 @@
+Microsoft Visual C++ Runtime
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+The Windows OCR runtime includes unmodified Microsoft Visual C++ runtime DLLs
+from the release builder's licensed Visual Studio VC/Redist/MSVC directory.
+The SHA-256 digest of each bundled DLL is recorded in vc-runtime-files.json.
+
+These files are proprietary Microsoft software, not covered by the ONNX Runtime
+MIT license or SiYuan's AGPL license. Redistribution is subject to the applicable
+Microsoft Visual Studio Software License Terms and its Distributable Code list:
+https://visualstudio.microsoft.com/license-terms/
+https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution
+
+App-local deployment information:
+https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files
+
+The release builder is responsible for having the required redistribution
+rights and keeping these app-local runtime files updated. No Microsoft runtime
+installer is run, and no system-wide runtime files are changed by this package.

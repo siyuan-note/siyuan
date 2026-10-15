@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"math"
 	"strings"
 	"testing"
 
@@ -89,6 +90,76 @@ func TestPruneListMindmapPreservesInvalidRoutes(t *testing.T) {
 	}
 }
 
+func TestPruneListMindmapArrowDirections(t *testing.T) {
+	for _, direction := range []string{"forward", "reverse", "both", "none"} {
+		_, list, _ := mindmapTestTree()
+		original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"` + list.ID +
+			`","to":"child","label":"Keep","arrowDirection":"` + direction +
+			`","route":{"version":1,"points":[{"x":10,"y":20,"t":0.5}]},"extension":9007199254740993}]}`
+		list.SetIALAttr(listMindmapMetadataAttr, original)
+		next, changed := pruneListMindmapMetadata(list)
+		if !changed || strings.Contains(next, "deleted") || !strings.Contains(next, `"arrowDirection":"`+direction+`"`) ||
+			!strings.Contains(next, `"label":"Keep"`) || !strings.Contains(next, `"points":[{"x":10,"y":20,"t":0.5}]`) ||
+			!strings.Contains(next, "9007199254740993") {
+			t.Fatalf("arrow metadata was lost during pruning: %s", next)
+		}
+	}
+	for _, direction := range []string{`null`, `""`, `"backward"`, `0`, `false`, `{}`, `[]`} {
+		_, list, _ := mindmapTestTree()
+		original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"a","to":"b","label":"","arrowDirection":` + direction + `}]}`
+		list.SetIALAttr(listMindmapMetadataAttr, original)
+		if next, changed := pruneListMindmapMetadata(list); changed || next != original {
+			t.Fatalf("invalid arrow direction was changed: %s", next)
+		}
+	}
+}
+
+func TestPruneListMindmapRelationAnchors(t *testing.T) {
+	for _, side := range []string{"left", "right", "top", "bottom"} {
+		for _, ratio := range []string{"0", "0.317", "1"} {
+			_, list, _ := mindmapTestTree()
+			anchor := `{"side":"` + side + `","ratio":` + ratio + `,"extension":9007199254740993}`
+			original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"` + list.ID +
+				`","to":"child","label":"Keep","fromAnchor":` + anchor + `,"toAnchor":` + anchor +
+				`,"route":{"version":1,"points":[{"x":10,"y":20,"t":0.5}]},"arrowDirection":"reverse"}]}`
+			list.SetIALAttr(listMindmapMetadataAttr, original)
+			next, changed := pruneListMindmapMetadata(list)
+			if !changed || strings.Contains(next, "deleted") || strings.Count(next, anchor) != 2 ||
+				!strings.Contains(next, `"arrowDirection":"reverse"`) ||
+				!strings.Contains(next, `"points":[{"x":10,"y":20,"t":0.5}]`) {
+				t.Fatalf("anchor metadata or extension was lost during pruning: %s", next)
+			}
+			list.SetIALAttr(listMindmapMetadataAttr, next)
+			if again, changed := pruneListMindmapMetadata(list); changed || again != next {
+				t.Fatal("anchor normalization should be idempotent")
+			}
+		}
+	}
+}
+
+func TestPruneListMindmapPreservesInvalidAnchors(t *testing.T) {
+	for _, key := range []string{"fromAnchor", "toAnchor"} {
+		for _, anchor := range []string{
+			`null`, `[]`, `{}`, `"left"`, `{"side":"center","ratio":0.5}`, `{"side":["left"],"ratio":0.5}`,
+			`{"side":"left"}`, `{"ratio":0.5}`, `{"side":"left","ratio":null}`,
+			`{"side":"left","ratio":"0.5"}`, `{"side":"left","ratio":-0.001}`,
+			`{"side":"left","ratio":1.001}`, `{"side":"left","ratio":1e999}`,
+		} {
+			_, list, _ := mindmapTestTree()
+			original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"a","to":"b","label":"","` + key + `":` + anchor + `}]}`
+			list.SetIALAttr(listMindmapMetadataAttr, original)
+			if next, changed := pruneListMindmapMetadata(list); changed || next != original {
+				t.Fatalf("invalid anchor configuration changed: %s", next)
+			}
+		}
+	}
+	for _, ratio := range []float64{math.NaN(), math.Inf(1), math.Inf(-1), -0.001, 1.001} {
+		if validListMindmapRelationAnchor(map[string]any{"side": "left", "ratio": ratio}) {
+			t.Fatalf("invalid anchor ratio accepted: %v", ratio)
+		}
+	}
+}
+
 func TestPruneListMindmapExcludesListsInsideContentBlocks(t *testing.T) {
 	_, list, child := mindmapTestTree()
 	quote := &ast.Node{Type: ast.NodeBlockquote, ID: "quote"}
@@ -105,7 +176,7 @@ func TestPruneListMindmapExcludesListsInsideContentBlocks(t *testing.T) {
 
 func TestPruneListMindmapPreservesInvalidMetadata(t *testing.T) {
 	for _, value := range []string{
-		`broken`, `null`, `{"version":2,"nodes":{"deleted":{}},"relations":[]}`,
+		`broken`, `null`, `{"version":3,"nodes":{"deleted":{}},"relations":[]}`,
 		`{"version":1,"nodes":{"deleted":{"bold":"true"}},"relations":[]}`,
 		`{"version":1,"nodes":{},"relations":[{"id":"r","from":"a","to":"b"}]}`,
 		`{"version":1,"nodes":{},"relations":[{"id":"r","from":"a","to":"b","label":""},{"id":"r","from":"b","to":"a","label":""}]}`,

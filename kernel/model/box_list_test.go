@@ -29,10 +29,10 @@ func TestListNotebooksIgnoresBoxWithoutConfAndDocuments(t *testing.T) {
 	oldConf, oldDataDir := Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
-	Conf.Sync.Enabled = true
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Sync.Load().Enabled = true
 	t.Cleanup(func() {
 		Conf, util.DataDir = oldConf, oldDataDir
 	})
@@ -71,10 +71,10 @@ func TestListNotebooksDoesNotRepairBoxWithDocuments(t *testing.T) {
 	oldConf, oldDataDir := Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
-	Conf.Sync.Enabled = true
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Sync.Load().Enabled = true
 	t.Cleanup(func() {
 		Conf, util.DataDir = oldConf, oldDataDir
 	})

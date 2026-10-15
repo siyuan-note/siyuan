@@ -30,11 +30,16 @@ func prepareSyncDirectoryTest(t *testing.T) {
 		t.Fatal(err)
 	}
 	Conf = NewAppConf()
-	Conf.Sync, Conf.Repo, Conf.System = conf.NewSync(), conf.NewRepo(), conf.NewSystem()
-	Conf.Sync.Provider = conf.ProviderS3
-	Conf.Sync.S3 = &conf.S3{Bucket: "notes.backup", Region: "us-east-1", Timeout: 5, PathStyle: true,
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSync(), conf.NewRepo(), conf.NewSystem()
+		Conf.Sync.Store(confSectionValue0)
+		Conf.Repo.Store(confSectionValue1)
+		Conf.System.Store(confSectionValue2)
+	}
+	Conf.Sync.Load().Provider = conf.ProviderS3
+	Conf.Sync.Load().S3 = &conf.S3{Bucket: "notes.backup", Region: "us-east-1", Timeout: 5, PathStyle: true,
 		AccessKey: "test-key", SecretKey: "test-secret"}
-	Conf.Repo.Key = []byte("0123456789abcdef0123456789abcdef")
+	Conf.Repo.Load().Key = []byte("0123456789abcdef0123456789abcdef")
 }
 
 func TestS3DirectoryListingPreservesConfiguration(t *testing.T) {
@@ -63,7 +68,7 @@ func TestS3DirectoryListingPreservesConfiguration(t *testing.T) {
 					fmt.Fprintf(w, `<ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Buckets>%s</Buckets></ListAllMyBucketsResult>`, bucket)
 				}))
 				defer server.Close()
-				Conf.Sync.S3.Endpoint, Conf.Sync.CloudName = server.URL, name
+				Conf.Sync.Load().S3.Endpoint, Conf.Sync.Load().CloudName = server.URL, name
 				Conf.Save()
 				confPath := filepath.Join(util.ConfDir, "conf.json")
 				before, err := os.ReadFile(confPath)
@@ -83,12 +88,12 @@ func TestS3DirectoryListingPreservesConfiguration(t *testing.T) {
 					t.Fatalf("unexpected fallback directory: %+v", dirs)
 				}
 				after, err := os.ReadFile(confPath)
-				if err != nil || !bytes.Equal(before, after) || Conf.Sync.CloudName != name || lanSyncScope() != scope {
-					t.Fatalf("listing changed configuration or LAN scope: name=%q, err=%v", Conf.Sync.CloudName, err)
+				if err != nil || !bytes.Equal(before, after) || Conf.Sync.Load().CloudName != name || lanSyncScope() != scope {
+					t.Fatalf("listing changed configuration or LAN scope: name=%q, err=%v", Conf.Sync.Load().CloudName, err)
 				}
 				if name == "work" && result == "matched" {
 					for _, provider := range []int{conf.ProviderSiYuan, conf.ProviderLocal, conf.ProviderWebDAV} {
-						if err = SetSyncProvider(provider, false); err != nil || Conf.Sync.CloudName != name {
+						if err = SetSyncProvider(provider, false); err != nil || Conf.Sync.Load().CloudName != name {
 							t.Fatalf("provider %d did not retain the chosen directory: %v", provider, err)
 						}
 					}
@@ -100,7 +105,7 @@ func TestS3DirectoryListingPreservesConfiguration(t *testing.T) {
 
 func TestS3DirectorySelectionIsRejected(t *testing.T) {
 	prepareSyncDirectoryTest(t)
-	Conf.Sync.CloudName = "work"
+	Conf.Sync.Load().CloudName = "work"
 	Conf.Save()
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	before, err := os.ReadFile(confPath)
@@ -113,13 +118,13 @@ func TestS3DirectorySelectionIsRejected(t *testing.T) {
 		}
 	}
 	after, err := os.ReadFile(confPath)
-	if err != nil || !bytes.Equal(before, after) || Conf.Sync.CloudName != "work" {
+	if err != nil || !bytes.Equal(before, after) || Conf.Sync.Load().CloudName != "work" {
 		t.Fatalf("rejected selection changed configuration: %v", err)
 	}
 	for _, provider := range []int{conf.ProviderSiYuan, conf.ProviderLocal, conf.ProviderWebDAV} {
-		Conf.Sync.Provider = provider
+		Conf.Sync.Load().Provider = provider
 		name := fmt.Sprintf("chosen-%d", provider)
-		if err = SetCloudSyncDir(name); err != nil || Conf.Sync.CloudName != name {
+		if err = SetCloudSyncDir(name); err != nil || Conf.Sync.Load().CloudName != name {
 			t.Fatalf("provider %d cannot select a directory: %v", provider, err)
 		}
 	}
@@ -127,17 +132,17 @@ func TestS3DirectorySelectionIsRejected(t *testing.T) {
 
 func TestS3SyncIgnoresDirectoryValidation(t *testing.T) {
 	prepareSyncDirectoryTest(t)
-	Conf.Sync.Enabled = true
+	Conf.Sync.Load().Enabled = true
 	Conf.SetUser(&conf.User{UserId: "sync-test", UserSiYuanOneTimePayStatus: 1})
 	for _, name := range []string{"notes.backup", ""} {
-		Conf.Sync.CloudName = name
+		Conf.Sync.Load().CloudName = name
 		if !checkSync(false, false, true) {
 			t.Fatalf("S3 sync rejected an unused directory name: %q", name)
 		}
-		Conf.Sync.Provider = conf.ProviderWebDAV
+		Conf.Sync.Load().Provider = conf.ProviderWebDAV
 		if checkSync(false, false, false) {
 			t.Fatalf("WebDAV sync accepted an invalid directory: %q", name)
 		}
-		Conf.Sync.Provider = conf.ProviderS3
+		Conf.Sync.Load().Provider = conf.ProviderS3
 	}
 }

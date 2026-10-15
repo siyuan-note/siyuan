@@ -109,22 +109,21 @@ describe("shouldCaptureHintUndoFocus", () => {
     const blockHintKeys = ["((", "[[", "（（", "【【"];
 
     it("captures block hint focus in all editors", () => {
-        assert.equal(shouldCaptureHintUndoFocus("[[", blockHintKeys, false), true);
+        assert.equal(shouldCaptureHintUndoFocus("[[", blockHintKeys), true);
     });
 
-    it("captures slash hint focus in lite editors", () => {
-        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, true), true);
-        assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys, true), true);
+    it("captures slash hint focus in all editors", () => {
+        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys), true);
+        assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys), true);
     });
 
     it("captures slash emoji focus in regular editors", () => {
-        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, false, "emoji"), true);
-        assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys, false, "emoji"), true);
+        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, "emoji"), true);
+        assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys, "emoji"), true);
     });
 
-    it("does not change regular editor slash hint focus handling", () => {
-        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, false), false);
-        assert.equal(shouldCaptureHintUndoFocus("#", blockHintKeys, true), false);
+    it("does not change unrelated hint focus handling", () => {
+        assert.equal(shouldCaptureHintUndoFocus("#", blockHintKeys), false);
     });
 });
 

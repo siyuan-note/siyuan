@@ -14,6 +14,7 @@ interface IPanelHarness {
     heading: unknown;
     sourceTree: unknown;
     clearSelection(): void;
+    updateDocActions(): void;
     refresh(dirtyChildren?: Set<string>): Promise<void>;
     onFileTreeMessage(data: {cmd: string, data?: {id: string}}): void;
     collapse(): void;
@@ -45,18 +46,28 @@ const loadPanel = (fetchCode = 0) => {
     const storage = new Map<string, string>();
     const docs: {id: string, notebook: string, name: string}[] = [];
     const childData = {effectiveSortMode: 6, files: [] as {id: string, name: string, icon?: string}[]};
-    const config = {readonly: false, fileTree: {docIconClickExpand: false, parentDocClickExpand: false}};
+    const config = {readonly: false, fileTree: {docIconClickMode: 0, parentDocTitleClickMode: 0}};
     const calls: {kind: string, args: unknown[]}[] = [];
     const timers: (() => void)[] = [];
+    let menuVisible = false;
+    const menu = {
+        data: undefined as Element | undefined,
+        element: {classList: {contains: () => !menuVisible}},
+        remove: () => { menuVisible = false; menu.data = undefined; },
+    };
     const runtime = {config, notebooks: [] as unknown[], languages: {pinDoc: "Pin", dragTipMoveChild: "Into ${x}",
         dragTipMoveBefore: "Before ${x}", dragTipMoveAfter: "After ${x}"}, dragElement: undefined as {innerText: string},
-        dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown};
+        dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown, menus: {menu}};
     const tips: unknown[][] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
         return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
+    const menuToggle = {};
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "../../menus/menuToggle.ts"), "utf8"), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+    }).outputText, {exports: menuToggle, window: {siyuan: runtime}});
     const source = ts.transpileModule(readFileSync(join(__dirname, "PinnedDocs.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
     }).outputText;
@@ -73,6 +84,8 @@ const loadPanel = (fetchCode = 0) => {
             remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/menuToggle")) { return menuToggle; }
+            if (name.endsWith("/menuClick")) { return {globalClickHideMenu: () => {}}; }
             if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost"),
                 showDragTip: (...args: unknown[]) => tips.push(args), hideDragTip: () => tips.push([])}; }
             if (name.endsWith("/fileTreeAnimation")) { return {setFileTreeVisibility: (element: HTMLElement, visible: boolean) => element.classList.toggle("fn__none", !visible)}; }
@@ -84,8 +97,12 @@ const loadPanel = (fetchCode = 0) => {
             if (name.endsWith("/emoji")) { return {openEmojiPanel: record("icon")}; }
             if (name.endsWith("/navigation")) {
                 return {initFileMenu: (...args: unknown[]) => {
+                    menu.remove();
                     calls.push({kind: "menu", args});
-                    return {popup: record("popup"), fullscreen: record("fullscreen")};
+                    return {
+                        popup: (...position: unknown[]) => { menuVisible = true; return record("popup")(...position); },
+                        fullscreen: (...position: unknown[]) => { menuVisible = true; return record("fullscreen")(...position); },
+                    };
                 }};
             }
             if (name.endsWith("/pinnedDocs")) { return {updatePinnedDocs: record("pin"), pinnedDocIDs: new Set<string>()}; }
@@ -131,14 +148,16 @@ test("collapse clears descendant expansion and persists the closed section", asy
     assert.equal(calls[0].args[0], "/api/filetree/listDocsByPath");
 });
 
-test("pinned document more actions open the source document menu", () => {
+test("pinned document more actions open the source document menu and toggle on repeated clicks", () => {
     const {panel, calls} = loadPanel();
     const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"}};
-    const button = {getBoundingClientRect: () => ({left: 180, bottom: 120, height: 24})};
-    panel.click({
+    const button = {closest: (): null => null, setAttribute: () => {},
+        getBoundingClientRect: () => ({left: 180, bottom: 120, height: 24})};
+    const event = {
         stopPropagation: () => {}, clientX: 10, clientY: 20,
         target: {closest: (selector: string) => selector === "[data-pin-row]" ? row : selector === "[data-pin-more]" ? button : null},
-    });
+    };
+    panel.click(event);
     assert.equal(calls[0].kind, "menu");
     assert.deepEqual(calls[0].args.slice(1), ["notebook", "/document.sy", row]);
     assert.equal(calls[1].kind, "popup");
@@ -146,6 +165,12 @@ test("pinned document more actions open the source document menu", () => {
     panel.mobile = true;
     panel.menu(row, {x: 180, y: 120, h: 24});
     assert.equal(calls[3].kind, "fullscreen");
+    panel.click(event);
+    assert.equal(calls.length, 6);
+    panel.click(event);
+    assert.equal(calls.length, 6);
+    panel.click(event);
+    assert.equal(calls.length, 8);
 });
 
 test("pinned roots share one list and retain each document notebook without wrapper lists", async () => {
@@ -211,7 +236,7 @@ test("pinned icons respect editing, expansion and readonly settings", () => {
     config.readonly = true;
     panel.click(event);
     assert.equal(calls.length, 1);
-    config.fileTree.docIconClickExpand = true;
+    config.fileTree.docIconClickMode = 1;
     panel.toggle = () => { calls.push({kind: "toggle", args: []}); };
     panel.open = () => { calls.push({kind: "open", args: []}); };
     panel.click(event);
@@ -219,6 +244,63 @@ test("pinned icons respect editing, expansion and readonly settings", () => {
     row.dataset.count = "0";
     panel.click(event);
     assert.equal(calls[2].kind, "open");
+});
+
+test("document action updates refresh existing pinned icons without reloading their documents", () => {
+    const {panel, config, runtime, calls} = loadPanel();
+    Object.assign(runtime.languages, {changeIcon: "Change icon", docIconClickExpand: "Expand children", openDocument: "Open"});
+    const makeRow = (count: number) => {
+        const attributes = new Map<string, string>();
+        const classes = new Set<string>();
+        const icon = {
+            classList: {toggle: (name: string, enabled: boolean) => {
+                if (enabled) { classes.add(name); } else { classes.delete(name); }
+            }},
+            setAttribute: (name: string, value: string) => attributes.set(name, value),
+            removeAttribute: (name: string) => attributes.delete(name),
+        };
+        return {dataset: {count: String(count)}, querySelector: () => icon, attributes, classes};
+    };
+    const rows = [makeRow(2), makeRow(0)];
+    panel.list = {querySelectorAll: () => rows};
+    panel.expanded = new Set(["parent"]);
+    const file = "Files.ts";
+    const source = ts.createSourceFile(file, readFileSync(join(__dirname, file), "utf8"), ts.ScriptTarget.Latest, true);
+    let method: ts.MethodDeclaration;
+    const visit = (node: ts.Node) => {
+        if (ts.isMethodDeclaration(node) && node.name.getText(source) === "updateDocActions") { method = node; }
+        ts.forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(method?.body);
+    const exports = {} as {update: () => void};
+    runInNewContext(ts.transpileModule(`exports.update = function() ${method.body.getText(source)};`, {
+        compilerOptions: {target: ts.ScriptTarget.ES2020},
+    }).outputText, {exports});
+    const regularRow = {};
+    const regularUpdates: unknown[] = [];
+    const files = {pinnedDocs: panel, element: {querySelectorAll: () => [regularRow]},
+        updateDocActionElement: (row: unknown) => regularUpdates.push(row)};
+    for (const mode of [1, 0, 1]) {
+        config.fileTree.docIconClickMode = mode;
+        exports.update.call(files);
+        rows.forEach(row => {
+            assert.equal(row.classes.has("ariaLabel"), mode === 0);
+            assert.equal(row.attributes.get("aria-label"), mode === 0 ? "Change icon" : undefined);
+        });
+    }
+    assert.equal(regularUpdates.length, 3);
+    assert.equal(regularUpdates[0], regularRow);
+    assert.deepEqual([...panel.expanded], ["parent"]);
+    assert.equal(calls.length, 0);
+    panel.mobile = true;
+    for (const mode of [0, 1]) {
+        config.fileTree.docIconClickMode = mode;
+        panel.updateDocActions();
+        assert.equal(rows[0].attributes.get("aria-label"), "Expand children");
+        assert.equal(rows[1].attributes.get("aria-label"), "Open");
+        assert.equal(rows.every(row => row.classes.has("ariaLabel")), true);
+    }
 });
 
 test("root drops create an entry without invoking source movement", async () => {
@@ -323,15 +405,15 @@ test("pin drop tips describe pinning and source moves, and self targets clear fe
     panel.list = {getBoundingClientRect: () => ({})};
     runtime.dragElement = {innerText: "source"};
     panel.previewDrop(10, 1);
-    assert.deepEqual(tips.at(-1), ["Document", "Pin", 10, 1]);
+    assert.deepEqual(tips.at(-1), ["Document", "Pin", 10, 1, "Target"]);
     source = true;
     row.dataset.pinRoot = "false";
     panel.previewDrop(10, 15, true);
-    assert.deepEqual(tips.at(-1), ["Document", "Into Target", 10, 15]);
+    assert.deepEqual(tips.at(-1), ["Document", "Into ${x}", 10, 15, "Target"]);
     panel.previewDrop(10, 1, true);
-    assert.deepEqual(tips.at(-1), ["Document", "Before Target", 10, 1]);
+    assert.deepEqual(tips.at(-1), ["Document", "Before ${x}", 10, 1, "Target"]);
     panel.previewDrop(10, 29, true);
-    assert.deepEqual(tips.at(-1), ["Document", "After Target", 10, 29]);
+    assert.deepEqual(tips.at(-1), ["Document", "After ${x}", 10, 29, "Target"]);
     for (source of [true, false]) {
         runtime.dragElement.innerText = "target";
         const count = highlights.length;
@@ -405,7 +487,7 @@ test("parent titles prefetch once and double clicks preserve expanded and collap
         {expanded: false, mobile: true}, {expanded: true, mobile: true},
     ]) {
         const {panel, config, calls} = loadPanel();
-        config.fileTree.parentDocClickExpand = true;
+        config.fileTree.parentDocTitleClickMode = 2;
         panel.mobile = mobile;
         panel.generation = 0;
         panel.expanded = new Set(expanded ? ["doc"] : []);
@@ -429,7 +511,7 @@ test("parent titles prefetch once and double clicks preserve expanded and collap
 
 test("single parent click reuses prefetched children after the click window", async () => {
     const {panel, config, calls, childData} = loadPanel();
-    config.fileTree.parentDocClickExpand = true;
+    config.fileTree.parentDocTitleClickMode = 2;
     panel.generation = 0;
     panel.expanded = new Set();
     const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},
@@ -442,6 +524,23 @@ test("single parent click reuses prefetched children after the click window", as
     await delay(330);
     assert.equal(calls.filter(call => call.kind === "http").length, 1);
     assert.deepEqual(calls.find(call => call.kind === "toggle").args, [row, true, childData]);
+});
+
+test("expand-only mode toggles pinned parent titles immediately on desktop and mobile", () => {
+    for (const mobile of [false, true]) {
+        const {panel, config, calls} = loadPanel();
+        config.fileTree.parentDocTitleClickMode = 1;
+        panel.mobile = mobile;
+        const row = {dataset: {nodeId: "doc", notebook: "box", count: "4"}, classList: {add() {}}};
+        const event = {stopPropagation() {}, target: {closest: (selector: string) =>
+            selector === "[data-pin-row]" || selector === ".b3-list-item__text" ? row : null}};
+        panel.toggle = () => { panel.parentDocClick.cancel(); calls.push({kind: "toggle", args: []}); };
+        panel.open = () => assert.fail("expand-only mode must not open the document");
+        panel.click(event);
+        assert.deepEqual(calls.map(call => call.kind), ["toggle"]);
+        panel.click(event);
+        assert.equal(calls.filter(call => call.kind === "http").length, 0);
+    }
 });
 
 test("pinned area follows list contents on initial load, pin, unpin and sync", async () => {

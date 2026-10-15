@@ -21,14 +21,14 @@ const expectedDesktopGeneralKeys = [
     "splitLR", "splitMoveB", "splitMoveR", "splitTB", "switchLeftDock", "switchRightDock", "switchBottomDock",
     "tabToWindow", "stickSearch", "toggleDock", "toggleLeftDockPanel", "toggleRightDockPanel",
     "toggleBottomDockPanel", "unsplitAll", "unsplit", "recentClosed", "increaseEditorFontSize",
-    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin", "switchTab",
+    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin", "switchTab", "previousDatabaseRow", "nextDatabaseRow",
 ];
 
 const expectedMobileGeneralKeys = [
     "addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
     "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "lockScreen", "mainMenu", "move",
     "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow", "increaseEditorFontSize",
-    "decreaseEditorFontSize", "resetEditorFontSize",
+    "decreaseEditorFontSize", "resetEditorFontSize", "previousDatabaseRow", "nextDatabaseRow",
 ];
 
 const getSupportedIds = (environment: TNativeCommandEnvironment) => NATIVE_COMMAND_CATALOG
@@ -40,19 +40,19 @@ describe("native command catalog", () => {
         assert.deepEqual([...DESKTOP_COMMAND_PANEL_GENERAL_KEYS], expectedDesktopGeneralKeys);
         assert.deepEqual([...MOBILE_COMMAND_PANEL_GENERAL_KEYS], expectedMobileGeneralKeys);
         assert.deepEqual([...COMMAND_PANEL_EDITOR_KEYS], ["switchReadonly", "switchAdjust"]);
-        assert.equal(DESKTOP_COMMAND_PANEL_GENERAL_KEYS.length, 68);
-        assert.equal(MOBILE_COMMAND_PANEL_GENERAL_KEYS.length, 26);
+        assert.equal(DESKTOP_COMMAND_PANEL_GENERAL_KEYS.length, 70);
+        assert.equal(MOBILE_COMMAND_PANEL_GENERAL_KEYS.length, 28);
         assert.equal(COMMAND_PANEL_EDITOR_KEYS.length, 2);
-        assert.equal(NATIVE_COMMAND_CATALOG.length, 70);
+        assert.equal(NATIVE_COMMAND_CATALOG.length, 72);
         assert.equal(new Set(NATIVE_COMMAND_CATALOG.map(item => item.id)).size, NATIVE_COMMAND_CATALOG.length);
     });
 
     it("filters all five frontends without exposing desktop-only commands", () => {
-        assert.equal(getSupportedIds("desktop").length, 70);
-        assert.equal(getSupportedIds("desktop-window").length, 70);
-        assert.equal(getSupportedIds("browser-desktop").length, 69);
-        assert.equal(getSupportedIds("mobile").length, 28);
-        assert.equal(getSupportedIds("browser-mobile").length, 28);
+        assert.equal(getSupportedIds("desktop").length, 72);
+        assert.equal(getSupportedIds("desktop-window").length, 72);
+        assert.equal(getSupportedIds("browser-desktop").length, 71);
+        assert.equal(getSupportedIds("mobile").length, 30);
+        assert.equal(getSupportedIds("browser-mobile").length, 30);
         assert.equal(getSupportedIds("browser-desktop").includes("core.general.toggleWin"), false);
         assert.equal(getSupportedIds("mobile").includes("core.general.graphView"), false);
         assert.equal(getSupportedIds("desktop-window").includes("core.general.switchTab"), true);

@@ -23,7 +23,10 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-const embedHeadingLevelAttr = "custom-heading-level"
+const (
+	embedHeadingLevelAttr = "custom-heading-level"
+	embedHeadingModeAttr  = "custom-heading-mode"
+)
 
 func explicitEmbedHeadingLevel(embed *ast.Node, targetID string) int {
 	if targetID == "" || treenode.GetEmbedBlockRef(embed) != targetID {

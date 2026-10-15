@@ -1,9 +1,10 @@
 import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
-import {UDLRHint, upDownHint} from "../../../util/upDownHint";
-import {fetchPost} from "../../../util/fetch";
-import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
+import {UDLRHint} from "../../../util/upDownHint";
+import {fetchPost, fetchSyncPost} from "../../../util/fetch";
+import type {AVRelationItemPreview, AVRelationItemCellInput} from "../../../types/api";
+import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
@@ -23,9 +24,10 @@ import {getSearchAVFocus} from "./searchAVFocus";
 import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {getAVBlockIconHTML} from "./blockIcon";
 import {unicode2Emoji} from "../../../emoji";
 import {bindRelationLayout} from "./relationLayout";
+import {getRelationKeyboardTarget} from "./relationKeyboard";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 
 interface IAVItem {
@@ -44,12 +46,14 @@ type TSearchAVPurpose = "addToDatabase" | "selectRelation";
 interface IOpenSearchAVOptions {
     avID: string;
     target: HTMLElement;
+    position?: IPosition;
     callback?: (element: HTMLElement) => void;
     purpose: TSearchAVPurpose;
     blockID?: string;
 }
 
 const RELATION_PAGE_SIZE = 16;
+const relationItemPreviews = new WeakMap<HTMLElement, {keyword: string, preview: AVRelationItemPreview}>();
 
 const SEARCH_AV_LOADING_HTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">';
 
@@ -120,7 +124,8 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
 
 export const openSearchAV = (options: IOpenSearchAVOptions) => {
     window.siyuan.menus.menu.remove();
-    const menu = new Menu();
+    let cancelSearch: () => void;
+    const menu = new Menu(undefined, () => cancelSearch?.());
     menu.addItem({
         iconHTML: "",
         type: "empty",
@@ -137,16 +142,26 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             let searchTimer = 0;
             let requestSequence = 0;
             let controller: AbortController;
+            let closed = false;
+            cancelSearch = () => {
+                closed = true;
+                clearTimeout(searchTimer);
+                requestSequence++;
+                controller?.abort();
+            };
             // 列表内容变化后重新适配菜单位置和面板高度。
             const updateMenuPosition = () => {
                 window.siyuan.menus.menu.resetPosition();
             };
             const loadList = (keyword: string, cb?: () => void) => {
+                if (closed) {
+                    return;
+                }
                 controller?.abort();
                 controller = new AbortController();
                 const currentSequence = ++requestSequence;
                 genSearchList(listElement, keyword, options, controller.signal, () => {
-                    if (currentSequence !== requestSequence) {
+                    if (closed || currentSequence !== requestSequence) {
                         return;
                     }
                     cb?.();
@@ -154,6 +169,9 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
                 });
             };
             const search = () => {
+                if (closed) {
+                    return;
+                }
                 controller?.abort();
                 requestSequence++;
                 clearTimeout(searchTimer);
@@ -227,7 +245,7 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             });
             loadList("", () => {
                 const rect = options.target.getBoundingClientRect();
-                menu.open({
+                menu.open(options.position || {
                     x: rect.left,
                     y: rect.bottom,
                     h: rect.height,
@@ -449,12 +467,12 @@ style="grid-template-columns:${gridTemplate}">
             const isDetached = primaryValue.isDetached;
             const useRenderedContent = hasAVRenderTemplateResult(primaryValue, column.renderTemplate);
             const content = useRenderedContent ? getAVTemplateHTML(primaryValue.renderedContent || "") :
-                Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled);
+                escapeHtmlTextAndAttr(primaryValue.block?.content || window.siyuan.languages.untitled);
             html += `<span data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
-    ${isDetached ? "" : `<span class="av__relation-row-icon">${getFileTreeIconHTML(primaryValue.block?.icon, "file")}</span>`}
+    <span class="av__relation-row-icon">${getAVBlockIconHTML(primaryValue)}</span>
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}${useRenderedContent ? " av__celltext--template" : ""}"
         data-icon="${escapeAttr(primaryValue.block?.icon || "")}"
         data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${isDetached ? content : `<span class="av__celltext--ref">${content}</span>`}</span>
@@ -462,9 +480,11 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
-            html += `<div data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell"
+            const text = cell?.value ? getCellValueText(cell.value, column) : "";
+            html += `<div data-relation-column="${escapeAttr(column.id)}" data-dtype="${column.type}" data-wrap="false" title="${escapeAttr(text)}" class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
+                column.type === "text" ? `<span class="av__celltext">${escapeHtmlTextAndAttr(text)}</span>` :
+                    renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
         }
     });
     return html + "</div>";
@@ -482,20 +502,25 @@ const genRelationRowsHTML = (rows: IAVRow[], columns: IAVColumn[], type: "select
     return html;
 };
 
-const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string, hasCandidates: boolean, hasMore: boolean) => {
-    if (keyword) {
-        const refElement = menuElement.querySelector(".popover__block");
-        const databaseName = `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block"
+const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string) => {
+    const preview = relationItemPreviews.get(menuElement)?.preview;
+    const creating = menuElement.querySelector<HTMLElement>(".av__relation")?.dataset.creating === "true";
+    const content = preview ? preview.primaryKey : keyword;
+    const refElement = menuElement.querySelector(".popover__block");
+    const databaseName = `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block"
 data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(refElement?.textContent || "")}</span>`;
-        return `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create">
-    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", databaseName).
-            replace("${y}", Lute.EscapeHTMLStr(keyword))}</span>
+    const inputName = preview?.inputPrimaryKey ?? keyword.trim();
+    const hasNameChoice = preview?.hasPrimaryKeyTemplate && keyword.trim() && inputName !== content;
+    const genButton = (label: string, name: string, useInputName = false) => `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create" data-use-input-name="${useInputName}"
+${!preview || preview.error || creating ? "disabled" : ""} title="${escapeAttr(preview?.error || "")}">
+    <span class="b3-menu__label fn__ellipsis">${label.replace("${x}", databaseName).
+        replace("${y}", escapeHtmlTextAndAttr(name || window.siyuan.languages.untitled))}</span>
 </button>`;
+    if (hasNameChoice) {
+        return genButton(window.siyuan.languages.newRelationItemWithTemplate, content) +
+            genButton(window.siyuan.languages.newRelationItemWithInputName, inputName, true);
     }
-    if (!hasCandidates && !hasMore) {
-        return `<div class="b3-list--empty av__relation-table-footer" data-relation-type="empty">${window.siyuan.languages.noMoreItems}</div>`;
-    }
-    return "";
+    return genButton(window.siyuan.languages.newRowInRelation, content);
 };
 
 const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
@@ -663,11 +688,11 @@ export const bindRelationEvent = (options: {
             };
         });
     };
-    const renderFooter = (hasCandidates: boolean) => {
-        listElement.querySelector('[data-relation-type="create"], [data-relation-type="empty"]')?.remove();
+    const renderFooter = () => {
+        listElement.querySelectorAll('[data-relation-type="create"], [data-relation-type="empty"]').forEach(element => element.remove());
         const more = hasMore();
         listElement.dataset.hasMore = more.toString();
-        const footerHTML = genRelationFooterHTML(options.menuElement, state.keyword, hasCandidates, more);
+        const footerHTML = genRelationFooterHTML(options.menuElement, state.keyword);
         if (footerHTML) {
             listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", footerHTML);
         }
@@ -711,10 +736,8 @@ ${genRelationLoaderHTML(false)}`;
             Array.from(listElement.querySelectorAll<HTMLElement>('[role="columnheader"]'))
                 .find(header => header.dataset.relationColumn === focusedColumn)?.focus();
         }
-        renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
-        if (!listElement.querySelector(".b3-menu__item--current")) {
-            listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
-        }
+        renderFooter();
+        getRelationKeyboardTarget(listElement, state.keyword.trim() !== "");
         updateCopyRelatedItems(options.menuElement);
     };
     const loadPage = (reset: boolean) => {
@@ -738,6 +761,8 @@ ${genRelationLoaderHTML(false)}`;
         setLoading(initialLoad || !reset, initialLoad && reset, controller);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
+            includeNewItemPreview: true,
+            blockID: options.blockElement.getAttribute("data-node-id"),
             avID: relationElement.getAttribute("data-source-av-id"),
             keyID: relationElement.getAttribute("data-key-id"),
             keyword,
@@ -758,6 +783,11 @@ ${genRelationLoaderHTML(false)}`;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
             relationElement.dataset.databaseBlockId = response.data.blockIDs?.[0] || "";
             relationElement.dataset.notebookId = response.data.notebookID || "";
+            if (response.data.newItemPreview) {
+                relationItemPreviews.set(options.menuElement, {keyword, preview: response.data.newItemPreview});
+            } else {
+                relationItemPreviews.delete(options.menuElement);
+            }
             const columns = response.data.columns as IAVColumn[] || [];
             const selectedRowsByID = new Map<string, IAVRow>((response.data.selectedRows as IAVRow[] || []).
                 map((row) => [row.id, row]));
@@ -838,6 +868,9 @@ ${genRelationLoaderHTML(false)}`;
     });
     const search = () => {
         state.keyword = inputElement.value;
+        listElement.querySelectorAll(".b3-menu__item--current").forEach(item => item.classList.remove("b3-menu__item--current"));
+        relationItemPreviews.delete(options.menuElement);
+        renderFooter();
         state.controller?.abort();
         state.controller = undefined;
         state.loading = false;
@@ -846,20 +879,24 @@ ${genRelationLoaderHTML(false)}`;
             clearTimeout(searchTimer);
         }
         searchTimer = window.setTimeout(() => {
+            searchTimer = undefined;
             loadPage(true);
         }, Constants.TIMEOUT_INPUT);
     };
 
     inputElement.addEventListener("keydown", (event) => {
-        if (event.isComposing) {
+        if (event.isComposing || !["Enter", "ArrowDown", "ArrowUp"].includes(event.key)) {
             return;
         }
-        upDownHint(listElement, event, "b3-menu__item--current");
-        const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
-        if (event.key === "Enter" && currentElement && currentElement.getAttribute("data-type") === "setRelationCell") {
+        event.preventDefault();
+        event.stopPropagation();
+        // 搜索防抖或首页请求完成前，不允许键盘操作旧候选项。
+        if (searchTimer || state.page === 0 || inputElement.value !== state.keyword) {
+            return;
+        }
+        const currentElement = getRelationKeyboardTarget(listElement, state.keyword.trim() !== "", event.key);
+        if (event.key === "Enter" && currentElement) {
             setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
-            event.preventDefault();
-            event.stopPropagation();
         }
     });
     inputElement.addEventListener("input", (event: InputEvent) => {
@@ -993,12 +1030,13 @@ const getRelationValue = (menuElement: HTMLElement) => {
     return value;
 };
 
-const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string) => {
+const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string, blockID = "", isDetached = true) => {
     const headerElement = menuElement.querySelector('[data-relation-type="header"]') as HTMLElement;
     const columns = headerElement?.querySelectorAll<HTMLElement>(".av__relation-table-cell");
     let cellsHTML = `<span data-relation-column="${escapeAttr(columns?.[0]?.dataset.relationColumn || "")}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <span class="b3-menu__label fn__ellipsis" data-id="">${Lute.EscapeHTMLStr(content)}</span>
+    <span class="av__relation-row-icon">${getAVBlockIconHTML({isDetached})}</span>
+    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}" data-id="${escapeAttr(isDetached ? "" : blockID)}">${escapeHtmlTextAndAttr(content)}</span>
 </span>`;
     for (let i = 1; i < (columns?.length || 1); i++) {
         cellsHTML += `<span data-relation-column="${escapeAttr(columns[i].dataset.relationColumn)}" class="av__relation-table-cell${columns[i].classList.contains("fn__none") ? " fn__none" : ""}"></span>`;
@@ -1052,32 +1090,65 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
             updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
             menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else {
-            const blockID = target.querySelector(".popover__block").getAttribute("data-id");
-            const content = target.querySelector("b").textContent;
-            const rowId = Lute.NewNodeID();
-            const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
-            menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML(
-                "beforeend", genCreatedRelationRowHTML(menuElement, rowId, content));
-            const newValue = getRelationValue(menuElement);
-            const updateOptions = await updateCellsValue(protyle, nodeElement, newValue, cellElements, null, null, true);
-            const doOperations: IOperation[] = [{
-                action: "insertAttrViewBlock",
-                ignoreDefaultFill: true,
-                avID: relationElement.getAttribute("data-av-id"),
-                srcs: [{
-                    itemID: rowId,
-                    id: Lute.NewNodeID(),
-                    isDetached: true,
-                    content
-                }],
-                blockID,
-                groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : "",
-            }, {
-                action: "doUpdateUpdated",
-                id: blockID,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            }];
-            transaction(protyle, doOperations.concat(updateOptions.doOperations));
+            const entry = relationItemPreviews.get(menuElement);
+            if (target.hasAttribute("disabled") || relationElement.dataset.creating === "true" ||
+                !entry || entry.preview.error || entry.keyword !== menuElement.querySelector("input").value) {
+                return;
+            }
+            relationElement.dataset.creating = "true";
+            const useInputName = target.dataset.useInputName === "true";
+            target.setAttribute("disabled", "");
+            try {
+                // 用临时 ID 计算批量关系合并结果，仅成功创建后更新面板。
+                const pendingID = Lute.NewNodeID();
+                const value = getRelationValue(menuElement);
+                value.blockIDs.push(pendingID);
+                value.contents.push({type: "block", block: {content: useInputName ?
+                    (entry.preview.inputPrimaryKey ?? entry.keyword.trim()) : entry.preview.primaryKey}, isDetached: true});
+                const operations = await updateCellsValue(protyle, nodeElement, value, cellElements,
+                    null, null, true, false, false, undefined, false);
+                const cells: AVRelationItemCellInput[] = [];
+                operations.doOperations.forEach(operation => {
+                    if (operation.action === "updateAttrViewCell" && operation.data.relation) {
+                        cells.push({itemID: operation.rowID,
+                            relatedItemIDs: operation.data.relation.blockIDs.filter(id => id !== pendingID)});
+                    }
+                });
+                if (!cells.length) {
+                    return;
+                }
+                const response = await fetchSyncPost("/api/av/createAttributeViewRelationItem", {
+                    avID: nodeElement.dataset.avId,
+                    blockID: nodeElement.dataset.nodeId,
+                    keyID: relationElement.dataset.keyId,
+                    keyword: entry.keyword,
+                    useInputName,
+                    cells,
+                    preview: entry.preview,
+                    app: protyle.app.appId,
+                    session: protyle.id,
+                });
+                if (response.code !== 0 || !response.data || !("itemID" in response.data)) {
+                    if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
+                        showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+                    }
+                    return;
+                }
+                if (response.data.warnings?.length) {
+                    showMessage(response.data.warnings.map(item => escapeHtml(item)).join("<br>"));
+                }
+                if (menuElement.isConnected && !menuElement.querySelector(`[data-relation-type="selected"][data-row-id="${response.data.itemID}"]`)) {
+                    menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML("beforeend",
+                        genCreatedRelationRowHTML(menuElement, response.data.itemID, response.data.content,
+                            response.data.blockID, response.data.isDetached));
+                }
+            } catch (error) {
+                showMessage(escapeHtml(error.message), 6000, "error");
+            } finally {
+                delete relationElement.dataset.creating;
+                target.removeAttribute("disabled");
+                menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
+            }
         }
     }
     updateCopyRelatedItems(menuElement);

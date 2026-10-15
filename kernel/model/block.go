@@ -868,7 +868,7 @@ func swapBlockRefNodes(refNode, defNode *ast.Node, defID string, includeChildren
 			if includeChildren {
 				headingMode = "0"
 			}
-			embed.SetIALAttr("custom-heading-mode", headingMode)
+			embed.SetIALAttr(embedHeadingModeAttr, headingMode)
 		}
 		embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + defID + "'")})
 		originalRefNode.InsertBefore(embed)
@@ -1327,10 +1327,6 @@ func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, acc
 	return
 }
 
-func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
-	resolveEmbedContentInBox(n, luteEngine, "", nil)
-}
-
 // loadTreeForBlockDOM 按指定 box 加载树，空 box 不回退搜索已打开的加密笔记本。
 func loadTreeForBlockDOM(id, boxID string) *parse.Tree {
 	bt := treenode.GetBlockTreeInBox(id, boxID)
@@ -1367,7 +1363,7 @@ func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string, 
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 
 		// 执行查询获取嵌入的块
-		sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
+		sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Load().Limit, boxID)
 		sqlBlocks = filterEmbedBlocksByAccess(sqlBlocks, accessChecker)
 
 		// 收集所有嵌入块的内容 HTML
@@ -1434,16 +1430,16 @@ func filterEmbedBlocksByAccess(blocks []*sql.Block, accessChecker EmbedBlockAcce
 	return
 }
 
+var (
+	embedHTMLPattern    = regexp.MustCompile(`<div[^>]*data-type="NodeBlockQueryEmbed"[^>]*embed-content="[^"]*"[^>]*>`)
+	embedContentPattern = regexp.MustCompile(`embed-content="([^"]*)"`)
+)
+
 func processEmbedHTML(htmlStr string) string {
 	// 使用正则表达式查找所有带有 embed-content 属性的嵌入块
-	embedPattern := `<div[^>]*data-type="NodeBlockQueryEmbed"[^>]*embed-content="[^"]*"[^>]*>`
-	re := regexp.MustCompile(embedPattern)
-
-	return re.ReplaceAllStringFunc(htmlStr, func(match string) string {
+	return embedHTMLPattern.ReplaceAllStringFunc(htmlStr, func(match string) string {
 		// 提取 embed-content 属性值
-		contentPattern := `embed-content="([^"]*)"`
-		contentRe := regexp.MustCompile(contentPattern)
-		contentMatches := contentRe.FindStringSubmatch(match)
+		contentMatches := embedContentPattern.FindStringSubmatch(match)
 
 		if len(contentMatches) > 1 {
 			embedContent := contentMatches[1]
@@ -1451,7 +1447,7 @@ func processEmbedHTML(htmlStr string) string {
 			embedContent = html.UnescapeString(embedContent)
 
 			// 移除 embed-content 属性，避免在最终 HTML 中显示
-			cleanMatch := contentRe.ReplaceAllString(match, "")
+			cleanMatch := embedContentPattern.ReplaceAllString(match, "")
 
 			// 将内容插入到嵌入块内部
 			return cleanMatch + embedContent + "</div>"
@@ -1578,7 +1574,7 @@ func compareBlockKramdownIALAttrNames(a, b string) int {
 }
 
 func isSystemManagedBlockKramdownIALAttr(name string) bool {
-	return "custom-avs" == name || "custom-heading-mode" == name || embedHeadingLevelAttr == name || "custom-reminder-wechat" == name ||
+	return av.NodeAttrNameAvs == name || embedHeadingModeAttr == name || embedHeadingLevelAttr == name || reminderWechatAttr == name ||
 		strings.HasPrefix(name, "custom-riff-") || strings.HasPrefix(name, "custom-sy-")
 }
 

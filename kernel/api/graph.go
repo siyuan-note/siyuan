@@ -27,15 +27,13 @@ import (
 
 var resetGraph = contractHandler(apicontract.ResetGraph, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.ResetGraphData] {
 	graph := conf.NewGlobalGraph()
-	model.Conf.Graph.Global = graph
-	model.Conf.Save()
+	model.UpdateGraphConf(func(g *conf.Graph) bool { g.Global = graph; return true })
 	return apicontract.Success(apicontract.ResetGraphData{Conf: globalGraphContract(graph)})
 })
 
 var resetLocalGraph = contractHandler(apicontract.ResetLocalGraph, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.ResetLocalGraphData] {
 	graph := conf.NewLocalGraph()
-	model.Conf.Graph.Local = graph
-	model.Conf.Save()
+	model.UpdateGraphConf(func(g *conf.Graph) bool { g.Local = graph; return true })
 	return apicontract.Success(apicontract.ResetLocalGraphData{Conf: localGraphContract(graph)})
 })
 
@@ -60,8 +58,7 @@ var setGraphConf = contractHandler(apicontract.SetGraphConf, func(c *gin.Context
 			return apicontract.Failure[apicontract.GraphConfigurationData](-1, err.Error())
 		}
 		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
-			model.Conf.Graph.Global = global
-			model.Conf.Save()
+			model.UpdateGraphConf(func(g *conf.Graph) bool { g.Global = global; return true })
 		}
 		return apicontract.Success(apicontract.GlobalGraphConfiguration(globalGraphContract(global)))
 	case "local":
@@ -70,8 +67,7 @@ var setGraphConf = contractHandler(apicontract.SetGraphConf, func(c *gin.Context
 			return apicontract.Failure[apicontract.GraphConfigurationData](-1, err.Error())
 		}
 		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
-			model.Conf.Graph.Local = local
-			model.Conf.Save()
+			model.UpdateGraphConf(func(g *conf.Graph) bool { g.Local = local; return true })
 		}
 		return apicontract.Success(apicontract.LocalGraphConfiguration(localGraphContract(local)))
 	default:
@@ -95,8 +91,7 @@ var getGraph = contractHandler(apicontract.GetGraph, func(c *gin.Context, reques
 	}
 
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
-		model.Conf.Graph.Global = global
-		model.Conf.Save()
+		model.Conf.SaveGraphQueryConf(global, nil)
 	}
 
 	boxID, nodes, links := model.BuildGraph(query)
@@ -134,8 +129,7 @@ var getLocalGraph = contractHandler(apicontract.GetLocalGraph, func(c *gin.Conte
 	}
 
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
-		model.Conf.Graph.Local = local
-		model.Conf.Save()
+		model.Conf.SaveGraphQueryConf(nil, local)
 	}
 
 	boxID, nodes, links := model.BuildTreeGraph(id, keyword)

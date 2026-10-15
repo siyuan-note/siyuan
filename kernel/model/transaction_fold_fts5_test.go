@@ -469,8 +469,8 @@ func assertFoldMoveState(t *testing.T, rootID string, wantIDs []string, headingI
 
 func setupFoldTransactionDatabase(t *testing.T, fixture *fileOperationTestFixture) {
 	t.Helper()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	originalTempDir := util.TempDir
 	originalQueueDir := util.QueueDir
 	originalConfDir := util.ConfDir
@@ -499,7 +499,7 @@ func setupFoldTransactionDatabase(t *testing.T, fixture *fileOperationTestFixtur
 		treenode.UpsertBlockTree(tree)
 	}
 	t.Cleanup(func() {
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir

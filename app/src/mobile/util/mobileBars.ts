@@ -36,6 +36,10 @@ export const isMobileBlockSelecting = () => {
 const isPanelOpen = () => PANEL_IDS.some((id) => Boolean(document.getElementById(id)?.style.transform));
 
 const renderMobileBars = () => {
+    // 标题输入框位于顶栏内，编辑标题时保持栏位可见和可交互。
+    if (document.activeElement?.id === "toolbarName") {
+        barsState = reduceMobileBarsState(barsState, {type: "set-reading-bars", visible: true});
+    }
     const visibility = getMobileBarsVisibility(barsState);
     const immersive = !visibility.topbarVisible;
     document.body.classList.toggle("mobile-chrome--hidden", immersive);
@@ -203,13 +207,24 @@ export const initMobileBars = () => {
     }
     initialized = true;
     window.addEventListener("siyuan-mobile-keyboard-change", ((event: CustomEvent<boolean>) => {
+        pauseMobileBarsScroll();
         barsState = reduceMobileBarsState(barsState, {
             type: "set-editing",
             active: event.detail,
             scrollTop: scrollElement?.scrollTop,
         });
+        if (!isMobileBarsAutoHide()) {
+            barsState = reduceMobileBarsState(barsState, {type: "set-reading-bars", visible: true});
+        }
         renderMobileBars();
     }) as EventListener);
+    window.addEventListener("resize", () => pauseMobileBarsScroll());
+    window.visualViewport?.addEventListener("resize", () => pauseMobileBarsScroll());
+    document.addEventListener("focusin", () => {
+        if (document.activeElement?.id === "toolbarName") {
+            showMobileBars();
+        }
+    });
     document.addEventListener("selectionchange", onSelectionChange);
 
     panelObserver?.disconnect();

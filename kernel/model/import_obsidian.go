@@ -234,10 +234,15 @@ var (
 	errObsidianVaultMarkdownMissing = errors.New("Obsidian Vault has no readable Markdown")
 	errObsidianSourceChanged        = errors.New("Obsidian source file changed")
 
-	obsidianBlockIDPattern  = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
-	obsidianQuotePattern    = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
-	obsidianListItemPattern = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
-	obsidianFootnotePattern = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
+	obsidianBlockIDPattern              = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
+	obsidianQuotePattern                = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
+	obsidianListItemPattern             = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
+	obsidianFootnotePattern             = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
+	obsidianFootnoteDefinitionPattern   = regexp.MustCompile(`(?m)^\[\^([^\]\r\n]+)\]:[ \t]*(.*?)[ \t]*\r?$`)
+	obsidianFootnoteReferencePattern    = regexp.MustCompile(`\[\^([^\]\r\n]+)\]`)
+	obsidianBlockRefTextReplacer        = strings.NewReplacer("\\", "\\\\", "\"", "\\\"")
+	obsidianDynamicBlockRefTextReplacer = strings.NewReplacer("\\", "\\\\", "'", "\\'")
+	obsidianMarkdownTextReplacer        = strings.NewReplacer("\\", "\\\\", "[", "\\[", "]", "\\]")
 )
 
 func StartObsidianVaultAnalysis(localPath string) (*ObsidianVaultTask, error) {
@@ -870,7 +875,7 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 				doc.BlockIDs[blockID] = ast.NewNodeID()
 			}
 		}
-		tree, _, _, _ := parseStdMd(data)
+		tree, _, _, _ := parseStdMd(data, false)
 		if tree == nil {
 			return newObsidianUserError(347, doc.Source.RelPath,
 				fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath))
@@ -913,7 +918,7 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 				}
 			}
 		}
-		tree, _, _, _ := parseStdMd(data)
+		tree, _, _, _ := parseStdMd(data, false)
 		if tree == nil {
 			return newObsidianUserError(347, doc.Source.RelPath,
 				fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath))
@@ -1992,16 +1997,15 @@ func obsidianWikiLinkAnchor(token obsidianWikiToken, doc *obsidianDocPlan) strin
 }
 
 func escapeObsidianBlockRefText(text string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(text, "\\", "\\\\"), "\"", "\\\"")
+	return obsidianBlockRefTextReplacer.Replace(text)
 }
 
 func escapeObsidianDynamicBlockRefText(text string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(text, "\\", "\\\\"), "'", "\\'")
+	return obsidianDynamicBlockRefTextReplacer.Replace(text)
 }
 
 func escapeObsidianMarkdownText(text string) string {
-	replacer := strings.NewReplacer("\\", "\\\\", "[", "\\[", "]", "\\]")
-	return replacer.Replace(text)
+	return obsidianMarkdownTextReplacer.Replace(text)
 }
 
 func isObsidianImage(filePath string) bool {
@@ -2038,8 +2042,7 @@ func parseObsidianImageSize(value string) (width, height int, ok bool) {
 func convertObsidianFootnotes(data []byte, stats *obsidianTransformStats) []byte {
 	scan := scanObsidianSource(data)
 	masked := maskObsidianProtected(data, scan.Protected)
-	definitionPattern := regexp.MustCompile(`(?m)^\[\^([^\]\r\n]+)\]:[ \t]*(.*?)[ \t]*\r?$`)
-	matches := definitionPattern.FindAllSubmatchIndex(masked, -1)
+	matches := obsidianFootnoteDefinitionPattern.FindAllSubmatchIndex(masked, -1)
 	if len(matches) == 0 {
 		return data
 	}
@@ -2058,8 +2061,7 @@ func convertObsidianFootnotes(data []byte, stats *obsidianTransformStats) []byte
 		definitions[label] = append(definitions[label], def)
 		orderedDefinitions = append(orderedDefinitions, def)
 	}
-	refPattern := regexp.MustCompile(`\[\^([^\]\r\n]+)\]`)
-	refMatches := refPattern.FindAllSubmatchIndex(masked, -1)
+	refMatches := obsidianFootnoteReferencePattern.FindAllSubmatchIndex(masked, -1)
 	var orderedLabels []string
 	seen := map[string]bool{}
 	for _, match := range refMatches {
@@ -2371,7 +2373,7 @@ func writeObsidianTempTree(docsTemp string, tree *parse.Tree) error {
 	if !json.Valid(data) {
 		return fmt.Errorf("generated tree [%s] is not valid JSON", tree.HPath)
 	}
-	if !util.UseSingleLineSave {
+	if !util.UseSingleLineSave.Load() {
 		var buffer bytes.Buffer
 		if err := json.Indent(&buffer, data, "", "\t"); err != nil {
 			return err

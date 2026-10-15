@@ -12,6 +12,7 @@ import {getAVData} from "./virtualScroll";
 import {resolveAVSelectedCell} from "./selectionState";
 import {beginAVEditorSession} from "./editorSession";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
+import {focusBlock} from "../../util/selection";
 import {
     configureAVRichTextLute,
     createAVRichTextValue,
@@ -106,11 +107,10 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     maskElement.dataset.avBlockId = options.nodeElement.dataset.nodeId;
     maskElement.style.zIndex = (++window.siyuan.zIndex).toString();
     maskElement.innerHTML = `<div class="av__richtext-editor" role="dialog">
-    <div class="av__richtext-host"></div>
     ${mobile ? `<div class="av__richtext-actions">
-        <button type="button" class="b3-button b3-button--cancel" data-type="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
-        <button type="button" class="b3-button b3-button--text" data-type="save">${escapeHtml(window.siyuan.languages.save)}</button>
+        <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}
+    <div class="av__richtext-host"></div>
 </div>`;
     document.body.appendChild(maskElement);
     // 独立记录详情使用未挂载的编辑器上下文，浮层生命周期跟随实际可见的详情面板。
@@ -155,6 +155,10 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             protyle.undo.clear();
         },
     });
+    // 临时块不在块树中，块引搜索和新建文档使用所属文档及真实载体块的上下文。
+    fragment.protyle.block.rootID = options.protyle.block.rootID;
+    fragment.protyle.block.parentID = options.nodeElement.dataset.nodeId;
+    fragment.protyle.path = options.protyle.path;
     setPanelPosition(panelElement, options.anchorElement);
     const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
 
@@ -200,7 +204,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     });
     ownerObserver.observe(document.body, {childList: true, subtree: true});
 
-    const finish = async (save: boolean) => {
+    const finish = async (save: boolean, restoreFocus = false) => {
         if (!save) {
             cancelled = true;
         }
@@ -231,6 +235,10 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             }
             endEditorSession();
             options.onDestroy?.();
+            if (restoreFocus && !mobile && !cancelled && !activeEditor && isOwnerConnected() &&
+                options.protyle.wysiwyg.element.contains(options.nodeElement)) {
+                focusBlock(options.nodeElement);
+            }
         }
     };
 
@@ -240,15 +248,14 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             void finish(true);
         }
     });
-    panelElement.querySelector('[data-type="cancel"]')?.addEventListener("click", () => void finish(false));
-    panelElement.querySelector('[data-type="save"]')?.addEventListener("click", () => void finish(true));
+    panelElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
             event.preventDefault();
             event.stopPropagation();
-            void finish(true);
+            void finish(true, true);
         }
     }, true);
     fragment.focus(true);

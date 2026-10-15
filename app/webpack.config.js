@@ -21,6 +21,7 @@ module.exports = (env, argv) => {
         entry: {
             "main": "./src/index.ts",
             "window": "./src/window/index.ts",
+            "settings": "./src/config/setting/window.ts",
         },
         resolve: {
             extensions: [".ts", ".js", ".tpl", ".scss", ".png", ".svg"],
@@ -72,7 +73,8 @@ module.exports = (env, argv) => {
                     test: /\.tpl/,
                     include: [
                         path.resolve(__dirname, "src/assets/template/app/index.tpl"),
-                        path.resolve(__dirname, "src/assets/template/app/window.tpl")],
+                        path.resolve(__dirname, "src/assets/template/app/window.tpl"),
+                        path.resolve(__dirname, "src/assets/template/app/settings.tpl")],
                     loader: "html-loader",
                     options: {
                         sources: false,
@@ -161,6 +163,12 @@ module.exports = (env, argv) => {
                 chunks: ["window"],
                 filename: "window.html",
                 template: "src/assets/template/app/window.tpl",
+            }),
+            new HtmlWebpackPlugin({
+                inject: "head",
+                chunks: ["settings"],
+                filename: "settings.html",
+                template: "src/assets/template/app/settings.tpl",
             }),
         ],
     };

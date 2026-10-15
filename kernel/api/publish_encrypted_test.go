@@ -36,7 +36,7 @@ func TestPublishReaderSearchAndBacklinkEncryptedNotebook(t *testing.T) {
 	oldConf, oldDataDir := model.Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	t.Cleanup(func() {
 		model.Conf, util.DataDir = oldConf, oldDataDir
 	})

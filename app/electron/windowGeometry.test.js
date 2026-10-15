@@ -100,13 +100,18 @@ test("异步退出全屏后才恢复边界和全屏状态", async () => {
     assert.equal(f.window.listenerCount("leave-full-screen"), 0);
 });
 
-const openWindow = windowGeometry => {
+const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
     const source = readFileSync("electron/main.js", "utf8");
     const start = source.indexOf('ipcMain.on("siyuan-open-window",');
     const end = source.indexOf('ipcMain.on("siyuan-open-workspace",', start);
     const calls = [];
+    const timers = new Set();
+    const ipcMain = new EventEmitter();
+    const initializedWindowIds = new Set();
     let options;
-    let open;
+    let url;
+    const windows = [];
+    let pathname = "/stage/build/app/window.html";
     class Window extends EventEmitter {
         static getFocusedWindow() {
             return {getBounds: () => ({x: 0, y: 0})};
@@ -114,7 +119,12 @@ const openWindow = windowGeometry => {
         constructor(value) {
             super();
             options = value;
-            this.webContents = {session: {setSpellCheckerLanguages: () => {}}};
+            windows.push(this);
+            this.destroyed = false;
+            this.webContents = Object.assign(new EventEmitter(), {id: 2,
+                session: {setSpellCheckerLanguages: () => {}},
+                send: value => calls.push(value),
+            });
         }
         center() { calls.push("center"); }
         setPosition(x, y) { calls.push({x, y}); }
@@ -122,14 +132,17 @@ const openWindow = windowGeometry => {
         maximize() { calls.push("maximize"); }
         setFullScreen() { calls.push("fullscreen"); }
         setAlwaysOnTop() {}
-        loadURL() {}
+        loadURL(value) { url = value; }
+        isDestroyed() { return this.destroyed; }
+        destroy() { this.destroyed = true; calls.push("destroy"); }
     }
     const workArea = {x: 1920, y: 0, width: 1280, height: 1000};
     runInNewContext(source.slice(start, end), {
-        ipcMain: {on: (_name, callback) => open = callback},
+        ipcMain, initializedWindowIds,
         BrowserWindow: Window, URL, process: {platform: "win32"},
-        getWindowKernelTarget: () => ({origin: "http://127.0.0.1:6806", mode: "local"}),
-        windowWorkspaces: {get: () => undefined, associate: () => {}},
+        getWindowKernelTarget: () => ({origin: "http://127.0.0.1:6806", mode}),
+        getRemoteSession: () => ({}),
+        windowWorkspaces: {get: () => windows[0], associate: () => {}},
         screen: {
             ...screen,
             getDisplayNearestPoint: point => point.x === 2000 ? {id: 2, workArea} : {id: 1, size: {width: 1920, height: 1080}},
@@ -138,21 +151,107 @@ const openWindow = windowGeometry => {
         normalizeWindowGeometry, path: {join: () => "icon"}, appDir: "", appVer: "test",
         remote: {enable: () => {}}, bindSpellcheckContextMenu: () => {}, rememberWindowKernelTarget: () => {},
         windowNavigate: () => {},
+        showWindow: () => calls.push("show"), getWindowPathname: () => pathname, writeLog: () => {},
+        markExpectedRendererExit: () => calls.push("expected-exit"),
+        setTimeout: callback => { timers.add(callback); return callback; },
+        clearTimeout: timer => timers.delete(timer),
     });
-    open({sender: {id: 1}}, {
+    const open = () => ipcMain.emit("siyuan-open-window", {sender: {id: 1}}, {
         url: "http://127.0.0.1:6806/stage/build/app/window.html?windowWorkspace=20260924100000-abcdefg",
         windowGeometry,
+        ...appearance,
     });
-    return {options, calls, workArea};
+    open();
+    const win = windows[0];
+    return {options, calls, workArea, win, ipcMain, initializedWindowIds, url, open, timers,
+        navigate: value => { pathname = value; },
+        close: () => win.emit("close", {preventDefault: () => calls.push("prevent-close")}),
+    };
 };
 
 test("新窗口创建时使用保存边界，不被鼠标所在显示器覆盖", () => {
     const f = openWindow(state({maximized: true}));
     assert.deepEqual([f.options.x, f.options.y, f.options.width, f.options.height], [100, 80, 900, 700]);
-    assert.deepEqual(f.calls, ["maximize"]);
+    // 首帧绘制（或短延迟）前不显示窗口，最大化也在那时才应用
+    assert.equal(f.options.show, false);
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["maximize", "show"]);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["maximize", "show"]);
 });
 
 test("旧窗口布局继续使用默认窗口位置", () => {
     const f = openWindow(undefined);
     assert.deepEqual(f.calls, ["center", f.workArea]);
 });
+
+test("新窗口首帧后显示，定时器先到也显示，重复打开激活已有窗口", () => {
+    const f = openWindow(state());
+    assert.equal(f.options.show, false);
+    assert.equal(f.options.webPreferences.backgroundThrottling, undefined);
+    assert.equal(f.ipcMain.listenerCount("siyuan-window-ready"), 0);
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["show"]);
+    assert.equal(f.timers.size, 1, "ready-to-show 已显示，只保留兜底超时");
+    f.open();
+    assert.deepEqual(f.calls, ["show", "show"]);
+
+    // 首帧迟迟不来时由短延迟定时器显示，且不会重复显示
+    const timer = openWindow(state());
+    assert.equal(timer.timers.size, 2);
+    assert.ok([...timer.timers].some(fn => {
+        if (fn.name !== "revealWindow") return false;
+        fn();
+        return true;
+    }), "存在短延迟显示定时器");
+    assert.deepEqual(timer.calls, ["show"]);
+    timer.win.emit("ready-to-show");
+    assert.deepEqual(timer.calls, ["show"]);
+});
+
+test("全屏窗口首帧后恢复状态", () => {
+    const f = openWindow(state({fullscreen: true}));
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["fullscreen", "show"]);
+});
+
+test("原生窗口和页面使用同一实际主题颜色，非法颜色使用安全默认值", () => {
+    for (const appearance of [
+        {themeMode: "dark", backgroundColor: "#234567", foregroundColor: "#abcdef"},
+        {themeMode: "light", backgroundColor: "#f0e8d8", foregroundColor: "#345678"},
+        {themeMode: "dark", backgroundColor: "transparent", foregroundColor: "red;}"},
+        {},
+    ]) {
+        const f = openWindow(state(), appearance);
+        const dark = appearance.themeMode === "dark";
+        const background = appearance.backgroundColor?.startsWith("#") ? appearance.backgroundColor : dark ? "#1e1e1e" : "#ffffff";
+        const foreground = appearance.foregroundColor?.startsWith("#") ? appearance.foregroundColor : dark ? "#d4d4d4" : "#222222";
+        assert.equal(f.options.backgroundColor, background);
+        const params = new URL(f.url).searchParams;
+        assert.equal(params.get("windowBackground"), background);
+        assert.equal(params.get("windowForeground"), foreground);
+        assert.equal(params.get("windowThemeMode"), dark ? "dark" : "light");
+    }
+});
+
+for (const mode of ["local", "remote"]) {
+    test(`加载期间可直接关闭窗口，初始化后仍保存布局：${mode}`, () => {
+        const loading = openWindow(state(), {}, mode);
+        loading.close();
+        assert.deepEqual(loading.calls, ["prevent-close", "expected-exit", "destroy"]);
+        const ready = openWindow(state(), {}, mode);
+        ready.initializedWindowIds.add(ready.win.webContents.id);
+        ready.close();
+        assert.deepEqual(ready.calls, ["siyuan-save-close", "prevent-close"]);
+        if (mode === "remote") {
+            const auth = openWindow(state(), {}, mode);
+            auth.initializedWindowIds.add(auth.win.webContents.id);
+            auth.navigate("/check-auth");
+            auth.close();
+            assert.deepEqual(auth.calls, ["prevent-close", "expected-exit", "destroy"]);
+        }
+    });
+}

@@ -250,8 +250,8 @@ func TestRenderFallbackDocVersionUsesRawContent(t *testing.T) {
 func TestParseDocVersionTreeNormalizesSpecAndRootID(t *testing.T) {
 	oldConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	defer func() {
 		Conf = oldConf
 	}()

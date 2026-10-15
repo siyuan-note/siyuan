@@ -1,10 +1,10 @@
 import {showMessage} from "../dialog/message";
 import {openInputDialog} from "../dialog/inputDialog";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
 import {showTooltip} from "../dialog/tooltip";
 /// #if !MOBILE
@@ -102,28 +102,35 @@ export const renameAsset = (assetPath: string) => {
     const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
         value: oldName,
-        onConfirm: (value, dialog) => {
+        description: window.siyuan.languages.renameAssetTip,
+        onConfirm: async (value, dialog) => {
             if (value === oldName || !value) {
                 dialog.destroy();
                 return;
             }
 
-            fetchPost("/api/asset/renameAsset", {oldPath: assetPath, newName: value}, (response) => {
-                /// #if !MOBILE
-                getAllModels().asset.forEach(item => {
-                    if (item.path === assetPath) {
-                        item.update(response.data.newPath);
-                    }
-                });
-                /// #endif
-                getAllEditor().forEach(item => {
-                    item.reload(false);
-                });
+            if (await renameAssetFile(assetPath, value)) {
                 dialog.destroy();
-            });
+            }
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMEASSETS);
+};
+
+export const renameAssetFile = async (assetPath: string, newName: string): Promise<string | undefined> => {
+    const response = await fetchSyncPost("/api/asset/renameAsset", {oldPath: assetPath, newName});
+    if (response.code !== 0) {
+        return;
+    }
+    /// #if !MOBILE
+    getAllModels().asset.forEach(item => {
+        if (item.path === assetPath) {
+            item.update(response.data.newPath);
+        }
+    });
+    /// #endif
+    getAllEditor().forEach(item => item.reload(false));
+    return response.data.newPath;
 };
 
 export const newFileContentBySelect = (protyle: IProtyle) => {

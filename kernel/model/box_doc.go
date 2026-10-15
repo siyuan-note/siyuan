@@ -92,7 +92,9 @@ func writeBoxDocID(boxID string) error {
 }
 
 func IsBoxDocEnabled() bool {
-	return nil != Conf && nil != Conf.FileTree && nil != Conf.FileTree.BoxDocEnabled && *Conf.FileTree.BoxDocEnabled
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
+	return nil != Conf && nil != confFileTreeSnapshot && nil != confFileTreeSnapshot.BoxDocEnabled && *confFileTreeSnapshot.BoxDocEnabled
 }
 
 func hiddenBoxDocRootIDs() (ret []string) {
@@ -289,7 +291,8 @@ func BoxDocSubFileCountForPublishAt(boxID, docPath string, publishAccess Publish
 
 func boxDocSubFileCount(boxID, parentPath string, include func(docPath string) bool) int {
 	ret, _ := visibleDocCount(boxID, parentPath, func(p string) map[string]string {
-		return filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+		ial, _ := filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+		return ial
 	}, include)
 	return ret
 }

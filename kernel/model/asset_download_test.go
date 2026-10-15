@@ -19,9 +19,9 @@ func prepareAssetDownloadRepoTest(t *testing.T) (*dejavu.Repo, *dejavu.Repo, str
 	originalConf := Conf
 	originalWorkspace, originalData, originalRepo := util.WorkspaceDir, util.DataDir, util.RepoDir
 	originalHistory, originalTemp, originalConfDir := util.HistoryDir, util.TempDir, util.ConfDir
-	originalStatusBar := util.StatusBarCfg
+	originalStatusBar := util.StatusBarCfg.Load()
 	t.Cleanup(func() {
-		util.StatusBarCfg = originalStatusBar
+		util.StatusBarCfg.Store(originalStatusBar)
 		Conf = originalConf
 		util.WorkspaceDir, util.DataDir, util.RepoDir = originalWorkspace, originalData, originalRepo
 		util.HistoryDir, util.TempDir, util.ConfDir = originalHistory, originalTemp, originalConfDir
@@ -47,13 +47,19 @@ func prepareAssetDownloadRepoTest(t *testing.T) (*dejavu.Repo, *dejavu.Repo, str
 		}
 	}
 	Conf = NewAppConf()
-	util.StatusBarCfg = &util.StatusBar{MsgDataSyncDisabled: true}
-	Conf.Sync, Conf.Repo, Conf.System, Conf.Search = conf.NewSync(), conf.NewRepo(), conf.NewSystem(), conf.NewSearch()
-	Conf.Sync.Local = &conf.Local{Endpoint: remote}
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2, confSectionValue3 := conf.NewSync(), conf.NewRepo(), conf.NewSystem(), conf.NewSearch()
+		Conf.Sync.Store(confSectionValue0)
+		Conf.Repo.Store(confSectionValue1)
+		Conf.System.Store(confSectionValue2)
+		Conf.Search.Store(confSectionValue3)
+	}
+	Conf.Sync.Load().Local = &conf.Local{Endpoint: remote}
 	Conf.SetUser(&conf.User{UserId: "asset-test", UserSiYuanOneTimePayStatus: 1})
-	Conf.Sync.Provider, Conf.Sync.CloudName, Conf.Sync.Enabled = conf.ProviderLocal, "main", true
-	Conf.Sync.Local.Endpoint, Conf.Sync.AssetDownloadMode = remote, 1
-	Conf.Repo.Key = key
+	Conf.Sync.Load().Provider, Conf.Sync.Load().CloudName, Conf.Sync.Load().Enabled = conf.ProviderLocal, "main", true
+	Conf.Sync.Load().Local.Endpoint, Conf.Sync.Load().AssetDownloadMode = remote, 1
+	Conf.Repo.Load().Key = key
 	util.WorkspaceDir = filepath.Join(base, "partial")
 	util.DataDir, util.RepoDir = filepath.Join(util.WorkspaceDir, "data"), filepath.Join(util.WorkspaceDir, "repo")
 	util.HistoryDir, util.TempDir = filepath.Join(util.WorkspaceDir, "history"), filepath.Join(util.WorkspaceDir, "temp")
@@ -100,6 +106,9 @@ func TestAssetDownloadModePreservesHistoricalRecovery(t *testing.T) {
 	if err = requireCompleteAssetDownloads(); err == nil {
 		t.Fatal("source change allowed with missing current content")
 	}
+	if err = ClearSyncProviderConfig(conf.ProviderLocal); err == nil || !Conf.Sync.Load().Enabled || Conf.Sync.Load().Local.Endpoint == "" {
+		t.Fatal("clear discarded the source of missing current assets")
+	}
 	assetPath := filepath.Join(fullData, "assets", "file.bin")
 	if err = os.WriteFile(assetPath, []byte("version two is different"), 0644); err != nil {
 		t.Fatal(err)
@@ -127,18 +136,21 @@ func TestAssetDownloadModePreservesHistoricalRecovery(t *testing.T) {
 	if err = requireCompleteAssetDownloads(); err == nil {
 		t.Fatal("source change allowed with missing historical content")
 	}
-	Conf.Sync.Enabled = false
-	if err = SetSyncAssetDownloadMode(0); err == nil || Conf.Sync.AssetDownloadMode != 1 {
+	if err = ClearSyncProviderConfig(conf.ProviderLocal); err == nil || !Conf.Sync.Load().Enabled || Conf.Sync.Load().Local.Endpoint == "" {
+		t.Fatal("clear discarded the source of missing historical assets")
+	}
+	Conf.Sync.Load().Enabled = false
+	if err = SetSyncAssetDownloadMode(0); err == nil || Conf.Sync.Load().AssetDownloadMode != 1 {
 		t.Fatalf("offline mode switch discarded the previous mode: %v", err)
 	}
 	if err = EnsureAssetLocal(localAsset); err != nil {
 		t.Fatalf("cached resource unavailable offline: %v", err)
 	}
-	Conf.Sync.Enabled = true
+	Conf.Sync.Load().Enabled = true
 	if err = SetSyncAssetDownloadMode(0); err != nil {
 		t.Fatal(err)
 	}
-	if Conf.Sync.AssetDownloadMode != 0 || repoFileNeedsDownload(oldFile) {
+	if Conf.Sync.Load().AssetDownloadMode != 0 || repoFileNeedsDownload(oldFile) {
 		t.Fatal("full mode did not complete historical assets")
 	}
 	if err = requireCompleteAssetDownloads(); err != nil {
@@ -151,13 +163,16 @@ func TestAssetDownloadModePreservesHistoricalRecovery(t *testing.T) {
 	if data, err = os.ReadFile(localAsset); err != nil || !bytes.Equal(data, []byte("version two is different")) {
 		t.Fatalf("historical read overwrote current asset: %q, %v", data, err)
 	}
-	if err = clearAssetDownloadState(); err != nil {
+	if err = ClearSyncProviderConfig(conf.ProviderLocal); err != nil {
 		t.Fatal(err)
+	}
+	if Conf.Sync.Load().Enabled || Conf.Sync.Load().Local.Endpoint != "" {
+		t.Fatal("complete source was not cleared and disabled")
 	}
 	if exists, err := assetDownloadStateExists(); err != nil || exists {
 		t.Fatalf("authenticated complete state was not cleared: %v", err)
 	}
-	Conf.Repo.Key = nil
+	Conf.Repo.Load().Key = nil
 	if err = requireCompleteAssetDownloads(); err != nil {
 		t.Fatalf("reset state prevents initializing another key: %v", err)
 	}
@@ -174,18 +189,18 @@ func TestAssetDownloadStateCorruptionPreservesSource(t *testing.T) {
 	if err = os.WriteFile(statePath, data, 0600); err != nil {
 		t.Fatal(err)
 	}
-	key := append([]byte(nil), Conf.Repo.Key...)
+	key := append([]byte(nil), Conf.Repo.Load().Key...)
 	if err = requireCompleteAssetDownloads(); err == nil {
 		t.Fatal("corrupt state accepted for a source change")
 	}
-	if err = SetSyncAssetDownloadMode(0); err == nil || Conf.Sync.AssetDownloadMode != 1 {
+	if err = SetSyncAssetDownloadMode(0); err == nil || Conf.Sync.Load().AssetDownloadMode != 1 {
 		t.Fatal("corrupt state was discarded during a mode change")
 	}
 	if err = clearAssetDownloadState(); err == nil {
 		t.Fatal("corrupt state was discarded before changing the key")
 	}
 	remaining, err := os.ReadFile(statePath)
-	if err != nil || !bytes.Equal(data, remaining) || !bytes.Equal(key, Conf.Repo.Key) {
+	if err != nil || !bytes.Equal(data, remaining) || !bytes.Equal(key, Conf.Repo.Load().Key) {
 		t.Fatal("failure changed source state or recovery key")
 	}
 }
@@ -203,7 +218,7 @@ func TestAssetDownloadUsesLocalSnapshotChunksWhileLoggedOut(t *testing.T) {
 	if _, err = os.Stat(assetPath); !os.IsNotExist(err) {
 		t.Fatal("snapshot chunk download unexpectedly materialized workspace content")
 	}
-	Conf.Sync.Enabled = false
+	Conf.Sync.Load().Enabled = false
 	Conf.SetUser(nil)
 	if err = EnsureAssetLocal(assetPath); err != nil {
 		t.Fatalf("offline local chunks were not reused: %v", err)

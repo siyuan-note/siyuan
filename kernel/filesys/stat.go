@@ -206,6 +206,8 @@ func StatNodes(tree *parse.Tree, nodes []*ast.Node) (ret *util.BlockStatResult) 
 						continue
 					}
 					content.WriteString(v.Email.Content)
+				case av.KeyTypeLocation:
+					content.WriteString(v.String(false))
 				case av.KeyTypePhone:
 					if v.IsBlank() {
 						continue

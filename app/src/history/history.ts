@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
@@ -20,7 +21,10 @@ import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 import {openDocHistory} from "./doc";
-import {getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
+import {getRepoSnapshotRange, getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
+import {repoSnapshotInRange} from "./repoRange";
+import {MenuItem} from "../menus/Menu";
+import {renderSnapshotActions} from "./snapshotActions";
 
 let historyEditor: Protyle;
 const repoPanelCleanup = new WeakMap<Element, () => void>();
@@ -149,7 +153,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         }
         pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
         const pageElement = nextElement.nextElementSibling.nextElementSibling;
-        pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
+        pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 0)}`;
         pageElement.classList.remove("fn__none");
         const histories = response.data.histories || [];
         if (histories.length === 0) {
@@ -173,97 +177,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         updateRepoSelection(element);
         return;
     }
-    let actionHTML = "";
-    /// #if MOBILE
-    if (type === "getCloudRepoTagSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadSnapshot">
-    <svg><use xlink:href="#iconDownload"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.download}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadRollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.downloadRollback}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="removeCloudRepoTagSnapshot">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.remove}
-</span>
-<span class="fn__flex-1"></span>`;
-    } else if (type === "getCloudRepoSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadSnapshot">
-    <svg><use xlink:href="#iconDownload"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.download}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadRollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.downloadRollback}
-</span>
-<span class="fn__flex-1"></span>`;
-    } else if (type === "getRepoTagSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="uploadSnapshot">
-    <svg><use xlink:href="#iconUpload"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.upload}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="rollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.rollback}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="removeRepoTagSnapshot">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.remove}
-</span>
-<span class="fn__flex-1"></span>`;
-    } else if (type === "getRepoSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="genTag">
-    <svg><use xlink:href="#iconTag"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.tagSnapshot}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="rollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.rollback}
-</span>
-<span class="fn__flex-1"></span>`;
-    }
-    /// #else
-    if (type === "getCloudRepoTagSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadRollback" aria-label="${window.siyuan.languages.downloadRollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
-    } else if (type === "getCloudRepoSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadRollback" aria-label="${window.siyuan.languages.downloadRollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
-    } else if (type === "getRepoTagSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
-    } else if (type === "getRepoSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTag"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
-    }
-    /// #endif
-    if (["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) && !window.siyuan.config.readonly) {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="editSnapshotMemo" aria-label="${window.siyuan.languages.editSnapshotMemo}"><svg><use xlink:href="#iconEdit"></use></svg></span>` + actionHTML;
-    }
+    const actionHTML = renderSnapshotActions(type, window.siyuan.languages, isMobile(), window.siyuan.config.readonly);
     const memos = new Map<string, string>();
     snapshotMemos.set(element, memos);
     let repoHTML = "";
@@ -317,7 +231,7 @@ ${statHTML}`;
         repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
 <div class="fn__flex-1">
     ${infoHTML}
-    <div class="fn__flex" style="height: 26px" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
+    <div class="fn__flex history__repo-actions" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
         ${actionHTML}
         <span class="b3-list-item__action" data-type="more">
             <svg><use xlink:href="#iconMore"></use></svg>
@@ -387,8 +301,10 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const request = (repoRequests.get(element) || 0) + 1;
     repoRequests.set(element, request);
     const selectValue = getRepoSnapshotType(element);
+    const range = getRepoSnapshotRange(element);
+    const hasRange = !!(range.startTime || range.endTime);
     const searchInputElement = element.querySelector<HTMLInputElement>(".b3-text-field");
-    const keyword = searchInputElement.value.trim();
+    const keyword = hasRange ? "" : searchInputElement.value.trim();
     const searchSnapshot = selectValue === "getRepoSnapshots" && /^[0-9a-f]{7,40}$/i.test(keyword);
     let searching = Boolean(keyword && selectValue === "getRepoSnapshots" && !searchSnapshot);
     const tagged = selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots";
@@ -402,7 +318,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
     updateRepoSelection(element);
     element.setAttribute("data-page", String(currentPage));
     pageBtn.textContent = String(currentPage);
-    searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
+    searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots" || hasRange);
     searchButton.disabled = true;
     [previousElement, nextElement, pageBtn].forEach(button => {
         button.classList.toggle("fn__none", tagged);
@@ -427,13 +343,16 @@ const renderRepo = async (element: Element, currentPage: number) => {
         } else if (tagged) {
             response = await fetchSyncPost(`/api/repo/${selectValue}`, {}, undefined, false);
         } else {
-            response = await fetchSyncPost(`/api/repo/${selectValue}`, {page: currentPage}, undefined, false);
+            response = await fetchSyncPost(`/api/repo/${selectValue}`, {page: currentPage, ...range}, undefined, false);
         }
         if (repoRequests.get(element) !== request || !element.isConnected) {
             return;
         }
         if (response.code !== 0) {
             throw new Error(response.msg);
+        }
+        if (tagged && hasRange) {
+            response.data.snapshots = response.data.snapshots.filter((snapshot: {created: number}) => repoSnapshotInRange(snapshot.created, range));
         }
         setRepoSearchLayout(element, searching);
         if (searching) {
@@ -484,12 +403,12 @@ const renderRmNotebook = (element: HTMLElement) => {
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
                 item.items.forEach((docItem) => {
-                    logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
+                    logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 32px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+    <button type="button" class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
+    </button>
 </li>`;
                 });
                 logsHTML += "</ul>";
@@ -499,13 +418,15 @@ const renderRmNotebook = (element: HTMLElement) => {
     });
 };
 
-export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") => {
+export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", openOnly = false) => {
     if (window.siyuan.config.readonly) {
         return;
     }
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#historyContainer")) {
-            item.destroy();
+            if (!openOnly) {
+                item.destroy();
+            }
             return true;
         }
     });
@@ -603,7 +524,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     <button class="b3-button b3-button--outline" data-type="genRepo">
                         <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.createSnapshot}
                     </button>
-                </div>    
+                </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
                 <ul data-type="repoList" class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
@@ -827,10 +748,33 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "more") {
-                target.parentElement.parentElement.querySelectorAll(".b3-list-item__meta").forEach(item => {
-                    item.classList.toggle("fn__none");
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        const row = target.closest<HTMLElement>('li[data-type="repoitem"]');
+                        const menu = window.siyuan.menus.menu;
+
+                        row.querySelectorAll<HTMLElement>(".history__snapshot-menu-action").forEach(action => {
+                            menu.append(new MenuItem({
+                                icon: action.querySelector("use").getAttribute("xlink:href").substring(1),
+                                label: action.getAttribute("aria-label") || action.textContent.trim(),
+                                click: () => {
+                                    menu.remove();
+                                    action.click();
+                                },
+                            }).element);
+                        });
+                        menu.append(new MenuItem({
+                            icon: "iconInfo",
+                            label: window.siyuan.languages.info,
+                            click: () => row.querySelectorAll(".b3-list-item__meta").forEach(item => item.classList.toggle("fn__none")),
+                        }).element);
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
+
+                    },
                 });
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "toggle") {
@@ -892,14 +836,14 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 const compareHTML = itemType === "doc" && docItem.op !== "delete" ? `<span class="b3-list-item__action ariaLabel" data-type="compare" data-position="6south" aria-label="${window.siyuan.languages.compare}">
         <svg><use xlink:href="#iconSplitLR"></use></svg>
     </span>` : "";
-                                html += `<li data-id="${docItem.id}" data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${itemType}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+                                html += `<li data-id="${docItem.id}" data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${itemType}" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 22px">
     <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     ${compareHTML}
-    <span class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
+    <button type="button" class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
+    </button>
 </li>`;
                             });
                             target.insertAdjacentHTML("afterend", `<ul>${html}</ul>`);

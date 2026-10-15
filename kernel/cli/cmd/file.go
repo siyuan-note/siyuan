@@ -290,7 +290,7 @@ var fileGrepCmd = &cobra.Command{
 		ctx, _ := cmd.Flags().GetInt("context")
 		max, _ := cmd.Flags().GetInt("limit")
 		if max <= 0 {
-			max = 200
+			max = int(^uint(0) >> 1)
 		}
 		results, err := gulu.File.Grep(abs, include, pattern, ctx, max)
 		if err != nil {
@@ -329,9 +329,6 @@ var fileFindCmd = &cobra.Command{
 		}
 		include, _ := cmd.Flags().GetString("include")
 		max, _ := cmd.Flags().GetInt("limit")
-		if max <= 0 {
-			max = 200
-		}
 		var results []string
 		total := 0
 		err = filepath.WalkDir(abs, func(path string, d os.DirEntry, err error) error {
@@ -352,14 +349,14 @@ var fileFindCmd = &cobra.Command{
 				return nil
 			}
 			total++
-			if len(results) < max {
+			if max <= 0 || len(results) < max {
 				rel, relErr := filepath.Rel(util.WorkspaceDir, path)
 				if relErr != nil {
 					rel = path
 				}
 				results = append(results, rel)
 			}
-			if total >= max {
+			if max > 0 && total >= max {
 				return filepath.SkipAll
 			}
 			return nil
@@ -372,7 +369,7 @@ var fileFindCmd = &cobra.Command{
 			data, _ := json.MarshalIndent(results, "", "  ")
 			fmt.Println(string(data))
 		default:
-			if max < total {
+			if max > 0 && max < total {
 				fmt.Printf("Found %d files (showing first %d):\n\n", total, max)
 			} else {
 				fmt.Printf("Found %d files:\n\n", len(results))

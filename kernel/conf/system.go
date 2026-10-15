@@ -16,10 +16,6 @@
 
 package conf
 
-import (
-	"github.com/siyuan-note/siyuan/kernel/util"
-)
-
 type System struct {
 	ID               string `json:"id"`
 	Name             string `json:"name"`
@@ -43,6 +39,7 @@ type System struct {
 	UpdateChannel      string `json:"updateChannel,omitempty"`
 	AutoLaunch2        int    `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
 	LockScreenMode     int    `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
+	SettingsWindow     bool   `json:"settingsWindow"` // 是否在独立窗口中打开设置界面，仅桌面端生效
 
 	EncryptedNotebookFollowSystemLock bool `json:"encryptedNotebookFollowSystemLock"` // 系统锁屏时锁定加密笔记本，默认关闭
 
@@ -75,9 +72,6 @@ type Onboarding struct {
 
 func NewSystem() *System {
 	return &System{
-		ID:                 util.GetDeviceID(),
-		Name:               util.GetDeviceName(),
-		KernelVersion:      util.Ver,
 		NetworkProxy:       &NetworkProxy{},
 		DownloadInstallPkg: true,
 		UpdateChannel:      UpdateChannelStable,

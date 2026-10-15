@@ -35,6 +35,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var outlineFontSizePattern = regexp.MustCompile("font-size:.*?;")
+
 func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 	if nil == heading {
 		return ""
@@ -60,7 +62,7 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 
 		if style := n.IALAttr("style"); "" != style {
 			if strings.Contains(style, "font-size") { // 大纲字号不应该跟随字体设置 https://github.com/siyuan-note/siyuan/issues/7202
-				style = regexp.MustCompile("font-size:.*?;").ReplaceAllString(style, "font-size: inherit;")
+				style = outlineFontSizePattern.ReplaceAllString(style, "font-size: inherit;")
 				n.SetIALAttr("style", style)
 			}
 		}
@@ -244,10 +246,6 @@ func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
 	return nodes[0]
 }
 
-func renderCleanBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
-	return renderBlockDOMByNodes(cleanRenderNodes(nodes, false), luteEngine)
-}
-
 func renderVisibleBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	return renderBlockDOMByNodes(cleanRenderNodes(nodes, true), luteEngine)
 }
@@ -345,7 +343,7 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 			stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 			stmt = html.UnescapeString(stmt)
 			stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-			sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+			sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Load().Limit)
 			var embedAccessChecker EmbedBlockAccessChecker
 			if 0 < len(accessChecker) {
 				embedAccessChecker = accessChecker[0]
@@ -395,8 +393,8 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					var hChildren []*ast.Node
 
 					// 从嵌入块的 IAL 属性中解析 custom-heading-mode，使用全局配置作为默认值
-					blockHeadingMode := Conf.Editor.HeadingEmbedMode
-					if customHeadingMode := n.IALAttr("custom-heading-mode"); "" != customHeadingMode {
+					blockHeadingMode := Conf.Editor.Load().HeadingEmbedMode
+					if customHeadingMode := n.IALAttr(embedHeadingModeAttr); "" != customHeadingMode {
 						if mode, err := strconv.Atoi(customHeadingMode); nil == err && (mode == 0 || mode == 1 || mode == 2) {
 							blockHeadingMode = mode
 						}
@@ -559,6 +557,8 @@ func renderBlockMarkdownR(id string, rendered *[]string, boxIDs ...string) (ret 
 	for _, child := range children {
 		var unlinks, inserts []*ast.Node
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			confSearchSnapshot := Conf.LoadSearch()
+
 			if !entering || !n.IsBlock() {
 				return ast.WalkContinue
 			}
@@ -569,9 +569,9 @@ func renderBlockMarkdownR(id string, rendered *[]string, boxIDs ...string) (ret 
 				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 				var sqlBlocks []*sql.Block
 				if boxID != "" && IsEncryptedBox(boxID) {
-					sqlBlocks = sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
+					sqlBlocks = sql.SelectBlocksRawStmtInBox(stmt, 1, confSearchSnapshot.Limit, boxID)
 				} else {
-					sqlBlocks = sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+					sqlBlocks = sql.SelectBlocksRawStmt(stmt, 1, confSearchSnapshot.Limit)
 				}
 				for _, sqlBlock := range sqlBlocks {
 					subNodes := renderBlockMarkdownR(sqlBlock.ID, rendered, boxID)

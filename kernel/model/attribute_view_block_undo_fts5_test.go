@@ -193,11 +193,21 @@ func TestAttributeViewDeletedBlockUndoRelations(t *testing.T) {
 		t.Run(map[bool]string{false: "other database", true: "same database"}[self], func(t *testing.T) {
 			fixture, source, tx := setupAttributeViewDeletedBlockTest(t, "container")
 			dest, backID, targetID := addDeletedBlockTestRelation(t, source, self)
+			keptID := source.GetBlockKeyValues().Values[2].BlockID
+			back := dest.GetValue(backID, targetID)
+			back.Relation.BlockIDs = append([]string{keptID}, back.Relation.BlockIDs...)
+			if err := av.SaveAttributeView(dest); err != nil {
+				t.Fatal(err)
+			}
 			if err := PerformTxSync(tx); err != nil {
 				t.Fatal(err)
 			}
 			entry := GlobalUndoLog.Peek(fixture.sourceID)
 			for cycle := 0; cycle < 2; cycle++ {
+				back := readAttributeViewItemsTest(t, dest.ID).GetValue(backID, targetID)
+				if !slices.Equal(back.Relation.BlockIDs, []string{keptID}) {
+					t.Fatalf("deletion retained stale back relations: %v", back.Relation.BlockIDs)
+				}
 				for _, id := range []string{source.ID, dest.ID} {
 					rendered := readAttributeViewItemsTest(t, id)
 					for _, view := range rendered.Views {
@@ -209,7 +219,7 @@ func TestAttributeViewDeletedBlockUndoRelations(t *testing.T) {
 				}
 				replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 				assertAttributeViewFieldsTest(t, source, readAttributeViewItemsTest(t, source.ID))
-				back := readAttributeViewItemsTest(t, dest.ID).GetValue(backID, targetID)
+				back = readAttributeViewItemsTest(t, dest.ID).GetValue(backID, targetID)
 				if !slices.Equal(back.Relation.BlockIDs, dest.GetValue(backID, targetID).Relation.BlockIDs) {
 					t.Fatal("block undo did not restore the back relation")
 				}
@@ -253,6 +263,47 @@ func addDeletedBlockTestRelation(t *testing.T, source *av.AttributeView, self bo
 	av.UpsertAvBackRel(source.ID, dest.ID)
 	av.UpsertAvBackRel(dest.ID, source.ID)
 	return dest, backID, targetID
+}
+
+func TestAttributeViewDeletedBlockRelationsWriteFailure(t *testing.T) {
+	fixture, source, tx := setupAttributeViewDeletedBlockTest(t, "container")
+	dest, _, _ := addDeletedBlockTestRelation(t, source, false)
+	tx.writeTransactionTree = func(*parse.Tree) error { return errors.New("injected document write failure") }
+	if err := PerformTxSync(tx); err == nil {
+		t.Fatal("failed deletion succeeded")
+	}
+	assertAttributeViewFieldsTest(t, source, readAttributeViewItemsTest(t, source.ID))
+	assertAttributeViewFieldsTest(t, dest, readAttributeViewItemsTest(t, dest.ID))
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil || treenode.GetNodeInTree(tree, tx.DoOperations[0].ID) == nil {
+		t.Fatalf("failed deletion did not restore the document: %v", err)
+	}
+}
+
+func TestAttributeViewDeletedBlockOneWayRelations(t *testing.T) {
+	fixture, source, tx := setupAttributeViewDeletedBlockTest(t, "block")
+	dest, backID, targetID := addDeletedBlockTestRelation(t, source, false)
+	for _, view := range []*av.AttributeView{source, dest} {
+		for _, kv := range view.KeyValues {
+			if kv.Key.Relation != nil {
+				kv.Key.Relation.IsTwoWay = false
+			}
+		}
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	got := readAttributeViewItemsTest(t, dest.ID).GetValue(backID, targetID).Relation.BlockIDs
+	expected := dest.GetValue(backID, targetID).Relation.BlockIDs[1:]
+	if !slices.Equal(got, expected) {
+		t.Fatalf("one-way relation retained a deleted entry: %v", got)
+	}
+	replayAttributeViewFieldsTest(t, GlobalUndoLog.Peek(fixture.sourceID).UndoOperationsForReplay())
+	assertAttributeViewFieldsTest(t, source, readAttributeViewItemsTest(t, source.ID))
+	assertAttributeViewFieldsTest(t, dest, readAttributeViewItemsTest(t, dest.ID))
 }
 
 func setupAttributeViewDeletedBlockTest(t *testing.T, mode string) (*fileOperationTestFixture, *av.AttributeView, *Transaction) {

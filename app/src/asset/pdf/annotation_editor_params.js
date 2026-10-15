@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {internalOpt} from "./internal_evt.js";
+
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 
 import { AnnotationEditorParamsType } from "./pdfjs";
@@ -93,7 +95,7 @@ class AnnotationEditorParams {
       dispatchEvent("HIGHLIGHT_SHOW_ALL", !checked);
     });
 
-    this.eventBus._on("annotationeditorparamschanged", evt => {
+    this.eventBus.on("annotationeditorparamschanged", evt => {
       for (const [type, value] of evt.details) {
         switch (type) {
           case AnnotationEditorParamsType.FREETEXT_SIZE:
@@ -122,7 +124,7 @@ class AnnotationEditorParams {
             break;
         }
       }
-    });
+    }, internalOpt);
   }
 }
 

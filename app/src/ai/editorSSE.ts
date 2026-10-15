@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../util/fetchWithAppId";
 export interface IAIEditorMessage {
     role: "user" | "assistant";
     content: string;
@@ -92,7 +93,7 @@ export const fetchAIEditorSSE = async (
     onEvent: (event: TAIEditorSSEEvent) => void,
     signal: AbortSignal,
 ) => {
-    const response = await fetch("/api/ai/editor/chat", {
+    const response = await fetchWithAppId("/api/ai/editor/chat", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(request),

@@ -39,6 +39,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var extensionIframePattern = regexp.MustCompile(`(?i)<iframe[^>]*>([\s\S]*?)<\/iframe>`)
+
 var extensionCopy = contractHandler(apicontract.ExtensionCopy, func(c *gin.Context, request apicontract.ExtensionCopyRequest) apicontract.Response[*apicontract.ExtensionCopyData] {
 	code := 0
 	dom := request.DOM
@@ -231,8 +233,7 @@ var extensionCopy = contractHandler(apicontract.ExtensionCopy, func(c *gin.Conte
 	var tree *parse.Tree
 	if "" == md {
 		// 通过正则将 <iframe>.*</iframe> 标签中间包含的换行去掉
-		regx, _ := regexp.Compile(`(?i)<iframe[^>]*>([\s\S]*?)<\/iframe>`)
-		dom = regx.ReplaceAllStringFunc(dom, func(s string) string {
+		dom = extensionIframePattern.ReplaceAllStringFunc(dom, func(s string) string {
 			s = strings.ReplaceAll(s, "\n", "")
 			s = strings.ReplaceAll(s, "\r", "")
 			return s

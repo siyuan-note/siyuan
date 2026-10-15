@@ -78,6 +78,10 @@ func TestControlConcurrencySerializesWrites(t *testing.T) {
 				c.Next()
 			}, ControlConcurrency)
 			engine.POST(path, func(c *gin.Context) {
+				if err := LockRequestAfterDecode(c); err != nil {
+					c.Status(http.StatusBadRequest)
+					return
+				}
 				if c.GetHeader("X-Test-Hold") == "true" {
 					close(started)
 					<-release

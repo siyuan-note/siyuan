@@ -6,7 +6,7 @@
 		"id": "20260613155453-pxxzmhc",
 		"title": "字段類型",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-5mfqt52",
-				"updated": "20260613155453"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -45,7 +45,7 @@
 		{
 			"ID": "20260613155453-19iw9k8",
 			"Type": "NodeTable",
-			"Data": "| 字段類型 | 適用場景 | 可排序 | 可過濾 | 可彙總 | 特殊範本後綴 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 標題、描述、任意文字 | √ | √ | × | — |\n| 數字 | 金額、數量、評分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、創建日 | √ | √ | × | `_end` |\n| 單選 | 狀態、分類、優先級 | √ | √ | × | — |\n| 多選 | 標籤、多分類 | √ | √ | × | `_str` |\n| 網址 | 外部連結、參考來源 | × | √ | × | — |\n| 郵箱 | 聯繫人郵箱 | × | √ | × | — |\n| 電話 | 聯繫人電話 | × | √ | × | — |\n| 覈取方塊 | 是否完成、是否啟用 | √ | √ | × | — |\n| 主鍵（繫結區塊） | 記錄的唯一標識，可繫結內容區塊 | √ | √ | × | `_created` |\n| 資源 | 附件、圖片、檔案 | × | × | × | — |\n| 關聯 | 跨資料庫關聯記錄 | × | √ | × | — |\n| 彙總 | 基於關聯字段的統計計算 | √ | √ | √ | — |\n| 範本 | 自動填充預設值 | × | × | × | — |\n| 創建時間 | 記錄創建時間（自動） | √ | √ | × | — |\n| 更新時間 | 記錄更新時間（自動） | √ | √ | × | — |\n| 行號 | 自動遞增序號 | √ | √ | × | — |",
+			"Data": "| 字段類型 | 適用場景 | 可排序 | 可過濾 | 可彙總 | 特殊範本後綴 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 標題、描述、任意文字 | √ | √ | × | — |\n| 數字 | 金額、數量、評分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、創建日 | √ | √ | × | `_end` |\n| 單選 | 狀態、分類、優先級 | √ | √ | × | — |\n| 多選 | 標籤、多分類 | √ | √ | × | `_str` |\n| 網址 | 外部連結、參考來源 | × | √ | × | — |\n| 郵箱 | 聯繫人郵箱 | × | √ | × | — |\n| 電話 | 聯繫人電話 | × | √ | × | — |\n| 覈取方塊 | 是否完成、是否啟用 | √ | √ | × | — |\n| 主鍵（繫結區塊） | 記錄的唯一標識，可繫結內容區塊 | √ | √ | × | `_created` |\n| 資源 | 附件、圖片、檔案 | × | × | × | — |\n| 關聯 | 跨資料庫關聯記錄 | × | √ | × | — |\n| 彙總 | 基於關聯字段的統計計算 | √ | √ | √ | — |\n| 範本 | 自動填充預設值 | × | × | × | — |\n| 創建時間 | 記錄創建時間（自動） | √ | √ | × | — |\n| 更新時間 | 記錄更新時間（自動） | √ | √ | × | — |\n| 行號 | 自動遞增序號 | √ | √ | × | — |\n| 位置 | 地點名稱和經緯度 | √ | √ | √ | — |",
 			"TableAligns": [
 				0,
 				0,
@@ -56,7 +56,7 @@
 			],
 			"Properties": {
 				"id": "20260613155453-19iw9k8",
-				"updated": "20260730184353"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1264,6 +1264,73 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "位置"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "地點名稱和經緯度"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1277,7 +1344,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e "
+					"Data": "> "
 				},
 				{
 					"ID": "20260613155453-zi43aq8",
@@ -2053,7 +2120,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-veckkdg",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
@@ -2071,12 +2138,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-2pbevhk",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "用於儲存日期或日期時間。"
+					"Data": "用於儲存日期或日期時間，支援西曆和農曆。"
 				}
 			]
 		},
@@ -5534,6 +5601,117 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-5oq6h7a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009034010-5oq6h7a",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "位置欄位"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-m2e4n60",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-m2e4n60",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增類型為「位置」的欄位後，點擊儲存格編輯名稱和 WGS84 座標。名稱可留空。經度和緯度須成對填寫，使用十進位度數。經度範圍為 -180 到 180，緯度範圍為 -90 到 90，零是有效值。將兩個座標都留空時，可僅儲存名稱。座標不會自動轉換。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-ue87c6m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-ue87c6m",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在經度和緯度輸入框中分別填寫座標，例如經度 116.4074、緯度 39.9042。僅修改名稱時，保留的來源文字維持不變；修改座標會清除來源文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-g7jsd2p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-g7jsd2p",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 套用修改，點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 放棄修改，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會移除位置值。文字過濾和排序使用名稱、座標及固定 WGS84 標記組合後的文字。應用程式內依經度、緯度順序顯示；純文字複製和匯出使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "名稱; 緯度, 經度 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式，未填寫名稱時省略名稱及分號。可將該文字或 WGS84 的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "緯度, 經度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 座標對貼上至位置儲存格。例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "北京; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 同時包含名稱和座標。資料庫內的結構化複製保留經緯度各自的具名欄位值。"
 				}
 			]
 		},

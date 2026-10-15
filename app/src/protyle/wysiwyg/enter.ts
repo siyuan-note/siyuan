@@ -1,5 +1,6 @@
 import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
-import {focusByRange, focusByWbr, getSelectionOffset, getUndoFocusContext, setLastNodeRange} from "../util/selection";
+import {focusByWbr, getUndoFocusContext} from "../util/selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {
     getContenteditableElement, getParentBlock,
     getEmbedChildOperationContext,
@@ -39,6 +40,7 @@ import {
     getBlockSelectionModeElement
 } from "./blockSelection";
 import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
+import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {
     activateTrackedRangeInsertion,
     setTrackedRangeInsertionResult,
@@ -87,6 +89,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         return;
     }
     const editableElement = getContenteditableElement(blockElement) as HTMLElement;
+    prepareInlineElementBoundaryMutation(range);
     // 选中图片后回车，应取消图片的选中状态 https://ld246.com/article/1650357135043
     editableElement.querySelectorAll(".img--select").forEach(item => {
         item.classList.remove("img--select");
@@ -567,6 +570,7 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
     if (!listItemElement.isConnected) {
         return true;
     }
+    prepareInlineElementBoundaryMutation(range);
     activateTrackedRangeInsertion(trackedRangeInsertion);
     const subListElement = listItemElement.querySelector(".list");
     let newElement;
@@ -759,6 +763,7 @@ const removeEmptyNode = (newElement: Element) => {
 
 export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProtyle,
                           trackedRangeInsertion?: ITrackedRangeInsertion) => {
+    prepareInlineElementBoundaryMutation(range);
     if (range.collapsed && nodeElement.getAttribute("data-type") === "NodeParagraph") {
         const editableElement = getContenteditableElement(nodeElement);
         if (editableElement?.contains(range.startContainer)) {

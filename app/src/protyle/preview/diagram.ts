@@ -5,6 +5,17 @@ import {getPlantumlImageURL} from "../render/plantumlImage";
 
 const DIAGRAM_SUBTYPES = ["mermaid", "graphviz", "flowchart", "echarts", "plantuml"];
 
+// 从图表所在容器向外查找背景，使独立预览与编辑器中的图表保持一致。
+const getDiagramBackground = (element: HTMLElement) => {
+    for (let parent = element; parent; parent = parent.parentElement) {
+        const color = window.getComputedStyle(parent).backgroundColor;
+        if (color && color !== "transparent" && !/^rgba\([^)]*,\s*0\)$/.test(color)) {
+            return color;
+        }
+    }
+    return "#fff";
+};
+
 export const getDiagramBlock = (element: HTMLElement) => {
     if (!element) {
         return false;
@@ -16,7 +27,7 @@ export const getDiagramBlock = (element: HTMLElement) => {
 };
 
 // 将继承的样式写入副本，使 SVG 在独立图片中保留编辑器内的显示效果。
-const createDiagramSVG = (element: SVGSVGElement) => {
+const createDiagramSVG = (element: SVGSVGElement, backgroundColor: string) => {
     const clone = element.cloneNode(true) as SVGSVGElement;
     const elements = [element, ...Array.from(element.querySelectorAll("*"))];
     const clones = [clone, ...Array.from(clone.querySelectorAll("*"))];
@@ -40,7 +51,7 @@ const createDiagramSVG = (element: SVGSVGElement) => {
     clone.style.width = `${width}px`;
     clone.style.height = `${height}px`;
     clone.style.maxWidth = "none";
-    clone.style.backgroundColor = "#fff";
+    clone.style.backgroundColor = backgroundColor;
     return new Blob([new XMLSerializer().serializeToString(clone)], {type: "image/svg+xml"});
 };
 
@@ -64,9 +75,10 @@ export const previewDiagram = (diagramElement: HTMLElement) => {
 
         let blob: Blob;
         try {
+            const backgroundColor = getDiagramBackground(diagramElement);
             blob = type === "echarts" ?
-                await window.htmlToImage.toBlob(renderElement, {backgroundColor: "#fff"}) :
-                createDiagramSVG(renderElement as SVGSVGElement);
+                await window.htmlToImage.toBlob(renderElement, {backgroundColor}) :
+                createDiagramSVG(renderElement as SVGSVGElement, backgroundColor);
         } catch (e) {
             return;
         }

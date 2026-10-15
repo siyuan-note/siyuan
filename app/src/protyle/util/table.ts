@@ -1,13 +1,14 @@
+import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {Constants} from "../../constants";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
     focusBlock,
-    focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
 } from "./selection";
+import {focusByRange, getSelectionOffset} from "./selectionOffsets";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
@@ -52,12 +53,12 @@ export const getOrCreateTableBody = (tableElement: HTMLTableElement) => {
 };
 
 export const isTableHeaderEnabled = (nodeElement: Element, type: "row" | "column") => {
-    return type === "row" ? nodeElement.getAttribute("custom-sy-table-header-row") !== "false" :
-        nodeElement.getAttribute("custom-sy-table-header-column") === "true";
+    return type === "row" ? nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_HEADER_ROW) !== "false" :
+        nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_HEADER_COLUMN) === "true";
 };
 
 const setTableHeaderEnabled = (nodeElement: Element, type: "row" | "column", enabled: boolean) => {
-    const attribute = `custom-sy-table-header-${type}`;
+    const attribute = type === "row" ? Constants.CUSTOM_SY_TABLE_HEADER_ROW : Constants.CUSTOM_SY_TABLE_HEADER_COLUMN;
     if (type === "row") {
         if (enabled) {
             nodeElement.removeAttribute(attribute);
@@ -73,7 +74,7 @@ const setTableHeaderEnabled = (nodeElement: Element, type: "row" | "column", ena
 
 export const toggleTableHeader = (protyle: IProtyle, nodeElement: Element, type: "row" | "column") => {
     const html = nodeElement.outerHTML;
-    const attribute = `custom-sy-table-header-${type}`;
+    const attribute = type === "row" ? Constants.CUSTOM_SY_TABLE_HEADER_ROW : Constants.CUSTOM_SY_TABLE_HEADER_COLUMN;
     if (isTableHeaderEnabled(nodeElement, type)) {
         if (type === "row") {
             nodeElement.setAttribute(attribute, "false");
@@ -453,25 +454,10 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     if (!nodeElement.classList.contains("protyle-wysiwyg--select") && !hasClosestByClassName(nodeElement, "protyle-wysiwyg--select")) {
-        // enter 光标跳转到下一行同列
+        // 未进入编辑状态的单元格先挂载内部编辑器，再按正文规则处理回车。
         if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
             event.preventDefault();
-            const trElement = cellElement.parentElement as HTMLTableRowElement;
-            if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
-                (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
-                insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
-                return true;
-            }
-            let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
-            if (!nextElement) {
-                nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
-            }
-            if (!nextElement) {
-                return true;
-            }
-            range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
-            range.collapse(true);
-            scrollCenter(protyle);
+            void import("../render/tableCellRichEditor").then(module => module.enterTableCellRichEditor(protyle, cellElement));
             return true;
         }
         // 表格后无内容时，按右键需新建空块
@@ -787,13 +773,13 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
             const title = value.trim();
             const location = (dialog.element.querySelector("select") as HTMLSelectElement).value;
             if (title) {
-                const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${Lute.EscapeHTMLStr(title)}</caption>`;
+                const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${escapeHtmlTextAndAttr(title)}</caption>`;
                 if (captionElement) {
                     captionElement.outerHTML = html;
                 } else {
                     nodeElement.querySelector("table").insertAdjacentHTML("afterbegin", html);
                 }
-                nodeElement.setAttribute("caption", Lute.EscapeHTMLStr(html));
+                nodeElement.setAttribute("caption", escapeHtmlTextAndAttr(html));
             } else {
                 if (captionElement) {
                     captionElement.remove();

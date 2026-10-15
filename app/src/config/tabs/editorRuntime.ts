@@ -4,77 +4,81 @@ import {refreshHeadingNumberMeasurements, setInlineStyle} from "../../util/asset
 import {reloadProtyle} from "../../protyle/util/reload";
 import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
+import {createSectionRuntime} from "../util/sectionRuntime";
 import {shouldResetBottomBacklinkPanel} from "./editorRuntimeState";
 import {objEquals} from "../../util/functions";
 import {lineNumberRender} from "../../protyle/render/highlightRender";
+/// #if MOBILE
+import {setTitleAutoDirection} from "../../protyle/render/autoDirection";
+/// #endif
 
-const applyEditorConfig = (data: Config.IEditor) => {
-    const refreshKeepLoadedContent = window.siyuan.config.editor.keepLoadedContent !== data.keepLoadedContent;
-    const refreshDatabaseRowLayout = window.siyuan.config.editor.fullWidth !== data.fullWidth;
-    const resetBottomBacklinkPanel = shouldResetBottomBacklinkPanel(window.siyuan.config.editor, data);
-    const refreshHeadingNumbers = window.siyuan.config.editor.headingNumber !== data.headingNumber ||
-        window.siyuan.config.editor.headingNumberFormat !== data.headingNumberFormat;
-    const remeasureHeadingNumbers = window.siyuan.config.editor.fontSize !== data.fontSize ||
-        !objEquals(window.siyuan.config.editor.fontFamilies, data.fontFamilies);
-    const refreshCodeLineNumbers = !objEquals(window.siyuan.config.editor.codeFontFamilies, data.codeFontFamilies);
-    window.siyuan.config.editor = data;
-    const models = getAllModels();
-    models.editor.forEach(item => item.updateBacklinkPanel(resetBottomBacklinkPanel));
-    if (refreshDatabaseRowLayout) {
-        models.custom.forEach(item => {
-            if (item.type === "siyuan-database-row") {
-                item.resize?.();
-            }
-        });
-    }
-    getAllEditor().forEach((editorItem) => {
-        const protyle = editorItem.protyle;
-        if (refreshKeepLoadedContent) {
-            protyle.scroll.keepLoadedContent = data.keepLoadedContent;
-        }
-        protyle.databaseAttributePanel?.updateDisplayConfig();
-        reloadProtyle(protyle, false);
-        let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
-        if (!isFullWidth) {
-            isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
-        }
-        if (isFullWidth === "true" && protyle.contentElement.getAttribute("data-fullwidth") === "true") {
-            return;
-        }
-        resize(protyle);
-        if (isFullWidth === "true") {
-            protyle.contentElement.setAttribute("data-fullwidth", "true");
-            protyle.preview.element.setAttribute("data-fullwidth", "true");
-        } else {
-            protyle.contentElement.removeAttribute("data-fullwidth");
-            protyle.preview.element.removeAttribute("data-fullwidth");
-        }
-    });
-    if (refreshHeadingNumbers) {
-        /// #if MOBILE
-        window.siyuan.mobile.docks.outline?.reload();
-        /// #else
-        models.outline.forEach(item => item.refresh());
-        /// #endif
-    }
-
-    void setInlineStyle().then(() => {
-        if (remeasureHeadingNumbers) {
-            refreshHeadingNumberMeasurements();
-        }
-        if (refreshCodeLineNumbers) {
-            getAllEditor().forEach((editorItem) => {
-                editorItem.protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows")
-                    .forEach((rowsElement: HTMLElement) => lineNumberRender(rowsElement.parentElement));
+const runtime = createSectionRuntime<Config.IEditor>({
+    namespace: "editor",
+    get: () => window.siyuan.config.editor,
+    set: data => { window.siyuan.config.editor = data; },
+    reactions: [{
+        name: "backlink-panel",
+        changed: () => true,
+        apply: (old, next) => {
+            getAllModels().editor.forEach(item => item.updateBacklinkPanel(shouldResetBottomBacklinkPanel(old, next)));
+        },
+    }, {
+        name: "database-row-layout",
+        changed: (old, next) => old.fullWidth !== next.fullWidth,
+        apply: () => {
+            getAllModels().custom.forEach(item => {
+                if (item.type === "siyuan-database-row") item.resize?.();
             });
-        }
-    });
-};
+        },
+    }, {
+        name: "editor-layout",
+        changed: () => true,
+        apply: (old, next) => {
+            /// #if MOBILE
+            setTitleAutoDirection(document.getElementById("toolbarName"), next.autoDirection);
+            /// #endif
+            getAllEditor().forEach(({protyle}) => {
+                if (old.keepLoadedContent !== next.keepLoadedContent) protyle.scroll.keepLoadedContent = next.keepLoadedContent;
+                protyle.databaseAttributePanel?.updateDisplayConfig();
+                reloadProtyle(protyle, false);
+                const fullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH) || String(next.fullWidth);
+                if (fullWidth === "true" && protyle.contentElement.getAttribute("data-fullwidth") === "true") return;
+                resize(protyle);
+                for (const element of [protyle.contentElement, protyle.preview.element]) {
+                    if (fullWidth === "true") element.setAttribute("data-fullwidth", "true");
+                    else element.removeAttribute("data-fullwidth");
+                }
+            });
+        },
+    }, {
+        name: "heading-numbers",
+        changed: (old, next) => old.headingNumber !== next.headingNumber || old.headingNumberFormat !== next.headingNumberFormat,
+        apply: () => {
+            /// #if MOBILE
+            window.siyuan.mobile.docks.outline?.reload();
+            /// #else
+            getAllModels().outline.forEach(item => item.refresh());
+            /// #endif
+        },
+    }, {
+        name: "editor-styles",
+        changed: () => true,
+        apply: async (old, next) => {
+            await setInlineStyle();
+            if (old.fontSize !== next.fontSize || !objEquals(old.fontFamilies, next.fontFamilies)) refreshHeadingNumberMeasurements();
+            if (!objEquals(old.codeFontFamilies, next.codeFontFamilies)) {
+                getAllEditor().forEach(({protyle}) => {
+                    protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows")
+                        .forEach((rowsElement: HTMLElement) => lineNumberRender(rowsElement.parentElement));
+                });
+            }
+        },
+    }],
+});
 
-/** 编辑器命名空间：设置面板注册项 save、设置面板外入口共用 */
 export const editorConfigApi = createConfigNamespaceApi<Config.IEditor>({
     namespace: "editor",
     getConfig: () => window.siyuan.config.editor,
-    setConfig: applyEditorConfig,
-    apiPath: "/api/setting/setEditor",
+    setConfig: runtime.apply,
+
 });

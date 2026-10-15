@@ -210,9 +210,9 @@ func TestResolveDocCreateSaveLocation(t *testing.T) {
 	originalConf, originalDataDir := Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		Conf = originalConf
 		util.DataDir = originalDataDir
@@ -232,8 +232,8 @@ func TestResolveDocCreateSaveLocation(t *testing.T) {
 			t.Fatalf("save notebook config failed: %s", err)
 		}
 	}
-	Conf.FileTree.DocCreateSaveBox = globalBoxID
-	Conf.FileTree.DocCreateSavePath = "/Global/{{now | date \"200601\"}}"
+	Conf.FileTree.Load().DocCreateSaveBox = globalBoxID
+	Conf.FileTree.Load().DocCreateSavePath = "/Global/{{now | date \"200601\"}}"
 
 	assertLocation := func(expectedBoxID, expectedPath string) {
 		t.Helper()
@@ -242,7 +242,7 @@ func TestResolveDocCreateSaveLocation(t *testing.T) {
 			t.Fatalf("unexpected save location: box=%q path=%q", boxID, pathTemplate)
 		}
 	}
-	assertLocation(globalBoxID, Conf.FileTree.DocCreateSavePath)
+	assertLocation(globalBoxID, Conf.FileTree.Load().DocCreateSavePath)
 
 	currentBoxConf.DocCreateSavePath = "Local/{{now | date \"200601\"}}"
 	if err := (&Box{ID: currentBoxID}).SaveConf(currentBoxConf); nil != err {
@@ -255,7 +255,7 @@ func TestResolveDocCreateSaveLocation(t *testing.T) {
 	if err := (&Box{ID: currentBoxID}).SaveConf(currentBoxConf); nil != err {
 		t.Fatal(err)
 	}
-	assertLocation(localBoxID, Conf.FileTree.DocCreateSavePath)
+	assertLocation(localBoxID, Conf.FileTree.Load().DocCreateSavePath)
 
 	currentBoxConf.DocCreateSavePath = "/Local"
 	if err := (&Box{ID: currentBoxID}).SaveConf(currentBoxConf); nil != err {

@@ -7,12 +7,68 @@ package sql
 import (
 	stdsql "database/sql"
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAnnotationRefRangeQueryPreservesExistingMatches(t *testing.T) {
+	previousDB := db
+	testDB, err := stdsql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	db = testDB
+	t.Cleanup(func() { db = previousDB; testDB.Close() })
+	if _, err = db.Exec("CREATE TABLE file_annotation_refs (block_id, annotation_id)"); err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		if err = ensureFileAnnotationRefIndex(db); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, id := range []string{"20261008000000-abcdefg", "", "a%_'\\", "标注"} {
+		if _, err = db.Exec("DELETE FROM file_annotation_refs"); err != nil {
+			t.Fatal(err)
+		}
+		for _, stored := range []string{id, id, id + "?", id + "?box=notebook", id + "#", id + "#view", id + "?中文", id + "@", id + "$", id + "x", "x" + id} {
+			if _, err = db.Exec("INSERT INTO file_annotation_refs VALUES (?, ?)", stored, stored); err != nil {
+				t.Fatal(err)
+			}
+		}
+		rows, err := db.Query("SELECT block_id FROM file_annotation_refs WHERE annotation_id = ? OR substr(annotation_id, 1, ?) IN (?, ?)", id, len(id)+1, id+"?", id+"#")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var before []string
+		for rows.Next() {
+			var blockID string
+			if err = rows.Scan(&blockID); err != nil {
+				t.Fatal(err)
+			}
+			before = append(before, blockID)
+		}
+		if err = rows.Err(); err != nil {
+			t.Fatal(err)
+		}
+		rows.Close()
+		after := QueryRefIDsByAnnotationID(id)
+		sort.Strings(before)
+		sort.Strings(after)
+		if !reflect.DeepEqual(before, after) {
+			t.Fatalf("annotation %q changed matches: before=%v after=%v", id, before, after)
+		}
+	}
+	plan := queryPlanDetails(t, db, fileAnnotationRefQuery, "id", "id?", "id@", "id#", "id$")
+	if strings.Count(plan, "SEARCH file_annotation_refs USING INDEX idx_file_annotation_refs_annotation_id") != 3 || strings.Contains(plan, "SCAN file_annotation_refs") {
+		t.Fatalf("annotation reference query still scans the table: %s", plan)
+	}
+}
 
 func TestFileAnnotationRefsFromTree(t *testing.T) {
 	const id = "20260912000000-abcdefg"

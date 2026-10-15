@@ -6,7 +6,7 @@
 		"id": "20260903150000-hpfmx4t",
 		"title": "リモートカーネルへの接続",
 		"type": "doc",
-		"updated": "20260914195107"
+		"updated": "20260929104942"
 	},
 	"Children": [
 		{"ID": "20260903150000-ekjy0ld", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-ekjy0ld", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "概要"}]},
@@ -26,15 +26,85 @@
 		{"ID": "20260908082237-qepobrf", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-qepobrf", "updated": "20260908110648"}, "Children": [{"Type": "NodeText", "Data": "コマンドラインを使う場合は、デスクトップクライアントを完全に終了してから、"}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port] --trust-remote-extensions"}, {"Type": "NodeText", "Data": " を指定して起動します。このコマンドラインオプションは今回指定したサーバーのみを信頼し、画面で保存した信頼設定を変更せず、ログイン時の自動起動引数にも自動では追加されません。コマンドライン起動では画面の信頼設定を読み取りません。別のインスタンスを起動しても、実行中のインスタンスの信頼状態は変わりません。信頼を取り消すには、完全に終了してからこのオプションを外して起動してください。"}]},
 		{"ID": "20260908082237-843e8r9", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-843e8r9", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "有効にすると、リモートワークスペースのプラグイン、テーマスクリプト、アイコンスクリプト、JavaScript コードスニペットがローカルのデスクトップ環境で実行されます。これらは Node.js を使ってローカルファイルの読み書きやプログラムの実行ができます。サーバーと、今後の更新を含めてサーバーが提供する拡張機能のコードを信頼できる場合にのみ使用してください。"}]},
 		{"ID": "20260908082237-jlqabtc", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-jlqabtc", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "このオプションはプラグイン、マーケットプレイス、カスタムテーマ、アイコン、フォント、コードスニペットを有効にします。内蔵のフロントエンド、テーマ、アイコンは引き続きクライアントから読み込みます。ウィジェットおよびその他のリモートモードの制限は変わりません。プラグインのコードはクライアントで実行され、ワークスペースはサーバーにあります。ローカルのワークスペースパス、ネイティブモジュール、外部プログラムに依存するプラグインには対応作業が必要な場合があり、すべてのデスクトッププラグインとの互換性は保証されません。"}]},
-		{"ID": "20260903150000-uo7ekyt", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-uo7ekyt", "updated": "20260914195107"}, "Children": [{"Type": "NodeText", "Data": "機能制限"}]},
+		{
+			"ID": "20260929104942-2f8mr79",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260929104942-2f8mr79",
+				"updated": "20260929104942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントのインポートとエクスポート"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260929104942-srep5wb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929104942-srep5wb",
+				"updated": "20260929104942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リモートモードでは、SiYuan .sy.zip と Markdown ZIP のインポート、およびドキュメントの SiYuan .sy.zip、Markdown ZIP、画像、HTML ZIP へのエクスポートに対応しています。このデバイスで圧縮ファイルを選択すると、リモートカーネルにアップロードされます。エクスポートしたファイルは現在の接続を通じてダウンロードされ、このデバイスで選択した場所に保存されます。ドキュメントツリーのインポートとエクスポートのメニューを利用できます。ノートブックの新規作成とデータ移行のダイアログからも圧縮ファイルをインポートできます。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-uo7ekyt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-uo7ekyt",
+				"updated": "20260929104942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "機能制限"
+				}
+			]
+		},
 		{"ID": "20260903150000-zbe0bfm", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-zbe0bfm", "updated": "20260903205342"}, "Children": [{"Type": "NodeText", "Data": "リモートモードでは、次の機能を利用できません。ローカルモードには影響しません。"}]},
 		{
 			"ID": "20260903150000-8orlk9f",
 			"Type": "NodeList",
 			"ListData": {},
-			"Properties": {"id": "20260903150000-8orlk9f", "updated": "20260914195107"},
+			"Properties": {"id": "20260903150000-8orlk9f", "updated": "20260929104942"},
 			"Children": [
-				{"ID": "20260903150000-b5xb7ub", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-b5xb7ub", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-t5961l9", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-t5961l9", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "インポートとエクスポート"}]}]},
+				{
+					"ID": "20260903150000-b5xb7ub",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-b5xb7ub",
+						"updated": "20260929104942"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-t5961l9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-t5961l9",
+								"updated": "20260929104942"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown ファイルやフォルダー、Obsidian 保管庫の直接インポート、Word と PDF のエクスポート、全データ・設定・バックアップのインポートとエクスポート"
+								}
+							]
+						}
+					]
+				},
 				{"ID": "20260903150000-xoz3jw0", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-xoz3jw0", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-rme1xbh", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-rme1xbh", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "ファイルのクリップボード操作"}]}]},
 				{"ID": "20260903150000-3s8fcw7", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-3s8fcw7", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-p1m4g9q", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-p1m4g9q", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "クライアントのローカルパスまたはサーバーの絶対パスに依存する操作（ファイルマネージャーでの表示や、パスを使ったファイルのドラッグ＆ドロップまたはオープンなど）。ファイル選択ダイアログからの通常のアセットアップロードは引き続き利用できます"}]}]},
 				{"ID": "20260903150000-j3snjto", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-j3snjto", "updated": "20260908082237"}, "Children": [{"ID": "20260903150000-adyybel", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-adyybel", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "デスクトッププラグイン、マーケットプレイス、カスタム外観は既定では無効です。上記の信頼オプションでリモートのプラグイン、マーケットプレイス、カスタムテーマ、アイコン、フォント、コードスニペットを有効にできますが、ウィジェットは引き続き利用できません"}]}]},

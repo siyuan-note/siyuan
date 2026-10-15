@@ -1,5 +1,6 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost} from "../util/fetch";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -113,15 +114,16 @@ const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range)
 };
 
 const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {
+    const keyword = inputElement.value.trim().toLowerCase();
     element.querySelectorAll(".b3-list-item").forEach(item => {
-        if (item.textContent.indexOf(inputElement.value) > -1) {
+        if (item.textContent.toLowerCase().indexOf(keyword) > -1) {
             item.classList.remove("fn__none");
         } else {
             item.classList.add("fn__none");
         }
     });
     element.querySelectorAll(".b3-menu__separator").forEach(item => {
-        if (inputElement.value) {
+        if (keyword) {
             item.classList.add("fn__none");
         } else {
             item.classList.remove("fn__none");
@@ -282,24 +284,34 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
 
 let aiActionsRequestID = 0;
 
-export const AIActions = (elements: Element[], protyle: IProtyle, range?: Range) => {
+export const AIActions = (elements: Element[], protyle: IProtyle, range?: Range, target?: Element) => {
     if (isDisabledFeature("ai")) {
         return;
     }
-    window.siyuan.menus.menu.remove();
-    const sourceElements = elements.filter((item): item is HTMLElement => item instanceof HTMLElement);
-    const sourceRange = range?.cloneRange();
-    if (sourceRange) {
-        protyle.toolbar.range = sourceRange;
-    }
-    const requestID = ++aiActionsRequestID;
-    fetchPost("/api/ai/editor/lsActions", {}, (response) => {
-        if (requestID !== aiActionsRequestID ||
-            (sourceElements.length > 0 && !sourceElements[sourceElements.length - 1].isConnected) ||
-            (sourceRange && (!protyle.wysiwyg.element.contains(sourceRange.startContainer) ||
-                !protyle.wysiwyg.element.contains(sourceRange.endContainer)))) {
-            return;
-        }
-        openAIActions(Array.isArray(response.data) ? response.data : [], sourceElements, protyle, sourceRange);
+    toggleMenu({
+        target: target,
+        build: (_menu, session) => {
+
+            const sourceElements = elements.filter((item): item is HTMLElement => item instanceof HTMLElement);
+            const sourceRange = range?.cloneRange();
+            if (sourceRange) {
+                protyle.toolbar.range = sourceRange;
+            }
+            const requestID = ++aiActionsRequestID;
+            fetchPost("/api/ai/editor/lsActions", {}, (response) => {
+                if (!session.isCurrent()) {
+                    return;
+                }
+
+                if (requestID !== aiActionsRequestID ||
+                    (sourceElements.length > 0 && !sourceElements[sourceElements.length - 1].isConnected) ||
+                    (sourceRange && (!protyle.wysiwyg.element.contains(sourceRange.startContainer) ||
+                        !protyle.wysiwyg.element.contains(sourceRange.endContainer)))) {
+                    return;
+                }
+                session.show(() => openAIActions(Array.isArray(response.data) ? response.data : [], sourceElements, protyle, sourceRange));
+            });
+
+        },
     });
 };

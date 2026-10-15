@@ -37,6 +37,9 @@ func githubClipboardFixture(t *testing.T) string {
 }
 
 func TestMatchHTMLClipboardElements(t *testing.T) {
+	originalMarkdown := util.MarkdownSettings.Load()
+	util.MarkdownSettings.Store(util.NewMarkdown())
+	t.Cleanup(func() { util.MarkdownSettings.Store(originalMarkdown) })
 	input := render.Sanitize(githubClipboardFixture(t)) + `<h2 style="color:red;background:yellow;font:20px serif">` +
 		`<strong>heading</strong></h2><p style="color:gray;font-size:1rem">text ` +
 		`<a href="https://example.com" title="title" style="color:blue;background-color:transparent;` +
@@ -70,6 +73,18 @@ func TestMatchHTMLClipboardElements(t *testing.T) {
 	}
 	if again := matchHTMLClipboardElements(output); again != output {
 		t.Fatal("matching elements is not idempotent")
+	}
+}
+
+func TestMatchHTMLClipboardElementsRestoresMarkdownSettings(t *testing.T) {
+	originalMarkdown := util.MarkdownSettings.Load()
+	settings := util.NewMarkdown()
+	settings.InlineAsterisk, settings.InlineStrikethrough = false, false
+	util.MarkdownSettings.Store(settings)
+	t.Cleanup(func() { util.MarkdownSettings.Store(originalMarkdown) })
+	t.Run("default syntax", TestMatchHTMLClipboardElements)
+	if util.MarkdownSettings.Load() != settings {
+		t.Fatal("clipboard fixture did not restore the previous Markdown settings")
 	}
 }
 

@@ -27,7 +27,7 @@ export const beginSearchPathRequest = (element: Element) => {
     return () => isSearchPathRequestVersionCurrent(element, version) && element.isConnected;
 };
 
-const resolveCurrentSearchHPath = (idPath: string[], notebookNames: Record<string, string> = {}) => {
+export const resolveCurrentSearchHPath = (idPath: string[], notebookNames: Record<string, string> = {}) => {
     return resolveSearchHPath(idPath, async (path) => {
         const id = getSearchPathID(path);
         const notebookHPath = resolveSearchNotebookHPath(path, window.siyuan.notebooks, notebookNames);

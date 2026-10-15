@@ -13,7 +13,6 @@ import {
     mountEmbeddingStatsBlock,
     mountEmbeddingTestBtn,
     mountRerankTestBtn,
-    mountDecisionTestBtn,
 } from "./aiUi";
 import {
     genProviderCardsHtml,
@@ -26,12 +25,15 @@ import {
     mountAgentCapabilityBlock,
 } from "./aiCapabilityUi";
 import {
+    getBuiltinSkillsBlockKeywords,
     getUserSkillsBlockKeywords,
+    mountBuiltinSkillsBlock,
     mountUserSkillsBlock,
 } from "./aiSkillUi";
 import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
 import {openSkillManager} from "../../../ai/skills/manager";
 import {openAgentInstructions} from "./aiInstructions";
+import {genDecisionCardsHtml, mountDecisionCards} from "./aiDecisionUi";
 import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
@@ -161,35 +163,20 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
 
 const registerAiDecisionGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("decision", window.siyuan.languages.decisionModel);
+    const keywords = [window.siyuan.languages.decisionModel, window.siyuan.languages.decisionModelTip,
+        "TypeSafe", "OpenAI", "Decisions", window.siyuan.languages.apiKey,
+        window.siyuan.languages.apiEndpoint, window.siyuan.languages.apiModel,
+        window.siyuan.languages.apiTimeout, window.siyuan.languages.testConnection];
     group.switch("ai.decision.enabled", {
         title: window.siyuan.languages.decisionModel,
         desc: window.siyuan.languages.decisionModelTip,
+        keywords,
     });
-    group.textBlock("ai.decision.endpoint", {
-        spellcheck: false,
-        title: window.siyuan.languages.apiEndpoint,
-        desc: window.siyuan.languages.decisionEndpointTip,
-        mode: "input-text",
-    });
-    group.textBlock("ai.decision.apiKey", {
-        spellcheck: false,
-        title: window.siyuan.languages.apiKey,
-        desc: window.siyuan.languages.apiKeyTip,
-        mode: "input-password",
-    });
-    group.textBlock("ai.decision.name", {
-        spellcheck: false,
-        title: window.siyuan.languages.apiModel,
-        desc: window.siyuan.languages.apiModelTip,
-        mode: "input-text",
-        afterMount: mountDecisionTestBtn,
-    });
-    group.number("ai.decision.timeout", {
-        title: window.siyuan.languages.apiTimeout,
-        desc: window.siyuan.languages.apiTimeoutTip,
-        min: 1,
-        max: 600,
-        unit: "s",
+    group.slot({
+        key: "decisionProviders",
+        keywords,
+        html: genDecisionCardsHtml,
+        afterMount: mountDecisionCards,
     });
 };
 
@@ -217,6 +204,15 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
 const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("skills", window.siyuan.languages.tokenCatSkills);
 
+    group.button({
+        id: "aiBuiltinSkills",
+        title: window.siyuan.languages.agentBuiltinSkills,
+        desc: window.siyuan.languages.agentBuiltinSkillsTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
+        keywords: getBuiltinSkillsBlockKeywords(),
+        afterMount: mountBuiltinSkillsBlock,
+    });
     group.button({
         id: "aiWorkspaceSkills",
         title: window.siyuan.languages.agentWorkspaceSkills,

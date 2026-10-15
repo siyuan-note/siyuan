@@ -152,7 +152,7 @@ HTML 在初始化前显示全部内容，交互初始化成功后才隐藏未选
 | 页签操作与任务状态 | [`tabs.ts`](../app/src/protyle/wysiwyg/tabs.ts)、[`taskListMarker.ts`](../app/src/protyle/wysiwyg/taskListMarker.ts) |
 | 列表转换和删除修复 | [`tabsList.ts`](../app/src/protyle/wysiwyg/tabsList.ts)、[`tabsRemoval.ts`](../app/src/protyle/wysiwyg/tabsRemoval.ts) |
 | 块标菜单及配置目录 | [`gutter/index.ts`](../app/src/protyle/gutter/index.ts)、[`catalog.ts`](../app/src/config/entryVisibility/catalog.ts) |
-| 内核规范化和标题遍历 | [`treenode/tabs.go`](../kernel/treenode/tabs.go)、[`model/tabs.go`](../kernel/model/tabs.go) |
+| 内核规范化和标题遍历 | [`treenode/tabs.go`](../kernel/treenode/tabs.go) |
 | JSON 格式 | [`SY-FORMAT.zh-CN.md`](SY-FORMAT.zh-CN.md) |
 
 ## 兼容与恢复

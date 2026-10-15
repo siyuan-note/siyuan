@@ -12,14 +12,16 @@ import {restoreLuteMarkdownSyntax} from "./paste";
 import {invalidateTrackedRanges} from "./trackedRange";
 import {updateBacklinkReferenceVisibility} from "../wysiwyg/backlinkReference";
 import {shouldReloadProtyle} from "./reloadState";
-import {setAutoDirection} from "../render/autoDirection";
+import {setAutoDirection, setTitleAutoDirection} from "../render/autoDirection";
+import {preserveReloadScroll} from "./reloadScroll";
 
-export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
+export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean, callback?: () => void) => {
     if (!shouldReloadProtyle(protyle)) {
         return;
     }
     updateBacklinkReferenceVisibility(protyle);
     setAutoDirection(protyle.wysiwyg.element, window.siyuan.config.editor.autoDirection);
+    setTitleAutoDirection(protyle.title?.editElement, window.siyuan.config.editor.autoDirection);
     protyle.wysiwyg.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
     invalidateTrackedRanges(protyle);
     /// #if MOBILE
@@ -91,17 +93,25 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
         }
     } else {
         preventScroll(protyle);
+        const scrollAttr = saveScroll(protyle, true) as IScrollAttr;
+        const reloadScroll = focus ? undefined :
+            preserveReloadScroll(protyle, scrollAttr?.scrollTop ?? protyle.contentElement.scrollTop);
         getDocByScroll({
             protyle,
             focus,
-            scrollAttr: saveScroll(protyle, true) as IScrollAttr,
+            scrollAttr,
             updateReadonly,
+            isValid: reloadScroll?.isValid,
+            beforeAVRender: reloadScroll?.beforeAVRender,
+            afterAVRender: reloadScroll?.afterAVRender,
+            onRenderError: reloadScroll?.cancel,
             cb(keys) {
                 if (protyle.query?.key) {
                     searchMarkRender(protyle, keys, protyle.highlight.rangeIndex);
                 }
                 protyle.databaseAttributePanel?.refresh();
                 protyle.model?.refreshBottomBacklinkPanel();
+                callback?.();
             }
         });
     }

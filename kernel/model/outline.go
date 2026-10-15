@@ -214,6 +214,8 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 
 // OutlineInBox 与 Outline 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
 func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err error) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	FlushTxQueue()
 
 	ret = []*Path{}
@@ -222,11 +224,11 @@ func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err e
 		return
 	}
 	headingNumbers := map[string]string{}
-	if headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
-		headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+	if headingNumberEnabled(tree, confEditorSnapshot.HeadingNumber) {
+		headingNumbers = headingNumberLabels(tree, confEditorSnapshot.HeadingNumberFormat)
 	}
 
-	if preview && Conf.Export.AddTitle {
+	if preview && Conf.Export.Load().AddTitle {
 		if root, _ := getBlock(tree.ID, tree); nil != root {
 			root.IAL["type"] = "doc"
 			title := &ast.Node{ID: root.ID, Type: ast.NodeHeading, HeadingLevel: 1}

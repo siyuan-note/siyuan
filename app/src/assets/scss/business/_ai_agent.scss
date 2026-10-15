@@ -1,3 +1,5 @@
+@use "../util/tokens";
+
 .agent-chat {
   min-height: 0;
 }
@@ -97,7 +99,7 @@
   text-align: center;
   padding: 16px 24px;
   gap: 12px;
-  margin: auto;
+  margin: auto 0;
 }
 
 .agent-welcome__icon {
@@ -130,8 +132,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
-  max-width: 300px;
+  width: max-content;
+  max-width: min(100%, 300px);
   margin-top: 8px;
 }
 
@@ -144,6 +146,7 @@
   color: var(--b3-theme-on-surface);
   cursor: pointer;
   text-align: left;
+  overflow-wrap: anywhere;
   transition: var(--b3-transition);
 }
 
@@ -321,7 +324,7 @@
 .agent-chat__body--mirror pre {
   position: relative;
   // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
-  padding: 8px var(--agent-code-pad, 8px);
+  padding: 8px tokens.token("--agent-code-pad");
   margin: 0.5em 0;
   border: 0;
   border-radius: var(--b3-border-radius);
@@ -346,7 +349,7 @@
   content: attr(data-language);
   position: absolute;
   top: 4px;
-  left: var(--agent-code-pad, 8px);
+  left: tokens.token("--agent-code-pad");
   font-size: 12px;
   color: var(--b3-theme-on-surface-light);
 }
@@ -1024,6 +1027,7 @@
 }
 
 .agent-chat__question-text {
+  white-space: pre-wrap;
   margin-bottom: 10px;
   color: var(--b3-theme-on-surface);
   line-height: 1.5;
@@ -1226,8 +1230,6 @@
 
 .agent-chat__composer-host .protyle-wysiwyg {
   min-height: 24px;
-  max-height: 120px;
-  overflow-y: auto;
 }
 
 .agent-chat__composer-host,
@@ -1266,7 +1268,6 @@
     min-height: 48px;
     padding-left: max(8px, env(safe-area-inset-left));
     padding-right: max(4px, env(safe-area-inset-right));
-    border-bottom: .5px solid var(--b3-theme-background-light);
     -webkit-user-select: none;
     user-select: none;
   }
@@ -1340,12 +1341,6 @@
     .agent-session-popup__search {
       margin: 8px;
       min-height: 36px;
-    }
-
-    .agent-session-popup__close {
-      width: 16px;
-      height: 16px;
-      padding: 12px;
     }
 
     .b3-list-item {

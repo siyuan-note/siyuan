@@ -16,8 +16,8 @@ import (
 func TestBacklink2OptionalMentions(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, fixture)
-	Conf.Search = conf.NewSearch()
-	Conf.Search.BacklinkMentionDoc = true
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Search.Load().BacklinkMentionDoc = true
 	for _, id := range []string{fixture.sourceID, fixture.targetID} {
 		tree, err := LoadTreeByBlockID(id)
 		if err != nil {

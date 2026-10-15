@@ -1,11 +1,111 @@
 package model
 
 import (
+	"archive/zip"
+	"errors"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestBlockedTransactionWaitSavesDiagnostic(t *testing.T) {
+	// 在独立进程中验证诊断，隔离全局限流状态及其他用例的后台任务。
+	const childEnv = "SIYUAN_TEST_BLOCKED_TRANSACTION_DIAGNOSTIC"
+	if os.Getenv(childEnv) != "1" {
+		command := exec.Command(os.Args[0], "-test.run=^TestBlockedTransactionWaitSavesDiagnostic$", "-test.timeout=30s")
+		command.Env = append(os.Environ(), childEnv+"=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("blocked transaction diagnostic subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+	oldTemp := util.TempDir
+	util.TempDir = t.TempDir()
+	t.Cleanup(func() { util.TempDir = oldTemp })
+	flushLock.Lock()
+	isFlushing.Store(true)
+	finished := make(chan struct{})
+	go func() { FlushTxQueue(); close(finished) }()
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+		<-finished
+	}()
+	deadline := time.Now().Add(20 * time.Second)
+	for {
+		data, err := os.ReadFile(filepath.Join(util.TempDir, util.OperationStallLogName))
+		if err == nil {
+			for _, want := range []string{"flush editing transactions", "wait for transaction queue", "model.FlushTxQueue"} {
+				if !strings.Contains(string(data), want) {
+					t.Fatalf("diagnostic missing %q", want)
+				}
+			}
+			select {
+			case <-finished:
+				t.Fatal("transaction wait was bypassed")
+			default:
+			}
+			return
+		}
+		// Windows 上快照文件可能暂时被占用，继续在既有超时范围内等待可读取状态。
+		sharingViolation := runtime.GOOS == "windows" && errors.Is(err, syscall.Errno(32))
+		if !os.IsNotExist(err) && !sharingViolation {
+			t.Fatal(err)
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("blocked transaction did not save a diagnostic")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+func TestExportSystemLogIncludesStallWhileTransactionsBlocked(t *testing.T) {
+	oldTemp, oldHome, oldSystemTemp := util.TempDir, util.HomeDir, util.SystemTempDir
+	util.TempDir, util.HomeDir, util.SystemTempDir = t.TempDir(), t.TempDir(), t.TempDir()
+	t.Cleanup(func() {
+		util.TempDir, util.HomeDir, util.SystemTempDir = oldTemp, oldHome, oldSystemTemp
+	})
+	want := "operation: remove document\nstage: index document history\n"
+	if err := os.WriteFile(filepath.Join(util.TempDir, util.OperationStallLogName), []byte(want), 0600); err != nil {
+		t.Fatal(err)
+	}
+	// 持有事务执行锁并标记正在刷新，验证导出不依赖编辑事务完成。
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() { isFlushing.Store(false); flushLock.Unlock() }()
+	if exported := ExportSystemLog(); exported == "" {
+		t.Fatal("export failed")
+	}
+	archive, err := zip.OpenReader(filepath.Join(util.TempDir, "export", "system-log.zip"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer archive.Close()
+	for _, entry := range archive.File {
+		if filepath.Base(entry.Name) != util.OperationStallLogName {
+			continue
+		}
+		reader, err := entry.Open()
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := io.ReadAll(reader)
+		reader.Close()
+		if err != nil || string(data) != want {
+			t.Fatalf("unexpected stall snapshot: %q, %v", data, err)
+		}
+		return
+	}
+	t.Fatal("stall snapshot missing from export")
+}
 
 func TestWriteSystemGoroutineLog(t *testing.T) {
 	started, release := make(chan struct{}), make(chan struct{})

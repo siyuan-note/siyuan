@@ -122,8 +122,8 @@ func TestAPIContractExportMarkdownOptions(t *testing.T) {
 	}
 	previous := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Export = conf.NewExport()
-	model.Conf.Export.AddTitle = true
+	model.Conf.Export.Store(conf.NewExport())
+	model.Conf.Export.Load().AddTitle = true
 	t.Cleanup(func() { model.Conf = previous })
 	addTitle, title := exportTitleOptions(apicontract.ExportTitleOptions{CustomTitle: " custom "})
 	if !addTitle || title != "custom" {

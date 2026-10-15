@@ -396,21 +396,3 @@ var removeViewState = contractHandler(apicontract.RemoveViewState, func(c *gin.C
 
 	return contractFailure[apicontract.Null](ret)
 })
-
-func parseViewStateRemoveKeys(value any) (ret []string, valid bool) {
-	if nil == value {
-		return []string{}, true
-	}
-	values, ok := value.([]any)
-	if !ok {
-		return nil, false
-	}
-	for _, item := range values {
-		key, ok := item.(string)
-		if !ok || "" == strings.TrimSpace(key) {
-			return nil, false
-		}
-		ret = append(ret, key)
-	}
-	return ret, true
-}

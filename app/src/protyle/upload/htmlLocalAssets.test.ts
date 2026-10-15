@@ -67,21 +67,24 @@ describe("HTML local assets", () => {
         assert.equal(isHTMLLocalAssetPath("assets/a.png"), false);
     });
 
-    it("rewrites only successful paths by their input indexes", () => {
+    it("rewrites successful paths and removes failed local references by their input indexes", () => {
         const values = ["file:///tmp/a.png", "/tmp/b.pdf"];
         const assets = values.map((path, index) => ({
             element: {
                 setAttribute(_attribute: string, value: string) {
                     values[index] = value;
                 },
-            } as Element,
+                removeAttribute() {
+                    values[index] = undefined;
+                },
+            } as unknown as Element,
             attribute: index === 0 ? "src" : "href",
             path,
         })) as IHTMLLocalAsset[];
 
         applyHTMLLocalAssetPaths(assets, [undefined, "assets/b.pdf"]);
 
-        assert.deepEqual(values, ["file:///tmp/a.png", "assets/b.pdf"]);
+        assert.deepEqual(values, [undefined, "assets/b.pdf"]);
     });
 
     it("removes local paths before remote HTML conversion", () => {

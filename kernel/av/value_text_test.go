@@ -851,9 +851,9 @@ func TestValueTextRichInlineRoundTrip(t *testing.T) {
 }
 
 func TestValueTextRichParserIgnoresEditorMarkdownSettings(t *testing.T) {
-	original := *util.MarkdownSettings
+	original := *util.MarkdownSettings.Load()
 	defer func() {
-		*util.MarkdownSettings = original
+		*util.MarkdownSettings.Load() = original
 	}()
 
 	rich := &ValueTextRich{
@@ -865,18 +865,18 @@ func TestValueTextRichParserIgnoresEditorMarkdownSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	util.MarkdownSettings.InlineAsterisk = false
-	util.MarkdownSettings.InlineUnderscore = false
-	util.MarkdownSettings.InlineSup = false
-	util.MarkdownSettings.InlineSub = false
-	util.MarkdownSettings.InlineTag = false
-	util.MarkdownSettings.InlineMath = false
-	util.MarkdownSettings.InlineStrikethrough = false
-	util.MarkdownSettings.InlineFullWidthStrikethrough = false
-	util.MarkdownSettings.InlineMark = false
+	util.MarkdownSettings.Load().InlineAsterisk = false
+	util.MarkdownSettings.Load().InlineUnderscore = false
+	util.MarkdownSettings.Load().InlineSup = false
+	util.MarkdownSettings.Load().InlineSub = false
+	util.MarkdownSettings.Load().InlineTag = false
+	util.MarkdownSettings.Load().InlineMath = false
+	util.MarkdownSettings.Load().InlineStrikethrough = false
+	util.MarkdownSettings.Load().InlineFullWidthStrikethrough = false
+	util.MarkdownSettings.Load().InlineMark = false
 	disabled := false
-	util.MarkdownSettings.BlockFullWidthTaskList = &disabled
-	util.MarkdownSettings.CodeBlockMiddleDot = &disabled
+	util.MarkdownSettings.Load().BlockFullWidthTaskList = &disabled
+	util.MarkdownSettings.Load().CodeBlockMiddleDot = &disabled
 
 	disabledSettingsRich := &ValueTextRich{
 		Spec:    ValueTextRichSpec,
@@ -987,20 +987,20 @@ func TestValueTextRichLinkTargetPolicy(t *testing.T) {
 	for _, target := range allowed {
 		linkDest := &ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(target)}
 		textMark := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: target}
-		if !isAllowedValueTextRichNode(linkDest) {
+		if !isAllowedValueTextRichNode(linkDest, false) {
 			t.Fatalf("allowed classic link destination was rejected: %q", target)
 		}
-		if !isAllowedValueTextMark(textMark) {
+		if !isAllowedValueTextMark(textMark, false) {
 			t.Fatalf("allowed text mark link destination was rejected: %q", target)
 		}
 	}
 	for _, target := range blocked {
 		linkDest := &ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(target)}
 		textMark := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: target}
-		if isAllowedValueTextRichNode(linkDest) {
+		if isAllowedValueTextRichNode(linkDest, false) {
 			t.Fatalf("unsafe classic link destination was accepted: %q", target)
 		}
-		if isAllowedValueTextMark(textMark) {
+		if isAllowedValueTextMark(textMark, false) {
 			t.Fatalf("unsafe text mark link destination was accepted: %q", target)
 		}
 	}
@@ -1045,13 +1045,13 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 	}
 	for _, content := range allowed {
 		node := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "inline-memo", TextMarkInlineMemoContent: content}
-		if !isAllowedValueTextMark(node) {
+		if !isAllowedValueTextMark(node, false) {
 			t.Fatalf("plain inline memo was rejected: %q", content)
 		}
 	}
 	for _, content := range blocked {
 		node := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "inline-memo", TextMarkInlineMemoContent: content}
-		if isAllowedValueTextMark(node) {
+		if isAllowedValueTextMark(node, false) {
 			t.Fatalf("active or ambiguous inline memo was accepted: %q", content)
 		}
 	}

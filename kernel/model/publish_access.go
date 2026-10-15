@@ -432,11 +432,6 @@ func CheckBlockTreeMetadataAccessableByPublishAccess(c *gin.Context, publishAcce
 	return password == "" || CheckPublishAuthCookie(c, passwordID, password)
 }
 
-func CheckBlockIdDiscoverableByPublishAccessInBox(publishAccess PublishAccess, blockID, boxID string) bool {
-	bt := treenode.GetBlockTreeInBox(blockID, boxID)
-	return CheckBlockTreeDiscoverableByPublishAccess(publishAccess, bt)
-}
-
 func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *treenode.BlockTree) bool {
 	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return false
@@ -449,11 +444,14 @@ func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *
 }
 
 func GetBlockTreePublishAccessStatus(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) PublishAccessStatus {
+	return getBlockTreePublishAccessStatus(c, publishAccess, filterDisablePublishAccess(publishAccess), bt)
+}
+
+func getBlockTreePublishAccessStatus(c *gin.Context, publishAccess, publishDisable PublishAccess, bt *treenode.BlockTree) PublishAccessStatus {
 	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return PublishAccessDenied
 	}
 
-	publishDisable := filterDisablePublishAccess(publishAccess)
 	if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) {
 		return PublishAccessDenied
 	}
@@ -472,11 +470,13 @@ func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess Publi
 func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 	authCookie := util.SHA256Hash([]byte(ID + password))
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "publish-auth-" + ID,
-		Value:    authCookie,
-		MaxAge:   24 * 60 * 60,
-		Path:     "/",
-		Secure:   util.SSL,
+		Name:   "publish-auth-" + ID,
+		Value:  authCookie,
+		MaxAge: 24 * 60 * 60,
+		Path:   "/",
+		// 只有客户端连接确实使用 TLS 时才标记 Secure，与发布会话 Cookie 保持一致
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+		Secure:   util.SSL || util.IsTLSRequest(c.Request),
 		HttpOnly: true,
 	})
 }

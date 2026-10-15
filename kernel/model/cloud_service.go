@@ -39,6 +39,12 @@ import (
 
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
+var (
+	shorthandAudioPattern = regexp.MustCompile("<audio.*>.*</audio>")
+	shorthandVideoPattern = regexp.MustCompile("<video.*>.*</video>")
+	shorthandFilePattern  = regexp.MustCompile("\\[文件]\\(.*\\)")
+)
+
 func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err error) {
 	user := Conf.GetUser()
 	if nil == user {
@@ -144,7 +150,7 @@ func StartFreeTrial() (err error) {
 func DeactivateUser() (err error) {
 	release := lockAssetSourceChange()
 	defer release()
-	if Conf.Sync.Provider == conf.ProviderSiYuan {
+	if Conf.Sync.Load().Provider == conf.ProviderSiYuan {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
@@ -315,17 +321,14 @@ func refreshSubscriptionExpirationRemind() {
 func refreshUser() {
 	defer logging.Recover()
 
-	if nil != Conf.GetUser() {
-		time.Sleep(2 * time.Minute)
-		if nil != Conf.GetUser() {
-			_, err := RefreshUser(Conf.GetUser().UserToken)
-			if nil != err {
-				msg := Conf.Language(18)
-				if IsInvalidUserRefresh(err) {
-					msg = Conf.Language(19)
-				}
-				util.PushErrMsg(msg, 5000)
+	if user := Conf.GetUser(); nil != user {
+		_, err := RefreshUser(user.UserToken)
+		if nil != err {
+			msg := Conf.Language(18)
+			if IsInvalidUserRefresh(err) {
+				msg = Conf.Language(19)
 			}
+			util.PushErrMsg(msg, 5000)
 		}
 		subscriptionExpirationReminded = false
 	}
@@ -501,7 +504,9 @@ func IsCloudAssetSourceChange(err error) bool {
 
 // 使用服务端返回的账号标识验证来源，允许过期登出后重新认证原账号。
 func validateCloudUserAssetSource(user *conf.User) error {
-	if Conf.Sync.Provider != conf.ProviderSiYuan {
+	confSyncSnapshot := Conf.LoadSync()
+
+	if confSyncSnapshot.Provider != conf.ProviderSiYuan {
 		return nil
 	}
 	cloudConf, err := buildCloudConf()
@@ -509,7 +514,7 @@ func validateCloudUserAssetSource(user *conf.User) error {
 		return &cloudAssetSourceError{cause: err}
 	}
 	cloudConf.UserID = user.UserId
-	if err = validateAssetDownloadSourceScope(assetDownloadScope(Conf.Sync.Provider, cloudConf, Conf.Repo.Key)); err != nil {
+	if err = validateAssetDownloadSourceScope(assetDownloadScope(confSyncSnapshot.Provider, cloudConf, Conf.Repo.Load().Key)); err != nil {
 		return &cloudAssetSourceError{cause: err}
 	}
 	return nil
@@ -674,9 +679,6 @@ func GetCloudShorthands(page int) (result map[string]any, err error) {
 	}
 
 	luteEngine := NewLute()
-	audioRegexp := regexp.MustCompile("<audio.*>.*</audio>")
-	videoRegexp := regexp.MustCompile("<video.*>.*</video>")
-	fileRegexp := regexp.MustCompile("\\[文件]\\(.*\\)")
 	shorthands := result["data"].(map[string]any)["shorthands"].([]any)
 	for _, item := range shorthands {
 		shorthand := item.(map[string]any)
@@ -686,9 +688,9 @@ func GetCloudShorthands(page int) (result map[string]any, err error) {
 		shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
 
 		desc := shorthand["shorthandDesc"].(string)
-		desc = audioRegexp.ReplaceAllString(desc, " 语音 ")
-		desc = videoRegexp.ReplaceAllString(desc, " 视频 ")
-		desc = fileRegexp.ReplaceAllString(desc, " 文件 ")
+		desc = shorthandAudioPattern.ReplaceAllString(desc, " 语音 ")
+		desc = shorthandVideoPattern.ReplaceAllString(desc, " 视频 ")
+		desc = shorthandFilePattern.ReplaceAllString(desc, " 文件 ")
 		desc = strings.ReplaceAll(desc, "\n\n", "")
 		desc = strings.TrimSpace(desc)
 		shorthand["shorthandDesc"] = desc
@@ -828,7 +830,7 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	release := lockAssetSourceChange()
 	defer release()
 	previousCloudRegion := util.CurrentCloudRegion
-	if Conf.Sync.Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
+	if Conf.Sync.Load().Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
 		if err := requireCompleteAssetDownloads(); err != nil {
 			ret = gulu.Ret.NewResult()
 			ret.Code = -1

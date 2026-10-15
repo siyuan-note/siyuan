@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import * as dateFormat from "../dateFormat";
 
 class Control {
     value = "";
@@ -33,7 +34,7 @@ const loadJump = () => {
     const dateExports = {} as typeof import("./date");
     const compilerOptions = {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020};
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/calendar/date.ts", "utf8"),
-        {compilerOptions}).outputText, {exports: dateExports, Date, Intl, Math, Number});
+        {compilerOptions}).outputText, {exports: dateExports, Date, Intl, Math, Number, require: () => dateFormat});
     const jumpExports = {} as typeof import("./jump");
     let current: {
         date: Control;

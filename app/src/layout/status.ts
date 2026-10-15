@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 /// #if !MOBILE
 import {getDockByType} from "./tabUtil";
 import {applyStatusBarEntryVisibility} from "../config/entryVisibility/runtime";
@@ -43,77 +44,77 @@ export const initStatus = (isWindow = false) => {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("status__backgroundtask")) {
-                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_BACKGROUND_TASK) {
-                    window.siyuan.menus.menu.remove();
-                    return;
-                }
-                window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_BACKGROUND_TASK);
-                JSON.parse(target.getAttribute("data-tasks")).forEach((item: { action: string }) => {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        type: "readonly",
-                        iconHTML: "",
-                        label: item.action
-                    }).element);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_BACKGROUND_TASK);
+                        JSON.parse(target.getAttribute("data-tasks")).forEach((item: {action: string}) => {
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                type: "readonly",
+                                iconHTML: "",
+                                label: item.action
+                            }).element);
+                        });
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+
+                    },
                 });
-                const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                event.stopPropagation();
+            event.stopPropagation();
                 break;
             } else if (target.id === "statusHelp") {
-                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_HELP) {
-                    window.siyuan.menus.menu.remove();
-                    return;
-                }
-                window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_HELP);
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.userGuide,
-                    icon: "iconHelp",
-                    ignore: window.siyuan.config.readonly,
-                    click: () => {
-                        mountHelp();
-                    }
-                }).element);
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.feedback,
-                    icon: "iconFeedback",
-                    click: () => {
-                        if ("zh-CN" === window.siyuan.config.lang) {
-                            openLink(window.siyuan.ws.app, "https://ld246.com/article/1649901726096");
-                        } else {
-                            openLink(window.siyuan.ws.app, "https://liuyun.io/article/1686530886208");
-                        }
-                    }
-                }).element);
-                /// #if !BROWSER
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.debug,
-                    icon: "iconBug",
-                    click: () => {
-                        ipcRenderer.send(Constants.SIYUAN_CMD, "toggleDevTools");
-                    }
-                }).element);
-                /// #endif
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages["_trayMenu"].officialWebsite,
-                    icon: "iconSiYuan",
-                    click: () => {
-                        openLink(window.siyuan.ws.app, "https://b3log.org/siyuan");
-                    }
-                }).element);
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages["_trayMenu"].openSource,
-                    icon: "iconGithub",
-                    click: () => {
-                        openLink(window.siyuan.ws.app, "https://github.com/siyuan-note/siyuan");
-                    }
-                }).element);
-                const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                event.stopPropagation();
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_HELP);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages.userGuide,
+                            icon: "iconHelp",
+                            ignore: window.siyuan.config.readonly,
+                            click: () => {
+                                mountHelp();
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages.feedback,
+                            icon: "iconFeedback",
+                            click: () => {
+                                if ("zh-CN" === window.siyuan.config.lang) {
+                                    openLink(window.siyuan.ws.app, "https://ld246.com/article/1649901726096");
+                                } else {
+                                    openLink(window.siyuan.ws.app, "https://liuyun.io/article/1686530886208");
+                                }
+                            }
+                        }).element);
+                        /// #if !BROWSER
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages.debug,
+                            icon: "iconBug",
+                            click: () => {
+                                ipcRenderer.send(Constants.SIYUAN_CMD, "toggleDevTools");
+                            }
+                        }).element);
+                        /// #endif
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages["_trayMenu"].officialWebsite,
+                            icon: "iconSiYuan",
+                            click: () => {
+                                openLink(window.siyuan.ws.app, "https://b3log.org/siyuan");
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages["_trayMenu"].openSource,
+                            icon: "iconGithub",
+                            click: () => {
+                                openLink(window.siyuan.ws.app, "https://github.com/siyuan-note/siyuan");
+                            }
+                        }).element);
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+
+                    },
+                });
+            event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-menu__item")) {
                 const type = target.getAttribute("data-type");

@@ -23,48 +23,62 @@ const defaultRerankCandidateCount = 30
 
 // isRerankEnabled 判断重排是否可用：配置已开启且填了 APIKey。语义搜索在召回后会据此决定是否走重排。
 func isRerankEnabled() bool {
-	return !util.IsDisabledFeature("ai") && nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && len(Conf.AI.Rerank.APIKey) > 0
+	confAISnapshot := Conf.LoadAI()
+
+	return !util.IsDisabledFeature("ai") && nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled && len(confAISnapshot.Rerank.APIKey) > 0
 }
 
 func rerankKey() string {
-	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && "" != Conf.AI.Rerank.APIKey {
-		return Conf.AI.Rerank.APIKey
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled && "" != confAISnapshot.Rerank.APIKey {
+		return confAISnapshot.Rerank.APIKey
 	}
 	return ""
 }
 
 func rerankEndpoint() string {
-	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && "" != Conf.AI.Rerank.Endpoint {
-		return Conf.AI.Rerank.Endpoint
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled && "" != confAISnapshot.Rerank.Endpoint {
+		return confAISnapshot.Rerank.Endpoint
 	}
 	return ""
 }
 
 func rerankModel() string {
-	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && "" != Conf.AI.Rerank.Name {
-		return Conf.AI.Rerank.Name
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled && "" != confAISnapshot.Rerank.Name {
+		return confAISnapshot.Rerank.Name
 	}
 	return ""
 }
 
 func rerankRequestFormat() util.RerankRequestFormat {
-	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled {
-		return Conf.AI.Rerank.RequestFormat
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled {
+		return confAISnapshot.Rerank.RequestFormat
 	}
 	return util.RerankRequestFormatCohere
 }
 
 func rerankTimeout() int {
-	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && 0 < Conf.AI.Rerank.Timeout {
-		return Conf.AI.Rerank.Timeout
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled && 0 < confAISnapshot.Rerank.Timeout {
+		return confAISnapshot.Rerank.Timeout
 	}
 	return 30
 }
 
 // rerankCandidateCount 返回向量召回后送入重排的候选文档数。Normalize 已保证落在 [5,100]，这里做兜底。
 func rerankCandidateCount() int {
-	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && 0 < Conf.AI.Rerank.CandidateCount {
-		return Conf.AI.Rerank.CandidateCount
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Rerank && confAISnapshot.Rerank.Enabled && 0 < confAISnapshot.Rerank.CandidateCount {
+		return confAISnapshot.Rerank.CandidateCount
 	}
 	return defaultRerankCandidateCount
 }

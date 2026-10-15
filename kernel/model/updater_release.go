@@ -47,6 +47,7 @@ const (
 
 type updateRelease struct {
 	Version    string
+	Channel    string
 	ReleaseURL string
 	Packages   map[string]*updatePackage
 }
@@ -79,7 +80,7 @@ var (
 )
 
 func getUpdateRelease(force bool) (*updateRelease, error) {
-	channel := Conf.System.UpdateChannel
+	channel := Conf.System.Load().UpdateChannel
 	if conf.UpdateChannelStable == channel {
 		return getStableUpdateRelease(force)
 	}
@@ -103,6 +104,7 @@ func getStableUpdateRelease(force bool) (*updateRelease, error) {
 
 	release := &updateRelease{
 		Version:    version,
+		Channel:    conf.UpdateChannelStable,
 		ReleaseURL: getStableReleaseURL(result, version),
 		Packages:   map[string]*updatePackage{},
 	}
@@ -171,6 +173,7 @@ func getGitHubUpdateRelease(channel string, force bool) (*updateRelease, error) 
 	version := strings.TrimPrefix(normalizeReleaseVersion(selected.TagName), "v")
 	release := &updateRelease{
 		Version:    version,
+		Channel:    channel,
 		ReleaseURL: selected.HTMLURL,
 		Packages:   map[string]*updatePackage{},
 	}

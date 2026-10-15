@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -24,7 +25,7 @@ test("returning from the color menu during field loading does not restore or bin
     }).outputText, {
         exports: methods,
         window: {siyuan: {config: {}, languages: {conditionalColors: "Colors"}}},
-        require: (name: string) => name === "./filter" ? {prepareFilterColumns: () => loading} : {},
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "./filter" ? {prepareFilterColumns: () => loading} : {}),
     });
     const pending = methods.openConditionalColorsMenu({
         protyle: {options: {}} as IProtyle,
@@ -67,7 +68,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {
         exports: methods, window,
-        require: (name: string) => ({
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./filter": {prepareFilterColumns: async () => {}},
             "./view": {getFieldsByData: () => [{id: "text", type: "text"}]},
             "../../../util/escape": {escapeAttr: String},
@@ -75,7 +76,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
                 transactions.push({perform, undo});
             }},
-        })[name] || {},
+        })[name] || {}),
     });
     const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map(id => ({id, target: "item", color: null,
         matchOption: false, filter: {column: "text", operator: "Is not empty"}}));

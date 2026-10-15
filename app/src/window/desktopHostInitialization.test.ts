@@ -17,7 +17,7 @@ describe("desktop host initialization", () => {
         const mainSource = readFileSync(resolve(process.cwd(), "src/boot/onGetConfig.ts"), "utf8");
         const detachedSource = readFileSync(resolve(process.cwd(), "src/window/init.ts"), "utf8");
 
-        assert.match(mainSource, /void initDesktopHost\(\);/);
+        assert.match(mainSource, /await initDesktopHost\(\);/);
         assert.match(detachedSource, /await initDesktopHost\(\);/);
         assert.ok(detachedSource.indexOf("await initDesktopHost();") < detachedSource.indexOf("initWindowEvent(app);"));
     });

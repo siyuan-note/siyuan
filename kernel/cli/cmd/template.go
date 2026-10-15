@@ -21,12 +21,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
 )
@@ -83,11 +80,7 @@ var templateGetCmd = &cobra.Command{
 	Short: "Read template content",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		p, _ := cmd.Flags().GetString("path")
-		abs, err := resolveTemplateAbs(p)
-		if err != nil {
-			return err
-		}
-		data, err := os.ReadFile(abs)
+		data, err := model.ReadTemplateFile(p)
 		if err != nil {
 			return err
 		}
@@ -101,7 +94,7 @@ var templateRemoveCmd = &cobra.Command{
 	Short: "Remove a template",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		p, _ := cmd.Flags().GetString("path")
-		abs, err := resolveTemplateAbs(p)
+		abs, err := model.ResolveTemplatePath(p)
 		if err != nil {
 			return err
 		}
@@ -126,7 +119,7 @@ var templateRenderCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
-		abs, err := resolveTemplateAbs(p)
+		abs, err := model.ResolveTemplatePath(p)
 		if err != nil {
 			return err
 		}
@@ -195,25 +188,6 @@ var templateCreateCmd = &cobra.Command{
 		fmt.Printf("%s.md\n", name)
 		return nil
 	},
-}
-
-// resolveTemplateAbs 把模板路径解析为 data/templates 下的绝对路径，拒绝越界。
-// 接受绝对路径或相对 data/templates 的相对路径。
-func resolveTemplateAbs(p string) (string, error) {
-	if p == "" {
-		return "", fmt.Errorf("--path is required")
-	}
-	abs := p
-	if !filepath.IsAbs(abs) {
-		abs = filepath.Join(util.DataDir, "templates", p)
-	}
-	abs = filepath.Clean(abs)
-	templatesBase := filepath.Clean(filepath.Join(util.DataDir, "templates"))
-	rel, err := filepath.Rel(templatesBase, abs)
-	if err != nil || strings.HasPrefix(rel, "..") || rel == ".." {
-		return "", fmt.Errorf("path escapes templates dir: %s", p)
-	}
-	return abs, nil
 }
 
 func init() {

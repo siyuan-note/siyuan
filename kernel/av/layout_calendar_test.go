@@ -2,10 +2,105 @@ package av
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestCalendarTemplateDates(t *testing.T) {
+	oldLang, oldLangs := util.Lang, util.AttrViewLangs
+	util.AttrViewLangs = map[string]map[string]any{}
+	t.Cleanup(func() { util.Lang, util.AttrViewLangs = oldLang, oldLangs })
+	data, err := os.ReadFile("testdata/calendar_template_dates.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []struct{ Name, Zone, Content, Start, End, Lang, Format string }
+	if err = json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range cases {
+		t.Run(test.Name, func(t *testing.T) {
+			lang := test.Lang
+			if lang == "" {
+				lang = "en"
+			}
+			loadCalendarTestLanguage(t, lang)
+			location, err := time.LoadLocation(test.Zone)
+			if err != nil {
+				t.Fatal(err)
+			}
+			value := &Value{Type: KeyTypeDate, HasRenderTemplate: true, RenderedContent: test.Content,
+				Date: &ValueDate{Content: 1, IsNotEmpty: true, Content2: 9999999999999, HasEndDate: true, IsNotEmpty2: true}}
+			before, _ := json.Marshal(value)
+			date := newCalendarTemplateDateParser(DateDisplayFormat(test.Format))(value.RenderedContent, location)
+			start, end, ok := CalendarInterval(&Value{Type: KeyTypeDate, Date: date}, location)
+			if ok != (test.Start != "") {
+				t.Fatalf("unexpected availability: %v", ok)
+			}
+			if ok {
+				wantStart, _ := time.Parse(time.RFC3339, test.Start)
+				wantEnd, _ := time.Parse(time.RFC3339, test.End)
+				if start != wantStart.UnixMilli() || end != wantEnd.UnixMilli() {
+					t.Fatalf("unexpected interval %d - %d", start, end)
+				}
+			}
+			after, _ := json.Marshal(value)
+			if string(before) != string(after) {
+				t.Fatal("calendar changed the stored date")
+			}
+		})
+	}
+}
+
+func loadCalendarTestLanguage(t *testing.T, lang string) {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("../../app/appearance/langs", lang+".json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var language struct {
+		AttrView map[string]any `json:"_attrView"`
+	}
+	if err = json.Unmarshal(data, &language); err != nil {
+		t.Fatal(err)
+	}
+	util.Lang = lang
+	util.AttrViewLangs[lang] = language.AttrView
+}
+
+func TestCalendarTemplateAllLanguages(t *testing.T) {
+	oldLang, oldLangs := util.Lang, util.AttrViewLangs
+	util.AttrViewLangs = map[string]map[string]any{}
+	t.Cleanup(func() { util.Lang, util.AttrViewLangs = oldLang, oldLangs })
+	paths, err := filepath.Glob("../../app/appearance/langs/*.json")
+	if err != nil || len(paths) == 0 {
+		t.Fatalf("language files: %v", err)
+	}
+	for _, path := range paths {
+		lang := strings.TrimSuffix(filepath.Base(path), ".json")
+		loadCalendarTestLanguage(t, lang)
+		parse := newCalendarTemplateDateParser(DateDisplayFormatFull)
+		for month, name := range strings.Split(GetAttributeViewI18n("dateMonths"), "|") {
+			content := strings.NewReplacer("${year}", "2026", "${month}", name, "${day}", "2").Replace(GetAttributeViewI18n("dateFormatFullTemplate"))
+			for _, suffix := range []string{"", " 09:30:15"} {
+				date := parse(content+suffix, time.UTC)
+				want := time.Date(2026, time.Month(month+1), 2, 0, 0, 0, 0, time.UTC)
+				if suffix != "" {
+					want = want.Add(9*time.Hour + 30*time.Minute + 15*time.Second)
+				}
+				if date == nil || date.Content != want.UnixMilli() || date.IsNotTime != (suffix == "") {
+					t.Fatalf("%s: %s%s produced %+v", lang, content, suffix, date)
+				}
+			}
+		}
+	}
+}
 
 func TestCalendarRowLimitCompatibility(t *testing.T) {
 	var settings CalendarSettings

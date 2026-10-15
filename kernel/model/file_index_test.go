@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -67,9 +68,9 @@ func TestRemoveDocFlushesDatabaseIndex(t *testing.T) {
 	}
 
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 
 	box := &Box{ID: "20260726000000-abcdefg"}
 	boxConf := conf.NewBoxConf()
@@ -191,11 +192,11 @@ func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {
 	}
 
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	Conf.Lang = "en"
 	util.WorkingDir = filepath.Clean(filepath.Join("..", "..", "app"))
 	initLang()
@@ -232,6 +233,87 @@ func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {
 	}
 	dailyID := util.GetTreeID(dailyPath)
 	assertTemplateOutputIndexed(t, dailyID)
+
+	boxConf.DailyNoteSavePath = "/Daily note/{{now | date \"2006-01-02\"}}"
+	boxConf.DailyNoteTemplatePath = "/dated.md"
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(templateDir, "dated.md"), []byte(`.action{now | date "2006-01-02"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	target := time.Date(2024, 2, 29, 0, 0, 0, 0, time.Local)
+	info, err := GetDailyNoteInfo(box.ID, target)
+	if err != nil || info.Existed || info.ID != "" || info.HPath != "/Daily note/2024-02-29" || info.Title != "2024-02-29" {
+		t.Fatalf("unexpected missing daily note preview: %#v %v", info, err)
+	}
+	if treenode.GetBlockTreeRootByHPath(box.ID, info.HPath) != nil {
+		t.Fatal("preview created a document")
+	}
+	datedPath, existed, err := CreateDailyNoteAt(box.ID, target)
+	if err != nil || existed {
+		t.Fatalf("create dated note: %s %v %v", datedPath, existed, err)
+	}
+	datedID := util.GetTreeID(datedPath)
+	datedTree, err := LoadTreeByBlockID(datedID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if datedTree.HPath != "/Daily note/2024-02-29" || datedTree.Root.IALAttr(DailyNoteAttrPrefix+"20240229") != "20240229" {
+		t.Fatalf("date did not reach path and attribute: %#v", datedTree)
+	}
+	if content := string(datedTree.Root.Text()); !strings.Contains(content, "2024-02-29") {
+		t.Fatalf("content template used another date: %s", content)
+	}
+	if strings.HasPrefix(datedID, "20240229") || strings.HasPrefix(datedTree.Root.IALAttr("updated"), "20240229") {
+		t.Fatal("target date replaced real document timestamps")
+	}
+	reusedPath, existed, err := CreateDailyNoteAt(box.ID, target)
+	if err != nil || !existed || reusedPath != datedPath {
+		t.Fatalf("dated note was duplicated: %s %v %v", reusedPath, existed, err)
+	}
+	if err := RenameDoc(box.ID, datedPath, "Renamed daily note"); err != nil {
+		t.Fatal(err)
+	}
+	reusedPath, existed, err = CreateDailyNoteAt(box.ID, target)
+	if err != nil || !existed || reusedPath != datedPath {
+		t.Fatalf("renaming duplicated an existing date: %s %v %v", reusedPath, existed, err)
+	}
+	if err := MoveDocs([]string{box.ID + datedPath}, box.ID, "/", nil); err != nil {
+		t.Fatal(err)
+	}
+	datedPath = "/" + datedID + ".sy"
+	reusedPath, existed, err = CreateDailyNoteAt(box.ID, target)
+	if err != nil || !existed || reusedPath != datedPath {
+		t.Fatalf("moving duplicated an existing date: %s %v %v", reusedPath, existed, err)
+	}
+	boxConf.DailyNoteSavePath = "/Changed daily note/{{now | date \"2006-01-02\"}}"
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	reusedPath, existed, err = CreateDailyNoteAt(box.ID, target)
+	if err != nil || !existed || reusedPath != datedPath {
+		t.Fatalf("template change duplicated an existing date: %s %v %v", reusedPath, existed, err)
+	}
+	info, err = GetDailyNoteInfo(box.ID, target)
+	if err != nil || !info.Existed || info.ID != datedID || info.HPath != "/Renamed daily note" || info.Title != "Renamed daily note" {
+		t.Fatalf("preview did not reuse actual renamed and moved document: %#v %v", info, err)
+	}
+	beforeTree, err := LoadTreeByBlockID(datedID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	beforeUpdated := beforeTree.Root.IALAttr("updated")
+	if _, err := GetDailyNoteInfo(box.ID, target); err != nil {
+		t.Fatal(err)
+	}
+	afterTree, err := LoadTreeByBlockID(datedID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if beforeUpdated != afterTree.Root.IALAttr("updated") {
+		t.Fatal("preview changed document timestamps")
+	}
 
 	docID := "20260728000001-abcdefg"
 	arg := map[string]any{"docCreateTemplatePath": "/indexed.md"}

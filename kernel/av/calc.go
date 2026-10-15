@@ -114,6 +114,8 @@ func calcField(collection Collection, field Field, fieldIndex int, attrView *Att
 		calcFieldURL(collection, field, fieldIndex)
 	case KeyTypeEmail:
 		calcFieldEmail(collection, field, fieldIndex)
+	case KeyTypeLocation:
+		calcFieldLocation(collection, field, fieldIndex)
 	case KeyTypePhone:
 		calcFieldPhone(collection, field, fieldIndex)
 	case KeyTypeMAsset:

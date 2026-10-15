@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260928143000"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -1911,12 +1911,37 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20260928143000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Mind map block"
+				}
+			]
+		},
+		{
+			"ID": "20261012014859-9tz0em8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014859-9tz0em8",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For definitions and list conversion, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260921215916-r1kfene",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Mind map block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -1931,6 +1956,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block."
+				}
+			]
+		},
+		{
+			"ID": "20261003225941-mxlfdrn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003225941-mxlfdrn",
+				"updated": "20261003225941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS) and click a node's fold button to fold or expand sibling branches under the same parent. If any sibling branch is expanded, all are folded; otherwise, all are expanded. Deeper folding states are preserved. A normal click only toggles the current node."
 				}
 			]
 		},
@@ -3095,6 +3152,227 @@
 			]
 		},
 		{
+			"ID": "20260930234403-jmgkoqd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-jmgkoqd",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing a node, type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and choose “Insert image or file” to upload a local image. You can also paste clipboard images. Images are stored as document attachments. The virtual center title used for multiple top-level nodes remains plain text."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-my9v7og",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-my9v7og",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a relation line and use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Arrow direction"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom settings to choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Forward arrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (start to end, the default), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reverse arrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (end to start), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Arrows at both ends"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "No arrows"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Changing direction preserves the connected nodes, label, and manual path, supports undo and redo, and does not affect parent-child lines."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-yca6fy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-yca6fy3",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On a selected relation, the hollow circle marks the start and the filled circle marks the end, regardless of arrow direction. Drag either circle along any of its node’s four edges to position the connection point, or onto another valid node to reconnect. Mouse and touch dragging are supported. Releasing saves one undoable change. Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. A position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-ow14bv7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-ow14bv7",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the bottom relation settings, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Restore automatic connection points"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a path-segment handle resets only the intermediate path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-ue75z7f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-ue75z7f",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points. A notice identifies which setting cannot be used. Saved settings are retained and restored when the layout permits. Read-only views and exports use the same drawing rules without adjustment handles; read-only views also show fallback notices."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-3w0f58c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-3w0f58c",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over the outer frame to reveal the small handles outside the border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly. This changes the block size in the document, not the canvas zoom. Releasing saves one undoable change; press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or cancel the touch gesture to restore the original size. The block menu’s width and height settings remain available."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-8tls0r0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-8tls0r0",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Resize handles are hidden in read-only, locked, and full-screen views. A mind map directly inside a super block has only the bottom height handle; use the super block’s column divider to change its width."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-kkcg79g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-kkcg79g",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select the first node in a range, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Summary"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous. Single-node summaries and nested ranges are supported; ranges may contain each other but must not cross. The bracket encloses the visible subtree and any inner summaries. To create several summaries, activate Summary and drag a selection on blank canvas. You can also tap blank canvas, then tap nodes individually. The preview groups consecutive selected siblings by parent; selected ancestors take precedence over their descendants. Existing identical summaries are skipped, and crossing ranges prevent creation. Use the confirm button or Enter to create all previewed groups in one undoable operation; Esc cancels. Document updates cancel a pending selection. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-2f033n1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-2f033n1",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Double-click the summary text, or select the summary and use the edit button at the bottom, to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-z49ph4y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-z49ph4y",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block. SiYuan-format HTML and PDF previews display summaries. Deleting an inner summary preserves the nodes and the outer summary. Nested configurations require a newer client; older clients preserve the configuration and display the source list instead of the mind map."
+				}
+			]
+		},
+		{
 			"ID": "20210604230145-zsjeri5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -3292,7 +3570,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-top2oxl",
-				"updated": "20260905124213"
+				"updated": "20261003234156"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3326,7 +3604,39 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. Switching in a read-only view is temporary. Removing the tab layout preserves every title and its content in order."
+					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. In a locked document, the last tab viewed is saved in the local workspace without changing the document default. Published pages, read-only kernels and encrypted notebooks keep this position only for the current session. Removing the tab layout preserves every title and its content in order."
+				}
+			]
+		},
+		{
+			"ID": "20261003234156-ki04gzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003234156-ki04gzc",
+				"updated": "20261003234156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use a tab item's menu to choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Zoom in"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Only that item and its title are displayed, and backlinks follow that item. Whether backlinks include its child blocks follows the existing setting. Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Exit focus"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to restore the full tab group. Nested tab groups inside the focused item can still be switched normally."
 				}
 			]
 		},
@@ -3737,7 +4047,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-qr9enpx",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -3765,12 +4075,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0008",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. When the cell contains only one ordinary paragraph, "
+					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3779,16 +4089,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " moves to the same column in the next row, or inserts a paragraph after the table when on the last row. "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " switches cells, and "
+					"Data": " creates a new paragraph, continues a list item, or inserts a line break in code according to the normal editor rules. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3797,7 +4098,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " inserts a line break within the cell. With headings, multiple paragraphs, or other block content, Enter edits within the cell according to the current content type. Lists and code blocks use their own line-break and indentation behavior. Close suggestions, then press "
+					"Data": " inserts a soft line break within a paragraph. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " switch cells; lists and code blocks retain their indentation and outdent behavior. Close suggestions, then press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3806,7 +4125,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " or click outside the cell to finish editing and save automatically."
+					"Data": " or click outside the cell to finish editing and save automatically. Copying a table as plain text preserves blank lines between paragraphs within a cell."
 				}
 			]
 		},
@@ -4061,7 +4380,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604230350-ql890l0",
-				"updated": "20210608004924"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -4078,6 +4397,20 @@
 				"id": "20220909095329-0tocxte",
 				"updated": "20220909095329"
 			}
+		},
+		{
+			"ID": "20261002002136-2v39dr6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002002136-2v39dr6",
+				"updated": "20261002002136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over the block to reveal the small handles outside its border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
+				}
+			]
 		},
 		{
 			"ID": "20210608121322-k9l5wuv",
@@ -5371,7 +5704,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260928090424-voiqqta",
-				"updated": "20260928090424"
+				"updated": "20260929221400"
 			},
 			"Children": [
 				{
@@ -5403,7 +5736,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " below Right to Left (RTL). This option is off by default. Paragraphs and headings use their first strong directional character to choose RTL or LTR; numbers, punctuation, and emoji at the beginning do not decide the direction. Manual block and inline directions take priority. List marker positions and table column order keep their existing settings. Preview and HTML/PDF export also use automatic text direction."
+					"Data": " below Right to Left (RTL). This option is off by default. Paragraphs and headings use their first strong directional character to choose RTL or LTR; numbers, punctuation, and emoji at the beginning do not decide the direction. Manual block and inline directions take priority. Each list item, including nested items, independently follows the direction of its own first text block: checkboxes, bullets, numbers, and indentation move to the corresponding side. Manual list directions take priority. Table column order keeps its existing setting. Preview and HTML/PDF export also use automatic text direction."
 				}
 			]
 		}

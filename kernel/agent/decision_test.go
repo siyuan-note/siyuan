@@ -12,7 +12,7 @@ import (
 func TestDecisionCapabilityAvailabilityAndApproval(t *testing.T) {
 	original := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
+	kernelModel.Conf.AI.Store(conf.NewAI())
 	t.Cleanup(func() { kernelModel.Conf = original })
 	check := func(want bool) *capabilitySet {
 		t.Helper()
@@ -29,21 +29,21 @@ func TestDecisionCapabilityAvailabilityAndApproval(t *testing.T) {
 		return set
 	}
 	check(false)
-	kernelModel.Conf.AI.Decision.Enabled = true
+	kernelModel.Conf.AI.Load().Decision.Enabled = true
 	check(false)
-	kernelModel.Conf.AI.Decision.APIKey = "key"
+	kernelModel.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey = "key"
 	set := check(true)
 	registration := set.registration("decision")
-	if !tools.DecisionTool.AgentOnly || !needsCapabilityConfirm(registration, "evaluate", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(registration, "evaluate", nil, false, nil); !tools.DecisionTool.AgentOnly || !required {
 		t.Fatal("decision bypassed data egress/cost confirmation")
 	}
-	kernelModel.Conf.AI.Decision.Enabled = false
+	kernelModel.Conf.AI.Load().Decision.Enabled = false
 	if capabilityStillExecutable(registration, nil) {
 		t.Fatal("disabled decision remained executable")
 	}
 	check(false)
-	kernelModel.Conf.AI.Decision.Enabled = true
-	kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides["native/backend/decision"] = "deny"
+	kernelModel.Conf.AI.Load().Decision.Enabled = true
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy.Overrides["native/backend/decision"] = "deny"
 	check(false)
 	if capabilityStillExecutable(registration, nil) {
 		t.Fatal("denied decision remained executable")

@@ -17,7 +17,7 @@ import (
 
 func TestAPIContractAIAgentInstructions(t *testing.T) {
 	aiContractConfiguration(t)
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	engine := gin.New()
 	engine.POST("/api/ai/agent/getInstructions", getAgentInstructions)
 	engine.POST("/api/ai/agent/setInstructions", setAgentInstructions)

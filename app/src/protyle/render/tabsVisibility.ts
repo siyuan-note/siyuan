@@ -1,5 +1,23 @@
-export const isHiddenTabContent = (element: Element) =>
-    typeof element?.closest === "function" && !!element.closest(".tab-item[data-tabs-hidden=\"true\"]");
+export const isHiddenTabContent = (element: Element) => {
+    let item = typeof element?.closest === "function" ? element.closest(".tab-item") : null;
+    while (item) {
+        const hidden = item.getAttribute("data-tabs-hidden");
+        if (hidden === "true") {
+            return true;
+        }
+        const tabs = item.parentElement;
+        // 新插入的页签尚未渲染时，按持久选择判断正文可见性，避免光标触发额外切换。
+        if (hidden !== "false" && tabs?.classList.contains("tabs")) {
+            const items = Array.from(tabs.children).filter(child => child.classList.contains("tab-item"));
+            const selected = items.find(child => child.getAttribute("data-node-id") === tabs.getAttribute("tabs-active-id")) || items[0];
+            if (selected !== item) {
+                return true;
+            }
+        }
+        item = tabs?.closest(".tab-item");
+    }
+    return false;
+};
 
 // 普通文本选区只携带可见正文；块选择通过原始 BlockDOM 保留全部页签。
 export const visibleTabsSelectionHTML = (html: string) => {

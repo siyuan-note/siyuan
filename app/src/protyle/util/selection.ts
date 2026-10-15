@@ -980,7 +980,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         cursorElement = getContenteditableElement(element);
     } else {
         Array.from(element.querySelectorAll('[contenteditable="true"]')).reverse().find(item => {
-            if (item.getBoundingClientRect().width > 0) {
+            if (!isHiddenTabContent(item) && item.getBoundingClientRect().width > 0) {
                 cursorElement = item;
                 return true;
             }

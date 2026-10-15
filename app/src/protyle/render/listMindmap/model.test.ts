@@ -3737,7 +3737,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     };
     class ListHint {${fill.getText(hintSource)}}`, {compilerOptions: {target: typescript.ScriptTarget.ES2021}}).outputText;
     const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget} = (() => {" +
-        ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
+        ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsVisibility.ts", "../tabsRender.ts"]
             .map(file => compile(path.join(__dirname, file))).join("\n") +
         "return {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget};})();\n";
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +

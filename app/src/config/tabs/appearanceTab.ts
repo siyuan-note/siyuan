@@ -139,34 +139,26 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
             setEditorFontSize(value as number);
         },
     });
-    group.button({
-        id: "manageColors",
-        title: window.siyuan.languages.manageColors,
-        label: window.siyuan.languages.config,
-        icon: "iconSettings",
-        keywords: [window.siyuan.languages.color, window.siyuan.languages.colorFont, window.siyuan.languages.colorPrimary],
+    const colorOptions: {type: TInlineStyleType; label: string}[] = [
+        {type: "style1", label: window.siyuan.languages.color},
+        {type: "color", label: window.siyuan.languages.colorFont},
+        {type: "backgroundColor", label: window.siyuan.languages.colorPrimary},
+    ];
+    group.slot({
+        key: "manageColors",
+        keywords: [window.siyuan.languages.manageColors, ...colorOptions.map(option => option.label)],
+        html: () => genStackHtml(colorOptions.map((option, index) => ({
+            left: {
+                kind: index === 0 ? "title" : "desc",
+                text: index === 0 ? window.siyuan.languages.manageColors : "",
+            },
+            right: {kind: "button", id: `manageColors-${option.type}`, label: option.label, icon: "iconSettings"},
+        }))),
         afterMount: (root) => {
-            const button = root.querySelector<HTMLButtonElement>("#manageColors");
-            button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
-            button.addEventListener("click", (event) => {
-                event.stopPropagation();
-                toggleMenu({
-                    target: button,
-                    build: (_menu, session) => {
-                        const menu = new Menu();
-                        const options: {type: TInlineStyleType; label: string}[] = [
-                            {type: "style1", label: window.siyuan.languages.color},
-                            {type: "color", label: window.siyuan.languages.colorFont},
-                            {type: "backgroundColor", label: window.siyuan.languages.colorPrimary},
-                        ];
-                        options.forEach(({type, label}) => menu.addItem({
-                            label,
-                            click: () => { openInlineStyleDialog(type); },
-                        }));
-                        const rect = button.getBoundingClientRect();
-                        session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, target: button}));
-                    },
-                });
+            colorOptions.forEach(({type}) => {
+                const button = root.querySelector<HTMLButtonElement>(`#manageColors-${type}`);
+                button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
+                button.addEventListener("click", () => { openInlineStyleDialog(type); });
             });
         },
     });

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261015131447"
+		"updated": "20261016011750"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-sg4pt12",
-				"updated": "20261015131447"
+				"updated": "20261016011750"
 			},
 			"Children": [
 				{
@@ -839,12 +839,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015131447-lgzshyq",
-				"updated": "20261015131447"
+				"updated": "20261016011750"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use "
+					"Data": "Under "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -880,7 +880,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose a color type and manage combined colors, font colors, and background colors."
+					"Data": ", click the corresponding button to manage combined colors, font colors, or background colors."
 				}
 			]
 		},

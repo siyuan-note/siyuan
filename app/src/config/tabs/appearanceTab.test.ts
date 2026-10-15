@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {genStackHtml} from "../render/render";
 const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const {parse} = require("ifdef-loader/preprocessor");
@@ -21,9 +22,6 @@ for (const mobile of [true, false]) {
             },
         };
         const openedColors: string[] = [];
-        const colorMenuItems: Array<{label: string; click: () => void}> = [];
-        let menuTarget: unknown;
-        let menuPosition: unknown;
         const windowContext = {siyuan: {
             languages: new Proxy({}, {get: (_, key) => String(key)}),
             config: {langs: [] as unknown[], readonly: false},
@@ -40,31 +38,18 @@ for (const mobile of [true, false]) {
             } : name === "../entryVisibility/ui" ? toolbarSettings :
                 name === "../../protyle/toolbar/inlineStyleDialog" ? {
                     openInlineStyleDialog: (type: string) => openedColors.push(type),
-                } : name === "../../menus/menuToggle" ? {toggleMenu: (options: {
-                    target: unknown;
-                    build: (menu: unknown, session: {show: (render: () => void) => void}) => void;
-                }) => {
-                    menuTarget = options.target;
-                    options.build(undefined, {show: render => render()});
-                }} : name === "../../plugin/Menu" ? {Menu: class {
-                    addItem(item: typeof colorMenuItems[number]) { colorMenuItems.push(item); }
-                    open(position: unknown) { menuPosition = position; }
-                }} :
+                } : name === "../render/render" ? {genStackHtml} :
                 new Proxy({}, {get: () => () => ({})}),
         });
         const groups: string[] = [];
-        const slots: Array<{key: string; html: () => string; afterMount: () => void}> = [];
+        const slots: Array<{key: string; keywords: string[]; html: () => string; afterMount: (root?: unknown) => void}> = [];
         const switches: Array<{id: string; spec: {title: string; readConfig?: () => boolean; save?: unknown}}> = [];
-        const buttons: Array<{id: string; title: string; keywords: string[];
-            afterMount: (root: unknown) => void}> = [];
         const group = new Proxy({}, {
             get: (_, method) => (...args: unknown[]) => {
                 if (method === "slot") {
                     slots.push(args[0] as typeof slots[number]);
                 } else if (method === "switch") {
                     switches.push({id: args[0] as string, spec: args[1] as typeof switches[number]["spec"]});
-                } else if (method === "button") {
-                    buttons.push(args[0] as typeof buttons[number]);
                 }
             },
         });
@@ -87,32 +72,32 @@ for (const mobile of [true, false]) {
         assert.equal(typeof pageScrollSwitch.spec.readConfig, "function");
         assert.equal(typeof pageScrollSwitch.spec.save, "function");
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
-        const colors = buttons.find(item => item.id === "manageColors");
+        const colors = slots.find(item => item.key === "manageColors");
         assert.ok(colors);
-        assert.equal(colors.title, "manageColors");
-        assert.equal(colors.keywords.join(","), "color,colorFont,colorPrimary");
-        let clickColors: (event: {stopPropagation: () => void}) => void;
-        const button = {
-            disabled: true,
-            addEventListener: (_name: string, listener: typeof clickColors) => { clickColors = listener; },
-            getBoundingClientRect: () => ({left: 100, bottom: 200, height: 28}),
-        };
-        const root = {querySelector: (selector: string) => selector === "#manageColors" ? button : undefined};
+        assert.equal(colors.keywords.join(","), "manageColors,color,colorFont,colorPrimary");
+        const html = colors.html();
+        assert.equal((html.match(/<button /g) || []).length, 3);
+        assert.equal((html.match(/xlink:href="#iconSettings"/g) || []).length, 3);
+        const buttons = new Map(["style1", "color", "backgroundColor"].map(type => {
+            const selector = `#manageColors-${type}`;
+            assert.ok(html.includes(`id="${selector.slice(1)}"`));
+            return [selector, {disabled: true, click: () => {},
+                addEventListener(_name: string, listener: () => void) { this.click = listener; }}] as const;
+        }));
+        const root = {querySelector: (selector: string) => buttons.get(selector)};
         colors.afterMount(root);
-        assert.equal(button.disabled, false);
-        clickColors({stopPropagation() {}});
-        assert.equal(menuTarget, button);
-        assert.equal(colorMenuItems.map(item => item.label).join(","), "color,colorFont,colorPrimary");
-        colorMenuItems.forEach(item => item.click());
+        buttons.forEach(button => {
+            assert.equal(button.disabled, false);
+            button.click();
+        });
         assert.deepEqual(openedColors, ["style1", "color", "backgroundColor"]);
-        assert.equal((menuPosition as {target: unknown}).target, button);
         windowContext.siyuan.config.readonly = true;
         colors.afterMount(root);
-        assert.equal(button.disabled, true);
+        buttons.forEach(button => assert.equal(button.disabled, true));
         windowContext.siyuan.config.readonly = false;
         windowContext.siyuan.isPublish = true;
         colors.afterMount(root);
-        assert.equal(button.disabled, true);
+        buttons.forEach(button => assert.equal(button.disabled, true));
     });
 }
 

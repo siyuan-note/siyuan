@@ -671,6 +671,7 @@ class ListMindmapController {
             onSave: (html, undo, redo) => this.change(() => replaceListMindmapContent(this.list, id, html), true, id, {undo, redo}),
             onResize: () => this.view.refreshLayout(),
             onAdd: kind => this.add(id, kind),
+            isPanTarget: event => this.view.isPanTarget(event),
             onFinish: () => {
                 if (this.activeEditor !== editor) {
                     return;

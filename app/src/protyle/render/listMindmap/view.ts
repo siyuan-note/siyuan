@@ -394,6 +394,9 @@ export class ListMindmapView {
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (this.editingId && this.isPanTarget(event)) {
+            return;
+        }
         if (this.summarySelecting && (this.viewport.contains(target) || this.summaryControls.contains(target))) {
             return;
         }
@@ -889,6 +892,7 @@ export class ListMindmapView {
         }
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
+        this.revealNode(id);
     }
 
     public setEditing(id?: string) {
@@ -2065,6 +2069,16 @@ export class ListMindmapView {
         }
     };
 
+    public isPanTarget(event: PointerEvent) {
+        const target = event.target as HTMLElement;
+        return !this.locked && !this.pinching && !this.summarySelecting && !this.relationFrom &&
+            (event.pointerType !== "touch" || event.isPrimary) && [0, 2].includes(event.button) &&
+            this.viewport.contains(target) && target.closest(".mindmap-view") === this.options.host &&
+            !target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing") &&
+            (this.panning || event.button === 2 ||
+                !target.closest(".mindmap-view__node, .mindmap-view__summary") && !this.findLine(event));
+    }
+
     private pointerDown = (event: PointerEvent) => {
         if (this.locked || this.pinching || event.pointerType === "touch" && !event.isPrimary) {
             return;
@@ -2084,6 +2098,12 @@ export class ListMindmapView {
         const element = target.closest<HTMLElement>(".mindmap-view__node");
         const id = element?.dataset.mindmapId;
         this.preparePointer(event);
+        if (this.editingId && this.isPanTarget(event)) {
+            // 平移只改变画布位置，保留节点编辑器及其文字选区。
+            event.preventDefault();
+            this.beginPointer(event);
+            return;
+        }
         this.finishThen(() => {
             if (this.pendingPointerId === event.pointerId) {
                 this.beginPointer(event, id);
@@ -2170,7 +2190,9 @@ export class ListMindmapView {
         if (id) {
             this.selectNode(id);
         }
-        this.options.host.focus({preventScroll: true});
+        if (!this.editingId || id) {
+            this.options.host.focus({preventScroll: true});
+        }
         this.pointer = {
             pointerId: event.pointerId,
             rightButton: event.button === 2,
@@ -2413,7 +2435,13 @@ export class ListMindmapView {
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
         } else if (!moved && !id && !pointer.rightButton && !this.readOnly && !this.panning) {
-            this.selectLine(event);
+            if (this.editingId) {
+                this.clearSelection();
+            }
+            this.finishThen(() => {
+                this.options.host.focus({preventScroll: true});
+                this.selectLine(event);
+            });
         }
     };
 

@@ -33,6 +33,7 @@ interface ListMindmapEditorOptions {
     onAdd: (kind: "child" | "sibling") => Promise<void>;
     onFinish: () => void;
     onUndo: (redo: boolean, selection?: Record<string, string>) => void;
+    isPanTarget?: (event: PointerEvent) => boolean;
     replaceFirstParagraph?: string;
     selection?: Record<string, string>;
 }
@@ -486,7 +487,9 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog");
     };
     document.addEventListener("pointerdown", event => {
-        if (!belongs(event.target as Node)) {
+        if (options.isPanTarget?.(event)) {
+            captureBeforeChange();
+        } else if (!belongs(event.target as Node)) {
             finish();
         } else {
             // 工具栏浮层位于节点 host 外，格式命令执行前仍需保存原文字选区。

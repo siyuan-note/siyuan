@@ -62,6 +62,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         document.body.append(container);
         const state = {
             focusedText: "",
+            panTarget: undefined as Element | undefined,
             flushed: 0,
             destroyed: 0,
             finished: 0,
@@ -183,6 +184,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             canEdit: () => element.isConnected,
             onResize: noop,
             onAdd: async (kind: string) => { state.additions.push(kind); },
+            isPanTarget: (event: PointerEvent) => event.target === state.panTarget,
             onFinish: () => state.finished++,
             onUndo: noop,
             onSave: async (html: string) => {
@@ -249,6 +251,29 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
     // 粘贴到选中节点时保留原正文，在当前可见正文末尾启动上传；上传结束前保留编辑器。
+    const panEditor = create(paragraph("body", "Keep caret"));
+    const panTarget = document.createElement("div");
+    document.body.append(panTarget);
+    panEditor.state.panTarget = panTarget;
+    const editable = panEditor.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+    editable.focus();
+    const panRange = document.createRange();
+    panRange.setStart(editable.firstChild, 3);
+    panRange.collapse(true);
+    getSelection().removeAllRanges();
+    getSelection().addRange(panRange);
+    panTarget.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+    await settle();
+    check.equal(panEditor.state.finished, 0, "canvas panning does not close the node editor");
+    check.equal(document.activeElement, editable);
+    check.equal(getSelection().anchorOffset, 3, "canvas panning retains the insertion point");
+    await require("electron").ipcRenderer.invoke("mindmap-view-editor-type", "X");
+    check.equal(editable.textContent, "KeeXp caret", "typing continues at the retained insertion point");
+    document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+    await until(() => panEditor.state.finished === 1);
+    panTarget.remove();
+    await panEditor.remove();
+
     const imageEditor = create(paragraph("body", "Keep text"));
     const images = [new File(["image"], "image.png", {type: "image/png"})];
     imageEditor.editor.pasteImages(images);

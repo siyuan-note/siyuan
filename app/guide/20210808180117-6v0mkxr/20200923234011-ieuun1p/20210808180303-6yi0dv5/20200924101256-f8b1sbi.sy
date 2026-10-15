@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20261014223520"
+		"updated": "20261015221015"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20261014223520"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-k3pzlyv",
-				"updated": "20261014223520"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -139,7 +139,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Auto-close [[ / 【【"
+					"TextMarkTextContent": "Auto-close [[ or 【【"
 				},
 				{
 					"Type": "NodeText",

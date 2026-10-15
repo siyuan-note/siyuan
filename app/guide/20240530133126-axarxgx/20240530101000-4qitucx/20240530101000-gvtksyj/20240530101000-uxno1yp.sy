@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20261014223520"
+		"updated": "20261015221015"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-3mutq27",
 				"id": "20240530101000-ggy8jav",
-				"updated": "20261014223520"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -110,7 +110,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-0xqno1c",
-				"updated": "20261014223520"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -143,7 +143,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "[[ / 【【 を自動で閉じる"
+					"TextMarkTextContent": "[[ または 【【 を自動で閉じる"
 				},
 				{
 					"Type": "NodeText",

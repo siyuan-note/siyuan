@@ -6,7 +6,7 @@
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容區塊",
 		"type": "doc",
-		"updated": "20261014223520"
+		"updated": "20261015221015"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-x5qwass",
-				"updated": "20261014223520"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-brzvwem",
-				"updated": "20261014223520"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -139,7 +139,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "自動閉合 [[ / 【【"
+					"TextMarkTextContent": "自動閉合 [[ 或 【【"
 				},
 				{
 					"Type": "NodeText",

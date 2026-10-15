@@ -162,33 +162,82 @@ def prepare_windows_crt(target, directory, source):
     (directory / "vc-runtime-files.json").write_text(json.dumps({name: digest(directory / name) for name in sorted(selected)}, indent=2) + "\n", encoding="utf-8")
 
 
-def linux_worker_environment(target):
+def linux_worker_zig(check_only=False):
+    config = MANIFEST["linuxWorker"]
+    host = {"amd64": "x86_64", "arm64": "aarch64"}.get(platform.machine().lower(), platform.machine().lower())
+    if platform.system() != "Linux" or host not in config["toolchains"]:
+        raise RuntimeError("Default Linux OCR toolchain requires a Linux AMD64 or ARM64 build host")
+    entry = config["toolchains"][host]
+    archive_name = entry["url"].rsplit("/", 1)[1]
+    directory = CACHE / archive_name.removesuffix(".tar.xz")
+    executable = directory / "zig"
+    if check_only:
+        return executable
+    archive = CACHE / archive_name
+    download(entry, archive)
+    stamp = directory / ".siyuan-source-sha256"
+    if not executable.is_file() or not stamp.is_file() or stamp.read_text(encoding="utf-8") != entry["sha256"]:
+        # 仅解包已校验的官方工具链，缓存目录不随安装包分发。
+        with tempfile.TemporaryDirectory(prefix="zig-", dir=CACHE) as temporary:
+            with tarfile.open(archive) as source:
+                source.extractall(temporary, filter="data")
+            extracted = Path(temporary) / directory.name
+            if directory.exists():
+                if directory.resolve().parent != CACHE.resolve() or directory.is_symlink():
+                    raise RuntimeError(f"Invalid OCR toolchain cache directory: {directory}")
+                shutil.rmtree(directory)
+            extracted.rename(directory)
+        stamp.write_text(entry["sha256"], encoding="utf-8")
+    version = subprocess.check_output([str(executable), "version"], encoding="utf-8").strip()
+    if version != config["zigVersion"]:
+        raise RuntimeError(f"Unexpected OCR compiler version: {version}")
+    return executable
+
+
+def linux_worker_environment(target, check_only=False):
     architecture = target.split("-", 1)[1]
     triples = {"amd64": "x86_64-linux-gnu", "arm64": "aarch64-linux-gnu"}
-    host = {"x86_64": "amd64", "amd64": "amd64", "aarch64": "arm64", "arm64": "arm64"}.get(platform.machine().lower())
     variable = "SIYUAN_OCR_CC_" + architecture.upper()
-    compiler = os.environ.get(variable) or ("gcc" if host == architecture and platform.system() == "Linux" else triples[architecture] + "-gcc")
-    command = shlex.split(compiler)
+    compiler = os.environ.get(variable)
+    glibc = MANIFEST["linuxWorker"]["glibc"]
+    command = shlex.split(compiler) if compiler else [str(linux_worker_zig(check_only)), "cc", "-target", f"{triples[architecture]}.{glibc}"]
+    environment = os.environ.copy()
+    environment.update(GOOS="linux", GOARCH=architecture, CGO_ENABLED="1", CC=shlex.join(command))
+    if not compiler and check_only:
+        return environment
     if not command or not shutil.which(command[0]):
-        package = {"amd64": "gcc-x86-64-linux-gnu", "arm64": "gcc-aarch64-linux-gnu"}[architecture]
-        raise RuntimeError(f"Missing OCR compiler {compiler}. Install gcc/{package} or set {variable} to a glibc target compiler")
-    triple = subprocess.check_output(command + ["-dumpmachine"], encoding="utf-8").strip()
-    if triple.split("-", 1)[0] != triples[architecture].split("-", 1)[0] or "-linux-gnu" not in triple:
-        raise RuntimeError(f"OCR compiler {compiler} targets {triple}; {target} requires {triples[architecture]} (glibc)")
+        raise RuntimeError(f"Missing OCR compiler {compiler}; set {variable} to a glibc <= {glibc} target compiler")
+    if compiler:
+        triple = subprocess.check_output(command + ["-dumpmachine"], encoding="utf-8").strip()
+        if triple.split("-", 1)[0] != triples[architecture].split("-", 1)[0] or "-linux-gnu" not in triple:
+            raise RuntimeError(f"OCR compiler {compiler} targets {triple}; {target} requires {triples[architecture]} (glibc)")
     macros = subprocess.check_output(command + ["-dM", "-E", "-x", "c", "-"], input="#include <features.h>\n", encoding="utf-8")
     if not re.search(r"^#define __GLIBC__ \d+$", macros, re.M):
         raise RuntimeError(f"OCR compiler {compiler} does not use glibc headers; musl wrappers cannot load the bundled runtime")
-    environment = os.environ.copy()
-    # 内核可使用 musl 静态链接；识别辅助进程必须匹配随包分发的 glibc 原生运行库。
-    environment.update(GOOS="linux", GOARCH=architecture, CGO_ENABLED="1", CC=shlex.join(command))
+    major = re.search(r"^#define __GLIBC__ (\d+)$", macros, re.M)
+    minor = re.search(r"^#define __GLIBC_MINOR__ (\d+)$", macros, re.M)
+    if not minor or (int(major[1]), int(minor[1])) > tuple(map(int, glibc.split("."))):
+        raise RuntimeError(f"OCR compiler must target glibc <= {glibc}; use the default Zig toolchain or an older sysroot")
+    # 不继承内核的 musl 编译器，双架构统一使用指定的 glibc 兼容目标。
     return environment
 
 
-def runtime_prerequisites(target, build_worker):
+def verify_linux_glibc(path):
+    environment = {**os.environ, "LC_ALL": "C"}
+    output = subprocess.check_output(["readelf", "--version-info", "--wide", str(path)], encoding="utf-8", env=environment)
+    versions = [tuple(map(int, value.split("."))) for value in re.findall(r"Name: GLIBC_(\d+(?:\.\d+)+)", output)]
+    limit = MANIFEST["linuxWorker"]["glibc"]
+    if not versions or max(versions) > tuple(map(int, limit.split("."))):
+        raise RuntimeError(f"Linux OCR artifact must require glibc <= {limit}: {path}")
+
+
+def runtime_prerequisites(target, build_worker, check_only=False):
     if target.startswith("windows-"):
         return windows_crt_directory(target)
     if target.startswith("linux-") and build_worker:
-        return linux_worker_environment(target)
+        if not shutil.which("readelf"):
+            raise RuntimeError("Missing readelf; install binutils to verify Linux OCR compatibility")
+        return linux_worker_environment(target, check_only)
     return None
 
 
@@ -347,6 +396,8 @@ def prepare_runtime(target, build_worker, prerequisites=None):
         prepare_windows_crt(target, directory, prerequisites)
     if target.startswith("linux-") and build_worker:
         subprocess.run(["go", "build", "-trimpath", "-ldflags=-s -w", "-o", str(directory / "siyuan-ocr"), "./ocr/cmd/ocr-worker"], cwd=ROOT / "kernel", env=prerequisites, check=True)
+        verify_linux_glibc(directory / "siyuan-ocr")
+        verify_linux_glibc(directory / entry["library"])
 
 
 def remove_obsolete_models():
@@ -368,7 +419,7 @@ def main():
     args = parser.parse_args()
     if args.check_only and args.runtime == "none":
         parser.error("--check-only requires --runtime")
-    prerequisites = runtime_prerequisites(args.runtime, args.build_worker)
+    prerequisites = runtime_prerequisites(args.runtime, args.build_worker, check_only=args.check_only)
     if args.check_only:
         print(f"OCR prerequisites ready: {args.runtime}")
         return

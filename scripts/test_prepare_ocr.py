@@ -355,39 +355,43 @@ class ResourceTests(unittest.TestCase):
                 patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
                 patch.object(prepare, "CACHE", self.root / "cache"):
             prepare.prepare_runtime("linux-amd64", False)
-            with patch.object(prepare, "download") as download, patch.object(prepare.subprocess, "run") as build:
+            with patch.object(prepare, "download") as download, patch.object(prepare.subprocess, "run") as build, \
+                    patch.object(prepare, "verify_linux_glibc") as verify:
                 prepare.prepare_runtime("linux-amd64", True, {"CC": "gcc"})
                 download.assert_not_called()
                 build.assert_called_once()
                 self.assertEqual(build.call_args.kwargs["env"], {"CC": "gcc"})
+                self.assertEqual(verify.call_count, 2)
 
 
 class CompilerTests(unittest.TestCase):
-    def test_selects_native_and_cross_compilers_without_inheriting_kernel_cc(self):
-        for host, target, compiler, triple in (
-            ("x86_64", "amd64", "gcc", "x86_64-linux-gnu"),
-            ("aarch64", "arm64", "gcc", "aarch64-linux-gnu"),
-            ("x86_64", "arm64", "aarch64-linux-gnu-gcc", "aarch64-linux-gnu"),
-            ("aarch64", "amd64", "x86_64-linux-gnu-gcc", "x86_64-linux-gnu"),
+    def test_selects_glibc_228_for_both_architectures_without_inheriting_kernel_cc(self):
+        for host, target, triple in (
+            ("x86_64", "amd64", "x86_64-linux-gnu"),
+            ("aarch64", "arm64", "aarch64-linux-gnu"),
+            ("x86_64", "arm64", "aarch64-linux-gnu"),
+            ("aarch64", "amd64", "x86_64-linux-gnu"),
         ):
             with self.subTest(host=host, target=target), patch.dict(os.environ, {"CC": "wrong-linux-musl-gcc"}, clear=True), \
                     patch.object(prepare.platform, "machine", return_value=host), \
                     patch.object(prepare.platform, "system", return_value="Linux"), \
+                    patch.object(prepare, "linux_worker_zig", return_value=Path("/tools/zig")), \
                     patch.object(prepare.shutil, "which", return_value="/usr/bin/compiler"), \
-                    patch.object(prepare.subprocess, "check_output", side_effect=[triple, "#define __GLIBC__ 2\n"]) as probe:
+                    patch.object(prepare.subprocess, "check_output", return_value="#define __GLIBC__ 2\n#define __GLIBC_MINOR__ 28\n") as probe:
                 environment = prepare.linux_worker_environment("linux-" + target)
-                self.assertEqual(environment["CC"], compiler)
+                command = [str(Path("/tools/zig")), "cc", "-target", triple + ".2.28"]
+                self.assertEqual(environment["CC"], prepare.shlex.join(command))
                 self.assertEqual(environment["GOARCH"], target)
                 self.assertEqual(environment["CGO_ENABLED"], "1")
-                self.assertEqual(probe.call_args_list[0].args, ([compiler, "-dumpmachine"],))
-                self.assertEqual(probe.call_count, 2)
+                self.assertEqual(probe.call_args_list[0].args, (command + ["-dM", "-E", "-x", "c", "-"],))
+                self.assertEqual(probe.call_count, 1)
 
     def test_explicit_compiler_supports_paths_with_spaces(self):
         with patch.dict(os.environ, {"SIYUAN_OCR_CC_AMD64": "'/opt/cross tools/gcc'"}, clear=True), \
                 patch.object(prepare.platform, "machine", return_value="AMD64"), \
                 patch.object(prepare.platform, "system", return_value="Windows"), \
                 patch.object(prepare.shutil, "which", return_value="/opt/cross tools/gcc"), \
-                patch.object(prepare.subprocess, "check_output", side_effect=["x86_64-linux-gnu", "#define __GLIBC__ 2\n"]) as probe:
+                patch.object(prepare.subprocess, "check_output", side_effect=["x86_64-linux-gnu", "#define __GLIBC__ 2\n#define __GLIBC_MINOR__ 28\n"]) as probe:
             self.assertEqual(prepare.linux_worker_environment("linux-amd64")["CC"], "'/opt/cross tools/gcc'")
             self.assertEqual(probe.call_args_list[0].args, (["/opt/cross tools/gcc", "-dumpmachine"],))
 
@@ -399,11 +403,11 @@ class CompilerTests(unittest.TestCase):
                 prepare.linux_worker_environment("linux-amd64")
 
     def test_rejects_missing_wrong_architecture_and_musl_compilers(self):
-        with patch.dict(os.environ, {}, clear=True), patch.object(prepare.shutil, "which", return_value=None):
+        with patch.dict(os.environ, {"SIYUAN_OCR_CC_AMD64": "gcc"}, clear=True), patch.object(prepare.shutil, "which", return_value=None):
             with self.assertRaisesRegex(RuntimeError, "Missing OCR compiler"):
                 prepare.linux_worker_environment("linux-amd64")
         for triple in ("aarch64-linux-gnu", "x86_64-linux-musl", "x86_64-apple-darwin"):
-            with self.subTest(triple=triple), patch.dict(os.environ, {}, clear=True), \
+            with self.subTest(triple=triple), patch.dict(os.environ, {"SIYUAN_OCR_CC_AMD64": "gcc"}, clear=True), \
                     patch.object(prepare.shutil, "which", return_value="/usr/bin/gcc"), \
                     patch.object(prepare.subprocess, "check_output", return_value=triple):
                 with self.assertRaisesRegex(RuntimeError, "requires x86_64-linux-gnu"):
@@ -414,16 +418,79 @@ class CompilerTests(unittest.TestCase):
                 patch.object(prepare, "runtime_prerequisites") as prerequisites, \
                 patch.object(prepare, "download") as download, patch.object(prepare, "prepare_runtime") as runtime:
             prepare.main()
-            prerequisites.assert_called_once_with("linux-arm64", True)
+            prerequisites.assert_called_once_with("linux-arm64", True, check_only=True)
             download.assert_not_called()
             runtime.assert_not_called()
 
     def test_linux_missing_compiler_fails_before_downloading(self):
-        with patch.dict(os.environ, {}, clear=True), patch.object(prepare.shutil, "which", return_value=None), \
+        with patch.dict(os.environ, {"SIYUAN_OCR_CC_AMD64": "gcc"}, clear=True), patch.object(prepare.shutil, "which", side_effect=lambda name: "readelf" if name == "readelf" else None), \
                 patch.object(prepare, "download") as download:
             with self.assertRaisesRegex(RuntimeError, "Missing OCR compiler"):
                 prepare.prepare_runtime("linux-amd64", True)
             download.assert_not_called()
+
+    def test_explicit_newer_or_unknown_sysroot_is_rejected(self):
+        for minor in ("#define __GLIBC_MINOR__ 34\n", ""):
+            with self.subTest(minor=minor), patch.dict(os.environ, {"SIYUAN_OCR_CC_AMD64": "gcc"}, clear=True), \
+                    patch.object(prepare.shutil, "which", return_value="gcc"), \
+                    patch.object(prepare.subprocess, "check_output", side_effect=["x86_64-linux-gnu", "#define __GLIBC__ 2\n" + minor]):
+                with self.assertRaisesRegex(RuntimeError, "must target glibc <= 2.28"):
+                    prepare.linux_worker_environment("linux-amd64")
+
+    def test_default_check_only_selects_toolchain_without_downloads_or_execution(self):
+        with patch.dict(os.environ, {}, clear=True), \
+                patch.object(prepare.platform, "machine", return_value="x86_64"), \
+                patch.object(prepare.platform, "system", return_value="Linux"), \
+                patch.object(prepare, "download") as download, patch.object(prepare.subprocess, "check_output") as probe:
+            environment = prepare.linux_worker_environment("linux-arm64", check_only=True)
+            self.assertIn("aarch64-linux-gnu.2.28", environment["CC"])
+            download.assert_not_called()
+            probe.assert_not_called()
+
+    def test_artifact_verification_uses_required_symbol_versions(self):
+        for version, accepted in (("2.17", True), ("2.28", True), ("2.34", False), ("", False)):
+            with self.subTest(version=version), patch.object(prepare.subprocess, "check_output", return_value=
+                    "Name: GLIBC_" + version if version else "No version information found"):
+                if accepted:
+                    prepare.verify_linux_glibc(Path("siyuan-ocr"))
+                else:
+                    with self.assertRaisesRegex(RuntimeError, "must require glibc <= 2.28"):
+                        prepare.verify_linux_glibc(Path("siyuan-ocr"))
+
+    def test_default_toolchain_extracts_verified_archive_and_reuses_cache(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            archive = root / "toolchain.tar.xz"
+            with tarfile.open(archive, "w:xz") as output:
+                info = tarfile.TarInfo("toolchain/zig")
+                info.size = 8
+                output.addfile(info, io.BytesIO(b"compiler"))
+            entry = {"url": archive.as_uri(), "sha256": prepare.digest(archive), "size": archive.stat().st_size}
+            manifest = {"linuxWorker": {"zigVersion": "0.15.2", "toolchains": {"x86_64": entry}}}
+            with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", root / "cache"), \
+                    patch.object(prepare.platform, "machine", return_value="x86_64"), \
+                    patch.object(prepare.platform, "system", return_value="Linux"), \
+                    patch.object(prepare.subprocess, "check_output", return_value="0.15.2\n"):
+                compiler = prepare.linux_worker_zig()
+                self.assertEqual(compiler.read_bytes(), b"compiler")
+                with patch.object(prepare.tarfile, "open") as unpack:
+                    self.assertEqual(prepare.linux_worker_zig(), compiler)
+                    unpack.assert_not_called()
+
+    def test_default_toolchain_checks_version(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(prepare, "CACHE", root), patch.object(prepare, "download"), \
+                    patch.object(prepare.platform, "machine", return_value="x86_64"), \
+                    patch.object(prepare.platform, "system", return_value="Linux"):
+                directory = root / "zig-x86_64-linux-0.15.2"
+                directory.mkdir()
+                (directory / "zig").write_bytes(b"compiler")
+                (directory / ".siyuan-source-sha256").write_text(
+                    prepare.MANIFEST["linuxWorker"]["toolchains"]["x86_64"]["sha256"], encoding="utf-8")
+                with patch.object(prepare.subprocess, "check_output", return_value="unexpected\n"):
+                    with self.assertRaisesRegex(RuntimeError, "Unexpected OCR compiler version"):
+                        prepare.linux_worker_zig()
 
 
 if __name__ == "__main__":

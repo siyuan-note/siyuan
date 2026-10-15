@@ -1405,15 +1405,15 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOpti
 
 func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string,
 	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
-	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, mergeHeadingOptions...)
+	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, false, mergeHeadingOptions...)
 }
 
-func ExportPreviewHTMLWithTitle(id string, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed bool,
+func ExportPreviewHTMLWithTitle(id string, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed, excludeTitleImage bool,
 	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
-	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, mergeHeadingOptions...)
+	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, excludeTitleImage, mergeHeadingOptions...)
 }
 
-func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed bool,
+func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed, excludeTitleImage bool,
 	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
 	if err := prepareExportBlockAssets(id, merge); err != nil {
 		util.PushErrMsg(err.Error(), 7000)
@@ -1481,14 +1481,15 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 				AddTitle:              addTitle,
 				InlineMemo:            confExportSnapshot.InlineMemo,
 			},
-			WYSIWYG:          true,
-			RichTableCells:   true,
-			KeepFold:         keepFold,
-			AVHiddenCol:      true,
-			CustomTitle:      customTitle,
-			AddDocAnchorSpan: true,
-			References:       nil,
-			AVPublishFilter:  nil,
+			WYSIWYG:           true,
+			RichTableCells:    true,
+			KeepFold:          keepFold,
+			AVHiddenCol:       true,
+			CustomTitle:       customTitle,
+			ExcludeTitleImage: excludeTitleImage,
+			AddDocAnchorSpan:  true,
+			References:        nil,
+			AVPublishFilter:   nil,
 		})
 		if nil != exportTreeErr {
 			return exportTreeErr
@@ -3638,7 +3639,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 
 	// 导出时支持导出题头图 https://github.com/siyuan-note/siyuan/issues/4372
 	titleImgPath := treenode.GetDocTitleImgPath(ret.Root)
-	if "" != titleImgPath {
+	if "" != titleImgPath && !exportOpts.ExcludeTitleImage {
 		p := &ast.Node{Type: ast.NodeParagraph}
 		titleImg := &ast.Node{Type: ast.NodeImage}
 		titleImg.AppendChild(&ast.Node{Type: ast.NodeBang})

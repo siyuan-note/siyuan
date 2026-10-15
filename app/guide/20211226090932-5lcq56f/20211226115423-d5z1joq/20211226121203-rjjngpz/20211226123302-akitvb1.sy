@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20261002211013"
+		"updated": "20261015174914"
 	},
 	"Children": [
 		{
@@ -465,7 +465,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223850-ar008cn",
-				"updated": "20250115151217"
+				"updated": "20261015174914"
 			},
 			"Children": [
 				{
@@ -568,7 +568,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223850-k4b4s53",
-				"updated": "20260809232000"
+				"updated": "20261015174914"
 			},
 			"Children": [
 				{
@@ -803,6 +803,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中的對應選項。"
+				}
+			]
+		},
+		{
+			"ID": "20261015174914-be7kaig",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015174914-be7kaig",
+				"updated": "20261015174914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在「導出為圖片」對話框中，關閉「匯出題頭圖」可排除題頭圖並保留正文圖片。此開關預設開啟，獨立於「新增文件標題」，會記住選擇，並套用於預覽、導出文件和對話框內的「複製為 PNG」。原始文檔不受影響。"
 				}
 			]
 		},

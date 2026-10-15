@@ -1,4 +1,5 @@
 {
+	"exportTitleImage": "Exportar imagen de título",
 	"automationCollectBlocks": "Un bloque cumple las condiciones",
 	"automationCollectionScope": "Ámbito de seguimiento (incluye subdocumentos)",
 	"automationCollectionPreview": "Vista previa de bloques coincidentes",

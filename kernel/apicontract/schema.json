@@ -24551,6 +24551,16 @@
             }
           ]
         },
+        "excludeTitleImage": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },

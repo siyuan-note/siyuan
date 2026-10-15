@@ -1,3 +1,16 @@
+.export-img__options {
+  justify-content: flex-start;
+  gap: 8px;
+
+  > label {
+    flex-shrink: 0;
+  }
+
+  > input {
+    min-width: 120px;
+  }
+}
+
 .export-img {
   box-sizing: border-box;
   position: relative;

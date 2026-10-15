@@ -1,4 +1,5 @@
 {
+	"exportTitleImage": "导出题头图",
 	"automationCollectBlocks": "普通块符合条件",
 	"automationCollectionScope": "监听范围（包含子文档）",
 	"automationCollectionPreview": "预览匹配块",

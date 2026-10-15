@@ -1,4 +1,5 @@
 {
+	"exportTitleImage": "Export title image",
 	"automationCollectBlocks": "Block matches conditions",
 	"automationCollectionScope": "Watch scope (includes subdocuments)",
 	"automationCollectionPreview": "Preview matching blocks",

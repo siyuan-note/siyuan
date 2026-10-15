@@ -1,4 +1,5 @@
 {
+	"exportTitleImage": "제목 이미지 내보내기",
 	"automationCollectBlocks": "일반 블록이 조건과 일치",
 	"automationCollectionScope": "감시 범위(하위 문서 포함)",
 	"automationCollectionPreview": "일치하는 블록 미리 보기",

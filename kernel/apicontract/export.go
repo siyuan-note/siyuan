@@ -120,6 +120,8 @@ type ExportHTMLRequest struct {
 }
 type ExportPreviewHTMLRequest struct {
 	ID string `json:"id" api:"trim"`
+	// ExcludeTitleImage 仅在 image=true 时排除题头图；省略、null 或 false 保留题头图，不影响文档标题和正文图片。
+	ExcludeTitleImage bool `json:"excludeTitleImage" api:"optional,nullable"`
 	// KeepJSEmbed 保留 JavaScript 嵌入块供受信任的前端异步渲染；默认关闭，内核不执行脚本。
 	KeepJSEmbed             bool   `json:"keepJSEmbed" api:"optional,nullable"`
 	KeepFold                bool   `json:"keepFold" api:"optional,nullable"`

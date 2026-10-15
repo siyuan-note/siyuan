@@ -1,4 +1,5 @@
 {
+	"exportTitleImage": "匯出題頭圖",
 	"automationCollectBlocks": "一般區塊符合條件",
 	"automationCollectionScope": "監聽範圍（包含子文件）",
 	"automationCollectionPreview": "預覽符合的區塊",

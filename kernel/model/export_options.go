@@ -26,6 +26,7 @@ type treeExportOptions struct {
 	Config                                         conf.Export
 	WYSIWYG, RichTableCells, KeepFold, AVHiddenCol bool
 	CustomTitle                                    string
+	ExcludeTitleImage                              bool
 	AddDocAnchorSpan                               bool
 	References                                     *markdownExportReferences
 	AVPublishFilter                                AVExportPublishFilter

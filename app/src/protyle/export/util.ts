@@ -51,14 +51,18 @@ export const exportImage = (id: string, copyOnly = false) => {
         <div class="export-img__watermark"></div>
     </div>
 </div>
-<div class="b3-dialog__action${copyOnly ? " fn__none" : ""}" style="justify-content: flex-start">
+<div class="b3-dialog__action export-img__options${copyOnly ? " fn__none" : ""}">
     <label class="fn__flex fn__flex-center">
         ${window.siyuan.languages.export17}
         <span class="fn__space"></span>
         <input id="addTitle" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.config.export.addTitle ? "checked" : ""}>
     </label>
-    <span class="fn__space"></span>
     <input aria-label="${window.siyuan.languages.title}" id="customTitle" class="b3-text-field fn__flex-1 fn__flex-center" placeholder="${window.siyuan.languages.title}" ${window.siyuan.config.export.addTitle ? "" : "disabled"}>
+    <label class="fn__flex fn__flex-center">
+        ${window.siyuan.languages.exportTitleImage}
+        <span class="fn__space"></span>
+        <input id="titleImage" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].titleImage !== false ? "checked" : ""}>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <label class="fn__flex${copyOnly ? " fn__none" : ""}">
@@ -96,6 +100,7 @@ export const exportImage = (id: string, copyOnly = false) => {
     const foldElement = exportDialog.element.querySelector("#keepFold") as HTMLInputElement;
     const watermarkElement = exportDialog.element.querySelector("#watermark") as HTMLInputElement;
     const addTitleElement = exportDialog.element.querySelector("#addTitle") as HTMLInputElement;
+    const titleImageElement = exportDialog.element.querySelector("#titleImage") as HTMLInputElement;
     const customTitleElement = exportDialog.element.querySelector("#customTitle") as HTMLInputElement;
     let imageName = "image.png";
     let outputting = false;
@@ -261,6 +266,11 @@ export const exportImage = (id: string, copyOnly = false) => {
         customTitleElement.disabled = !addTitleElement.checked;
         refreshExportPreview();
     });
+    titleImageElement.addEventListener("change", () => {
+        window.siyuan.storage[Constants.LOCAL_EXPORTIMG].titleImage = titleImageElement.checked;
+        setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
+        refreshExportPreview();
+    });
     const scheduleTitleRefresh = () => {
         window.clearTimeout(titleRefreshTimer);
         titleRefreshTimer = window.setTimeout(refreshExportPreview, 300);
@@ -364,6 +374,7 @@ export const exportImage = (id: string, copyOnly = false) => {
             keepJSEmbed: true,
             keepFold: foldElement.checked,
             image: true,
+            excludeTitleImage: !titleImageElement.checked,
             addTitle: addTitleElement.checked,
             customTitle: customTitleElement.value,
         }, (response) => {

@@ -775,6 +775,7 @@ export const getLocalStorage = (cb: () => void) => {
             headingPageBreakLevels: [],
         };
         defaultStorage[Constants.LOCAL_EXPORTIMG] = {
+            titleImage: true,
             keepFold: false,
             watermark: false
         };

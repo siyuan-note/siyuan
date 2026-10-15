@@ -3,8 +3,10 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
 	"net/url"
 	"os"
@@ -15,6 +17,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -59,6 +63,7 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 		model.Conf.Export.Store(confSectionValue1)
 		model.Conf.Search.Store(confSectionValue2)
 	}
+	model.Conf.Appearance.Store(conf.NewAppearance())
 	*model.Conf.FileTree.Load().BoxDocEnabled = true
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
@@ -76,7 +81,35 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	const cover = "https://example.com/encrypted-cover.png"
+	tree.Root.SetIALAttr("title-img", `background-image:url("`+cover+`")`)
+	paragraph := parse.Parse("", []byte("![body](https://example.com/encrypted-body.png)\n"), util.NewLute().ParseOptions).Root.FirstChild
+	paragraph.ID = ast.NewNodeID()
+	paragraph.SetIALAttr("id", paragraph.ID)
+	tree.Root.AppendChild(paragraph)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
 	treenode.UpsertBlockTree(tree)
+	docPath := filepath.Join(util.DataDir, boxID, boxID+".sy")
+	before, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, exclude := range []bool{false, true} {
+		code, msg, raw := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
+			fmt.Sprintf(`{"id":%q,"image":true,"excludeTitleImage":%t}`, boxID, exclude))
+		var preview apicontract.ExportPreviewHTMLData
+		if err := json.Unmarshal(raw, &preview); err != nil || code != 0 ||
+			strings.Contains(preview.Content, `<img src="`+cover+`"`) == exclude ||
+			!strings.Contains(preview.Content, `<img src="https://example.com/encrypted-body.png"`) {
+			t.Fatalf("encrypted preview failed: %d %s %s %v", code, msg, raw, err)
+		}
+	}
+	after, err := os.ReadFile(docPath)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatalf("preview changed source ciphertext: %v", err)
+	}
 	engine := gin.New()
 	engine.Use(model.ControlConcurrency, boxLeaseMiddleware)
 	engine.POST("/api/export/exportTempContent", exportTempContent)
@@ -116,6 +149,15 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	}
 	if early {
 		t.Fatal("encrypted export lease ended before response serialization")
+	}
+	baselineCode, _, baseline := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
+		`{"id":"`+boxID+`","image":true}`)
+	code, _, lockedPreview := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
+		`{"id":"`+boxID+`","image":true,"excludeTitleImage":true}`)
+	var lockedData apicontract.ExportPreviewHTMLData
+	if code != baselineCode || !bytes.Equal(baseline, lockedPreview) ||
+		json.Unmarshal(lockedPreview, &lockedData) != nil || lockedData.Content != "" {
+		t.Fatalf("locked notebook preview changed or exposed content: %d %s", code, lockedPreview)
 	}
 	requireAPIContract(t, "POST", "/api/export/exportTempContent", writer.ResponseRecorder)
 	entries, err := os.ReadDir(filepath.Join(util.TempDir, "export", boxID, "temp"))

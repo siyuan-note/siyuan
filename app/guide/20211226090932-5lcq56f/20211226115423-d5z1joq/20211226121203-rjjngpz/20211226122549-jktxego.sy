@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261017003000"
 	},
 	"Children": [
 		{
@@ -13103,7 +13103,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261003225941"
+				"updated": "20261017003000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13118,7 +13118,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-f8y6pxv",
-				"updated": "20261003225941",
+				"updated": "20261017003000",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13437,7 +13437,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取上一個同級節點"
+									"Data": "選取上一個可見的同深度節點，可跨父節點"
 								}
 							]
 						},
@@ -13464,7 +13464,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取下一個同級節點"
+									"Data": "選取下一個可見的同深度節點，可跨父節點"
 								}
 							]
 						},

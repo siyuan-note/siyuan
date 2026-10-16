@@ -2986,9 +2986,17 @@ export class ListMindmapView {
                     if (!(this.folded.get(node.id) ?? node.collapsed)) {
                         next = node.children[0]?.id;
                     }
-                } else if (parent) {
-                    const index = parent.children.findIndex(child => child.id === node.id);
-                    next = parent.children[index + (event.key === "ArrowUp" ? -1 : 1)]?.id;
+                } else {
+                    // 按层遍历可见节点，让上下导航跨越父节点，并跳过折叠分支。
+                    let level = [this.model.root];
+                    while (level.length) {
+                        const index = level.findIndex(item => item.id === node.id);
+                        if (index >= 0) {
+                            next = level[index + (event.key === "ArrowUp" ? -1 : 1)]?.id;
+                            break;
+                        }
+                        level = level.flatMap(item => (this.folded.get(item.id) ?? item.collapsed) ? [] : item.children);
+                    }
                 }
                 if (next) {
                     this.selectNode(next);

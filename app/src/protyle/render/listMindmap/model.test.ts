@@ -2323,6 +2323,28 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         await settle();
     };
     await settle();
+    const navigateSibling = (key: string, expected: string) => {
+        const event = new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true});
+        siblingHost.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true);
+        check.equal(siblingView.selectedId, expected);
+    };
+    siblingView.focusNode(a.id);
+    navigateSibling("ArrowUp", a.id);
+    navigateSibling("ArrowDown", b.id);
+    navigateSibling("ArrowDown", leaf.id);
+    navigateSibling("ArrowDown", c.id);
+    navigateSibling("ArrowDown", c.id);
+    navigateSibling("ArrowUp", leaf.id);
+    siblingView.focusNode(deep.id);
+    navigateSibling("ArrowDown", b.children[0].id);
+    navigateSibling("ArrowDown", c.children[0].id);
+    navigateSibling("ArrowUp", b.children[0].id);
+    await clickSiblingFold(b.id, false);
+    siblingView.focusNode(deep.id);
+    navigateSibling("ArrowDown", c.children[0].id);
+    navigateSibling("ArrowUp", deep.id);
+    await clickSiblingFold(b.id, false);
     await clickSiblingFold(a.id, false);
     check.equal(siblingElement(deep.id).hidden, true, "ordinary clicks only fold the clicked node");
     check.equal(siblingElement(b.children[0].id).hidden, false);

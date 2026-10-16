@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261017003000"
 	},
 	"Children": [
 		{
@@ -13115,7 +13115,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261003225941"
+				"updated": "20261017003000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13130,7 +13130,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20261003225941",
+				"updated": "20261017003000",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13449,7 +13449,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the previous sibling node"
+									"Data": "Select the previous visible node at the same depth, across parents"
 								}
 							]
 						},
@@ -13476,7 +13476,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the next sibling node"
+									"Data": "Select the next visible node at the same depth, across parents"
 								}
 							]
 						},

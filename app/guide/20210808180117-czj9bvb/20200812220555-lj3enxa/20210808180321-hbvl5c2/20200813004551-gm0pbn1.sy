@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261017003000"
 	},
 	"Children": [
 		{
@@ -13097,7 +13097,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261003225941"
+				"updated": "20261017003000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13112,7 +13112,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-fr0uxw6",
-				"updated": "20261003225941",
+				"updated": "20261017003000",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13479,7 +13479,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中上一个同级节点"
+									"Data": "选中上一个可见的同深度节点，可跨父节点"
 								}
 							]
 						},
@@ -13514,7 +13514,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中下一个同级节点"
+									"Data": "选中下一个可见的同深度节点，可跨父节点"
 								}
 							]
 						},

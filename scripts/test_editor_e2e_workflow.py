@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -27,6 +28,46 @@ def snapshot_command():
 
 
 class EditorWorkflowTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == "linux" and all(shutil.which(tool) for tool in ["bash", "gcc", "readelf"]),
+                         "Linux ELF verification requires native compiler and binutils")
+    def test_linux_kernel_verification_rejects_dynamic_and_unusable_binaries(self):
+        step = DESKTOP.split("      - name: Verify static Linux Kernel\n", 1)[1].split("      - ", 1)[0]
+        command = step.split("        run: |\n", 1)[1]
+        command = "\n".join(line[10:] for line in command.splitlines())
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "fixture.c"
+            source.write_text(
+                '#include <stdio.h>\n#include <string.h>\n'
+                '#ifndef EXIT_CODE\n#define EXIT_CODE 0\n#endif\n'
+                'int main(int argc, char **argv) {\n'
+                '    if (argc != 2 || strcmp(argv[1], "--version")) return 3;\n'
+                '    puts("Linux kernel fixture");\n'
+                '    return EXIT_CODE;\n}\n', encoding="utf-8")
+            for name, flags, expected in [
+                ("static-pie", ["-static-pie"], 0),
+                ("dynamic", [], 1),
+                ("shared", ["-shared", "-fPIC"], 1),
+                ("broken-startup", ["-static-pie", "-DEXIT_CODE=7"], 7),
+            ]:
+                with self.subTest(name=name):
+                    binary = root / name
+                    subprocess.run(["gcc", *flags, str(source), "-o", str(binary)], check=True, capture_output=True)
+                    result = subprocess.run(["bash", "-euo", "pipefail", "-c", command],
+                                            env={**os.environ, "KERNEL_PATH": str(binary), "LC_ALL": "C"},
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                    if expected == 1:
+                        self.assertIn("Linux kernel must be statically linked", result.stdout)
+                    else:
+                        self.assertIn("Linux kernel fixture", result.stdout)
+            invalid = root / "invalid"
+            invalid.write_text("not an ELF binary", encoding="utf-8")
+            result = subprocess.run(["bash", "-euo", "pipefail", "-c", command],
+                                    env={**os.environ, "KERNEL_PATH": str(invalid), "LC_ALL": "C"},
+                                    capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+
     def test_windows_kernel_tests_cover_all_packages_with_cgo(self):
         kernel = job("kernel-tests-windows")
         compiler = kernel.split("- name: Set up Windows kernel test compiler\n", 1)[1].split("      - ", 1)[0]

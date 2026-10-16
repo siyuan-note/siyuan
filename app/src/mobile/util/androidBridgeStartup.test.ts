@@ -24,13 +24,16 @@ const startup = (ready?: Promise<void>) => {
         window: {JSAndroid: ready ? {ready} : {}},
         Constants: {PROTYLE_CDN: "/protyle", SIYUAN_VERSION: "test"},
         console: {error: () => calls.push("error")},
-        finishMobileStartup: () => calls.push("finish"),
-        addScriptSync: () => { calls.push("script"); throw stop; },
+        setStartupLanguage() {},
+        setStartupStage() {},
+        guardStartup: (callback: (response: unknown) => Promise<void>) => (response: unknown) =>
+            callback(response).catch(() => { calls.push("error"); }),
+        ensureLute: () => { calls.push("script"); throw stop; },
     };
     runInNewContext(transpileModule(`module.exports = ${callback}`, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, scope);
-    return {calls, stop, run: () => module.exports({})};
+    return {calls, stop, run: () => module.exports({data: {conf: {appearance: {lang: "en"}}}})};
 };
 
 test("Android startup waits for the trusted document grant before plugins and native reads", async () => {
@@ -40,20 +43,20 @@ test("Android startup waits for the trusted document grant before plugins and na
     await Promise.resolve();
     assert.deepEqual(scenario.calls, []);
     grant();
-    await assert.rejects(pending, error => error === scenario.stop);
-    assert.deepEqual(scenario.calls, ["script"]);
+    await pending;
+    assert.deepEqual(scenario.calls, ["script", "error"]);
 });
 
 test("failed Android grants abort initialization without calling native readers", async () => {
     const scenario = startup(Promise.reject(new Error("expired document")));
     await scenario.run();
-    assert.deepEqual(scenario.calls, ["error", "finish"]);
+    assert.deepEqual(scenario.calls, ["error"]);
 });
 
 test("legacy Android and browser startup do not require a new bridge", async () => {
     const scenario = startup();
-    await assert.rejects(scenario.run(), error => error === scenario.stop);
-    assert.deepEqual(scenario.calls, ["script"]);
+    await scenario.run();
+    assert.deepEqual(scenario.calls, ["script", "error"]);
 });
 
 test("authentication callbacks preserve their synchronous result after the trusted bridge grant", async () => {

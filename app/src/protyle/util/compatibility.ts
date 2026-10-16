@@ -726,7 +726,7 @@ export const updateHotkeyTip = (hotkey: string) => {
     return keys.join("+");
 };
 
-export const getLocalStorage = (cb: () => void) => {
+export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => void) => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
         window.siyuan.storage = response.data;
         // 历史数据迁移
@@ -919,7 +919,7 @@ export const getLocalStorage = (cb: () => void) => {
             setStorageVal(Constants.LOCAL_CLOSED_TABS, sanitizedClosedTabs);
         }
         cb();
-    });
+    }, undefined, onError ? response => onError(new Error(response.msg)) : undefined);
 };
 
 export const isSensitiveSearchConfig = (config?: Config.IUILayoutTabSearchConfig) => {

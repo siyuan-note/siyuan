@@ -10,7 +10,7 @@
     "node": "24.x"
   },
   "scripts": {
-    "lint": "pnpm run typecheck && eslint . --fix --cache && pnpm run css:check && pnpm run menu:check",
+    "lint": "pnpm run typecheck && eslint . --fix --cache && pnpm run css:check && pnpm run menu:check && node scripts/startup-languages.mjs --check",
     "menu:check": "node ../scripts/check-menu-owner.mjs",
     "css:check": "node scripts/css-contracts.mjs",
     "css:unused": "node scripts/css-contracts.mjs --report-unused",

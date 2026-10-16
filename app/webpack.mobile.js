@@ -20,6 +20,7 @@ module.exports = (env, argv) => {
             path: path.resolve(__dirname, "stage/build/mobile"),
         },
         entry: {
+            "startup": "./src/mobile/startup.ts",
             "main": "./src/mobile/index.ts",
         },
         optimization: {
@@ -123,7 +124,8 @@ module.exports = (env, argv) => {
             }),
             new HtmlWebpackPlugin({
                 inject: "head",
-                chunks: ["main"],
+                chunks: ["startup", "main"],
+                chunksSortMode: "manual",
                 filename: "index.html",
                 template: "src/assets/template/mobile/index.tpl",
             }),

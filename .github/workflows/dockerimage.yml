@@ -4,14 +4,12 @@ run-name: Release Docker Image ${{ github.event_name == 'workflow_dispatch' && f
 on:
   push:
     tags:
+      # 预发行版（-alpha/-beta/-rc）同样构建镜像，但只发布版本标签，不更新 latest。
       - 'v*'
-      - '!*alpha*'
-      - '!*beta*'
-      - '!*rc*'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Stable version to build, without the v prefix'
+        description: 'Version to build, without the v prefix; an -alpha/-beta/-rc suffix is allowed'
         required: true
         type: string
       verify_cache:
@@ -20,6 +18,7 @@ on:
         type: boolean
 
 concurrency:
+  # 预发行版与正式版共用同一队列串行执行，且不取消进行中的运行，避免同时向镜像仓库推送。
   group: siyuan-docker-release
   cancel-in-progress: false
   queue: max
@@ -73,8 +72,8 @@ jobs:
           else
             VERSION="${GITHUB_REF_NAME#v}"
           fi
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Expected a stable version without a v prefix, stopping"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)(\.[0-9A-Za-z]+)*)?$ ]]; then
+            echo "Expected a version without a v prefix, optionally with an -alpha/-beta/-rc suffix, stopping"
             exit 1
           fi
           PACKAGE_VERSION=$(jq -er .version app/package.json)
@@ -96,6 +95,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       # 一个平台失败时保留其他平台的构建结果，支持只重试失败任务。
+      # 预发行版与正式版构建相同的平台集合。
       fail-fast: false
       matrix:
         include:

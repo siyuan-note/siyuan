@@ -32,7 +32,7 @@ git tag v3.8.7-beta.1
 git push origin v3.8.7-beta.1
 ```
 
-推送包含 `-alpha`、`-beta` 或 `-rc` 的标签会触发 `CD For SiYuan`。标签去掉开头的 `v` 后必须与 `app/package.json` 版本完全一致，Android 版本也必须匹配，否则准备阶段会失败。
+推送包含 `-alpha`、`-beta` 或 `-rc` 的标签会触发 `CD For SiYuan`，以及 [Release Docker Image](../.github/workflows/dockerimage.yml) 的预发行镜像构建。标签去掉开头的 `v` 后必须与 `app/package.json` 版本完全一致，Android 版本也必须匹配，否则准备阶段会失败。预发行镜像只发布 `v` 加版本号的标签，不更新 `latest`。
 
 ### 3. 等待自动构建与发布
 
@@ -204,7 +204,7 @@ git diff --exit-code $releaseCommit origin/master
 在 GitHub 创建 Release 时输入新标签 `v3.8.7`，选择创建新标签，目标分支选择 `master`，核对目标提交。发布 Release 时由 GitHub 创建标签，无需在本地手动打标签或推送标签。已有同名标签时先核对其指向，不覆盖或重复创建。
 
 - 将公开分发的安装包和最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，核对版本、目标提交和文件名后公开正式版
-- 确认正式版标签已创建，并检查 [Release Docker Image](../.github/workflows/dockerimage.yml) 的运行状态；该工作流监听正式版标签的推送事件，仅合并分支不会触发
+- 确认正式版标签已创建，并检查 [Release Docker Image](../.github/workflows/dockerimage.yml) 的运行状态；该工作流监听 `v*` 标签推送，正式版同时更新 `latest`，预发行版只发布版本标签，仅合并分支不会触发
 - 通过下载域名下载安装包并核对摘要
 - 同步 Gitee
 - 上传百度网盘

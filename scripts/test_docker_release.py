@@ -70,6 +70,22 @@ class ManifestTests(unittest.TestCase):
                     release.manifests(index)
 
 
+class VersionTests(unittest.TestCase):
+    def test_version_pattern_accepts_stable_and_prerelease_versions(self):
+        for version in ("3.8.7", "3.8.8-alpha", "3.8.8-alpha.1", "3.8.8-beta.2", "3.8.8-rc.3"):
+            with self.subTest(version=version):
+                self.assertTrue(release.VERSION.fullmatch(version), version)
+
+    def test_version_pattern_rejects_other_or_partial_versions(self):
+        for version in ("v3.8.7", "3.8", "3.8.7.1", "3.8.8-alpha.", "3.8.8-preview.1", "latest"):
+            with self.subTest(version=version):
+                self.assertFalse(release.VERSION.fullmatch(version), version)
+
+    def test_release_tags_keep_latest_on_stable_versions_only(self):
+        self.assertEqual(release.release_tags("3.8.7"), [":v3.8.7", ":latest"])
+        self.assertEqual(release.release_tags("3.8.8-alpha.2"), [":v3.8.8-alpha.2"])
+
+
 class OCRTests(unittest.TestCase):
     def test_recognition_tolerates_layout_whitespace_and_latin_case(self):
         release.validate_rows('[{"text":"SiYuan"},{"text":" OCR123"}]', "siyuan ocr 123")
@@ -190,6 +206,20 @@ class PublishTests(unittest.TestCase):
         self.assertIn("b3log/siyuan:v3.8.7", command)
         self.assertIn("b3log/siyuan:latest", command)
         self.assertEqual(run.call_count, 4)
+
+    def test_prerelease_publishes_version_tag_without_latest(self):
+        # 预发行版不得更新 latest，否则拉取 latest 的稳定用户会拿到预发行版。
+        value = report()
+        value["version"] = "3.8.8-alpha.2"
+        self.save(value)
+        response = subprocess.CompletedProcess([], 0, json.dumps(manifest()), "")
+        with patch.object(release, "run", return_value=response) as run:
+            release.promote(IMAGE, "3.8.8-alpha.2", self.path)
+        command = run.call_args_list[1].args[0]
+        self.assertEqual(command[-1], IMAGE)
+        self.assertIn("b3log/siyuan:v3.8.8-alpha.2", command)
+        self.assertNotIn("b3log/siyuan:latest", command)
+        self.assertEqual(run.call_count, 3)
 
     def test_remote_manifest_difference_is_reported(self):
         self.save(report())

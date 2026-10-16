@@ -99,3 +99,61 @@ test("editor padding preserves embedded content gutters in editors, popovers and
         assert.ok(f.calls.every(element => element === f.container));
     }
 });
+
+test("editable embedded tables expose column resize handles while readonly and custom tables do not", () => {
+    for (const embedded of [false, true]) {
+        for (const editable of [false, true]) {
+            for (const custom of [false, true]) {
+                const attributes = new Map<string, string>();
+                const resize = {
+                    parentElement: {style: {left: ""}},
+                    setAttribute: (name: string, value: string) => attributes.set(name, value),
+                };
+                const cell = {
+                    colSpan: 1, offsetLeft: 100, offsetWidth: 100, previousElementSibling: {},
+                    getBoundingClientRect: () => ({left: 100, right: 200}),
+                };
+                const table = {
+                    clientHeight: 80,
+                    getAttribute: () => editable ? "true" : "false",
+                    querySelector: (selector: string) => selector === "colgroup" ? {clientHeight: 80} : null,
+                };
+                const block = {
+                    style: {cursor: "", textAlign: ""}, firstElementChild: {scrollLeft: 20},
+                    querySelector: (selector: string) => selector === "table" ? table : resize,
+                };
+                const target = {nodeType: 1, classList: {contains: () => false}};
+                const dependencies = {
+                    hasClosestByClassName: (_element: unknown, name: string) => {
+                        if (name === "table") {
+                            return block;
+                        }
+                        return name === "protyle" || name === "protyle-wysiwyg__embed" && embedded ||
+                            name === "protyle-custom" && custom;
+                    },
+                    hasClosestByTag: () => cell,
+                    getColIndex: () => 1,
+                };
+                const api = {} as {windowMouseMove: (event: unknown) => void};
+                runInNewContext(source, {
+                    exports: api, require: () => dependencies,
+                    window: {siyuan: {layout: {}}},
+                    document: {body: {classList: {contains: () => false}}, getElementById: (): null => null},
+                });
+                for (const [clientX, index, left] of [[199, "1", 177], [101, "0", 77]] as const) {
+                    api.windowMouseMove({target, clientX, composedPath: () => [target]});
+                    if (editable && !custom) {
+                        assert.equal(attributes.get("data-col-index"), index);
+                        assert.match(attributes.get("style"), new RegExp(`height:80px;left: ${left}px;display:block`));
+                    } else {
+                        assert.equal(attributes.size, 0);
+                    }
+                }
+                if (editable && !custom) {
+                    api.windowMouseMove({target, clientX: 150, composedPath: () => [target]});
+                    assert.equal(attributes.get("style"), "display:none");
+                }
+            }
+        }
+    }
+});

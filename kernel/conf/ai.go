@@ -110,12 +110,20 @@ type ImageGeneration struct {
 	OutputFormat   string `json:"outputFormat"`
 }
 
+// 嵌入索引调度的默认值和资源上限，与设置控件范围保持一致。
+const (
+	DefaultEmbeddingConcurrency = 8
+	MaxEmbeddingConcurrency     = 64
+	DefaultEmbeddingBatchSize   = 10
+	MaxEmbeddingBatchSize       = 128
+)
+
 type Embedding struct {
-	ID         string `json:"id"`
-	Enabled    bool   `json:"enabled"`
-	APIKey     string `json:"apiKey"`
-	BaseURL    string `json:"baseURL"`
-	Name       string `json:"name"`
+	ID          string `json:"id"`
+	Enabled     bool   `json:"enabled"`
+	APIKey      string `json:"apiKey"`
+	BaseURL     string `json:"baseURL"`
+	Name        string `json:"name"`
 	Timeout     int    `json:"timeout"`
 	Dimensions  int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
 	Concurrency int    `json:"concurrency"`
@@ -325,7 +333,7 @@ type MCPServer struct {
 }
 
 func defaultEmbedding() *Embedding {
-	return &Embedding{Timeout: 30, Concurrency: 8, BatchSize: 10}
+	return &Embedding{Timeout: 30, Concurrency: DefaultEmbeddingConcurrency, BatchSize: DefaultEmbeddingBatchSize}
 }
 
 func defaultRerank() *Rerank {
@@ -846,11 +854,13 @@ func (ai *AI) Normalize() {
 		ai.Embedding.Dimensions = 0 // 负值非法，归零表示用模型默认维度
 	}
 	if ai.Embedding.Concurrency < 1 {
-		ai.Embedding.Concurrency = 8
+		ai.Embedding.Concurrency = DefaultEmbeddingConcurrency
 	}
+	ai.Embedding.Concurrency = min(ai.Embedding.Concurrency, MaxEmbeddingConcurrency)
 	if ai.Embedding.BatchSize < 1 {
-		ai.Embedding.BatchSize = 10
+		ai.Embedding.BatchSize = DefaultEmbeddingBatchSize
 	}
+	ai.Embedding.BatchSize = min(ai.Embedding.BatchSize, MaxEmbeddingBatchSize)
 	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 		ai.Embedding.ID = normalizedAIID("embedding")
 	}

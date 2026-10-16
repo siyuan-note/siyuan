@@ -233,7 +233,9 @@ declare namespace Config {
         name: string;
         timeout: number;
         dimensions: number;
+        /** 嵌入索引并发请求数，默认 8，范围 1–64。 */
         concurrency: number;
+        /** 每次嵌入索引请求的文本块数，默认 10，范围 1–128。 */
         batchSize: number;
     }
 

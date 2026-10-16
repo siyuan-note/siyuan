@@ -1,16 +1,19 @@
 {
   "compilerOptions": {
     "outDir": "./src/types/dist",
+    "rootDir": "./src",
+    "strict": false,
+    "useDefineForClassFields": false,
     "noImplicitAny": true,
-    "module": "commonjs",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "target": "es6",
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "typeRoots": [
       "./node_modules/@types"
     ],
     "types": [
-      "./src/types",
       "node"
     ],
     "declaration": true,

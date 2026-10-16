@@ -10,7 +10,7 @@ const listeners = new Map<string, string>();
 const visit = (node: Node) => {
     if (isCallExpression(node) && node.expression.getText(file) === "this.element.addEventListener" &&
         ["\"input\"", "\"compositionend\""].includes(node.arguments[0]?.getText(file))) {
-        listeners.set(JSON.parse(node.arguments[0].getText(file)), transpileModule("(" + node.arguments[1].getText(file) + ")", {
+        listeners.set(JSON.parse(node.arguments[0].getText(file)), transpileModule("const listener = (" + node.arguments[1].getText(file) + ");", {
             compilerOptions: {target: ScriptTarget.ES2020},
         }).outputText);
     }
@@ -51,7 +51,7 @@ test("reference bracket input waits for IME commit and avoids saving duplicate c
             };
             const event = {data, inputType: "insertText", isComposing: false,
                 target: {tagName: "DIV"}, stopPropagation() {}};
-            const listener = runInNewContext("(function () { return " + listeners.get(type) + " }).call(receiver)",
+            const listener = runInNewContext("(function () { " + listeners.get(type) + " return listener; }).call(receiver)",
                 Object.assign(context, {receiver}));
             if (type === "input") {
                 await listener.call(receiver, {...event, isComposing: true, inputType: "insertCompositionText"});

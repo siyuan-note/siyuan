@@ -225,7 +225,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
                 tasks.push(task);
             }
         });
-        return Promise.all(tasks).then(() => undefined);
+        return Promise.all(tasks).then((): undefined => undefined);
     }
 
     public getState(name: string): TPluginLifecycleState {
@@ -433,7 +433,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         const provider = this.observe(record.name, "loadData", () => task.dataProvider?.());
         const result = await Promise.race([
             provider.then((data) => ({type: "data" as const, data})),
-            record.interrupt.promise.then(() => ({type: "interrupt" as const, data: undefined})),
+            record.interrupt.promise.then((): {type: "interrupt"; data: undefined} => ({type: "interrupt" as const, data: undefined})),
         ]);
         return result.type === "data" ? result.data : undefined;
     }
@@ -522,7 +522,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             if (!result || typeof result.then !== "function") {
                 return Promise.resolve(true);
             }
-            const promise = Promise.resolve(result).catch((error) => {
+            const promise = Promise.resolve(result).catch((error): undefined => {
                 this.adapter.onError(name, hook, error);
             });
             if (deadlineReached || deadline <= this.now()) {
@@ -595,7 +595,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
 
     private observe<T>(name: string, hook: TPluginLifecycleHook, callback: () => Promise<T> | T): Promise<T | undefined> {
         try {
-            return Promise.resolve(callback()).catch((error) => {
+            return Promise.resolve(callback()).catch((error): undefined => {
                 this.adapter.onError(name, hook, error);
                 return undefined;
             });

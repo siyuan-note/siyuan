@@ -477,7 +477,6 @@ func settingExportPayload(value *conf.Export) *apicontract.SettingExport {
 	result.FileAnnotationRefMode = value.FileAnnotationRefMode
 	result.PandocBin = value.PandocBin
 	result.PandocParams = value.PandocParams
-	result.DocxTemplate = value.DocxTemplate
 	result.RemoveAssetsID = value.RemoveAssetsID
 	result.MarkdownYFM = value.MarkdownYFM
 	result.InlineMemo = value.InlineMemo

@@ -41,7 +41,7 @@ export interface IGraphData {
     targets: Uint32Array;
     references: Uint8Array;
     degrees: Uint32Array;
-    sizes: Float32Array;
+    sizes: Float32Array<ArrayBuffer>;
 }
 
 export interface IGraphOptions {
@@ -113,8 +113,8 @@ export interface IGraphLayoutOptions {
 export type TGraphLayoutRequest = {
     type: "init";
     generation: number;
-    positions: Float32Array;
-    sizes: Float32Array;
+    positions: Float32Array<ArrayBuffer>;
+    sizes: Float32Array<ArrayBuffer>;
     sources: Uint32Array;
     targets: Uint32Array;
     degrees: Uint32Array;
@@ -142,7 +142,7 @@ export type TGraphLayoutRequest = {
 export type TGraphLayoutResponse = {
     type: "positions";
     generation: number;
-    positions: Float32Array;
+    positions: Float32Array<ArrayBuffer>;
     settled: boolean;
 } | {
     type: "released";

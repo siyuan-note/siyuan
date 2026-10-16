@@ -149,7 +149,7 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
         control.dispatchEvent(key);
         check.equal(key.defaultPrevented, false, "native control navigation remains available");
         if (control instanceof HTMLSelectElement) {
-            const before = closeCount;
+            const before: number = closeCount;
             control.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
             check.equal(closeCount, before, "Enter on a select confirms its option without closing the editor");
         }

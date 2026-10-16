@@ -15,7 +15,7 @@ import {
     renderCellAttr
 } from "./cell";
 import {fetchPost} from "../../../util/fetch";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
 import {clearSelect} from "../../util/clear";

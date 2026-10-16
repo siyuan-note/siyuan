@@ -12,7 +12,7 @@ import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getLuteInstance} from "../protyle/render/setLute";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {
     bindDynamicIconTarget,
     getIconSearchText,

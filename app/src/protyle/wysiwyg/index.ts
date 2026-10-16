@@ -65,7 +65,7 @@ import {
     tagMenu,
     zoomOut
 } from "../../menus/protyle";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
 import {getMultilineInputText, isTextInputType} from "./multilineInput";

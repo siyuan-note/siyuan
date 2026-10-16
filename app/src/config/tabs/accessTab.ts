@@ -105,7 +105,7 @@ const mountOIDCButton = (root: HTMLElement) => {
     root.querySelector("#oidcConfig")?.addEventListener("click", () => {
         const config = window.siyuan.config.oidc;
         const escape = (value: string) => escapeHtmlTextAndAttr(value);
-        let destroyOIDCDialog: () => void = () => undefined;
+        let destroyOIDCDialog: () => void = (): undefined => undefined;
         const dialog = new Dialog({
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
@@ -230,7 +230,7 @@ const mountOIDCButton = (root: HTMLElement) => {
             if (validationPollToken && !validationActivating) {
                 void fetchSyncPost("/api/system/oidc/validateCancel", {
                     pollToken: validationPollToken,
-                }, undefined, false).catch(() => undefined);
+                }, undefined, false).catch((): undefined => undefined);
             }
             validationPollToken = "";
         };
@@ -402,7 +402,7 @@ const mountOIDCButton = (root: HTMLElement) => {
                             if (response.code === 0 && response.data.pollToken) {
                                 void fetchSyncPost("/api/system/oidc/validateCancel", {
                                     pollToken: response.data.pollToken,
-                                }, undefined, false).catch(() => undefined);
+                                }, undefined, false).catch((): undefined => undefined);
                             }
                             return;
                         }
@@ -411,7 +411,7 @@ const mountOIDCButton = (root: HTMLElement) => {
                             if (response.code === 0 && response.data.pollToken) {
                                 void fetchSyncPost("/api/system/oidc/validateCancel", {
                                     pollToken: response.data.pollToken,
-                                }, undefined, false).catch(() => undefined);
+                                }, undefined, false).catch((): undefined => undefined);
                             }
                             return;
                         }

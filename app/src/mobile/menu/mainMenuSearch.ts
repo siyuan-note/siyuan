@@ -50,7 +50,7 @@ const createSettingSearchMountQueue = (app: App) => {
         mount(root: HTMLElement, tabId: TSettingTab, keywords: string, result: SettingTabSearchResult) {
             const taskVersion = ++version;
             const previousQueue = queue;
-            queue = previousQueue.catch(() => undefined).then(async () => {
+            queue = previousQueue.catch((): undefined => undefined).then(async () => {
                 if (taskVersion !== version || !root.isConnected) {
                     if (!root.isConnected) {
                         unmountSettingTab(root, tabId);

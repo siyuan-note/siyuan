@@ -123,7 +123,8 @@ export class DOMElement {
     dispatch(type: string, options: {key?: string; bubbles?: boolean} = {}) {
         let stopped = false;
         let immediate = false;
-        const event = {target: this, key: options.key, defaultPrevented: false,
+        const event: {target: DOMElement; key: string; defaultPrevented: boolean; preventDefault: () => void;
+            stopPropagation: () => void; stopImmediatePropagation: () => void} = {target: this, key: options.key, defaultPrevented: false,
             preventDefault() { this.defaultPrevented = true; },
             stopPropagation() { stopped = true; }, stopImmediatePropagation() { stopped = true; immediate = true; }};
         const dispatchTo = (element: DOMElement) => {

@@ -2,7 +2,7 @@ import {openSearchAV} from "./relation";
 import {transaction} from "../../wysiwyg/transaction";
 import {focusByRange} from "../../util/selectionOffsets";
 import {hasClosestBlock} from "../../util/hasClosest";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getAVFilteredTipContext} from "./filteredTip";
 
 export const addFilesToDatabase = (fileLiElements: Element[]) => {

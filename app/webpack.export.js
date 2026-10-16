@@ -2,7 +2,6 @@ const path = require("path");
 const webpack = require("webpack");
 const pkg = require("./package.json");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const {EsbuildPlugin} = require("esbuild-loader");
 
@@ -12,6 +11,8 @@ module.exports = (env, argv) => {
         watch: argv.mode !== "production",
         devtool: argv.mode !== "production" ? "eval-source-map" : false,
         output: {
+            // 开发期间保留旧资源，避免已打开窗口引用的哈希文件被清除。
+            clean: argv.mode === "production",
             publicPath: "auto",
             filename: "[name].js",
             path: path.resolve(__dirname, "stage/build/export"),
@@ -91,10 +92,6 @@ module.exports = (env, argv) => {
         },
         plugins: [
             // new BundleAnalyzerPlugin(),
-            new CleanWebpackPlugin({
-                cleanOnceBeforeBuildPatterns: [
-                    path.join(__dirname, "stage/build/export")],
-            }),
             new webpack.DefinePlugin({
                 NODE_ENV: JSON.stringify(argv.mode),
                 SIYUAN_VERSION: JSON.stringify(pkg.version),

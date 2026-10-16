@@ -114,8 +114,9 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     let state: State = [{id: "root", children: ["existing"]}, {id: "existing", children: []}];
     let selectedID = "existing";
     let target: any;
+    type ModelNode = {id: string; children: ModelNode[]; parentId: string};
     const getModel = () => {
-        const nodes = new Map(state.map(node => [node.id, {id: node.id, children: [], parentId: ""}]));
+        const nodes = new Map<string, ModelNode>(state.map((node): [string, ModelNode] => [node.id, {id: node.id, children: [], parentId: ""}]));
         state.forEach(node => {
             nodes.get(node.id).children = node.children.map(id => {
                 const child = nodes.get(id);

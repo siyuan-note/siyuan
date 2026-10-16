@@ -10,7 +10,7 @@ import {isDynamicRef, objEquals} from "../../../util/functions";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {focusBlock} from "../../util/selection";
 import {focusByRange} from "../../util/selectionOffsets";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {getColIconByType, getColId} from "./col";
 import {genAVRelationHTML, genAVValueHTML, getAVTemplateHTML} from "./attributeValue";

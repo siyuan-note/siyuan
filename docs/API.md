@@ -2204,8 +2204,7 @@ The field types (`keyType`) are:
                   "pin": false,
                   "width": ""
                 }
-              ],
-              "rowIds": null
+              ]
             },
             "itemIds": ["20240118203818-ct041hj", "20240118203855-sqzbja0", "20240118203831-fkfvvtx", "20240118203842-kc31ovy", "20240531235026-uiap07y"],
             "groupCreated": 0,

@@ -1431,7 +1431,7 @@ export class BacklinkContent extends Model {
                 promises.push(applyViewFoldStates(editor.protyle));
             }
         });
-        return Promise.all(promises).then(() => undefined);
+        return Promise.all(promises).then((): undefined => undefined);
     }
 
     private syncViewFoldVisibility() {

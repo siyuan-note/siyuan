@@ -50,7 +50,7 @@ import {
 import {getAssetUploadPathsByInput, getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
 import {
@@ -1459,7 +1459,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (localAssets.length > 0) {
                 let localAssetResult: Omit<IAssetUploadResult, "requestId" | "input"> | undefined;
                 await new Promise<void>(resolve => {
-                    uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
+                    uploadLocalFiles(localAssets.map((item): ILocalFiles => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,

@@ -5,7 +5,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {genCellValue, getCellValueText} from "./cell";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
@@ -457,7 +457,7 @@ export const prepareFilterColumns = async (data: IAV) => {
         if (!request) {
             request = fetchSyncPost("/api/av/getAttributeView", {id: targetAVID}).then((response) => {
                 return response.code === 0 ? (response.data?.av?.keyValues || []).map(item => item.key) : [];
-            }).catch(() => []);
+            }).catch((): IAVColumn[] => []);
             avRequests.set(targetAVID, request);
         }
         const targetColumns = await request;

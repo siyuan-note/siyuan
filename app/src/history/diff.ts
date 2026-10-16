@@ -5,7 +5,7 @@ import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {isMobile} from "../util/functions";
 import type {App} from "../index";
 import {pathPosix} from "../util/pathName";

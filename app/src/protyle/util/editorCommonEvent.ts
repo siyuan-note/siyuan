@@ -47,7 +47,7 @@ import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {zoomOut} from "../../menus/protyle";
 import {isFoldedHeading, shouldUnfoldMovedHeading} from "./foldHeadingMove";
 /// #if !BROWSER

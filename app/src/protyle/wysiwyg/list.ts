@@ -2,7 +2,7 @@ import {focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection
 import {focusByRange} from "../util/selectionOffsets";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {Constants} from "../../constants";
 import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";

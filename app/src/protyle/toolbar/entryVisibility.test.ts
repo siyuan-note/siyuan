@@ -65,7 +65,7 @@ const resolve = (items: IToolbarTestItem[], options: {
     getKey: (item) => item.key,
     isSeparator: (item) => item.separator === true,
     isVisible: (key) => !(options.hidden || []).includes(key),
-    order: options.order || items.flatMap((item) => item.key || []),
+    order: options.order || items.flatMap((item): string | [] => item.key || []),
 });
 
 test("desktop toolbar defaults expose stable configuration identifiers", () => {

@@ -109,7 +109,7 @@ test("calendar all-day end is inclusive and timed midnight is exclusive", () => 
     assert.equal(getCalendarInterval(value).end, day("2026-09-21"));
     value.date.isNotTime = false;
     assert.equal(getCalendarInterval(value).end, day("2026-09-20"));
-    const segments = packCalendarWeek([{...getCalendarInterval(value), row: {id: "one", cells: []}, date: {value}}], day("2026-09-14"));
+    const segments = packCalendarWeek([{...getCalendarInterval(value), row: {id: "one", cells: new Array<IAVCell>()}, date: {value}}], day("2026-09-14"));
     assert.equal(segments[0].span, 1);
     assert.equal(segments[0].column, 5);
 });
@@ -128,7 +128,7 @@ test("missing and reversed endpoints preserve the source value", () => {
 test("calendar packing splits cross-week events without overlapping lanes", () => {
     const start = day("2026-09-14");
     const events = Array.from({length: 100}, (_, i) => ({start: addCalendarDays(start, i % 7 - 3),
-        end: addCalendarDays(start, i % 7 + 9), invalid: false, row: {id: `${i}`, cells: []}, date: {}}));
+        end: addCalendarDays(start, i % 7 + 9), invalid: false, row: {id: `${i}`, cells: new Array<IAVCell>()}, date: {}}));
     const segments = packCalendarWeek(events, start);
     assert.equal(segments.length, 100);
     for (const segment of segments) {

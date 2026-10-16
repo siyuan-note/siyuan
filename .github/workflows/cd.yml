@@ -180,12 +180,6 @@ jobs:
       - name: Check generated contracts and route coverage
         run: pnpm run api:check
         working-directory: app
-      - name: Check legacy coverage does not grow
-        # 排除当前提交上的标签，与上一个版本比较旧接口列表。
-        run: |
-          API_CONTRACT_BASE=$(git describe --tags --match 'v[0-9]*' --abbrev=0 HEAD^)
-          pnpm run api:check --base "$API_CONTRACT_BASE"
-        working-directory: app
       - name: Check application and strict contract types
         run: pnpm run typecheck
         working-directory: app

@@ -6,7 +6,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "./hasClosest";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {copyTableCellContent} from "./tableCellRich";
 import {

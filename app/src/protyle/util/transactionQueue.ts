@@ -25,7 +25,7 @@ const getTransactionQueue = (protyle: IProtyle) => {
 };
 
 const appendTransaction = (queue: ITransactionQueue, task: () => Promise<void>) => {
-    const currentTransaction = queue.tail.catch(() => undefined).then(task);
+    const currentTransaction = queue.tail.catch((): undefined => undefined).then(task);
     queue.tail = currentTransaction;
     return currentTransaction;
 };
@@ -71,5 +71,5 @@ export const waitForPendingTransactions = (protyle: IProtyle) => {
         return Promise.resolve();
     }
     sealPendingBatches(queue);
-    return queue.tail.catch(() => undefined);
+    return queue.tail.catch((): undefined => undefined);
 };

@@ -3084,7 +3084,7 @@ const initRemoteKernel = async (target) => {
             storages: remoteKernelActiveStorageTypes,
         });
     } catch (error) {
-        throw new Error("failed to clear remote kernel active storage: " + error.message);
+        throw new Error("failed to clear remote kernel active storage: " + error.message, {cause: error});
     }
 
     writeLog("connecting to remote kernel [origin=" + target.origin + "]");

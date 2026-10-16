@@ -33,7 +33,7 @@ const fixture = () => {
             {code: 4, table: 2, "plugin:one:same": 3, "plugin:two:same": 1}),
     });
     Object.assign(hint, {source: "hint", splitChar: "/", lastIndex: -1, fixImageCursor() {},
-        element: {closest: () => undefined}});
+        element: {closest: (): undefined => undefined}});
     const protyle = {toolbar: {range}, wysiwyg: {element: {}}};
     return {hint, protyle, counts, unavailable: () => { available = false; }};
 };

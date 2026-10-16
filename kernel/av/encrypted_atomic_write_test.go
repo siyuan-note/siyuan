@@ -2,6 +2,7 @@ package av
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -11,6 +12,15 @@ import (
 )
 
 func TestEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T) {
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false)
+}
+
+func TestEncryptedDeprecatedLayoutRecovery(t *testing.T) {
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, true)
+}
+
+func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool) {
+	t.Helper()
 	const boxID, avID = "20261010120000-encbox0", "20261010120001-encav00"
 	oldData := util.DataDir
 	oldDEK, oldEncrypted, oldUnlocked := AVDEKProvider, AVIsEncryptedBox, AVIsBoxUnlocked
@@ -31,10 +41,37 @@ func TestEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T) {
 	})
 	view := &AttributeView{ID: avID, Spec: PlainTextSpec}
 	view.Name = "first encrypted version"
-	if err := SaveAttributeView(view); err != nil {
+	file := attributeViewDataPathByBox(avID, boxID)
+	if legacy {
+		raw, err := os.ReadFile("testdata/spec1-deprecated-layouts.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = json.Unmarshal(raw, view); err != nil {
+			t.Fatal(err)
+		}
+		view.Name = "first encrypted version"
+		raw, err = json.Marshal(view)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ciphertext, err := encryptAVData(boxID, avID, raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.MkdirAll(filepath.Dir(file), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(file, ciphertext, 0600); err != nil {
+			t.Fatal(err)
+		}
+		view, err = ParseAttributeViewInBox(avID, boxID)
+		if err != nil {
+			t.Fatal(err)
+		}
+	} else if err := SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
-	file := attributeViewDataPathByBox(avID, boxID)
 	before, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatal(err)
@@ -63,5 +100,9 @@ func TestEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T) {
 	previous, err := ParseAttributeViewData(avID, plain)
 	if err != nil || previous.Name != "first encrypted version" {
 		t.Fatalf("previous ciphertext is not recoverable: %+v, %v", previous, err)
+	}
+	if legacy && (previous.Spec != 1 || len(previous.Views[0].Table.RowIDs) != 2 ||
+		len(loaded.Views[0].ItemIDs) != 2 || loaded.Views[0].PageSize != 25) {
+		t.Fatal("encrypted save lost legacy layout data or its recovery source")
 	}
 }

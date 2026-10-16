@@ -22,6 +22,7 @@ const browserCases = async (source: string) => {
         },
     }}}, menus: {menu: {element: hidden(), remove: noop}}} as any;
     const dependencies = {
+        CALLOUT_PRESETS: new Array<import("./calloutType").ICalloutPreset>(),
         Constants: {KEYCODELIST: {27: "Escape", 38: "↑", 74: "J", 76: "L"}, MENU_BLOCK_MULTI: "multi",
             CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"},
         bindVerticalNavigationReset: noop, getAVTemplateInteractiveElement: noop,

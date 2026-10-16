@@ -38,7 +38,7 @@ import {focusByRange} from "../../util/selectionOffsets";
 import {showMessage} from "../../../dialog/message";
 import {previewAttrViewImages} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender, initUnfoldedGroupTables, setAVGroupFolded as setGroupFolded} from "./render";
 import {addView, openViewMenu} from "./view";

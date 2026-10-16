@@ -78,7 +78,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
             }},
         })[name] || {}),
     });
-    const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map(id => ({id, target: "item", color: null,
+    const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map((id): IAVConditionalColorRule => ({id, target: "item", color: null,
         matchOption: false, filter: {column: "text", operator: "Is not empty"}}));
     await methods.openConditionalColorsMenu({
         protyle: {options: {}} as IProtyle,

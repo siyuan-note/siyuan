@@ -2,9 +2,9 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -13,11 +13,19 @@ import (
 )
 
 func TestAttributeViewLayoutSpecLegacyRecovery(t *testing.T) {
-	fixture, err := os.ReadFile("../av/testdata/spec9-layouts.json")
+	testAttributeViewLayoutSpecRecovery(t, "spec9-layouts.json", "20260921000000-layouts", 9, 10, 1)
+}
+
+func TestAttributeViewDeprecatedLayoutLegacyRecovery(t *testing.T) {
+	testAttributeViewLayoutSpecRecovery(t, "spec1-deprecated-layouts.json", "20261010120001-encav00", 1, 8, 2)
+}
+
+func testAttributeViewLayoutSpecRecovery(t *testing.T, file, avID string, sourceSpec, savedSpec, rows int) {
+	t.Helper()
+	fixture, err := os.ReadFile(filepath.Join("../av/testdata", file))
 	if err != nil {
 		t.Fatal(err)
 	}
-	const avID = "20260921000000-layouts"
 	for _, encrypted := range []bool{false, true} {
 		name := "ordinary"
 		if encrypted {
@@ -46,25 +54,45 @@ func TestAttributeViewLayoutSpecLegacyRecovery(t *testing.T) {
 				t.Fatal(err)
 			}
 			original, err := av.ParseAttributeViewForIndexInBox(avID, boxID)
-			if err != nil || original.Spec != 9 {
+			if err != nil || original.Spec != sourceSpec {
 				t.Fatalf("legacy source read: %v", err)
 			}
 			before, _ := os.ReadFile(path)
 			if !bytes.Equal(source, before) {
 				t.Fatal("reading rewrote the legacy source")
 			}
-			for _, view := range original.Views {
-				if exported := getAttrViewTable(original, view, ""); exported == nil || len(exported.Rows) != 1 {
+			av.UpgradeSpec(original)
+			exportData, err := json.Marshal(original)
+			if err != nil {
+				t.Fatal(err)
+			}
+			exportable, err := av.ParseAttributeViewData(avID, exportData)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, view := range exportable.Views {
+				if exported := getAttrViewTable(exportable, view, ""); exported == nil || len(exported.Rows) != rows {
 					t.Fatalf("legacy layout export failed: %s", view.LayoutType)
 				}
 			}
 			if err := av.SaveAttributeView(original); err != nil {
 				t.Fatal(err)
 			}
+			want, err := json.Marshal(original.Views)
+			if err != nil {
+				t.Fatal(err)
+			}
 			cache.ClearAVCache()
 			upgraded, err := av.ParseAttributeViewForIndexInBox(avID, boxID)
-			if err != nil || upgraded.Spec != 10 || !reflect.DeepEqual(upgraded.Views, original.Views) {
+			if err != nil {
 				t.Fatalf("upgraded layout read: %v", err)
+			}
+			if upgraded.Spec != savedSpec {
+				t.Fatalf("upgraded spec = %d, want %d", upgraded.Spec, savedSpec)
+			}
+			got, err := json.Marshal(upgraded.Views)
+			if err != nil || !bytes.Equal(got, want) {
+				t.Fatalf("upgraded views differ: got %s, want %s", got, want)
 			}
 
 			// 历史或备份保留的旧源仍须先认证，再解析并恢复，不能依赖当前文件的格式版本。
@@ -73,7 +101,7 @@ func TestAttributeViewLayoutSpecLegacyRecovery(t *testing.T) {
 				t.Fatal(err)
 			}
 			historical, err := av.ParseAttributeViewData(avID, plain)
-			if err != nil || historical.Spec != 9 {
+			if err != nil || historical.Spec != sourceSpec {
 				t.Fatalf("historical layout read: %v", err)
 			}
 			if err := av.SaveAttributeView(historical); err != nil {
@@ -81,8 +109,12 @@ func TestAttributeViewLayoutSpecLegacyRecovery(t *testing.T) {
 			}
 			cache.ClearAVCache()
 			restored, err := av.ParseAttributeViewForIndexInBox(avID, boxID)
-			if err != nil || restored.Spec != 10 || !reflect.DeepEqual(upgraded.Views, restored.Views) {
+			if err != nil || restored.Spec != savedSpec {
 				t.Fatalf("legacy backup recovery lost layouts: %v", err)
+			}
+			got, err = json.Marshal(restored.Views)
+			if err != nil || !bytes.Equal(got, want) {
+				t.Fatalf("restored views differ: got %s, want %s", got, want)
 			}
 			if encrypted {
 				stored, err := os.ReadFile(path)

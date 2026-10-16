@@ -57,7 +57,7 @@ import {
     getTopAloneElement,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {escapeAttr} from "../../util/escape";
 import {confirmBlockRef} from "../../util/checkBlockRef";
@@ -2106,7 +2106,7 @@ export class Gutter {
                 }
                 const start = response.data?.start;
                 return response.data?.found && typeof start === "number" && Number.isInteger(start) ? start : undefined;
-            }).catch(() => undefined) : undefined;
+            }).catch((): undefined => undefined) : undefined;
             const genListBlockSubmenu = (continueListStart?: number) => {
                 const submenu: IMenu[] = [];
                 if (type === "NodeListItem" && nodeElement.getAttribute("data-subtype") === "t") {

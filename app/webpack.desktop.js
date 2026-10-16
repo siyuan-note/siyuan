@@ -3,7 +3,6 @@ const webpack = require("webpack");
 const pkg = require("./package.json");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const {EsbuildPlugin} = require("esbuild-loader");
 
@@ -13,6 +12,8 @@ module.exports = (env, argv) => {
         watch: argv.mode !== "production",
         devtool: argv.mode !== "production" ? "eval-source-map" : false,
         output: {
+            // 开发期间保留旧资源，避免已打开窗口引用的哈希文件被清除。
+            clean: argv.mode === "production",
             publicPath: "/stage/build/desktop/",
             filename: "[name].[chunkhash].js",
             path: path.resolve(__dirname, "stage/build/desktop"),
@@ -112,11 +113,6 @@ module.exports = (env, argv) => {
         },
         plugins: [
             // new BundleAnalyzerPlugin(),
-            new CleanWebpackPlugin({
-                cleanStaleWebpackAssets: false,
-                cleanOnceBeforeBuildPatterns: [
-                    path.join(__dirname, "stage/build/desktop")],
-            }),
             new webpack.DefinePlugin({
                 SIYUAN_VERSION: JSON.stringify(pkg.version),
                 NODE_ENV: JSON.stringify(argv.mode),

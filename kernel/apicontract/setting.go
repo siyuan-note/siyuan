@@ -307,7 +307,6 @@ type SettingExport struct {
 	FileAnnotationRefMode   int    `json:"fileAnnotationRefMode" api:"optional,nullable"`
 	PandocBin               string `json:"pandocBin" api:"optional,nullable"`
 	PandocParams            string `json:"pandocParams" api:"optional,nullable"`
-	DocxTemplate            string `json:"docxTemplate" api:"optional,nullable"`
 	RemoveAssetsID          bool   `json:"removeAssetsID" api:"optional,nullable"`
 	MarkdownYFM             bool   `json:"markdownYFM" api:"optional,nullable"`
 	InlineMemo              bool   `json:"inlineMemo" api:"optional,nullable"`

@@ -16,6 +16,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     const openAssetPicker = async (): Promise<null> => null;
     const dependency = new Proxy({}, {
         get(_target, key) {
+            if (key === "__esModule") return true;
             assert.ok(dependenciesReady, `Dependency ${String(key)} was read during module initialization`);
             if (key === "openInputDialog") {
                 return openInputDialog;

@@ -122,6 +122,7 @@ const rendererSource = () => {
             let recoveredComposition = false, compositionSnapshot;
             let lineBreakUndoContext, forwardDeleteUndoContext;
             let compositionRange, crossBlockComposition;
+            let compositionInputText = "";
             const isAfterInlineMath = ${isAfterInlineMath};
             const pending = [];
             Object.assign(protyle.wysiwyg, new InputQueue());
@@ -129,7 +130,7 @@ const rendererSource = () => {
                 protyle.wysiwyg[name] = InputQueue.prototype[name];
             }
             protyle.toolbar = {};
-            protyle.hint = {};
+            protyle.hint = {handleRefBracketInput: () => false};
             const handlers = (function () {
                 this.persistComposition = ${persistComposition};
                 return {start: ${handlers.compositionstart}, end: ${handlers.compositionend},

@@ -55,7 +55,7 @@ import {blockRender} from "../render/blockRender";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
 import {hideElements} from "../ui/hideElements";

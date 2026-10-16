@@ -127,7 +127,7 @@ export const shouldCreateListItemChildOnEnter = (isPrimaryBlock: boolean, isLast
 export const getFollowingOrderedListMarkerUpdates = (currentMarker: string, followingMarkers: string[]) => {
     const currentIndex = Number.parseInt(currentMarker, 10);
     if (Number.isNaN(currentIndex)) {
-        return followingMarkers.map(() => undefined);
+        return followingMarkers.map((): undefined => undefined);
     }
     return followingMarkers.map((marker, index) => {
         const expectedMarker = `${currentIndex + index + 2}.`;

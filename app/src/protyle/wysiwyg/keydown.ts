@@ -122,7 +122,7 @@ import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";

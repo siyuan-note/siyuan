@@ -6,7 +6,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {renderRepoFile} from "./repoFile";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./notebookDialogs";
 
 export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string) => {

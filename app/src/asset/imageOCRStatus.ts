@@ -19,7 +19,7 @@ const getImageOCREntry = (path: string) => {
                 return undefined;
             }
             return response.data;
-        }).catch(() => undefined);
+        }).catch((): undefined => undefined);
     const entry = {
         expires: Infinity,
         result,

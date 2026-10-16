@@ -23,7 +23,7 @@ import {
 import {writeText} from "../../util/compatibility";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {getCompressURL, removeCompressURL} from "../../../util/image";

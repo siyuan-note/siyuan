@@ -64,7 +64,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
             ["b", {id: "b", x: -20, y: 0, width: 20, height: 20}]]),
         relationElements: new Map([["r", element()]]),
         relationRoutes: new Map([["r", [{x: 100, y: 10}, {x: 0, y: 10}]]]),
-        routingObstacles: () => [], drawRelationPreview: () => {}, drawSummaries: () => {}, renderRouteControls: () => {},
+        routingObstacles: (): unknown[] => [], drawRelationPreview: () => {}, drawSummaries: () => {}, renderRouteControls: () => {},
     });
     return {target, context, polygons, strokes, element};
 };

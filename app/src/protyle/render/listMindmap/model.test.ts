@@ -3838,7 +3838,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     // 展开测试函数，避免断言失败时 Node 从压缩后的源码提取表达式而掩盖实际错误。
     const browserSource = typescript.transpileModule(`(${browserCases.toString()})`, {
         compilerOptions: {target: typescript.ScriptTarget.ES2021},
-    }).outputText.trim().replace(/;$/, "");
+    }).outputText.trim().replace(/^"use strict";\s*/, "").replace(/;$/, "");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

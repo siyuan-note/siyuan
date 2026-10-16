@@ -102,7 +102,7 @@ const browserCases = async (source: string) => {
             protyle, wysiwygElement: editor, element: document.createElement("div"),
             abortController: new AbortController(), selectedCells: cells,
             selection: {node, mode: "cell", activeCell: cells[1]},
-            scheduleRender: () => undefined, isRectangle: () => true,
+            scheduleRender: (): undefined => undefined, isRectangle: () => true,
             writeClipboard: () => true,
         });
         control.bindEvents();

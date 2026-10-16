@@ -1335,7 +1335,7 @@ export const refreshToolbarCatalogEntries = (items: IToolbarCatalogEntry[]) => {
     const order = mergeEntryOrderPreservingUnknown(DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key), actualOrder);
     const children = normalizeToolbarCatalogSeparators([
         ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && item.simple),
-        ...order.flatMap((key) => nodes.get(key) || []),
+        ...order.flatMap((key): IEntryCatalogNode | [] => nodes.get(key) || []),
         ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && !item.simple),
     ]);
     const signature = JSON.stringify(children.map((item) => toolbarCatalogNodeSignature(item, pluginLabels)));

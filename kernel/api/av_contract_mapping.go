@@ -1055,7 +1055,6 @@ func toContractAVLayoutTable(value *av.LayoutTable) *apicontract.AVLayoutTable {
 		Columns: avContractSlice(value.Columns, func(value *av.ViewTableColumn) *apicontract.AVViewTableColumn {
 			return toContractAVViewTableColumn(value)
 		}),
-		RowIDs: value.RowIDs,
 	}
 }
 func toContractAVBaseLayout(value *av.BaseLayout) *apicontract.AVBaseLayout {
@@ -1067,9 +1066,6 @@ func toContractAVBaseLayout(value *av.BaseLayout) *apicontract.AVBaseLayout {
 		ID:        value.ID,
 		ShowIcon:  value.ShowIcon,
 		WrapField: value.WrapField,
-		Filters:   avContractSlice(value.Filters, func(value *av.ViewFilter) *apicontract.AVViewFilter { return toContractAVViewFilter(value) }),
-		Sorts:     avContractSlice(value.Sorts, func(value *av.ViewSort) *apicontract.AVViewSort { return toContractAVViewSort(value) }),
-		PageSize:  value.PageSize,
 	}
 }
 func toContractAVViewTableColumn(value *av.ViewTableColumn) *apicontract.AVViewTableColumn {
@@ -1115,7 +1111,6 @@ func toContractAVLayoutGallery(value *av.LayoutGallery) *apicontract.AVLayoutGal
 		CardFields: avContractSlice(value.CardFields, func(value *av.ViewGalleryCardField) *apicontract.AVViewGalleryCardField {
 			return toContractAVViewGalleryCardField(value)
 		}),
-		CardIDs: value.CardIDs,
 	}
 }
 func toContractAVViewGalleryCardField(value *av.ViewGalleryCardField) *apicontract.AVViewGalleryCardField {

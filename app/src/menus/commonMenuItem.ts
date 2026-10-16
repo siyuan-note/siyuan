@@ -29,7 +29,7 @@ import {focusByRange} from "../protyle/util/selectionOffsets";
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif
 import {rename, replaceFileName} from "../editor/rename";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
 import type {App} from "../index";

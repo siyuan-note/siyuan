@@ -48,7 +48,7 @@ export const fetchPost = ((
         init.signal = signal;
     }
     let isGetFile202 = false;
-    return trackEditorSaveRequest(url, data, trackSettingRequest(url, withFetchTimeout((requestSignal) => fetchWithAppId(url, {...init, signal: requestSignal}).then((response) => {
+    return trackEditorSaveRequest(url, data, trackSettingRequest(url, withFetchTimeout((requestSignal) => fetchWithAppId(url, {...init, signal: requestSignal}).then((response): Promise<IWebSocketData | string> | IWebSocketData => {
         switch (response.status) {
             case 403:
             case 404:

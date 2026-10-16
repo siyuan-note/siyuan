@@ -526,17 +526,13 @@ type AVView struct {
 type AVLayoutTable struct {
 	*AVBaseLayout
 	Columns []*AVViewTableColumn `json:"columns" api:"optional,nullable"`
-	RowIDs  []string             `json:"rowIds" api:"optional,nullable"`
 }
 
 type AVBaseLayout struct {
-	Spec      int             `json:"spec" api:"optional,nullable"`
-	ID        string          `json:"id" api:"optional,nullable"`
-	ShowIcon  bool            `json:"showIcon" api:"optional,nullable"`
-	WrapField bool            `json:"wrapField" api:"optional,nullable"`
-	Filters   []*AVViewFilter `json:"filters,omitempty" api:"optional,nullable"`
-	Sorts     []*AVViewSort   `json:"sorts,omitempty" api:"optional,nullable"`
-	PageSize  int             `json:"pageSize,omitempty" api:"optional,nullable"`
+	Spec      int    `json:"spec" api:"optional,nullable"`
+	ID        string `json:"id" api:"optional,nullable"`
+	ShowIcon  bool   `json:"showIcon" api:"optional,nullable"`
+	WrapField bool   `json:"wrapField" api:"optional,nullable"`
 }
 
 type AVViewTableColumn struct {
@@ -568,7 +564,6 @@ type AVLayoutGallery struct {
 	DisplayFieldName     bool                      `json:"displayFieldName" api:"optional,nullable"`
 	DisplayEmptyFields   bool                      `json:"displayEmptyFields" api:"optional,nullable"`
 	CardFields           []*AVViewGalleryCardField `json:"fields" api:"optional,nullable"`
-	CardIDs              []string                  `json:"cardIds" api:"optional,nullable"`
 }
 
 type AVViewGalleryCardField struct {

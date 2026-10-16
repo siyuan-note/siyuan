@@ -10,7 +10,7 @@ export interface IGraphRenderState {
     options: IGraphOptions;
     palette: IGraphPalette;
     positionVersion: number;
-    positions: Float32Array;
+    positions: Float32Array<ArrayBuffer>;
     selected: number;
     selectionVersion: number;
     styleVersion: number;

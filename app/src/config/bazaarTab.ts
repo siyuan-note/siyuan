@@ -69,7 +69,7 @@ export const mountBazaarTab = (
         return module;
     });
     activeMountPromise = mountPromise;
-    return mountPromise.then(() => undefined);
+    return mountPromise.then((): undefined => undefined);
 };
 
 /** 释放已挂载或正在加载的集市 */

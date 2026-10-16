@@ -9,7 +9,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {isCustomAttr} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
 import {Constants} from "../../../constants";

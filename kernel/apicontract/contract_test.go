@@ -202,22 +202,14 @@ func TestRouteCoverage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile("legacy_routes.json")
-	if err != nil {
+	if err := CheckRoutes(routes, bindings); err != nil {
 		t.Fatal(err)
 	}
-	var legacy []Route
-	if err := json.Unmarshal(data, &legacy); err != nil {
-		t.Fatal(err)
-	}
-	if err := CheckRoutes(routes, bindings, legacy); err != nil {
-		t.Fatal(err)
-	}
-	if err := CheckRoutes(append(routes, Route{Method: "POST", Path: "/api/new/untyped", Handler: "newHandler"}), bindings, legacy); err == nil {
+	if err := CheckRoutes(append(routes, Route{Method: "POST", Path: "/api/new/untyped", Handler: "newHandler"}), bindings); err == nil {
 		t.Fatal("new untyped route was accepted")
 	}
 	bindings["getBlockAttrs"] = "setBlockAttrs"
-	if err := CheckRoutes(routes, bindings, legacy); err == nil {
+	if err := CheckRoutes(routes, bindings); err == nil {
 		t.Fatal("handler bound to the wrong contract was accepted")
 	}
 }
@@ -231,19 +223,11 @@ func TestGeneratedArtifacts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	legacyJSON, err := os.ReadFile("legacy_routes.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var legacy []Route
-	if err := json.Unmarshal(legacyJSON, &legacy); err != nil {
-		t.Fatal(err)
-	}
 	documentation, err := ReadEndpointDocumentation("contracts.go")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.ReplaceAll(string(declaration), "\r\n", "\n") != string(bundle.TypeScript(legacy, documentation)) {
+	if strings.ReplaceAll(string(declaration), "\r\n", "\n") != string(bundle.TypeScript(documentation)) {
 		t.Fatal("TypeScript contracts are out of date")
 	}
 	schema, err := os.ReadFile("schema.json")

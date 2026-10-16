@@ -9440,24 +9440,8 @@
                 }
               ]
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "id": {
               "type": "string"
-            },
-            "pageSize": {
-              "type": "integer"
             },
             "rowIds": {
               "anyOf": [
@@ -9477,19 +9461,6 @@
             },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9569,19 +9540,6 @@
             "cardAspectRatioValue": {
               "type": "number"
             },
-            "cardIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
             "cardLayout": {
               "type": "integer"
             },
@@ -9623,43 +9581,14 @@
                 }
               ]
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "fitImage": {
               "type": "boolean"
             },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9679,7 +9608,6 @@
             "displayFieldName",
             "displayEmptyFields",
             "fields",
-            "cardIds",
             "spec",
             "id",
             "showIcon",
@@ -9695,19 +9623,6 @@
             },
             "cardAspectRatioValue": {
               "type": "number"
-            },
-            "cardIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
             },
             "cardLayout": {
               "type": "integer"
@@ -9764,8 +9679,7 @@
             "fitImage",
             "displayFieldName",
             "displayEmptyFields",
-            "fields",
-            "cardIds"
+            "fields"
           ],
           "additionalProperties": false
         }
@@ -9826,43 +9740,14 @@
             "fillColBackgroundColor": {
               "type": "boolean"
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "fitImage": {
               "type": "boolean"
             },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9989,53 +9874,11 @@
                 }
               ]
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
-            "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -10046,7 +9889,6 @@
           },
           "required": [
             "columns",
-            "rowIds",
             "spec",
             "id",
             "showIcon",
@@ -10076,24 +9918,10 @@
                   "type": "null"
                 }
               ]
-            },
-            "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
             }
           },
           "required": [
-            "columns",
-            "rowIds"
+            "columns"
           ],
           "additionalProperties": false
         }
@@ -41003,16 +40831,6 @@
             }
           ]
         },
-        "docxTemplate": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "fileAnnotationRefMode": {
           "anyOf": [
             {
@@ -45911,9 +45729,6 @@
         "blockRefTextRight": {
           "type": "string"
         },
-        "docxTemplate": {
-          "type": "string"
-        },
         "fileAnnotationRefMode": {
           "type": "integer"
         },
@@ -45969,7 +45784,6 @@
         "blockRefMode",
         "blockRefTextLeft",
         "blockRefTextRight",
-        "docxTemplate",
         "fileAnnotationRefMode",
         "imageWatermarkDesc",
         "imageWatermarkStr",
@@ -46033,16 +45847,6 @@
           ]
         },
         "blockRefTextRight": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "docxTemplate": {
           "anyOf": [
             {
               "type": "string"
@@ -126444,86 +126248,6 @@
     },
     {
       "method": "POST",
-      "path": "/api/attr/resetBlockAttrs",
-      "handler": "resetBlockAttrs",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
       "path": "/api/attr/setBlockAttrs",
       "handler": "setBlockAttrs",
       "authorization": [
@@ -129878,86 +129602,6 @@
               },
               "data": {
                 "$ref": "#/$defs/AVSearchData"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/av/searchAttributeViewNonRelationKey",
-      "handler": "searchAttributeViewNonRelationKey",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
               },
               "msg": {
                 "type": "string"
@@ -164747,86 +164391,6 @@
     },
     {
       "method": "POST",
-      "path": "/api/storage/setLocalStorage",
-      "handler": "setLocalStorage",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
       "path": "/api/storage/setLocalStorageVal",
       "handler": "setLocalStorageVal",
       "authorization": [
@@ -170664,86 +170228,6 @@
       "method": "POST",
       "path": "/api/system/rebuildDataIndex",
       "handler": "rebuildDataIndex",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/system/reloadUI",
-      "handler": "deprecatedReloadUI",
       "authorization": [
         "authenticated",
         "admin",

@@ -1,4 +1,4 @@
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {openInputDialog} from "../../../../dialog/inputDialog";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getCalendarRange, getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday} from "./date";

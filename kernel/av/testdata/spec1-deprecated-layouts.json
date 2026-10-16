@@ -1,0 +1,29 @@
+{
+  "id": "20261010120001-encav00",
+  "name": "Legacy layout",
+  "spec": 1,
+  "keyValues": [{"key": {"id": "title", "type": "block"}, "values": [
+    {"id": "first-value", "keyID": "title", "blockID": "first", "type": "block", "isDetached": true, "block": {"content": "First"}},
+    {"id": "second-value", "keyID": "title", "blockID": "second", "type": "block", "isDetached": true, "block": {"content": "Second"}}
+  ]}],
+  "views": [
+    {
+      "id": "table-view",
+      "type": "table",
+      "table": {
+        "spec": 0,
+        "id": "table-layout",
+        "columns": [{"id": "title"}],
+        "rowIds": ["second", "first"],
+        "filters": [{"column": "title", "operator": "Contains", "value": {"type": "text", "text": {"content": "legacy"}}}],
+        "sorts": [{"column": "title", "order": "DESC"}],
+        "pageSize": 25
+      }
+    },
+    {
+      "id": "gallery-view",
+      "type": "gallery",
+      "gallery": {"spec": 0, "id": "gallery-layout", "cardIds": ["first", "second"], "cardFields": []}
+    }
+  ]
+}

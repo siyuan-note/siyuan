@@ -1,4 +1,4 @@
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {genCellValueByElement, updateCellsValue} from "./cell";
 import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";

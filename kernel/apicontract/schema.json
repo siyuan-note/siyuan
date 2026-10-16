@@ -35149,6 +35149,12 @@
     "PinnedDoc": {
       "type": "object",
       "properties": {
+        "alias": {
+          "type": "string"
+        },
+        "bookmark": {
+          "type": "string"
+        },
         "childrenSortMode": {
           "anyOf": [
             {
@@ -35159,13 +35165,28 @@
             }
           ]
         },
+        "hCtime": {
+          "type": "string"
+        },
+        "hMtime": {
+          "type": "string"
+        },
+        "hSize": {
+          "type": "string"
+        },
         "icon": {
           "type": "string"
         },
         "id": {
           "type": "string"
         },
+        "memo": {
+          "type": "string"
+        },
         "name": {
+          "type": "string"
+        },
+        "name1": {
           "type": "string"
         },
         "notebook": {
@@ -35182,10 +35203,17 @@
         }
       },
       "required": [
+        "alias",
+        "bookmark",
         "childrenSortMode",
+        "hCtime",
+        "hMtime",
+        "hSize",
         "icon",
         "id",
+        "memo",
         "name",
+        "name1",
         "notebook",
         "path",
         "subFileCount",

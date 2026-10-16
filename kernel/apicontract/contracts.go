@@ -152,6 +152,8 @@ var (
 )
 
 var (
+	// GetPinnedDocs 按置顶顺序返回普通文档及与文档树一致的大小、属性和时间信息。
+	// 关闭笔记本的条目标记 unavailable，详细信息为空；加密笔记本不返回置顶条目。
 	GetPinnedDocs    = define[EmptyRequest, []PinnedDoc]("getPinnedDocs", "/api/filetree/getPinnedDocs", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{NonNullable: true}, "POST")
 	UpdatePinnedDocs = define[UpdatePinnedDocsRequest, Null]("updatePinnedDocs", "/api/filetree/updatePinnedDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )

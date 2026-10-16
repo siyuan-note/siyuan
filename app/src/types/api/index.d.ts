@@ -1582,7 +1582,7 @@ export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number;
 
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "settingsWindow"?: boolean; "userDisabledInPublish": boolean; "version": string; };
 
-export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
 export type PluginPublishInfo = { "fields": Array<string>; "granted": boolean; "resources": Array<string>; };
 
@@ -5113,6 +5113,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 按置顶顺序返回普通文档及与文档树一致的大小、属性和时间信息。
+     * 关闭笔记本的条目标记 unavailable，详细信息为空；加密笔记本不返回置顶条目。
+     */
     "/api/filetree/getPinnedDocs": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<PinnedDoc>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

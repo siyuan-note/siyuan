@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Nie można potwierdzić ostatniego zapisu. Pozostaw ten edytor otwarty i skopiuj zmiany przed ponownym wczytaniem, aby sprawdzić zapisaną zawartość.",
 	"automationInsertVariable": "Wstaw zmienną",
 	"automationTemplateTip": "Obliczanie w strefie czasowej reguły; pusty wynik czyści pole, a błędy cofają zmianę",
 	"automationTemplateExample": "Przykład",

@@ -12,6 +12,8 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
                        processResponse: (response: IWebSocketData) => boolean = () => true) => {
     const sends: unknown[][] = [];
     const timeouts: number[] = [];
+    const notifications: unknown[][] = [];
+    let kernelChecks = 0;
     const exports: {
         fetchPost?: (...args: any[]) => Promise<void>;
         fetchSyncPost?: (...args: any[]) => Promise<IWebSocketData>;
@@ -27,7 +29,8 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
                 case "../constants": return {Constants: {SIYUAN_QUIT: "quit"}};
                 case "electron": return {ipcRenderer: {send: (...args: unknown[]) => sends.push(args)}};
                 case "./processMessage": return {processMessage: processResponse};
-                case "./kernelFault": return {kernelError: () => assert.fail("unexpected kernel error")};
+                case "./kernelFault": return {kernelError: () => { kernelChecks++; }};
+                case "../dialog/message": return {showMessage: (...args: unknown[]) => notifications.push(args)};
                 case "../config/setting/pending": return {trackSettingRequest};
                 case "../protyle/util/editorSave": return {trackEditorSaveRequest};
                 case "./fetchTimeout": return {
@@ -43,8 +46,10 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         FormData,
         location: {port: "6806"},
         console: {warn: () => {}},
+        window: {siyuan: {languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
     });
-    return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts};
+    return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts, notifications,
+        kernelChecks: () => kernelChecks};
 };
 
 it("invokes the failure callback once when a request stalls", async () => {
@@ -145,4 +150,45 @@ it("reports consumed settings errors to reset without changing fetch callbacks",
         await fetchPost("/api/setting/patch", {});
         await assert.rejects(flushSettingSaves(before));
     }
+});
+
+it("lost transaction responses warn without replaying writes or reporting success", async () => {
+    for (const method of ["fetchPost", "fetchSyncPost"] as const) {
+        for (const action of ["update", "insert", "create"]) {
+            let applied = 0;
+            const state = loadFetchPost(async () => {
+                applied++;
+                throw new TypeError("Failed to fetch");
+            });
+            const request = {session: "editor", transactions: [{doOperations: [{action, id: "block"}]}]};
+            if (method === "fetchSyncPost") {
+                await assert.rejects(state.fetchSyncPost("/api/transactions", request), /Failed to fetch/);
+            } else {
+                let failed = 0;
+                await state.fetchPost("/api/transactions", request, () => assert.fail("unexpected success"), undefined,
+                    () => { failed++; });
+                assert.equal(failed, 1);
+            }
+            assert.equal(applied, 1, `${method}: ${action}`);
+            assert.deepEqual(state.notifications, [["Save unconfirmed", 0, "error", "transaction-save-unconfirmed"]]);
+            assert.equal(state.kernelChecks(), 1);
+        }
+    }
+});
+
+it("truncated transaction responses are visible while cancellation and callback errors do not diagnose the kernel", async () => {
+    const truncated = loadFetchPost(async () => new Response("{", {headers: {"Content-Type": "application/json"}}));
+    await truncated.fetchPost("/api/transactions", {});
+    assert.equal(truncated.notifications.length, 1);
+    assert.equal(truncated.kernelChecks(), 1);
+    const cancelled = loadFetchPost(async () => { throw new DOMException("Cancelled", "AbortError"); });
+    await cancelled.fetchPost("/api/transactions", {});
+    assert.equal(cancelled.notifications.length, 0);
+    assert.equal(cancelled.kernelChecks(), 0);
+    const callback = loadFetchPost(async () => new Response('{"code":0,"data":[]}', {
+        headers: {"Content-Type": "application/json"},
+    }));
+    await callback.fetchPost("/api/transactions", {}, () => { throw new TypeError("Failed to fetch"); });
+    assert.equal(callback.notifications.length, 0);
+    assert.equal(callback.kernelChecks(), 0);
 });

@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "De laatste opslag kon niet worden bevestigd. Houd deze editor open en kopieer je wijzigingen voordat je opnieuw laadt om te controleren wat is opgeslagen.",
 	"automationInsertVariable": "Variabele invoegen",
 	"automationTemplateTip": "Berekend in de tijdzone van de regel; lege uitvoer wist het veld en fouten draaien de wijziging terug",
 	"automationTemplateExample": "Voorbeeld",

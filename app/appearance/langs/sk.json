@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Posledné uloženie sa nepodarilo potvrdiť. Nechajte tento editor otvorený a pred opätovným načítaním na kontrolu uloženého obsahu skopírujte svoje zmeny.",
 	"automationInsertVariable": "Vložiť premennú",
 	"automationTemplateTip": "Výpočet v časovom pásme pravidla; prázdny výsledok vymaže pole a chyby vrátia zmenu späť",
 	"automationTemplateExample": "Príklad",

@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "直前の保存が成功したか確認できません。このエディターを開いたままにし、再読み込みして保存結果を確認する前に、変更内容をコピーしてください。",
 	"automationInsertVariable": "変数を挿入",
 	"automationTemplateTip": "ルールのタイムゾーンで計算し、空の結果はフィールドを消去、エラー時は変更を取り消します",
 	"automationTemplateExample": "例",

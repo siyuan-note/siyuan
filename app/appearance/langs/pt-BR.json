@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Não foi possível confirmar o último salvamento. Mantenha este editor aberto e copie suas alterações antes de recarregar para conferir o conteúdo salvo.",
 	"automationInsertVariable": "Inserir variável",
 	"automationTemplateTip": "Calculado no fuso horário da regra; resultados vazios limpam o campo e erros revertem a alteração",
 	"automationTemplateExample": "Exemplo",

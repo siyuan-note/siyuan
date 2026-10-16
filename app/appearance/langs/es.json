@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "No se puede confirmar el último guardado. Mantén este editor abierto y copia tus cambios antes de recargar para comprobar lo que se ha guardado.",
 	"automationInsertVariable": "Insertar variable",
 	"automationTemplateTip": "Se calcula en la zona horaria de la regla; un resultado vacío borra el campo y los errores revierten el cambio",
 	"automationTemplateExample": "Ejemplo",

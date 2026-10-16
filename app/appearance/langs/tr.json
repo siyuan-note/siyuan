@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Son kaydetme işlemi doğrulanamadı. Kaydedilen içeriği kontrol etmek için yeniden yüklemeden önce bu düzenleyiciyi açık tutun ve değişikliklerinizi kopyalayın.",
 	"automationInsertVariable": "Değişken ekle",
 	"automationTemplateTip": "Kuralın saat diliminde hesaplanır; boş sonuç alanı temizler ve hatalar değişikliği geri alır",
 	"automationTemplateExample": "Örnek",

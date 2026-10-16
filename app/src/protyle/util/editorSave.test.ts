@@ -21,6 +21,7 @@ const loadFetch = (fetchImplementation: typeof fetch) => {
                 case "electron": return {ipcRenderer: {send: () => {}}};
                 case "./processMessage": return {processMessage: (response: {code: number}) => response.code >= 0};
                 case "./kernelFault": return {kernelError: () => {}};
+                case "../dialog/message": return {showMessage: () => {}};
                 case "../config/setting/pending": return {trackSettingRequest: (_url: string, promise: Promise<unknown>) => promise};
                 case "../protyle/util/editorSave": return {trackEditorSaveRequest};
                 case "./fetchTimeout": return {withFetchTimeout: (request: () => Promise<unknown>) => request()};
@@ -28,7 +29,7 @@ const loadFetch = (fetchImplementation: typeof fetch) => {
             }
         },
         FormData,
-        window: {siyuan: {}},
+        window: {siyuan: {languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
         console: {warn: () => {}},
     });
     return exports;

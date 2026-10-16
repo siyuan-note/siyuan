@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "تعذر التأكد من نجاح الحفظ الأخير. أبقِ هذا المحرر مفتوحًا وانسخ تغييراتك قبل إعادة التحميل للتحقق مما تم حفظه.",
 	"automationInsertVariable": "إدراج متغير",
 	"automationTemplateTip": "يُحسب وفق المنطقة الزمنية للقاعدة؛ النتيجة الفارغة تمسح الحقل والأخطاء تتراجع عن التغيير",
 	"automationTemplateExample": "مثال",

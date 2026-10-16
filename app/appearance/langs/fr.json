@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Impossible de confirmer le dernier enregistrement. Gardez cet éditeur ouvert et copiez vos modifications avant de recharger pour vérifier le contenu enregistré.",
 	"automationInsertVariable": "Insérer une variable",
 	"automationTemplateTip": "Calcul dans le fuseau de la règle ; un résultat vide efface le champ et une erreur annule la modification",
 	"automationTemplateExample": "Exemple",

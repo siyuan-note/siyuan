@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "無法確認最近一次儲存是否成功。請保留目前的編輯器，重新載入以核對儲存結果前，先複製修改內容。",
 	"automationInsertVariable": "插入變數",
 	"automationTemplateTip": "依規則時區計算；空結果清空欄位，錯誤會復原本次修改",
 	"automationTemplateExample": "範例",

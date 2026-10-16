@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Unable to confirm the latest save. Keep this editor open and copy your changes before reloading to check the saved result.",
 	"automationInsertVariable": "Insert variable",
 	"automationTemplateTip": "Calculated in the rule's time zone; empty output clears the field, and errors roll back the change",
 	"automationTemplateExample": "Example",

@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Penyimpanan terakhir belum dapat dipastikan berhasil. Biarkan editor ini terbuka dan salin perubahan Anda sebelum memuat ulang untuk memeriksa hasil yang tersimpan.",
 	"automationInsertVariable": "Sisipkan variabel",
 	"automationTemplateTip": "Dihitung dalam zona waktu aturan; hasil kosong mengosongkan kolom dan kesalahan membatalkan perubahan",
 	"automationTemplateExample": "Contoh",

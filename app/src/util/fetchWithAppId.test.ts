@@ -60,6 +60,7 @@ test("shared fetch helpers attach the caller and preserve payloads", async () =>
             electron: {ipcRenderer: {}},
             "./processMessage": {processMessage: () => true},
             "./kernelFault": {kernelError: () => assert.fail("Unexpected kernel error")},
+            "../dialog/message": {showMessage: () => assert.fail("Unexpected transaction failure")},
             "./fetchTimeout": {withFetchTimeout: (run: (signal: AbortSignal) => unknown, signal: AbortSignal) => run(signal)},
             "../config/setting/pending": {trackSettingRequest: (_url: string, promise: Promise<unknown>) => promise},
             "../protyle/util/editorSave": {trackEditorSaveRequest},

@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "마지막 저장이 성공했는지 확인할 수 없습니다. 이 편집기를 열어 둔 채로 변경 내용을 복사한 후 새로고침하여 저장 결과를 확인하세요.",
 	"automationInsertVariable": "변수 삽입",
 	"automationTemplateTip": "규칙의 시간대로 계산하며, 빈 결과는 필드를 지우고 오류가 발생하면 변경을 되돌립니다",
 	"automationTemplateExample": "예제",

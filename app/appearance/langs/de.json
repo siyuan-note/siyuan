@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "Der letzte Speichervorgang konnte nicht bestätigt werden. Lassen Sie diesen Editor geöffnet und kopieren Sie Ihre Änderungen, bevor Sie die Seite neu laden, um den gespeicherten Stand zu prüfen.",
 	"automationInsertVariable": "Variable einfügen",
 	"automationTemplateTip": "Berechnung in der Zeitzone der Regel; leere Ergebnisse löschen das Feld, Fehler machen die Änderung rückgängig",
 	"automationTemplateExample": "Beispiel",

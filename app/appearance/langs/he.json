@@ -1,4 +1,5 @@
 {
+	"transactionSaveUnconfirmed": "לא ניתן לאשר שהשמירה האחרונה הצליחה. יש להשאיר את העורך הזה פתוח ולהעתיק את השינויים לפני טעינה מחדש כדי לבדוק מה נשמר.",
 	"automationInsertVariable": "הוספת משתנה",
 	"automationTemplateTip": "החישוב לפי אזור הזמן של הכלל; תוצאה ריקה מנקה את השדה ושגיאות מבטלות את השינוי",
 	"automationTemplateExample": "דוגמה",

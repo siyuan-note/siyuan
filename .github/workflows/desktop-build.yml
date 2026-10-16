@@ -49,11 +49,18 @@ jobs:
           GOARCH: ${{ fromJSON(inputs.config).goarch }}
         run: |
           case "$GOARCH" in
-            amd64) target_prefix=x86_64-linux-musl ;;
-            arm64) target_prefix=aarch64-linux-musl ;;
+            amd64)
+              target_prefix=x86_64-linux-musl
+              sha256=c5d410d9f82a4f24c549fe5d24f988f85b2679b452413a9f7e5f7b956f2fe7ea
+              ;;
+            arm64)
+              target_prefix=aarch64-linux-musl
+              sha256=c909817856d6ceda86aa510894fa3527eac7989f0ef6e87b5721c58737a06c38
+              ;;
             *) echo "Unsupported Linux architecture: $GOARCH"; exit 1 ;;
           esac
-          curl --fail --location --retry 3 "https://musl.cc/${target_prefix}-cross.tgz" -o "$RUNNER_TEMP/musl-cross.tgz"
+          curl --fail --location --retry 3 "https://github.com/musl-cc/musl.cc/releases/download/v0.0.1/${target_prefix}-cross.tgz" -o "$RUNNER_TEMP/musl-cross.tgz"
+          printf '%s  %s\n' "$sha256" "$RUNNER_TEMP/musl-cross.tgz" | sha256sum --check --strict
           tar -xzf "$RUNNER_TEMP/musl-cross.tgz" -C "$RUNNER_TEMP"
           echo "cc=$RUNNER_TEMP/${target_prefix}-cross/bin/${target_prefix}-gcc" >> "$GITHUB_OUTPUT"
 

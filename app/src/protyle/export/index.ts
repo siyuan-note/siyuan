@@ -467,6 +467,13 @@ const renderPDF = async (id: string) => {
             <span class="fn__hr"></span>
             <input id="addTitle" class="b3-switch" type="checkbox" ${window.siyuan.config.export.addTitle ? "checked" : ""}>
         </label>
+        <label class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportTitleImage}
+            </div>
+            <span class="fn__hr"></span>
+            <input id="titleImage" class="b3-switch" type="checkbox" ${localData.titleImage !== false ? "checked" : ""}>
+        </label>
         <label id="customTitlePanel" class="b3-label${window.siyuan.config.export.addTitle ? "" : " fn__none"}">
             <div>
                 ${window.siyuan.languages.title}
@@ -728,6 +735,8 @@ ${getIconScript(servePath)}
         id: "${id}",
         keepJSEmbed: true,
         keepFold: ${localData.keepFold},
+        pdf: true,
+        excludeTitleImage: ${localData.titleImage === false},
         addTitle: ${window.siyuan.config.export.addTitle},
         customTitle: "",
         merge: ${localData.mergeSubdocs},
@@ -783,6 +792,10 @@ ${getIconScript(servePath)}
             refreshPreview();
         });
         const addTitleElement = actionElement.querySelector('#addTitle');
+        const titleImageElement = actionElement.querySelector('#titleImage');
+        titleImageElement.addEventListener('change', () => {
+            refreshPreview();
+        });
         const customTitleElement = actionElement.querySelector('#customTitle');
         const customTitlePanelElement = actionElement.querySelector('#customTitlePanel');
         let titleRefreshTimer;
@@ -832,6 +845,8 @@ ${getIconScript(servePath)}
                 id: "${id}",
                 keepJSEmbed: true,
                 keepFold: keepFoldElement.checked,
+                pdf: true,
+                excludeTitleImage: !titleImageElement.checked,
                 addTitle: addTitleElement.checked,
                 customTitle: customTitleElement.value,
                 merge: mergeSubdocsElement.checked,
@@ -913,6 +928,7 @@ ${getIconScript(servePath)}
                     pageSize: unPagedPageSize || pageSize,
                 },
                 pageSize,
+                titleImage: titleImageElement.checked,
                 keepFold: keepFoldElement.checked,
                 addTitle: addTitleElement.checked,
                 customTitle: customTitleElement.value,

@@ -920,6 +920,8 @@ ${databaseOptions}`,
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
                         id,
+                        pdf: true,
+                        excludeTitleImage: localData.titleImage === false,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
                         mergeDocHeadingMode: localData.mergeDocHeadingMode,

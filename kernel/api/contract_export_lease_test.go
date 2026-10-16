@@ -96,14 +96,16 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, exclude := range []bool{false, true} {
-		code, msg, raw := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
-			fmt.Sprintf(`{"id":%q,"image":true,"excludeTitleImage":%t}`, boxID, exclude))
-		var preview apicontract.ExportPreviewHTMLData
-		if err := json.Unmarshal(raw, &preview); err != nil || code != 0 ||
-			strings.Contains(preview.Content, `<img src="`+cover+`"`) == exclude ||
-			!strings.Contains(preview.Content, `<img src="https://example.com/encrypted-body.png"`) {
-			t.Fatalf("encrypted preview failed: %d %s %s %v", code, msg, raw, err)
+	for _, mode := range []string{"image", "pdf"} {
+		for _, exclude := range []bool{false, true} {
+			code, msg, raw := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
+				fmt.Sprintf(`{"id":%q,%q:true,"excludeTitleImage":%t}`, boxID, mode, exclude))
+			var preview apicontract.ExportPreviewHTMLData
+			if err := json.Unmarshal(raw, &preview); err != nil || code != 0 ||
+				strings.Contains(preview.Content, `<img src="`+cover+`"`) == exclude ||
+				!strings.Contains(preview.Content, `<img src="https://example.com/encrypted-body.png"`) {
+				t.Fatalf("encrypted preview failed: %d %s %s %v", code, msg, raw, err)
+			}
 		}
 	}
 	after, err := os.ReadFile(docPath)
@@ -150,14 +152,16 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	if early {
 		t.Fatal("encrypted export lease ended before response serialization")
 	}
-	baselineCode, _, baseline := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
-		`{"id":"`+boxID+`","image":true}`)
-	code, _, lockedPreview := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
-		`{"id":"`+boxID+`","image":true,"excludeTitleImage":true}`)
-	var lockedData apicontract.ExportPreviewHTMLData
-	if code != baselineCode || !bytes.Equal(baseline, lockedPreview) ||
-		json.Unmarshal(lockedPreview, &lockedData) != nil || lockedData.Content != "" {
-		t.Fatalf("locked notebook preview changed or exposed content: %d %s", code, lockedPreview)
+	for _, mode := range []string{"image", "pdf"} {
+		baselineCode, _, baseline := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
+			fmt.Sprintf(`{"id":%q,%q:true}`, boxID, mode))
+		code, _, lockedPreview := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
+			fmt.Sprintf(`{"id":%q,%q:true,"excludeTitleImage":true}`, boxID, mode))
+		var lockedData apicontract.ExportPreviewHTMLData
+		if code != baselineCode || !bytes.Equal(baseline, lockedPreview) ||
+			json.Unmarshal(lockedPreview, &lockedData) != nil || lockedData.Content != "" {
+			t.Fatalf("locked notebook preview changed or exposed content: %d %s", code, lockedPreview)
+		}
 	}
 	requireAPIContract(t, "POST", "/api/export/exportTempContent", writer.ResponseRecorder)
 	entries, err := os.ReadDir(filepath.Join(util.TempDir, "export", boxID, "temp"))

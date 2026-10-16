@@ -8,7 +8,7 @@ const compile = source => ts.transpileModule(source, {
     compilerOptions: {target: ts.ScriptTarget.ES2021, module: ts.ModuleKind.CommonJS},
 }).outputText;
 
-const browserCases = async (headingSource, uiSource, desktopSource, mobileSource) => {
+const browserCases = async (headingSource, uiSource, desktopSource, mobileSource, mobileMenuSource, persistSource) => {
     const check = require("node:assert/strict");
     const heading = {};
     new Function("exports", headingSource)(heading);
@@ -50,13 +50,14 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     const Constants = {LOCAL_EXPORTPDF: "pdf", SIYUAN_VERSION: "test", SIYUAN_GET: "get"};
     window.siyuan = {storage: {pdf: {headingPageBreakLevels: [2]}}, languages: {
         print: "Print", confirm: "Confirm", cancel: "Cancel", pdfHeadingPageBreaks: "Heading page breaks",
-        pdfHeadingPageBreaksTip: "Choose levels",
+        pdfHeadingPageBreaksTip: "Choose levels", exportTitleImage: "Export title image",
     }};
     const ui = {};
     new Function("exports", "require", uiSource)(ui, name => {
         if (name === "./headingPageBreaks") return heading;
         if (name.includes("constants")) return {Constants};
-        if (name.includes("compatibility")) return {setStorageVal: (key, value) => saved = {key, levels: [...value.headingPageBreakLevels]}};
+        if (name.includes("compatibility")) return {setStorageVal: (key, value) => saved = {
+            key, levels: [...value.headingPageBreakLevels], titleImage: value.titleImage}};
         if (name.includes("dialog")) return {Dialog: class {
             constructor(options) {
                 this.element = document.createElement("div");
@@ -69,20 +70,25 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         throw new Error(name);
     });
     ui.openHeadingPageBreakDialog(() => confirmed++);
+    check.equal(activeDialog.element.querySelector("#titleImage").checked, true);
     check.ok(parseFloat(getComputedStyle(activeDialog.element.querySelector(".ft__smaller")).fontSize) <
         parseFloat(getComputedStyle(activeDialog.element.querySelector(".b3-dialog__content > div")).fontSize),
         "Mobile print descriptions use a smaller font than their titles");
     check.equal(activeDialog.element.querySelector('input[value="2"]').checked, true);
     activeDialog.element.querySelector('input[value="6"]').checked = true;
+    activeDialog.element.querySelector("#titleImage").checked = false;
     activeDialog.element.querySelector(".b3-button--cancel").click();
     check.equal(saved, undefined);
     check.equal(confirmed, 0);
     ui.openHeadingPageBreakDialog(() => confirmed++);
+    check.equal(activeDialog.element.querySelector("#titleImage").checked, true, "Cancel preserves the default");
     activeDialog.element.querySelector('input[value="6"]').checked = true;
+    activeDialog.element.querySelector("#titleImage").checked = false;
     activeDialog.element.querySelector(".b3-button--text").click();
-    check.deepEqual(saved, {key: "pdf", levels: [2, 6]});
+    check.deepEqual(saved, {key: "pdf", levels: [2, 6], titleImage: false});
     check.equal(confirmed, 1);
     ui.openHeadingPageBreakDialog(() => confirmed++);
+    check.equal(activeDialog.element.querySelector("#titleImage").checked, false, "Mobile printing restores the saved choice");
     check.equal(activeDialog.element.querySelector('input[value="6"]').checked, true);
     activeDialog.element.querySelector(".b3-button--cancel").click();
 
@@ -102,6 +108,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         .classList.contains("fn__none"), "Unpaged preferences hide heading options before initialization");
     window.siyuan.storage.pdf.paged = true;
     await renderPDF("root");
+    check.equal(new DOMParser().parseFromString(html, "text/html").getElementById("titleImage").checked, true);
     check.ok(html.includes('id="headingPageBreaks"'));
     const inline = html.match(/<script>\s*const previewElement[\s\S]*?<\/script>/)[0]
         .replace(/^<script>|<\/script>$/g, "");
@@ -109,10 +116,35 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     window.Protyle = new Proxy({applyExportHeadingPageBreaks: apply, renderExportJSEmbeds: async () => {}}, {
         get: (target, key) => target[key] || (() => {}),
     });
-    window.fetch = async () => ({ok: true, json: async () => ({code: 0, data: {name: "Test", attrs: {},
-        content: h(1, "root-title") + p("Body") + h(2, "child-title") + p("Child body") + h(6, "deep-title")}})});
+    const previewRequests = [];
+    window.fetch = async (_url, options) => {
+        const request = JSON.parse(options.body);
+        previewRequests.push(request);
+        return {ok: true, json: async () => ({code: 0, data: {name: "Test", attrs: {},
+            content: (request.excludeTitleImage ? "" : "<div data-cover>Title image</div>") +
+                (request.addTitle ? h(1, "root-title") : "") + p("Body") +
+                h(2, "child-title") + p("Child body") + h(6, "deep-title")}})};
+    };
     await new Function(inline + "; return new Promise(resolve => setTimeout(resolve, 30));")();
     const preview = document.getElementById("preview");
+    const waitForPreview = () => new Promise(resolve => setTimeout(resolve, 30));
+    check.equal(previewRequests.at(-1).pdf, true);
+    check.equal(previewRequests.at(-1).excludeTitleImage, false);
+    check.ok(preview.querySelector("[data-cover]"));
+    const titleImage = document.getElementById("titleImage");
+    titleImage.click();
+    await waitForPreview();
+    check.equal(preview.querySelector("[data-cover]"), null);
+    check.ok(preview.querySelector('[data-node-id="root-title"]'));
+    check.equal(previewRequests.at(-1).excludeTitleImage, true);
+    check.equal(previewRequests.at(-1).pdf, true);
+    document.getElementById("addTitle").click();
+    await waitForPreview();
+    check.equal(titleImage.checked, false);
+    check.equal(preview.querySelector('[data-node-id="root-title"]'), null);
+    check.ok(preview.textContent.includes("Body"));
+    document.getElementById("addTitle").click();
+    await waitForPreview();
     check.deepEqual(Array.from(preview.querySelectorAll("[data-export-heading-page-break]"))
         .map(element => element.getAttribute("data-node-id")), ["child-title", "deep-title"]);
     const paged = document.getElementById("paged");
@@ -142,6 +174,17 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         "Refreshing merged previews reapplies the selected levels");
     const exportStyle = html.match(/<style>([\s\S]*?)<\/style>/)[1];
 
+    const persist = new Function("Constants", "setStorageVal", "ipcData", persistSource);
+    const ipcData = {titleImage: false, pdfOptions: {margins: {}}, headingPageBreakLevels: [2, 6]};
+    window.siyuan = {config, storage: {pdf: {}}, languages: {}};
+    persist(Constants, (key, value) => saved = {key, value}, ipcData);
+    check.equal(saved.value.titleImage, false);
+    await renderPDF("root");
+    check.equal(new DOMParser().parseFromString(html, "text/html").getElementById("titleImage").checked, false,
+        "Desktop PDF exports restore the preference saved by the parent window");
+    persist(Constants, () => {}, {...ipcData, titleImage: undefined});
+    check.equal(window.siyuan.storage.pdf.titleImage, true, "Older export messages preserve the default");
+
     window.siyuan = {config, storage: {pdf: {headingPageBreakLevels: [2, 6]}}, languages: {}};
     const onExport = new Function("Constants", "isInMobileApp", "getScreenWidth", "getThemeMode", "setInlineStyle",
         "getPluginStyle", "getSnippetCSS", "getSnippetJS", "getIconScript", "getExportLanguages", "normalizeHeadingPageBreakLevels",
@@ -156,6 +199,30 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     new Function(mobileInline)();
     check.deepEqual(Array.from(document.querySelectorAll("[data-export-heading-page-break]"))
         .map(element => element.getAttribute("data-node-id")), ["second", "sixth"]);
+
+    let mobileRequest;
+    let printed;
+    window.siyuan = {config, storage: {pdf: {headingPageBreakLevels: [2, 6]}}, languages: {}};
+    window.JSAndroid = {print: (name, content) => printed = {name, content}};
+    window.siyuan.storage.pdf.titleImage = false;
+    const mobilePrint = new Function("openHeadingPageBreakDialog", "showMessage", "Constants", "id", "fetchPost",
+        "onExport", "isInAndroid", "isInHarmony", "isInIOS", "hideMessage", mobileMenuSource + ";return printPDF;")(
+        callback => callback(), () => "message", Constants, "root",
+        (_url, request, callback) => {
+            mobileRequest = request;
+            return callback({data: {name: "Mobile", content: (request.excludeTitleImage ? "" : "<div data-cover>Cover</div>") + p("Body")}});
+        }, onExport, () => true, () => false, () => false, () => {});
+    mobilePrint();
+    await waitForPreview();
+    check.equal(mobileRequest.pdf, true);
+    check.equal(mobileRequest.excludeTitleImage, true);
+    check.ok(printed.content.includes("Body"));
+    check.ok(!printed.content.includes("data-cover"));
+    window.siyuan.storage.pdf.titleImage = true;
+    mobilePrint();
+    await waitForPreview();
+    check.equal(mobileRequest.excludeTitleImage, false);
+    check.ok(printed.content.includes("data-cover"));
     return {message: "Heading page break UI and DOM cases passed", exportStyle};
 };
 
@@ -171,11 +238,27 @@ const runElectron = async () => {
         const source = readFileSync(path.join(__dirname, "../src/protyle/export/index.ts"), "utf8");
         const desktopSource = compile(source.slice(source.indexOf("const renderPDF ="), source.indexOf("const getExportPath =")));
         const mobileSource = compile(source.slice(source.indexOf("export const onExport =")).replace("export const", "const"));
+        const menu = ts.createSourceFile("menu.ts", readFileSync(path.join(__dirname, "../src/menus/commonMenuItem.ts"), "utf8"),
+            ts.ScriptTarget.Latest, true);
+        let mobileMenuSource;
+        const visit = node => {
+            if (ts.isPropertyAssignment(node) && node.name.getText(menu) === "click" &&
+                node.initializer.getText(menu).includes("openHeadingPageBreakDialog")) {
+                mobileMenuSource = compile("const printPDF = " + node.initializer.getText(menu) + ";");
+            }
+            ts.forEachChild(node, visit);
+        };
+        visit(menu);
+        assert.ok(mobileMenuSource);
+        const bootSource = readFileSync(path.join(__dirname, "../src/boot/onGetConfig.ts"), "utf8");
+        const persistStart = bootSource.indexOf("        window.siyuan.storage[Constants.LOCAL_EXPORTPDF] =");
+        const persistSource = compile(bootSource.slice(persistStart, bootSource.indexOf("        try {", persistStart)));
         await win.loadURL("data:text/html,<!DOCTYPE html><html><body></body></html>");
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/export.scss")).css;
         await win.webContents.insertCSS(css);
         const result = await win.webContents.executeJavaScript(`(${browserCases.toString()})(
-            ${JSON.stringify(headingSource)}, ${JSON.stringify(uiSource)}, ${JSON.stringify(desktopSource)}, ${JSON.stringify(mobileSource)})`);
+            ${JSON.stringify(headingSource)}, ${JSON.stringify(uiSource)}, ${JSON.stringify(desktopSource)}, ${JSON.stringify(mobileSource)},
+            ${JSON.stringify(mobileMenuSource)}, ${JSON.stringify(persistSource)})`);
         console.log(result.message);
 
         const h = level => `<div data-node-id="h${level}" data-type="NodeHeading" data-subtype="h${level}">Heading ${level}</div>`;

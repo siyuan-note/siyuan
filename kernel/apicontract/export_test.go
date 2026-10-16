@@ -115,6 +115,15 @@ func TestExportPreviewJSEmbedCompatibility(t *testing.T) {
 }
 
 func TestExportPreviewTitleImageCompatibility(t *testing.T) {
+	for _, extra := range []string{"", `,"pdf":null`, `,"pdf":false`, `,"pdf":true`} {
+		request, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || request.PDF != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected PDF preview mode: %+v %v", request, err)
+		}
+	}
+	if _, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id","pdf":"true"}`)); err == nil {
+		t.Fatal("invalid PDF preview mode accepted")
+	}
 	for _, extra := range []string{"", `,"excludeTitleImage":null`, `,"excludeTitleImage":false`, `,"excludeTitleImage":true`} {
 		request, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
 		if err != nil || request.ExcludeTitleImage != strings.Contains(extra, "true") {

@@ -98,6 +98,12 @@ func TestAPIContractExportTitleImage(t *testing.T) {
 				{`,"image":true,"excludeTitleImage":true`, true},
 				{`,"image":false,"excludeTitleImage":true`, false},
 				{`,"excludeTitleImage":true`, false},
+				{`,"pdf":true`, false},
+				{`,"pdf":true,"excludeTitleImage":null`, false},
+				{`,"pdf":true,"excludeTitleImage":false`, false},
+				{`,"pdf":true,"excludeTitleImage":true`, true},
+				{`,"pdf":false,"excludeTitleImage":true`, false},
+				{`,"pdf":null,"excludeTitleImage":true`, false},
 			} {
 				code, message, raw := exportContractRequest(t, "exportPreviewHTML", exportPreviewHTML,
 					fmt.Sprintf(`{"id":%q,"addTitle":%t,"customTitle":"CUSTOM-TITLE"%s}`, docID, addTitle, entry.extra))

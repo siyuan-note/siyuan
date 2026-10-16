@@ -1028,7 +1028,7 @@ export type ExportPreviewData = { "fillCSSVar": boolean; "html": string; };
 
 export type ExportPreviewHTMLData = { "attrs": Record<string, string> | null; "content": string; "id": string; "name": string; "type": string; };
 
-export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "excludeTitleImage"?: boolean | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "keepJSEmbed"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
+export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "excludeTitleImage"?: boolean | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "keepJSEmbed"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "pdf"?: boolean | null; };
 
 export type ExportRepoFileRequestInput = { "id": string; };
 
@@ -4845,8 +4845,8 @@ export interface APIPOSTRoutes {
     /**
      * 导出图片或 PDF 预览时，可选的 keepJSEmbed: true 保留脚本嵌入占位，默认不保留。
      * 内核不执行脚本；调用方须遵守安全模式限制，并等待异步渲染完成后再导出。
-     * image=true 时可用 excludeTitleImage=true 排除题头图；省略、null 或 false 保留题头图，独立于 addTitle。
-     * 非图片预览忽略 excludeTitleImage；原始文档、正文图片及加密笔记本读取授权不受影响。
+     * image=true 或 pdf=true 时可用 excludeTitleImage=true 排除题头图；省略、null 或 false 保留，独立于 addTitle。
+     * 未指定图片或 PDF 模式时忽略 excludeTitleImage；原始文档、正文图片及加密笔记本读取授权不受影响。
      */
     "/api/export/exportPreviewHTML": {
         request: ExportPreviewHTMLRequestInput;

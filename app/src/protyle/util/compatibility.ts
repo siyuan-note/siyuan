@@ -802,6 +802,7 @@ export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => vo
             mergeContentHeadingMode: "preserve",
         };
         defaultStorage[Constants.LOCAL_EXPORTPDF] = {
+            titleImage: true,
             landscape: false,
             marginType: "0",
             scale: 1,

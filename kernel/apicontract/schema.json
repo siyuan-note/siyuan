@@ -24501,6 +24501,16 @@
               "type": "null"
             }
           ]
+        },
+        "pdf": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

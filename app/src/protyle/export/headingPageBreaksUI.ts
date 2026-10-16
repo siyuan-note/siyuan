@@ -16,6 +16,11 @@ export const openHeadingPageBreakDialog = (onConfirm: () => void) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.print,
         content: `<div class="b3-dialog__content">
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">${window.siyuan.languages.exportTitleImage}</div>
+        <span class="fn__space"></span>
+        <input id="titleImage" type="checkbox" class="b3-switch fn__flex-center" ${localData.titleImage !== false ? "checked" : ""}>
+    </label>
     <div>${window.siyuan.languages.pdfHeadingPageBreaks}</div>
     <div class="ft__smaller ft__on-surface">${window.siyuan.languages.pdfHeadingPageBreaksTip}</div>
     <div class="fn__hr"></div>
@@ -30,6 +35,7 @@ export const openHeadingPageBreakDialog = (onConfirm: () => void) => {
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => dialog.destroy());
     dialog.element.querySelector(".b3-button--text").addEventListener("click", () => {
+        localData.titleImage = dialog.element.querySelector<HTMLInputElement>("#titleImage").checked;
         localData.headingPageBreakLevels = Array.from(dialog.element.querySelectorAll<HTMLInputElement>(
             "[data-heading-page-breaks] input:checked")).map(input => Number(input.value));
         setStorageVal(Constants.LOCAL_EXPORTPDF, localData);

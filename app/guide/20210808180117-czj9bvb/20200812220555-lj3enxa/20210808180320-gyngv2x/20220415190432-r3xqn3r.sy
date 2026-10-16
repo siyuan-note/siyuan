@@ -6,7 +6,7 @@
 		"id": "20220415190432-r3xqn3r",
 		"title": "查询语法",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -672,7 +672,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415192044-9d8ou1j",
-				"updated": "20220415192101"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -778,7 +778,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cquery1\u003e AND \u003cquery2\u003e"
+									"TextMarkTextContent": "<query1> AND <query2>"
 								}
 							]
 						},
@@ -805,7 +805,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cquery1\u003e OR \u003cquery2\u003e"
+									"TextMarkTextContent": "<query1> OR <query2>"
 								}
 							]
 						},
@@ -832,7 +832,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cquery1\u003e NOT \u003cquery2\u003e"
+									"TextMarkTextContent": "<query1> NOT <query2>"
 								}
 							]
 						},
@@ -879,7 +879,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20220415212235-jon9dnr",
-				"updated": "20220502163519"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -892,7 +892,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "-- 匹配包含 \"one\" 或者 \"two\" 的块，不匹配包含 \"three\" 的块\n'one OR two NOT three'\n\n-- 匹配包含 \"one\" 或者包含 \"two\" 且不包含 \"three\" 的块\n'one OR (two NOT three)'\n"
+					"Data": "-- NOT 的优先级高于 OR，请使用括号明确分组。\n-- 匹配包含 \"one\" 或者 \"two\" 的块，不匹配包含 \"three\" 的块\n'(one OR two) NOT three'\n\n-- 匹配包含 \"one\" 或者包含 \"two\" 且不包含 \"three\" 的块\n'one OR (two NOT three)'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1004,7 +1004,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "MATCH '{content name alias memo}:\u0026quot; + query"
+					"TextMarkTextContent": "MATCH '{content name alias memo}:&quot; + query"
 				},
 				{
 					"Type": "NodeText",

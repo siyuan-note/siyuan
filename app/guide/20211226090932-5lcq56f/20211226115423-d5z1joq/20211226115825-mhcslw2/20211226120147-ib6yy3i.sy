@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-2s70boj",
-				"updated": "20260921215916"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -49,7 +49,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226120227-nx8tlf5",
-				"updated": "20260923221935"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1006,6 +1006,75 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "心智圖項目區塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "list-item"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/listitem-block-20260425175517-4uac18s.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "列表"
 								},
 								{
@@ -1434,7 +1503,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20261012014930"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -2548,7 +2617,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-cfx2ewc",
-				"updated": "20261012014930"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -2568,6 +2637,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "心智圖區塊是獨立的區塊類型。可以將無序列表、有序列表或任務列表轉換為心智圖區塊，也可以轉換回列表。轉換會保留列表項內容、編號和任務狀態。以列表形式儲存的舊心智圖會在開啟文件進行編輯時升級。"
+				}
+			]
+		},
+		{
+			"ID": "20261016111305-cgqyl9y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-cgqyl9y",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "心智圖區塊只能包含心智圖項目區塊。每個心智圖項目都有獨立的區塊 ID，可包含一般內容區塊及巢狀心智圖，但不能直接包含列表區塊、列表項區塊或其他心智圖項目區塊。"
 				}
 			]
 		},
@@ -3213,7 +3296,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-3jdgfm5",
-				"updated": "20260906003122"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -3242,7 +3325,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120227-8jsk008",
-				"updated": "20260906003122"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -3480,6 +3563,62 @@
 								{
 									"Type": "NodeText",
 									"Data": "頁籤項目區塊：包含一般內容區塊及巢狀頁籤區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016111305-te2v48m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016111305-te2v48m",
+						"updated": "20261016111305"
+					},
+					"Children": [
+						{
+							"ID": "20261016111305-qe157vp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016111305-qe157vp",
+								"updated": "20261016111305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "心智圖區塊：只能包含心智圖項目區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016111305-xn2huj7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016111305-xn2huj7",
+						"updated": "20261016111305"
+					},
+					"Children": [
+						{
+							"ID": "20261016111305-6mktzg8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016111305-6mktzg8",
+								"updated": "20261016111305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "心智圖項目區塊：包含一般內容區塊及巢狀心智圖，不能直接包含列表區塊、列表項區塊或心智圖項目區塊"
 								}
 							]
 						}

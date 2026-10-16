@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261016013311"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-arn57f1",
-				"updated": "20260820133158"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -94,6 +94,31 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中設定按一下、Ctrl+按一下 / ⌘按一下、Alt+按一下和 Shift+按一下資源檔案時的開啟方式。"
+				}
+			]
+		},
+		{
+			"ID": "20261016111305-dy1rcih",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-dy1rcih",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在檔案內容和 OCR 文字中搜尋，請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230805232920-5fdco36",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "搜索資源文件內容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

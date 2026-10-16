@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20261016013311"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210118101709-5a7bzl0"
+				"id": "20210118101709-5a7bzl0",
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -32,7 +33,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118101709-9lqij9d",
-				"updated": "20220623201341"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -51,11 +52,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "202008250000-a1b2c3d"
+					"TextMarkTextContent": "20200825000000-a1b2c3d"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", consisting of time and 7 random characters."
+					"Data": ", consisting of a 14-digit timestamp ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "), a hyphen, and 7 random lowercase letters or digits."
 				}
 			]
 		},

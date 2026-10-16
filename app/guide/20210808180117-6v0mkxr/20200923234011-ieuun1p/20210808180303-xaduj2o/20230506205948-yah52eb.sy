@@ -6,7 +6,7 @@
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210937-yel1yei",
-				"updated": "20260803171606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -83,7 +83,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-v1ki1ir",
-				"updated": "20260803171606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -93,7 +93,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace/plugins/"
+					"TextMarkTextContent": "workspace/data/plugins/"
 				},
 				{
 					"Type": "NodeText",
@@ -106,7 +106,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -115,7 +119,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -124,7 +132,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -137,7 +137,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20260619110446"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -297,7 +297,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20260619110446"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1264,7 +1264,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-28r34vb",
-						"updated": "20240530101000"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1272,7 +1272,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-ktm1kij",
-								"updated": "20240530101000"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1286,7 +1286,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は週番号を返します"
+									"Data": "​: 入力日付が属する ISO 8601 の週番号（1–53）を返します。例えば、2021-01-01 は第 53 週に属します"
 								}
 							]
 						}
@@ -1301,7 +1301,7 @@
 					},
 					"Properties": {
 						"id": "20250828155049-69k1o8n",
-						"updated": "20250828155049"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1309,7 +1309,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828155049-vbcmh76",
-								"updated": "20250828155051"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1323,7 +1323,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は現在の月を返します"
+									"Data": "​: 入力日付が属する ISO 週の木曜日の暦月を返します。例えば、2021-01-01 は 12 を返します。入力日付の暦月が必要な場合は次を使用します："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"01\""
 								}
 							]
 						}
@@ -1338,7 +1343,7 @@
 					},
 					"Properties": {
 						"id": "20250828155051-8r71644",
-						"updated": "20250828155051"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1346,7 +1351,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828155051-d8e3faa",
-								"updated": "20250828155057"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1360,7 +1365,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は現在の年を返します"
+									"Data": "​: 入力日付が属する ISO 週番号の年を返します。例えば、2021-01-01 は 2020 を返します。暦年が必要な場合は次を使用します："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"2006\""
 								}
 							]
 						}

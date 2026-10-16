@@ -6,7 +6,7 @@
 		"id": "20260614104254-4ifhixg",
 		"title": "网络代理",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104306-tylh2a2",
-				"updated": "20260803163440"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104306-zvmmfua",
-				"updated": "20260803163440"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -81,7 +81,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -90,7 +90,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -99,7 +99,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中配置："
+					"Data": " 中配置："
 				}
 			]
 		},
@@ -109,7 +109,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104306-s1ddhjq",
-				"updated": "20260614104306"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -121,7 +121,7 @@
 					},
 					"Properties": {
 						"id": "20260614104306-z5vyah1",
-						"updated": "20260614104306"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -129,17 +129,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614104306-ifs0z9h",
-								"updated": "20260614104306"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "协议"
-								},
+									"Type": "NodeText",
+									"Data": "协议：可选直接连接（不使用代理）、使用系统代理、HTTP、HTTPS 或 SOCKS5；直接连接和使用系统代理无需填写主机与端口"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016112115-zd0i0ab",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261016112115-zd0i0ab",
+						"updated": "20261016112115"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261016112115-bggswt8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016112115-bggswt8",
+								"updated": "20261016112115"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "：选择代理协议——直接连接（不使用代理）、HTTP、HTTPS 或 SOCKS5"
+									"Data": "系统模式使用受支持的系统设置，或内核启动时继承的代理环境变量。内核支持读取 Windows 手动代理和 Linux GNOME 手动代理，Linux 上显式代理环境变量优先。这些读取器不支持自动 PAC 配置，Windows 自动检测也不受支持；其他平台的内核保留启动时的代理环境，不读取操作系统代理设置"
 								}
 							]
 						}
@@ -251,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104306-mplk72h",
-				"updated": "20260614104306"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -280,7 +303,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104306-24z7zh1",
-				"updated": "20260614104306"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -376,7 +399,7 @@
 					},
 					"Properties": {
 						"id": "20260614104306-rjtlnid",
-						"updated": "20260614104306"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -384,12 +407,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614104306-v7nffko",
-								"updated": "20260614104306"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "其他所有需要联网的操作"
+									"Data": "通过思源受管理代理客户端发起的其他网络请求；外部浏览器、插件和 stdio 子进程可能有各自的代理设置"
 								}
 							]
 						}

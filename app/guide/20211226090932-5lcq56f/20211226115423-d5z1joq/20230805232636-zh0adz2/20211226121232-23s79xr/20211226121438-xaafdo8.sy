@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111950"
 	},
 	"Children": [
 		{
@@ -208,7 +208,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-g3niy0i",
-				"updated": "20250115162655"
+				"updated": "20261016111950"
 			},
 			"Children": [
 				{
@@ -222,7 +222,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220703231425-knmdjxb",
-				"updated": "20220821170702"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -234,7 +234,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "后如果一切正常就已经配置好同步了。如果你不太熟悉同步配置，建議通過點擊同步按鈕打開同步配置嚮導，通過嚮導進行配置會更簡便一些。"
+					"Data": "後如果一切正常就已經設定好同步了。如果你不太熟悉同步配置，建議通過點擊同步按鈕打開同步配置嚮導，通過嚮導進行配置會更簡便一些。"
 				}
 			]
 		},
@@ -360,7 +360,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230220103637-v3wy8lv",
-				"updated": "20250115162655"
+				"updated": "20261016111950"
 			},
 			"Children": [
 				{
@@ -400,7 +400,7 @@
 					},
 					"Properties": {
 						"id": "20230220103640-opmw3uo",
-						"updated": "20250115162655"
+						"updated": "20261016111950"
 					},
 					"Children": [
 						{
@@ -408,21 +408,48 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230220103640-gpbn39m",
-								"updated": "20250115162655"
+								"updated": "20261016111950"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果資料量較大，建議通過設定中的 "
+									"Data": "如果資料量較大，建議透過 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導出 Data"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 導出資料包，然後將該資料包通過手動拷貝或者其他方式發送到新設備上，並在新設備上 "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "應用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "匯出 Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 匯出資料包，傳輸到新裝置後，在該裝置的同一設定頁面使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -431,7 +458,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，最後再配置同步"
+									"Data": "​，最後再設定同步"
 								}
 							]
 						}
@@ -445,7 +472,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261011151543-1587etm",
-				"updated": "20261011151543"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -459,7 +486,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261011151543-j3donul",
-				"updated": "20261011151543"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -482,7 +509,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中選擇 S3、WebDAV 或本地檔案系統（僅桌面版），然後點擊同步服務設定一列的設定按鈕。填寫完整後點擊 "
+					"Data": " 中選擇 S3、WebDAV 或本地檔案系統，再點擊同步服務設定一列的設定按鈕。本地檔案系統支援桌面標準核心和 Docker 核心，行動核心不提供此選項；路徑屬於核心所在機器或容器，不是瀏覽器所在裝置的目錄。填寫完整後點擊 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -538,7 +565,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230219121211-f7pvncg",
-				"updated": "20260803163402"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -552,7 +579,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230219121211-z22snch",
-				"updated": "20260803163402"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -584,7 +611,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中支持三種同步模式："
+					"Data": "​ 中支持三種同步模式："
 				}
 			]
 		},
@@ -594,7 +621,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219121211-kxpzt8h",
-				"updated": "20230219121211"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -606,7 +633,7 @@
 					},
 					"Properties": {
 						"id": "20230219121211-ghv6fxi",
-						"updated": "20230219121211"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -629,7 +656,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230219121211-owo5ku7",
-								"updated": "20230219121211"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -641,7 +668,7 @@
 									},
 									"Properties": {
 										"id": "20230219121211-ei8xksh",
-										"updated": "20230219121211"
+										"updated": "20261016111431"
 									},
 									"Children": [
 										{
@@ -649,12 +676,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230219121211-ex1htrc",
-												"updated": "20230219121211"
+												"updated": "20261016111431"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "啟動和退出時會進行一次同步，使用中資料不再變動後 30 秒進行一次同步"
+													"Data": "啟動和正常退出時會進行一次同步，使用中本地資料停止變動後，按設定的間隔進行同步，預設間隔為 30 秒"
 												}
 											]
 										}
@@ -823,7 +850,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-i5h1wl1",
-				"updated": "20260918195936"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1000,7 +1027,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220510105029-d1ufczf",
-				"updated": "20220510105029"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1012,7 +1039,7 @@
 					},
 					"Properties": {
 						"id": "20220510105029-4ri0ne0",
-						"updated": "20220510105029"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1020,12 +1047,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220510105029-8rsvfuv",
-								"updated": "20220510105029"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料變動後 30 秒如果不再發生變動則進行一次對比，如果繼續發生變動則順延 30 秒"
+									"Data": "從最後一次資料變動開始，按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "帳號與同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "同步間隔"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 安排同步，預設 30 秒，可設為 30 至 43200 秒；繼續變動會重新開始等待"
 								}
 							]
 						}
@@ -1040,7 +1094,7 @@
 					},
 					"Properties": {
 						"id": "20220510105029-rdxn16v",
-						"updated": "20220510105029"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1048,16 +1102,105 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220510105029-7q5kg5g",
-								"updated": "20220510105029"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "沒有資料變動則按 5 分鐘、8 分鐘、16 分鐘、32 分鐘……遞增間隔"
+									"Data": "沒有偵測到資料變化時，會延長自動檢查間隔；再次發生資料變化後，按設定的同步間隔重新安排同步"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-g4i7r5n",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261016111431-g4i7r5n",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同步感知與區域網路加速"
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-77viyw8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-77viyw8",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "帳號與同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同步感知"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 利用思源官方雲端的訊號，在自動模式下更及時地觸發同步。Docker 核心不提供同步感知；它不會繞過手動或完全手動模式，也不能消除編輯衝突。"
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-kcvxs23",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-kcvxs23",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "帳號與同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區域網路同步加速"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 優先從區域網路內可連線、使用相同倉庫密鑰和雲端同步目標的裝置下載加密資料物件。雲端儲存仍是同步權威來源，區域網路傳輸無法使用時會回退到雲端，因此不能當作完全離線的點對點同步。Docker 核心不提供區域網路加速；區域網路通知僅在自動模式下觸發同步。"
 				}
 			]
 		},
@@ -1067,7 +1210,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220307095239-5sgxvyl",
-				"updated": "20220307095239"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1081,12 +1224,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220307095239-14zl03b",
-				"updated": "20220307095239"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "從上述工作原理我們可以得知，思源僅支持在多設備上交替同步資料：設備 A 上同步完成以後設備 B 上再進行同步。無法支持多設備同時同步，這樣會發生無法預期的資料覆蓋。"
+					"Data": "為減少衝突，請先在裝置 A 上完成同步，再在裝置 B 上同步完成後開始編輯。同時編輯同一檔案可能產生衝突並使一個版本覆蓋另一個版本；同步感知和區域網路加速也不能消除這種風險。"
 				}
 			]
 		},
@@ -1096,7 +1239,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220307095239-elclvy3",
-				"updated": "20220307095239"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1113,7 +1256,7 @@
 			},
 			"Properties": {
 				"id": "20220307095239-8s5z7ki",
-				"updated": "20230630142312"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1127,7 +1270,7 @@
 					},
 					"Properties": {
 						"id": "20220307095239-bqfn42n",
-						"updated": "20230630142259"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1135,12 +1278,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307095239-iz19nv1",
-								"updated": "20230630142259"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在設備 A 上編輯後執行同步（通過自動或者手動觸發同步），此時雲端資料會被設備 A 資料覆蓋，既雲端和設備 A 保持資料一致"
+									"Data": "在裝置 A 上編輯後執行同步並等待完成，將變更上傳到雲端"
 								}
 							]
 						}
@@ -1157,7 +1300,7 @@
 					},
 					"Properties": {
 						"id": "20220307095239-fz84088",
-						"updated": "20230630142306"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1165,12 +1308,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307095239-1yu2g8x",
-								"updated": "20230630142306"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在設備 B 上執行同步，此時設備 B 資料會被雲端資料覆蓋，即雲端和設備 A、B 保持資料一致"
+									"Data": "在裝置 B 上開始編輯前先同步並等待完成，取得裝置 A 的變更"
 								}
 							]
 						}
@@ -1187,7 +1330,7 @@
 					},
 					"Properties": {
 						"id": "20220307095239-smkxi2z",
-						"updated": "20230630142309"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1195,12 +1338,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307095239-ydutuxv",
-								"updated": "20230630142309"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "設備 B 上編輯後再次執行同步，此時雲端資料會被設備 B 資料覆蓋，既雲端和設備 B 保持資料一致"
+									"Data": "在裝置 B 上編輯後再次同步，等待其變更上傳到雲端"
 								}
 							]
 						}
@@ -1217,7 +1360,7 @@
 					},
 					"Properties": {
 						"id": "20220307095239-zhwwj9o",
-						"updated": "20230630142312"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1225,12 +1368,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307095239-j9w5415",
-								"updated": "20230630142312"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在設備 A 上執行同步，此時設備 A 資料會被雲端資料覆蓋，即雲端和設備 A、B 保持資料一致"
+									"Data": "回到裝置 A 後先同步取得裝置 B 的變更，再繼續編輯"
 								}
 							]
 						}
@@ -1243,12 +1386,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220307095239-xb7advy",
-				"updated": "20220307095239"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "該場景下，使用同步的過程是在設備 A、B 上交替進行的，這樣能夠保證資料同步符合預期正常完成。"
+					"Data": "交替編輯並確認每次同步成功，可以減少衝突並幫助兩台裝置保持一致。"
 				}
 			]
 		},
@@ -1258,7 +1401,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220703231640-y2kpysi",
-				"updated": "20220703231640"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1275,7 +1418,7 @@
 			},
 			"Properties": {
 				"id": "20220703231640-9pkvgzl",
-				"updated": "20221009104430"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1289,7 +1432,7 @@
 					},
 					"Properties": {
 						"id": "20220703231640-i8rkg1k",
-						"updated": "20220703231640"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1297,12 +1440,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703231640-jqwuxcf",
-								"updated": "20220703231640"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在設備 A 上編輯 a 文件後同步"
+									"Data": "裝置 A 編輯檔案 a 後完成同步"
 								}
 							]
 						}
@@ -1319,7 +1462,7 @@
 					},
 					"Properties": {
 						"id": "20220703231640-avwyybn",
-						"updated": "20220703231640"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1327,12 +1470,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703231640-2klknr1",
-								"updated": "20220703231640"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在設備 B 上編輯 a 文件後同步"
+									"Data": "裝置 B 尚未取得 A 的變更就編輯自己的舊版檔案 a，然後執行同步"
 								}
 							]
 						}
@@ -1376,7 +1519,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-0nlneiq",
-				"updated": "20261011203418"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1392,7 +1535,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121454-kv5itch",
-				"updated": "20261011203418"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1544,7 +1687,7 @@
 					},
 					"Properties": {
 						"id": "20231120213105-95jggay",
-						"updated": "20261011203418"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1660,7 +1803,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231120213106-56yd2us",
-								"updated": "20231120213106"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -1674,7 +1817,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​（12 秒），最大值不限制；啟動時會優先讀取環境變數覆蓋 conf 檔案中的值。"
+									"Data": "​（12 秒），最大值不限制；啟動時會優先讀取環境變數覆蓋 conf 檔案中的值"
 								}
 							]
 						}

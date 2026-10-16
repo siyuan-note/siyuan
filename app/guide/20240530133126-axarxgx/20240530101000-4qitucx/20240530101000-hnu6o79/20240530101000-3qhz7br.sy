@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261016011750"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -5360,7 +5360,7 @@
 			"Properties": {
 				"ID": "20240530101000-agmhi90",
 				"id": "20240530101000-mguk4vq",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -5403,12 +5403,23 @@
 			"Properties": {
 				"ID": "20240530101000-mfktcb8",
 				"id": "20240530101000-8sj8uxy",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以下の 3 つの形式で定義できます:"
+					"Data": "ローカルカーネルでは以下の 3 つの形式を使用できます。リモートカーネルへの接続時は厳密な JSON のみをサポートし、JavaScript オブジェクト式や関数は実行されません。詳しくは"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "リモートカーネルへの接続"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},

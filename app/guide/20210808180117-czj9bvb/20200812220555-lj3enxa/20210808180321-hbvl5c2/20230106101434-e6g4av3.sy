@@ -6,7 +6,7 @@
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
 		"type": "doc",
-		"updated": "20260918195936"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -110,7 +110,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230109113547-eg7zbrh",
-				"updated": "20260829104731"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -125,7 +125,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230106104300-j6nj9t2",
-				"updated": "20260829104731"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20230109113554-izjti9n",
-						"updated": "20250306083454"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -159,7 +159,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113909-5dp3vml",
-								"updated": "20250306083454"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -200,7 +200,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 来指定内核监听的端口。"
+									"Data": "​ 来指定内核监听的端口"
 								}
 							]
 						}
@@ -215,7 +215,7 @@
 					},
 					"Properties": {
 						"id": "20230109113624-du5o3e3",
-						"updated": "20260829104731"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -223,7 +223,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113624-zjqzh5l",
-								"updated": "20260829104731"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -251,11 +251,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "关于"
+									"TextMarkTextContent": "应用"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中切换不同的工作空间"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "工作空间"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中切换不同的工作空间"
 								}
 							]
 						}

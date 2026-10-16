@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261016174753"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -142,7 +142,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208115136-9g2b46l",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -157,7 +157,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240208115415-bvq6noy",
-				"updated": "20260613160412"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -227,6 +227,41 @@
 									"TextMarkBlockRefID": "20260613155453-n1se73o",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "字段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016191345-t2t1ou7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016191345-t2t1ou7",
+						"updated": "20261016191345"
+					},
+					"Children": [
+						{
+							"ID": "20261016191345-zdl33xf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016191345-zdl33xf",
+								"updated": "20261016191345"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查看"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260617122823-56cr2zv",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "表格计算"
 								}
 							]
 						}
@@ -1650,7 +1685,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613170258-y3mj135",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1679,7 +1714,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613170258-kfaoevw",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1708,7 +1743,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613170258-stvvay1",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2021,7 +2056,7 @@
 					},
 					"Properties": {
 						"id": "20260613170258-uwddfvi",
-						"updated": "20260613170258"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2029,7 +2064,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613170258-2mrv7ni",
-								"updated": "20260613170258"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2039,7 +2074,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：可对多个字段同时设置过滤条件，多条条件之间为「与」关系（必须同时满足）"
+									"Data": "：可为多个字段设置条件，默认以「与」（AND）组合，要求全部满足；可切换为「或」（OR），满足任一条件即可，也可添加嵌套条件组"
 								}
 							]
 						}
@@ -2185,7 +2220,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613170258-kdajpht",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2214,7 +2249,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613170258-h59ky9v",
-				"updated": "20260613170258"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2570,7 +2605,7 @@
 					},
 					"Properties": {
 						"id": "20260613170258-rq2h626",
-						"updated": "20260613170258"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2598,7 +2633,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613170258-cd1b6oz",
-								"updated": "20260613170258"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2638,7 +2673,7 @@
 									},
 									"Properties": {
 										"id": "20260613170258-3io8uax",
-										"updated": "20260613170258"
+										"updated": "20261016191345"
 									},
 									"Children": [
 										{
@@ -2646,12 +2681,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613170258-rpriwkn",
-												"updated": "20260613170258"
+												"updated": "20261016191345"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "未编辑过的行排在最后，按创建时间升序排列"
+													"Data": "未编辑过的行排在最后并保留手动顺序；排序条件相同的条目也保留手动顺序"
 												}
 											]
 										}
@@ -2683,7 +2718,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613170258-j738gis",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2712,7 +2747,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613170258-jcdhbkf",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2757,7 +2792,7 @@
 					},
 					"Properties": {
 						"id": "20260613170258-lineysf",
-						"updated": "20260613170258"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2765,7 +2800,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613170258-9qu7z0j",
-								"updated": "20260613170258"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2775,7 +2810,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：除汇总、资源和行号外，几乎所有字段类型都支持分组。不同字段类型对应不同的分组方式："
+									"Data": "：汇总、行号和位置字段不支持分组，其他字段类型支持分组；资源字段需先配置显示模板，并按模板结果分组。不同字段类型对应不同分组方式："
 								}
 							]
 						},

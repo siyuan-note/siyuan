@@ -7,7 +7,7 @@
 		"id": "20210808180303-xaduj2o",
 		"title": "General Operations",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -483,6 +483,57 @@
 					"TextMarkBlockRefID": "20260614104204-staofnm",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Network Proxy"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-t4inbxw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-t4inbxw",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190002-oidcen1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "OIDC login"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-lbkdl4e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-lbkdl4e",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185002-secvr03",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Secrets and Variables"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-t6o363b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-t6o363b",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260907120000-cryen01",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Encrypted Notebook"
 				}
 			]
 		}

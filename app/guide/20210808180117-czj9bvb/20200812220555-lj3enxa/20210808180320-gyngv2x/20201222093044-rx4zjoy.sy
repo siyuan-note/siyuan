@@ -6,7 +6,7 @@
 		"id": "20201222093044-rx4zjoy",
 		"title": "数据库表",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -107,7 +107,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201117103851-l9cahuc",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -135,7 +135,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20201224120447-cs6ur9x",
-				"updated": "20221014133123"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -273,7 +273,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "content 的 SHA256 校验和"
+									"Data": "用于识别块及相关上下文变化的短哈希，不是 content 的完整 SHA256 校验和"
 								}
 							]
 						}
@@ -543,16 +543,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​字符数：叶子块取自身 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "fcontent"
+									"TextMarkTextContent": "content"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 长度"
+									"Data": "​，容器块取首个叶子块内容，文档块取标题"
 								}
 							]
 						}

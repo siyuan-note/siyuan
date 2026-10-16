@@ -6,7 +6,7 @@
 		"id": "20240119212048-0huuevw",
 		"title": "Ignore search",
 		"type": "doc",
-		"updated": "20241001011905"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119212104-9fehl3c",
-				"updated": "20241001011905"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -157,12 +157,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240119212104-w5aqumm",
-				"updated": "20240119212108"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Each line in these ignore configuration files will be used as a condition for SQL path NOT LIKE, for example:"
+					"Data": "Each line in these ignore configuration files must be a complete SQL filter condition. Multiple lines are combined with AND, for example:"
 				}
 			]
 		},

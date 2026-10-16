@@ -6,7 +6,7 @@
 		"id": "20211010211311-ffz0wbu",
 		"title": "虚拟引用",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010211443-fekufvk",
-				"updated": "20211010211450"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211010211616-b5kzfqf",
-				"updated": "20211010211707"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -78,6 +78,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双向链接"
 				},
 				{
 					"Type": "NodeText",

@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -275,7 +275,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-qlngedh",
-				"updated": "20260816114944"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -556,7 +556,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-t9reg9k",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -570,7 +570,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-mk2k1ns",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -584,7 +584,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 在目前會話中不再詢問任何操作。"
+					"Data": " 免除本會話中一般操作的逐項確認。設為必須確認的能力及程式碼片段修改仍需確認。"
 				}
 			]
 		},
@@ -593,7 +593,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170043-geqztqz",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -607,7 +607,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 前應確認目前任務範圍和所用工具可信，因為後續寫入操作將不再逐項確認。"
+					"Data": " 前應確認目前任務範圍和所用工具可信，因為一般寫入操作將不再逐項確認；上述強制確認仍然有效。"
 				}
 			]
 		},

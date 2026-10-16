@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -275,7 +275,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20260816114944"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -556,7 +556,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-m6wpz84",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -570,7 +570,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-d73n5cg",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -584,7 +584,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to stop asking for confirmation in the current session."
+					"Data": " to skip individual confirmations for ordinary operations in this session. Capabilities set to require confirmation and code snippet changes still require approval."
 				}
 			]
 		},
@@ -593,7 +593,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170043-8c898qc",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -607,7 +607,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", confirm that the task scope and tools are trusted because subsequent write operations will no longer be confirmed individually."
+					"Data": ", confirm that the task scope and tools are trusted: ordinary writes will no longer be confirmed individually, while the forced confirmations above remain in effect."
 				}
 			]
 		},

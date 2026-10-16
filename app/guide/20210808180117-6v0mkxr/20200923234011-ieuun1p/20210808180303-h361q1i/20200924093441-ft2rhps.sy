@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261016011750"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -5165,7 +5165,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-hlh01sn",
-				"updated": "20210415201002"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -5206,12 +5206,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221225013111-k0tinm3",
-				"updated": "20221225013144"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "It can be defined in the following three formats:"
+					"Data": "With a local kernel, the following three formats are supported. When connected to a remote kernel, only strict JSON is supported; JavaScript object expressions and functions are not executed. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-s4hctea",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Connect to a Remote Kernel"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

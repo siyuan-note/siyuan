@@ -7,7 +7,7 @@
 		"id": "20240530101000-4p096e8",
 		"title": "ワークスペース",
 		"type": "doc",
-		"updated": "20260918195936"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -120,7 +120,7 @@
 			"Properties": {
 				"ID": "20240530101000-dy3las4",
 				"id": "20240530101000-c9x0nlh",
-				"updated": "20260829104731"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -136,7 +136,7 @@
 			"Properties": {
 				"ID": "20240530101000-dhcolxj",
 				"id": "20240530101000-y2rv8ja",
-				"updated": "20260829104731"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -149,7 +149,7 @@
 					"Properties": {
 						"ID": "20240530101000-req2wqr",
 						"id": "20240530101000-zwpmazv",
-						"updated": "20250306083820"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -158,12 +158,12 @@
 							"Properties": {
 								"ID": "20240530101000-329zfla",
 								"id": "20240530101000-jr5t0r5",
-								"updated": "20240530101000"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デスクトップ版では画面左上にあるドロップダウンメニューから複数のワークスペースを開けます。"
+									"Data": "デスクトップ版では画面左上にあるドロップダウンメニューから複数のワークスペースを開けます"
 								}
 							]
 						},
@@ -172,7 +172,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-bthacdl",
-								"updated": "20250306083820"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -213,7 +213,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を指定することでカーネルがリッスンするポートを指定できます。"
+									"Data": "​ を指定することでカーネルがリッスンするポートを指定できます"
 								}
 							]
 						}
@@ -229,7 +229,7 @@
 					"Properties": {
 						"ID": "20240530101000-x400lts",
 						"id": "20240530101000-26qtta1",
-						"updated": "20260829104731"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -238,7 +238,7 @@
 							"Properties": {
 								"ID": "20240530101000-i8yieo6",
 								"id": "20240530101000-owkbmon",
-								"updated": "20260829104731"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -266,11 +266,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "情報"
+									"TextMarkTextContent": "アプリ"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ から異なるワークスペースに切り替えることができます。"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ワークスペース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " でワークスペースを切り替えられます"
 								}
 							]
 						}

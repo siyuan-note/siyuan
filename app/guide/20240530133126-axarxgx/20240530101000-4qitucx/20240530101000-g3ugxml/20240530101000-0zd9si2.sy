@@ -7,7 +7,7 @@
 		"id": "20240530101000-0zd9si2",
 		"title": "仮想参照",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-ex5n5l4",
 				"id": "20240530101000-vm3i8g2",
-				"updated": "20260803163243"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -63,7 +63,7 @@
 			"Properties": {
 				"ID": "20240530101000-urio87q",
 				"id": "20240530101000-esnoq90",
-				"updated": "20260803163243"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -87,6 +87,15 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双方向リンク"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",

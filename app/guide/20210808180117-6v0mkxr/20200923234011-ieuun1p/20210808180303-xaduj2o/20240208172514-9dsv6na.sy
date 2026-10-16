@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261016174753"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -142,7 +142,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -157,7 +157,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20251224101749-2wip2q0",
-				"updated": "20260613160453"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -227,6 +227,41 @@
 									"TextMarkBlockRefID": "20260613155453-sgecaav",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "fields"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016191345-7g1gwxq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016191345-7g1gwxq",
+						"updated": "20261016191345"
+					},
+					"Children": [
+						{
+							"ID": "20261016191345-wyplf76",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016191345-wyplf76",
+								"updated": "20261016191345"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "See "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260617123409-cmygnqa",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Table Calculation"
 								}
 							]
 						}
@@ -1650,7 +1685,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1679,7 +1714,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-5zjv62o",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1708,7 +1743,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-438l9c3",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2021,7 +2056,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-4a6yi6q",
-						"updated": "20260613171129"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2029,7 +2064,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171129-5e9n0cc",
-								"updated": "20260613171129"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2039,7 +2074,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Filter conditions can be set on multiple fields simultaneously. Multiple conditions use AND logic (all must be satisfied)"
+									"Data": ": Conditions can target multiple fields. They use AND by default (all must match), can switch to OR (any can match), and can be organized into nested groups"
 								}
 							]
 						}
@@ -2185,7 +2220,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-vqc74gs",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2214,7 +2249,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-kv1oshm",
-				"updated": "20260613171129"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2570,7 +2605,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-jxnni38",
-						"updated": "20260613171129"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2598,7 +2633,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613171129-42i5mjn",
-								"updated": "20260613171129"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2638,7 +2673,7 @@
 									},
 									"Properties": {
 										"id": "20260613171129-bkk8gir",
-										"updated": "20260613171129"
+										"updated": "20261016191345"
 									},
 									"Children": [
 										{
@@ -2646,12 +2681,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613171129-wfww2an",
-												"updated": "20260613171129"
+												"updated": "20261016191345"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Unmodified rows are placed last, sorted by creation time in ascending order"
+													"Data": "Unmodified rows are placed last and retain their manual order; entries with equal sort values also retain their manual order"
 												}
 											]
 										}
@@ -2683,7 +2718,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-y8inb0t",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2712,7 +2747,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-y221wzt",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2757,7 +2792,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-ifu1208",
-						"updated": "20260613171129"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2765,7 +2800,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171129-hjdzw4d",
-								"updated": "20260613171129"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2775,7 +2810,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Except for rollup, asset, and line number, almost all field types support grouping. Different field types correspond to different grouping methods:"
+									"Data": ": Rollup, line number, and location fields do not support grouping. Other types do; asset fields require a display template and are grouped by its result. Grouping methods vary by field type:"
 								}
 							]
 						},

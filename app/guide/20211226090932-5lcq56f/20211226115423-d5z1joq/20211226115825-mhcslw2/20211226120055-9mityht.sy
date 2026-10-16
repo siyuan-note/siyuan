@@ -6,7 +6,7 @@
 		"id": "20211226120055-9mityht",
 		"title": "什麼是內容區塊",
 		"type": "doc",
-		"updated": "20261016013311"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120120-jm4t451",
-				"updated": "20260730184353"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120120-83k0bgj",
-				"updated": "20260730184353"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -48,11 +48,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "202008250000-a1b2c3d"
+					"TextMarkTextContent": "20200825000000-a1b2c3d"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，由時間和 7 位隨機字符組成。"
+					"Data": "，由 14 位時間戳記（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、連字號和 7 位隨機小寫英文字母或數字組成。"
 				}
 			]
 		},

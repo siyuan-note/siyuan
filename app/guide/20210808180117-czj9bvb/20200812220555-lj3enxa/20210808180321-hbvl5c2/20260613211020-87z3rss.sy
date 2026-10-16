@@ -6,7 +6,7 @@
 		"id": "20260613211020-87z3rss",
 		"title": "内容统计",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -239,7 +239,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613211910-hehof5u",
-				"updated": "20260613211912"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -258,7 +258,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260613211910-saj0fin",
-				"updated": "20260613211910"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -313,7 +313,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文档中 Unicode 字符的总数，汉字、字母、数字、标点、空格等均计入"
+									"Data": "文档可统计文本中的 Unicode 字符数，汉字、字母、数字和标点计入，空格、换行等空白字符不计入"
 								}
 							]
 						}

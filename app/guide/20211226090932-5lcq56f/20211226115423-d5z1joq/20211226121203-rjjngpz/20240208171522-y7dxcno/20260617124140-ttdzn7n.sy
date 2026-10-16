@@ -6,7 +6,7 @@
 		"id": "20260617124140-ttdzn7n",
 		"title": "表格計算",
 		"type": "doc",
-		"updated": "20260617124159"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617124141-vlyd6cy",
-				"updated": "20260617124141"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617124141-w29q59c",
-				"updated": "20260617124141"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -696,7 +696,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617124141-dvkk167",
-				"updated": "20260617124141"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -708,7 +708,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260617124141-45mapoo",
-						"updated": "20260617124141"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -722,7 +722,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ 的元素個數取決於列型別：數字、文字等單值列每行算一個值；多選、資源等多值列每個選項單獨算一個值（與原生「計算值數量」口徑一致）。"
+							"Data": "​ 的元素個數取決於列型別：空白儲存格會被略過，數字、文字等單值欄每個非空白儲存格算一個值；多選、資源等多值列每個選項單獨算一個值（與原生「計算值數量」口徑一致）。"
 						}
 					]
 				}
@@ -802,7 +802,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617124141-e5l4lrp",
-				"updated": "20260617124141"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -835,7 +835,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260617124141-a0i47hb",
-				"updated": "20260617124141"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1055,7 +1055,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不重複選項數（多選列）"
+									"Data": "不重複選項數（多選欄）"
 								}
 							]
 						},
@@ -1070,7 +1070,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{len (uniq .strings)}}"
+									"TextMarkTextContent": ".action{len (uniq .strings)}"
 								},
 								{
 									"Type": "NodeText",

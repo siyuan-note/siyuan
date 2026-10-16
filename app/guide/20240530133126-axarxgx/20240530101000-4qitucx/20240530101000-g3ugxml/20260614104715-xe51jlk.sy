@@ -6,7 +6,7 @@
 		"id": "20260614104715-xe51jlk",
 		"title": "ネットワークプロキシ",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104730-7u2gg5k",
-				"updated": "20260803163402"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104730-tbz888i",
-				"updated": "20260803163402"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -68,7 +68,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -77,7 +77,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -86,7 +86,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -95,7 +95,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ で設定します："
+					"Data": " で設定します："
 				}
 			]
 		},
@@ -105,7 +105,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104730-16ja8ya",
-				"updated": "20260614104730"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -117,7 +117,7 @@
 					},
 					"Properties": {
 						"id": "20260614104730-b7upuvp",
-						"updated": "20260614104730"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -125,17 +125,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614104730-2p8n4ok",
-								"updated": "20260614104730"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "プロトコル"
-								},
+									"Type": "NodeText",
+									"Data": "プロトコル：直接接続（プロキシ不使用）、システムプロキシを使用、HTTP、HTTPS、SOCKS5 から選択します。直接接続とシステムプロキシではホストとポートの入力は不要です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016112115-s6u6kl7",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261016112115-s6u6kl7",
+						"updated": "20261016112115"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261016112115-ezc3mdr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016112115-ezc3mdr",
+								"updated": "20261016112115"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "：プロキシプロトコルを選択 — 直接接続（プロキシ不使用）、HTTP、HTTPS、または SOCKS5"
+									"Data": "システムモードは、対応する OS 設定またはカーネル起動時に継承したプロキシ環境変数を使用します。カーネルは Windows と Linux GNOME の手動プロキシを読み取り、Linux では明示的なプロキシ環境変数を優先します。これらの読み取り処理は自動 PAC 設定に対応せず、Windows の自動検出にも対応しません。その他の OS では OS 設定を読み取らず、起動時のプロキシ環境を保持します"
 								}
 							]
 						}
@@ -247,7 +270,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104730-pacusxy",
-				"updated": "20260614104730"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -276,7 +299,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104730-voo7oe8",
-				"updated": "20260614104730"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -372,7 +395,7 @@
 					},
 					"Properties": {
 						"id": "20260614104730-7in2v85",
-						"updated": "20260614104730"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -380,12 +403,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614104730-q4wc0fm",
-								"updated": "20260614104730"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "その他すべてのネットワーク接続を必要とする操作"
+									"Data": "SiYuan が管理するプロキシクライアントを通したその他の通信。外部ブラウザ、プラグイン、stdio 子プロセスは独自のプロキシ設定を使用する場合があります"
 								}
 							]
 						}

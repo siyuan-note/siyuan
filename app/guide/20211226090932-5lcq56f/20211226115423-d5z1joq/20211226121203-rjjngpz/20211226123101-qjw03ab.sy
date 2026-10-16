@@ -6,7 +6,7 @@
 		"id": "20211226123101-qjw03ab",
 		"title": "小工具",
 		"type": "doc",
-		"updated": "20261002002136"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -78,7 +78,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123118-fqy6ibk",
-				"updated": "20261002002136"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -92,7 +92,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123118-4dtjsok",
-				"updated": "20260730184353"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "工作空間/widgets/"
+					"TextMarkTextContent": "工作空間/data/widgets/"
 				},
 				{
 					"Type": "NodeText",

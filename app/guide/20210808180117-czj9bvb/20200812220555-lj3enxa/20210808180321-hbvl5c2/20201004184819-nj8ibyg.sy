@@ -6,7 +6,7 @@
 		"id": "20201004184819-nj8ibyg",
 		"title": "在浏览器上使用",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090909-6pyfjgx",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025092410-jsrv6gc",
-				"updated": "20260803163440"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "在运行中的应用内打开 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -52,7 +52,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "伺服"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -61,7 +70,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -70,16 +79,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 后就可以直接在浏览器上使用了，如果需要在局域网内使用，将 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "127.0.0.1"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 换成局域网 IP 地址即可。"
+					"Data": "，即可在本机浏览器使用。保持内核运行，使用打开的地址及其端口。"
 				}
 			]
 		},
@@ -88,12 +88,68 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025092746-xsahzmh",
-				"updated": "20221025093126"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "除了本地局域网使用，通过以下两个方法可以实现公网使用："
+					"Data": "在同一局域网的其他设备访问前，先设置锁屏密码或有效的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190000-oidccn1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC 登录"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，开启 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "伺服"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "网络伺服"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，并在应用退出后重新打开思源。然后将地址中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 替换为内核所在电脑的局域网 IP，保留显示的端口，并在防火墙中允许该端口。公网访问可采用以下部署方式："
 				}
 			]
 		},
@@ -227,7 +283,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090909-9x9sqe8"
+				"id": "20210104090909-9x9sqe8",
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -245,7 +302,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090909-20f2hvi",
-				"updated": "20210522214354"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -268,7 +325,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中可配置浏览器锁屏密码，留空表示不启用。这在开放网络（比如办公场所和公网）会比较有用，只有密码验证通过后才能进入工作空间。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "登录与令牌"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "锁屏密码"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置锁屏密码。留空表示不启用密码登录；正常的非本地访问仍需要密码或有效的 OIDC 配置。请先完成鉴权配置，再将内核开放给其他设备。"
 				}
 			]
 		},

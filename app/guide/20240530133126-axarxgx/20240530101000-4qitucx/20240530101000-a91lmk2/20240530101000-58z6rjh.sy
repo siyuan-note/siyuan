@@ -7,7 +7,7 @@
 		"id": "20240530101000-58z6rjh",
 		"title": "データベーステーブル",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -110,7 +110,7 @@
 			"Properties": {
 				"ID": "20240530101000-vygoylv",
 				"id": "20240530101000-dgjyf1m",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -135,7 +135,7 @@
 				"ID": "20240530101000-56ov1cd",
 				"colgroup": "|",
 				"id": "20240530101000-nfyqf19",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -273,7 +273,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コンテンツの SHA256 チェックサム"
+									"Data": "ブロックと関連するコンテキストの変更を検出するための短いハッシュ。content の完全な SHA256 チェックサムではありません"
 								}
 							]
 						}
@@ -543,16 +543,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​文字数：リーフブロックでは自身の "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "fcontent"
+									"TextMarkTextContent": "content"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ の長さ"
+									"Data": "​、コンテナブロックでは最初のリーフブロックの内容、ドキュメントではタイトルを対象とします"
 								}
 							]
 						}

@@ -7,7 +7,7 @@
 		"id": "20240530101000-xq26o73",
 		"title": "カーネルパラメータ",
 		"type": "doc",
-		"updated": "20260917190844"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-p4a4sqs",
 				"id": "20240530101000-pmhprwt",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -37,21 +37,82 @@
 			"Properties": {
 				"ID": "20240530101000-jnec75x",
 				"id": "20240530101000-v0bquxf",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "ワークスペースフォルダのパスを指定します。指定しない場合のデフォルト値は "
+					"Data": " では "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "~/SiYuan/"
+					"TextMarkTextContent": "--workspace"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ です。"
+					"Data": " でワークスペースを指定します。省略した場合は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_WORKSPACE_PATH"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、最後に登録されたワークスペース、OS のデフォルトディレクトリの順で選択します。デフォルトは macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/Library/Application Support/SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、Windows では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "%USERPROFILE%\\SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、その他では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " です。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--home-dir"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は設定とデフォルトパスの基準となるホームディレクトリを変更します。通常の単発 CLI コマンドは選択規則が異なります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612192417-fb4ueux",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "コマンドラインインターフェース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},
@@ -62,7 +123,7 @@
 			"Properties": {
 				"ID": "20240530101000-e1xtgtc",
 				"id": "20240530101000-edwo40h",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -82,12 +143,35 @@
 			"Properties": {
 				"ID": "20240530101000-pmwrpun",
 				"id": "20240530101000-q9chcul",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "appearance/"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "カーネルの作業ディレクトリパスを指定します。指定しない場合は、カーネル実行ファイルのエントリに従って自動的に取得されます。"
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "stage/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を含むプログラムのリソースディレクトリです。省略するとカーネル実行ファイルから自動検出します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で指定するデータディレクトリとは別です。"
 				}
 			]
 		},
@@ -143,7 +227,7 @@
 			"Properties": {
 				"ID": "20240530101000-17dyrfu",
 				"id": "20240530101000-0w6cfgi",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -159,7 +243,7 @@
 			"Properties": {
 				"ID": "20240530101000-2b9ic8o",
 				"id": "20240530101000-ybjiuls",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -175,25 +259,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "を指定します。設定すると "
+					"Data": "を指定します。空でない "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "conf.json"
+					"TextMarkTextContent": "--accessAuthCode"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ の "
+					"Data": " は "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "authCode"
+					"TextMarkTextContent": "conf/conf.json"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ を上書きします。"
+					"Data": " の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を上書きします。省略または空の場合は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用します。最終的な値が空でも保存済みパスワードは消去されません。"
 				}
 			]
 		},

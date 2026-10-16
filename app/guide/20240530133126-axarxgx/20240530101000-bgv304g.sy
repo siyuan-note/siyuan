@@ -8,7 +8,7 @@
 		"id": "20240530101000-bgv304g",
 		"title": "拡張機能の開発",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -256,7 +256,7 @@
 			"Properties": {
 				"ID": "20240530101000-b2725rd",
 				"id": "20240530101000-qnks6ak",
-				"updated": "20260804235500"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -269,7 +269,7 @@
 					"Properties": {
 						"ID": "20240530101000-w9a9or6",
 						"id": "20240530101000-vw761x6",
-						"updated": "20240530101000"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -278,7 +278,7 @@
 							"Properties": {
 								"ID": "20240530101000-2f7rrl9",
 								"id": "20240530101000-2lsfraz",
-								"updated": "20240530101000"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -329,6 +329,17 @@
 								{
 									"Type": "NodeText",
 									"Data": "​) にあります。"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "暗号化ノートブック内の永続ファイルは、これらの raw ファイル API では読み書きできません。ロックを解除してから、対応するドキュメント、ブロック、アセットの API を使用してください。詳しくは"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-cryja01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "暗号化ノートブック"
 								}
 							]
 						}
@@ -373,7 +384,7 @@
 							"Children": [
 								{
 									"Type": "NodeBlockquoteMarker",
-									"Data": "\u003e"
+									"Data": ">"
 								},
 								{
 									"ID": "20240530101000-8vs5yaq",

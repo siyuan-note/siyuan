@@ -6,7 +6,7 @@
 		"id": "20260613212028-gozdm4e",
 		"title": "Content Statistics",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -239,7 +239,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613212037-l0gd4ec",
-				"updated": "20260613212056"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -258,7 +258,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260613212037-u0vyr2d",
-				"updated": "20260613212037"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -313,7 +313,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Total number of Unicode characters in the document, including Chinese characters, letters, digits, punctuation, spaces, etc."
+									"Data": "Number of Unicode characters in the document’s countable text. Chinese characters, letters, digits, and punctuation are included; whitespace such as spaces and line breaks is excluded."
 								}
 							]
 						}

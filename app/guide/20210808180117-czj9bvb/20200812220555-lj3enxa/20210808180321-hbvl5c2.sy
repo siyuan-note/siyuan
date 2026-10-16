@@ -7,7 +7,7 @@
 		"id": "20210808180321-hbvl5c2",
 		"title": "通用操作",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -483,6 +483,57 @@
 					"TextMarkBlockRefID": "20260614104254-4ifhixg",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "网络代理"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-1pn7jpz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-1pn7jpz",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190000-oidccn1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "OIDC 登录"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-ef23phm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-ef23phm",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185000-secvr01",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "密钥和变量"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-mraox6b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-mraox6b",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260907120000-crycn01",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "加密笔记本"
 				}
 			]
 		}

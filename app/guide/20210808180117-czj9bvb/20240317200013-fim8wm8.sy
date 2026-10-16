@@ -7,7 +7,7 @@
 		"id": "20240317200013-fim8wm8",
 		"title": "扩展开发",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -253,7 +253,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317201708-e6uwpl2",
-				"updated": "20260804235500"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -265,7 +265,7 @@
 					},
 					"Properties": {
 						"id": "20240317201708-mfe7y9d",
-						"updated": "20240317201708"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -273,7 +273,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240317201810-kb9f6qe",
-								"updated": "20240317201841"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -324,6 +324,17 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 等）"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。加密笔记本的持久化文件不能通过这些原始文件 API 读取或改写。请在解锁后使用对应的文档、内容块或资源 API，详见"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-crycn01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "加密笔记本"
 								}
 							]
 						}
@@ -365,7 +376,7 @@
 							"Children": [
 								{
 									"Type": "NodeBlockquoteMarker",
-									"Data": "\u003e"
+									"Data": ">"
 								},
 								{
 									"ID": "20240317201924-fr7chfe",

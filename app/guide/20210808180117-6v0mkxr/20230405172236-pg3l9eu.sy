@@ -7,7 +7,7 @@
 		"id": "20230405172236-pg3l9eu",
 		"title": "Performance Optimization",
 		"type": "doc",
-		"updated": "20260916173158"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405172238-x56gmi0",
-				"updated": "20260916173158"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -708,7 +708,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250825114750-j9t49j2",
-				"updated": "20260803171606"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -722,12 +722,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20250825114750-qtm8i82",
-				"updated": "20260803171606"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "It is recommended to regularly optimize the index by going to "
+					"Data": "Regularly optimize the index using "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -736,7 +736,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -745,7 +745,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Maintenance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -754,7 +763,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": "."
 				}
 			]
 		}

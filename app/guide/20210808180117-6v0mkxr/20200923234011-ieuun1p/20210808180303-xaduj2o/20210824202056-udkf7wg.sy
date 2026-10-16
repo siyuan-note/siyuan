@@ -6,7 +6,7 @@
 		"id": "20210824202056-udkf7wg",
 		"title": "Widgets",
 		"type": "doc",
-		"updated": "20261002002136"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -86,7 +86,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210824202107-3zt4469",
-				"updated": "20261002002136"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -100,7 +100,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210824202107-cmsetzk",
-				"updated": "20230506210716"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -110,7 +110,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace/widgets/"
+					"TextMarkTextContent": "workspace/data/widgets/"
 				},
 				{
 					"Type": "NodeText",

@@ -7,7 +7,7 @@
 		"id": "20240530101000-8m2dowc",
 		"title": "プラグイン",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -70,7 +70,7 @@
 			"Properties": {
 				"ID": "20240530101000-ofwsgnj",
 				"id": "20240530101000-qt554cl",
-				"updated": "20260803170332"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -84,7 +84,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-7g50y4t",
-				"updated": "20260803170332"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -94,7 +94,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace/plugins/"
+					"TextMarkTextContent": "workspace/data/plugins/"
 				},
 				{
 					"Type": "NodeText",
@@ -107,7 +107,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -116,7 +120,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -125,7 +133,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -134,7 +146,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ から行います。"
+					"Data": "​ から行います。"
 				}
 			]
 		},

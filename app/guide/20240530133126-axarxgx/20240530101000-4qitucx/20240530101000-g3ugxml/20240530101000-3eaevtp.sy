@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261016174753"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -143,7 +143,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101829-lva3op2",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -158,7 +158,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20251224101829-v3hcvn9",
-				"updated": "20260613160915"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -228,6 +228,41 @@
 								{
 									"Type": "NodeText",
 									"Data": "の追加"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016191345-dwzoz59",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016191345-dwzoz59",
+						"updated": "20261016191345"
+					},
+					"Children": [
+						{
+							"ID": "20261016191345-8je8zpx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016191345-8je8zpx",
+								"updated": "20261016191345"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260617123701-ju7eee5",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "テーブル計算"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を参照"
 								}
 							]
 						}
@@ -1651,7 +1686,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171234-4oam4x1",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1680,7 +1715,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171234-x40bu7m",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1709,7 +1744,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171234-lbxo0ro",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2022,7 +2057,7 @@
 					},
 					"Properties": {
 						"id": "20260613171234-y9o6lwt",
-						"updated": "20260613171234"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2030,7 +2065,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171234-d3igeac",
-								"updated": "20260613171234"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2040,7 +2075,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：複数のフィールドに同時にフィルター条件を設定可能。複数条件はAND論理（すべて満たす必要あり）"
+									"Data": "：複数のフィールドに条件を設定できます。デフォルトは AND（すべての条件を満たす）ですが、OR（いずれかの条件を満たす）に切り替えたり、条件グループを入れ子にしたりできます"
 								}
 							]
 						}
@@ -2186,7 +2221,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171234-qx49xnf",
-				"updated": "20261016130603"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2215,7 +2250,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171234-z7g4s8l",
-				"updated": "20260613171234"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2571,7 +2606,7 @@
 					},
 					"Properties": {
 						"id": "20260613171234-od6h0vp",
-						"updated": "20260613171234"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2599,7 +2634,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613171234-bfb6j5k",
-								"updated": "20260613171234"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2639,7 +2674,7 @@
 									},
 									"Properties": {
 										"id": "20260613171234-50x5z31",
-										"updated": "20260613171234"
+										"updated": "20261016191345"
 									},
 									"Children": [
 										{
@@ -2647,12 +2682,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613171234-7orv5n3",
-												"updated": "20260613171234"
+												"updated": "20261016191345"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "未編集の行は最後尾に配置され、作成日時昇順でソート"
+													"Data": "未編集の行は最後に配置され、手動の並び順が保持されます。ソート条件の値が同じエントリも手動の並び順を保持します"
 												}
 											]
 										}
@@ -2684,7 +2719,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171234-567esec",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2713,7 +2748,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171234-5xm22ao",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2758,7 +2793,7 @@
 					},
 					"Properties": {
 						"id": "20260613171234-g8f23il",
-						"updated": "20260613171234"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2766,7 +2801,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171234-a2ly9id",
-								"updated": "20260613171234"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2776,7 +2811,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：ロールアップ、アセット、行番号以外のほぼすべてのフィールドタイプがグループ化に対応。フィールドタイプごとに異なるグループ化方式："
+									"Data": "：ロールアップ、行番号、位置フィールドはグループ化に対応していません。他のタイプは対応しますが、アセットフィールドでは表示テンプレートを設定し、その結果でグループ化します。グループ化の方法はフィールドタイプによって異なります："
 								}
 							]
 						},

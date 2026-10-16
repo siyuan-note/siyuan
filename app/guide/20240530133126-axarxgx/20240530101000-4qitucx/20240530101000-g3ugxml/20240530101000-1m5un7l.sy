@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261016013311"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-you29ty",
 				"id": "20240530101000-penh301",
-				"updated": "20260820133158"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -97,6 +97,31 @@
 				{
 					"Type": "NodeText",
 					"Data": " で、クリック、Ctrl+クリック / ⌘クリック、Alt+クリック、Shift+クリック時のリソースの開き方を設定できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261016111305-bmxf6if",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-bmxf6if",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ファイルの内容や OCR テキストの検索については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-5k5d5i3",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "アセットの内容検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},

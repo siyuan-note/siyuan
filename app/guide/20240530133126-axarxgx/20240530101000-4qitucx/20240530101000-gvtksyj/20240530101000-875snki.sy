@@ -7,7 +7,7 @@
 		"id": "20240530101000-875snki",
 		"title": "コンテンツブロックの属性",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -281,7 +281,7 @@
 			"Properties": {
 				"ID": "20240530101000-i0jnklc",
 				"id": "20240530101000-41pnskz",
-				"updated": "20251201102644"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -295,7 +295,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-qc6ciit",
-				"updated": "20251201102644"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -309,7 +309,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ を選んで設定します。属性名には小文字の英語とアラビア数字のみを使用でき、文字で始まる必要があります（例："
+					"Data": "​ を選んで設定します。属性名は英小文字で始め、英小文字、数字、ハイフン（-）を使用できます。入力された英大文字は小文字に変換されます（例："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -324,6 +324,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "day1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "project-id"
 				},
 				{
 					"Type": "NodeText",

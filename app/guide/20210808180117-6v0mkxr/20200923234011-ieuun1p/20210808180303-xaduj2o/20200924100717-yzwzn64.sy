@@ -6,7 +6,7 @@
 		"id": "20200924100717-yzwzn64",
 		"title": "Kernel parameter",
 		"type": "doc",
-		"updated": "20260917190844"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225172241-237rz9o",
-				"updated": "20210502162639"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -34,17 +34,82 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201225172241-p1fcj43",
-				"updated": "20210502164218"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Used to specify the workspace folder path, the default value when not specified is "
+					"Data": "For "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "~/SiYuan/"
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", choose the workspace with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". If omitted, SiYuan uses "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_WORKSPACE_PATH"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then the last registered workspace, then the platform default: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/Library/Application Support/SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "%USERPROFILE%\\SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on Windows, or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on other platforms. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--home-dir"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " changes the home directory used for configuration and defaults. Ordinary one-shot CLI commands select their workspace differently; see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612192252-sgw2paw",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Command Line Interface"
 				},
 				{
 					"Type": "NodeText",
@@ -57,7 +122,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225172241-m3ffs88"
+				"id": "20201225172241-m3ffs88",
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -75,12 +141,40 @@
 			"ID": "20201225172241-oyntdl9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201225172241-oyntdl9"
+				"id": "20201225172241-oyntdl9",
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Kernel working directory path, automatically obtained according to the kernel executable file entry if it is not specified."
+					"Data": "The program resource directory containing "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "stage/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", automatically located from the kernel executable when omitted. This is separate from the data directory selected with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -131,7 +225,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210117224305-alzt1xr",
-				"updated": "20210728171255"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -145,12 +239,13 @@
 			"ID": "20210117224305-vyqi75g",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210117224305-vyqi75g"
+				"id": "20210117224305-vyqi75g",
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Used to specify the browser access "
+					"Data": "Sets the browser "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -161,7 +256,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", which will overwrite the authCode in conf.json after setting."
+					"Data": ". A nonempty "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " value overrides "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/conf.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; an omitted or empty value falls back to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". An empty resulting value does not clear a saved password."
 				}
 			]
 		},

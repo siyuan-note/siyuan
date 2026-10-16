@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Variabele invoegen",
+	"automationTemplateTip": "Berekend in de tijdzone van de regel; lege uitvoer wist het veld en fouten draaien de wijziging terug",
+	"automationTemplateExample": "Voorbeeld",
+	"automationTemplatePreview": "Voorbeeldresultaat",
+	"automationPreviewData": "Gegevens voor het voorbeeld",
+	"automationPreviewItem": "Voorbeelditem",
+	"automationPreviewTime": "Datum voor het voorbeeld",
+	"automationPreviewOnly": "Alleen een voorbeeld; items worden niet gewijzigd",
+	"automationTimeZone": "Tijdzone van de regel",
 	"startupFailed": "SiYuan kon niet worden gestart",
 	"startupStage": "Mislukte stap: ${stage}",
 	"startupReload": "Opnieuw laden",

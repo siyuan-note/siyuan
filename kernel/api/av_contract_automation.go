@@ -19,6 +19,18 @@ var previewAttributeViewCollection = contractHandler(apicontract.PreviewAttribut
 		return apicontract.Success(data)
 	})
 
+var previewAttributeViewTemplate = contractHandler(apicontract.PreviewAttributeViewTemplate,
+	func(c *gin.Context, request apicontract.AVAutomationTemplatePreviewRequest) apicontract.Response[*apicontract.AVValue] {
+		if err := holdAttributeViewRequest(c, "", request.AvID); err != nil {
+			return apicontract.Failure[*apicontract.AVValue](-1, err.Error())
+		}
+		value, err := model.PreviewAttributeViewTemplate(request)
+		if err != nil {
+			return apicontract.Failure[*apicontract.AVValue](-1, err.Error())
+		}
+		return apicontract.Success(toContractAVValue(value))
+	})
+
 func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAutomationConfig {
 	if value == nil {
 		return nil
@@ -28,6 +40,7 @@ func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAut
 			return nil
 		}
 		return &apicontract.AVAutomationRule{ID: rule.ID, Name: rule.Name, Enabled: rule.Enabled, Trigger: rule.Trigger,
+			TimeZone:    rule.TimeZone,
 			BlockSource: toContractAVAutomationBlockSource(rule.BlockSource),
 			KeyID:       rule.KeyID, Conditions: avContractSlice(rule.Conditions, toContractAVViewFilter),
 			Actions: avContractSlice(rule.Actions, func(action *av.AutomationAction) *apicontract.AVAutomationAction {
@@ -40,7 +53,7 @@ func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAut
 						if field == nil {
 							return nil
 						}
-						return &apicontract.AVAutomationValue{Mode: field.Mode, KeyID: field.KeyID, Value: toContractAVValue(field.Value)}
+						return &apicontract.AVAutomationValue{Mode: field.Mode, KeyID: field.KeyID, Value: toContractAVValue(field.Value), Template: field.Template}
 					})}
 			})}
 	})}

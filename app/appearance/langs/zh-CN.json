@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "插入变量",
+	"automationTemplateTip": "按规则时区计算；空结果清空字段，错误会回滚本次修改",
+	"automationTemplateExample": "示例",
+	"automationTemplatePreview": "预览结果",
+	"automationPreviewData": "预览使用的数据",
+	"automationPreviewItem": "示例条目",
+	"automationPreviewTime": "预览使用的日期",
+	"automationPreviewOnly": "仅用于预览，不会修改条目",
+	"automationTimeZone": "规则时区",
 	"startupFailed": "思源启动失败",
 	"startupStage": "失败阶段：${stage}",
 	"startupReload": "重新加载",

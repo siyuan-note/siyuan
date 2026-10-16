@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261016130603"
+		"updated": "20261016165601"
 	},
 	"Children": [
 		{
@@ -3820,7 +3820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-l8jclpi",
-				"updated": "20261016113125"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
@@ -3898,12 +3898,177 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-zhikh2u",
-				"updated": "20261002224707"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "动作中的字段值可以是固定值、类型兼容的源字段、触发时间，或关联到触发条目。触发时间适用于日期字段；关联到触发条目适用于指向源数据库的关联字段。修改主键文本会保留原有绑定关系和图标"
+					"Data": "动作中的字段值可以是固定值、类型兼容的源字段、触发时间，或关联到触发条目，也可以使用模板计算。触发时间适用于日期字段；关联到触发条目适用于指向源数据库的关联字段。修改主键文本会保留原有绑定关系和图标"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-0p95j4w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-0p95j4w",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "赋值方式选择「模板」后，可在行内编辑 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{...}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 模板，使用变量菜单插入触发时间或源字段。编辑模板会暂停规则，完成后请重新启用。所有可编辑字段均支持模板；创建时间、更新时间、行号、汇总和模板字段等计算字段不支持赋值。主键只修改文本，保留已有绑定"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-cgid9sj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-cgid9sj",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，将状态为已完成的浇花任务作为触发条目，新增下一次任务，并将日期设为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 固定为本次触发时间，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate 0 0 7"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 按自然日期顺延七天。规则首次使用模板时保存当前前端时区，跨设备执行继续使用该时区"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-9k1r41o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-9k1r41o",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "field \"字段ID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 读取源条目的存储值，日期可参与 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 运算；字段重命名不影响 ID 引用。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "value \"字段ID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 读取结构化载荷，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "toJson"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 输出 JSON。例如，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"字段ID\"))}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可同时顺延日期范围的起止时间，并保留纯日期或具体时间设置"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-6n3qtz0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-6n3qtz0",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文本、链接、邮箱和电话使用文本结果，数字必须是有效的有限数值，复选框使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。日期接受 ISO 日期、日期时间或日期载荷 JSON；单选使用已有选项名称，多选使用 JSON 名称数组或选项数组；关联使用已有条目 ID 数组；资源与位置使用现有载荷 JSON。不会自动创建选项、关联条目或资源"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-9odotkr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-9odotkr",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "展开「预览使用的数据」，选择实际条目作为示例，修改预览日期或引用字段后，再查看预览结果。这些输入只影响预览，不修改实际条目。合法空输出清空字段；缺失变量、空源日期、类型或引用错误使触发修改和全部自动动作一起回滚。模板结果只在触发时写入，重做复用首次结果。模板不支持 SQL、文件、网络、循环或递归；源码最多 8 KiB，单个输入和输出最多 64 KiB。保存模板后，该数据库需要支持自动化版本 2 的客户端读取，旧版会明确拒绝读取；原有版本 1 的规则保持兼容"
 				}
 			]
 		},

@@ -98,6 +98,9 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	call("/api/av/addAttributeViewBlocks", map[string]any{"avID": database.ID,
 		"ignoreDefaultFill": true, "srcs": []map[string]any{{"id": itemID, "itemID": itemID, "isDetached": true, "content": "Entry"}},
 	}, addAttributeViewBlocks)
+	call("/api/av/previewAttributeViewTemplate", map[string]any{"avID": database.ID, "itemID": itemID,
+		"keyID": fixture.textKeyID, "timeZone": "Asia/Shanghai", "triggerTime": "2026-10-16T15:30",
+		"template": `.action{now | date "2006-01-02"}`}, previewAttributeViewTemplate)
 	stored, err := av.ParseAttributeView(database.ID)
 	if err != nil || stored.GetValue(fixture.textKeyID, itemID).Text.Content != "created" {
 		t.Fatalf("add API did not trigger automation: %v", err)

@@ -10,6 +10,7 @@ import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptio
 import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
 import {collectionSourceIncomplete, mountBlockCollectionSource, openBlockCollectionPreview} from "./blockCollection";
+import {automationTimeZone, mountAutomationTemplate} from "./automationTemplate";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
     value?: IAVCellValue;
@@ -102,9 +103,10 @@ export const openAutomationMenu = async (options: {
         goBack();
         return;
     }
-    let previous: {spec: 1, rules: AutomationRule[]} = clone(database.automations || {spec: 1, rules: []});
+    let previous: {spec: number, rules: AutomationRule[]} = clone(database.automations || {spec: 1, rules: []});
     const createRule = (): AutomationRule => ({
         id: Lute.NewNodeID(), name: lang.databaseAutomations, enabled: false, trigger: "changed",
+        timeZone: automationTimeZone(),
         actions: [{type: "edit", target: "current", fields: {}}],
     });
     const rules: AutomationRule[] = clone(previous.rules || []);
@@ -128,7 +130,7 @@ export const openAutomationMenu = async (options: {
     const filtersAvailable = (source: AVAttributeViewData, filters: IAVFilter[] = []): boolean => filters.every(filter =>
         filter.filters ? filtersAvailable(source, filter.filters) : fieldsOf(source).some(field => field.id === filter.column));
     const incomplete = (rule: AutomationRule): string => {
-        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.checkValidity())) {
+        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.closest("[data-template-preview]") && !input.checkValidity())) {
             return lang.invalid;
         }
         if (!rule.name.trim()) {
@@ -199,7 +201,8 @@ export const openAutomationMenu = async (options: {
         }
         updateStatus();
         onResize();
-        const next = {spec: 1 as const, rules: clone(rules)};
+        const usesTemplates = rules.some(rule => rule.actions.some(action => Object.values(action.fields).some(value => value.mode === "template")));
+        const next = {spec: usesTemplates ? 2 : previous.spec, rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }
@@ -357,7 +360,7 @@ ${target ? `${action.type === "edit" && action.target !== "current" ? `<div clas
                 const compatible = action.type === "collect" ? [] : compatibleFields(database, field);
                 const fieldName = field?.name || `${lang.invalid}: ${keyID}`;
                 row.innerHTML = `<span class="av__automation-field-name fn__ellipsis ariaLabel" aria-label="${escapeAttr(fieldName)}" data-position="north">${escapeHtml(fieldName)}</span>
-<div class="av__automation-assignment">${field ? `<select class="b3-select" data-mode aria-label="${escapeAttr(lang.automationValueMode)}">${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select><div class="av__automation-value" data-value></div>` : ""}</div>
+<div class="av__automation-assignment">${field ? `<select class="b3-select" data-mode aria-label="${escapeAttr(lang.automationValueMode)}">${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}${optionHTML("template", lang.template, value.mode)}</select><div class="av__automation-value" data-value></div>` : ""}</div>
 ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
                 fieldsHost.append(row);
                 if (!field) {
@@ -368,6 +371,13 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
                     mountValue(host, field, value);
                 } else if (value.mode === "source") {
                     host.innerHTML = `<select class="b3-select fn__block" data-source-field aria-label="${lang.automationSourceField}">${compatible.map(source => optionHTML(source.id, source.name, value.keyID)).join("")}</select>`;
+                } else if (value.mode === "template") {
+                    row.dataset.templateAssignment = "true";
+                    row.append(host);
+                    mountAutomationTemplate({host, field, source: database, targetID: targetID(action), rule, value, save: () => {
+                        rule.enabled = false;
+                        save();
+                    }, onResize});
                 }
             });
         });
@@ -440,7 +450,11 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
             const keyID = target.closest<HTMLElement>("[data-field-id]").dataset.fieldId;
             const field = fieldsOf(databases.get(targetID(action))).find(item => item.id === keyID);
             const value = action.fields[keyID];
-            value.mode = target.value === "source" ? "source" : target.value === "currentTime" ? "currentTime" : target.value === "triggerItem" ? "triggerItem" : "static";
+            value.mode = target.value === "template" ? "template" : target.value === "source" ? "source" : target.value === "currentTime" ? "currentTime" : target.value === "triggerItem" ? "triggerItem" : "static";
+            if (value.mode === "template") {
+                rule.timeZone = rule.timeZone || automationTimeZone();
+                rule.enabled = false;
+            }
             if (value.mode === "source") {
                 value.keyID = compatibleFields(database, field)[0]?.id;
             } else if (value.mode === "static" && !value.value) {

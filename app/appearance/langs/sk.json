@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Vložiť premennú",
+	"automationTemplateTip": "Výpočet v časovom pásme pravidla; prázdny výsledok vymaže pole a chyby vrátia zmenu späť",
+	"automationTemplateExample": "Príklad",
+	"automationTemplatePreview": "Výsledok náhľadu",
+	"automationPreviewData": "Údaje pre náhľad",
+	"automationPreviewItem": "Vzorová položka",
+	"automationPreviewTime": "Dátum pre náhľad",
+	"automationPreviewOnly": "Iba náhľad; položky sa nemenia",
+	"automationTimeZone": "Časové pásmo pravidla",
 	"startupFailed": "SiYuan sa nepodarilo spustiť",
 	"startupStage": "Neúspešný krok: ${stage}",
 	"startupReload": "Znova načítať",

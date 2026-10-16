@@ -21,6 +21,7 @@ type AutomationRule struct {
 	Conditions  []*ViewFilter          `json:"conditions,omitempty"`
 	Actions     []*AutomationAction    `json:"actions"`
 	BlockSource *AutomationBlockSource `json:"blockSource,omitempty"`
+	TimeZone    string                 `json:"timeZone,omitempty"`
 }
 
 // AutomationBlockSource 的范围取并集，各类条件取交集；文档范围包含其子文档。
@@ -48,9 +49,10 @@ type AutomationAction struct {
 }
 
 type AutomationValue struct {
-	Mode  string `json:"mode"` // static、source、currentTime 或 triggerItem
-	KeyID string `json:"keyID,omitempty"`
-	Value *Value `json:"value,omitempty"`
+	Mode     string `json:"mode"` // static、source、currentTime、triggerItem 或 template
+	KeyID    string `json:"keyID,omitempty"`
+	Value    *Value `json:"value,omitempty"`
+	Template string `json:"template,omitempty"`
 }
 
 // visitAutomationValues 将规则中的条件及固定值纳入资源、颜色和富文本的持久化遍历。
@@ -267,6 +269,9 @@ func (view *AttributeView) remapAutomationKeys(originalID string, keyIDs map[str
 			}
 			action.RelationKeyID = keyIDs[action.RelationKeyID]
 			for _, value := range action.Fields {
+				if value != nil && value.Mode == "template" {
+					value.Template = RemapAutomationTemplate(value.Template, keyIDs)
+				}
 				if value != nil && value.Mode == "source" {
 					value.KeyID = keyIDs[value.KeyID]
 				}

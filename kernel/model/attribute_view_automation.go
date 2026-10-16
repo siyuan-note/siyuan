@@ -272,7 +272,7 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 	// 先确定全部触发条件，关联关键词也不会读到前一自动动作修改后的标题。
 	for _, entry := range triggered {
 		for _, action := range entry.rule.Actions {
-			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action); err != nil {
+			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action, entry.rule.TimeZone); err != nil {
 				return fmt.Errorf("automation [%s]: %w", entry.rule.ID, err)
 			}
 		}
@@ -501,6 +501,10 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 					fmt.Sprintf("automation action field [%s] is unavailable", keyID))
 			}
 			switch field.Mode {
+			case "template":
+				if err := av.ValidateAutomationTemplate(field.Template, rule.TimeZone); err != nil {
+					return err
+				}
 			case "currentTime":
 				if key.Type != av.KeyTypeDate {
 					return unavailableAutomationReference("fields", keyID, "automation trigger time requires a date field")
@@ -533,7 +537,7 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 }
 
 func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource, current *av.AttributeView,
-	itemID string, action *av.AutomationAction) error {
+	itemID string, action *av.AutomationAction, timeZone string) error {
 	target, err := tx.automationTarget(current, action, source.boxID)
 	if err != nil {
 		return err
@@ -589,6 +593,7 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 	sort.Strings(keys)
 	ids = slices.Compact(ids)
 	relationValues := tx.automationRelationValues(source.boxID, nil)
+	computed := map[string]*av.Value{}
 	for _, id := range ids {
 		target, err = tx.readAttributeViewForMutation(target.ID, blockID, source.boxID)
 		if err != nil {
@@ -608,7 +613,20 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 		}
 		for _, keyID := range keys {
 			key, _ := target.GetKey(keyID)
-			value, valueErr := tx.resolveAutomationValue(current, itemID, key, action.Fields[keyID])
+			value := computed[keyID]
+			var valueErr error
+			if value == nil {
+				value, valueErr = tx.resolveAutomationValue(current, itemID, key, action.Fields[keyID], timeZone)
+				if valueErr == nil && action.Fields[keyID].Mode == "template" {
+					valueErr = tx.validateAutomationTemplateReferences(current, target, key, value, source.boxID)
+					if value.Relation != nil {
+						value.Relation.Contents = nil
+					}
+				}
+				if valueErr == nil {
+					computed[keyID] = value
+				}
+			}
 			if valueErr != nil {
 				return valueErr
 			}
@@ -670,9 +688,12 @@ func automationValuePatch(value *av.Value) map[string]any {
 }
 
 func (tx *Transaction) resolveAutomationValue(source *av.AttributeView, itemID string, key *av.Key,
-	field *av.AutomationValue) (*av.Value, error) {
+	field *av.AutomationValue, timeZone string) (*av.Value, error) {
 	var value *av.Value
 	switch field.Mode {
+	case "template":
+		return av.EvaluateAutomationTemplate(av.AutomationTemplateContext{Source: source, ItemID: itemID,
+			Time: time.UnixMilli(tx.attributeViewAutomations.time), TimeZone: timeZone}, key, field.Template)
 	case "currentTime":
 		value = &av.Value{Type: av.KeyTypeDate, Date: &av.ValueDate{Content: tx.attributeViewAutomations.time, IsNotEmpty: true}}
 	case "triggerItem":
@@ -743,7 +764,7 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 	if err = json.Unmarshal(data, &config); err != nil {
 		return fail(err)
 	}
-	if config.Spec != 1 || len(config.Rules) > 100 {
+	if config.Spec != 1 && config.Spec != 2 || len(config.Rules) > 100 {
 		return fail(fmt.Errorf("unsupported automation configuration"))
 	}
 	if err = (&av.AttributeView{Automations: &config}).NormalizeLocations(); nil != err {
@@ -756,6 +777,16 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 			return fail(fmt.Errorf("invalid automation rule"))
 		}
 		seen[rule.ID] = true
+		for _, action := range rule.Actions {
+			if action == nil {
+				continue
+			}
+			for _, field := range action.Fields {
+				if field != nil && field.Mode == "template" && config.Spec < 2 {
+					return fail(fmt.Errorf("template assignments require automation spec 2"))
+				}
+			}
+		}
 		if rule.Enabled {
 			if err = tx.validateAutomationRule(view, rule, boxID); err != nil {
 				return fail(err)

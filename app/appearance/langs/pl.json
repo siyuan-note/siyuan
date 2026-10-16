@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Wstaw zmienną",
+	"automationTemplateTip": "Obliczanie w strefie czasowej reguły; pusty wynik czyści pole, a błędy cofają zmianę",
+	"automationTemplateExample": "Przykład",
+	"automationTemplatePreview": "Wynik podglądu",
+	"automationPreviewData": "Dane do podglądu",
+	"automationPreviewItem": "Przykładowy wpis",
+	"automationPreviewTime": "Data do podglądu",
+	"automationPreviewOnly": "Tylko podgląd; wpisy nie są zmieniane",
+	"automationTimeZone": "Strefa czasowa reguły",
 	"startupFailed": "Nie udało się uruchomić SiYuan",
 	"startupStage": "Etap błędu: ${stage}",
 	"startupReload": "Wczytaj ponownie",

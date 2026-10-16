@@ -23,6 +23,7 @@ const runCases = async (sources, css, mobile) => {
     const lang = sources.languages;
     const currentCondition = {column: "status", operator: "=", value: {type: "select", mSelect: [{content: "Done"}]}};
     const database = {id: "source", name: "Tasks", keyValues: [
+        {key: {id: "primary", name: "Name", type: "block"}, values: [{blockID: "sample", type: "block", block: {content: "Watering"}}]},
         {key: {id: "status", name: "Status", type: "select", options: [{name: "Done"}]}},
         {key: {id: "tags", name: "Tags", type: "mSelect", options: [{name: "Work"}]}},
         {key: {id: "finished", name: "Completion time", type: "date"}},
@@ -33,6 +34,7 @@ const runCases = async (sources, css, mobile) => {
         conditions: [currentCondition], actions: [{type: "edit", target: "current", fields: {finished: {mode: "currentTime"}}}]}]}};
     const targetDatabase = {...database, id: "target", name: "Time logs"};
     const transactions = [];
+    const templatePreviews = [];
     const searches = [];
     let fieldMenu;
     let nextID = 0;
@@ -40,7 +42,8 @@ const runCases = async (sources, css, mobile) => {
     window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, menus: {menu: {remove() {}}}};
     const mocks = {
         "plugin/Menu": {Menu: class {items = []; addItem(item) {this.items.push(item);} open() {fieldMenu = {items: this.items};}}},
-        "util/fetch": {fetchSyncPost: async (url, request) => url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
+        "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
+            (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
             {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
         fetchPost: (_url, _request, callback) => searches.push(() => callback({code: 0, data: {rows: {values: [
             {blockID: "related", block: {content: "Related"}},
@@ -280,6 +283,35 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     await change("[data-mode]", "currentTime");
     const theme = document.createElement("style");
+    await change("[data-mode]", "template");
+    assert.equal(transactions.at(-1).perform[0].data.spec, 2, "templates use the new format");
+    assert.ok(latest().timeZone, "the rule records the frontend timezone");
+    await click("[data-template-example]");
+    assert.match(latest().actions[0].fields.finished.template, /AddDate 0 0 7/);
+    get("[data-template-preview]").open = true;
+    await change("[data-template-item]", "sample");
+    await change("[data-template-time]", "2026-10-16T15:30");
+    const writesBeforePreview = transactions.length;
+    await click("[data-template-run]");
+    assert.equal(templatePreviews.length, 1);
+    assert.equal(templatePreviews[0].triggerTime, "2026-10-16T15:30");
+    assert.equal(transactions.length, writesBeforePreview, "preview never saves or changes entries");
+    assert.ok(get("[data-template-result]").textContent);
+    assert.ok(get("[data-template-time]").getBoundingClientRect().bottom < get("[data-template-result]").getBoundingClientRect().top,
+        "preview inputs precede the result");
+    const editor = get("[data-template]");
+    editor.value = '.action{field "finished"}';
+    editor.dispatchEvent(new Event("input", {bubbles: true}));
+    editor.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.ok(get('[data-template-input="finished"]'));
+    assert.equal(get("[data-template-result]").textContent, "", "editing inputs invalidates old previews");
+    const previewDate = get('[data-template-input="finished"]');
+    previewDate.value = "2026-10-14";
+    previewDate.dispatchEvent(new Event("input", {bubbles: true}));
+    const writesBeforeInputPreview = transactions.length;
+    await click("[data-template-run]");
+    assert.equal(templatePreviews.at(-1).inputs.finished, "2026-10-14");
+    assert.equal(transactions.length, writesBeforeInputPreview, "editing sample dates never saves a rule or entry");
     document.head.append(theme);
     for (const width of mobile ? [360, 740] : [560, 1000]) {
         await require("electron").ipcRenderer.invoke("automation-size", width, 900);
@@ -340,7 +372,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;

@@ -3221,6 +3221,31 @@ img.av__cellassetimg {
     white-space: nowrap;
   }
 
+  &-field[data-template-assignment] {
+    align-items: start;
+
+    > .av__automation-value {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &-template,
+  &-template-data {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &-template-data {
+    margin-top: 8px;
+  }
+
+  &-template-result {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
   &-assignment {
     display: flex;
     align-items: center;

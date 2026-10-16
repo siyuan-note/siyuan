@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261016130603"
+		"updated": "20261016165601"
 	},
 	"Children": [
 		{
@@ -3820,7 +3820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261016113125"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
@@ -3898,12 +3898,177 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-x0qa1o9",
-				"updated": "20261002224707"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, or a relation to the triggering item. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon"
+					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, a relation to the triggering item, or a calculated template. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-kcsjytv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-kcsjytv",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose Template as the value source to edit a "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{...}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " template inline. Use the variable menu to insert the trigger time or source fields. Editing a template pauses the rule; enable it again after editing. Every editable field supports templates; computed fields such as creation time, update time, row number, rollup, and template fields cannot be assigned. Primary fields retain their existing binding"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-v82xurl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-v82xurl",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, when a watering task is completed, add the next task and set its date to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is fixed to the trigger time, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate 0 0 7"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " advances seven calendar days. The rule saves the frontend time zone when templates are first used and keeps that zone across devices"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-r1dfdx7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-r1dfdx7",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "field \"fieldID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " reads a source item's stored value; dates support "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Renaming a field does not change its ID reference. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "value \"fieldID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " reads a structured payload, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "toJson"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " outputs JSON. For example, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"fieldID\"))}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " advances both ends of a date range while preserving its date-only or specific-time setting"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-l1uq6e6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-l1uq6e6",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Text, URL, email, and phone fields use text. Numbers must be finite, and checkboxes use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Dates accept ISO dates, date-times, or date payload JSON. Select uses an existing option name; multi-select uses a JSON array of names or option objects. Relations use existing item ID arrays; assets and locations use their existing payload JSON. Templates do not create options, related items, or assets"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-tphvdoa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-tphvdoa",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Expand Data used for preview, select an actual example entry, and adjust the preview date or referenced fields before viewing the result. These inputs do not modify entries. Empty output clears the field; missing variables, empty source dates, invalid types, or invalid references roll back the triggering edit and all actions. Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible"
 				}
 			]
 		},

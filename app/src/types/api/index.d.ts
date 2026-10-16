@@ -260,17 +260,19 @@ export type AVAutomationBlockSource = { "attributes"?: Array<AVAutomationBlockAt
 
 export type AVAutomationBlockSourceInput = { "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": 1; };
+export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
-export type AVAutomationConfigInput = { "rules": Array<AVAutomationRuleInput | null>; "spec": 1; };
+export type AVAutomationConfigInput = { "rules": Array<AVAutomationRuleInput | null>; "spec": number; };
 
-export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
 
-export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
 
-export type AVAutomationValue = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem"; "value"?: AVValue; };
+export type AVAutomationTemplatePreviewRequestInput = { "avID": string; "inputs"?: Record<string, string>; "itemID": string; "keyID": string; "targetAvID"?: string; "template": string; "timeZone": string; "triggerTime"?: string; };
 
-export type AVAutomationValueInput = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem"; "value"?: AVValueInput | null; };
+export type AVAutomationValue = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem" | "template"; "template"?: string; "value"?: AVValue; };
+
+export type AVAutomationValueInput = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem" | "template"; "template"?: string; "value"?: AVValueInput | null; };
 
 export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "list" | "gallery" | "kanban" | "calendar"; "viewName": string; };
 
@@ -3676,6 +3678,17 @@ export interface APIPOSTRoutes {
     "/api/av/previewAttributeViewCollection": {
         request: AVBlockCollectionPreviewRequestInput;
         response: { "code": 0; "data": AVBlockCollectionPreview | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
+     * 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
+     */
+    "/api/av/previewAttributeViewTemplate": {
+        request: AVAutomationTemplatePreviewRequestInput;
+        response: { "code": 0; "data": AVValue | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
@@ -7763,7 +7776,7 @@ export interface APIPOSTRoutes {
     /**
      * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1，所有视图共享数据库级规则。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 或 2，所有视图共享数据库级规则。
      * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
      * 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
      * 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。

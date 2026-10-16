@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Insérer une variable",
+	"automationTemplateTip": "Calcul dans le fuseau de la règle ; un résultat vide efface le champ et une erreur annule la modification",
+	"automationTemplateExample": "Exemple",
+	"automationTemplatePreview": "Résultat de l’aperçu",
+	"automationPreviewData": "Données utilisées pour l’aperçu",
+	"automationPreviewItem": "Entrée d’exemple",
+	"automationPreviewTime": "Date utilisée pour l’aperçu",
+	"automationPreviewOnly": "Aperçu uniquement ; les entrées ne sont pas modifiées",
+	"automationTimeZone": "Fuseau horaire de la règle",
 	"startupFailed": "SiYuan n’a pas pu démarrer",
 	"startupStage": "Étape en échec : ${stage}",
 	"startupReload": "Recharger",

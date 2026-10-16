@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Insert variable",
+	"automationTemplateTip": "Calculated in the rule's time zone; empty output clears the field, and errors roll back the change",
+	"automationTemplateExample": "Example",
+	"automationTemplatePreview": "Preview result",
+	"automationPreviewData": "Data used for preview",
+	"automationPreviewItem": "Example entry",
+	"automationPreviewTime": "Date used for preview",
+	"automationPreviewOnly": "Preview only; entries are not modified",
+	"automationTimeZone": "Rule time zone",
 	"startupFailed": "SiYuan failed to start",
 	"startupStage": "Failed stage: ${stage}",
 	"startupReload": "Reload",

@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261016130603"
+		"updated": "20261016165601"
 	},
 	"Children": [
 		{
@@ -3820,7 +3820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-f9wjtlr",
-				"updated": "20261016113125"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
@@ -3898,12 +3898,177 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-vi6feb3",
-				"updated": "20261002224707"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "動作中的欄位值可以是固定值、類型相容的來源欄位、觸發時間，或關聯至觸發項目。觸發時間適用於日期欄位；關聯至觸發項目適用於指向來源資料庫的關聯欄位。修改主鍵文字會保留原有繫結關係與圖示"
+					"Data": "動作中的欄位值可以是固定值、類型相容的來源欄位、觸發時間，或關聯至觸發項目，也可使用模板計算。觸發時間適用於日期欄位；關聯至觸發項目適用於指向來源資料庫的關聯欄位。修改主鍵文字會保留原有繫結關係與圖示"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-zk0dnna",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-zk0dnna",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "賦值方式選擇「模板」後，可在行內編輯 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{...}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 模板，使用變數選單插入觸發時間或來源欄位。編輯模板會暫停規則，完成後請重新啟用。所有可編輯欄位均支援模板；建立時間、更新時間、行號、彙總及模板欄位等計算欄位不支援賦值。主鍵只修改文字，保留既有繫結"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-ay013u0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-ay013u0",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，以狀態為已完成的澆花任務作為觸發項目，新增下一次任務，並將日期設為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 固定為本次觸發時間，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate 0 0 7"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 依自然日期順延七天。規則首次使用模板時儲存目前前端時區，跨裝置執行仍使用該時區"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-zvjhh4u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-zvjhh4u",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "field \"欄位ID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 讀取來源項目的儲存值，日期可參與 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 運算；欄位重新命名不影響 ID 引用。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "value \"欄位ID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 讀取結構化資料，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "toJson"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 輸出 JSON。例如，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"欄位ID\"))}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可同時順延日期範圍的起訖時間，並保留純日期或具體時間設定"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-meihq9p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-meihq9p",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文字、連結、電子郵件和電話使用文字結果，數字必須為有效的有限數值，核取方塊使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。日期接受 ISO 日期、日期時間或日期資料 JSON；單選使用既有選項名稱，多選使用 JSON 名稱陣列或選項陣列；關聯使用既有項目 ID 陣列；資源與位置使用既有資料結構的 JSON。不會自動建立選項、關聯項目或資源"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-6akhx0e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-6akhx0e",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "展開「預覽使用的資料」，選擇實際項目作為範例，修改預覽日期或引用欄位後，再查看預覽結果。這些輸入只影響預覽，不修改實際項目。合法空輸出清空欄位；缺少變數、空來源日期、類型或引用錯誤會讓觸發修改與全部自動動作一起復原。模板結果只在觸發時寫入，重做沿用首次結果。模板不支援 SQL、檔案、網路、迴圈或遞迴；原始碼最多 8 KiB，單一輸入與輸出最多 64 KiB。儲存模板後，該資料庫需要支援自動化版本 2 的用戶端讀取，舊版會明確拒絕讀取；既有版本 1 的規則保持相容"
 				}
 			]
 		},

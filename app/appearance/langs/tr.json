@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Değişken ekle",
+	"automationTemplateTip": "Kuralın saat diliminde hesaplanır; boş sonuç alanı temizler ve hatalar değişikliği geri alır",
+	"automationTemplateExample": "Örnek",
+	"automationTemplatePreview": "Önizleme sonucu",
+	"automationPreviewData": "Önizleme verileri",
+	"automationPreviewItem": "Örnek kayıt",
+	"automationPreviewTime": "Önizleme tarihi",
+	"automationPreviewOnly": "Yalnızca önizleme; kayıtlar değiştirilmez",
+	"automationTimeZone": "Kuralın saat dilimi",
 	"startupFailed": "SiYuan başlatılamadı",
 	"startupStage": "Başarısız aşama: ${stage}",
 	"startupReload": "Yeniden yükle",

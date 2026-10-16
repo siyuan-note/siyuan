@@ -6760,10 +6760,7 @@
           ]
         },
         "spec": {
-          "type": "integer",
-          "enum": [
-            1
-          ]
+          "type": "integer"
         }
       },
       "required": [
@@ -6789,10 +6786,7 @@
           }
         },
         "spec": {
-          "type": "integer",
-          "enum": [
-            1
-          ]
+          "type": "integer"
         }
       },
       "required": [
@@ -6850,6 +6844,9 @@
           "type": "string"
         },
         "name": {
+          "type": "string"
+        },
+        "timeZone": {
           "type": "string"
         },
         "trigger": {
@@ -6921,6 +6918,9 @@
         "name": {
           "type": "string"
         },
+        "timeZone": {
+          "type": "string"
+        },
         "trigger": {
           "type": "string",
           "enum": [
@@ -6939,6 +6939,46 @@
       ],
       "additionalProperties": false
     },
+    "AVAutomationTemplatePreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "itemID": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "targetAvID": {
+          "type": "string"
+        },
+        "template": {
+          "type": "string"
+        },
+        "timeZone": {
+          "type": "string"
+        },
+        "triggerTime": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "itemID",
+        "keyID",
+        "template",
+        "timeZone"
+      ],
+      "additionalProperties": false
+    },
     "AVAutomationValue": {
       "type": "object",
       "properties": {
@@ -6951,8 +6991,12 @@
             "static",
             "source",
             "currentTime",
-            "triggerItem"
+            "triggerItem",
+            "template"
           ]
+        },
+        "template": {
+          "type": "string"
         },
         "value": {
           "$ref": "#/$defs/AVValue"
@@ -6975,8 +7019,12 @@
             "static",
             "source",
             "currentTime",
-            "triggerItem"
+            "triggerItem",
+            "template"
           ]
+        },
+        "template": {
+          "type": "string"
         },
         "value": {
           "anyOf": [
@@ -128981,6 +129029,92 @@
                 "anyOf": [
                   {
                     "$ref": "#/$defs/AVBlockCollectionPreview"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/previewAttributeViewTemplate",
+      "handler": "previewAttributeViewTemplate",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/AVAutomationTemplatePreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVValue"
                   },
                   {
                     "type": "null"

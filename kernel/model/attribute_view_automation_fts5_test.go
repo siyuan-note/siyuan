@@ -723,6 +723,11 @@ func TestAutomationRelationReplacementUndo(t *testing.T) {
 
 func TestAutomationEncryptedExecutionAndFailures(t *testing.T) {
 	_, source, target, statusID, _ := setupAutomationTest(t)
+	source.Automations.Spec = 2
+	source.Automations.Rules[0].TimeZone = "Asia/Shanghai"
+	source.Automations.Rules[0].Actions[0].Fields[target.KeyValues[2].Key.ID] = &av.AutomationValue{
+		Mode: "template", Template: `.action{now | date "2006-01-02T15:04:05Z07:00"}`,
+	}
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x71}, 32)

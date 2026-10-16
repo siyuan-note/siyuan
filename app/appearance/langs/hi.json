@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "चर डालें",
+	"automationTemplateTip": "नियम के समय क्षेत्र में गणना होती है; खाली परिणाम फ़ील्ड साफ़ करता है और त्रुटि होने पर बदलाव वापस होता है",
+	"automationTemplateExample": "उदाहरण",
+	"automationTemplatePreview": "पूर्वावलोकन परिणाम",
+	"automationPreviewData": "पूर्वावलोकन का डेटा",
+	"automationPreviewItem": "उदाहरण प्रविष्टि",
+	"automationPreviewTime": "पूर्वावलोकन की तारीख",
+	"automationPreviewOnly": "केवल पूर्वावलोकन; प्रविष्टियाँ नहीं बदलतीं",
+	"automationTimeZone": "नियम का समय क्षेत्र",
 	"startupFailed": "SiYuan शुरू नहीं हो सका",
 	"startupStage": "विफल चरण: ${stage}",
 	"startupReload": "फिर से लोड करें",

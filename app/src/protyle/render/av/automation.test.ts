@@ -156,6 +156,7 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         Lute: {NewNodeID: () => "draft-rule"},
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"}}},
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
+            "./automationTemplate": {automationTimeZone: () => "UTC"},
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {av: database}})},
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {

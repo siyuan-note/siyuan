@@ -112,7 +112,7 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 2
+	source.Automations.Spec = 3
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")

@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Вставити змінну",
+	"automationTemplateTip": "Обчислення в часовому поясі правила; порожній результат очищає поле, помилки скасовують зміну",
+	"automationTemplateExample": "Приклад",
+	"automationTemplatePreview": "Результат попереднього перегляду",
+	"automationPreviewData": "Дані для попереднього перегляду",
+	"automationPreviewItem": "Приклад запису",
+	"automationPreviewTime": "Дата для попереднього перегляду",
+	"automationPreviewOnly": "Лише перегляд; записи не змінюються",
+	"automationTimeZone": "Часовий пояс правила",
 	"startupFailed": "Не вдалося запустити SiYuan",
 	"startupStage": "Етап збою: ${stage}",
 	"startupReload": "Перезавантажити",

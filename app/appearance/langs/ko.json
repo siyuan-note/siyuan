@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "변수 삽입",
+	"automationTemplateTip": "규칙의 시간대로 계산하며, 빈 결과는 필드를 지우고 오류가 발생하면 변경을 되돌립니다",
+	"automationTemplateExample": "예제",
+	"automationTemplatePreview": "미리보기 결과",
+	"automationPreviewData": "미리보기에 사용할 데이터",
+	"automationPreviewItem": "예제 항목",
+	"automationPreviewTime": "미리보기에 사용할 날짜",
+	"automationPreviewOnly": "미리보기 전용이며 항목을 수정하지 않습니다",
+	"automationTimeZone": "규칙 시간대",
 	"startupFailed": "SiYuan을 시작하지 못했습니다",
 	"startupStage": "실패한 단계: ${stage}",
 	"startupReload": "다시 불러오기",

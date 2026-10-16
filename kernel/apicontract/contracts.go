@@ -1225,6 +1225,10 @@ var GetAttributeView = define[GetAttributeViewRequest, AVData]("getAttributeView
 // PreviewAttributeViewCollection 预览已保存且启用的普通块收集规则，不修改文档或数据库。
 // 仅在目标数据库的加密边界内查询；page 从 1 开始，每页最多 100 个，hasMore 表示还有下一页。
 var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AVBlockCollectionPreview]("previewAttributeViewCollection", "/api/av/previewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
+// 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
+var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
@@ -1416,7 +1420,7 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 
 // move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
 // 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1，所有视图共享数据库级规则。
+// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 或 2，所有视图共享数据库级规则。
 // addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
 // 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
 // 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。

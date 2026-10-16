@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Variable einfügen",
+	"automationTemplateTip": "Berechnung in der Zeitzone der Regel; leere Ergebnisse löschen das Feld, Fehler machen die Änderung rückgängig",
+	"automationTemplateExample": "Beispiel",
+	"automationTemplatePreview": "Vorschauergebnis",
+	"automationPreviewData": "Daten für die Vorschau",
+	"automationPreviewItem": "Beispieleintrag",
+	"automationPreviewTime": "Datum für die Vorschau",
+	"automationPreviewOnly": "Nur Vorschau; Einträge werden nicht geändert",
+	"automationTimeZone": "Zeitzone der Regel",
 	"startupFailed": "SiYuan konnte nicht gestartet werden",
 	"startupStage": "Fehlgeschlagener Schritt: ${stage}",
 	"startupReload": "Neu laden",

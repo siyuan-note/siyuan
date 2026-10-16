@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "הוספת משתנה",
+	"automationTemplateTip": "החישוב לפי אזור הזמן של הכלל; תוצאה ריקה מנקה את השדה ושגיאות מבטלות את השינוי",
+	"automationTemplateExample": "דוגמה",
+	"automationTemplatePreview": "תוצאת התצוגה המקדימה",
+	"automationPreviewData": "נתונים לתצוגה מקדימה",
+	"automationPreviewItem": "רשומה לדוגמה",
+	"automationPreviewTime": "תאריך לתצוגה מקדימה",
+	"automationPreviewOnly": "תצוגה מקדימה בלבד; הרשומות לא משתנות",
+	"automationTimeZone": "אזור הזמן של הכלל",
 	"startupFailed": "לא ניתן להפעיל את SiYuan",
 	"startupStage": "השלב שנכשל: ${stage}",
 	"startupReload": "טעינה מחדש",

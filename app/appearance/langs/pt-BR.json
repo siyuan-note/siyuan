@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Inserir variável",
+	"automationTemplateTip": "Calculado no fuso horário da regra; resultados vazios limpam o campo e erros revertem a alteração",
+	"automationTemplateExample": "Exemplo",
+	"automationTemplatePreview": "Resultado da prévia",
+	"automationPreviewData": "Dados usados na prévia",
+	"automationPreviewItem": "Item de exemplo",
+	"automationPreviewTime": "Data usada na prévia",
+	"automationPreviewOnly": "Somente prévia; os itens não são alterados",
+	"automationTimeZone": "Fuso horário da regra",
 	"startupFailed": "Não foi possível iniciar o SiYuan",
 	"startupStage": "Etapa com falha: ${stage}",
 	"startupReload": "Recarregar",

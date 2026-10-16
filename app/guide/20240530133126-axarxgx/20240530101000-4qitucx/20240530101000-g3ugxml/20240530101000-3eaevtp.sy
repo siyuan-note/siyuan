@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261016130603"
+		"updated": "20261016165601"
 	},
 	"Children": [
 		{
@@ -3830,7 +3830,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-2ctdjhm",
-				"updated": "20261016113125"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
@@ -3908,12 +3908,177 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-odr4vof",
-				"updated": "20261002224707"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "アクションの値には固定値、互換性のある型のソースフィールド、トリガー時刻、トリガー項目への関連を指定できます。トリガー時刻は日付フィールドに使用します。トリガー項目への関連には、ソースデータベースを参照する関連フィールドが必要です。主キーのテキストを編集しても既存のバインドとアイコンは維持されます"
+					"Data": "アクションの値には固定値、互換性のある型のソースフィールド、トリガー時刻、トリガー項目への関連、または計算用テンプレートを指定できます。トリガー時刻は日付フィールドに使用します。トリガー項目への関連には、ソースデータベースを参照する関連フィールドが必要です。主キーのテキストを編集しても既存のバインドとアイコンは維持されます"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-3mbpi7s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-3mbpi7s",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "値の設定方法で「テンプレート」を選ぶと、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{...}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をインラインで編集できます。変数メニューからトリガー時刻やソースフィールドを挿入します。テンプレートを編集するとルールが一時停止するため、編集後に再度有効にしてください。編集可能なすべてのフィールドに対応しますが、作成日時、更新日時、行番号、ロールアップ、テンプレートなどの計算フィールドには代入できません。主キーは既存のバインドを維持します"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-udw7gbs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-udw7gbs",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例えば、水やりタスクを完了したときに次のタスクを追加し、日付を "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " に設定します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " はトリガー時刻に固定され、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate 0 0 7"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は暦上の七日後を計算します。テンプレートを初めて使用するときにフロントエンドのタイムゾーンを保存し、他の端末でも同じタイムゾーンで実行します"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-8ub6ywb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-8ub6ywb",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "field \"フィールドID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " はソース項目の保存値を読み取り、日付では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用できます。フィールド名を変更しても ID 参照は維持されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "value \"フィールドID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は構造化データを読み取り、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "toJson"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は JSON を出力します。例えば "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"フィールドID\"))}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は日付範囲の開始と終了を進め、日付のみか時刻付きかの設定も維持します"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-vimxvf5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-vimxvf5",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テキスト、リンク、メール、電話には文字列を使用し、数値には有限の値、チェックボックスには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用します。日付には ISO 日付、日時、既存の日付データの JSON を使用できます。単一選択は既存の選択肢名、複数選択は名前または選択肢オブジェクトの JSON 配列、関連は既存項目 ID の配列を使用します。アセットと位置には既存のデータ構造の JSON を使用します。選択肢、関連項目、アセットは自動作成しません"
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-4qrtsdm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-4qrtsdm",
+				"updated": "20261016165601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "「プレビューに使用するデータ」を開き、実際の項目を選び、日付や参照フィールドを変更してから結果を確認します。入力はプレビュー専用で、項目を変更しません。空の出力はフィールドを消去し、変数の不足、空のソース日付、型や参照のエラーは元の編集と全アクションを取り消します。結果は一度だけ保存し、やり直しでも再利用します。SQL、ファイル、ネットワーク、ループ、再帰は使用できません。ソースは最大 8 KiB、各入力と出力は最大 64 KiB です。テンプレート保存後は自動化形式 2 に対応したクライアントが必要で、旧版はデータベースの読み込みを明示的に拒否します。既存の形式 1 のルールは引き続き使用できます"
 				}
 			]
 		},
@@ -4007,12 +4172,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-ag8e3p7",
-				"updated": "20261015141042"
+				"updated": "20261016165601"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "タグはブロック自体と照合し、すべての親コンテナを自動収集しません。リスト項目は先頭段落のタグを使用し、段落の種類を明示的に選んだ場合にのみ先頭段落も個別に照合します。収集は元のブロックを現在のデータベースにバインドし、原文をコピーしたり移動したりしません。初期フィールドには固定値と日付フィールドのトリガー時刻を指定でき、主キーは元のブロックへのバインドを保持します"
+					"Data": "タグはブロック自体と照合し、すべての親コンテナを自動収集しません。リスト項目は先頭段落のタグを使用し、段落の種類を明示的に選んだ場合にのみ先頭段落も個別に照合します。収集は元のブロックを現在のデータベースにバインドし、原文をコピーしたり移動したりしません。初期フィールドには固定値、日付フィールドのトリガー時刻、テンプレートを指定でき、主キーは元のブロックへのバインドを保持します"
 				}
 			]
 		},

@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Sisipkan variabel",
+	"automationTemplateTip": "Dihitung dalam zona waktu aturan; hasil kosong mengosongkan kolom dan kesalahan membatalkan perubahan",
+	"automationTemplateExample": "Contoh",
+	"automationTemplatePreview": "Hasil pratinjau",
+	"automationPreviewData": "Data untuk pratinjau",
+	"automationPreviewItem": "Entri contoh",
+	"automationPreviewTime": "Tanggal untuk pratinjau",
+	"automationPreviewOnly": "Hanya pratinjau; entri tidak diubah",
+	"automationTimeZone": "Zona waktu aturan",
 	"startupFailed": "SiYuan gagal dimulai",
 	"startupStage": "Tahap yang gagal: ${stage}",
 	"startupReload": "Muat ulang",

@@ -173,6 +173,12 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		if value.Mode == "currentTime" && key.Type == av.KeyTypeDate {
 			continue
 		}
+		if value.Mode == "template" {
+			if err = av.ValidateAutomationTemplate(value.Template, rule.TimeZone); err != nil {
+				return err
+			}
+			continue
+		}
 		if value.Mode != "static" || value.Value == nil || value.Value.Type != key.Type {
 			return unavailableAutomationReference("fields", keyID, fmt.Sprintf("invalid collection field value [%s]", keyID))
 		}
@@ -428,8 +434,16 @@ func (tx *Transaction) addCollectedItem(view *av.AttributeView, rule *av.Automat
 	if len(rule.Actions[0].Fields) == 0 {
 		return nil
 	}
-	return tx.runAutomationAction(&attributeViewAutomationSource{before: view, boxID: boxID}, view, id,
-		&av.AutomationAction{Type: "edit", Target: "current", Fields: rule.Actions[0].Fields})
+	current, err := tx.readAttributeViewForMutation(view.ID, "", boxID)
+	if err != nil {
+		return err
+	}
+	current, err = cloneAttributeViewForFieldMutation(current)
+	if err != nil {
+		return err
+	}
+	return tx.runAutomationAction(&attributeViewAutomationSource{before: view, boxID: boxID}, current, id,
+		&av.AutomationAction{Type: "edit", Target: "current", Fields: rule.Actions[0].Fields}, rule.TimeZone)
 }
 
 func (tx *Transaction) removeCollectedItem(view *av.AttributeView, row *av.Value, boxID string) error {

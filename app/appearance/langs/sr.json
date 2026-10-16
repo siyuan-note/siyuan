@@ -1,4 +1,13 @@
 {
+	"automationInsertVariable": "Уметни променљиву",
+	"automationTemplateTip": "Израчунавање у временској зони правила; празан резултат брише поље, а грешке поништавају измену",
+	"automationTemplateExample": "Пример",
+	"automationTemplatePreview": "Резултат прегледа",
+	"automationPreviewData": "Подаци за преглед",
+	"automationPreviewItem": "Пример ставке",
+	"automationPreviewTime": "Датум за преглед",
+	"automationPreviewOnly": "Само преглед; ставке се не мењају",
+	"automationTimeZone": "Временска зона правила",
 	"startupFailed": "SiYuan није могао да се покрене",
 	"startupStage": "Неуспешна фаза: ${stage}",
 	"startupReload": "Учитај поново",

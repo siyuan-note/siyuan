@@ -102,7 +102,7 @@ body.body--harmony {
 }
 
 :root[data-ios-window-controls] #status {
-  height: calc(32px + var(--ios-window-safe-bottom, 0px));
+  height: calc(var(--b3-ui-status-height, 32px) + var(--ios-window-safe-bottom, 0px));
   padding-bottom: var(--ios-window-safe-bottom, 0px);
 }
 
@@ -281,8 +281,8 @@ body.body--harmony {
 
   box-sizing: border-box;
   z-index: 2;
-  height: 32px;
-  line-height: 32px;
+  height: var(--b3-ui-status-height, 32px);
+  line-height: var(--b3-ui-status-height, 32px);
   padding: 0 7px;
 
   &__msg {

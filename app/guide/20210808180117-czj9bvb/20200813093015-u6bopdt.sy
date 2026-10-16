@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20261016191102"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -1562,7 +1562,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201224120447-kp1qdga"
+				"id": "20201224120447-kp1qdga",
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1625,7 +1626,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230406111610-s0vr122",
-				"updated": "20230806002852"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1637,6 +1638,10 @@
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://ld246.com/sponsor",
 					"TextMarkTextContent": "靠爱发电 - 链滴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

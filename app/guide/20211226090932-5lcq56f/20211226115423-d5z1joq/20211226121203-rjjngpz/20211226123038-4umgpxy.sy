@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -1082,7 +1082,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20261014150710"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1582,7 +1582,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261014150710"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1695,12 +1695,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203058-pvk5pnz",
-				"updated": "20261001013550"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "透過圖片結果編輯視窗儲存後會自動更新搜尋索引；在思源外部修改 JSON 檔案後，需手動重建資源檔案索引"
+					"Data": "透過圖片結果編輯視窗儲存後會自動更新搜尋索引；在思源外部修改 JSON 檔案後，需手動重建資源檔案索引。"
 				}
 			]
 		},

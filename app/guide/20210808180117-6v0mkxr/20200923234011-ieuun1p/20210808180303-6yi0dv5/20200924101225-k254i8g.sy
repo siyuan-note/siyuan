@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -1474,7 +1474,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20261016111305"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1984,7 +1984,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429115218-ydwuros",
-				"updated": "20260803171606"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -2031,7 +2031,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427231112-lcwev4m",
-				"updated": "20260803171606"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -2043,7 +2043,7 @@
 					},
 					"Properties": {
 						"id": "20240427231112-q60pwo8",
-						"updated": "20260803171606"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -2051,7 +2051,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427231112-e7j3mqt",
-								"updated": "20260803171606"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -2083,7 +2083,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, but please confirm that the code is safe before opening it to avoid cross-site scripting attacks (XSS)."
+									"Data": "​, but please confirm that the code is safe before opening it to avoid cross-site scripting attacks (XSS)"
 								}
 							]
 						}
@@ -2098,7 +2098,7 @@
 					},
 					"Properties": {
 						"id": "20240427231112-o1imtjo",
-						"updated": "20240427231112"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -2106,7 +2106,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427231112-3txbq9w",
-								"updated": "20240427231112"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -2120,7 +2120,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to wrap HTML code and remove blank lines."
+									"Data": "​ to wrap HTML code and remove blank lines"
 								}
 							]
 						}

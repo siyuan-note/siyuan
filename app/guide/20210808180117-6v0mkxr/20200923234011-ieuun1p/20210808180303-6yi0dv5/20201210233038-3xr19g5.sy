@@ -6,7 +6,7 @@
 		"id": "20201210233038-3xr19g5",
 		"title": "Conversion of Document and Heading",
 		"type": "doc",
-		"updated": "20260924013047"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -447,7 +447,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091550-fualfrs",
-				"updated": "20260426180032"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -476,7 +476,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240415092450-z9g5u00",
-				"updated": "20240415092640"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -516,7 +516,7 @@
 					},
 					"Properties": {
 						"id": "20240415092513-f6xngjx",
-						"updated": "20240415092640"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -524,12 +524,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240415092513-gteta4u",
-								"updated": "20240415092640"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If there are subheadings under the original heading block, the largest level among these subheadings will be used as the second-level heading in the new document. The remaining subheadings will be adjusted according to the relative levels. For example, the original heading block contains three, four, and five. level subheadings, these subheadings will be converted into second, third, and fourth level headings after conversion to document blocks."
+									"Data": "If there are subheadings under the original heading block, the largest level among these subheadings will be used as the second-level heading in the new document. The remaining subheadings will be adjusted according to the relative levels. For example, the original heading block contains three, four, and five level subheadings, these subheadings will be converted into second, third, and fourth level headings after conversion to document blocks"
 								}
 							]
 						}

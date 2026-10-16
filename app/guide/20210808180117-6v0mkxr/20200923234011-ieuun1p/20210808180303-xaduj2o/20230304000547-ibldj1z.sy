@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261015225720"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -76,7 +76,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170002-24z0hpx",
-				"updated": "20260813120000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -107,7 +107,7 @@
 			},
 			"Properties": {
 				"id": "20260804170004-9yg5i8j",
-				"updated": "20260813120000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -236,7 +236,7 @@
 					},
 					"Properties": {
 						"id": "20260804170009-l87zz79",
-						"updated": "20260813120000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -244,7 +244,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170010-wxcjvxu",
-								"updated": "20260813120000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -267,7 +267,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion."
+									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion"
 								}
 							]
 						}

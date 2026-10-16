@@ -6,7 +6,7 @@
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
 		"type": "doc",
-		"updated": "20260810230450"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105512-qod53ij",
-				"updated": "20260809232000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			},
 			"Properties": {
 				"id": "20230417141958-yemp12k",
-				"updated": "20260809232000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -142,7 +142,7 @@
 					},
 					"Properties": {
 						"id": "20230417141958-141fdej",
-						"updated": "20260809232000"
+						"updated": "20261016202635"
 					},
 					"Children": [
 						{
@@ -150,7 +150,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230417141958-m3qhlu1",
-								"updated": "20260809232000"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
@@ -191,7 +191,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，選擇 CSS 分頁。"
+									"Data": "，選擇 CSS 分頁"
 								}
 							]
 						}
@@ -633,7 +633,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230418093635-7nkc3rv",
-				"updated": "20260803163402"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -662,7 +662,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-afma4ct",
-				"updated": "20260809232000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -677,7 +677,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121625-yv8muau",
-				"updated": "20260809232000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -689,7 +689,7 @@
 					},
 					"Properties": {
 						"id": "20211226121625-vu61b5u",
-						"updated": "20260809232000"
+						"updated": "20261016202635"
 					},
 					"Children": [
 						{
@@ -697,7 +697,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121625-63qu17b",
-								"updated": "20260809232000"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
@@ -729,7 +729,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中在線瀏覽社區開發者貢獻的主題。"
+									"Data": " 中在線瀏覽社區開發者貢獻的主題"
 								}
 							]
 						}
@@ -1258,7 +1258,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-kirhoib",
-				"updated": "20260810230450"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1273,7 +1273,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121625-tvni8h7",
-				"updated": "20260810230450"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1321,7 +1321,7 @@
 					},
 					"Properties": {
 						"id": "20211226121625-i9negbq",
-						"updated": "20260809232000"
+						"updated": "20261016202635"
 					},
 					"Children": [
 						{
@@ -1329,12 +1329,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121625-61yh93j",
-								"updated": "20260809232000"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "自定義主題會繼承內置主題變數，只需覆蓋需要調整的變數；思源升級後應檢查變數是否發生重新命名或移除。"
+									"Data": "自定義主題會繼承內置主題變數，只需覆蓋需要調整的變數；思源升級後應檢查變數是否發生重新命名或移除"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -639,7 +639,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202058-4nvpz56",
-				"updated": "20261016111305"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -653,7 +653,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-q54zwf8",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -667,7 +667,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 前缀执行 JavaScript 代码，动态决定要嵌入哪些块，适合 SQL 查询无法满足的复杂场景"
+					"Data": "​ 前缀执行 JavaScript 代码，动态决定要嵌入哪些块，适合 SQL 查询无法满足的复杂场景。"
 				}
 			]
 		},
@@ -691,7 +691,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-1tfila8",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -705,7 +705,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-paqopye",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -719,7 +719,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 开头的代码即可进入 JS 模式"
+					"Data": "​ 开头的代码即可进入 JS 模式。"
 				}
 			]
 		},
@@ -1018,7 +1018,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-8ljs229",
-				"updated": "20261016111305"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1100,12 +1100,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-81vbloa",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "返回数组中 ID 的顺序即为最终显示顺序"
+					"Data": "返回数组中 ID 的顺序即为最终显示顺序。"
 				}
 			]
 		},

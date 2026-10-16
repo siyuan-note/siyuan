@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -150,7 +150,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091535-sbufc1h",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -192,7 +192,8 @@
 			"ID": "20210104091535-11dba0r",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091535-11dba0r"
+				"id": "20210104091535-11dba0r",
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -208,7 +209,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " . Logically, there is no page concept, which reduces unnecessary burdens in use and allows users to focus on the content block."
+					"Data": ". Logically, there is no page concept, which reduces unnecessary burdens in use and allows users to focus on the content block."
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20201121224345-rc27qvo",
 		"title": "Acknowledgements",
 		"type": "doc",
-		"updated": "20230821234713"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230820175825-fvnif0x",
-				"updated": "20230820180114"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan ❤️"
+					"Data": "The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan. ❤️"
 				}
 			]
 		}

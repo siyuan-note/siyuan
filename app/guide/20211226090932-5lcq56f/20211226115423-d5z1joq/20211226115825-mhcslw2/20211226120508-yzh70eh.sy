@@ -6,7 +6,7 @@
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容區塊",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -585,7 +585,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202457-cgu87b8",
-				"updated": "20261016111305"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -599,7 +599,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-piyz66c",
-				"updated": "20260730184353"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -613,7 +613,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 前綴執行 JavaScript 程式碼，動態決定要嵌入哪些區塊，適合 SQL 查詢無法滿足的複雜場景"
+					"Data": "​ 前綴執行 JavaScript 程式碼，動態決定要嵌入哪些區塊，適合 SQL 查詢無法滿足的複雜場景。"
 				}
 			]
 		},
@@ -637,7 +637,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-tp9uaus",
-				"updated": "20260612202457"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -651,7 +651,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-9r9tm6j",
-				"updated": "20260730184353"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -665,7 +665,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 開頭的程式碼即可進入 JS 模式"
+					"Data": "​ 開頭的程式碼即可進入 JS 模式。"
 				}
 			]
 		},
@@ -964,7 +964,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-zngmbbn",
-				"updated": "20261016111305"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1046,12 +1046,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-sj5i3ja",
-				"updated": "20260612202457"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "返回陣列中 ID 的順序即為最終顯示順序"
+					"Data": "返回陣列中 ID 的順序即為最終顯示順序。"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -128,7 +128,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20261016111305"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -146,7 +146,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091444-ycq0a40",
-				"updated": "20210502205109"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -161,7 +161,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". If you have an understanding of this, you can implement some program logic in it, such as comparison logic , Iterative logic, etc. In addition, to avoid syntax conflicts, template syntax uses "
+					"Data": ". If you have an understanding of this, you can implement some program logic in it, such as comparison logic, Iterative logic, etc. In addition, to avoid syntax conflicts, template syntax uses "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -19,7 +19,7 @@
 			"Properties": {
 				"ID": "20240530101000-tfcp9du",
 				"id": "20240530101000-e1tndfu",
-				"updated": "20261016011750"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -35,7 +35,7 @@
 			"Properties": {
 				"ID": "20240530101000-8o1a9my",
 				"id": "20240530101000-wlqefeq",
-				"updated": "20240530101000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -113,7 +113,7 @@
 					"Properties": {
 						"ID": "20240530101000-gjgldj9",
 						"id": "20240530101000-gm1p50s",
-						"updated": "20240530101000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -137,12 +137,12 @@
 							"Properties": {
 								"ID": "20240530101000-h8nud0n",
 								"id": "20240530101000-r0imp45",
-								"updated": "20240530101000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コピー＆ペースト、またはドラッグ＆ドロップによるアップロードに対応しています。サイドバーをドラッグすることでサイズを調整できます。"
+									"Data": "コピー＆ペースト、またはドラッグ＆ドロップによるアップロードに対応しています。サイドバーをドラッグすることでサイズを調整できます"
 								}
 							]
 						},

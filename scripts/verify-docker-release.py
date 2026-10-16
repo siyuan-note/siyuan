@@ -15,6 +15,8 @@ import uuid
 PLATFORMS = ("linux/amd64", "linux/arm64", "linux/arm/v7", "linux/arm/v8")
 CHECKS = {"licenses", "version", "model-load", "chinese", "latin", "blank", "worker-failure", "notebook"}
 DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
+# 与 app/package.json 的版本一致：正式版为 x.y.z，预发行版追加 -alpha.1、-beta.2 或 -rc.3。
+VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+(?:-(?:alpha|beta|rc)(?:\.[0-9A-Za-z]+)*)?")
 
 
 def run(arguments, *, input=None, timeout=300, check=True):
@@ -260,6 +262,14 @@ def assemble(repository, tag, version, reports_path, report_path, provenance):
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def release_tags(version):
+    """预发行版只发布版本标签，latest 始终指向正式版。"""
+    tags = [":v" + version]
+    if "-" not in version:
+        tags.append(":latest")
+    return tags
+
+
 def promote(image, version, report_path):
     report = json.loads(report_path.read_text(encoding="utf-8"))
     expected = verified_platforms(report, image, version)
@@ -267,9 +277,12 @@ def promote(image, version, report_path):
     actual = manifests(json.loads(run(["docker", "buildx", "imagetools", "inspect", image, "--raw"]).stdout))
     if actual != expected:
         raise ValueError("Candidate manifest differs from the verified image")
-    run(["docker", "buildx", "imagetools", "create", "--tag", repository + ":v" + version,
-         "--tag", repository + ":latest", image], timeout=900)
-    for tag in (":v" + version, ":latest"):
+    tags = release_tags(version)
+    command = ["docker", "buildx", "imagetools", "create"]
+    for tag in tags:
+        command += ["--tag", repository + tag]
+    run(command + [image], timeout=900)
+    for tag in tags:
         published = manifests(json.loads(run(["docker", "buildx", "imagetools", "inspect", repository + tag, "--raw"]).stdout))
         if published != expected:
             raise ValueError(f"Published manifest differs from the verified image: {tag}")
@@ -291,8 +304,8 @@ def main():
     parser.add_argument("--configuration-commit")
     parser.add_argument("--run-id")
     args = parser.parse_args()
-    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", args.version) or args.timeout <= 0:
-        parser.error("Expected a stable release version and positive timeout")
+    if not VERSION.fullmatch(args.version) or args.timeout <= 0:
+        parser.error("Expected a release version and positive timeout")
     provenance = {"source_commit": args.source_commit, "configuration_commit": args.configuration_commit,
                   "run_id": args.run_id}
     if args.command == "assemble" or args.platform:

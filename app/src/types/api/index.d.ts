@@ -1670,7 +1670,7 @@ export type RenameRiffDeckRequestInput = { "deckID": string; "name": string; };
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
-export type RenderAttributeViewRequestInput = { "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "createIfNotExist"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "viewID"?: string | null; };
+export type RenderAttributeViewRequestInput = { "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "createIfNotExist"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "temporarySort"?: AVViewSortInput | null; "viewID"?: string | null; };
 
 export type RenderHistoryAttributeViewRequestInput = { "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "carrierViewID"?: string | null; "created": string; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "viewID"?: string | null; };
 
@@ -3716,6 +3716,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 渲染指定数据库视图，保留载体权限、加密笔记本租约、筛选和分页行为。
+     * temporarySort 可选，省略或 null 时使用已保存的排序；指定时以单字段规则覆盖本次渲染排序，先排序再分页。
+     * 临时排序的 order 必须为 ASC 或 DESC；字段缺失或不支持排序时恢复已保存规则。
+     * 临时排序不创建或保存数据库，不改变载体默认视图；支持现有 valueSource 和 dateEndpoint 语义。
+     */
     "/api/av/renderAttributeView": {
         request: RenderAttributeViewRequestInput;
         response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };

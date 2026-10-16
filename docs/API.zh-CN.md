@@ -1964,6 +1964,7 @@ if (response.code === 0 && response.data) {
     * `groupPaging`: 分组（看板）视图的可选分页配置
     * `targetItemID`: 可选的待定位数据库条目 ID。指定后，返回值中包含目标定位信息
     * `targetGroupID`: 与 `targetItemID` 配合使用的可选分组提示
+    * `temporarySort`: 可选的单字段排序，例如 `{"column":"field-id","order":"DESC"}`。省略或为 `null` 时使用已保存规则；指定时仅覆盖本次请求的排序，在分页前生效，不创建或保存数据库，也不改变载体默认视图。`order` 必须为 `ASC` 或 `DESC`；字段缺失或不支持排序时恢复已保存规则。支持现有的 `valueSource` 和 `dateEndpoint` 选项
     * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在则创建包含默认视图的数据库
     * `persistView`: 已废弃的兼容参数。接口仍接受该参数但会忽略，因为数据库定义不再存储顶层当前视图
 * 返回值（真实响应，表格布局，展示一行）：

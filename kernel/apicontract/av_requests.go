@@ -318,6 +318,7 @@ type RenderHistoryAttributeViewRequest struct {
 }
 
 type RenderAttributeViewRequest struct {
+	TemporarySort *AVViewSort `json:"temporarySort" api:"optional,nullable"`
 	// 仅限制本次日历渲染范围，语义见 AVCalendarRange；无效区间返回错误，不修改已存数据。
 	// 发布读取保留权限过滤；日期范围和定位参数不扩大条目访问权限。
 	CalendarRange    *AVCalendarRange          `json:"calendarRange" api:"optional,nullable"`

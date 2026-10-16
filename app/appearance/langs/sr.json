@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Привремено сортирање",
+	"avRestoreDefaultSort": "Врати подразумевано сортирање",
 	"automationRule": "Тренутно правило",
 	"automationWhen": "Када се догоди овај догађај",
 	"automationWatchField": "Праћено поље",

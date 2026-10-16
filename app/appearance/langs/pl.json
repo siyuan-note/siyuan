@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Sortowanie tymczasowe",
+	"avRestoreDefaultSort": "Przywróć domyślne sortowanie",
 	"automationRule": "Bieżąca reguła",
 	"automationWhen": "Gdy wystąpi to zdarzenie",
 	"automationWatchField": "Obserwowane pole",

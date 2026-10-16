@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Pengurutan sementara",
+	"avRestoreDefaultSort": "Pulihkan urutan bawaan",
 	"automationRule": "Aturan saat ini",
 	"automationWhen": "Saat peristiwa ini terjadi",
 	"automationWatchField": "Kolom yang dipantau",

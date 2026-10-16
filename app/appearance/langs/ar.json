@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "ترتيب مؤقت",
+	"avRestoreDefaultSort": "استعادة الترتيب الافتراضي",
 	"automationRule": "القاعدة الحالية",
 	"automationWhen": "عند وقوع هذا الحدث",
 	"automationWatchField": "الحقل المراقب",

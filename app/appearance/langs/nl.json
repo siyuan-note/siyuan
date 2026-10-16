@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Tijdelijke sortering",
+	"avRestoreDefaultSort": "Standaardsortering herstellen",
 	"automationRule": "Huidige regel",
 	"automationWhen": "Wanneer deze gebeurtenis optreedt",
 	"automationWatchField": "Bewaakt veld",

@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "临时排序",
+	"avRestoreDefaultSort": "恢复默认排序",
 	"automationRule": "当前规则",
 	"automationWhen": "当发生以下事件",
 	"automationWatchField": "监听字段",

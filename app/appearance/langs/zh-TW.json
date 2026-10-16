@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "暫時排序",
+	"avRestoreDefaultSort": "恢復預設排序",
 	"automationRule": "目前規則",
 	"automationWhen": "當發生以下事件",
 	"automationWatchField": "監聽欄位",

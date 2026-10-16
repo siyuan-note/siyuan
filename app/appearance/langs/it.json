@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Ordinamento temporaneo",
+	"avRestoreDefaultSort": "Ripristina ordinamento predefinito",
 	"automationRule": "Regola corrente",
 	"automationWhen": "Quando si verifica questo evento",
 	"automationWatchField": "Campo monitorato",

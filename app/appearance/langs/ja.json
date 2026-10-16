@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "一時的な並べ替え",
+	"avRestoreDefaultSort": "既定の並び順に戻す",
 	"automationRule": "現在のルール",
 	"automationWhen": "次のイベントが発生したとき",
 	"automationWatchField": "監視するフィールド",

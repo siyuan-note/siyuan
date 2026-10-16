@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Geçici sıralama",
+	"avRestoreDefaultSort": "Varsayılan sıralamayı geri yükle",
 	"automationRule": "Geçerli kural",
 	"automationWhen": "Bu olay gerçekleştiğinde",
 	"automationWatchField": "İzlenen alan",

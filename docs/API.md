@@ -1968,6 +1968,7 @@ The field types (`keyType`) are:
     * `groupPaging`: Optional paging configuration for grouped (kanban) views
     * `targetItemID`: Optional database item ID to locate. When specified, the response includes target-location metadata
     * `targetGroupID`: Optional group hint used with `targetItemID`
+    * `temporarySort`: Optional single-field sort, e.g. `{"column":"field-id","order":"DESC"}`. Omitted or `null` uses the saved rules. Overrides sorting before pagination for this request only; does not create or save the database or change the carrier view. `order` must be `ASC` or `DESC`; missing or unsupported fields fall back to saved rules. Existing `valueSource` and `dateEndpoint` options are supported
     * `createIfNotExist`: When `true` (default), create a database with a default view if the database does not exist
     * `persistView`: Deprecated compatibility parameter. It is accepted but ignored because the database definition no longer stores a top-level current view
 * Return value (real response, table layout, one row shown):

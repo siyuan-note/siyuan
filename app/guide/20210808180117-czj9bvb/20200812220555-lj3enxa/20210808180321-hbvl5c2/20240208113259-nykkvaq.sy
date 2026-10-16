@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261016113125"
+		"updated": "20261016130603"
 	},
 	"Children": [
 		{
@@ -142,7 +142,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208115136-9g2b46l",
-				"updated": "20261012014930"
+				"updated": "20261016130603"
 			},
 			"Children": [
 				{
@@ -1650,7 +1650,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613170258-y3mj135",
-				"updated": "20261012014930"
+				"updated": "20261016130603"
 			},
 			"Children": [
 				{
@@ -2185,7 +2185,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613170258-kdajpht",
-				"updated": "20260613170258"
+				"updated": "20261016130603"
 			},
 			"Children": [
 				{
@@ -2660,6 +2660,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261016130603-jqn6bi8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016130603-jqn6bi8",
+				"updated": "20261016130603"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "锁定编辑时，点击数据库工具栏的排序图标，选择字段及升序或降序。临时排序仅影响当前窗口中的当前数据库块和视图，不修改已保存的排序规则。选择恢复默认排序、解除锁定或关闭文档后，恢复已保存的规则。"
 				}
 			]
 		},

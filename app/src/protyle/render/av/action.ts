@@ -60,6 +60,7 @@ import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {setPublishAVFolds, setPublishAVView} from "./publishState";
 import {setReadonlyAVFolds, setReadonlyAVView} from "./readonlyState";
+import {openReadonlyAVSortMenu} from "./readonlySort";
 import {
     finishCardCoverPosition,
     isCardCoverPositioning,
@@ -440,8 +441,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-sort" && !protyle.disabled) {
-            openMenuPanel({protyle, blockElement, type: "sorts"});
+        } else if (type === "av-sort") {
+            if (protyle.disabled) {
+                openReadonlyAVSortMenu(blockElement as HTMLElement, protyle, target);
+            } else {
+                openMenuPanel({protyle, blockElement, type: "sorts"});
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

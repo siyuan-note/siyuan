@@ -250,7 +250,7 @@ func TestAVContractCalendarPublishTarget(t *testing.T) {
 		return calendar
 	}
 	response := renderAttrView("", database.ID, view.ID, "", 1, 1, nil, av.LayoutTypeCalendar, false, false,
-		hiddenID, "", filter, true, &av.CalendarRange{Start: start, End: start + 42*86400000, TimeZone: "UTC"})
+		hiddenID, "", filter, true, model.AttributeViewRenderOptions{CalendarRange: &av.CalendarRange{Start: start, End: start + 42*86400000, TimeZone: "UTC"}})
 	body, err := json.Marshal(response)
 	if err != nil {
 		t.Fatal(err)

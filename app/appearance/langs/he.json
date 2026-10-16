@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "מיון זמני",
+	"avRestoreDefaultSort": "שחזור המיון המוגדר כברירת מחדל",
 	"automationRule": "הכלל הנוכחי",
 	"automationWhen": "כאשר האירוע הזה מתרחש",
 	"automationWatchField": "השדה שבמעקב",

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261016113125"
+		"updated": "20261016130603"
 	},
 	"Children": [
 		{
@@ -142,7 +142,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20261012014930"
+				"updated": "20261016130603"
 			},
 			"Children": [
 				{
@@ -1650,7 +1650,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20261012014930"
+				"updated": "20261016130603"
 			},
 			"Children": [
 				{
@@ -2185,7 +2185,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-vqc74gs",
-				"updated": "20260613171129"
+				"updated": "20261016130603"
 			},
 			"Children": [
 				{
@@ -2660,6 +2660,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261016130603-ca75uwv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016130603-ca75uwv",
+				"updated": "20261016130603"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing is locked, click the sort icon in the database toolbar and choose a field and ascending or descending order. This temporary sort applies only to the current database block and view in this window, without changing the saved sort rules. Choose Restore default sorting, unlock editing, or close the document to restore the saved rules."
 				}
 			]
 		},

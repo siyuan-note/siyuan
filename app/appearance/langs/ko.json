@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "임시 정렬",
+	"avRestoreDefaultSort": "기본 정렬 복원",
 	"automationRule": "현재 규칙",
 	"automationWhen": "다음 이벤트가 발생하면",
 	"automationWatchField": "감시할 필드",

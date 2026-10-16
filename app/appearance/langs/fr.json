@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Tri temporaire",
+	"avRestoreDefaultSort": "Rétablir le tri par défaut",
 	"automationRule": "Règle actuelle",
 	"automationWhen": "Lorsque cet événement se produit",
 	"automationWatchField": "Champ surveillé",

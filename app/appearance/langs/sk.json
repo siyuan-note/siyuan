@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Dočasné zoradenie",
+	"avRestoreDefaultSort": "Obnoviť predvolené zoradenie",
 	"automationRule": "Aktuálne pravidlo",
 	"automationWhen": "Keď nastane táto udalosť",
 	"automationWatchField": "Sledované pole",

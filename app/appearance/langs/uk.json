@@ -1,4 +1,6 @@
 {
+	"avTemporarySort": "Тимчасове сортування",
+	"avRestoreDefaultSort": "Відновити типове сортування",
 	"automationRule": "Поточне правило",
 	"automationWhen": "Коли відбувається ця подія",
 	"automationWatchField": "Відстежуване поле",

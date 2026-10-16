@@ -1097,7 +1097,7 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
     .av__row--util svg[data-type="set-page-size"],
     .av__row--header > .block__icons,
     .av__views .fn__space,
-    .av__views .block__icon:not([data-type="av-search-icon"]),
+    .av__views .block__icon:not([data-type="av-search-icon"]):not(.av__readonly-sort),
     .av__widthdrag,
     .av__gallery-actions,
     .av__gallery-add,

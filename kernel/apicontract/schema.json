@@ -36218,6 +36218,16 @@
             }
           ]
         },
+        "temporarySort": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVViewSortInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "viewID": {
           "anyOf": [
             {

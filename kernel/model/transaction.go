@@ -2017,7 +2017,13 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if ast.NodeTable == oldNode.Type && ast.NodeTable == updatedNode.Type &&
 		(treenode.HasTableCellRich(oldNode) || "1" == oldNode.IALAttr(treenode.TableCellRichTableAttribute)) &&
 		"1" != updatedNode.IALAttr(treenode.TableCellRichTableAttribute) {
-		return &TxErr{code: TxErrCodeReloadUI, msg: "table update omitted rich text format metadata", id: id}
+		if !tx.isReplay || "" != updatedNode.IALAttr(treenode.TableCellRichTableAttribute) {
+			return &TxErr{code: TxErrCodeReloadUI, msg: "table update omitted rich text format metadata", id: id}
+		}
+		// 撤销日志中的普通表格快照保留富文本格式标记，确保连续撤销和重做可恢复。
+		updatedNode.SetIALAttr(treenode.TableCellRichTableAttribute, "1")
+		data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = data
 	}
 	if err = treenode.ValidateTableCellRich(updatedNode); nil != err {
 		return &TxErr{code: TxErrCodeReloadUI, msg: err.Error(), id: id}

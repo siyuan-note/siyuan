@@ -36,7 +36,7 @@ export const onlyProtyleCommand = (options: {
     if (!options.previousRange) {
         return false;
     }
-    const nodeElement = hasClosestBlock(options.previousRange.startContainer);
+    const nodeElement = hasClosestBlock(options.previousRange.startContainer, true);
     if (!nodeElement) {
         return false;
     }

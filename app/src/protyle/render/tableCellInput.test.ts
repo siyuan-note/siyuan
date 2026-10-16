@@ -8,7 +8,8 @@ import {promisify} from "node:util";
 import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
-                            transactionSource: string, copyPlainSource: string, gutterSource: string, mouseDownSource: string) => {
+                            transactionSource: string, copyPlainSource: string, gutterSource: string, mouseDownSource: string,
+                            commandSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -53,11 +54,13 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
-        "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM};")(...Object.values(dependencies)) as
+        "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
+        "hasClosestBlock, hasClosestByClassName, hasClosestByTag};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
-        typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection");
+        typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
+        typeof import("../util/hasClosest");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -196,6 +199,72 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const rich of [false, true]) {
+        const {owner, element, table} = fixture();
+        const cell = table.querySelector("th");
+        if (rich) {
+            api.setTableCellRich(cell, "first\n\nsecond");
+        }
+        await open(owner, cell);
+        const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+        const blocks = Array.from(host.querySelectorAll<HTMLElement>("[data-node-id]"));
+        check.ok(blocks.length > 0);
+        const child = blocks[0];
+        const range = document.createRange();
+        range.selectNodeContents(child.querySelector('[contenteditable="true"]'));
+        focusByRange(range);
+        check.equal(api.hasClosestBlock(range.startContainer), child, "local editing retains the fragment identity");
+        check.equal(api.hasClosestBlock(range.startContainer, true), table, "document commands resolve the table identity");
+        const writes: {ids: string[], type: string}[] = [];
+        const duplicated: Element[][] = [];
+        const general = window.siyuan.config.keymap.editor.general;
+        const bindings = new Proxy({}, {get: (_target, key) => key});
+        window.siyuan.config.keymap.editor.general = bindings;
+        window.siyuan.config.keymap.general = bindings;
+        const commandDependencies = {...api,
+            matchHotKey: (binding: string, event: KeyboardEvent) => binding === event.key,
+            getEditorRange: () => getSelection().getRangeAt(0),
+            getBlockElementsByRange: () => blocks,
+            getAllEditor: () => [{protyle: owner}], getActiveTab: noop,
+            documentKeydown: () => false, handleDocumentBoundaryHotkey: () => false,
+            cloneCommandRange: (range: Range) => range?.cloneRange(),
+            getDockElement: noop, resolveCommandFocus: () => "editor", getFrontend: () => "desktop",
+            createCommandContextSnapshot: (value: unknown) => value,
+            copyTextByType: (ids: string[], type: string) => writes.push({ids, type}),
+            getContentByInlineHTML: (range: Range, callback: (text: string) => void) => callback(range.toString()),
+            writeText: (text: string) => writes.push({ids: [text], type: "text"}),
+            duplicateBlock: (elements: Element[]) => duplicated.push(elements),
+        };
+        const commands = new Function(...Object.keys(commandDependencies), commandSource +
+            "\nreturn {commonHotkey, editKeydown, captureCommandContext, hasCommandEditorTarget};")(...Object.values(commandDependencies));
+        const event = (key: string) => ({key, target: child, preventDefault: noop, stopPropagation: noop});
+        for (const [key, type] of [["copyID", "id"], ["copyProtocol", "protocol"],
+            ["copyProtocolInMd", "protocolMd"], ["copyBlockEmbed", "blockEmbed"]]) {
+            writes.length = 0;
+            commands.commonHotkey(owner, event(key), child);
+            check.deepEqual(writes, [{ids: [table.dataset.nodeId], type}]);
+        }
+        writes.length = 0;
+        check.equal(commands.editKeydown({}, event("copyBlockRef")), true);
+        check.deepEqual(writes, [{ids: [`((${table.dataset.nodeId} "${range.toString().trim()}"))`], type: "text"}]);
+        range.collapse(true);
+        writes.length = 0;
+        commands.editKeydown({}, event("copyBlockRef"));
+        check.deepEqual(writes, [{ids: [table.dataset.nodeId], type: "ref"}]);
+        blocks.forEach(block => block.classList.add("protyle-wysiwyg--select"));
+        writes.length = 0;
+        commands.editKeydown({}, event("copyBlockRef"));
+        check.deepEqual(writes, [{ids: [table.dataset.nodeId], type: "ref"}], "selected cell fragments are deduplicated");
+        commands.editKeydown({}, event("duplicate"));
+        check.deepEqual(duplicated, [[table]]);
+        const context = commands.captureCommandContext({app: {}, source: "commandPanel", protyle: owner, range});
+        check.equal(context.block.id, table.dataset.nodeId);
+        check.deepEqual(context.selectedBlocks.map((block: {id: string}) => block.id), [table.dataset.nodeId]);
+        check.equal(commands.hasCommandEditorTarget(context), true, "normalized cell selections retain a valid command target");
+        window.siyuan.config.keymap.editor.general = general;
+        await finish(element);
+    }
 
     for (const index of [0, 1]) {
         const {owner, element, table} = fixture();
@@ -733,6 +802,15 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
         statement.declarationList.declarations.some(declaration =>
             ["updateTransaction", "promiseTransaction"].includes(declaration.name.getText(transactionFile))))
         .map(statement => statement.getText(transactionFile)).join("\n"));
+    const commandSource = [["../wysiwyg/commonHotkey.ts", "commonHotkey"],
+        ["../../boot/globalEvent/keydown.ts", "editKeydown"], ["../../command/context.ts", "getBlockContext"],
+        ["../../command/context.ts", "captureCommandContext"], ["../../command/contextTargets.ts", "getCommandBlocks"],
+        ["../../command/contextTargets.ts", "hasCommandEditorTarget"]].map(([file, name]) => {
+        const parsed = createSourceFile(file, read(file), ScriptTarget.Latest, true);
+        return compile(parsed.statements.filter(isVariableStatement).filter(statement =>
+            statement.declarationList.declarations.some(declaration => declaration.name.getText(parsed) === name))
+            .map(statement => statement.getText(parsed)).join("\n"));
+    }).join("\n");
     const wysiwygSource = read("../wysiwyg/index.ts");
     const copyEnd = wysiwygSource.indexOf("copyPlainText(textPlain.slice(0, -1));") + "copyPlainText(textPlain.slice(0, -1));".length;
     const copyStart = wysiwygSource.lastIndexOf('let textPlain = "";', copyEnd);
@@ -777,7 +855,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource, commandSource]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

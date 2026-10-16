@@ -1,4 +1,5 @@
 import type {ICommandContextSnapshot} from "./types";
+import {hasClosestBlock} from "../protyle/util/hasClosest";
 
 export const getCommandBlocks = (context: ICommandContextSnapshot) =>
     context.selectedBlocks.length ? context.selectedBlocks : context.block ? [context.block] : [];
@@ -20,7 +21,8 @@ export const hasCommandEditorTarget = (context: ICommandContextSnapshot) => {
         return false;
     }
     // 面板打开后选中集合发生变化时取消操作，避免底层函数使用新的选中目标。
-    const selected = Array.from(editor.querySelectorAll(".protyle-wysiwyg--select"));
+    const selected = Array.from(new Set(Array.from(editor.querySelectorAll(".protyle-wysiwyg--select"))
+        .map(element => hasClosestBlock(element, true) || element)));
     return selected.length === context.selectedBlocks.length &&
         context.selectedBlocks.every(block => selected.includes(block.element));
 };

@@ -204,11 +204,13 @@ export const captureCommandContext = (options: ICaptureCommandContextOptions): I
     if (!range) {
         range = cloneCommandRange(protyle?.toolbar?.range);
     }
-    const blockElement = range ? hasClosestBlock(range.startContainer) : false;
+    const blockElement = range ? hasClosestBlock(range.startContainer, true) : false;
     const block = getBlockContext(blockElement);
     const selectedBlocks = protyle?.wysiwyg?.element ?
         Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(".protyle-wysiwyg--select"))
-            .map(element => getBlockContext(element)).filter((item): item is ICommandBlockContext => Boolean(item)) : [];
+            .map(element => getBlockContext(hasClosestBlock(element, true) || element))
+            .filter((item, index, items): item is ICommandBlockContext => item !== undefined &&
+                items.findIndex(other => other?.id === item.id) === index) : [];
     const tableCellElement = range && (hasClosestByTag(range.startContainer, "TD") ||
         hasClosestByTag(range.startContainer, "TH"));
     const focus = resolveCommandFocus({

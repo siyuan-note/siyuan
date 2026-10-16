@@ -7,6 +7,7 @@ import * as ts from "typescript";
 import {getPinnedDropPosition} from "../../util/pinnedDocsDrop";
 import {ParentDocClick} from "./parentDocClick";
 import {setTimeout as delay} from "node:timers/promises";
+import {escapeAriaLabel, escapeHtml} from "../../util/escape";
 
 interface IPanelHarness {
     parentDocClick: ParentDocClick;
@@ -95,7 +96,7 @@ const loadPanel = (fetchCode = 0) => {
             if (name.endsWith("/dragover")) { return {dragOverScroll: () => {}}; }
             if (name.endsWith("/compatibility")) { return {isOnlyMeta: (event: MouseEvent) => Boolean(event.ctrlKey)}; }
             if (name.endsWith("/fileTreeIcon")) { return {getFileTreeIconHTML: () => ""}; }
-            if (name.endsWith("/escape")) { return {escapeHtml: (value: string) => value}; }
+            if (name.endsWith("/escape")) { return {escapeAriaLabel, escapeHtml}; }
             if (name.endsWith("/emoji")) { return {openEmojiPanel: record("icon")}; }
             if (name.endsWith("/navigation")) {
                 return {initFileMenu: (...args: unknown[]) => {

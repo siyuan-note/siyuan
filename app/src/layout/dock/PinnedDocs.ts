@@ -5,7 +5,7 @@ import {pinnedDocIDs, updatePinnedDocs} from "../../util/pinnedDocs";
 import {getPinnedDropPosition} from "../../util/pinnedDocsDrop";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {openEmojiPanel} from "../../emoji";
-import {escapeHtml} from "../../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../../util/escape";
 import {initFileMenu} from "../../menus/navigation";
 import {toggleMenu} from "../../menus/menuToggle";
 import {globalClickHideMenu} from "../../menus/menuClick";
@@ -327,7 +327,7 @@ export class PinnedDocs {
         // 桌面端点击会修改图标时给出提示，移动端保留无障碍标签
         const iconLabel = this.getDocIconLabel(doc.subFileCount);
         if (!doc.icon) { row.dataset.defaultIcon = doc.subFileCount ? "folder" : "file"; }
-        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" data-menu="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
+        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE" aria-label="${escapeAriaLabel(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" data-menu="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
         if (!doc.unavailable && !window.siyuan.config.readonly) {
             const add = document.createElement("span");
             add.className = "b3-list-item__action";

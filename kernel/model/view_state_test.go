@@ -128,7 +128,7 @@ func TestPatchViewStateConcurrently(t *testing.T) {
 	const count = 32
 	errs := make(chan error, count)
 	var waitGroup sync.WaitGroup
-	for i := 0; i < count; i++ {
+	for i := range count {
 		waitGroup.Add(1)
 		go func(index int) {
 			defer waitGroup.Done()
@@ -210,7 +210,7 @@ func TestLoadViewStateAppliesLimits(t *testing.T) {
 	})
 
 	views := map[string]*ViewState{}
-	for i := 0; i < maxViewStateCount+2; i++ {
+	for i := range maxViewStateCount + 2 {
 		views[fmt.Sprintf("view-%04d", i)] = &ViewState{
 			Updated: int64(i),
 			Data:    map[string]any{"value": i},
@@ -219,7 +219,7 @@ func TestLoadViewStateAppliesLimits(t *testing.T) {
 	latest := views[fmt.Sprintf("view-%04d", maxViewStateCount+1)]
 	latest.Data = map[string]any{}
 	latest.Order = []string{}
-	for i := 0; i < maxViewStateDataCount+2; i++ {
+	for i := range maxViewStateDataCount + 2 {
 		key := fmt.Sprintf("field-%05d", i)
 		latest.Data[key] = i
 		latest.Order = append(latest.Order, key)
@@ -328,7 +328,7 @@ func oversizedViewStateStorage() *viewStateStorage {
 
 func TestPruneViewStates(t *testing.T) {
 	views := map[string]*ViewState{}
-	for i := 0; i < maxViewStateCount+2; i++ {
+	for i := range maxViewStateCount + 2 {
 		views[fmt.Sprintf("view-%04d", i)] = &ViewState{Updated: int64(i), Data: map[string]any{"value": i}}
 	}
 	pruneViewStates(views)
@@ -353,7 +353,7 @@ func TestNextViewStateUpdatedRebasesOverflow(t *testing.T) {
 
 func TestPruneViewStateFieldsUsesFieldOrder(t *testing.T) {
 	state := &ViewState{Data: map[string]any{}, Order: []string{}}
-	for i := 0; i < maxViewStateDataCount+2; i++ {
+	for i := range maxViewStateDataCount + 2 {
 		key := fmt.Sprintf("field-%05d", i)
 		state.Data[key] = i
 		state.Order = append(state.Order, key)

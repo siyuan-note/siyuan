@@ -31,7 +31,7 @@ func TestReadyInstallPackageDiagnosticsDoNotExposeMetadata(t *testing.T) {
 
 func TestReadyInstallPackageDiagnosticLimit(t *testing.T) {
 	diagnostics := readyInstallPackageDiagnostics{}
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		message := diagnostics.rejected("package\nname.json", errors.New("metadata authentication failed"))
 		if i < readyInstallPackageDiagnosticLimit {
 			if !strings.Contains(message, "metadata authentication failed") || strings.Contains(message, "\n") {

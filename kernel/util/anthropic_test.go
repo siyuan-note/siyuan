@@ -62,7 +62,7 @@ func TestAnthropicContextWindowTruncation(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer stream.Close()
-	var text string
+	var text strings.Builder
 	var finish openai.FinishReason
 	for {
 		part, err := stream.Recv()
@@ -73,14 +73,14 @@ func TestAnthropicContextWindowTruncation(t *testing.T) {
 			t.Fatal(err)
 		}
 		for _, choice := range part.Choices {
-			text += choice.Delta.Content
+			text.WriteString(choice.Delta.Content)
 			if choice.FinishReason != "" {
 				finish = choice.FinishReason
 			}
 		}
 	}
-	if text != "partial answer" || finish != openai.FinishReasonLength || stream.NativeContent() == nil {
-		t.Fatalf("context truncation lost streamed content: text=%q finish=%q", text, finish)
+	if text.String() != "partial answer" || finish != openai.FinishReasonLength || stream.NativeContent() == nil {
+		t.Fatalf("context truncation lost streamed content: text=%q finish=%q", text.String(), finish)
 	}
 	for _, reason := range []string{"pause_turn", "future_reason"} {
 		if _, err := anthropicFinishReason(reason, false); err == nil {
@@ -280,7 +280,7 @@ func TestAnthropicIncompleteStreams(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer stream.Close()
-			for i := 0; i < 100; i++ {
+			for range 100 {
 				_, err = stream.Recv()
 				if err != nil {
 					break

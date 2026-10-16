@@ -130,7 +130,7 @@ func TestBoundInstallUpdatesWithoutSeparateBackups(t *testing.T) {
 		t.Fatal(err)
 	}
 	previous := first.InstalledRevision
-	for i := 0; i < 33; i++ {
+	for i := range 33 {
 		installed := installBoundFixture(t, fmt.Sprintf("version %d", i), previous)
 		if !installed.Updated || installed.PreviousRevision != previous {
 			t.Fatalf("update binding = %+v", installed)

@@ -99,7 +99,7 @@ func TestTimedOutTaskRemainsTrackedUntilHandlerCompletes(t *testing.T) {
 func TestConcurrentTaskAdmissionIsAtomic(t *testing.T) {
 	isolateTaskQueue(t)
 	var wait sync.WaitGroup
-	for i := 0; i < 64; i++ {
+	for range 64 {
 		wait.Go(func() { AppendTask(OCRImage, func() {}) })
 	}
 	wait.Wait()

@@ -44,7 +44,7 @@ func TestAttributeViewItemsUndoRedo(t *testing.T) {
 			if err != nil || strings.Contains(string(data), "private field contents") {
 				t.Fatalf("private field snapshots leaked into response: %s, %v", data, err)
 			}
-			for cycle := 0; cycle < 3; cycle++ {
+			for cycle := range 3 {
 				deleted := readAttributeViewItemsTest(t, before.ID)
 				for _, kv := range deleted.KeyValues {
 					for _, value := range kv.Values {
@@ -98,7 +98,7 @@ func TestAttributeViewItemsUndoRelationConfiguration(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		for _, before := range []*av.AttributeView{source, peer} {
 			current := readAttributeViewItemsTest(t, before.ID)
 			if len(current.Views[0].Filters[0].Filters) != 0 || len(current.NewItemTemplates[0].FieldValues) != 0 {
@@ -246,7 +246,7 @@ func TestAttributeViewItemsUndoRelations(t *testing.T) {
 				t.Fatal(err)
 			}
 			entry := GlobalUndoLog.Peek(fixture.sourceID)
-			for cycle := 0; cycle < 2; cycle++ {
+			for range 2 {
 				deletedDest := readAttributeViewItemsTest(t, dest.ID)
 				if got := av.GetValue(deletedDest.KeyValues, backID, targetID).Relation.BlockIDs; !slices.Equal(got, []string{keptID}) {
 					t.Fatalf("delete did not clear back relations: %v", got)

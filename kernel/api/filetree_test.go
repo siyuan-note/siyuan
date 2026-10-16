@@ -348,7 +348,7 @@ func TestAuthFilePublishAccessThrottlesBruteForce(t *testing.T) {
 	defer util.AuthThrottleReset(attackerIP)
 
 	// 前 5 次失败为普通失败响应，第 6 次失败触发锁定但本次仍返回普通响应（与 util.AuthThrottleFail 语义一致）
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		recorder := post(passwordWrong)
 		if recorder.Code != http.StatusOK {
 			t.Fatalf("attempt %d expected %d, got %d", i+1, http.StatusOK, recorder.Code)

@@ -10,6 +10,7 @@ package agent
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"path/filepath"
 	"testing"
@@ -311,9 +312,7 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 		t.Fatalf("runtime token metadata was not restored: %#v", recovered)
 	}
 	wrongCommit := map[string]any{}
-	for key, value := range recovered {
-		wrongCommit[key] = value
-	}
+	maps.Copy(wrongCommit, recovered)
 	wrongCommit["expectedRevision"] = int64(1)
 	wrongCommit["commitTurnID"] = "20260715120009-abcdefg"
 	if revision, _, err := SaveSessionState(marshalSession(t, wrongCommit)); !errors.Is(err, ErrSessionConflict) || revision != 1 {
@@ -363,9 +362,7 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 		}
 	}
 	repeatedCommit := map[string]any{}
-	for key, value := range committed {
-		repeatedCommit[key] = value
-	}
+	maps.Copy(repeatedCommit, committed)
 	repeatedCommit["entries"].([]any)[1].(map[string]any)["content"] = "tampered repeated commit"
 	// 模拟提交已落盘但响应丢失：客户端会携带旧修订号原样重试。
 	repeatedCommit["expectedRevision"] = int64(1)

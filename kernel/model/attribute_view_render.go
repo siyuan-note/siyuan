@@ -1153,7 +1153,7 @@ func findAttributeViewTargetIndex(targetItemID string, length int, getID func(in
 	if targetItemID == "" {
 		return -1
 	}
-	for i := 0; i < length; i++ {
+	for i := range length {
 		if getID(i) == targetItemID {
 			return i
 		}

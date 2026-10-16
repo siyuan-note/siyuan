@@ -20,6 +20,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -38,14 +39,14 @@ type oauthCredential struct {
 	RedirectURL         string    `json:"redirectUrl,omitempty"`
 	ClientID            string    `json:"clientId"`
 	ClientSecret        string    `json:"clientSecret,omitempty"`
-	ClientSecretExpiry  time.Time `json:"clientSecretExpiry,omitempty"`
+	ClientSecretExpiry  time.Time `json:"clientSecretExpiry"`
 	TokenEndpoint       string    `json:"tokenEndpoint"`
 	RevocationEndpoint  string    `json:"revocationEndpoint,omitempty"`
 	TokenAuthMethod     string    `json:"tokenAuthMethod,omitempty"`
 	AccessToken         string    `json:"accessToken"`
 	RefreshToken        string    `json:"refreshToken,omitempty"`
 	TokenType           string    `json:"tokenType,omitempty"`
-	Expiry              time.Time `json:"expiry,omitempty"`
+	Expiry              time.Time `json:"expiry"`
 	Scopes              []string  `json:"scopes,omitempty"`
 	Rejected            bool      `json:"rejected,omitempty"`
 }
@@ -118,8 +119,8 @@ func getOAuthCredential(serverID, endpoint string) (oauthCredential, bool) {
 	oauthCredentialStore.Lock()
 	defer oauthCredentialStore.Unlock()
 	loadOAuthCredentialsLocked()
-	for i := len(oauthCredentialStore.credentials) - 1; i >= 0; i-- {
-		credential := oauthCredentialStore.credentials[i]
+	for _, credential := range slices.Backward(oauthCredentialStore.credentials) {
+
 		credentialEndpoint := credential.Endpoint
 		if credentialEndpoint == "" {
 			credentialEndpoint = credential.Resource

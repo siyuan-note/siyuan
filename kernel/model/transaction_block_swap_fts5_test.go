@@ -187,7 +187,7 @@ func testBlockSwapTransactionUndoRedo(t *testing.T, kind string, sameTree, child
 	if err != nil || strings.Contains(string(data), "Secret definition") {
 		t.Fatalf("undo snapshots leaked into response: %s, %v", data, err)
 	}
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		replay := &Transaction{DoOperations: entry.UndoOperationsForReplay()}
 		replay.MarkReplay()
 		if err = PerformTxSync(replay); err != nil {

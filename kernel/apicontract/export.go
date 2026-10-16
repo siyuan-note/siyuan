@@ -222,7 +222,7 @@ func decodeExportFields(value reflect.Value, fields map[string]json.RawMessage) 
 			}
 			continue
 		}
-		name := strings.Split(field.Tag.Get("json"), ",")[0]
+		name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
 		opts := "," + field.Tag.Get("api") + ","
 		has := func(option string) bool { return strings.Contains(opts, ","+option+",") }
 		if has("filterstrings") {

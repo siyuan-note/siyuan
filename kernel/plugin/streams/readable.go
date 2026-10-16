@@ -89,9 +89,9 @@ type readRequest struct {
 }
 
 var (
-	readableStateType      = reflect.TypeOf((*readableState)(nil))
-	readableControllerType = reflect.TypeOf((*readableController)(nil))
-	readableReaderType     = reflect.TypeOf((*readableReaderState)(nil))
+	readableStateType      = reflect.TypeFor[*readableState]()
+	readableControllerType = reflect.TypeFor[*readableController]()
+	readableReaderType     = reflect.TypeFor[*readableReaderState]()
 )
 
 // readableStateOf 取出 ReadableStream 的内部状态，只接受本包创建的对象。

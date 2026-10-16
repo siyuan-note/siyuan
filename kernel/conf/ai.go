@@ -677,7 +677,7 @@ func (ai *AI) Normalize() {
 	serverIDs := map[string]bool{}
 	for i := range ai.MCP.Servers {
 		if ai.MCP.Servers[i].ID == "" || serverIDs[ai.MCP.Servers[i].ID] {
-			data := []byte(fmt.Sprintf("mcp:%d:%s:%s", i, ai.MCP.Servers[i].Name, ai.MCP.Servers[i].Type))
+			data := fmt.Appendf(nil, "mcp:%d:%s:%s", i, ai.MCP.Servers[i].Name, ai.MCP.Servers[i].Type)
 			ai.MCP.Servers[i].ID = uuid.NewSHA1(uuid.NameSpaceOID, data).String()
 		}
 		serverIDs[ai.MCP.Servers[i].ID] = true

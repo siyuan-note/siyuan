@@ -141,7 +141,7 @@ func (b *Bundle) TypeScript(documentation map[string]string) []byte {
 			}
 			if text := documentation[endpoint.Handler]; text != "" {
 				output.WriteString("    /**\n")
-				for _, line := range strings.Split(strings.ReplaceAll(text, "*/", "*\\/"), "\n") {
+				for line := range strings.SplitSeq(strings.ReplaceAll(text, "*/", "*\\/"), "\n") {
 					if line == "" {
 						output.WriteString("     *\n")
 					} else {

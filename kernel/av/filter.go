@@ -18,6 +18,7 @@ package av
 
 import (
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -749,12 +750,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return true
 				}
 
-				for _, c := range value.Rollup.Contents {
-					if isRollupStoredValueEmpty(c) {
-						return true
-					}
-				}
-				return false
+				return slices.ContainsFunc(value.Rollup.Contents, isRollupStoredValueEmpty)
 			} else if FilterOperatorIsNotEmpty == filter.Operator {
 				if 1 > len(value.Rollup.Contents) {
 					return false
@@ -806,12 +802,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return false
 				}
 
-				for _, c := range value.Rollup.Contents {
-					if isRollupStoredValueEmpty(c) {
-						return false
-					}
-				}
-				return true
+				return !slices.ContainsFunc(value.Rollup.Contents, isRollupStoredValueEmpty)
 			}
 
 			if 1 > len(filter.Value.Rollup.Contents) {
@@ -838,12 +829,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return true
 				}
 
-				for _, c := range value.Rollup.Contents {
-					if isRollupStoredValueEmpty(c) {
-						return false
-					}
-				}
-				return true
+				return !slices.ContainsFunc(value.Rollup.Contents, isRollupStoredValueEmpty)
 			} else if FilterOperatorIsNotEmpty == filter.Operator {
 				if 1 > len(value.Rollup.Contents) {
 					return true
@@ -883,10 +869,8 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 		if nil != value.Relation {
 			for _, blockID := range value.Relation.BlockIDs {
-				for _, filterBlockID := range filter.Value.Relation.BlockIDs {
-					if blockID == filterBlockID {
-						return FilterOperatorContainsAnyItem == filter.Operator
-					}
+				if slices.Contains(filter.Value.Relation.BlockIDs, blockID) {
+					return FilterOperatorContainsAnyItem == filter.Operator
 				}
 			}
 		}

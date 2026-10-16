@@ -102,7 +102,7 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 	}
 	tags := map[string]bool{}
 	if node.Type == ast.NodeDocument {
-		for _, tag := range strings.Split(node.IALAttr("tags"), ",") {
+		for tag := range strings.SplitSeq(node.IALAttr("tags"), ",") {
 			tags[strings.Trim(strings.TrimSpace(tag), "#")] = true
 		}
 	}
@@ -348,8 +348,7 @@ func (tx *Transaction) runAttributeViewCollections() error {
 		for _, rule := range view.Automations.Rules {
 			if rule != nil && rule.Enabled && rule.Trigger == "block" {
 				validationErr := tx.validateBlockCollectionRule(view, rule, boxID)
-				var unavailable *automationUnavailableReference
-				if errors.As(validationErr, &unavailable) {
+				if unavailable, ok := errors.AsType[*automationUnavailableReference](validationErr); ok {
 					if err = tx.rememberAutomationView(view, ""); err != nil {
 						return err
 					}

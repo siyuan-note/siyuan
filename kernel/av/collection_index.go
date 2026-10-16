@@ -2,6 +2,7 @@ package av
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -86,9 +87,7 @@ func BlockCollectionViewIDsInBox(boxID string) ([]string, error) {
 			collectionIndex.Unlock()
 			return BlockCollectionViewIDsInBox(boxID)
 		}
-		for id, enabled := range collectionIndex.boxes[boxID] {
-			ids[id] = enabled
-		}
+		maps.Copy(ids, collectionIndex.boxes[boxID])
 		collectionIndex.boxes[boxID], collectionIndex.loaded[boxID] = ids, true
 		collectionIndex.Unlock()
 	}

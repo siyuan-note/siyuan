@@ -9,7 +9,7 @@ import (
 
 func TestFileQueryLimits(t *testing.T) {
 	workspace := setupProbeWorkspace(t)
-	for i := 0; i < 205; i++ {
+	for i := range 205 {
 		writeProbeFile(t, filepath.Join(workspace, "data", "query", fmt.Sprintf("%03d.txt", i)), "match\n")
 	}
 	writeProbeFile(t, filepath.Join(workspace, "data", "lines.txt"), strings.Repeat("match\n", 205))

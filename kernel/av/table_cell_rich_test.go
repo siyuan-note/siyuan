@@ -17,7 +17,7 @@ func TestTableCellRichCodeSettings(t *testing.T) {
 			t.Run(attribute+"/"+value, func(t *testing.T) {
 				source := "before\n\n```go\na | b\n```\n{: id=\"20260921000000-code001\" " + attribute + "=\"" + value + "\"}\n\nafter"
 				rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
-				for pass := 0; pass < 3; pass++ {
+				for pass := range 3 {
 					tree, err := ParseTableCellRich(rich)
 					if err != nil {
 						t.Fatal(err)
@@ -75,7 +75,7 @@ func TestTableCellRichCustomInlineStyle(t *testing.T) {
 	} {
 		source := `before <span data-type="custom_symble_strong_CJK_rectangle_yin" style="` + style + `">after</span>`
 		rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
-		for pass := 0; pass < 3; pass++ {
+		for pass := range 3 {
 			tree, err := ParseTableCellRich(rich)
 			if err != nil {
 				t.Fatal(err)
@@ -125,7 +125,7 @@ func TestTableCellRichLocalLinks(t *testing.T) {
 		t.Run(target, func(t *testing.T) {
 			source := `<span data-type="a strong" data-href="` + target + `" data-title="title">anchor</span>`
 			rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
-			for pass := 0; pass < 3; pass++ {
+			for pass := range 3 {
 				tree, err := ParseTableCellRich(rich)
 				if err != nil {
 					t.Fatal(err)

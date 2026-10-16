@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -75,7 +76,6 @@ Child: .action{renderDocRef "path" "/资料"}`)
 		t.Fatalf("unexpected document tree plan: %+v", summary)
 	}
 	for _, node := range summary.Nodes {
-		node := node
 		t.Cleanup(func() {
 			cache.RemoveTreeData(node.ID)
 			cache.RemoveDocIAL(node.path)
@@ -177,7 +177,6 @@ func TestTemplateDocTreeTransactionFailureCleansCreatedDocuments(t *testing.T) {
 	plan := value.(*templateDocTreePlan)
 	plan.trees[len(plan.trees)-1].Path = "/\x00/invalid.sy"
 	for _, node := range summary.Nodes {
-		node := node
 		t.Cleanup(func() {
 			cache.RemoveTreeData(node.ID)
 			cache.RemoveDocIAL(node.path)
@@ -416,7 +415,6 @@ func cleanupTemplateDocTreeTestNodes(t *testing.T, fixture *fileOperationTestFix
 	summary *TemplateDocTreePlanSummary) {
 	t.Helper()
 	for _, node := range summary.Nodes {
-		node := node
 		t.Cleanup(func() {
 			cache.RemoveTreeData(node.ID)
 			cache.RemoveDocIAL(node.path)
@@ -529,10 +527,8 @@ func assertTemplateDocTreeApplied(t *testing.T, fixture *fileOperationTestFixtur
 
 func assertTemplateDocTreeRef(t *testing.T, tree *parse.Tree, defID, source string) {
 	t.Helper()
-	for _, id := range getRefDefIDs(tree.Root) {
-		if defID == id {
-			return
-		}
+	if slices.Contains(getRefDefIDs(tree.Root), defID) {
+		return
 	}
 	t.Fatalf("%s block reference to planned document [%s] was degraded", source, defID)
 }

@@ -29,14 +29,14 @@ type CapabilityManifest struct {
 	OwnerName   string                     `json:"ownerName,omitempty"`
 	Runtime     string                     `json:"runtime"`
 	AgentOnly   bool                       `json:"agentOnly,omitempty"`
-	Effects     ToolEffects                `json:"effects,omitempty"`
+	Effects     ToolEffects                `json:"effects"`
 	Available   bool                       `json:"available"`
 	Actions     []CapabilityActionManifest `json:"actions,omitempty"`
 }
 
 type CapabilityActionManifest struct {
 	Name    string      `json:"name"`
-	Effects ToolEffects `json:"effects,omitempty"`
+	Effects ToolEffects `json:"effects"`
 }
 
 // CapabilityIDForTool 返回工具的稳定能力 ID，并为未显式声明 ID 的动态工具构造回退值。

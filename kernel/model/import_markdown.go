@@ -67,7 +67,7 @@ func (spool *markdownImportSpool) close() {
 }
 
 func markdownImportAAD(index int) []byte {
-	return []byte(fmt.Sprintf("siyuan/markdown-import/v1/%d", index))
+	return fmt.Appendf(nil, "siyuan/markdown-import/v1/%d", index)
 }
 
 func (spool *markdownImportSpool) add(tree *parse.Tree) error {

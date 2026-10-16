@@ -155,7 +155,7 @@ func TestParseToolArgsRejectsInvalidJSON(t *testing.T) {
 
 func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
 	var tracker doomLoopTracker
-	for i := 0; i < doomLoopStopThreshold; i++ {
+	for range doomLoopStopThreshold {
 		tracker.record("question", "", map[string]any{}, true)
 	}
 	if tracker.count != doomLoopStopThreshold || tracker.prevName != "question" {

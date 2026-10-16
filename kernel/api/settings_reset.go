@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 	"time"
 
@@ -98,13 +99,7 @@ var resetSettings = contractHandler(apicontract.ResetSettings,
 		defer settingMutationMu.Unlock()
 		// 等待期间新接入的客户端尚未保存输入，此次操作应取消并由用户重试。
 		for _, current := range util.SessionsByType("main") {
-			prepared := false
-			for _, session := range sessions {
-				if current == session {
-					prepared = true
-					break
-				}
-			}
+			prepared := slices.Contains(sessions, current)
 			if !prepared {
 				return apicontract.Failure[apicontract.Null](-1, util.I18nTerm(model.Conf.Lang, "settingsPendingSaveError"))
 			}

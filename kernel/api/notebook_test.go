@@ -131,7 +131,7 @@ func writeNotebookSortFixture(t *testing.T, boxID string, childCount, boxIndex i
 
 	writeNotebookSortDoc(t, boxID, boxID)
 	childIDs := make([]string, 0, childCount)
-	for i := 0; i < childCount; i++ {
+	for i := range childCount {
 		childID := fmt.Sprintf("2026081201%02d%02d-doc%04d", boxIndex, i, boxIndex*100+i)
 		writeNotebookSortDoc(t, boxID, childID)
 		childIDs = append(childIDs, childID)

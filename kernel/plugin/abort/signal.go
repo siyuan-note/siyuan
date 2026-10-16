@@ -31,7 +31,7 @@ import (
 // 对动态对象返回宿主类型，都不会访问任何属性；而 Object.Export() 对普通对象会遍历其所有自有可枚举属性并调用
 // 它们的访问器：当接收者是 AbortSignal.prototype 本身时（aborted 等访问器就定义在它自己身上），直接 Export()
 // 会再次进入这些访问器而无限递归，因此必须先用 ExportType() 过滤。
-var signalStateType = reflect.TypeOf((*SignalState)(nil))
+var signalStateType = reflect.TypeFor[*SignalState]()
 
 // signalListener 是 addEventListener("abort", ...) 登记的一个监听器。
 type signalListener struct {

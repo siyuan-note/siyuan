@@ -32,9 +32,9 @@ import (
 var (
 	// blobStateType 用于在 Object.Export() 前先以 Object.ExportType() 做品牌判定，原因见 kernel/plugin/abort 中
 	// signalStateType 的注释。
-	blobStateType = reflect.TypeOf((*blobState)(nil))
+	blobStateType = reflect.TypeFor[*blobState]()
 	// arrayBufferExportType 是 ArrayBuffer 对象的导出类型，用于在不调用 Export() 的前提下识别 ArrayBuffer。
-	arrayBufferExportType = reflect.TypeOf(goja.ArrayBuffer{})
+	arrayBufferExportType = reflect.TypeFor[goja.ArrayBuffer]()
 )
 
 var (

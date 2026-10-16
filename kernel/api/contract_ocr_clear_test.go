@@ -53,7 +53,7 @@ func TestAPIContractOCRClearDuringDownload(t *testing.T) {
 	const path = "assets/plain.bin"
 	defer util.RemoveAssetText(path)
 	cleared := false
-	if err := eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(_ map[string]interface{}, _ int) {
+	if err := eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(_ map[string]any, _ int) {
 		if cleared {
 			return
 		}

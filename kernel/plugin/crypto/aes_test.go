@@ -84,7 +84,7 @@ func TestAESGCMTagLength(t *testing.T) {
 
 	// 96 到 128 位的标签长度按请求长度生效。
 	for _, tagLength := range []int{96, 104, 112, 120, 128} {
-		alg := Algorithm{Name: AlgAESGCM, IV: iv, TagLength: intPtr(tagLength)}
+		alg := Algorithm{Name: AlgAESGCM, IV: iv, TagLength: new(tagLength)}
 		ciphertext, err := Encrypt(alg, key, []byte("x"))
 		if err != nil {
 			t.Fatalf("tagLength %d: %v", tagLength, err)
@@ -96,14 +96,14 @@ func TestAESGCMTagLength(t *testing.T) {
 
 	// Go 不支持 32、64 位标签，按设计返回 NotSupportedError。
 	for _, tagLength := range []int{32, 64} {
-		alg := Algorithm{Name: AlgAESGCM, IV: iv, TagLength: intPtr(tagLength)}
+		alg := Algorithm{Name: AlgAESGCM, IV: iv, TagLength: new(tagLength)}
 		if _, err := Encrypt(alg, key, []byte("x")); errorName(t, err) != ErrNameNotSupported {
 			t.Fatalf("tagLength %d: error = %v, want NotSupportedError", tagLength, err)
 		}
 	}
 
 	// 其他取值不符合规范，返回 OperationError。
-	alg := Algorithm{Name: AlgAESGCM, IV: iv, TagLength: intPtr(100)}
+	alg := Algorithm{Name: AlgAESGCM, IV: iv, TagLength: new(100)}
 	if _, err := Encrypt(alg, key, []byte("x")); errorName(t, err) != ErrNameOperation {
 		t.Fatalf("error = %v, want OperationError", err)
 	}
@@ -125,7 +125,7 @@ func TestAESGCMNonStandardIVRequiresFullTag(t *testing.T) {
 		t.Fatalf("plaintext = %q, want %q", plaintext, "data")
 	}
 
-	alg.TagLength = intPtr(96)
+	alg.TagLength = new(96)
 	if _, err = Encrypt(alg, key, []byte("data")); errorName(t, err) != ErrNameNotSupported {
 		t.Fatalf("error = %v, want NotSupportedError", err)
 	}
@@ -211,7 +211,7 @@ func TestAESCTRMatchesStandardLibraryWithoutWrap(t *testing.T) {
 	data := bytes.Repeat([]byte{0xab}, 64)
 
 	// 计数器从 0 开始且不回绕时，结果与标准库一致。
-	alg := Algorithm{Name: AlgAESCTR, Counter: counter, Length: intPtr(64)}
+	alg := Algorithm{Name: AlgAESCTR, Counter: counter, Length: new(64)}
 	got, err := Encrypt(alg, key, data)
 	if err != nil {
 		t.Fatal(err)
@@ -243,7 +243,7 @@ func TestAESCTRWrapsWithinCounterBits(t *testing.T) {
 	counter[aes.BlockSize-1] = 0x03
 	data := bytes.Repeat([]byte{0}, 4*aes.BlockSize)
 
-	alg := Algorithm{Name: AlgAESCTR, Counter: counter, Length: intPtr(2)}
+	alg := Algorithm{Name: AlgAESCTR, Counter: counter, Length: new(2)}
 	got, err := Encrypt(alg, key, data)
 	if err != nil {
 		t.Fatal(err)
@@ -274,7 +274,7 @@ func TestAESCTRWrapsWithinCounterBits(t *testing.T) {
 
 func TestAESCTRRejectsTooSmallCounterSpace(t *testing.T) {
 	key := newSecretKey(AlgAESCTR, "", bytes.Repeat([]byte{6}, 16), UsageEncrypt, UsageDecrypt)
-	alg := Algorithm{Name: AlgAESCTR, Counter: make([]byte, aes.BlockSize), Length: intPtr(1)}
+	alg := Algorithm{Name: AlgAESCTR, Counter: make([]byte, aes.BlockSize), Length: new(1)}
 
 	// 计数空间为 2 个分组，3 个分组的数据会导致计数器重复。
 	data := bytes.Repeat([]byte{0}, 3*aes.BlockSize)
@@ -287,7 +287,7 @@ func TestAESCTRRejectsInvalidParameters(t *testing.T) {
 	key := newSecretKey(AlgAESCTR, "", bytes.Repeat([]byte{6}, 16), UsageEncrypt, UsageDecrypt)
 
 	// counter 必须是 16 字节。
-	short := Algorithm{Name: AlgAESCTR, Counter: make([]byte, 8), Length: intPtr(64)}
+	short := Algorithm{Name: AlgAESCTR, Counter: make([]byte, 8), Length: new(64)}
 	if _, err := Encrypt(short, key, []byte("data")); errorName(t, err) != ErrNameOperation {
 		t.Fatalf("error = %v, want OperationError", err)
 	}
@@ -300,7 +300,7 @@ func TestAESCTRRejectsInvalidParameters(t *testing.T) {
 
 	// length 超出 1 到 128 的范围。
 	for _, length := range []int{0, 129} {
-		alg := Algorithm{Name: AlgAESCTR, Counter: make([]byte, aes.BlockSize), Length: intPtr(length)}
+		alg := Algorithm{Name: AlgAESCTR, Counter: make([]byte, aes.BlockSize), Length: new(length)}
 		if _, err := Encrypt(alg, key, []byte("data")); errorName(t, err) != ErrNameOperation {
 			t.Fatalf("length %d: error = %v, want OperationError", length, err)
 		}

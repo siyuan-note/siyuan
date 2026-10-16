@@ -37,7 +37,7 @@ func TestBlockCacheReplacementRemainsInvalidatable(t *testing.T) {
 	cacheDisabled = false
 	ClearCache()
 	t.Cleanup(func() { ClearCache(); cacheDisabled = previousDisabled })
-	for i := 0; i < 64; i++ {
+	for i := range 64 {
 		putBlockCache(&Block{ID: "replaced", Content: strings.Repeat("x", i+1)})
 	}
 	blockCache.Wait()

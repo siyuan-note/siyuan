@@ -51,9 +51,9 @@ func TestNativeEmojiCacheReplacementAndConcurrentReads(t *testing.T) {
 	}
 	write(`[{"items":[{"unicode":"new"}]}]`)
 	var group sync.WaitGroup
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		group.Go(func() {
-			for j := 0; j < 50; j++ {
+			for range 50 {
 				InitEmojiChars()
 				if !IsNativeEmoji("new") || IsNativeEmoji("old") {
 					t.Error("concurrent refresh changed emoji membership")
@@ -123,16 +123,16 @@ func TestRhyCacheSnapshotsAndConcurrentRefresh(t *testing.T) {
 	fail.Store(false)
 	var group sync.WaitGroup
 	group.Go(func() {
-		for i := 0; i < 25; i++ {
+		for range 25 {
 			if _, err := getRhyResult0(ctx, server.URL); err != nil {
 				t.Error(err)
 				return
 			}
 		}
 	})
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		group.Go(func() {
-			for j := 0; j < 100; j++ {
+			for range 100 {
 				result, err := GetRhyResult(ctx, false)
 				if err != nil || !strings.HasPrefix(result["bazaar"].(string), "hash-") {
 					t.Errorf("invalid cached result: %#v err=%v", result, err)

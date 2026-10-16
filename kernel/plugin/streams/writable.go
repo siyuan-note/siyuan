@@ -114,9 +114,9 @@ type writableWriterState struct {
 }
 
 var (
-	writableStateType      = reflect.TypeOf((*writableState)(nil))
-	writableControllerType = reflect.TypeOf((*writableController)(nil))
-	writableWriterType     = reflect.TypeOf((*writableWriterState)(nil))
+	writableStateType      = reflect.TypeFor[*writableState]()
+	writableControllerType = reflect.TypeFor[*writableController]()
+	writableWriterType     = reflect.TypeFor[*writableWriterState]()
 )
 
 func writableStateOf(value goja.Value) (*writableState, bool) {

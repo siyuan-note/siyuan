@@ -34,13 +34,12 @@ func textFileError(code, message string) error {
 }
 
 func textFileBeforeCommitError(err error) error {
-	var failure *TextFileError
-	if errors.As(err, &failure) {
+	if failure, ok := errors.AsType[*TextFileError](err); ok {
 		return failure
 	}
 	for _, code := range []string{"revision_conflict", "invalid_path", "unsupported_encoding", "too_large", "backup_failed", "result_unknown"} {
-		if strings.HasPrefix(err.Error(), code+":") {
-			return textFileError(code, strings.TrimSpace(strings.TrimPrefix(err.Error(), code+":")))
+		if after, ok := strings.CutPrefix(err.Error(), code+":"); ok {
+			return textFileError(code, strings.TrimSpace(after))
 		}
 	}
 	return textFileError("backup_failed", err.Error())

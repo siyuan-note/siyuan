@@ -210,7 +210,7 @@ func TestGlobalBacklinkSnapshotBounds(t *testing.T) {
 	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
 	query := GlobalBacklinkQuery{ID: "id", Sort: 1}
 	first := ""
-	for i := 0; i < globalBacklinkSnapshotLimit+1; i++ {
+	for i := range globalBacklinkSnapshotLimit + 1 {
 		token, _, err := globalBacklinkSnapshotPut(query, []*GlobalBacklinkItem{{ID: fmt.Sprint(i)}})
 		if err != nil {
 			t.Fatal(err)
@@ -254,7 +254,7 @@ func TestGlobalBacklinkLargeDataset(t *testing.T) {
 		t.Fatal(err)
 	}
 	sql.IndexTreeQueue(definition)
-	for doc := 0; doc < documents; doc++ {
+	for doc := range documents {
 		tree := addFileOperationTestDoc(t, fixture, fmt.Sprintf("20260923000000-d%06d", doc), fmt.Sprintf("Source%d", doc), false)
 		for tree.Root.FirstChild != nil {
 			tree.Root.FirstChild.Unlink()

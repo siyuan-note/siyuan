@@ -80,7 +80,7 @@ func TestBookmarkIndexPreservesBlockFieldsAndLabels(t *testing.T) {
 		t.Fatal(err)
 	}
 	rows.Close()
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		if err = ensureBookmarkAttributesIndex(database); err != nil {
 			t.Fatal(err)
 		}

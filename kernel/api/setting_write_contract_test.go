@@ -108,19 +108,20 @@ func TestSettingWriteEndpointsAreDeclared(t *testing.T) {
 				body = funcs[ident.Name]
 			}
 			// 展开同文件中被直接调用的辅助函数一层
-			expanded := body
+			var expanded strings.Builder
+			expanded.WriteString(body)
 			for fn, fnBody := range funcs {
 				if strings.Contains(body, fn+"(") {
-					expanded += fnBody
+					expanded.WriteString(fnBody)
 				}
 			}
 			path := paths[selector.Sel.Name]
 			definition := definitions[path]
-			if directSettingWritePattern.MatchString(expanded) && !definition.Setting.Declared() {
+			if directSettingWritePattern.MatchString(expanded.String()) && !definition.Setting.Declared() {
 				t.Errorf("%s (%s) writes configuration directly but declares no setting namespace", path, name)
 			}
 			if definition.Setting.Declared() && definition.Setting.Mode != apicontract.SettingSelfManaged &&
-				strings.Contains(expanded, "settingMutationMu.Lock()") {
+				strings.Contains(expanded.String(), "settingMutationMu.Lock()") {
 				t.Errorf("%s locks the setting mutex itself; declare SettingSelfManaged instead", path)
 			}
 			return true

@@ -124,7 +124,7 @@ func TestListConversionFrontendTransactions(t *testing.T) {
 				}
 				assertAttributeViewFieldsTest(t, view, readAttributeViewItemsTest(t, view.ID))
 			}
-			for cycle := 0; cycle < 2; cycle++ {
+			for range 2 {
 				check(testCase.After)
 				replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 				check(testCase.Before)
@@ -217,7 +217,7 @@ func TestCancelListPreservesDatabaseFields(t *testing.T) {
 					}
 				}
 			}
-			for cycle := 0; cycle < 3; cycle++ {
+			for range 3 {
 				check(false)
 				replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 				check(true)

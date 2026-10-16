@@ -61,7 +61,7 @@ func TestHTML2BlockDOMQuotedFontFamily(t *testing.T) {
 				t.Fatalf("conversion failed: %s, %v", recorder.Body.String(), err)
 			}
 			engine := util.NewLute()
-			for round := 0; round < 3; round++ {
+			for round := range 3 {
 				if strings.Contains(response.Data, "{: style=") {
 					t.Fatalf("round %d leaked attributes: %s", round, response.Data)
 				}

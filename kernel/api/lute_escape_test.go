@@ -83,7 +83,7 @@ func TestHTML2BlockDOMContractEscapedText(t *testing.T) {
 						t.Fatalf("conversion failed: %s, %v", recorder.Body.String(), err)
 					}
 					engine := util.NewLute()
-					for round := 0; round < 3; round++ {
+					for round := range 3 {
 						doc, parseErr := goquery.NewDocumentFromReader(strings.NewReader(response.Data))
 						if parseErr != nil {
 							t.Fatal(parseErr)

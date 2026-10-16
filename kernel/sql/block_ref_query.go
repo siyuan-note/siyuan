@@ -123,10 +123,7 @@ func ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs [
 	}
 	exist := func(column string, ids []string) (bool, error) {
 		for start := 0; start < len(ids); start += batchSize {
-			end := start + batchSize
-			if len(ids) < end {
-				end = len(ids)
-			}
+			end := min(len(ids), start+batchSize)
 			batch := ids[start:end]
 			placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
 			args := make([]any, 0, len(batch))
@@ -197,10 +194,7 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 	ret = map[string][]string{}
 	queryByColumn := func(column string, ids []string) error {
 		for start := 0; start < len(ids); start += batchSize {
-			end := start + batchSize
-			if len(ids) < end {
-				end = len(ids)
-			}
+			end := min(len(ids), start+batchSize)
 			batch := ids[start:end]
 			placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
 			args := make([]any, 0, len(batch))

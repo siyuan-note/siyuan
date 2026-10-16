@@ -25,7 +25,7 @@ func TestLegacyMapLayoutPreservesStorageAsTable(t *testing.T) {
 		}
 	}
 	locationBefore := *database.KeyValues[0].Values[0].Location
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		data, marshalErr := json.Marshal(database)
 		if marshalErr != nil {
 			t.Fatal(marshalErr)

@@ -89,8 +89,8 @@ func init() {
 			if restricted != nil {
 				allowed := map[string]bool{}
 				typ := reflect.TypeOf(restricted)
-				for i := 0; i < typ.NumField(); i++ {
-					allowed[strings.Split(typ.Field(i).Tag.Get("json"), ",")[0]] = true
+				for field := range typ.Fields() {
+					allowed[strings.Split(field.Tag.Get("json"), ",")[0]] = true
 				}
 				for field := range object {
 					if !allowed[field] {

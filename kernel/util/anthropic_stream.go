@@ -53,8 +53,8 @@ func (s *anthropicStream) readEvent() ([]byte, error) {
 		if line == "" {
 			return bytes.TrimSuffix(data.Bytes(), []byte("\n")), nil
 		}
-		if strings.HasPrefix(line, "data:") {
-			data.WriteString(strings.TrimPrefix(strings.TrimPrefix(line, "data:"), " "))
+		if after, ok := strings.CutPrefix(line, "data:"); ok {
+			data.WriteString(strings.TrimPrefix(after, " "))
 			data.WriteByte('\n')
 			if data.Len() > 32*1024*1024 {
 				return nil, errors.New("Anthropic stream event is too large")

@@ -127,7 +127,7 @@ func resolveEncryptedBoxLeases(args map[string]any) []string {
 	addValue := func(value any, add func(string)) {
 		switch typed := value.(type) {
 		case string:
-			for _, item := range strings.Split(typed, ",") {
+			for item := range strings.SplitSeq(typed, ",") {
 				add(item)
 			}
 		case []string:
@@ -154,7 +154,7 @@ func resolveEncryptedBoxLeases(args map[string]any) []string {
 	}
 	for _, key := range []string{"path", "historyPath"} {
 		pathValue, _ := args[key].(string)
-		for _, segment := range strings.Split(filepath.ToSlash(pathValue), "/") {
+		for segment := range strings.SplitSeq(filepath.ToSlash(pathValue), "/") {
 			addBoxID(segment)
 		}
 	}

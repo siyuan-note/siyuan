@@ -291,7 +291,7 @@ func isReleaseAllowed(channel, version string) bool {
 }
 
 func prereleaseChannelLabel(prerelease string) string {
-	identifier := strings.SplitN(prerelease, ".", 2)[0]
+	identifier, _, _ := strings.Cut(prerelease, ".")
 	for _, channel := range []string{"alpha", "beta", "rc"} {
 		if channel == identifier {
 			return channel
@@ -415,7 +415,7 @@ func getGitHubManifestChecksum(ctx context.Context, release *githubRelease, pkgN
 }
 
 func parseChecksumManifest(manifest, pkgName string) string {
-	for _, line := range strings.Split(manifest, "\n") {
+	for line := range strings.SplitSeq(manifest, "\n") {
 		fields := strings.Fields(line)
 		if 2 > len(fields) {
 			continue

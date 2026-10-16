@@ -57,8 +57,8 @@ type transformController struct {
 }
 
 var (
-	transformStateType      = reflect.TypeOf((*transformState)(nil))
-	transformControllerType = reflect.TypeOf((*transformController)(nil))
+	transformStateType      = reflect.TypeFor[*transformState]()
+	transformControllerType = reflect.TypeFor[*transformController]()
 )
 
 func transformStateOf(value goja.Value) (*transformState, bool) {

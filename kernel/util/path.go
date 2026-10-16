@@ -556,10 +556,10 @@ func localAdminShareDrive(p string) (drive string, prefixLen int) {
 
 	host := rest[:sep]
 	rest = rest[sep+1:]
-	shareSep := strings.Index(rest, `\`)
+	before, _, ok := strings.Cut(rest, `\`)
 	share := rest
-	if 0 <= shareSep {
-		share = rest[:shareSep]
+	if ok {
+		share = before
 	}
 	if len(share) != 2 || share[1] != '$' || !isASCIILetter(share[0]) {
 		return "", 0

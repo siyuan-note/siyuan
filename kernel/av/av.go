@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -657,7 +658,7 @@ func loadAttributeViewSearchInfoInBox(avID, avJSONPath, avBoxID string) (ret *At
 	}
 	defer release()
 
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		if cached, ok := cache.GetAVSearchDataInBox[*AttributeViewSearchInfo](avID, avBoxID); ok {
 			return cached, nil
 		}
@@ -1066,8 +1067,8 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 
 	// 清理渲染回填值
 	for _, kv := range av.KeyValues {
-		for i := len(kv.Values) - 1; i >= 0; i-- {
-			if kv.Values[i].IsRenderAutoFill {
+		for i, v := range slices.Backward(kv.Values) {
+			if v.IsRenderAutoFill {
 				kv.Values = append(kv.Values[:i], kv.Values[i+1:]...)
 			}
 		}

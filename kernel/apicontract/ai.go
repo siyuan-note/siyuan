@@ -160,14 +160,14 @@ type AICapabilityManifest struct {
 	OwnerName   string               `json:"ownerName,omitempty"`
 	Runtime     string               `json:"runtime"`
 	AgentOnly   bool                 `json:"agentOnly,omitempty"`
-	Effects     AIToolEffects        `json:"effects,omitempty"`
+	Effects     AIToolEffects        `json:"effects"`
 	Available   bool                 `json:"available"`
 	Actions     []AICapabilityAction `json:"actions,omitempty"`
 }
 
 type AICapabilityAction struct {
 	Name    string        `json:"name"`
-	Effects AIToolEffects `json:"effects,omitempty"`
+	Effects AIToolEffects `json:"effects"`
 }
 
 type AIMessageRequest struct {

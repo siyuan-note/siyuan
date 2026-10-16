@@ -80,7 +80,7 @@ func IsForbiddenDataRelPath(rel string) bool {
 	// 统一为斜杠并清理（path.Clean 使用斜杠语义，避免 Windows 上分隔符差异）
 	rel = path.Clean("/" + filepath.ToSlash(rel))
 	protectedRel := pluginDevelopmentLexicalPath(rel)
-	for _, component := range strings.Split(protectedRel, "/") {
+	for component := range strings.SplitSeq(protectedRel, "/") {
 		if strings.HasPrefix(component, ".siyuan-package-install-") {
 			return true
 		}

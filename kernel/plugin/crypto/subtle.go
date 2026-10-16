@@ -345,7 +345,7 @@ func derivedKeyLength(derived Algorithm) (*int, error) {
 		if err != nil {
 			return nil, err
 		}
-		return intPtr(h.New().BlockSize() * 8), nil
+		return new(h.New().BlockSize() * 8), nil
 	default:
 		return nil, notSupportedError("%s keys cannot be derived", derived.Name)
 	}

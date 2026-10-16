@@ -21,7 +21,7 @@ func normalizedRichCacheFixture(t testing.TB) (string, []byte) {
 	view := &AttributeView{ID: id, Spec: RichTextSpec, Name: "Original", KeyValues: []*KeyValues{{
 		Key: &Key{ID: "text", Type: KeyTypeText},
 	}}}
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		view.KeyValues[0].Values = append(view.KeyValues[0].Values, &Value{Type: KeyTypeText, Text: &ValueText{
 			Content: "incorrect projection",
 			Rich:    &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: "**bold**\n"},

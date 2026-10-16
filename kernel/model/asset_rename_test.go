@@ -80,7 +80,7 @@ func TestRenameAssetReferences(t *testing.T) {
 			treenode.UpsertBlockTree(tree)
 			t.Cleanup(func() { cache.RemoveTreeData(tree.ID) })
 			avPath := filepath.Join(util.DataDir, "storage", "av", test.id+".json")
-			avData, _ := json.Marshal(map[string]interface{}{"paths": hrefs, "text": path.Base(oldPath)})
+			avData, _ := json.Marshal(map[string]any{"paths": hrefs, "text": path.Base(oldPath)})
 			writeAssetRelinkTestFile(t, "storage/av/"+test.id+".json", avData)
 
 			newPath, err := RenameAsset(oldPath+test.suffix, "习题2")
@@ -121,7 +121,7 @@ func TestRenameAssetReferences(t *testing.T) {
 				t.Fatalf("document references: %v, want %v", got, want)
 			}
 			updated, err := os.ReadFile(avPath)
-			wantAV, _ := json.Marshal(map[string]interface{}{"paths": want, "text": path.Base(oldPath)})
+			wantAV, _ := json.Marshal(map[string]any{"paths": want, "text": path.Base(oldPath)})
 			if err != nil || !bytes.Equal(updated, wantAV) {
 				t.Fatalf("database references: %s, want %s: %v", updated, wantAV, err)
 			}

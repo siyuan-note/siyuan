@@ -28,7 +28,7 @@ func TestQueryBacklinkRefDefsInBox(t *testing.T) {
 		}
 	}
 	ids := []string{"a", "b", "'); DELETE FROM refs --"}
-	for i := 0; i < queryRefsByDefIDsBatchSize; i++ {
+	for range queryRefsByDefIDsBatchSize {
 		ids = append(ids, "missing")
 	}
 	refs, err := QueryBacklinkRefDefsInBox(ids, boxID)

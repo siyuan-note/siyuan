@@ -18,6 +18,7 @@ package model
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"slices"
 	"sync"
@@ -433,9 +434,7 @@ func cloneOperations(ops []*Operation) []*Operation {
 		cloned.BlockIDs = cloneOperationBlockIDs(op.BlockIDs)
 		if nil != op.Context {
 			cloned.Context = make(map[string]any, len(op.Context))
-			for key, value := range op.Context {
-				cloned.Context[key] = value
-			}
+			maps.Copy(cloned.Context, op.Context)
 		}
 		ret[i] = &cloned
 	}

@@ -19,6 +19,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"slices"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -60,10 +61,8 @@ var getLocalStorageVals = contractHandler(apicontract.GetLocalStorageVals, func(
 	if len(keys) == 0 {
 		return apicontract.Failure[map[string]apicontract.JSONValue](-1, "Field [keys] must not be empty")
 	}
-	for _, key := range keys {
-		if key == "" {
-			return apicontract.Failure[map[string]apicontract.JSONValue](-1, "Field [keys]: each element must not be empty")
-		}
+	if slices.Contains(keys, "") {
+		return apicontract.Failure[map[string]apicontract.JSONValue](-1, "Field [keys]: each element must not be empty")
 	}
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
@@ -152,10 +151,8 @@ var removeLocalStorageVals = contractHandler(apicontract.RemoveLocalStorageVals,
 	if len(keys) == 0 {
 		return apicontract.Failure[apicontract.Null](-1, "Field [keys] must not be empty")
 	}
-	for _, key := range keys {
-		if key == "" {
-			return apicontract.Failure[apicontract.Null](-1, "Field [keys]: each element must not be empty")
-		}
+	if slices.Contains(keys, "") {
+		return apicontract.Failure[apicontract.Null](-1, "Field [keys]: each element must not be empty")
 	}
 	app := request.App
 	err := model.RemoveLocalStorageVals(keys)

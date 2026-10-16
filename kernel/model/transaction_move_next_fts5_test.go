@@ -60,7 +60,7 @@ func TestMoveNextIDOrderAndReplay(t *testing.T) {
 				{Action: "move", ID: first, NextID: end},
 				{Action: "move", ID: second, NextID: end},
 			}}
-			for step := 0; step < 3; step++ {
+			for step := range 3 {
 				tx := forward
 				if step == 1 {
 					tx = &Transaction{DoOperations: cloneOperations(forward.UndoOperations)}

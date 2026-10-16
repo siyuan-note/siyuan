@@ -50,7 +50,7 @@ func TestDAVDeleteMissingCollection(t *testing.T) {
 			}
 		})
 	}
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		err := calendarStore.DeleteCalendar(calendarPath)
 		if want := webdav.NewHTTPError(http.StatusNotFound, ErrorCalDavCalendarNotFound); !reflect.DeepEqual(err, want) {
 			t.Fatalf("DeleteCalendar error = %v, want %v", err, want)

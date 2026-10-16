@@ -23,7 +23,7 @@ func testAPIContractMoveBlock(t *testing.T, engine *gin.Engine, boxID string) {
 	paragraphID := tree.Root.FirstChild.ID
 	list := &ast.Node{Type: ast.NodeList, ID: ast.NewNodeID(), ListData: &ast.ListData{Typ: 0}}
 	list.SetIALAttr("id", list.ID)
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		item := &ast.Node{Type: ast.NodeListItem, ID: ast.NewNodeID(), ListData: &ast.ListData{Typ: 0}}
 		item.SetIALAttr("id", item.ID)
 		paragraph := treenode.NewParagraph(ast.NewNodeID())

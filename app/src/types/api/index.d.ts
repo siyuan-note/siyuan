@@ -32,9 +32,9 @@ export type AIBrowserCapabilityResultRequestInput = { "callID"?: string | null; 
 
 export type AIBuiltinSkillInfo = { "description": string; "digest": string; "enabled": boolean; "id": string; "name": string; "source": string; "version": string; };
 
-export type AICapabilityAction = { "effects"?: AIToolEffects; "name": string; };
+export type AICapabilityAction = { "effects": AIToolEffects; "name": string; };
 
-export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "agentOnly"?: boolean; "available": boolean; "description": string; "effects"?: AIToolEffects; "id": string; "name": string; "ownerId"?: string; "ownerName"?: string; "runtime": string; "source": string; "title"?: string; };
+export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "agentOnly"?: boolean; "available": boolean; "description": string; "effects": AIToolEffects; "id": string; "name": string; "ownerId"?: string; "ownerName"?: string; "runtime": string; "source": string; "title"?: string; };
 
 export type AIConfirmRequestInput = { "always"?: boolean | null; "approved"?: boolean | null; "confirmID"?: string | null; };
 

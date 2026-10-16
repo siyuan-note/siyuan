@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -781,10 +782,8 @@ func fileManagedRelative(grant *util.PluginDevelopmentGrant, p string) (string, 
 	if err = util.ValidateTextFilePath(rel); err != nil {
 		return "", err
 	}
-	for _, allowed := range grant.AllowFiles {
-		if rel == allowed {
-			return rel, nil
-		}
+	if slices.Contains(grant.AllowFiles, rel) {
+		return rel, nil
 	}
 	return "", fileInvalid("invalid_path", "file is outside the approved project allowlist")
 }

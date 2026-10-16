@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -265,12 +266,10 @@ var exportNotebooksMd = contractHandler(apicontract.ExportNotebooksMd, func(c *g
 		ret.Code = -1
 		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-	for _, notebook := range notebooks {
-		if model.IsEncryptedBox(notebook) {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(395)
-			return contractFailure[apicontract.ExportNamedZipData](ret)
-		}
+	if slices.ContainsFunc(notebooks, model.IsEncryptedBox) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(395)
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	if err := request.Validate(); err != nil {
 		ret.Code = -1
@@ -335,12 +334,10 @@ var exportNotebooksSY = contractHandler(apicontract.ExportNotebooksSY, func(c *g
 		ret.Code = -1
 		return contractFailure[apicontract.ExportZipData](ret)
 	}
-	for _, notebook := range notebooks {
-		if model.IsEncryptedBox(notebook) {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(395)
-			return contractFailure[apicontract.ExportZipData](ret)
-		}
+	if slices.ContainsFunc(notebooks, model.IsEncryptedBox) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(395)
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 	zipPath := model.ExportNotebooksSY(notebooks)
 	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})

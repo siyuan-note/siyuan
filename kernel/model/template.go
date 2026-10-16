@@ -703,7 +703,7 @@ func validateTemplateAttributeViewNode(node *ast.Node, attrView *av.AttributeVie
 		return
 	}
 	visibleViewCount := 0
-	for _, visibleViewID := range strings.Split(visibleViewIDs, ",") {
+	for visibleViewID := range strings.SplitSeq(visibleViewIDs, ",") {
 		visibleViewID = strings.TrimSpace(visibleViewID)
 		if "" == visibleViewID {
 			continue
@@ -866,7 +866,7 @@ func applyTemplateAttributeViewPlan(node *ast.Node, plan *templateAttributeViewP
 		}
 		if visibleViewIDs := strings.TrimSpace(node.IALAttr(av.NodeAttrVisibleViewIDs)); "" != visibleViewIDs {
 			var copiedVisibleViewIDs []string
-			for _, sourceViewID := range strings.Split(visibleViewIDs, ",") {
+			for sourceViewID := range strings.SplitSeq(visibleViewIDs, ",") {
 				sourceViewID = strings.TrimSpace(sourceViewID)
 				if copiedViewID := plan.copiedViewIDs[sourceViewID]; "" != copiedViewID {
 					copiedVisibleViewIDs = append(copiedVisibleViewIDs, copiedViewID)

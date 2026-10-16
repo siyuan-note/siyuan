@@ -98,7 +98,7 @@ func validateInstallRelativePath(name string) error {
 		strings.ContainsAny(name, "\\:\x00") {
 		return errors.New("invalid marketplace package path")
 	}
-	for _, component := range strings.Split(name, "/") {
+	for component := range strings.SplitSeq(name, "/") {
 		if component == ".." || strings.TrimRight(component, ". ") != component {
 			return errors.New("invalid marketplace package path")
 		}

@@ -149,7 +149,7 @@ func addHEIFVaryAccept(context *gin.Context) {
 		return
 	}
 	for _, vary := range context.Writer.Header().Values("Vary") {
-		for _, value := range strings.Split(vary, ",") {
+		for value := range strings.SplitSeq(vary, ",") {
 			if strings.EqualFold(strings.TrimSpace(value), "Accept") || strings.TrimSpace(value) == "*" {
 				return
 			}

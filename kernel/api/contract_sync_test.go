@@ -64,7 +64,7 @@ func compareSyncDecode[Request, Data, Value any](t *testing.T, endpoint apicontr
 
 func TestAPIContractSyncProviderConfigCompatibility(t *testing.T) {
 	for _, raw := range []string{`{}`, `{"ENDPOINT":" example ","timeout":1.0,"concurrentReqs":9007199254740993}`, `{"endpoint":false}`, `{"timeout":1.5}`, `{"pathStyle":null}`, `{"endpoint":"first","endpoint":"second"}`} {
-		var object map[string]interface{}
+		var object map[string]any
 		if err := json.Unmarshal([]byte(raw), &object); err != nil {
 			t.Fatal(err)
 		}
@@ -218,7 +218,7 @@ func TestAPIContractSyncProviderMultipart(t *testing.T) {
 		for _, count := range []int{0, 1, 2} {
 			var body bytes.Buffer
 			writer := multipart.NewWriter(&body)
-			for i := 0; i < count; i++ {
+			for range count {
 				part, err := writer.CreateFormFile("file", "config.txt")
 				if err != nil {
 					t.Fatal(err)

@@ -116,7 +116,7 @@ func TestAttributeViewItemIconBindingInheritance(t *testing.T) {
 				return
 			}
 			entry := GlobalUndoLog.Peek(fixture.sourceID)
-			for cycle := 0; cycle < 2; cycle++ {
+			for range 2 {
 				if err = PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err != nil {
 					t.Fatal(err)
 				}

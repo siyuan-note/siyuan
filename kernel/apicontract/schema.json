@@ -761,6 +761,7 @@
         }
       },
       "required": [
+        "effects",
         "name"
       ],
       "additionalProperties": false
@@ -811,6 +812,7 @@
       "required": [
         "available",
         "description",
+        "effects",
         "id",
         "name",
         "runtime",

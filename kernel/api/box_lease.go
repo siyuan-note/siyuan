@@ -18,6 +18,7 @@ package api
 
 import (
 	"errors"
+	"slices"
 	"sort"
 
 	"github.com/88250/lute/ast"
@@ -38,10 +39,8 @@ func holdEncryptedBoxRequest(c *gin.Context, boxID string) error {
 		return nil
 	}
 	leases := requestBoxLeases(c)
-	for _, heldBoxID := range leases {
-		if heldBoxID == boxID {
-			return nil
-		}
+	if slices.Contains(leases, boxID) {
+		return nil
 	}
 
 	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
@@ -101,8 +100,8 @@ func requestBoxLeases(c *gin.Context) []string {
 
 func releaseEncryptedBoxRequest(c *gin.Context, boxID string) {
 	leases := requestBoxLeases(c)
-	for i := len(leases) - 1; i >= 0; i-- {
-		if leases[i] != boxID {
+	for i, lease := range slices.Backward(leases) {
+		if lease != boxID {
 			continue
 		}
 		leases = append(leases[:i], leases[i+1:]...)
@@ -114,8 +113,8 @@ func releaseEncryptedBoxRequest(c *gin.Context, boxID string) {
 
 func releaseRequestBoxLeases(c *gin.Context) {
 	leases := requestBoxLeases(c)
-	for i := len(leases) - 1; i >= 0; i-- {
-		model.ReleaseEncryptedBoxOperation(leases[i])
+	for _, lease := range slices.Backward(leases) {
+		model.ReleaseEncryptedBoxOperation(lease)
 	}
 	c.Set(requestBoxLeasesKey, []string{})
 }

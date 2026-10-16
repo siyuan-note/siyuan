@@ -37,7 +37,7 @@ func TestSortConfAppendReadersObserveCompleteJSON(t *testing.T) {
 		}
 	}()
 	defer func() { close(stop); <-done }()
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		_, data, err := readSortConfMapData(confPath)
 		if err != nil {
 			t.Fatal(err)

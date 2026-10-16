@@ -320,8 +320,8 @@ func chineseNumber(number int) string {
 		number /= 10000
 		unitIndex++
 	}
-	if strings.HasPrefix(ret, "一十") {
-		ret = "十" + strings.TrimPrefix(ret, "一十")
+	if after, ok := strings.CutPrefix(ret, "一十"); ok {
+		ret = "十" + after
 	}
 	return ret
 }

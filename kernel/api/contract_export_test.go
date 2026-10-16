@@ -113,7 +113,7 @@ func TestAPIContractExportMarkdownOptions(t *testing.T) {
 	if err != nil || request.Validate() != nil {
 		t.Fatalf("decode failed: %v", err)
 	}
-	var fields map[string]interface{}
+	var fields map[string]any
 	if err = json.Unmarshal([]byte(input), &fields); err != nil {
 		t.Fatal(err)
 	}

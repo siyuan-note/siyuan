@@ -14,6 +14,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const changes: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
+    const fragmentOwners = new WeakSet<IProtyle>();
+    let mobile = true;
     const enteredCells: Element[] = [];
     let gutterHidden = false;
     const gutterRenderTarget = new Function("hideElements", gutterSource + "\nreturn render;")(
@@ -29,7 +31,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     }});
     const dependencies = {
         Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"},
-        dayjs: () => ({format: () => "20260924120000"}), isMobile: () => true,
+        dayjs: () => ({format: () => "20260924120000"}), isMobile: () => mobile,
         normalizeSemanticInlineElements: noop, removeEmptySemanticInlineElement: noop,
         getSemanticMarkerPrefixLengthForNode: () => 0, getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         turnIntoTaskList: () => false, headingTurnIntoList: () => false, isProtyleListItemFirstParagraph: () => false,
@@ -42,6 +44,9 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             changes.push({doOperations, undoOperations});
         },
         updateTransaction: (owner: IProtyle, block: Element, oldHTML: string) => {
+            if (fragmentOwners.has(owner)) {
+                return;
+            }
             changes.push({
                 doOperations: [{action: "update", id: block.getAttribute("data-node-id"), data: api.cleanTableCellRichHTML(block.outerHTML)}],
                 undoOperations: [{action: "update", id: block.getAttribute("data-node-id"), data: api.cleanTableCellRichHTML(oldHTML)}],
@@ -55,12 +60,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
-        "hasClosestBlock, hasClosestByClassName, hasClosestByTag};")(...Object.values(dependencies)) as
+        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
         typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
-        typeof import("../util/hasClosest");
+        typeof import("../util/hasClosest") & typeof import("../wysiwyg/list") & typeof import("../wysiwyg/taskListMarker");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -156,9 +161,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             hidden.className = "fn__none";
             api.updateTableCellContentLayout(host, options.initialBlockHTML);
             wysiwyg.addEventListener("input", () => options.onChange());
+            const protyle = {block: {}, options: {action: []},
+                toolbar: {element: hidden, subElement: hidden}, undo: {clear: noop}} as unknown as IProtyle;
+            fragmentOwners.add(protyle);
             return {
                 wysiwyg, hintElement: hidden,
-                protyle: {block: {}, toolbar: {element: hidden, subElement: hidden}, undo: {clear: noop}},
+                protyle,
                 getBlockHTML: () => wysiwyg.innerHTML, destroy: noop,
                 focus: () => {
                     wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]').focus();
@@ -265,6 +273,41 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         window.siyuan.config.keymap.editor.general = general;
         await finish(element);
     }
+
+    for (const isMobile of [false, true]) {
+        mobile = isMobile;
+        for (const marker of [" ", "X"]) {
+            for (const switchCell of [false, true]) {
+                const {owner, element, table} = fixture();
+                const cell = table.querySelectorAll("td")[1];
+                api.setTableCellRich(cell, `- [ ] First\n  - [${marker}] Nested\n- [ ] Last`);
+                cell.querySelector(".table__cell-rich").innerHTML = api.getTableCellRichBlockDOM(cell);
+                if (switchCell) {
+                    await open(owner, table.querySelector("th"));
+                }
+                const action = cell.querySelectorAll(".protyle-action--task")[1];
+                await open(owner, cell, undefined, {x: 10, y: 20, target: action.querySelector("use")});
+                const tasks = cell.querySelectorAll('[data-type="NodeListItem"][data-subtype="t"]');
+                check.deepEqual(Array.from(tasks, task => task.getAttribute("data-task") ?? " "),
+                    [" ", marker === " " ? "X" : " ", " "], "the first click toggles only the nested task");
+                check.equal(changes.length, 1, "one click creates one outer table transaction");
+                const saved = document.createElement("div");
+                saved.innerHTML = operationHTML(changes[0].doOperations[0]);
+                const before = document.createElement("div");
+                before.innerHTML = operationHTML(changes[0].undoOperations[0]);
+                const completed = (table: Element) => {
+                    const content = document.createElement("div");
+                    content.innerHTML = api.getTableCellRichBlockDOM(table.querySelectorAll("td")[1]);
+                    return Array.from(content.querySelectorAll('[data-type="NodeListItem"][data-subtype="t"]'),
+                        task => task.classList.contains("protyle-task--done"));
+                };
+                check.deepEqual(completed(saved), [false, marker === " ", false], "the saved table retains the toggled state");
+                check.deepEqual(completed(before), [false, marker === "X", false], "undo retains the original task state");
+                await finish(element);
+            }
+        }
+    }
+    mobile = true;
 
     for (const index of [0, 1]) {
         const {owner, element, table} = fixture();
@@ -783,12 +826,17 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
             ["focusByWbr", "focusByOffset", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange", "getDOMOffset", "createRangeByOffsets"]
                 .includes(declaration.name.getText(selection))))
         .map(statement => statement.getText(selection)).join("\n");
+    const list = createSourceFile("list.ts", read("../wysiwyg/list.ts"), ScriptTarget.Latest, true);
+    const taskSource = list.statements.filter(isVariableStatement).filter(statement =>
+        statement.declarationList.declarations.some(declaration =>
+            declaration.name.getText(list) === "setTaskListItemMarker"))
+        .map(statement => statement.getText(list)).join("\n");
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
         "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../wysiwyg/tableVirtualization.ts",
         "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts"]
-        .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource);
+        .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const members = wysiwyg.statements.find(isClassDeclaration).members.filter(member =>
         ["inputTimeout", "pendingInputTimeouts", "runningInputTasks", "scheduleInput", "runInput", "flushPendingInput"]

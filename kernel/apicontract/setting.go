@@ -53,8 +53,10 @@ type SettingEmbedding struct {
 	APIKey     string `json:"apiKey" api:"optional,nullable"`
 	BaseURL    string `json:"baseURL" api:"optional,nullable"`
 	Name       string `json:"name" api:"optional,nullable"`
-	Timeout    int    `json:"timeout" api:"optional,nullable"`
-	Dimensions int    `json:"dimensions" api:"optional,nullable"`
+	Timeout     int    `json:"timeout" api:"optional,nullable"`
+	Dimensions  int    `json:"dimensions" api:"optional,nullable"`
+	Concurrency int    `json:"concurrency" api:"optional,nullable"`
+	BatchSize   int    `json:"batchSize" api:"optional,nullable"`
 }
 
 type SettingRerank struct {

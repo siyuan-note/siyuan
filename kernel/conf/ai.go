@@ -116,8 +116,10 @@ type Embedding struct {
 	APIKey     string `json:"apiKey"`
 	BaseURL    string `json:"baseURL"`
 	Name       string `json:"name"`
-	Timeout    int    `json:"timeout"`
-	Dimensions int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
+	Timeout     int    `json:"timeout"`
+	Dimensions  int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
+	Concurrency int    `json:"concurrency"`
+	BatchSize   int    `json:"batchSize"`
 }
 
 // Decision 按供应商隔离凭证，平铺字段仅用于兼容旧配置输入。
@@ -323,7 +325,7 @@ type MCPServer struct {
 }
 
 func defaultEmbedding() *Embedding {
-	return &Embedding{Timeout: 30}
+	return &Embedding{Timeout: 30, Concurrency: 8, BatchSize: 10}
 }
 
 func defaultRerank() *Rerank {
@@ -842,6 +844,12 @@ func (ai *AI) Normalize() {
 	}
 	if ai.Embedding.Dimensions < 0 {
 		ai.Embedding.Dimensions = 0 // 负值非法，归零表示用模型默认维度
+	}
+	if ai.Embedding.Concurrency < 1 {
+		ai.Embedding.Concurrency = 8
+	}
+	if ai.Embedding.BatchSize < 1 {
+		ai.Embedding.BatchSize = 10
 	}
 	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 		ai.Embedding.ID = normalizedAIID("embedding")

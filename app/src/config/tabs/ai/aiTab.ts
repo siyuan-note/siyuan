@@ -289,6 +289,18 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         min: 1,
         unit: "s",
     });
+    group.number("ai.embedding.concurrency", {
+        title: window.siyuan.languages.apiConcurrency,
+        desc: window.siyuan.languages.apiConcurrencyTip,
+        min: 1,
+        max: 64,
+    });
+    group.number("ai.embedding.batchSize", {
+        title: window.siyuan.languages.apiBatchSize,
+        desc: window.siyuan.languages.apiBatchSizeTip,
+        min: 1,
+        max: 128,
+    });
 
     // 独立的嵌入索引重建按钮，不与全局重建索引耦合
     group.button({

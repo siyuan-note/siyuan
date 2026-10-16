@@ -45373,6 +45373,12 @@
         "baseURL": {
           "type": "string"
         },
+        "batchSize": {
+          "type": "integer"
+        },
+        "concurrency": {
+          "type": "integer"
+        },
         "dimensions": {
           "type": "integer"
         },
@@ -45392,6 +45398,8 @@
       "required": [
         "apiKey",
         "baseURL",
+        "batchSize",
+        "concurrency",
         "dimensions",
         "enabled",
         "id",
@@ -45417,6 +45425,26 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "batchSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "concurrency": {
+          "anyOf": [
+            {
+              "type": "integer"
             },
             {
               "type": "null"

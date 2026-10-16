@@ -106,6 +106,8 @@ func settingEmbeddingPayload(value *conf.Embedding) *apicontract.SettingEmbeddin
 	result.Name = value.Name
 	result.Timeout = value.Timeout
 	result.Dimensions = value.Dimensions
+	result.Concurrency = value.Concurrency
+	result.BatchSize = value.BatchSize
 	return result
 }
 

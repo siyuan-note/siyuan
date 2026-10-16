@@ -740,7 +740,7 @@ func query2Stmt(queryStr string) (ret string) {
 			for i, tag := range tags {
 				buf.WriteString("ial LIKE '%tags=\"%")
 				buf.WriteString(conf.EscapeSearchLikePattern(tag))
-				buf.WriteString("%\"%' ESCAPE '\\\\'")
+				buf.WriteString("%\"%' ESCAPE '\\'")
 				if i < len(tags)-1 {
 					buf.WriteString(" AND ")
 				}

@@ -126,6 +126,35 @@ func TestAVContractCalendarTemplateDate(t *testing.T) {
 	}
 }
 
+func TestAVContractCalendarLegacyRowIDs(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		rows []string
+	}{
+		{name: "nil"},
+		{name: "empty", rows: []string{}},
+		{name: "legacy order", rows: []string{"second", "first"}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			layout := &av.LayoutCalendar{LayoutTable: av.NewLayoutTable(), Settings: av.CalendarSettings{WeekStart: 1}}
+			layout.RowIDs = test.rows
+			converted := toContractAVLayoutCalendar(layout)
+			assertAVContractJSONEqual(t, layout, converted)
+			data, err := json.Marshal(converted)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var fields map[string]json.RawMessage
+			if err = json.Unmarshal(data, &fields); err != nil {
+				t.Fatal(err)
+			}
+			if _, present := fields["rowIds"]; present != (len(test.rows) > 0) {
+				t.Fatalf("unexpected legacy row order field: %s", data)
+			}
+		})
+	}
+}
+
 func TestAVContractCalendarLayoutAndRange(t *testing.T) {
 	fixture := setupAttributeViewContextFilterAPITest(t)
 	util.AttrViewLangs["en"]["calendar"] = "Calendar"

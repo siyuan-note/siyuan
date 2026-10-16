@@ -9444,17 +9444,10 @@
               "type": "string"
             },
             "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "settings": {
               "$ref": "#/$defs/AVCalendarSettings"
@@ -9471,7 +9464,6 @@
           },
           "required": [
             "columns",
-            "rowIds",
             "settings",
             "spec",
             "id",
@@ -9504,17 +9496,10 @@
               ]
             },
             "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "settings": {
               "$ref": "#/$defs/AVCalendarSettings"
@@ -9522,7 +9507,6 @@
           },
           "required": [
             "columns",
-            "rowIds",
             "settings"
           ],
           "additionalProperties": false

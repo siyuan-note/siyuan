@@ -191,7 +191,7 @@ python -X utf8 scripts/verify-release.py check --version 3.8.7
 
 在 GitHub 创建发布 PR，来源分支选择 `dev`，目标分支选择 `master`，确认来源提交就是步骤 1 记录的构建提交。正式发布允许直接使用 `dev` 作为 PR 来源；普通开发 PR 仍使用独立任务分支并合入 `dev`。[分支检查工作流](../.github/workflows/target-branch.yml) 已通过 `exclude: dev` 支持该发布流程，其他来源分支向 `master` 提 PR 时会被自动改为合入 `dev`。
 
-检查通过后使用 **Create a merge commit** 合并发布 PR，保留 `dev` 的完整提交历史，避免长期分支反复 squash 导致后续 PR 重复列出旧提交。仓库设置须启用 **Allow merge commits**，不要为发布 PR 选择 squash 或 rebase。通过 PR 更新 `master`，无需直接向 `master` 推送。
+检查通过后使用 **Create a merge commit** 合并发布 PR，保留 `dev` 的完整提交历史，避免长期分支反复 squash 导致后续 PR 重复列出旧提交。仓库设置须启用 **Allow merge commits**；如果设置不允许，报告限制并停止合并，不要为发布 PR 改用 squash 或 rebase。通过 PR 更新 `master`，无需直接向 `master` 推送。
 
 合并后获取最新 `master`，将下面的 `<构建提交的完整 SHA>` 替换为步骤 1 记录的完整 SHA，核对其文件树与构建提交一致；差异检查必须无输出且退出码为 `0`，存在差异时停止发布并核对原因：
 
@@ -239,7 +239,7 @@ GitHub 源地址：https://github.com/siyuan-note/siyuan/releases/download/v3.8.
 
 ### 10. 将发布历史同步回 dev
 
-正式发布后、继续开发前，在工作区干净的 `dev` 上获取最新远端提交，将已发布的 `master` 合并回 `dev` 并推送。使用普通合并保留两边历史，不重置或强推 `dev`。如果发布后两边没有新增代码改动，同步前后的文件树应完全相同；存在其他改动或冲突时先核对并处理。
+正式发布后、继续开发前，在工作区干净的 `dev` 上获取最新远端提交，将已发布的 `master` 合并回 `dev` 并推送。代理执行时，合并须有用户授权，推送须有明确授权；发布流程本身不授权未请求的合并、标签、上传或公开发布，也不授权直接提交或推送到 `master`。使用普通合并保留两边历史，不重置或强推 `dev`。如果发布后两边没有新增代码改动，同步前后的文件树应完全相同；存在其他改动或冲突时先核对并处理。
 
 历史上使用 squash 的发布也需要这次同步，它能让 `dev` 包含发布提交并更新共同祖先，但不会消除原始提交在后续 PR 提交列表中的重复。后续发布统一使用普通合并，让这些原始提交进入 `master` 的历史。
 

@@ -90,7 +90,7 @@ func TestEmbeddingQueueStopsUnsentJobs(t *testing.T) {
 		embeddingStop.Store(true)
 		calls.Add(1)
 	})
-	if queries.Load() != 1 || calls.Load() < 1 || calls.Load() > embeddingMaxConcurrency {
+	if queries.Load() != 1 || calls.Load() < 1 || calls.Load() > defaultEmbeddingConcurrency {
 		t.Fatalf("queries=%d, calls=%d", queries.Load(), calls.Load())
 	}
 	if embeddingErrNotified.Load() {

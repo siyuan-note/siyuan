@@ -233,6 +233,8 @@ declare namespace Config {
         name: string;
         timeout: number;
         dimensions: number;
+        concurrency: number;
+        batchSize: number;
     }
 
     /**

@@ -40,8 +40,8 @@ import (
 )
 
 const (
-	embeddingBatchSize      = 10
-	embeddingMaxConcurrency = 8
+	defaultEmbeddingBatchSize   = 10
+	defaultEmbeddingConcurrency = 8
 	embeddingMinTextLen     = 7
 	embeddingMaxContentLen  = 12000
 	embeddingVectorDim      = 4 // float32 = 4 bytes
@@ -160,11 +160,14 @@ func processPendingEmbeddingRows(query func(string, ...any) ([]map[string]any, e
 	embeddingStop.Store(false)
 	embeddingErrNotified.Store(false)
 
-	workCh := make(chan embeddingJob, embeddingMaxConcurrency*2)
+	concurrency := embeddingConcurrency()
+	batchSize := embeddingBatchSize()
+
+	workCh := make(chan embeddingJob, concurrency*2)
 	var jobsWg sync.WaitGroup
 
 	var workersWg sync.WaitGroup
-	for range embeddingMaxConcurrency {
+	for range concurrency {
 		workersWg.Go(func() {
 			for job := range workCh {
 				if embeddingStop.Load() {
@@ -239,7 +242,7 @@ func processPendingEmbeddingRows(query func(string, ...any) ([]map[string]any, e
 				texts = append(texts, content)
 				blocks = append(blocks, row)
 
-				if len(texts) >= embeddingBatchSize {
+				if len(texts) >= batchSize {
 					jobsWg.Add(1)
 					workCh <- embeddingJob{texts: texts, blocks: blocks, generation: generation}
 					anySubmitted = true
@@ -872,4 +875,22 @@ func embeddingModel() string {
 		return v
 	}
 	return ""
+}
+
+func embeddingConcurrency() int {
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && 0 < confAISnapshot.Embedding.Concurrency {
+		return confAISnapshot.Embedding.Concurrency
+	}
+	return defaultEmbeddingConcurrency
+}
+
+func embeddingBatchSize() int {
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && 0 < confAISnapshot.Embedding.BatchSize {
+		return confAISnapshot.Embedding.BatchSize
+	}
+	return defaultEmbeddingBatchSize
 }

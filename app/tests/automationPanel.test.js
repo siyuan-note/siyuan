@@ -152,7 +152,8 @@ const runCases = async (sources, css, mobile) => {
     const removeRect = numberCondition.closest("[data-condition]").querySelector('[data-action="remove-condition"]').getBoundingClientRect();
     assert.ok(Math.abs(fieldRect.top - operatorRect.top) <= 1, "field and operator stay aligned");
     assert.ok(Math.abs(fieldRect.top - valueRect.top) <= 1, "a short number condition stays on one line");
-    assert.ok(removeRect.left - valueRect.right <= 16, `removal stays beside the condition value: ${removeRect.left - valueRect.right}`);
+    assert.ok(Math.abs(removeRect.right - numberCondition.closest("[data-condition]").getBoundingClientRect().right) <= 1,
+        "removal aligns with the right edge of the condition row");
     await click("[data-source-conditions] [data-add-condition]");
     fieldMenu.items.find(item => item.label === "Text").click();
     await tick();
@@ -181,6 +182,7 @@ const runCases = async (sources, css, mobile) => {
             assert.ok(row.scrollWidth <= row.clientWidth + 1, "conditions do not overflow");
             const field = row.querySelector(".av__field-wrapper").getBoundingClientRect();
             const remove = row.querySelector('[data-action="remove-condition"]').getBoundingClientRect();
+            assert.ok(Math.abs(remove.right - row.getBoundingClientRect().right) <= 1, "all condition removal buttons align to the right");
             assert.ok(remove.top >= field.top && remove.bottom <= field.bottom + 1,
                 `removal stays with the first line of a wrapped condition: ${JSON.stringify({field, remove})}`);
         }

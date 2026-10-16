@@ -23,9 +23,14 @@ const browserCases = ({css, desktop, community}) => {
             <div class="toolbar__item toolbar__item--close"><svg><use href="#iconClose"></use></svg></div></div>
         <div class="dock" id="dockLeft"><span class="dock__item"><svg><use href="#iconFiles"></use></svg></span></div>
         <div class="layout__dockl"><div class="block__icons">Files</div><ul class="b3-list" id="navigation">${item}</ul></div>
-        <div class="layout__wnd--center"><ul class="layout-tab-bar fn__flex" id="tabs"><li class="item">
+        <div class="layout__wnd--center"><div data-type="wnd"><div class="fn__flex"><ul class="layout-tab-bar fn__flex" id="tabs"><li class="item">
             <span class="item__icon">📄</span><span class="item__text">Document</span>
-            <span class="item__close"><svg><use href="#iconClose"></use></svg></span></li></ul></div>
+            <span class="item__close"><svg><use href="#iconClose"></use></svg></span></li></ul>
+            <ul class="layout-tab-bar layout-tab-bar--readonly fn__flex-1" id="tab-actions"><li class="item item--readonly">
+                <span class="block__icon block__icon--show"><svg><use href="#iconAdd"></use></svg></span>
+                <span class="fn__flex-1"></span>
+                <span class="block__icon block__icon--show"><svg><use href="#iconDown"></use></svg></span>
+            </li></ul></div></div></div>
         <div class="protyle-breadcrumb">Notebook / Document</div>
         <div id="status" class="status fn__flex">
             <div id="barDock" class="toolbar__item"><svg><use href="#iconDock"></use></svg></div>
@@ -57,6 +62,23 @@ const browserCases = ({css, desktop, community}) => {
         `${label}: ${actual} / ${expected}`);
     const settle = () => document.getAnimations().filter(animation => animation instanceof CSSTransition)
         .forEach(animation => animation.finish());
+    const checkTabEdge = () => {
+        const tabs = find("#tabs");
+        for (const width of [280, 800]) {
+            tabs.parentElement.style.width = width + "px";
+            for (const count of [1, 5]) {
+                while (tabs.children.length < count) tabs.append(tabs.firstElementChild.cloneNode(true));
+                tabs.scrollLeft = tabs.scrollWidth;
+                const edge = tabs.lastElementChild.getBoundingClientRect().right;
+                const actions = find("#tab-actions").getBoundingClientRect();
+                // 滚动范围按整数像素取整，容许末端出现不足半个像素的测量误差。
+                check.ok(edge <= actions.left + 0.5, `tab actions must not cover the last tab at width ${width}: ${edge} / ${actions.left}`);
+            }
+            while (tabs.children.length > 1) tabs.lastElementChild.remove();
+        }
+        tabs.parentElement.style.width = "";
+        tabs.scrollLeft = 0;
+    };
     const snapshot = () => Object.fromEntries([
         ["toolbar", ".toolbar"], ["tabs", "#tabs"], ["panel", ".block__icons"], ["breadcrumb", ".protyle-breadcrumb"],
         ["list", "#navigation .b3-list-item"], ["menu", ".b3-menu__item"], ["dialog", ".b3-dialog__header"],
@@ -65,6 +87,7 @@ const browserCases = ({css, desktop, community}) => {
     ].map(([key, selector]) => [key, {height: height(selector), font: getComputedStyle(find(selector)).fontSize}]));
     const normal = snapshot();
     if (desktop && !community) {
+        checkTabEdge();
         for (const [key, expected] of Object.entries({toolbar: 32, tabs: 42, panel: 42, breadcrumb: 42,
             list: 28, menu: 28, dialog: 43, status: 32})) {
             near(normal[key].height, expected, `${key} retains the default size`);
@@ -82,6 +105,7 @@ const browserCases = ({css, desktop, community}) => {
     }
     for (const key of Object.keys(normal)) check.equal(compact[key].font, normal[key].font, `${key} keeps its font size`);
     if (!community) {
+        checkTabEdge();
         for (const key of ["toolbar", "tabs", "panel", "breadcrumb", "list", "menu", "dialog", "status"]) {
             check.ok(compact[key].height < normal[key].height, `${key} becomes smaller: ${JSON.stringify({normal, compact})}`);
         }
@@ -110,6 +134,7 @@ const browserCases = ({css, desktop, community}) => {
         near(find(".dock").getBoundingClientRect().width, 34, "dock width");
         document.body.classList.add("body--toolbar-hide");
         settle();
+        checkTabEdge();
         near(height(".toolbar"), height("#tabs"), "fused toolbar aligns with tabs");
         near(number(".layout__dockl", "marginTop"), height(".toolbar"), "side panel offset follows fused toolbar");
         near(number("#dockLeft", "marginTop"), height(".toolbar"), "dock offset follows fused toolbar");

@@ -5,6 +5,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML} from "./filter";
+import {closeInlineFilterDropdowns} from "./filterDropdown";
 import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue, openFieldLocationEditor} from "./fieldValueEditor";
 import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
@@ -70,12 +71,13 @@ export const openAutomationMenu = async (options: {
     const panel = menuElement.querySelector<HTMLElement>(".av__automation");
     const body = panel.querySelector<HTMLElement>("[data-body]");
     // 先收起已打开的选项菜单，再由本次点击打开新菜单，避免冒泡被面板拦截后菜单滞留。
-    const closeMenu = () => {
+    const closeMenu = (event: MouseEvent) => {
         if (!panel.isConnected) {
             menuElement.removeEventListener("click", closeMenu, true);
             return;
         }
         window.siyuan.menus.menu.remove();
+        closeInlineFilterDropdowns(body, event.target as HTMLElement);
     };
     menuElement.addEventListener("click", closeMenu, true);
     const goBack = () => {

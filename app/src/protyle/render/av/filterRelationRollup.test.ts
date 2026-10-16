@@ -1,4 +1,5 @@
 import * as capabilities from "./capabilities";
+import * as filterDropdown from "./filterDropdown";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -19,6 +20,7 @@ const createEditor = () => {
         document: {createElement: () => ({style: {}, offsetWidth: 10}), body: {appendChild() {}, removeChild() {}}},
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./view": {getFieldsByData: () => fields},
+            "./filterDropdown": filterDropdown,
             "./col": {getColIconByType: () => "iconDatabase"},
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../constants": {Constants: {}},

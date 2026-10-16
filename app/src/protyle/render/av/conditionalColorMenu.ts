@@ -4,6 +4,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {getFieldsByData} from "./view";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML, prepareFilterColumns} from "./filter";
+import {closeInlineFilterDropdowns} from "./filterDropdown";
 import {AV_MANAGE_CUSTOM_COLORS_TYPE, getAVColorGridHTML, getAVColorOrder, getAVCustomColors} from "./color";
 import {getConditionalBackground, moveConditionalColorRule} from "./conditionalColor";
 import {openAVCustomColorDialog} from "./colorDialog";
@@ -103,21 +104,7 @@ ${data.viewType === "table" || rule.target === "property" ? `<select class="b3-s
             menuElement.removeEventListener("click", closeDropdowns, true);
             return;
         }
-        const target = event.target as HTMLElement;
-        const dropdownTypes = [
-            ["selectDropdown", '[data-type="selectTrigger"]'],
-            ["relationFilterDropdown", '[data-type="relationFilterTrigger"]'],
-            ["relList", '[data-type-rel="relation"]'],
-        ];
-        dropdownTypes.forEach(([type, triggerSelector]) => {
-            const trigger = target.closest(triggerSelector);
-            root.querySelectorAll<HTMLElement>(`[data-type="${type}"]`).forEach(dropdown => {
-                if (!dropdown.contains(target) &&
-                    (!trigger || trigger.closest("[data-filter]") !== dropdown.closest("[data-filter]"))) {
-                    dropdown.style.display = "none";
-                }
-            });
-        });
+        closeInlineFilterDropdowns(root, event.target as HTMLElement);
     };
     menuElement.addEventListener("click", closeDropdowns, true);
     panelElement.addEventListener("change", event => {

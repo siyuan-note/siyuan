@@ -24,25 +24,33 @@ const runCases = async (sources, css, mobile) => {
     const currentCondition = {column: "status", operator: "=", value: {type: "select", mSelect: [{content: "Done"}]}};
     const database = {id: "source", name: "Tasks", keyValues: [
         {key: {id: "status", name: "Status", type: "select", options: [{name: "Done"}]}},
+        {key: {id: "tags", name: "Tags", type: "mSelect", options: [{name: "Work"}]}},
         {key: {id: "finished", name: "Completion time", type: "date"}},
+        {key: {id: "number", name: "Number", type: "number"}},
+        {key: {id: "text", name: "Text", type: "text"}},
         {key: {id: "relation", name: "Time logs", type: "relation", relation: {avID: "target"}}},
     ], automations: {spec: 1, rules: [{id: "rule", name: "Record completion time", enabled: false, trigger: "changed", keyID: "status",
         conditions: [currentCondition], actions: [{type: "edit", target: "current", fields: {finished: {mode: "currentTime"}}}]}]}};
     const targetDatabase = {...database, id: "target", name: "Time logs"};
     const transactions = [];
+    const searches = [];
     let fieldMenu;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
-    window.siyuan = {languages: lang, config: {}, notebooks: [], menus: {menu: {remove() {}}}};
+    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, menus: {menu: {remove() {}}}};
     const mocks = {
         "plugin/Menu": {Menu: class {items = []; addItem(item) {this.items.push(item);} open() {fieldMenu = {items: this.items};}}},
         "util/fetch": {fetchSyncPost: async (url, request) => url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
-            {code: 0, data: {av: request.id === "source" ? database : targetDatabase}}},
+            {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
+        fetchPost: (_url, _request, callback) => searches.push(() => callback({code: 0, data: {rows: {values: [
+            {blockID: "related", block: {content: "Related"}},
+        ]}}}))},
         "protyle/wysiwyg/transaction": {transaction: (_protyle, perform, undo) => transactions.push(structuredClone({perform, undo}))},
         "protyle/render/av/view": {getFieldsByData: data => data.view.columns},
         "protyle/render/av/col": {getColIconByType: () => "iconDatabase"},
         "protyle/render/av/color": {getAVColorStyle: () => ""},
-        "protyle/render/av/cell": {getCellValueText: value => value.text?.content || ""},
+        "protyle/render/av/cell": {getCellValueText: value => value.text?.content || "",
+            genCellValue: (type, value) => ({type, mSelect: value})},
         "protyle/render/av/relation": {openSearchAV: options => options.callback({dataset: {avId: "target"}})},
     };
     const cache = {};
@@ -78,6 +86,111 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     assert.equal(transactions.length, 0, "opening settings must preserve the stored rule");
     const originalConditions = structuredClone(database.automations.rules[0].conditions);
+    await click('[data-source-conditions] [data-type="selectTrigger"]');
+    assert.notEqual(get('[data-source-conditions] [data-type="selectDropdown"]').style.display, "none");
+    await click(".av__automation-section");
+    assert.equal(get('[data-source-conditions] [data-type="selectDropdown"]').style.display, "none",
+        "clicking outside a condition dismisses its dropdown");
+    await click('[data-source-conditions] [data-type="selectTrigger"]');
+    await click('[data-source-conditions] [data-type="selectDropdown"]');
+    assert.notEqual(get('[data-source-conditions] [data-type="selectDropdown"]').style.display, "none",
+        "internal interaction does not dismiss the dropdown");
+    await click('[data-source-conditions] [data-type="selectTrigger"]');
+    assert.equal(get('[data-source-conditions] [data-type="selectDropdown"]').style.display, "none",
+        "clicking the same trigger still toggles the dropdown closed");
+    await click("[data-source-conditions] [data-add-condition]");
+    fieldMenu.items.find(item => item.label === "Tags").click();
+    await tick();
+    await click('[data-column="tags"] [data-type="selectTrigger"]');
+    await click('[data-column="tags"] [data-type="selectOption"]');
+    assert.equal(latest().conditions[1].value.mSelect[0].content, "Work");
+    assert.notEqual(get('[data-column="tags"] [data-type="selectDropdown"]').style.display, "none",
+        "selecting an option keeps the dropdown open for further choices");
+    await click('[data-column="status"] [data-type="selectTrigger"]');
+    assert.equal(get('[data-column="tags"] [data-type="selectDropdown"]').style.display, "none",
+        "opening another condition closes the previous dropdown even when paths match");
+    await click('[data-column="tags"] [data-type="selectTrigger"]');
+    assert.equal(get('[data-column="status"] [data-type="selectDropdown"]').style.display, "none");
+    await click(".av__automation-section");
+    assert.equal(get('[data-column="tags"] [data-type="selectDropdown"]').style.display, "none");
+    await click('[data-source-conditions] [data-condition="1"] [data-action="remove-condition"]');
+    await click("[data-source-conditions] [data-add-condition]");
+    fieldMenu.items.find(item => item.label === "Time logs").click();
+    await tick();
+    await change('[data-column="relation"] [data-type="operation"]', "Contains any item");
+    await click('[data-column="relation"] [data-type="relationFilterTrigger"]');
+    assert.notEqual(get('[data-column="relation"] [data-type="relationFilterDropdown"]').style.display, "none");
+    await click(".av__automation-section");
+    searches.splice(0).forEach(finish => finish());
+    assert.equal(get('[data-column="relation"] [data-type="relationFilterDropdown"]').style.display, "none",
+        "late relation results do not reopen a dismissed dropdown");
+    await change('[data-column="relation"] [data-type="operation"]', "Contains");
+    const keywordInput = get('[data-column="relation"] [data-type-rel="relation"]');
+    keywordInput.focus();
+    keywordInput.value = "Related";
+    keywordInput.dispatchEvent(new Event("input", {bubbles: true}));
+    keywordInput.blur();
+    await click(".av__automation-section");
+    searches.splice(0).forEach(finish => finish());
+    assert.equal(menu.querySelector('[data-type="relList"]'), null, "late keyword results do not recreate a dismissed candidate list");
+    keywordInput.focus();
+    keywordInput.dispatchEvent(new Event("input", {bubbles: true}));
+    searches.splice(0).forEach(finish => finish());
+    assert.equal(get('[data-type="relList"]').style.display, "block");
+    keywordInput.blur();
+    await click(".av__automation-section");
+    assert.equal(get('[data-type="relList"]').style.display, "none");
+    await click('[data-source-conditions] [data-condition="1"] [data-action="remove-condition"]');
+    assert.deepEqual(latest().conditions, originalConditions);
+    await click("[data-source-conditions] [data-add-condition]");
+    fieldMenu.items.find(item => item.label === "Number").click();
+    await tick();
+    const numberCondition = get('[data-source-conditions] [data-column="number"]');
+    const fieldRect = numberCondition.querySelector(".av__field-wrapper").getBoundingClientRect();
+    const operatorRect = numberCondition.querySelector('[data-type="operation"]').getBoundingClientRect();
+    const valueRect = numberCondition.querySelector('[data-type="filterValue"]').getBoundingClientRect();
+    const removeRect = numberCondition.closest("[data-condition]").querySelector('[data-action="remove-condition"]').getBoundingClientRect();
+    assert.ok(Math.abs(fieldRect.top - operatorRect.top) <= 1, "field and operator stay aligned");
+    assert.ok(Math.abs(fieldRect.top - valueRect.top) <= 1, "a short number condition stays on one line");
+    assert.ok(removeRect.left - valueRect.right <= 16, `removal stays beside the condition value: ${removeRect.left - valueRect.right}`);
+    await click("[data-source-conditions] [data-add-condition]");
+    fieldMenu.items.find(item => item.label === "Text").click();
+    await tick();
+    const numberRow = get('[data-source-conditions] [data-condition="1"]');
+    const textRow = get('[data-source-conditions] [data-condition="2"]');
+    const sourceAddButton = get("[data-source-conditions] [data-add-condition]");
+    assert.ok(textRow.getBoundingClientRect().top - numberRow.getBoundingClientRect().bottom >= 8, "conditions have visible spacing");
+    assert.ok(sourceAddButton.getBoundingClientRect().top - textRow.getBoundingClientRect().bottom >= 8, "the add button is separated from existing conditions");
+    await click("[data-source-conditions] [data-add-condition]");
+    fieldMenu.items.find(item => item.label === "Completion time").click();
+    await tick();
+    await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 560, 900);
+    const conditionTheme = document.createElement("style");
+    document.head.append(conditionTheme);
+    for (const name of ["daylight", "midnight"]) {
+        conditionTheme.textContent = sources[name];
+        get("[data-source-conditions]").scrollIntoView({block: "center"});
+        await tick();
+        const currentNumber = get('[data-source-conditions] [data-column="number"]');
+        const currentText = get('[data-source-conditions] [data-column="text"]');
+        const numberField = currentNumber.querySelector(".av__field-wrapper").getBoundingClientRect();
+        const numberValue = currentNumber.querySelector('[data-type="filterValue"]').getBoundingClientRect();
+        assert.ok(Math.abs(numberField.top - numberValue.top) <= 1, "a short condition also fits on narrow screens");
+        assert.ok(currentText.querySelector('[data-type="filterValue"]').clientWidth >= 48, "wrapped text values keep usable input space");
+        for (const row of get("[data-source-conditions]").querySelectorAll("[data-condition]")) {
+            assert.ok(row.scrollWidth <= row.clientWidth + 1, "conditions do not overflow");
+            const field = row.querySelector(".av__field-wrapper").getBoundingClientRect();
+            const remove = row.querySelector('[data-action="remove-condition"]').getBoundingClientRect();
+            assert.ok(remove.top >= field.top && remove.bottom <= field.bottom + 1,
+                `removal stays with the first line of a wrapped condition: ${JSON.stringify({field, remove})}`);
+        }
+        await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${mobile ? 360 : 560}-${name}-conditions`);
+    }
+    conditionTheme.remove();
+    await click('[data-source-conditions] [data-condition="3"] [data-action="remove-condition"]');
+    await click('[data-source-conditions] [data-condition="2"] [data-action="remove-condition"]');
+    await click('[data-source-conditions] [data-condition="1"] [data-action="remove-condition"]');
+    assert.deepEqual(latest().conditions, originalConditions);
     await change("[data-target]", "related");
     await change("[data-relation]", "relation");
     assert.equal(get("[data-status]").classList.contains("ft__error"), true);
@@ -93,6 +206,16 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     assert.equal(latest().actions[0].filters[0].column, "finished");
     assert.deepEqual(latest().conditions, originalConditions);
+    await click("[data-target-filters] [data-add-condition]");
+    fieldMenu.items.find(item => item.label === "Status").click();
+    await tick();
+    await click('[data-target-filters] [data-type="selectTrigger"]');
+    assert.notEqual(get('[data-target-filters] [data-type="selectDropdown"]').style.display, "none");
+    await click('[data-source-conditions] [data-type="selectTrigger"]');
+    assert.equal(get('[data-target-filters] [data-type="selectDropdown"]').style.display, "none",
+        "source and target conditions do not retain each other's dropdowns");
+    await click(".av__automation-section");
+    await click('[data-target-filters] [data-condition="1"] [data-action="remove-condition"]');
     await click('[data-target-filters] [data-action="remove-condition"]');
     assert.equal(latest().actions[0].filters.length, 0);
     assert.deepEqual(latest().conditions, originalConditions);
@@ -165,7 +288,7 @@ if (process.versions.electron && process.type === "browser") {
             ipcMain.handle("automation-size", (_event, width, height) => win.setContentSize(width, height));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -174,7 +297,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection"]) {
+            for (const name of ["automation", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;

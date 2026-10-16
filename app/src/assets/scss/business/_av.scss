@@ -3056,6 +3056,18 @@ img.av__cellassetimg {
     display: contents;
   }
 
+  .av__field-wrapper {
+    width: 128px;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .b3-select {
+    max-width: 100%;
+  }
+}
+
+.av__panel .av__conditional-colors {
   .av__filter-date-config {
     order: 1;
     flex-basis: 100%;
@@ -3066,15 +3078,15 @@ img.av__cellassetimg {
     flex-basis: 100%;
     min-width: 0;
   }
+}
 
-  .av__field-wrapper {
-    width: 128px;
-    max-width: 100%;
+.av__panel .av__automation-filter {
+  flex: 0 1 auto;
+  min-width: 0;
+
+  .av__filter-value {
+    flex-basis: auto;
     min-width: 0;
-  }
-
-  .b3-select {
-    max-width: 100%;
   }
 }
 
@@ -3118,6 +3130,16 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
+  [data-conditions] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  [data-conditions]:not(:empty) + [data-add-condition] {
+    margin-top: 12px;
+  }
+
   &-row {
     display: flex;
     align-items: center;
@@ -3128,6 +3150,16 @@ img.av__cellassetimg {
     > .b3-menu__action {
       flex-shrink: 0;
       margin-left: 0;
+    }
+  }
+
+  &-row[data-condition] {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+
+    > .b3-menu__action {
+      align-self: flex-start;
+      margin-top: 3px;
     }
   }
 

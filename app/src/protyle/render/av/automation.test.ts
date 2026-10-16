@@ -1,4 +1,5 @@
 import * as capabilities from "./capabilities";
+import * as filterDropdown from "./filterDropdown";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -43,10 +44,10 @@ test("automation settings autosave changes with independent undo snapshots and k
     let returned = 0;
     let resized = 0;
     let menuVisible = false;
-    let captureClick: () => void;
+    let captureClick: (event: {target: {closest: () => HTMLElement}}) => void;
     const classes = new Set(["b3-menu--fullscreen", "b3-menu--sheet"]);
     const menu = {innerHTML: "", classList: {add: (name: string) => classes.add(name), remove: (name: string) => classes.delete(name)},
-        addEventListener: (_type: string, listener: () => void, capture: boolean) => {
+        addEventListener: (_type: string, listener: typeof captureClick, capture: boolean) => {
             assert.equal(capture, true);
             captureClick = listener;
         },
@@ -71,6 +72,7 @@ test("automation settings autosave changes with independent undo snapshots and k
                 addItem() {}
                 open() { menuVisible = true; }
             }},
+            "./filterDropdown": filterDropdown,
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async (_path: string, request: {id: string}) => ({code: 0, data: {av: request.id === "source" ? database : destination}})},
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
@@ -89,10 +91,10 @@ test("automation settings autosave changes with independent undo snapshots and k
     assert.ok(resized >= 2);
     const addField = {dataset: {action: "add-field"}, closest: () => ({dataset: {index: "0"}}),
         getBoundingClientRect: () => ({left: 0, bottom: 0, height: 20})};
-    captureClick();
+    captureClick({target: {closest: () => null}});
     listeners.get("click")({target: {closest: () => addField}});
     assert.equal(menuVisible, true);
-    captureClick();
+    captureClick({target: {closest: () => null}});
     listeners.get("click")({target: {closest: (): HTMLElement => null}});
     assert.equal(menuVisible, false);
     assert.equal(transactions.length, 0);
@@ -123,7 +125,7 @@ test("automation settings autosave changes with independent undo snapshots and k
     assert.deepEqual(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[1], otherRule);
     panel.isConnected = false;
     menuVisible = true;
-    captureClick();
+    captureClick({target: {closest: () => null}});
     assert.equal(menuVisible, true);
     assert.equal(returned, 0);
 });

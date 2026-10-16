@@ -13,6 +13,7 @@ import {Constants} from "../../../constants";
 import {countFilterLeaves} from "./filterTree";
 import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
+import {closeInlineFilterDropdowns} from "./filterDropdown";
 
 interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
@@ -1303,28 +1304,13 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         event.stopImmediatePropagation();
     });
 
-    // 点击面板空白处收起所有 select 下拉
+    // 点击条件外部时收起下拉，保持当前触发器的切换行为和下拉内部操作。
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
             return;
         }
-        if (!target.closest('[data-type="selectTrigger"]') && !target.closest('[data-type="selectDropdown"]')) {
-            menuElement.querySelectorAll('[data-type="selectDropdown"]').forEach((el: HTMLElement) => {
-                el.style.display = "none";
-            });
-        }
-        if (!target.closest('[data-type="relationFilterTrigger"]') &&
-            !target.closest('[data-type="relationFilterDropdown"]')) {
-            menuElement.querySelectorAll('[data-type="relationFilterDropdown"]').forEach((el: HTMLElement) => {
-                el.style.display = "none";
-            });
-        }
-        if (!target.closest('[data-type-rel="relation"]') && !target.closest('[data-type="relList"]')) {
-            menuElement.querySelectorAll('[data-type="relList"]').forEach((el: HTMLElement) => {
-                el.style.display = "none";
-            });
-        }
+        closeInlineFilterDropdowns(menuElement, target);
     }, true);
 
     // select 搜索过滤
@@ -1360,7 +1346,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 id: colData.relation.avID,
                 keyword,
             }, response => {
-                if ((target as HTMLInputElement).value !== keyword) {
+                if (!target.isConnected || document.activeElement !== target || (target as HTMLInputElement).value !== keyword) {
                     return;
                 }
                 const row = getRow(target);

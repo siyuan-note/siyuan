@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261016165601"
+		"updated": "20261016174753"
 	},
 	"Children": [
 		{
@@ -3820,7 +3820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-f9wjtlr",
-				"updated": "20261016165601"
+				"updated": "20261016174753"
 			},
 			"Children": [
 				{
@@ -3912,7 +3912,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261016165601-zk0dnna",
-				"updated": "20261016165601"
+				"updated": "20261016174215"
 			},
 			"Children": [
 				{
@@ -3926,7 +3926,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 模板，使用變數選單插入觸發時間或來源欄位。編輯模板會暫停規則，完成後請重新啟用。所有可編輯欄位均支援模板；建立時間、更新時間、行號、彙總及模板欄位等計算欄位不支援賦值。主鍵只修改文字，保留既有繫結"
+					"Data": " 模板。編輯模板會暫停規則，完成後請重新啟用。所有可編輯欄位均支援模板；建立時間、更新時間、行號、彙總及模板欄位等計算欄位不支援賦值。主鍵只修改文字，保留既有繫結"
 				}
 			]
 		},
@@ -4125,6 +4125,349 @@
 				{
 					"Type": "NodeText",
 					"Data": "加密資料庫只能操作同一加密筆記本內的資料庫。請先解鎖相關筆記本；目標資料庫或欄位無法使用時，需要修正或暫停規則。複製資料庫後規則保留但處於暫停狀態，請檢查目標與關聯欄位後再啟用"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-ir30l97",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261016174753-ir30l97",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板範例"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-bfygs5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016174753-bfygs5z",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將完整範例複製到模板輸入框。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "FIELD_ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 是預留位置，請替換為觸發條目所在資料庫的來源欄位 ID，而非欄位名稱。複製欄位時，來源與目標欄位應為相同類型；複製關聯時，兩個關聯欄位還須指向同一資料庫"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-8mlxif2",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20261016174753-8mlxif2",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "用途"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "模板內容"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期：觸發當天"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{now | date \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期：觸發七天後"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期：來源日期或範圍順延七天，保留時間設定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"FIELD_ID\"))}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文字、主鍵、連結、電子郵件或電話：複製來源欄位"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文字或主鍵：在來源文字後加上後綴"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"}（下次）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "數字：來源數字加一，支援小數"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{addf (field \"FIELD_ID\") 1}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "核取方塊：取來源欄位的相反值"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{not (field \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "單選：設定為既有選項"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "已完成"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多選：設定兩個既有選項"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[\"工作\",\"重要\"]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期、多選、關聯、資源或位置：複製同類型來源欄位"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (value \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-m04acgg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016174753-m04acgg",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "日期格式中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 是固定的格式寫法，請勿替換為目前日期。單選與多選範例中的選項名稱須已存在於目標欄位，可依需要替換。設定後先使用預覽檢查結果，再啟用規則"
 				}
 			]
 		},

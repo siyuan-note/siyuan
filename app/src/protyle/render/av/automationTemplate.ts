@@ -56,16 +56,10 @@ export const mountAutomationTemplate = (options: {
     const fields = source.keyValues.filter(item => item?.key && hasAVCapability(item.key.type, "editable"));
     const rows = fields.find(item => item.key.type === "block")?.values || [];
     let version = 0;
-    const example = field.type === "date" ? '.action{((now).AddDate 0 0 7).Format "2006-01-02"}' :
-        field.type === "checkbox" ? "true" : field.type === "number" ? ".action{add 1 2}" :
-            field.type === "mSelect" || field.type === "relation" || field.type === "mAsset" ? "[]" :
-                field.type === "location" ? '{"name":"","latitude":0,"longitude":0}' : ".action{now | date \"2006-01-02\"}";
     host.classList.add("av__automation-template");
     host.innerHTML = `<textarea class="b3-text-field fn__block" data-template rows="3" maxlength="8192" aria-label="${escapeAttr(lang.template)}">${escapeHtml(value.template || "")}</textarea>
-<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span>${lang.variables}</span><select class="b3-select" data-template-variable><option value="">${lang.automationInsertVariable}</option><option value="now">${lang.automationTriggerTime}</option>${fields.map(item => `<option value="${escapeAttr(item.key.id)}">${escapeHtml(item.key.name)}</option><option value="value:${escapeAttr(item.key.id)}">${escapeHtml(item.key.name)} (JSON)</option>`).join("")}</select></label><button type="button" class="b3-button b3-button--cancel" data-template-example>${lang.automationTemplateExample}</button></div>
 <div class="ft__on-surface ft__smaller">${lang.automationTemplateTip}</div>
-<div class="ft__on-surface ft__smaller">${lang.automationTimeZone} ${escapeHtml(timeZone)}</div>
-<details data-template-preview><summary>${lang.automationPreviewData}</summary><div class="av__automation-template-data">
+<details data-template-preview><summary class="av__automation-template-toggle b3-button b3-button--cancel fn__block"><svg aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span>${lang.automationPreviewData}</span></summary><div class="av__automation-template-data">
 <div class="ft__on-surface ft__smaller">${lang.automationPreviewOnly}</div>
 <label class="av__automation-control"><span>${lang.automationPreviewItem}</span><select class="b3-select" data-template-item><option value="">${lang.selectRelationItems}</option>${rows.map(row => `<option value="${escapeAttr(row.blockID)}">${escapeHtml(row.block?.content || row.blockID)}</option>`).join("")}</select></label>
 <label class="av__automation-control"><span>${lang.automationPreviewTime}</span><input class="b3-text-field" type="datetime-local" data-template-time value="${automationDateInput(Date.now(), timeZone)}"></label>
@@ -102,27 +96,6 @@ export const mountAutomationTemplate = (options: {
         value.template = editor.value;
         save();
     });
-    host.querySelector<HTMLSelectElement>("[data-template-variable]").addEventListener("change", event => {
-        const select = event.target as HTMLSelectElement;
-        if (!select.value) {
-            return;
-        }
-        const variable = select.value;
-        const text = variable === "now" ? ".action{now}" : variable.startsWith("value:") ?
-            `.action{toJson (value ${JSON.stringify(variable.substring(6))})}` : `.action{field ${JSON.stringify(variable)}}`;
-        editor.setRangeText(text, editor.selectionStart, editor.selectionEnd, "end");
-        value.template = editor.value;
-        select.value = "";
-        save();
-        renderInputs();
-        editor.focus();
-    });
-    host.querySelector("[data-template-example]").addEventListener("click", () => {
-        editor.value = example;
-        value.template = example;
-        save();
-        renderInputs();
-    });
     host.addEventListener("input", event => {
         const input = event.target as HTMLInputElement;
         if (input.matches("[data-template-input]")) {
@@ -130,7 +103,11 @@ export const mountAutomationTemplate = (options: {
         }
         invalidate();
     });
-    host.querySelector("[data-template-preview]").addEventListener("toggle", onResize);
+    const preview = host.querySelector<HTMLDetailsElement>("[data-template-preview]");
+    preview.addEventListener("toggle", () => {
+        preview.querySelector("summary use").setAttribute("xlink:href", preview.open ? "#iconDown" : "#iconRight");
+        onResize();
+    });
     host.querySelector<HTMLButtonElement>("[data-template-run]").addEventListener("click", async event => {
         const button = event.currentTarget as HTMLButtonElement;
         if (!item.value || !triggerTime.checkValidity() || !triggerTime.value) {

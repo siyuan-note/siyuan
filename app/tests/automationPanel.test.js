@@ -55,6 +55,7 @@ const runCases = async (sources, css, mobile) => {
         "protyle/render/av/cell": {getCellValueText: value => value.text?.content || "",
             genCellValue: (type, value) => ({type, mSelect: value})},
         "protyle/render/av/relation": {openSearchAV: options => options.callback({dataset: {avId: "target"}})},
+        "layout/getTopBarHeight": {getTopBarHeight: () => 0},
     };
     const cache = {};
     const load = name => {
@@ -68,7 +69,13 @@ const runCases = async (sources, css, mobile) => {
         return exports;
     };
     await load("protyle/render/av/automation").openAutomationMenu({protyle: {options: {}, block: {rootID: "document"}},
-        blockElement: {dataset: {nodeId: "carrier"}}, avID: "source", menuElement: menu, onResize() {}});
+        blockElement: {dataset: {nodeId: "carrier"}}, avID: "source", menuElement: menu, onResize() {
+            if (mobile) {
+                void menu.offsetHeight;
+            } else {
+                load("util/setPosition").setPosition(menu, window.innerWidth - menu.clientWidth, 100, 30, 0, true);
+            }
+        }});
     const get = selector => {const element = menu.querySelector(selector); assert.ok(element, selector); return element;};
     const change = async (selector, value) => {
         const element = get(selector);
@@ -283,10 +290,30 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     await change("[data-mode]", "currentTime");
     const theme = document.createElement("style");
+    await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 560, 620);
+    get("[data-mode]").scrollIntoView({block: "center"});
+    await tick();
+    const scroller = get(".b3-menu__items");
+    const assignmentScrollTop = scroller.scrollTop;
+    assert.ok(assignmentScrollTop > 100, "the assignment is reached by scrolling before changing its mode");
     await change("[data-mode]", "template");
+    assert.ok(Math.abs(scroller.scrollTop - assignmentScrollTop) <= 1,
+        `switching to a template preserves the scrolled assignment: ${assignmentScrollTop} -> ${scroller.scrollTop}`);
+    assert.ok(get("[data-mode]").getBoundingClientRect().top >= scroller.getBoundingClientRect().top,
+        "the assignment remains visible after its template editor expands");
+    await change("[data-mode]", "currentTime");
+    get("[data-mode]").scrollIntoView({block: "center"});
+    await tick();
+    const repeatedScrollTop = scroller.scrollTop;
+    await change("[data-mode]", "template");
+    assert.ok(Math.abs(scroller.scrollTop - repeatedScrollTop) <= 1, "repeated mode switches also preserve scrolling");
+    await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 560, 900);
     assert.equal(transactions.at(-1).perform[0].data.spec, 2, "templates use the new format");
     assert.ok(latest().timeZone, "the rule records the frontend timezone");
-    await click("[data-template-example]");
+    const editor = get("[data-template]");
+    editor.value = '.action{((now).AddDate 0 0 7).Format "2006-01-02"}';
+    editor.dispatchEvent(new Event("input", {bubbles: true}));
+    editor.dispatchEvent(new Event("change", {bubbles: true}));
     assert.match(latest().actions[0].fields.finished.template, /AddDate 0 0 7/);
     get("[data-template-preview]").open = true;
     await change("[data-template-item]", "sample");
@@ -299,7 +326,6 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(get("[data-template-result]").textContent);
     assert.ok(get("[data-template-time]").getBoundingClientRect().bottom < get("[data-template-result]").getBoundingClientRect().top,
         "preview inputs precede the result");
-    const editor = get("[data-template]");
     editor.value = '.action{field "finished"}';
     editor.dispatchEvent(new Event("input", {bubbles: true}));
     editor.dispatchEvent(new Event("change", {bubbles: true}));
@@ -377,9 +403,11 @@ if (process.versions.electron && process.type === "browser") {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;
             }
-            sources["util/escape"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/util/escape.ts"), "utf8"), {
-                compilerOptions: {module: ts.ModuleKind.CommonJS},
-            }).outputText;
+            for (const name of ["escape", "setPosition"]) {
+                sources[`util/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/util/${name}.ts`), "utf8"), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS},
+                }).outputText;
+            }
             for (const name of ["daylight", "midnight"]) sources[name] = fs.readFileSync(path.join(__dirname, `../appearance/themes/${name}/theme.css`), "utf8");
             for (const mobile of [false, true]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");

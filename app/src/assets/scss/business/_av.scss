@@ -3222,8 +3222,6 @@ img.av__cellassetimg {
   }
 
   &-field[data-template-assignment] {
-    align-items: start;
-
     > .av__automation-value {
       grid-column: 1 / -1;
     }
@@ -3239,6 +3237,15 @@ img.av__cellassetimg {
 
   &-template-data {
     margin-top: 8px;
+  }
+
+  &-template-toggle {
+    justify-content: flex-start;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
   }
 
   &-template-result {

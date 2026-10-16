@@ -71,6 +71,7 @@ export const openAutomationMenu = async (options: {
 </div></div>`;
     const panel = menuElement.querySelector<HTMLElement>(".av__automation");
     const body = panel.querySelector<HTMLElement>("[data-body]");
+    const scrollElement = menuElement.querySelector<HTMLElement>(".b3-menu__items");
     // 先收起已打开的选项菜单，再由本次点击打开新菜单，避免冒泡被面板拦截后菜单滞留。
     const closeMenu = (event: MouseEvent) => {
         if (!panel.isConnected) {
@@ -306,6 +307,7 @@ export const openAutomationMenu = async (options: {
         if (!body.isConnected || rules[index] !== rule || version !== renderVersion) {
             return;
         }
+        const scrollTop = scrollElement.scrollTop;
         body.innerHTML = `<div class="ft__on-surface ft__smaller">${lang.automationTip}</div>
 <div class="av__automation-row">${rule ? `<label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.automationRule}</span><select class="b3-select" data-rule>${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select></label>` : ""}<div class="av__automation-row av__automation-tools">${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div></div>
 ${rule ? `<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.name}</span><input class="b3-text-field" data-name value="${escapeAttr(rule.name)}"></label><label class="av__automation-row av__automation-enabled"><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}></label></div>
@@ -319,6 +321,7 @@ ${rule.trigger === "block" ? "" : `<div class="ft__on-surface ft__smaller">${lan
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface">3</span><span>${lang.automationThen}</span></div><div data-actions></div>${rule.trigger === "block" ? `<button type="button" class="b3-button b3-button--outline" data-action="preview-collection"${rule.enabled ? "" : " disabled"}>${lang.automationCollectionPreview}</button>` : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddAction}</button>`}</section>` : ""}`;
         if (!rule) {
             onResize();
+            scrollElement.scrollTop = scrollTop;
             return;
         }
         if (rule.trigger === "block") {
@@ -383,6 +386,8 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
         });
         updateStatus();
         onResize();
+        // 重建期间内容高度可能暂时变小，所有字段挂载并完成定位后再恢复滚动位置。
+        scrollElement.scrollTop = scrollTop;
     };
     body.addEventListener("input", event => {
         if ((event.target as HTMLElement).matches("[data-name]")) {

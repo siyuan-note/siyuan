@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261016165601"
+		"updated": "20261016174753"
 	},
 	"Children": [
 		{
@@ -3830,7 +3830,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-2ctdjhm",
-				"updated": "20261016165601"
+				"updated": "20261016174753"
 			},
 			"Children": [
 				{
@@ -3922,7 +3922,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261016165601-3mbpi7s",
-				"updated": "20261016165601"
+				"updated": "20261016174215"
 			},
 			"Children": [
 				{
@@ -3936,7 +3936,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " をインラインで編集できます。変数メニューからトリガー時刻やソースフィールドを挿入します。テンプレートを編集するとルールが一時停止するため、編集後に再度有効にしてください。編集可能なすべてのフィールドに対応しますが、作成日時、更新日時、行番号、ロールアップ、テンプレートなどの計算フィールドには代入できません。主キーは既存のバインドを維持します"
+					"Data": " をインラインで編集できます。テンプレートを編集するとルールが一時停止するため、編集後に再度有効にしてください。編集可能なすべてのフィールドに対応しますが、作成日時、更新日時、行番号、ロールアップ、テンプレートなどの計算フィールドには代入できません。主キーは既存のバインドを維持します"
 				}
 			]
 		},
@@ -4135,6 +4135,349 @@
 				{
 					"Type": "NodeText",
 					"Data": "暗号化されたデータベースは、同じ暗号化ノートブック内のデータベースだけを操作できます。先にノートブックのロックを解除してください。対象のデータベースやフィールドが利用できない場合は、ルールを修正するか一時停止します。データベースをコピーするとルールは一時停止した状態で保持されるため、対象と関連フィールドを確認してから有効にしてください"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-54vbc83",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261016174753-54vbc83",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートの使用例"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-fyb1nlk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016174753-fyb1nlk",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用例全体をテンプレート入力欄にコピーしてください。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "FIELD_ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " はプレースホルダーです。フィールド名ではなく、トリガー元アイテムのデータベースにあるソースフィールドの ID に置き換えます。コピー元とコピー先のフィールドは同じ型にしてください。リレーションをコピーする場合は、両方のリレーションフィールドが同じデータベースを参照している必要があります"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-z6xd85j",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20261016174753-z6xd85j",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "用途"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "テンプレートの内容"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日付：トリガー当日"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{now | date \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日付：トリガーの7日後"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日付：ソースの日付または範囲を7日後にずらし、時刻設定を保持"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"FIELD_ID\"))}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テキスト、主キー、URL、メール、電話：ソースフィールドをコピー"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テキストまたは主キー：ソーステキストに接尾辞を追加"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"}（次回）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数値：ソースの数値に1を加算、小数にも対応"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{addf (field \"FIELD_ID\") 1}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "チェックボックス：ソースの値を反転"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{not (field \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択：既存の選択肢を設定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "完了"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複数選択：既存の選択肢を2つ設定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[\"仕事\",\"重要\"]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日付、複数選択、リレーション、アセット、位置：同じ型のソースフィールドをコピー"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (value \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-9csv5xs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016174753-9csv5xs",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "日付書式の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は固定の書式指定です。現在の日付に置き換えないでください。選択と複数選択の例では、コピー先フィールドに既存の選択肢名を指定し、必要に応じて置き換えます。ルールを有効にする前にプレビューで結果を確認してください"
 				}
 			]
 		},

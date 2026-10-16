@@ -32,6 +32,9 @@ const (
 	// ClientTLSHeaderValue 为标记 TLS 的头部取值。
 	ClientTLSHeaderValue = "1"
 
+	// ClientTLSHeaderPlaintextValue 为标记客户端使用明文连接的头部取值。
+	ClientTLSHeaderPlaintextValue = "0"
+
 	// StrictTransportSecurityValue 为 HTTPS 响应附加的 HSTS 策略，有效期一年。
 	StrictTransportSecurityValue = "max-age=31536000"
 )

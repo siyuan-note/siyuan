@@ -255,6 +255,7 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 		name         string
 		remoteAddr   string
 		serveTLS     bool
+		clientTLS    string
 		host         string
 		wantSecure   bool
 		wantRedirect bool
@@ -264,6 +265,9 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 		// 本机 HTTP 会话必须能被不接受明文 Secure Cookie 的客户端回传。
 		{name: "plaintext loopback connection", remoteAddr: "127.0.0.1:54321", host: "127.0.0.1:6806", wantSecure: false},
 		{name: "plaintext ipv6 loopback connection", remoteAddr: "[::1]:54321", host: "[::1]:6806", wantSecure: false},
+		{name: "HTTP client through TLS backend", remoteAddr: "127.0.0.1:54321", serveTLS: true, clientTLS: util.ClientTLSHeaderPlaintextValue, host: "notes.example.com:6806"},
+		{name: "HTTPS client through HTTP backend", remoteAddr: "127.0.0.1:54321", clientTLS: util.ClientTLSHeaderValue, host: "notes.example.com:6806", wantSecure: true},
+		{name: "remote forged HTTP marker over TLS", remoteAddr: "192.0.2.10:54321", serveTLS: true, clientTLS: util.ClientTLSHeaderPlaintextValue, host: "notes.example.com:6806", wantSecure: true},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -272,6 +276,9 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 			request := httptest.NewRequest(http.MethodPost, "/api/system/loginAuth", nil)
 			request.RemoteAddr = test.remoteAddr
 			request.Host = test.host
+			if test.clientTLS != "" {
+				request.Header.Set(util.ClientTLSHeader, test.clientTLS)
+			}
 			if test.serveTLS {
 				request.TLS = &tls.ConnectionState{}
 			}
@@ -302,6 +309,13 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 			}
 			if !cookies[0].HttpOnly {
 				t.Fatal("cookie HttpOnly = false, want true")
+			}
+			wantHSTS := ""
+			if test.wantSecure {
+				wantHSTS = util.StrictTransportSecurityValue
+			}
+			if hsts := recorder.Result().Header.Get("Strict-Transport-Security"); hsts != wantHSTS {
+				t.Fatalf("Strict-Transport-Security = %q, want %q", hsts, wantHSTS)
 			}
 		})
 	}

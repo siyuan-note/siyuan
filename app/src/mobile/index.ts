@@ -212,8 +212,6 @@ class App {
         fetchPost("/api/system/getConf", {}, guardStartup<IWebSocketData>(async (confResponse) => {
             setStartupLanguage(confResponse.data.conf.appearance.lang);
             setStartupStage("engine");
-            // 现代 Android 壳先完成可信主文档握手，再开放保持同步语义的原生接口。
-            await window.JSAndroid?.ready;
             await ensureLute({reloadOnFailure: false});
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(confResponse.data.conf);

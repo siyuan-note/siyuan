@@ -197,7 +197,6 @@ interface Window {
     };
     siyuan: ISiyuan;
     JSAndroid: {
-        ready?: Promise<void>
         openAuthURL(url: string): void
         returnDesktop(): void
         openExternal(url: string): void

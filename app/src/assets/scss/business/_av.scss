@@ -3147,8 +3147,8 @@ img.av__cellassetimg {
   &-row[data-condition]:focus-within > .av__automation-remove,
   &-action[data-index]:hover > .av__automation-row > .av__automation-remove,
   &-action[data-index]:focus-within > .av__automation-row > .av__automation-remove,
-  &-field[data-field-id]:hover > .av__automation-row > .av__automation-remove,
-  &-field[data-field-id]:focus-within > .av__automation-row > .av__automation-remove {
+  &-field[data-field-id]:hover > .av__automation-remove,
+  &-field[data-field-id]:focus-within > .av__automation-remove {
     opacity: 1;
     pointer-events: auto;
   }
@@ -3205,6 +3205,38 @@ img.av__cellassetimg {
 
   &-action:last-child {
     margin-bottom: 0;
+  }
+
+  &-field[data-field-id] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) max-content;
+    align-items: center;
+
+    > .b3-menu__action {
+      margin-left: 0;
+    }
+  }
+
+  &-field-name {
+    white-space: nowrap;
+  }
+
+  &-assignment {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+
+    > .av__automation-value {
+      flex-basis: 160px;
+      min-width: 0;
+      align-self: center;
+
+      &:empty {
+        display: none;
+      }
+    }
   }
 
   &-action[data-index] {

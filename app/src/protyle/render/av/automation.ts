@@ -355,8 +355,10 @@ ${target ? `${action.type === "edit" && action.target !== "current" ? `<div clas
                 row.className = "av__automation-field";
                 row.dataset.fieldId = keyID;
                 const compatible = action.type === "collect" ? [] : compatibleFields(database, field);
-                row.innerHTML = `<div class="av__automation-row"><span class="fn__flex-1">${escapeHtml(field?.name || `${lang.invalid}: ${keyID}`)}</span>${iconButton("remove-field", "iconClose", lang.delete, true, true)}</div>
-${field ? `<div class="av__automation-row"><label class="av__automation-control"><span class="ft__on-surface">${lang.automationValueMode}</span><select class="b3-select" data-mode>${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select></label><div class="av__automation-value" data-value></div></div>` : ""}`;
+                const fieldName = field?.name || `${lang.invalid}: ${keyID}`;
+                row.innerHTML = `<span class="av__automation-field-name fn__ellipsis ariaLabel" aria-label="${escapeAttr(fieldName)}" data-position="north">${escapeHtml(fieldName)}</span>
+<div class="av__automation-assignment">${field ? `<select class="b3-select" data-mode aria-label="${escapeAttr(lang.automationValueMode)}">${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select><div class="av__automation-value" data-value></div>` : ""}</div>
+${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
                 fieldsHost.append(row);
                 if (!field) {
                     return;

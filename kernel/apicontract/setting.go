@@ -236,9 +236,11 @@ type SettingEditor struct {
 	FloatWindowMode                 int                  `json:"floatWindowMode" api:"optional,nullable"`
 	FloatWindowDelay                *int                 `json:"floatWindowDelay" api:"optional,nullable"`
 	KeepLoadedContent               bool                 `json:"keepLoadedContent" api:"optional,nullable"`
-	DynamicLoadBlocks               int                  `json:"dynamicLoadBlocks" api:"optional,nullable"`
-	Justify                         bool                 `json:"justify" api:"optional,nullable"`
-	RTL                             bool                 `json:"rtl" api:"optional,nullable"`
+	// PageScrollButtons 控制翻屏按钮，默认关闭，不迁移旧的本地偏好。
+	PageScrollButtons bool `json:"pageScrollButtons" api:"optional,nullable"`
+	DynamicLoadBlocks int  `json:"dynamicLoadBlocks" api:"optional,nullable"`
+	Justify           bool `json:"justify" api:"optional,nullable"`
+	RTL               bool `json:"rtl" api:"optional,nullable"`
 	// AutoDirection 默认关闭；段落和标题按首个强方向字符排版，列表项独立调整标记和缩进。
 	// 手动方向优先，表格列顺序不变。
 	AutoDirection       bool     `json:"autoDirection" api:"optional,nullable"`

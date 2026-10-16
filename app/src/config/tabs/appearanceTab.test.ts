@@ -66,11 +66,7 @@ for (const mobile of [true, false]) {
         assert.equal(slots.some(item => item.key === "mobileBottomBar"), mobile);
         assert.equal(slots.some(item => item.key === "mobileBarsAutoHide"), mobile);
         assert.equal(slots.some(item => item.key === "mobileSidebarAccess"), mobile);
-        const pageScrollSwitch = switches.find(item => item.id === "pageScrollButtons");
-        assert.ok(pageScrollSwitch);
-        assert.equal(pageScrollSwitch.spec.title, "showPageScrollButtons");
-        assert.equal(typeof pageScrollSwitch.spec.readConfig, "function");
-        assert.equal(typeof pageScrollSwitch.spec.save, "function");
+        assert.equal(switches.some(item => item.id === "pageScrollButtons" || item.id === "editor.pageScrollButtons"), false);
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
         const colors = slots.find(item => item.key === "manageColors");
         assert.ok(colors);

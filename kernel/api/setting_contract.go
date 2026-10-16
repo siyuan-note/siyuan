@@ -390,6 +390,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.FloatWindowMode = value.FloatWindowMode
 	result.FloatWindowDelay = value.FloatWindowDelay
 	result.KeepLoadedContent = value.KeepLoadedContent
+	result.PageScrollButtons = value.PageScrollButtons
 	result.DynamicLoadBlocks = value.DynamicLoadBlocks
 	result.Justify = value.Justify
 	result.RTL = value.RTL

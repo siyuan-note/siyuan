@@ -40798,6 +40798,16 @@
             }
           ]
         },
+        "pageScrollButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pasteURLAutoConvert": {
           "anyOf": [
             {
@@ -44655,6 +44665,9 @@
         "onlySearchForDoc": {
           "type": "boolean"
         },
+        "pageScrollButtons": {
+          "type": "boolean"
+        },
         "pasteURLAutoConvert": {
           "type": "boolean"
         },
@@ -44752,6 +44765,7 @@
         "listLogicalOutdent",
         "markdown",
         "onlySearchForDoc",
+        "pageScrollButtons",
         "pasteURLAutoConvert",
         "plantUMLServePath",
         "readOnly",
@@ -45417,6 +45431,16 @@
           ]
         },
         "onlySearchForDoc": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pageScrollButtons": {
           "anyOf": [
             {
               "type": "boolean"

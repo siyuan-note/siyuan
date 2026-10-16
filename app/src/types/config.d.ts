@@ -680,6 +680,8 @@ declare namespace Config {
          * Whether to retain dynamically loaded content blocks
          */
         keepLoadedContent: boolean;
+        /** 是否显示翻屏按钮，默认关闭，不迁移旧的本地偏好 */
+        pageScrollButtons: boolean;
         /**
          * The number of blocks loaded each time they are dynamically loaded
          */

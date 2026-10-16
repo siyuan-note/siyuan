@@ -1,7 +1,6 @@
 import {Constants} from "./constants";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {onAgentStreamingMarkdownStorageChanged} from "./config/tabs/ai/agentStreamingMarkdown";
-import {onPageScrollButtonsStorageChanged} from "./protyle/scroll/pageButtons";
 import {onCompactModeStorageChanged, refreshCompactMode} from "./config/tabs/compactMode";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {systemConfig} from "./config/systemConfig";
@@ -184,7 +183,6 @@ export class App {
                             if (window.siyuan.storage) {
                                 window.siyuan.storage[data.data.key] = data.data.val;
                                 onAgentStreamingMarkdownStorageChanged(data.data.key);
-                                onPageScrollButtonsStorageChanged(data.data.key);
                                 onCompactModeStorageChanged(data.data.key);
                             }
                             break;
@@ -192,21 +190,18 @@ export class App {
                             Object.keys(data.data.keyVals).forEach((k) => {
                                 window.siyuan.storage[k] = data.data.keyVals[k];
                                 onAgentStreamingMarkdownStorageChanged(k);
-                                onPageScrollButtonsStorageChanged(k);
                                 onCompactModeStorageChanged(k);
                             });
                             break;
                         case "removeLocalStorageVal":
                             delete window.siyuan.storage[data.data.key];
                             onAgentStreamingMarkdownStorageChanged(data.data.key);
-                            onPageScrollButtonsStorageChanged(data.data.key);
                             onCompactModeStorageChanged(data.data.key);
                             break;
                         case "removeLocalStorageVals":
                             data.data.keys.forEach((k: string) => {
                                 delete window.siyuan.storage[k];
                                 onAgentStreamingMarkdownStorageChanged(k);
-                                onPageScrollButtonsStorageChanged(k);
                                 onCompactModeStorageChanged(k);
                             });
                             break;

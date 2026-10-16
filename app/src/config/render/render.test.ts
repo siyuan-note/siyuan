@@ -78,13 +78,13 @@ describe("genStackHtml", () => {
         }
     });
 
-    it("renders descriptions with controls using the primary text color", () => {
+    it("keeps descriptions beside controls styled as secondary text", () => {
         const html = genStackHtml([{
             left: {kind: "desc", text: "Setting name"},
             right: {kind: "button", id: "setting", label: "Configure", icon: "iconSettings"},
         }]);
 
-        assert.match(html, /class="fn__flex-center fn__flex-1 config-item__main">Setting name<\/div>/);
+        assert.match(html, /class="fn__flex-center fn__flex-1 config-item__main b3-label__text">Setting name<\/div>/);
         assert.doesNotMatch(html, /ft__on-surface/);
     });
 

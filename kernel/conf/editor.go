@@ -86,6 +86,7 @@ type Editor struct {
 	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
 	FloatWindowDelay                *int           `json:"floatWindowDelay"`                // 浮窗悬停触发延迟，单位：毫秒，默认 620，nil 表示未设置
 	KeepLoadedContent               bool           `json:"keepLoadedContent"`               // 是否保持动态加载的内容
+	PageScrollButtons               bool           `json:"pageScrollButtons"`               // 是否显示翻屏按钮，默认关闭
 	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，下限 48
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示

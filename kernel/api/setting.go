@@ -369,6 +369,9 @@ func applyEditorSetting(c *gin.Context, request apicontract.SetEditorRequest) (r
 	if !request.HasFieldFold("displayImgAlt") {
 		editor.DisplayImgAlt = model.Conf.Editor.Load().DisplayImgAlt
 	}
+	if !request.HasFieldFold("pageScrollButtons") {
+		editor.PageScrollButtons = model.Conf.Editor.Load().PageScrollButtons
+	}
 
 	issues, applyErr := model.ApplyConfSection("editor", editor)
 	recordSettingIssues(c, issues)

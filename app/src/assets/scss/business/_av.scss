@@ -3130,6 +3130,33 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
+  &-enabled,
+  &-tools {
+    align-self: flex-end;
+    min-height: 28px;
+  }
+
+  &-remove {
+    pointer-events: none;
+  }
+
+  &-row[data-condition]:hover > .av__automation-remove,
+  &-row[data-condition]:focus-within > .av__automation-remove,
+  &-action[data-index]:hover > .av__automation-row > .av__automation-remove,
+  &-action[data-index]:focus-within > .av__automation-row > .av__automation-remove,
+  &-field[data-field-id]:hover > .av__automation-row > .av__automation-remove,
+  &-field[data-field-id]:focus-within > .av__automation-row > .av__automation-remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (hover: none), (any-pointer: coarse) {
+    &-remove {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
   [data-conditions] {
     display: flex;
     flex-direction: column;

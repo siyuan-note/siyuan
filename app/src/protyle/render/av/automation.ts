@@ -41,8 +41,8 @@ const compatibleFields = (database: AVAttributeViewData, field: IAVColumn): IAVC
 const optionHTML = (value: string, label: string, selected: string) =>
     `<option value="${escapeAttr(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>`;
 
-const iconButton = (action: string, icon: string, label: string, warning = false) =>
-    `<svg class="b3-menu__action b3-menu__action--show${warning ? " b3-menu__action--warning" : ""} fn__pointer ariaLabel" data-action="${action}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(label)}"><use xlink:href="#${icon}"></use></svg>`;
+const iconButton = (action: string, icon: string, label: string, warning = false, contextual = false) =>
+    `<svg class="b3-menu__action ${contextual ? "av__automation-remove" : "b3-menu__action--show"}${warning ? " b3-menu__action--warning" : ""} fn__pointer ariaLabel" data-action="${action}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(label)}"><use xlink:href="#${icon}"></use></svg>`;
 
 export const openAutomationMenu = async (options: {
     protyle: IProtyle,
@@ -220,7 +220,7 @@ export const openAutomationMenu = async (options: {
         host.innerHTML = `<div data-conditions></div><button class="b3-button b3-button--cancel" type="button" data-add-condition>${lang.addFilterCondition}</button>`;
         const render = () => {
             const list = host.querySelector<HTMLElement>("[data-conditions]");
-            list.innerHTML = filters.map((_, i) => `<div class="av__automation-row" data-condition="${i}"><div class="av__automation-filter" data-filter></div>${iconButton("remove-condition", "iconTrashcan", lang.delete, true)}</div>`).join("");
+            list.innerHTML = filters.map((_, i) => `<div class="av__automation-row" data-condition="${i}"><div class="av__automation-filter" data-filter></div>${iconButton("remove-condition", "iconTrashcan", lang.delete, true, true)}</div>`).join("");
             list.querySelectorAll<HTMLElement>("[data-condition]").forEach(element => {
                 const i = Number(element.dataset.condition);
                 const filterRoot = element.querySelector<HTMLElement>("[data-filter]");
@@ -304,8 +304,8 @@ export const openAutomationMenu = async (options: {
             return;
         }
         body.innerHTML = `<div class="ft__on-surface ft__smaller">${lang.automationTip}</div>
-<div class="av__automation-row">${rule ? `<label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.automationRule}</span><select class="b3-select" data-rule>${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select></label>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div>
-${rule ? `<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.name}</span><input class="b3-text-field" data-name value="${escapeAttr(rule.name)}"></label><label class="av__automation-row"><span>${lang.enable}</span><input type="checkbox" class="b3-switch" data-enabled${rule.enabled ? " checked" : ""}></label></div>
+<div class="av__automation-row">${rule ? `<label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.automationRule}</span><select class="b3-select" data-rule>${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select></label>` : ""}<div class="av__automation-row av__automation-tools">${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div></div>
+${rule ? `<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.name}</span><input class="b3-text-field" data-name value="${escapeAttr(rule.name)}"></label><label class="av__automation-row av__automation-enabled"><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}></label></div>
 <div class="ft__on-surface ft__smaller">${lang.automationAutoSaveTip}</div>
 <div class="ft__on-surface ft__smaller fn__none" role="status" data-status></div>
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface">1</span><span>${lang.automationWhen}</span></div>
@@ -330,7 +330,7 @@ ${rule.trigger === "block" ? "" : `<div class="ft__on-surface ft__smaller">${lan
         const actionsHost = body.querySelector<HTMLElement>("[data-actions]");
         actionsHost.innerHTML = rule.actions.map((action, i) => {
             const target = databases.get(targetID(action));
-            return `<div class="av__automation-action" data-index="${i}"><div class="av__automation-row"><span class="ft__b fn__flex-1">${lang.automationAction} ${i + 1}</span>${action.type === "collect" ? "" : iconButton("remove-action", "iconTrashcan", lang.delete, true)}</div>
+            return `<div class="av__automation-action" data-index="${i}"><div class="av__automation-row"><span class="ft__b fn__flex-1">${lang.automationAction} ${i + 1}</span>${action.type === "collect" ? "" : iconButton("remove-action", "iconTrashcan", lang.delete, true, true)}</div>
 ${action.type === "collect" ? `<div>${lang.automationCollectionAction}</div>` : `<div class="av__automation-columns"><label class="av__automation-control"><span class="ft__on-surface">${lang.automationOperation}</span><select class="b3-select" data-action-type>${optionHTML("edit", lang.editFields, action.type)}${optionHTML("add", lang.new, action.type)}</select></label>
 <label class="av__automation-control"><span class="ft__on-surface">${action.type === "add" ? lang.database : lang.automationTarget}</span><select class="b3-select" data-target>${optionHTML("current", action.type === "add" ? lang.thisDatabase : lang.automationCurrentItem, action.target)}${optionHTML("related", action.type === "add" ? lang.relation : lang.relatedItems, action.target)}${optionHTML("filtered", action.type === "add" ? lang.database : lang.automationMatchingItems, action.target)}</select></label></div>`}
 ${action.target === "related" ? `<select class="b3-select fn__block" data-relation aria-label="${lang.relation}">${optionHTML("", lang.selectRelation, action.relationKeyID || "")}${fieldsOf(database).filter(field => field.type === "relation" && field.relation?.avID).map(field => optionHTML(field.id, field.name, action.relationKeyID)).join("")}</select>` : action.target === "filtered" ? `<button type="button" class="b3-button b3-button--outline fn__block" data-action="database">${escapeHtml(target?.name || lang.select)} (${lang.database})</button>` : ""}
@@ -355,7 +355,7 @@ ${target ? `${action.type === "edit" && action.target !== "current" ? `<div clas
                 row.className = "av__automation-field";
                 row.dataset.fieldId = keyID;
                 const compatible = action.type === "collect" ? [] : compatibleFields(database, field);
-                row.innerHTML = `<div class="av__automation-row"><span class="fn__flex-1">${escapeHtml(field?.name || `${lang.invalid}: ${keyID}`)}</span>${iconButton("remove-field", "iconClose", lang.delete, true)}</div>
+                row.innerHTML = `<div class="av__automation-row"><span class="fn__flex-1">${escapeHtml(field?.name || `${lang.invalid}: ${keyID}`)}</span>${iconButton("remove-field", "iconClose", lang.delete, true, true)}</div>
 ${field ? `<div class="av__automation-row"><label class="av__automation-control"><span class="ft__on-surface">${lang.automationValueMode}</span><select class="b3-select" data-mode>${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select></label><div class="av__automation-value" data-value></div></div>` : ""}`;
                 fieldsHost.append(row);
                 if (!field) {

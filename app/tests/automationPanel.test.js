@@ -81,10 +81,46 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(sections[1].contains(get("[data-source-conditions]")));
     assert.ok(sections[2].contains(get("[data-actions]")));
     assert.equal(get("[data-rule]").labels[0].textContent.includes(lang.automationRule), true);
-    assert.equal(get("[data-enabled]").labels[0].textContent.trim(), lang.enable);
+    assert.equal(get("[data-enabled]").labels[0].textContent.trim(), "");
+    assert.equal(get("[data-enabled]").getAttribute("aria-label"), lang.enable);
+    assert.ok(get("[data-enabled]").classList.contains("ariaLabel"), "the enable switch exposes its label as a tooltip");
     assert.equal(get("[data-trigger-field] option").textContent, lang.automationAnyField);
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     assert.equal(transactions.length, 0, "opening settings must preserve the stored rule");
+    const nameRect = get("[data-name]").getBoundingClientRect();
+    const enabledRect = get("[data-enabled]").getBoundingClientRect();
+    assert.ok(Math.abs((nameRect.top + nameRect.bottom) / 2 - (enabledRect.top + enabledRect.bottom) / 2) <= 1,
+        "the enable switch aligns with the name input rather than its label");
+    const ruleRect = get("[data-rule]").getBoundingClientRect();
+    for (const action of ["add-rule", "remove-rule"]) {
+        const button = get(`[data-action="${action}"]`).getBoundingClientRect();
+        assert.ok(Math.abs((ruleRect.top + ruleRect.bottom) / 2 - (button.top + button.bottom) / 2) <= 1,
+            "rule actions align with the selector rather than its label");
+    }
+    const removals = [
+        ['[data-source-conditions] [data-condition="0"]', '[data-source-conditions] [data-action="remove-condition"]'],
+        ['[data-actions] [data-index="0"]', '[data-actions] [data-action="remove-action"]'],
+        ['[data-field-id="finished"]', '[data-actions] [data-action="remove-field"]'],
+    ];
+    assert.equal(matchMedia("(hover: none), (any-pointer: coarse)").matches, mobile, "touch devices have visible removal controls");
+    for (const [rowSelector, buttonSelector] of removals) {
+        const button = get(buttonSelector);
+        button.scrollIntoView({block: "center"});
+        await require("electron").ipcRenderer.invoke("automation-pointer", window.innerWidth - 2, 2);
+        await tick();
+        const before = button.getBoundingClientRect();
+        assert.equal(getComputedStyle(button).opacity, mobile ? "1" : "0", "removal is contextual on desktop and visible on touch");
+        button.focus();
+        assert.equal(getComputedStyle(button).opacity, "1", "keyboard focus reveals the removal button");
+        button.blur();
+        const rowRect = get(rowSelector).getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("automation-pointer", Math.round(rowRect.left + 8), Math.round(rowRect.top + 8));
+        await tick();
+        assert.equal(getComputedStyle(button).opacity, "1",
+            `hovering the item's content reveals its removal button: ${rowSelector}, ${JSON.stringify(rowRect)}, ${Array.from(document.querySelectorAll(":hover"), item => item.className).join(" / ")}`);
+        assert.equal(button.getBoundingClientRect().right, before.right, "revealing removal does not change its position");
+    }
+    await require("electron").ipcRenderer.invoke("automation-pointer", window.innerWidth - 2, 2);
     const originalConditions = structuredClone(database.automations.rules[0].conditions);
     await click('[data-source-conditions] [data-type="selectTrigger"]');
     assert.notEqual(get('[data-source-conditions] [data-type="selectDropdown"]').style.display, "none");
@@ -288,6 +324,7 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             ipcMain.handle("automation-size", (_event, width, height) => win.setContentSize(width, height));
+            ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
                 assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions)?$/);
@@ -310,6 +347,8 @@ if (process.versions.electron && process.type === "browser") {
             for (const name of ["daylight", "midnight"]) sources[name] = fs.readFileSync(path.join(__dirname, `../appearance/themes/${name}/theme.css`), "utf8");
             for (const mobile of [false, true]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
+                if (!win.webContents.debugger.isAttached()) win.webContents.debugger.attach("1.3");
+                await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: mobile});
                 const css = sources.daylight + sass.compile(path.join(__dirname, `../src/assets/scss/${mobile ? "mobile" : "base"}.scss`), {logger: sass.Logger.silent}).css;
                 await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)}, ${mobile})`);
             }

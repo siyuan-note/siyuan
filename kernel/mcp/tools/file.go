@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 )
 
 var FileTool = &Tool{
@@ -267,18 +268,18 @@ func fileList(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Directory: %s (%d entries)\n\n", p, total))
+	fmt.Fprintf(&sb, "Directory: %s (%d entries)\n\n", p, total)
 	for _, e := range entries {
 		info, _ := e.Info()
 		size := ""
 		if info != nil {
 			size = fmt.Sprintf("%d", info.Size())
 		}
-		sb.WriteString(fmt.Sprintf("- %s [%s] %s\n", e.Name(), typeLabel(e.IsDir()), size))
+		fmt.Fprintf(&sb, "- %s [%s] %s\n", e.Name(), typeLabel(e.IsDir()), size)
 	}
 
 	if max > 0 && max < total {
-		sb.WriteString(fmt.Sprintf("\n...output limited to %d of %d entries. Use limit parameter to adjust.", max, total))
+		fmt.Fprintf(&sb, "\n...output limited to %d of %d entries. Use limit parameter to adjust.", max, total)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -591,7 +592,8 @@ func fileMutationRequest(args map[string]any) (util.TextFileMutation, error) {
 	request.IfAbsent, _ = args["ifAbsent"].(bool)
 	request.DryRun, _ = args["dryRun"].(bool)
 	action, _ := args["action"].(string)
-	if action == "edit" {
+	switch action {
+	case "edit":
 		raw, ok := args["edits"].([]any)
 		if !ok || len(raw) == 0 || len(raw) > 128 {
 			return request, fileInvalid("invalid_edit", "edits must contain 1 to 128 replacements")
@@ -609,7 +611,7 @@ func fileMutationRequest(args map[string]any) (util.TextFileMutation, error) {
 			}
 			request.Edits[i] = util.TextEdit{OldText: oldText, NewText: newText}
 		}
-	} else if action == "write" || action == "" {
+	case "write", "":
 		var ok bool
 		request.Content, ok = args["data"].(string)
 		if !ok {
@@ -948,7 +950,7 @@ func fileGrep(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d lines:\n\n", len(results)))
+	fmt.Fprintf(&sb, "Found %d lines:\n\n", len(results))
 	for _, r := range results {
 		rel, relErr := filepath.Rel(util.WorkspaceDir, r.File)
 		if relErr != nil {
@@ -958,7 +960,7 @@ func fileGrep(args map[string]any) (CallToolResult, error) {
 		if r.Context {
 			sep = "-:"
 		}
-		sb.WriteString(fmt.Sprintf("%s:%d%s %s\n", rel, r.Line, sep, r.Text))
+		fmt.Fprintf(&sb, "%s:%d%s %s\n", rel, r.Line, sep, r.Text)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -1079,6 +1081,9 @@ func grepGuardedFile(path string, re *regexp.Regexp, context int, results *[]*gu
 			}
 		}
 	}
+	if scanErr := scanner.Err(); scanErr != nil {
+		logging.LogErrorf("scan file [%s] failed: %s", path, scanErr)
+	}
 }
 
 // skipTraversalDir 判断遍历时是否跳过该目录，与 Gulu 的隐藏目录跳过规则保持一致。
@@ -1143,15 +1148,16 @@ func fileFind(args map[string]any) (CallToolResult, error) {
 
 	var sb strings.Builder
 	if max > 0 && max < total {
-		sb.WriteString(fmt.Sprintf("Found %d files (showing first %d):\n\n", total, max))
+		fmt.Fprintf(&sb, "Found %d files (showing first %d):\n\n", total, max)
 	} else {
-		sb.WriteString(fmt.Sprintf("Found %d files:\n\n", len(results)))
+		fmt.Fprintf(&sb, "Found %d files:\n\n", len(results))
 	}
 	for _, r := range results {
-		sb.WriteString(r + "\n")
+		sb.WriteString(r)
+		sb.WriteString("\n")
 	}
 	if max > 0 && max < total {
-		sb.WriteString(fmt.Sprintf("\n...output limited to %d of %d files. Use limit parameter to adjust.", max, total))
+		fmt.Fprintf(&sb, "\n...output limited to %d of %d files. Use limit parameter to adjust.", max, total)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

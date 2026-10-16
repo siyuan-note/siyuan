@@ -140,9 +140,10 @@ func currentPaddleConfig() ocr.PaddleConfig {
 	value := Conf.GetOCR()
 	directory := filepath.Join(util.WorkingDir, "stage", "ocr", "runtime", runtime.GOOS+"-"+runtime.GOARCH)
 	filename := "libonnxruntime.so"
-	if runtime.GOOS == "windows" {
+	switch runtime.GOOS {
+	case "windows":
 		filename = "onnxruntime.dll"
-	} else if runtime.GOOS == "darwin" {
+	case "darwin":
 		filename = "libonnxruntime.dylib"
 	}
 	result := ocr.PaddleConfig{Directory: ocrModelDirectory(value.Model), Library: filepath.Join(directory, filename), Thresholds: ocr.Thresholds(value.Thresholds)}

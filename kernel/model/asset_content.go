@@ -376,7 +376,6 @@ func indexAssetContent(absPath string) {
 
 func ReindexAssetContent() {
 	task.AppendTask(task.AssetContentDatabaseIndexFull, fullReindexAssetContent)
-	return
 }
 
 func fullReindexAssetContent() {
@@ -384,7 +383,6 @@ func fullReindexAssetContent() {
 	sql.InitAssetContentDatabase(true)
 
 	assetContentSearcher.FullIndex()
-	return
 }
 
 func init() {
@@ -748,7 +746,8 @@ func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		}
 		for _, row := range rows {
 			for _, colCell := range row {
-				buf.WriteString(colCell + " ")
+				buf.WriteString(colCell)
+				buf.WriteString(" ")
 			}
 		}
 	}
@@ -967,7 +966,8 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	// loop through ordered PDF text pages and join content for asset parse DB result
 	contentBuilder := bytes.Buffer{}
 	for _, pt := range pageText {
-		contentBuilder.WriteString(" " + normalizeNonTxtAssetContent(pt))
+		contentBuilder.WriteString(" ")
+		contentBuilder.WriteString(normalizeNonTxtAssetContent(pt))
 	}
 	ret = &AssetParseResult{
 		Content: contentBuilder.String(),

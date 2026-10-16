@@ -572,7 +572,7 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 				openPromises = append(openPromises, Promise{Resolve: resolve, Reject: reject})
 			}
 
-			resolveOpenPromises := func(rt *goja.Runtime) {
+			resolveOpenPromises := func(_ *goja.Runtime) {
 				if openPromises != nil {
 					for _, promise := range openPromises {
 						if resolveErr := promise.Resolve(nil); resolveErr != nil {

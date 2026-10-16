@@ -206,9 +206,10 @@ func filterClipboardStyle(style string, remove map[string]bool) string {
 			quote = c
 			continue
 		}
-		if c == '(' {
+		switch c {
+		case '(':
 			depth++
-		} else if c == ')' {
+		case ')':
 			depth--
 		}
 		if c != ';' || depth != 0 {

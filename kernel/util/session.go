@@ -97,7 +97,7 @@ func AuthThrottleCheck(key string) (retryAfter int) {
 		delete(authThrottles, key)
 		return 0
 	}
-	if authThrottleWindowSec*time.Second <= time.Now().Sub(throttle.LastFail) {
+	if authThrottleWindowSec*time.Second <= time.Since(throttle.LastFail) {
 		// 超过窗口期未再失败，清除计数避免误锁
 		delete(authThrottles, key)
 	}

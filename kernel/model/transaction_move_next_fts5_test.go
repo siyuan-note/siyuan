@@ -62,10 +62,11 @@ func TestMoveNextIDOrderAndReplay(t *testing.T) {
 			}}
 			for step := range 3 {
 				tx := forward
-				if step == 1 {
+				switch step {
+				case 1:
 					tx = &Transaction{DoOperations: cloneOperations(forward.UndoOperations)}
 					tx.MarkReplay()
-				} else if step == 2 {
+				case 2:
 					tx = &Transaction{DoOperations: cloneOperations(forward.DoOperations)}
 					tx.MarkReplay()
 				}

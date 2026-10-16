@@ -534,9 +534,9 @@ var blockBatchKramdownCmd = &cobra.Command{
 			var sb strings.Builder
 			for _, id := range ids {
 				if kd, ok := kramdowns[id]; ok {
-					sb.WriteString(fmt.Sprintf("--- %s ---\n%s\n\n", id, kd))
+					fmt.Fprintf(&sb, "--- %s ---\n%s\n\n", id, kd)
 				} else {
-					sb.WriteString(fmt.Sprintf("--- %s ---\n(not found)\n\n", id))
+					fmt.Fprintf(&sb, "--- %s ---\n(not found)\n\n", id)
 				}
 			}
 			fmt.Print(sb.String())

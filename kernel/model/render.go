@@ -456,7 +456,8 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					if 0 == blockEmbedMode { // 使用原始文本
 						buf.WriteString(line)
 					} else { // 使用引述块
-						buf.WriteString("> " + line)
+						buf.WriteString("> ")
+						buf.WriteString(line)
 					}
 					if i < len(lines)-1 {
 						buf.WriteString("\n")
@@ -504,7 +505,6 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 			unlink.Unlink()
 		}
 	}
-	return
 }
 
 func renderBlockMarkdownR(id string, rendered *[]string, boxIDs ...string) (ret []*ast.Node) {

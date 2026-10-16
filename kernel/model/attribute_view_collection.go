@@ -445,7 +445,7 @@ func (tx *Transaction) addCollectedItem(view *av.AttributeView, rule *av.Automat
 		&av.AutomationAction{Type: "edit", Target: "current", Fields: rule.Actions[0].Fields}, rule.TimeZone)
 }
 
-func (tx *Transaction) removeCollectedItem(view *av.AttributeView, row *av.Value, boxID string) error {
+func (tx *Transaction) removeCollectedItem(view *av.AttributeView, row *av.Value, _ string) error {
 	if err := tx.rememberAutomationView(view, ""); err != nil {
 		return err
 	}

@@ -194,14 +194,14 @@ func htmlAssetIFrameBlockDOM(assetPath string) (dom, blockID string, err error) 
 
 func newAssetUploadToolResult(succeeded []model.AssetUploadSuccess, failed []model.AssetUploadFailure) CallToolResult {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Uploaded %d file(s):\n", len(succeeded)))
+	fmt.Fprintf(&sb, "Uploaded %d file(s):\n", len(succeeded))
 	for _, result := range succeeded {
-		sb.WriteString(fmt.Sprintf("- %s -> %s\n", result.Name, result.Path))
+		fmt.Fprintf(&sb, "- %s -> %s\n", result.Name, result.Path)
 	}
 	if 0 < len(failed) {
-		sb.WriteString(fmt.Sprintf("\nFailed %d file(s):\n", len(failed)))
+		fmt.Fprintf(&sb, "\nFailed %d file(s):\n", len(failed))
 		for _, result := range failed {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", result.Name, result.Error))
+			fmt.Fprintf(&sb, "- %s: %s\n", result.Name, result.Error)
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}, IsError: 0 < len(failed)}
@@ -246,7 +246,7 @@ func validateAssetUploadPaths(fileList []string) ([]string, error) {
 	return fileList, nil
 }
 
-func assetUnused(args map[string]any) (CallToolResult, error) {
+func assetUnused(_ map[string]any) (CallToolResult, error) {
 	items, err := model.UnusedAssets(true)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
@@ -255,9 +255,9 @@ func assetUnused(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no unused assets found"}}}, nil
 	}
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Unused assets (%d):\n\n", len(items)))
+	fmt.Fprintf(&sb, "Unused assets (%d):\n\n", len(items))
 	for _, item := range items {
-		sb.WriteString(fmt.Sprintf("- %s (%s)\n", item.Item, item.Name))
+		fmt.Fprintf(&sb, "- %s (%s)\n", item.Item, item.Name)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -283,9 +283,9 @@ func assetClean(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no unused assets to clean"}}}, nil
 	}
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Removed %d asset(s):\n\n", len(removed)))
+	fmt.Fprintf(&sb, "Removed %d asset(s):\n\n", len(removed))
 	for _, p := range removed {
-		sb.WriteString(fmt.Sprintf("- %s\n", p))
+		fmt.Fprintf(&sb, "- %s\n", p)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

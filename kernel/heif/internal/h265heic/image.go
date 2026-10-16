@@ -7,11 +7,11 @@ import (
 	"github.com/gen2brain/h265/hevc"
 )
 
-func colorModelFor(f *file, it *item) color.Model {
+func colorModelFor(_ *file, _ *item) color.Model {
 	return color.NRGBAModel
 }
 
-func (f *file) colorInfo(it *item, pic *hevc.Picture) ColorInfo {
+func (f *file) colorInfo(it *item, _ *hevc.Picture) ColorInfo {
 	ci := ColorInfo{Matrix: mcUnspec, Primaries: 2, Transfer: 2}
 
 	p := f.meta.prop(it, "colr")

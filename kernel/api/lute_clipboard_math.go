@@ -240,12 +240,22 @@ func normalizeOfficeHTMLOMML(fragment string) (normalized string, ok bool) {
 				builder.WriteString("<w:p>")
 			}
 			mathStack = append(mathStack, value.Name.Local)
-			builder.WriteString("<m:" + value.Name.Local)
+			builder.WriteString("<m:")
+			builder.WriteString(value.Name.Local)
 			for _, attr := range value.Attr {
-				if attr.Name.Space == officeHTMLOMMLNamespace || attr.Name.Space == docxOMMLNamespace {
-					builder.WriteString(` m:` + attr.Name.Local + `="` + html.EscapeString(attr.Value) + `"`)
-				} else if attr.Name.Space == "http://www.w3.org/XML/1998/namespace" {
-					builder.WriteString(` xml:` + attr.Name.Local + `="` + html.EscapeString(attr.Value) + `"`)
+				switch attr.Name.Space {
+				case officeHTMLOMMLNamespace, docxOMMLNamespace:
+					builder.WriteString(` m:`)
+					builder.WriteString(attr.Name.Local)
+					builder.WriteString(`="`)
+					builder.WriteString(html.EscapeString(attr.Value))
+					builder.WriteString(`"`)
+				case "http://www.w3.org/XML/1998/namespace":
+					builder.WriteString(` xml:`)
+					builder.WriteString(attr.Name.Local)
+					builder.WriteString(`="`)
+					builder.WriteString(html.EscapeString(attr.Value))
+					builder.WriteString(`"`)
 				}
 			}
 			builder.WriteByte('>')
@@ -257,7 +267,9 @@ func normalizeOfficeHTMLOMML(fragment string) (normalized string, ok bool) {
 			if localName != value.Name.Local {
 				return "", false
 			}
-			builder.WriteString("</m:" + localName + ">")
+			builder.WriteString("</m:")
+			builder.WriteString(localName)
+			builder.WriteString(">")
 			mathStack = mathStack[:len(mathStack)-1]
 			if len(mathStack) == 0 {
 				builder.WriteString("</w:p>")
@@ -270,7 +282,9 @@ func normalizeOfficeHTMLOMML(fragment string) (normalized string, ok bool) {
 			if mathStack[len(mathStack)-1] == "t" {
 				builder.WriteString(html.EscapeString(content))
 			} else if mathStack[len(mathStack)-1] == "r" && strings.TrimSpace(content) != "" {
-				builder.WriteString(`<m:t xml:space="preserve">` + html.EscapeString(content) + `</m:t>`)
+				builder.WriteString(`<m:t xml:space="preserve">`)
+				builder.WriteString(html.EscapeString(content))
+				builder.WriteString(`</m:t>`)
 			}
 		}
 	}

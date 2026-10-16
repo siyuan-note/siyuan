@@ -598,27 +598,3 @@ func inferFontWeight(weight int, subfamily string) int {
 	}
 	return weight
 }
-
-func fontWeightFromNormalizedTrait(weight float64, style string) int {
-	if inferred := inferFontWeight(400, style); inferred != 400 {
-		return inferred
-	}
-	switch {
-	case weight <= -0.5:
-		return 100
-	case weight <= -0.25:
-		return 300
-	case weight < 0.15:
-		return 400
-	case weight < 0.28:
-		return 500
-	case weight < 0.35:
-		return 600
-	case weight < 0.5:
-		return 700
-	case weight < 0.6:
-		return 800
-	default:
-		return 900
-	}
-}

@@ -420,7 +420,6 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 
 		if !displayInText {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
-			var unlinks []*ast.Node
 			ast.Walk(snapshotTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering {
 					return ast.WalkContinue
@@ -430,10 +429,6 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 				n.RemoveIALAttr("fold")
 				return ast.WalkContinue
 			})
-
-			for _, unlink := range unlinks {
-				unlink.Unlink()
-			}
 
 			var appends []*ast.Node
 			for n := snapshotTree.Root.FirstChild; nil != n; n = n.Next {

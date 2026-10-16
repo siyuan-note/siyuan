@@ -35,7 +35,11 @@ func TestValueTextRichEmptyParagraphs(t *testing.T) {
 	for _, paragraphs := range [][]string{{"", ""}, {"", "first", "", "", "last", ""}} {
 		var dom strings.Builder
 		for _, content := range paragraphs {
-			dom.WriteString(`<div data-node-id="` + ast.NewNodeID() + `" data-type="NodeParagraph"><div contenteditable="true">` + content + `</div></div>`)
+			dom.WriteString(`<div data-node-id="`)
+			dom.WriteString(ast.NewNodeID())
+			dom.WriteString(`" data-type="NodeParagraph"><div contenteditable="true">`)
+			dom.WriteString(content)
+			dom.WriteString(`</div></div>`)
 		}
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown,
 			Content: valueTextRichBlockDOM2Kramdown(newValueTextRichLute(), dom.String())}

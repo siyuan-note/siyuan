@@ -325,7 +325,9 @@ func TestAttributeViewSearchCompactFieldLimit(t *testing.T) {
 	marked.WriteString("DB")
 	for _, field := range []string{"one", "two", "three", "four", "five", "six", "seven", "eight"} {
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: &av.Key{Name: field, Type: av.KeyTypeText}, Values: []*av.Value{attributeViewSearchTestText("match")}})
-		marked.WriteString(" " + field + " <mark>match</mark>")
+		marked.WriteString(" ")
+		marked.WriteString(field)
+		marked.WriteString(" <mark>match</mark>")
 	}
 	got := compactAttributeViewSearchContent(attrView, marked.String())
 	if strings.Count(got, `class="fn__code"`) != 6 || strings.Contains(got, "seven") || strings.Contains(got, "eight") {

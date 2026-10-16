@@ -329,7 +329,7 @@ func newControllerConstructor(rt *goja.Runtime, prototype *goja.Object, signalCt
 }
 
 // newControllerPrototype 构造 AbortController.prototype：signal 访问器与 abort 方法。
-func newControllerPrototype(rt *goja.Runtime, signalCtor *goja.Object) (*goja.Object, error) {
+func newControllerPrototype(rt *goja.Runtime, _ *goja.Object) (*goja.Object, error) {
 	prototype := rt.NewObject()
 
 	self := func(call goja.FunctionCall, method string) *controllerState {

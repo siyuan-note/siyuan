@@ -175,7 +175,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 
 	indexMu.Lock()
 	index := loadSessionIndex()
-	if index == nil || len(index) == 0 {
+	if len(index) == 0 {
 		index = rebuildSessionIndex()
 	}
 	if index == nil {

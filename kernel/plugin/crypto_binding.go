@@ -261,7 +261,7 @@ func (h *cryptoHost) cryptoBytesOf(rt *goja.Runtime, value goja.Value, name stri
 }
 
 // isBufferSource 判断值是 ArrayBuffer 还是 ArrayBuffer 视图。
-func (h *cryptoHost) isBufferSource(rt *goja.Runtime, value goja.Value) (bool, error) {
+func (h *cryptoHost) isBufferSource(_ *goja.Runtime, value goja.Value) (bool, error) {
 	if !isJsValueNotNull(value) {
 		return false, nil
 	}

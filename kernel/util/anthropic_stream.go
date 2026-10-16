@@ -175,9 +175,10 @@ func (s *anthropicStream) recv() (openai.ChatCompletionStreamResponse, error) {
 		if s.block == nil || event.Index != s.blockIndex {
 			return ret, errors.New("Anthropic content stop has no matching block")
 		}
-		if s.blockType == "text" {
+		switch s.blockType {
+		case "text":
 			s.block["text"] = anthropicJSON(s.text.String())
-		} else if s.blockType == "thinking" {
+		case "thinking":
 			s.block["thinking"] = anthropicJSON(s.thinking.String())
 			s.block["signature"] = anthropicJSON(s.signature.String())
 		}

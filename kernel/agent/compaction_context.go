@@ -132,9 +132,10 @@ func projectCompactionContext(messages []AgentMessage, covered int) []AgentMessa
 	}
 	index := 0
 	for _, message := range messages {
-		if message.Role == "system" {
+		switch message.Role {
+		case "system":
 			projected = append(projected, message)
-		} else if message.Role == "user" || message.Role == "assistant" {
+		case "user", "assistant":
 			if index >= covered {
 				projected = append(projected, message)
 			}

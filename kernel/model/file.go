@@ -2364,7 +2364,6 @@ func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
 	if titleChanged || emptyAttrUpdated {
 		IncSync()
 	}
-	return
 }
 
 type createDocValidation struct {

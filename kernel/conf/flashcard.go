@@ -64,7 +64,7 @@ func DefaultFSRSWeights() string {
 	buf := bytes.Buffer{}
 	defaultWs := fsrs.DefaultWeights()
 	for i, w := range defaultWs {
-		buf.WriteString(fmt.Sprintf("%v", w))
+		fmt.Fprintf(&buf, "%v", w)
 		if i < len(defaultWs)-1 {
 			buf.WriteString(", ")
 		}

@@ -87,12 +87,12 @@ func historyList(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("History (%d total, page %d/%d):\n\n", totalCount, page, pageCount))
+	fmt.Fprintf(&sb, "History (%d total, page %d/%d):\n\n", totalCount, page, pageCount)
 	for _, ts := range results {
 		items := model.FullTextSearchHistoryItems(ts, query, notebook, op, typ)
-		sb.WriteString(fmt.Sprintf("--- %s (%d items) ---\n", ts, len(items)))
+		fmt.Fprintf(&sb, "--- %s (%d items) ---\n", ts, len(items))
 		for _, item := range items {
-			sb.WriteString(fmt.Sprintf("  - [%s] %s (path: %s)\n", item.Op, item.Title, item.Path))
+			fmt.Fprintf(&sb, "  - [%s] %s (path: %s)\n", item.Op, item.Title, item.Path)
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -137,12 +137,12 @@ func historySearch(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Search '%s' (%d total, page %d/%d):\n\n", query, totalCount, page, pageCount))
+	fmt.Fprintf(&sb, "Search '%s' (%d total, page %d/%d):\n\n", query, totalCount, page, pageCount)
 	for _, ts := range timestamps {
 		items := model.FullTextSearchHistoryItems(ts, query, box, op, typ)
-		sb.WriteString(fmt.Sprintf("--- %s (%d items) ---\n", ts, len(items)))
+		fmt.Fprintf(&sb, "--- %s (%d items) ---\n", ts, len(items))
 		for _, item := range items {
-			sb.WriteString(fmt.Sprintf("  - [%s] %s (path: %s)\n", item.Op, item.Title, item.Path))
+			fmt.Fprintf(&sb, "  - [%s] %s (path: %s)\n", item.Op, item.Title, item.Path)
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -164,7 +164,7 @@ func historyRollback(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "history rolled back: " + path}}}, nil
 }
 
-func historyClear(args map[string]any) (CallToolResult, error) {
+func historyClear(_ map[string]any) (CallToolResult, error) {
 	if err := model.ClearWorkspaceHistory(); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "clear history failed: " + err.Error()}}, IsError: true}, nil
 	}

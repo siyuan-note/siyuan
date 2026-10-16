@@ -169,7 +169,7 @@ func printAssetSearchResult(assetContents []*model.AssetContent, matchedAssetCou
 		(page-1)*pageSize+1, (page-1)*pageSize+len(assetContents), matchedAssetCount, pageCount)
 }
 
-func printSearchResult(blocks []*model.Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool, page, pageSize, groupBy int) {
+func printSearchResult(blocks []*model.Block, matchedBlockCount, matchedRootCount, pageCount int, _ bool, page, pageSize, groupBy int) {
 	if len(blocks) == 0 {
 		fmt.Println("No results found.")
 		return

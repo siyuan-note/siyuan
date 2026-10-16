@@ -315,9 +315,10 @@ func setupAttributeViewDeletedBlockTest(t *testing.T, mode string) (*fileOperati
 	}
 	var nodes []*ast.Node
 	count := 1
-	if mode == "container" {
+	switch mode {
+	case "container":
 		count = 2
-	} else if mode == "batch" {
+	case "batch":
 		count = 32
 	}
 	for i := 0; i < count; i++ {

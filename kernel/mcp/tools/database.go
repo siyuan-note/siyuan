@@ -524,7 +524,7 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	})
 }
 
-func databaseUnused(args map[string]any) (CallToolResult, error) {
+func databaseUnused(_ map[string]any) (CallToolResult, error) {
 	items, err := model.UnusedAttributeViews(true)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil

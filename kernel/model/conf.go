@@ -814,7 +814,11 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
 	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
+	pendingPathRefresh := len(hpathRefresh.tasks)
 	hpathRefresh.Unlock()
+	if 0 < pendingPathRefresh {
+		logging.LogInfof("pending path refresh tasks: %d", pendingPathRefresh)
+	}
 	diagnostic.Stage("check install package")
 	newVerInstallPkgPath := getNewVerInstallPkgPath(2 == execInstallPkg || (force && 0 == execInstallPkg))
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {

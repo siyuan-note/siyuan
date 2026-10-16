@@ -125,8 +125,3 @@ func filterUsages(usages []KeyUsage, allowed ...KeyUsage) []KeyUsage {
 	}
 	return ret
 }
-
-//go:fix inline
-func intPtr(value int) *int {
-	return new(value)
-}

@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"crypto/hkdf"
 	"crypto/pbkdf2"
-	"hash"
 )
 
 // importKDFKey 导入 HKDF/PBKDF2 的基础密钥材料，规范要求此类密钥不可导出。
@@ -56,7 +55,7 @@ func deriveBitsHKDF(alg Algorithm, key *Key, length *int) ([]byte, error) {
 		return nil, err
 	}
 
-	ret, err := hkdf.Key[hash.Hash](h.New, key.secret, alg.Salt, string(alg.Info), size)
+	ret, err := hkdf.Key(h.New, key.secret, alg.Salt, string(alg.Info), size)
 	if err != nil {
 		return nil, operationError("HKDF derivation failed: %s", err)
 	}
@@ -85,7 +84,7 @@ func deriveBitsPBKDF2(alg Algorithm, key *Key, length *int) ([]byte, error) {
 	}
 
 	// PBKDF2 的口令按字节处理，string 转换保留原始字节。
-	ret, err := pbkdf2.Key[hash.Hash](h.New, string(key.secret), alg.Salt, *alg.Iterations, size)
+	ret, err := pbkdf2.Key(h.New, string(key.secret), alg.Salt, *alg.Iterations, size)
 	if err != nil {
 		return nil, operationError("PBKDF2 derivation failed: %s", err)
 	}

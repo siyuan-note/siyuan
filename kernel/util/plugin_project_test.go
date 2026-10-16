@@ -423,7 +423,8 @@ func TestPluginProjectReplanFailuresKeepRecoverableBaseline(t *testing.T) {
 			previousPlan := grant.PlanHash
 			grant.PlanHash, grant.PlanVersion = "next plan", 2
 			blocked := private
-			if phase == "cleanup-before" {
+			switch phase {
+			case "cleanup-before":
 				blocked = filepath.Join(private, "checkpoints", PluginProjectDigest([]byte("obsolete checkpoint")))
 				if err = os.MkdirAll(blocked, 0700); err != nil {
 					t.Fatal(err)
@@ -431,7 +432,7 @@ func TestPluginProjectReplanFailuresKeepRecoverableBaseline(t *testing.T) {
 				if err = os.WriteFile(filepath.Join(blocked, "index.js"), []byte("obsolete"), 0600); err != nil {
 					t.Fatal(err)
 				}
-			} else if phase == "cleanup-after" {
+			case "cleanup-after":
 				blocked = filepath.Join(private, "baseline")
 			}
 			t.Cleanup(func() { _ = os.Chmod(blocked, 0700) })

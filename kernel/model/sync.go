@@ -239,7 +239,6 @@ func BootSyncData() {
 	if iosAfterBoot {
 		completeSyncPerception(cloudPublished, err)
 	}
-	return
 }
 
 func SyncData(byHand bool) {

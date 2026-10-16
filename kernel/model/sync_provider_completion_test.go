@@ -72,9 +72,10 @@ func TestSyncProviderCompletionFailurePreservesSource(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if failure == "offline" {
+			switch failure {
+			case "offline":
 				Conf.Sync.Load().Enabled = false
-			} else if failure == "missing-current-chunk" {
+			case "missing-current-chunk":
 				files, err := deferredSyncAssets()
 				if err != nil || len(files) != 1 {
 					t.Fatalf("expected deferred asset: %v %v", files, err)
@@ -83,7 +84,7 @@ func TestSyncProviderCompletionFailurePreservesSource(t *testing.T) {
 				if err = os.Remove(filepath.Join(Conf.Sync.Load().Local.Endpoint, "main", "objects", chunk[:2], chunk[2:])); err != nil {
 					t.Fatal(err)
 				}
-			} else {
+			default:
 				state, err := os.ReadFile(assetDownloadStatePath())
 				if err != nil {
 					t.Fatal(err)

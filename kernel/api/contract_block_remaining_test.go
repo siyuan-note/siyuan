@@ -83,7 +83,7 @@ func testAPIContractRemainingBlockQueries(t *testing.T, engine *gin.Engine, boxI
 			t.Fatal(err)
 		}
 		got.Timestamp = want.Timestamp
-		actualJSON, _ := json.Marshal(got)
+		actualJSON, _ := json.Marshal(&got)
 		wantJSON, _ := json.Marshal(want)
 		if string(actualJSON) != string(wantJSON) {
 			t.Fatalf("heading JSON changed: %s != %s", actualJSON, wantJSON)

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261015141042"
+		"updated": "20261016113125"
 	},
 	"Children": [
 		{
@@ -3806,7 +3806,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261015141042"
+				"updated": "20261016113125"
 			},
 			"Children": [
 				{
@@ -3856,12 +3856,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-ayryj7q",
-				"updated": "20261002224707"
+				"updated": "20261016113125"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Triggers support added items and changed fields. A field-change trigger can watch one field or any editable field; writing the same value again does not trigger it. Add filter conditions to run actions only for matching items"
+					"Data": "Configure a rule in three sections: “When this event occurs”, “And the triggering item matches (optional)”, and “Run these actions”. Choose added items or changed fields as the event. A field-change trigger can watch one field or any editable field; writing the same value again does not trigger it. The second section checks the triggering item's values after the change; leaving it empty adds no restriction"
 				}
 			]
 		},
@@ -3870,12 +3870,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-hrqksxn",
-				"updated": "20261002224707"
+				"updated": "20261016113125"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Each rule can run several actions in order: edit the triggering item, edit related items, edit items matching filters in a database, or add an unbound item to this or another database. Empty target filters match all items"
+					"Data": "Each rule can run several actions in order. Choose the operation and its target, then add the fields to set and their value sources. Editing supports the triggering item, related items, or items matching filters in a selected database. Conditions inside an action filter the items to modify, not the triggering item; empty target conditions match all items in that target. Adding creates an unbound item in this or another database"
 				}
 			]
 		},
@@ -3890,6 +3890,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, or a relation to the triggering item. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon"
+				}
+			]
+		},
+		{
+			"ID": "20261016113125-e9334a5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016113125-e9334a5",
+				"updated": "20261016113125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, to record the first completion time, watch changes to Status, require the triggering item's Status to be Done and Completion time to be empty, then edit the triggering item and set Completion time to Trigger time. After completing the configuration, enable the rule. Without the empty-time condition, completing the item again can overwrite its completion time"
 				}
 			]
 		},

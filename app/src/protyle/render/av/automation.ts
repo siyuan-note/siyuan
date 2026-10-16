@@ -136,7 +136,7 @@ export const openAutomationMenu = async (options: {
             return lang.automationCollectionScope;
         }
         if (rule.keyID && !fieldsOf(database).some(field => field.id === rule.keyID)) {
-            return lang.automationTrigger;
+            return lang.automationWatchField;
         }
         if (!filtersAvailable(database, rule.conditions)) {
             return lang.filter;
@@ -172,8 +172,9 @@ export const openAutomationMenu = async (options: {
         const issue = rule && incomplete(rule);
         const status = body.querySelector<HTMLElement>("[data-status]");
         if (status) {
-            status.textContent = issue ? lang.automationIncomplete.replace("${1}", issue) : "";
-            status.classList.toggle("fn__none", !issue);
+            status.textContent = issue ? lang.automationIncomplete.replace("${1}", issue) : rule && !rule.enabled ? lang.automationReady : "";
+            status.classList.toggle("ft__error", !!issue);
+            status.classList.toggle("fn__none", !issue && (!rule || rule.enabled));
         }
         const enabled = body.querySelector<HTMLInputElement>("[data-enabled]");
         if (enabled && rule) {
@@ -301,11 +302,16 @@ export const openAutomationMenu = async (options: {
             return;
         }
         body.innerHTML = `<div class="ft__on-surface ft__smaller">${lang.automationTip}</div>
-<div class="av__automation-row">${rule ? `<select class="b3-select fn__flex-1" data-rule aria-label="${lang.databaseAutomations}">${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div>
-${rule ? `<div class="av__automation-row"><input class="b3-text-field fn__flex-1" data-name aria-label="${lang.name}" value="${escapeAttr(rule.name)}"><input type="checkbox" class="b3-switch fn__flex-center ariaLabel" data-position="north" aria-label="${escapeAttr(lang.enable)}" data-enabled${rule.enabled ? " checked" : ""}></div>
-<div class="ft__error ft__smaller fn__none" role="status" data-status></div>
-<div class="ft__b">${lang.automationTrigger}</div><div class="av__automation-row"><select class="b3-select" data-trigger>${optionHTML("added", lang.automationAdded, rule.trigger)}${optionHTML("changed", lang.automationChanged, rule.trigger)}${optionHTML("block", lang.automationCollectBlocks, rule.trigger)}</select>${rule.trigger === "changed" ? `<select class="b3-select fn__flex-1" data-trigger-field aria-label="${lang.fields}">${optionHTML("", lang.all, rule.keyID || "")}${fieldsOf(database).map(field => optionHTML(field.id, field.name, rule.keyID)).join("")}</select>` : ""}</div>
-<div data-source-conditions></div><div class="ft__b">${lang.automationAction}</div><div data-actions></div>${rule.trigger === "block" ? `<button type="button" class="b3-button b3-button--outline" data-action="preview-collection"${rule.enabled ? "" : " disabled"}>${lang.automationCollectionPreview}</button>` : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAction}</button>`}` : ""}`;
+<div class="av__automation-row">${rule ? `<label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.automationRule}</span><select class="b3-select" data-rule>${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select></label>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div>
+${rule ? `<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="ft__on-surface">${lang.name}</span><input class="b3-text-field" data-name value="${escapeAttr(rule.name)}"></label><label class="av__automation-row"><span>${lang.enable}</span><input type="checkbox" class="b3-switch" data-enabled${rule.enabled ? " checked" : ""}></label></div>
+<div class="ft__on-surface ft__smaller">${lang.automationAutoSaveTip}</div>
+<div class="ft__on-surface ft__smaller fn__none" role="status" data-status></div>
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface">1</span><span>${lang.automationWhen}</span></div>
+<div class="av__automation-columns"><label class="av__automation-control"><span class="ft__on-surface">${lang.automationTrigger}</span><select class="b3-select" data-trigger>${optionHTML("added", lang.automationAdded, rule.trigger)}${optionHTML("changed", lang.automationChanged, rule.trigger)}${optionHTML("block", lang.automationCollectBlocks, rule.trigger)}</select></label>${rule.trigger === "changed" ? `<label class="av__automation-control"><span class="ft__on-surface">${lang.automationWatchField}</span><select class="b3-select" data-trigger-field>${optionHTML("", lang.automationAnyField, rule.keyID || "")}${fieldsOf(database).map(field => optionHTML(field.id, field.name, rule.keyID)).join("")}</select></label>` : ""}</div>
+${rule.trigger === "changed" ? `<div class="ft__on-surface ft__smaller">${lang.automationChangedTip}</div>` : ""}</section>
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface">2</span><span>${rule.trigger === "block" ? lang.automationBlockConditions : lang.automationConditions}</span></div>
+${rule.trigger === "block" ? "" : `<div class="ft__on-surface ft__smaller">${lang.automationConditionsTip}</div>`}<div data-source-conditions></div></section>
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface">3</span><span>${lang.automationThen}</span></div><div data-actions></div>${rule.trigger === "block" ? `<button type="button" class="b3-button b3-button--outline" data-action="preview-collection"${rule.enabled ? "" : " disabled"}>${lang.automationCollectionPreview}</button>` : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddAction}</button>`}</section>` : ""}`;
         if (!rule) {
             onResize();
             return;
@@ -322,12 +328,11 @@ ${rule ? `<div class="av__automation-row"><input class="b3-text-field fn__flex-1
         const actionsHost = body.querySelector<HTMLElement>("[data-actions]");
         actionsHost.innerHTML = rule.actions.map((action, i) => {
             const target = databases.get(targetID(action));
-            return `<div class="av__automation-action" data-index="${i}"><div class="av__automation-row">
-${action.type === "collect" ? `<span>${lang.automationCollectionAction}</span>` : `<select class="b3-select" data-action-type aria-label="${lang.automationAction}">${optionHTML("edit", lang.editFields, action.type)}${optionHTML("add", lang.new, action.type)}</select>
-<select class="b3-select fn__flex-1" data-target aria-label="${lang.conditionalColorTarget}">${optionHTML("current", action.type === "add" ? lang.thisDatabase : lang.automationCurrentItem, action.target)}${optionHTML("related", action.type === "add" ? lang.relation : lang.relatedItems, action.target)}${optionHTML("filtered", action.type === "add" ? lang.database : lang.automationMatchingItems, action.target)}</select>
-${iconButton("remove-action", "iconTrashcan", lang.delete, true)}`}</div>
+            return `<div class="av__automation-action" data-index="${i}"><div class="av__automation-row"><span class="ft__b fn__flex-1">${lang.automationAction} ${i + 1}</span>${action.type === "collect" ? "" : iconButton("remove-action", "iconTrashcan", lang.delete, true)}</div>
+${action.type === "collect" ? `<div>${lang.automationCollectionAction}</div>` : `<div class="av__automation-columns"><label class="av__automation-control"><span class="ft__on-surface">${lang.automationOperation}</span><select class="b3-select" data-action-type>${optionHTML("edit", lang.editFields, action.type)}${optionHTML("add", lang.new, action.type)}</select></label>
+<label class="av__automation-control"><span class="ft__on-surface">${action.type === "add" ? lang.database : lang.automationTarget}</span><select class="b3-select" data-target>${optionHTML("current", action.type === "add" ? lang.thisDatabase : lang.automationCurrentItem, action.target)}${optionHTML("related", action.type === "add" ? lang.relation : lang.relatedItems, action.target)}${optionHTML("filtered", action.type === "add" ? lang.database : lang.automationMatchingItems, action.target)}</select></label></div>`}
 ${action.target === "related" ? `<select class="b3-select fn__block" data-relation aria-label="${lang.relation}">${optionHTML("", lang.selectRelation, action.relationKeyID || "")}${fieldsOf(database).filter(field => field.type === "relation" && field.relation?.avID).map(field => optionHTML(field.id, field.name, action.relationKeyID)).join("")}</select>` : action.target === "filtered" ? `<button type="button" class="b3-button b3-button--outline fn__block" data-action="database">${escapeHtml(target?.name || lang.select)} (${lang.database})</button>` : ""}
-${target ? `<div data-target-filters></div><div data-fields></div><button type="button" class="b3-button b3-button--cancel" data-action="add-field"><svg><use xlink:href="#iconAdd"></use></svg>${lang.fields}</button>` : ""}</div>`;
+${target ? `${action.type === "edit" && action.target !== "current" ? `<div class="ft__on-surface">${lang.automationTargetConditions}</div><div class="ft__on-surface ft__smaller">${lang.automationTargetTip}</div>` : ""}<div data-target-filters></div><div class="ft__on-surface">${lang.automationSetFields}</div><div data-fields></div><button type="button" class="b3-button b3-button--cancel" data-action="add-field"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddField}</button>` : ""}</div>`;
         }).join("");
         actionsHost.querySelectorAll<HTMLElement>("[data-index]").forEach(element => {
             const action = rule.actions[Number(element.dataset.index)];
@@ -349,7 +354,7 @@ ${target ? `<div data-target-filters></div><div data-fields></div><button type="
                 row.dataset.fieldId = keyID;
                 const compatible = action.type === "collect" ? [] : compatibleFields(database, field);
                 row.innerHTML = `<div class="av__automation-row"><span class="fn__flex-1">${escapeHtml(field?.name || `${lang.invalid}: ${keyID}`)}</span>${iconButton("remove-field", "iconClose", lang.delete, true)}</div>
-${field ? `<div class="av__automation-row"><select class="b3-select" data-mode aria-label="${lang.automationStaticValue}">${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select><div class="av__automation-value" data-value></div></div>` : ""}`;
+${field ? `<div class="av__automation-row"><label class="av__automation-control"><span class="ft__on-surface">${lang.automationValueMode}</span><select class="b3-select" data-mode>${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select></label><div class="av__automation-value" data-value></div></div>` : ""}`;
                 fieldsHost.append(row);
                 if (!field) {
                     return;

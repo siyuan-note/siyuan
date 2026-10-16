@@ -286,6 +286,10 @@ const runCases = async (sources, css, mobile) => {
         for (const fontSize of ["", "28px"]) {
             menu.style.fontSize = fontSize;
             await tick();
+            const selectorRect = get("[data-rule]").getBoundingClientRect();
+            const nameInputRect = get("[data-name]").getBoundingClientRect();
+            assert.ok(Math.abs(selectorRect.left - nameInputRect.left) <= 1 && Math.abs(selectorRect.right - nameInputRect.right) <= 1,
+                `${mobile}/${width}/${fontSize}: rule selector and name input share their left and right edges`);
             for (const element of [menu, get(".av__automation-body"), ...menu.querySelectorAll("section, [data-index]")]) {
                 assert.ok(element.scrollWidth <= element.clientWidth + 1, `${mobile}/${width}/${fontSize}: content overflows`);
             }

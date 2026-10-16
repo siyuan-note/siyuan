@@ -3133,7 +3133,10 @@ img.av__cellassetimg {
   &-enabled,
   &-tools {
     align-self: flex-end;
+    flex-shrink: 0;
+    justify-content: flex-end;
     min-height: 28px;
+    width: 52px;
   }
 
   &-remove {

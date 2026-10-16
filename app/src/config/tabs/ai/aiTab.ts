@@ -238,17 +238,17 @@ const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
 
     group.slot({
-        key: "mcpOAuthServer",
-        keywords: [window.siyuan.languages.mcpOAuthServer, "OAuth", "ChatGPT"],
-        html: genMcpOAuthHtml,
-        afterMount: mountMcpOAuth,
-    });
-
-    group.slot({
         key: "mcpServers",
         keywords: getMcpServersBlockKeywords(),
         html: genMcpServersBlockHtml,
         afterMount: mountMcpServersBlock,
+    });
+    tab.group("mcpOAuth", window.siyuan.languages.mcpOAuthServer).slot({
+        key: "mcpOAuthServer",
+        keywords: [window.siyuan.languages.mcpOAuthServer, "OAuth", "ChatGPT",
+            window.siyuan.languages.mcpOAuthPublicURL, window.siyuan.languages.mcpOAuthRegister],
+        html: genMcpOAuthHtml,
+        afterMount: mountMcpOAuth,
     });
 };
 

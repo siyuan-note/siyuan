@@ -61,7 +61,7 @@ func validateTemplateRelativePath(p string, allowRoot bool) error {
 	if p == "" || !fs.ValidPath(p) || strings.ContainsAny(p, "\\:\x00") {
 		return errors.New("invalid template path")
 	}
-	for _, part := range strings.Split(p, "/") {
+	for part := range strings.SplitSeq(p, "/") {
 		if strings.HasPrefix(part, ".") {
 			return errors.New("hidden template paths are reserved")
 		}

@@ -11,7 +11,7 @@ func IsPublishRelativePath(name string) bool {
 	if name == "" || strings.ContainsAny(name, "\\:%\x00") {
 		return false
 	}
-	for _, part := range strings.Split(name, "/") {
+	for part := range strings.SplitSeq(name, "/") {
 		if part == "" || part == "." || part == ".." || strings.TrimSpace(part) != part || strings.HasSuffix(part, ".") {
 			return false
 		}

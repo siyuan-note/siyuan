@@ -134,10 +134,8 @@ func (f *file) decodeTiles(g gridInfo, tiles []uint32) (*hevc.Picture, error) {
 	perTile := max(f.workers(0)/tileWorkers, 1)
 
 	for range tileWorkers - 1 {
-		wg.Add(1)
 
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 
 			var dec itemDecoder
 
@@ -176,7 +174,7 @@ func (f *file) decodeTiles(g gridInfo, tiles []uint32) (*hevc.Picture, error) {
 				blit(out, p, g, i, tw, th)
 				p.Release()
 			}
-		}()
+		})
 	}
 
 	var dec itemDecoder

@@ -468,7 +468,7 @@ func newAssetRelinkHistoryDir() (string, error) {
 	if err := os.MkdirAll(util.HistoryDir, 0755); err != nil {
 		return "", err
 	}
-	for offset := 0; offset < 1000; offset++ {
+	for offset := range 1000 {
 		dir := filepath.Join(util.HistoryDir, time.Now().Add(time.Duration(offset)*time.Second).Format("2006-01-02-150405")+"-"+HistoryOpReplace)
 		if err := os.Mkdir(dir, 0755); err == nil {
 			return dir, nil

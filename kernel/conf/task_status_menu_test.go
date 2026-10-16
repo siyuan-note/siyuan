@@ -23,7 +23,7 @@ func TestTaskStatusMenuMigration(t *testing.T) {
 		t.Run(fixture.Name, func(t *testing.T) {
 			fixture.Input.ID, fixture.Input.Name = "custom", "Custom"
 			config := &EntryVisibility{Version: 5, Active: "custom", Profiles: []*EntryVisibilityProfile{&fixture.Input}}
-			for i := 0; i < 2; i++ {
+			for range 2 {
 				NormalizeEntryVisibility(config, EntryVisibilityProfileFull)
 				if config.Version != EntryVisibilityVersion || !reflect.DeepEqual(fixture.Input.Entries, fixture.Expected.Entries) ||
 					!reflect.DeepEqual(fixture.Input.Orders, fixture.Expected.Orders) {

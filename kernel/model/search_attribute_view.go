@@ -166,7 +166,7 @@ func mapAttributeViewSearchRanges(source, marked string) ([]attributeViewSearchR
 	}
 	var mapped []attributeViewSearchRange
 	offset, after := 0, 0
-	for _, window := range strings.Split(plain, "...") {
+	for window := range strings.SplitSeq(plain, "...") {
 		var matches []attributeViewSearchRange
 		for _, match := range ranges {
 			if offset <= match.start && match.end <= offset+len(window) {

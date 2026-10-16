@@ -376,16 +376,16 @@ func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoin
 			for _, v := range value.MAsset {
 				v1.WriteString(v.Content)
 			}
-			var v2 string
+			var v2 strings.Builder
 			for _, v := range other.MAsset {
-				v2 += v.Content
+				v2.WriteString(v.Content)
 			}
 
-			if 0 == strings.Compare(v1.String(), v2) {
+			if 0 == strings.Compare(v1.String(), v2.String()) {
 				return 0
 			}
 
-			if util.EmojiPinYinCompare(v1.String(), v2) {
+			if util.EmojiPinYinCompare(v1.String(), v2.String()) {
 				return -1
 			}
 			return 1

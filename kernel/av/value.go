@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -755,7 +756,7 @@ func isAllowedValueTextMarkType(node *ast.Node) bool {
 	if "" == node.TextMarkType || "" != node.TextMarkFlashcardOcclusionID {
 		return false
 	}
-	for _, typ := range strings.Fields(node.TextMarkType) {
+	for typ := range strings.FieldsSeq(node.TextMarkType) {
 		switch typ {
 		case "text", "block-ref", "kbd", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark",
 			"sup", "sub", "tag", "code", "inline-math", "inline-memo":
@@ -846,7 +847,7 @@ func isAllowedValueTextRichLinkTarget(target string) bool {
 
 func decodeValueTextRichLinkTarget(target string) (ret, decoded string, ok bool) {
 	ret = target
-	for iteration := 0; iteration < 8; iteration++ {
+	for range 8 {
 		next := html.UnescapeString(ret)
 		if next == ret {
 			decoded, err := url.PathUnescape(ret)
@@ -883,7 +884,7 @@ func isAllowedValueTextRichInlineMemoContent(content string) bool {
 		return false
 	}
 	decoded := content
-	for iteration := 0; iteration < 8; iteration++ {
+	for range 8 {
 		next := html.UnescapeString(decoded)
 		if next == decoded {
 			return !containsValueTextRichHTMLTag(decoded)
@@ -1545,12 +1546,7 @@ func valueTextRichBlockDOMAttribute(tag, name string) (value string, ok bool) {
 }
 
 func containsValueTextRichDataType(dataType, expected string) bool {
-	for _, typ := range strings.Fields(dataType) {
-		if expected == typ {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings.Fields(dataType), expected)
 }
 
 type valueTextRichStyleEntityProtection struct {
@@ -1727,8 +1723,8 @@ func valueTextRichBlockLiteralMarkdownRanges(markdown string) (ret []valueTextRi
 func stripValueTextRichMarkdownContainer(line string) string {
 	for {
 		line = strings.TrimLeft(line, " \t")
-		if strings.HasPrefix(line, ">") {
-			line = strings.TrimPrefix(line, ">")
+		if after, ok := strings.CutPrefix(line, ">"); ok {
+			line = after
 			continue
 		}
 		if 2 <= len(line) && ('-' == line[0] || '+' == line[0] || '*' == line[0]) &&
@@ -2202,7 +2198,7 @@ func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (
 func normalizeValueTextRichTreeSourceWithLute(tree *parse.Tree, images bool, luteEngine *lute.Lute) (content string, normalizedTree *parse.Tree, err error) {
 	normalizedTree = tree
 	previous := ""
-	for iteration := 0; iteration < 4; iteration++ {
+	for iteration := range 4 {
 		if err = normalizeValueTextRichTreeStyles(normalizedTree, images); nil != err {
 			return "", nil, err
 		}

@@ -17,8 +17,8 @@ func createInstallPackageDirectoryLink(target, link string) (err error) {
 		return err
 	}
 	name := "\\??\\" + target
-	if strings.HasPrefix(target, "\\\\") {
-		name = "\\??\\UNC\\" + strings.TrimPrefix(target, "\\\\")
+	if after, ok := strings.CutPrefix(target, "\\\\"); ok {
+		name = "\\??\\UNC\\" + after
 	}
 	substitute, err := windows.UTF16FromString(name)
 	if err != nil {

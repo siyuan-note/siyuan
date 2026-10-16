@@ -51,7 +51,7 @@ func testAPIContractRemainingBlockQueries(t *testing.T, engine *gin.Engine, boxI
 		source, target int
 		children       bool
 	}{{0, 0, false}, {1, 3, false}, {1, 2, true}, {6, 1, true}} {
-		input := map[string]interface{}{"id": docID, "notebook": boxID, "source": entry.source, "target": entry.target, "withSubheadings": entry.children}
+		input := map[string]any{"id": docID, "notebook": boxID, "source": entry.source, "target": entry.target, "withSubheadings": entry.children}
 		body, _ := json.Marshal(input)
 		data := post("getDocHeadingLevelTransaction", string(body), 0)
 		want, err := model.GetDocHeadingLevelTransaction(docID, boxID, entry.source, entry.target, entry.children)

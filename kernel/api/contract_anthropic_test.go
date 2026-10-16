@@ -94,7 +94,7 @@ func testNativeProviderContract(t *testing.T, baseURL, protocol string) {
 				t.Fatal(err)
 			}
 			if tc.path == "/api/ai/editor/chat" {
-				for _, frame := range strings.Split(strings.TrimSpace(recorder.Body.String()), "\n\n") {
+				for frame := range strings.SplitSeq(strings.TrimSpace(recorder.Body.String()), "\n\n") {
 					lines := strings.SplitN(frame, "\n", 2)
 					if len(lines) != 2 {
 						t.Fatalf("invalid SSE frame: %s", frame)

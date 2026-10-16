@@ -46,7 +46,7 @@ func generateHMACKey(alg Algorithm, extractable bool, usages []KeyUsage) (*Key, 
 		Type:        KeyTypeSecret,
 		Extractable: extractable,
 		Usages:      cloneUsages(usages),
-		Algorithm:   KeyAlgorithm{Name: alg.Name, Hash: h.Name, Length: intPtr(length)},
+		Algorithm:   KeyAlgorithm{Name: alg.Name, Hash: h.Name, Length: new(length)},
 		secret:      secret,
 	}, nil
 }
@@ -77,7 +77,7 @@ func importHMACKey(alg Algorithm, secret []byte, extractable bool, usages []KeyU
 		Type:        KeyTypeSecret,
 		Extractable: extractable,
 		Usages:      cloneUsages(usages),
-		Algorithm:   KeyAlgorithm{Name: alg.Name, Hash: h.Name, Length: intPtr(length)},
+		Algorithm:   KeyAlgorithm{Name: alg.Name, Hash: h.Name, Length: new(length)},
 		secret:      bytes.Clone(secret),
 	}, nil
 }

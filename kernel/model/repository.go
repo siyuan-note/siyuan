@@ -2945,8 +2945,8 @@ func appendLANSyncTrafficStat(message string, trafficStat *dejavu.TrafficStat) s
 
 func removeLANSyncTrafficStat(message string) string {
 	const marker = `<br data-type="lanSyncTraffic">`
-	if index := strings.Index(message, marker); 0 <= index {
-		return message[:index]
+	if before, _, ok := strings.Cut(message, marker); ok {
+		return before
 	}
 
 	// 兼容已保存的无标记局域网流量统计。

@@ -329,8 +329,8 @@ func anthropicMessageBlocks(message openai.ChatCompletionMessage) ([]json.RawMes
 				return nil, errors.New("missing Anthropic image source")
 			}
 			source := map[string]string{"type": "url", "url": part.ImageURL.URL}
-			if strings.HasPrefix(part.ImageURL.URL, "data:") {
-				meta, data, ok := strings.Cut(strings.TrimPrefix(part.ImageURL.URL, "data:"), ";base64,")
+			if after, ok := strings.CutPrefix(part.ImageURL.URL, "data:"); ok {
+				meta, data, ok := strings.Cut(after, ";base64,")
 				if !ok || data == "" || (meta != "image/png" && meta != "image/jpeg" && meta != "image/gif" && meta != "image/webp") {
 					return nil, errors.New("unsupported Anthropic image data URL")
 				}

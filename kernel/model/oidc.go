@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -483,10 +484,8 @@ func ValidateOIDCConfiguration(config *conf.OIDC) error {
 		if rule.Operator != conf.OIDCClaimOperatorEquals && rule.Operator != conf.OIDCClaimOperatorContains {
 			return errors.New("Unsupported OIDC claim rule operator")
 		}
-		for _, value := range rule.Values {
-			if value == "" {
-				return errors.New("OIDC claim rule values cannot be empty")
-			}
+		if slices.Contains(rule.Values, "") {
+			return errors.New("OIDC claim rule values cannot be empty")
 		}
 	}
 	return nil

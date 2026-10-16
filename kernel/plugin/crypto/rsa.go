@@ -60,7 +60,7 @@ func generateRSAKeyPair(alg Algorithm, extractable bool, usages []KeyUsage) (*Ke
 	keyAlg := KeyAlgorithm{
 		Name:           alg.Name,
 		Hash:           h.Name,
-		ModulusLength:  intPtr(privateKey.N.BitLen()),
+		ModulusLength:  new(privateKey.N.BitLen()),
 		PublicExponent: big.NewInt(rsaPublicExponent).Bytes(),
 	}
 	privateUsages, publicUsages := splitAsymmetricUsages(alg.Name, usages)
@@ -101,7 +101,7 @@ func newRSAKey(alg Algorithm, hashName string, material any, extractable bool, u
 			Usages:      cloneUsages(usages),
 			Algorithm: KeyAlgorithm{
 				Name: alg.Name, Hash: hashName,
-				ModulusLength:  intPtr(typed.N.BitLen()),
+				ModulusLength:  new(typed.N.BitLen()),
 				PublicExponent: rsaExponentBytes(typed.E),
 			},
 			private: typed,
@@ -116,7 +116,7 @@ func newRSAKey(alg Algorithm, hashName string, material any, extractable bool, u
 			Usages:      cloneUsages(usages),
 			Algorithm: KeyAlgorithm{
 				Name: alg.Name, Hash: hashName,
-				ModulusLength:  intPtr(typed.N.BitLen()),
+				ModulusLength:  new(typed.N.BitLen()),
 				PublicExponent: rsaExponentBytes(typed.E),
 			},
 			public: typed,

@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"sync"
 	"time"
@@ -514,9 +515,7 @@ func validBazaarRatingDistribution(distribution bazaarRatingDistribution) bool {
 
 func cloneBazaarRatingDistributions(source map[string]bazaarRatingDistribution) map[string]bazaarRatingDistribution {
 	ret := make(map[string]bazaarRatingDistribution, len(source))
-	for packageName, distribution := range source {
-		ret[packageName] = distribution
-	}
+	maps.Copy(ret, source)
 	return ret
 }
 

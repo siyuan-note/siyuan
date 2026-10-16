@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"math/rand"
 	"os"
@@ -755,17 +756,13 @@ func applyFilterDefaultValues0(filters []*av.ViewFilter, attrView *av.AttributeV
 
 func cloneDefaultValues(values map[string]*av.Value) (ret map[string]*av.Value) {
 	ret = make(map[string]*av.Value, len(values))
-	for key, value := range values {
-		ret[key] = value
-	}
+	maps.Copy(ret, values)
 	return
 }
 
 func cloneBoolMap(values map[string]bool) (ret map[string]bool) {
 	ret = make(map[string]bool, len(values))
-	for key, value := range values {
-		ret[key] = value
-	}
+	maps.Copy(ret, values)
 	return
 }
 
@@ -867,16 +864,12 @@ func applyAttributeViewContextFilterDefaultValue(attrView *av.AttributeView, add
 
 func replaceDefaultValues(target, source map[string]*av.Value) {
 	clear(target)
-	for key, value := range source {
-		target[key] = value
-	}
+	maps.Copy(target, source)
 }
 
 func replaceBoolMap(target, source map[string]bool) {
 	clear(target)
-	for key, value := range source {
-		target[key] = value
-	}
+	maps.Copy(target, source)
 }
 
 func (tx *Transaction) doSortAttrViewGroup(operation *Operation) (ret *TxErr) {
@@ -2679,10 +2672,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	if 1 > pageSize {
 		pageSize = 16
 	}
-	start := (page - 1) * pageSize
-	if len(keyValues.Values) < start {
-		start = len(keyValues.Values)
-	}
+	start := min(len(keyValues.Values), (page-1)*pageSize)
 	end := min(len(keyValues.Values), start+pageSize)
 	keyValues.Values = keyValues.Values[start:end]
 	return

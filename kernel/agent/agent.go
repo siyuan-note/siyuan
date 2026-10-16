@@ -23,10 +23,12 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"maps"
 	"math/rand/v2"
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -589,8 +591,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					currentUserExists := false
 					if regenerate {
 						lastUserIdx := -1
-						for i := len(truncated) - 1; i >= 0; i-- {
-							if truncated[i].Role == "user" && (userEntryID == "" || truncated[i].EntryID == userEntryID) {
+						for i, t := range slices.Backward(truncated) {
+							if t.Role == "user" && (userEntryID == "" || t.EntryID == userEntryID) {
 								lastUserIdx = i
 								break
 							}
@@ -602,12 +604,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							return
 						}
 					} else {
-						for i := len(truncated) - 1; i >= 0; i-- {
-							if truncated[i].Role != "user" {
+						for _, t := range slices.Backward(truncated) {
+							if t.Role != "user" {
 								continue
 							}
-							currentUserExists = userEntryID != "" && truncated[i].EntryID == userEntryID
-							if userEntryID == "" && (truncated[i].Content == userMessage || truncated[i].Content == rawUserMessage) {
+							currentUserExists = userEntryID != "" && t.EntryID == userEntryID
+							if userEntryID == "" && (t.Content == userMessage || t.Content == rawUserMessage) {
 								currentUserExists = true
 							}
 							break
@@ -683,8 +685,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		saveTurn := func(state string) bool {
 			turn.State = state
 			deltaStart := turnBaseIndex
-			for i := len(checkpointMsgs) - 1; i >= 0; i-- {
-				message := checkpointMsgs[i]
+			for i, message := range slices.Backward(checkpointMsgs) {
+
 				if message.Role == "user" && ((userEntryID != "" && message.EntryID == userEntryID) ||
 					(userEntryID == "" && message.Content == userMessage)) {
 					deltaStart = i + 1
@@ -1251,9 +1253,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							toolInputErr = previewErr
 						} else if preview != nil {
 							confirmationArgs = make(map[string]any, len(args)+1)
-							for key, value := range args {
-								confirmationArgs[key] = value
-							}
+							maps.Copy(confirmationArgs, args)
 							confirmationArgs["verifiedPackage"] = preview
 						}
 					}
@@ -1263,9 +1263,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							toolInputErr = previewErr
 						} else if preview != nil {
 							confirmationArgs = make(map[string]any, len(args)+1)
-							for key, value := range args {
-								confirmationArgs[key] = value
-							}
+							maps.Copy(confirmationArgs, args)
 							confirmationArgs["currentSnippet"] = preview
 						}
 					}
@@ -2223,7 +2221,7 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 				sb.WriteString("Visible block ids:\n")
 			}
 			limit := min(totalVisible, maxVisibleBlockIDs)
-			for i := 0; i < limit; i++ {
+			for i := range limit {
 				sb.WriteString("- ")
 				sb.WriteString(editorCtx.VisibleBlockIDs[i])
 				sb.WriteString("\n")
@@ -2699,16 +2697,14 @@ func classifyRetry(err error) string {
 	if errors.Is(err, errModelRequestTimeout) || errors.Is(err, errModelStreamIdleTimeout) || errors.Is(err, context.DeadlineExceeded) {
 		return "timeout"
 	}
-	var subscriptionErr *chatgpt.RequestError
-	if errors.As(err, &subscriptionErr) {
+	if subscriptionErr, ok := errors.AsType[*chatgpt.RequestError](err); ok {
 		if subscriptionErr.Status >= 500 {
 			return "server_error"
 		}
 		return "fatal"
 	}
 
-	var apiErr *openai.APIError
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*openai.APIError](err); ok {
 		code := strings.ToLower(strings.TrimSpace(fmt.Sprint(apiErr.Code)))
 		if code == "subscription_sharing_usage_limit_exceeded" {
 			return "fatal"
@@ -2767,8 +2763,7 @@ func getAgentErrorMessage(err error) string {
 }
 
 func getAgentRequestErrorMessage(err error, _ []openai.ChatCompletionMessage) string {
-	var apiErr *openai.APIError
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*openai.APIError](err); ok {
 		message := strings.TrimSpace(apiErr.Message)
 		if message != "" {
 			runes := []rune(message)

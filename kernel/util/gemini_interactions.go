@@ -284,8 +284,8 @@ func geminiMessageContent(message openai.ChatCompletionMessage) ([]json.RawMessa
 				return nil, errors.New("missing Gemini image source")
 			}
 			image := map[string]string{"type": "image", "uri": part.ImageURL.URL}
-			if strings.HasPrefix(part.ImageURL.URL, "data:") {
-				mime, data, ok := strings.Cut(strings.TrimPrefix(part.ImageURL.URL, "data:"), ";base64,")
+			if after, ok := strings.CutPrefix(part.ImageURL.URL, "data:"); ok {
+				mime, data, ok := strings.Cut(after, ";base64,")
 				if !ok || !strings.HasPrefix(mime, "image/") || data == "" {
 					return nil, errors.New("unsupported Gemini image data URL")
 				}

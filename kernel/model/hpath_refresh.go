@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -392,9 +393,7 @@ func RefreshHPathsJob() {
 		}
 		delete(hpathRefresh.tasks, key)
 		if err = saveHPathRefreshLocked(); err != nil {
-			for removedKey, removedTask := range removed {
-				hpathRefresh.tasks[removedKey] = removedTask
-			}
+			maps.Copy(hpathRefresh.tasks, removed)
 			logging.LogErrorf("save hpath refresh tasks failed: %s", err)
 			return
 		}

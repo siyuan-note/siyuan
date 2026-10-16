@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	stdhtml "html"
+	"maps"
 	"math"
 	"os"
 	"path"
@@ -1080,9 +1081,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			return
 		}
 		reloadTreeIDs = append(reloadTreeIDs, rootID)
-		for id, node := range pendingNodes[rootID] {
-			updateNodes[id] = node
-		}
+		maps.Copy(updateNodes, pendingNodes[rootID])
 	}
 	return
 }
@@ -1486,9 +1485,7 @@ func cloneReplaceTextNode(node *ast.Node) *ast.Node {
 	ret.Tokens = bytes.Clone(node.Tokens)
 	if nil != node.Properties {
 		ret.Properties = map[string]string{}
-		for key, value := range node.Properties {
-			ret.Properties[key] = value
-		}
+		maps.Copy(ret.Properties, node.Properties)
 	}
 	if nil != node.KramdownIAL {
 		ret.KramdownIAL = make([][]string, len(node.KramdownIAL))

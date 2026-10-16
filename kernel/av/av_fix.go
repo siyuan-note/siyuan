@@ -17,6 +17,7 @@
 package av
 
 import (
+	"slices"
 	"time"
 
 	"github.com/88250/lute"
@@ -69,18 +70,11 @@ func upgradeSpec10(av *AttributeView) {
 		if nil != view.List || nil != view.Calendar {
 			return true
 		}
-		for _, group := range view.Groups {
-			if needsUpgrade(group) {
-				return true
-			}
-		}
-		return false
+		return slices.ContainsFunc(view.Groups, needsUpgrade)
 	}
-	for _, view := range av.Views {
-		if needsUpgrade(view) {
-			av.Spec = 10
-			return
-		}
+	if slices.ContainsFunc(av.Views, needsUpgrade) {
+		av.Spec = 10
+		return
 	}
 }
 

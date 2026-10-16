@@ -61,7 +61,7 @@ func TestAuthByAPITokenThrottle(t *testing.T) {
 	t.Run("wrong tokens trigger lockout", func(t *testing.T) {
 		ip := "192.0.2.11:1234"
 		defer util.AuthThrottleReset(ip)
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			if recorder := newRequest(ip, "wrong-token"); recorder.Code != http.StatusUnauthorized {
 				t.Fatalf("guess %d status = %d, want %d", i+1, recorder.Code, http.StatusUnauthorized)
 			}
@@ -79,7 +79,7 @@ func TestAuthByAPITokenThrottle(t *testing.T) {
 	t.Run("lockout is per IP", func(t *testing.T) {
 		attackerIP := "192.0.2.12:1234"
 		defer util.AuthThrottleReset(attackerIP)
-		for i := 0; i < 6; i++ {
+		for i := range 6 {
 			if recorder := newRequest(attackerIP, "wrong-token"); recorder.Code != http.StatusUnauthorized {
 				t.Fatalf("guess %d status = %d, want %d", i+1, recorder.Code, http.StatusUnauthorized)
 			}

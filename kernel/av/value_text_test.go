@@ -39,7 +39,7 @@ func TestValueTextRichEmptyParagraphs(t *testing.T) {
 		}
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown,
 			Content: valueTextRichBlockDOM2Kramdown(newValueTextRichLute(), dom.String())}
-		for round := 0; round < 3; round++ {
+		for range 3 {
 			before := rich.Content
 			tree, err := NormalizeValueTextRich(rich)
 			if nil != err {
@@ -674,17 +674,17 @@ func TestValueTextRichStyleEntityScannerManyMarkers(t *testing.T) {
 			`var(--b3-font-family-editor), var(--b3-font-family);"}`
 	)
 	var markdown strings.Builder
-	for i := 0; i < repetitions; i++ {
+	for range repetitions {
 		markdown.WriteString(styled)
 		markdown.WriteByte('\n')
 	}
 	markdown.WriteString("```\n")
-	for i := 0; i < repetitions; i++ {
+	for range repetitions {
 		markdown.WriteString(styled)
 		markdown.WriteByte('\n')
 	}
 	markdown.WriteString("```\n")
-	for i := 0; i < repetitions; i++ {
+	for range repetitions {
 		markdown.WriteByte('`')
 		markdown.WriteString(styled)
 		markdown.WriteString("`\n")
@@ -790,7 +790,7 @@ func TestValueTextRichInlineRoundTrip(t *testing.T) {
 	}
 	for _, test := range tests {
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: test.content}
-		for pass := 0; pass < 2; pass++ {
+		for pass := range 2 {
 			tree, err := ParseValueTextRich(rich)
 			if nil != err {
 				t.Fatalf("parse inline type %q failed: %s", test.typ, err)
@@ -826,7 +826,7 @@ func TestValueTextRichInlineRoundTrip(t *testing.T) {
 	}
 
 	combined := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: "***combined***"}
-	for pass := 0; pass < 2; pass++ {
+	for pass := range 2 {
 		tree, err := ParseValueTextRich(combined)
 		if nil != err {
 			t.Fatal(err)

@@ -539,7 +539,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		scoredCh := make(chan []scoredBlock, numWorkers)
 		var wg sync.WaitGroup
 
-		for w := 0; w < numWorkers; w++ {
+		for w := range numWorkers {
 			start := w * chunkSize
 			end := min(start+chunkSize, len(rows))
 			if start >= end {

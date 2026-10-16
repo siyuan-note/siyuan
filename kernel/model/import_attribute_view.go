@@ -103,7 +103,7 @@ func retainImportedAttributeViewBindings(node *ast.Node, avIDs map[string]string
 		allowed[id] = true
 	}
 	var retained []string
-	for _, id := range strings.Split(node.IALAttr(av.NodeAttrNameAvs), ",") {
+	for id := range strings.SplitSeq(node.IALAttr(av.NodeAttrNameAvs), ",") {
 		id = strings.TrimSpace(id)
 		if allowed[id] {
 			retained = append(retained, id)

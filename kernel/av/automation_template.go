@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -126,23 +127,17 @@ func automationTemplate(context AutomationTemplateContext, source string) (*temp
 		case *parse.WithNode:
 			children = []parse.Node{node.Pipe, node.List, node.ElseList}
 		case *parse.ChainNode:
-			for _, field := range node.Field {
-				if field == "Local" {
-					return fmt.Errorf("automation templates use the saved time zone")
-				}
+			if slices.Contains(node.Field, "Local") {
+				return fmt.Errorf("automation templates use the saved time zone")
 			}
 			children = []parse.Node{node.Node}
 		case *parse.FieldNode:
-			for _, field := range node.Ident {
-				if field == "Local" {
-					return fmt.Errorf("automation templates use the saved time zone")
-				}
+			if slices.Contains(node.Ident, "Local") {
+				return fmt.Errorf("automation templates use the saved time zone")
 			}
 		case *parse.VariableNode:
-			for _, field := range node.Ident {
-				if field == "Local" {
-					return fmt.Errorf("automation templates use the saved time zone")
-				}
+			if slices.Contains(node.Ident, "Local") {
+				return fmt.Errorf("automation templates use the saved time zone")
 			}
 		case *parse.RangeNode, *parse.TemplateNode:
 			return fmt.Errorf("automation template loops and recursion are unavailable")

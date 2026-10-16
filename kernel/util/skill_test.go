@@ -306,7 +306,7 @@ func TestLoadSkillCapsManifestTraversal(t *testing.T) {
 	workspaceRoot, _ := setSkillTestRoots(t)
 	writeSkill(t, workspaceRoot, "many-dirs", "many-dirs", "description", "body")
 	skillDir := filepath.Join(workspaceRoot, "many-dirs")
-	for i := 0; i < maxSkillResourceVisited; i++ {
+	for i := range maxSkillResourceVisited {
 		if err := os.Mkdir(filepath.Join(skillDir, fmt.Sprintf("empty-%04d", i)), 0755); err != nil {
 			t.Fatal(err)
 		}

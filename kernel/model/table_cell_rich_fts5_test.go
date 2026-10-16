@@ -73,7 +73,7 @@ func TestTableCellRichUpgradeUndoRedo(t *testing.T) {
 			t.Fatalf("unexpected restored table: %s, %#v", cell.Text(), cell.TableCellRich)
 		}
 	}
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		for _, text := range []string{"edited", "initial"} {
 			entry := GlobalUndoLog.Undo(fixture.sourceID)
 			if entry == nil {

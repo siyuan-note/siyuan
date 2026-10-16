@@ -41,7 +41,7 @@ func TestAutoSpacePreservesMindmapBlocks(t *testing.T) {
 				}
 				return ast.WalkContinue
 			})
-			for pass := 0; pass < 2; pass++ {
+			for pass := range 2 {
 				// 已保存的 .sy 树只在属性中保存 IAL，移除 Markdown 解析使用的辅助节点。
 				var ialNodes []*ast.Node
 				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

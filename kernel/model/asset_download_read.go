@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -34,8 +35,8 @@ func ResolveAssetPathWithMissingLeaf(absPath string) (string, error) {
 	for {
 		resolved, err := ResolveRealPath(current)
 		if err == nil {
-			for i := len(missing) - 1; i >= 0; i-- {
-				resolved = filepath.Join(resolved, missing[i])
+			for _, m := range slices.Backward(missing) {
+				resolved = filepath.Join(resolved, m)
 			}
 			return resolved, nil
 		}

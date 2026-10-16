@@ -58,7 +58,7 @@ func validateManagedSkillPath(p string) error {
 	if p == "" || !fs.ValidPath(p) || strings.ContainsAny(p, "\\:") {
 		return errors.New("invalid skill path")
 	}
-	for _, part := range strings.Split(p, "/") {
+	for part := range strings.SplitSeq(p, "/") {
 		if strings.TrimSpace(part) != part || strings.HasSuffix(part, ".") ||
 			strings.ContainsAny(part, "<>\"|?*~") || strings.ContainsFunc(part, unicode.IsControl) {
 			return errors.New("invalid skill path component")

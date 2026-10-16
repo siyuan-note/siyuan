@@ -69,8 +69,8 @@ var (
 )
 
 type Promise struct {
-	Resolve func(reason interface{}) error
-	Reject  func(reason interface{}) error
+	Resolve func(reason any) error
+	Reject  func(reason any) error
 }
 
 type FunctionResult[T any] struct {

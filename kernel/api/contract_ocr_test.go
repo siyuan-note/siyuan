@@ -100,7 +100,6 @@ func TestAPIContractOCRNotebookIsolation(t *testing.T) {
 	engine.POST("/api/asset/getImageOCRText", getImageOCRText)
 	results := map[string]string{path: "global OCR", path + "?box=" + firstBox: "first notebook OCR", path + "?box=" + secondBox: "second notebook OCR"}
 	for reference, text := range results {
-		reference := reference
 		t.Cleanup(func() { util.RemoveAssetText(reference) })
 		body, _ := json.Marshal(map[string]string{"path": reference + "#preview", "text": text})
 		recorder := httptest.NewRecorder()

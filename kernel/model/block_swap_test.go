@@ -122,7 +122,7 @@ func TestSwapBlockRefNodes(t *testing.T) {
 						for _, tree := range trees {
 							treeMap[tree.ID] = tree
 						}
-						for cycle := 0; cycle < 2; cycle++ {
+						for range 2 {
 							if err := restoreBlockSwapFragments(state.after, state.before, treeMap); err != nil {
 								t.Fatalf("undo: %v", err)
 							}

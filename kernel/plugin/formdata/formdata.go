@@ -32,8 +32,8 @@ import (
 var (
 	// stateType 与 iteratorStateType 用于在 Object.Export() 前先以 Object.ExportType() 做品牌判定，
 	// 原因见 kernel/plugin/abort 中 signalStateType 的注释。
-	stateType         = reflect.TypeOf((*State)(nil))
-	iteratorStateType = reflect.TypeOf((*iteratorState)(nil))
+	stateType         = reflect.TypeFor[*State]()
+	iteratorStateType = reflect.TypeFor[*iteratorState]()
 )
 
 // multipartNameEscaper 按 HTML 规范转义 Content-Disposition 的 name 与 filename 参数：只把 LF、CR、双引号替换为百分号编码。

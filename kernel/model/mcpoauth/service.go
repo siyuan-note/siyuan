@@ -280,7 +280,7 @@ func normalizeScope(value string) (string, error) {
 		return scope, nil
 	}
 	hasMCP, offline := false, false
-	for _, item := range strings.Fields(value) {
+	for item := range strings.FieldsSeq(value) {
 		switch item {
 		case scope:
 			hasMCP = true

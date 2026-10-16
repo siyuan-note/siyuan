@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -47,15 +48,13 @@ var backgroundRefreshWaitGroup sync.WaitGroup
 
 // runBackgroundRefresh 跟踪延迟刷新任务，便于工作区释放前等待任务结束。
 func runBackgroundRefresh(delay time.Duration, refresh func()) {
-	backgroundRefreshWaitGroup.Add(1)
-	go func() {
-		defer backgroundRefreshWaitGroup.Done()
+	backgroundRefreshWaitGroup.Go(func() {
 		time.Sleep(delay)
 		// 与编辑事务串行刷新，避免异步分组写回覆盖撤销、重做后的数据。
 		flushLock.Lock()
 		defer flushLock.Unlock()
 		refresh()
-	}()
+	})
 }
 
 func PushReloadSnippet(snippet *conf.Snpt) {
@@ -521,9 +520,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 		if ok {
 			updatedTrees[refTreeID] = refTree
 		}
-		for id, node := range changedRefNodes {
-			updatedRefNodes[id] = node
-		}
+		maps.Copy(updatedRefNodes, changedRefNodes)
 		for _, update := range updates {
 			appendSetRefDynamicTextTask(refTreeID, update.blockID, update.defNode.id, update.defNode.refText, refTree.Box)
 		}

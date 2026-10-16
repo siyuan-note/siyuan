@@ -51,7 +51,7 @@ func TestMatchAttributeViewSearchName(t *testing.T) {
 
 func TestSortAndLimitAttributeViewSearchResults(t *testing.T) {
 	var results []*AvSearchTempResult
-	for i := 0; i < 15; i++ {
+	for i := range 15 {
 		results = append(results, &AvSearchTempResult{AvID: string(rune('a' + i)), AvUpdated: int64(i)})
 	}
 
@@ -136,7 +136,7 @@ func resetAttributeViewSearchCacheWarmups() {
 
 func waitAttributeViewSearchCacheLoads(t *testing.T, loaded <-chan struct{}, expected int) {
 	t.Helper()
-	for i := 0; i < expected; i++ {
+	for i := range expected {
 		select {
 		case <-loaded:
 		case <-time.After(time.Second):

@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"time"
 
@@ -123,11 +124,11 @@ func runtimeCompactionMatchesProtocol(compaction *runtimeCompaction, protocol st
 }
 
 func sessionUserEntryIndex(entries []SessionEntry, userEntryID string) int {
-	for i := len(entries) - 1; i >= 0; i-- {
-		if entries[i].Type != "user" {
+	for i, entrie := range slices.Backward(entries) {
+		if entrie.Type != "user" {
 			continue
 		}
-		if userEntryID == "" || entries[i].ID == userEntryID {
+		if userEntryID == "" || entrie.ID == userEntryID {
 			return i
 		}
 	}

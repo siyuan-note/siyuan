@@ -49,7 +49,7 @@ func parseSystemNetworkProxy(proxyServer, proxyOverride string) (*systemNetworkP
 	}
 
 	proxies := map[string]string{}
-	for _, field := range strings.Split(proxyServer, ";") {
+	for field := range strings.SplitSeq(proxyServer, ";") {
 		parts := strings.SplitN(field, "=", 2)
 		if 2 != len(parts) {
 			continue
@@ -119,7 +119,7 @@ func parseSystemNetworkProxyBypass(proxyOverride string) string {
 			seen[entry] = true
 		}
 	}
-	for _, field := range strings.Split(proxyOverride, ";") {
+	for field := range strings.SplitSeq(proxyOverride, ";") {
 		field = strings.TrimSpace(field)
 		if strings.EqualFold(field, "<local>") {
 			add("localhost")

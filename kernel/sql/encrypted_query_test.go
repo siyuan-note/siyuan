@@ -64,7 +64,7 @@ func TestQueryRefsByDefIDInBoxContainsChildren(t *testing.T) {
 
 func TestQueryRefsRecentInBoxPrioritizesUsageBeforeLimit(t *testing.T) {
 	testDB, boxID := useEncryptedQueryTestDB(t)
-	for i := 0; i < 40; i++ {
+	for i := range 40 {
 		defID := fmt.Sprintf("def-%02d", i)
 		insertEncryptedQueryTestBlock(t, testDB, defID, "", defID, "d")
 		insertEncryptedQueryTestRef(t, testDB, fmt.Sprintf("ref-%02d", i), defID, defID)

@@ -33,7 +33,7 @@ func TestRepoSnapshotTimeRangeContract(t *testing.T) {
 
 func TestRepoSnapshotIDContract(t *testing.T) {
 	for _, enabled := range []bool{false, true} {
-		body, _ := json.Marshal(map[string]interface{}{"page": 1, "includeFiles": enabled})
+		body, _ := json.Marshal(map[string]any{"page": 1, "includeFiles": enabled})
 		request, err := GetRepoSnapshots.Decode(strings.NewReader(string(body)))
 		if err != nil || request.IncludeFiles != enabled {
 			t.Fatalf("includeFiles: %+v %v", request, err)

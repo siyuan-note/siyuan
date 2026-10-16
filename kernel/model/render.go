@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -201,9 +202,7 @@ func cloneRenderNode(node *ast.Node) *ast.Node {
 	}
 	if nil != node.Properties {
 		cloned.Properties = make(map[string]string, len(node.Properties))
-		for name, value := range node.Properties {
-			cloned.Properties[name] = value
-		}
+		maps.Copy(cloned.Properties, node.Properties)
 	}
 
 	for child := node.FirstChild; nil != child; child = child.Next {

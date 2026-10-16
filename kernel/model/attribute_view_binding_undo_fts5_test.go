@@ -39,7 +39,7 @@ func TestAttributeViewBindingUndoRedo(t *testing.T) {
 			if after.GetBlockValue(itemID).Block.ID != fixture.sourceID {
 				t.Fatal("replacement did not bind the new block")
 			}
-			for cycle := 0; cycle < 3; cycle++ {
+			for range 3 {
 				assertAttributeViewBindingBacklink(t, fixture.targetID, before.ID, false)
 				assertAttributeViewBindingBacklink(t, fixture.sourceID, before.ID, true)
 				if err = PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err != nil {
@@ -93,7 +93,7 @@ func TestAttributeViewBindingCreatedDocumentReplay(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		if err := PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err != nil {
 			t.Fatal(err)
 		}

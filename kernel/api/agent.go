@@ -86,10 +86,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 	client := model.NewAIProviderClient(selectedProvider, selectedModel.Name)
 
 	confirmTimeout := resolveAgentConfirmTimeout(confAISnapshot.Agent.ConfirmTimeout)
-	maxRetries := confAISnapshot.Agent.MaxRetries
-	if maxRetries < 0 {
-		maxRetries = 0
-	}
+	maxRetries := max(confAISnapshot.Agent.MaxRetries, 0)
 	// Provider 请求超时只限制建立上游流；流建立后由可重置的空闲超时检测连续无输出，
 	// 避免持续正常输出的长回答被固定截止时间中断。
 	requestTimeout := time.Duration(selectedProvider.RequestTimeout) * time.Second

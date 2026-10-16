@@ -43,7 +43,7 @@ func relinkPath(value string) (string, error) {
 	if !strings.HasPrefix(p, "assets/") || path.Clean(p) != p || strings.ContainsAny(p, "\\\x00\r\n") || strings.HasSuffix(p, "/") {
 		return "", fmt.Errorf("invalid asset path: %q", value)
 	}
-	for _, segment := range strings.Split(p, "/") {
+	for segment := range strings.SplitSeq(p, "/") {
 		if strings.Contains(segment, ":") {
 			return "", fmt.Errorf("invalid asset path: %q", value)
 		}

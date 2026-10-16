@@ -49,7 +49,7 @@ func TestParseAttributeViewSearchInfo(t *testing.T) {
 		t.Fatalf("unexpected second view: %+v", info.Views[1])
 	}
 
-	if _, err = parseAttributeViewSearchInfo([]byte(fmt.Sprintf(`{"spec": %d}`, CurrentSpec+1))); err != ErrSpecTooNew {
+	if _, err = parseAttributeViewSearchInfo(fmt.Appendf(nil, `{"spec": %d}`, CurrentSpec+1)); err != ErrSpecTooNew {
 		t.Fatalf("expected newer spec error, got %v", err)
 	}
 }

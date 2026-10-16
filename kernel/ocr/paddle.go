@@ -388,8 +388,8 @@ func imageTensor(img image.Image, w, h int, detector bool) []float32 {
 	resized := imaging.Resize(img, w, h, imaging.Linear)
 	data := make([]float32, 3*w*h)
 	mean, std := [3]float32{.485, .456, .406}, [3]float32{.229, .224, .225}
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
+	for y := range h {
+		for x := range w {
 			pixel := resized.NRGBAAt(x, y)
 			channels := [3]uint8{pixel.B, pixel.G, pixel.R}
 			for c, value := range channels {
@@ -410,8 +410,8 @@ func recognitionTensor(img image.Image, width int) []float32 {
 	w := min(width, max(1, int(math.Ceil(float64(img.Bounds().Dx())*48/float64(img.Bounds().Dy())))))
 	resized := imageTensor(img, w, 48, false)
 	result := make([]float32, 3*48*width)
-	for c := 0; c < 3; c++ {
-		for y := 0; y < 48; y++ {
+	for c := range 3 {
+		for y := range 48 {
 			copy(result[c*48*width+y*width:c*48*width+y*width+w], resized[c*48*w+y*w:c*48*w+(y+1)*w])
 		}
 	}

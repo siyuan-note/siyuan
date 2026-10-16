@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -103,7 +104,7 @@ func ValidatePluginProjectFile(name string) error {
 	if err := validateManagedSkillPath(name); err != nil {
 		return fmt.Errorf("invalid_path: %w", err)
 	}
-	for _, part := range strings.Split(strings.ToLower(name), "/") {
+	for part := range strings.SplitSeq(strings.ToLower(name), "/") {
 		switch part {
 		case "configs", "settings", "cache", "logs", "secrets", "credentials", "data.json", "settings.json", "token.json", "token.txt", "tokens.txt", "auth.json", "auth.txt", "credential.json", "credentials.txt", "secret.json", "secrets.json", "secrets.txt":
 			return fmt.Errorf("invalid_path: credential or runtime material is not permitted: %s", name)
@@ -173,7 +174,7 @@ func OpenPluginProjectDirectory(abs string, create bool) (*os.Root, error) {
 	if rel == "." {
 		return root, nil
 	}
-	for _, part := range strings.Split(filepath.ToSlash(rel), "/") {
+	for part := range strings.SplitSeq(filepath.ToSlash(rel), "/") {
 		if part == "" || part == "." || part == ".." {
 			root.Close()
 			return nil, errors.New("invalid_path")
@@ -832,9 +833,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			return errors.New("revision_conflict: current project revision changed")
 		}
 		known := map[string]string{}
-		for name, rev := range manifest.Current {
-			known[name] = rev
-		}
+		maps.Copy(known, manifest.Current)
 		for name, change := range manifest.Pending {
 			actual := inventory[name]
 			if actual == "" {

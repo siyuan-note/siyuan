@@ -78,7 +78,7 @@ func TestAPIContractSettingValueRanges(t *testing.T) {
 				}
 				for field, want := range entry.want {
 					value := actual[entry.namespace]
-					for _, key := range strings.Split(field, ".") {
+					for key := range strings.SplitSeq(field, ".") {
 						value = value.(map[string]any)[key]
 					}
 					if value != want {

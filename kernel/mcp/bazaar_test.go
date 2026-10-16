@@ -21,7 +21,7 @@ func TestBazaarMCPPagination(t *testing.T) {
 	model.Conf.Bazaar.Store(&conf.Bazaar{})
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() { model.Conf, util.DataDir = oldConf, oldDataDir })
-	for i := 0; i < 23; i++ {
+	for i := range 23 {
 		name := fmt.Sprintf("widget-%02d", i)
 		dir := filepath.Join(util.DataDir, "widgets", name)
 		if err := os.MkdirAll(dir, 0755); err != nil {

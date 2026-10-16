@@ -57,7 +57,7 @@ func safeCloudErrorHost(host string) bool {
 	if nil != net.ParseIP(host) {
 		return true
 	}
-	for _, label := range strings.Split(strings.TrimSuffix(host, "."), ".") {
+	for label := range strings.SplitSeq(strings.TrimSuffix(host, "."), ".") {
 		if "" == label || 63 < len(label) || '-' == label[0] || '-' == label[len(label)-1] {
 			return false
 		}

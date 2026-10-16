@@ -326,7 +326,7 @@ func TestPluginProjectRepeatedMutationsKeepBoundedRecoveryState(t *testing.T) {
 		t.Fatal(err)
 	}
 	previous := "initial"
-	for i := 0; i < 600; i++ {
+	for i := range 600 {
 		next := fmt.Sprintf("revision %d", i)
 		err := WithPluginProjectSource(ctx, true, func(g *PluginDevelopmentGrant, root *os.Root) error {
 			if err := BeginPluginProjectMutation(g, "index.js", PluginProjectDigest([]byte(previous)), PluginProjectDigest([]byte(next))); err != nil {
@@ -389,7 +389,7 @@ func TestPluginProjectRepeatedReplansKeepOnlyCurrentCheckpoint(t *testing.T) {
 	if err = os.WriteFile(unknown, []byte("keep"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		grant.PlanHash, grant.PlanVersion = fmt.Sprintf("plan %d", i), i+2
 		status, err = PreparePluginProject(ctx, grant.TaskID, nil, status.SourceRevision)
 		if err != nil {

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"reflect"
 	"strings"
 )
@@ -91,9 +92,7 @@ func (r FileTreeSetPublishRequest) Options() (FileTreePublishOptions, error) {
 }
 func (r FileTreeGetDocRequest) Options() (FileTreeGetDocOptions, error) {
 	fields := make(fileTreeFields, len(r.fields))
-	for key, value := range r.fields {
-		fields[key] = value
-	}
+	maps.Copy(fields, r.fields)
 	var includeDocInfo bool
 	if json.Unmarshal(fields["includeDocInfo"], &includeDocInfo) != nil {
 		delete(fields, "includeDocInfo")

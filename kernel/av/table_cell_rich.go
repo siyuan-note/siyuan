@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,12 +50,7 @@ func isTableCellRichCustomTextMark(node *ast.Node) bool {
 	if nil == node || ast.NodeTextMark != node.Type {
 		return false
 	}
-	for _, typ := range strings.Fields(node.TextMarkType) {
-		if tableCellRichCustomTypePattern.MatchString(typ) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(strings.Fields(node.TextMarkType), tableCellRichCustomTypePattern.MatchString)
 }
 
 func isAllowedTableCellRichCustomNode(node *ast.Node) bool {
@@ -68,7 +64,7 @@ func isAllowedTableCellRichCustomNode(node *ast.Node) bool {
 		"" != node.TextMarkFlashcardOcclusionID || !isAllowedValueTextMarkReferenceData(node, true) {
 		return false
 	}
-	for _, typ := range strings.Fields(node.TextMarkType) {
+	for typ := range strings.FieldsSeq(node.TextMarkType) {
 		if tableCellRichCustomTypePattern.MatchString(typ) {
 			continue
 		}

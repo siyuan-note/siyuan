@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"os/exec"
@@ -359,7 +360,7 @@ func listAllMCPTools(ctx context.Context,
 		params   *mcp.ListToolsParams
 	)
 	seenCursors := map[string]struct{}{}
-	for page := 0; page < maxMCPToolListPages; page++ {
+	for range maxMCPToolListPages {
 		result, err := listPage(ctx, params)
 		if err != nil {
 			return nil, err
@@ -1121,9 +1122,7 @@ func MCPStatus() []MCPStatusItem {
 	mcpMu.Lock()
 	servers := append([]conf.MCPServer(nil), mcpServers...)
 	runtimeStates := make(map[string]mcpRuntimeState, len(mcpRuntime))
-	for serverID, state := range mcpRuntime {
-		runtimeStates[serverID] = state
-	}
+	maps.Copy(runtimeStates, mcpRuntime)
 	mcpMu.Unlock()
 
 	items := make([]MCPStatusItem, 0, len(servers))

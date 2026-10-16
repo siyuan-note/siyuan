@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"math"
+	"slices"
 
 	"github.com/dop251/goja"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
@@ -176,19 +177,12 @@ func keyFormatOf(value goja.Value) (crypto.KeyFormat, error) {
 	}
 
 	format := crypto.KeyFormat(value.String())
-	for _, cur := range crypto.KeyFormats {
-		if cur == format {
-			return format, nil
-		}
+	if slices.Contains(crypto.KeyFormats, format) {
+		return format, nil
 	}
 	return "", crypto.NewError(crypto.ErrNameType, "%q is not a valid key format", value.String())
 }
 
 func containsKeyUsage(usages []crypto.KeyUsage, usage crypto.KeyUsage) bool {
-	for _, cur := range usages {
-		if cur == usage {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(usages, usage)
 }

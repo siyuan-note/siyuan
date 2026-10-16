@@ -26,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -232,10 +233,8 @@ func DiscoverUserSkills(enabledUserSkills []string) []UserSkillInfo {
 func findSkillRecord(records []skillRecord, name string) (skillRecord, bool) {
 	key := skillKey(name)
 	for _, record := range records {
-		for _, alias := range skillAliases(record) {
-			if alias == key {
-				return record, true
-			}
+		if slices.Contains(skillAliases(record), key) {
+			return record, true
 		}
 	}
 	return skillRecord{}, false

@@ -230,8 +230,7 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 				continue
 			}
 			validationErr := tx.validateAutomationRule(current, rule, source.boxID)
-			var unavailable *automationUnavailableReference
-			if errors.As(validationErr, &unavailable) {
+			if unavailable, ok := errors.AsType[*automationUnavailableReference](validationErr); ok {
 				rule.Enabled = false
 				paused = true
 				state.paused = append(state.paused, automationPausedRule{rule.Name, unavailable})

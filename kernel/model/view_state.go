@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"os"
 	"path/filepath"
@@ -126,9 +127,7 @@ func PatchViewState(key string, values map[string]any, removeKeys []string) (ret
 	} else if nil == state.Data {
 		state.Data = map[string]any{}
 	}
-	for valueKey, value := range values {
-		state.Data[valueKey] = value
-	}
+	maps.Copy(state.Data, values)
 	for _, removeKey := range removeKeys {
 		delete(state.Data, removeKey)
 	}

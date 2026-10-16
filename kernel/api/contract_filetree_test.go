@@ -119,7 +119,7 @@ func TestAPIContractFileTreeDailyNoteDate(t *testing.T) {
 func TestAPIContractFileTreePayloadConversions(t *testing.T) {
 	compare := func(before, after []byte) {
 		t.Helper()
-		var left, right interface{}
+		var left, right any
 		if err := json.Unmarshal(before, &left); err != nil {
 			t.Fatal(err)
 		}

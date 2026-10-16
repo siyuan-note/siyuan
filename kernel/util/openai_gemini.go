@@ -383,8 +383,8 @@ func (r *geminiThoughtSignatureReadCloser) captureLine(line []byte) {
 	if len(line) == 0 {
 		return
 	}
-	if bytes.HasPrefix(line, []byte("data:")) {
-		line = bytes.TrimSpace(bytes.TrimPrefix(line, []byte("data:")))
+	if after, ok := bytes.CutPrefix(line, []byte("data:")); ok {
+		line = bytes.TrimSpace(after)
 	}
 	if len(line) == 0 || bytes.Equal(line, []byte("[DONE]")) {
 		return
@@ -452,6 +452,6 @@ type geminiChatToolCall struct {
 	ExtraContent struct {
 		Google struct {
 			ThoughtSignature string `json:"thought_signature,omitempty"`
-		} `json:"google,omitempty"`
-	} `json:"extra_content,omitempty"`
+		} `json:"google"`
+	} `json:"extra_content"`
 }

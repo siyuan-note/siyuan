@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -441,8 +442,8 @@ func isRuntimeTurnTerminal(turn *agentRuntimeTurn) bool {
 
 func findRuntimeUserAnchor(session map[string]any, userEntryID string) int {
 	entries, _ := session["entries"].([]any)
-	for i := len(entries) - 1; i >= 0; i-- {
-		entry, _ := entries[i].(map[string]any)
+	for i, entrie := range slices.Backward(entries) {
+		entry, _ := entrie.(map[string]any)
 		if entry["type"] != "user" {
 			continue
 		}

@@ -342,7 +342,7 @@ func TestAutomationLargeDatabaseNoOp(t *testing.T) {
 	status, _ := source.GetKeyValues(statusID)
 	primaryTemplate, statusTemplate := primary.Values[0].Clone(), status.Values[0].Clone()
 	primary.Values, status.Values = nil, nil
-	for i := 0; i < 20000; i++ {
+	for range 20000 {
 		id := ast.NewNodeID()
 		p, s := primaryTemplate.Clone(), statusTemplate.Clone()
 		p.ID, p.BlockID, s.ID, s.BlockID = ast.NewNodeID(), id, ast.NewNodeID(), id
@@ -479,7 +479,7 @@ func BenchmarkAutomationChangedItems(b *testing.B) {
 				{Key: &av.Key{ID: "primary", Type: av.KeyTypeBlock}},
 				{Key: &av.Key{ID: "status", Type: av.KeyTypeText}},
 			}, Automations: &av.AutomationConfig{Rules: []*av.AutomationRule{{Enabled: true, Trigger: "changed", KeyID: "status"}}}}
-			for i := 0; i < size; i++ {
+			for i := range size {
 				id := fmt.Sprint(i)
 				view.KeyValues[0].Values = append(view.KeyValues[0].Values, &av.Value{BlockID: id, Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: "Task"}})
 				view.KeyValues[1].Values = append(view.KeyValues[1].Values, &av.Value{BlockID: id, Type: av.KeyTypeText, Text: &av.ValueText{Content: "Pending"}})

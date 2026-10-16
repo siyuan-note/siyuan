@@ -1087,10 +1087,7 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	if start >= len(ret) {
 		return []*cache.Asset{}, nil
 	}
-	end := start + pageSize
-	if end > len(ret) {
-		end = len(ret)
-	}
+	end := min(start+pageSize, len(ret))
 	ret = ret[start:end]
 	// 仅处理当前页的高亮内容，避免对其他页重复渲染。
 	highlightKeyword := strings.Join(keywords, search.TermSep)

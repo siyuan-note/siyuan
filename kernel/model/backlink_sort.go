@@ -1,6 +1,7 @@
 package model
 
 import (
+	"maps"
 	"sort"
 	"strings"
 
@@ -30,9 +31,7 @@ func expandBacklinkDocumentEntries(blocks []*Block, refs []*sql.Ref, defRootID s
 			}
 		}
 		entries, _, _, mappings := buildLinkRefsInBoxWithDocumentGrouping(defRootID, removeDuplicatedRefs(documentRefs), keywords, boxID, false)
-		for parentID, refID := range mappings {
-			originalRefBlockIDs[parentID] = refID
-		}
+		maps.Copy(originalRefBlockIDs, mappings)
 		result = append(result, entries...)
 	}
 	return result

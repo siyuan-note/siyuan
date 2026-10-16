@@ -27,14 +27,12 @@ func TestAPIContractSettingPatchConcurrentFields(t *testing.T) {
 	fontSize := model.Conf.Editor.Load().FontSize
 	var group sync.WaitGroup
 	for _, body := range []string{`{"editor":{"displayImgName":true}}`, `{"editor":{"displayImgAlt":true}}`} {
-		group.Add(1)
-		go func() {
-			defer group.Done()
+		group.Go(func() {
 			code, message, _ := settingContractRequest(t, "patch", patchSetting, body)
 			if code != 0 {
 				t.Errorf("patch failed: %d %s", code, message)
 			}
-		}()
+		})
 	}
 	group.Wait()
 	if !model.Conf.Editor.Load().DisplayImgName || !model.Conf.Editor.Load().DisplayImgAlt || model.Conf.Editor.Load().FontSize != fontSize {

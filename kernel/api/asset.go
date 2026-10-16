@@ -132,7 +132,7 @@ var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.C
 
 var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetOCRData] {
 
-	path := strings.SplitN(request.Path, "#", 2)[0]
+	path, _, _ := strings.Cut(request.Path, "#")
 
 	// 加密笔记本的资源不参与全局 OCR
 	if model.IsEncryptedOCRAsset(path) {

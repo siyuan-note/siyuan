@@ -75,7 +75,7 @@ func TestRPCHTTPWaitCancellation(t *testing.T) {
 		t.Run(path, func(t *testing.T) {
 			p := newRPCCancellationTestPlugin(t)
 			started := make(chan struct{})
-			var resolve func(interface{}) error
+			var resolve func(any) error
 			rpcCancellationTestRun(t, p, func(rt *goja.Runtime) (any, error) {
 				p.rpcMethods.Store("pending", &RpcMethod{Method: func(goja.Value, ...goja.Value) (goja.Value, error) {
 					promise, resolvePromise, _ := rt.NewPromise()

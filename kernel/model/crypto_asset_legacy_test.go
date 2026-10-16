@@ -44,7 +44,7 @@ func legacyEncryptedAssetFixture(t *testing.T, boxID, diskName, originalName str
 	ret = append(ret, encryptedMetadata...)
 	for i := range chunks {
 		start, end := i*chunkSize, min((i+1)*chunkSize, len(plaintext))
-		chunk, encryptErr := util.EncryptWithAAD(key, plaintext[start:end], []byte(fmt.Sprintf("%s:content:%d", prefix, i)))
+		chunk, encryptErr := util.EncryptWithAAD(key, plaintext[start:end], fmt.Appendf(nil, "%s:content:%d", prefix, i))
 		if encryptErr != nil {
 			t.Fatal(encryptErr)
 		}

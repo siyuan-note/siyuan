@@ -154,7 +154,7 @@ func TestPublishSessionPerAccountCapEvictsOldest(t *testing.T) {
 
 	base := time.Now()
 	sessionLock.Lock()
-	for i := 0; i < publishSessionPerAccountCap; i++ {
+	for i := range publishSessionPerAccountCap {
 		sessionsMap["id-"+strconv.Itoa(i)] = &PublishSession{
 			Username:   "alice",
 			LastActive: base.Add(time.Duration(i) * time.Second),
@@ -350,13 +350,13 @@ func TestConcurrentPublishAccountRefreshAndJWTParsing(t *testing.T) {
 	wait.Add(2)
 	go func() {
 		defer wait.Done()
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			InitPublishAccounts()
 		}
 	}()
 	go func() {
 		defer wait.Done()
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			_, _ = ParseJWT(account.Token)
 		}
 	}()

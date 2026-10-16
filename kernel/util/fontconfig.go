@@ -44,7 +44,7 @@ type fontconfigLocalizedName struct {
 }
 
 func parseFontconfigFonts(data []byte, lang string) (ret []*Font) {
-	for _, record := range bytes.Split(data, []byte(fontconfigRecordSeparator)) {
+	for record := range bytes.SplitSeq(data, []byte(fontconfigRecordSeparator)) {
 		if 0 == len(record) {
 			continue
 		}
@@ -100,7 +100,7 @@ func parseFontconfigFonts(data []byte, lang string) (ret []*Font) {
 }
 
 func parseFontconfigLocalizedNames(value string) (ret []fontconfigLocalizedName) {
-	for _, item := range strings.Split(value, fontconfigValueSeparator) {
+	for item := range strings.SplitSeq(value, fontconfigValueSeparator) {
 		item = strings.TrimSpace(item)
 		if "" == item {
 			continue
@@ -120,7 +120,7 @@ func parseFontconfigLocalizedNames(value string) (ret []fontconfigLocalizedName)
 }
 
 func parseFontconfigValues(value string) (ret []string) {
-	for _, item := range strings.Split(value, fontconfigValueSeparator) {
+	for item := range strings.SplitSeq(value, fontconfigValueSeparator) {
 		if item = strings.TrimSpace(item); "" != item {
 			ret = append(ret, item)
 		}
@@ -152,8 +152,8 @@ func fontconfigLanguagesMatch(left, right string) bool {
 	if "" == left || "" == right {
 		return false
 	}
-	leftPrimary := strings.SplitN(left, "-", 2)[0]
-	rightPrimary := strings.SplitN(right, "-", 2)[0]
+	leftPrimary, _, _ := strings.Cut(left, "-")
+	rightPrimary, _, _ := strings.Cut(right, "-")
 	if leftPrimary != rightPrimary {
 		return false
 	}

@@ -16,7 +16,10 @@
 
 package crypto
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // 受支持的算法名称，取值与 Web Crypto 规范一致。
 const (
@@ -167,10 +170,8 @@ func checkFormat(algName string, format KeyFormat) error {
 		return notSupportedError("%s keys cannot be imported or exported", algName)
 	}
 
-	for _, cur := range formats {
-		if cur == format {
-			return nil
-		}
+	if slices.Contains(formats, format) {
+		return nil
 	}
 	return notSupportedError("%s keys do not support the %s format", algName, format)
 }

@@ -20,6 +20,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/dop251/goja"
@@ -206,9 +207,7 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 
 			fullToolName := pluginCapabilityModelName(p.Name, name)
 			declaredActionEffects := make(map[string]tools.ToolEffects, len(actionEffects)+1)
-			for action, actionEffect := range actionEffects {
-				declaredActionEffects[action] = actionEffect
-			}
+			maps.Copy(declaredActionEffects, actionEffects)
 			if effects != nil {
 				declaredActionEffects[""] = *effects
 			}

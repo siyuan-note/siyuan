@@ -189,7 +189,7 @@ func isEncryptedBoxMounted(boxID string) bool {
 // Go 的 os.RemoveAll 在 Windows 上遇到"目录非空"（并发写入或句柄占用）不会重试，
 // 因此这里在每次重试前主动清空残留内容，并在最终失败时返回残留条目供定位。
 func removeBoxDir(p string) (err error) {
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		err = filelock.RemoveWithoutFatal(p)
 		if nil == err {
 			return

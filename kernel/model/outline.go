@@ -17,6 +17,8 @@
 package model
 
 import (
+	"slices"
+
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
@@ -102,8 +104,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		diffLevel := heading.HeadingLevel - previousHeading.HeadingLevel
 		heading.HeadingLevel = previousHeading.HeadingLevel
 
-		for i := len(headingChildren) - 1; i >= 0; i-- {
-			child := headingChildren[i]
+		for _, child := range slices.Backward(headingChildren) {
+
 			if ast.NodeHeading == child.Type {
 				child.HeadingLevel -= diffLevel
 				if 6 < child.HeadingLevel {
@@ -158,8 +160,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel - 1
 		heading.HeadingLevel = min(6, parentHeading.HeadingLevel+1)
 
-		for i := len(headingChildren) - 1; i >= 0; i-- {
-			child := headingChildren[i]
+		for _, child := range slices.Backward(headingChildren) {
+
 			if ast.NodeHeading == child.Type {
 				child.HeadingLevel -= diffLevel
 				if 6 < child.HeadingLevel {

@@ -31,6 +31,7 @@ export interface ListMindmapViewOptions {
     labels?: Record<string, string>;
     cdn?: string;
     onOpenLink?: (href: string, event: MouseEvent) => void;
+    onPreviewImage?: (src: string) => void;
     colors?: () => {label: string, value: string}[];
     nodeColors?: () => {
         label: string, color: string, backgroundColor: string,
@@ -2587,10 +2588,23 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.readOnly || this.relationFrom || this.summarySelecting || this.panning || this.pinching) {
+        if (this.relationFrom || this.summarySelecting || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;
+        if (target.tagName === "IMG" && !target.classList.contains("emoji") &&
+            !target.closest('[data-subtype="plantuml"]') &&
+            !this.viewport.contains(target.closest(".mindmap-view__node--editing")) && this.options.onPreviewImage) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.cancelPointer();
+            const src = target.getAttribute("src");
+            this.finishThen(() => this.options.onPreviewImage(src));
+            return;
+        }
+        if (this.readOnly) {
+            return;
+        }
         const summary = target.closest<HTMLElement>(".mindmap-view__summary");
         if (summary) {
             this.editSummaryLabel(summary.dataset.summaryId);

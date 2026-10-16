@@ -2628,13 +2628,42 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     locateView.destroy();
     locateList.remove();
     // 公式在副本上异步渲染；链接单击跳转，双击和拖拽不跳转。
-    const richList = reset("* $x^2$ [example](https://example.com)\n  * child\n");
+    const richList = reset("* $x^2$ [example](https://example.com) ![image](assets/example.png)\n  * child\n");
     const richHost = document.createElement("div");
     hostParent.append(richHost);
     const opened: string[] = [];
+    const previewed: string[] = [];
     let richEdits = 0;
     const richView = new api.ListMindmapView({host: richHost, model: api.readListMindmap(richList),
-        onExit: () => {}, onOpenLink: (href: string) => opened.push(href), onEdit: () => richEdits++});
+        onExit: () => {}, onOpenLink: (href: string) => opened.push(href), onEdit: () => richEdits++,
+        onPreviewImage: (src: string) => previewed.push(src)});
+    await settle();
+    const doubleClickImage = () => richHost.querySelector("img").dispatchEvent(new MouseEvent("dblclick", {
+        bubbles: true, cancelable: true,
+    }));
+    doubleClickImage();
+    check.deepEqual(previewed, ["assets/example.png"]);
+    check.equal(richEdits, 0, "image previews do not open a node editor");
+    richView.setReadOnly(true);
+    doubleClickImage();
+    check.equal(previewed.length, 2, "read-only nodes support image previews");
+    richView.setReadOnly(false);
+    richView.setLocked(true);
+    doubleClickImage();
+    check.equal(previewed.length, 3, "locked nodes support image previews without editing");
+    richView.setLocked(false);
+    for (const mode of ["relationFrom", "summarySelecting", "panning", "pinching"]) {
+        richView[mode] = true;
+        doubleClickImage();
+        check.equal(previewed.length, 3, "active canvas interactions do not open image previews");
+        richView[mode] = undefined;
+    }
+    richHost.querySelector("img").classList.add("emoji");
+    doubleClickImage();
+    check.equal(previewed.length, 3, "emoji images keep the node editing interaction");
+    richHost.querySelector("img").classList.remove("emoji");
+    richView.setEditing();
+    richEdits = 0;
     await settle();
     check.ok(richHost.querySelector('[data-subtype="math"] .katex'));
     check.equal(richList.querySelector(".katex"), null, "preview rendering does not mutate the source");

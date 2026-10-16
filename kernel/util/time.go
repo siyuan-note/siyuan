@@ -127,37 +127,37 @@ func HumanizeDiffTime(a, b time.Time, lang string) string {
 	buf := bytes.Buffer{}
 	if 0 < year {
 		if 1 == year {
-			buf.WriteString(fmt.Sprintf(labels["1y"].(string), " "))
+			fmt.Fprintf(&buf, labels["1y"].(string), " ")
 		} else {
-			buf.WriteString(fmt.Sprintf(labels["xy"].(string), year, " "))
+			fmt.Fprintf(&buf, labels["xy"].(string), year, " ")
 		}
 	}
 	if 0 < month {
 		if 1 == month {
-			buf.WriteString(fmt.Sprintf(labels["1M"].(string), " "))
+			fmt.Fprintf(&buf, labels["1M"].(string), " ")
 		} else {
-			buf.WriteString(fmt.Sprintf(labels["xM"].(string), month, " "))
+			fmt.Fprintf(&buf, labels["xM"].(string), month, " ")
 		}
 	}
 	if 0 < day {
 		if 1 == day {
-			buf.WriteString(fmt.Sprintf(labels["1d"].(string), " "))
+			fmt.Fprintf(&buf, labels["1d"].(string), " ")
 		} else {
-			buf.WriteString(fmt.Sprintf(labels["xd"].(string), day, " "))
+			fmt.Fprintf(&buf, labels["xd"].(string), day, " ")
 		}
 	}
 	if 0 < hour {
 		if 1 == hour {
-			buf.WriteString(fmt.Sprintf(labels["1h"].(string), " "))
+			fmt.Fprintf(&buf, labels["1h"].(string), " ")
 		} else {
-			buf.WriteString(fmt.Sprintf(labels["xh"].(string), hour, " "))
+			fmt.Fprintf(&buf, labels["xh"].(string), hour, " ")
 		}
 	}
 	if 0 < min {
 		if 1 == min {
-			buf.WriteString(fmt.Sprintf(labels["1m"].(string), " "))
+			fmt.Fprintf(&buf, labels["1m"].(string), " ")
 		} else {
-			buf.WriteString(fmt.Sprintf(labels["xm"].(string), min, " "))
+			fmt.Fprintf(&buf, labels["xm"].(string), min, " ")
 		}
 	}
 	return strings.TrimSpace(buf.String())

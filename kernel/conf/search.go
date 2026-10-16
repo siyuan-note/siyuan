@@ -148,13 +148,16 @@ func (s *Search) NAMFilter(keyword string) string {
 	pattern := SearchLikePattern(strings.TrimSpace(keyword))
 	buf := bytes.Buffer{}
 	if s.Name {
-		buf.WriteString(" OR name LIKE " + pattern)
+		buf.WriteString(" OR name LIKE ")
+		buf.WriteString(pattern)
 	}
 	if s.Alias {
-		buf.WriteString(" OR alias LIKE " + pattern)
+		buf.WriteString(" OR alias LIKE ")
+		buf.WriteString(pattern)
 	}
 	if s.Memo {
-		buf.WriteString(" OR memo LIKE " + pattern)
+		buf.WriteString(" OR memo LIKE ")
+		buf.WriteString(pattern)
 	}
 	return buf.String()
 }

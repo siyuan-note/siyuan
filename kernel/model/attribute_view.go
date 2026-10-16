@@ -4831,7 +4831,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 	view := attrView.GetView(operation.ID)
 	if nil == view {
 		logging.LogErrorf("get view failed: %s", operation.BlockID)
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: av.ErrViewNotFound.Error()}
 	}
 	viewID := view.ID
 	previousViewID := operation.PreviousID
@@ -5655,7 +5655,7 @@ func (tx *Transaction) doSetAttrViewContextFilter(operation *Operation) (ret *Tx
 }
 
 // resolveAttributeViewFilterContext 将数据库块所在根文档映射为关联目标数据库的条目 ID。
-func resolveAttributeViewFilterContext(attrView *av.AttributeView, view *av.View,
+func resolveAttributeViewFilterContext(attrView *av.AttributeView, _ *av.View,
 	blockID string) (*av.FilterContext, error) {
 	if nil == attrView || "" == blockID {
 		return nil, nil
@@ -6100,7 +6100,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	operationData := operation.Data.(any)
+	operationData := operation.Data
 	data, err := gulu.JSON.MarshalJSON(operationData)
 	if err != nil {
 		return
@@ -8477,12 +8477,10 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		}
 	}
 
-	if nil != blockVal {
-		blockVal.Block.Updated = now
-		blockVal.SetUpdatedAt(now)
-		if isUpdatingBlockKey {
-			blockVal.IsDetached = val.IsDetached
-		}
+	blockVal.Block.Updated = now
+	blockVal.SetUpdatedAt(now)
+	if isUpdatingBlockKey {
+		blockVal.IsDetached = val.IsDetached
 	}
 	val.SetUpdatedAt(now)
 
@@ -8672,7 +8670,6 @@ func unbindBlockAv(tx *Transaction, avID, nodeID string) {
 		logging.LogWarnf("set node [%s] attrs failed: %s", nodeID, err)
 		return
 	}
-	return
 }
 
 func (tx *Transaction) doSortAttrViewBinding(operation *Operation) (ret *TxErr) {
@@ -8747,7 +8744,6 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 	}
 
 	bindBlockAv0(tx, avID, node, tree)
-	return
 }
 
 func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree) {
@@ -8779,7 +8775,6 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)
 		return
 	}
-	return
 }
 
 func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {

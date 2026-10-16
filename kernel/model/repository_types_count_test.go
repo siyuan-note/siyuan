@@ -136,7 +136,7 @@ func TestStatTypesByPathNoExt(t *testing.T) {
 func format(ret []*TypeCount) string {
 	var s strings.Builder
 	for _, tc := range ret {
-		s.WriteString(fmt.Sprintf("%s=%d ", tc.Type, tc.Count))
+		fmt.Fprintf(&s, "%s=%d ", tc.Type, tc.Count)
 	}
 	return s.String()
 }

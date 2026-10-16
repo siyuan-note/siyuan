@@ -415,9 +415,10 @@ func TestAgentChatReusesOnlyCompatibleCompaction(t *testing.T) {
 				t.Fatal(err)
 			}
 			model, provider := "test-model", "provider"
-			if name == "other-model" {
+			switch name {
+			case "other-model":
 				model = "other-model"
-			} else if name == "other-provider" {
+			case "other-provider":
 				provider = "other-provider"
 			}
 			var summaries atomic.Int32

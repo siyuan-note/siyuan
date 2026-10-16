@@ -371,27 +371,6 @@ func planes16(src, dst *hevc.Picture, pl int) ([]uint16, []uint16) {
 	}
 }
 
-// gridAlpha assembles a grid's alpha from the auxiliary items on its tiles.
-func (f *file) gridAlpha(it *item) (*hevc.Picture, error) {
-	g, tiles, err := f.gridOf(it)
-	if err != nil {
-		return nil, err
-	}
-
-	alpha := make([]uint32, len(tiles))
-
-	for i, id := range tiles {
-		a := f.alphaOf(id)
-		if a == nil {
-			return nil, nil
-		}
-
-		alpha[i] = a.id
-	}
-
-	return f.decodeTiles(g, alpha)
-}
-
 func (f *file) hasAlpha(it *item) (bool, error) {
 	if it.typ != "grid" {
 		return f.alphaOf(it.id) != nil, nil

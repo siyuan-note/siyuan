@@ -522,7 +522,7 @@ func TestAttachTemplateDocTreePlansValidatesTransactionBoundary(t *testing.T) {
 		t.Fatalf("render document tree plan failed: %v", err)
 	}
 	transaction, _ := newTemplateDocTreeInsertTransaction(summary.ID, fixture.sourceID)
-	if attached, attachErr := AttachTemplateDocTreePlans([]*Transaction{transaction, &Transaction{}}); nil == attachErr || attached {
+	if attached, attachErr := AttachTemplateDocTreePlans([]*Transaction{transaction, {}}); nil == attachErr || attached {
 		t.Fatalf("plan spanning multiple transactions was accepted: attached=%t, err=%v", attached, attachErr)
 	}
 	if _, ok := templateDocTreePlans.Load(summary.ID); !ok {

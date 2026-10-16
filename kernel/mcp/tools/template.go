@@ -76,10 +76,10 @@ func templateSearch(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Templates (%d):\n\n", len(results)))
+	fmt.Fprintf(&sb, "Templates (%d):\n\n", len(results))
 	for _, r := range results {
-		sb.WriteString(fmt.Sprintf("- %s\n", r.Content))
-		sb.WriteString(fmt.Sprintf("  path: %s\n", r.Path))
+		fmt.Fprintf(&sb, "- %s\n", r.Content)
+		fmt.Fprintf(&sb, "  path: %s\n", r.Path)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

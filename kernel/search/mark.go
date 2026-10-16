@@ -136,7 +136,8 @@ func compileHighlightingRegexp(keywords []string, caseSensitive, splitWords bool
 	}
 
 	var re strings.Builder
-	re.WriteString(ic + "(")
+	re.WriteString(ic)
+	re.WriteString("(")
 	for i, k := range keywords {
 		if "" == k {
 			continue

@@ -154,9 +154,10 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 			sql.FlushQueue()
 			for _, mode := range []int{0, 1, 2, 0} {
 				want := []string{fixture.targetID}
-				if mode == 1 {
+				switch mode {
+				case 1:
 					want = []string{ids[2], ids[1], ids[3], ids[0]}
-				} else if mode == 2 {
+				case 2:
 					want = []string{ids[0], ids[1], ids[3], ids[2]}
 				}
 				for _, explicitBox := range []bool{false, true} {

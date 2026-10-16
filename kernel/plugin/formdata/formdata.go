@@ -365,11 +365,16 @@ func (s *State) EncodeMultipart() (body []byte, contentType string) {
 
 	var buffer bytes.Buffer
 	for _, e := range s.entries {
-		buffer.WriteString("--" + boundary + "\r\n")
-		buffer.WriteString(`Content-Disposition: form-data; name="` +
-			multipartNameEscaper.Replace(crlfReplacer.Replace(e.name)) + `"`)
+		buffer.WriteString("--")
+		buffer.WriteString(boundary)
+		buffer.WriteString("\r\n")
+		buffer.WriteString(`Content-Disposition: form-data; name="`)
+		buffer.WriteString(multipartNameEscaper.Replace(crlfReplacer.Replace(e.name)))
+		buffer.WriteString(`"`)
 		if e.fileState == nil {
-			buffer.WriteString("\r\n\r\n" + crlfReplacer.Replace(e.value) + "\r\n")
+			buffer.WriteString("\r\n\r\n")
+			buffer.WriteString(crlfReplacer.Replace(e.value))
+			buffer.WriteString("\r\n")
 			continue
 		}
 
@@ -377,11 +382,17 @@ func (s *State) EncodeMultipart() (body []byte, contentType string) {
 		if fileType == "" {
 			fileType = "application/octet-stream"
 		}
-		buffer.WriteString(`; filename="` + multipartNameEscaper.Replace(e.fileState.name) + `"` +
-			"\r\nContent-Type: " + fileType + "\r\n\r\n")
+		buffer.WriteString(`; filename="`)
+		buffer.WriteString(multipartNameEscaper.Replace(e.fileState.name))
+		buffer.WriteString(`"`)
+		buffer.WriteString("\r\nContent-Type: ")
+		buffer.WriteString(fileType)
+		buffer.WriteString("\r\n\r\n")
 		buffer.Write(e.fileState.data)
 		buffer.WriteString("\r\n")
 	}
-	buffer.WriteString("--" + boundary + "--\r\n")
+	buffer.WriteString("--")
+	buffer.WriteString(boundary)
+	buffer.WriteString("--\r\n")
 	return buffer.Bytes(), "multipart/form-data; boundary=" + boundary
 }

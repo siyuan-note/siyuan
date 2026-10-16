@@ -210,7 +210,7 @@ func blockGetChildren(args map[string]any) (CallToolResult, error) {
 			content = c.Content
 		}
 		content = truncateText(content, 200)
-		sb.WriteString(fmt.Sprintf("- [%s] %s (%s)\n", c.Type, content, c.ID))
+		fmt.Fprintf(&sb, "- [%s] %s (%s)\n", c.Type, content, c.ID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -601,7 +601,7 @@ func blockBreadcrumb(args map[string]any) (CallToolResult, error) {
 
 	var sb strings.Builder
 	for _, p := range paths {
-		sb.WriteString(fmt.Sprintf("%s/%s (%s)\n", p.Type, p.Name, p.ID))
+		fmt.Fprintf(&sb, "%s/%s (%s)\n", p.Type, p.Name, p.ID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -678,9 +678,9 @@ func blockBatchGet(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Batch get %d blocks (found %d):\n\n", len(ids), len(infos)))
+	fmt.Fprintf(&sb, "Batch get %d blocks (found %d):\n\n", len(ids), len(infos))
 	for _, info := range infos {
-		sb.WriteString(fmt.Sprintf("- %s: %s (rootID: %s, refCount: %d)\n", info.ID, info.Name, info.RootID, info.RefCount))
+		fmt.Fprintf(&sb, "- %s: %s (rootID: %s, refCount: %d)\n", info.ID, info.Name, info.RootID, info.RefCount)
 	}
 	for _, id := range ids {
 		found := false
@@ -691,7 +691,7 @@ func blockBatchGet(args map[string]any) (CallToolResult, error) {
 			}
 		}
 		if !found {
-			sb.WriteString(fmt.Sprintf("- %s: not found\n", id))
+			fmt.Fprintf(&sb, "- %s: not found\n", id)
 		}
 	}
 
@@ -722,12 +722,12 @@ func blockBatchKramdown(args map[string]any) (CallToolResult, error) {
 	kramdowns := model.GetBlockKramdownsInBox(ids, "md", boxID)
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Batch kramdown %d blocks (found %d):\n\n", len(ids), len(kramdowns)))
+	fmt.Fprintf(&sb, "Batch kramdown %d blocks (found %d):\n\n", len(ids), len(kramdowns))
 	for _, id := range ids {
 		if kd, ok := kramdowns[id]; ok {
-			sb.WriteString(fmt.Sprintf("--- %s ---\n%s\n\n", id, kd))
+			fmt.Fprintf(&sb, "--- %s ---\n%s\n\n", id, kd)
 		} else {
-			sb.WriteString(fmt.Sprintf("--- %s ---\n(not found)\n\n", id))
+			fmt.Fprintf(&sb, "--- %s ---\n(not found)\n\n", id)
 		}
 	}
 

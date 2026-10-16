@@ -851,29 +851,27 @@ func serveAppearance(ginServer *gin.Engine) {
 					return
 				}
 
-				for {
-					data, err := os.ReadFile(filePath)
-					if err != nil {
-						c.JSON(200, enUSMap)
-						return
-					}
-					data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
-
-					langMap := map[string]any{}
-					if err = gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
-						logging.LogErrorf("unmarshal json [%s] failed: %s", filePath, err)
-						c.JSON(200, enUSMap)
-						return
-					}
-
-					for enUSDataKey, enUSDataValue := range enUSMap {
-						if _, ok := langMap[enUSDataKey]; !ok {
-							langMap[enUSDataKey] = enUSDataValue
-						}
-					}
-					c.JSON(200, langMap)
+				data, err := os.ReadFile(filePath)
+				if err != nil {
+					c.JSON(200, enUSMap)
 					return
 				}
+				data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
+
+				langMap := map[string]any{}
+				if err = gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
+					logging.LogErrorf("unmarshal json [%s] failed: %s", filePath, err)
+					c.JSON(200, enUSMap)
+					return
+				}
+
+				for enUSDataKey, enUSDataValue := range enUSMap {
+					if _, ok := langMap[enUSDataKey]; !ok {
+						langMap[enUSDataKey] = enUSDataValue
+					}
+				}
+				c.JSON(200, langMap)
+				return
 			}
 		}
 

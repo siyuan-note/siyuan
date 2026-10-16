@@ -1165,7 +1165,12 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		}
 		rowIDs = append(rowIDs, strconv.FormatInt(rowID, 10))
 	}
+	iterErr := rows.Err()
 	rows.Close()
+	if err = iterErr; err != nil {
+		logging.LogErrorf("iterate block rowIDs failed: %s", err)
+		return
+	}
 
 	if 1 > len(rowIDs) {
 		return
@@ -1662,6 +1667,10 @@ func migrateBlockEmbeddingsSchema() {
 		}
 		existing[name] = true
 	}
+	if err = rows.Err(); err != nil {
+		logging.LogErrorf("iterate block_embeddings columns failed: %s", err)
+		return
+	}
 
 	// 表不存在（首次启动还没建）时 existing 为空，跳过；待 initDBTables 建表
 	if 0 == len(existing) {
@@ -1921,7 +1930,6 @@ func closeDatabase() {
 	debug.FreeOSMemory()
 	db = nil
 	runtime.GC()
-	return
 }
 
 func SQLTemplateFuncs(templateFuncMap *template.FuncMap, boxIDs ...string) {

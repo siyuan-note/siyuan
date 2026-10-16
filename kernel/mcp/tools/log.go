@@ -320,7 +320,7 @@ func collectAgentLogSecrets(value reflect.Value, ownerType string, secrets map[s
 		return
 	}
 	if value.CanInterface() {
-		if section, ok := value.Interface().(interface{ SnapshotValue() any }); ok {
+		if section, ok := reflect.TypeAssert[interface{ SnapshotValue() any }](value); ok {
 			collectAgentLogSecrets(reflect.ValueOf(section.SnapshotValue()), ownerType, secrets)
 			return
 		}

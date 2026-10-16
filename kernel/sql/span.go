@@ -88,11 +88,10 @@ func selectSpansRawStmt(stmt string, limit int, queryFn func(string) (*sql.Rows,
 		//logging.LogErrorf("select [%s] failed: %s", stmt, err)
 		return
 	}
-	switch parsedStmt.(type) {
+	switch parsedStmt := parsedStmt.(type) {
 	case *sqlparser.Select:
-		slct := parsedStmt.(*sqlparser.Select)
-		if nil == slct.Limit {
-			slct.Limit = &sqlparser.Limit{
+		if nil == parsedStmt.Limit {
+			parsedStmt.Limit = &sqlparser.Limit{
 				Rowcount: &sqlparser.SQLVal{
 					Type: sqlparser.IntVal,
 					Val:  []byte(strconv.Itoa(limit)),
@@ -100,7 +99,7 @@ func selectSpansRawStmt(stmt string, limit int, queryFn func(string) (*sql.Rows,
 			}
 		}
 
-		stmt = sqlparser.String(slct)
+		stmt = sqlparser.String(parsedStmt)
 	default:
 		return
 	}

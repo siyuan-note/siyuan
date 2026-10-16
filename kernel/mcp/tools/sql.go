@@ -173,12 +173,16 @@ func formatSQLRows(rows []map[string]any, possiblyTruncated bool) string {
 
 	var sb strings.Builder
 	if possiblyTruncated {
-		sb.WriteString(fmt.Sprintf("Query results (%d rows; the %d-row limit may have truncated the result. Use an explicit LIMIT with OFFSET to paginate):\n\n", len(rows), sqlQueryDefaultLimit))
+		fmt.Fprintf(&sb, "Query results (%d rows; the %d-row limit may have truncated the result. Use an explicit LIMIT with OFFSET to paginate):\n\n", len(rows), sqlQueryDefaultLimit)
 	} else {
-		sb.WriteString(fmt.Sprintf("Query results (%d rows):\n\n", len(rows)))
+		fmt.Fprintf(&sb, "Query results (%d rows):\n\n", len(rows))
 	}
-	sb.WriteString("| " + strings.Join(columns, " | ") + " |\n")
-	sb.WriteString("|" + strings.Repeat("---|", len(columns)) + "\n")
+	sb.WriteString("| ")
+	sb.WriteString(strings.Join(columns, " | "))
+	sb.WriteString(" |\n")
+	sb.WriteString("|")
+	sb.WriteString(strings.Repeat("---|", len(columns)))
+	sb.WriteString("\n")
 	for _, row := range rows {
 		vals := make([]string, 0, len(columns))
 		for _, k := range columns {
@@ -187,7 +191,9 @@ func formatSQLRows(rows []map[string]any, possiblyTruncated bool) string {
 			value = strings.ReplaceAll(strings.ReplaceAll(value, "\r\n", "\n"), "\n", "<br>")
 			vals = append(vals, value)
 		}
-		sb.WriteString("| " + strings.Join(vals, " | ") + " |\n")
+		sb.WriteString("| ")
+		sb.WriteString(strings.Join(vals, " | "))
+		sb.WriteString(" |\n")
 	}
 	return sb.String()
 }

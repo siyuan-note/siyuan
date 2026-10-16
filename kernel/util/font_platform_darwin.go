@@ -180,3 +180,29 @@ func loadPlatformFonts() (ret []*Font) {
 	}
 	return
 }
+
+// fontWeightFromNormalizedTrait 把 CoreText 的归一化字重（-1 到 1）与样式映射为 CSS 字重。
+// 样式能推断出明确字重时以样式为准，否则按归一化字重区间取值。
+func fontWeightFromNormalizedTrait(weight float64, style string) int {
+	if inferred := inferFontWeight(400, style); inferred != 400 {
+		return inferred
+	}
+	switch {
+	case weight <= -0.5:
+		return 100
+	case weight <= -0.25:
+		return 300
+	case weight < 0.15:
+		return 400
+	case weight < 0.28:
+		return 500
+	case weight < 0.35:
+		return 600
+	case weight < 0.5:
+		return 700
+	case weight < 0.6:
+		return 800
+	default:
+		return 900
+	}
+}

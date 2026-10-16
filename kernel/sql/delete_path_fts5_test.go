@@ -184,7 +184,8 @@ func TestDocumentPathDeletionQueryPlan(t *testing.T) {
 						if err = rows.Scan(&id, &parent, &unused, &detail); err != nil {
 							t.Fatal(err)
 						}
-						plan.WriteString(detail + "\n")
+						plan.WriteString(detail)
+						plan.WriteString("\n")
 					}
 					rows.Close()
 					if err = rows.Err(); err != nil {

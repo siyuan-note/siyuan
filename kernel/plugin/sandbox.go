@@ -440,7 +440,7 @@ func getJsContextValue(rt *goja.Runtime, paths []any) (value goja.Value, err err
 }
 
 // dispatchEvent calls the globalThis.siyuan.event.on hook with the given event object.
-func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (async bool, err error) {
+func dispatchEvent(_ *KernelPlugin, rt *goja.Runtime, e any) (async bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("goja panic during dispatchEvent: %v", r)

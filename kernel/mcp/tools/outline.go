@@ -69,7 +69,7 @@ func outlineGet(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Document outline (%d headings):\n\n", countHeadings(paths)))
+	fmt.Fprintf(&sb, "Document outline (%d headings):\n\n", countHeadings(paths))
 	for _, p := range paths {
 		writePaths(&sb, p, 0)
 	}
@@ -101,7 +101,7 @@ func countBlockChildren(b *model.Block) int {
 
 func writePaths(sb *strings.Builder, p *model.Path, depth int) {
 	prefix := strings.Repeat("  ", depth)
-	sb.WriteString(fmt.Sprintf("%s- [%s] (id: %s, depth: %d)\n", prefix, p.Name, p.ID, p.Depth))
+	fmt.Fprintf(sb, "%s- [%s] (id: %s, depth: %d)\n", prefix, p.Name, p.ID, p.Depth)
 	for _, b := range p.Blocks {
 		writeBlock(sb, b, depth+1)
 	}
@@ -112,7 +112,7 @@ func writePaths(sb *strings.Builder, p *model.Path, depth int) {
 
 func writeBlock(sb *strings.Builder, b *model.Block, depth int) {
 	prefix := strings.Repeat("  ", depth)
-	sb.WriteString(fmt.Sprintf("%s- [%s] (id: %s, depth: %d)\n", prefix, b.Content, b.ID, b.Depth))
+	fmt.Fprintf(sb, "%s- [%s] (id: %s, depth: %d)\n", prefix, b.Content, b.ID, b.Depth)
 	for _, c := range b.Children {
 		writeBlock(sb, c, depth+1)
 	}

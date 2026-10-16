@@ -401,7 +401,7 @@ func writableStreamFinishInFlightWriteWithError(h *Host, stream *writableState, 
 }
 
 // writableStreamFinishInFlightClose 对应 WritableStreamFinishInFlightClose。
-func writableStreamFinishInFlightClose(h *Host, stream *writableState) {
+func writableStreamFinishInFlightClose(_ *Host, stream *writableState) {
 	stream.inFlightCloseRequest.settle(true, goja.Undefined())
 	stream.inFlightCloseRequest = nil
 

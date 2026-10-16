@@ -73,9 +73,9 @@ func attrGet(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Attributes for %s:\n\n", id))
+	fmt.Fprintf(&sb, "Attributes for %s:\n\n", id)
 	for k, v := range attrs {
-		sb.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
+		fmt.Fprintf(&sb, "- %s: %s\n", k, v)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -135,11 +135,11 @@ func attrBatchGet(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Batch attributes (%d blocks):\n\n", len(attrs)))
+	fmt.Fprintf(&sb, "Batch attributes (%d blocks):\n\n", len(attrs))
 	for id, kv := range attrs {
-		sb.WriteString(fmt.Sprintf("--- %s ---\n", id))
+		fmt.Fprintf(&sb, "--- %s ---\n", id)
 		for k, v := range kv {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
+			fmt.Fprintf(&sb, "- %s: %s\n", k, v)
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

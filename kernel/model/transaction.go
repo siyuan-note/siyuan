@@ -2294,9 +2294,7 @@ func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
 		}
-		if _, ok := oldNodes[n.ID]; ok {
-			delete(oldNodes, n.ID)
-		}
+		delete(oldNodes, n.ID)
 		return ast.WalkContinue
 	})
 	for _, n := range oldNodes {
@@ -3131,7 +3129,6 @@ func (tx *Transaction) rollback() {
 	tx.writeTransactionTree = nil
 	tx.state.Store(3)
 	tx.m.Unlock()
-	return
 }
 
 // cleanupRestoredCreatedDocs 清理提交失败前已经写入的计划文档，避免父文档失败后遗留孤儿文档。
@@ -3270,7 +3267,6 @@ func (tx *Transaction) writeTree(tree *parse.Tree) {
 		tx.collectionState().err = err
 	}
 	treenode.UpsertBlockTree(tree)
-	return
 }
 
 func getRefsCacheByDefNode(updateNode *ast.Node, boxID string) (ret []*sql.Ref, changedNodes []*ast.Node) {

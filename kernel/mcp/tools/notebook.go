@@ -72,16 +72,16 @@ func notebookHandler(args map[string]any) (CallToolResult, error) {
 	}, nil
 }
 
-func notebookList(args map[string]any) (CallToolResult, error) {
+func notebookList(_ map[string]any) (CallToolResult, error) {
 	notebooks, err := model.ListNotebooks()
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "list notebooks failed: " + err.Error()}}, IsError: true}, nil
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Notebooks (%d):\n\n", len(notebooks)))
+	fmt.Fprintf(&sb, "Notebooks (%d):\n\n", len(notebooks))
 	for _, nb := range notebooks {
-		sb.WriteString(fmt.Sprintf("- %s (id: %s, icon: %s, closed: %v)\n", nb.Name, nb.ID, nb.Icon, nb.Closed))
+		fmt.Fprintf(&sb, "- %s (id: %s, icon: %s, closed: %v)\n", nb.Name, nb.ID, nb.Icon, nb.Closed)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -245,12 +245,12 @@ func notebookRandomIcon(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Randomized icons for %d notebook(s):\n", len(targets)))
+	fmt.Fprintf(&sb, "Randomized icons for %d notebook(s):\n", len(targets))
 	for _, nb := range targets {
 		oldIcon := nb.Icon
 		newIcon := randomEmoji()
 		model.SetBoxIcon(nb.ID, newIcon)
-		sb.WriteString(fmt.Sprintf("- %s (id: %s): %s -> %s\n", nb.Name, nb.ID, oldIcon, newIcon))
+		fmt.Fprintf(&sb, "- %s (id: %s): %s -> %s\n", nb.Name, nb.ID, oldIcon, newIcon)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

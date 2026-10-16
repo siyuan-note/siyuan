@@ -247,5 +247,4 @@ func upgradeSpec1(tree *parse.Tree) {
 
 	parse.NestedInlines2FlattedSpans(tree, false)
 	tree.Root.Spec = "1"
-	return
 }

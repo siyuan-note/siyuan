@@ -758,9 +758,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 				u := dest
 				if strings.Contains(u, "qpic.cn") {
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
-					if strings.Contains(u, "http://") {
-						u = strings.Replace(u, "http://", "https://", 1)
-					}
+					u = strings.Replace(u, "http://", "https://", 1)
 
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/6431
 					// 下面这部分需要注释掉，否则会导致响应 400

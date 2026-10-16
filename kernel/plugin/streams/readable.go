@@ -415,7 +415,7 @@ func readableStreamClose(h *Host, stream *readableState) {
 
 // readableStreamError 对应 ReadableStreamError：置为 errored，拒绝 reader 的 closed Promise，并以同一 reason
 // 拒绝所有挂起的 read() 请求。
-func readableStreamError(h *Host, stream *readableState, reason goja.Value) {
+func readableStreamError(_ *Host, stream *readableState, reason goja.Value) {
 	stream.status = statusErrored
 	stream.storedError = reason
 	reader := stream.reader

@@ -349,11 +349,12 @@ func newNestedRollupTestLeaf(typ av.KeyType) (*av.AttributeView, *av.Key) {
 	values := &av.KeyValues{Key: key}
 	for row, block := range attrView.GetBlockKeyValues().Values {
 		value := &av.Value{ID: block.BlockID + "-value", KeyID: key.ID, BlockID: block.BlockID, Type: typ}
-		if typ == av.KeyTypeNumber {
+		switch typ {
+		case av.KeyTypeNumber:
 			value.Number = &av.ValueNumber{Content: float64(row + 1), IsNotEmpty: true}
-		} else if typ == av.KeyTypeLocation {
+		case av.KeyTypeLocation:
 			value.Location = &av.ValueLocation{Name: fmt.Sprintf("fresh-%d", row), OriginalInput: "source"}
-		} else {
+		default:
 			value.Text = &av.ValueText{Content: fmt.Sprintf("fresh-%d", row)}
 		}
 		values.Values = append(values.Values, value)

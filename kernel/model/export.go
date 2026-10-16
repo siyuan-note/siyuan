@@ -680,7 +680,7 @@ func ExportSYs(ids []string) (zipPath string) {
 	if block == nil {
 		return
 	}
-	if nil != block && IsEncryptedBox(block.BoxID) && !IsBoxUnlocked(block.BoxID) {
+	if IsEncryptedBox(block.BoxID) && !IsBoxUnlocked(block.BoxID) {
 		logging.LogErrorf("export encrypted doc [%s] failed: box [%s] locked", ids[0], block.BoxID)
 		return
 	}
@@ -2376,7 +2376,7 @@ func exportPandocConvertZipWithConfig(ids []string, pandocTo, ext string, config
 	if block == nil {
 		return
 	}
-	if nil != block && IsEncryptedBox(block.BoxID) && !IsBoxUnlocked(block.BoxID) {
+	if IsEncryptedBox(block.BoxID) && !IsBoxUnlocked(block.BoxID) {
 		logging.LogErrorf("export pandoc zip [%s] failed: encrypted notebook locked", ids[0])
 		return
 	}

@@ -461,6 +461,9 @@ func TestFTSAndHPathMatchesDeduplicateAndSort(t *testing.T) {
 		ids = append(ids, id)
 		sources = append(sources, source)
 	}
+	if err = rows.Err(); err != nil {
+		t.Fatal(err)
+	}
 	expectedIDs := []string{"20260729120000-parent1", "20260729120002-block01", "20260729120001-child01"}
 	if !slices.Equal(ids, expectedIDs) {
 		t.Fatalf("单关键词路径搜索排序错误：got %v, want %v", ids, expectedIDs)
@@ -723,6 +726,9 @@ func TestDocumentSearchFinalOrderPrioritizesDirectMatches(t *testing.T) {
 			ids = append(ids, id)
 			sources = append(sources, source)
 			scores = append(scores, score)
+		}
+		if err = rows.Err(); err != nil {
+			t.Fatal(err)
 		}
 		if err = rows.Close(); err != nil {
 			t.Fatal(err)

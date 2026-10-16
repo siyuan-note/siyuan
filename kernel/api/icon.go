@@ -624,19 +624,19 @@ func generateTypeEightSVG(color, content string) string {
 	isChinese := iconHanPattern.MatchString(content)
 	var fontSize float64
 	if isChinese {
-		switch {
-		case contentLen == 1:
+		switch contentLen {
+		case 1:
 			fontSize = 320
 		default:
 			fontSize = 480 / float64(contentLen)
 		}
 	} else {
-		switch {
-		case contentLen == 1:
+		switch contentLen {
+		case 1:
 			fontSize = 480
-		case contentLen == 2:
+		case 2:
 			fontSize = 300
-		case contentLen == 3:
+		case 3:
 			fontSize = 240
 		default:
 			fontSize = 750 / float64(contentLen)

@@ -52,7 +52,7 @@ var outlineGetCmd = &cobra.Command{
 			fmt.Println(string(data))
 		default:
 			var sb strings.Builder
-			sb.WriteString(fmt.Sprintf("Document outline (%d headings):\n\n", countOutlineHeadings(paths)))
+			fmt.Fprintf(&sb, "Document outline (%d headings):\n\n", countOutlineHeadings(paths))
 			for _, p := range paths {
 				writeOutlinePath(&sb, p, 0)
 			}
@@ -86,7 +86,7 @@ func countOutlineBlockChildren(b *model.Block) int {
 
 func writeOutlinePath(sb *strings.Builder, p *model.Path, depth int) {
 	prefix := strings.Repeat("  ", depth)
-	sb.WriteString(fmt.Sprintf("%s- [%s] (id: %s, depth: %d)\n", prefix, p.Name, p.ID, p.Depth))
+	fmt.Fprintf(sb, "%s- [%s] (id: %s, depth: %d)\n", prefix, p.Name, p.ID, p.Depth)
 	for _, b := range p.Blocks {
 		writeOutlineBlock(sb, b, depth+1)
 	}
@@ -97,7 +97,7 @@ func writeOutlinePath(sb *strings.Builder, p *model.Path, depth int) {
 
 func writeOutlineBlock(sb *strings.Builder, b *model.Block, depth int) {
 	prefix := strings.Repeat("  ", depth)
-	sb.WriteString(fmt.Sprintf("%s- [%s] (id: %s, depth: %d)\n", prefix, b.Content, b.ID, b.Depth))
+	fmt.Fprintf(sb, "%s- [%s] (id: %s, depth: %d)\n", prefix, b.Content, b.ID, b.Depth)
 	for _, c := range b.Children {
 		writeOutlineBlock(sb, c, depth+1)
 	}

@@ -105,9 +105,10 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 		}
 	}
 	id := docID
-	if name == "child" {
+	switch name {
+	case "child":
 		id = tree.Root.FirstChild.ID
-	} else if name == "missing" {
+	case "missing":
 		id = ast.NewNodeID()
 	}
 	if name == "indexing" {

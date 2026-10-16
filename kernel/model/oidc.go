@@ -89,14 +89,6 @@ type oidcStartInput struct {
 	RememberMe bool   `json:"rememberMe"`
 }
 
-type oidcMobileCallbackInput struct {
-	CallbackURL string `json:"callbackURL"`
-}
-
-type oidcPollInput struct {
-	PollToken string `json:"pollToken"`
-}
-
 func OIDCValidateStart(c *gin.Context, request apicontract.SystemOIDCRequest) (ret apicontract.Response[apicontract.SystemOIDCStartData]) {
 	ret = apicontract.Success(apicontract.SystemOIDCStartData{})
 

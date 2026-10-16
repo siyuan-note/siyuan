@@ -7,9 +7,6 @@ import (
 	"testing"
 )
 
-//go:fix inline
-func locationCoordinate(value float64) *float64 { return new(value) }
-
 func TestLocationValueValidationAndDisplay(t *testing.T) {
 	for _, test := range []struct {
 		name     string

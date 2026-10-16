@@ -42,7 +42,7 @@ var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 var (
 	shorthandAudioPattern = regexp.MustCompile("<audio.*>.*</audio>")
 	shorthandVideoPattern = regexp.MustCompile("<video.*>.*</video>")
-	shorthandFilePattern  = regexp.MustCompile("\\[文件]\\(.*\\)")
+	shorthandFilePattern  = regexp.MustCompile(`\[文件\]\(.*\)`)
 )
 
 func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err error) {

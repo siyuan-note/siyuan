@@ -15,9 +15,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-//go:fix inline
-func modelLocationCoordinate(value float64) *float64 { return new(value) }
-
 func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 	const keyID, itemID = "20261009000001-locakey", "20261009000002-locarow"
 	value := &av.Value{ID: "20261009000003-locaval", KeyID: keyID, BlockID: itemID,

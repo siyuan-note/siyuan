@@ -234,7 +234,9 @@ func attributeViewSearchPartHTML(part *attributeViewSearchPart) string {
 			break
 		}
 		result.WriteString(util.EscapeHTML(part.text[cursor:match.start]))
-		result.WriteString("<mark>" + util.EscapeHTML(part.text[match.start:match.end]) + "</mark>")
+		result.WriteString("<mark>")
+		result.WriteString(util.EscapeHTML(part.text[match.start:match.end]))
+		result.WriteString("</mark>")
 		cursor = match.end
 	}
 	result.WriteString(util.EscapeHTML(part.text[cursor:end]))

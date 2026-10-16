@@ -81,7 +81,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		}
 		inputCaptcha = request.Captcha
 
-		if strings.ToLower(workspaceSession.Captcha) != strings.ToLower(inputCaptcha) {
+		if !strings.EqualFold(workspaceSession.Captcha, inputCaptcha) {
 			ret = apicontract.Failure[apicontract.Null](1, Conf.Language(22))
 			logging.LogWarnf("invalid captcha")
 

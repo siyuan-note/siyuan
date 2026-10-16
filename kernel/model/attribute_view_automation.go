@@ -402,9 +402,10 @@ func equalAutomationValues(left, right *av.Value) bool {
 
 func (tx *Transaction) automationTarget(source *av.AttributeView, action *av.AutomationAction, boxID string) (*av.AttributeView, error) {
 	id := action.AvID
-	if action.Target == "current" {
+	switch action.Target {
+	case "current":
 		id = source.ID
-	} else if action.Target == "related" {
+	case "related":
 		key, err := source.GetKey(action.RelationKeyID)
 		if err != nil || key.Relation == nil || key.Relation.AvID == "" {
 			return nil, unavailableAutomationReference("fields", action.RelationKeyID,

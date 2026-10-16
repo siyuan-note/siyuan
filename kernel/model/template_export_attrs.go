@@ -130,7 +130,8 @@ func templateDocumentAttributes(source []byte) [][]string {
 			return nil
 		}
 		actions = append(actions, text[start:end+1])
-		masked.WriteString(prefix + strings.Repeat("x", len(actions)))
+		masked.WriteString(prefix)
+		masked.WriteString(strings.Repeat("x", len(actions)))
 		text = text[end+1:]
 	}
 	attrs := parseTemplateDocumentAttributes(masked.String())

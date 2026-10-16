@@ -997,7 +997,6 @@ func (box *Box) generateDocHistory0() {
 	}
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	return
 }
 
 func generateDocHistoryFile(boxID, file, historyDir string, luteEngine *lute.Lute) error {
@@ -1201,7 +1200,6 @@ func generateTreeHistory(tree *parse.Tree, historyDir string) {
 		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
-	return
 }
 
 func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
@@ -1235,7 +1233,6 @@ func getHistoryDir(suffix string) (ret string, err error) {
 
 func ReindexHistory() {
 	task.AppendTask(task.HistoryDatabaseIndexFull, fullReindexHistory)
-	return
 }
 
 func fullReindexHistory() {
@@ -1258,7 +1255,6 @@ func fullReindexHistory() {
 		name := historyDir.Name()
 		indexHistoryDir(name, lutEngine)
 	}
-	return
 }
 
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace, HistoryOpOutline}
@@ -1421,7 +1417,6 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	}
 
 	sql.IndexHistoriesQueue(histories)
-	return
 }
 
 func fromSQLHistories(sqlHistories []*sql.History) (ret []*HistoryItem) {

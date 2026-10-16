@@ -168,17 +168,17 @@ func fulltextSearch(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d results (page %d/%d):\n\n", matchedCount, page, pageCount))
+	fmt.Fprintf(&sb, "Found %d results (page %d/%d):\n\n", matchedCount, page, pageCount)
 	for _, b := range blocks {
 		content := b.Markdown
 		if content == "" {
 			content = b.Content
 		}
 		content = truncateText(content, 200)
-		sb.WriteString(fmt.Sprintf("- [%s] %s\n  %s\n  id: %s\n\n", b.HPath, b.Type, content, b.ID))
+		fmt.Fprintf(&sb, "- [%s] %s\n  %s\n  id: %s\n\n", b.HPath, b.Type, content, b.ID)
 	}
 	if docMode {
-		sb.WriteString(fmt.Sprintf("(grouped by document, %d documents matched)\n", matchedRootCount))
+		fmt.Fprintf(&sb, "(grouped by document, %d documents matched)\n", matchedRootCount)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: sb.String()}},
@@ -222,17 +222,17 @@ func semanticSearch(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d semantic results (page %d/%d):\n\n", matchedCount, page, pageCount))
+	fmt.Fprintf(&sb, "Found %d semantic results (page %d/%d):\n\n", matchedCount, page, pageCount)
 	for _, b := range blocks {
 		content := b.Markdown
 		if content == "" {
 			content = b.Content
 		}
 		content = truncateText(content, 200)
-		sb.WriteString(fmt.Sprintf("- [%s] %s\n  %s\n  id: %s\n\n", b.HPath, b.Type, content, b.ID))
+		fmt.Fprintf(&sb, "- [%s] %s\n  %s\n  id: %s\n\n", b.HPath, b.Type, content, b.ID)
 	}
 	if matchedRootCount > 0 {
-		sb.WriteString(fmt.Sprintf("(%d documents matched)\n", matchedRootCount))
+		fmt.Fprintf(&sb, "(%d documents matched)\n", matchedRootCount)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: sb.String()}},
@@ -282,15 +282,15 @@ func assetSearch(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d asset matches (page %d/%d):\n\n", matchedAssetCount, page, pageCount))
+	fmt.Fprintf(&sb, "Found %d asset matches (page %d/%d):\n\n", matchedAssetCount, page, pageCount)
 	for _, a := range assetContents {
 		content := a.Content
 		content = truncateText(content, 200)
-		sb.WriteString(fmt.Sprintf("- [%s] %s\n", a.Ext, a.Name))
-		sb.WriteString(fmt.Sprintf("  path: %s\n", a.Path))
-		sb.WriteString(fmt.Sprintf("  size: %s\n", a.HSize))
-		sb.WriteString(fmt.Sprintf("  content: %s\n", content))
-		sb.WriteString(fmt.Sprintf("  id: %s\n\n", a.ID))
+		fmt.Fprintf(&sb, "- [%s] %s\n", a.Ext, a.Name)
+		fmt.Fprintf(&sb, "  path: %s\n", a.Path)
+		fmt.Fprintf(&sb, "  size: %s\n", a.HSize)
+		fmt.Fprintf(&sb, "  content: %s\n", content)
+		fmt.Fprintf(&sb, "  id: %s\n\n", a.ID)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: sb.String()}},
@@ -312,11 +312,11 @@ func getAssetHandler(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Asset: %s\n", a.Name))
-	sb.WriteString(fmt.Sprintf("Ext: %s\n", a.Ext))
-	sb.WriteString(fmt.Sprintf("Path: %s\n", a.Path))
-	sb.WriteString(fmt.Sprintf("Size: %s\n", a.HSize))
-	sb.WriteString(fmt.Sprintf("ID: %s\n", a.ID))
+	fmt.Fprintf(&sb, "Asset: %s\n", a.Name)
+	fmt.Fprintf(&sb, "Ext: %s\n", a.Ext)
+	fmt.Fprintf(&sb, "Path: %s\n", a.Path)
+	fmt.Fprintf(&sb, "Size: %s\n", a.HSize)
+	fmt.Fprintf(&sb, "ID: %s\n", a.ID)
 	sb.WriteString("\nContent:\n")
 	sb.WriteString(a.Content)
 	return CallToolResult{

@@ -175,14 +175,19 @@ var toolSignatureKeys = map[string][]string{
 // buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。
 func buildDoomSignature(name, action string, args map[string]any) string {
 	var sig strings.Builder
-	sig.WriteString(name + "::action=" + action)
+	sig.WriteString(name)
+	sig.WriteString("::action=")
+	sig.WriteString(action)
 	for _, k := range toolSignatureKeys[name] {
 		if v, ok := args[k]; ok {
 			s := fmt.Sprint(v)
 			if len(s) > 64 {
 				s = s[:64] + "..."
 			}
-			sig.WriteString("::" + k + "=" + s)
+			sig.WriteString("::")
+			sig.WriteString(k)
+			sig.WriteString("=")
+			sig.WriteString(s)
 		}
 	}
 	return sig.String()
@@ -553,7 +558,6 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 			return
 		}
-		tools := capabilities.definitions
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
 		var contextMsgs []AgentMessage
@@ -944,7 +948,6 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				roundCapabilities = &capabilitySet{registrations: map[string]*capabilityRegistration{}}
 			}
 			capabilities = roundCapabilities
-			tools = requestTools
 			contextMsgs = projectCompactionContext(checkpointMsgs, coveredMessages)
 			messages = checkpointMessagesToOpenAIWithSummary(contextMsgs, language, capabilities, compaction, instructions.Content)
 			if len(messages) > 0 && messages[0].Role == openai.ChatMessageRoleSystem {
@@ -1603,13 +1606,6 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
-
-		turn.TokenBreakdown = computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens)
-		if !saveTurn("finished") {
-			return
-		}
-		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 	}()
 
 	return ch
@@ -2125,7 +2121,13 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 				"Yes requires loading skill with source=builtin and name=siyuan-plugin-development BEFORE asking only materially missing details; No skips that skill and continues the user's custom approach. " +
 				"Do not turn ordinary templates or existing capabilities into plugin work. Confirm a short proposal with workflow.action=plan before implementation; neither choice nor proposal authorizes installation or enabling. " +
 				"Reuse the taskId for adjustments; use newTask only for a separate requested plugin and reconsider only when the user changes the choice.\n")
-			sb.WriteString("Official skill: " + html.EscapeString(builtin.ID) + " · " + html.EscapeString(builtin.Version) + " · " + html.EscapeString(builtin.Digest) + ". This entry requires the workflow question; generic skill matching does not activate it.")
+			sb.WriteString("Official skill: ")
+			sb.WriteString(html.EscapeString(builtin.ID))
+			sb.WriteString(" · ")
+			sb.WriteString(html.EscapeString(builtin.Version))
+			sb.WriteString(" · ")
+			sb.WriteString(html.EscapeString(builtin.Digest))
+			sb.WriteString(". This entry requires the workflow question; generic skill matching does not activate it.")
 		}
 	}
 
@@ -2213,9 +2215,9 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 			totalVisible := len(editorCtx.VisibleBlockIDs)
 			if totalVisible > maxVisibleBlockIDs {
 				sb.WriteString("Visible block ids (showing first ")
-				sb.WriteString(fmt.Sprintf("%d", maxVisibleBlockIDs))
+				fmt.Fprintf(&sb, "%d", maxVisibleBlockIDs)
 				sb.WriteString(" of ")
-				sb.WriteString(fmt.Sprintf("%d", totalVisible))
+				fmt.Fprintf(&sb, "%d", totalVisible)
 				sb.WriteString("):\n")
 			} else {
 				sb.WriteString("Visible block ids:\n")
@@ -2448,7 +2450,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 	return msgs
 }
 
-func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet,
+func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, _ string, capabilities *capabilitySet,
 	compaction *runtimeCompaction, downgradeImages bool) []any {
 	var input []any
 	if compaction != nil {

@@ -121,13 +121,13 @@ func formatTodoResult(todos []agentTodoItem) string {
 	for _, t := range todos {
 		switch t.Status {
 		case "completed":
-			sb.WriteString(fmt.Sprintf("- [x] %s\n", t.Content))
+			fmt.Fprintf(&sb, "- [x] %s\n", t.Content)
 		case "in_progress":
-			sb.WriteString(fmt.Sprintf("- [/] %s\n", t.Content))
+			fmt.Fprintf(&sb, "- [/] %s\n", t.Content)
 		case "cancelled":
-			sb.WriteString(fmt.Sprintf("- [-] %s\n", t.Content))
+			fmt.Fprintf(&sb, "- [-] %s\n", t.Content)
 		default:
-			sb.WriteString(fmt.Sprintf("- [ ] %s\n", t.Content))
+			fmt.Fprintf(&sb, "- [ ] %s\n", t.Content)
 		}
 	}
 	return sb.String()

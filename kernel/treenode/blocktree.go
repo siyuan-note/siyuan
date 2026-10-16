@@ -173,7 +173,6 @@ func closeDatabase() {
 	debug.FreeOSMemory()
 	db = nil
 	runtime.GC()
-	return
 }
 
 func GetBlockTreesByType(typ string) (ret []*BlockTree) {

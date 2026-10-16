@@ -40,13 +40,6 @@ func touchSkillMd(t *testing.T, parts ...string) {
 	}
 }
 
-// sorted 把 findSkillDirs 的返回结果排序后比较，避免遍历顺序影响断言。
-func sorted(ss []string) []string {
-	out := append([]string(nil), ss...)
-	sort.Strings(out)
-	return out
-}
-
 // toSlashSet 把路径分隔符统一为 /，便于跨平台断言。
 func toSlashSet(ss []string) []string {
 	out := make([]string, len(ss))

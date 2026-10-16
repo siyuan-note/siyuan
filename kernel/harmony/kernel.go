@@ -252,8 +252,7 @@ func Unzip(zipFilePath, destination *C.char) {
 func GetExportFilePath(exportPath *C.char) *C.char {
 	pathStr := C.GoString(exportPath)
 	var absPath string
-	if strings.HasPrefix(pathStr, "/export/") {
-		fileName := strings.TrimPrefix(pathStr, "/export/")
+	if fileName, ok := strings.CutPrefix(pathStr, "/export/"); ok {
 		if decoded, err := url.PathUnescape(fileName); err == nil {
 			fileName = decoded
 		}

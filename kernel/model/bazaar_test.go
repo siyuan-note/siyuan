@@ -364,7 +364,7 @@ func TestFilterUpdatableBazaarPackages(t *testing.T) {
 	allowed := &UpdatedPackage{Available: &bazaar.Package{Name: "allowed"}}
 	blocked := &UpdatedPackage{Available: &bazaar.Package{Name: "blocked", DisallowUpdate: true}}
 
-	updatable, unmetRequirementCount := filterUpdatableBazaarPackages([]*UpdatedPackage{allowed, blocked, &UpdatedPackage{}})
+	updatable, unmetRequirementCount := filterUpdatableBazaarPackages([]*UpdatedPackage{allowed, blocked, {}})
 	if len(updatable) != 1 || updatable[0] != allowed {
 		t.Fatalf("expected only the allowed package, got %#v", updatable)
 	}

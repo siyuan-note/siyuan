@@ -135,6 +135,16 @@
       background-color: var(--b3-list-icon-hover);
     }
 
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible:not([disabled]) {
+      opacity: 1;
+      outline: 1px solid var(--b3-theme-primary);
+      outline-offset: -1px;
+    }
+
     &[disabled] {
       opacity: .38;
       cursor: not-allowed;

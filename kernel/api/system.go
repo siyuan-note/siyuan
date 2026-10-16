@@ -681,7 +681,11 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
-	// 导入的旧版配置与启动加载执行相同的格式迁移
+	importAppearance := importedConf.Appearance.Load() != nil
+	importOCR := importedConf.OCR.Load() != nil
+	importSnippet := importedConf.Snippet.Load() != nil
+	importVariables := importedConf.Variables.Load() != nil
+	// 导入的旧版配置与启动加载执行相同的格式迁移。
 	model.ApplyImportedConfMigrations(importedConf, data)
 	preserveImportedAISecrets(importedConf.AI.Load(), model.Conf.AI.Load())
 	if err = validateAIProviderHeaders(importedConf.AI.Load()); err != nil {
@@ -700,6 +704,33 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 	model.NormalizeAppConf(importedConf)
 	if err = model.LoadChatGPTAccountBindings(importedConf.AI.Load()); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	// 旧版包缺失的新增配置段保持不变；外观资源列表仍以目标工作空间为准。
+	if importAppearance {
+		appearance := importedConf.Appearance.Load()
+		if current := model.Conf.Appearance.Load(); current != nil {
+			appearance.DarkThemes = current.DarkThemes
+			appearance.LightThemes = current.LightThemes
+			appearance.Icons = current.Icons
+		}
+		if appearance.Lang == "" {
+			appearance.Lang = importedConf.Lang
+		}
+		if appearance.Lang == "" {
+			appearance.Lang = model.Conf.Lang
+		}
+		appearance.Lang = util.LangToBCP47(appearance.Lang)
+		model.Conf.Lang = appearance.Lang
+		model.Conf.Appearance.Store(appearance)
+	}
+	if importOCR {
+		model.Conf.OCR.Store(importedConf.OCR.Load())
+	}
+	if importSnippet {
+		model.Conf.Snippet.Store(importedConf.Snippet.Load())
+	}
+	if importVariables {
+		model.Conf.Variables.Store(importedConf.Variables.Load())
 	}
 	model.Conf.FileTree.Store(importedConf.FileTree.Load())
 	model.Conf.Tag.Store(importedConf.Tag.Load())

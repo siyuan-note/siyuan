@@ -228,6 +228,8 @@ const layoutSaveRequests = new Set<Promise<void>>();
 
 // 切换布局前停止自动保存并等待在途请求，成功后保持暂停直到页面刷新，失败时由调用方恢复。
 export const suspendLayoutSaving = async () => {
+    const host = getSettingsWindowHost();
+    if (host) return host.suspendLayoutSaving();
     layoutSavingSuspended = true;
     window.clearTimeout(saveRetryTimeout);
     saveCount = 0;

@@ -1805,6 +1805,37 @@ func serveDebug(ginServer *gin.Engine) {
 	ginServer.GET("/debug/pprof/trace", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Trace))
 }
 
+// isLocalWebSocketRequest 判断未设置锁屏密码时的 WebSocket 握手是否来自本机可信来源。
+// 与 HTTP 接口的放行策略保持一致：直接对端、转发来源、Host 与 Origin 都必须指向本机，
+// 避免远程客户端绕过锁屏密码接入推送通道。
+func isLocalWebSocketRequest(r *http.Request) bool {
+	if !util.IsLocalHost(r.RemoteAddr) {
+		return false
+	}
+	if forwardedFor := r.Header.Get("X-Forwarded-For"); "" != forwardedFor {
+		clientIP, _, _ := strings.Cut(forwardedFor, ",")
+		if !util.IsLocalHostname(strings.TrimSpace(clientIP)) {
+			return false
+		}
+	}
+	if forwardedHost := r.Header.Get("X-Forwarded-Host"); "" != forwardedHost && !isLocalHostHeader(forwardedHost) {
+		return false
+	}
+	if origin := r.Header.Get("Origin"); "" != origin && !util.IsLocalOrigin(origin) {
+		return false
+	}
+	return isLocalHostHeader(r.Host)
+}
+
+// isLocalHostHeader 判断 Host 头是否指向本机，允许 Host 省略端口。
+func isLocalHostHeader(host string) bool {
+	host = strings.TrimSpace(host)
+	if hostname, _, err := net.SplitHostPort(host); err == nil {
+		return util.IsLocalHostname(hostname)
+	}
+	return util.IsLocalHostname(host)
+}
+
 func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer = melody.New()
 	// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
@@ -1834,7 +1865,9 @@ func serveWebSocket(ginServer *gin.Engine) {
 			return
 		}
 
-		authOk := !model.IsAccessAuthRequired()
+		// 未设置锁屏密码时只放行本机连接，与 HTTP 接口的放行策略保持一致，
+		// 否则远程客户端可以完全跳过认证接收内核推送
+		authOk := !model.IsAccessAuthRequired() && (util.SiYuanAccessAuthCodeBypass || isLocalWebSocketRequest(s.Request))
 
 		if model.IsAccessAuthRequired() {
 			session, err := sessionStore.Get(s.Request, "siyuan")

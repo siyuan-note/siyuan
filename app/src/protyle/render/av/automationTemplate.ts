@@ -57,12 +57,12 @@ export const mountAutomationTemplate = (options: {
     const rows = fields.find(item => item.key.type === "block")?.values || [];
     let version = 0;
     host.classList.add("av__automation-template");
-    host.innerHTML = `<textarea class="b3-text-field fn__block" data-template rows="3" maxlength="8192" aria-label="${escapeAttr(lang.template)}">${escapeHtml(value.template || "")}</textarea>
-<div class="ft__on-surface ft__smaller">${lang.automationTemplateTip}</div>
-<details data-template-preview><summary class="av__automation-template-toggle b3-button b3-button--cancel fn__block"><svg aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span>${lang.automationPreviewData}</span></summary><div class="av__automation-template-data">
-<div class="ft__on-surface ft__smaller">${lang.automationPreviewOnly}</div>
-<label class="av__automation-control"><span>${lang.automationPreviewItem}</span><select class="b3-select" data-template-item><option value="">${lang.selectRelationItems}</option>${rows.map(row => `<option value="${escapeAttr(row.blockID)}">${escapeHtml(row.block?.content || row.blockID)}</option>`).join("")}</select></label>
-<label class="av__automation-control"><span>${lang.automationPreviewTime}</span><input class="b3-text-field" type="datetime-local" data-template-time value="${automationDateInput(Date.now(), timeZone)}"></label>
+    host.innerHTML = `<textarea class="b3-text-field fn__block av__automation-template-editor" data-template rows="3" maxlength="8192" aria-label="${escapeAttr(lang.template)}">${escapeHtml(value.template || "")}</textarea>
+<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTemplateTip}</div>
+<details data-template-preview><summary class="av__automation-template-toggle b3-button b3-button--cancel fn__block"><svg aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span class="av__automation-control-label">${lang.automationPreviewData}</span></summary><div class="av__automation-template-data">
+<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationPreviewOnly}</div>
+<label class="av__automation-control"><span class="av__automation-control-label">${lang.automationPreviewItem}</span><select class="b3-select av__automation-template-item" data-template-item><option value="">${lang.selectRelationItems}</option>${rows.map(row => `<option value="${escapeAttr(row.blockID)}">${escapeHtml(row.block?.content || row.blockID)}</option>`).join("")}</select></label>
+<label class="av__automation-control"><span class="av__automation-control-label">${lang.automationPreviewTime}</span><input class="b3-text-field av__automation-template-time" type="datetime-local" data-template-time value="${automationDateInput(Date.now(), timeZone)}"></label>
 <div class="av__automation-template-data" data-template-inputs></div>
 <button type="button" class="b3-button b3-button--outline" data-template-run>${lang.automationTemplatePreview}</button>
 <output class="av__automation-template-result" role="status" aria-live="polite" data-template-result></output></div></details>`;
@@ -82,7 +82,7 @@ export const mountAutomationTemplate = (options: {
             const text = automationTemplateValueText(stored, timeZone);
             const date = entry.key.type === "date" && !stored?.date?.hasEndDate;
             const type = date ? (stored?.date?.isNotTime === false ? "datetime-local" : "date") : entry.key.type === "number" ? "number" : "text";
-            return `<label class="av__automation-control"><span>${escapeHtml(entry.key.name)}</span><input class="b3-text-field" data-template-input="${escapeAttr(entry.key.id)}" type="${type}"${type === "number" ? ' step="any"' : ""} value="${escapeAttr(text)}" maxlength="65536"></label>`;
+            return `<label class="av__automation-control"><span class="av__automation-control-label">${escapeHtml(entry.key.name)}</span><input class="b3-text-field av__automation-template-input" data-template-input="${escapeAttr(entry.key.id)}" type="${type}"${type === "number" ? ' step="any"' : ""} value="${escapeAttr(text)}" maxlength="65536"></label>`;
         }).join("");
         invalidate();
         onResize();

@@ -418,7 +418,7 @@ const runCases = async (sources, css, mobile) => {
     await change("[data-attr-operator]", "equals");
     await change("[data-attr-value]", "ready");
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
-    await click('[data-remove="attribute"] svg');
+    await click('[data-remove="attribute"]');
     assert.equal(latest().blockSource.attributes.length, 0);
     window.removeEventListener("resize", resizeMenu);
 };

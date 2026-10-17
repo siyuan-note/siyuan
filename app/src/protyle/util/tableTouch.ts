@@ -49,7 +49,7 @@ export class TableTouchControl {
     private controller = new AbortController();
     private gesture?: AbortController;
     private scrollFrame: number;
-    private dragging = false;
+    private dragging?: "controls" | "range";
     private longPress?: {
         cell: HTMLTableCellElement, identifier: number, clientX: number, clientY: number, timer: number, selected: boolean,
     };
@@ -203,7 +203,7 @@ export class TableTouchControl {
         multi.classList.toggle("block__icon--active", this.multiSelect);
         const copy = this.toolbar.querySelector<HTMLButtonElement>('[data-type="copy"]');
         copy.disabled = !!state?.selection && state.selection.mode === "cell" && !state.selection.rectangle;
-        if (this.dragging) {
+        if (this.dragging === "controls") {
             this.renderEndpoints(state);
             return;
         }
@@ -459,7 +459,7 @@ export class TableTouchControl {
 
     private holdControls(event: PointerEvent) {
         this.cancelGesture();
-        this.dragging = true;
+        this.dragging = "controls";
         this.gesture = new AbortController();
         const end = (up: PointerEvent) => {
             if (up.pointerId === event.pointerId) {
@@ -489,11 +489,12 @@ export class TableTouchControl {
         if (!anchor) {
             return;
         }
-        this.dragging = true;
+        this.dragging = "range";
         const controller = new AbortController();
         this.gesture = controller;
         const signal = controller.signal;
         let point = {clientX: event.clientX, clientY: event.clientY};
+        let moved = false;
         const update = () => {
             const current = this.getState();
             if (!current?.selection) {
@@ -520,6 +521,13 @@ export class TableTouchControl {
             }
             move.preventDefault();
             point = move;
+            if (!moved) {
+                if (Math.hypot(move.clientX - event.clientX, move.clientY - event.clientY) < Constants.SIZE_DRAG_THRESHOLD) {
+                    return;
+                }
+                moved = true;
+                this.scrollFrame = requestAnimationFrame(scroll);
+            }
             update();
         }, {signal, passive: false});
         const end = (up: PointerEvent) => {
@@ -535,31 +543,47 @@ export class TableTouchControl {
             if (!this.gesture || !current?.selection) {
                 return;
             }
-            const {viewport} = current;
+            const content = this.content();
+            const contentRect = content.getBoundingClientRect();
+            const visualViewport = window.visualViewport;
+            const left = Math.max(contentRect.left, visualViewport?.offsetLeft || 0);
+            const right = Math.min(contentRect.right, window.innerWidth,
+                (visualViewport?.offsetLeft || 0) + (visualViewport?.width || window.innerWidth));
+            const top = Math.max(contentRect.top, visualViewport?.offsetTop || 0, this.toolbar.getBoundingClientRect().bottom + 8);
+            const bottom = Math.min(contentRect.bottom, window.innerHeight,
+                (visualViewport?.offsetTop || 0) + (visualViewport?.height || window.innerHeight));
+            const wrapper = current.table.parentElement;
+            const wrapperRect = wrapper.getBoundingClientRect();
             const delta = (value: number, min: number, max: number) => value < min + 28 ? -10 : value > max - 28 ? 10 : 0;
-            const dx = delta(point.clientX, viewport.left, viewport.right);
-            const dy = delta(point.clientY, viewport.top, viewport.bottom);
-            if (dx || dy) {
-                current.table.parentElement.scrollLeft += dx;
-                const wrapper = current.table.parentElement;
-                const scrollTop = wrapper.scrollTop;
-                wrapper.scrollTop += dy;
-                if (wrapper.scrollTop === scrollTop) {
-                    this.content().scrollTop += dy;
-                }
+            const scrollLeft = wrapper.scrollLeft;
+            const scrollTop = wrapper.scrollTop;
+            const contentScrollTop = content.scrollTop;
+            if (wrapper.scrollWidth > wrapper.clientWidth) {
+                wrapper.scrollLeft += delta(point.clientX, Math.max(wrapperRect.left, left), Math.min(wrapperRect.right, right));
+            }
+            if (wrapper.scrollHeight > wrapper.clientHeight) {
+                wrapper.scrollTop += delta(point.clientY, Math.max(wrapperRect.top, top), Math.min(wrapperRect.bottom, bottom));
+            }
+            // 表格内部先滚动；只有滚动视口外仍有表格内容时才滚动正文，避免越过表格继续滚动。
+            const dy = delta(point.clientY, top, bottom);
+            const tableRect = current.table.getBoundingClientRect();
+            if (wrapper.scrollTop === scrollTop && (dy < 0 && Math.max(wrapperRect.top, tableRect.top) < top ||
+                dy > 0 && Math.min(wrapperRect.bottom, tableRect.bottom) > bottom)) {
+                content.scrollTop += dy;
+            }
+            if (wrapper.scrollLeft !== scrollLeft || wrapper.scrollTop !== scrollTop || content.scrollTop !== contentScrollTop) {
                 update();
                 this.actions.render();
             }
             this.scrollFrame = requestAnimationFrame(scroll);
         };
-        this.scrollFrame = requestAnimationFrame(scroll);
     }
 
     private cancelGesture() {
         this.cancelLongPress();
         this.gesture?.abort();
         this.gesture = undefined;
-        this.dragging = false;
+        this.dragging = undefined;
         cancelAnimationFrame(this.scrollFrame);
     }
 }

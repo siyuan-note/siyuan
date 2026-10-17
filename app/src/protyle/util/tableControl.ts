@@ -1315,8 +1315,13 @@ export class TableControl {
     }
 
     private scheduleRender() {
-        cancelAnimationFrame(this.frame);
-        this.frame = requestAnimationFrame(() => this.render());
+        if (this.frame) {
+            return;
+        }
+        this.frame = requestAnimationFrame(() => {
+            this.frame = 0;
+            this.render();
+        });
     }
 
     private setPosition(element: HTMLElement, left: number, top: number) {

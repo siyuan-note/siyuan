@@ -16,7 +16,7 @@ const browserCases = async (sources: Record<string, string>) => {
         ".block__icons svg,.protyle-table-control svg{width:16px;height:16px}.fn__none{display:none}" +
         ".protyle-table-control__handle,.protyle-table-control__add,.protyle-table-control__touch-button{" +
         "position:fixed;width:28px;height:28px;transform:translate(-50%,-50%)}" +
-        ".protyle-table-control__width-guide{position:fixed}";
+        ".protyle-table-control__width-guide,.protyle-table-control__selection{position:fixed}";
     document.head.append(fixtureStyle);
     const transactions: {before: string, after: string}[] = [];
     const clipboard: {textPlain: string, textHTML?: string, textSiyuan?: string}[] = [];
@@ -130,6 +130,11 @@ const browserCases = async (sources: Record<string, string>) => {
     const context = load("src/protyle/util/tableCellRichContext.ts") as typeof import("./tableCellRichContext");
     const virtual = load("src/protyle/util/tableVirtualizationDOM.ts") as typeof import("./tableVirtualizationDOM");
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
+    const frames = async (count: number) => {
+        for (let frame = 0; frame < count; frame++) {
+            await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        }
+    };
     const pointer = (target: EventTarget, type: string, x = 0, y = 0, id = 1) => target.dispatchEvent(new PointerEvent(type,
         {bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, pointerId: id, pointerType: "touch"}));
     const touchEvent = (target: Element, type: string, x = 60, y = 110, count = 1) => {
@@ -254,6 +259,78 @@ const browserCases = async (sources: Record<string, string>) => {
         f.render();
         check.equal(toolbar.classList.contains("fn__none"), true);
         check.equal(f.table.rows.length, 4);
+        f.dispose();
+    }
+    for (const mode of ["cell", "row", "column"] as const) {
+        const f = fixture();
+        f.editor.style.minHeight = "1400px";
+        f.core.startTouchSelection(f.cell(3, 1), mode);
+        f.render();
+        const endpoint = f.touch("[data-endpoint='end']");
+        const rect = endpoint.getBoundingClientRect();
+        const count = f.core.getSelectedCells().length;
+        pointer(endpoint, "pointerdown", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        await frames(4);
+        check.equal(f.root.scrollTop, 0, `${mode} endpoints do not scroll while held still`);
+        check.equal(f.core.getSelectedCells().length, count, "holding an endpoint does not change the selection");
+        pointer(document, "pointermove", rect.left + rect.width / 2 - 10, rect.top + rect.height / 2 - 5);
+        await frames(4);
+        check.equal(f.root.scrollTop, 0, "dragging near a fully visible table edge does not scroll the document");
+        f.root.scrollTop = 20;
+        await frames(4);
+        const header = f.cell(0, 0).getBoundingClientRect();
+        const column = f.touch("[data-mode='column']").getBoundingClientRect();
+        const row = f.touch("[data-mode='row']").getBoundingClientRect();
+        check.equal(row.top + row.height / 2, (Math.max(header.top, column.top + column.height / 2) + header.bottom) / 2,
+            "row handles follow scrolling while an endpoint is being dragged");
+        pointer(document, "pointercancel");
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        f.editor.style.minHeight = "1400px";
+        f.editor.querySelectorAll<HTMLElement>("td, th").forEach(cell => cell.style.height = "150px");
+        const maxScroll = f.table.getBoundingClientRect().bottom - f.root.getBoundingClientRect().bottom;
+        f.core.startTouchSelection(f.cell(1, 0));
+        f.render();
+        const endpoint = f.touch("[data-endpoint='end']");
+        const rect = endpoint.getBoundingClientRect();
+        pointer(endpoint, "pointerdown", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        pointer(document, "pointermove", 165, 490);
+        await frames(8);
+        check.ok(f.root.scrollTop > 0, "dragging to the editor viewport edge reveals hidden table rows");
+        const selection = f.touch(".protyle-table-control__selection:not(.fn__none)").getBoundingClientRect();
+        check.ok(Math.abs(selection.top - f.core.getSelectedCells()[0].getBoundingClientRect().top) <= 12,
+            "selection painting keeps up with continuous automatic scrolling");
+        await frames(24);
+        check.ok(f.root.scrollTop <= maxScroll + 10, "automatic scrolling stops after the last table row becomes visible");
+        const stopped = f.root.scrollTop;
+        await frames(4);
+        check.equal(f.root.scrollTop, stopped);
+        pointer(document, "pointerup");
+        f.dispose();
+    }
+    for (const axis of ["horizontal", "vertical"]) {
+        const f = fixture();
+        f.editor.style.minHeight = "1400px";
+        const wrapper = f.table.parentElement;
+        wrapper.style[axis === "horizontal" ? "width" : "height"] = axis === "horizontal" ? "180px" : "130px";
+        if (axis === "horizontal") f.table.style.minWidth = "270px";
+        f.core.startTouchSelection(f.cell(1, 0));
+        f.render();
+        const endpoint = f.touch("[data-endpoint='end']");
+        const rect = endpoint.getBoundingClientRect();
+        pointer(endpoint, "pointerdown", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        pointer(document, "pointermove", axis === "horizontal" ? 175 : 110, axis === "horizontal" ? 110 : 128);
+        await frames(6);
+        check.ok((axis === "horizontal" ? wrapper.scrollLeft : wrapper.scrollTop) > 0,
+            `${axis} scrolling uses the table's own scroll container`);
+        check.equal(f.root.scrollTop, 0, "scrolling inside a table leaves the surrounding document in place");
+        pointer(document, "pointercancel");
+        const stopped = axis === "horizontal" ? wrapper.scrollLeft : wrapper.scrollTop;
+        await frames(3);
+        check.equal(axis === "horizontal" ? wrapper.scrollLeft : wrapper.scrollTop, stopped,
+            "canceling an endpoint drag stops automatic scrolling");
         f.dispose();
     }
     {

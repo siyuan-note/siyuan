@@ -956,6 +956,56 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); };
+
+    // 方向键选中视口外的节点时自动平移，待完成的布局和只读视图使用同一定位逻辑。
+    const navigationHost = document.createElement("div");
+    navigationHost.style.width = "400px";
+    hostParent.append(navigationHost);
+    const navigationView = new api.ListMindmapView({...options, host: navigationHost});
+    await settle();
+    const navigationViewport = navigationHost.querySelector<HTMLElement>(".mindmap-view__viewport");
+    const navigationCases = [
+        {key: "ArrowLeft", from: alpha, to: model.root.id, x: -1000, y: 0},
+        {key: "ArrowRight", from: alpha, to: model.nodes.get(alpha).children[0].id, x: 1000, y: 0},
+        {key: "ArrowUp", from: beta, to: alpha, x: 0, y: -1000},
+        {key: "ArrowDown", from: alpha, to: beta, x: 0, y: 1000},
+    ];
+    for (const readOnly of [false, true]) {
+        navigationView.setReadOnly(readOnly);
+        for (const item of navigationCases) {
+            navigationView.selectNode(item.from);
+            const offset = navigationView.boundedPan(item.x, item.y);
+            navigationView.offsetX = offset.x;
+            navigationView.offsetY = offset.y;
+            navigationView.draw();
+            const node = navigationHost.querySelector<HTMLElement>(`[data-mindmap-id="${item.to}"]`);
+            const viewportRect = navigationViewport.getBoundingClientRect();
+            const before = node.getBoundingClientRect();
+            check.ok(before.left < viewportRect.left || before.right > viewportRect.right ||
+                before.top < viewportRect.top || before.bottom > viewportRect.bottom, "target starts outside the viewport");
+            navigationView.refreshLayout();
+            navigationHost.focus();
+            navigationHost.dispatchEvent(new KeyboardEvent("keydown", {key: item.key, bubbles: true, cancelable: true}));
+            await settle();
+            const after = node.getBoundingClientRect();
+            check.equal(navigationView.getSelectedId(), item.to);
+            check.ok(after.left >= viewportRect.left && after.right <= viewportRect.right &&
+                after.top >= viewportRect.top && after.bottom <= viewportRect.bottom,
+                `${item.key} reveals the target after layout, readOnly=${readOnly}`);
+            check.equal(document.activeElement, navigationHost, "navigation keeps keyboard focus on the canvas");
+        }
+        navigationView.fit();
+        navigationView.selectNode(model.root.id);
+        const transform = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
+        navigationHost.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
+        await settle();
+        check.equal(navigationView.getSelectedId(), alpha);
+        check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], transform,
+            "navigating to a visible node preserves the viewport");
+    }
+    navigationView.destroy();
+    navigationHost.remove();
+
     const view = new api.ListMindmapView(options);
     await settle();
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");

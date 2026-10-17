@@ -3013,7 +3013,7 @@ export class ListMindmapView {
                     }
                 }
                 if (next) {
-                    this.selectNode(next);
+                    this.focusNode(next);
                 }
             }
         } else if (!this.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&

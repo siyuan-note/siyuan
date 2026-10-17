@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Koşulları değiştirmek, bir kuralı devre dışı bırakmak veya silmek toplanan kayıtları ve alan değerlerini korur",
 	"automationNotifySuccess": "Başarıyla tamamlandığında bildir",
 	"automationResultRule": "“${1}” otomasyonu tamamlandı: ${2}",
 	"automationResultSummary": "Veritabanı otomasyonları tamamlandı: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "İzleme kapsamı (alt belgeler dahil)",
 	"automationCollectionPreview": "Eşleşen blokları önizle",
 	"automationCollectPage": "Bu sayfadaki eşleşmeleri topla",
-	"automationCollectionTip": "Yeni eşleşmeler bu veritabanına eklenir. Koşullar artık karşılanmadığında otomatik toplanan kayıtlar kaldırılır ve kaynak bloklar korunur. Yeniden eşleşme, başlangıç alan değerleriyle yeni bir kayıt oluşturur",
+	"automationCollectionTip": "Kaynak blok artık eşleşmediğinde, elle düzenlenenler dahil tüm alan değerleriyle birlikte otomatik kaydı çıkarılır. Kaynak blok korunur; bu düzenlemeyi geri almak kaydı ve alanlarını geri getirir. Yeniden eşleşme, başlangıç değerleriyle yeni bir kayıt oluşturur",
 	"automationCollectionTags": "Etiketler (virgülle ayrılmış, tümü gerekli)",
 	"automationCollectionTypes": "Blok türleri (boş bırakılırsa tümü)",
 	"automationCollectionCollected": "Zaten toplandı",

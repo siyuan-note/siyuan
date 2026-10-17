@@ -7,6 +7,7 @@ interface RuleSummary {
     id: string;
     name: string;
     enabled: boolean;
+    trigger: string;
 }
 
 export const openAutomationRules = (target: HTMLElement, rules: RuleSummary[], currentID: string,
@@ -28,13 +29,14 @@ export const openAutomationRules = (target: HTMLElement, rules: RuleSummary[], c
 <svg class="b3-list-item__graphic ariaLabel" aria-label="${escapeAttr(rule.enabled ? lang.enable : lang.disable)}"><use xlink:href="#${rule.enabled ? "iconPlay" : "iconPause"}"></use></svg>
 <span class="b3-list-item__text ariaLabel" aria-label="${escapeAttr(rule.name)}">${escapeHtml(rule.name)}</span>
 <span class="b3-list-item__action ariaLabel" data-rename role="button" tabindex="0" aria-label="${escapeAttr(lang.rename)}"><svg><use xlink:href="#iconEdit"></use></svg></span>
-<span class="b3-list-item__action ariaLabel" data-more role="button" tabindex="0" aria-label="${escapeAttr(lang.more)}"><svg><use xlink:href="#iconMore"></use></svg><div class="b3-menu__submenu"><div class="b3-menu__items"><button class="b3-menu__item b3-menu__item--warning" data-delete><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">${lang.delete}</span></button></div></div></span>
+<span class="b3-list-item__action ariaLabel" data-more role="button" tabindex="0" aria-label="${escapeAttr(lang.more)}"><svg><use xlink:href="#iconMore"></use></svg><div class="b3-menu__submenu"><div class="b3-menu__items">${rule.trigger === "block" ? `<div class="ft__on-surface ft__smaller av__automation-rule-warning" data-rule-change-tip>${lang.automationCollectionRuleChangeTip}</div>` : ""}<button class="b3-menu__item b3-menu__item--warning" data-delete><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">${lang.delete}</span></button></div></div></span>
 ${rule.id === currentID ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}</div>`).join("") || `<div class="b3-list--empty">${lang.emptyContent}</div>`;
         };
         search.addEventListener("input", render);
         element.addEventListener("click", event => {
             event.stopPropagation();
             const clicked = event.target as Element;
+            if (clicked.closest("[data-rule-change-tip]")) { return; }
             const row = clicked.closest<HTMLElement>("[data-id]");
             if (!row || clicked.closest("input")) { return; }
             const id = row.dataset.id;

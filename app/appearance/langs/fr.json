@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Modifier les conditions, désactiver ou supprimer une règle conserve les entrées collectées et les valeurs de leurs champs",
 	"automationNotifySuccess": "Notifier en cas de succès",
 	"automationResultRule": "Automatisation « ${1} » terminée : ${2}",
 	"automationResultSummary": "Automatisations de la base de données terminées : ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Portée de surveillance (sous-documents inclus)",
 	"automationCollectionPreview": "Aperçu des blocs correspondants",
 	"automationCollectPage": "Collecter les résultats de cette page",
-	"automationCollectionTip": "Les nouveaux blocs correspondants sont ajoutés à cette base. Les entrées collectées automatiquement sont retirées lorsque les conditions ne sont plus remplies ; les blocs sources sont conservés. Une nouvelle correspondance crée une entrée avec les valeurs initiales",
+	"automationCollectionTip": "Lorsqu’un bloc source ne correspond plus, son entrée automatique est retirée avec toutes les valeurs des champs, y compris celles modifiées manuellement. Le bloc source reste intact ; annuler cette modification restaure l’entrée et ses champs. Une nouvelle correspondance crée une entrée avec les valeurs initiales",
 	"automationCollectionTags": "Étiquettes (séparées par des virgules, toutes requises)",
 	"automationCollectionTypes": "Types de blocs (vide pour tous)",
 	"automationCollectionCollected": "Déjà collecté",

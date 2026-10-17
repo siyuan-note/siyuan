@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Modificare le condizioni, disabilitare o eliminare una regola conserva le voci raccolte e i valori dei loro campi",
 	"automationNotifySuccess": "Notifica in caso di successo",
 	"automationResultRule": "Automazione «${1}» completata: ${2}",
 	"automationResultSummary": "Automazioni del database completate: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Ambito di monitoraggio (include i sottodocumenti)",
 	"automationCollectionPreview": "Anteprima dei blocchi corrispondenti",
 	"automationCollectPage": "Raccogli le corrispondenze di questa pagina",
-	"automationCollectionTip": "Le nuove corrispondenze vengono aggiunte a questo database. Se le condizioni non sono più soddisfatte, le voci raccolte automaticamente vengono rimosse e i blocchi originali rimangono. Una nuova corrispondenza crea una voce con i valori iniziali",
+	"automationCollectionTip": "Quando un blocco sorgente non corrisponde più, la sua voce automatica viene rimossa con tutti i valori dei campi, inclusi quelli modificati manualmente. Il blocco sorgente rimane; annullare la modifica ripristina la voce e i campi. Una nuova corrispondenza crea una voce con i valori iniziali",
 	"automationCollectionTags": "Tag (separati da virgole, tutti richiesti)",
 	"automationCollectionTypes": "Tipi di blocco (vuoto per tutti)",
 	"automationCollectionCollected": "Già raccolto",

@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "修改條件、停用或刪除規則不會清理已收集的項目，也不會重設欄位",
 	"automationNotifySuccess": "執行成功時通知",
 	"automationResultRule": "自動化「${1}」已執行：${2}",
 	"automationResultSummary": "資料庫自動化執行完成：${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "監聽範圍（包含子文件）",
 	"automationCollectionPreview": "預覽符合的區塊",
 	"automationCollectPage": "收集本頁符合的區塊",
-	"automationCollectionTip": "首次符合條件時加入目前資料庫；不再符合時移出自動收集的條目，保留原文。再次符合會建立新條目並重新初始化欄位",
+	"automationCollectionTip": "原文不再匹配時會移出整個自動項目，包括後來手動填寫的欄位；原文保留，復原該次修改可還原項目及欄位。再次匹配會建立新項目並重新初始化欄位",
 	"automationCollectionTags": "標籤（逗號分隔，須全部符合）",
 	"automationCollectionTypes": "區塊類型（留空表示全部）",
 	"automationCollectionCollected": "已收集",

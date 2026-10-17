@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "修改条件、停用或删除规则不会清理已收集的条目，也不会重置字段",
 	"automationNotifySuccess": "执行成功时通知",
 	"automationResultRule": "自动化「${1}」已执行：${2}",
 	"automationResultSummary": "数据库自动化执行完成：${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "监听范围（包含子文档）",
 	"automationCollectionPreview": "预览匹配块",
 	"automationCollectPage": "收集本页匹配块",
-	"automationCollectionTip": "首次符合条件时加入当前数据库；不再符合时移出自动收集的条目，保留原文。再次符合会创建新条目并重新初始化字段",
+	"automationCollectionTip": "原文不再匹配时会移出整个自动条目，包括后来手动填写的字段；原文保留，撤销该次修改可恢复条目及字段。再次匹配会创建新条目并重新初始化字段",
 	"automationCollectionTags": "标签（逗号分隔，须全部符合）",
 	"automationCollectionTypes": "块类型（留空表示全部）",
 	"automationCollectionCollected": "已收集",

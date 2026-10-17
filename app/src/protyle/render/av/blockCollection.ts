@@ -33,7 +33,7 @@ export const mountBlockCollectionSource = (host: HTMLElement, source: AVAutomati
         const notebooks = source.notebookIDs || [];
         const documents = source.documentIDs || [];
         host.innerHTML = `<div class="av__automation-action">
-<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationCollectionTip}</div>
+<div class="ft__on-surface ft__smaller av__automation-tip" data-collection-removal-tip>${lang.automationCollectionTip}</div>
 <button type="button" class="b3-button b3-button--outline av__automation-source-action" data-scope>${lang.automationCollectionScope}</button>
 ${notebooks.length || documents.length ? `<div class="av__automation-source-list">${notebooks.map((id, i) => `<div class="av__automation-row av__automation-source-row"><svg class="block__logoicon ft__on-surface"><use xlink:href="#iconNotebook"></use></svg><span class="fn__flex-1 ft__breakword av__automation-notebook-name">${escapeHtml(window.siyuan.notebooks.find(box => box.id === id)?.name || id)}</span>${removeButton("notebook", i)}</div>`).join("")}${documents.map((id, i) => `<div class="av__automation-row av__automation-source-row"><span class="b3-list-item__icon fn__pointer popover__block" data-id="${escapeAttr(id)}"><svg><use xlink:href="#iconFile"></use></svg></span><a href="siyuan://blocks/${escapeAttr(id)}" class="fn__flex-1 ft__breakword av__automation-document-name">${escapeHtml(names.get(id) || id)}</a>${removeButton("document", i)}</div>`).join("")}</div>` : ""}
 </div>`;

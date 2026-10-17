@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Cambiar condiciones, desactivar o eliminar una regla conserva las entradas recopiladas y los valores de sus campos",
 	"automationNotifySuccess": "Notificar al completarse correctamente",
 	"automationResultRule": "Automatización «${1}» completada: ${2}",
 	"automationResultSummary": "Automatizaciones de la base de datos completadas: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Ámbito de seguimiento (incluye subdocumentos)",
 	"automationCollectionPreview": "Vista previa de bloques coincidentes",
 	"automationCollectPage": "Recopilar coincidencias de esta página",
-	"automationCollectionTip": "Las nuevas coincidencias se añaden a esta base de datos. Si dejan de cumplir las condiciones, se eliminan las entradas recopiladas automáticamente y se conservan los bloques originales. Una nueva coincidencia crea otra entrada con los valores iniciales",
+	"automationCollectionTip": "Cuando un bloque de origen deja de coincidir, su entrada automática se retira con todos los valores de sus campos, incluidos los editados manualmente. El bloque de origen se conserva; deshacer esa edición restaura la entrada y sus campos. Una nueva coincidencia crea otra entrada con valores iniciales",
 	"automationCollectionTags": "Etiquetas (separadas por comas, todas obligatorias)",
 	"automationCollectionTypes": "Tipos de bloque (vacío para todos)",
 	"automationCollectionCollected": "Ya recopilado",

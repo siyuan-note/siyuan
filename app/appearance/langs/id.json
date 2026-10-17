@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Mengubah kondisi, menonaktifkan, atau menghapus aturan mempertahankan entri yang dikumpulkan dan nilai bidangnya",
 	"automationNotifySuccess": "Beri tahu saat berhasil",
 	"automationResultRule": "Otomatisasi “${1}” selesai: ${2}",
 	"automationResultSummary": "Otomatisasi basis data selesai: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Cakupan pemantauan (termasuk subdokumen)",
 	"automationCollectionPreview": "Pratinjau blok yang cocok",
 	"automationCollectPage": "Kumpulkan kecocokan di halaman ini",
-	"automationCollectionTip": "Kecocokan baru ditambahkan ke basis data ini. Saat kondisi tidak lagi terpenuhi, entri yang dikumpulkan otomatis dihapus dan blok sumber tetap ada. Jika cocok kembali, entri baru dibuat dengan nilai awal bidang",
+	"automationCollectionTip": "Saat blok sumber tidak lagi cocok, entri otomatisnya dikeluarkan beserta semua nilai bidang, termasuk yang diedit manual. Blok sumber tetap ada; mengurungkan perubahan tersebut memulihkan entri dan bidangnya. Kecocokan berikutnya membuat entri baru dengan nilai awal",
 	"automationCollectionTags": "Tag (dipisahkan koma, semuanya wajib cocok)",
 	"automationCollectionTypes": "Jenis blok (kosong berarti semua)",
 	"automationCollectionCollected": "Sudah dikumpulkan",

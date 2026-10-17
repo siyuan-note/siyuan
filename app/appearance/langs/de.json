@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Geänderte Bedingungen sowie das Deaktivieren oder Löschen einer Regel erhalten gesammelte Einträge und ihre Feldwerte",
 	"automationNotifySuccess": "Bei Erfolg benachrichtigen",
 	"automationResultRule": "Automatisierung „${1}“ abgeschlossen: ${2}",
 	"automationResultSummary": "Datenbankautomatisierungen abgeschlossen: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Überwachungsbereich (mit Unterdokumenten)",
 	"automationCollectionPreview": "Passende Blöcke anzeigen",
 	"automationCollectPage": "Treffer dieser Seite erfassen",
-	"automationCollectionTip": "Neue Treffer werden dieser Datenbank hinzugefügt. Nicht mehr passende automatisch erfasste Einträge werden entfernt; die Quellblöcke bleiben erhalten. Erneute Treffer erzeugen neue Einträge mit anfänglichen Feldwerten",
+	"automationCollectionTip": "Wenn ein Quellblock nicht mehr übereinstimmt, wird sein automatischer Eintrag mit allen Feldwerten entfernt, auch mit manuell bearbeiteten Werten. Der Quellblock bleibt erhalten; das Rückgängigmachen dieser Änderung stellt Eintrag und Felder wieder her. Eine erneute Übereinstimmung erstellt einen neuen Eintrag mit Anfangswerten",
 	"automationCollectionTags": "Tags (kommagetrennt, alle erforderlich)",
 	"automationCollectionTypes": "Blocktypen (leer bedeutet alle)",
 	"automationCollectionCollected": "Bereits erfasst",

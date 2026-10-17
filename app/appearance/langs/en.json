@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Changing conditions, disabling, or deleting a rule preserves collected entries and their field values",
 	"automationNotifySuccess": "Notify on success",
 	"automationResultRule": "Automation \"${1}\" completed: ${2}",
 	"automationResultSummary": "Database automations completed: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Watch scope (includes subdocuments)",
 	"automationCollectionPreview": "Preview matching blocks",
 	"automationCollectPage": "Collect matches on this page",
-	"automationCollectionTip": "New matches are added to this database. When conditions stop matching, automatic entries are removed and source blocks remain. Matching again creates a new entry with initial field values",
+	"automationCollectionTip": "When a source block stops matching, its automatic entry is removed with all field values, including manually edited values. The source block remains; undoing that edit restores the entry and its fields. Matching again creates a new entry with initial values",
 	"automationCollectionTags": "Tags (comma-separated, all required)",
 	"automationCollectionTypes": "Block types (empty means all)",
 	"automationCollectionCollected": "Already collected",

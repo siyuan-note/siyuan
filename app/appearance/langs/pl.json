@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Zmiana warunków, wyłączenie lub usunięcie reguły zachowuje zebrane wpisy i wartości ich pól",
 	"automationNotifySuccess": "Powiadamiaj po pomyślnym wykonaniu",
 	"automationResultRule": "Automatyzacja „${1}” zakończona: ${2}",
 	"automationResultSummary": "Automatyzacje bazy danych zakończone: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Zakres obserwacji (z dokumentami podrzędnymi)",
 	"automationCollectionPreview": "Podgląd pasujących bloków",
 	"automationCollectPage": "Zbierz dopasowania z tej strony",
-	"automationCollectionTip": "Nowe dopasowania są dodawane do tej bazy danych. Gdy warunki przestają być spełnione, automatycznie zebrane wpisy są usuwane, a bloki źródłowe pozostają. Ponowne dopasowanie tworzy nowy wpis z początkowymi wartościami pól",
+	"automationCollectionTip": "Gdy blok źródłowy przestaje pasować, automatyczny wpis jest usuwany ze wszystkimi wartościami pól, także edytowanymi ręcznie. Blok źródłowy pozostaje; cofnięcie tej zmiany przywraca wpis i pola. Ponowne dopasowanie tworzy nowy wpis z wartościami początkowymi",
 	"automationCollectionTags": "Tagi (oddzielone przecinkami, wszystkie wymagane)",
 	"automationCollectionTypes": "Typy bloków (puste oznacza wszystkie)",
 	"automationCollectionCollected": "Już zebrano",

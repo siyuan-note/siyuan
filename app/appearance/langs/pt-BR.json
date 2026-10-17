@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Alterar condições, desativar ou excluir uma regra preserva as entradas coletadas e os valores dos campos",
 	"automationNotifySuccess": "Notificar em caso de sucesso",
 	"automationResultRule": "Automação “${1}” concluída: ${2}",
 	"automationResultSummary": "Automações do banco de dados concluídas: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Escopo de monitoramento (inclui subdocumentos)",
 	"automationCollectionPreview": "Visualizar blocos correspondentes",
 	"automationCollectPage": "Coletar correspondências desta página",
-	"automationCollectionTip": "Novas correspondências são adicionadas a este banco de dados. Quando as condições deixam de ser atendidas, as entradas coletadas automaticamente são removidas e os blocos originais permanecem. Uma nova correspondência cria outra entrada com os valores iniciais",
+	"automationCollectionTip": "Quando um bloco de origem deixa de corresponder, sua entrada automática é removida com todos os valores dos campos, inclusive os editados manualmente. O bloco de origem permanece; desfazer essa edição restaura a entrada e os campos. Uma nova correspondência cria outra entrada com os valores iniciais",
 	"automationCollectionTags": "Etiquetas (separadas por vírgulas, todas obrigatórias)",
 	"automationCollectionTypes": "Tipos de bloco (vazio para todos)",
 	"automationCollectionCollected": "Já coletado",

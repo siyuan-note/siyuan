@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "שינוי תנאים, השבתה או מחיקה של כלל שומרים על הרשומות שנאספו ועל ערכי השדות שלהן",
 	"automationNotifySuccess": "הודעה לאחר הצלחה",
 	"automationResultRule": "האוטומציה „${1}” הושלמה: ${2}",
 	"automationResultSummary": "האוטומציות של מסד הנתונים הושלמו: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "טווח מעקב (כולל מסמכי משנה)",
 	"automationCollectionPreview": "תצוגה מקדימה של בלוקים תואמים",
 	"automationCollectPage": "איסוף התאמות בעמוד זה",
-	"automationCollectionTip": "התאמות חדשות מתווספות למסד נתונים זה. כשהתנאים אינם מתקיימים עוד, רשומות שנאספו אוטומטית מוסרות ובלוקי המקור נשמרים. התאמה חוזרת יוצרת רשומה חדשה עם ערכי השדות ההתחלתיים",
+	"automationCollectionTip": "כאשר בלוק המקור מפסיק להתאים, הרשומה האוטומטית שלו מוסרת עם כל ערכי השדות, כולל ערכים שנערכו ידנית. בלוק המקור נשמר; ביטול אותה עריכה משחזר את הרשומה והשדות. התאמה חוזרת יוצרת רשומה חדשה עם ערכי התחלה",
 	"automationCollectionTags": "תגיות (מופרדות בפסיקים, כולן נדרשות)",
 	"automationCollectionTypes": "סוגי בלוקים (ריק משמעו הכול)",
 	"automationCollectionCollected": "כבר נאסף",

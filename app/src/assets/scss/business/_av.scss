@@ -3157,6 +3157,12 @@ img.av__cellassetimg {
     max-width: 100%;
   }
 
+  &-rule-warning {
+    max-width: min(260px, calc(100vw - 32px));
+    margin: 0 8px 8px;
+    white-space: normal;
+  }
+
   &-enabled,
   &-tools {
     align-self: flex-end;

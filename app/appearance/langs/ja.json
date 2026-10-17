@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "条件の変更、ルールの無効化や削除では、収集済みの項目とフィールド値を保持します",
 	"automationNotifySuccess": "実行成功時に通知",
 	"automationResultRule": "自動化「${1}」を実行しました：${2}",
 	"automationResultSummary": "データベースの自動化が完了しました：${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "監視範囲（子文書を含む）",
 	"automationCollectionPreview": "一致するブロックをプレビュー",
 	"automationCollectPage": "このページの一致ブロックを収集",
-	"automationCollectionTip": "新たに条件に一致すると現在のデータベースに追加します。一致しなくなると自動収集した項目を削除し、元のブロックは保持します。再び一致した場合はフィールドを初期化した新しい項目を作成します",
+	"automationCollectionTip": "元のブロックが条件に一致しなくなると、手動で編集した値も含め、すべてのフィールド値とともに自動項目を削除します。元のブロックは残り、その編集を元に戻すと項目とフィールドも復元します。再び一致すると初期値を持つ新しい項目を作成します",
 	"automationCollectionTags": "タグ（カンマ区切り、すべて必須）",
 	"automationCollectionTypes": "ブロックの種類（空欄はすべて）",
 	"automationCollectionCollected": "収集済み",

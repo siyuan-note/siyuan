@@ -410,6 +410,8 @@ const runCases = async (sources, css, mobile) => {
         }
     }
     await change("[data-trigger]", "block");
+    assert.equal(get("[data-collection-removal-tip]").textContent, lang.automationCollectionTip);
+    assert.equal(get("[data-rule-change-tip]").textContent, lang.automationCollectionRuleChangeTip);
     assert.equal(get("[data-source-conditions]").closest("section").textContent.includes(lang.automationBlockConditions), true);
     assert.equal(menu.querySelector("[data-add-condition]"), null);
     assert.ok(get("[data-scope]"));
@@ -512,6 +514,9 @@ const runCases = async (sources, css, mobile) => {
     const secondID = transactions.at(-1).perform[0].data.rules[1].id;
     await click('[data-action="rules"]');
     fieldMenu.element.querySelector('[data-id="rule"] [data-more]').click();
+    const deletionTip = fieldMenu.element.querySelector('[data-id="rule"] [data-rule-change-tip]');
+    assert.equal(deletionTip.textContent, lang.automationCollectionRuleChangeTip);
+    assert.ok(deletionTip.scrollWidth <= deletionTip.clientWidth + 1, "the collection deletion notice wraps on narrow screens");
     assert.equal(fieldMenu.element.querySelector('[data-id="rule"] .b3-menu__submenu').style.display, "block");
     fieldMenu.element.querySelector('[data-id="rule"] [data-delete]').click();
     await tick();

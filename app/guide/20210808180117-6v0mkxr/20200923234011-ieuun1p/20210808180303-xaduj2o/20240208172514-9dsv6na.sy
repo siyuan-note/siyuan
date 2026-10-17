@@ -4582,12 +4582,16 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-4gexoxe",
-				"updated": "20261016202856"
+				"updated": "20261017202821"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "When a block first matches, a new entry is added. Repeated matches preserve the entry and its field values. When it stops matching, an automatically collected entry is removed, while the source block remains. Manually added entries are preserved, as are entries still matching another enabled collection rule. Disabling or deleting the rule that created an entry leaves that entry in place."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Removal includes field values entered or edited manually after collection; editing those values does not detach the entry from the collection rule. Changing rule conditions does not immediately clean up existing entries or reset their fields."
 				}
 			]
 		},

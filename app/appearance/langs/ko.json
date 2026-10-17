@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "조건 변경, 규칙 비활성화 또는 삭제 시에도 수집한 항목과 필드 값은 유지됩니다",
 	"automationNotifySuccess": "실행 성공 시 알림",
 	"automationResultRule": "자동화 “${1}” 실행 완료: ${2}",
 	"automationResultSummary": "데이터베이스 자동화 실행 완료: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "감시 범위(하위 문서 포함)",
 	"automationCollectionPreview": "일치하는 블록 미리 보기",
 	"automationCollectPage": "이 페이지의 일치 블록 수집",
-	"automationCollectionTip": "새로 조건과 일치하면 현재 데이터베이스에 추가합니다. 더 이상 일치하지 않으면 자동 수집한 항목을 제거하고 원본 블록은 유지합니다. 다시 일치하면 필드를 초기화한 새 항목을 만듭니다",
+	"automationCollectionTip": "원본 블록이 조건과 일치하지 않게 되면 수동으로 편집한 값을 포함한 모든 필드 값과 함께 자동 항목이 제거됩니다. 원본 블록은 유지되며 해당 편집을 실행 취소하면 항목과 필드가 복원됩니다. 다시 일치하면 초기값으로 새 항목을 만듭니다",
 	"automationCollectionTags": "태그(쉼표로 구분, 모두 일치해야 함)",
 	"automationCollectionTypes": "블록 유형(비워 두면 전체)",
 	"automationCollectionCollected": "이미 수집됨",

@@ -1,4 +1,5 @@
 {
+	"automationCollectionRuleChangeTip": "Zmena podmienok, vypnutie alebo odstránenie pravidla zachová zhromaždené položky a hodnoty ich polí",
 	"automationNotifySuccess": "Upozorniť pri úspechu",
 	"automationResultRule": "Automatizácia „${1}“ dokončená: ${2}",
 	"automationResultSummary": "Automatizácie databázy dokončené: ${1}",
@@ -65,7 +66,7 @@
 	"automationCollectionScope": "Rozsah sledovania (vrátane poddokumentov)",
 	"automationCollectionPreview": "Náhľad zodpovedajúcich blokov",
 	"automationCollectPage": "Zhromaždiť zhody na tejto stránke",
-	"automationCollectionTip": "Nové zhody sa pridajú do tejto databázy. Keď podmienky prestanú platiť, automaticky zhromaždené položky sa odstránia a zdrojové bloky zostanú zachované. Opätovná zhoda vytvorí novú položku s počiatočnými hodnotami polí",
+	"automationCollectionTip": "Keď zdrojový blok prestane vyhovovať, jeho automatická položka sa odstráni so všetkými hodnotami polí vrátane ručne upravených. Zdrojový blok zostane zachovaný; vrátenie tejto úpravy obnoví položku aj polia. Nová zhoda vytvorí novú položku s počiatočnými hodnotami",
 	"automationCollectionTags": "Značky (oddelené čiarkami, vyžadujú sa všetky)",
 	"automationCollectionTypes": "Typy blokov (prázdne znamená všetky)",
 	"automationCollectionCollected": "Už zhromaždené",

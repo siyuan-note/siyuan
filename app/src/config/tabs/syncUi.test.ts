@@ -32,7 +32,7 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         checkValidity() { return this.value.trim() !== "" && Number.isInteger(Number(this.value)) && Number(this.value) > 0; },
     }]));
     const errors = Object.fromEntries(Object.keys(template).map(key => [`sync-${key}-error`, {
-        textContent: "", classList: {toggle() {}},
+        lastElementChild: {textContent: ""}, classList: {toggle() {}},
     }]));
     const status = {textContent: "", classList: {toggle() {} }};
     let warningHidden = true;

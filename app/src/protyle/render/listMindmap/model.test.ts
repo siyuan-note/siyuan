@@ -1056,6 +1056,67 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], transform,
             "navigating to a visible node preserves the viewport");
     }
+    // 新节点和方向键导航均避开底部菜单，窄画布、缩放及菜单尺寸变化后仍按实际遮挡范围定位。
+    const navigationSource = list.cloneNode(true) as HTMLElement;
+    const addedSource = document.createElement("div");
+    addedSource.innerHTML = lute.Md2BlockDOM("- New node\n");
+    const addedItem = addedSource.querySelector<HTMLElement>('[data-type="NodeListItem"]');
+    check.ok(api.addListMindmapNode(navigationSource, beta, "after", addedItem));
+    navigationView.setReadOnly(false);
+    navigationView.update(api.readListMindmap(navigationSource));
+    await settle();
+    const addedNode = navigationHost.querySelector<HTMLElement>(`[data-mindmap-id="${addedItem.dataset.nodeId}"]`);
+    const navigationInspector = navigationHost.querySelector<HTMLElement>(".mindmap-view__inspector");
+    const placeUnderInspector = (bounds: DOMRect) => {
+        const rect = addedNode.getBoundingClientRect();
+        const viewportBounds = navigationViewport.getBoundingClientRect();
+        const scaleX = viewportBounds.width / navigationViewport.offsetWidth;
+        const scaleY = viewportBounds.height / navigationViewport.offsetHeight;
+        navigationView.offsetX += (bounds.left + bounds.width / 2 - rect.left - rect.width / 2) / scaleX;
+        navigationView.offsetY += (bounds.top + 8 * scaleY - rect.bottom) / scaleY;
+        navigationView.draw();
+    };
+    for (const width of [400, 240, 300]) {
+        const scale = width === 300 ? .5 : 1;
+        navigationHost.style.width = `${width}px`;
+        navigationHost.style.transform = `scale(${scale})`;
+        navigationHost.style.transformOrigin = "top left";
+        navigationInspector.style.paddingTop = width === 240 ? "18px" : "4px";
+        navigationInspector.style.paddingBottom = navigationInspector.style.paddingTop;
+        navigationView.refreshLayout();
+        await settle();
+        for (const keyboard of [false, true]) {
+            navigationView.selectNode(beta);
+            const menuBounds = navigationInspector.getBoundingClientRect();
+            check.ok(menuBounds.width > 0 && menuBounds.height > 0);
+            placeUnderInspector(menuBounds);
+            const before = addedNode.getBoundingClientRect();
+            check.ok(before.bottom > menuBounds.top && before.top < menuBounds.bottom);
+            navigationView.refreshLayout();
+            if (keyboard) {
+                navigationHost.dispatchEvent(new KeyboardEvent("keydown", {
+                    key: "ArrowDown", bubbles: true, cancelable: true,
+                }));
+            } else {
+                navigationView.focusNode(addedItem.dataset.nodeId);
+            }
+            await settle();
+            const after = addedNode.getBoundingClientRect();
+            check.equal(navigationView.getSelectedId(), addedItem.dataset.nodeId);
+            check.ok(after.bottom <= navigationInspector.getBoundingClientRect().top - 15 * scale,
+                `node stays above the menu, width=${width}, keyboard=${keyboard}`);
+            check.ok(after.top >= navigationViewport.getBoundingClientRect().top + 15 * scale);
+        }
+    }
+    const visibleMenuBounds = navigationInspector.getBoundingClientRect();
+    navigationView.setReadOnly(true);
+    await settle();
+    placeUnderInspector(visibleMenuBounds);
+    const hiddenMenuTransform = [navigationView.offsetX, navigationView.offsetY];
+    navigationView.focusNode(addedItem.dataset.nodeId);
+    await settle();
+    check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenMenuTransform,
+        "a hidden menu does not reduce the node's visible area");
     navigationView.destroy();
     navigationHost.remove();
 

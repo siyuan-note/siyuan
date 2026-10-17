@@ -870,13 +870,29 @@ export class ListMindmapView {
             if (!viewport.width || !viewport.height || !rect.width || !rect.height) {
                 return;
             }
-            const margin = 16;
-            const x = rect.left < viewport.left + margin ? viewport.left + margin - rect.left :
-                rect.right > viewport.right - margin ? viewport.right - margin - rect.right : 0;
-            const y = rect.top < viewport.top + margin ? viewport.top + margin - rect.top :
-                rect.bottom > viewport.bottom - margin ? viewport.bottom - margin - rect.bottom : 0;
+            const scaleX = viewport.width / (this.viewport.offsetWidth || viewport.width);
+            const scaleY = viewport.height / (this.viewport.offsetHeight || viewport.height);
+            const marginX = 16 * scaleX;
+            const marginY = 16 * scaleY;
+            const x = rect.left < viewport.left + marginX ? viewport.left + marginX - rect.left :
+                rect.right > viewport.right - marginX ? viewport.right - marginX - rect.right : 0;
+            let bottom = viewport.bottom - marginY;
+            // 底部浮层按实际尺寸避让，横向定位后仍不相交的节点无需额外上移。
+            [this.inspector, this.summaryControls].forEach(panel => {
+                if (panel.hidden) {
+                    return;
+                }
+                const bounds = panel.getBoundingClientRect();
+                if (bounds.width && bounds.height && bounds.bottom > viewport.top && bounds.top < viewport.bottom &&
+                    rect.left + x < bounds.right && rect.right + x > bounds.left) {
+                    bottom = Math.min(bottom, bounds.top - marginY);
+                }
+            });
+            // 可用高度不足以完整显示节点时，优先保留节点顶部的正文。
+            const y = rect.top < viewport.top + marginY ? viewport.top + marginY - rect.top :
+                rect.bottom > bottom ? Math.max(viewport.top + marginY - rect.top, bottom - rect.bottom) : 0;
             if (x || y) {
-                const bounded = this.boundedPan(this.offsetX + x, this.offsetY + y);
+                const bounded = this.boundedPan(this.offsetX + x / scaleX, this.offsetY + y / scaleY);
                 this.offsetX = bounded.x;
                 this.offsetY = bounded.y;
                 this.draw();

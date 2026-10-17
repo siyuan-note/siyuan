@@ -24,9 +24,10 @@ const setup = () => {
     const host = {focus: () => focus = "canvas"};
     const target = Object.assign(new context.View(), {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
-        selectedId: "new", tooltip: {},
+        selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
         nodeElements: new Map(), offsetX: 0, offsetY: 0,
         viewport: {contains: (element: unknown) => !!element, setPointerCapture: () => {},
+            offsetWidth: 400, offsetHeight: 300,
             getBoundingClientRect: () => ({left: 0, top: 0, right: 400, bottom: 300, width: 400, height: 300})},
         selectNode: () => {}, findLine: (): unknown => undefined, selectLine: () => {},
         clearSelection: () => { target.selectedId = undefined; },
@@ -74,6 +75,82 @@ test("focusing visible, missing or removed nodes does not pan", () => {
     target.destroyed = true;
     target.focusNode("new");
     assert.equal(drawn(), 0);
+});
+
+test("node focus avoids the actual bottom panel bounds after the pending layout", () => {
+    for (const panel of ["inspector", "summaryControls"]) {
+        for (const top of [250, 210]) {
+            const {target, frames, drawn} = setup();
+            target.frame = 1;
+            target[panel] = {hidden: false, getBoundingClientRect: () =>
+                ({left: 80, right: 320, top, bottom: 292, width: 240, height: 292 - top})};
+            target.nodeElements.set("new", {getBoundingClientRect: () =>
+                ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
+            target.focusNode("new");
+            assert.equal(drawn(), 0);
+            frames.forEach(action => action());
+            assert.equal(280 + target.offsetY, top - 16);
+            assert.equal(target.offsetX, 0);
+            assert.equal(drawn(), 1);
+        }
+    }
+});
+
+test("hidden, unmeasured and non-overlapping panels do not move an unobstructed node", () => {
+    for (const bounds of [
+        {left: 200, right: 320, top: 250, bottom: 292, width: 120, height: 42},
+        {left: 80, right: 320, top: 310, bottom: 352, width: 240, height: 42},
+        {left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0},
+    ]) {
+        const {target, drawn} = setup();
+        target.inspector = {hidden: false, getBoundingClientRect: () => bounds};
+        target.nodeElements.set("new", {getBoundingClientRect: () =>
+            ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
+        target.focusNode("new");
+        assert.equal(drawn(), 0);
+    }
+    const {target, drawn} = setup();
+    target.inspector = {hidden: true, getBoundingClientRect: () => {
+        throw new Error("hidden panels do not need measuring");
+    }};
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
+    target.focusNode("new");
+    assert.equal(drawn(), 0);
+});
+
+test("horizontal reveal also avoids a panel at the destination", () => {
+    const {target} = setup();
+    target.inspector = {hidden: false, getBoundingClientRect: () =>
+        ({left: 80, right: 390, top: 250, bottom: 292, width: 310, height: 42})};
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 420, top: 240, right: 500, bottom: 280, width: 80, height: 40})});
+    target.focusNode("new");
+    assert.equal(target.offsetX, -116);
+    assert.equal(target.offsetY, -46);
+});
+
+test("scaled canvases convert menu clearance into canvas pan coordinates", () => {
+    const {target} = setup();
+    target.viewport.getBoundingClientRect = () =>
+        ({left: 0, top: 0, right: 200, bottom: 150, width: 200, height: 150});
+    target.inspector = {hidden: false, getBoundingClientRect: () =>
+        ({left: 40, right: 160, top: 125, bottom: 146, width: 120, height: 21})};
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 50, top: 120, right: 90, bottom: 140, width: 40, height: 20})});
+    target.focusNode("new");
+    assert.equal(target.offsetX, 0);
+    assert.equal(target.offsetY, -46);
+});
+
+test("a node taller than the unobstructed area keeps its top visible", () => {
+    const {target} = setup();
+    target.inspector = {hidden: false, getBoundingClientRect: () =>
+        ({left: 80, right: 320, top: 210, bottom: 292, width: 240, height: 82})};
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 100, top: 100, right: 180, bottom: 320, width: 80, height: 220})});
+    target.focusNode("new");
+    assert.equal(100 + target.offsetY, 16);
 });
 
 test("mouse, right-button and primary touch panning preserve the editing focus", () => {

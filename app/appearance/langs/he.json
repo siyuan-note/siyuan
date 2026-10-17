@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "יעד האיסוף",
+	"automationCollectionTargetBlock": "בלוק המכיל את התגית",
+	"automationCollectionTargetContainer": "בלוק מכל",
+	"automationCollectionTargetDefaultTip": "כאשר מוגדרים תנאי תגיות, הפסקה הראשונה בפריט רשימה שייכת לפריט; בלוקים אחרים בודקים את התגיות שלהם",
+	"automationCollectionTargetBlockTip": "כאשר מוגדרים תנאי תגיות, יש לאסוף את הבלוק המכיל את התגית לפי הסוג והמאפיינים שלו",
+	"automationCollectionTargetContainerTip": "כאשר מוגדרים תנאי תגיות, יש לאסוף את המכל הקרוב ביותר התואם לסוג ולמאפיינים; יש לבחור מסמכים במפורש",
+	"automationCollectionTargetChangeTip": "שינוי האפשרות שומר על הרשומות והשדות הקיימים; ניתן לבדוק את התוצאות החדשות בתצוגה המקדימה",
 	"automationCollectionRuleChangeTip": "שינוי תנאים, השבתה או מחיקה של כלל שומרים על הרשומות שנאספו ועל ערכי השדות שלהן",
 	"automationNotifySuccess": "הודעה לאחר הצלחה",
 	"automationResultRule": "האוטומציה „${1}” הושלמה: ${2}",

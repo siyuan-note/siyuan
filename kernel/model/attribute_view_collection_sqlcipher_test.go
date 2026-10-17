@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -18,6 +19,16 @@ import (
 )
 
 func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
+	for _, target := range []string{"", "block", "container"} {
+		name := target
+		if name == "" {
+			name = "default"
+		}
+		t.Run(name, func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target) })
+	}
+}
+
+func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) {
 	fixture, view, _ := setupBlockCollectionTest(t)
 	boxID := fixture.box.ID
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
@@ -54,11 +65,33 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 		delete(cachedDEKs, boxID)
 		cachedDEKsLock.Unlock()
 	})
+	sourceID := tree.ID
+	if target != "" {
+		view.Automations.Spec = 4
+		view.Automations.Rules[0].BlockSource.TagTarget = target
+		paragraph := treenode.NewParagraph("")
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "tag", TextMarkTextContent: "todo"})
+		if target == "container" {
+			quote := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockquote}
+			quote.SetIALAttr("id", quote.ID)
+			quote.AppendChild(&ast.Node{Type: ast.NodeBlockquoteMarker, Tokens: []byte(">")})
+			tree.Root.AppendChild(quote)
+			quote.AppendChild(paragraph)
+			sourceID = quote.ID
+			view.Automations.Rules[0].BlockSource.Types = []string{"b"}
+		} else {
+			tree.Root.AppendChild(paragraph)
+			sourceID = paragraph.ID
+			view.Automations.Rules[0].BlockSource.Types = []string{"p"}
+		}
+	}
 	if _, err = filesys.WriteTree(tree); err != nil {
 		t.Fatal(err)
 	}
 	treenode.UpsertBlockTree(tree)
-	view.Automations.Rules[0].BlockSource.Tags = nil
+	if target == "" {
+		view.Automations.Rules[0].BlockSource.Tags = nil
+	}
 	view.Automations.Rules[0].BlockSource.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-state", Operator: "equals", Value: "active"}}
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
@@ -68,13 +101,13 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 	cache.ClearAVCache()
-	op := &Operation{Action: "setAttrs", ID: tree.ID, Data: `{"custom-state":"active"}`}
-	tx := &Transaction{fromAPI: true, DoOperations: []*Operation{op}, UndoOperations: []*Operation{{Action: "setAttrs", ID: tree.ID, Data: `{"custom-state":""}`}}}
+	op := &Operation{Action: "setAttrs", ID: sourceID, Data: `{"custom-state":"active"}`}
+	tx := &Transaction{fromAPI: true, DoOperations: []*Operation{op}, UndoOperations: []*Operation{{Action: "setAttrs", ID: sourceID, Data: `{"custom-state":""}`}}}
 	if err = PerformTxSync(tx); err != nil {
 		t.Fatal(err)
 	}
 	stored, err := av.ParseAttributeViewForIndexInBox(view.ID, boxID)
-	if err != nil || stored.GetBlockValueByBoundID(tree.ID) == nil {
+	if err != nil || stored.GetBlockValueByBoundID(sourceID) == nil {
 		t.Fatal("encrypted source was not collected", err)
 	}
 	if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(tx.UndoOperations), isReplay: true}); err != nil {
@@ -115,7 +148,7 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 		if _, err = PreviewAttributeViewCollection(view.ID, view.Automations.Rules[0].ID, 1); err == nil {
 			t.Fatal("preview accepted inaccessible ciphertext")
 		}
-		if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "setAttrs", ID: tree.ID, Data: `{"custom-state":"inactive"}`}}}); err == nil {
+		if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "setAttrs", ID: sourceID, Data: `{"custom-state":"inactive"}`}}}); err == nil {
 			t.Fatal("collection accepted inaccessible ciphertext")
 		}
 		for path, before := range map[string][]byte{avPath: beforeView, docPath: beforeDoc} {

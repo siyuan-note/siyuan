@@ -206,7 +206,8 @@ export const openAutomationMenu = async (options: {
         const usesTemplates = rules.some(rule => rule.actions.some(action => Object.values(action.fields).some(value => value.mode === "template")));
         const usesSourceOptions = rules.some(rule => rule.blockSource?.types?.some(type => type.includes(":")) ||
             rule.blockSource?.tagMatch === "or" || rule.blockSource?.attributeMatch === "or");
-        const next = {spec: Math.max(previous.spec, usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
+        const usesTagTarget = rules.some(rule => !!rule.blockSource?.tagTarget);
+        const next = {spec: Math.max(previous.spec, usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }

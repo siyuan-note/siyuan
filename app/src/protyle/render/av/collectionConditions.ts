@@ -31,13 +31,15 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
     const operators = {equals: lang.filterOperatorIs, contains: lang.filterOperatorContains,
         exists: lang.automationAttrExists, notExists: lang.automationAttrNotExists};
     const modeLabel = (mode: string) => mode === "or" ? lang.filterMatchAny : lang.filterMatchAll;
+    const tagTargets = {"": lang.default, block: lang.automationCollectionTargetBlock, container: lang.automationCollectionTargetContainer};
+    const tagTargetTips = {"": lang.automationCollectionTargetDefaultTip, block: lang.automationCollectionTargetBlockTip, container: lang.automationCollectionTargetContainerTip};
     const modeButton = (field: "tagMatch" | "attributeMatch", label: string) => `<button type="button" class="b3-button b3-button--cancel" data-match="${field}" aria-label="${escapeAttr(label)}">${modeLabel(source[field])}<svg><use xlink:href="#iconDown"></use></svg></button>`;
-    const addButton = (action: string, label: string) => `<button type="button" class="b3-button b3-button--cancel av__automation-source-action" ${action}><svg><use xlink:href="#iconAdd"></use></svg><span>${escapeHtml(label)}</span></button>`;
+    const addButton = (action: string, label: string) => `<button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" ${action}><svg><use xlink:href="#iconAdd"></use></svg><span>${escapeHtml(label)}</span></button>`;
     const chip = (kind: string, index: number, label: string, editable = false) => `<div class="b3-chip b3-chip--middle"><span class="fn__ellipsis${editable ? " b3-chip--pointer" : ""} ariaLabel" ${editable ? `data-edit-attribute="${index}" role="button" tabindex="0"` : ""} aria-label="${escapeAttr(label)}">${escapeHtml(label)}</span><svg class="b3-chip__close" data-remove-filter="${kind}" data-index="${index}" role="button" tabindex="0" aria-label="${escapeAttr(lang.delete)}"><use xlink:href="#iconClose"></use></svg></div>`;
     host.className = "av__automation-control";
-    host.innerHTML = `<div class="av__automation-control"><span class="av__automation-control-label">${lang.automationCollectionTypes}</span><div class="b3-chips b3-chips__doctag av__automation-chips" data-type-chips></div>${addButton("data-types", `${lang.add} - ${lang.automationCollectionTypes}`)}</div>
-<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.tag}</span>${modeButton("tagMatch", lang.tag)}</div><div data-tags></div></div>
-<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.attr}</span>${modeButton("attributeMatch", lang.attr)}</div><div class="b3-chips b3-chips__doctag av__automation-chips" data-attribute-chips></div>${addButton("data-add-attribute", `${lang.add} - ${lang.attr}`)}<div data-attribute-editor></div></div>`;
+    host.innerHTML = `<div class="av__automation-control"><span class="av__automation-control-label">${lang.automationCollectionTypes}</span><div class="b3-chips b3-chips__doctag av__automation-chips" data-type-chips></div>${addButton("data-types", `${lang.addAttr} - ${lang.automationCollectionTypes}`)}</div>
+<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.tag}</span>${modeButton("tagMatch", lang.tag)}</div><div data-tags></div><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.automationCollectionTarget}</span><button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" data-tag-target aria-label="${escapeAttr(lang.automationCollectionTarget)}"><span>${tagTargets[source.tagTarget || ""]}</span><svg><use xlink:href="#iconDown"></use></svg></button></div><div class="ft__on-surface ft__smaller av__automation-tip" data-tag-target-tip>${tagTargetTips[source.tagTarget || ""]}</div><div class="ft__on-surface ft__smaller av__automation-tip fn__none" data-tag-target-change-tip>${lang.automationCollectionTargetChangeTip}</div></div>
+<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.attr}</span>${modeButton("attributeMatch", lang.attr)}</div><div class="b3-chips b3-chips__doctag av__automation-chips" data-attribute-chips></div>${addButton("data-add-attribute", `${lang.addAttr} - ${lang.attr}`)}<div data-attribute-editor></div></div>`;
     const typeChips = host.querySelector<HTMLElement>("[data-type-chips]");
     const attributes = host.querySelector<HTMLElement>("[data-attribute-chips]");
     const editor = host.querySelector<HTMLElement>("[data-attribute-editor]");
@@ -159,7 +161,18 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
         const target = (event.target as Element).closest<HTMLElement>("button, [data-remove-filter], [data-edit-attribute]");
         if (!target) { return; }
         if (target.hasAttribute("data-types")) { openTypes(target); }
-        else if (target.dataset.match) {
+        else if (target.hasAttribute("data-tag-target")) {
+            choose(target, Object.entries(tagTargets).map(([value, label]) => ({value, label})), source.tagTarget || "", value => {
+                const next = value === "block" ? "block" : value === "container" ? "container" : "";
+                if (next === (source.tagTarget || "")) { return; }
+                if (next) { source.tagTarget = next; } else { delete source.tagTarget; }
+                target.querySelector("span").textContent = tagTargets[next];
+                host.querySelector("[data-tag-target-tip]").textContent = tagTargetTips[next];
+                host.querySelector("[data-tag-target-change-tip]").classList.remove("fn__none");
+                save();
+                resize();
+            });
+        } else if (target.dataset.match) {
             const field = target.dataset.match === "tagMatch" ? "tagMatch" : "attributeMatch";
             choose(target, [{value: "and", label: lang.filterMatchAll}, {value: "or", label: lang.filterMatchAny}], source[field] || "and", mode => {
                 source[field] = mode === "or" ? "or" : "and";

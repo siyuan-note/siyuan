@@ -6696,6 +6696,14 @@
             "or"
           ]
         },
+        "tagTarget": {
+          "type": "string",
+          "enum": [
+            "",
+            "block",
+            "container"
+          ]
+        },
         "tags": {
           "type": "array",
           "items": {
@@ -6753,6 +6761,14 @@
             "",
             "and",
             "or"
+          ]
+        },
+        "tagTarget": {
+          "type": "string",
+          "enum": [
+            "",
+            "block",
+            "container"
           ]
         },
         "tags": {

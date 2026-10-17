@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "수집 대상",
+	"automationCollectionTargetBlock": "태그가 있는 블록",
+	"automationCollectionTargetContainer": "컨테이너 블록",
+	"automationCollectionTargetDefaultTip": "태그 조건이 있으면 목록 항목의 첫 문단은 해당 항목에 속하며, 다른 블록은 자체 태그로 일치 여부를 확인합니다",
+	"automationCollectionTargetBlockTip": "태그 조건이 있으면 태그가 있는 블록의 유형과 속성에 따라 수집합니다",
+	"automationCollectionTargetContainerTip": "태그 조건이 있으면 유형과 속성 조건을 충족하는 가장 가까운 컨테이너를 수집합니다. 문서는 명시적으로 선택해야 합니다",
+	"automationCollectionTargetChangeTip": "변경해도 기존 항목과 필드는 유지됩니다. 미리보기에서 새로운 수집 결과를 확인하세요",
 	"automationCollectionRuleChangeTip": "조건 변경, 규칙 비활성화 또는 삭제 시에도 수집한 항목과 필드 값은 유지됩니다",
 	"automationNotifySuccess": "실행 성공 시 알림",
 	"automationResultRule": "자동화 “${1}” 실행 완료: ${2}",

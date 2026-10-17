@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "収集対象",
+	"automationCollectionTargetBlock": "タグを含むブロック",
+	"automationCollectionTargetContainer": "コンテナブロック",
+	"automationCollectionTargetDefaultTip": "タグ条件がある場合、リスト項目の最初の段落はリスト項目に属し、他のブロックは自身のタグと照合します",
+	"automationCollectionTargetBlockTip": "タグ条件がある場合、タグを含むブロックの種類と属性で絞り込んで収集します",
+	"automationCollectionTargetContainerTip": "タグ条件がある場合、種類と属性の条件に一致する最も近いコンテナを収集します。文書は明示的な選択が必要です",
+	"automationCollectionTargetChangeTip": "切り替えても既存の項目やフィールドは変更されません。プレビューで新しい収集結果を確認できます",
 	"automationCollectionRuleChangeTip": "条件の変更、ルールの無効化や削除では、収集済みの項目とフィールド値を保持します",
 	"automationNotifySuccess": "実行成功時に通知",
 	"automationResultRule": "自動化「${1}」を実行しました：${2}",

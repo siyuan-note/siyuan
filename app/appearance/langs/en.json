@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Collect",
+	"automationCollectionTargetBlock": "Block containing the tag",
+	"automationCollectionTargetContainer": "Container block",
+	"automationCollectionTargetDefaultTip": "With tag conditions, the first paragraph of a list item belongs to the list item; other blocks match their own tags",
+	"automationCollectionTargetBlockTip": "With tag conditions, collect the block containing the tag using its type and attributes",
+	"automationCollectionTargetContainerTip": "With tag conditions, collect the nearest container matching the type and attributes; documents must be explicitly selected",
+	"automationCollectionTargetChangeTip": "Changing this option preserves existing entries and fields; preview the collection to check the new results",
 	"automationCollectionRuleChangeTip": "Changing conditions, disabling, or deleting a rule preserves collected entries and their field values",
 	"automationNotifySuccess": "Notify on success",
 	"automationResultRule": "Automation \"${1}\" completed: ${2}",

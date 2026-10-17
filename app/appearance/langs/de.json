@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Sammelziel",
+	"automationCollectionTargetBlock": "Block mit dem Tag",
+	"automationCollectionTargetContainer": "Containerblock",
+	"automationCollectionTargetDefaultTip": "Bei Tag-Bedingungen gehört der erste Absatz eines Listeneintrags zum Eintrag; andere Blöcke prüfen ihre eigenen Tags",
+	"automationCollectionTargetBlockTip": "Bei Tag-Bedingungen den Block mit dem Tag anhand seines Typs und seiner Attribute sammeln",
+	"automationCollectionTargetContainerTip": "Bei Tag-Bedingungen den nächsten Container mit passendem Typ und passenden Attributen sammeln; Dokumente müssen ausdrücklich ausgewählt werden",
+	"automationCollectionTargetChangeTip": "Ein Wechsel erhält vorhandene Einträge und Felder; prüfen Sie die neuen Ergebnisse in der Vorschau",
 	"automationCollectionRuleChangeTip": "Geänderte Bedingungen sowie das Deaktivieren oder Löschen einer Regel erhalten gesammelte Einträge und ihre Feldwerte",
 	"automationNotifySuccess": "Bei Erfolg benachrichtigen",
 	"automationResultRule": "Automatisierung „${1}“ abgeschlossen: ${2}",

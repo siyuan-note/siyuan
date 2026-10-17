@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Objeto da coleta",
+	"automationCollectionTargetBlock": "Bloco que contém a etiqueta",
+	"automationCollectionTargetContainer": "Bloco contêiner",
+	"automationCollectionTargetDefaultTip": "Com condições de etiquetas, o primeiro parágrafo de um item de lista pertence ao item; os demais blocos verificam suas próprias etiquetas",
+	"automationCollectionTargetBlockTip": "Com condições de etiquetas, coletar o bloco que contém a etiqueta conforme seu tipo e atributos",
+	"automationCollectionTargetContainerTip": "Com condições de etiquetas, coletar o contêiner mais próximo que corresponda ao tipo e aos atributos; documentos devem ser selecionados explicitamente",
+	"automationCollectionTargetChangeTip": "Alterar esta opção preserva as entradas e os campos existentes; confira os novos resultados na prévia",
 	"automationCollectionRuleChangeTip": "Alterar condições, desativar ou excluir uma regra preserva as entradas coletadas e os valores dos campos",
 	"automationNotifySuccess": "Notificar em caso de sucesso",
 	"automationResultRule": "Automação “${1}” concluída: ${2}",

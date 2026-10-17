@@ -1,7 +1,8 @@
 package apicontract
 
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
-// spec 为 1、2 或 3；模板赋值至少使用 2，块子类型至少使用 3；旧读取器拒绝新版本，防止配置静默丢失。
+// spec 为 1 至 4；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4。
+// 旧读取器拒绝新版本，防止配置静默丢失。
 // 缺省配置不会触发自动化，既有版本的主类型匹配含义不变。
 // 普通条目新增、字段编辑及对应 API 会触发启用的规则，
 // 导入、同步、历史恢复和撤销重放不会再次触发，自动化之间不串联。
@@ -30,10 +31,14 @@ type AVAutomationRule struct {
 
 // AVAutomationBlockSource 监听范围取笔记本与文档的并集，文档包含子文档；范围至少选择一项。
 // 类型组取或关系；标签和属性组各自通过 tagMatch、attributeMatch 选择 and（缺省）或 or（至少 spec 3）。
-// 各条件组之间取与关系，空组不限制；标签精确匹配，不递归匹配父容器。
+// 各条件组之间取与关系，空组不限制；标签精确匹配，全部标签必须出现在同一个来源块中。
 // types 为空不限制类型；主类型匹配其全部子类型，类型之间取或关系。
 // spec 3 支持 h:h1 至 h:h6、l:u/o/t、i:u/o/t 和 callout:类型名；提示块类型区分大小写，允许自定义名称。
 // 列表项首段的标签默认归属列表项；显式选择段落类型时可匹配该段落。
+// tagTarget 缺省或空字符串沿用默认行为；block 收集直接包含标签的块，不做列表项提升。
+// container 从标签来源块向上选择最近的满足类型及属性条件的容器，按块 ID 去重。
+// 文档仅在 types 显式包含 d 时作为目标容器；无标签条件时 tagTarget 不改变类型及属性筛选结果。
+// 切换收集对象不转换或移出已有条目；预览、收集及后续原文失配移出使用相同的匹配逻辑。
 // 仅从不匹配变为匹配时收集，原条目不会重置；失配时移出本功能创建的条目，保留源块。
 // 其他启用的收集规则仍匹配时保留条目；停用或删除创建规则会保留既有条目。
 // 再次匹配创建新条目并初始化字段，不恢复移出条目的字段；撤销重做仍恢复原事务快照。
@@ -45,6 +50,7 @@ type AVAutomationBlockSource struct {
 	Tags           []string                      `json:"tags,omitempty" api:"optional"`
 	Attributes     []*AVAutomationBlockAttribute `json:"attributes,omitempty" api:"optional"`
 	TagMatch       string                        `json:"tagMatch,omitempty" api:"optional,enum=|and|or"`
+	TagTarget      string                        `json:"tagTarget,omitempty" api:"optional,enum=|block|container"`
 	AttributeMatch string                        `json:"attributeMatch,omitempty" api:"optional,enum=|and|or"`
 }
 

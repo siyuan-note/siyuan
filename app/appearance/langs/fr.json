@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Objet à collecter",
+	"automationCollectionTargetBlock": "Bloc contenant l’étiquette",
+	"automationCollectionTargetContainer": "Bloc conteneur",
+	"automationCollectionTargetDefaultTip": "Avec des conditions d’étiquettes, le premier paragraphe d’un élément de liste appartient à cet élément ; les autres blocs vérifient leurs propres étiquettes",
+	"automationCollectionTargetBlockTip": "Avec des conditions d’étiquettes, collecter le bloc contenant l’étiquette selon son type et ses attributs",
+	"automationCollectionTargetContainerTip": "Avec des conditions d’étiquettes, collecter le conteneur le plus proche correspondant au type et aux attributs ; les documents doivent être sélectionnés explicitement",
+	"automationCollectionTargetChangeTip": "Changer cette option conserve les entrées et champs existants ; vérifiez les nouveaux résultats dans l’aperçu",
 	"automationCollectionRuleChangeTip": "Modifier les conditions, désactiver ou supprimer une règle conserve les entrées collectées et les valeurs de leurs champs",
 	"automationNotifySuccess": "Notifier en cas de succès",
 	"automationResultRule": "Automatisation « ${1} » terminée : ${2}",

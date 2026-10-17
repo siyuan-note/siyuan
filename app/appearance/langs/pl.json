@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Obiekt zbierania",
+	"automationCollectionTargetBlock": "Blok zawierający tag",
+	"automationCollectionTargetContainer": "Blok kontenera",
+	"automationCollectionTargetDefaultTip": "Przy warunkach tagów pierwszy akapit elementu listy należy do tego elementu; pozostałe bloki sprawdzają własne tagi",
+	"automationCollectionTargetBlockTip": "Przy warunkach tagów zbieraj blok zawierający tag według jego typu i atrybutów",
+	"automationCollectionTargetContainerTip": "Przy warunkach tagów zbieraj najbliższy kontener zgodny z typem i atrybutami; dokumenty wymagają jawnego wyboru",
+	"automationCollectionTargetChangeTip": "Zmiana zachowuje istniejące wpisy i pola; sprawdź nowe wyniki w podglądzie",
 	"automationCollectionRuleChangeTip": "Zmiana warunków, wyłączenie lub usunięcie reguły zachowuje zebrane wpisy i wartości ich pól",
 	"automationNotifySuccess": "Powiadamiaj po pomyślnym wykonaniu",
 	"automationResultRule": "Automatyzacja „${1}” zakończona: ${2}",

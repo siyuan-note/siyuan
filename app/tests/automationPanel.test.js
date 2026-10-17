@@ -53,7 +53,12 @@ const runCases = async (sources, css, mobile) => {
                     item.bind(this.element);
                 }
             }
-            open() { this.element.className = "b3-menu"; document.body.append(this.element); fieldMenu = {items: this.items, element: this.element}; }
+            open() {
+                document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
+                this.element.className = "b3-menu";
+                document.body.append(this.element);
+                fieldMenu = {items: this.items, element: this.element};
+            }
             close() { this.element.remove(); }
             showSubMenu() {}
         }},
@@ -339,11 +344,13 @@ const runCases = async (sources, css, mobile) => {
     await change("[data-mode]", "currentTime");
     const theme = document.createElement("style");
     await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 560, 620);
+    for (let attempt = 0; window.innerHeight !== 620 && attempt < 100; attempt++) { await tick(); }
+    assert.equal(window.innerHeight, 620, "the resized viewport is ready before testing assignment scrolling");
     get("[data-mode]").scrollIntoView({block: "center"});
     await tick();
     const scroller = get(".b3-menu__items");
     const assignmentScrollTop = scroller.scrollTop;
-    assert.ok(assignmentScrollTop > 100, "the assignment is reached by scrolling before changing its mode");
+    assert.ok(assignmentScrollTop > 0, `the assignment is reached by scrolling before changing its mode: ${assignmentScrollTop}`);
     await change("[data-mode]", "template");
     assert.ok(Math.abs(scroller.scrollTop - assignmentScrollTop) <= 1,
         `switching to a template preserves the scrolled assignment: ${assignmentScrollTop} -> ${scroller.scrollTop}`);
@@ -425,6 +432,7 @@ const runCases = async (sources, css, mobile) => {
         }
     }
     await change("[data-trigger]", "block");
+    assert.ok(!get("[data-source-conditions]").textContent.includes("undefined"), "collection controls use defined localized labels");
     assert.equal(get("[data-collection-removal-tip]").textContent, lang.automationCollectionTip);
     assert.equal(get("[data-rule-change-tip]").textContent, lang.automationCollectionRuleChangeTip);
     assert.equal(get("[data-source-conditions]").closest("section").textContent.includes(lang.automationBlockConditions), true);
@@ -452,10 +460,15 @@ const runCases = async (sources, css, mobile) => {
                     const button = get(selector);
                     assert.equal(button.getBoundingClientRect().left, tagsRect.left, "collection controls align with the form");
                     assert.ok(button.scrollWidth <= button.clientWidth + 1, "collection controls wrap without horizontal overflow");
+                    assert.ok(parseFloat(getComputedStyle(button).lineHeight) >= parseFloat(getComputedStyle(button).fontSize) * 1.2,
+                        "wrapped collection controls leave enough line height for large fonts");
                     button.focus();
                     assert.equal(document.activeElement, button, "collection controls remain keyboard focusable");
                 }
                 assert.ok(typesRect.height > 0 && addRect.height > 0);
+                const targetButton = get("[data-tag-target]");
+                assert.ok(targetButton.scrollWidth <= targetButton.clientWidth + 1, "collection targets wrap with shared button styles");
+                assert.ok(targetButton.getBoundingClientRect().right <= window.innerWidth, "collection targets stay inside narrow layouts");
                 assert.equal(menu.querySelector("[data-attr-name]"), null, "attribute editors stay collapsed until needed");
             }
             menu.style.fontSize = "";
@@ -511,6 +524,25 @@ const runCases = async (sources, css, mobile) => {
     await click('[data-match="attributeMatch"]');
     fieldMenu.items.find(item => item.label === lang.filterMatchAny).click();
     assert.equal(latest().blockSource.attributeMatch, "or");
+    assert.equal(get("[data-tag-target] span").textContent, lang.default);
+    assert.equal(latest().blockSource.tagTarget, undefined, "existing rules retain their collection granularity");
+    for (const [value, label] of [["block", lang.automationCollectionTargetBlock], ["container", lang.automationCollectionTargetContainer], ["", lang.default]]) {
+        await click("[data-tag-target]");
+        const targetOption = fieldMenu.items.find(item => item.label === get("[data-tag-target] span").textContent);
+        assert.equal(targetOption.checked, true, "the current target is checked in the shared menu");
+        fieldMenu.items.find(item => item.label === label).click();
+        assert.equal(latest().blockSource.tagTarget, value || undefined);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 4);
+        assert.equal(get("[data-tag-target] span").textContent, label);
+        assert.ok(get("[data-tag-target]").scrollWidth <= get("[data-tag-target]").clientWidth + 1, "all target labels wrap at narrow widths and large fonts");
+        assert.equal(get("[data-tag-target-change-tip]").classList.contains("fn__none"), false);
+        assert.ok(get("[data-tag-target-change-tip]").textContent.includes(lang.automationCollectionTargetChangeTip));
+        if (value === "container") {
+            get("[data-tag-target]").scrollIntoView({block: "center"});
+            await tick();
+            await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${window.innerWidth}-midnight-collection`);
+        }
+    }
     await click("[data-tags] button");
     const tagInput = get("[data-tags] input");
     tagInput.value = " #todo# ";

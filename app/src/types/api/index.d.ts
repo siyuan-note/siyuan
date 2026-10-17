@@ -256,9 +256,9 @@ export type AVAutomationBlockAttribute = { "name": string; "operator": "equals" 
 
 export type AVAutomationBlockAttributeInput = { "name": string; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
 export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
@@ -7814,9 +7814,12 @@ export interface APIPOSTRoutes {
     /**
      * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1、2 或 3，所有视图共享数据库级规则。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 4，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
      * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
+     * spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
+     * 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。
+     * 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。
      * 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
      * 手动收集、无变化、撤销重放和失败回滚不发送成功通知。
      * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。

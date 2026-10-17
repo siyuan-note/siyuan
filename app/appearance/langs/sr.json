@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Објекат прикупљања",
+	"automationCollectionTargetBlock": "Блок који садржи ознаку",
+	"automationCollectionTargetContainer": "Контејнерски блок",
+	"automationCollectionTargetDefaultTip": "Када постоје услови ознака, први пасус ставке листе припада тој ставци; остали блокови проверавају сопствене ознаке",
+	"automationCollectionTargetBlockTip": "Када постоје услови ознака, прикупљај блок који садржи ознаку према његовом типу и атрибутима",
+	"automationCollectionTargetContainerTip": "Када постоје услови ознака, прикупљај најближи контејнер који одговара типу и атрибутима; документи морају бити изричито изабрани",
+	"automationCollectionTargetChangeTip": "Промена чува постојеће ставке и поља; проверите нове резултате у прегледу",
 	"automationCollectionRuleChangeTip": "Промена услова, искључивање или брисање правила задржава прикупљене ставке и вредности њихових поља",
 	"automationNotifySuccess": "Обавести о успешном извршавању",
 	"automationResultRule": "Аутоматизација „${1}“ је завршена: ${2}",

@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Objekt zbierania",
+	"automationCollectionTargetBlock": "Blok obsahujúci značku",
+	"automationCollectionTargetContainer": "Kontajnerový blok",
+	"automationCollectionTargetDefaultTip": "Pri podmienkach značiek patrí prvý odsek položky zoznamu k položke; ostatné bloky porovnávajú vlastné značky",
+	"automationCollectionTargetBlockTip": "Pri podmienkach značiek zbierať blok obsahujúci značku podľa jeho typu a atribútov",
+	"automationCollectionTargetContainerTip": "Pri podmienkach značiek zbierať najbližší kontajner zodpovedajúci typu a atribútom; dokumenty treba výslovne vybrať",
+	"automationCollectionTargetChangeTip": "Zmena zachová existujúce položky a polia; nové výsledky skontrolujte v náhľade",
 	"automationCollectionRuleChangeTip": "Zmena podmienok, vypnutie alebo odstránenie pravidla zachová zhromaždené položky a hodnoty ich polí",
 	"automationNotifySuccess": "Upozorniť pri úspechu",
 	"automationResultRule": "Automatizácia „${1}“ dokončená: ${2}",

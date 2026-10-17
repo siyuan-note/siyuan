@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Objek pengumpulan",
+	"automationCollectionTargetBlock": "Blok yang berisi tag",
+	"automationCollectionTargetContainer": "Blok wadah",
+	"automationCollectionTargetDefaultTip": "Dengan kondisi tag, paragraf pertama item daftar menjadi bagian item tersebut; blok lain mencocokkan tag masing-masing",
+	"automationCollectionTargetBlockTip": "Dengan kondisi tag, kumpulkan blok yang berisi tag berdasarkan jenis dan atributnya",
+	"automationCollectionTargetContainerTip": "Dengan kondisi tag, kumpulkan wadah terdekat yang sesuai dengan jenis dan atribut; dokumen harus dipilih secara eksplisit",
+	"automationCollectionTargetChangeTip": "Perubahan mempertahankan entri dan kolom yang ada; periksa hasil baru melalui pratinjau",
 	"automationCollectionRuleChangeTip": "Mengubah kondisi, menonaktifkan, atau menghapus aturan mempertahankan entri yang dikumpulkan dan nilai bidangnya",
 	"automationNotifySuccess": "Beri tahu saat berhasil",
 	"automationResultRule": "Otomatisasi “${1}” selesai: ${2}",

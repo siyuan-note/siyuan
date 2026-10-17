@@ -252,4 +252,90 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	if stored.GetBlockValueByBoundID(tree.ID) != nil {
 		t.Fatal("OR tag group bypassed an unmatched attribute group")
 	}
+	collection.BlockSource = &av.AutomationBlockSource{DocumentIDs: []string{tree.ID}, Types: []string{"b"},
+		Tags: []string{"collect"}, TagTarget: "container"}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 4, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	response := callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+	requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+	var readBack struct {
+		Data struct {
+			AV struct{ Automations av.AutomationConfig }
+		}
+	}
+	if err = json.Unmarshal(response.Body.Bytes(), &readBack); err != nil ||
+		readBack.Data.AV.Automations.Spec != 4 || len(readBack.Data.AV.Automations.Rules) != 1 ||
+		readBack.Data.AV.Automations.Rules[0].BlockSource.TagTarget != "container" {
+		t.Fatalf("tag target contract round trip: %s %v", response.Body.String(), err)
+	}
+	call("/api/block/appendBlock", map[string]any{"parentID": tree.ID, "dataType": "markdown", "data": "> First #collect#\n>\n> Second #collect#"}, appendBlock)
+	stored, _ = av.ParseAttributeView(database.ID)
+	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
+	if err != nil || len(preview.Blocks) != 1 || stored.GetBlockValueByBoundID(preview.Blocks[0].ID) == nil {
+		t.Fatalf("container preview and collection disagree: %+v %v", preview, err)
+	}
+	quoteID := preview.Blocks[0].ID
+	sourceTree, err := model.LoadTreeByBlockID(quoteID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	quote := treenode.GetNodeInTree(sourceTree, quoteID)
+	if quote == nil || quote.Type != ast.NodeBlockquote {
+		t.Fatal("collected a descendant instead of the quote")
+	}
+	var paragraphs []string
+	for child := quote.FirstChild; child != nil; child = child.Next {
+		if child.Type == ast.NodeParagraph {
+			paragraphs = append(paragraphs, child.ID)
+		}
+	}
+	if len(paragraphs) != 2 {
+		t.Fatalf("quote fixture paragraphs: %v", paragraphs)
+	}
+	collection.BlockSource.TagTarget, collection.BlockSource.Types = "block", []string{"p"}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 4, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(quoteID) == nil {
+		t.Fatal("changing target converted the existing quote entry")
+	}
+	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
+	if err != nil || len(preview.Blocks) != 2 {
+		t.Fatalf("direct target preview: %+v %v", preview, err)
+	}
+	for _, block := range preview.Blocks {
+		if block.ID != paragraphs[0] && block.ID != paragraphs[1] {
+			t.Fatal("direct preview returned a container")
+		}
+	}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "collectAttrViewBlocks", AvID: database.ID,
+		Data: map[string]any{"ruleID": collection.ID, "blockIDs": paragraphs}}}); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ = av.ParseAttributeView(database.ID)
+	for _, id := range paragraphs {
+		if stored.GetBlockValueByBoundID(id) == nil {
+			t.Fatal("explicit collection disagreed with direct preview")
+		}
+	}
+	collection.BlockSource.TagTarget, collection.BlockSource.Types = "container", []string{"b"}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 4, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	for index, id := range paragraphs {
+		call("/api/block/updateBlock", map[string]any{"id": id, "dataType": "markdown", "data": "Without tag"}, updateBlock)
+		stored, _ = av.ParseAttributeView(database.ID)
+		if (stored.GetBlockValueByBoundID(quoteID) != nil) != (index == 0) {
+			t.Fatal("container must remain until its last matching source disappears")
+		}
+	}
+	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
+	if err != nil || len(preview.Blocks) != 0 {
+		t.Fatalf("unmatched container preview: %+v %v", preview, err)
+	}
 }

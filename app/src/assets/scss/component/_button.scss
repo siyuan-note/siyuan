@@ -53,6 +53,12 @@
     padding: 2px 8px;
   }
 
+  &--wrap {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: max(20px, 1.4em);
+  }
+
   &--big {
     min-width: 214px;
     background: var(--b3-theme-secondary);

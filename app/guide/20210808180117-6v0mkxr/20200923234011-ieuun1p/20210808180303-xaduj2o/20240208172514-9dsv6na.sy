@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261017204817"
 	},
 	"Children": [
 		{
@@ -4546,6 +4546,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Choose the Block matches conditions trigger and select notebooks or documents in Watch scope (includes subdocuments). Notebook and document scopes are combined. Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them. Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction. Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
+				}
+			]
+		},
+		{
+			"ID": "20261017204817-jfdo45b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017204817-jfdo45b",
+				"updated": "20261017204817"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The Collect menu beside the tag conditions offers Default, Block containing the tag, and Container block. Default preserves existing behavior, including treating a list item’s first paragraph as part of that item. Block containing the tag filters and collects the actual tagged block by its type and attributes. Container block collects the nearest container meeting the selected type and attribute conditions, deduplicating by block ID; documents are eligible only when explicitly selected. All required tags must occur in the same source block, rather than being combined across children. With no tag conditions, this option has no effect. Preview shows the final collection targets. Changing this option preserves existing entries and fields without converting their bound blocks. The two explicit modes require automation format 4; older formats remain readable, and older clients reject format 4 without rewriting the database."
 				}
 			]
 		},

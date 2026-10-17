@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "संग्रह लक्ष्य",
+	"automationCollectionTargetBlock": "टैग वाला ब्लॉक",
+	"automationCollectionTargetContainer": "कंटेनर ब्लॉक",
+	"automationCollectionTargetDefaultTip": "टैग की शर्तें होने पर सूची आइटम का पहला अनुच्छेद उसी आइटम का भाग माना जाता है; अन्य ब्लॉक अपने टैग से मिलान करते हैं",
+	"automationCollectionTargetBlockTip": "टैग की शर्तें होने पर टैग वाले ब्लॉक को उसके प्रकार और विशेषताओं के अनुसार संग्रहित करें",
+	"automationCollectionTargetContainerTip": "टैग की शर्तें होने पर प्रकार और विशेषताओं से मेल खाने वाला निकटतम कंटेनर संग्रहित करें; दस्तावेज़ स्पष्ट रूप से चुनने होंगे",
+	"automationCollectionTargetChangeTip": "यह विकल्प बदलने पर मौजूदा प्रविष्टियाँ और फ़ील्ड सुरक्षित रहते हैं; नए परिणाम पूर्वावलोकन में देखें",
 	"automationCollectionRuleChangeTip": "शर्तें बदलने, नियम बंद करने या हटाने पर एकत्रित प्रविष्टियाँ और उनके फ़ील्ड मान बने रहते हैं",
 	"automationNotifySuccess": "सफल होने पर सूचना दें",
 	"automationResultRule": "स्वचालन “${1}” पूरा हुआ: ${2}",

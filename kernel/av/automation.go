@@ -35,6 +35,7 @@ type AutomationBlockSource struct {
 	Tags           []string                    `json:"tags,omitempty"`
 	Attributes     []*AutomationBlockAttribute `json:"attributes,omitempty"`
 	TagMatch       string                      `json:"tagMatch,omitempty"`
+	TagTarget      string                      `json:"tagTarget,omitempty"`
 	AttributeMatch string                      `json:"attributeMatch,omitempty"`
 }
 
@@ -67,6 +68,9 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		if rule.BlockSource.TagTarget != "" {
+			return 4
+		}
 		if rule.BlockSource.TagMatch == "or" || rule.BlockSource.AttributeMatch == "or" {
 			return 3
 		}
@@ -93,7 +97,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 3 {
+	if config.Spec < 1 || config.Spec > 4 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "收集對象",
+	"automationCollectionTargetBlock": "標籤所在區塊",
+	"automationCollectionTargetContainer": "容器區塊",
+	"automationCollectionTargetDefaultTip": "有標籤條件時，清單項目首段預設歸屬清單項目，其他區塊比對自身標籤",
+	"automationCollectionTargetBlockTip": "有標籤條件時，依標籤所在區塊的類型與屬性篩選並收集",
+	"automationCollectionTargetContainerTip": "有標籤條件時，收集最近且符合類型與屬性條件的容器；文件需明確選取",
+	"automationCollectionTargetChangeTip": "切換不會轉換既有項目或修改其欄位，可透過預覽確認新的收集結果",
 	"automationCollectionRuleChangeTip": "修改條件、停用或刪除規則不會清理已收集的項目，也不會重設欄位",
 	"automationNotifySuccess": "執行成功時通知",
 	"automationResultRule": "自動化「${1}」已執行：${2}",

@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Objeto de recopilación",
+	"automationCollectionTargetBlock": "Bloque que contiene la etiqueta",
+	"automationCollectionTargetContainer": "Bloque contenedor",
+	"automationCollectionTargetDefaultTip": "Con condiciones de etiquetas, el primer párrafo de un elemento de lista pertenece al elemento; los demás bloques comparan sus propias etiquetas",
+	"automationCollectionTargetBlockTip": "Con condiciones de etiquetas, recopilar el bloque que contiene la etiqueta según su tipo y atributos",
+	"automationCollectionTargetContainerTip": "Con condiciones de etiquetas, recopilar el contenedor más cercano que cumpla el tipo y los atributos; los documentos deben seleccionarse explícitamente",
+	"automationCollectionTargetChangeTip": "Cambiar esta opción conserva las entradas y los campos existentes; compruebe los nuevos resultados en la vista previa",
 	"automationCollectionRuleChangeTip": "Cambiar condiciones, desactivar o eliminar una regla conserva las entradas recopiladas y los valores de sus campos",
 	"automationNotifySuccess": "Notificar al completarse correctamente",
 	"automationResultRule": "Automatización «${1}» completada: ${2}",

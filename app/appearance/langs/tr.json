@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Toplanacak nesne",
+	"automationCollectionTargetBlock": "Etiketi içeren blok",
+	"automationCollectionTargetContainer": "Kapsayıcı blok",
+	"automationCollectionTargetDefaultTip": "Etiket koşullarında liste öğesinin ilk paragrafı öğeye aittir; diğer bloklar kendi etiketleriyle eşleştirilir",
+	"automationCollectionTargetBlockTip": "Etiket koşullarında etiketi içeren bloğu türüne ve özniteliklerine göre topla",
+	"automationCollectionTargetContainerTip": "Etiket koşullarında tür ve öznitelik koşullarına uyan en yakın kapsayıcıyı topla; belgeler açıkça seçilmelidir",
+	"automationCollectionTargetChangeTip": "Değişiklik mevcut kayıtları ve alanları korur; yeni sonuçları önizlemede kontrol edin",
 	"automationCollectionRuleChangeTip": "Koşulları değiştirmek, bir kuralı devre dışı bırakmak veya silmek toplanan kayıtları ve alan değerlerini korur",
 	"automationNotifySuccess": "Başarıyla tamamlandığında bildir",
 	"automationResultRule": "“${1}” otomasyonu tamamlandı: ${2}",

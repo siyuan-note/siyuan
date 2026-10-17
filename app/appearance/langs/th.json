@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "เป้าหมายการรวบรวม",
+	"automationCollectionTargetBlock": "บล็อกที่มีแท็ก",
+	"automationCollectionTargetContainer": "บล็อกคอนเทนเนอร์",
+	"automationCollectionTargetDefaultTip": "เมื่อมีเงื่อนไขแท็ก ย่อหน้าแรกของรายการจะถือเป็นส่วนหนึ่งของรายการ ส่วนบล็อกอื่นจะตรวจสอบแท็กของตนเอง",
+	"automationCollectionTargetBlockTip": "เมื่อมีเงื่อนไขแท็ก ให้รวบรวมบล็อกที่มีแท็กตามประเภทและคุณลักษณะของบล็อกนั้น",
+	"automationCollectionTargetContainerTip": "เมื่อมีเงื่อนไขแท็ก ให้รวบรวมคอนเทนเนอร์ที่ใกล้ที่สุดซึ่งตรงตามประเภทและคุณลักษณะ ต้องเลือกเอกสารอย่างชัดเจน",
+	"automationCollectionTargetChangeTip": "การเปลี่ยนตัวเลือกจะคงรายการและเขตข้อมูลเดิมไว้ ตรวจสอบผลลัพธ์ใหม่ได้ในการแสดงตัวอย่าง",
 	"automationCollectionRuleChangeTip": "การเปลี่ยนเงื่อนไข ปิดใช้งาน หรือลบกฎจะเก็บรายการที่รวบรวมและค่าฟิลด์ไว้",
 	"automationNotifySuccess": "แจ้งเตือนเมื่อสำเร็จ",
 	"automationResultRule": "ระบบอัตโนมัติ “${1}” ทำงานเสร็จแล้ว: ${2}",

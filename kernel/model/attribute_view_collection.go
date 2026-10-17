@@ -51,6 +51,26 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 	if node == nil || !node.IsBlock() || !ast.IsNodeIDPattern(node.ID) || !collectionScopeMatches(source, tree) {
 		return false
 	}
+	if !collectionBlockConditionsMatch(source, node) {
+		return false
+	}
+	if len(source.Tags) == 0 {
+		return true
+	}
+	root := node
+	if source.TagTarget == "" {
+		if node.Type == ast.NodeListItem {
+			root = treenode.FirstLeafBlock(node)
+		}
+		if node.Type == ast.NodeParagraph && node.Parent != nil && node.Parent.Type == ast.NodeListItem &&
+			treenode.FirstLeafBlock(node.Parent) == node && !slices.Contains(source.Types, "p") {
+			return false
+		}
+	}
+	return collectionTagsMatch(source, root)
+}
+
+func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node) bool {
 	if len(source.Types) > 0 {
 		typ := treenode.TypeAbbr(node.Type.String())
 		matched := slices.Contains(source.Types, typ)
@@ -61,28 +81,18 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 			return false
 		}
 	}
-	if !collectionConditionsMatch(source.Attributes, source.AttributeMatch, func(attr *av.AutomationBlockAttribute) bool {
+	return collectionConditionsMatch(source.Attributes, source.AttributeMatch, func(attr *av.AutomationBlockAttribute) bool {
 		return collectionAttributeMatches(attr, node)
-	}) {
-		return false
-	}
-	if len(source.Tags) == 0 {
-		return true
-	}
-	root := node
-	if node.Type == ast.NodeListItem {
-		root = treenode.FirstLeafBlock(node)
-	}
-	if node.Type == ast.NodeParagraph && node.Parent != nil && node.Parent.Type == ast.NodeListItem &&
-		treenode.FirstLeafBlock(node.Parent) == node && !slices.Contains(source.Types, "p") {
-		return false
-	}
+	})
+}
+
+func collectionTagsMatch(source *av.AutomationBlockSource, root *ast.Node) bool {
 	if root == nil {
 		return false
 	}
 	tags := map[string]bool{}
-	if node.Type == ast.NodeDocument {
-		for tag := range strings.SplitSeq(node.IALAttr("tags"), ",") {
+	if root.Type == ast.NodeDocument {
+		for tag := range strings.SplitSeq(root.IALAttr("tags"), ",") {
 			tags[strings.Trim(strings.TrimSpace(tag), "#")] = true
 		}
 	}
@@ -101,6 +111,41 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 	return collectionConditionsMatch(source.Tags, source.TagMatch, func(tag string) bool {
 		return tags[strings.Trim(strings.TrimSpace(tag), "#")]
 	})
+}
+
+// 每个标签来源只选择最近的合格容器；整棵树共用结果，避免嵌套容器反复扫描子树。
+func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[string]bool {
+	ret := map[string]bool{}
+	if !collectionScopeMatches(source, tree) {
+		return ret
+	}
+	var containers []*ast.Node
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			if len(containers) > 0 && containers[len(containers)-1] == node {
+				containers = containers[:len(containers)-1]
+			}
+			return ast.WalkContinue
+		}
+		if !node.IsBlock() || !ast.IsNodeIDPattern(node.ID) {
+			return ast.WalkContinue
+		}
+		if source.TagTarget != "container" || len(source.Tags) == 0 {
+			if collectionBlockMatches(source, node, tree) {
+				ret[node.ID] = true
+			}
+			return ast.WalkContinue
+		}
+		if node.IsContainerBlock() && (node.Type != ast.NodeDocument || slices.Contains(source.Types, "d")) &&
+			collectionBlockConditionsMatch(source, node) {
+			containers = append(containers, node)
+		}
+		if len(containers) > 0 && collectionTagsMatch(source, node) {
+			ret[containers[len(containers)-1].ID] = true
+		}
+		return ast.WalkContinue
+	})
+	return ret
 }
 
 // 条件组为空时不限制，缺省保持全部匹配；不同条件组仍由调用方取交集。
@@ -146,7 +191,8 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		return fmt.Errorf("invalid block collection source")
 	}
 	if !slices.Contains([]string{"", "and", "or"}, source.TagMatch) ||
-		!slices.Contains([]string{"", "and", "or"}, source.AttributeMatch) {
+		!slices.Contains([]string{"", "and", "or"}, source.AttributeMatch) ||
+		!slices.Contains([]string{"", "block", "container"}, source.TagTarget) {
 		return fmt.Errorf("invalid block collection match mode")
 	}
 	for _, id := range source.NotebookIDs {
@@ -329,13 +375,8 @@ func (tx *Transaction) runAttributeViewCollections() error {
 		notifyRule                     *av.AutomationRule
 	}
 	var changes []collectionChange
-	beforeNodes, afterNodes := map[string]*ast.Node{}, map[string]*ast.Node{}
-	beforeTrees, afterTrees := map[string]*parse.Tree{}, map[string]*parse.Tree{}
-	for _, before := range state.before {
-		for blockID, node := range collectionNodes(before) {
-			beforeNodes[blockID], beforeTrees[blockID] = node, before
-		}
-	}
+	afterNodes := map[string]*ast.Node{}
+	afterTrees := map[string]*parse.Tree{}
 	for _, after := range tx.trees {
 		for blockID, node := range collectionNodes(after) {
 			afterNodes[blockID], afterTrees[blockID] = node, after
@@ -385,8 +426,22 @@ func (tx *Transaction) runAttributeViewCollections() error {
 			}
 			ReloadAttrView(id)
 		}
+		beforeMatches, afterMatches := map[*av.AutomationRule]map[string]bool{}, map[*av.AutomationRule]map[string]bool{}
+		for _, rule := range rules {
+			beforeMatches[rule], afterMatches[rule] = map[string]bool{}, map[string]bool{}
+			for _, tree := range state.before {
+				for id := range collectionMatches(rule.BlockSource, tree) {
+					beforeMatches[rule][id] = true
+				}
+			}
+			for _, tree := range tx.trees {
+				for id := range collectionMatches(rule.BlockSource, tree) {
+					afterMatches[rule][id] = true
+				}
+			}
+		}
 		for _, blockID := range blockIDs {
-			node, tree := afterNodes[blockID], afterTrees[blockID]
+			tree := afterTrees[blockID]
 			if !IsSameCryptoBoundary(boxID, tree.Box) {
 				continue
 			}
@@ -395,8 +450,8 @@ func (tx *Transaction) runAttributeViewCollections() error {
 			var ownerRule *av.AutomationRule
 			row := view.GetBlockValueByBoundID(blockID)
 			for _, rule := range rules {
-				before := collectionBlockMatches(rule.BlockSource, beforeNodes[blockID], beforeTrees[blockID])
-				after := collectionBlockMatches(rule.BlockSource, node, tree)
+				before := beforeMatches[rule][blockID]
+				after := afterMatches[rule][blockID]
 				matching = matching || after
 				previouslyMatching = previouslyMatching || before
 				if after && (!before || slices.Contains(state.requested[id][rule.ID], blockID)) && entering == nil {
@@ -528,13 +583,14 @@ func PreviewAttributeViewCollection(avID, ruleID string, page int) (*apicontract
 			return nil, loadErr
 		}
 		nodes := collectionNodes(tree)
+		matches := collectionMatches(rule.BlockSource, tree)
 		ids := []string{}
 		for id := range nodes {
 			ids = append(ids, id)
 		}
 		sort.Strings(ids)
 		for _, id := range ids {
-			if !collectionBlockMatches(rule.BlockSource, nodes[id], tree) {
+			if !matches[id] {
 				continue
 			}
 			if skipped < (page-1)*size {
@@ -582,6 +638,7 @@ func (tx *Transaction) doCollectAttrViewBlocks(op *Operation) *TxErr {
 		return fail(err)
 	}
 	state := tx.collectionState()
+	matchesByTree := map[string]map[string]bool{}
 	if state.requested[op.AvID] == nil {
 		state.requested[op.AvID] = map[string][]string{}
 	}
@@ -594,7 +651,12 @@ func (tx *Transaction) doCollectAttrViewBlocks(op *Operation) *TxErr {
 		if loadErr != nil {
 			return fail(loadErr)
 		}
-		if collectionBlockMatches(rule.BlockSource, treenode.GetNodeInTree(tree, id), tree) {
+		matches := matchesByTree[tree.ID]
+		if matches == nil {
+			matches = collectionMatches(rule.BlockSource, tree)
+			matchesByTree[tree.ID] = matches
+		}
+		if matches[id] {
 			state.requested[op.AvID][rule.ID] = append(state.requested[op.AvID][rule.ID], id)
 		}
 	}

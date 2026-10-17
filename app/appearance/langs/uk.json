@@ -1,4 +1,11 @@
 {
+	"automationCollectionTarget": "Об’єкт збирання",
+	"automationCollectionTargetBlock": "Блок із тегом",
+	"automationCollectionTargetContainer": "Блок-контейнер",
+	"automationCollectionTargetDefaultTip": "За умовами тегів перший абзац елемента списку належить цьому елементу; інші блоки перевіряють власні теги",
+	"automationCollectionTargetBlockTip": "За умовами тегів збирати блок із тегом відповідно до його типу й атрибутів",
+	"automationCollectionTargetContainerTip": "За умовами тегів збирати найближчий контейнер, що відповідає типу й атрибутам; документи потрібно вибирати явно",
+	"automationCollectionTargetChangeTip": "Зміна зберігає наявні записи й поля; перевірте нові результати в попередньому перегляді",
 	"automationCollectionRuleChangeTip": "Зміна умов, вимкнення або видалення правила зберігає зібрані записи та значення їхніх полів",
 	"automationNotifySuccess": "Сповіщати про успішне виконання",
 	"automationResultRule": "Автоматизацію «${1}» виконано: ${2}",

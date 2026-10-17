@@ -112,7 +112,7 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 4
+	source.Automations.Spec = 5
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")
@@ -134,7 +134,7 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, spec := range []int{1, 2, 3} {
+	for _, spec := range []int{1, 2, 3, 4} {
 		view, err := ParseAttributeViewData("20260921000000-layouts", data)
 		if err != nil {
 			t.Fatal(err)
@@ -148,15 +148,23 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 		rule.BlockSource.Types = []string{"l:t"}
 		raw, _ = json.Marshal(view)
 		_, err = ParseAttributeViewData(view.ID, raw)
-		if (err == nil) != (spec == 3) {
+		if (err == nil) != (spec >= 3) {
 			t.Fatalf("subtype spec %d: %v", spec, err)
 		}
 		rule.BlockSource.Types = []string{"l"}
 		rule.BlockSource.TagMatch = "or"
 		raw, _ = json.Marshal(view)
 		_, err = ParseAttributeViewData(view.ID, raw)
-		if (err == nil) != (spec == 3) {
+		if (err == nil) != (spec >= 3) {
 			t.Fatalf("OR spec %d: %v", spec, err)
+		}
+		for _, target := range []string{"block", "container"} {
+			rule.BlockSource.TagTarget = target
+			raw, _ = json.Marshal(view)
+			_, err = ParseAttributeViewData(view.ID, raw)
+			if (err == nil) != (spec == 4) {
+				t.Fatalf("tag target %s spec %d: %v", target, spec, err)
+			}
 		}
 	}
 }

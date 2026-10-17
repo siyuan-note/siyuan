@@ -2094,7 +2094,7 @@
 	"dataRepoKey": "Clé de référentiel de données",
 	"dataRepoPurge": "Purger le référentiel de données local",
 	"dataRepoPurgeTip": "Purger tous les instantanés non référencés et les objets de données associés",
-	"dataRepoPurgeConfirm": "La purge du référentiel de données supprimera complètement tous les instantanés non référencés et les objets de données associés, êtes-vous sûr de purger ?",
+	"dataRepoPurgeConfirm": "Tous les instantanés historiques locaux non référencés et les objets de données associés seront définitivement supprimés. Les instantanés conservés par des références, tels que le dernier instantané, la base de synchronisation et les instantanés marqués manuellement, seront préservés.<br><br>La purge manuelle ne suit pas les paramètres de purge automatique concernant la durée de conservation ou le nombre d'instantanés conservés par jour. Les instantanés locaux supprimés ne pourront plus servir à restaurer des données historiques.<br><br>Voulez-vous vraiment effectuer la purge ?",
 	"purge": "Purger",
 	"plsChoose": "Veuillez d'abord choisir",
 	"freeSub": "Abonnement d'essai gratuit",

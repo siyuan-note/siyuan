@@ -2094,7 +2094,7 @@
 	"dataRepoKey": "Ključ riznice podataka",
 	"dataRepoPurge": "Čišćenje lokalne riznice podataka",
 	"dataRepoPurgeTip": "Briše sve snimke na koje ništa ne upućuje i povezane objekte podataka",
-	"dataRepoPurgeConfirm": "Čišćenje riznice podataka trajno briše sve snimke na koje ništa ne upućuje i povezane objekte podataka. Očistiti?",
+	"dataRepoPurgeConfirm": "Svi lokalni istorijski snimci na koje ništa ne upućuje i povezani objekti podataka biće trajno obrisani. Snimci sačuvani putem referenci, kao što su najnoviji snimak, osnova sinhronizacije i ručno označeni snimci, biće zadržani.<br><br>Ručno čišćenje ne prati postavke automatskog čišćenja za broj dana čuvanja ili broj snimaka koji se čuvaju dnevno. Obrisani lokalni snimci više se ne mogu koristiti za vraćanje istorijskih podataka.<br><br>Da li ste sigurni da želite da izvršite čišćenje?",
 	"purge": "Očisti",
 	"plsChoose": "Prvo izaberi",
 	"freeSub": "Besplatna probna pretplata",

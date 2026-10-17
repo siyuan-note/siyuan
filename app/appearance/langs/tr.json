@@ -2094,7 +2094,7 @@
 	"dataRepoKey": "Veri deposu anahtarı",
 	"dataRepoPurge": "Yerel veri deposunu temizle",
 	"dataRepoPurgeTip": "Referanssız tüm anlık görüntüleri ve ilgili veri nesnelerini sil",
-	"dataRepoPurgeConfirm": "Veri deposu temizliği, tüm referanssız anlık görüntüleri ve veri nesnelerini kalıcı olarak siler. Emin misin?",
+	"dataRepoPurgeConfirm": "Referanssız tüm yerel geçmiş anlık görüntüler ve ilgili veri nesneleri kalıcı olarak silinecektir. En son anlık görüntü, senkronizasyon temeli ve elle etiketlenmiş anlık görüntüler gibi referanslarla korunan anlık görüntüler saklanacaktır.<br><br>Elle temizleme, otomatik temizlemenin saklama süresi veya günlük saklanacak anlık görüntü sayısı ayarlarını dikkate almaz. Silinen yerel anlık görüntüler artık geçmiş verileri geri yüklemek için kullanılamaz.<br><br>Temizlemek istediğine emin misin?",
 	"purge": "Temizle",
 	"plsChoose": "Lütfen önce seç",
 	"freeSub": "Ücretsiz deneme aboneliği",

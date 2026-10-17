@@ -2094,7 +2094,7 @@
 	"dataRepoKey": "Kunci repositori data",
 	"dataRepoPurge": "Pembersihan repositori data lokal",
 	"dataRepoPurgeTip": "Hapus semua snapshot yang tidak dirujuk dan objek data terkait",
-	"dataRepoPurgeConfirm": "Membersihkan repositori data akan menghapus semua snapshot yang tidak dirujuk dan objek data terkait, apakah Anda yakin ingin membersihkan?",
+	"dataRepoPurgeConfirm": "Semua snapshot historis lokal yang tidak dirujuk dan objek data terkait akan dihapus secara permanen. Snapshot yang dipertahankan oleh referensi, seperti snapshot terbaru, dasar sinkronisasi, dan snapshot yang diberi tag secara manual, akan tetap disimpan.<br><br>Pembersihan manual tidak mengikuti pengaturan pembersihan otomatis untuk jumlah hari retensi atau jumlah snapshot yang disimpan per hari. Snapshot lokal yang telah dihapus tidak dapat lagi digunakan untuk memulihkan data historis.<br><br>Apakah Anda yakin ingin melakukan pembersihan?",
 	"purge": "Bersihkan",
 	"plsChoose": "Silakan pilih dulu",
 	"freeSub": "Langganan Uji Coba Gratis",

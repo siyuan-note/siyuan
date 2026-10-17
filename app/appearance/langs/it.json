@@ -2094,7 +2094,7 @@
 	"dataRepoKey": "Chiave del repository dati",
 	"dataRepoPurge": "Pulizia repository dati locale",
 	"dataRepoPurgeTip": "Elimina tutti gli snapshot non referenziati e gli oggetti dati correlati",
-	"dataRepoPurgeConfirm": "La pulizia del repository dei dati eliminerà completamente tutti gli snapshot non referenziati e gli oggetti dati correlati, sei sicuro di voler pulire?",
+	"dataRepoPurgeConfirm": "Tutti gli snapshot storici locali non referenziati e gli oggetti dati correlati verranno eliminati definitivamente. Gli snapshot conservati tramite riferimenti, come lo snapshot più recente, la base di sincronizzazione e gli snapshot contrassegnati manualmente, verranno mantenuti.<br><br>La pulizia manuale non segue le impostazioni di pulizia automatica relative ai giorni di conservazione o al numero di snapshot conservati al giorno. Gli snapshot locali eliminati non potranno più essere utilizzati per ripristinare dati storici.<br><br>Vuoi davvero eseguire la pulizia?",
 	"purge": "Pulisci",
 	"plsChoose": "Si prega di scegliere prima",
 	"freeSub": "Prova gratuita",

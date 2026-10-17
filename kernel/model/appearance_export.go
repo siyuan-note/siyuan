@@ -41,7 +41,7 @@ func copyExportAppearance(savePath, theme, icon string) error {
 				return fmt.Errorf("invalid appearance package [%s/%s]", kind, name)
 			}
 			// 解析包目录本身的符号链接，使导出保留完整资源而不携带本机路径。
-			from, err := filepath.EvalSymlinks(from)
+			from, err := util.ResolveRealPath(from)
 			if err != nil {
 				return err
 			}

@@ -1167,8 +1167,8 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 	}
 	if assetDirIndex > 0 {
 		notebookRoot := filepath.Join(util.DataDir, parts[0])
-		resolvedDataDir, dataEvalErr := ResolveRealPath(util.DataDir)
-		resolvedNotebookRoot, notebookEvalErr := ResolveRealPath(notebookRoot)
+		resolvedDataDir, dataEvalErr := util.ResolveRealPath(util.DataDir)
+		resolvedNotebookRoot, notebookEvalErr := util.ResolveRealPath(notebookRoot)
 		if dataEvalErr != nil || notebookEvalErr != nil ||
 			!gulu.File.IsSubPath(resolvedDataDir, resolvedNotebookRoot) ||
 			!gulu.File.IsSubPath(resolvedNotebookRoot, resolvedRoot) {

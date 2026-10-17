@@ -33,7 +33,7 @@ func ResolveAssetPathWithMissingLeaf(absPath string) (string, error) {
 	current := filepath.Clean(absPath)
 	var missing []string
 	for {
-		resolved, err := ResolveRealPath(current)
+		resolved, err := util.ResolveRealPath(current)
 		if err == nil {
 			for _, m := range slices.Backward(missing) {
 				resolved = filepath.Join(resolved, m)
@@ -105,8 +105,8 @@ func deferredAssetPathFromFiles(relativePath, boxID string, includeEncrypted boo
 			}
 			root, rootErr := ResolveAssetPathWithMissingLeaf(filepath.Join(util.DataDir, resolvedBoxID, "assets"))
 			resolved, resolveErr := ResolveAssetPathWithMissingLeaf(absPath)
-			notebookRoot, notebookErr := ResolveRealPath(filepath.Join(util.DataDir, resolvedBoxID))
-			dataRoot, dataErr := ResolveRealPath(util.DataDir)
+			notebookRoot, notebookErr := util.ResolveRealPath(filepath.Join(util.DataDir, resolvedBoxID))
+			dataRoot, dataErr := util.ResolveRealPath(util.DataDir)
 			if rootErr != nil || resolveErr != nil || notebookErr != nil || dataErr != nil ||
 				!gulu.File.IsSubPath(dataRoot, notebookRoot) ||
 				!gulu.File.IsSubPath(notebookRoot, root) || !gulu.File.IsSubPath(root, resolved) {

@@ -594,9 +594,9 @@ func initMime() {
 func GetDataAssetsAbsPath() (ret string) {
 	ret = filepath.Join(DataDir, "assets")
 	if IsSymlinkPath(ret) {
-		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
+		// 跟随资源目录的符号链接和目录联接。
 		var err error
-		ret, err = filepath.EvalSymlinks(ret)
+		ret, err = ResolveRealPath(ret)
 		if err != nil {
 			logging.LogErrorf("read assets link failed: %s", err)
 		}

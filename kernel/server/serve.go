@@ -678,7 +678,7 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	rootRealPath, err := filepath.EvalSymlinks(rootAbsPath)
+	rootRealPath, err := util.ResolveRealPath(rootAbsPath)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -698,7 +698,7 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 		targetPath = filepath.Join(targetPath, "index.html")
 	}
 
-	targetRealPath, err := filepath.EvalSymlinks(targetPath)
+	targetRealPath, err := util.ResolveRealPath(targetPath)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -709,7 +709,7 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 		firstSegment, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
 		if firstSegment != "" {
 			packageRoot := filepath.Join(rootAbsPath, filepath.FromSlash(firstSegment))
-			if resolvedPackageRoot, resolveErr := filepath.EvalSymlinks(packageRoot); resolveErr == nil {
+			if resolvedPackageRoot, resolveErr := util.ResolveRealPath(packageRoot); resolveErr == nil {
 				allowedRoot = resolvedPackageRoot
 			}
 		}

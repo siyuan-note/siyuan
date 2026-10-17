@@ -75,7 +75,7 @@ func resolveArchivePath(path string) (string, error) {
 		}
 		parent = filepath.Dir(parent)
 	}
-	resolved, err := model.ResolveRealPath(parent)
+	resolved, err := util.ResolveRealPath(parent)
 	if err != nil {
 		return "", err
 	}

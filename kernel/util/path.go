@@ -640,7 +640,7 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	if !inWorkspace && workspaceDir != "" {
 		// 静态资源使用解析后的真实路径，工作空间也需采用相同形式判断归属及 conf、temp 目录。
 		// 仅解析工作空间根目录，不能将指向外部敏感文件的资源符号链接视为工作空间内文件。
-		if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && gulu.File.IsSubPath(resolved, p) {
+		if resolved, err := ResolveRealPath(workspaceDir); err == nil && gulu.File.IsSubPath(resolved, p) {
 			workspaceDir = resolved
 			inWorkspace = true
 		}
@@ -718,21 +718,21 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	// 自定义配置主目录不能使系统用户主目录中的凭据失去保护。
 	if homeDirOverridden && systemHomeDir != "" && systemHomeDir != HomeDir {
 		homeDirs = append(homeDirs, systemHomeDir)
-		if resolved, err := filepath.EvalSymlinks(systemHomeDir); err == nil && resolved != systemHomeDir {
+		if resolved, err := ResolveRealPath(systemHomeDir); err == nil && resolved != systemHomeDir {
 			homeDirs = append(homeDirs, resolved)
 		}
 	}
 	homeCheckPaths := []string{toCheckPathLower}
 	if HomeDir != "" {
 		// 主目录自身也可能是别名，工作空间规范路径必须同时匹配其真实目录中的敏感位置。
-		if resolved, err := filepath.EvalSymlinks(HomeDir); err == nil && resolved != HomeDir {
+		if resolved, err := ResolveRealPath(HomeDir); err == nil && resolved != HomeDir {
 			homeDirs = append(homeDirs, resolved)
 		}
 	}
 	// 工作空间别名可能位于自定义主目录中，但指向系统主目录中的敏感位置。
 	// 只映射工作空间根目录，保留对尚未创建的目标及工作空间内路径的检查。
 	if inWorkspace && workspaceDir == WorkspaceDir {
-		if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && resolved != workspaceDir {
+		if resolved, err := ResolveRealPath(workspaceDir); err == nil && resolved != workspaceDir {
 			if rel, err := filepath.Rel(workspaceDir, p); err == nil {
 				homeCheckPaths = append(homeCheckPaths, strings.ToLower(filepath.Join(resolved, rel)))
 			}
@@ -777,7 +777,7 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	return false
 }
 
-// ResolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
+// ResolveLongestExistingParent 解析 absPath 中最长已存在部分的符号链接或目录联接，拼回剩余路径。
 // 例如 absPath = /workspace/data/link/newdir/file，其中 /workspace/data/link 是指向
 // /workspace/data/<encBoxID>/ 的 symlink，newdir/file 尚不存在：
 // 返回 /workspace/data/<encBoxID>/newdir/file。
@@ -795,7 +795,7 @@ func ResolveLongestExistingParent(absPath string) string {
 		dir = parent
 	}
 	if dir == cleaned {
-		if resolved, err := filepath.EvalSymlinks(cleaned); err == nil {
+		if resolved, err := ResolveRealPath(cleaned); err == nil {
 			return resolved
 		}
 		return cleaned
@@ -803,7 +803,7 @@ func ResolveLongestExistingParent(absPath string) string {
 	if dir == "/" || dir == "." {
 		return cleaned
 	}
-	resolvedDir, err := filepath.EvalSymlinks(dir)
+	resolvedDir, err := ResolveRealPath(dir)
 	if err != nil {
 		return cleaned
 	}

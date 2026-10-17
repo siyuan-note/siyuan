@@ -111,12 +111,13 @@ func GetMimeTypeByPath(filePath string) (m *mimetype.MIME, ok bool) {
 	return
 }
 
+// IsSymlinkPath 判断现有路径是否为符号链接或目录联接。
 func IsSymlinkPath(absPath string) bool {
 	fi, err := os.Lstat(absPath)
 	if err != nil {
 		return false
 	}
-	return 0 != fi.Mode()&os.ModeSymlink
+	return isLinkFileInfo(fi)
 }
 
 // IsSystemMetadataFile 判断是否为操作系统自动生成的元数据文件（如 macOS 的 .DS_Store），
@@ -179,8 +180,16 @@ func RemoveEmptyDir(p string) (err error) {
 	return
 }
 
+// IsSymlink 判断目录条目是否为符号链接或目录联接。
 func IsSymlink(dir fs.DirEntry) bool {
-	return dir.Type() == fs.ModeSymlink
+	if dir.Type()&fs.ModeSymlink != 0 {
+		return true
+	}
+	if dir.Type()&fs.ModeIrregular == 0 {
+		return false
+	}
+	info, err := dir.Info()
+	return err == nil && isLinkFileInfo(info)
 }
 
 func IsDirRegularOrSymlink(dir fs.DirEntry) bool {

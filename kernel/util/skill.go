@@ -96,7 +96,7 @@ func readSkillRecords(root string) []skillRecord {
 	var records []skillRecord
 	for _, e := range entries {
 		isDir := e.IsDir()
-		if !isDir && e.Type()&os.ModeSymlink != 0 {
+		if !isDir && IsSymlink(e) {
 			if info, statErr := os.Stat(filepath.Join(root, e.Name())); statErr == nil {
 				isDir = info.IsDir()
 			}
@@ -303,7 +303,7 @@ func hasWindowsDrivePrefix(resource string) bool {
 }
 
 func listSkillResources(skillDir string) (resources []string, truncated bool) {
-	realRoot, err := filepath.EvalSymlinks(skillDir)
+	realRoot, err := ResolveRealPath(skillDir)
 	if err != nil {
 		return nil, false
 	}
@@ -356,13 +356,13 @@ func listSkillResources(skillDir string) (resources []string, truncated bool) {
 }
 
 func readSkillResource(skillDir, skillName, resource string) (string, error) {
-	realRoot, err := filepath.EvalSymlinks(skillDir)
+	realRoot, err := ResolveRealPath(skillDir)
 	if err != nil {
 		return "", fmt.Errorf("skill not found: %s", skillName)
 	}
 
 	target := filepath.Join(realRoot, filepath.FromSlash(resource))
-	realTarget, err := filepath.EvalSymlinks(target)
+	realTarget, err := ResolveRealPath(target)
 	if err != nil {
 		return "", fmt.Errorf("skill resource not found: %s/%s", skillName, resource)
 	}

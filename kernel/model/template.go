@@ -1367,11 +1367,11 @@ func resolveDocContentTemplatePath(templatePath string) (string, error) {
 	if !filelock.IsExist(absPath) {
 		return "", fmt.Errorf("content template [%s] not found", templatePath)
 	}
-	realRoot, err := filepath.EvalSymlinks(templateRoot)
+	realRoot, err := util.ResolveRealPath(templateRoot)
 	if nil != err {
 		return "", err
 	}
-	realPath, err := filepath.EvalSymlinks(absPath)
+	realPath, err := util.ResolveRealPath(absPath)
 	if nil != err {
 		return "", err
 	}

@@ -5,6 +5,7 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../../asset/html";
 import {updateTransaction, transaction} from "../../wysiwyg/transaction";
 import {genListItemElement, setTaskListItemMarker} from "../../wysiwyg/list";
+import {getListConversionType, type TListSubtype} from "../../wysiwyg/listContext";
 import {nextTaskListMarker, nextTaskListStatus} from "../../wysiwyg/taskListMarker";
 import {getTaskStatusItems} from "../../wysiwyg/taskStatusDialog";
 import {getTabTask} from "../tabsRender";
@@ -88,7 +89,8 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
         if (!source || !canEdit(owner, list)) {
             return;
         }
-        const type = {o: "UL2OL", t: "UL2TL", u: "OL2UL"}[source.getAttribute("data-subtype")] || "OL2UL";
+        const type = getListConversionType("u", source.getAttribute("data-subtype") as TListSubtype) ||
+            getListConversionType("o", "u");
         const html = convertListMindmapToList(source, type, owner.lute);
         const template = list.ownerDocument.createElement("template");
         template.innerHTML = html;

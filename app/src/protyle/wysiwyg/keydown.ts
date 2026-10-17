@@ -2359,7 +2359,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle,
                             nodeElement: selectsElement[0],
                             id: selectsElement[0].dataset.nodeId,
-                            type: isMatchCheck ? "UL2TL" : (isMatchList ? "OL2UL" : "UL2OL"),
+                            type: getListConversionType("u", targetSubtype) || getListConversionType("o", "u"),
                         });
                     } else if (listContext) {
                         const isListItemFocused = Boolean(protyle.block.showAll &&

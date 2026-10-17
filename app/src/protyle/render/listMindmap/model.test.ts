@@ -7,12 +7,13 @@ import {execFile} from "node:child_process";
 import {promisify} from "node:util";
 import type {ListMindmapLayoutNode, ListMindmapNode} from "./model";
 import type {ListMindmapFoldTarget} from "./fold";
+import {getListConversionType, type TListSubtype} from "../../wysiwyg/listContext";
 
 const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
     name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
 }));
 buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {configurable: true, value: "test"}));
-const {layoutListMindmap, parseListMindmapMetadata}: typeof import("./model") = require("./model");
+const {layoutListMindmap, parseListMindmapMetadata, isListMindmapListConversion}: typeof import("./model") = require("./model");
 buildGlobals.forEach(({name, descriptor}) => {
     if (descriptor) {
         Object.defineProperty(globalThis, name, descriptor);
@@ -23,6 +24,26 @@ buildGlobals.forEach(({name, descriptor}) => {
 
 const measured = (id: string, width = 100, height = 40,
                   children: ListMindmapLayoutNode[] = []): ListMindmapLayoutNode => ({id, width, height, children});
+
+test("mindmap list conversion accepts exactly the shared list conversion actions", () => {
+    const conversions = new Set<string>();
+    const subtypes: TListSubtype[] = ["u", "o", "t"];
+    for (const from of subtypes) {
+        for (const to of subtypes) {
+            const conversion = getListConversionType(from, to);
+            if (conversion) {
+                conversions.add(conversion);
+            }
+        }
+    }
+    for (const legacy of [false, true]) {
+        const element = {getAttribute: (name: string) => name === "data-type" ?
+            (legacy ? "NodeList" : "NodeMindmap") : legacy ? "1" : null} as unknown as Element;
+        const candidates = ["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL",
+            "UL2UL", "OL2OL", "TL2TL", "CancelList", "Blocks2UL", "invalid", ""];
+        assert.deepEqual(new Set(candidates.filter(type => isListMindmapListConversion(element, type))), conversions);
+    }
+});
 
 test("relation label spacing only expands the requested branch boundary", () => {
     const root = measured("root", 100, 40, [measured("a"), measured("b"), measured("c")]);

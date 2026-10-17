@@ -1,5 +1,5 @@
 import {Constants} from "../../../constants";
-import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
+import {getOrderedListMarkerUpdates, isListConversionType} from "../../wysiwyg/listContext";
 import type {MindmapManualRoute, MindmapRelationAnchor} from "./routing";
 import {getListMindmapSiblingIDs, isListMindmapSummaryCrossing, normalizeListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary} from "./summary";
@@ -438,7 +438,7 @@ export const materializeListMindmapRoot = (list: HTMLElement, lute: Lute): boole
 export const isListMindmapListConversion = (element: Element, type: string) =>
     (element.getAttribute("data-type") === "NodeMindmap" ||
         element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") &&
-    ["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type);
+    isListConversionType(type);
 
 // 转换列表类型时退出脑图显示，保留节点、连接元数据及原 DOM 供撤销使用。
 export const convertListMindmapToList = (element: Element, type: string, lute: Lute): string | undefined => {

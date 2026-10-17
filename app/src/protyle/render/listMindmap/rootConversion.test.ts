@@ -4,6 +4,7 @@ import {createRequire} from "node:module";
 import * as path from "node:path";
 import test from "node:test";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {isListConversionType} from "../../wysiwyg/listContext";
 
 // 使用项目已有的 HTML 解析器承载节点操作，Lute 负责真实块 DOM 的生成和转换。
 const parse5 = createRequire(require.resolve("html-loader"))("parse5");
@@ -114,11 +115,11 @@ lute.SetKramdownIAL(true);
 lute.SetProtyleWYSIWYG(true);
 const source = readFileSync(path.join(__dirname, "model.ts"), "utf8")
     .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "");
-const api = new Function("Constants", "Lute", "document", "NodeFilter", transpileModule(source, {
+const api = new Function("Constants", "Lute", "document", "NodeFilter", "isListConversionType", transpileModule(source, {
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText + "; return {convertListMindmapToList, readListMindmap, retagMindmapBranch, listMindmapConversionSource, cleanListMindmapHTML};")({
     CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data",
-}, Lute, documentFixture, {SHOW_COMMENT: 8});
+}, Lute, documentFixture, {SHOW_COMMENT: 8}, isListConversionType);
 const parse = (html: string) => wrap(parse5.parseFragment(html)).firstElementChild;
 const ids = (element: ElementFixture) => [element, ...element.querySelectorAll<ElementFixture>("[data-node-id]")]
     .map(item => item.dataset.nodeId);

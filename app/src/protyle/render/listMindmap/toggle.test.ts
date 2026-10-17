@@ -4,6 +4,7 @@ import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {isProtyleListItemFragment, registerProtyleRuntimeCapabilities} from "../../runtimeCapabilities";
+import {getListConversionType} from "../../wysiwyg/listContext";
 
 const source = createSourceFile("index.ts", readFileSync("src/protyle/render/listMindmap/index.ts", "utf8"),
     ScriptTarget.ES2021, true);
@@ -42,6 +43,7 @@ const setup = (embedded = true) => {
     const context: any = {
         Constants: {CB_GET_HISTORY: "history", CUSTOM_SY_LIST_MINDMAP: attribute},
         isProtyleListItemFragment,
+        getListConversionType,
         roots: new WeakMap(), hideElements: () => {}, readListMindmap: () => {},
         hasListMindmapRootTitle: () => false,
         cleanListMindmapHTML: (html: string) => html,

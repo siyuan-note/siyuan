@@ -36,7 +36,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
     const chip = (kind: string, index: number, label: string, editable = false) => `<div class="b3-chip b3-chip--middle"><span class="fn__ellipsis${editable ? " b3-chip--pointer" : ""} ariaLabel" ${editable ? `data-edit-attribute="${index}" role="button" tabindex="0"` : ""} aria-label="${escapeAttr(label)}">${escapeHtml(label)}</span><svg class="b3-chip__close" data-remove-filter="${kind}" data-index="${index}" role="button" tabindex="0" aria-label="${escapeAttr(lang.delete)}"><use xlink:href="#iconClose"></use></svg></div>`;
     host.className = "av__automation-control";
     host.innerHTML = `<div class="av__automation-control"><span class="av__automation-control-label">${lang.automationCollectionTypes}</span><div class="b3-chips b3-chips__doctag av__automation-chips" data-type-chips></div>${addButton("data-types", `${lang.add} - ${lang.automationCollectionTypes}`)}</div>
-<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.automationCollectionTags}</span>${modeButton("tagMatch", lang.automationCollectionTags)}</div><div data-tags></div></div>
+<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.tag}</span>${modeButton("tagMatch", lang.tag)}</div><div data-tags></div></div>
 <div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.attr}</span>${modeButton("attributeMatch", lang.attr)}</div><div class="b3-chips b3-chips__doctag av__automation-chips" data-attribute-chips></div>${addButton("data-add-attribute", `${lang.add} - ${lang.attr}`)}<div data-attribute-editor></div></div>`;
     const typeChips = host.querySelector<HTMLElement>("[data-type-chips]");
     const attributes = host.querySelector<HTMLElement>("[data-attribute-chips]");
@@ -75,7 +75,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
         renderEditor();
     };
     bindAliasInput(host.querySelector("[data-tags]"), (source.tags || []).join(","), {
-        addLabel: lang.addTag, removeLabel: lang.delete, placeholder: lang.automationCollectionTags, spellcheck: false,
+        addLabel: lang.addTag, removeLabel: lang.delete, placeholder: lang.tag, spellcheck: false,
         normalize: value => value.trim().replace(/^#+|#+$/g, ""),
         save: async value => {
             const tags = Array.from(new Set(value.split(",").map(tag => tag.trim().replace(/^#+|#+$/g, "")).filter(Boolean)));

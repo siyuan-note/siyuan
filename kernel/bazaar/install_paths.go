@@ -23,7 +23,7 @@ func installPrivateRoot() string {
 	return filepath.Join(confDir, "plugin-development")
 }
 
-// makePrivateInstallDir 拒绝链接目录及非绝对根；已有目录同样逐层检查。
+// makePrivateInstallDir 拒绝工作空间内部的链接目录及非绝对根；已有目录同样逐层检查。
 func makePrivateInstallDir(root string) error {
 	if !filepath.IsAbs(root) {
 		return errors.New("private package operation root is unavailable")
@@ -42,7 +42,24 @@ func rejectInstallPathLinks(target string) error {
 	if err != nil {
 		return err
 	}
+	workspace := ""
+	if util.WorkspaceDir != "" && filepath.IsAbs(util.WorkspaceDir) {
+		workspace = filepath.Clean(util.WorkspaceDir)
+	}
 	for current := target; ; current = filepath.Dir(current) {
+		if workspace != "" {
+			if relative, relErr := filepath.Rel(workspace, current); relErr == nil && relative == "." {
+				// 用户选择的工作空间及其祖先可使用链接，空间内部的操作路径仍须逐层拒绝链接。
+				info, statErr := os.Stat(current)
+				if statErr != nil {
+					return statErr
+				}
+				if !info.IsDir() {
+					return errors.New("package operation workspace must be a directory")
+				}
+				return nil
+			}
+		}
 		info, err := os.Lstat(current)
 		if err != nil && !os.IsNotExist(err) {
 			return err

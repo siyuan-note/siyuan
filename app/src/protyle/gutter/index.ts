@@ -1610,7 +1610,7 @@ export class Gutter {
                 label: window.siyuan.languages.multiSelect,
                 click: () => {
                     const blockElement = getMobileBlockSelectionElement(nodeElement as HTMLElement,
-                        window.siyuan.config.editor.blockGutterMode === 1 || type === "NodeListItem");
+                        window.siyuan.config.editor.blockGutterMode || type === "NodeListItem");
                     hideElements(["select"], protyle);
                     window.getSelection()?.removeAllRanges();
                     protyle.toolbar.showMultiSelectMode(protyle, blockElement);
@@ -3709,7 +3709,7 @@ export class Gutter {
             hideElements(["gutter"], protyle);
             return;
         }
-        const fullGutter = !isMultiSelect && window.siyuan.config.editor.blockGutterMode === 1;
+        const fullGutter = !isMultiSelect && window.siyuan.config.editor.blockGutterMode;
         let html = "";
         let nodeElement = selectedElement || element;
         const listItemContainer = isMultiSelect ? undefined : getListItemGutterContainer(nodeElement, fullGutter);

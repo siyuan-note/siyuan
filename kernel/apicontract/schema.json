@@ -40499,7 +40499,14 @@
         "blockGutterMode": {
           "anyOf": [
             {
-              "type": "integer"
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
             },
             {
               "type": "null"
@@ -44602,7 +44609,7 @@
           ]
         },
         "blockGutterMode": {
-          "type": "integer"
+          "type": "boolean"
         },
         "blockRefDynamicAnchorTextMaxLen": {
           "type": "integer"
@@ -45145,7 +45152,14 @@
         "blockGutterMode": {
           "anyOf": [
             {
-              "type": "integer"
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
             },
             {
               "type": "null"

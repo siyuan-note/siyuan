@@ -38,7 +38,7 @@ func TestNormalizeSettingsEnumRanges(t *testing.T) {
 	for _, field := range []string{"BacklinkGlobalSort", "BacklinkBlockSort", "FloatWindowMode", "HeadingEmbedMode"} {
 		checkNormalizedIntValues(t, NewEditor, NormalizeEditor, field, ternary)
 	}
-	for _, field := range []string{"DatabaseAttrClickMode", "DatabaseAttrViewMode", "BlockGutterMode"} {
+	for _, field := range []string{"DatabaseAttrClickMode", "DatabaseAttrViewMode"} {
 		checkNormalizedIntValues(t, NewEditor, NormalizeEditor, field, binary)
 	}
 	checkNormalizedIntValues(t, NewEditor, NormalizeEditor, "CodeTabSpaces",

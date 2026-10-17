@@ -16,7 +16,7 @@ func TestAPIContractSettingBlockGutterMode(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
 		`{}`, `{"blockGutterMode":0}`, `{"blockGutterMode":1}`, `{"blockGutterMode":null}`,
 		`{"BlockGutterMode":1}`, `{"blockGutterMode":-1}`, `{"blockGutterMode":2}`,
-		`{"blockGutterMode":"bad"}`, `{"blockGutterMode":true}`, `{"blockGutterMode":1.5}`,
+		`{"blockGutterMode":"bad"}`, `{"blockGutterMode":true}`, `{"blockGutterMode":false}`, `{"blockGutterMode":1.5}`,
 	})
 	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
 	previousConfDir := util.ConfDir
@@ -30,41 +30,60 @@ func TestAPIContractSettingBlockGutterMode(t *testing.T) {
 		util.MarkdownSettings.Store(previousMarkdown)
 		util.ConfDir = previousConfDir
 	})
-	if model.Conf.Editor.Load().BlockGutterMode != 0 {
+	if model.Conf.Editor.Load().BlockGutterMode {
 		t.Fatal("block gutter mode must default to compact")
 	}
 	for _, entry := range []struct {
 		body string
-		want int
+		want bool
 	}{
-		{`{"blockGutterMode":1}`, 1}, {`{}`, 1}, {`{"blockGutterMode":0}`, 0},
-		{`{"BlockGutterMode":1}`, 1}, {`{"blockGutterMode":null}`, 0},
-		{`{"blockGutterMode":-1}`, 0}, {`{"blockGutterMode":2}`, 0},
+		{`{"blockGutterMode":true}`, true}, {`{}`, true}, {`{"blockGutterMode":false}`, false},
+		{`{"blockGutterMode":1}`, true}, {`{}`, true}, {`{"blockGutterMode":0}`, false},
+		{`{"BlockGutterMode":1}`, true}, {`{"blockGutterMode":null}`, false},
+		{`{"blockGutterMode":-1}`, false}, {`{"blockGutterMode":2}`, false},
 	} {
 		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
 		var response apicontract.SettingEditor
 		if err := json.Unmarshal(data, &response); err != nil {
 			t.Fatal(err)
 		}
-		if code != 0 || model.Conf.Editor.Load().BlockGutterMode != entry.want || response.BlockGutterMode != entry.want {
+		if code != 0 || bool(model.Conf.Editor.Load().BlockGutterMode) != entry.want || bool(response.BlockGutterMode) != entry.want {
 			t.Fatalf("block gutter mode update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+		var output struct {
+			BlockGutterMode bool `json:"blockGutterMode"`
+		}
+		if err := json.Unmarshal(data, &output); err != nil || output.BlockGutterMode != entry.want {
+			t.Fatalf("response did not use a boolean: %s, %v", data, err)
 		}
 	}
 	for _, entry := range []struct {
 		body string
-		want int
+		want bool
 	}{
-		{`{"editor":{"blockGutterMode":1}}`, 1}, {`{"editor":{"fontSize":18}}`, 1},
-		{`{"editor":{"blockGutterMode":0}}`, 0}, {`{"editor":{"blockGutterMode":99}}`, 0},
+		{`{"editor":{"blockGutterMode":true}}`, true}, {`{"editor":{"fontSize":18}}`, true},
+		{`{"editor":{"blockGutterMode":false}}`, false}, {`{"editor":{"blockGutterMode":1}}`, true},
+		{`{"editor":{"blockGutterMode":0}}`, false}, {`{"editor":{"blockGutterMode":99}}`, false},
+		{`{"editor":{"blockGutterMode":true}}`, true}, {`{"editor":{"blockGutterMode":null}}`, false},
 	} {
 		code, message, data := settingContractRequest(t, "patch", patchSetting, entry.body)
-		if code != 0 || model.Conf.Editor.Load().BlockGutterMode != entry.want {
+		if code != 0 || bool(model.Conf.Editor.Load().BlockGutterMode) != entry.want {
 			t.Fatalf("block gutter mode patch %s: code=%d message=%s data=%s", entry.body, code, message, data)
 		}
 	}
 	code, message, _ := settingContractRequest(t, "setEditor", setEditor, `{"blockGutterMode":1}`)
 	if code != 0 {
 		t.Fatalf("full mode could not be saved: %d %s", code, message)
+	}
+	for _, raw := range []string{`"true"`, `1.5`, `[]`, `{}`} {
+		code, _, _ = settingContractRequest(t, "setEditor", setEditor, `{"blockGutterMode":`+raw+`}`)
+		if code == 0 || !model.Conf.Editor.Load().BlockGutterMode {
+			t.Fatalf("invalid legacy write changed the enabled preference: %s", raw)
+		}
+		code, _, _ = settingContractRequest(t, "patch", patchSetting, `{"editor":{"blockGutterMode":`+raw+`}}`)
+		if code == 0 || !model.Conf.Editor.Load().BlockGutterMode {
+			t.Fatalf("invalid patch changed the enabled preference: %s", raw)
+		}
 	}
 	util.ReadOnly = false
 	model.Conf.Save()
@@ -75,7 +94,15 @@ func TestAPIContractSettingBlockGutterMode(t *testing.T) {
 	var stored struct {
 		Editor conf.Editor `json:"editor"`
 	}
-	if err = json.Unmarshal(data, &stored); err != nil || conf.NormalizeEditor(&stored.Editor).BlockGutterMode != 1 {
+	if err = json.Unmarshal(data, &stored); err != nil || !conf.NormalizeEditor(&stored.Editor).BlockGutterMode {
 		t.Fatalf("full block gutter mode was not preserved in saved configuration: %v", err)
+	}
+	var saved struct {
+		Editor struct {
+			BlockGutterMode bool `json:"blockGutterMode"`
+		} `json:"editor"`
+	}
+	if err = json.Unmarshal(data, &saved); err != nil || !saved.Editor.BlockGutterMode {
+		t.Fatalf("saved configuration did not use a boolean: %v", err)
 	}
 }

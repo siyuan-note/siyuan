@@ -283,7 +283,7 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     }
     check.deepEqual(movements, [], "moving to the marker must preserve gutters");
 
-    window.siyuan.config.editor.blockGutterMode = 0;
+    window.siyuan.config.editor.blockGutterMode = false;
     window.siyuan.menus = {menu: {element: document.createElement("div"), remove() {}, fullscreen() {}, popup() {}}};
     Object.assign(protyle, {toolbar: {range: {}}, block: {rootID: "document"}, notebookId: "notebook"});
     gutter.getNodeElement = (...args) => getNodeElement.apply(gutter, args);
@@ -355,7 +355,7 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
         }
     }
 
-    window.siyuan.config.editor.blockGutterMode = 1;
+    window.siyuan.config.editor.blockGutterMode = true;
     for (const platform of [false, true]) {
         mobile = platform;
         for (const [type, cls, content, layout = "row"] of fixtures) {
@@ -424,7 +424,7 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     check.equal(gutter.element.querySelectorAll(".protyle-gutters__line, .protyle-gutters__plus").length, 0);
     check.equal(gutter.element.classList.contains("protyle-gutters--full"), false);
     multiSelect = false;
-    window.siyuan.config.editor.blockGutterMode = 0;
+    window.siyuan.config.editor.blockGutterMode = false;
     root.innerHTML = `<div data-node-id="list" data-type="NodeList" class="list"><div data-node-id="item" data-type="NodeListItem" class="li"><div class="protyle-action"></div>${p("paragraph")}${attr}</div>${attr}</div>`;
     gutter.render(protyle, root.querySelector('[data-node-id="paragraph"]'));
     check.deepEqual(state().ids.sort(), ["item", "list"], "narrow compact mode retains both list and item indicators");

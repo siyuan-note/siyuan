@@ -106,9 +106,6 @@ func NormalizeEditor(editor *Editor) *Editor {
 	if editor.DatabaseAttrViewMode < 0 || editor.DatabaseAttrViewMode > 1 {
 		editor.DatabaseAttrViewMode = defaults.DatabaseAttrViewMode
 	}
-	if editor.BlockGutterMode < 0 || editor.BlockGutterMode > 1 {
-		editor.BlockGutterMode = defaults.BlockGutterMode
-	}
 	switch editor.CodeTabSpaces {
 	case 0, 2, 4, 6, 8:
 	default:

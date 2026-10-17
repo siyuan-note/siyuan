@@ -274,6 +274,33 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.table.rows.length, 3, "shrinking preserves all nonempty rows");
         f.dispose();
     }
+    {
+        const f = fixture();
+        f.root.style.height = `${window.innerHeight}px`;
+        f.table.style.margin = "100px 0 0";
+        f.table.parentElement.style.width = "180px";
+        f.table.parentElement.scrollLeft = 45;
+        f.core.startTouchSelection(f.cell(0, 0));
+        f.render();
+        const cellRect = f.cell(0, 0).getBoundingClientRect();
+        const wrapperRect = f.table.parentElement.getBoundingClientRect();
+        const row = f.touch("[data-mode='row']").getBoundingClientRect();
+        const column = f.touch("[data-mode='column']").getBoundingClientRect();
+        check.equal(row.left + row.width / 2, wrapperRect.left, "row handles follow the clipped grid border at the screen edge");
+        check.equal(column.top + column.height / 2, cellRect.top, "column handles sit on the top grid border");
+        check.equal(column.left + column.width / 2, (wrapperRect.left + cellRect.right) / 2,
+            "column handles stay centered on the visible portion when horizontally scrolled");
+        f.table.style.marginTop = `${window.innerHeight - 70}px`;
+        f.render();
+        const bottomCell = f.cell(0, 0).getBoundingClientRect();
+        const bottomRow = f.touch("[data-mode='row']").getBoundingClientRect();
+        const bottomColumn = f.touch("[data-mode='column']").getBoundingClientRect();
+        check.equal(bottomRow.top + bottomRow.height / 2, bottomCell.top + bottomCell.height / 2,
+            "row handles remain aligned near the bottom of the viewport");
+        check.equal(bottomColumn.top + bottomColumn.height / 2, bottomCell.top,
+            "column handles remain on the grid border near the bottom of the viewport");
+        f.dispose();
+    }
     for (const mode of ["row", "column"] as const) {
         const f = fixture();
         f.core.startTouchSelection(f.cell(1, 0), mode);

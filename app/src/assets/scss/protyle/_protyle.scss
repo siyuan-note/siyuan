@@ -1491,9 +1491,23 @@ html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > 
   }
 
   &__touch-handle {
-    width: 28px;
-    height: 28px;
+    width: 16px;
+    height: 16px;
     touch-action: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    &.protyle-table-control__handle--row::after {
+      left: -12px;
+    }
+
+    &.protyle-table-control__handle--column::after {
+      top: -12px;
+    }
 
     &:not(:hover):not(.protyle-table-control__handle--active)::before {
       opacity: 1;

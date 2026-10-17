@@ -159,8 +159,8 @@ export class TableTouchControl {
             }
             if (!rows.has(info.row)) {
                 rows.add(info.row);
-                const row = this.button(window.siyuan.languages.row, "iconDrag", viewport.left - 14,
-                    (Math.max(rect.top, viewport.top) + Math.min(rect.bottom, viewport.bottom)) / 2);
+                const row = this.button(window.siyuan.languages.row, "iconDrag", viewport.left,
+                    (Math.max(rect.top, viewport.top) + Math.min(rect.bottom, viewport.bottom)) / 2, false);
                 row.className = "protyle-table-control__handle protyle-table-control__handle--row protyle-table-control__touch-handle";
                 row.style.height = `${Math.min(rect.bottom, viewport.bottom) - Math.max(rect.top, viewport.top)}px`;
                 row.dataset.mode = "row";
@@ -172,7 +172,7 @@ export class TableTouchControl {
             if (!columns.has(info.col)) {
                 columns.add(info.col);
                 const column = this.button(window.siyuan.languages.column, "iconDrag",
-                    (Math.max(rect.left, viewport.left) + Math.min(rect.right, viewport.right)) / 2, viewport.top - 14);
+                    (Math.max(rect.left, viewport.left) + Math.min(rect.right, viewport.right)) / 2, viewport.top, false);
                 column.className = "protyle-table-control__handle protyle-table-control__handle--column protyle-table-control__touch-handle";
                 column.style.width = `${Math.min(rect.right, viewport.right) - Math.max(rect.left, viewport.left)}px`;
                 column.dataset.mode = "column";
@@ -247,14 +247,14 @@ export class TableTouchControl {
         }
     }
 
-    private button(label: string, icon: string, left: number, top: number) {
+    private button(label: string, icon: string, left: number, top: number, clampToScreen = true) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "block__icon block__icon--show protyle-table-control__touch-button";
         button.setAttribute("aria-label", label);
         button.innerHTML = `<svg><use xlink:href="#${icon}"></use></svg>`;
-        button.style.left = `${Math.max(16, Math.min(window.innerWidth - 16, left))}px`;
-        button.style.top = `${Math.max(16, Math.min(window.innerHeight - 72, top))}px`;
+        button.style.left = `${clampToScreen ? Math.max(16, Math.min(window.innerWidth - 16, left)) : left}px`;
+        button.style.top = `${clampToScreen ? Math.max(16, Math.min(window.innerHeight - 72, top)) : top}px`;
         this.controls.append(button);
         return button;
     }

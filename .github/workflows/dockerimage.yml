@@ -25,7 +25,7 @@ concurrency:
 
 env:
   IMAGE_REPOSITORY: b3log/siyuan
-  # ARMv7 的 QEMU 冷编译耗时较长，在四核运行器上使用全部核心。
+  # ARMv7 的 ONNX 冷编译使用四核运行器的全部核心。
   ARMV7_ONNX_BUILD_PARALLEL: 4
 
 permissions:
@@ -57,6 +57,9 @@ jobs:
             .dockerignore
             scripts/verify-docker-release.py
             scripts/check-docker-cache.py
+            scripts/build-docker-onnx.py
+            scripts/docker-onnx-build.sh
+            scripts/docker-onnx-toolchain.cmake
             scripts/test_docker_release.py
             scripts/testdata/docker-ocr
           sparse-checkout-cone-mode: false
@@ -137,6 +140,9 @@ jobs:
           sparse-checkout: |
             Dockerfile
             .dockerignore
+            scripts/build-docker-onnx.py
+            scripts/docker-onnx-build.sh
+            scripts/docker-onnx-toolchain.cmake
             scripts/verify-docker-release.py
             scripts/testdata/docker-ocr
           sparse-checkout-cone-mode: false
@@ -152,6 +158,7 @@ jobs:
           test "$(jq -er .version app/package.json)" = "$RELEASE_VERSION"
           cp ../docker-config/Dockerfile Dockerfile
           cp ../docker-config/.dockerignore .dockerignore
+          cp ../docker-config/scripts/docker-onnx-build.sh ../docker-config/scripts/docker-onnx-toolchain.cmake scripts/
           echo "Source commit: $SOURCE_COMMIT; configuration commit: $CONFIGURATION_COMMIT"
           sha256sum Dockerfile .dockerignore
 
@@ -181,18 +188,29 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
+      - name: Resolve or build immutable ONNX runtime artifact
+        id: onnx
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          PLATFORM_ID: ${{ matrix.id }}
+        run: |
+          ONNX_PARALLEL=2
+          if [ "$PLATFORM_ID" = "armv7" ]; then ONNX_PARALLEL="$ARMV7_ONNX_BUILD_PARALLEL"; fi
+          python3 ../docker-config/scripts/build-docker-onnx.py --context . \
+            --repository "$IMAGE_REPOSITORY" --platform "$PLATFORM" --parallel "$ONNX_PARALLEL" \
+            --records "$RUNNER_TEMP/docker-onnx" --github-output "$GITHUB_OUTPUT"
+
       - name: Build platform candidate and export its cache
         id: build
         shell: bash
         env:
           PLATFORM: ${{ matrix.platform }}
           PLATFORM_ID: ${{ matrix.id }}
+          ONNX_IMAGE: ${{ steps.onnx.outputs.onnx_image }}
           CACHE_IMAGE: ${{ env.IMAGE_REPOSITORY }}:buildcache-release-v2-${{ matrix.id }}
         run: |
-          ONNX_PARALLEL=2
-          if [ "$PLATFORM_ID" = "armv7" ]; then ONNX_PARALLEL="$ARMV7_ONNX_BUILD_PARALLEL"; fi
           docker buildx build --push --platform "$PLATFORM" --provenance=mode=min \
-            --build-arg "ONNX_BUILD_PARALLEL=$ONNX_PARALLEL" \
+            --build-arg "ONNX_IMAGE=$ONNX_IMAGE" \
             --cache-from "type=registry,ref=$CACHE_IMAGE" \
             --cache-to "type=registry,ref=$CACHE_IMAGE,mode=max" \
             --metadata-file "$RUNNER_TEMP/docker-metadata.json" --progress plain \
@@ -234,6 +252,7 @@ jobs:
           name: docker-build-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.id }}
           path: |
             ${{ runner.temp }}/docker-build.log
+            ${{ runner.temp }}/docker-onnx
             ${{ runner.temp }}/docker-metadata.json
             ${{ runner.temp }}/docker-verification/report.json
             ${{ runner.temp }}/docker-verification/diagnostics
@@ -273,6 +292,8 @@ jobs:
           sparse-checkout: |
             Dockerfile
             scripts/check-docker-cache.py
+            scripts/docker-onnx-build.sh
+            scripts/docker-onnx-toolchain.cmake
           sparse-checkout-cone-mode: false
           persist-credentials: false
 

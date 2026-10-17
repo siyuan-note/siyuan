@@ -1,7 +1,5 @@
 package apicontract
 
-import "github.com/siyuan-note/siyuan/kernel/internal/configcompat"
-
 type SettingSnpt struct {
 	EnabledCSS bool `json:"enabledCSS" api:"optional,nullable"`
 	EnabledJS  bool `json:"enabledJS" api:"optional,nullable"`
@@ -201,52 +199,52 @@ type SettingFlashcard struct {
 }
 
 // SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
-// blockGutterMode 为布尔开关，默认 false，输出及持久化均为布尔值；旧接口省略时保留当前值。
-// 输入兼容旧整数：1 表示启用，其他整数归为关闭；null 表示关闭，非法类型和小数拒绝更新。
+// blockGutterMode 控制是否显示完整块标，默认 false，输出及持久化均为布尔值。
+// 整段设置接口省略时保留当前值；null 表示关闭，其他非布尔类型拒绝更新。
 type SettingEditor struct {
-	AllowSVGScript                  bool                         `json:"allowSVGScript" api:"optional,nullable"`
-	AllowHTMLBLockScript            bool                         `json:"allowHTMLBLockScript" api:"optional,nullable"`
-	CursorSurroundingLines          int                          `json:"cursorSurroundingLines" api:"optional,nullable"`
-	FontSize                        int                          `json:"fontSize" api:"optional,nullable"`
-	FontSizeScrollZoom              bool                         `json:"fontSizeScrollZoom" api:"optional,nullable"`
-	FontFamily                      string                       `json:"fontFamily" api:"optional,nullable"`
-	FontWeight                      int                          `json:"fontWeight" api:"optional,nullable"`
-	FontFamilyDisplay               string                       `json:"fontFamilyDisplay" api:"optional,nullable"`
-	FontFamilies                    []*SettingEditorFont         `json:"fontFamilies" api:"optional,nullable"`
-	CodeFontFamilies                []*SettingEditorFont         `json:"codeFontFamilies" api:"optional,nullable"`
-	CodeSyntaxHighlightLineNum      bool                         `json:"codeSyntaxHighlightLineNum" api:"optional,nullable"`
-	CodeTabSpaces                   int                          `json:"codeTabSpaces" api:"optional,nullable"`
-	CodeLineWrap                    bool                         `json:"codeLineWrap" api:"optional,nullable"`
-	CodeLigatures                   bool                         `json:"codeLigatures" api:"optional,nullable"`
-	DisplayBookmarkIcon             bool                         `json:"displayBookmarkIcon" api:"optional,nullable"`
-	BlockGutterMode                 configcompat.BlockGutterMode `json:"blockGutterMode" api:"optional,nullable"`
-	DisplayNetImgMark               bool                         `json:"displayNetImgMark" api:"optional,nullable"`
-	DisplayImgName                  bool                         `json:"displayImgName" api:"optional,nullable"`
-	DisplayImgAlt                   bool                         `json:"displayImgAlt" api:"optional,nullable"`
-	DatabaseAttrShow                *bool                        `json:"databaseAttrShow" api:"optional,nullable"`
-	DatabaseAttrClickMode           int                          `json:"databaseAttrClickMode" api:"optional,nullable"`
-	DatabaseAttrViewMode            int                          `json:"databaseAttrViewMode" api:"optional,nullable"`
-	DatabaseAttrHideEmpty           bool                         `json:"databaseAttrHideEmpty" api:"optional,nullable"`
-	DatabaseAttrUseTabs             *bool                        `json:"databaseAttrUseTabs" api:"optional,nullable"`
-	GenerateHistoryInterval         int                          `json:"generateHistoryInterval" api:"optional,nullable"`
-	HistoryRetentionDays            int                          `json:"historyRetentionDays" api:"optional,nullable"`
-	Emoji                           []string                     `json:"emoji" api:"optional,nullable"`
-	VirtualBlockRef                 bool                         `json:"virtualBlockRef" api:"optional,nullable"`
-	VirtualBlockRefExclude          string                       `json:"virtualBlockRefExclude" api:"optional,nullable"`
-	VirtualBlockRefInclude          string                       `json:"virtualBlockRefInclude" api:"optional,nullable"`
-	CheckBlockRef                   *bool                        `json:"checkBlockRef" api:"optional,nullable"`
-	BlockRefDynamicAnchorTextMaxLen int                          `json:"blockRefDynamicAnchorTextMaxLen" api:"optional,nullable"`
-	AssetOpen                       *SettingAssetOpen            `json:"assetOpen" api:"optional,nullable"`
-	PlantUMLServePath               string                       `json:"plantUMLServePath" api:"optional,nullable"`
-	FullWidth                       bool                         `json:"fullWidth" api:"optional,nullable"`
-	KaTexMacros                     string                       `json:"katexMacros" api:"optional,nullable"`
-	ReadOnly                        bool                         `json:"readOnly" api:"optional,nullable"`
-	EmbedBlockBreadcrumb            bool                         `json:"embedBlockBreadcrumb" api:"optional,nullable"`
-	ListLogicalOutdent              bool                         `json:"listLogicalOutdent" api:"optional,nullable"`
-	ListItemDotNumberClickFocus     bool                         `json:"listItemDotNumberClickFocus" api:"optional,nullable"`
-	FloatWindowMode                 int                          `json:"floatWindowMode" api:"optional,nullable"`
-	FloatWindowDelay                *int                         `json:"floatWindowDelay" api:"optional,nullable"`
-	KeepLoadedContent               bool                         `json:"keepLoadedContent" api:"optional,nullable"`
+	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
+	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
+	CursorSurroundingLines          int                  `json:"cursorSurroundingLines" api:"optional,nullable"`
+	FontSize                        int                  `json:"fontSize" api:"optional,nullable"`
+	FontSizeScrollZoom              bool                 `json:"fontSizeScrollZoom" api:"optional,nullable"`
+	FontFamily                      string               `json:"fontFamily" api:"optional,nullable"`
+	FontWeight                      int                  `json:"fontWeight" api:"optional,nullable"`
+	FontFamilyDisplay               string               `json:"fontFamilyDisplay" api:"optional,nullable"`
+	FontFamilies                    []*SettingEditorFont `json:"fontFamilies" api:"optional,nullable"`
+	CodeFontFamilies                []*SettingEditorFont `json:"codeFontFamilies" api:"optional,nullable"`
+	CodeSyntaxHighlightLineNum      bool                 `json:"codeSyntaxHighlightLineNum" api:"optional,nullable"`
+	CodeTabSpaces                   int                  `json:"codeTabSpaces" api:"optional,nullable"`
+	CodeLineWrap                    bool                 `json:"codeLineWrap" api:"optional,nullable"`
+	CodeLigatures                   bool                 `json:"codeLigatures" api:"optional,nullable"`
+	DisplayBookmarkIcon             bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
+	BlockGutterMode                 bool                 `json:"blockGutterMode" api:"optional,nullable"`
+	DisplayNetImgMark               bool                 `json:"displayNetImgMark" api:"optional,nullable"`
+	DisplayImgName                  bool                 `json:"displayImgName" api:"optional,nullable"`
+	DisplayImgAlt                   bool                 `json:"displayImgAlt" api:"optional,nullable"`
+	DatabaseAttrShow                *bool                `json:"databaseAttrShow" api:"optional,nullable"`
+	DatabaseAttrClickMode           int                  `json:"databaseAttrClickMode" api:"optional,nullable"`
+	DatabaseAttrViewMode            int                  `json:"databaseAttrViewMode" api:"optional,nullable"`
+	DatabaseAttrHideEmpty           bool                 `json:"databaseAttrHideEmpty" api:"optional,nullable"`
+	DatabaseAttrUseTabs             *bool                `json:"databaseAttrUseTabs" api:"optional,nullable"`
+	GenerateHistoryInterval         int                  `json:"generateHistoryInterval" api:"optional,nullable"`
+	HistoryRetentionDays            int                  `json:"historyRetentionDays" api:"optional,nullable"`
+	Emoji                           []string             `json:"emoji" api:"optional,nullable"`
+	VirtualBlockRef                 bool                 `json:"virtualBlockRef" api:"optional,nullable"`
+	VirtualBlockRefExclude          string               `json:"virtualBlockRefExclude" api:"optional,nullable"`
+	VirtualBlockRefInclude          string               `json:"virtualBlockRefInclude" api:"optional,nullable"`
+	CheckBlockRef                   *bool                `json:"checkBlockRef" api:"optional,nullable"`
+	BlockRefDynamicAnchorTextMaxLen int                  `json:"blockRefDynamicAnchorTextMaxLen" api:"optional,nullable"`
+	AssetOpen                       *SettingAssetOpen    `json:"assetOpen" api:"optional,nullable"`
+	PlantUMLServePath               string               `json:"plantUMLServePath" api:"optional,nullable"`
+	FullWidth                       bool                 `json:"fullWidth" api:"optional,nullable"`
+	KaTexMacros                     string               `json:"katexMacros" api:"optional,nullable"`
+	ReadOnly                        bool                 `json:"readOnly" api:"optional,nullable"`
+	EmbedBlockBreadcrumb            bool                 `json:"embedBlockBreadcrumb" api:"optional,nullable"`
+	ListLogicalOutdent              bool                 `json:"listLogicalOutdent" api:"optional,nullable"`
+	ListItemDotNumberClickFocus     bool                 `json:"listItemDotNumberClickFocus" api:"optional,nullable"`
+	FloatWindowMode                 int                  `json:"floatWindowMode" api:"optional,nullable"`
+	FloatWindowDelay                *int                 `json:"floatWindowDelay" api:"optional,nullable"`
+	KeepLoadedContent               bool                 `json:"keepLoadedContent" api:"optional,nullable"`
 	// PageScrollButtons 控制翻屏按钮，默认关闭，不迁移旧的本地偏好。
 	PageScrollButtons bool `json:"pageScrollButtons" api:"optional,nullable"`
 	DynamicLoadBlocks int  `json:"dynamicLoadBlocks" api:"optional,nullable"`

@@ -266,6 +266,7 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
             "../protyle/breadcrumb/action", "../menus/Menu", "../util/escape", "../editor/util", "dayjs",
             "../util/pathName", "../protyle/util/resize", "../dialog/message", "../plugin/Menu",
             "../protyle/wysiwyg/transaction", "./flashcardMode", "../protyle/util/blockFold", "../plugin/EventBusCore",
+            "./flashcardV2Session", "./flashcardV2", "./flashcardV2Query", "./flashcardLocate", "../util/hostCapabilities",
         ].map(name => [name, new Proxy({}, {get: (_target, key) => {
             if (key === "__esModule") return false;
             throw new Error(`Unexpected flashcard fixture dependency: ${name}.${String(key)}`);

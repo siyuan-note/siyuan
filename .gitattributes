@@ -7,3 +7,4 @@ app/stage/protyle/** linguist-vendored
 *.scss text eol=lf
 *.ts   text eol=lf
 *.go   text eol=lf
+/scripts/docker-onnx-build.sh text eol=lf

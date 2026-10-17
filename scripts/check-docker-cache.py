@@ -35,9 +35,12 @@ def cache_bytes(manifest):
 def onnx_steps(log, expected=PLATFORMS):
     steps, result = {}, {}
     for line in log.splitlines():
-        match = re.match(r"^#(\d+) \[(linux/[a-z0-9/]+) onnx-build \d+/\d+\] RUN python3 /onnxruntime/tools/ci_build/build.py", line)
+        match = re.match(r"^#(\d+) \[(?:(linux/[a-z0-9/]+) )?onnx-build \d+/\d+\] RUN "
+                         r"(?:python3 /onnxruntime/tools/ci_build/build.py|/bin/sh /docker-onnx-build.sh)", line)
         if match:
-            steps[match[1]] = match[2]
+            if match[2] is None and len(expected) != 1:
+                raise ValueError("ONNX log has no unambiguous target platform")
+            steps[match[1]] = match[2] or next(iter(expected))
         status = re.match(r"^#(\d+) (CACHED|DONE)(?:\s|$)", line)
         if status and status[1] in steps:
             platform = steps[status[1]]
@@ -123,6 +126,9 @@ def main():
         with tempfile.TemporaryDirectory(prefix="siyuan-onnx-cache-") as directory:
             context = Path(directory)
             (context / "Dockerfile").write_bytes(args.dockerfile.read_bytes())
+            (context / "scripts").mkdir()
+            for name in ("docker-onnx-build.sh", "docker-onnx-toolchain.cmake"):
+                (context / "scripts" / name).write_bytes((args.dockerfile.parent / "scripts" / name).read_bytes())
             (context / "app").mkdir()
             for name, imported, changed in (("cold", False, False), ("warm", True, False),
                                              ("application-change", True, True), ("onnx-input-change", True, False)):

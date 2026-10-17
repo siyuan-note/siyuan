@@ -213,6 +213,10 @@ git diff --exit-code $releaseCommit origin/master
 - 部署 Index（版本更新、构建和推送已由发布准备的 `--publish --execute` 完成）
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
 
+Docker 工作流会先解析或构建独立的 ONNX 运行库镜像，再向应用构建传入 `ONNX_IMAGE=<仓库>@sha256:<摘要>`。产物键包含目标平台、Alpine 基础镜像、ONNX 源码及版本、工具链修订、编译脚本和工具链文件；应用源码、应用版本和 Go 工具链变化不会使 ONNX 产物失效。更新系统编译工具包时须递增 `ONNX_TOOLCHAIN_REV`，实际包版本保存在产物的 `onnx-toolchain.txt` 中。解析失败、认证失败或产物元数据不匹配时停止发布，不回退到其他版本。
+
+ARM32 的 ONNX 编译使用构建机原生 Clang、目标 Alpine 开发文件和从锁定依赖编译的原生 `protoc`，避免在 QEMU 下执行 C++ 编译器；最终安装包仍须完成原有的逐平台真实 OCR 和笔记本读写验收。独立产物保留 ONNX 许可证及第三方声明。构建日志和产物解析报告随平台记录一起上传。首次验证应包含 ARMv7 冷构建、相同输入复用、应用改动后复用，以及 ONNX 输入变更后失效；对应脚本回归通过 `python -m unittest discover -s scripts -p test_docker_release.py` 运行。
+
 `release.liuyun.io` 通过 Cloudflare Worker `siyuan-release` 从正式版安装包文件名提取版本号，代理 GitHub Release 下载：
 
 ```text

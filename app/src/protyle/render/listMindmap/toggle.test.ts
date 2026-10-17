@@ -6,6 +6,9 @@ import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} fr
 import {isProtyleListItemFragment, registerProtyleRuntimeCapabilities} from "../../runtimeCapabilities";
 import {getListConversionType} from "../../wysiwyg/listContext";
 
+const metadataAttribute = "custom-sy-list-mindmap-data";
+const legacyStyle = JSON.stringify({version: 1, nodes: {}, relations: [], connectorStyle: "bezier"});
+
 const source = createSourceFile("index.ts", readFileSync("src/protyle/render/listMindmap/index.ts", "utf8"),
     ScriptTarget.ES2021, true);
 const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
@@ -41,10 +44,17 @@ const setup = (embedded = true) => {
     const operations: {doOperations: any[], undoOperations: any[]}[] = [];
     const updates: string[] = [];
     const context: any = {
-        Constants: {CB_GET_HISTORY: "history", CUSTOM_SY_LIST_MINDMAP: attribute},
+        Constants: {CB_GET_HISTORY: "history", CUSTOM_SY_LIST_MINDMAP: attribute, CUSTOM_SY_LIST_MINDMAP_DATA: metadataAttribute},
         isProtyleListItemFragment,
         getListConversionType,
         roots: new WeakMap(), hideElements: () => {}, readListMindmap: () => {},
+        getDefaultListMindmapConnectorStyle: () => "rounded",
+        initializeListMindmapConnectorStyle: (element: unknown, style: string) => {
+            assert.equal(element, list);
+            if (!attrs.has("custom-sy-list-mindmap-data")) {
+                attrs.set("custom-sy-list-mindmap-data", JSON.stringify({version: 1, nodes: {}, relations: [], connectorStyle: style}));
+            }
+        },
         hasListMindmapRootTitle: () => false,
         cleanListMindmapHTML: (html: string) => html,
         clearListMindmapHeight: () => {
@@ -75,6 +85,19 @@ test("a regular list becomes a dedicated mind map block", () => {
     assert.equal(list.dataset.type, "NodeMindmap");
     assert.deepEqual(updates, ['<div data-type="NodeList"></div>']);
     assert.equal(operations.length, 0);
+    assert.equal(JSON.parse(attrs.get("custom-sy-list-mindmap-data")).connectorStyle, "rounded");
+});
+
+test("returning lists retain existing connector metadata instead of applying the new default", async () => {
+    for (const data of [{version: 1, nodes: {}, relations: [] as unknown[]},
+        {version: 2, nodes: {}, relations: [] as unknown[], connectorStyle: "spline", extension: "keep"}]) {
+        const {owner, list, attrs, attribute, api} = setup(false);
+        attrs.delete(attribute);
+        const original = JSON.stringify(data);
+        attrs.set("custom-sy-list-mindmap-data", original);
+        await api.toggleListMindmap(owner, list);
+        assert.equal(attrs.get("custom-sy-list-mindmap-data"), original);
+    }
 });
 
 test("a dedicated mind map becomes a list block", () => {
@@ -97,8 +120,10 @@ test("embedded mind maps persist view changes against the source list with undo"
         const operation = operations[operations.length - 1];
         assert.equal(operation.doOperations[0].action, "setAttrs");
         assert.equal(operation.doOperations[0].id, "source-list");
-        assert.deepEqual(JSON.parse(operation.doOperations[0].data), {[attribute]: next});
-        assert.deepEqual(JSON.parse(operation.undoOperations[0].data), {[attribute]: previous});
+        assert.deepEqual(JSON.parse(operation.doOperations[0].data), {[attribute]: next,
+            ...(!next ? {[metadataAttribute]: legacyStyle} : {})});
+        assert.deepEqual(JSON.parse(operation.undoOperations[0].data), {[attribute]: previous,
+            ...(!next ? {[metadataAttribute]: ""} : {})});
         assert.equal(attrs.get(attribute), next);
     }
     assert.equal(operations.length, 2);
@@ -123,14 +148,15 @@ test("legacy mindmap exit includes height cleanup and exact style restoration in
         attrs.set("style", style);
         await api.toggleListMindmap(owner, list);
         const expected = style.includes("color") ? "color:red" : "";
-        assert.deepEqual(JSON.parse(operations[0].doOperations[0].data), {[attribute]: "", style: expected});
-        assert.deepEqual(JSON.parse(operations[0].undoOperations[0].data), {[attribute]: "1", style});
+        assert.deepEqual(JSON.parse(operations[0].doOperations[0].data), {[attribute]: "", style: expected, [metadataAttribute]: legacyStyle});
+        assert.deepEqual(JSON.parse(operations[0].undoOperations[0].data), {[attribute]: "1", style, [metadataAttribute]: ""});
         assert.equal(attrs.get("style") || "", expected);
         for (const [name, value] of Object.entries(JSON.parse(operations[0].undoOperations[0].data))) {
-            attrs.set(name, value as string);
+            if (value) { attrs.set(name, value as string); }
+            else { attrs.delete(name); }
         }
         await api.toggleListMindmap(owner, list);
-        assert.deepEqual(JSON.parse(operations[1].doOperations[0].data), {[attribute]: "", style: expected});
+        assert.deepEqual(JSON.parse(operations[1].doOperations[0].data), {[attribute]: "", style: expected, [metadataAttribute]: legacyStyle});
     }
 });
 

@@ -513,7 +513,7 @@ export class ListMindmapView {
         }
         if (!this.readOnly) {
             if (this.options.onSettingsMenu) {
-                add("settings", "config", "iconSettings", () => this.options.onSettingsMenu(this.buttons.get("settings")));
+                add("settings", "listMindmapConnectors", "iconLine", () => this.options.onSettingsMenu(this.buttons.get("settings")));
                 this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
             }
             add("summary", "listMindmapSummary", "iconGroups", () => {

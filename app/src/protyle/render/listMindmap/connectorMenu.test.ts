@@ -33,12 +33,17 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         const transactions: {before: string, after: string}[] = [];
         let editable = true;
         let item: IMenu;
+        let defaultItem: IMenu;
+        let defaultStyle = "bezier";
+        const defaults: string[] = [];
         const placements: unknown[] = [];
         const anchor = {getBoundingClientRect: () => ({left: 20, bottom: 100, height: 24})};
         const context: any = {
             owner: {}, list,
             canEdit: () => editable,
             getListMindmapConnectorMenuItem,
+            getDefaultListMindmapConnectorStyle: () => defaultStyle,
+            setDefaultListMindmapConnectorStyle: (style: string) => { defaultStyle = style; defaults.push(style); },
             getListMindmapSiblingIDs: () => new Map(),
             normalizeListMindmapSummaryMetadata: () => {},
             readListMindmap: () => ({root: {id: "root"}, metadata: JSON.parse(JSON.stringify(data)),
@@ -54,7 +59,10 @@ test("desktop and mobile connector menus persist one undoable change and preserv
                 build(undefined, {show: (open: () => void) => open()});
             },
             Menu: class {
-                addItem(value: IMenu) { item = value; }
+                addItem(value: IMenu) {
+                    if (value.id === "defaultConnectorStyle") { defaultItem = value; }
+                    else { item = value; }
+                }
                 open(position: unknown) { placements.push(position); }
                 fullscreen(position: unknown) { placements.push(position); }
             },
@@ -67,6 +75,13 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         target.onSettingsMenu(anchor);
         assert.equal((item.submenu as IMenu[]).find(entry => entry.checked).id, "bezier");
         assert.deepEqual(JSON.parse(JSON.stringify(placements)), [mobile ? "bottom" : {x: 20, y: 100, h: 24}]);
+        (defaultItem.submenu as IMenu[]).find(entry => entry.id === "rounded").click(undefined, undefined);
+        assert.deepEqual(defaults, ["rounded"]);
+        assert.equal(transactions.length, 0, "changing the preference must not enter document undo history");
+        assert.equal(JSON.stringify(data), original, "changing the preference must not restyle the current map");
+        target.onSettingsMenu(anchor);
+        assert.equal((defaultItem.submenu as IMenu[]).find(entry => entry.checked).id, "rounded");
+        assert.equal((item.submenu as IMenu[]).find(entry => entry.checked).id, "bezier");
         choose("orthogonal");
         assert.equal(transactions.length, 1);
         assert.equal(transactions[0].before, original);
@@ -93,6 +108,8 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         const count = transactions.length;
         editable = false;
         choose("spline");
+        (defaultItem.submenu as IMenu[]).find(entry => entry.id === "spline").click(undefined, undefined);
+        assert.deepEqual(defaults, ["rounded"], "a stale menu cannot change preferences after editing is disabled");
         assert.equal(transactions.length, count, "an already open menu cannot edit a newly read-only map");
     }
 });

@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "연결선",
+	"listMindmapDefaultConnectorStyle": "새 지도의 기본 연결선 스타일",
 	"listMindmapConnectorStyle": "연결선 스타일",
 	"listMindmapConnectorSpline": "곡선 분기",
 	"listMindmapConnectorOrthogonal": "직각선",

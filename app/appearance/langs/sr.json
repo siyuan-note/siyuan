@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Линије повезивања",
+	"listMindmapDefaultConnectorStyle": "Подразумевани стил веза за нове мапе",
 	"listMindmapConnectorStyle": "Стил спојних линија",
 	"listMindmapConnectorSpline": "Закривљено гранање",
 	"listMindmapConnectorOrthogonal": "Правоугаони",

@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Bağlantı çizgileri",
+	"listMindmapDefaultConnectorStyle": "Yeni haritalar için varsayılan bağlantı stili",
 	"listMindmapConnectorStyle": "Bağlantı çizgisi stili",
 	"listMindmapConnectorSpline": "Eğri dallanma",
 	"listMindmapConnectorOrthogonal": "Dik açılı",

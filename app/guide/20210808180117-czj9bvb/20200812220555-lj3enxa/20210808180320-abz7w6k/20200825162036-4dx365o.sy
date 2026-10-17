@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261017110432"
+		"updated": "20261017113835"
 	},
 	"Children": [
 		{
@@ -1964,7 +1964,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261017110432"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2017,7 +2017,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-6mghas7",
-				"updated": "20261017110432"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2027,7 +2027,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
+					"TextMarkTextContent": "连线"
 				},
 				{
 					"Type": "NodeText",
@@ -2041,6 +2041,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中选择曲线分叉、正交折线、曲线汇聚或圆角折线。选择应用于整张脑图，随文档保存，并支持撤销和重做。切换只改变父子节点间的连线，不改变节点位置或关系线。正交样式共用的竖线沿用默认线色，不单独选中；横向分支仍可单独选中和配色。思源格式的 HTML 和 PDF 预览使用保存的样式。"
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-kojg0bw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-kojg0bw",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连线"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建默认连线样式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择新建导图的连线样式，也适用于首次将列表或页签转换为导图。此偏好保存在当前工作空间的本地配置中，不参与云同步。修改它不会改变已有导图；复制、导入及列表或页签往返转换保留原样式。"
 				}
 			]
 		},

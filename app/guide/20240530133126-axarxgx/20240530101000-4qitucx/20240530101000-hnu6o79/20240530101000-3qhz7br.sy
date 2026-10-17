@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261017110432"
+		"updated": "20261017113835"
 	},
 	"Children": [
 		{
@@ -2090,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261017110432"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2143,7 +2143,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-562ro9u",
-				"updated": "20261017110432"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2153,7 +2153,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
+					"TextMarkTextContent": "接続線"
 				},
 				{
 					"Type": "NodeText",
@@ -2167,6 +2167,34 @@
 				{
 					"Type": "NodeText",
 					"Data": " を開き、分岐曲線、直角線、扇形曲線、角丸直角線から選択できます。選択はマップ全体に適用され、文書とともに保存され、取り消しとやり直しに対応します。親子ノード間の接続線のみを変更し、ノードの位置や関連線は変更しません。直角のスタイルでは共通の縦線に既定の線色を使用し、縦線を個別に選択することはできません。横方向の分岐は個別に選択して色を変更できます。SiYuan 形式の HTML と PDF プレビューには保存したスタイルが反映されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-geqkoea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-geqkoea",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新規マップの既定の接続線スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、新規マップやリスト・タブから初めて変換するマップの接続線スタイルを選択できます。この設定は現在のワークスペースのローカル設定に保存され、クラウド同期には含まれません。変更しても既存のマップには影響しません。コピー、インポート、リストやタブとの往復変換では元のスタイルが保持されます。"
 				}
 			]
 		},

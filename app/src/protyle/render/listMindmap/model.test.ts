@@ -220,6 +220,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, getListMindmapSiblingFoldStates, " +
         "addListMindmapSummaryRanges, getListMindmapSummarySnapshot, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
+        "initializeListMindmapConnectorStyle, LIST_MINDMAP_DEFAULT_CONNECTOR_STYLE_KEY, " +
         "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock, getListMindmapElements, registerListMindmapRoot, restoreListMindmapFocus};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
@@ -462,6 +463,40 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(newMindmap.dataset.type, "NodeList");
     check.equal(newMindmap.getAttribute("custom-sy-list-mindmap"), "1");
     const creationSource = `- ${Lute.Caret}`;
+    const preferenceKey = api.LIST_MINDMAP_DEFAULT_CONNECTOR_STYLE_KEY;
+    lute.SetTabs(true);
+    for (const style of ["spline", "orthogonal", "bezier", "rounded"]) {
+        window.siyuan.storage[preferenceKey] = style;
+        holder.innerHTML = api.spinListMindmapDOM(lute, creationSource);
+        const created = holder.firstElementChild as HTMLElement;
+        check.equal(api.readListMindmap(created).metadata.connectorStyle, style);
+        const saved = lute.SpinBlockDOM(created.outerHTML);
+        window.siyuan.storage[preferenceKey] = "orthogonal";
+        holder.innerHTML = saved;
+        check.equal(api.readListMindmap(holder.firstElementChild).metadata.connectorStyle, style,
+            "saved maps keep their creation snapshot after the preference changes");
+        const tabs = api.convertTabsList(reset("* First\n* Second\n"), "List2Tabs", lute);
+        window.siyuan.storage[preferenceKey] = style;
+        const converted = api.convertTabsList(tabs, "Tabs2Mindmap", lute);
+        check.equal(api.readListMindmap(converted).metadata.connectorStyle, style, "first tab conversion uses the preference");
+        window.siyuan.storage[preferenceKey] = "rounded";
+        const tabRoundTrip = api.convertTabsList(api.listMindmapConversionSource(converted), "List2Tabs", lute);
+        check.equal(api.readListMindmap(api.convertTabsList(tabRoundTrip, "Tabs2Mindmap", lute)).metadata.connectorStyle,
+            style, "tab round trips retain the stored style");
+    }
+    window.siyuan.storage[preferenceKey] = "rounded";
+    for (const legacy of [false, true]) {
+        const old = reset("* Old\n");
+        if (legacy) { old.setAttribute("custom-sy-list-mindmap", "1"); }
+        else { api.retagMindmapBranch(old, true); }
+        check.equal(api.readListMindmap(old).metadata.connectorStyle, undefined,
+            "opening legacy maps cannot apply the local default");
+        const listAgain = api.listMindmapConversionSource(old);
+        api.initializeListMindmapConnectorStyle(listAgain, "rounded");
+        check.equal(api.readListMindmap(listAgain).metadata.connectorStyle, "bezier",
+            "old maps without metadata retain the fixed legacy style after leaving and returning");
+    }
+    delete window.siyuan.storage[preferenceKey];
     const paragraph = reset("Empty\n");
     const paragraphID = paragraph.dataset.nodeId;
     paragraph.querySelector('[contenteditable="true"]').textContent = creationSource;
@@ -1027,7 +1062,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const view = new api.ListMindmapView(options);
     await settle();
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
-    const settings = host.querySelector<HTMLButtonElement>('[aria-label="config"]');
+    const settings = host.querySelector<HTMLButtonElement>('[aria-label="listMindmapConnectors"]');
     check.equal(settings.getAttribute("aria-haspopup"), "menu");
     settings.click();
     check.equal(settingsOpened, 1, "the editable toolbar opens the shared settings menu");
@@ -1059,7 +1094,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(view.findLine(branch).id, child.id, "the real canvas hit test selects each horizontal branch");
         }
         view.setReadOnly(true);
-        check.equal(host.querySelector('[aria-label="config"]'), null, "read-only views render saved styles without an edit menu");
+        check.equal(host.querySelector('[aria-label="listMindmapConnectors"]'), null, "read-only views render saved styles without an edit menu");
         check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
         view.setReadOnly(false);
     }
@@ -3962,7 +3997,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "connectors.ts")) +
-        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
+        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
         compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +

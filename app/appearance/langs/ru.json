@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Соединительные линии",
+	"listMindmapDefaultConnectorStyle": "Стиль соединений по умолчанию для новых карт",
 	"listMindmapConnectorStyle": "Стиль соединительных линий",
 	"listMindmapConnectorSpline": "Изогнутая развилка",
 	"listMindmapConnectorOrthogonal": "Прямоугольный",

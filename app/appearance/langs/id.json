@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Penghubung",
+	"listMindmapDefaultConnectorStyle": "Gaya penghubung bawaan untuk peta baru",
 	"listMindmapConnectorStyle": "Gaya garis penghubung",
 	"listMindmapConnectorSpline": "Cabang melengkung",
 	"listMindmapConnectorOrthogonal": "Siku-siku",

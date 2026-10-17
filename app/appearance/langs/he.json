@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "קווי חיבור",
+	"listMindmapDefaultConnectorStyle": "סגנון חיבור ברירת מחדל למפות חדשות",
 	"listMindmapConnectorStyle": "סגנון קווי חיבור",
 	"listMindmapConnectorSpline": "הסתעפות מעוקלת",
 	"listMindmapConnectorOrthogonal": "זוויות ישרות",

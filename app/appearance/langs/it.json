@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Collegamenti",
+	"listMindmapDefaultConnectorStyle": "Stile dei collegamenti predefinito per le nuove mappe",
 	"listMindmapConnectorStyle": "Stile dei collegamenti",
 	"listMindmapConnectorSpline": "Diramazione curva",
 	"listMindmapConnectorOrthogonal": "Ortogonale",

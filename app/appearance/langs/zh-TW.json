@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "連線",
+	"listMindmapDefaultConnectorStyle": "新建預設連線樣式",
 	"listMindmapConnectorStyle": "連線樣式",
 	"listMindmapConnectorSpline": "曲線分岔",
 	"listMindmapConnectorOrthogonal": "直角折線",

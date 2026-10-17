@@ -1,5 +1,6 @@
 import {getTabTitle, getTabTitleBlock} from "../render/tabsRender";
-import {retagMindmapBranch} from "../render/listMindmap/model";
+import {initializeListMindmapConnectorStyle, retagMindmapBranch} from "../render/listMindmap/model";
+import {getDefaultListMindmapConnectorStyle} from "../render/listMindmap/preferences";
 
 export type TTabsListConversion = "List2Tabs" | "Tabs2UL" | "Tabs2OL" | "Tabs2TL" | "Tabs2Mindmap";
 
@@ -172,6 +173,7 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
         }
     }
     if (type === "Tabs2Mindmap") {
+        initializeListMindmapConnectorStyle(result, getDefaultListMindmapConnectorStyle());
         retagMindmapBranch(result, true);
     }
     return result;

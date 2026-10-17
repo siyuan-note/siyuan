@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Conectores",
+	"listMindmapDefaultConnectorStyle": "Estilo de conexión predeterminado para mapas nuevos",
 	"listMindmapConnectorStyle": "Estilo de conexión",
 	"listMindmapConnectorSpline": "Bifurcación curva",
 	"listMindmapConnectorOrthogonal": "Ortogonal",

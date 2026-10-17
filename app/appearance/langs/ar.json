@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "خطوط التوصيل",
+	"listMindmapDefaultConnectorStyle": "نمط التوصيل الافتراضي للخرائط الجديدة",
 	"listMindmapConnectorStyle": "نمط خطوط الربط",
 	"listMindmapConnectorSpline": "تفرع منحني",
 	"listMindmapConnectorOrthogonal": "زوايا قائمة",

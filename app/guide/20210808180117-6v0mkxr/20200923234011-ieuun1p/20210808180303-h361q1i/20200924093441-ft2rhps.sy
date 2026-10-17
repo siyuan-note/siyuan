@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261017110432"
+		"updated": "20261017113835"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261017110432"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2014,7 +2014,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-mq248cg",
-				"updated": "20261017110432"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2024,7 +2024,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
+					"TextMarkTextContent": "Connectors"
 				},
 				{
 					"Type": "NodeText",
@@ -2038,6 +2038,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " to select Curved fork, Orthogonal, Curved fan, or Rounded orthogonal. The choice applies to the whole map, is saved with the document, and supports undo and redo. It changes parent-child connectors without moving nodes or changing relationship lines. Orthogonal styles use a shared vertical trunk in the default line color; the trunk cannot be selected separately, while horizontal branches can still be selected and colored individually. SiYuan-format HTML and PDF previews use the saved style."
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-rxzvh9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-rxzvh9f",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Connectors"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default connector style for new maps"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " you can choose the style used when creating a map or converting a list or tabs to a map for the first time. This preference is saved locally in the current workspace and is not included in cloud sync. Changing it does not affect existing maps. Copies, imports, and maps converted to lists or tabs and back retain their original style."
 				}
 			]
 		},

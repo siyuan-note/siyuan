@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Connectors",
+	"listMindmapDefaultConnectorStyle": "Default connector style for new maps",
 	"listMindmapConnectorStyle": "Connector style",
 	"listMindmapConnectorSpline": "Curved fork",
 	"listMindmapConnectorOrthogonal": "Orthogonal",

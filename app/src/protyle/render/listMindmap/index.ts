@@ -32,7 +32,7 @@ import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
-    convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight,
+    convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight, initializeListMindmapConnectorStyle,
 } from "./model";
 import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
@@ -55,6 +55,7 @@ import {highlightRender} from "../highlightRender";
 import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {getListMindmapConnectorMenuItem} from "./connectorMenu";
+import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void, focusRevision: number,
@@ -108,6 +109,9 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     if (list.dataset.type === "NodeMindmap" || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) == null) {
         const before = cleanListMindmapHTML(list.outerHTML);
         const toMindmap = list.dataset.type === "NodeList";
+        if (toMindmap) {
+            initializeListMindmapConnectorStyle(list, getDefaultListMindmapConnectorStyle());
+        }
         retagMindmapBranch(list, toMindmap);
         if (!toMindmap) {
             list.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
@@ -130,12 +134,19 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     }
     hideElements(["gutter", "toolbar", "hint"], owner);
     const previousStyle = list.getAttribute("style") || "";
+    const previousMetadata = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA) || "";
     if (!next) {
+        initializeListMindmapConnectorStyle(list, "bezier");
         clearListMindmapHeight(list);
     }
     const nextStyle = list.getAttribute("style") || "";
     const doAttrs: Record<string, string> = {[Constants.CUSTOM_SY_LIST_MINDMAP]: next};
     const undoAttrs: Record<string, string> = {[Constants.CUSTOM_SY_LIST_MINDMAP]: previous};
+    const nextMetadata = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA) || "";
+    if (nextMetadata !== previousMetadata) {
+        doAttrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA] = nextMetadata;
+        undoAttrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA] = previousMetadata;
+    }
     if (nextStyle !== previousStyle) {
         doAttrs.style = nextStyle;
         undoAttrs.style = previousStyle;
@@ -249,6 +260,11 @@ class ListMindmapController {
                                     }
                                 });
                             }, window.siyuan.languages));
+                        menu.addItem(getListMindmapConnectorMenuItem(getDefaultListMindmapConnectorStyle(), style => {
+                            if (canEdit(owner, list)) {
+                                setDefaultListMindmapConnectorStyle(style);
+                            }
+                        }, window.siyuan.languages, "default"));
                         if (isMobile()) {
                             session.show(() => menu.fullscreen("bottom"));
                         } else {

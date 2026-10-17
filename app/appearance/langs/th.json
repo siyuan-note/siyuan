@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "เส้นเชื่อม",
+	"listMindmapDefaultConnectorStyle": "รูปแบบเส้นเชื่อมเริ่มต้นสำหรับแผนผังใหม่",
 	"listMindmapConnectorStyle": "รูปแบบเส้นเชื่อม",
 	"listMindmapConnectorSpline": "เส้นโค้งแตกแขนง",
 	"listMindmapConnectorOrthogonal": "เส้นหักมุมฉาก",

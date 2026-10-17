@@ -197,6 +197,13 @@ export const writeListMindmapMetadata = (list: HTMLElement, metadata: ListMindma
     list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, value);
 };
 
+// 仅首次创建配置时写入样式，已有脑图配置继续按自身的样式或固定缺省值显示。
+export const initializeListMindmapConnectorStyle = (list: Element, style: ListMindmapConnectorStyle) => {
+    if (!list.hasAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA)) {
+        writeListMindmapMetadata(list as HTMLElement, {...parseListMindmapMetadata(null), connectorStyle: style});
+    }
+};
+
 // 退出脑图时移除画布高度，让列表按正文撑开，同时保留其他块样式。
 export const clearListMindmapHeight = (element: Element) => {
     const style = (element as HTMLElement).style;
@@ -211,6 +218,9 @@ export const clearListMindmapHeight = (element: Element) => {
 
 export const retagMindmapBranch = (root: Element, toMindmap: boolean) => {
     if (!toMindmap) {
+        if (root.getAttribute("data-type") === "NodeMindmap") {
+            initializeListMindmapConnectorStyle(root, "bezier");
+        }
         clearListMindmapHeight(root);
     }
     const sourceBranch = toMindmap ? "NodeList" : "NodeMindmap";
@@ -381,6 +391,9 @@ export const listMindmapConversionSource = (element: Element): Element => {
     const template = document.createElement("template");
     template.innerHTML = cleanListMindmapHTML(element.outerHTML);
     const source = template.content.firstElementChild;
+    if (source.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") {
+        initializeListMindmapConnectorStyle(source, "bezier");
+    }
     if (source.getAttribute("data-type") === "NodeMindmap") {
         retagMindmapBranch(source, false);
     }

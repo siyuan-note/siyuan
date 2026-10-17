@@ -1,4 +1,6 @@
 {
+	"listMindmapConnectors": "Verbindungslinien",
+	"listMindmapDefaultConnectorStyle": "Standard-Verbindungsstil für neue Mindmaps",
 	"listMindmapConnectorStyle": "Linienstil",
 	"listMindmapConnectorSpline": "Verzweigte Kurve",
 	"listMindmapConnectorOrthogonal": "Rechtwinklig",

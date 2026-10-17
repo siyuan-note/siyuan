@@ -40,12 +40,13 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         block.textContent = text;
         return block.outerHTML;
     };
-    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string) => {
+    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string, branchType = "NodeList") => {
         let transactionOwner: (operations: Array<{action: string; id: string; parentID?: string;
             previousID?: string; nextID?: string}>) => unknown;
         const container = document.createElement("section");
+        container.dataset.type = branchType;
         const element = document.createElement("div");
-        element.dataset.type = "NodeListItem";
+        element.dataset.type = `${branchType}Item`;
         element.dataset.nodeId = "item";
         element.innerHTML = initialBlockHTML;
         const host = document.createElement("div");
@@ -250,6 +251,38 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     // 直接键入只替换首个段落，保留其余内容块。
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
+    // 新增的直接子分支在关闭节点编辑时提交，自动保存不能先把分支 ID 写入源树。
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        const current = create(paragraph("body", "Keep body"), undefined, "NodeMindmap");
+        const branch = document.createElement("div");
+        branch.dataset.type = type;
+        branch.dataset.nodeId = "new-branch";
+        branch.innerHTML = `<div data-node-id="new-item" data-type="${type}Item">${paragraph("child", "New child")}</div>`;
+        current.wysiwyg.append(branch);
+        await settle();
+        const flushed = current.state.flushed;
+        window.dispatchEvent(new Event("blur"));
+        await until(() => current.state.flushed > flushed);
+        await settle();
+        check.equal(current.state.saves.length, 0, type);
+        check.equal(current.element.textContent, "Keep body", "background saves retain the original source");
+        check.equal(await current.editor.finish(), true, type);
+        check.equal(current.state.saves.length, 1, "closing commits the branch in one content snapshot");
+        check.equal(current.element.querySelector('[data-node-id="child"]').textContent, "New child");
+        check.equal(current.state.finished, 1);
+        check.equal(current.state.messages.length, 0);
+        await current.remove();
+    }
+    // 旧列表脑图中的独立脑图仍属于正文，保留其后台保存能力。
+    const legacyNested = create(paragraph("body", "Keep body"));
+    legacyNested.wysiwyg.insertAdjacentHTML("beforeend", '<div data-type="NodeMindmap" data-node-id="nested">' +
+        '<div data-type="NodeMindmapItem" data-node-id="nested-item">' + paragraph("child", "Nested body") + "</div></div>");
+    await settle();
+    window.dispatchEvent(new Event("blur"));
+    await until(() => legacyNested.state.saves.length === 1);
+    check.equal(legacyNested.element.querySelector('[data-node-id="child"]').textContent, "Nested body");
+    check.equal(await legacyNested.editor.finish(), true);
+    await legacyNested.remove();
     // 粘贴到选中节点时保留原正文，在当前可见正文末尾启动上传；上传结束前保留编辑器。
     const panEditor = create(paragraph("body", "Keep caret"));
     const panTarget = document.createElement("div");
@@ -762,6 +795,30 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             content.innerHTML = preview;
             check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
                 "repeated editing does not change preview dimensions");
+        }
+    }
+    // 百分比宽度的内层画布不能在按内容撑开的节点中塌缩，缩放和大字号也保持可操作宽度。
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        for (const fontSize of [16, 32]) {
+            fixture.style.fontSize = `${fontSize}px`;
+            fixture.innerHTML = '<div class="mindmap-view"><div class="mindmap-view__viewport"><div class="mindmap-view__world">' +
+                '<div class="mindmap-view__node mindmap-view__node--editing"><div class="mindmap-view__content mindmap-view__editor protyle">' +
+                '<div class="protyle-content" data-padding-mode="responsive"><div class="protyle-wysiwyg" spellcheck="false">' +
+                `<div data-type="${type}" class="${type === "NodeList" ? "list" : "mindmap"}" data-mindmap-view-rendered="true">` +
+                '<div class="mindmap-view"><div class="mindmap-view__toolbar block__icons"></div>' +
+                '<div class="mindmap-view__viewport"><div class="mindmap-view__world"></div></div></div>' +
+                "</div></div></div></div></div></div></div></div>";
+            const node = fixture.querySelector<HTMLElement>(".mindmap-view__node--editing");
+            const nested = fixture.querySelector<HTMLElement>(".mindmap-view__editor .mindmap-view");
+            for (const device of ["desktop", "mobile"]) {
+                fixture.style.width = device === "mobile" ? "320px" : "800px";
+                fixture.querySelector<HTMLElement>(".protyle-content").dataset.device = device;
+                for (const scale of [1, 0.65, 1.5]) {
+                    fixture.style.transform = `scale(${scale})`;
+                    check.ok(nested.offsetWidth >= 260, "nested canvases retain a usable intrinsic width");
+                    check.ok(node.offsetWidth <= 300, "nested canvases respect the node width limit");
+                }
+            }
         }
     }
     fixture.remove();

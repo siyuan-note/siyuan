@@ -262,9 +262,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished || composing) {
             return false;
         }
-        // 编辑器中创建的列表会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
+        // 编辑器中创建的列表和脑图会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
         if (!finishSession &&
-            Array.from(fragment.wysiwyg.children).some(element => element.getAttribute("data-type") === "NodeList")) {
+            Array.from(fragment.wysiwyg.children).some(element =>
+                ["NodeList", nestedBranchType(node)].includes(element.getAttribute("data-type")))) {
             return false;
         }
         const html = cleanListMindmapHTML(fragment.getBlockHTML());

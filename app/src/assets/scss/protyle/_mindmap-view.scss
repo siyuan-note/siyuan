@@ -517,6 +517,11 @@
     }
   }
 
+  // 内层画布为按内容撑开的节点提供固有宽度，避免百分比宽度循环计算后塌缩。
+  &__editor .mindmap-view {
+    min-width: 260px;
+  }
+
   &__editor .protyle-content[data-padding-mode] {
     container-type: normal;
   }

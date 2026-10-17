@@ -3147,6 +3147,12 @@ img.av__cellassetimg {
     text-align: left;
   }
 
+  &-source-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   &-enabled,
   &-tools {
     align-self: flex-end;
@@ -3198,6 +3204,12 @@ img.av__cellassetimg {
       flex-shrink: 0;
       margin-left: 0;
     }
+  }
+
+  &-source-row {
+    flex-wrap: nowrap;
+    column-gap: 0;
+    min-height: 24px;
   }
 
   &-row[data-condition] {

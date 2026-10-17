@@ -8,6 +8,7 @@ import {isMobile} from "../../../util/functions";
 import {movePathTo} from "../../../util/pathName";
 import {transaction} from "../../wysiwyg/transaction";
 import {waitForPendingTransactions} from "../../util/transactionQueue";
+import {openLink} from "../../../editor/openLink";
 
 export const collectionSourceIncomplete = (source: AVAutomationBlockSourceInput) => !source ||
     !(source.notebookIDs?.length || source.documentIDs?.length) ||
@@ -25,7 +26,7 @@ export const mountBlockCollectionSource = (host: HTMLElement, source: AVAutomati
     };
     const names = new Map<string, string>();
     let revision = 0;
-    const removeButton = (kind: string, index: number) => `<button type="button" class="block__icon" data-remove="${kind}" data-index="${index}" aria-label="${escapeAttr(lang.delete)}"><svg><use xlink:href="#iconClose"></use></svg></button>`;
+    const removeButton = (kind: string, index: number) => `<svg class="b3-menu__action b3-menu__action--show b3-menu__action--warning fn__pointer ariaLabel" data-remove="${kind}" data-index="${index}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(lang.delete)}"><use xlink:href="#iconClose"></use></svg>`;
     const render = async () => {
         const version = ++revision;
         await Promise.all((source.documentIDs || []).map(async id => {
@@ -41,7 +42,7 @@ export const mountBlockCollectionSource = (host: HTMLElement, source: AVAutomati
         host.innerHTML = `<div class="av__automation-action">
 <div class="ft__on-surface ft__smaller">${lang.automationCollectionTip}</div>
 <button type="button" class="b3-button b3-button--outline av__automation-source-action" data-scope>${lang.automationCollectionScope}</button>
-${notebooks.length || documents.length ? `<div>${notebooks.map((id, i) => `<div class="av__automation-row"><span class="fn__flex-1 ft__breakword">${escapeHtml(window.siyuan.notebooks.find(box => box.id === id)?.name || id)}</span>${removeButton("notebook", i)}</div>`).join("")}${documents.map((id, i) => `<div class="av__automation-row"><span class="fn__flex-1 ft__breakword">${escapeHtml(names.get(id) || id)}</span>${removeButton("document", i)}</div>`).join("")}</div>` : ""}
+${notebooks.length || documents.length ? `<div class="av__automation-source-list">${notebooks.map((id, i) => `<div class="av__automation-row av__automation-source-row"><svg class="block__logoicon ft__on-surface"><use xlink:href="#iconNotebook"></use></svg><span class="fn__flex-1 ft__breakword">${escapeHtml(window.siyuan.notebooks.find(box => box.id === id)?.name || id)}</span>${removeButton("notebook", i)}</div>`).join("")}${documents.map((id, i) => `<div class="av__automation-row av__automation-source-row"><span class="b3-list-item__icon fn__pointer popover__block" data-id="${escapeAttr(id)}"><svg><use xlink:href="#iconFile"></use></svg></span><a href="siyuan://blocks/${escapeAttr(id)}" class="fn__flex-1 ft__breakword">${escapeHtml(names.get(id) || id)}</a>${removeButton("document", i)}</div>`).join("")}</div>` : ""}
 <label class="av__automation-control"><span>${lang.automationCollectionTags}</span><input class="b3-text-field" data-tags value="${escapeAttr((source.tags || []).join(", "))}"></label>
 <button type="button" class="b3-button b3-button--cancel av__automation-source-action" data-types><svg><use xlink:href="#iconDown"></use></svg><span>${lang.automationCollectionTypes}: ${escapeHtml((source.types || []).map(type => types[type] || type).join(", ") || lang.all)}</span></button>
 ${attributes.map((attr, i) => `<div class="av__automation-control" data-attribute="${i}"><div class="av__automation-row"><input class="b3-text-field fn__flex-1" data-attr-name aria-label="${escapeAttr(lang.attr)}" placeholder="custom-name" value="${escapeAttr(attr.name)}">${removeButton("attribute", i)}</div><div class="av__automation-row"><select class="b3-select" data-attr-operator aria-label="${escapeAttr(lang.filter)}">${Object.entries({equals: lang.filterOperatorIs, contains: lang.filterOperatorContains, exists: lang.automationAttrExists, notExists: lang.automationAttrNotExists}).map(([operator, label]) => `<option value="${operator}"${attr.operator === operator ? " selected" : ""}>${label}</option>`).join("")}</select>${["equals", "contains"].includes(attr.operator) ? `<input class="b3-text-field fn__flex-1" data-attr-value aria-label="${escapeAttr(lang.text)}" value="${escapeAttr(attr.value || "")}">` : ""}</div></div>`).join("")}
@@ -50,7 +51,13 @@ ${attributes.map((attr, i) => `<div class="av__automation-control" data-attribut
         onResize();
     };
     host.addEventListener("click", event => {
-        const target = (event.target as Element).closest<HTMLElement>("button");
+        const link = (event.target as Element).closest<HTMLAnchorElement>("a[href]");
+        if (link) {
+            event.preventDefault();
+            openLink(protyle.app, link.getAttribute("href"), event, event.ctrlKey || event.metaKey);
+            return;
+        }
+        const target = (event.target as Element).closest<HTMLElement>("button, [data-remove]");
         if (!target) { return; }
         if (target.hasAttribute("data-scope")) {
             movePathTo({title: lang.automationCollectionScope, flashcard: false, sourceNotebookIds: [protyle.notebookId],
@@ -93,6 +100,14 @@ ${attributes.map((attr, i) => `<div class="av__automation-control" data-attribut
         } else { return; }
         save();
         void render();
+    });
+    host.addEventListener("keydown", event => {
+        const target = (event.target as Element).closest<SVGElement>("[data-remove]");
+        if (target && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            event.stopPropagation();
+            target.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        }
     });
     host.addEventListener("change", event => {
         const target = event.target as HTMLInputElement;

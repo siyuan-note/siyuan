@@ -1,7 +1,6 @@
 {
 	"cleanUnusedAssets": "Limpar recursos sem referências",
 	"tableSelectRange": "Selecionar intervalo de células",
-	"tableSelectionDone": "Concluído",
 	"listMindmapConnectors": "Conectores",
 	"listMindmapDefaultConnectorStyle": "Estilo de conexão padrão para novos mapas",
 	"listMindmapConnectorStyle": "Estilo das conexões",

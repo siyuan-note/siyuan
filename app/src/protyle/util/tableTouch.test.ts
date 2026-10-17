@@ -11,8 +11,15 @@ const browserCases = async (sources: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const nodePath: typeof path = require("node:path");
     const noop = () => {};
+    const fixtureStyle = document.createElement("style");
+    fixtureStyle.textContent = ".protyle-util{position:fixed;top:8px;left:8px;right:8px}.block__icons{display:flex;height:42px}" +
+        ".block__icons svg,.protyle-table-control svg{width:16px;height:16px}.fn__none{display:none}" +
+        ".protyle-table-control__handle,.protyle-table-control__add,.protyle-table-control__touch-button{" +
+        "position:fixed;width:28px;height:28px;transform:translate(-50%,-50%)}";
+    document.head.append(fixtureStyle);
     const transactions: {before: string, after: string}[] = [];
-    const clipboard: {textPlain: string, textHTML?: string}[] = [];
+    const clipboard: {textPlain: string, textHTML?: string, textSiyuan?: string}[] = [];
+    const pasted: {target: HTMLTableCellElement, textPlain: string}[] = [];
     const items: IMenu[] = [];
     let mobile = true;
     let clipboardFailure = false;
@@ -20,13 +27,16 @@ const browserCases = async (sources: Record<string, string>) => {
     const menuElement = document.createElement("div");
     menuElement.id = "commonMenu";
     document.body.append(menuElement);
+    const menuScrim = document.createElement("div");
+    menuScrim.id = "commonMenuScrim";
+    document.body.append(menuScrim);
     const menu = {element: menuElement, append: (element: HTMLElement) => menuElement.append(element),
         remove: () => { items.length = 0; menuElement.replaceChildren(); }, fullscreen: noop, popup: noop};
     const languages = new Proxy({}, {get: (_target, key: string) => key === "insertRowBefore" ||
         key === "insertRowAfter" || key === "insertColumnLeft1" || key === "insertColumnRight1" ? "${x}" : key});
     const hotkeys = new Proxy({}, {get: () => ({custom: ""})});
     Object.assign(window, {Lute: {NewNodeID: () => "20261017120000-newnode", Caret: ""},
-        siyuan: {languages, menus: {menu}, config: {editor: {fontSize: 16},
+        siyuan: {languages, zIndex: 10, menus: {menu}, config: {editor: {fontSize: 16},
         keymap: {editor: {general: hotkeys, table: hotkeys, insert: hotkeys}}}}});
     const focusByRange = (range: Range) => {
         getSelection().removeAllRanges();
@@ -72,13 +82,18 @@ const browserCases = async (sources: Record<string, string>) => {
         }},
         "src/protyle/util/selectionOffsets.ts": {focusByRange},
         "src/protyle/util/compatibility.ts": {isMac: () => false, encodeBase64: (value: string) => Buffer.from(value, "utf8").toString("base64"),
-            copyPlainText: noop, readClipboard: async () => ({textPlain: "pasted"}),
+            copyPlainText: noop, readClipboard: async () => {
+                await clipboardWait;
+                return {textPlain: "pasted"};
+            },
             writeClipboardData: async (value: {textPlain: string}) => {
                 await clipboardWait;
                 clipboard.push(value);
                 return {status: clipboardFailure ? "failed" : "rich"};
             }},
         "src/protyle/util/normalizeText.ts": {removeZWJ: (value: string) => value},
+        "src/protyle/util/paste.ts": {paste: (_protyle: object, value: {target: HTMLTableCellElement, textPlain: string}) =>
+            pasted.push(value)},
         "src/protyle/util/inlineElementMarker.ts": {getTextWithoutSemanticMarkers: (node: Node) => node.textContent},
         "src/protyle/toolbar/tableCell.ts": {getTableCellTextStyleMenus: (): IMenu[] => [], applyTableCellStyleHotkey: () => false},
         "src/protyle/toolbar/inlineStyle.ts": {getInlineStylesCache: () => ({}), getVisibleOrderedStyleKeys: (): string[] => [],
@@ -132,33 +147,47 @@ const browserCases = async (sources: Record<string, string>) => {
             wysiwyg: {element: editor}, lute: {}, block: {rootID: "root"}} as unknown as IProtyle;
         const core = new TableControl(owner, editor);
         owner.wysiwyg.tableControl = core;
-        const table = editor.querySelector("table");
-        const cell = (row: number, col: number) => table.rows[row].cells[col];
+        const cell = (row: number, col: number) => editor.querySelector("table").rows[row].cells[col];
         const render = () => Reflect.get(core, "render").call(core);
         const invoke = (name: string, ...args: unknown[]) => Reflect.get(core, name).apply(core, args);
-        const touch = (selector: string) => root.querySelector<HTMLElement>(".protyle-table-control " + selector);
+        const touch = (selector: string) => root.querySelector<HTMLElement>(selector);
         const dispose = () => { core.destroy(); root.remove(); getSelection().removeAllRanges(); };
-        return {root, editor, owner, core, table, cell, render, invoke, touch, dispose};
+        return {root, editor, owner, core, get table() { return editor.querySelector("table"); }, cell, render, invoke, touch, dispose};
     };
     {
         const f = fixture();
         check.equal(f.core.startTouchSelection(f.cell(1, 0)), true);
         f.render();
-        check.equal(f.touch("[data-action='done']").textContent, "tableSelectionDone");
+        const toolbar = f.touch(".protyle-table-control__toolbar");
+        check.equal(toolbar.querySelector(".multiSelectCount").textContent, "1");
+        check.equal(toolbar.classList.contains("protyle-util--mobile"), true);
         const active = f.core.getSelectedCells()[0];
         pointer(f.cell(2, 2), "pointerdown", 210, 150);
         pointer(f.cell(2, 2), "pointermove", 200, 100);
         pointer(f.cell(2, 2), "pointercancel", 200, 100);
         check.equal(f.core.getSelectedCells()[0], active, "scroll gestures preserve the selection");
-        f.touch("[data-action='multi']").click();
+        const multi = f.touch("[data-type='multi']");
+        pointer(multi, "pointerdown");
+        check.equal(f.core.hasTouchSelection(), true, "touching the top toolbar retains the table selection");
+        pointer(multi, "pointerup");
+        multi.click();
         f.cell(2, 2).click();
         f.render();
         check.equal(f.core.getSelectedCells().length, 2);
-        check.equal((f.touch("[data-action='copy']") as HTMLButtonElement).disabled, true, "nonrectangular copying stays disabled");
+        check.equal(toolbar.querySelector(".multiSelectCount").textContent, "2");
+        check.equal((f.touch("[data-type='copy']") as HTMLButtonElement).disabled, true, "nonrectangular copying stays disabled");
         f.cell(2, 2).click();
         check.equal(f.core.getSelectedCells().length, 1);
-        f.touch("[data-action='done']").click();
+        f.touch("[data-type='selectAll']").click();
+        check.equal(f.core.getSelectedCells().length, 12);
+        f.touch("[data-type='menu']").click();
+        check.equal(items.some(item => item.label === "mergeCell"), true, "the shared menu button opens table operations");
+        pointer(menuScrim, "pointerdown");
+        check.equal(f.core.hasTouchSelection(), true, "dismissing the menu sheet preserves the selection");
+        f.touch("[data-type='exitMultiSelectMode']").click();
         check.equal(f.core.hasTouchSelection(), false);
+        f.render();
+        check.equal(toolbar.classList.contains("fn__none"), true);
         check.equal(f.table.rows.length, 4);
         f.dispose();
     }
@@ -245,17 +274,20 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.table.rows.length, 3, "shrinking preserves all nonempty rows");
         f.dispose();
     }
-    {
+    for (const mode of ["row", "column"] as const) {
         const f = fixture();
-        f.core.startTouchSelection(f.cell(1, 0), "row");
+        f.core.startTouchSelection(f.cell(1, 0), mode);
         f.render();
-        const handle = f.touch("[data-mode='row'][aria-pressed='true']");
+        const handle = f.touch(`[data-mode='${mode}'][aria-pressed='true']`);
         const rect = handle.getBoundingClientRect();
         pointer(handle, "pointerdown", rect.left + rect.width / 2, rect.top + rect.height / 2);
-        pointer(document, "pointermove", rect.left, 490);
-        pointer(document, "pointerup", rect.left, 490);
+        const x = mode === "row" ? rect.left : 350;
+        const y = mode === "row" ? 490 : rect.top;
+        pointer(document, "pointermove", x, y);
+        pointer(document, "pointerup", x, y);
         await tick();
-        check.equal(f.table.rows[3].textContent, "A1A2A3", "row drag uses the shared reorder transaction");
+        check.equal(mode === "row" ? f.table.rows[3].textContent : f.table.rows[1].textContent,
+            mode === "row" ? "A1A2A3" : "A2A3A1", "touch row and column dragging uses the shared reorder transaction");
         f.dispose();
     }
     {
@@ -307,6 +339,71 @@ const browserCases = async (sources: Record<string, string>) => {
     }
     {
         const f = fixture();
+        f.core.startTouchSelection(f.cell(1, 0));
+        f.core.selectCellRange(f.cell(1, 0), f.cell(2, 1));
+        const selected = f.core.getSelectedCells();
+        f.invoke("setCellStyle", "background-color", "rgb(255, 0, 0)");
+        f.invoke("setCellStyle", "text-align", "center");
+        f.invoke("setCellStyle", "vertical-align", "bottom");
+        check.equal(selected.every(cell => cell.style.backgroundColor === "rgb(255, 0, 0)" &&
+            cell.style.textAlign === "center" && cell.style.verticalAlign === "bottom"), true);
+        check.equal(f.cell(1, 2).getAttribute("style").includes("text-align"), false, "batch styles preserve other cells");
+        await f.invoke("writeTouchClipboard", false, true);
+        check.equal(clipboard.at(-1).textSiyuan, undefined, "rich text copying uses standard HTML");
+        check.match(clipboard.at(-1).textHTML, /A1.*A2.*B1.*B2/);
+        await f.invoke("writeTouchClipboard", true);
+        check.equal(selected.every(cell => cell.textContent === ""), true, "successful cutting clears only the selected cells");
+        check.equal(f.cell(1, 2).textContent, "A3");
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        f.core.startTouchSelection(f.cell(1, 0));
+        await f.invoke("paste");
+        check.equal(pasted.at(-1).target, f.cell(1, 0), "touch paste targets the selection's first cell");
+        check.equal(pasted.at(-1).textPlain, "pasted");
+        const count = pasted.length;
+        let release: () => void;
+        clipboardWait = new Promise(resolve => { release = resolve; });
+        const pending = f.invoke("paste");
+        f.core.startTouchSelection(f.cell(2, 2));
+        release();
+        await pending;
+        check.equal(pasted.length, count, "a delayed clipboard read cannot paste into a changed selection");
+        clipboardWait = undefined;
+        f.dispose();
+    }
+    for (const mode of ["row", "column"] as const) {
+        const f = fixture();
+        f.core.startTouchSelection(f.cell(1, 1), mode);
+        f.invoke("duplicateRowsOrColumns");
+        check.equal(mode === "row" ? f.table.rows.length : f.table.rows[1].cells.length, mode === "row" ? 5 : 4);
+        f.invoke("deleteSelection", false);
+        check.equal(f.table.rows.length, 4);
+        check.equal(f.table.rows[1].cells.length, 3);
+        check.equal(f.cell(1, 1).textContent, "A2", "deleting duplicates preserves the original row or column");
+        f.core.startTouchSelection(f.cell(1, 1), mode);
+        await f.invoke("writeTouchClipboard", true);
+        check.equal(mode === "row" ? f.table.rows.length : f.table.rows[1].cells.length, mode === "row" ? 3 : 2);
+        check.equal(f.cell(0, 0).textContent, "H1", "cutting a body row or column preserves the header");
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        f.core.startTouchSelection(f.cell(1, 0));
+        f.render();
+        f.touch("[data-action='add-column']").click();
+        check.equal(f.table.rows[1].cells.length, 4);
+        f.core.startTouchSelection(f.cell(1, 0));
+        f.render();
+        f.touch("[data-action='add-both']").click();
+        check.equal(f.table.rows.length, 5);
+        check.equal(f.table.rows[1].cells.length, 5);
+        check.equal(f.cell(1, 0).textContent, "A1");
+        f.dispose();
+    }
+    {
+        const f = fixture();
         const detached = Array.from(f.table.tBodies[0].rows).slice(1);
         const placeholder = document.createElement("tr");
         detached[0].before(placeholder);
@@ -346,6 +443,8 @@ const browserCases = async (sources: Record<string, string>) => {
         f.dispose();
     }
     menuElement.remove();
+    menuScrim.remove();
+    fixtureStyle.remove();
     return "Mobile table interaction cases passed";
 };
 
@@ -354,9 +453,11 @@ test("mobile table selection, editing handoff, operations and gesture cancellati
     timeout: 45000,
 }, async () => {
     const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableColumnWidth", "tableGridCache",
-        "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"];
-    const sources = Object.fromEntries(files.map(file => ["src/protyle/util/" + file + ".ts", transpileModule(
-        readFileSync(path.join(__dirname, file + ".ts"), "utf8"),
+        "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
+        .map(file => "src/protyle/util/" + file + ".ts");
+    files.push("src/mobile/util/multiSelectToolbar.ts");
+    const sources = Object.fromEntries(files.map(file => [file, transpileModule(
+        readFileSync(path.resolve(process.cwd(), file), "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022}}).outputText]));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-touch-test-"));
     const script = path.join(temporary, "run.cjs");

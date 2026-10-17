@@ -1,7 +1,6 @@
 {
 	"cleanUnusedAssets": "Nicht referenzierte Ressourcen bereinigen",
 	"tableSelectRange": "Zellbereich auswählen",
-	"tableSelectionDone": "Fertig",
 	"listMindmapConnectors": "Verbindungslinien",
 	"listMindmapDefaultConnectorStyle": "Standard-Verbindungsstil für neue Mindmaps",
 	"listMindmapConnectorStyle": "Linienstil",

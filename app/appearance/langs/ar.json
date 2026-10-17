@@ -1,7 +1,6 @@
 {
 	"cleanUnusedAssets": "تنظيف الموارد غير المشار إليها",
 	"tableSelectRange": "تحديد نطاق خلايا",
-	"tableSelectionDone": "تم",
 	"listMindmapConnectors": "خطوط التوصيل",
 	"listMindmapDefaultConnectorStyle": "نمط التوصيل الافتراضي للخرائط الجديدة",
 	"listMindmapConnectorStyle": "نمط خطوط الربط",

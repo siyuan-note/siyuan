@@ -29,6 +29,8 @@ import {
     getTableResizeCount,
     isTableCellContentEmpty,
     isTableResizeControlVisible,
+    TABLE_ADD_CONTROL_GAP,
+    TABLE_ADD_CONTROL_THICKNESS,
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
 import {getTableCellsInRectangle, getTableDragEdge} from "./tableSelection";
@@ -325,8 +327,6 @@ export const getTableCellVerticalAlignmentMenus = (
 };
 
 const TABLE_HANDLE_THICKNESS = 16;
-const TABLE_ADD_CONTROL_THICKNESS = 16;
-const TABLE_ADD_CONTROL_GAP = 10;
 const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
 const TABLE_RESIZE_DRAG_THRESHOLD = 4;
 const TABLE_NON_TEXT_CONTENT_SELECTOR = "img, audio, video, iframe, canvas, svg, math, input, textarea, select, button, object, embed";
@@ -427,6 +427,13 @@ export class TableControl {
                 },
                 width: (event, cell, column) => this.startColumnResize(event, cell, column),
                 menu: () => this.openMenu(0, 0),
+                selectAll: () => {
+                    const state = this.getTouchState();
+                    if (state?.selection) {
+                        const {grid} = state;
+                        this.selectCellRange(grid.grid[0][0], grid.grid[grid.rowCount - 1][grid.columnCount - 1]);
+                    }
+                },
                 copy: () => this.execClipboardCommand("copy"),
                 clear: () => this.clearCells(),
                 finish: () => this.clear(),
@@ -556,7 +563,7 @@ export class TableControl {
         viewport.right = Math.min(viewport.right, window.innerWidth);
         viewport.top = Math.max(viewport.top, visualViewport?.offsetTop || 0);
         viewport.bottom = Math.min(viewport.bottom, (visualViewport?.height || window.innerHeight) +
-            (visualViewport?.offsetTop || 0), window.innerHeight - (this.selection ? 64 : 0));
+            (visualViewport?.offsetTop || 0), window.innerHeight);
         return {cell, table, viewport, grid: this.selectionGrid || this.gridCache.get(table).grid,
             selection: this.selection ? {
                 mode: this.selection.mode,
@@ -789,8 +796,9 @@ export class TableControl {
                 }
                 return;
             }
-            if (this.element.contains(target) || this.selection.node.contains(target) ||
-                document.getElementById("commonMenu")?.contains(target)) {
+            if (this.element.contains(target) || this.touch?.containsToolbar(target) || this.selection.node.contains(target) ||
+                document.getElementById("commonMenu")?.contains(target) ||
+                this.touch && document.getElementById("commonMenuScrim")?.contains(target)) {
                 return;
             }
             this.clear();

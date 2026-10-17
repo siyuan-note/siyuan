@@ -1,7 +1,6 @@
 {
 	"cleanUnusedAssets": "ล้างทรัพยากรที่ไม่มีการอ้างอิง",
 	"tableSelectRange": "เลือกช่วงเซลล์",
-	"tableSelectionDone": "เสร็จสิ้น",
 	"listMindmapConnectors": "เส้นเชื่อม",
 	"listMindmapDefaultConnectorStyle": "รูปแบบเส้นเชื่อมเริ่มต้นสำหรับแผนผังใหม่",
 	"listMindmapConnectorStyle": "รูปแบบเส้นเชื่อม",

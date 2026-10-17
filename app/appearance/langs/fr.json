@@ -1,7 +1,6 @@
 {
 	"cleanUnusedAssets": "Nettoyer les ressources non référencées",
 	"tableSelectRange": "Sélectionner une plage de cellules",
-	"tableSelectionDone": "Terminé",
 	"listMindmapConnectors": "Connecteurs",
 	"listMindmapDefaultConnectorStyle": "Style de connexion par défaut des nouvelles cartes",
 	"listMindmapConnectorStyle": "Style des connexions",

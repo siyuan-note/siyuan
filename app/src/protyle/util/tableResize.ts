@@ -1,3 +1,6 @@
+export const TABLE_ADD_CONTROL_THICKNESS = 16;
+export const TABLE_ADD_CONTROL_GAP = 10;
+
 export const isTableCellContentEmpty = (text: string, hasNonTextContent: boolean) => {
     return !hasNonTextContent && text.replace(/[\u200B-\u200D\uFEFF]/g, "").trim() === "";
 };

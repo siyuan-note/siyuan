@@ -1,6 +1,7 @@
 import type {ITableGrid} from "./table";
-import {escapeAttr} from "../../util/escape";
 import {TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
+import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
+import {TABLE_ADD_CONTROL_GAP, TABLE_ADD_CONTROL_THICKNESS} from "./tableResize";
 
 type SelectionMode = "cell" | "row" | "column";
 
@@ -26,6 +27,7 @@ interface ITableTouchActions {
     add: (cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both") => void;
     width: (event: PointerEvent, cell: HTMLTableCellElement, column: number) => void;
     menu: () => void;
+    selectAll: () => void;
     copy: () => void;
     clear: () => void;
     finish: () => void;
@@ -48,12 +50,27 @@ export class TableTouchControl {
         container.classList.add("protyle-table-control--touch");
         container.dataset.preventSwipe = "true";
         this.controls.dataset.tableTouchControls = "true";
-        this.toolbar.className = "protyle-table-control__toolbar fn__none";
-        this.toolbar.innerHTML = `<button class="block__icon block__icon--show block__icon--touch" data-action="multi" aria-label="${escapeAttr(window.siyuan.languages.multiSelect)}"><svg><use xlink:href="#iconSelect"></use></svg></button>
-<button class="block__icon block__icon--show block__icon--touch" data-action="copy" aria-label="${escapeAttr(window.siyuan.languages.copy)}"><svg><use xlink:href="#iconCopy"></use></svg></button>
-<button class="block__icon block__icon--show block__icon--touch" data-action="clear" aria-label="${escapeAttr(window.siyuan.languages.clear)}"><svg><use xlink:href="#iconClear"></use></svg></button>
-<button class="block__icon block__icon--show block__icon--touch" data-action="more" aria-label="${escapeAttr(window.siyuan.languages.more)}"><svg><use xlink:href="#iconMore"></use></svg></button>
-<button class="b3-button b3-button--text" data-action="done">${window.siyuan.languages.tableSelectionDone}</button>`;
+        this.toolbar.className = "protyle-util protyle-util--mobile protyle-table-control__toolbar fn__none";
+        this.toolbar.dataset.preventSwipe = "true";
+        renderMultiSelectToolbar(this.toolbar, 0, actions.menu, actions.finish, actions.selectAll, [{
+            type: "multi",
+            icon: "iconSelect",
+            label: window.siyuan.languages.multiSelect,
+            click: () => {
+                this.multiSelect = !this.multiSelect;
+                this.actions.render();
+            },
+        }, {
+            type: "copy",
+            icon: "iconCopy",
+            label: window.siyuan.languages.copy,
+            click: actions.copy,
+        }, {
+            type: "clear",
+            icon: "iconClear",
+            label: window.siyuan.languages.clear,
+            click: actions.clear,
+        }]);
         this.toolbar.setAttribute("role", "toolbar");
         this.toolbar.setAttribute("aria-label", window.siyuan.languages.table);
         this.endpoints = ["start", "end"].map(endpoint => {
@@ -64,29 +81,15 @@ export class TableTouchControl {
             button.setAttribute("aria-label", window.siyuan.languages.tableSelectRange);
             return button;
         });
-        container.append(this.controls, ...this.endpoints, this.toolbar);
+        container.append(this.controls, ...this.endpoints);
+        container.after(this.toolbar);
         const signal = this.controller.signal;
         this.toolbar.addEventListener("pointerdown", event => event.preventDefault(), {signal});
-        this.toolbar.addEventListener("click", event => {
-            const action = (event.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
-            if (action === "multi") {
-                this.multiSelect = !this.multiSelect;
-                this.actions.render();
-            } else if (action === "copy") {
-                this.actions.copy();
-            } else if (action === "clear") {
-                this.actions.clear();
-            } else if (action === "more") {
-                this.actions.menu();
-            } else if (action === "done") {
-                this.actions.finish();
-            }
-        }, {signal});
         this.endpoints.forEach(button => button.addEventListener("pointerdown", event =>
             this.startRangeDrag(event, button.dataset.endpoint === "start"), {signal}));
         // 点击改变选区，滑动内容仍交给浏览器滚动，不在 pointerdown 阶段阻止默认行为。
         editor.addEventListener("click", event => {
-            const state = this.actions.state();
+            const state = this.getState();
             const cell = (event.target as Element).closest<HTMLTableCellElement>("th, td");
             if (!state?.selection || !cell || cell.closest("table") !== state.table) {
                 return;
@@ -108,6 +111,10 @@ export class TableTouchControl {
         this.cancelGesture();
     }
 
+    public containsToolbar(target: Node) {
+        return this.toolbar.contains(target);
+    }
+
     public destroy() {
         this.reset();
         this.controller.abort();
@@ -117,12 +124,18 @@ export class TableTouchControl {
     }
 
     public render() {
-        const state = this.actions.state();
-        this.toolbar.classList.toggle("fn__none", !state?.selection);
-        const multi = this.toolbar.querySelector('[data-action="multi"]');
+        const wasHidden = this.toolbar.classList.contains("fn__none");
+        const selecting = !!this.actions.state()?.selection;
+        this.toolbar.classList.toggle("fn__none", !selecting);
+        if (selecting && wasHidden) {
+            this.toolbar.style.zIndex = (++window.siyuan.zIndex).toString();
+        }
+        const state = this.getState();
+        updateMultiSelectToolbar(this.toolbar, state?.selection?.cells.length || 0);
+        const multi = this.toolbar.querySelector('[data-type="multi"]');
         multi.setAttribute("aria-pressed", String(this.multiSelect));
         multi.classList.toggle("block__icon--active", this.multiSelect);
-        const copy = this.toolbar.querySelector<HTMLButtonElement>('[data-action="copy"]');
+        const copy = this.toolbar.querySelector<HTMLButtonElement>('[data-type="copy"]');
         copy.disabled = !!state?.selection && state.selection.mode === "cell" && !state.selection.rectangle;
         if (this.dragging) {
             this.renderEndpoints(state);
@@ -148,9 +161,11 @@ export class TableTouchControl {
                 rows.add(info.row);
                 const row = this.button(window.siyuan.languages.row, "iconDrag", viewport.left - 14,
                     (Math.max(rect.top, viewport.top) + Math.min(rect.bottom, viewport.bottom)) / 2);
+                row.className = "protyle-table-control__handle protyle-table-control__handle--row protyle-table-control__touch-handle";
+                row.style.height = `${Math.min(rect.bottom, viewport.bottom) - Math.max(rect.top, viewport.top)}px`;
                 row.dataset.mode = "row";
                 row.setAttribute("aria-pressed", String(selection?.mode === "row" && selection.indexes.has(info.row)));
-                row.classList.toggle("block__icon--active", selection?.mode === "row" && selection.indexes.has(info.row));
+                row.classList.toggle("protyle-table-control__handle--active", selection?.mode === "row" && selection.indexes.has(info.row));
                 row.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "row", row));
             }
             // 列控件只按逻辑列创建一次，支持没有表头的表格。
@@ -158,9 +173,11 @@ export class TableTouchControl {
                 columns.add(info.col);
                 const column = this.button(window.siyuan.languages.column, "iconDrag",
                     (Math.max(rect.left, viewport.left) + Math.min(rect.right, viewport.right)) / 2, viewport.top - 14);
+                column.className = "protyle-table-control__handle protyle-table-control__handle--column protyle-table-control__touch-handle";
+                column.style.width = `${Math.min(rect.right, viewport.right) - Math.max(rect.left, viewport.left)}px`;
                 column.dataset.mode = "column";
                 column.setAttribute("aria-pressed", String(selection?.mode === "column" && selection.indexes.has(info.col)));
-                column.classList.toggle("block__icon--active", selection?.mode === "column" && selection.indexes.has(info.col));
+                column.classList.toggle("protyle-table-control__handle--active", selection?.mode === "column" && selection.indexes.has(info.col));
                 column.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "column", column));
             }
         });
@@ -188,14 +205,18 @@ export class TableTouchControl {
             });
         }
         const tableRect = table.getBoundingClientRect();
+        const addOffset = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2;
         if (tableRect.bottom <= viewport.bottom + 1) {
-            this.addResize(cell, "add-row", viewport.left + (viewport.right - viewport.left) / 2, tableRect.bottom + 14);
+            this.addResize(cell, "add-row", viewport.left + (viewport.right - viewport.left) / 2,
+                tableRect.bottom + addOffset, viewport.right - viewport.left, TABLE_ADD_CONTROL_THICKNESS);
         }
         if (tableRect.right <= viewport.right + 1) {
-            this.addResize(cell, "add-column", tableRect.right + 14, viewport.top + (viewport.bottom - viewport.top) / 2);
+            this.addResize(cell, "add-column", tableRect.right + addOffset,
+                viewport.top + (viewport.bottom - viewport.top) / 2, TABLE_ADD_CONTROL_THICKNESS, viewport.bottom - viewport.top);
         }
         if (tableRect.bottom <= viewport.bottom + 1 && tableRect.right <= viewport.right + 1) {
-            this.addResize(cell, "add-both", tableRect.right + 14, tableRect.bottom + 14);
+            this.addResize(cell, "add-both", tableRect.right + addOffset, tableRect.bottom + addOffset,
+                TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_THICKNESS);
         }
         this.renderEndpoints(state);
     }
@@ -238,13 +259,21 @@ export class TableTouchControl {
         return button;
     }
 
+    private getState() {
+        const state = this.actions.state();
+        if (state?.selection && !this.toolbar.classList.contains("fn__none")) {
+            state.viewport.top = Math.max(state.viewport.top, this.toolbar.getBoundingClientRect().bottom + 28);
+        }
+        return state;
+    }
+
     private selectHandle(event: PointerEvent, cell: HTMLTableCellElement, mode: "row" | "column", handle: HTMLElement) {
         if (event.button !== 0) {
             return;
         }
         event.preventDefault();
         event.stopPropagation();
-        const state = this.actions.state();
+        const state = this.getState();
         // 拖动已选行列时保留整个选区，多选开关开启后点击手柄切换选中状态。
         const selected = state?.selection?.mode === mode && state.selection.cells.includes(cell);
         if ((!selected || this.multiSelect) && !this.actions.select(cell, mode, this.multiSelect)) {
@@ -256,12 +285,17 @@ export class TableTouchControl {
         }
     }
 
-    private addResize(cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both", x: number, y: number) {
+    private addResize(cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both",
+                      x: number, y: number, width: number, height: number) {
         const button = this.button(type === "add-column" ? window.siyuan.languages.tableAddColumnTip :
             window.siyuan.languages.tableAddRowTip, type === "add-both" ? "iconMove" : "iconAdd", x, y);
         button.dataset.action = type;
+        button.className = `protyle-table-control__add protyle-table-control__add--${type.substring(4)} protyle-table-control__touch-add`;
+        button.style.width = `${width}px`;
+        button.style.height = `${height}px`;
         button.addEventListener("pointerdown", event => {
             event.preventDefault();
+            button.classList.add("protyle-table-control__add--active");
             this.holdControls(event);
             this.actions.resize(event, cell, type);
         });
@@ -283,7 +317,7 @@ export class TableTouchControl {
     }
 
     private startRangeDrag(event: PointerEvent, start: boolean) {
-        const state = this.actions.state();
+        const state = this.getState();
         if (event.button !== 0 || !state?.selection?.cells.length) {
             return;
         }
@@ -306,7 +340,7 @@ export class TableTouchControl {
         const signal = controller.signal;
         let point = {clientX: event.clientX, clientY: event.clientY};
         const update = () => {
-            const current = this.actions.state();
+            const current = this.getState();
             if (!current?.selection) {
                 this.cancelGesture();
                 return;
@@ -342,7 +376,7 @@ export class TableTouchControl {
         document.addEventListener("pointerup", end, {signal});
         document.addEventListener("pointercancel", end, {signal});
         const scroll = () => {
-            const current = this.actions.state();
+            const current = this.getState();
             if (!this.gesture || !current?.selection) {
                 return;
             }

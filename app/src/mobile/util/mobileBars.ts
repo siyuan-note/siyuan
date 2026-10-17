@@ -28,9 +28,9 @@ const hasTextSelection = () => {
 };
 
 export const isMobileBlockSelecting = () => {
-    const multiSelectElement = scrollElement?.closest(".protyle")
-        ?.querySelector(".protyle-util--mobile [data-type='exitMultiSelectMode']");
-    return Boolean(multiSelectElement && !multiSelectElement.closest(".fn__none"));
+    const multiSelectElements = scrollElement?.closest(".protyle")
+        ?.querySelectorAll(".protyle-util--mobile [data-type='exitMultiSelectMode']");
+    return Array.from(multiSelectElements || []).some(element => !element.closest(".fn__none"));
 };
 
 const isPanelOpen = () => PANEL_IDS.some((id) => Boolean(document.getElementById(id)?.style.transform));
@@ -146,15 +146,15 @@ export const bindMobileBarsScroll = (element: HTMLElement, onBreadcrumbPositionC
     selectionObserver = undefined;
     scrollElement = element;
     scrollElement.addEventListener("scroll", onScroll, {passive: true});
-    const selectionElement = element.closest(".protyle")?.querySelector(".protyle-util--mobile");
-    if (selectionElement) {
+    const selectionElements = element.closest(".protyle")?.querySelectorAll(".protyle-util--mobile");
+    if (selectionElements?.length) {
         selectionObserver = new MutationObserver(updateSelectionState);
-        selectionObserver.observe(selectionElement, {
+        selectionElements.forEach(selectionElement => selectionObserver.observe(selectionElement, {
             attributes: true,
             attributeFilter: ["class"],
             childList: true,
             subtree: true,
-        });
+        }));
     }
     resetMobileBars(element.scrollTop);
     updateSelectionState();

@@ -1249,7 +1249,6 @@ table + .protyle-action__table {
 html[data-frontend="mobile"] .protyle-wysiwyg [data-type="NodeTable"] > div:first-child,
 html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > div:first-child {
   padding-top: 16px;
-  padding-left: 16px;
 }
 
 .protyle-table-control {
@@ -1300,7 +1299,8 @@ html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > 
       transition: opacity 150ms linear;
     }
 
-    &:hover {
+    &:hover,
+    &--active {
       &::before {
         opacity: 0;
       }
@@ -1473,20 +1473,31 @@ html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > 
   }
 
   &__toolbar {
-    position: fixed;
     left: 8px;
     right: 8px;
-    bottom: max(8px, env(safe-area-inset-bottom));
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    gap: 4px;
-    padding: 8px;
-    background-color: var(--b3-theme-background);
-    border-radius: var(--b3-border-radius);
-    box-shadow: var(--b3-point-shadow);
+    top: 8px;
+    width: auto;
     pointer-events: auto;
+  }
+
+  &__touch-add {
+    touch-action: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+    }
+  }
+
+  &__touch-handle {
+    width: 28px;
+    height: 28px;
+    touch-action: none;
+
+    &:not(:hover):not(.protyle-table-control__handle--active)::before {
+      opacity: 1;
+    }
   }
 }
 .image-ocr {

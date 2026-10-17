@@ -46,6 +46,7 @@ class TestBreadcrumbElement {
 class TestScrollElement {
     public scrollTop = 0;
     public onScroll: () => void;
+    public parent: HTMLElement;
 
     public addEventListener(_name: string, callback: () => void): void {
         this.onScroll = callback;
@@ -55,8 +56,8 @@ class TestScrollElement {
         // 测试无需触发滚动事件
     }
 
-    public closest(): undefined {
-        return undefined;
+    public closest(): HTMLElement {
+        return this.parent;
     }
 }
 
@@ -70,6 +71,11 @@ describe("mobile bars", () => {
             const breadcrumbElement = new TestBreadcrumbElement();
             const bottomBarElement = new TestBreadcrumbElement();
             const scrollElement = new TestScrollElement();
+            const selectionToolbars = [{hidden: true}, {hidden: true}];
+            const selectionObservers = new Map<object, () => void>();
+            scrollElement.parent = {querySelectorAll: (selector: string) => selector.includes("exitMultiSelectMode") ?
+                selectionToolbars.map(toolbar => ({closest: () => toolbar.hidden ? toolbar : null})) : selectionToolbars,
+            } as unknown as HTMLElement;
             let frame: FrameRequestCallback;
             let finishScroll: () => void;
             const mockDocument = {
@@ -113,12 +119,28 @@ describe("mobile bars", () => {
                 cancelAnimationFrame: () => {},
                 getSelection: (): undefined => undefined,
                 MutationObserver: class {
-                    observe(): void {}
+                    constructor(private callback: () => void) {}
+                    observe(element: object): void {
+                        selectionObservers.set(element, this.callback);
+                    }
                     disconnect(): void {}
                 },
             });
             moduleExports.initMobileBars();
             moduleExports.bindMobileBarsScroll(scrollElement as unknown as HTMLElement);
+            for (const toolbar of selectionToolbars) {
+                assert.equal(selectionObservers.has(toolbar), true);
+                toolbar.hidden = false;
+                selectionObservers.get(toolbar)();
+                assert.equal(moduleExports.isMobileBlockSelecting(), true);
+                assert.equal(classes.has("mobile-selection--active"), true);
+                assert.equal(bottomBarElement.attributes.has("inert"), true);
+                toolbar.hidden = true;
+                selectionObservers.get(toolbar)();
+                assert.equal(moduleExports.isMobileBlockSelecting(), false);
+                assert.equal(classes.has("mobile-selection--active"), false);
+                assert.equal(bottomBarElement.attributes.has("inert"), false);
+            }
             const changeKeyboard = (open: boolean) => windowListeners.get("siyuan-mobile-keyboard-change")({detail: open});
             const assertTitleVisible = () => {
                 assert.equal(topbarElement.style.getPropertyValue("--mobile-bar-translate-y"),

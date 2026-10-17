@@ -1,7 +1,6 @@
 {
 	"cleanUnusedAssets": "Очистити ресурси без посилань",
 	"tableSelectRange": "Вибрати діапазон клітинок",
-	"tableSelectionDone": "Готово",
 	"listMindmapConnectors": "З’єднувальні лінії",
 	"listMindmapDefaultConnectorStyle": "Типовий стиль з’єднань для нових карт",
 	"listMindmapConnectorStyle": "Стиль сполучних ліній",

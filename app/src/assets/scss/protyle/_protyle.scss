@@ -1246,9 +1246,10 @@ table + .protyle-action__table {
   }
 }
 
-html[data-frontend="mobile"] .protyle-wysiwyg [data-type="NodeTable"] > div:first-child,
-html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > div:first-child {
-  padding-top: 16px;
+.table__cell--touch-selecting {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .protyle-table-control {
@@ -1433,11 +1434,33 @@ html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > 
     pointer-events: none;
   }
 
-  &__drop {
+  &__drop,
+  &__width-guide {
     position: fixed;
     z-index: 3;
     background-color: var(--b3-theme-primary);
     pointer-events: none;
+  }
+
+  &__width-guide {
+    width: 2px;
+    transform: translateX(-50%);
+  }
+
+  &__width {
+    width: 28px;
+    cursor: col-resize;
+    touch-action: none;
+
+    &::before {
+      width: 2px;
+      height: 100%;
+      background-color: var(--b3-theme-primary);
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
   }
 
   &--touch {

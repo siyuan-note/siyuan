@@ -407,6 +407,16 @@ export class TableControl {
         this.bindEvents();
         if (isMobile()) {
             this.touch = new TableTouchControl(wysiwygElement, this.element, () => protyle.contentElement || protyle.element, {
+                enabled: () => !protyle.disabled && !protyle.toolbar.isMultiSelectMode(),
+                activate: cell => {
+                    if (protyle.disabled || !finishTableCellEditing(cell)) {
+                        return false;
+                    }
+                    this.clear();
+                    this.caretCell = cell;
+                    this.blurTouchEditor();
+                    return true;
+                },
                 state: () => this.getTouchState(),
                 select: (cell, mode, toggle, extend) => this.startTouchSelection(cell, mode, toggle, extend),
                 range: (anchor, active) => this.selectCellRange(anchor, active),

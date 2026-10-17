@@ -459,6 +459,7 @@ export const handleTouchStart = (event: TouchEvent) => {
                 target.dataset.type,
                 !!hasClosestByAttribute(target, "data-type", "inline-math"),
                 target.tagName === "IMG" && !!hasClosestByClassName(target, "img"),
+                !!target.closest("td, th") && !!target.closest('[data-type="NodeTable"]'),
             )) {
             longPressBlockElement = blockElement;
             const touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);

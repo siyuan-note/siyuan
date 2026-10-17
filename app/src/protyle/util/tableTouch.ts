@@ -2,8 +2,12 @@ import type {ITableGrid} from "./table";
 import {TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
 import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
 import {TABLE_ADD_CONTROL_GAP, TABLE_ADD_CONTROL_THICKNESS} from "./tableResize";
+import {Constants} from "../../constants";
 
 type SelectionMode = "cell" | "row" | "column";
+const TABLE_TOUCH_INTERACTIVE_SELECTOR = "a, [data-type~='a'], [data-type~='block-ref'], [data-type~='file-annotation-ref'], " +
+    "[data-type~='tag'], [data-type~='inline-memo'], [data-type='inline-math'], " +
+    "img, input, textarea, button, select, audio, video, iframe";
 
 export interface ITableTouchState {
     cell: HTMLTableCellElement;
@@ -19,6 +23,8 @@ export interface ITableTouchState {
 }
 
 interface ITableTouchActions {
+    enabled: () => boolean;
+    activate: (cell: HTMLTableCellElement) => boolean;
     state: () => ITableTouchState | undefined;
     select: (cell: HTMLTableCellElement, mode: SelectionMode, toggle: boolean, extend?: boolean) => boolean;
     range: (anchor: HTMLTableCellElement, active: HTMLTableCellElement) => void;
@@ -44,6 +50,11 @@ export class TableTouchControl {
     private gesture?: AbortController;
     private scrollFrame: number;
     private dragging = false;
+    private longPress?: {
+        cell: HTMLTableCellElement, identifier: number, clientX: number, clientY: number, timer: number, selected: boolean,
+    };
+    private longPressContextCell?: HTMLTableCellElement;
+    private columnBoundary?: {cell: HTMLTableCellElement, column: number};
 
     constructor(editor: HTMLElement, container: HTMLElement, private content: () => HTMLElement,
                 private actions: ITableTouchActions) {
@@ -87,8 +98,61 @@ export class TableTouchControl {
         this.toolbar.addEventListener("pointerdown", event => event.preventDefault(), {signal});
         this.endpoints.forEach(button => button.addEventListener("pointerdown", event =>
             this.startRangeDrag(event, button.dataset.endpoint === "start"), {signal}));
+        document.addEventListener("touchstart", event => this.startLongPress(event, editor), {capture: true, signal});
+        document.addEventListener("touchmove", event => {
+            const press = this.longPress;
+            if (!press) {
+                return;
+            }
+            const point = Array.from(event.touches).find(touch => touch.identifier === press.identifier);
+            if (event.touches.length !== 1 || !point) {
+                this.cancelLongPress();
+            } else if (press.selected) {
+                event.preventDefault();
+            } else if (Math.max(Math.abs(point.clientX - press.clientX), Math.abs(point.clientY - press.clientY)) >=
+                Constants.SIZE_DRAG_THRESHOLD) {
+                this.cancelLongPress();
+            }
+        }, {capture: true, passive: false, signal});
+        document.addEventListener("touchend", event => {
+            const press = this.longPress;
+            if (!press || !Array.from(event.changedTouches).some(touch => touch.identifier === press.identifier)) {
+                return;
+            }
+            if (press.selected) {
+                event.preventDefault();
+            }
+            this.cancelLongPress();
+        }, {capture: true, passive: false, signal});
+        document.addEventListener("touchcancel", () => this.cancelLongPress(), {capture: true, signal});
+        document.addEventListener("scroll", () => {
+            if (!this.longPress?.selected) {
+                this.cancelLongPress();
+            }
+        }, {capture: true, signal});
+        document.addEventListener("contextmenu", event => {
+            const cell = (event.target as Element).closest("td, th");
+            if (cell && (cell === this.longPress?.cell || cell === this.longPressContextCell)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        }, {capture: true, signal});
+        document.addEventListener("pointerdown", event => {
+            if (event.pointerType !== "touch") {
+                this.longPressContextCell = undefined;
+            }
+            if (this.columnBoundary && !this.controls.querySelector('[data-action="width"]')?.contains(event.target as Node)) {
+                this.columnBoundary = undefined;
+                this.actions.render();
+            }
+        }, {capture: true, signal});
         // 点击改变选区，滑动内容仍交给浏览器滚动，不在 pointerdown 阶段阻止默认行为。
         editor.addEventListener("click", event => {
+            if (this.activateColumnBoundary(event, editor)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+            }
             const state = this.getState();
             const cell = (event.target as Element).closest<HTMLTableCellElement>("th, td");
             if (!state?.selection || !cell || cell.closest("table") !== state.table) {
@@ -108,6 +172,8 @@ export class TableTouchControl {
 
     public reset() {
         this.multiSelect = false;
+        this.longPressContextCell = undefined;
+        this.columnBoundary = undefined;
         this.cancelGesture();
     }
 
@@ -181,29 +247,7 @@ export class TableTouchControl {
                 column.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "column", column));
             }
         });
-        if (!selection) {
-            const rect = cell.getBoundingClientRect();
-            if (rect.bottom > viewport.top && rect.top < viewport.bottom && rect.right > viewport.left && rect.left < viewport.right) {
-                const select = this.button(window.siyuan.languages.tableSelectRange, "iconSelect",
-                    Math.min(rect.right, viewport.right) - 14, Math.min(rect.bottom, viewport.bottom) - 14);
-                select.dataset.action = "select";
-                select.addEventListener("pointerdown", event => event.preventDefault());
-                select.addEventListener("click", () => this.actions.select(cell, "cell", false));
-            }
-        }
-        const activeColumn = grid.cellInfos.find(info => info.cell === cell)?.col;
-        const column = typeof activeColumn === "number" ?
-            table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[activeColumn] : undefined;
-        const widthRect = column?.getBoundingClientRect() || cell.getBoundingClientRect();
-        if (typeof activeColumn === "number" && widthRect.right > viewport.left && widthRect.right <= viewport.right + 1) {
-            const width = this.button(window.siyuan.languages.width, "iconWidth", widthRect.right, viewport.top - 14);
-            width.dataset.action = "width";
-            width.addEventListener("pointerdown", event => {
-                event.preventDefault();
-                this.holdControls(event);
-                this.actions.width(event, cell, activeColumn);
-            });
-        }
+        this.renderColumnBoundary(state);
         const tableRect = table.getBoundingClientRect();
         const addOffset = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2;
         if (tableRect.bottom <= viewport.bottom + 1) {
@@ -247,12 +291,12 @@ export class TableTouchControl {
         }
     }
 
-    private button(label: string, icon: string, left: number, top: number, clampToScreen = true) {
+    private button(label: string, icon: string | undefined, left: number, top: number, clampToScreen = true) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "block__icon block__icon--show protyle-table-control__touch-button";
         button.setAttribute("aria-label", label);
-        button.innerHTML = `<svg><use xlink:href="#${icon}"></use></svg>`;
+        button.innerHTML = icon ? `<svg><use xlink:href="#${icon}"></use></svg>` : "";
         button.style.left = `${clampToScreen ? Math.max(16, Math.min(window.innerWidth - 16, left)) : left}px`;
         button.style.top = `${clampToScreen ? Math.max(16, Math.min(window.innerHeight - 72, top)) : top}px`;
         this.controls.append(button);
@@ -262,9 +306,121 @@ export class TableTouchControl {
     private getState() {
         const state = this.actions.state();
         if (state?.selection && !this.toolbar.classList.contains("fn__none")) {
-            state.viewport.top = Math.max(state.viewport.top, this.toolbar.getBoundingClientRect().bottom + 28);
+            state.viewport.top = Math.max(state.viewport.top, this.toolbar.getBoundingClientRect().bottom + 8);
         }
         return state;
+    }
+
+    private activateColumnBoundary(event: MouseEvent, editor: HTMLElement) {
+        const target = event.target as Element;
+        const cell = target.closest<HTMLTableCellElement>("td, th");
+        const table = cell?.closest("table");
+        if (event.defaultPrevented || !this.actions.enabled() || event.button !== 0 ||
+            event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || target.closest(TABLE_TOUCH_INTERACTIVE_SELECTOR) ||
+            !cell?.closest('[data-type="NodeTable"]') || cell.closest(".protyle-wysiwyg") !== editor ||
+            cell.parentElement !== table.rows[0]) {
+            return false;
+        }
+        const columns = Array.from(table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col"));
+        const rect = cell.getBoundingClientRect();
+        if (Math.min(Math.abs(rect.left - event.clientX), Math.abs(rect.right - event.clientX)) > 8) {
+            return false;
+        }
+        // 首次点按仅激活表头边界，正文中的滑动和点按继续用于滚动与编辑。
+        const index = columns.findIndex(column => Math.abs(column.getBoundingClientRect().right - event.clientX) <= 8);
+        if (index < 0 || !this.actions.activate(cell)) {
+            return false;
+        }
+        this.columnBoundary = {cell, column: index};
+        this.actions.render();
+        return true;
+    }
+
+    private renderColumnBoundary(state: ITableTouchState) {
+        const boundary = this.columnBoundary;
+        if (!boundary?.cell.isConnected || boundary.cell.closest("table") !== state.table) {
+            return;
+        }
+        const {table, viewport} = state;
+        const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[boundary.column];
+        const edge = column?.getBoundingClientRect().right;
+        const header = boundary.cell.getBoundingClientRect();
+        const top = Math.max(header.top, viewport.top);
+        const bottom = Math.min(header.bottom, viewport.bottom);
+        if (typeof edge !== "number" || edge <= viewport.left || edge > viewport.right + 1 || bottom <= top) {
+            return;
+        }
+        const guide = document.createElement("div");
+        guide.className = "protyle-table-control__width-guide";
+        guide.style.left = `${edge}px`;
+        guide.style.top = `${viewport.top}px`;
+        guide.style.height = `${viewport.bottom - viewport.top}px`;
+        this.controls.append(guide);
+        const width = this.button(window.siyuan.languages.width, undefined, edge, (top + bottom) / 2, false);
+        width.className = "protyle-table-control__handle protyle-table-control__width";
+        width.style.height = `${bottom - top}px`;
+        width.dataset.action = "width";
+        width.setAttribute("aria-pressed", "true");
+        width.addEventListener("pointerdown", event => {
+            if (event.button !== 0 || !this.actions.enabled()) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.holdControls(event);
+            Array.from(this.controls.children).forEach(control => {
+                if (control !== width && control !== guide) {
+                    control.classList.add("fn__none");
+                }
+            });
+            this.actions.width(event, boundary.cell, boundary.column);
+            document.addEventListener("pointermove", move => {
+                if (move.pointerId === event.pointerId) {
+                    const left = `${column.getBoundingClientRect().right}px`;
+                    guide.style.left = left;
+                    width.style.left = left;
+                }
+            }, {signal: this.gesture.signal});
+        });
+    }
+
+    private startLongPress(event: TouchEvent, editor: HTMLElement) {
+        this.cancelLongPress();
+        this.longPressContextCell = undefined;
+        const target = event.target as Element;
+        const cell = target.closest<HTMLTableCellElement>("td, th");
+        if (event.defaultPrevented || event.touches.length !== 1 || !this.actions.enabled() ||
+            this.actions.state()?.selection || !cell?.closest('[data-type="NodeTable"]') ||
+            cell.closest(".protyle-wysiwyg") !== editor || editor.closest(".fn__none, [inert]") ||
+            cell.closest(`tr[${TABLE_VIRTUAL_ROWS}]`) || cell.querySelector(".table__cell-editor") ||
+            target.closest(TABLE_TOUCH_INTERACTIVE_SELECTOR)) {
+            return;
+        }
+        const {identifier, clientX, clientY} = event.touches[0];
+        const press = {cell, identifier, clientX, clientY, timer: 0, selected: false};
+        this.longPress = press;
+        // 仅在待识别的单元格上关闭原生选词，编辑中的单元格保留文字长按行为。
+        cell.classList.add("table__cell--touch-selecting");
+        press.timer = window.setTimeout(() => {
+            if (!this.actions.enabled() || !cell.isConnected || cell.querySelector(".table__cell-editor")) {
+                this.cancelLongPress();
+                return;
+            }
+            press.selected = this.actions.select(cell, "cell", false);
+            if (press.selected) {
+                this.longPressContextCell = cell;
+            } else {
+                this.cancelLongPress();
+            }
+        }, Constants.TIMEOUT_LONGPRESS);
+    }
+
+    private cancelLongPress() {
+        if (this.longPress) {
+            clearTimeout(this.longPress.timer);
+            this.longPress.cell.classList.remove("table__cell--touch-selecting");
+            this.longPress = undefined;
+        }
     }
 
     private selectHandle(event: PointerEvent, cell: HTMLTableCellElement, mode: "row" | "column", handle: HTMLElement) {
@@ -401,6 +557,7 @@ export class TableTouchControl {
     }
 
     private cancelGesture() {
+        this.cancelLongPress();
         this.gesture?.abort();
         this.gesture = undefined;
         this.dragging = false;

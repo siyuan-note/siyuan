@@ -15,7 +15,8 @@ const browserCases = async (sources: Record<string, string>) => {
     fixtureStyle.textContent = ".protyle-util{position:fixed;top:8px;left:8px;right:8px}.block__icons{display:flex;height:42px}" +
         ".block__icons svg,.protyle-table-control svg{width:16px;height:16px}.fn__none{display:none}" +
         ".protyle-table-control__handle,.protyle-table-control__add,.protyle-table-control__touch-button{" +
-        "position:fixed;width:28px;height:28px;transform:translate(-50%,-50%)}";
+        "position:fixed;width:28px;height:28px;transform:translate(-50%,-50%)}" +
+        ".protyle-table-control__width-guide{position:fixed}";
     document.head.append(fixtureStyle);
     const transactions: {before: string, after: string}[] = [];
     const clipboard: {textPlain: string, textHTML?: string, textSiyuan?: string}[] = [];
@@ -52,7 +53,8 @@ const browserCases = async (sources: Record<string, string>) => {
         range.collapse(true);
         return range;
     };
-    const constants = new Proxy<Record<string, string>>({ZWSP: "\u200b"}, {get: (target, key: string) => target[key] || key});
+    const constants = new Proxy<Record<string, string | number>>({ZWSP: "\u200b", TIMEOUT_LONGPRESS: 20,
+        SIZE_DRAG_THRESHOLD: 5}, {get: (target, key: string) => target[key] || key});
     const stubs: Record<string, object | (() => object)> = {
         "src/constants.ts": {Constants: constants},
         "src/menus/menuToggle.ts": {toggleMenu: (options: {build: (menu: object, session: object) => void}) => {
@@ -130,6 +132,13 @@ const browserCases = async (sources: Record<string, string>) => {
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const pointer = (target: EventTarget, type: string, x = 0, y = 0, id = 1) => target.dispatchEvent(new PointerEvent(type,
         {bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, pointerId: id, pointerType: "touch"}));
+    const touchEvent = (target: Element, type: string, x = 60, y = 110, count = 1) => {
+        const points = Array.from({length: count}, (_, identifier) => new Touch({identifier, target, clientX: x, clientY: y}));
+        const event = new TouchEvent(type, {bubbles: true, cancelable: true, changedTouches: points,
+            touches: type === "touchend" || type === "touchcancel" ? [] : points});
+        target.dispatchEvent(event);
+        return event;
+    };
     const fixture = () => {
         const root = document.createElement("div");
         const editor = document.createElement("div");
@@ -143,7 +152,9 @@ const browserCases = async (sources: Record<string, string>) => {
         root.append(editor);
         document.body.append(root);
         editor.querySelectorAll<HTMLElement>("td, th").forEach(cell => cell.style.height = "42px");
-        const owner = {element: root, contentElement: root, disabled: false, toolbar: {}, options: {},
+        let blockMultiSelect = false;
+        const owner = {element: root, contentElement: root, disabled: false,
+            toolbar: {isMultiSelectMode: () => blockMultiSelect}, options: {},
             wysiwyg: {element: editor}, lute: {}, block: {rootID: "root"}} as unknown as IProtyle;
         const core = new TableControl(owner, editor);
         owner.wysiwyg.tableControl = core;
@@ -152,8 +163,62 @@ const browserCases = async (sources: Record<string, string>) => {
         const invoke = (name: string, ...args: unknown[]) => Reflect.get(core, name).apply(core, args);
         const touch = (selector: string) => root.querySelector<HTMLElement>(selector);
         const dispose = () => { core.destroy(); root.remove(); getSelection().removeAllRanges(); };
-        return {root, editor, owner, core, get table() { return editor.querySelector("table"); }, cell, render, invoke, touch, dispose};
+        return {root, editor, owner, core, get table() { return editor.querySelector("table"); }, cell, render, invoke, touch, dispose,
+            setBlockMultiSelect: (value: boolean) => { blockMultiSelect = value; }};
     };
+    {
+        const f = fixture();
+        const cell = f.cell(1, 0);
+        touchEvent(cell, "touchstart");
+        await tick();
+        check.equal(f.core.hasTouchSelection(), true, "holding an inactive cell enters cell selection");
+        check.deepEqual(f.core.getSelectedCells(), [cell]);
+        check.equal(touchEvent(cell, "touchend").defaultPrevented, true, "release consumes the long press instead of editing");
+        check.equal(cell.classList.contains("table__cell--touch-selecting"), false);
+        const menu = new MouseEvent("contextmenu", {bubbles: true, cancelable: true});
+        cell.dispatchEvent(menu);
+        check.equal(menu.defaultPrevented, true, "the same long press cannot open another context menu");
+        f.core.clear();
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        range.collapse(true);
+        focusByRange(range);
+        document.dispatchEvent(new Event("selectionchange"));
+        f.render();
+        check.equal(f.touch("[data-action='select']"), null, "cell selection no longer adds a checkmark button");
+        check.equal(f.touch("[data-action='width']"), null, "an editing caret does not expose a ruler button");
+        f.dispose();
+    }
+    for (const kind of ["tap", "move", "cancel", "scroll", "multiple", "blur", "disabled", "block", "removed"]) {
+        const f = fixture();
+        const cell = f.cell(1, 0);
+        if (kind === "disabled") f.owner.disabled = true;
+        if (kind === "block") f.setBlockMultiSelect(true);
+        touchEvent(cell, "touchstart");
+        if (kind === "tap") check.equal(touchEvent(cell, "touchend").defaultPrevented, false);
+        if (kind === "move") check.equal(touchEvent(cell, "touchmove", 66, 110).defaultPrevented, false);
+        if (kind === "cancel") touchEvent(cell, "touchcancel");
+        if (kind === "scroll") f.root.dispatchEvent(new Event("scroll"));
+        if (kind === "multiple") touchEvent(cell, "touchstart", 60, 110, 2);
+        if (kind === "blur") window.dispatchEvent(new Event("blur"));
+        if (kind === "removed") cell.parentElement.remove();
+        await tick();
+        check.equal(f.core.hasTouchSelection(), false, `${kind} leaves the table unselected`);
+        check.equal(cell.classList.contains("table__cell--touch-selecting"), false, `${kind} clears temporary touch state`);
+        f.dispose();
+    }
+    for (const kind of ["editing", "link"]) {
+        const f = fixture();
+        const cell = f.cell(1, 0);
+        const target = document.createElement(kind === "editing" ? "div" : "a");
+        if (kind === "editing") target.className = "table__cell-editor";
+        cell.append(target);
+        touchEvent(target, "touchstart");
+        await tick();
+        check.equal(f.core.hasTouchSelection(), false, `${kind} retains its own long-press behavior`);
+        check.equal(touchEvent(target, "touchend").defaultPrevented, false);
+        f.dispose();
+    }
     {
         const f = fixture();
         check.equal(f.core.startTouchSelection(f.cell(1, 0)), true);
@@ -237,9 +302,17 @@ const browserCases = async (sources: Record<string, string>) => {
     }
     {
         const f = fixture();
-        f.core.startTouchSelection(f.cell(1, 0));
+        const header = f.cell(0, 0);
+        const headerRect = header.getBoundingClientRect();
+        check.equal(f.touch("[data-action='width']"), null, "column resizing has no persistent ruler button");
+        header.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+            clientX: headerRect.right, clientY: headerRect.top + headerRect.height / 2}));
         f.render();
         const width = f.touch("[data-action='width']");
+        check.ok(width, "tapping a header divider activates its width control");
+        check.equal(f.core.hasTouchSelection(), false, "activating a divider does not select the column's cells");
+        check.equal(width.querySelector("svg"), null);
+        check.equal(width.getBoundingClientRect().left + width.getBoundingClientRect().width / 2, headerRect.right);
         const before = f.table.querySelector("col").getAttribute("style");
         const count = transactions.length;
         pointer(width, "pointerdown", 120, 60);
@@ -250,10 +323,43 @@ const browserCases = async (sources: Record<string, string>) => {
         f.render();
         pointer(f.touch("[data-action='width']"), "pointerdown", 120, 60);
         pointer(document, "pointermove", 180, 60);
+        check.equal(f.touch(".protyle-table-control__width-guide").getBoundingClientRect().left,
+            f.table.querySelector("col").getBoundingClientRect().right, "the divider guide follows the resized boundary");
         pointer(document, "pointerup", 180, 60);
         check.equal((f.table.querySelector("col") as HTMLElement).style.width, "150px");
         check.equal(transactions.length, count + 1);
         check.match(transactions.at(-1).before, /width:90px/);
+        pointer(f.cell(1, 1), "pointerdown", 180, 110);
+        f.render();
+        check.equal(f.touch("[data-action='width']"), null, "touching cell content dismisses the active divider");
+        const bodyRect = f.cell(1, 0).getBoundingClientRect();
+        f.cell(1, 0).dispatchEvent(new MouseEvent("click", {bubbles: true,
+            clientX: bodyRect.right, clientY: bodyRect.top + bodyRect.height / 2}));
+        f.render();
+        check.equal(f.touch("[data-action='width']"), null, "body dividers remain available for editing and scrolling");
+        f.dispose();
+    }
+    for (const kind of ["merged", "no-header", "disabled", "block", "link"]) {
+        const f = fixture();
+        const first = f.cell(0, 0);
+        const rect = first.getBoundingClientRect();
+        if (kind === "merged") {
+            first.colSpan = 2;
+            f.cell(0, 1).remove();
+        }
+        if (kind === "no-header") {
+            f.table.tBodies[0].prepend(f.table.tHead.rows[0]);
+            f.table.tHead.remove();
+        }
+        if (kind === "disabled") f.owner.disabled = true;
+        if (kind === "block") f.setBlockMultiSelect(true);
+        const link = document.createElement("a");
+        if (kind === "link") first.append(link);
+        (kind === "link" ? link : first).dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+            clientX: rect.right, clientY: rect.top + rect.height / 2}));
+        f.render();
+        check.equal(!!f.touch("[data-action='width']"), kind === "no-header",
+            `${kind} only exposes real, editable top-row dividers`);
         f.dispose();
     }
     {

@@ -109,6 +109,15 @@ const runCases = async (sources, css, mobile) => {
     };
     const click = async selector => {get(selector).dispatchEvent(new MouseEvent("click", {bubbles: true})); await tick();};
     const latest = () => transactions.at(-1).perform[0].data.rules[0];
+    const assertChipActionSpacing = (listSelector, buttonSelector) => {
+        const chips = Array.from(get(listSelector).querySelectorAll(".b3-chip"));
+        assert.ok(chips.length > 0, "spacing checks require visible chips");
+        const bottom = Math.max(...chips.map(chip => chip.getBoundingClientRect().bottom));
+        const gap = get(buttonSelector).getBoundingClientRect().top - bottom;
+        const expected = mobile ? 22 : 8;
+        assert.ok(Math.abs(gap - expected) <= 1,
+            `${listSelector} keeps the platform's chip spacing before its add button: ${gap}, expected ${expected}`);
+    };
     const sections = menu.querySelectorAll("section");
     assert.equal(sections.length, 3);
     assert.ok(sections[0].contains(get("[data-trigger]")));
@@ -480,6 +489,7 @@ const runCases = async (sources, css, mobile) => {
     const typePopup = fieldMenu.element;
     typePopup.querySelector('[data-collection-type="l"]').click();
     assert.deepEqual(latest().blockSource.types, ["l"]);
+    assertChipActionSpacing("[data-type-chips]", "[data-types]");
     typePopup.querySelector('[data-collection-type="l:o"]').click();
     assert.deepEqual(latest().blockSource.types, ["l:o"]);
     assert.equal(transactions.at(-1).perform[0].data.spec, 3);
@@ -501,6 +511,7 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(latest().blockSource.types.length > 10);
     assert.ok(get("[data-types]").scrollWidth <= get("[data-types]").clientWidth + 1, "many selected block types wrap");
     assert.equal(menu.querySelectorAll("[data-type-chips] .b3-chip").length, latest().blockSource.types.length);
+    assertChipActionSpacing("[data-type-chips]", "[data-types]");
     const draftWrites = transactions.length;
     await click("[data-add-attribute] svg");
     assert.equal(transactions.length, draftWrites, "adding an attribute starts an unsaved draft");
@@ -511,6 +522,7 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(transactions.length, draftWrites, "editing a draft does not save it");
     await click("[data-confirm-attribute]");
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
+    assertChipActionSpacing("[data-attribute-chips]", "[data-add-attribute]");
     await click("[data-edit-attribute]");
     await change("[data-attr-value]", "cancelled");
     get("[data-attr-value]").dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
@@ -550,6 +562,7 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     assert.deepEqual(latest().blockSource.tags, ["todo"]);
     assert.equal(get("[data-tags] .b3-chip span").textContent, "todo");
+    assertChipActionSpacing("[data-tags] .b3-chips", "[data-tags] button");
     await click("[data-tags] button");
     get("[data-tags] input").value = "todo";
     get("[data-tags] input").dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));

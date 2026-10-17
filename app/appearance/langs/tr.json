@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "Tüm sıralamaları sıfırla",
 	"displayImgAlt": "Görsel ipucu metnini göster",
 	"displayImgName": "Görsel dosya adlarını göster",
-	"s3EndpointBucketWarning": "Endpoint zaten kova adını içeriyor olabilir; bu durum bulut anlık görüntülerinin listelenmesini ve temizlenmesini aksatabilir. Yapılandırmayı kontrol edin; eşitlenmiş veriler varsa yapılandırmayı değiştirmeden önce yedekleyin ve depolama yolunu doğrulayın",
+	"s3EndpointBucketWarning": "Endpoint bir yol içeriyor, kova adı bir yol içeriyor veya ana makine adı kova adıyla başlıyor; bu durum bulut anlık görüntülerinin listelenmesini ve temizlenmesini aksatabilir. Bu bölüm hizmet uç noktasına ait değilse kova adı içermeyen bir uç nokta kullanın; eşitlenmiş veriler varsa yapılandırmayı değiştirmeden önce yedekleyin ve depolama yolunu doğrulayın, ardından bağlantı testiyle onaylayın",
 	"embedHTMLFileBelow": "HTML dosyasını aşağıya göm",
 	"horizontalSuperBlock": "Yatay süper blok",
 	"verticalSuperBlock": "Dikey süper blok",

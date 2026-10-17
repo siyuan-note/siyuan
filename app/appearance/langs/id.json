@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "Atur ulang semua urutan",
 	"displayImgAlt": "Tampilkan teks keterangan gambar",
 	"displayImgName": "Tampilkan nama berkas gambar",
-	"s3EndpointBucketWarning": "Endpoint mungkin sudah memuat nama bucket, sehingga daftar dan pembersihan snapshot cloud dapat terganggu. Periksa konfigurasi; jika sudah ada data tersinkron, cadangkan dan pastikan jalur penyimpanannya sebelum mengubah konfigurasi",
+	"s3EndpointBucketWarning": "Endpoint memuat jalur, nama bucket memuat jalur, atau nama host diawali nama bucket, sehingga daftar dan pembersihan snapshot cloud dapat terganggu. Jika bagian itu bukan bagian dari endpoint layanan, gunakan endpoint tanpa nama bucket; jika data sudah tersinkron, cadangkan dan pastikan jalur penyimpanannya sebelum mengubah konfigurasi, lalu konfirmasi dengan uji koneksi",
 	"embedHTMLFileBelow": "Sematkan berkas HTML di bawah",
 	"horizontalSuperBlock": "Super blok horizontal",
 	"verticalSuperBlock": "Super blok vertikal",

@@ -39,6 +39,15 @@ type SyncProviderConfigRulesData struct {
 	EndpointBucketWarning bool     `json:"endpointBucketWarning"`
 }
 
+type TestSyncProviderS3Request struct {
+	S3 SyncS3 `json:"s3"`
+}
+
+type TestSyncProviderS3Data struct {
+	Kind string `json:"kind"`
+	Msg  string `json:"msg"`
+}
+
 type ClearSyncProviderConfigData struct {
 	Enabled bool        `json:"enabled"`
 	S3      *SyncS3     `json:"s3,omitempty"`

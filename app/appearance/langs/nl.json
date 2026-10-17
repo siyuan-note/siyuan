@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "Alle volgordes herstellen",
 	"displayImgAlt": "Tooltiptekst van afbeeldingen tonen",
 	"displayImgName": "Bestandsnamen van afbeeldingen tonen",
-	"s3EndpointBucketWarning": "Endpoint bevat mogelijk al de bucketnaam, wat het weergeven en opruimen van cloudsnapshots kan verstoren. Controleer de configuratie; maak een back-up van bestaande gesynchroniseerde gegevens en controleer hun opslagpad voordat u de configuratie wijzigt",
+	"s3EndpointBucketWarning": "Endpoint bevat een pad, de bucketnaam bevat een pad of de hostnaam begint met de bucketnaam, wat het weergeven en opruimen van cloudsnapshots kan verstoren. Hoort dat deel niet bij het service-eindpunt, gebruik dan een eindpunt zonder bucketnaam; maak een back-up van bestaande gesynchroniseerde gegevens en controleer het opslagpad voordat u de configuratie wijzigt, en bevestig met een verbindingstest",
 	"embedHTMLFileBelow": "HTML-bestand hieronder insluiten",
 	"horizontalSuperBlock": "Horizontaal superblok",
 	"verticalSuperBlock": "Verticaal superblok",

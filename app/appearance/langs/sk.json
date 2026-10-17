@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "Obnoviť všetky poradia",
 	"displayImgAlt": "Zobraziť text popisu obrázkov",
 	"displayImgName": "Zobraziť názvy súborov obrázkov",
-	"s3EndpointBucketWarning": "Endpoint už môže obsahovať názov bucketu, čo môže narušiť zobrazovanie a čistenie cloudových snímok. Skontrolujte nastavenia; ak už existujú synchronizované údaje, pred zmenou nastavení ich zálohujte a overte cestu uloženia",
+	"s3EndpointBucketWarning": "Endpoint obsahuje cestu, názov bucketu obsahuje cestu alebo názov hostiteľa začína názvom bucketu, čo môže narušiť zobrazovanie a čistenie cloudových snímok. Ak táto časť nie je súčasťou koncového bodu služby, použite koncový bod bez názvu bucketu; ak už existujú synchronizované údaje, pred zmenou nastavení ich zálohujte a overte cestu uloženia, potom to potvrďte testom pripojenia",
 	"embedHTMLFileBelow": "Vložiť súbor HTML nižšie",
 	"horizontalSuperBlock": "Horizontálny super blok",
 	"verticalSuperBlock": "Vertikálny super blok",

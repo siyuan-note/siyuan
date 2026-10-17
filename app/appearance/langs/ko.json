@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "모든 순서 초기화",
 	"displayImgAlt": "이미지 도움말 텍스트 표시",
 	"displayImgName": "이미지 파일 이름 표시",
-	"s3EndpointBucketWarning": "Endpoint에 버킷 이름이 이미 포함되어 있으면 클라우드 스냅샷 목록 조회와 정리에 문제가 생길 수 있습니다. 설정을 확인하고, 동기화된 데이터가 있다면 설정을 변경하기 전에 백업하고 저장 경로를 확인하세요",
+	"s3EndpointBucketWarning": "Endpoint에 경로가 포함되어 있거나 버킷 이름에 경로가 포함되어 있거나 호스트 이름이 버킷 이름으로 시작합니다. 이 경우 클라우드 스냅샷 목록 조회와 정리에 문제가 생길 수 있습니다. 해당 부분이 서비스 엔드포인트가 아니라면 버킷 이름이 없는 엔드포인트를 사용하고, 동기화된 데이터가 있다면 설정을 변경하기 전에 백업하고 저장 경로를 확인한 뒤 연결 테스트로 확인하세요",
 	"embedHTMLFileBelow": "아래에 HTML 파일 삽입",
 	"horizontalSuperBlock": "가로 슈퍼 블록",
 	"verticalSuperBlock": "세로 슈퍼 블록",

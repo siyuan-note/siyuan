@@ -25,6 +25,10 @@ func TestAPIContractSyncProviderConfigRules(t *testing.T) {
 		warning        bool
 	}{
 		{`{"provider":2,"endpoint":"https://notes.example.com","bucket":"notes"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/notes/","bucket":"notes"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/proxy/","bucket":"notes"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/","bucket":"notes/sub"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/","bucket":"notes"}`, conf.ProviderS3, 0, false},
 		{`{"provider":2}`, conf.ProviderS3, 0, false},
 		{`{"provider":3,"endpoint":"https://notes.example.com","bucket":"notes"}`, conf.ProviderWebDAV, 0, false},
 		{`{"provider":4}`, conf.ProviderLocal, 0, false},

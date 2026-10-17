@@ -465,6 +465,9 @@ const openSyncProviderConfigDialog = (root: Element) => {
     }
     const L = window.siyuan.languages;
     const warning = def.configKey === "s3" ? L.s3EndpointBucketWarning : "";
+    // 测试连接仅用于 S3：探测会写入并删除探针对象，WebDAV 与本地目录没有等价的列举语义
+    const testButton = def.configKey === "s3" ? `<div class="fn__space"></div>
+    <button class="b3-button b3-button--outline" data-action="test"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${L.testConnection}</span></button>` : "";
     let closed = false;
     let rulesVersion = 0;
     let rulesTimer: ReturnType<typeof setTimeout>;
@@ -475,7 +478,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
         content: `<div class="b3-dialog__content config-sync-form">${def.fields.map(field => genProviderField(field, field.id === "endpoint" ? warning : "")).join("")}
 <div data-type="sync-config-error" class="ft__error fn__none" role="status"></div></div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button><div class="fn__flex-1"></div><div class="fn__space"></div>
+    <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button>${testButton}<div class="fn__flex-1"></div><div class="fn__space"></div>
     <button class="b3-button b3-button--cancel" data-action="cancel">${L.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text" data-action="save">${L.save}</button>
 </div>`,
@@ -492,6 +495,8 @@ const openSyncProviderConfigDialog = (root: Element) => {
     const configElement = dialog.element;
     const template = {...def.getConfig()};
     fillSyncProviderConfigValues(configElement, template);
+    const testElement = configElement.querySelector<HTMLButtonElement>('[data-action="test"]');
+    const testLabel = testElement?.querySelector("span");
     const fields = def.fields.map(field => configElement.querySelector<HTMLInputElement | HTMLSelectElement>(`#${field.id}`));
     const initialValues = fields.map(field => field.value);
     const destroy = dialog.destroy.bind(dialog);
@@ -512,11 +517,14 @@ const openSyncProviderConfigDialog = (root: Element) => {
         });
         configElement.setAttribute("aria-busy", String(value));
     };
-    const setError = (message: string) => {
+    const setStatus = (message: string, success = false) => {
         const error = configElement.querySelector<HTMLElement>('[data-type="sync-config-error"]');
         error.textContent = message;
         error.classList.toggle("fn__none", !message);
+        error.classList.toggle("ft__success", !!message && success);
+        error.classList.toggle("ft__error", !!message && !success);
     };
+    const setError = (message: string) => setStatus(message);
     const loadRules = async () => {
         const version = ++rulesVersion;
         const response = await fetchSyncPost("/api/sync/getSyncProviderConfigRules", {
@@ -606,6 +614,66 @@ const openSyncProviderConfigDialog = (root: Element) => {
     };
     configElement.querySelector('[data-action="save"]').addEventListener("click", () => { void save(); });
     configElement.querySelector('[data-action="cancel"]').addEventListener("click", () => dialog.destroy());
+    // 测试连接只探测当前草稿，不保存配置；失败分为确定错误与网络未知，避免把无法判定的情况报成配置问题
+    const testConnection = async () => {
+        if (pending || confirming || window.siyuan.config.readonly || !testElement || !testLabel) {
+            return;
+        }
+        validationShown = true;
+        if (!validateSyncProviderFields(configElement, def, requiredFields)) {
+            setError(L.syncConfigNotSaved);
+            configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+            return;
+        }
+        setError("");
+        setPending(true);
+        testLabel.textContent = L.testConnectionTesting;
+        try {
+            // 必填清单来自内核，规则尚未返回时它是空的，空值会漏过本地校验并被内核报成配置错误，因此先取规则
+            let rules: Awaited<ReturnType<typeof loadRules>>;
+            try {
+                rules = await loadRules();
+            } catch {
+                if (!closed) {
+                    setError(L.loadingError);
+                }
+                return;
+            }
+            if (closed) {
+                return;
+            }
+            if (!rules) {
+                setError(L.loadingError);
+                return;
+            }
+            if (!validateSyncProviderFields(configElement, def, rules.requiredFields)) {
+                setError(L.syncConfigNotSaved);
+                configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+                return;
+            }
+            const response = await fetchSyncPost("/api/sync/testSyncProviderS3", {
+                s3: readProviderConfigFields(configElement, template),
+            });
+            if (closed) {
+                return;
+            }
+            if (response.code !== 0) {
+                setError(response.msg || L.testConnectionFail);
+            } else if ("ok" === response.data.kind) {
+                setStatus(L.testConnectionSuccess, true);
+            } else {
+                setStatus(response.data.msg ? L.testConnectionFailMsg.replace("${msg}", response.data.msg) : L.testConnectionFail);
+            }
+        } catch {
+            if (!closed) {
+                setError(L.testConnectionFail);
+            }
+        } finally {
+            testLabel.textContent = L.testConnection;
+            setPending(false);
+        }
+    };
+    testElement?.addEventListener("click", () => { void testConnection(); });
     configElement.querySelector('[data-action="clear"]').addEventListener("click", () => {
         if (pending || confirming || window.siyuan.config.readonly) {
             return;
@@ -642,6 +710,8 @@ const openSyncProviderConfigDialog = (root: Element) => {
         rulesVersion++;
         clearTimeout(rulesTimer);
         configElement.querySelector("#sync-endpoint-warning")?.classList.toggle("fn__none", true);
+        // 配置已改变，旧的测试结果不再对应当前草稿
+        setStatus("");
         rulesTimer = setTimeout(refreshRules, 300);
         if (validationShown) {
             validateSyncProviderFields(configElement, def, requiredFields);

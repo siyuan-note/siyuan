@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "重置全部排序",
 	"displayImgAlt": "显示图片提示文本",
 	"displayImgName": "显示图片文件名",
-	"s3EndpointBucketWarning": "Endpoint 可能重复包含桶名，导致云端快照列举和清理异常。请核对配置；已有同步数据时，请先备份并确认存储路径，再修改配置",
+	"s3EndpointBucketWarning": "Endpoint 包含路径、Bucket 含路径或主机名以桶名开头，云端快照列举和清理可能异常。若该部分不属于服务端地址本身，请改为不带桶名的服务端地址；已有同步数据时，请先备份并确认存储路径，再修改配置，并可用测试连接确认",
 	"embedHTMLFileBelow": "在下方嵌入 HTML 文件",
 	"horizontalSuperBlock": "横向超级块",
 	"verticalSuperBlock": "纵向超级块",

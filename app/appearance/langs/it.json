@@ -292,7 +292,7 @@
 	"entryResetAllOrders": "Reimposta tutti gli ordini",
 	"displayImgAlt": "Mostra il testo dei suggerimenti delle immagini",
 	"displayImgName": "Mostra i nomi dei file immagine",
-	"s3EndpointBucketWarning": "Endpoint potrebbe già contenere il nome del bucket, causando problemi nell'elenco e nella pulizia delle istantanee nel cloud. Controlla la configurazione; se esistono già dati sincronizzati, esegui un backup e verifica il percorso di archiviazione prima di modificarla",
+	"s3EndpointBucketWarning": "Endpoint contiene un percorso, il nome del bucket contiene un percorso o il nome host inizia con il nome del bucket, il che può disturbare l'elenco e la pulizia delle istantanee nel cloud. Se questa parte non appartiene all'endpoint del servizio, usare un endpoint senza nome del bucket; se esistono già dati sincronizzati, eseguire un backup e verificare il percorso di archiviazione prima di modificare la configurazione, quindi confermare con il test di connessione",
 	"embedHTMLFileBelow": "Incorpora file HTML sotto",
 	"horizontalSuperBlock": "Super blocco orizzontale",
 	"verticalSuperBlock": "Super blocco verticale",

@@ -344,7 +344,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (linkElement && richTextElement.contains(linkElement)) {
-            href = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"));
+            href = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"), false, true);
         }
         if (href) {
             openLink(protyle.app, href, event, event.ctrlKey || event.metaKey);

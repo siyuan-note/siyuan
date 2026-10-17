@@ -113,7 +113,7 @@ const handleRichTextInteraction = (protyle: IProtyle, event: MouseEvent) => {
         });
         /// #endif
     } else if (linkElement && richTextElement.contains(linkElement)) {
-        const link = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"));
+        const link = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"), false, true);
         if (link) {
             openLink(protyle.app, link, event, event.ctrlKey || event.metaKey);
         }

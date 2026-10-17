@@ -119,7 +119,7 @@ const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
         return true;
     }
     const linkDest = resolveLinkDest(text, protyle.lute);
-    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle)))) {
+    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle), true))) {
         protyle.toolbar.range = range;
         protyle.toolbar.setInlineMark(protyle, "a", "range", {type: "a", color: linkDest});
         return true;

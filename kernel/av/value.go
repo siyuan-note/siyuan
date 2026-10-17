@@ -715,7 +715,7 @@ func isAllowedValueTextRichNode(node *ast.Node, localLinks bool) bool {
 		ast.NodeFileAnnotationRefText:
 		return true
 	case ast.NodeLinkDest:
-		return isAllowedValueTextRichLinkTarget(node.TokensStr()) ||
+		return isAllowedValueTextRichLinkTarget(node.TokensStr(), !node.ParentIs(ast.NodeImage)) ||
 			localLinks && !node.ParentIs(ast.NodeImage) && isAllowedTableCellRichLocalLinkTarget(node.TokensStr())
 	case ast.NodeCodeBlock, ast.NodeCodeBlockFenceInfoMarker:
 		return !isValueTextRichExecutableCodeFence(node.CodeBlockInfo)
@@ -791,7 +791,7 @@ func isAllowedValueTextMarkReferenceData(node *ast.Node, localLinks bool) bool {
 	}
 
 	if node.IsTextMarkType("a") {
-		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref) &&
+		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref, true) &&
 			!(localLinks && isAllowedTableCellRichLocalLinkTarget(node.TextMarkAHref)) {
 			return false
 		}
@@ -809,7 +809,7 @@ func isAllowedValueTextMarkReferenceData(node *ast.Node, localLinks bool) bool {
 	return true
 }
 
-func isAllowedValueTextRichLinkTarget(target string) bool {
+func isAllowedValueTextRichLinkTarget(target string, customProtocols bool) bool {
 	if "" == target {
 		return true
 	}
@@ -840,8 +840,13 @@ func isAllowedValueTextRichLinkTarget(target string) bool {
 			strings.HasPrefix(strings.ToLower(target), scheme+"://")
 	case "":
 		return isAllowedValueTextRichRelativeLinkTarget(target, decodedTarget, parsed)
-	default:
+	case "javascript", "vbscript", "data", "blob", "file", "filesystem", "about", "chrome", "chrome-extension",
+		"devtools", "view-source", "resource", "moz-extension":
 		return false
+	default:
+		// 自定义协议仅用于主动点击的链接，不能作为图片等自动加载的资源地址。
+		return customProtocols && parsed.Host != "" && parsed.Opaque == "" &&
+			strings.HasPrefix(strings.ToLower(target), scheme+"://")
 	}
 }
 

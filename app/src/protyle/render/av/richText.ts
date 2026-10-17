@@ -248,7 +248,7 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tab
         });
     });
     template.content.querySelectorAll<HTMLElement>('[data-type~="a"][data-href]').forEach((element) => {
-        const href = getAVRichTextSafeURL(element.dataset.href, tableCellCustomInline);
+        const href = getAVRichTextSafeURL(element.dataset.href, tableCellCustomInline, true);
         if (href) {
             element.dataset.href = href;
         } else {
@@ -454,7 +454,7 @@ const prepareAVRichTextPreviewHTML = (html: string) => {
         element.disabled = true;
     });
     template.content.querySelectorAll<HTMLElement>("[data-href], a[href]").forEach((element) => {
-        const href = getAVRichTextSafeURL(element.getAttribute("href") || element.dataset.href);
+        const href = getAVRichTextSafeURL(element.getAttribute("href") || element.dataset.href, false, true);
         if (!href) {
             element.removeAttribute("href");
             element.removeAttribute("data-href");

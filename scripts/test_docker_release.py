@@ -501,22 +501,60 @@ class CacheTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             cache.onnx_steps(line, {"linux/arm64"})
 
-    def test_selected_platform_is_used_for_all_four_cache_acceptance_cases(self):
+    def test_selected_platform_and_parallelism_are_used_for_all_four_cache_acceptance_cases(self):
         def build(context, cache_ref, directory, name, *, platforms, **kwargs):
-            self.assertEqual(platforms, {"linux/arm64"})
-            return {"cached": {"linux/arm64": name in ("warm", "application-change")}}
+            self.assertEqual(platforms, {"linux/arm/v7"})
+            self.assertEqual(kwargs["onnx_parallel"], 4)
+            return {"cached": {"linux/arm/v7": name in ("warm", "application-change")}}
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             dockerfile = root / "Dockerfile"
             dockerfile.write_text("FROM alpine AS onnx-build\n", encoding="utf-8")
             with patch("sys.argv", ["check-docker-cache.py", "--dockerfile", str(dockerfile),
                                     "--cache-repository", "b3log/siyuan", "--records", str(root / "records"),
-                                    "--platform", "linux/arm64"]), patch.object(cache, "build_case", side_effect=build) as run:
+                                    "--platform", "linux/arm/v7", "--onnx-parallel", "4"]), \
+                    patch.object(cache, "build_case", side_effect=build) as run:
                 cache.main()
             self.assertEqual(run.call_count, 4)
             value = json.loads(root.joinpath("records/report.json").read_text(encoding="utf-8"))
             self.assertEqual(value["status"], "passed")
-            self.assertEqual(value["platforms"], ["linux/arm64"])
+            self.assertEqual(value["platforms"], ["linux/arm/v7"])
+            self.assertEqual(value["onnx_parallel"], 4)
+
+    def test_build_uses_selected_parallelism_and_retains_cache_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            commands = []
+
+            def command(arguments, **kwargs):
+                commands.append(arguments)
+                if arguments[:3] == ["docker", "buildx", "build"]:
+                    kwargs["stdout"].write(
+                        "#1 [linux/arm/v7 onnx-build 5/5] RUN python3 /onnxruntime/tools/ci_build/build.py\n#1 CACHED\n")
+                return subprocess.CompletedProcess(arguments, 0, '{"layers": []}', "")
+
+            with patch.object(cache.subprocess, "run", side_effect=command), patch.object(cache.threading, "Thread"):
+                value = cache.build_case(root, "b3log/siyuan:cache", root, "warm", import_cache=True,
+                                         platforms={"linux/arm/v7"}, onnx_parallel=4, revision="changed")
+            build = next(arguments for arguments in commands if arguments[:3] == ["docker", "buildx", "build"])
+            self.assertIn("ONNX_BUILD_PARALLEL=4", build)
+            self.assertIn("ONNX_TOOLCHAIN_REV=changed", build)
+            self.assertIn("linux/arm/v7", build)
+            self.assertIn("--cache-from", build)
+            self.assertIn("--cache-to", build)
+            self.assertEqual(value["cached"], {"linux/arm/v7": True})
+
+    def test_invalid_parallelism_stops_before_creating_records_or_running_docker(self):
+        with tempfile.TemporaryDirectory() as directory:
+            records = Path(directory) / "records"
+            for count in ("0", "-1", "invalid"):
+                with self.subTest(count=count), patch("sys.argv", ["check-docker-cache.py", "--dockerfile", "Dockerfile",
+                        "--cache-repository", "b3log/siyuan", "--records", str(records), "--onnx-parallel", count]), \
+                        patch.object(cache, "build_case") as build, contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaises(SystemExit):
+                        cache.main()
+                    build.assert_not_called()
+                    self.assertFalse(records.exists())
 
 
 class SourceDownloadTests(unittest.TestCase):

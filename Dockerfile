@@ -103,8 +103,10 @@ patch --fuzz=0 -p1 <<'EOPATCH'
  #include <vector>
 EOPATCH
 EORUN
+ARG ONNX_BUILD_PARALLEL=2
+# 并行度只影响编译层，允许发布环境按可用资源调整。
 RUN python3 /onnxruntime/tools/ci_build/build.py --build_dir /onnxruntime/build \
-    --config Release --update --build --parallel 2 --build_shared_lib \
+    --config Release --update --build --parallel ${ONNX_BUILD_PARALLEL} --build_shared_lib \
     --skip_tests --allow_running_as_root --compile_no_warning_as_error \
     --cmake_extra_defines onnxruntime_BUILD_UNIT_TESTS=OFF \
     && grep -q '^onnxruntime_BUILD_UNIT_TESTS:BOOL=OFF$' /onnxruntime/build/Release/CMakeCache.txt \

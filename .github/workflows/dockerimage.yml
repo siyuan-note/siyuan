@@ -25,6 +25,8 @@ concurrency:
 
 env:
   IMAGE_REPOSITORY: b3log/siyuan
+  # ARMv7 的 QEMU 冷编译耗时较长，在四核运行器上使用全部核心。
+  ARMV7_ONNX_BUILD_PARALLEL: 4
 
 permissions:
   contents: read
@@ -187,7 +189,10 @@ jobs:
           PLATFORM_ID: ${{ matrix.id }}
           CACHE_IMAGE: ${{ env.IMAGE_REPOSITORY }}:buildcache-release-v2-${{ matrix.id }}
         run: |
+          ONNX_PARALLEL=2
+          if [ "$PLATFORM_ID" = "armv7" ]; then ONNX_PARALLEL="$ARMV7_ONNX_BUILD_PARALLEL"; fi
           docker buildx build --push --platform "$PLATFORM" --provenance=mode=min \
+            --build-arg "ONNX_BUILD_PARALLEL=$ONNX_PARALLEL" \
             --cache-from "type=registry,ref=$CACHE_IMAGE" \
             --cache-to "type=registry,ref=$CACHE_IMAGE,mode=max" \
             --metadata-file "$RUNNER_TEMP/docker-metadata.json" --progress plain \
@@ -294,8 +299,12 @@ jobs:
       - name: Verify platform ONNX cache reuse and invalidation
         env:
           PLATFORM: ${{ matrix.platform }}
+          PLATFORM_ID: ${{ matrix.id }}
         run: |
+          ONNX_PARALLEL=2
+          if [ "$PLATFORM_ID" = "armv7" ]; then ONNX_PARALLEL="$ARMV7_ONNX_BUILD_PARALLEL"; fi
           python3 scripts/check-docker-cache.py --platform "$PLATFORM" \
+            --onnx-parallel "$ONNX_PARALLEL" \
             --dockerfile Dockerfile --cache-repository "$IMAGE_REPOSITORY" \
             --records "$RUNNER_TEMP/docker-cache-acceptance"
 

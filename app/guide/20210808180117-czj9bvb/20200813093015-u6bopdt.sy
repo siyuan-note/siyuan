@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20261017234852"
+		"updated": "20261018005815"
 	},
 	"Children": [
 		{
@@ -1060,7 +1060,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501230739-whydmx1",
-				"updated": "20261017234852"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
@@ -1074,12 +1074,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017212429-ssbwd82",
-				"updated": "20261017234852"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "默认使用精简块标。只有一个列表项时，也会保留列表块和列表项块标。若要显示当前块及其所属容器的全部块标，可在 "
+					"Data": "默认使用精简块标。只有一个列表项时，也会保留列表块和列表项块标。若要显示当前块及其所属容器的全部块标，可启用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1111,11 +1111,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "块标显示模式"
+					"TextMarkTextContent": "显示完整块标"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中选择「完整」，通过各层块标直接打开对应块的菜单或拖拽该块。"
+					"Data": "，通过各层块标直接打开对应块的菜单或拖拽该块。"
 				}
 			]
 		},

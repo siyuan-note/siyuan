@@ -50,13 +50,11 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.md12,
         desc: window.siyuan.languages.md16,
     });
-    group.select("editor.blockGutterMode", {
+    group.switch("editor.blockGutterMode", {
         title: window.siyuan.languages.blockGutterMode,
         desc: window.siyuan.languages.blockGutterModeTip,
-        options: [
-            {value: 0, label: window.siyuan.languages.blockGutterCompact},
-            {value: 1, label: window.siyuan.languages.blockGutterFull},
-        ],
+        readConfig: () => window.siyuan.config.editor.blockGutterMode === 1,
+        save: (value) => editorConfigApi.patch("blockGutterMode", value ? 1 : 0),
     });
     group.select("editor.codeTabSpaces", {
         title: window.siyuan.languages.md29,

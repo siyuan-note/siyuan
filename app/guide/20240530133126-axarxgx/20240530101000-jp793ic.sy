@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20261017234852"
+		"updated": "20261018005815"
 	},
 	"Children": [
 		{
@@ -1110,7 +1110,7 @@
 			"Properties": {
 				"ID": "20240530101000-owjuw7q",
 				"id": "20240530101000-1u51q5t",
-				"updated": "20261017234852"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
@@ -1134,7 +1134,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017212429-yem61n3",
-				"updated": "20261017234852"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
@@ -1171,11 +1171,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ブロックアイコンの表示モード"
+					"TextMarkTextContent": "ブロックアイコンをすべて表示"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で「完全」を選択します。各アイコンから対応するブロックのメニューを開いたり、そのブロックをドラッグしたりできます。"
+					"Data": " を有効にします。各アイコンから対応するブロックのメニューを開いたり、そのブロックをドラッグしたりできます。"
 				}
 			]
 		},

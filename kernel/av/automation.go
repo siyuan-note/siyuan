@@ -28,11 +28,13 @@ type AutomationRule struct {
 
 // AutomationBlockSource 的范围取并集，各类条件取交集；文档范围包含其子文档。
 type AutomationBlockSource struct {
-	NotebookIDs []string                    `json:"notebookIDs,omitempty"`
-	DocumentIDs []string                    `json:"documentIDs,omitempty"`
-	Types       []string                    `json:"types,omitempty"`
-	Tags        []string                    `json:"tags,omitempty"`
-	Attributes  []*AutomationBlockAttribute `json:"attributes,omitempty"`
+	NotebookIDs    []string                    `json:"notebookIDs,omitempty"`
+	DocumentIDs    []string                    `json:"documentIDs,omitempty"`
+	Types          []string                    `json:"types,omitempty"`
+	Tags           []string                    `json:"tags,omitempty"`
+	Attributes     []*AutomationBlockAttribute `json:"attributes,omitempty"`
+	TagMatch       string                      `json:"tagMatch,omitempty"`
+	AttributeMatch string                      `json:"attributeMatch,omitempty"`
 }
 
 type AutomationBlockAttribute struct {
@@ -64,6 +66,9 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		if rule.BlockSource.TagMatch == "or" || rule.BlockSource.AttributeMatch == "or" {
+			return 3
+		}
 		for _, typ := range rule.BlockSource.Types {
 			if strings.Contains(typ, ":") {
 				return 3

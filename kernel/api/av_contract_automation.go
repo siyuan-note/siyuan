@@ -64,6 +64,7 @@ func toContractAVAutomationBlockSource(source *av.AutomationBlockSource) *apicon
 		return nil
 	}
 	return &apicontract.AVAutomationBlockSource{NotebookIDs: source.NotebookIDs, DocumentIDs: source.DocumentIDs,
+		TagMatch: source.TagMatch, AttributeMatch: source.AttributeMatch,
 		Types: source.Types, Tags: source.Tags, Attributes: avContractSlice(source.Attributes, func(attr *av.AutomationBlockAttribute) *apicontract.AVAutomationBlockAttribute {
 			if attr == nil {
 				return nil

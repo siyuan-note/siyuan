@@ -3153,6 +3153,10 @@ img.av__cellassetimg {
     gap: 4px;
   }
 
+  &-chips .b3-chip {
+    max-width: 100%;
+  }
+
   &-enabled,
   &-tools {
     align-self: flex-end;

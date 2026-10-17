@@ -293,6 +293,75 @@ func TestBlockCollectionSubtypes(t *testing.T) {
 	}
 }
 
+func TestBlockCollectionConditionCombinations(t *testing.T) {
+	id := ast.NewNodeID()
+	node := &ast.Node{ID: id, Type: ast.NodeDocument}
+	node.SetIALAttr("tags", "todo")
+	node.SetIALAttr("custom-state", "ready")
+	tree := &parse.Tree{ID: id, Box: "notebook", Path: "/" + id + ".sy", Root: node}
+	source := &av.AutomationBlockSource{DocumentIDs: []string{id}, Tags: []string{"todo", "other"},
+		Attributes: []*av.AutomationBlockAttribute{{Name: "custom-state", Operator: "equals", Value: "ready"},
+			{Name: "custom-flag", Operator: "exists"}}}
+	for _, modes := range []struct {
+		tags, attrs string
+		want        bool
+	}{
+		{"", "", false}, {"and", "and", false}, {"or", "and", false}, {"and", "or", false}, {"or", "or", true},
+	} {
+		source.TagMatch, source.AttributeMatch = modes.tags, modes.attrs
+		if got := collectionBlockMatches(source, node, tree); got != modes.want {
+			t.Fatalf("%+v: %v", modes, got)
+		}
+	}
+	source.Tags = []string{"missing"}
+	if collectionBlockMatches(source, node, tree) {
+		t.Fatal("OR inside a group bypassed the other group")
+	}
+	source.Tags, source.Attributes = nil, nil
+	if !collectionBlockMatches(source, node, tree) {
+		t.Fatal("empty OR groups restricted matches")
+	}
+	source.Types = []string{"p"}
+	if collectionBlockMatches(source, node, tree) {
+		t.Fatal("empty groups bypassed type filtering")
+	}
+}
+
+func TestBlockCollectionAnyTagTransitions(t *testing.T) {
+	fixture, view, _ := setupBlockCollectionTest(t)
+	rule := view.Automations.Rules[0]
+	view.Automations.Spec = 3
+	rule.BlockSource.Tags, rule.BlockSource.TagMatch = []string{"todo", "other"}, "or"
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	var itemID string
+	for _, tags := range []string{"other", "todo", "none"} {
+		if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, tags)); err != nil {
+			t.Fatal(err)
+		}
+		stored := readAttributeViewItemsTest(t, view.ID)
+		row := stored.GetBlockValueByBoundID(fixture.sourceID)
+		preview, err := PreviewAttributeViewCollection(view.ID, rule.ID, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if tags == "none" {
+			if row != nil || len(preview.Blocks) != 0 {
+				t.Fatal("OR mismatch kept a row or preview match")
+			}
+		} else {
+			if row == nil || len(preview.Blocks) != 1 {
+				t.Fatal("OR match not reflected in collection and preview")
+			}
+			if itemID != "" && row.BlockID != itemID {
+				t.Fatal("switching between matching tags recreated the row")
+			}
+			itemID = row.BlockID
+		}
+	}
+}
+
 func TestBlockCollectionCreateAndMoveAcrossScope(t *testing.T) {
 	fixture, view, _ := setupBlockCollectionTest(t)
 	rule := view.Automations.Rules[0]

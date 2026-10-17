@@ -61,37 +61,10 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 			return false
 		}
 	}
-	for _, attr := range source.Attributes {
-		if attr == nil {
-			return false
-		}
-		value, present := "", false
-		for _, pair := range node.KramdownIAL {
-			if len(pair) == 2 && pair[0] == attr.Name {
-				value, present = util.UnescapeHTML(pair[1]), true
-				break
-			}
-		}
-		switch attr.Operator {
-		case "equals":
-			if !present || value != attr.Value {
-				return false
-			}
-		case "contains":
-			if !present || !strings.Contains(value, attr.Value) {
-				return false
-			}
-		case "exists":
-			if !present {
-				return false
-			}
-		case "notExists":
-			if present {
-				return false
-			}
-		default:
-			return false
-		}
+	if !collectionConditionsMatch(source.Attributes, source.AttributeMatch, func(attr *av.AutomationBlockAttribute) bool {
+		return collectionAttributeMatches(attr, node)
+	}) {
+		return false
 	}
 	if len(source.Tags) == 0 {
 		return true
@@ -125,12 +98,44 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 		}
 		return ast.WalkContinue
 	})
-	for _, tag := range source.Tags {
-		if !tags[strings.Trim(strings.TrimSpace(tag), "#")] {
-			return false
+	return collectionConditionsMatch(source.Tags, source.TagMatch, func(tag string) bool {
+		return tags[strings.Trim(strings.TrimSpace(tag), "#")]
+	})
+}
+
+// 条件组为空时不限制，缺省保持全部匹配；不同条件组仍由调用方取交集。
+func collectionConditionsMatch[T any](values []T, mode string, matches func(T) bool) bool {
+	if len(values) == 0 {
+		return true
+	}
+	if mode == "or" {
+		return slices.ContainsFunc(values, matches)
+	}
+	return !slices.ContainsFunc(values, func(value T) bool { return !matches(value) })
+}
+
+func collectionAttributeMatches(attr *av.AutomationBlockAttribute, node *ast.Node) bool {
+	if attr == nil {
+		return false
+	}
+	value, present := "", false
+	for _, pair := range node.KramdownIAL {
+		if len(pair) == 2 && pair[0] == attr.Name {
+			value, present = util.UnescapeHTML(pair[1]), true
+			break
 		}
 	}
-	return true
+	switch attr.Operator {
+	case "equals":
+		return present && value == attr.Value
+	case "contains":
+		return present && strings.Contains(value, attr.Value)
+	case "exists":
+		return present
+	case "notExists":
+		return !present
+	}
+	return false
 }
 
 func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule *av.AutomationRule, boxID string) error {
@@ -139,6 +144,10 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		len(source.NotebookIDs)+len(source.DocumentIDs) > 100 || len(source.Tags) > 20 || len(source.Attributes) > 20 ||
 		len(rule.Conditions) != 0 || rule.KeyID != "" || len(rule.Actions) != 1 {
 		return fmt.Errorf("invalid block collection source")
+	}
+	if !slices.Contains([]string{"", "and", "or"}, source.TagMatch) ||
+		!slices.Contains([]string{"", "and", "or"}, source.AttributeMatch) {
+		return fmt.Errorf("invalid block collection match mode")
 	}
 	for _, id := range source.NotebookIDs {
 		if !ast.IsNodeIDPattern(id) || Conf.Box(id) == nil || !IsSameCryptoBoundary(boxID, id) {

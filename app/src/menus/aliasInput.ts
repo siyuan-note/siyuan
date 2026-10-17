@@ -14,9 +14,11 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     spellcheck: boolean,
     readonly?: boolean,
     dragThreshold?: number,
+    normalize?: (value: string) => string,
     save: (value: string) => Promise<boolean>,
 }) => {
-    let aliases = parseAliases(initialValue);
+    const normalize = (values: string[]) => Array.from(new Set(values.map(value => options.normalize ? options.normalize(value) : value).filter(Boolean)));
+    let aliases = normalize(parseAliases(initialValue));
     let editing = -1;
     let pending: Promise<boolean>;
     let actions = Promise.resolve();
@@ -238,7 +240,7 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
         if (input.classList.contains("fn__none")) {
             return Promise.resolve(true);
         }
-        const next = updateAliases(aliases, input.value, editing);
+        const next = normalize(updateAliases(aliases, input.value, editing));
         if (next.join(",") === aliases.join(",")) {
             finish();
             if (restoreFocus) {

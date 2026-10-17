@@ -132,7 +132,7 @@ export const openAutomationMenu = async (options: {
     const filtersAvailable = (source: AVAttributeViewData, filters: IAVFilter[] = []): boolean => filters.every(filter =>
         filter.filters ? filtersAvailable(source, filter.filters) : fieldsOf(source).some(field => field.id === filter.column));
     const incomplete = (rule: AutomationRule): string => {
-        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.closest("[data-template-preview]") && !input.checkValidity())) {
+        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.closest("[data-template-preview], [data-attribute-editor]") && !input.checkValidity())) {
             return lang.invalid;
         }
         if (!rule.name.trim()) {
@@ -204,8 +204,9 @@ export const openAutomationMenu = async (options: {
         updateStatus();
         onResize();
         const usesTemplates = rules.some(rule => rule.actions.some(action => Object.values(action.fields).some(value => value.mode === "template")));
-        const usesSubtypes = rules.some(rule => rule.blockSource?.types?.some(type => type.includes(":")));
-        const next = {spec: Math.max(previous.spec, usesSubtypes ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
+        const usesSourceOptions = rules.some(rule => rule.blockSource?.types?.some(type => type.includes(":")) ||
+            rule.blockSource?.tagMatch === "or" || rule.blockSource?.attributeMatch === "or");
+        const next = {spec: Math.max(previous.spec, usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }

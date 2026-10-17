@@ -4526,12 +4526,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-nrq3k5z",
-				"updated": "20261016202856"
+				"updated": "20261017200709"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Choose the “Block matches conditions” trigger, select notebooks or documents under “Watch scope (includes subdocuments)”, and optionally filter by block types, tags, and custom attributes. Notebook and document scopes are combined; document scopes include subdocuments. A block may have any selected type, but must match every tag and attribute condition. Custom attributes support exact equality, contains, exists, and does not exist."
+					"Data": "Choose the Block matches conditions trigger and select notebooks or documents in Watch scope (includes subdocuments). Notebook and document scopes are combined. Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them. Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction. Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
 				}
 			]
 		},

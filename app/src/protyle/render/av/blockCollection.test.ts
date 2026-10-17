@@ -18,8 +18,11 @@ test("collection scope requires a notebook or document and complete attribute na
 });
 
 test("collection type selection replaces overlapping parents and preserves independent types", () => {
-    const methods = {} as typeof import("./blockCollection");
-    runInNewContext(compiled, {exports: methods, require: () => ({})});
+    const methods = {} as typeof import("./collectionConditions");
+    const conditions = transpileModule(readFileSync("src/protyle/render/av/collectionConditions.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+    }).outputText;
+    runInNewContext(conditions, {exports: methods, require: () => ({})});
     const toggle = (types: string[], type: string): string[] => JSON.parse(JSON.stringify(methods.toggleCollectionType(types, type)));
     assert.deepEqual(toggle(["l:u", "l:t", "i:t"], "l"), ["i:t", "l"]);
     assert.deepEqual(toggle(["l", "h:h1"], "l:o"), ["h:h1", "l:o"]);

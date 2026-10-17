@@ -231,4 +231,23 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	if err != nil || len(preview.Blocks) != 0 {
 		t.Fatalf("unmatched subtype preview: %+v %v", preview, err)
 	}
+	collection.BlockSource.Types = []string{"d"}
+	collection.BlockSource.Tags, collection.BlockSource.TagMatch = []string{"collect", "other"}, "or"
+	collection.BlockSource.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-state", Operator: "equals", Value: "ready"}, {Name: "custom-flag", Operator: "exists"}}
+	collection.BlockSource.AttributeMatch = "or"
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 3, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	call("/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+	call("/api/attr/setBlockAttrs", map[string]any{"id": tree.ID, "attrs": map[string]string{"tags": "other", "custom-state": "ready"}}, setBlockAttrs)
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(tree.ID) == nil {
+		t.Fatal("OR groups did not collect a matching document")
+	}
+	call("/api/attr/setBlockAttrs", map[string]any{"id": tree.ID, "attrs": map[string]string{"custom-state": "blocked"}}, setBlockAttrs)
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(tree.ID) != nil {
+		t.Fatal("OR tag group bypassed an unmatched attribute group")
+	}
 }

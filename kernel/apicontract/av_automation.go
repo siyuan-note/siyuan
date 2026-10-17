@@ -27,7 +27,8 @@ type AVAutomationRule struct {
 }
 
 // AVAutomationBlockSource 监听范围取笔记本与文档的并集，文档包含子文档；范围至少选择一项。
-// 类型和标签分别取或、与关系，所有自定义属性条件取与关系。标签精确匹配，不递归匹配父容器。
+// 类型组取或关系；标签和属性组各自通过 tagMatch、attributeMatch 选择 and（缺省）或 or（至少 spec 3）。
+// 各条件组之间取与关系，空组不限制；标签精确匹配，不递归匹配父容器。
 // types 为空不限制类型；主类型匹配其全部子类型，类型之间取或关系。
 // spec 3 支持 h:h1 至 h:h6、l:u/o/t、i:u/o/t 和 callout:类型名；提示块类型区分大小写，允许自定义名称。
 // 列表项首段的标签默认归属列表项；显式选择段落类型时可匹配该段落。
@@ -36,11 +37,13 @@ type AVAutomationRule struct {
 // 再次匹配创建新条目并初始化字段，不恢复移出条目的字段；撤销重做仍恢复原事务快照。
 // 配置变更、启用规则、导入、同步和历史恢复不补收存量内容，也不串联触发其他自动化。
 type AVAutomationBlockSource struct {
-	NotebookIDs []string                      `json:"notebookIDs,omitempty" api:"optional"`
-	DocumentIDs []string                      `json:"documentIDs,omitempty" api:"optional"`
-	Types       []string                      `json:"types,omitempty" api:"optional"`
-	Tags        []string                      `json:"tags,omitempty" api:"optional"`
-	Attributes  []*AVAutomationBlockAttribute `json:"attributes,omitempty" api:"optional"`
+	NotebookIDs    []string                      `json:"notebookIDs,omitempty" api:"optional"`
+	DocumentIDs    []string                      `json:"documentIDs,omitempty" api:"optional"`
+	Types          []string                      `json:"types,omitempty" api:"optional"`
+	Tags           []string                      `json:"tags,omitempty" api:"optional"`
+	Attributes     []*AVAutomationBlockAttribute `json:"attributes,omitempty" api:"optional"`
+	TagMatch       string                        `json:"tagMatch,omitempty" api:"optional,enum=|and|or"`
+	AttributeMatch string                        `json:"attributeMatch,omitempty" api:"optional,enum=|and|or"`
 }
 
 type AVAutomationBlockAttribute struct {

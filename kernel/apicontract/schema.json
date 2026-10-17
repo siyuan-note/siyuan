@@ -6655,6 +6655,14 @@
     "AVAutomationBlockSource": {
       "type": "object",
       "properties": {
+        "attributeMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
         "attributes": {
           "type": "array",
           "items": {
@@ -6680,6 +6688,14 @@
             "type": "string"
           }
         },
+        "tagMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
         "tags": {
           "type": "array",
           "items": {
@@ -6698,6 +6714,14 @@
     "AVAutomationBlockSourceInput": {
       "type": "object",
       "properties": {
+        "attributeMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
         "attributes": {
           "type": "array",
           "items": {
@@ -6722,6 +6746,14 @@
           "items": {
             "type": "string"
           }
+        },
+        "tagMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
         },
         "tags": {
           "type": "array",

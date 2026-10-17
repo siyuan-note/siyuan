@@ -2218,7 +2218,7 @@ if (response.code === 0 && response.data) {
 
     * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
 
-    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1`、`2` 或 `3`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。已有手动条目不受影响；移出后再次匹配会创建新条目并初始化字段，撤销则恢复原条目及字段
+    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1`、`2` 或 `3`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。已有手动条目不受影响；移出后再次匹配会创建新条目并初始化字段，撤销则恢复原条目及字段 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。
 
 ### 获取主键值
 

@@ -256,9 +256,9 @@ export type AVAutomationBlockAttribute = { "name": string; "operator": "equals" 
 
 export type AVAutomationBlockAttributeInput = { "name": string; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockSource = { "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationBlockSourceInput = { "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tags"?: Array<string>; "types"?: Array<string>; };
 
 export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
@@ -7816,6 +7816,7 @@ export interface APIPOSTRoutes {
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
      * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1、2 或 3，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
+     * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
      * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
      * 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
      * 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。

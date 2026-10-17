@@ -430,8 +430,8 @@ const runCases = async (sources, css, mobile) => {
                     button.focus();
                     assert.equal(document.activeElement, button, "collection controls remain keyboard focusable");
                 }
-                assert.ok(typesRect.top - tagsRect.bottom <= 12, "tag field has no extra trailing margin");
-                assert.ok(addRect.top - typesRect.bottom <= 12, "empty attributes do not leave a gap");
+                assert.ok(typesRect.height > 0 && addRect.height > 0);
+                assert.equal(menu.querySelector("[data-attr-name]"), null, "attribute editors stay collapsed until needed");
             }
             menu.style.fontSize = "";
             get("[data-source-conditions]").scrollIntoView({block: "center"});
@@ -439,29 +439,67 @@ const runCases = async (sources, css, mobile) => {
         }
     }
     await click("[data-types] svg");
-    fieldMenu.items.find(item => item.label === lang.list1).click();
+    const typePopup = fieldMenu.element;
+    typePopup.querySelector('[data-collection-type="l"]').click();
     assert.deepEqual(latest().blockSource.types, ["l"]);
-    fieldMenu.items.find(item => item.label === lang["ordered-list"]).click();
+    typePopup.querySelector('[data-collection-type="l:o"]').click();
     assert.deepEqual(latest().blockSource.types, ["l:o"]);
     assert.equal(transactions.at(-1).perform[0].data.spec, 3);
-    fieldMenu.items.at(-1).click();
+    assert.equal(typePopup.isConnected, true, "type selection keeps the searchable list open");
+    const typeSearch = typePopup.querySelector("[data-type-search]");
+    typeSearch.value = lang.heading1;
+    typeSearch.dispatchEvent(new Event("input"));
+    assert.equal(typePopup.querySelector('[data-collection-type="l:o"]').classList.contains("fn__none"), true);
+    assert.equal(typePopup.querySelector('[data-collection-type="h:h1"]').classList.contains("fn__none"), false);
+    typePopup.querySelector("[data-custom-callout]").click();
     collectionTypeInput.onConfirm("CUSTOM", {destroy() {}});
     assert.deepEqual(latest().blockSource.types, ["l:o", "callout:CUSTOM"]);
-    fieldMenu.items.slice(0, -1).forEach(item => item.click());
+    await click("[data-types]");
+    fieldMenu.element.querySelectorAll("[data-collection-type]").forEach(item => item.click());
     await tick();
     await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 420, 900);
     menu.style.fontSize = "28px";
     await tick();
     assert.ok(latest().blockSource.types.length > 10);
     assert.ok(get("[data-types]").scrollWidth <= get("[data-types]").clientWidth + 1, "many selected block types wrap");
+    assert.equal(menu.querySelectorAll("[data-type-chips] .b3-chip").length, latest().blockSource.types.length);
+    const draftWrites = transactions.length;
     await click("[data-add-attribute] svg");
-    assert.equal(latest().blockSource.attributes.length, 1);
+    assert.equal(transactions.length, draftWrites, "adding an attribute starts an unsaved draft");
     await change("[data-attr-name]", "custom-status");
-    await change("[data-attr-operator]", "equals");
+    await click("[data-attr-operator]");
+    fieldMenu.items.find(item => item.label === lang.filterOperatorIs).click();
     await change("[data-attr-value]", "ready");
+    assert.equal(transactions.length, draftWrites, "editing a draft does not save it");
+    await click("[data-confirm-attribute]");
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
-    await click('[data-remove="attribute"]');
+    await click("[data-edit-attribute]");
+    await change("[data-attr-value]", "cancelled");
+    get("[data-attr-value]").dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    await tick();
+    assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
+    await click('[data-remove-filter="attribute"]');
     assert.equal(latest().blockSource.attributes.length, 0);
+    await click('[data-match="tagMatch"]');
+    fieldMenu.items.find(item => item.label === lang.filterMatchAny).click();
+    assert.equal(latest().blockSource.tagMatch, "or");
+    await click('[data-match="attributeMatch"]');
+    fieldMenu.items.find(item => item.label === lang.filterMatchAny).click();
+    assert.equal(latest().blockSource.attributeMatch, "or");
+    await click("[data-tags] button");
+    const tagInput = get("[data-tags] input");
+    tagInput.value = " #todo# ";
+    tagInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    await tick();
+    assert.deepEqual(latest().blockSource.tags, ["todo"]);
+    assert.equal(get("[data-tags] .b3-chip span").textContent, "todo");
+    await click("[data-tags] button");
+    get("[data-tags] input").value = "todo";
+    get("[data-tags] input").dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    await tick();
+    assert.equal(menu.querySelectorAll("[data-tags] .b3-chip").length, 1, "tag normalization removes duplicates");
+    await click("[data-tags] .b3-chip__close");
+    assert.deepEqual(latest().blockSource.tags, []);
     await click('[data-action="add-rule"]');
     const secondID = transactions.at(-1).perform[0].data.rules[1].id;
     await click('[data-action="rules"]');
@@ -503,12 +541,15 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;
             }
-            for (const name of ["escape", "setPosition"]) {
+            sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
+                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
+            }).outputText;
+            for (const name of ["escape", "setPosition", "upDownHint"]) {
                 sources[`util/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/util/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS},
                 }).outputText;

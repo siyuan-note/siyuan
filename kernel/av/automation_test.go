@@ -151,6 +151,13 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 		if (err == nil) != (spec == 3) {
 			t.Fatalf("subtype spec %d: %v", spec, err)
 		}
+		rule.BlockSource.Types = []string{"l"}
+		rule.BlockSource.TagMatch = "or"
+		raw, _ = json.Marshal(view)
+		_, err = ParseAttributeViewData(view.ID, raw)
+		if (err == nil) != (spec == 3) {
+			t.Fatalf("OR spec %d: %v", spec, err)
+		}
 	}
 }
 

@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -370,10 +371,8 @@ func databasePreviousKeyID(attrView *av.AttributeView, args map[string]any) (ret
 		if "" == prev {
 			return "", nil
 		}
-		for _, fieldID := range fieldIDs {
-			if fieldID == prev {
-				return prev, nil
-			}
+		if slices.Contains(fieldIDs, prev) {
+			return prev, nil
 		}
 		return "", fmt.Errorf("previous key not found in current view: %s", prev)
 	}
@@ -525,7 +524,7 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	})
 }
 
-func databaseUnused(args map[string]any) (CallToolResult, error) {
+func databaseUnused(_ map[string]any) (CallToolResult, error) {
 	items, err := model.UnusedAttributeViews(true)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil

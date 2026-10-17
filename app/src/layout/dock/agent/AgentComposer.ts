@@ -10,7 +10,8 @@ import {uploadFiles} from "../../../protyle/upload";
 import {previewImages} from "../../../protyle/preview/image";
 import {removeCompressURL} from "../../../util/image";
 import {mountProtyleLiteFragment} from "../../../protyle/lite/fragmentEditor";
-import {AGENT_SKILL_SELECTOR, expandAgentSkillSelection, normalizeAgentSkills} from "./agentSkill";
+import {AGENT_SKILL_SELECTOR, deleteAgentSkill, expandAgentSkillSelection, normalizeAgentSkills} from "./agentSkill";
+import {focusByRange} from "../../../protyle/util/selectionOffsets";
 
 export interface AgentComposerData {
     text: string;
@@ -260,8 +261,29 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             }
         }
     };
-    ["beforeinput", "cut", "paste"].forEach(type => {
+    let skillDeletionRange: Range;
+    const handleSkillDeletion = (event: InputEvent) => {
+        if (!deleteAgentSkill(p, event)) {
+            return false;
+        }
+        skillDeletionRange = getSelection().getRangeAt(0).cloneRange();
+        return true;
+    };
+    wysiwyg.element.addEventListener("beforeinput", (event: InputEvent) => {
+        if (!handleSkillDeletion(event)) {
+            prepareSkillSelection();
+        }
+    }, true);
+    ["cut", "paste"].forEach(type => {
         wysiwyg.element.addEventListener(type, prepareSkillSelection, true);
+    });
+    wysiwyg.element.addEventListener("keyup", (event: KeyboardEvent) => {
+        // Android 软键盘可能在退格后的 keyup 再次清空选区，恢复本次删除后的光标。
+        if (event.key === "Unidentified" && skillDeletionRange && getSelection().rangeCount === 0 &&
+            wysiwyg.element.contains(skillDeletionRange.startContainer)) {
+            focusByRange(skillDeletionRange);
+        }
+        skillDeletionRange = undefined;
     });
 
     // 智能体输入框没有文档 ID，直接预览输入框中的图片，避免走依赖文档资源列表的默认逻辑。
@@ -284,7 +306,15 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
     // capture 阶段拦截 hint 选择、发送快捷键、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
     wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
+        skillDeletionRange = undefined;
         if (event.isComposing) {
+            return;
+        }
+        if (!event.ctrlKey && !event.metaKey && !event.altKey && ["Backspace", "Delete"].includes(event.key) &&
+            handleSkillDeletion(new InputEvent("beforeinput", {cancelable: true,
+                inputType: event.key === "Backspace" ? "deleteContentBackward" : "deleteContentForward"}))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
             return;
         }
         prepareSkillSelection();

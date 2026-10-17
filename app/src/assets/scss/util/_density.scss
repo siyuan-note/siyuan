@@ -1,0 +1,48 @@
+// 紧凑尺寸只在桌面入口启用，低优先级默认值允许主题通过根变量覆盖。
+$compact-sizes: (
+  "panel-height": 34px,
+  "list-height": max(24px, 1.5em),
+  "menu-height": max(26px, 1.5em),
+  "menu-padding": 4px 0,
+  "menu-item-padding": 0 6px,
+  "tab-min-height": 25px,
+  "tab-margin": 4px 3px,
+  "tab-actions-margin-left": -7px,
+  "tab-icon-padding": 2px 0 2px 6px,
+  "tab-text-padding": 0 6px,
+  "tab-close-padding": 5px 6px 4px 0,
+  "dock-width": 34px,
+  "dock-padding": 4px,
+  "dock-margin": 4px,
+  "dock-split-height": 13px,
+  "toolbar-height": 28px,
+  "status-height": 28px,
+  "browser-titlebar-height": 27px,
+  "toolbar-control-height": 27.5px,
+  "toolbar-control-padding": 7px,
+  "toolbar-item-margin": 1px 2px,
+  "window-control-padding": 9.25px,
+  "dialog-header-padding": 5px 24px,
+  "dialog-content-padding": 12px 16px,
+  "dialog-action-padding": 5px 16px,
+  "dialog-close-padding": 4px,
+  "config-padding": 16px,
+  "config-title-margin": 16px 12px 12px,
+  "config-row-padding": 12px 0,
+  "config-nav-height": 28px,
+  "config-nav-margin": 6px
+);
+
+:where(:root[data-ui-density="compact"]) {
+  @each $name, $value in $compact-sizes {
+    --b3-ui-#{$name}: #{$value};
+  }
+}
+
+// 编辑器及预览正文内复用的控件保持内容布局，浮层菜单仍使用界面密度。
+:where(.protyle-wysiwyg),
+:where(.b3-typography) {
+  @each $name, $value in $compact-sizes {
+    --b3-ui-#{$name}: initial;
+  }
+}

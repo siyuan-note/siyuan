@@ -40,8 +40,13 @@ func getNewVerInstallPkgPath(preserve bool) string {
 		return ""
 	}
 
-	return readyInstallPackagePath(filepath.Join(util.TempDir, "install"), util.Ver,
-		Conf.LoadSystem().UpdateChannel, currentInstallPackageSuffix(), Conf.CookieKey, preserve)
+	for _, installDir := range []string{sharedInstallPackageDir(), filepath.Join(util.TempDir, "install")} {
+		if path := readyInstallPackagePath(installDir, util.Ver,
+			Conf.LoadSystem().UpdateChannel, currentInstallPackageSuffix(), Conf.CookieKey, preserve); path != "" {
+			return path
+		}
+	}
+	return ""
 }
 
 type installPackageDownload struct {
@@ -74,7 +79,7 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
-	existingPkgPath, err := reuseInstallPackage(filepath.Join(util.TempDir, "install"), &pkg.Metadata, Conf.CookieKey)
+	existingPkgPath, err := reuseInstallPackage(sharedInstallPackageDir(), &pkg.Metadata, Conf.CookieKey)
 	if err != nil {
 		logging.LogErrorf("prepare existing install package failed: %s", err)
 		return
@@ -90,10 +95,13 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	for _, downloadPkgURL := range pkg.URLs {
 		err = downloadInstallPkg(downloadPkgURL, &pkg.Metadata)
 		if err == nil {
-			pkgPath := filepath.Join(util.TempDir, "install", pkg.Metadata.FileName)
+			pkgPath := filepath.Join(sharedInstallPackageDir(), pkg.Metadata.FileName)
 			clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(pkgPath)), pkgPath)
 			success = true
 			break
+		}
+		if errors.Is(err, errInstallPackageDownloadBusy) {
+			return
 		}
 	}
 	if success {
@@ -149,16 +157,21 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 
 	pkg := metadata.FileName
 	checksum := metadata.Checksum
-	installDir := filepath.Join(util.TempDir, "install")
-	savePath := filepath.Join(util.TempDir, "install", pkg)
+	installDir := sharedInstallPackageDir()
+	savePath := filepath.Join(installDir, pkg)
+	lock, err := tryInstallPackageDownloadLock(installDir)
+	if err != nil {
+		return err
+	}
+	defer lock.Close()
 	if existingPath, reuseErr := reuseInstallPackage(installDir, metadata, Conf.CookieKey); reuseErr != nil || existingPath != "" {
 		return reuseErr
 	}
-
-	err = os.MkdirAll(filepath.Join(util.TempDir, "install"), 0755)
-	if err != nil {
-		logging.LogErrorf("create temp install dir failed: %s", err)
-		return
+	if err = copyLegacyInstallPackage(filepath.Join(util.TempDir, "install"), installDir, metadata, Conf.CookieKey); err != nil {
+		return err
+	}
+	if existingPath, reuseErr := reuseInstallPackage(installDir, metadata, Conf.CookieKey); reuseErr != nil || existingPath != "" {
+		return reuseErr
 	}
 	temporaryFile, err := os.CreateTemp(installDir, pkg+".*.part")
 	if err != nil {

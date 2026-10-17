@@ -56,17 +56,42 @@ func TestShouldRedirectToTLS(t *testing.T) {
 }
 
 func TestIsTLSRequestHonorsClientTLSHeaderOnlyForLocalPeers(t *testing.T) {
-	request := httptest.NewRequest(http.MethodGet, "/", nil)
-	request.RemoteAddr = "127.0.0.1:54321"
-	request.Header.Set(ClientTLSHeader, ClientTLSHeaderValue)
-	if !IsTLSRequest(request) {
-		t.Fatal("local proxy marked connection should be treated as TLS")
+	if IsTLSRequest(nil) {
+		t.Fatal("nil request must not be treated as TLS")
 	}
 
-	// 远端调用方伪造同名头部不得被采信
-	request.RemoteAddr = "192.0.2.10:54321"
-	if IsTLSRequest(request) {
-		t.Fatal("forged client TLS header from a remote peer must be ignored")
+	tests := []struct {
+		name       string
+		remoteAddr string
+		header     string
+		tls        bool
+		want       bool
+	}{
+		{name: "local HTTPS client over HTTP backend", remoteAddr: "127.0.0.1:54321", header: ClientTLSHeaderValue, want: true},
+		{name: "local HTTP client over HTTPS backend", remoteAddr: "127.0.0.1:54321", header: ClientTLSHeaderPlaintextValue, tls: true},
+		{name: "IPv6 local HTTP client over HTTPS backend", remoteAddr: "[::1]:54321", header: ClientTLSHeaderPlaintextValue, tls: true},
+		{name: "local HTTPS client over HTTPS backend", remoteAddr: "127.0.0.1:54321", header: ClientTLSHeaderValue, tls: true, want: true},
+		{name: "local direct TLS without marker", remoteAddr: "127.0.0.1:54321", tls: true, want: true},
+		{name: "local direct HTTP without marker", remoteAddr: "127.0.0.1:54321"},
+		{name: "local invalid marker over TLS", remoteAddr: "127.0.0.1:54321", header: "invalid", tls: true, want: true},
+		{name: "local invalid marker over HTTP", remoteAddr: "127.0.0.1:54321", header: "invalid"},
+		{name: "remote forged HTTPS marker", remoteAddr: "192.0.2.10:54321", header: ClientTLSHeaderValue},
+		{name: "remote forged HTTP marker over TLS", remoteAddr: "192.0.2.10:54321", header: ClientTLSHeaderPlaintextValue, tls: true, want: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodGet, "/", nil)
+			request.RemoteAddr = test.remoteAddr
+			if test.header != "" {
+				request.Header.Set(ClientTLSHeader, test.header)
+			}
+			if test.tls {
+				request.TLS = &tls.ConnectionState{}
+			}
+			if actual := IsTLSRequest(request); actual != test.want {
+				t.Fatalf("IsTLSRequest = %v, want %v", actual, test.want)
+			}
+		})
 	}
 }
 

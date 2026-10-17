@@ -1,3 +1,6 @@
+import {initializeListMindmapConnectorStyle, retagMindmapBranch} from "./model";
+import {getDefaultListMindmapConnectorStyle} from "./preferences";
+
 // 隐藏列表正文前交接选区，后续按键交由脑图处理。
 export const focusListMindmap = (list: HTMLElement, host: HTMLElement): Range | undefined => {
     const selection = window.getSelection();
@@ -21,8 +24,8 @@ export const spinListMindmapDOM = (lute: Lute, html: string) => {
     template.innerHTML = lute.SpinBlockDOM(html);
     const list = template.content.firstElementChild;
     if (list?.getAttribute("data-type") === "NodeList") {
+        initializeListMindmapConnectorStyle(list, getDefaultListMindmapConnectorStyle());
         retagMindmapBranch(list, true);
     }
     return template.innerHTML;
 };
-import {retagMindmapBranch} from "./model";

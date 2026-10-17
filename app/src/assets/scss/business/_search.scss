@@ -56,8 +56,8 @@
     border-top: 1px solid var(--b3-theme-surface-lighter);
     min-height: 40px;
 
-    .block__icon {
-      opacity: 1;
+    > .block__icons {
+      align-self: flex-start;
     }
 
     .b3-text-field--text {

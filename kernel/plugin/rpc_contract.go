@@ -181,7 +181,7 @@ func pluginRPCReply(response *JsonRpcProcessingResponse) (apicontract.PluginRPCR
 	return apicontract.RPCFailureReply(result), nil
 }
 
-func pluginRPCID(value interface{}) (id apicontract.PluginRPCID, err error) {
+func pluginRPCID(value any) (id apicontract.PluginRPCID, err error) {
 	data, err := json.Marshal(value)
 	if err == nil {
 		err = json.Unmarshal(data, &id)

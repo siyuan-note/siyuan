@@ -1,5 +1,6 @@
 import { getViewHTML, bindViewEvent, getFieldsByData } from "../view";
 import { openAutomationMenu } from "../automation";
+import { setAutomationMenuPosition } from "../automationPosition";
 import { isMobile } from "../../../../util/functions";
 import { setPosition } from "../../../../util/setPosition";
 import { getLayoutHTML, bindLayoutEvent, updateLayout } from "../layout";
@@ -28,8 +29,10 @@ export const configPanel: IAVPanelDescriptor = {
                 menuElement: context.menuElement,
                 onResize: () => {
                     if (!isMobile()) {
-                        delete context.menuElement.dataset.positionX;
-                        setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
+                        const anchor = context.options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
+                        if (anchor) {
+                            setAutomationMenuPosition(context.menuElement, anchor);
+                        }
                     }
                 },
             });

@@ -40,12 +40,13 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         block.textContent = text;
         return block.outerHTML;
     };
-    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string) => {
+    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string, branchType = "NodeList") => {
         let transactionOwner: (operations: Array<{action: string; id: string; parentID?: string;
             previousID?: string; nextID?: string}>) => unknown;
         const container = document.createElement("section");
+        container.dataset.type = branchType;
         const element = document.createElement("div");
-        element.dataset.type = "NodeListItem";
+        element.dataset.type = `${branchType}Item`;
         element.dataset.nodeId = "item";
         element.innerHTML = initialBlockHTML;
         const host = document.createElement("div");
@@ -62,6 +63,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         document.body.append(container);
         const state = {
             focusedText: "",
+            panTarget: undefined as Element | undefined,
             flushed: 0,
             destroyed: 0,
             finished: 0,
@@ -183,6 +185,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             canEdit: () => element.isConnected,
             onResize: noop,
             onAdd: async (kind: string) => { state.additions.push(kind); },
+            isPanTarget: (event: PointerEvent) => event.target === state.panTarget,
             onFinish: () => state.finished++,
             onUndo: noop,
             onSave: async (html: string) => {
@@ -224,10 +227,86 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         }}},
     } as unknown as typeof window.siyuan;
 
+    // 节点编辑器透传未处理的组合快捷键，已消费的编辑操作和组合输入仍保持隔离。
+    const shortcutEditor = create();
+    const received: KeyboardEvent[] = [];
+    shortcutEditor.container.addEventListener("keydown", event => received.push(event));
+    for (const key of ["p", "f", "e"]) {
+        for (const modifiers of [{ctrlKey: true}, {metaKey: true}]) {
+            const event = new KeyboardEvent("keydown", {key, ...modifiers, bubbles: true, cancelable: true});
+            shortcutEditor.wysiwyg.dispatchEvent(event);
+            check.equal(received[received.length - 1], event);
+        }
+    }
+    const beforeHandled = received.length;
+    for (const init of [{key: "x"}, {key: "p", ctrlKey: true, isComposing: true}]) {
+        shortcutEditor.wysiwyg.dispatchEvent(new KeyboardEvent("keydown", {...init, bubbles: true}));
+    }
+    const consumed = new KeyboardEvent("keydown", {key: "p", ctrlKey: true, bubbles: true, cancelable: true});
+    consumed.preventDefault();
+    shortcutEditor.wysiwyg.dispatchEvent(consumed);
+    check.equal(received.length, beforeHandled);
+    await shortcutEditor.remove();
+
     // 直接键入只替换首个段落，保留其余内容块。
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
+    // 新增的直接子分支在关闭节点编辑时提交，自动保存不能先把分支 ID 写入源树。
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        const current = create(paragraph("body", "Keep body"), undefined, "NodeMindmap");
+        const branch = document.createElement("div");
+        branch.dataset.type = type;
+        branch.dataset.nodeId = "new-branch";
+        branch.innerHTML = `<div data-node-id="new-item" data-type="${type}Item">${paragraph("child", "New child")}</div>`;
+        current.wysiwyg.append(branch);
+        await settle();
+        const flushed = current.state.flushed;
+        window.dispatchEvent(new Event("blur"));
+        await until(() => current.state.flushed > flushed);
+        await settle();
+        check.equal(current.state.saves.length, 0, type);
+        check.equal(current.element.textContent, "Keep body", "background saves retain the original source");
+        check.equal(await current.editor.finish(), true, type);
+        check.equal(current.state.saves.length, 1, "closing commits the branch in one content snapshot");
+        check.equal(current.element.querySelector('[data-node-id="child"]').textContent, "New child");
+        check.equal(current.state.finished, 1);
+        check.equal(current.state.messages.length, 0);
+        await current.remove();
+    }
+    // 旧列表脑图中的独立脑图仍属于正文，保留其后台保存能力。
+    const legacyNested = create(paragraph("body", "Keep body"));
+    legacyNested.wysiwyg.insertAdjacentHTML("beforeend", '<div data-type="NodeMindmap" data-node-id="nested">' +
+        '<div data-type="NodeMindmapItem" data-node-id="nested-item">' + paragraph("child", "Nested body") + "</div></div>");
+    await settle();
+    window.dispatchEvent(new Event("blur"));
+    await until(() => legacyNested.state.saves.length === 1);
+    check.equal(legacyNested.element.querySelector('[data-node-id="child"]').textContent, "Nested body");
+    check.equal(await legacyNested.editor.finish(), true);
+    await legacyNested.remove();
     // 粘贴到选中节点时保留原正文，在当前可见正文末尾启动上传；上传结束前保留编辑器。
+    const panEditor = create(paragraph("body", "Keep caret"));
+    const panTarget = document.createElement("div");
+    document.body.append(panTarget);
+    panEditor.state.panTarget = panTarget;
+    const editable = panEditor.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+    editable.focus();
+    const panRange = document.createRange();
+    panRange.setStart(editable.firstChild, 3);
+    panRange.collapse(true);
+    getSelection().removeAllRanges();
+    getSelection().addRange(panRange);
+    panTarget.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+    await settle();
+    check.equal(panEditor.state.finished, 0, "canvas panning does not close the node editor");
+    check.equal(document.activeElement, editable);
+    check.equal(getSelection().anchorOffset, 3, "canvas panning retains the insertion point");
+    await require("electron").ipcRenderer.invoke("mindmap-view-editor-type", "X");
+    check.equal(editable.textContent, "KeeXp caret", "typing continues at the retained insertion point");
+    document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+    await until(() => panEditor.state.finished === 1);
+    panTarget.remove();
+    await panEditor.remove();
+
     const imageEditor = create(paragraph("body", "Keep text"));
     const images = [new File(["image"], "image.png", {type: "image/png"})];
     imageEditor.editor.pasteImages(images);
@@ -718,6 +797,30 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                 "repeated editing does not change preview dimensions");
         }
     }
+    // 百分比宽度的内层画布不能在按内容撑开的节点中塌缩，缩放和大字号也保持可操作宽度。
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        for (const fontSize of [16, 32]) {
+            fixture.style.fontSize = `${fontSize}px`;
+            fixture.innerHTML = '<div class="mindmap-view"><div class="mindmap-view__viewport"><div class="mindmap-view__world">' +
+                '<div class="mindmap-view__node mindmap-view__node--editing"><div class="mindmap-view__content mindmap-view__editor protyle">' +
+                '<div class="protyle-content" data-padding-mode="responsive"><div class="protyle-wysiwyg" spellcheck="false">' +
+                `<div data-type="${type}" class="${type === "NodeList" ? "list" : "mindmap"}" data-mindmap-view-rendered="true">` +
+                '<div class="mindmap-view"><div class="mindmap-view__toolbar block__icons"></div>' +
+                '<div class="mindmap-view__viewport"><div class="mindmap-view__world"></div></div></div>' +
+                "</div></div></div></div></div></div></div></div>";
+            const node = fixture.querySelector<HTMLElement>(".mindmap-view__node--editing");
+            const nested = fixture.querySelector<HTMLElement>(".mindmap-view__editor .mindmap-view");
+            for (const device of ["desktop", "mobile"]) {
+                fixture.style.width = device === "mobile" ? "320px" : "800px";
+                fixture.querySelector<HTMLElement>(".protyle-content").dataset.device = device;
+                for (const scale of [1, 0.65, 1.5]) {
+                    fixture.style.transform = `scale(${scale})`;
+                    check.ok(nested.offsetWidth >= 260, "nested canvases retain a usable intrinsic width");
+                    check.ok(node.offsetWidth <= 300, "nested canvases respect the node width limit");
+                }
+            }
+        }
+    }
     fixture.remove();
     style.remove();
     return "List mindmap editor lifecycle cases passed";
@@ -740,7 +843,7 @@ test("list mindmap editor flushes pending input and preserves text across finish
     const cleanupSource = transpileModule(modelSource.slice(modelSource.indexOf("const cleanListMindmapDOM ="),
         modelSource.indexOf("// 转换前将思维导图块还原为列表结构"))
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const tabsSource = ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
+    const tabsSource = ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsVisibility.ts", "../tabsRender.ts"]
         .map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: ScriptTarget.ES2021},

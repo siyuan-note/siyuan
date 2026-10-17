@@ -245,9 +245,9 @@ func fillSettingPayload(value reflect.Value) {
 		value.Set(reflect.New(value.Type().Elem()))
 		fillSettingPayload(value.Elem())
 	case reflect.Struct:
-		for i := 0; i < value.NumField(); i++ {
-			if value.Field(i).CanSet() {
-				fillSettingPayload(value.Field(i))
+		for _, field := range value.Fields() {
+			if field.CanSet() {
+				fillSettingPayload(field)
 			}
 		}
 		if value.Type() == reflect.TypeFor[conf.EntryVisibilityProfile]() {

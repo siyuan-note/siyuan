@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210118101709-5a7bzl0"
+				"id": "20210118101709-5a7bzl0",
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -32,7 +33,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118101709-9lqij9d",
-				"updated": "20220623201341"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -51,11 +52,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "202008250000-a1b2c3d"
+					"TextMarkTextContent": "20200825000000-a1b2c3d"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", consisting of time and 7 random characters."
+					"Data": ", consisting of a 14-digit timestamp ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "), a hyphen, and 7 random lowercase letters or digits."
 				}
 			]
 		},
@@ -140,7 +150,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091535-sbufc1h",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -182,7 +192,8 @@
 			"ID": "20210104091535-11dba0r",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091535-11dba0r"
+				"id": "20210104091535-11dba0r",
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -198,7 +209,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " . Logically, there is no page concept, which reduces unnecessary burdens in use and allows users to focus on the content block."
+					"Data": ". Logically, there is no page concept, which reduces unnecessary burdens in use and allows users to focus on the content block."
 				}
 			]
 		},
@@ -208,7 +219,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118104710-tmyyac4",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -247,7 +258,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118104710-2sb91b3",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -267,6 +278,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
 				},
 				{
 					"Type": "NodeText",

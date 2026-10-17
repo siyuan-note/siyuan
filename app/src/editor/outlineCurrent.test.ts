@@ -7,19 +7,30 @@ import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget,
 const source = createSourceFile("util.ts", readFileSync("src/editor/util.ts", "utf8"), ScriptTarget.ES2021, true);
 const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
     statement.declarationList.declarations.some(item =>
-        ["outlineRequests", "syncOutlineCurrent", "updateOutline"].includes(item.name.getText(source))));
+        ["outlineRequests", "invalidateOutlineRequest", "syncOutlineCurrent", "updateOutline"].includes(item.name.getText(source))));
 const compiled = transpileModule(declarations.map(item => item.getText(source).replace(/^export /, "")).join("\n") +
-    "\nglobalThis.update = updateOutline;", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    "\nglobalThis.update = updateOutline; globalThis.invalidateOutlineRequest = invalidateOutlineRequest;",
+    {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const makeProtyle = (rootID = "doc") => {
     const block = {id: rootID + "-heading"};
     const end = {id: "end"};
     const nodes = new Set([block, end]);
     const title = {id: "title"};
+    const listeners = new Map<string, Set<() => void>>();
     return {
         block: {rootID},
         element: {isConnected: true, classList: {contains: () => false},
-            contains: (node: unknown) => node === title || nodes.has(node as typeof block)},
+            contains: (node: unknown) => node === title || nodes.has(node as typeof block),
+            addEventListener: (type: string, callback: () => void, options?: {signal?: AbortSignal}) => {
+                if (!listeners.has(type)) {
+                    listeners.set(type, new Set());
+                }
+                listeners.get(type).add(callback);
+                options?.signal?.addEventListener("abort", () => listeners.get(type).delete(callback));
+            }},
+        interact: (type: string) => listeners.get(type)?.forEach(callback => callback()),
+        activeListeners: () => Array.from(listeners.values()).reduce((count, callbacks) => count + callbacks.size, 0),
         title: {editElement: title},
         notebookId: "box",
         background: {ial: {}},
@@ -32,6 +43,7 @@ const makeProtyle = (rootID = "doc") => {
 const setup = () => {
     const requests: {params: any, callback: (response: any) => void}[] = [];
     const currents: unknown[] = [];
+    const explicitCurrents: {id: string, scroll: boolean}[] = [];
     const updates: string[] = [];
     let invalidations = 0;
     let selected: {startContainer: unknown, endContainer: unknown};
@@ -39,21 +51,28 @@ const setup = () => {
         blockId: "doc", isPreview: false, type: "pin",
         invalidateCurrent: () => { invalidations++; },
         setCurrent: (block: unknown) => currents.push(block),
+        setCurrentById: (id: string, scroll: boolean) => explicitCurrents.push({id, scroll}),
         update: (_response: unknown, id: string) => { outline.blockId = id; updates.push(id); },
         updateDocTitle: () => {},
     };
     const context: any = {
+        AbortController,
         getSelection: () => ({rangeCount: selected ? 1 : 0, getRangeAt: () => selected}),
         hasClosestByAttribute: (node: unknown) => node,
         isEncryptedBox: () => false,
         isCurrentEditor: () => true,
-        fetchPost: (_url: string, params: unknown, callback: (response: unknown) => void) => requests.push({params, callback}),
+        fetchPost: (_url: string, params: unknown, callback: (response: unknown) => void) =>
+            new Promise<void>(resolve => requests.push({params, callback: response => {
+                callback(response);
+                resolve();
+            }})),
     };
     runInNewContext(compiled, context);
-    return {outline, requests, currents, updates, context,
+    return {outline, requests, currents, explicitCurrents, updates, context,
         getInvalidations: () => invalidations,
         select: (range: typeof selected) => { selected = range; },
-        update: (protyle?: ReturnType<typeof makeProtyle>, reload = false) => context.update({outline: [outline]}, protyle, reload),
+        update: (protyle?: ReturnType<typeof makeProtyle>, reload = false, outlineId?: string) =>
+            context.update({outline: [outline]}, protyle, reload, outlineId),
     };
 };
 
@@ -69,6 +88,99 @@ test("same-document tab switches sync each restored caret without refetching the
         first.toolbar.range.startContainer]);
     assert.equal(fixture.requests.length, 0);
     assert.equal(fixture.getInvalidations(), 3);
+});
+
+test("outline navigation selects an unloaded heading without following the old caret or scrolling", () => {
+    const fixture = setup();
+    const protyle = makeProtyle();
+    fixture.select(protyle.toolbar.range);
+    fixture.update(protyle, false, "unloaded-heading");
+    assert.deepEqual(fixture.currents, []);
+    assert.deepEqual(fixture.explicitCurrents, [{id: "unloaded-heading", scroll: false}]);
+    assert.equal(fixture.requests.length, 0);
+    assert.equal(fixture.getInvalidations(), 1);
+});
+
+test("a pinned outline reload retains the explicit navigation target instead of the restored caret", () => {
+    const fixture = setup();
+    const protyle = makeProtyle("other");
+    fixture.update(protyle, false, "unloaded-heading");
+    assert.equal(fixture.requests.length, 1);
+    fixture.requests[0].callback({data: []});
+    assert.deepEqual(fixture.updates, ["other"]);
+    assert.deepEqual(fixture.currents, []);
+    assert.deepEqual(fixture.explicitCurrents, [{id: "unloaded-heading", scroll: false}]);
+});
+
+for (const eventType of ["pointerdown", "keydown", "beforeinput"]) {
+    test(`interacting with the editor during a pinned outline reload follows the latest caret (${eventType})`, () => {
+        const fixture = setup();
+        const protyle = makeProtyle("other");
+        fixture.update(protyle, false, "clicked-heading");
+        const latest = protyle.toolbar.range.endContainer;
+        fixture.select({startContainer: latest, endContainer: latest});
+        protyle.interact(eventType);
+        fixture.requests[0].callback({data: []});
+        assert.deepEqual(fixture.updates, ["other"]);
+        assert.deepEqual(fixture.currents, [latest]);
+        assert.deepEqual(fixture.explicitCurrents, []);
+    });
+}
+
+test("restored focus preserves a pending outline target and completion removes input listeners", async () => {
+    const fixture = setup();
+    const protyle = makeProtyle("other");
+    fixture.update(protyle, false, "clicked-heading");
+    assert.equal(protyle.activeListeners(), 3);
+    protyle.interact("focusin");
+    assert.equal(protyle.activeListeners(), 3);
+    fixture.requests[0].callback({data: []});
+    await Promise.resolve();
+    assert.deepEqual(fixture.currents, []);
+    assert.deepEqual(fixture.explicitCurrents, [{id: "clicked-heading", scroll: false}]);
+    assert.equal(protyle.activeListeners(), 0);
+});
+
+test("a superseded outline request removes its listeners without removing the replacement's listeners", async () => {
+    const fixture = setup();
+    const first = makeProtyle("other");
+    const second = makeProtyle("other");
+    fixture.update(first, false, "first-heading");
+    fixture.update(second, false, "second-heading");
+    assert.equal(first.activeListeners(), 0);
+    assert.equal(second.activeListeners(), 3);
+    fixture.requests[0].callback({data: []});
+    await Promise.resolve();
+    assert.equal(second.activeListeners(), 3);
+    assert.deepEqual(fixture.explicitCurrents, []);
+    fixture.requests[1].callback({data: []});
+    await Promise.resolve();
+    assert.equal(second.activeListeners(), 0);
+    assert.deepEqual(fixture.explicitCurrents, [{id: "second-heading", scroll: false}]);
+});
+
+test("a newer outline navigation invalidates a pending reload's target", () => {
+    const fixture = setup();
+    const protyle = makeProtyle();
+    fixture.update(protyle, true, "first-heading");
+    fixture.update(protyle, false, "latest-heading");
+    fixture.requests[0].callback({data: []});
+    assert.deepEqual(fixture.updates, []);
+    assert.deepEqual(fixture.currents, []);
+    assert.deepEqual(fixture.explicitCurrents, [{id: "latest-heading", scroll: false}]);
+});
+
+test("invalidating a reload before navigation starts removes its listeners and rejects its response", () => {
+    const fixture = setup();
+    const protyle = makeProtyle("other");
+    fixture.update(protyle, false, "previous-heading");
+    assert.equal(protyle.activeListeners(), 3);
+    fixture.context.invalidateOutlineRequest(fixture.outline);
+    assert.equal(protyle.activeListeners(), 0);
+    fixture.requests[0].callback({data: []});
+    assert.deepEqual(fixture.updates, []);
+    assert.deepEqual(fixture.currents, []);
+    assert.deepEqual(fixture.explicitCurrents, []);
 });
 
 test("a selection in another editor falls back to the target editor's saved range", () => {
@@ -206,39 +318,6 @@ test("closing the last editor clears outline data without accessing a missing ed
     fixture.requests[0].callback({data: []});
     assert.deepEqual(fixture.updates, [""]);
 });
-
-const switchDeclaration = source.statements.find(statement => isVariableStatement(statement) &&
-    statement.declarationList.declarations.some(item => item.name.getText(source) === "switchEditor"));
-const switchCompiled = transpileModule(switchDeclaration.getText(source) + "\nglobalThis.switchEditor = switchEditor;", {
-    compilerOptions: {target: ScriptTarget.ES2021},
-}).outputText;
-
-for (const action of ["focus", "highlight"]) {
-    test(`outline navigation preserves the clicked heading after restoring the old caret (${action})`, () => {
-        const fixture = setup();
-        const protyle: any = makeProtyle();
-        const clicked = {id: "clicked", clientHeight: 20};
-        protyle.wysiwyg.element.querySelectorAll = () => [clicked];
-        protyle.contentElement = {addEventListener() {}};
-        protyle.element.addEventListener = () => {};
-        const editor = {editor: {protyle}, parent: {headElement: {}, parent: {
-            switchTab: () => fixture.update(protyle), showHeading() {},
-        }}};
-        Object.assign(fixture.context, {
-            Constants: {CB_GET_FOCUS: "focus", CB_GET_HL: "highlight", CB_GET_OUTLINE: "outline"},
-            isInEmbedBlock: () => false, revealTabsForTarget() {}, preventScroll() {}, highlightById() {},
-            focusBlock: () => ({startContainer: clicked, endContainer: clicked}),
-            scrollCenter() {}, ResizeObserver: class {observe() {} disconnect() {}}, AbortController,
-            setTimeout() {}, isPhablet: () => action === "highlight", pushBackByEditor() {}, pushBack() {},
-            hideElements() {}, updateOutlineCurrentBlock: (_protyle: unknown, node: unknown) => fixture.outline.setCurrent(node),
-        });
-        runInNewContext(switchCompiled, fixture.context);
-        fixture.context.switchEditor(editor, {id: "clicked", rootID: "doc", action: [action, "outline"]}, {});
-        assert.equal(fixture.currents.length, 2);
-        assert.equal(fixture.currents[1], clicked);
-        assert.equal(fixture.requests.length, 0);
-    });
-}
 
 const outlineSource = createSourceFile("Outline.ts", readFileSync("src/layout/dock/Outline.ts", "utf8"), ScriptTarget.ES2021, true);
 const outlineClass = outlineSource.statements.find(isClassDeclaration);

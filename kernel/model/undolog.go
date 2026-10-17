@@ -18,6 +18,7 @@ package model
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"slices"
 	"sync"
@@ -78,7 +79,7 @@ type UndoLog struct {
 // GlobalUndoLog 全局撤销日志单例。内存态，重启清空。
 var GlobalUndoLog = newUndoLog(64)
 
-var undoEntrySeq uint64
+var undoEntrySeq atomic.Uint64
 
 func newUndoLog(max int) *UndoLog {
 	return &UndoLog{
@@ -88,7 +89,7 @@ func newUndoLog(max int) *UndoLog {
 }
 
 func newUndoEntryID() string {
-	seq := atomic.AddUint64(&undoEntrySeq, 1)
+	seq := undoEntrySeq.Add(1)
 	return fmt.Sprintf("undo-%d-%d", time.Now().UnixNano(), seq)
 }
 
@@ -433,9 +434,7 @@ func cloneOperations(ops []*Operation) []*Operation {
 		cloned.BlockIDs = cloneOperationBlockIDs(op.BlockIDs)
 		if nil != op.Context {
 			cloned.Context = make(map[string]any, len(op.Context))
-			for key, value := range op.Context {
-				cloned.Context[key] = value
-			}
+			maps.Copy(cloned.Context, op.Context)
 		}
 		ret[i] = &cloned
 	}

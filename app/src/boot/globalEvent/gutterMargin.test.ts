@@ -2,8 +2,20 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {isContainerGutterBridge} from "../../protyle/gutter/container";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+
+const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
+    name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
+}));
+buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {value: "test", configurable: true}));
+const {isContainerGutterBridge} = require("../../protyle/gutter/container") as typeof import("../../protyle/gutter/container");
+buildGlobals.forEach(({name, descriptor}) => {
+    if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+    } else {
+        Reflect.deleteProperty(globalThis, name);
+    }
+});
 
 const compiled = transpileModule(readFileSync(__dirname + "/mousemove.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},

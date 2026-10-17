@@ -21,6 +21,7 @@ const rendererModules = () => {
     };
     // 使用实际选区、区域解析与标题按键入口；不挂载无关的工具栏及页签控制器。
     modules["util/selection"] = `const revealTabsForTarget = () => {};
+        import {isHiddenTabContent} from "../render/tabsVisibility";
         import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationState";
         import {getContenteditableElement} from "../wysiwyg/getBlock";
         import {hasClosestBlock} from "./hasClosest";\n` +
@@ -28,6 +29,7 @@ const rendererModules = () => {
         extract("util/selection", ["setFirstNodeRange", "focusBlock", "getEditorRange"]))
             .replace(/\/\/\/ #else[\s\S]*?\/\/\/ #endif/g, "");
     modules["util/hasClosest"] = readFileSync(path.join(root, "util/hasClosest.ts"), "utf8");
+    modules["render/tabsVisibility"] = readFileSync(path.join(root, "render/tabsVisibility.ts"), "utf8");
     modules["util/selectionOffsets"] = "const revealTabsForTarget = () => {};\n" +
         extract("util/selectionOffsets", ["focusByRange", "setLastNodeRange"]);
     modules["util/documentRange"] = readFileSync(path.join(root, "util/documentRange.ts"), "utf8");

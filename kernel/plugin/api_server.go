@@ -24,7 +24,7 @@ import (
 )
 
 // injectServer adds siyuan.server to the goja context.
-func injectServer(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+func injectServer(_ *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("injectServer: %v", r)

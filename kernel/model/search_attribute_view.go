@@ -166,7 +166,7 @@ func mapAttributeViewSearchRanges(source, marked string) ([]attributeViewSearchR
 	}
 	var mapped []attributeViewSearchRange
 	offset, after := 0, 0
-	for _, window := range strings.Split(plain, "...") {
+	for window := range strings.SplitSeq(plain, "...") {
 		var matches []attributeViewSearchRange
 		for _, match := range ranges {
 			if offset <= match.start && match.end <= offset+len(window) {
@@ -234,7 +234,9 @@ func attributeViewSearchPartHTML(part *attributeViewSearchPart) string {
 			break
 		}
 		result.WriteString(util.EscapeHTML(part.text[cursor:match.start]))
-		result.WriteString("<mark>" + util.EscapeHTML(part.text[match.start:match.end]) + "</mark>")
+		result.WriteString("<mark>")
+		result.WriteString(util.EscapeHTML(part.text[match.start:match.end]))
+		result.WriteString("</mark>")
 		cursor = match.end
 	}
 	result.WriteString(util.EscapeHTML(part.text[cursor:end]))

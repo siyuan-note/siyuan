@@ -135,7 +135,7 @@ export class AgentRunController<TState> {
 
     async waitForView(run: ManagedAgentRun<TState>) {
         const pending = [run.processingPromise, run.replayPromise].filter((promise): promise is Promise<void> => !!promise);
-        await Promise.all(pending.map(promise => promise.catch(() => undefined)));
+        await Promise.all(pending.map(promise => promise.catch((): undefined => undefined)));
     }
 
     enqueue(run: ManagedAgentRun<TState>, event: ISSEResult) {

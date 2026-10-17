@@ -121,7 +121,7 @@ func GetDocHistorySnapshots(ctx context.Context, id string, histories []*DocHist
 				if path.Base(file.Path) != id+".sy" {
 					continue
 				}
-				boxID := strings.Split(strings.TrimPrefix(file.Path, "/"), "/")[0]
+				boxID, _, _ := strings.Cut(strings.TrimPrefix(file.Path, "/"), "/")
 				if !IsEncryptedBox(boxID) {
 					boxID = ""
 				}

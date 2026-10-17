@@ -70,7 +70,7 @@ func TestAssetUploadContractAdapter(t *testing.T) {
 				var body bytes.Buffer
 				writer := multipart.NewWriter(&body)
 				if test.files {
-					for i := 0; i < 2; i++ {
+					for range 2 {
 						part, err := writer.CreateFormFile("file[]", "sample.txt")
 						if err != nil {
 							t.Fatal(err)
@@ -99,7 +99,7 @@ func TestAssetUploadContractAdapter(t *testing.T) {
 				}
 				return request
 			}
-			var responses []map[string]interface{}
+			var responses []map[string]any
 			for _, handler := range []gin.HandlerFunc{model.Upload, uploadAsset} {
 				engine := gin.New()
 				engine.POST("/api/asset/upload", handler)
@@ -108,7 +108,7 @@ func TestAssetUploadContractAdapter(t *testing.T) {
 				if err := bundle.ValidateHTTPResponse("POST", "/api/asset/upload", recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Bytes()); err != nil {
 					t.Fatal(err)
 				}
-				var response map[string]interface{}
+				var response map[string]any
 				if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 					t.Fatal(err)
 				}

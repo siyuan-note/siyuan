@@ -499,9 +499,7 @@ func setupFoldTransactionDatabase(t *testing.T, fixture *fileOperationTestFixtur
 		treenode.UpsertBlockTree(tree)
 	}
 	t.Cleanup(func() {
-		// 清理异步索引操作，避免测试工作区关闭后仍有待处理任务。
-		sql.ClearQueue()
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir

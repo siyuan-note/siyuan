@@ -260,7 +260,7 @@ func BenchmarkShorthandMarkdownFalseClosings(b *testing.B) {
 	md := "····go\n" + strings.Repeat("···\n    ····\n", 1000) + "····"
 	engine := util.NewLute()
 	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		parseShorthandMarkdown(md, time.Now(), engine)
 	}
 }

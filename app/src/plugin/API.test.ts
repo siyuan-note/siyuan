@@ -16,6 +16,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     const openAssetPicker = async (): Promise<null> => null;
     const dependency = new Proxy({}, {
         get(_target, key) {
+            if (key === "__esModule") return true;
             assert.ok(dependenciesReady, `Dependency ${String(key)} was read during module initialization`);
             if (key === "openInputDialog") {
                 return openInputDialog;
@@ -29,7 +30,9 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     const exports: {getAPI?: () => {
         adaptHotkey: typeof adaptHotkey,
         openInputDialog: typeof openInputDialog,
-        openAssetPicker: typeof openAssetPicker
+        openAssetPicker: typeof openAssetPicker,
+        insertContent: (options: import("./insertContent").IInsertContentOptions) =>
+            import("./insertContent").IInsertContentResult
     }} = {};
     runInNewContext(compiled, {exports, require: () => dependency});
     dependenciesReady = true;
@@ -37,5 +40,6 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     assert.equal(api.adaptHotkey, adaptHotkey);
     assert.equal(api.openInputDialog, openInputDialog);
     assert.equal(api.openAssetPicker, openAssetPicker);
+    assert.equal(typeof api.insertContent, "function");
     assert.equal(exports.getAPI(), api);
 });

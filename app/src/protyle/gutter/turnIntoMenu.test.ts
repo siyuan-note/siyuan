@@ -6,6 +6,7 @@ import {getEntryCatalogChildren} from "../../config/entryVisibility/catalog";
 import {mergeEntryOrderPreservingUnknown, reorderEntrySlots, resolveEntryOrder} from "../../config/entryVisibility/order";
 import {normalizeEntryVisibilityImportProfile} from "../../config/entryVisibility/profile";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
+import {CALLOUT_PRESETS} from "../wysiwyg/calloutType";
 
 const headings = ["heading1", "heading2", "heading3", "heading4", "heading5", "heading6"];
 const common = ["paragraph", ...headings, "list", "orderedList", "check", "quote", "callout"];
@@ -44,6 +45,47 @@ test("partial paragraph and heading menus keep their candidates and callbacks", 
         assert.deepEqual(items.map(item => item.id), input);
         sorted.forEach(item => assert.equal(item, items.find(original => original.id === item.id)));
     }
+});
+
+test("tabs expose direct mind map conversion through the existing configurable entry", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
+    const tabsMenu = source.slice(source.indexOf('} else if (type === "NodeTabs" && allowStructuralMutation)'),
+        source.indexOf('} else if (type === "NodeBlockquote" && allowStructuralMutation)'));
+    assert.match(tabsMenu, /menuId: "listMindmap", icon: "iconMindmap", label: "mindmap", type: "Tabs2Mindmap"/);
+    const catalog = getEntryCatalogChildren("gutter.single.turnInto");
+    assert.equal(catalog.filter(item => item.key === "listMindmap").length, 1);
+    assert.equal(catalog.find(item => item.key === "listMindmap").simple, true);
+    assert.deepEqual(orderGutterTurnIntoItems(["superBlock", "listMindmap", "check", "list", "orderedList"], key => key),
+        ["list", "orderedList", "check", "listMindmap", "superBlock"]);
+});
+
+test("blockquote callout types retain existing catalog identities and saved orders", () => {
+    const path = "gutter.single.turnInto";
+    const types = [...CALLOUT_PRESETS.map(item => item.id), "calloutCustom"];
+    const catalog = getEntryCatalogChildren(path);
+    assert.deepEqual(catalog.filter(item => types.includes(item.key)).map(item => item.key), types);
+    types.forEach(key => {
+        const entry = catalog.find(item => item.key === key);
+        assert.equal(entry.type, "entry");
+        assert.equal(entry.simple, true);
+    });
+    const defaults = catalog.map(item => item.key);
+    const saved = ["calloutWarning", "plugin:example:item", "paragraph", "callout", "calloutNote"];
+    const profile = normalizeEntryVisibilityImportProfile({name: "Custom", entries: {
+        [`${path}.callout`]: false, [`${path}.calloutTip`]: false,
+    }, orders: {[path]: saved}}, 6, {[path]: defaults});
+    assert.equal(profile.entries[`${path}.callout`], false);
+    assert.equal(profile.entries[`${path}.calloutTip`], false);
+    assert.deepEqual(profile.orders[path], saved);
+    const visible = ["paragraph", ...types].filter(key => profile.entries[`${path}.${key}`] !== false);
+    const ordered = reorderEntrySlots(orderGutterTurnIntoItems(visible, key => key),
+        resolveEntryOrder(defaults, saved, new Set()), key => key);
+    assert.deepEqual(ordered.filter(key => saved.includes(key)), ["calloutWarning", "paragraph", "calloutNote"]);
+    const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
+    const quoteMenu = source.slice(source.indexOf('} else if (type === "NodeBlockquote" && allowStructuralMutation)'),
+        source.indexOf('} else if (type === "NodeCallout" && allowStructuralMutation)'));
+    assert.match(quoteMenu, /this\.calloutTypeMenus\(protyle, \[nodeElement as HTMLElement\]\)/);
+    assert.doesNotMatch(quoteMenu, /Blockquote2Callout/);
 });
 
 test("saved conversion orders and visibility survive profile migration and default changes", () => {

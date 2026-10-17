@@ -101,6 +101,8 @@ export abstract class Constants {
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
     public static readonly ATTRIBUTE_DOCK_WIDTH = "data-dock-width";
     public static readonly ATTRIBUTE_MENU_KEYMAP = "data-menu-keymap";
+    // 界面密度标记仅用于根元素，不写入笔记内容。
+    public static readonly ATTRIBUTE_UI_DENSITY = "data-ui-density";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
@@ -218,7 +220,7 @@ export abstract class Constants {
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
     public static readonly LOCAL_TABS_READING = "local-tabs-reading";
-    public static readonly LOCAL_PAGE_SCROLL_BUTTONS = "local-page-scroll-buttons";
+    public static readonly LOCAL_COMPACT_MODE = "local-compact-mode";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";
@@ -672,6 +674,11 @@ export abstract class Constants {
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
                 quote: {default: "", custom: ""},
+                calloutNote: {default: "", custom: ""},
+                calloutTip: {default: "", custom: ""},
+                calloutImportant: {default: "", custom: ""},
+                calloutWarning: {default: "", custom: ""},
+                calloutCaution: {default: "", custom: ""},
                 clearInline: {default: "⌘\\", custom: "⌘\\"},
             },
             heading: {

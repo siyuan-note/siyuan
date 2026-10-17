@@ -320,8 +320,8 @@ func (tx *Transaction) prepareListConversionBindings(originals []*parse.Tree, tr
 			if !deleting {
 				return ast.WalkContinue
 			}
-			avIDs := strings.Split(source.IALAttr(av.NodeAttrNameAvs), ",")
-			for _, avID := range avIDs {
+			avIDs := strings.SplitSeq(source.IALAttr(av.NodeAttrNameAvs), ",")
+			for avID := range avIDs {
 				if avID == "" {
 					continue
 				}

@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {bindEditorFocusMemory} from "../util/editorFocusMemory";
 import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
@@ -13,6 +14,7 @@ import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
+import {bindListMarkerCaret} from "./listMarkerCaret";
 import {clearTouchBlockSelection} from "./touchBlockSelection";
 import {isDirectMathClick} from "../util/mathClick";
 import {
@@ -63,7 +65,7 @@ import {
     tagMenu,
     zoomOut
 } from "../../menus/protyle";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
 import {getMultilineInputText, isTextInputType} from "./multilineInput";
@@ -413,10 +415,12 @@ export class WYSIWYG {
     private largeListVirtualizer?: LargeListVirtualizer;
     private largeTableVirtualizer?: LargeTableVirtualizer;
     private disposeSpellcheckFocus?: () => void;
+    private disposeFocusMemory?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private disposeListMarkerCaret?: () => void;
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
@@ -536,18 +540,22 @@ export class WYSIWYG {
         this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
+        this.disposeFocusMemory = bindEditorFocusMemory(this.element);
         this.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
         // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
         this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
-        if (!isMobile()) {
+        if (!isMobile() || !protyle.lite) {
             this.tableControl = new TableControl(protyle, this.element);
         }
         this.bindCommonEvent(protyle);
         this.imageTitleEditor = bindImageTitleEditor(protyle, this.element);
         this.bindEvent(protyle);
+        this.disposeListMarkerCaret = bindListMarkerCaret(this.element, () => !protyle.disabled &&
+            !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
+            !getBlockSelectionModeElement(this.element));
         this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
         if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
@@ -593,6 +601,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeFocusMemory?.();
         this.imageTitleEditor?.destroy();
         this.persistComposition?.();
         this.persistComposition = undefined;
@@ -601,6 +610,7 @@ export class WYSIWYG {
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
         this.disposeTouchCaret?.();
+        this.disposeListMarkerCaret?.();
         this.largeListVirtualizer?.destroy();
         this.largeTableVirtualizer?.destroy();
     }
@@ -1236,6 +1246,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            if (this.tableControl?.hasTouchSelection() && (event.target as Element).closest("td, th")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             this.mouseDownTarget = event.target;
             // 常规划选时排除属性占位，三击时恢复以保留浏览器的整段选择行为
             this.element.classList.toggle("protyle-wysiwyg--select-attr", event.button === 0 && event.detail > 2);
@@ -2302,7 +2317,10 @@ export class WYSIWYG {
                 });
             };
             this.element.classList.add("fn__pointer-none");
-            hideElements(["gutter"], protyle);
+            // 单元格点击保留表格块标，进入跨单元格拖选后再隐藏。
+            if (!targetCellElement || startsFromPadding) {
+                hideElements(["gutter"], protyle);
+            }
             // 容器类元素判断（划选时 elementFromPoint 命中它们的边缘/空白需继续探测子块）
             const isContainer = (el: Element) => el.classList.contains("protyle-wysiwyg") || el.classList.contains("list") ||
                 el.classList.contains("li") || el.classList.contains("sb") || el.classList.contains("callout") ||
@@ -2352,6 +2370,7 @@ export class WYSIWYG {
                         }
                         if (moveTarget && (moveTarget.tagName === "TH" || moveTarget.tagName === "TD") &&
                             (!moveCellElement || moveCellElement !== moveTarget)) {
+                            hideElements(["gutter"], protyle);
                             // @ts-ignore
                             tableBlockElement.firstElementChild.style.webkitUserModify = "read-only";
                             const tableElement = tableBlockElement.querySelector("table");
@@ -4173,6 +4192,7 @@ export class WYSIWYG {
         let compositionRange: ({ range: Range } | { cell: HTMLElement; offset: number }) & {
             hasRetainedText?: (range: Range) => boolean;
         };
+        let compositionInputText = "";
         let crossBlockComposition: ICrossBlockComposition;
         this.persistComposition = () => {
             if (!isComposition || crossBlockComposition || !compositionSnapshot?.html ||
@@ -4214,6 +4234,7 @@ export class WYSIWYG {
             }
             this.persistComposition?.();
             isComposition = true;
+            compositionInputText = "";
             recoveredComposition = false;
             compositionSnapshot = undefined;
             crossBlockComposition = undefined;
@@ -4306,9 +4327,15 @@ export class WYSIWYG {
             if (!blockElement) {
                 return;
             }
-            if ("" !== event.data) {
+            // iOS 的空结束事件仍可能保留已提交的括号，只在确认文本保留后处理最近的组合输入。
+            const refBracketText = event.data || (compositionRange?.hasRetainedText?.(range) &&
+                /^[【】]{1,2}$/.test(compositionInputText) ? compositionInputText : "");
+            if ("" !== event.data || refBracketText) {
                 compositionRange = undefined;
                 this.escapeInline(protyle, range, event);
+                if (protyle.hint.handleRefBracketInput(protyle, range, refBracketText)) {
+                    return;
+                }
                 // 小鹤音形 ;k 不能使用 setTimeout;
                 // wysiwyg.element contenteditable 为 false 时，连拼 needRender 必须为 false
                 // hr 渲染；任务列表、粗体、数学公示结尾 needRender 必须为 true
@@ -4355,6 +4382,11 @@ export class WYSIWYG {
             if (!event.isComposing && ["deleteContentBackward", "deleteContentForward"].includes(event.inputType) &&
                 !getBlockSelectionModeElement(this.element) && !this.element.querySelector(".protyle-wysiwyg--select") &&
                 isTabTextBoundary(getEditorRange(this.element), event.inputType === "deleteContentBackward")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (!isComposition && protyle.hint.handleRefBracketBeforeInput(protyle, event)) {
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -4506,6 +4538,9 @@ export class WYSIWYG {
             }
             // 输入法可能暂时清空选区或把光标放到编辑器根节点，候选更新不能触发选区修复。
             if (event.isComposing || (isComposition && !isCommittedTextInput(event))) {
+                if (event.data !== null) {
+                    compositionInputText = event.data;
+                }
                 return;
             }
             const range = getEditorRange(this.element);
@@ -4538,6 +4573,10 @@ export class WYSIWYG {
                 return;
             }
             this.escapeInline(protyle, range, event);
+            if (protyle.hint.handleRefBracketInput(protyle, range, event.data)) {
+                event.stopPropagation();
+                return;
+            }
 
             // 原生输入结束后立即恢复各段折行，避免延迟解析前绘制出临时的整段换行。
             normalizeInlineElementBoundaries(this.element);

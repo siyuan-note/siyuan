@@ -228,6 +228,8 @@ const layoutSaveRequests = new Set<Promise<void>>();
 
 // 切换布局前停止自动保存并等待在途请求，成功后保持暂停直到页面刷新，失败时由调用方恢复。
 export const suspendLayoutSaving = async () => {
+    const host = getSettingsWindowHost();
+    if (host) return host.suspendLayoutSaving();
     layoutSavingSuspended = true;
     window.clearTimeout(saveRetryTimeout);
     saveCount = 0;
@@ -738,10 +740,6 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         window.siyuan.layout.bottomDock.layout.children[1].element.classList.contains("fn__none")) {
         window.siyuan.layout.bottomDock.layout.element.style.height = "0px";
     }
-    // 等待 dock 面板动画结束
-    setTimeout(() => {
-        setTabPosition();
-    }, Constants.TIMEOUT_TRANSITION);
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, breakObj?: IObject) => {

@@ -149,7 +149,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                     }
                 }
             });
-            return Promise.all(resizePromises).then(() => undefined);
+            return Promise.all(resizePromises).then((): undefined => undefined);
         });
     });
 };

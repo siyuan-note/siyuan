@@ -144,7 +144,7 @@ func TestAddHEIFVaryAccept(t *testing.T) {
 			acceptCount := 0
 			originFound := false
 			for _, value := range recorder.Header().Values("Vary") {
-				for _, field := range strings.Split(value, ",") {
+				for field := range strings.SplitSeq(value, ",") {
 					switch {
 					case strings.EqualFold(strings.TrimSpace(field), "Accept"):
 						acceptCount++

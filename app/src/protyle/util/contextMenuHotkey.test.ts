@@ -130,7 +130,7 @@ test("keymap panel marks context menu conflicts and clears them after unbinding"
     const rows = ["general.openContextMenu", "editor.general.undo"].map(path => ({
         dataset: {key: path.replaceAll(".", constants.ZWSP), keys: '["⌘/"]', defaults: '["⌘/"]', conflict: "false"},
         querySelector: () => ({querySelector: () => ({style: {}, tabIndex: 0})}),
-        querySelectorAll: () => [],
+        querySelectorAll: (): Element[] => [],
     }));
     let hidden = true;
     const filter = {dataset: {keymapFilterValue: "conflict"}, setAttribute() {},

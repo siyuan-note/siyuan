@@ -32,6 +32,7 @@ const rendererModules = (sources) => {
         electron: {ipcRenderer}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"}},
         "../util/functions": {setToolbarLeftMac() {}},
     });
+    document.body.classList.toggle("body--windows", process.platform !== "darwin");
     document.body.classList.toggle("body--win32", process.platform !== "darwin");
     const fit = loadRendererModule(sources.fit, {
         "../../boot/windowControls": controls, "../../protyle/util/compatibility": {isMac: () => process.platform === "darwin"},
@@ -194,6 +195,7 @@ const runCases = async (sources) => {
     class Plugin {openSetting() {}}
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
+    const settingInterface = loadRendererModule(sources.settingInterface, {electron: {ipcRenderer}});
     const native = loadRendererModule(sources.native, {
         electron: {ipcRenderer}, "../../util/genID": {genUUID}, "../../protyle/util/compatibility": {setStorageVal() {}},
         "../../layout/util": {exportLayout: async options => options.cb()}, "../../dialog/processSystem": {exitSiYuan: async () => {}},
@@ -207,6 +209,7 @@ const runCases = async (sources) => {
         "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
         "./taskBlocker": {hasNativeSettingTasks: () => false},
         "../bazaar/openPath": bazaarPath,
+        "./interface": settingInterface,
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
@@ -423,6 +426,11 @@ const runCases = async (sources) => {
     await wait();
     await native.openNativeSettings(window.siyuan.ws.app, {tab: "editor"});
     assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 1);
+    await ipcRenderer.invoke("test-settings-other-dialog");
+    assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 0);
+    await native.openNativeSettings(window.siyuan.ws.app, {tab: "editor"});
+    await ipcRenderer.invoke("test-settings-wait");
+    assert.equal(await ipcRenderer.invoke("test-settings-other-dialog-closed"), true);
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -436,6 +444,7 @@ if (process.versions.electron && process.type === "browser") {
         let ready = 0;
         let waiting;
         const children = new Set();
+        const otherOwners = new Set();
         const shown = new Set();
         const commands = [];
         const ts = require("typescript");
@@ -448,6 +457,7 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
+            settingInterface: "config/setting/interface.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
             mount: "config/setting/mount.ts", save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
             bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts", hoverInput: "util/hoverInput.ts"})) {
@@ -502,7 +512,10 @@ if (process.versions.electron && process.type === "browser") {
         });
         await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
         const origin = "http://127.0.0.1:" + server.address().port;
-        const policy = createSettingsWindows({ipcMain, screen, getTarget: id => owner?.webContents.id === id ? {origin, mode: "local"} : undefined,
+        const policy = createSettingsWindows({ipcMain, screen,
+            getTarget: id => owner?.webContents.id === id || [...otherOwners].some(win => win.webContents.id === id) ?
+                {origin, mode: "local"} : undefined,
+            getWindows: () => [...(owner ? [owner] : []), ...otherOwners],
             initialize: win => {
                 win.webContents.userAgent = "SiYuan/fixture Electron " + win.webContents.userAgent;
                 win.webContents.on("console-message", details => {
@@ -531,6 +544,30 @@ if (process.versions.electron && process.type === "browser") {
         });
         ipcMain.handle("test-settings-wait", () => ready ? (--ready, Promise.resolve()) : new Promise(resolve => { waiting = resolve; }));
         ipcMain.handle("test-settings-window-count", () => children.size);
+        ipcMain.handle("test-settings-other-dialog", async () => {
+            const other = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+            otherOwners.add(other);
+            other.once("closed", () => otherOwners.delete(other));
+            other.webContents.on("console-message", details => {
+                if (details.level === "error") console.error(details.message);
+            });
+            await other.loadURL(origin + "/stage/build/app/window.html");
+            await other.webContents.executeJavaScript(`
+                const loadSecondaryModule = ${loadRendererModule.toString()};
+                window.siyuan = {dialogs: []};
+                const settingInterface = loadSecondaryModule(${JSON.stringify(sources.settingInterface)}, {electron: require("electron")});
+                settingInterface.prepareSettingDialog();
+                window.dialogClosed = false;
+                window.siyuan.dialogs.push({element: {querySelector: () => ({})}, destroy() {
+                    window.dialogClosed = true;
+                    window.siyuan.dialogs.length = 0;
+                }});
+            `);
+        });
+        ipcMain.handle("test-settings-other-dialog-closed", async () => {
+            const states = await Promise.all([...otherOwners].map(win => win.webContents.executeJavaScript("window.dialogClosed")));
+            return states.every(closed => closed === true);
+        });
         ipcMain.on("siyuan-cmd", (event, command) => {
             if (event.sender === owner.webContents) {
                 assert.equal(command, "show");
@@ -612,6 +649,7 @@ if (process.versions.electron && process.type === "browser") {
             code = 1;
         } finally {
             for (const child of children) child.destroy();
+            for (const other of otherOwners) other.destroy();
             if (owner && !owner.isDestroyed()) owner.destroy();
             server.close();
             app.exit(code);

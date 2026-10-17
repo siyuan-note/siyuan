@@ -217,7 +217,15 @@ docker run -d \
   - Alternatif olarak, bu yol `SIYUAN_WORKSPACE_PATH` ortam değişkeniyle de ayarlanabilir. Eğer her iki yöntem de kullanılırsa, **komut satırı önceliklidir**.  
 - `accessAuthCode`: Ekran kilidi şifresi (**kesinlikle değiştir**, aksi halde herkes verilerine erişebilir)  
   - Alternatif olarak, ekran kilidi şifresi `SIYUAN_ACCESS_AUTH_CODE` ortam değişkeniyle de ayarlanabilir. Yine, hem komut satırı hem ortam değişkeni kullanılırsa, **komut satırı önceliklidir**.  
-  - Ekran kilidi şifresini devre dışı bırakmak için şu ortam değişkenini ayarla: `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`  
+  - Ekran kilidi şifresini devre dışı bırakmak için şu ortam değişkenini ayarla: `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
+- OIDC, gerekli Docker erişim kimlik doğrulaması için ekran kilidi şifresinin yerini alabilir. `SIYUAN_OIDC_ENABLED=true`, `SIYUAN_OIDC_PROVIDER` (`custom`, `google`, `microsoft` veya `github`), `SIYUAN_OIDC_CLIENT_ID` ve aşağıdaki sağlayıcıya özgü değerleri ayarlayın. GitHub, OAuth 2.0 kullanıcı API bağdaştırıcısını kullanır; diğer sağlayıcılar OpenID Connect discovery ve ID Token doğrulaması kullanır. Kullanılabilir bir ekran kilidi şifresi yokken geçersiz bir etkin yapılandırma, Docker'ın başlangıcını durdurur
+  - `SIYUAN_OIDC_ISSUER_URL`: `custom` ve `microsoft` sağlayıcıları için gereken Issuer URL'si; Microsoft, `https://login.microsoftonline.com/<tenant-id>/v2.0` gibi kiracıya özgü bir issuer kullanmalıdır
+  - `SIYUAN_OIDC_CLIENT_SECRET`: OpenID Connect sağlayıcıları için isteğe bağlı istemci sırrı; GitHub OAuth bağdaştırıcısı için gereklidir. Her yetkilendirme kodu akışı PKCE kullanır
+  - `SIYUAN_OIDC_SCOPES`: Virgül veya boşlukla ayrılmış kapsamlar; `openid` her zaman dahildir
+  - `SIYUAN_OIDC_REDIRECT_URL`: `/api/system/oidc/callback` ile biten genel HTTPS geri çağırma URL'si; uzak tarayıcı erişimi için gereklidir
+  - `SIYUAN_OIDC_ALLOW_ALL`: Sağlayıcı tarafından kimliği doğrulanan her kimliğe SiYuan yönetici erişimini açıkça verir
+  - `SIYUAN_OIDC_CLAIM_RULES`: allow-all devre dışı bırakıldığında kullanılan talep kuralları JSON dizisi, örneğin `[{"claim":"email","operator":"equals","values":["user@example.com"]},{"claim":"email_verified","operator":"equals","values":["true"]}]`; bir kural içindeki değerler VEYA (OR), kurallar arasında VE (AND) olarak değerlendirilir
+  - Yerel mobil uygulamalar sabit geri çağırma URI'si `siyuan:/oidc-callback` kullanır; tam olarak yazıldığı gibi kaydedin. Mobil yapılandırma doğrulaması, kaydetmeden önce bu geri çağırmayı kullanır. Özel sağlayıcılar, Microsoft ve GitHub yalnızca uygulama kayıtları bu geri çağırma URI'sini kabul ediyorsa kullanılabilir. Google, Android istemci türü için bu özel URI'yi kabul etmez; bu nedenle Google girişi tarayıcı ve masaüstü akışlarıyla sınırlıdır  
 - `SIYUAN_LANG`: Arayüz dili (isteğe bağlı, Docker'da ayarlanmazsa varsayılan `en`). BCP 47 etiketlerini (`zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR` vb.) kabul eder; eski alt çizgi biçimi (`zh_CN`/`en_US` vb.) de geriye dönük uyumluluk için kabul edilir. **Ayarlar**'da seçtiğin dilin yeniden başlatma sonrası da geçerli kalmasını istiyorsan dağıtımda bu değişkeni ekleme; ayarlanırsa her başlatmada uygulanır ve kaydedilmiş dil ayarının üzerine yazar
   - Alternatif olarak `--lang` komut satırı parametresiyle de ayarlanabilir. Her ikisi de ayarlanırsa komut satırı öncelikli olur
 

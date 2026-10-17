@@ -482,10 +482,13 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         } else {
             const selectElement: Element[] = [];
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                selectElement.push(item);
+                const block = hasClosestBlock(item, true) || item;
+                if (!selectElement.includes(block)) {
+                    selectElement.push(block);
+                }
             });
             if (selectElement.length === 0) {
-                const nodeElement = hasClosestBlock(range.startContainer);
+                const nodeElement = hasClosestBlock(range.startContainer, true);
                 if (nodeElement) {
                     selectElement.push(nodeElement);
                 }
@@ -522,12 +525,13 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.stopPropagation();
         let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
         if (selectsElement.length === 0) {
-            const nodeElement = hasClosestBlock(range.startContainer);
+            const nodeElement = hasClosestBlock(range.startContainer, true);
             if (nodeElement) {
                 const rangeElements = range.collapsed ? [] : getBlockElementsByRange(range);
                 selectsElement = rangeElements.length > 0 ? rangeElements : [nodeElement];
             }
         }
+        selectsElement = Array.from(new Set(selectsElement.map(element => hasClosestBlock(element, true) || element)));
         duplicateBlock(selectsElement, protyle);
         return true;
     }
@@ -597,7 +601,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         if (hasClosestByClassName(range.startContainer, "protyle-title")) {
             copyTextByType([protyle.block.rootID], "ref");
         } else {
-            const nodeElement = hasClosestBlock(range.startContainer);
+            const nodeElement = hasClosestBlock(range.startContainer, true);
             if (!nodeElement) {
                 return false;
             }
@@ -606,7 +610,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 copyPNGByLink(selectImgElement.querySelector("img").getAttribute("src"));
                 return true;
             }
-            const ids = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).map(item => item.getAttribute("data-node-id"));
+            const ids = Array.from(new Set(Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"))
+                .map(item => (hasClosestBlock(item, true) || item).getAttribute("data-node-id"))));
             if (ids.length > 0) {
                 copyTextByType(ids, "ref");
                 return true;

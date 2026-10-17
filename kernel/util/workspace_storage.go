@@ -73,7 +73,7 @@ func measureWorkspaceStorage(ctx context.Context, workspacePath string, walk fun
 		}
 	}()
 	ret = WorkspaceStorage{Directories: map[string]int64{"data": 0, "repo": 0, "history": 0, "temp": 0, "conf": 0, "other": 0}}
-	root, err := filepath.EvalSymlinks(workspacePath)
+	root, err := ResolveRealPath(workspacePath)
 	if err != nil {
 		return WorkspaceStorage{}, err
 	}
@@ -107,7 +107,7 @@ func measureWorkspaceStorage(ctx context.Context, workspacePath string, walk fun
 			}
 			return err
 		}
-		if info.Mode()&fs.ModeSymlink != 0 {
+		if isLinkFileInfo(info) {
 			if entry.IsDir() {
 				return fs.SkipDir
 			}

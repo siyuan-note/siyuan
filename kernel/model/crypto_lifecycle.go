@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"slices"
 	"sort"
 	"sync"
 
@@ -53,6 +54,7 @@ type encryptedBoxLifecycle struct {
 	state            EncryptedBoxState
 	acceptOperations bool
 	activeOperations int
+	assetCleanup     bool
 }
 
 func holdEncryptedBoxTransition(boxID string) func() {
@@ -153,6 +155,9 @@ func AcquireEncryptedBoxOperation(boxID string) error {
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
 	defer lifecycle.lock.Unlock()
+	for lifecycle.assetCleanup && lifecycle.state == EncryptedBoxStateUnlocked {
+		lifecycle.condition.Wait()
+	}
 	if lifecycle.state == EncryptedBoxStateLocked && IsBoxUnlocked(boxID) {
 		lifecycle.state = EncryptedBoxStateUnlocked
 		lifecycle.acceptOperations = true
@@ -238,16 +243,16 @@ func AcquireEncryptedBoxOperations(ctx context.Context, boxIDs []string) (releas
 	var acquired []string
 	for _, boxID := range sortedBoxIDs {
 		if err = AcquireEncryptedBoxOperation(boxID); err != nil {
-			for i := len(acquired) - 1; i >= 0; i-- {
-				ReleaseEncryptedBoxOperation(acquired[i])
+			for _, a := range slices.Backward(acquired) {
+				ReleaseEncryptedBoxOperation(a)
 			}
 			return func() {}, err
 		}
 		acquired = append(acquired, boxID)
 	}
 	return func() {
-		for i := len(acquired) - 1; i >= 0; i-- {
-			ReleaseEncryptedBoxOperation(acquired[i])
+		for _, a := range slices.Backward(acquired) {
+			ReleaseEncryptedBoxOperation(a)
 		}
 	}, nil
 }
@@ -282,7 +287,7 @@ func (scope *encryptedBoxOperationScope) release() {
 	scope.boxIDs = nil
 	scope.boxIDSet = nil
 	scope.lock.Unlock()
-	for i := len(boxIDs) - 1; i >= 0; i-- {
-		ReleaseEncryptedBoxOperation(boxIDs[i])
+	for _, boxID := range slices.Backward(boxIDs) {
+		ReleaseEncryptedBoxOperation(boxID)
 	}
 }

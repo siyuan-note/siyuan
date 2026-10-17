@@ -25,6 +25,22 @@
       "size": 55571
     }
   ],
+  "linuxWorker": {
+    "glibc": "2.28",
+    "zigVersion": "0.15.2",
+    "toolchains": {
+      "x86_64": {
+        "url": "https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz",
+        "sha256": "02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239",
+        "size": 53733924
+      },
+      "aarch64": {
+        "url": "https://ziglang.org/download/0.15.2/zig-aarch64-linux-0.15.2.tar.xz",
+        "sha256": "958ed7d1e00d0ea76590d27666efbf7a932281b3d7ba0c6b01b0ff26498f667f",
+        "size": 49471996
+      }
+    }
+  },
   "runtime": {
     "windows-amd64": {
       "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.3/onnxruntime-win-x64-1.24.3.zip",

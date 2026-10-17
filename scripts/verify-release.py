@@ -346,14 +346,21 @@ def frontend_versions(text):
         if match[1]:
             versions.add(match[1])
             continue
-        # 仅解析 Constants 模块内紧邻赋值的常量，不执行安装包里的 JavaScript。
+        # 仅解析 Constants 模块或压缩后的类绑定附近的常量，不执行安装包里的 JavaScript。
         prefix = text[max(0, match.start() - 3000):match.start()]
         marker = prefix.rfind("Constants:")
         if marker < 0:
             marker = prefix.rfind("class Constants")
         if marker < 0:
-            continue
-        prefix = prefix[marker:]
+            minified = re.search(
+                r"\b(?P<binding>[A-Za-z_$][\w$]*)\s*=\s*class\s*\{\s*\}\s*;\s*"
+                r"(?:let|const|var)\s+(?P<receiver>[A-Za-z_$][\w$]*)\s*=\s*(?P=binding)\s*;\s*"
+                r"(?P=receiver)\.\s*$", prefix)
+            if minified is None:
+                continue
+            prefix = prefix[:minified.start()]
+        else:
+            prefix = prefix[marker:]
         binding = re.compile(r"(?:\bconst\s+|\blet\s+|\bvar\s+|,)" + re.escape(match[2])
                              + r"\s*=\s*[\"'](" + VERSION + r")[\"']")
         candidates = {item[1] for item in binding.finditer(prefix)}

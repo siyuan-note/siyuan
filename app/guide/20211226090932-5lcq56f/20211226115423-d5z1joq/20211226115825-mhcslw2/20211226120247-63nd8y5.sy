@@ -6,7 +6,7 @@
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容區塊",
 		"type": "doc",
-		"updated": "20260927183214"
+		"updated": "20261015221015"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-x5qwass",
-				"updated": "20260927183214"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -94,6 +94,70 @@
 				{
 					"Type": "NodeText",
 					"Data": "，指定筆記本根目錄或父文件。確認後將在該位置建立文件，並在原位置插入區塊引用。所選位置僅對本次建立生效，不會修改預設儲存路徑；取消不會建立文件。桌面端和行動端均支援此操作。資料庫項目綁定或重新綁定文件時也可使用此操作。文件建立成功後才會綁定到該項目；取消或建立失敗不會改變原有綁定。"
+				}
+			]
+		},
+		{
+			"ID": "20261014130425-brzvwem",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014130425-brzvwem",
+				"updated": "20261015221015"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雙向連結"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自動閉合 [[ 或 【【"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以啟用自動閉合，預設關閉。啟用後，輸入 [[ 或 【【 會在游標後補全對應的 ]] 或 】】；輸入兩個閉合括號可跳過閉合符並完成區塊引用。按 Enter 選擇候選項也會替換閉合符；在空的 [[]] 或 【【】】 中按退格會刪除整組括號。"
+				}
+			]
+		},
+		{
+			"ID": "20261014130425-eewkoer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014130425-eewkoer",
+				"updated": "20261014223520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入 ]] 或 】】 完成區塊引用時，先尋找標題完全一致的文件，再尋找忽略大小寫後標題一致的文件，然後使用符合條件的日記；都未符合時依區塊引用新建文件的預設位置建立文件。行內程式碼、程式碼區塊和行內公式中不生效。輸入法文字在提交後處理，已由輸入法補全的閉合括號會保留。"
 				}
 			]
 		},
@@ -970,7 +1034,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026apos;"
+									"TextMarkTextContent": "&apos;"
 								},
 								{
 									"Type": "NodeText",

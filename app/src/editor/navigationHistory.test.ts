@@ -149,7 +149,7 @@ for (const fromFileTree of [false, true]) {
                     model: {}, block: {rootID: id}, path: "/" + id + ".sy",
                     title: {editElement: title},
                     element: {classList: {contains: () => false}, contains: (node: unknown) => node === block},
-                    toolbar: {}, wysiwyg: {element: {firstElementChild: emptyLastDocument && id === "D" ? undefined : block, querySelectorAll: () => []}},
+                    toolbar: {}, wysiwyg: {element: {firstElementChild: emptyLastDocument && id === "D" ? undefined : block, querySelectorAll: (): Element[] => []}},
                     preview: {element: {classList: {contains: () => true}}},
                 };
             });

@@ -142,7 +142,7 @@ const setup = (resize = true) => {
     runInNewContext(bridgeSource, {exports: bridge,
         require: (name: string) => name === "./touchDragBridgeCore" ? bridgeCore : {
             Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 500, TIMEOUT_MOUSE_DRAG_DELAY: 150},
-            isInAndroid: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
+            isInAndroid: () => false, isInHarmony: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
         }, ...globals});
     bridge.initTouchDragBridge();
     const dispatch = (type: string, x: number, eventTarget = target, properties = {}) => {

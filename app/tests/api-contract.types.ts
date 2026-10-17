@@ -45,6 +45,19 @@ fetchPost("/api/petal/loadPluginPublishData", {packageName: "example"}, response
 });
 
 fetchPost("/api/setting/setEditor", {markdown: {inlineMath: null}, fontFamilies: null});
+fetchPost("/api/setting/setEditor", {blockGutterMode: true}, response => {
+    if (response.code === 0 && response.data) {
+        const enabled: boolean = response.data.blockGutterMode;
+        // @ts-expect-error 块标开关响应统一为布尔值。
+        const legacyMode: number = response.data.blockGutterMode;
+        void [enabled, legacyMode];
+    }
+});
+fetchPost("/api/setting/setEditor", {blockGutterMode: 1});
+fetchPost("/api/setting/patch", {editor: {blockGutterMode: false}});
+fetchPost("/api/setting/patch", {editor: {blockGutterMode: 0}});
+// @ts-expect-error 块标开关不接受字符串。
+fetchPost("/api/setting/setEditor", {blockGutterMode: "true"});
 fetchPost("/api/setting/setAI", {mcp: {servers: [{name: "server", env: {KEY: "value"}}]}});
 fetchPost("/api/setting/setKeymap", {data: {extension: {items: [null, false, 1, "text", {}]}}});
 fetchPost("/api/setting/setTheme", {theme: "theme", modes: [0, 1]});

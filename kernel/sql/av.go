@@ -19,6 +19,8 @@ package sql
 import (
 	"bytes"
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 	"text/template"
@@ -607,9 +609,7 @@ func fillAttributeViewBlockRefSubtypes(attrView *av.AttributeView, attrs map[str
 			addedBlockIDs[value.Block.ID] = true
 		}
 	}
-	for blockID, blockAttrs := range BatchGetBlockAttrs(missingBlockIDs) {
-		attrs[blockID] = blockAttrs
-	}
+	maps.Copy(attrs, BatchGetBlockAttrs(missingBlockIDs))
 	for _, value := range blockValues.Values {
 		if nil == value || nil == value.Block {
 			continue
@@ -1391,13 +1391,7 @@ func GetTemplateKeyRelevantKeys(attrView *av.AttributeView, templateKey *av.Key)
 	if nil != err {
 		return
 	}
-	dynamicDependency := false
-	for _, variable := range vars {
-		if dynamicTemplateKeyVar == variable {
-			dynamicDependency = true
-			break
-		}
-	}
+	dynamicDependency := slices.Contains(vars, dynamicTemplateKeyVar)
 	if dynamicDependency {
 		for _, keyValues := range attrView.KeyValues {
 			if nil != keyValues && nil != keyValues.Key {

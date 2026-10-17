@@ -47,8 +47,7 @@ func init() {
 			return request, nil
 		}
 		endpoint.decodeFailure = func(err error) Response[*LoadedPlugin] {
-			var nameError *pluginNameError
-			if errors.As(err, &nameError) {
+			if nameError, ok := errors.AsType[*pluginNameError](err); ok {
 				return Failure[*LoadedPlugin](nameError.code, nameError.message)
 			}
 			return Failure[*LoadedPlugin](-1, err.Error())

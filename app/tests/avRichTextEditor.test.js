@@ -25,7 +25,7 @@ const runCases = async (sources) => {
         fetchPost: (url, params, callback) => {
             assert.equal(url, "/api/search/searchRefBlock");
             request = params;
-            callback({data: {newDoc: true, k: "New document", blocks: []}});
+            callback({code: 0, data: {newDoc: true, k: "New document", blocks: []}});
         },
         Lute: {UnEscapeHTMLStr: value => value, Caret: "caret"},
         replaceFileName: value => value,

@@ -10,7 +10,7 @@ import {mountSyncTabExtras, patchSyncConfig} from "../tabs/syncRuntime";
 import {refreshCloudUser} from "../tabs/accountUi";
 import {mountAccessTab} from "../tabs/accessRuntime";
 import {collectAssetsTabSearchStrings, mountAssetsTab} from "../assets";
-import {mountOCRTab, registerOCRTab} from "../ocr";
+import {mountOCRTab, registerOCRTab, updateOCRTabBorders} from "../ocr";
 import {collectBazaarTabSearchStrings, mountBazaarTab} from "../bazaarTab";
 /// #if !MOBILE
 import {collectKeymapTabSearchStrings, mountKeymapTab} from "../tabs/keymapUi";
@@ -92,6 +92,7 @@ const createSettingTabs = () => {
             icon: "iconOCR",
             title: () => "OCR",
             afterMount: mountOCRTab,
+            onShow: updateOCRTabBorders,
         }, registerOCRTab),
         export: setting.tab({
             id: "export",

@@ -74,6 +74,10 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.orderedList")?.keymapPath || []), ["editor", "insert", "ordered-list"]);
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.mindmap")?.keymapPath || []), ["editor", "insert", "mindmap"]);
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.ref")?.keymapPath || []), ["editor", "insert", "ref"]);
+    for (const type of ["Note", "Tip", "Important", "Warning", "Caution"]) {
+        assert.deepEqual(Array.from(registry.get(`core.mobile.insert.callout${type}`)?.keymapPath || []),
+            ["editor", "insert", `callout${type}`]);
+    }
     assert.equal(registry.get("core.mobile.insert.template")?.keymapPath, undefined);
     assert.equal(queryCommandPalette(registry, context, "模板")[0].id, "core.mobile.insert.template");
     const recent = recordPaletteCommand([], "core.mobile.insert.assets");

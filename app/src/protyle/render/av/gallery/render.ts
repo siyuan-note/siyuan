@@ -16,7 +16,7 @@ import {applyAVRenderContext, beginAVRender, failAVRender, getAVLocateParams, is
 
 import {setGroupFoldedStates} from "../groupFold";
 import {getPublishAVView} from "../publishState";
-import {getReadonlyAVView} from "../readonlyState";
+import {getReadonlyAVView, getReadonlyAVSortRequest, reconcileReadonlyAVSort} from "../readonlyState";
 
 import {replaceAVContainer} from "../container";
 
@@ -95,6 +95,7 @@ export const renderGallery = async (options: {
             createIfNotExist: !window.siyuan.isPublish && !standalone,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
+            temporarySort: getReadonlyAVSortRequest(options.blockElement, options.protyle, common.viewID),
         }, undefined, false));
         if (!isCurrentAVRender(options.blockElement, renderToken)) {
             return;
@@ -113,6 +114,7 @@ export const renderGallery = async (options: {
     if (persistAVLocateView(options.blockElement, options.protyle, data)) {
         return;
     }
+    reconcileReadonlyAVSort(options.blockElement, data);
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
     if (isTableLikeView(data.viewType) || data.viewType === "calendar") {

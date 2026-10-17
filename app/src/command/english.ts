@@ -29,7 +29,7 @@ export const initializeEnglishCommandTranslations = (
                 englishLanguages = languages;
                 return languages;
             })
-            .catch(error => {
+            .catch((error): undefined => {
                 console.warn("Unable to load English command translations:", error);
                 return undefined;
             });

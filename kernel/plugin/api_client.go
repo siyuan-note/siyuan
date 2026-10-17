@@ -567,12 +567,12 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 			var openOnce sync.Once
 			var openPromises []Promise
 
-			addOpenPromise := func(resolve, reject func(reason interface{}) error) {
+			addOpenPromise := func(resolve, reject func(reason any) error) {
 				// nil slice 也可以直接 append
 				openPromises = append(openPromises, Promise{Resolve: resolve, Reject: reject})
 			}
 
-			resolveOpenPromises := func(rt *goja.Runtime) {
+			resolveOpenPromises := func(_ *goja.Runtime) {
 				if openPromises != nil {
 					for _, promise := range openPromises {
 						if resolveErr := promise.Resolve(nil); resolveErr != nil {

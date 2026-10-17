@@ -162,7 +162,7 @@ func extractFilename(rawURL, contentType string) string {
 }
 
 func extByContentType(contentType string) string {
-	ct := strings.SplitN(contentType, ";", 2)[0]
+	ct, _, _ := strings.Cut(contentType, ";")
 	if exts, _ := mime.ExtensionsByType(ct); len(exts) > 0 {
 		return exts[0]
 	}

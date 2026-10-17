@@ -8,7 +8,7 @@
 		"id": "20240530101000-g3ugxml",
 		"title": "基本操作",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -506,6 +506,60 @@
 					"TextMarkBlockRefID": "20260614104715-xe51jlk",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "ネットワークプロキシ"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-az1ed1n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cu3rb1y",
+				"id": "20261016191102-az1ed1n",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190003-oidcja1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "OIDC ログイン"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-44pp333",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cu3rb1y",
+				"id": "20261016191102-44pp333",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185003-secvr04",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "シークレットと変数"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-yto8mow",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cu3rb1y",
+				"id": "20261016191102-yto8mow",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260907120000-cryja01",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "暗号化ノートブック"
 				}
 			]
 		}

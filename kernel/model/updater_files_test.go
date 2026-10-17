@@ -38,7 +38,7 @@ func blockedInstallPackageDownload(t *testing.T, metadata *installPackageMetadat
 		defer close(finished)
 		err := downloadInstallPkg(server.URL, metadata)
 		if err == nil && cleanup {
-			path := filepath.Join(util.TempDir, "install", metadata.FileName)
+			path := filepath.Join(sharedInstallPackageDir(), metadata.FileName)
 			clearOldInstallPackagesLocked(installPackageVersion(metadata.FileName), path)
 		}
 		result <- err
@@ -129,6 +129,8 @@ func TestInstallPackagePreviewDoesNotLeakExitPreservation(t *testing.T) {
 	if err := <-done; err != nil {
 		t.Fatal(err)
 	}
+	assertInstallPackagePresent(t, dir, older)
+	clearInstallPackagesBefore(dir, "v99.0.1", "v99.0.1", "")
 	for _, suffix := range []string{"", ".json"} {
 		if _, err := os.Stat(filepath.Join(dir, older.FileName+suffix)); !os.IsNotExist(err) {
 			t.Fatalf("preview leaked a preserved old package or record: %v", err)
@@ -158,7 +160,7 @@ func TestFinalExitInstallPackageBlocksSameNameReplacement(t *testing.T) {
 	}
 	assertInstallPackagePresent(t, dir, metadata)
 	entries, err := os.ReadDir(dir)
-	if err != nil || len(entries) != 2 {
+	if err != nil || len(entries) != 3 {
 		t.Fatalf("temporary download was not removed: %v, %v", entries, err)
 	}
 	// 已保留同名包时，下一次下载也必须在访问网络前拒绝替换。
@@ -172,7 +174,7 @@ func TestInstallPackageCleanupBeforeFinalSelection(t *testing.T) {
 	dir := prepareInstallPackageTest(t)
 	older := installPackageFixture(t, dir, "99.0.0", conf.UpdateChannelStable, "win.exe")
 	newer := installPackageFixture(t, dir, "99.0.1", conf.UpdateChannelStable, "win.exe")
-	clearOldInstallPackagesLocked("v99.0.1", filepath.Join(dir, newer.FileName))
+	clearInstallPackagesBefore(dir, "v99.0.1", "v99.0.1", filepath.Join(dir, newer.FileName))
 	if got := selectTestInstallPackage(t, dir, true); got != filepath.Join(dir, newer.FileName) {
 		t.Fatalf("selection after completed cleanup returned %q", got)
 	}

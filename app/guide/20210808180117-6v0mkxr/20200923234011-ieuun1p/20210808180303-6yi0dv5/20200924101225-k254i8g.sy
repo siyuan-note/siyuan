@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261017174053"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-4b3n4al",
-				"updated": "20260921215916"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -64,7 +64,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104091538-le8t1ci",
-				"updated": "20260923221935"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -993,6 +993,75 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "Mind map item block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "list-item"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/listitem-block-20260425175517-4uac18s.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "List Item block"
 								}
 							]
@@ -1405,7 +1474,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20261012014930"
+				"updated": "20261017174053"
 			},
 			"Children": [
 				{
@@ -1677,7 +1746,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-38bsz5r",
-				"updated": "20260222162325"
+				"updated": "20261017174053"
 			},
 			"Children": [
 				{
@@ -1870,6 +1939,48 @@
 			]
 		},
 		{
+			"ID": "20261017142635-7s38p0k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-7s38p0k",
+				"updated": "20261017170001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, tap a cell to edit its text. Long-press a cell that is not being edited to select a cell range, or use the block menu in the keyboard toolbar. Drag either corner handle to expand or shrink the selection; dragging near the viewport edge scrolls the table. Swiping cell content still scrolls. While editing text, holding text still selects text."
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-d2uc99x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-d2uc99x",
+				"updated": "20261017174053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tapping a cell shows blue dotted handles on the borders of its row and column. Tap a handle above a column or beside a row to select that column or row. Enable Multi-select in the top toolbar to add or remove nonadjacent cells, rows, or columns. Use More to merge cells, set styles and alignment, or operate on selected rows and columns. Tap Close to leave selection mode."
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-wrzqg7l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-wrzqg7l",
+				"updated": "20261017171205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tap a column divider in any row to highlight it, then drag the highlighted line horizontally to change the width. Vertical swipes still scroll the table. Tap outside the line to leave width adjustment. Select columns and use More to auto-fit their widths or distribute them evenly. Tap the plus controls at the table edges to add rows or columns, or drag the edge controls to add several at once or remove trailing empty rows and columns. Shrinking preserves nonempty content and merged cells."
+				}
+			]
+		},
+		{
 			"ID": "20250330191912-6gqtj5b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -1915,7 +2026,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429115218-ydwuros",
-				"updated": "20260803171606"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1962,7 +2073,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427231112-lcwev4m",
-				"updated": "20260803171606"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1974,7 +2085,7 @@
 					},
 					"Properties": {
 						"id": "20240427231112-q60pwo8",
-						"updated": "20260803171606"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -1982,7 +2093,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427231112-e7j3mqt",
-								"updated": "20260803171606"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -2014,7 +2125,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, but please confirm that the code is safe before opening it to avoid cross-site scripting attacks (XSS)."
+									"Data": "​, but please confirm that the code is safe before opening it to avoid cross-site scripting attacks (XSS)"
 								}
 							]
 						}
@@ -2029,7 +2140,7 @@
 					},
 					"Properties": {
 						"id": "20240427231112-o1imtjo",
-						"updated": "20240427231112"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -2037,7 +2148,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427231112-3txbq9w",
-								"updated": "20240427231112"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -2051,7 +2162,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to wrap HTML code and remove blank lines."
+									"Data": "​ to wrap HTML code and remove blank lines"
 								}
 							]
 						}
@@ -2533,7 +2644,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20261012014930"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -2553,6 +2664,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing."
+				}
+			]
+		},
+		{
+			"ID": "20261016111305-yf97d7e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-yf97d7e",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A mind map block contains only mind map item blocks. Each mind map item has its own block ID and may contain ordinary content blocks and nested mind maps; it cannot directly contain a list block, list item block, or another mind map item block."
 				}
 			]
 		},
@@ -3212,7 +3337,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200925102736-x94e40g",
-				"updated": "20260906003122"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -3244,7 +3369,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091538-3pi7fbf",
-				"updated": "20260906003122"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -3466,6 +3591,62 @@
 								{
 									"Type": "NodeText",
 									"Data": "Tab item block: contains ordinary content blocks and nested tabbed containers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016111305-81kzz6v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016111305-81kzz6v",
+						"updated": "20261016111305"
+					},
+					"Children": [
+						{
+							"ID": "20261016111305-i4u9mr0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016111305-i4u9mr0",
+								"updated": "20261016111305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mind map block: contains only mind map item blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016111305-yd1uvto",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016111305-yd1uvto",
+						"updated": "20261016111305"
+					},
+					"Children": [
+						{
+							"ID": "20261016111305-wglnd0s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016111305-wglnd0s",
+								"updated": "20261016111305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mind map item block: contains ordinary content blocks and nested mind maps; no direct list blocks, list item blocks, or mind map item blocks"
 								}
 							]
 						}

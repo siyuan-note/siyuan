@@ -30,5 +30,5 @@ func textFileSingleLink(_ *os.File, info os.FileInfo) error {
 			}
 		}
 	}
-	return textFileError("invalid_path", "hard-linked files or unknown link counts are not supported")
+	return textFileError(TextFileInvalidPath, "hard-linked files or unknown link counts are not supported")
 }

@@ -33,6 +33,52 @@ test("repository CSS contracts have no new violations", async () => {
     await checkContracts();
 });
 
+test("optimized editor and PDF selectors keep explicit keys and static exports retain inline RTL", () => {
+    const sass = require("sass");
+    const path = require("node:path");
+    const postcss = require("postcss");
+    const selectorParser = require("postcss-selector-parser");
+    const expandedSubjects = new Set([
+        "[data-node-id],[data-table-cell-node]", ".p,.h1,.h2,.h3,.h4,.h5,.h6", "input,textarea", "span,br",
+    ]);
+    // 仅约束已经优化的热点，不禁止其他具有不同特异性或匹配语义的伪类。
+    for (const entry of ["base", "mobile", "export"]) {
+        const css = sass.compile(path.join(__dirname, "../src/assets/scss", `${entry}.scss`), {
+            logger: sass.Logger.silent,
+        }).css;
+        let inlineListRules = 0;
+        let markedListRules = 0;
+        postcss.parse(css).walkRules(rule => {
+            const selectors = selectorParser().astSync(rule.selector);
+            selectors.walkPseudos(node => {
+                if (node.value === ":is") {
+                    assert.equal(expandedSubjects.has(node.nodes.map(option => option.toString().trim()).join(",")), false,
+                        `${entry}: ${rule.selector}`);
+                }
+            });
+            if (!rule.nodes.some(node => node.prop === "margin-right" && node.value === "34px")) {
+                return;
+            }
+            selectors.walkAttributes(node => {
+                if (node.attribute === "style" && node.operator === "*=" && node.value === "direction: rtl") {
+                    inlineListRules++;
+                }
+            });
+            selectors.walkClasses(node => {
+                if (node.value === "protyle-block--rtl") {
+                    markedListRules++;
+                }
+            });
+        });
+        if (entry === "export") {
+            assert.ok(inlineListRules > 0, "static exports must lay out existing inline RTL without scripts");
+        } else {
+            assert.equal(inlineListRules, 0, "editor list layout must not invalidate descendants on unrelated style changes");
+            assert.ok(markedListRules > 0);
+        }
+    }
+});
+
 test("shared token defaults preserve local var resolution and runtime overrides", async () => {
     const sass = require("sass");
     const path = require("node:path");

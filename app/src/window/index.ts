@@ -3,7 +3,7 @@ import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
 import {Constants} from "../constants";
 import {refreshSettingConfig} from "../config/setting/sync";
 import {onAgentStreamingMarkdownStorageChanged} from "../config/tabs/ai/agentStreamingMarkdown";
-import {onPageScrollButtonsStorageChanged} from "../protyle/scroll/pageButtons";
+import {onCompactModeStorageChanged, refreshCompactMode} from "../config/tabs/compactMode";
 import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
 import {Model} from "../layout/Model";
@@ -17,13 +17,13 @@ import {openFileById} from "../editor/util";
 import {
     processSync,
     progressBackgroundTask,
-    progressLoading,
     progressStatus,
     processBacklinkIndexCommit,
     setDefRefCount,
     setRefDynamicText,
     transactionError
 } from "../dialog/processSystem";
+import {progressLoading} from "../dialog/progress";
 import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
@@ -47,8 +47,8 @@ import {emitToPlugins} from "../plugin/EventBusCore";
 import {initializeEnglishCommandTranslations} from "../command/english";
 import {loadLanguages} from "../boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
-import {waitForWindowPaint} from "../util/windowPaint";
-import {ipcRenderer} from "electron";
+import {initWindowWithLoading} from "../boot/loading";
+import {setTabPosition} from "../layout/tabUtil";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -62,6 +62,11 @@ class App {
         mainWs.connect({
             id: genUUID(),
             type: "main",
+            callback: () => {
+                if (window.siyuan.isReady) {
+                    void refreshCompactMode().catch(error => console.error("Could not refresh compact mode", error));
+                }
+            },
             msgCallback: (data) => {
                     emitToPlugins("ws-main", data);
                     if (data) {
@@ -130,7 +135,7 @@ class App {
                                 if (window.siyuan.storage) {
                                     window.siyuan.storage[data.data.key] = data.data.val;
                                     onAgentStreamingMarkdownStorageChanged(data.data.key);
-                                    onPageScrollButtonsStorageChanged(data.data.key);
+                                    onCompactModeStorageChanged(data.data.key);
                                     onWindowWorkspaceStorageChanged(data.data.key);
                                 }
                                 break;
@@ -138,21 +143,21 @@ class App {
                                 Object.keys(data.data.keyVals).forEach((k) => {
                                     window.siyuan.storage[k] = data.data.keyVals[k];
                                     onAgentStreamingMarkdownStorageChanged(k);
-                                    onPageScrollButtonsStorageChanged(k);
+                                    onCompactModeStorageChanged(k);
                                     onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;
                             case "removeLocalStorageVal":
                                 delete window.siyuan.storage[data.data.key];
                                 onAgentStreamingMarkdownStorageChanged(data.data.key);
-                                onPageScrollButtonsStorageChanged(data.data.key);
+                                onCompactModeStorageChanged(data.data.key);
                                 onWindowWorkspaceStorageChanged(data.data.key);
                                 break;
                             case "removeLocalStorageVals":
                                 data.data.keys.forEach((k: string) => {
                                     delete window.siyuan.storage[k];
                                     onAgentStreamingMarkdownStorageChanged(k);
-                                    onPageScrollButtonsStorageChanged(k);
+                                    onCompactModeStorageChanged(k);
                                     onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;
@@ -258,12 +263,11 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
-                        await waitForWindowPaint(() => init(this));
+                        await initWindowWithLoading(() => init(this), setTabPosition);
                         setTitle("", true);
                         initMessage();
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
-                        ipcRenderer.send("siyuan-window-ready");
                         fetchPost("/api/setting/getCloudUser", {});
                     });
                 });

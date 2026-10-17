@@ -6,7 +6,7 @@
 		"id": "20201222100339-i5hzcph",
 		"title": "Database table",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -107,7 +107,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201117103851-gx21lz6",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -135,7 +135,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210111225813-9kys36i",
-				"updated": "20221014133135"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -273,7 +273,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Summary checksum of the content"
+									"Data": "Short hash used to detect changes to a block and its related context; not a full SHA256 checksum of content"
 								}
 							]
 						}
@@ -543,16 +543,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Length of "
+									"Data": "Character count: a leaf block uses its "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "fcontent"
+									"TextMarkTextContent": "content"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​; a container block uses its first leaf block’s content; a document uses its title"
 								}
 							]
 						}

@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -15,14 +16,15 @@ func TestOCRSmallMigrationPreservesPreferences(t *testing.T) {
 				t.Fatal(err)
 			}
 			original := value
+			original.ShowText = new(true)
 			if original.Model == "small" {
 				original.Model = "tiny"
 			}
 			got := normalizeOCRConfig(&value, true)
-			if *got != original {
+			if !reflect.DeepEqual(*got, original) {
 				t.Fatalf("migration changed preferences: %+v", got)
 			}
-			if again := normalizeOCRConfig(got, true); *again != original {
+			if again := normalizeOCRConfig(got, true); !reflect.DeepEqual(*again, original) {
 				t.Fatal("migration is not idempotent")
 			}
 		}
@@ -58,8 +60,9 @@ func TestNormalizeOCRConfig(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
+			test.want.ShowText = new(true)
 			got := normalizeOCRConfig(test.value, test.confFileExists)
-			if *got != test.want {
+			if !reflect.DeepEqual(*got, test.want) {
 				t.Fatalf("OCR config: got %+v, want %+v", *got, test.want)
 			}
 			if test.value != nil && got != test.value {

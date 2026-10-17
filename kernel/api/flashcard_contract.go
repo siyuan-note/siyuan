@@ -1,11 +1,42 @@
 package api
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
+
+// convertFlashcardPayload 在业务结构和传输结构之间保留 JSON 字段、空值及原始实体载荷。
+func convertFlashcardPayload[Target, Source any](source Source) (target Target, err error) {
+	encoded, err := json.Marshal(source)
+	if err == nil {
+		err = json.Unmarshal(encoded, &target)
+	}
+	return
+}
+
+func flashcardPayloadResponse[Target, Source any](source Source) apicontract.Response[Target] {
+	target, err := convertFlashcardPayload[Target](source)
+	if err != nil {
+		return apicontract.Failure[Target](-1, err.Error())
+	}
+	return apicontract.Success(target)
+}
+
+// limitAnkiFlashcardUpload 在解析表单前限制请求体，避免先读取超大卡包。
+func limitAnkiFlashcardUpload[Data any](c *gin.Context) *apicontract.Response[Data] {
+	limit := flashcardv2.MaxAnkiPackageArchiveSize + maxAnkiMultipartOverhead
+	if c.Request.ContentLength > limit {
+		response := apicontract.Failure[Data](-1, "Anki package upload exceeds its size limit")
+		return &response
+	}
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, limit)
+	return nil
+}
 
 func flashcardEditLaterData(result flashcardv2.CardEditLaterResult) apicontract.FlashcardEditLaterData {
 	data := apicontract.FlashcardEditLaterData{CardID: result.CardID, RevisionID: result.RevisionID}

@@ -6,7 +6,7 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20261007101500"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-d150748",
-				"updated": "20261007101500"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204349-f3c4f3q",
-				"updated": "20260903130000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204349-j3v5olp",
-				"updated": "20260903130000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -261,7 +261,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-s6cbn11",
-						"updated": "20260810212846"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -269,7 +269,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-w4ny52c",
-								"updated": "20260810212846"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -396,7 +396,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "1-9"
+									"TextMarkTextContent": "1-8"
 								},
 								{
 									"Type": "NodeText",
@@ -414,11 +414,47 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "1-9"
+									"TextMarkTextContent": "1-8"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 跳转到第 1 至第 9 个页签"
+									"Data": " 跳转到第 1 至第 8 个页签；使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 跳转到最后一个页签"
 								}
 							]
 						}

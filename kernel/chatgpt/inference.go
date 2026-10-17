@@ -65,7 +65,7 @@ func (s *Service) Do(request *http.Request, accountID string) (*http.Response, e
 			release()
 		}
 	}()
-	for attempt := 0; attempt < 2; attempt++ {
+	for attempt := range 2 {
 		token, err := s.Token(ctx, accountID, attempt != 0)
 		if err != nil {
 			return nil, err

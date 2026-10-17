@@ -42,12 +42,34 @@ func clearOldInstallPackages(preservePath string) {
 // clearOldInstallPackagesLocked 与下载共用互斥锁，保留当前版本及交给桌面宿主的安装包。
 // 调用方持有下载锁，清理时不会有正在写入的临时安装包。
 func clearOldInstallPackagesLocked(beforeVersion, preservePath string) {
-	clearInstallPackagesBefore(filepath.Join(util.TempDir, "install"), "v"+util.Ver, beforeVersion, preservePath)
+	for _, installDir := range []string{sharedInstallPackageDir(), filepath.Join(util.TempDir, "install")} {
+		if _, err := os.Stat(installDir); os.IsNotExist(err) {
+			continue
+		}
+		lock, err := tryInstallPackageDownloadLock(installDir)
+		if err != nil {
+			// 其他工作空间下载期间跳过清理，不能删除正在写入的临时包。
+			continue
+		}
+		cleanupBefore := beforeVersion
+		if installDir == sharedInstallPackageDir() {
+			// 共用缓存中的未来版本可能仍供其他通道或工作空间使用，升级后再清理。
+			cleanupBefore = "v" + util.Ver
+		}
+		clearInstallPackagesBefore(installDir, "v"+util.Ver, cleanupBefore, preservePath)
+		lock.Close()
+	}
 }
 
 func clearInstallPackagesBefore(installDir, currentVersion, beforeVersion, preservePath string) {
 	installPackageFiles.Lock()
 	defer installPackageFiles.Unlock()
+	lock, err := lockInstallPackageFiles(installDir)
+	if err != nil {
+		logging.LogWarnf("lock install package cleanup failed: %s", err)
+		return
+	}
+	defer lock.Close()
 
 	if !semver.IsValid(beforeVersion) || !semver.IsValid(currentVersion) {
 		return
@@ -70,10 +92,12 @@ func clearInstallPackagesBefore(installDir, currentVersion, beforeVersion, prese
 			continue
 		}
 		packageName := strings.TrimSuffix(entry.Name(), ".json")
+		packageName = strings.TrimSuffix(packageName, ".preserve")
 		version := installPackageVersion(packageName)
 		pkgPath := filepath.Join(installDir, entry.Name())
 		if version == "" || !entry.Type().IsRegular() || filepath.Join(installDir, packageName) == preservePath ||
 			filepath.Join(installDir, packageName) == installPackageFiles.preservedPath ||
+			sharedInstallPackageReserved(filepath.Join(installDir, packageName)) ||
 			semver.Compare(version, currentVersion) == 0 || semver.Compare(version, beforeVersion) >= 0 {
 			continue
 		}

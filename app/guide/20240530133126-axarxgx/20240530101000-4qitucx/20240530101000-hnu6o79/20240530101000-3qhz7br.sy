@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261017113835"
 	},
 	"Children": [
 		{
@@ -19,7 +19,7 @@
 			"Properties": {
 				"ID": "20240530101000-tfcp9du",
 				"id": "20240530101000-e1tndfu",
-				"updated": "20240530101000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -35,7 +35,7 @@
 			"Properties": {
 				"ID": "20240530101000-8o1a9my",
 				"id": "20240530101000-wlqefeq",
-				"updated": "20240530101000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -113,7 +113,7 @@
 					"Properties": {
 						"ID": "20240530101000-gjgldj9",
 						"id": "20240530101000-gm1p50s",
-						"updated": "20240530101000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -137,12 +137,12 @@
 							"Properties": {
 								"ID": "20240530101000-h8nud0n",
 								"id": "20240530101000-r0imp45",
-								"updated": "20240530101000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コピー＆ペースト、またはドラッグ＆ドロップによるアップロードに対応しています。サイドバーをドラッグすることでサイズを調整できます。"
+									"Data": "コピー＆ペースト、またはドラッグ＆ドロップによるアップロードに対応しています。サイドバーをドラッグすることでサイズを調整できます"
 								}
 							]
 						},
@@ -910,6 +910,52 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261015131447-v0xgm0w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015131447-v0xgm0w",
+				"updated": "20261016011750"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コンテンツ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "色を管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の各ボタンから、文字色と背景色の組み合わせ、文字色、背景色の管理画面を直接開けます。"
 				}
 			]
 		},
@@ -2044,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261012014930"
+				"updated": "20261017113835"
 			},
 			"Children": [
 				{
@@ -2089,6 +2135,66 @@
 				{
 					"Type": "NodeText",
 					"Data": "マインドマップのツールバーで「表示をロック」を押すと、編集、拡大・縮小、移動が無効になります。マップ上でのスワイプやマウスホイール操作は文書をスクロールします。「表示のロックを解除」で操作を再開できます。ロック状態はブロックとともに保存されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261017110432-562ro9u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017110432-562ro9u",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップのツールバーで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線のスタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、分岐曲線、直角線、扇形曲線、角丸直角線から選択できます。選択はマップ全体に適用され、文書とともに保存され、取り消しとやり直しに対応します。親子ノード間の接続線のみを変更し、ノードの位置や関連線は変更しません。直角のスタイルでは共通の縦線に既定の線色を使用し、縦線を個別に選択することはできません。横方向の分岐は個別に選択して色を変更できます。SiYuan 形式の HTML と PDF プレビューには保存したスタイルが反映されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-geqkoea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-geqkoea",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新規マップの既定の接続線スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、新規マップやリスト・タブから初めて変換するマップの接続線スタイルを選択できます。この設定は現在のワークスペースのローカル設定に保存され、クラウド同期には含まれません。変更しても既存のマップには影響しません。コピー、インポート、リストやタブとの往復変換では元のスタイルが保持されます。"
 				}
 			]
 		},
@@ -3286,7 +3392,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-3zow3ge",
-				"updated": "20261012014859"
+				"updated": "20261017003253"
 			},
 			"Children": [
 				{
@@ -3300,7 +3406,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を入力して「画像やファイルを挿入」を選択すると、ローカル画像をアップロードできます。クリップボードの画像を貼り付けることもできます。画像は文書の添付ファイルとして保存されます。複数の最上位ノードに対して表示される仮想中心のタイトルはプレーンテキストのままです。"
+					"Data": " を入力して「画像やファイルを挿入」を選択すると、ローカル画像をアップロードできます。クリップボードの画像を貼り付けることもできます。画像は文書の添付ファイルとして保存されます。複数の最上位ノードに対して表示される仮想中心のタイトルはプレーンテキストのままです。ノード内の画像をダブルクリックすると、ノードの編集に入らずに拡大プレビューを表示できます。"
 				}
 			]
 		},
@@ -5314,7 +5420,7 @@
 			"Properties": {
 				"ID": "20240530101000-agmhi90",
 				"id": "20240530101000-mguk4vq",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -5357,12 +5463,23 @@
 			"Properties": {
 				"ID": "20240530101000-mfktcb8",
 				"id": "20240530101000-8sj8uxy",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以下の 3 つの形式で定義できます:"
+					"Data": "ローカルカーネルでは以下の 3 つの形式を使用できます。リモートカーネルへの接続時は厳密な JSON のみをサポートし、JavaScript オブジェクト式や関数は実行されません。詳しくは"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "リモートカーネルへの接続"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},

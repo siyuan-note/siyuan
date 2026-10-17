@@ -17,8 +17,9 @@ import {openFile} from "../editor/util";
 /// #endif
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import {getWindowAppearance} from "../window/appearance";
 /// #endif
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
 import type {App} from "../index";
 import {resize} from "../protyle/util/resize";
@@ -635,7 +636,9 @@ export const bindCardEvent = async (options: {
                                 const url = new URL("/stage/build/app/window.html", window.location.origin);
                                 url.searchParams.set("v", Constants.SIYUAN_VERSION);
                                 url.searchParams.set("json", JSON.stringify(json));
-                                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {url: appendRemoteQuery(url).href});
+                                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
+                                    ...getWindowAppearance(), url: appendRemoteQuery(url).href,
+                                });
                                 options.dialog.destroy();
                             }
                         });

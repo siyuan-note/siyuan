@@ -18,7 +18,7 @@ import {focusBlock} from "../../util/selection";
 import {toggleUpdateRelationBtn} from "./relation";
 import {bindRollupData, getRollupHTML} from "./rollup";
 import {Constants} from "../../../constants";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne, isMobile} from "../../../util/functions";
 import {Dialog} from "../../../dialog";

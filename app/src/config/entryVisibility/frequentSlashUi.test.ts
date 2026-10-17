@@ -85,7 +85,9 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
             if (allowDiscard) callback();
         },
     };
-    const source = readFileSync(resolve("src/config/entryVisibility/ui.ts"), "utf8");
+    const source = readFileSync(resolve("src/config/entryVisibility/ui.ts"), "utf8")
+        .replace("const createEntryView =", "let createEntryView =")
+        .replace("const removeEntryView =", "let removeEntryView =");
     const code = transpileModule(source + `
 createEntryView = () => fixtureView;
 removeEntryView = () => { fixtureView.closed = true; };

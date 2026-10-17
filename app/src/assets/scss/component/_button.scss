@@ -1,10 +1,10 @@
 .b3-button {
   cursor: pointer;
-  color: var(--b3-theme-on-primary);
-  border-radius: var(--b3-border-radius);
+  color: var(--b3-theme-on-primary, ButtonText);
+  border-radius: var(--b3-border-radius, 4px);
   line-height: 20px;
   padding: 4px 8px;
-  background-color: var(--b3-theme-primary);
+  background-color: var(--b3-theme-primary, ButtonFace);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -53,6 +53,12 @@
     padding: 2px 8px;
   }
 
+  &--wrap {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: max(20px, 1.4em);
+  }
+
   &--big {
     min-width: 214px;
     background: var(--b3-theme-secondary);
@@ -94,7 +100,7 @@
   }
 
   &--outline {
-    color: var(--b3-theme-primary);
+    color: var(--b3-theme-primary, ButtonText);
     box-shadow: inset 0 0 0 .6px var(--b3-theme-primary);
     background-color: transparent;
     text-decoration: none;

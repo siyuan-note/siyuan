@@ -13,6 +13,14 @@ import (
 
 // ListProviderModels 按提供商协议读取模型清单，保持通用接口的返回结构。
 func ListProviderModels(apiKey, baseURL, protocol string, timeout int, headers ...map[string]string) ([]AvailableModel, error) {
+	if IsGeminiInteractionsProtocol(protocol) {
+		if timeout < 1 {
+			timeout = 30
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+		defer cancel()
+		return listGeminiInteractionModels(ctx, NewAIClientWithModel(apiKey, baseURL, "", headers...))
+	}
 	if !IsAnthropicMessagesProtocol(protocol) {
 		return ListAvailableModelsWithContext(apiKey, baseURL, timeout, headers...)
 	}

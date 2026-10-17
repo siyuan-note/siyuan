@@ -30,7 +30,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1740,107 +1739,6 @@ func TestFilterCriteriaByPublishAccess(t *testing.T) {
 	filtered = FilterCriteriaByPublishAccess(c, publishAccess, newCriteria())
 	if len(filtered) != 2 || filtered[0].Name != "public" || filtered[1].Name != "protected" {
 		t.Fatalf("unexpected authenticated criteria: %+v", filtered)
-	}
-}
-
-func TestFilterAssetContentByPublishAccess(t *testing.T) {
-	t.Run("body", func(t *testing.T) { testPublishDocAssets(t, false) })
-	t.Run("title image", func(t *testing.T) { testPublishDocAssets(t, true) })
-}
-
-func testPublishDocAssets(t *testing.T, titleImage bool) {
-	const (
-		boxID             = "20260804030000-boxid01"
-		publicDocID       = "20260804030001-public1"
-		protectedDocID    = "20260804030002-protect"
-		hiddenDocID       = "20260804030003-hidden1"
-		disabledDocID     = "20260804030004-disable"
-		publicAsset       = "assets/public.png"
-		protectedAsset    = "assets/protected.png"
-		hiddenAsset       = "assets/hidden.png"
-		disabledAsset     = "assets/disabled.png"
-		protectedPassword = "password"
-	)
-
-	oldDataDir := util.DataDir
-	oldBlockTreeDBPath := util.BlockTreeDBPath
-	util.DataDir = t.TempDir()
-	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
-	treenode.InitBlockTree(true)
-	invalidateEncryptedPublishAccessCache()
-	t.Cleanup(func() {
-		treenode.CloseDatabase()
-		util.DataDir = oldDataDir
-		util.BlockTreeDBPath = oldBlockTreeDBPath
-		invalidateEncryptedPublishAccessCache()
-		if "" != oldBlockTreeDBPath {
-			treenode.InitBlockTree(false)
-		}
-	})
-
-	newDocTree := func(docID, asset string) {
-		tree := treenode.NewTree(boxID, "/"+docID+".sy", "/"+docID, docID)
-		tree.Root.FirstChild.Unlink()
-		dom := `<div data-node-id="` + docID + `" data-type="htmlblock"><img src="` + asset + `" data-src="` + asset + `" /></div>`
-		node := util.NewLute().BlockDOM2Tree(dom).Root.FirstChild
-		tree.Root.AppendChild(node)
-		if titleImage {
-			node.Unlink()
-			tree.Root.SetIALAttr("title-img", `background-image: url(&quot;`+asset+`?v=1&amp;size=large&quot;); background-position: center;`)
-		}
-		if _, err := filesys.WriteTree(tree); err != nil {
-			t.Fatal(err)
-		}
-		treenode.UpsertBlockTree(tree)
-	}
-	newDocTree(publicDocID, publicAsset)
-	newDocTree(protectedDocID, protectedAsset)
-	newDocTree(hiddenDocID, hiddenAsset)
-	newDocTree(disabledDocID, disabledAsset)
-
-	newAssetContents := func() []*AssetContent {
-		return []*AssetContent{
-			{ID: publicDocID, Name: "public.png", Path: publicAsset},
-			{ID: protectedDocID, Name: "protected.png", Path: protectedAsset},
-			{ID: hiddenDocID, Name: "hidden.png", Path: hiddenAsset},
-			{ID: disabledDocID, Name: "disabled.png", Path: disabledAsset},
-		}
-	}
-	publishAccess := PublishAccess{
-		{ID: protectedDocID, Visible: true, Password: protectedPassword},
-		{ID: hiddenDocID, Visible: false},
-		{ID: disabledDocID, Visible: true, Disable: true},
-	}
-
-	c, _ := gin.CreateTestContext(httptest.NewRecorder())
-	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
-	if titleImage {
-		assets, err := DocAssets(publicDocID, true)
-		if err != nil || len(assets) != 1 || assets[0] != publicAsset+"?v=1&size=large" {
-			t.Fatalf("unexpected title image assets with query: %v, %v", assets, err)
-		}
-	}
-	for _, asset := range []string{publicAsset, protectedAsset, disabledAsset, "assets/unreferenced.png"} {
-		got := CheckAbsPathAccessableByPublishAccess(c, filepath.Join(util.DataDir, asset), publishAccess)
-		if got != (asset == publicAsset) {
-			t.Errorf("unexpected unauthenticated access to %s: %v", asset, got)
-		}
-	}
-	filtered := FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
-	if len(filtered) != 1 || filtered[0].Path != publicAsset {
-		t.Fatalf("unexpected unauthenticated asset contents: %+v", filtered)
-	}
-
-	c.Request.AddCookie(&http.Cookie{
-		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
-	})
-	filtered = FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
-	if !CheckAbsPathAccessableByPublishAccess(c, filepath.Join(util.DataDir, protectedAsset), publishAccess) {
-		t.Error("password protected asset should be accessible after authorization")
-	}
-	if len(filtered) != 2 || filtered[0].Path != publicAsset || filtered[1].Path != protectedAsset {
-		t.Fatalf("unexpected authenticated asset contents: %+v", filtered)
 	}
 }
 

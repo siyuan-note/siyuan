@@ -68,7 +68,7 @@ export interface IDockOrderDefaultEntry {
 type TDockOrdersByPosition = Partial<Record<TPluginDockPosition, readonly string[]>>;
 
 const createEmptySnapshot = (): TDockOrderSnapshot => Object.fromEntries(
-    DOCK_ORDER_SCOPES.map((scope) => [scope, []]),
+    DOCK_ORDER_SCOPES.map((scope): [TDockOrderScope, string[]] => [scope, []]),
 ) as TDockOrderSnapshot;
 
 const normalizeDockEntryOrderSnapshot = (

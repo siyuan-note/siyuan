@@ -366,8 +366,17 @@ const openedMcpOAuthURLs = new Map<string, string>();
 
 export const genMcpServersBlockHtml = (): string => `<div class="b3-label config-item" id="aiMcpServersBlock">
     <div class="fn__flex">
-        <span class="b3-label__text">${window.siyuan.languages.aiMcpServersTip}</span>
-        <span class="fn__flex-1"></span>
+        <div class="fn__flex-1 config-item__main">
+            <div class="config-name">${escapeHtmlTextAndAttr(window.siyuan.languages.aiMcpServerSettings)}</div>
+            <div class="b3-label__text">${escapeHtmlTextAndAttr(window.siyuan.languages.aiMcpServersTip)}</div>
+        </div>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addAiMcpServer">
+            <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
+            <span>${escapeHtmlTextAndAttr(window.siyuan.languages.addAiMcpServer)}</span>
+        </button>
+    </div>
+    <div class="fn__flex">
         <span id="aiMcpStatusSummary" class="b3-label__text ft__on-surface fn__none"></span>
     </div>
     <div class="fn__hr--small"></div>
@@ -375,19 +384,7 @@ export const genMcpServersBlockHtml = (): string => `<div class="b3-label config
 </div>`;
 
 const mountAddMcpServerButton = (root: HTMLElement, block: HTMLElement) => {
-    const groupTitle = block.closest<HTMLElement>(".config-group")
-        ?.querySelector<HTMLElement>(":scope > .config-title");
-    if (!groupTitle || groupTitle.querySelector("[data-type='addAiMcpServer']")) {
-        return;
-    }
-
-    groupTitle.classList.add("config-title--action");
-    groupTitle.insertAdjacentHTML("beforeend", `<span class="fn__flex-1"></span>
-<button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addAiMcpServer">
-    <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span>${escapeHtmlTextAndAttr(window.siyuan.languages.addAiMcpServer)}</span>
-</button>`);
-    (groupTitle.lastElementChild as HTMLButtonElement).addEventListener("click", (event) => {
+    block.querySelector<HTMLButtonElement>("[data-type='addAiMcpServer']")?.addEventListener("click", (event) => {
         openMcpServerDialog(root, null);
         event.preventDefault();
         event.stopPropagation();

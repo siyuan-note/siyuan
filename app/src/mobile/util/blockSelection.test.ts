@@ -78,6 +78,16 @@ describe("mobile block selection", () => {
         assert.equal(getMobileBlockSelectionElement(asHTMLElement(paragraph)), asHTMLElement(paragraph));
     });
 
+    it("keeps the exact paragraph or list item selected from a full indicator menu", () => {
+        const editor = new TestElement().addClass("protyle-wysiwyg");
+        const paragraph = block("NodeParagraph");
+        const listItem = block("NodeListItem").append(new TestElement(), paragraph, new TestElement());
+        editor.append(block("NodeList").append(listItem, new TestElement()));
+
+        assert.equal(getMobileBlockSelectionElement(asHTMLElement(paragraph), true), asHTMLElement(paragraph));
+        assert.equal(getMobileBlockSelectionElement(asHTMLElement(listItem), true), asHTMLElement(listItem));
+    });
+
     it("selects the query embed instead of a rendered child block", () => {
         const editor = new TestElement().addClass("protyle-wysiwyg");
         const child = block("NodeParagraph");
@@ -85,5 +95,6 @@ describe("mobile block selection", () => {
         editor.append(embed);
 
         assert.equal(getMobileBlockSelectionElement(asHTMLElement(child)), asHTMLElement(embed));
+        assert.equal(getMobileBlockSelectionElement(asHTMLElement(child), true), asHTMLElement(embed));
     });
 });

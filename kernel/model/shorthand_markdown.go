@@ -163,7 +163,8 @@ func normalizeShorthandMarkdown(md string, options *parse.Options) (string, map[
 			if "" != marker.replacement {
 				result.WriteString(marker.replacement)
 				if probe && marker.opened {
-					result.WriteString(marker.token + " ")
+					result.WriteString(marker.token)
+					result.WriteString(" ")
 				}
 			} else {
 				if probe {

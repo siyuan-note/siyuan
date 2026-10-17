@@ -6,7 +6,7 @@
 		"id": "20260614104322-shrqj15",
 		"title": "網路代理",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104332-ojj5e46",
-				"updated": "20260803163402"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104332-ai09rt7",
-				"updated": "20260803163402"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -81,7 +81,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -90,7 +90,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -99,7 +99,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中設定："
+					"Data": " 中設定："
 				}
 			]
 		},
@@ -109,7 +109,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104332-3skahri",
-				"updated": "20260614104332"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -121,7 +121,7 @@
 					},
 					"Properties": {
 						"id": "20260614104332-9ixe357",
-						"updated": "20260614104332"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -129,17 +129,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614104332-l69p8fd",
-								"updated": "20260614104332"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "協議"
-								},
+									"Type": "NodeText",
+									"Data": "協議：可選直接連線（不使用代理）、使用系統代理、HTTP、HTTPS 或 SOCKS5；直接連線和使用系統代理無需填寫主機與連接埠"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016112115-rt8undd",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261016112115-rt8undd",
+						"updated": "20261016112115"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261016112115-6yyf4an",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016112115-6yyf4an",
+								"updated": "20261016112115"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "：選擇代理協議——直接連線（不使用代理）、HTTP、HTTPS 或 SOCKS5"
+									"Data": "系統模式使用支援的系統設定，或核心啟動時繼承的代理環境變數。核心支援讀取 Windows 手動代理和 Linux GNOME 手動代理，Linux 上明確設定的代理環境變數優先。這些讀取器不支援自動 PAC 設定，Windows 自動偵測也不受支援；其他平台的核心保留啟動時的代理環境，不讀取作業系統代理設定"
 								}
 							]
 						}
@@ -251,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104332-uhwyd7m",
-				"updated": "20260614104332"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -280,7 +303,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104332-jcedjvg",
-				"updated": "20260614104332"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -376,7 +399,7 @@
 					},
 					"Properties": {
 						"id": "20260614104332-pg3xiur",
-						"updated": "20260614104332"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -384,12 +407,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614104332-ewwgxf4",
-								"updated": "20260614104332"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "其他所有需要聯網的操作"
+									"Data": "透過思源受管理代理用戶端發出的其他網路請求；外部瀏覽器、外掛和 stdio 子程序可能有各自的代理設定"
 								}
 							]
 						}

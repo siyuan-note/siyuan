@@ -3,6 +3,9 @@
 @use "tabs";
 @use "task";
 
+// 导出样式可使用原始方向属性，支持未执行脚本的静态内容。
+$block-rtl-selector: ".protyle-block--rtl" !default;
+
 // 任务点击保持隐藏布局，正文编辑时恢复引用块；折叠的列表项和标题保留定位内容。
 .protyle-wysiwyg[data-backlink-hide-reference]:is(:not(:focus-within), [data-backlink-task-focus]) {
   [data-backlink-reference]:not([fold="1"]):not(.li[fold="1"] *) {
@@ -208,11 +211,13 @@
         border-left-color: var(--b3-scroll-color);
       }
 
-      & > :is([data-node-id], [data-table-cell-node]) {
+      & > [data-node-id],
+      & > [data-table-cell-node] {
         margin-left: 34px;
       }
 
-      & > :is([data-node-id], [data-table-cell-node]):not(.p):not(.code-block) {
+      & > [data-node-id]:not(.p):not(.code-block),
+      & > [data-table-cell-node]:not(.p):not(.code-block) {
         padding-right: 0;
       }
 
@@ -314,7 +319,7 @@
       }
     }
 
-    &[style*="direction: rtl"] {
+    &#{$block-rtl-selector} {
       .li:not([data-auto-direction]) > .protyle-action,
       &:not([data-auto-direction]) > .protyle-action {
         right: 0;
@@ -322,8 +327,10 @@
         direction: rtl;
       }
 
-      .li:not([data-auto-direction]) > :is([data-node-id], [data-table-cell-node]),
-      &:not([data-auto-direction]) > :is([data-node-id], [data-table-cell-node]) {
+      .li:not([data-auto-direction]) > [data-node-id],
+      .li:not([data-auto-direction]) > [data-table-cell-node],
+      &:not([data-auto-direction]) > [data-node-id],
+      &:not([data-auto-direction]) > [data-table-cell-node] {
         margin-right: 34px;
         margin-left: 0;
       }
@@ -360,12 +367,14 @@
         direction: inherit;
       }
 
-      & > :is([data-node-id], [data-table-cell-node]) {
+      & > [data-node-id],
+      & > [data-table-cell-node] {
         margin-left: 34px;
         margin-right: 0;
       }
 
-      &[data-auto-list-direction="rtl"] > :is([data-node-id], [data-table-cell-node]) {
+      &[data-auto-list-direction="rtl"] > [data-node-id],
+      &[data-auto-list-direction="rtl"] > [data-table-cell-node] {
         margin-left: 0;
         margin-right: 34px;
       }
@@ -1088,7 +1097,7 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
     .av__row--util svg[data-type="set-page-size"],
     .av__row--header > .block__icons,
     .av__views .fn__space,
-    .av__views .block__icon:not([data-type="av-search-icon"]),
+    .av__views .block__icon:not([data-type="av-search-icon"]):not(.av__readonly-sort),
     .av__widthdrag,
     .av__gallery-actions,
     .av__gallery-add,

@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20260922175505"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -124,7 +124,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20260619110430"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -279,7 +279,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20260619110430"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1246,7 +1246,7 @@
 					},
 					"Properties": {
 						"id": "20240308162753-qs51tmz",
-						"updated": "20240308162753"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1254,7 +1254,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162753-tde2ifs",
-								"updated": "20250828154943"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1268,7 +1268,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回目前週"
+									"Data": "​：傳回輸入日期所屬的 ISO 8601 週數（1–53），例如 2021-01-01 屬於第 53 週"
 								}
 							]
 						}
@@ -1283,7 +1283,7 @@
 					},
 					"Properties": {
 						"id": "20250828154909-wxnydc5",
-						"updated": "20250828154909"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1291,7 +1291,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828154909-3grwety",
-								"updated": "20250828154910"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1305,7 +1305,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回目前月份"
+									"Data": "​：傳回輸入日期所屬 ISO 週的星期四所在的曆月，例如 2021-01-01 傳回 12。需要曆月時使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"01\""
 								}
 							]
 						}
@@ -1320,7 +1325,7 @@
 					},
 					"Properties": {
 						"id": "20250828154911-8n67tvc",
-						"updated": "20250828154911"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1328,7 +1333,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828154911-bb7z59o",
-								"updated": "20250828154916"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1342,7 +1347,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回目前年份"
+									"Data": "​：傳回輸入日期所屬的 ISO 週年，例如 2021-01-01 傳回 2020。需要曆年時使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"2006\""
 								}
 							]
 						}

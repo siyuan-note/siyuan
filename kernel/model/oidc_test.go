@@ -215,13 +215,11 @@ func TestOIDCTransactionCanOnlyBeClaimedOnceConcurrently(t *testing.T) {
 	}
 	results := make(chan claimResult, workers)
 	var waitGroup sync.WaitGroup
-	for i := 0; i < workers; i++ {
-		waitGroup.Add(1)
-		go func() {
-			defer waitGroup.Done()
+	for range workers {
+		waitGroup.Go(func() {
 			_, repeated, err := claimOIDCTransaction(context.Background(), transaction.State, transaction.Binding, false)
 			results <- claimResult{repeated: repeated, err: err}
-		}()
+		})
 	}
 	first := <-results
 	if first.err != nil || first.repeated {
@@ -520,7 +518,7 @@ func TestOIDCTransactionLimitsRejectWithoutEviction(t *testing.T) {
 		return &oidcTransaction{State: state, Binding: binding, ClientIP: clientIP,
 			ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()), ExpiresAt: time.Now().Add(time.Minute)}
 	}
-	for i := 0; i < oidcTransactionPerBind; i++ {
+	for i := range oidcTransactionPerBind {
 		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("binding-%d", i), "same-binding", "")); err != nil {
 			t.Fatal(err)
 		}
@@ -536,7 +534,7 @@ func TestOIDCTransactionLimitsRejectWithoutEviction(t *testing.T) {
 	oidcTransactions.byState = map[string]*oidcTransaction{}
 	oidcTransactions.byPoll = map[string]string{}
 	oidcTransactions.Unlock()
-	for i := 0; i < oidcTransactionPerIP; i++ {
+	for i := range oidcTransactionPerIP {
 		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("ip-%d", i), fmt.Sprintf("binding-%d", i), "192.0.2.1")); err != nil {
 			t.Fatal(err)
 		}
@@ -549,7 +547,7 @@ func TestOIDCTransactionLimitsRejectWithoutEviction(t *testing.T) {
 	oidcTransactions.byState = map[string]*oidcTransaction{}
 	oidcTransactions.byPoll = map[string]string{}
 	oidcTransactions.Unlock()
-	for i := 0; i < oidcTransactionMax; i++ {
+	for i := range oidcTransactionMax {
 		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("capacity-%d", i), "", "")); err != nil {
 			t.Fatal(err)
 		}

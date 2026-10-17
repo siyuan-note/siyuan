@@ -415,6 +415,27 @@ describe("attribute view text source compatibility", () => {
         }
     });
 
+    it("allows custom protocols only for explicit links and keeps dangerous schemes blocked", () => {
+        for (const target of [
+            "hook://file/EqhAm6xHS?p=YXJjaGl2ZXMvcHJvdmVuYW5jZQ==&n=2026%2D10%2D05",
+            "obsidian://open?vault=notes&file=book", "custom+app://action/path", "CUSTOM://action",
+            "ftp://example.com/file",
+        ]) {
+            assert.equal(getAVRichTextSafeURL(target, false, true), target);
+            assert.equal(getAVRichTextSafeURL(target), "", "automatic resource policy must remain restricted");
+        }
+        for (const target of [
+            "javascript://host/payload", "JaVaScRiPt://host/payload", "vbscript://host/payload",
+            "data://host/payload", "blob://host/payload", "file://host/payload", "filesystem://host/payload",
+            "about://host/payload", "chrome://settings", "chrome-extension://id/page", "devtools://host/page",
+            "view-source://host/page", "resource://host/page", "moz-extension://id/page",
+            "java%73cript://host/payload", "java\u200Bscript://host/payload", "custom&colon;payload",
+            "hook:/file/path", "hook://", "hook:payload", "hook://host/path%0a", "folder:name",
+        ]) {
+            assert.equal(getAVRichTextSafeURL(target, false, true), "", target);
+        }
+    });
+
     it("keeps only supported inline color declarations", () => {
         for (const id of ["error", "warning", "info", "success"]) {
             const style = `color: var(--b3-card-${id}-color); background-color: var(--b3-card-${id}-background);`;

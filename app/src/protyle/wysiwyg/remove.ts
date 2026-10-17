@@ -57,7 +57,7 @@ import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {avRender} from "../render/av/render";
 import {blockRender} from "../render/blockRender";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
 import {
     getBlockRefCheckElementChain,

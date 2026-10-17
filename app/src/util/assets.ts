@@ -31,6 +31,8 @@ import {
 } from "../protyle/toolbar/inlineStyle";
 import {refreshChartTheme} from "../protyle/render/chartRender";
 import {getHostCapabilities} from "./hostCapabilities";
+import {initSelectionStyle} from "./selectionStyle";
+import {applyCompactMode} from "../config/tabs/compactMode";
 
 let headingNumberMeasurementRefreshTimer: number;
 let appearanceUpdate = Promise.resolve();
@@ -132,6 +134,7 @@ export const refreshThemeStyle = (themeAddress: string) => {
 };
 
 export const loadAssets = async (appearance: Config.IAppearance) => {
+    initSelectionStyle();
     const scriptLoads: Promise<unknown>[] = [];
     setBodyHighlight(appearance.bodyGradient);
     const data = getHostCapabilities().customAppearance ? appearance : {
@@ -147,6 +150,8 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     const previousThemeMode = htmlElement.getAttribute("data-theme-mode");
     const themeMode = getThemeMode();
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
+    applyCompactMode();
+    // data-frontend 也会由 applyPlatformClasses 提前写入，此处保持为外观刷新时的权威来源
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", themeMode);
@@ -430,6 +435,10 @@ const cssVarToRgba = (varName: string) => {
     const rgba = getComputedStyle(probe).backgroundColor;
     probe.remove();
     return rgba;
+};
+
+export const getThemeColor = (varName: string, fallback: string) => {
+    return rgbaToHex(cssVarToRgba(varName)).slice(0, 7) || fallback;
 };
 
 const updateMobileTheme = (OSTheme: string) => {

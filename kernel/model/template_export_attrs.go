@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -129,14 +130,15 @@ func templateDocumentAttributes(source []byte) [][]string {
 			return nil
 		}
 		actions = append(actions, text[start:end+1])
-		masked.WriteString(prefix + strings.Repeat("x", len(actions)))
+		masked.WriteString(prefix)
+		masked.WriteString(strings.Repeat("x", len(actions)))
 		text = text[end+1:]
 	}
 	attrs := parseTemplateDocumentAttributes(masked.String())
 	for _, attr := range attrs {
 		// 长占位符优先替换，避免前缀相同的动作相互覆盖。
-		for i := len(actions) - 1; i >= 0; i-- {
-			attr[1] = strings.ReplaceAll(attr[1], prefix+strings.Repeat("x", i+1), actions[i])
+		for i, action := range slices.Backward(actions) {
+			attr[1] = strings.ReplaceAll(attr[1], prefix+strings.Repeat("x", i+1), action)
 		}
 	}
 	return attrs

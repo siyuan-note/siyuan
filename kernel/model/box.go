@@ -589,7 +589,6 @@ func (box *Box) listFiles(files, ret *[]*FileInfo) {
 			*ret = append(*ret, file)
 		}
 	}
-	return
 }
 
 type BoxInfo struct {
@@ -939,7 +938,6 @@ func clearTempDir(dir string, count *int, size *int64) {
 	if util.IsEmptyDir(dir) {
 		util.RemoveEmptyDir(dir)
 	}
-	return
 }
 
 func VacuumDataIndex() {

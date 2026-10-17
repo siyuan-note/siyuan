@@ -88,7 +88,7 @@ func inboxList(args map[string]any) (CallToolResult, error) {
 	data, _ := result["data"].(map[string]any)
 	shorthands, _ := data["shorthands"].([]any)
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Inbox (page %d, %d item(s)):\n\n", page, len(shorthands)))
+	fmt.Fprintf(&sb, "Inbox (page %d, %d item(s)):\n\n", page, len(shorthands))
 	for _, item := range shorthands {
 		sh, _ := item.(map[string]any)
 		if sh == nil {
@@ -99,12 +99,14 @@ func inboxList(args map[string]any) (CallToolResult, error) {
 		desc, _ := sh["shorthandDesc"].(string)
 		url, _ := sh["shorthandURL"].(string)
 		hCreated, _ := sh["hCreated"].(string)
-		sb.WriteString(fmt.Sprintf("- id: %s\n  title: %s\n  created: %s", id, title, hCreated))
+		fmt.Fprintf(&sb, "- id: %s\n  title: %s\n  created: %s", id, title, hCreated)
 		if url != "" {
-			sb.WriteString("\n  url: " + url)
+			sb.WriteString("\n  url: ")
+			sb.WriteString(url)
 		}
 		if desc != "" {
-			sb.WriteString("\n  summary: " + desc)
+			sb.WriteString("\n  summary: ")
+			sb.WriteString(desc)
 		}
 		sb.WriteString("\n\n")
 	}
@@ -133,11 +135,14 @@ func inboxGet(args map[string]any) (CallToolResult, error) {
 	hCreated, _ := sh["hCreated"].(string)
 	md, _ := sh["shorthandMd"].(string)
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("id: %s\ntitle: %s\ncreated: %s\n", id, title, hCreated))
+	fmt.Fprintf(&sb, "id: %s\ntitle: %s\ncreated: %s\n", id, title, hCreated)
 	if url != "" {
-		sb.WriteString("url: " + url + "\n")
+		sb.WriteString("url: ")
+		sb.WriteString(url)
+		sb.WriteString("\n")
 	}
-	sb.WriteString("\nmarkdown:\n" + md)
+	sb.WriteString("\nmarkdown:\n")
+	sb.WriteString(md)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
@@ -180,14 +185,14 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Converting %d shorthand(s) -> notebook %s (hPath: %s):\n\n", len(ids), notebook, hPath))
+	fmt.Fprintf(&sb, "Converting %d shorthand(s) -> notebook %s (hPath: %s):\n\n", len(ids), notebook, hPath)
 
 	successIDs := make([]string, 0, len(ids))
 	failed := 0
 	for _, id := range ids {
 		sh, err := model.GetCloudShorthand(id)
 		if err != nil {
-			sb.WriteString(fmt.Sprintf("- [%s] FAILED: %s\n", id, err.Error()))
+			fmt.Fprintf(&sb, "- [%s] FAILED: %s\n", id, err.Error())
 			failed++
 			continue
 		}
@@ -210,23 +215,24 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 		docPath := strings.TrimRight(parentPath, "/") + "/" + docID + ".sy"
 		tree, err := model.CreateDocByMdSync(notebook, docPath, title, md, nil, nil)
 		if err != nil {
-			sb.WriteString(fmt.Sprintf("- [%s] %s -> FAILED: %s\n", id, title, err.Error()))
+			fmt.Fprintf(&sb, "- [%s] %s -> FAILED: %s\n", id, title, err.Error())
 			failed++
 			continue
 		}
 		successIDs = append(successIDs, id)
-		sb.WriteString(fmt.Sprintf("- [%s] %s -> created %s\n", id, title, tree.Root.ID))
+		fmt.Fprintf(&sb, "- [%s] %s -> created %s\n", id, title, tree.Root.ID)
 	}
 
 	// 仅在全部转换成功的条目上清理云端原件；失败条目保留以便重试。
 	if removeAfter && len(successIDs) > 0 {
 		if err := model.RemoveCloudShorthands(successIDs); err != nil {
-			sb.WriteString("\nWARNING: failed to remove cloud originals: " + err.Error())
+			sb.WriteString("\nWARNING: failed to remove cloud originals: ")
+			sb.WriteString(err.Error())
 		}
 	}
 
 	util.PushReloadFiletree()
-	sb.WriteString(fmt.Sprintf("\nDone: %d succeeded, %d failed.", len(successIDs), failed))
+	fmt.Fprintf(&sb, "\nDone: %d succeeded, %d failed.", len(successIDs), failed)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 

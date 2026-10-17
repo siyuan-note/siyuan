@@ -41,8 +41,9 @@ type avSearchDataEntry struct {
 	version uint64
 }
 
-var avCacheKeys = map[string]map[string]struct{}{}
-var avCacheKeysLock sync.Mutex
+// 逻辑键与准入键由 avSearchDataCacheLock 一并保护；准入序号在清理后也不复用。
+var avCacheKeys = map[string]map[string]uint64{}
+var avCacheSequence uint64
 
 var avDataVersion uint64
 
@@ -69,7 +70,7 @@ func GetAVDataWithVersionInBox(avID, boxID string) (raw []byte, version uint64, 
 	avSearchDataCacheLock.RLock()
 	defer avSearchDataCacheLock.RUnlock()
 	key := avCacheKey(avID, boxID)
-	v, _ := avCache.Get(key)
+	v, _ := avCache.Get(avCacheKeys[avID][key])
 	if nil == v {
 		return
 	}
@@ -85,7 +86,7 @@ func GetAVNormalizedDataInBox(avID, boxID string, version uint64) (data []byte, 
 	avSearchDataCacheLock.RLock()
 	defer avSearchDataCacheLock.RUnlock()
 	key := avCacheKey(avID, boxID)
-	value, found := avCache.Get(key)
+	value, found := avCache.Get(avCacheKeys[avID][key])
 	if !found || value == nil || avDataVersions[key] != version {
 		return
 	}
@@ -101,8 +102,6 @@ func SetAVNormalizedDataInBox(avID, boxID string, version uint64, raw, normalize
 	if raw == nil || normalized == nil || version == 0 {
 		return false
 	}
-	// 等待原始数据的异步准入，避免两次新条目准入互相覆盖派生副本。
-	avCache.Wait()
 	avSearchDataCacheLock.Lock()
 	defer avSearchDataCacheLock.Unlock()
 	key := avCacheKey(avID, boxID)
@@ -117,9 +116,25 @@ func SetAVNormalizedDataInBox(avID, boxID string, version uint64, raw, normalize
 	if cost > avCache.MaxCost() {
 		return false
 	}
-	// 按新条目重新准入，使派生字节也参与容量淘汰，而不是直接扩大已驻留条目。
-	avCache.Del(key)
-	return avCache.Set(key, &avCacheEntry{raw: raw, version: version, normalized: normalized}, cost)
+	return replaceAVCacheLocked(avID, key, &avCacheEntry{raw: raw, version: version, normalized: normalized}, cost)
+}
+
+// replaceAVCacheLocked 使用独立准入键，让增长的条目参与淘汰，并隔离旧条目的异步写入及删除。
+// 调用方必须持有 avSearchDataCacheLock。
+func replaceAVCacheLocked(avID, key string, entry *avCacheEntry, cost int64) bool {
+	keys := avCacheKeys[avID]
+	if keys == nil {
+		keys = map[string]uint64{}
+		avCacheKeys[avID] = keys
+	}
+	previous := keys[key]
+	avCacheSequence++
+	cacheKey := avCacheSequence
+	keys[key] = cacheKey
+	if previous != 0 {
+		avCache.Del(previous)
+	}
+	return avCache.Set(cacheKey, entry, cost)
 }
 
 func EnsureAVDataVersionInBox(avID, boxID string) (version uint64) {
@@ -151,29 +166,21 @@ func setAVDataInBox(avID, boxID string, raw []byte) (version uint64) {
 	if raw == nil {
 		return
 	}
+	avSearchDataCacheLock.Lock()
+	defer avSearchDataCacheLock.Unlock()
 	key := avCacheKey(avID, boxID)
-	version = invalidateAVSearchDataByKey(key)
-	avCache.Set(key, &avCacheEntry{raw: raw, version: version}, int64(len(raw)))
-
-	avCacheKeysLock.Lock()
-	defer avCacheKeysLock.Unlock()
-	keys := avCacheKeys[avID]
-	if keys == nil {
-		keys = map[string]struct{}{}
-		avCacheKeys[avID] = keys
-	}
-	keys[key] = struct{}{}
+	version = invalidateAVSearchDataByKeyLocked(key)
+	replaceAVCacheLocked(avID, key, &avCacheEntry{raw: raw, version: version}, int64(len(raw)))
 	return
 }
 
 func RemoveAVDataInBox(avID, boxID string) {
+	avSearchDataCacheLock.Lock()
+	defer avSearchDataCacheLock.Unlock()
 	key := avCacheKey(avID, boxID)
-	avCache.Del(key)
-	invalidateAVSearchDataByKey(key)
-
-	avCacheKeysLock.Lock()
-	defer avCacheKeysLock.Unlock()
+	invalidateAVSearchDataByKeyLocked(key)
 	if keys := avCacheKeys[avID]; keys != nil {
+		avCache.Del(keys[key])
 		delete(keys, key)
 		if len(keys) == 0 {
 			delete(avCacheKeys, avID)
@@ -182,30 +189,25 @@ func RemoveAVDataInBox(avID, boxID string) {
 }
 
 func RemoveAVData(avID string) {
-	avCacheKeysLock.Lock()
+	avSearchDataCacheLock.Lock()
+	defer avSearchDataCacheLock.Unlock()
 	keys := avCacheKeys[avID]
 	delete(avCacheKeys, avID)
-	avCacheKeysLock.Unlock()
-
-	avCache.Del(avCacheKey(avID, ""))
-	for key := range keys {
-		avCache.Del(key)
-		invalidateAVSearchDataByKey(key)
+	for key, cacheKey := range keys {
+		avCache.Del(cacheKey)
+		invalidateAVSearchDataByKeyLocked(key)
 	}
-	invalidateAVSearchDataByKey(avCacheKey(avID, ""))
+	invalidateAVSearchDataByKeyLocked(avCacheKey(avID, ""))
 }
 
 func ClearAVCache() {
-	avCacheGeneration.Add(1)
-	avCacheKeysLock.Lock()
-	avCacheKeys = map[string]map[string]struct{}{}
-	avCacheKeysLock.Unlock()
-	avCache.Clear()
-
 	avSearchDataCacheLock.Lock()
+	defer avSearchDataCacheLock.Unlock()
+	avCacheGeneration.Add(1)
+	avCacheKeys = map[string]map[string]uint64{}
+	avCache.Clear()
 	avDataVersions = map[string]uint64{}
 	avSearchDataCache = map[string]*avSearchDataEntry{}
-	avSearchDataCacheLock.Unlock()
 }
 
 func GetAVCacheGeneration() uint64 {
@@ -239,12 +241,10 @@ func SetAVSearchDataInBox(avID, boxID string, version uint64, data any) (ok bool
 	return true
 }
 
-func invalidateAVSearchDataByKey(key string) (version uint64) {
-	avSearchDataCacheLock.Lock()
+func invalidateAVSearchDataByKeyLocked(key string) (version uint64) {
 	avDataVersion++
 	version = avDataVersion
 	avDataVersions[key] = version
 	delete(avSearchDataCache, key)
-	avSearchDataCacheLock.Unlock()
 	return
 }

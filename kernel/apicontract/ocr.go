@@ -4,6 +4,8 @@ import "mime/multipart"
 
 // SettingOCR 的选择仅保存在当前设备；切换提供商或模型不删除、重跑已有识别结果。
 // auto 仅控制内核后台识别，手动识别继续使用 /api/asset/ocr 的既有输入和输出。
+// showText、showEmpty、showError 独立控制图片悬浮提示，不受 auto 影响，也不改变已有结果和搜索索引。
+// 三项省略或为 null 时保留已有选择；缺失设备配置默认开启文本预览，关闭无文本和失败提示。
 // thresholds 省略或为 null 时保留设备已保存的阈值；传入对象时整体替换。
 // 修改阈值只影响后续识别，不修改模型文件或已有结果，Tesseract 不使用这些参数。
 // 仅内置 tiny；旧内置模型标识 small 会归一化为 tiny，自行导入的模型仍使用内容摘要标识。
@@ -16,6 +18,9 @@ type SettingOCR struct {
 	Provider        string         `json:"provider"`
 	Model           string         `json:"model"`
 	Auto            bool           `json:"auto"`
+	ShowText        *bool          `json:"showText,omitempty" api:"optional"`
+	ShowEmpty       *bool          `json:"showEmpty,omitempty" api:"optional"`
+	ShowError       *bool          `json:"showError,omitempty" api:"optional"`
 	AIModelID       *string        `json:"aiModelId,omitempty" api:"optional"`
 	ReasoningEffort *string        `json:"reasoningEffort,omitempty" api:"optional"`
 	Thresholds      *OCRThresholds `json:"thresholds,omitempty" api:"optional"`

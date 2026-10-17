@@ -1,6 +1,18 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {isEmptyTabPlaceholder} from "./tabsList";
+
+const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
+    name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
+}));
+buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {configurable: true, value: "test"}));
+const {isEmptyTabPlaceholder}: typeof import("./tabsList") = require("./tabsList");
+buildGlobals.forEach(({name, descriptor}) => {
+    if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+    } else {
+        Reflect.deleteProperty(globalThis, name);
+    }
+});
 
 const paragraph = (attrs: Record<string, string>, text = "", rich = false) => ({
     attributes: Object.entries(attrs).map(([name, value]) => ({name, value})),

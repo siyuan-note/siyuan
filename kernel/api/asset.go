@@ -100,20 +100,20 @@ var fullReindexAssetContent = contractHandler(apicontract.FullReindexAssetConten
 	return apicontract.Success(apicontract.Null{})
 })
 
-var getImageOCRText = contractHandler(apicontract.GetImageOCRText, func(c *gin.Context, request apicontract.AssetOCRTextRequest) apicontract.Response[apicontract.AssetTextData] {
+var getImageOCRText = contractHandler(apicontract.GetImageOCRText, func(c *gin.Context, request apicontract.AssetOCRTextRequest) apicontract.Response[apicontract.ImageOCRTextData] {
 
 	if request.Path == nil {
-		return apicontract.Success(apicontract.AssetTextData{Text: ""})
+		return apicontract.Success(apicontract.ImageOCRTextData{Text: ""})
 	}
 	path := *request.Path
 
 	// 加密笔记本的资源不参与全局 OCR（OCR 文本存在全局 data/assets/ocr-texts.json）
 	if model.IsEncryptedOCRAsset(path) {
-		return apicontract.Success(apicontract.AssetTextData{Text: ""})
+		return apicontract.Success(apicontract.ImageOCRTextData{Text: ""})
 
 	}
 
-	return apicontract.Success(apicontract.AssetTextData{Text: util.GetAssetText(path)})
+	return apicontract.Success(apicontract.ImageOCRTextData{Text: util.GetAssetText(path), Failed: model.HasOCRFailure(path)})
 })
 
 var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.Context, request apicontract.SetAssetOCRTextRequest) apicontract.Response[apicontract.Null] {
@@ -132,7 +132,7 @@ var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.C
 
 var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetOCRData] {
 
-	path := strings.SplitN(request.Path, "#", 2)[0]
+	path, _, _ := strings.Cut(request.Path, "#")
 
 	// 加密笔记本的资源不参与全局 OCR
 	if model.IsEncryptedOCRAsset(path) {
@@ -145,10 +145,6 @@ var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request api
 	if model.IsEncryptedAssetPath(absPath) {
 		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, model.Conf.Language(380), 3000)
 	}
-	if err = model.EnsureAssetLocal(absPath); err != nil {
-		return apicontract.Failure[apicontract.AssetOCRData](-1, err.Error())
-	}
-
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)
 	defer cancel()
 	text, ocrJSON, err := model.OCRAsset(ctx, path)
@@ -364,6 +360,22 @@ var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.C
 	}
 
 	return apicontract.Success(assetUnusedItems(unusedAssets))
+})
+
+var getUnusedEncryptedBoxAssets = contractHandler(apicontract.GetUnusedEncryptedBoxAssets, func(c *gin.Context, request apicontract.EncryptedBoxAssetsRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
+	items, err := model.UnusedEncryptedBoxAssets(encryptedBoxRequestScope(c), request.Notebook)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
+	return apicontract.Success(assetUnusedItems(items))
+})
+
+var removeUnusedEncryptedBoxAssets = contractHandler(apicontract.RemoveUnusedEncryptedBoxAssets, func(c *gin.Context, request apicontract.RemoveEncryptedBoxAssetsRequest) apicontract.Response[apicontract.AssetPathsData] {
+	paths, err := model.RemoveUnusedEncryptedBoxAssets(encryptedBoxRequestScope(c), request.Notebook, request.Paths)
+	if err != nil {
+		return apicontract.Failure[apicontract.AssetPathsData](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.AssetPathsData{Paths: paths})
 })
 
 var getMissingAssets = contractHandler(apicontract.GetMissingAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {

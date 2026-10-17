@@ -507,7 +507,6 @@ export const movePathTo = (options: {
         inputEvent(event);
     });
     inputElement.addEventListener("blur", saveMovePathHistory);
-    const lineHeight = 28;
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
             return;
@@ -634,9 +633,9 @@ export const movePathTo = (options: {
                     currentItemElement.nextElementSibling.classList.add("b3-list-item--focus");
                 }
                 currentItemElement = currentPanelElement.querySelector(".b3-list-item--focus");
-                if (currentPanelElement.scrollTop < currentItemElement.offsetTop - currentPanelElement.clientHeight + lineHeight ||
+                if (currentPanelElement.scrollTop < currentItemElement.offsetTop - currentPanelElement.clientHeight + currentItemElement.offsetHeight ||
                     currentPanelElement.scrollTop > currentItemElement.offsetTop) {
-                    currentPanelElement.scrollTop = currentItemElement.offsetTop - currentPanelElement.clientHeight + lineHeight;
+                    currentPanelElement.scrollTop = currentItemElement.offsetTop - currentPanelElement.clientHeight + currentItemElement.offsetHeight;
                 }
                 event.preventDefault();
                 return;
@@ -650,9 +649,9 @@ export const movePathTo = (options: {
                     currentItemElement.previousElementSibling.classList.add("b3-list-item--focus");
                 }
                 currentItemElement = currentPanelElement.querySelector(".b3-list-item--focus");
-                if (currentPanelElement.scrollTop < currentItemElement.offsetTop - currentPanelElement.clientHeight + lineHeight ||
-                    currentPanelElement.scrollTop > currentItemElement.offsetTop - lineHeight * 2) {
-                    currentPanelElement.scrollTop = currentItemElement.offsetTop - lineHeight * 2;
+                if (currentPanelElement.scrollTop < currentItemElement.offsetTop - currentPanelElement.clientHeight + currentItemElement.offsetHeight ||
+                    currentPanelElement.scrollTop > currentItemElement.offsetTop - currentItemElement.offsetHeight * 2) {
+                    currentPanelElement.scrollTop = currentItemElement.offsetTop - currentItemElement.offsetHeight * 2;
                 }
                 event.preventDefault();
                 return;

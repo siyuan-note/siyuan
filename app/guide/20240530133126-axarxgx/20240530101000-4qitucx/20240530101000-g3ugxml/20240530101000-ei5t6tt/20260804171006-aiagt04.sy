@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016191953"
 	},
 	"Children": [
 		{
@@ -267,7 +267,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-2jaadkf",
-				"updated": "20260816114944"
+				"updated": "20261016191953"
 			},
 			"Children": [
 				{
@@ -548,7 +548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-sri5ln6",
-				"updated": "20260804180000"
+				"updated": "20261016191953"
 			},
 			"Children": [
 				{
@@ -562,7 +562,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-fuwjiju",
-				"updated": "20260804180000"
+				"updated": "20261016191953"
 			},
 			"Children": [
 				{
@@ -577,6 +577,15 @@
 				{
 					"Type": "NodeText",
 					"Data": " を選択できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "セッション許可"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、このセッションでの通常の操作について個別の確認を省略できます。確認必須に設定された機能とコードスニペットの変更には、引き続き確認が必要です。"
 				}
 			]
 		},
@@ -585,7 +594,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170043-c3mrdfs",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -595,7 +604,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を使用すると、現在のセッションでは以降の書き込み操作が個別に確認されません。使用する前に、タスクの範囲とツールが信頼できることを確認してください。"
+					"Data": " を使う前に、タスクの範囲とツールが信頼できることを確認してください。通常の書き込み操作では個別の確認が省略されますが、上記の必須確認は引き続き行われます。"
 				}
 			]
 		},

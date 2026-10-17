@@ -229,11 +229,32 @@ func (appConf *AppConf) CompareAndSetOIDC(expectedVersion string, config *conf.O
 	return changed, true
 }
 
-func (conf *AppConf) SetAI(ai *conf.AI) {
+func (conf *AppConf) SetAI(ctx context.Context, ai *conf.AI) error {
 	conf.m.Lock()
+	defer conf.m.Unlock()
+	bindings := chatGPTAccountBindingIDs(ai)
+	if reflect.DeepEqual(bindings, chatGPTAccountBindingIDs(conf.AI.Load())) || util.ReadOnly {
+		conf.AI.Store(ai)
+		if !util.ReadOnly {
+			conf.saveLocked()
+		}
+		return nil
+	}
+	next := conf.cloneSettings()
+	next.AI.Store(ai)
+	data, err := next.marshalForSave()
+	if err != nil {
+		return err
+	}
+	if err = util.ChatGPTService().UpdateBindings(ctx, util.WorkspaceDir, bindings, func(path string, bindingsData []byte) error {
+		return writeChatGPTBindingConfiguration(path, bindingsData, data, writeChatGPTBindingFile)
+	}); err != nil {
+		return err
+	}
 	conf.AI.Store(ai)
-	conf.m.Unlock()
-	conf.Save()
+	applyConfRuntime(conf)
+	recordPersistedConf(data)
+	return nil
 }
 
 func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
@@ -255,9 +276,16 @@ func (conf *AppConf) SetUser(user *conf.User) {
 }
 
 func InitConf() {
+	if err := recoverEncryptedAssetCleanupOperations(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover encrypted asset cleanup failed: %s", err)
+	}
 	initLang()
 	if err := recoverSettingsReset(); err != nil {
 		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover settings reset failed: %s", err)
+		return
+	}
+	if err := recoverChatGPTAccountBindings(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover ChatGPT account bindings failed: %s", err)
 		return
 	}
 
@@ -401,6 +429,9 @@ func InitConf() {
 	}
 
 	flashcardWarning := normalizeAppConf(Conf)
+	if err := LoadChatGPTAccountBindings(Conf.AI.Load()); err != nil {
+		logging.LogErrorf("load local ChatGPT account bindings failed: %s", err)
+	}
 	if flashcardWarning != "" {
 		logging.LogWarnf("%s, reset to default weights [%s]", flashcardWarning, Conf.Flashcard.Load().Weights)
 		go func() {
@@ -514,6 +545,7 @@ func InitConf() {
 		}
 		writeCookieKey(Conf.CookieKey)
 	}
+	initSharedInstallPackages()
 
 	if util.ContainerDocker == util.Container && Conf.AccessAuthCode == "" && !util.SiYuanAccessAuthCodeBypass {
 		if err := ValidateOIDCConfigurationChange(context.Background(), Conf.OIDC, true, false, false); err != nil {
@@ -663,8 +695,11 @@ func loadLangs() (ret []*conf.Lang) {
 }
 
 var exitLock = sync.Mutex{}
+var exitFinished bool                             // 由 exitLock 保护，防止排队的重试请求再次关闭数据库。
+var exitServersStarted bool                       // 由 exitLock 保护，服务退出只启动一次。
+var pendingWorkspaceExit *util.WorkspaceExitState // 由 exitLock 保护，绑定可接管的退出批次。
 
-// Close 退出内核进程.
+// Close 完成退出清理，调用方处理退出结果后通过 ExitKernel 结束服务及进程。
 //
 // force：是否不执行同步过程而直接退出
 //
@@ -685,12 +720,53 @@ var exitLock = sync.Mutex{}
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
-	confSyncSnapshot := Conf.LoadSync()
+	return closeKernel(force, setCurrentWorkspace, execInstallPkg, nil)
+}
 
+// RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，允许用户确认后跳过同步，不触发安装更新。
+func RecoverWorkspaceExit(pid int, startedAt int64, force bool) (int, string) {
+	return closeKernel(force, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
+}
+
+func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
+	if util.Container != util.ContainerStd || !util.AttachUI || expected.PID != os.Getpid() ||
+		pendingWorkspaceExit == nil || expected.StartedAt != pendingWorkspaceExit.StartedAt {
+		return -1
+	}
+	if !exitFinished && util.CountSessions() > 0 {
+		return 3
+	}
+	return 0
+}
+
+func markPendingWorkspaceExit() {
+	if pendingWorkspaceExit == nil {
+		pendingWorkspaceExit = util.MarkWorkspaceExiting()
+	} else {
+		pendingWorkspaceExit.SetPhase("exiting")
+	}
+}
+
+func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
 	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
+	if recovery != nil {
+		if code := workspaceExitRecoveryCode(recovery); code != 0 {
+			return code, ""
+		}
+	}
+	if exitFinished {
+		return
+	}
+	confSyncSnapshot := Conf.LoadSync()
+	markPendingWorkspaceExit()
+	defer func() {
+		if exitCode == 1 || exitCode == 2 || exitCode == 3 {
+			pendingWorkspaceExit.SetPhase("waiting")
+		}
+	}()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
 	defer func() {
@@ -714,8 +790,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		if confSyncSnapshot.Enabled && 3 != confSyncSnapshot.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == confSyncSnapshot.Provider) || conf.ProviderSiYuan != confSyncSnapshot.Provider) {
 			diagnostic.Stage("exit sync")
-			syncData(true, false)
-			if 0 != ExitSyncSucc {
+			if err := syncData(true, false); err != nil {
 				exitCode = 1
 				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
 					installPkgPath = getNewVerInstallPkgPath(false)
@@ -723,6 +798,11 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 				return
 			}
 		}
+	}
+
+	// 同步期间可能重新连接界面；在关闭数据前再次确认，交还给仍可操作的窗口。
+	if recovery != nil && util.CountSessions() > 0 {
+		return 3, ""
 	}
 
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
@@ -737,7 +817,11 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
 	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
+	pendingPathRefresh := len(hpathRefresh.tasks)
 	hpathRefresh.Unlock()
+	if 0 < pendingPathRefresh {
+		logging.LogInfof("pending path refresh tasks: %d", pendingPathRefresh)
+	}
 	diagnostic.Stage("check install package")
 	newVerInstallPkgPath := getNewVerInstallPkgPath(2 == execInstallPkg || (force && 0 == execInstallPkg))
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
@@ -757,7 +841,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
 	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
 	// 排除用户指南：Unmount 对用户指南会触发 RemoveBox（mount.go:208-214）。
-	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
+	// 在退出确认之前推送，随后的等待留给前端处理笔记本关闭事件。
 	for _, box := range Conf.GetOpenedBoxes() {
 		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
 			diagnostic.Stage("unmount encrypted notebook " + box.ID)
@@ -793,35 +877,48 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	}
 
 	diagnostic.Stage("unlock workspace")
+	util.ClearWorkspaceExitMarker()
 	util.UnlockWorkspace()
 
 	diagnostic.Stage("wait for frontend events")
 	time.Sleep(500 * time.Millisecond)
 	diagnostic.Stage("close sync websocket")
 	closeSyncWebSocket()
+	exitFinished = true
+	return
+}
+
+// ExitKernel 在退出清理完成后结束服务，移动端保留确认通道直到原生宿主退出。
+func ExitKernel() {
+	exitLock.Lock()
+	if !exitFinished || exitServersStarted {
+		exitLock.Unlock()
+		return
+	}
+	exitServersStarted = true
+	exitLock.Unlock()
+
+	if util.IsMobileContainer() {
+		logging.LogInfof("exited kernel, waiting for mobile host to quit")
+		return
+	}
 
 	go func() {
-		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for exit response")
+		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for frontend exit event")
 		time.Sleep(500 * time.Millisecond)
-		logging.LogInfof("exited kernel")
+		diagnostic.Stage("close HTTP servers")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		util.ShutdownHTTPServers(ctx, util.HttpServer, util.HttpsServer)
+		cancel()
 		if nil != util.WebSocketServer {
 			diagnostic.Stage("close frontend websockets")
 			util.WebSocketServer.Close()
 		}
-		if nil != util.HttpServer {
-			diagnostic.Stage("close HTTP server")
-			util.HttpServer.Close()
-		}
 		util.HttpServing = false
 		diagnostic.Finish()
-
-		if util.IsMobileContainer() {
-			return
-		}
-
+		logging.LogInfof("exited kernel")
 		os.Exit(logging.ExitCodeOk)
 	}()
-	return
 }
 
 var customEmojis = sync.Map{}
@@ -928,6 +1025,7 @@ func (conf *AppConf) marshalForSave() ([]byte, error) {
 		return nil, err
 	}
 	if snapshot.AI.Load() != nil {
+		snapshot.AI.Load().ClearChatGPTAccountIDs()
 		snapshot.AI.Load().EncryptAPIKeys()
 	}
 	if snapshot.OIDC != nil {

@@ -17,7 +17,8 @@
   }
 
   [data-type="NodeList"][data-mindmap-view-rendered="true"] > [data-type="NodeListItem"],
-  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .mindmap-item[data-type="NodeMindmapItem"][data-node-id] {
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .mindmap-item[data-type="NodeMindmapItem"][data-node-id],
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .li[data-type="NodeMindmapItem"][data-node-id] {
     display: none;
   }
 }
@@ -514,6 +515,11 @@
     &.mindmap-view__editor .protyle-wysiwyg > .p {
       @include task.completed-text;
     }
+  }
+
+  // 内层画布为按内容撑开的节点提供固有宽度，避免百分比宽度循环计算后塌缩。
+  &__editor .mindmap-view {
+    min-width: 260px;
   }
 
   &__editor .protyle-content[data-padding-mode] {

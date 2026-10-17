@@ -7,7 +7,7 @@ import {getAppendListContext} from "./listContext";
 
 const source = readFileSync("src/protyle/wysiwyg/keydown.ts", "utf8");
 const start = source.indexOf("        if (matchHotKey(window.siyuan.config.keymap.editor.insert.mindmap");
-const end = source.indexOf("        const isMatchList =", start);
+const end = source.indexOf("        const calloutPreset =", start);
 assert.ok(start >= 0 && end > start);
 const compiled = transpileModule(`(async () => {${source.slice(start, end)}})()`, {
     compilerOptions: {target: ScriptTarget.ES2021},

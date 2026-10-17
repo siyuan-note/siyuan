@@ -161,6 +161,8 @@ var (
 )
 
 var (
+	// GetPinnedDocs 按置顶顺序返回普通文档及与文档树一致的大小、属性和时间信息。
+	// 关闭笔记本的条目标记 unavailable，详细信息为空；加密笔记本不返回置顶条目。
 	GetPinnedDocs    = define[EmptyRequest, []PinnedDoc]("getPinnedDocs", "/api/filetree/getPinnedDocs", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{NonNullable: true}, "POST")
 	UpdatePinnedDocs = define[UpdatePinnedDocsRequest, Null]("updatePinnedDocs", "/api/filetree/updatePinnedDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )
@@ -534,11 +536,6 @@ var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchV
 var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
 var GetRecentDocs = define[RecentDocsRequest, []*RecentDoc]("getRecentDocs", "/api/storage/getRecentDocs", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
 
-var ResetBlockAttrs = define[EmptyRequest, Null]("resetBlockAttrs", "/api/attr/resetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var SearchAttributeViewNonRelationKey = define[EmptyRequest, Null]("searchAttributeViewNonRelationKey", "/api/av/searchAttributeViewNonRelationKey", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var SetLocalStorage = define[EmptyRequest, Null]("setLocalStorage", "/api/storage/setLocalStorage", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{Setting: SettingWrite{Namespace: "localStorage", Mode: SettingSilent}}, "POST")
-var DeprecatedReloadUI = define[EmptyRequest, Null]("deprecatedReloadUI", "/api/system/reloadUI", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-
 var GetCriteria = define[EmptyRequest, []*Criterion]("getCriteria", "/api/storage/getCriteria", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
 var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
@@ -763,6 +760,10 @@ var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semantic
 // SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
 var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// SearchRefBlock 的 exactDocTitle 默认关闭，保留候选搜索行为；启用后仅匹配完整文档标题，
+// 先区分大小写，再忽略大小写，同级匹配按 ID 升序取一个，排除 id 和 rootID。
+// 精确匹配不受全文搜索字段、类型、忽略规则或结果上限影响；未匹配时 newDoc 为 true。
+// 保留发布权限、加密笔记本租约和原有响应变体，查询或文档读取失败时返回错误。
 var SearchRefBlock = define[SearchRefBlockRequest, SearchRefData]("searchRefBlock", "/api/search/searchRefBlock", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 var ListLoadedPlugins = define[EmptyRequest, []*LoadedPlugin]("listLoadedPlugins", "/api/plugin/listLoadedPlugins", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
@@ -849,6 +850,19 @@ var SetSyncProviderLocal = define[SetSyncLocalRequest, SyncLocalData]("setSyncPr
 // 清除当前服务时先验证资源及历史快照完整性，再关闭同步；失败时保留原配置，不删除本地或云端数据。
 // 响应包含当前同步开关及被清除服务的默认配置；其他服务配置、仓库密钥和下载模式保持不变。
 var ClearSyncProviderConfig = define[ClearSyncProviderConfigRequest, ClearSyncProviderConfigData]("clearSyncProviderConfig", "/api/sync/clearSyncProviderConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
+
+// GetSyncProviderConfigRules 返回服务类型 2（S3）、3（WebDAV）或 4（本地文件系统）的共用必填清单。
+// endpoint、bucket 可省略；仅 S3 返回 Endpoint 可能让对象键多出前缀的提示，提示不阻断保存或同步。
+// 此接口只做内存中的静态判定，不读取或保存用户配置，不接收凭据，不访问云端或文件系统。
+// 未知服务返回 code -1；规则提示不替代保存时的完整校验和资源来源保护。只读模式下也可调用。
+var GetSyncProviderConfigRules = define[SyncProviderConfigRulesRequest, SyncProviderConfigRulesData]("getSyncProviderConfigRules", "/api/sync/getSyncProviderConfigRules", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// TestSyncProviderS3 使用请求中的候选配置探测云端：写入探针对象、按前缀列举并比对、尽力删除探针，不读取或保存用户配置。
+// 请求字段与保存接口一致；缺少必填项或地址无效时同样返回 code 0，由 kind 为 config 表示，避免与网络故障混淆。
+// kind 为 ok 表示写入与列举指向同一个对象键；config 表示可确定的配置错误；network 表示网络或服务端不可达，无法判定配置。
+// 探测会在桶内创建再删除 repo/objects/.s/siyuan-probe-<随机值>-probe，需要该前缀的写入与列举权限；未删除的探针会作为未引用对象被云端清理回收。
+// 只读模式下也可调用，不修改已有快照或同步开关。
+var TestSyncProviderS3 = define[TestSyncProviderS3Request, TestSyncProviderS3Data]("testSyncProviderS3", "/api/sync/testSyncProviderS3", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetCloudSyncDir = define[SyncNameRequest, Null]("setCloudSyncDir", "/api/sync/setCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData]("setSyncAssetDownloadMode", "/api/sync/setSyncAssetDownloadMode", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
@@ -1007,8 +1021,15 @@ var ExportBrowserHTML = define[ExportBrowserHTMLRequest, ExportZipData]("exportB
 
 // 导出图片或 PDF 预览时，可选的 keepJSEmbed: true 保留脚本嵌入占位，默认不保留。
 // 内核不执行脚本；调用方须遵守安全模式限制，并等待异步渲染完成后再导出。
+// image=true 或 pdf=true 时可用 excludeTitleImage=true 排除题头图；省略、null 或 false 保留，独立于 addTitle。
+// 未指定图片或 PDF 模式时忽略 excludeTitleImage；原始文档、正文图片及加密笔记本读取授权不受影响。
 var ExportPreviewHTML = define[ExportPreviewHTMLRequest, ExportPreviewHTMLData]("exportPreviewHTML", "/api/export/exportPreviewHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportHTML = define[ExportHTMLRequest, ExportHTMLData]("exportHTML", "/api/export/exportHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// exportAssets=true 时仅复制 PDF 实际资源链接需要的外部文件，同名文件另存并更新链接，不覆盖已有文件。
+// removeAssets=true 时把链接目标嵌入为附件，不在输出目录复制或清理资源；页面图片不额外复制。
+// exportAssets 省略、null 或 false 保持已有处理方式；启用时保留加密笔记本读取租约，禁止写入加密目录。
+// 启用时 path 必须为绝对路径，资源读取或 PDF 写入失败会报错，并撤销本次新建的外部资源文件。
 var ProcessPDF = define[ProcessPDFRequest, Null]("processPDF", "/api/export/processPDF", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportPreview = define[ExportIDRequest, ExportPreviewData]("exportPreview", "/api/export/preview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportAsFile = define[ExportAsFileRequest, ExportFileData]("exportAsFile", "/api/export/exportAsFile", AuthenticatedAccess|AdminAccess, MultipartBody, ResponseOptions{}, "POST")
@@ -1025,7 +1046,12 @@ var ExportReStructuredText = define[ExportIDRequest, ExportNamedZipData]("export
 
 var StatAsset = define[AssetPathRequest, AssetStatData]("statAsset", "/api/asset/statAsset", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var FullReindexAssetContent = define[EmptyRequest, Null]("fullReindexAssetContent", "/api/asset/fullReindexAssetContent", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var GetImageOCRText = define[AssetOCRTextRequest, AssetTextData]("getImageOCRText", "/api/asset/getImageOCRText", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetImageOCRText 保留已有 text 字段；无文本、缺失 path 和加密资源返回空字符串。
+// failed 来自实际识别失败，不由空文本推断；取消和不支持的图片不记为失败。
+// 失败状态仅在当前内核运行期间保留最近 1024 个资源，成功识别或保存文本后清除，不写入 OCR 数据文件。
+// 加密资源始终返回 failed=false；笔记本资源身份保留 box 参数，显示参数和片段不改变状态身份。
+var GetImageOCRText = define[AssetOCRTextRequest, ImageOCRTextData]("getImageOCRText", "/api/asset/getImageOCRText", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/api/asset/setImageOCRText", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // AssetOCR 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
@@ -1073,6 +1099,16 @@ var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAsset
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
 // 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
 var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// GetUnusedEncryptedBoxAssets 扫描单个已解锁加密笔记本的文档、全部数据库定义及智能体会话引用。
+// 任意扫描失败返回 -1，不返回不完整候选。锁定目标使用既有 314 语言消息；结果不截断。
+// name 为响应期间可见的原始文件名，item 为 assets 相对路径，path 带目标 box 查询参数。
+var GetUnusedEncryptedBoxAssets = define[EncryptedBoxAssetsRequest, []*AssetUnusedItem]("getUnusedEncryptedBoxAssets", "/api/asset/getUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RemoveUnusedEncryptedBoxAssets 重新验证用户确认的候选，备份认证后的原始密文后整批删除。
+// 失败补偿恢复源文件，未提交的中断批次在启动同步前恢复；清理历史只索引脱敏元数据。
+// 不改变现有全局清理行为，不修改加密格式，不生成全局资源索引或明文缓存。
+var RemoveUnusedEncryptedBoxAssets = define[RemoveEncryptedBoxAssetsRequest, AssetPathsData]("removeUnusedEncryptedBoxAssets", "/api/asset/removeUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
@@ -1092,6 +1128,8 @@ var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/sett
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
 // 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
+// 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
+// ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
 var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai"}}, "POST")
 var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets"}}, "POST")
 var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "variables"}}, "POST")
@@ -1216,6 +1254,19 @@ var SearchAttributeViewRelationKey = define[SearchAttributeViewRelationKeyReques
 // 返回数据库级 automations，所有视图共享；缺省表示没有自动化规则。
 // 规则通过 `/api/transactions` 的 setAttrViewAutomations 操作整体保存。
 var GetAttributeView = define[GetAttributeViewRequest, AVData]("getAttributeView", "/api/av/getAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// PreviewAttributeViewCollection 预览已保存且启用的普通块收集规则，不修改文档或数据库。
+// 仅在目标数据库的加密边界内查询；page 从 1 开始，每页最多 100 个，hasMore 表示还有下一页。
+var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AVBlockCollectionPreview]("previewAttributeViewCollection", "/api/av/previewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 按全部启用收集规则的并集检查已有条目，返回 matched、unmatched、unknown 和规则版本。
+// 手动及自动绑定条目统一判断；游离、无可用规则或无法判断时保留，不隐式清理或补收。
+// 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
+var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
+// 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
+var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
@@ -1225,6 +1276,11 @@ var CreateAttributeViewItemDocs = define[CreateAttributeViewItemDocsRequest, AVC
 var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("searchAttributeView", "/api/av/searchAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVArchiveRenderData]("renderSnapshotAttributeView", "/api/av/renderSnapshotAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArchiveRenderData]("renderHistoryAttributeView", "/api/av/renderHistoryAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 渲染指定数据库视图，保留载体权限、加密笔记本租约、筛选和分页行为。
+// temporarySort 可选，省略或 null 时使用已保存的排序；指定时以单字段规则覆盖本次渲染排序，先排序再分页。
+// 临时排序的 order 必须为 ASC 或 DESC；字段缺失或不支持排序时恢复已保存规则。
+// 临时排序不创建或保存数据库，不改变载体默认视图；支持现有 valueSource 和 dateEndpoint 语义。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1241,10 +1297,16 @@ var AIChatGPTWithAction = define[AIActionRequest, string]("chatGPTWithAction", "
 var AIListEditorActions = define[EmptyRequest, []*AIEditorAction]("lsAIEditorActions", "/api/ai/editor/lsActions", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AISaveEditorAction = define[AIEditorActionSaveRequest, *AIEditorAction]("saveAIEditorAction", "/api/ai/editor/saveAction", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditorAction", "/api/ai/editor/removeAction", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按提供商协议验证实际生成能力，模型清单命中本身不代表测试通过。
+// gemini-interactions 使用原生端点、store=false 和有限输出预算，必须收到已校验的流式终止事件。
+// 测试允许无上游错误且不含工具调用的 incomplete 响应，避免思考耗尽测试预算导致误判；正常生成仍报错。
 var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AITestDecisionModel = define[AIDecisionTestRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按提供商协议读取模型及上下文上限；gemini-interactions 使用原生模型清单并去除 models/ 前缀。
 var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 套餐授权接口仅供已鉴权管理员使用，遵守 AI 禁用开关及只读限制。
@@ -1304,6 +1366,9 @@ var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/a
 var AIManageSkills = define[AISkillFileRequest, AISkillFileData]("manageSkills", "/api/ai/agent/manageSkills", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", AuthenticatedAccess|AdminAccess, StructJSONBody, aiEditorSSEOptions(), "POST")
+
+// gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
+// 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
@@ -1342,7 +1407,13 @@ var SystemCheckWorkspaceDir = define[SystemPathRequest, SystemWorkspaceCheckData
 var SystemCreateWorkspaceDir = define[SystemPathRequest, Null]("createWorkspaceDir", "/api/system/createWorkspaceDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SystemDismissOnboarding = define[EmptyRequest, *SystemOnboarding]("dismissOnboarding", "/api/system/dismissOnboarding", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnboarding", "/api/system/ensureOnboarding", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2}, DataOnError: true}, "POST")
+
+// SystemExit 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
+// 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。
+// 接管默认正常同步，recoverExit.force 为 true 时跳过同步但仍执行数据清理；跳过安装提示且不修改工作空间顺序。
+// 顶层 force、execInstallPkg、setCurrentWorkspace 在接管时忽略；省略 recoverExit.force 保持正常同步。
+// 省略或传入 null 时保持原行为及数字截断规则，认证、管理员权限及加密笔记本关闭流程不变。
+var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3}, DataOnError: true}, "POST")
 var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1356,6 +1427,10 @@ var SystemGetSysFonts = define[EmptyRequest, []*SystemFont]("getSysFonts", "/api
 var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspaces", "/api/system/getWorkspaces", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 
 // SystemImportConf 导入前按启动和设置接口的相同规则规范化编辑器、导出、文档树、搜索和闪卡偏好，并同步保存。
+// 同时导入外观及界面语言、OCR、代码片段总开关和普通变量；这些配置段缺失或为 null 时保留当前值。
+// 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
+// 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
+// ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
 var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{Setting: SettingWrite{Namespace: "*"}}, "POST")
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
@@ -1383,7 +1458,17 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 
 // move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
 // 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1，所有视图共享数据库级规则。
+// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 4，所有视图共享数据库级规则。
+// blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
+// blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
+// spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
+// 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。
+// 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
+// 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。
+// 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
+// cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
+// 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
+// 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。
 // addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
 // 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
 // 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。
@@ -1400,3 +1485,117 @@ var BroadcastWebSocket = define[EmptyRequest, Null]("broadcast", "/ws/broadcast"
 var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/broadcast/subscribe", AuthenticatedAccess|AdminAccess, NoBody, RawSSEOptions(), "GET")
 
 var AnkiConnect = define[AnkiConnectRequest, AnkiConnectResponse]("ankiConnect", "/api/flashcard/ankiConnect", PublicAccess, JSONBody, ResponseOptions{Output: DirectJSONOutput}, "POST")
+
+// ActivateFlashcardMigration 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ActivateFlashcardMigration = define[FlashcardV2ActivateFlashcardMigrationRequest, FlashcardV2LegacyActivationResult]("activateFlashcardMigration", "/api/flashcard/activateMigration", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// CreateAdvancedFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var CreateAdvancedFlashcardSource = define[FlashcardV2AdvancedSourceRequest, FlashcardV2AdvancedSourceResult]("createAdvancedFlashcardSource", "/api/flashcard/createAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// CreateBasicFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var CreateBasicFlashcardSource = define[FlashcardV2BasicSourceRequest, FlashcardV2BasicSourceResult]("createBasicFlashcardSource", "/api/flashcard/createBasicSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// DeleteInvalidFlashcardSources 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var DeleteInvalidFlashcardSources = define[FlashcardV2DeleteInvalidSourcesRequest, FlashcardV2DeleteInvalidSourcesResult]("deleteInvalidFlashcardSources", "/api/flashcard/deleteInvalidSources", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// DeleteFlashcardReviewSet 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var DeleteFlashcardReviewSet = define[FlashcardV2DeleteFlashcardReviewSetRequest, FlashcardV2EntityMutationResult]("deleteFlashcardReviewSet", "/api/flashcard/deleteReviewSet", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// FinishFlashcardSession 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var FinishFlashcardSession = define[FlashcardV2FinishSessionRequest, FlashcardV2StudySession]("finishFlashcardSession", "/api/flashcard/finishSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardHistory 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardHistory = define[FlashcardV2GetFlashcardHistoryRequest, FlashcardV2HistoryData]("getFlashcardHistory", "/api/flashcard/getCardHistory", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardEntity 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardEntity = define[FlashcardV2GetFlashcardEntityRequest, FlashcardV2EntityData]("getFlashcardEntity", "/api/flashcard/getEntity", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardMigrationStatus 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardMigrationStatus = define[EmptyRequest, FlashcardV2LegacyMigrationStatus]("getFlashcardMigrationStatus", "/api/flashcard/getMigrationStatus", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// GetFlashcardRenderModel 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardRenderModel = define[FlashcardV2GetFlashcardRenderModelRequest, FlashcardV2CardRenderModel]("getFlashcardRenderModel", "/api/flashcard/getRenderModel", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardSessionQueue 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardSessionQueue = define[FlashcardV2GetFlashcardSessionQueueRequest, FlashcardV2QueueData]("getFlashcardSessionQueue", "/api/flashcard/getSessionQueue", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardSourceHistory 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardSourceHistory = define[FlashcardV2SourceHistoryRequest, FlashcardV2SourceHistoryData]("getFlashcardSourceHistory", "/api/flashcard/getSourceHistory", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardStatistics 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardStatistics = define[FlashcardV2StatisticsRequest, FlashcardV2StatisticsResult]("getFlashcardStatistics", "/api/flashcard/getStatistics", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardStudyPolicy 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardStudyPolicy = define[FlashcardV2GetFlashcardStudyPolicyRequest, FlashcardV2EntityData]("getFlashcardStudyPolicy", "/api/flashcard/getStudyPolicy", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ImportAnkiFlashcardPackage 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ImportAnkiFlashcardPackage = define[FlashcardV2AnkiUploadRequest, FlashcardV2AnkiImportReport]("importAnkiFlashcardPackage", "/api/flashcard/importAnkiPackage", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// InspectInvalidFlashcardSources 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var InspectInvalidFlashcardSources = define[EmptyRequest, FlashcardV2InvalidSourcesReport]("inspectInvalidFlashcardSources", "/api/flashcard/inspectInvalidSources", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// ListFlashcardConflicts 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ListFlashcardConflicts = define[FlashcardV2ListFlashcardConflictsRequest, []FlashcardV2EntityConflictGroup]("listFlashcardConflicts", "/api/flashcard/listConflicts", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ListFlashcardEntities 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ListFlashcardEntities = define[FlashcardV2ListFlashcardEntitiesRequest, FlashcardV2EntityPage]("listFlashcardEntities", "/api/flashcard/listEntities", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ManageFlashcards 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ManageFlashcards = define[FlashcardV2CardManagementRequest, FlashcardV2CardManagementResult]("manageFlashcards", "/api/flashcard/manageCards", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ManageFlashcardSourceLifecycle 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ManageFlashcardSourceLifecycle = define[FlashcardV2SourceLifecycleRequest, FlashcardV2SourceLifecycleResult]("manageFlashcardSourceLifecycle", "/api/flashcard/manageSourceLifecycle", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// MutateFlashcardEntities 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var MutateFlashcardEntities = define[FlashcardV2MutateFlashcardEntitiesRequest, FlashcardV2EntityMutationResult]("mutateFlashcardEntities", "/api/flashcard/mutateEntities", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// PreviewAnkiFlashcardPackage 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var PreviewAnkiFlashcardPackage = define[FlashcardV2AnkiUploadRequest, FlashcardV2AnkiPackagePreview]("previewAnkiFlashcardPackage", "/api/flashcard/previewAnkiPackage", AuthenticatedAccess|AdminAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// PreviewFlashcardMigration 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var PreviewFlashcardMigration = define[EmptyRequest, FlashcardV2LegacyFlashcardMigrationPreview]("previewFlashcardMigration", "/api/flashcard/previewMigration", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// PreviewFlashcardReviewSet 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var PreviewFlashcardReviewSet = define[FlashcardV2PreviewFlashcardReviewSetRequest, FlashcardV2ReviewSetCardPage]("previewFlashcardReviewSet", "/api/flashcard/previewReviewSet", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ReconcileFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ReconcileFlashcardSource = define[FlashcardV2ReconcileFlashcardSourceRequest, FlashcardV2ReconcileResult]("reconcileFlashcardSource", "/api/flashcard/reconcileSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ResolveFlashcardConflict 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ResolveFlashcardConflict = define[FlashcardV2ConflictResolutionRequest, FlashcardV2EntityRevision]("resolveFlashcardConflict", "/api/flashcard/resolveConflict", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// RestoreFlashcardSourceHistory 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var RestoreFlashcardSourceHistory = define[FlashcardV2RestoreSourceHistoryRequest, FlashcardV2EntityRevision]("restoreFlashcardSourceHistory", "/api/flashcard/restoreSourceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ReviewFlashcard 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ReviewFlashcard = define[FlashcardV2ReviewRequest, FlashcardV2ReviewResult]("reviewFlashcard", "/api/flashcard/reviewCard", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SaveFlashcardStudyPolicy 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SaveFlashcardStudyPolicy = define[FlashcardV2SaveStudyPolicyRequest, FlashcardV2EntityRevision]("saveFlashcardStudyPolicy", "/api/flashcard/saveStudyPolicy", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SaveFlashcardTag 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SaveFlashcardTag = define[FlashcardV2SaveTagRequest, FlashcardV2EntityRevision]("saveFlashcardTag", "/api/flashcard/saveTag", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SetFlashcardReviewSetMemberships 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SetFlashcardReviewSetMemberships = define[FlashcardV2SetReviewSetMembershipsRequest, FlashcardV2SetReviewSetMembershipsResult]("setFlashcardReviewSetMemberships", "/api/flashcard/setReviewSetMemberships", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SetFlashcardTagAssignments 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SetFlashcardTagAssignments = define[FlashcardV2SetTagAssignmentsRequest, FlashcardV2SetTagAssignmentsResult]("setFlashcardTagAssignments", "/api/flashcard/setTagAssignments", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// StartFlashcardSession 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var StartFlashcardSession = define[FlashcardV2StudyQueueRequest, FlashcardV2StudyQueueResult]("startFlashcardSession", "/api/flashcard/startSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SummarizeFlashcardReviewSets 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SummarizeFlashcardReviewSets = define[FlashcardV2SummarizeFlashcardReviewSetsRequest, FlashcardV2SummariesData]("summarizeFlashcardReviewSets", "/api/flashcard/summarizeReviewSets", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UndoFlashcardReview 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UndoFlashcardReview = define[FlashcardV2ReviewUndoRequest, FlashcardV2ReviewUndoResult]("undoFlashcardReview", "/api/flashcard/undoReview", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UpdateAdvancedFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UpdateAdvancedFlashcardSource = define[FlashcardV2AdvancedSourceUpdateRequest, FlashcardV2AdvancedSourceResult]("updateAdvancedFlashcardSource", "/api/flashcard/updateAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UpdateBasicFlashcardDirection 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UpdateBasicFlashcardDirection = define[FlashcardV2BasicDirectionRequest, FlashcardV2BasicSourceResult]("updateBasicFlashcardDirection", "/api/flashcard/updateBasicDirection", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UpdateFlashcardSessionCard 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UpdateFlashcardSessionCard = define[FlashcardV2SessionCardUpdateRequest, FlashcardV2SessionCard]("updateFlashcardSessionCard", "/api/flashcard/updateSessionCard", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")

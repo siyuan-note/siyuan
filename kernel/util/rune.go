@@ -122,5 +122,4 @@ func InitEmojiChars() {
 	nativeEmojiCharsLock.Lock()
 	nativeEmojiChars = chars
 	nativeEmojiCharsLock.Unlock()
-	return
 }

@@ -120,11 +120,14 @@ type ExportHTMLRequest struct {
 }
 type ExportPreviewHTMLRequest struct {
 	ID string `json:"id" api:"trim"`
+	// ExcludeTitleImage 在 image=true 或 pdf=true 时排除题头图；省略、null 或 false 保留，不影响标题和正文图片。
+	ExcludeTitleImage bool `json:"excludeTitleImage" api:"optional,nullable"`
 	// KeepJSEmbed 保留 JavaScript 嵌入块供受信任的前端异步渲染；默认关闭，内核不执行脚本。
 	KeepJSEmbed             bool   `json:"keepJSEmbed" api:"optional,nullable"`
 	KeepFold                bool   `json:"keepFold" api:"optional,nullable"`
 	Merge                   bool   `json:"merge" api:"optional,nullable"`
 	Image                   bool   `json:"image" api:"optional,nullable"`
+	PDF                     bool   `json:"pdf" api:"optional,nullable"`
 	MergeDocHeadingMode     string `json:"mergeDocHeadingMode" api:"optional,nullable"`
 	MergeContentHeadingMode string `json:"mergeContentHeadingMode" api:"optional,nullable"`
 	ExportTitleOptions
@@ -143,6 +146,8 @@ type ExportBrowserHTMLRequest struct {
 	Name   string `json:"name" api:"trim"`
 }
 type ProcessPDFRequest struct {
+	// ExportAssets 按 PDF 实际资源链接处理附件及外部文件，默认关闭以兼容已有调用。
+	ExportAssets            bool   `json:"exportAssets" api:"optional,nullable"`
 	ID                      string `json:"id" api:"trim"`
 	Path                    string `json:"path" api:"trim"`
 	Merge                   bool   `json:"merge" api:"optional,nullable"`
@@ -220,7 +225,7 @@ func decodeExportFields(value reflect.Value, fields map[string]json.RawMessage) 
 			}
 			continue
 		}
-		name := strings.Split(field.Tag.Get("json"), ",")[0]
+		name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
 		opts := "," + field.Tag.Get("api") + ","
 		has := func(option string) bool { return strings.Contains(opts, ","+option+",") }
 		if has("filterstrings") {

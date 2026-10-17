@@ -6,7 +6,7 @@
 		"id": "20200813004931-q4cu8na",
 		"title": "什么是内容块",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210118100623-i00rgj0"
+				"id": "20210118100623-i00rgj0",
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -32,7 +33,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118100631-nhy9fe2",
-				"updated": "20210415202214"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -51,11 +52,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "202008250000-a1b2c3d"
+					"TextMarkTextContent": "20200825000000-a1b2c3d"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，由时间和 7 位随机字符组成。"
+					"Data": "，由 14 位时间戳（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、连字符和 7 位随机小写英文字母或数字组成。"
 				}
 			]
 		},
@@ -209,7 +219,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118101911-tbt6kkp",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -249,7 +259,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118102327-mybetkv",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -269,6 +279,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行为"
 				},
 				{
 					"Type": "NodeText",

@@ -1,6 +1,18 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {isContainerGutterBridge} from "./container";
+
+const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
+    name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
+}));
+buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {value: "test", configurable: true}));
+const {isContainerGutterBridge} = require("./container") as typeof import("./container");
+buildGlobals.forEach(({name, descriptor}) => {
+    if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+    } else {
+        Reflect.deleteProperty(globalThis, name);
+    }
+});
 
 const setup = (type = "NodeBlockquote") => {
     const block = {
@@ -25,7 +37,7 @@ const setup = (type = "NodeBlockquote") => {
 
 describe("isContainerGutterBridge", () => {
     it("preserves a child gutter while crossing nested container padding", () => {
-        ["NodeBlockquote", "NodeCallout", "NodeSuperBlock"].forEach(type => {
+        ["NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeList", "NodeListItem"].forEach(type => {
             assert.equal(setup(type).hit(), true);
         });
     });
@@ -67,6 +79,9 @@ describe("isContainerGutterBridge", () => {
         const fold = setup();
         fold.button.dataset.type = "fold";
         assert.equal(fold.hit(), false);
+        const row = setup("NodeListItem");
+        row.button.dataset.rowId = "row";
+        assert.equal(row.hit(), false, "database row actions must not become the list marker's block actions");
     });
 
     it("keeps callout titles directly accessible", () => {

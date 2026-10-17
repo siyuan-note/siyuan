@@ -594,7 +594,8 @@ export class Protyle {
                 focus: false,
                 pushBackStack: false,
                 reload: false,
-                resize: false
+                resize: false,
+                outlineId: mergedOptions.action?.includes(Constants.CB_GET_OUTLINE) ? mergedOptions.blockId : undefined,
             });
             /// #endif
         }
@@ -735,15 +736,6 @@ export class Protyle {
             type,
             level: subType,
         });
-    }
-
-    /**
-     * @deprecated 将在 3.7.1 版本中移除。请改用 {@link updateTransactionElement}。
-     */
-    public updateTransaction(id: string, newHTML: string, html: string) {
-        const element = document.createElement("template");
-        element.innerHTML = newHTML;
-        updateTransaction(this.protyle, element.content.firstElementChild, html);
     }
 
     public updateTransactionElement(element: Element, oldHTML: string) {

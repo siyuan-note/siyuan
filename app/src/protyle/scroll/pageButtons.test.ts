@@ -32,14 +32,13 @@ class MockElement {
 
 const fixture = (mobile: boolean, renderScroll = true) => {
     const storage: Record<string, unknown> = {};
-    const saves: Array<{key: string; value: unknown}> = [];
     const pages: Array<{protyle: unknown; direction: string}> = [];
     const groups: MockElement[] = [];
     const settingInput = {checked: false};
     const window = {siyuan: {
         storage, isPublish: false,
         languages: new Proxy({}, {get: (_, name) => String(name)}),
-        config: {readonly: false, editor: {keepLoadedContent: false}, keymap: {editor: {general: {
+        config: {readonly: false, editor: {keepLoadedContent: false, pageScrollButtons: false}, keymap: {editor: {general: {
             scrollPageUpWithoutMovingCaret: {custom: "Alt+PageUp"},
             scrollPageDownWithoutMovingCaret: {custom: "Alt+PageDown"},
         }}}},
@@ -52,9 +51,6 @@ const fixture = (mobile: boolean, renderScroll = true) => {
     const preferences: any = {};
     runInNewContext(compile("src/protyle/scroll/pageButtons.ts", mobile), {
         exports: preferences, window, document, Event,
-        require: (name: string) => name === "../../constants" ? {Constants: {LOCAL_PAGE_SCROLL_BUTTONS: "page-buttons"}} : {
-            setStorageVal: (key: string, value: unknown) => saves.push({key, value}),
-        },
     });
     const moduleExports: any = {};
     runInNewContext(compile("src/protyle/scroll/index.ts", mobile), {
@@ -96,7 +92,11 @@ const fixture = (mobile: boolean, renderScroll = true) => {
         groups.push(page);
         return {protyle, parent, page, up, down, resized: () => resized};
     };
-    return {preferences, window, storage, saves, pages, settingInput, createEditor};
+    const setEnabled = (enabled: boolean) => {
+        window.siyuan.config.editor.pageScrollButtons = enabled;
+        preferences.updatePageScrollButtons();
+    };
+    return {preferences, window, storage, setEnabled, pages, settingInput, createEditor};
 };
 
 for (const mobile of [false, true]) {
@@ -106,16 +106,13 @@ for (const mobile of [false, true]) {
         const first = f.createEditor();
         const second = f.createEditor();
         assert.equal(first.page.classList.contains("fn__none"), true);
-        f.preferences.setPageScrollButtonsEnabled(true);
-        assert.equal(f.saves.length, 1);
-        assert.equal(f.saves[0].value, true);
+        f.setEnabled(true);
         assert.equal(first.page.classList.contains("fn__none"), false);
         assert.equal(second.page.classList.contains("fn__none"), false);
         assert.equal(first.protyle.element.classList.contains("protyle--page-scroll"), true);
         assert.equal(first.resized(), 1);
         assert.equal(f.settingInput.checked, true);
-        delete f.storage["page-buttons"];
-        f.preferences.onPageScrollButtonsStorageChanged("page-buttons");
+        f.setEnabled(false);
         assert.equal(first.page.classList.contains("fn__none"), true);
         assert.equal(second.protyle.element.classList.contains("protyle--page-scroll"), false);
         assert.equal(f.settingInput.checked, false);
@@ -123,7 +120,7 @@ for (const mobile of [false, true]) {
 
     test(`button input preserves focus and scrolls only the owning editor (mobile=${mobile})`, () => {
         const f = fixture(mobile);
-        f.preferences.setPageScrollButtonsEnabled(true);
+        f.setEnabled(true);
         const editor = f.createEditor();
         f.createEditor();
         let prevented = 0;
@@ -140,13 +137,12 @@ for (const mobile of [false, true]) {
     });
 }
 
-test("page buttons respect readonly storage and editor render options", () => {
+test("page buttons ignore the old local preference and respect editor render options", () => {
     const f = fixture(false, false);
     f.window.siyuan.config.readonly = true;
-    f.preferences.setPageScrollButtonsEnabled(true);
+    f.storage["local-page-scroll-buttons"] = true;
     assert.equal(f.preferences.isPageScrollButtonsEnabled(), false);
-    assert.equal(f.saves.length, 0);
-    f.storage["page-buttons"] = true;
+    f.setEnabled(true);
     const editor = f.createEditor();
     assert.equal(editor.page.classList.contains("fn__none"), true);
     assert.equal(editor.protyle.element.classList.contains("protyle--page-scroll"), false);

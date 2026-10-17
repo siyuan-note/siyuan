@@ -9,7 +9,7 @@ import {escapeAttr, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {pathPosix} from "../util/pathName";
 import {getHostCapabilities} from "../util/hostCapabilities";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 interface IRepoFile {
     fileID: string;

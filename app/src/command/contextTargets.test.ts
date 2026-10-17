@@ -4,8 +4,11 @@ import {getCommandBlocks, getCommandDocument, hasCommandEditorTarget} from "./co
 import type {ICommandContextSnapshot} from "./types";
 
 const createEditorContext = () => {
-    const first = {isConnected: true, getAttribute: () => "first"} as unknown as HTMLElement;
-    const second = {isConnected: true, getAttribute: () => "second"} as unknown as HTMLElement;
+    const block = (id: string) => ({isConnected: true, nodeType: 1, tagName: "DIV",
+        classList: {contains: () => false}, hasAttribute: () => true, closest: (): null => null,
+        getAttribute: (name: string) => name === "data-type" ? "NodeParagraph" : id}) as unknown as HTMLElement;
+    const first = block("first");
+    const second = block("second");
     const state = {selected: [] as HTMLElement[], nodes: [first, second]};
     const element = {
         isConnected: true,

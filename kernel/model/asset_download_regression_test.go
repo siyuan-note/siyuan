@@ -26,7 +26,7 @@ func prepareAssetDownloadDocumentTest(t *testing.T) (*fileOperationTestFixture, 
 	}
 	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		writeAssetDownloadDocumentTest(t, treenode.NewTree(fixture.box.ID, "/"+ast.NewNodeID()+".sy", "/Seed", "Seed"))
 	}
 	if err := fixture.box.SaveConf(conf.NewBoxConf()); err != nil {

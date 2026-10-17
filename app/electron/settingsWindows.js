@@ -3,12 +3,40 @@ const {normalizeWindowGeometry, captureWindowGeometry} = require("./windowGeomet
 const settingsPath = "/stage/build/app/settings.html";
 
 // 只允许已登记的内核页面打开预先授权的设置页，不改变普通链接的打开规则。
-const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, log, icon, platform = process.platform}) => {
+const createSettingsWindows = ({ipcMain, screen, getTarget, getWindows, initialize, show, log, icon,
+    platform = process.platform}) => {
     const pending = new Map();
     const reservations = new Map();
     const windows = new Map();
     const windowStates = new WeakMap();
     const owners = new WeakMap();
+    let interfaceRevision = 0;
+    const getSettingTarget = event => {
+        const target = getTarget(event.sender.id);
+        if (!target || event.senderFrame !== event.sender.mainFrame) return;
+        try {
+            const url = new URL(event.sender.getURL());
+            if (url.origin === target.origin &&
+                ["/stage/build/app/", "/stage/build/app/index.html", "/stage/build/app/window.html"].includes(url.pathname)) {
+                return target;
+            }
+        } catch {
+            return;
+        }
+    };
+    const notifySettingDialogs = (target, revision = ++interfaceRevision) => {
+        for (const win of getWindows(target.origin)) {
+            if (win.isDestroyed()) continue;
+            const contents = win.webContents;
+            if (getSettingTarget({sender: contents, senderFrame: contents.mainFrame})?.origin !== target.origin) continue;
+            try {
+                contents.send("siyuan-settings-interface", revision);
+            } catch (error) {
+                log("settings dialog failed to receive switch notification: " + error);
+            }
+        }
+        return revision;
+    };
     const release = approved => {
         clearTimeout(approved.timer);
         const key = approved.owner.id + ":" + approved.frameName;
@@ -94,53 +122,62 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
         const approved = win && windowStates.get(win).approved;
         if (approved?.owner === event.sender && approved.data.token === data.token) cancel(approved);
     });
+    ipcMain.on("siyuan-settings-open-dialog", event => {
+        let revision = false;
+        try {
+            const target = getSettingTarget(event);
+            if (!target) return;
+            // 内置设置按工作区互斥，插件专属窗口仍通过所属宿主及令牌关闭。
+            const key = `${target.origin}:builtin`;
+            const reserved = reservations.get(key);
+            if (reserved) cancel(reserved);
+            const win = windows.get(key);
+            if (win && !win.isDestroyed()) cancel(windowStates.get(win).approved);
+            revision = notifySettingDialogs(target);
+        } finally {
+            event.returnValue = revision;
+        }
+    });
     ipcMain.handle("siyuan-settings-prepare", (event, data) => {
         const requestedAt = Date.now();
-        const target = getTarget(event.sender.id);
-        if (!target || event.senderFrame !== event.sender.mainFrame || !data ||
+        const target = getSettingTarget(event);
+        if (!target || !data ||
             !/^[a-zA-Z0-9-]{1,100}$/.test(data.token) ||
             !/^(builtin|plugin-[a-zA-Z0-9-]+)$/.test(data.key)) {
-            return {create: false};
-        }
-        let ownerURL;
-        try {
-            ownerURL = new URL(event.sender.getURL());
-        } catch {
-            return {create: false};
-        }
-        if (ownerURL.origin !== target.origin ||
-            !["/stage/build/app/", "/stage/build/app/index.html", "/stage/build/app/window.html"].includes(ownerURL.pathname)) {
             return {create: false};
         }
         const key = `${target.origin}:${data.key === "builtin" ? "builtin" : event.sender.id + ":" + data.key}`;
         const existing = windows.get(key);
         if (existing && !existing.isDestroyed()) {
             const state = windowStates.get(existing);
+            if (data.key === "builtin") notifySettingDialogs(target, state.approved.revision);
             state.data.command = data.command;
             existing.webContents.send("siyuan-settings-command", data.command);
             if (state.shown) show(existing);
-            return {create: false};
+            return {create: false, revision: state.approved.revision};
         }
         const reserved = reservations.get(key);
         if (reserved && reserved.expires >= Date.now() && !reserved.owner.isDestroyed()) {
+            if (data.key === "builtin") notifySettingDialogs(target, reserved.revision);
             reserved.data.command = data.command;
-            return {create: false};
+            return {create: false, revision: reserved.revision};
         }
         if (reserved) cancel(reserved);
+        const revision = data.key === "builtin" ? notifySettingDialogs(target) : undefined;
         const url = new URL(settingsPath, target.origin);
         url.searchParams.set("settingsWindowToken", data.token);
         if (target.mode === "remote") {
             url.searchParams.set("remote", "1");
         }
         const frameName = "siyuan-settings-" + data.token;
-        const approved = {key, target, owner: event.sender, url: url.href, frameName, data, requestedAt,
+        const approved = {key, target, owner: event.sender, url: url.href, frameName, data, requestedAt, revision,
             active: true, expires: Date.now() + 60000};
         watchOwner(event.sender).records.add(approved);
         approved.timer = setTimeout(() => cancel(approved), 60000);
         approved.timer.unref();
         pending.set(event.sender.id + ":" + frameName, approved);
         reservations.set(key, approved);
-        return {create: true, token: data.token, url: approved.url, frameName};
+        return {create: true, token: data.token, url: approved.url, frameName, revision};
     });
     return (contents, details) => {
         const pendingKey = contents.id + ":" + details.frameName;

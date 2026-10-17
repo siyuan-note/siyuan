@@ -35,7 +35,7 @@ import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
-import {remapListMindmapIDs} from "../render/listMindmap/model";
+import {cleanListMindmapHTML, remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
@@ -50,7 +50,7 @@ import {
 import {getAssetUploadPathsByInput, getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
 import {
@@ -119,7 +119,7 @@ const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
         return true;
     }
     const linkDest = resolveLinkDest(text, protyle.lute);
-    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle)))) {
+    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle), true))) {
         protyle.toolbar.range = range;
         protyle.toolbar.setInlineMark(protyle, "a", "range", {type: "a", color: linkDest});
         return true;
@@ -214,6 +214,11 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
 };
 
 export const getPlainText = (blockElement: HTMLElement, isNested = false): string => {
+    if (!isNested && blockElement.querySelector(".mindmap-view, .list-mindmap")) {
+        const template = document.createElement("template");
+        template.innerHTML = cleanListMindmapHTML(blockElement.outerHTML);
+        return getPlainText(template.content.firstElementChild as HTMLElement);
+    }
     const dataType = blockElement.dataset.type;
     if (dataType === "NodeBlockQueryEmbed" || blockElement.classList.contains("protyle-wysiwyg__embed") ||
         (!isNested && blockElement.querySelector('[data-type="NodeBlockQueryEmbed"], .protyle-wysiwyg__embed'))) {
@@ -260,7 +265,8 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false): strin
         text = text.slice(0, -1);
     } else if (dataType === "NodeTabItem" && isNested) {
         text += getTabTitle(blockElement)?.textContent || "";
-    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem"].includes(dataType)) {
+    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem",
+        "NodeMindmap", "NodeMindmapItem"].includes(dataType)) {
         if (dataType === "NodeCallout") {
             text += `${getCalloutInfo(blockElement)}\n`;
         } else if (dataType === "NodeTabItem") {
@@ -1453,7 +1459,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (localAssets.length > 0) {
                 let localAssetResult: Omit<IAssetUploadResult, "requestId" | "input"> | undefined;
                 await new Promise<void>(resolve => {
-                    uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
+                    uploadLocalFiles(localAssets.map((item): ILocalFiles => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,

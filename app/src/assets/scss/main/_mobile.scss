@@ -15,7 +15,7 @@ body {
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
 }
 
-body.body--android {
+html[data-frontend="mobile"] body.body--android {
   --mobile-top-safe-area: 0px;
 
   .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
@@ -282,6 +282,7 @@ body.mobile-keyboard--open {
     &--sql {
       height: auto;
       min-height: 48px;
+      align-items: flex-start;
     }
   }
 
@@ -1330,14 +1331,21 @@ body.mobile-topbar--merged {
       align-self: center;
     }
 
-    // 搜索框与返回按钮同处顶栏，占满返回按钮右侧的剩余宽度
+    &__title {
+      min-width: 0;
+    }
+
+    // 标题与搜索框共用顶栏剩余空间，输入框可以在窄屏下收缩。
     &__search {
       display: flex;
       flex: 1;
       min-width: 0;
-      padding-right: 11px;
       -webkit-user-select: text;
       user-select: text;
+
+      input {
+        min-width: 0;
+      }
     }
 
     &__groups {
@@ -1767,6 +1775,11 @@ body.mobile-topbar--merged {
 }
 
 .protyle {
+  &--page-scroll {
+    // 翻页键悬浮显示，保持移动端正文的原有宽度。
+    --b3-protyle-page-scroll-gutter: 0px;
+  }
+
   &-font {
     font-size: 14px;
   }

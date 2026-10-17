@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"syscall"
 
@@ -46,8 +47,8 @@ func logAppearanceRootDiagnostic(root, target string) {
 			break
 		}
 	}
-	for i := len(ancestors) - 1; i >= 0; i-- {
-		path := ancestors[i]
+	for _, path := range slices.Backward(ancestors) {
+
 		_, lstatErr := os.Lstat(path)
 		_, statErr := os.Stat(path)
 		resolved, resolveErr := evalAppearanceSymlinks(path)
@@ -68,8 +69,7 @@ func appearanceDiagnosticError(err error) string {
 	if err == nil {
 		return "ok"
 	}
-	var errno syscall.Errno
-	if errors.As(err, &errno) {
+	if errno, ok := errors.AsType[syscall.Errno](err); ok {
 		return fmt.Sprintf("%s (errno %d)", err, errno)
 	}
 	return err.Error()

@@ -15,7 +15,8 @@ import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
 import {getImageTooltip} from "../protyle/render/imageTooltip";
-import {getImageOCRText} from "../asset/imageOCRStatus";
+import {getImageOCRResult} from "../asset/imageOCRStatus";
+import type {ImageOCRTextData} from "../types/api";
 import {
     cancelPendingPopover,
     getPopoverGeneration,
@@ -194,16 +195,17 @@ export const initBlockPopover = (app: App) => {
                 tooltipAbortController = new AbortController();
                 const capturedController = tooltipAbortController;
                 let size: string;
-                let ocrText: string;
+                let ocrResult: ImageOCRTextData;
                 const updateImageTooltip = () => {
                     if (!capturedController.signal.aborted && image.isConnected &&
                         (image.getAttribute("data-src") || image.getAttribute("src")) === imagePath) {
-                        showTooltip(getImageTooltip(image, size, ocrText), image, undefined, event);
+                        showTooltip(getImageTooltip(image, size, ocrResult?.text, ocrResult?.failed), image, undefined, event);
                     }
                 };
-                if (imagePath.startsWith("assets/")) {
-                    getImageOCRText(imagePath).then(text => {
-                        ocrText = text;
+                const ocr = window.siyuan.config.ocr;
+                if (imagePath.startsWith("assets/") && (ocr?.showText !== false || ocr?.showEmpty || ocr?.showError)) {
+                    getImageOCRResult(imagePath).then(result => {
+                        ocrResult = result;
                         updateImageTooltip();
                     });
                 }
@@ -260,7 +262,7 @@ export const initBlockPopover = (app: App) => {
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
                 const title = aElement.getAttribute("data-name") || "";
-                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span>${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}` : title;
+                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span>${title ? "<br><span>" + title + "</span>" : ""}` : title;
                 tooltipClass = "href";
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
@@ -305,10 +307,10 @@ export const initBlockPopover = (app: App) => {
                         }
                         if (response.code === 1) {
                             if (title) {
-                                assetTip += '<div class="fn__hr"></div><span>' + title + "</span>";
+                                assetTip += "<br><span>" + title + "</span>";
                             }
                         } else {
-                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
+                            assetTip += ` ${response.data.hSize}${title ? "<br><span>" + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
                         try {
                             showTooltip(decodeURIComponent(assetTip), aElement, tooltipClass, event, tooltipSpace);
@@ -321,7 +323,7 @@ export const initBlockPopover = (app: App) => {
                     }, undefined, undefined, signal);
                     tip = "";
                 } else if (title) {
-                    tip = (tip ? (tip + '<div class="fn__hr"></div>') : "") + "<span>" + title + "</span>";
+                    tip = (tip ? (tip + "<br>") : "") + "<span>" + title + "</span>";
                 }
             }
 

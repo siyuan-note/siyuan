@@ -40,7 +40,7 @@ test("AI OCR prevents duplicate requests, refreshes saved results, and recovers 
     reject(new Error("Network failure"));
     await networkFailure;
     assert.equal(paths.length, 3);
-    assert.equal(refreshed.length, 1);
+    assert.deepEqual(refreshed, [path, path, path]);
     assert.equal(opened.length, 1);
     assert.deepEqual(hidden, ["progress-id", "progress-id", "progress-id"]);
     assert.ok(messages.includes("Network failure"));

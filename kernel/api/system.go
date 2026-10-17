@@ -470,6 +470,9 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		}
 		clonedConf.Appearance.Load().GlobalFontFamilies = fonts
 	}
+	if clonedConf.AI.Load() != nil {
+		clonedConf.AI.Load().ClearChatGPTAccountIDs()
+	}
 	if nil != clonedConf.Editor.Load() {
 		clonedConf.Editor.Load().Emoji = []string{}
 		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.Load().FontFamilies))
@@ -678,7 +681,11 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
-	// 导入的旧版配置与启动加载执行相同的格式迁移
+	importAppearance := importedConf.Appearance.Load() != nil
+	importOCR := importedConf.OCR.Load() != nil
+	importSnippet := importedConf.Snippet.Load() != nil
+	importVariables := importedConf.Variables.Load() != nil
+	// 导入的旧版配置与启动加载执行相同的格式迁移。
 	model.ApplyImportedConfMigrations(importedConf, data)
 	preserveImportedAISecrets(importedConf.AI.Load(), model.Conf.AI.Load())
 	if err = validateAIProviderHeaders(importedConf.AI.Load()); err != nil {
@@ -695,6 +702,36 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 	}
 
 	model.NormalizeAppConf(importedConf)
+	if err = model.LoadChatGPTAccountBindings(importedConf.AI.Load()); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	// 旧版包缺失的新增配置段保持不变；外观资源列表仍以目标工作空间为准。
+	if importAppearance {
+		appearance := importedConf.Appearance.Load()
+		if current := model.Conf.Appearance.Load(); current != nil {
+			appearance.DarkThemes = current.DarkThemes
+			appearance.LightThemes = current.LightThemes
+			appearance.Icons = current.Icons
+		}
+		if appearance.Lang == "" {
+			appearance.Lang = importedConf.Lang
+		}
+		if appearance.Lang == "" {
+			appearance.Lang = model.Conf.Lang
+		}
+		appearance.Lang = util.LangToBCP47(appearance.Lang)
+		model.Conf.Lang = appearance.Lang
+		model.Conf.Appearance.Store(appearance)
+	}
+	if importOCR {
+		model.Conf.OCR.Store(importedConf.OCR.Load())
+	}
+	if importSnippet {
+		model.Conf.Snippet.Store(importedConf.Snippet.Load())
+	}
+	if importVariables {
+		model.Conf.Variables.Store(importedConf.Variables.Load())
+	}
 	model.Conf.FileTree.Store(importedConf.FileTree.Load())
 	model.Conf.Tag.Store(importedConf.Tag.Load())
 	model.Conf.Editor.Store(importedConf.Editor.Load())
@@ -1365,22 +1402,36 @@ var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.C
 var exit = contractHandler(apicontract.SystemExit, exitSystem)
 
 var closeSystem = model.Close
+var recoverSystemExit = model.RecoverWorkspaceExit
+var finishSystemExit = model.ExitKernel
 
 func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontract.Response[apicontract.SystemExitData] {
 	setCurrentWorkspace := true
 	if request.SetCurrentWorkspace != nil {
 		setCurrentWorkspace = *request.SetCurrentWorkspace
 	}
-	exitCode, installPkgPath := closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+	var exitCode int
+	var installPkgPath string
+	if request.RecoverExit != nil {
+		exitCode, installPkgPath = recoverSystemExit(request.RecoverExit.PID, request.RecoverExit.StartedAt, request.RecoverExit.Force)
+	} else {
+		exitCode, installPkgPath = closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+	}
 	data := apicontract.SystemExitData{CloseTimeout: 0, InstallPkgPath: installPkgPath}
 	switch exitCode {
 	case 0:
-		// Close 返回后同步和 defer 清理均已完成，此时再通知移动端宿主退出。
-		util.BroadcastByType("main", "exit", 0, "", nil)
+		// 清理和响应写入完成后通知宿主退出，再启动服务退出流程。
+		return apicontract.WithAfterWrite(apicontract.Success(data), func() {
+			util.BroadcastByType("main", "exit", 0, "", nil)
+			finishSystemExit()
+		})
 	case 1: // 同步执行失败
 		return apicontract.SystemExit.FailureWithData(1, model.Conf.Language(96)+"<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">"+model.Conf.Language(97)+"</button>", data)
 	case 2: // 提示新安装包
 		return apicontract.SystemExit.FailureWithData(2, model.Conf.Language(61), data)
+	case 3: // 仍有界面处理退出结果，宿主继续等待。
+		return apicontract.SystemExit.FailureWithData(3, "", data)
+	default:
+		return apicontract.SystemExit.FailureWithData(-1, "Workspace exit no longer matches", data)
 	}
-	return apicontract.Success(data)
 }

@@ -260,7 +260,7 @@ func TestDeletedFlashcardBlockReplayRetainsDeckAttribute(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 		restored, err := LoadTreeByBlockID(fixture.sourceID)
 		if err != nil {
@@ -308,7 +308,7 @@ func TestFlashcardCopyRedoPreservesNormalizedAttributes(t *testing.T) {
 	}
 	check()
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
 		check()

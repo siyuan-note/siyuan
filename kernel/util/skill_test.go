@@ -40,13 +40,6 @@ func touchSkillMd(t *testing.T, parts ...string) {
 	}
 }
 
-// sorted 把 findSkillDirs 的返回结果排序后比较，避免遍历顺序影响断言。
-func sorted(ss []string) []string {
-	out := append([]string(nil), ss...)
-	sort.Strings(out)
-	return out
-}
-
 // toSlashSet 把路径分隔符统一为 /，便于跨平台断言。
 func toSlashSet(ss []string) []string {
 	out := make([]string, len(ss))
@@ -306,7 +299,7 @@ func TestLoadSkillCapsManifestTraversal(t *testing.T) {
 	workspaceRoot, _ := setSkillTestRoots(t)
 	writeSkill(t, workspaceRoot, "many-dirs", "many-dirs", "description", "body")
 	skillDir := filepath.Join(workspaceRoot, "many-dirs")
-	for i := 0; i < maxSkillResourceVisited; i++ {
+	for i := range maxSkillResourceVisited {
 		if err := os.Mkdir(filepath.Join(skillDir, fmt.Sprintf("empty-%04d", i)), 0755); err != nil {
 			t.Fatal(err)
 		}

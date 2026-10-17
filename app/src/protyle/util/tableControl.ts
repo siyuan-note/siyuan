@@ -1,11 +1,11 @@
 import {toggleMenu} from "../../menus/menuToggle";
 import {MenuItem} from "../../menus/Menu";
 import {getTableGridRect, TableGridCache} from "./tableGridCache";
-import {getVirtualTableGrid, setTableVirtualSelection, TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
+import {getVirtualTableGrid, restoreTableVirtualizationDOM, setTableVirtualSelection, TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
 import {clearTableCellContent, getTableCellPlainText, mergeTableCellContents} from "./tableCellRich";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
+import {copyPlainText, encodeBase64, isMac, readClipboard, writeClipboardData} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {paste} from "./paste";
 import {getEditorRange, getUndoFocusContext} from "./selection";
@@ -29,6 +29,8 @@ import {
     getTableResizeCount,
     isTableCellContentEmpty,
     isTableResizeControlVisible,
+    TABLE_ADD_CONTROL_GAP,
+    TABLE_ADD_CONTROL_THICKNESS,
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
 import {getTableCellsInRectangle, getTableDragEdge} from "./tableSelection";
@@ -47,6 +49,11 @@ import {
 } from "../toolbar/inlineStyle";
 import {escapeAttr} from "../../util/escape";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
+import {isMobile} from "../../util/functions";
+import {TableTouchControl, type ITableTouchState} from "./tableTouch";
+import {finishTableCellEditing} from "./tableCellRichContext";
+import {buildBlockDOMClipboardRichData} from "./blockDOMClipboard";
+import {showMessage} from "../../dialog/message";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -320,8 +327,6 @@ export const getTableCellVerticalAlignmentMenus = (
 };
 
 const TABLE_HANDLE_THICKNESS = 16;
-const TABLE_ADD_CONTROL_THICKNESS = 16;
-const TABLE_ADD_CONTROL_GAP = 10;
 const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
 const TABLE_RESIZE_DRAG_THRESHOLD = 4;
 const TABLE_NON_TEXT_CONTENT_SELECTOR = "img, audio, video, iframe, canvas, svg, math, input, textarea, select, button, object, embed";
@@ -360,6 +365,9 @@ export class TableControl {
     private pinnedTableResizeObserver: ResizeObserver;
     private pinnedTableActions = new Map<HTMLTableElement, HTMLElement>();
     private abortController = new AbortController();
+    private touch: TableTouchControl;
+    private dragCleanup?: () => void;
+    private columnResizeCleanup?: () => void;
 
     constructor(protyle: IProtyle, wysiwygElement: HTMLElement) {
         this.protyle = protyle;
@@ -397,11 +405,55 @@ export class TableControl {
         this.dropIndicator = this.element.querySelector(".protyle-table-control__drop");
         protyle.element.append(this.element);
         this.bindEvents();
+        if (isMobile()) {
+            this.touch = new TableTouchControl(wysiwygElement, this.element, () => protyle.contentElement || protyle.element, {
+                enabled: () => !protyle.disabled && !protyle.toolbar.isMultiSelectMode(),
+                activate: cell => {
+                    if (protyle.disabled || !finishTableCellEditing(cell)) {
+                        return false;
+                    }
+                    this.clear();
+                    this.caretCell = cell;
+                    this.blurTouchEditor();
+                    return true;
+                },
+                state: () => this.getTouchState(),
+                select: (cell, mode, toggle, extend) => this.startTouchSelection(cell, mode, toggle, extend),
+                range: (anchor, active) => this.selectCellRange(anchor, active),
+                drag: (event, cell, mode, handle) => this.startRowColumnDrag(event, mode, handle.getBoundingClientRect()),
+                resize: (event, cell, type) => {
+                    if (protyle.disabled || !finishTableCellEditing(cell)) {
+                        return;
+                    }
+                    this.blurTouchEditor();
+                    this.hoverCell = cell;
+                    this.startResize(event, type);
+                },
+                add: (cell, type) => {
+                    if (!protyle.disabled && !this.suppressAddClick && finishTableCellEditing(cell)) {
+                        this.hoverCell = cell;
+                        this.addAtEnd(type);
+                    }
+                },
+                width: (event, cell, column) => this.startColumnResize(event, cell, column),
+                menu: () => this.openMenu(0, 0),
+                selectAll: () => {
+                    const state = this.getTouchState();
+                    if (state?.selection) {
+                        const {grid} = state;
+                        this.selectCellRange(grid.grid[0][0], grid.grid[grid.rowCount - 1][grid.columnCount - 1]);
+                    }
+                },
+                copy: () => this.execClipboardCommand("copy"),
+                clear: () => this.clearCells(),
+                finish: () => this.clear(),
+                render: () => this.scheduleRender(),
+            });
+        }
         this.pinnedTableResizeObserver = new ResizeObserver(() => this.scheduleRender());
         this.observer = new MutationObserver(mutations => {
             if (this.resizeState && !this.resizeState.node.isConnected) {
-                this.resizeState = undefined;
-                this.resizeLabel.classList.add("fn__none");
+                this.cancelResize();
             }
             if (this.selection && (!this.selection.node.isConnected || !this.selection.activeCell.isConnected)) {
                 this.clear();
@@ -447,6 +499,9 @@ export class TableControl {
     }
 
     public destroy() {
+        this.touch?.destroy();
+        this.dragCleanup?.();
+        this.columnResizeCleanup?.();
         this.cancelResize();
         this.abortController.abort();
         this.observer.disconnect();
@@ -459,6 +514,9 @@ export class TableControl {
     }
 
     public clear() {
+        this.touch?.reset();
+        this.dragCleanup?.();
+        this.columnResizeCleanup?.();
         if (this.selection) {
             setTableVirtualSelection(this.selection.table);
         }
@@ -474,6 +532,142 @@ export class TableControl {
         this.dropIndicator.classList.add("fn__none");
         this.resizeLabel.classList.add("fn__none");
         this.scheduleRender();
+    }
+
+    public startTouchSelection(cell: HTMLTableCellElement, mode: TableSelectionMode = "cell", toggle = false,
+                               extend = false) {
+        if (!this.touch || this.protyle.disabled || cell?.closest(".protyle-wysiwyg") !== this.wysiwygElement ||
+            !getTableNode(cell) || !finishTableCellEditing(cell)) {
+            return false;
+        }
+        restoreTableVirtualizationDOM(cell.closest("table"));
+        const entering = !this.selection;
+        this.caretCell = cell;
+        this.selectFromCell(mode, cell, toggle, extend);
+        if (entering) {
+            this.blurTouchEditor();
+        }
+        return true;
+    }
+
+    private blurTouchEditor() {
+        (document.activeElement as HTMLElement)?.blur();
+        window.dispatchEvent(new Event("siyuan-mobile-table-action"));
+    }
+
+    public hasTouchSelection() {
+        return !!this.touch && !!this.selection;
+    }
+
+    private getTouchState(): ITableTouchState | undefined {
+        const cell = [this.selection?.activeCell, this.caretCell, this.hoverCell].find(item => item?.isConnected);
+        const node = getTableNode(cell);
+        if (this.protyle.disabled || !cell?.isConnected || !node || !this.wysiwygElement.contains(cell) ||
+            this.protyle.element.closest(".fn__none, [inert]")) {
+            return;
+        }
+        const table = cell.closest("table");
+        const grid = this.selectionGrid || this.gridCache.get(table).grid;
+        const info = grid.cellInfos.find(item => item.cell === cell);
+        const row = info && table.rows[info.row]?.getBoundingClientRect();
+        const column = info && this.getColumnRect(table, grid, info.col);
+        if (!row || !column) {
+            return;
+        }
+        const viewport = this.getTableGridViewportRect(table);
+        const visualViewport = window.visualViewport;
+        viewport.left = Math.max(viewport.left, visualViewport?.offsetLeft || 0);
+        viewport.right = Math.min(viewport.right, window.innerWidth);
+        viewport.top = Math.max(viewport.top, visualViewport?.offsetTop || 0);
+        viewport.bottom = Math.min(viewport.bottom, (visualViewport?.height || window.innerHeight) +
+            (visualViewport?.offsetTop || 0), window.innerHeight);
+        return {cell, table, viewport, grid,
+            row: {index: info.row, top: row.top, bottom: row.bottom},
+            column: {index: info.col, left: column.left, right: column.right},
+            selection: this.selection ? {
+                mode: this.selection.mode,
+                cells: this.getSelectedCells(),
+                indexes: this.selection.indexes,
+                rectangle: this.isRectangle(),
+            } : undefined};
+    }
+
+    private startColumnResize(event: PointerEvent, cell: HTMLTableCellElement, index: number) {
+        if (event.button !== 0 || this.protyle.disabled || !finishTableCellEditing(cell)) {
+            return;
+        }
+        const node = getTableNode(cell);
+        const table = cell.closest("table");
+        restoreTableVirtualizationDOM(table);
+        const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[index];
+        if (!node || !column) {
+            return;
+        }
+        this.columnResizeCleanup?.();
+        const oldHTML = node.outerHTML;
+        const oldStyle = column.getAttribute("style");
+        const cells = buildTableGrid(table).cellInfos.filter(info => info.col === index)
+            .map(info => ({cell: info.cell, style: info.cell.getAttribute("style")}));
+        const width = this.getColumnRect(table, buildTableGrid(table), index)?.width || TABLE_DEFAULT_COLUMN_WIDTH;
+        const start = event.clientX;
+        this.blurTouchEditor();
+        const controller = new AbortController();
+        const restore = () => {
+            if (oldStyle === null) {
+                column.removeAttribute("style");
+            } else {
+                column.setAttribute("style", oldStyle);
+            }
+            cells.forEach(({cell: target, style}) => {
+                if (style === null) {
+                    target.removeAttribute("style");
+                } else {
+                    target.setAttribute("style", style);
+                }
+            });
+        };
+        const cleanup = () => {
+            controller.abort();
+            this.columnResizeCleanup = undefined;
+            this.resizeLabel.classList.add("fn__none");
+        };
+        this.columnResizeCleanup = () => {
+            restore();
+            cleanup();
+        };
+        document.addEventListener("pointermove", move => {
+            if (move.pointerId !== event.pointerId) {
+                return;
+            }
+            move.preventDefault();
+            const nextWidth = Math.max(TABLE_DEFAULT_COLUMN_WIDTH, Math.round(width + move.clientX - start));
+            column.style.width = `${nextWidth}px`;
+            column.style.removeProperty("min-width");
+            cells.forEach(({cell: target}) => target.style.removeProperty("width"));
+            this.resizeLabel.textContent = `${nextWidth}px`;
+            this.setPosition(this.resizeLabel, move.clientX + 12, move.clientY + 12);
+            this.resizeLabel.classList.remove("fn__none");
+        }, {signal: controller.signal, passive: false});
+        const end = (up: PointerEvent) => {
+            if (up.pointerId !== event.pointerId) {
+                return;
+            }
+            if (up.type === "pointercancel") {
+                restore();
+            } else if (node.outerHTML !== oldHTML) {
+                updateTransaction(this.protyle, node, oldHTML);
+            }
+            cleanup();
+            this.scheduleRender();
+        };
+        document.addEventListener("pointerup", end, {signal: controller.signal});
+        document.addEventListener("pointercancel", end, {signal: controller.signal});
+        window.addEventListener("blur", () => this.columnResizeCleanup?.(), {signal: controller.signal});
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                this.columnResizeCleanup?.();
+            }
+        }, {signal: controller.signal});
     }
 
     public setHidden(hidden: boolean) {
@@ -540,6 +734,9 @@ export class TableControl {
             this.scheduleRender();
         }, {signal});
         this.wysiwygElement.addEventListener("pointerdown", event => {
+            if (this.touch) {
+                return;
+            }
             if (event.button === 0 && !(event.ctrlKey && isMac()) &&
                 !(event.target as Element).closest(".protyle-table-control")) {
                 this.clear();
@@ -618,8 +815,9 @@ export class TableControl {
                 }
                 return;
             }
-            if (this.element.contains(target) || this.selection.node.contains(target) ||
-                document.getElementById("commonMenu")?.contains(target)) {
+            if (this.element.contains(target) || this.touch?.containsToolbar(target) || this.selection.node.contains(target) ||
+                document.getElementById("commonMenu")?.contains(target) ||
+                this.touch && document.getElementById("commonMenuScrim")?.contains(target)) {
                 return;
             }
             this.clear();
@@ -670,8 +868,16 @@ export class TableControl {
                 top: event.deltaY,
             });
         }, {passive: false, signal});
-        this.element.addEventListener("pointerdown", event => this.handlePointerDown(event), {signal});
-        this.element.addEventListener("click", event => this.handleClick(event), {signal});
+        this.element.addEventListener("pointerdown", event => {
+            if (!this.touch) {
+                this.handlePointerDown(event);
+            }
+        }, {signal});
+        this.element.addEventListener("click", event => {
+            if (!this.touch) {
+                this.handleClick(event);
+            }
+        }, {signal});
         this.element.addEventListener("contextmenu", event => {
             const type = (event.target as Element).closest<HTMLElement>("[data-type]")?.dataset.type;
             const cell = this.getControlCell(type);
@@ -760,7 +966,7 @@ export class TableControl {
     }
 
     private handleTablePointerMove(event: PointerEvent, fromControl: boolean) {
-        if (event.buttons !== 0) {
+        if (this.touch || event.buttons !== 0) {
             return;
         }
         const eventCell = getCell(event.target);
@@ -828,7 +1034,11 @@ export class TableControl {
             return;
         }
         this.selectFromCell(type, cell, isPrimaryModifier(event), event.shiftKey);
-        if (!this.selection) {
+        this.startRowColumnDrag(event, type, (type === "row" ? this.rowHandle : this.columnHandle).getBoundingClientRect());
+    }
+
+    private startRowColumnDrag(event: PointerEvent, type: "row" | "column", handleRect: DOMRect) {
+        if (this.protyle.disabled || !this.selection) {
             return;
         }
         const grid = buildTableGrid(this.selection.table);
@@ -836,7 +1046,7 @@ export class TableControl {
             (type === "row" && this.selection.indexes.size > 1 && this.selection.indexes.has(0))) {
             return;
         }
-        const handleRect = (type === "row" ? this.rowHandle : this.columnHandle).getBoundingClientRect();
+        this.dragCleanup?.();
         this.dragState = {
             mode: type,
             startX: event.clientX,
@@ -848,14 +1058,43 @@ export class TableControl {
             handleSize: type === "row" ? handleRect.height : handleRect.width,
             cellInfos: new Map(grid.cellInfos.map(info => [info.cell, info])),
         };
-        const move = (moveEvent: PointerEvent) => this.handleDragMove(moveEvent);
+        const move = (moveEvent: PointerEvent) => {
+            if (moveEvent.pointerId === event.pointerId) {
+                moveEvent.preventDefault();
+                this.handleDragMove(moveEvent);
+            }
+        };
         const up = (upEvent: PointerEvent) => {
+            if (upEvent.pointerId !== event.pointerId) {
+                return;
+            }
+            this.dragCleanup?.();
+            if (upEvent.type === "pointercancel") {
+                this.dragState = undefined;
+                this.clearDragPreview();
+                this.dropIndicator.classList.add("fn__none");
+            } else {
+                this.handleDragEnd(upEvent);
+            }
+            this.scheduleRender();
+        };
+        const cancel = () => {
+            this.dragCleanup?.();
+            this.dragState = undefined;
+            this.clearDragPreview();
+            this.dropIndicator.classList.add("fn__none");
+        };
+        this.dragCleanup = () => {
             document.removeEventListener("pointermove", move);
             document.removeEventListener("pointerup", up);
-            this.handleDragEnd(upEvent);
+            document.removeEventListener("pointercancel", up);
+            window.removeEventListener("blur", cancel);
+            this.dragCleanup = undefined;
         };
-        document.addEventListener("pointermove", move);
+        document.addEventListener("pointermove", move, {passive: false});
         document.addEventListener("pointerup", up);
+        document.addEventListener("pointercancel", up);
+        window.addEventListener("blur", cancel);
     }
 
     private handleClick(event: MouseEvent) {
@@ -1085,8 +1324,13 @@ export class TableControl {
     }
 
     private scheduleRender() {
-        cancelAnimationFrame(this.frame);
-        this.frame = requestAnimationFrame(() => this.render());
+        if (this.frame) {
+            return;
+        }
+        this.frame = requestAnimationFrame(() => {
+            this.frame = 0;
+            this.render();
+        });
     }
 
     private setPosition(element: HTMLElement, left: number, top: number) {
@@ -1245,10 +1489,12 @@ export class TableControl {
         if (!state) {
             return;
         }
-        [this.rowHandle, this.columnHandle, this.cellHandle, this.addRowButton, this.addColumnButton,
-            this.addBothButton].forEach(item => {
-            item.classList.add("fn__none");
-            item.classList.remove("protyle-table-control__add--active");
+        const [addRowButton, addColumnButton, addBothButton] = this.touch?.renderResize() ||
+            [this.addRowButton, this.addColumnButton, this.addBothButton];
+        [this.rowHandle, this.columnHandle, this.cellHandle, addRowButton, addColumnButton,
+            addBothButton].forEach(item => {
+            item?.classList.add("fn__none");
+            item?.classList.remove("protyle-table-control__add--active");
         });
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
         const gridRect = getTableGridRect(state.table);
@@ -1262,28 +1508,28 @@ export class TableControl {
         const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
             isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                 TABLE_ADD_CONTROL_GAP);
-        if (state.mode === "row" || state.mode === "both") {
-            this.addRowButton.classList.remove("fn__none");
-            this.addRowButton.classList.add("protyle-table-control__add--active");
-            this.addRowButton.style.width = `${Math.max(0, tableViewportRect.width)}px`;
-            this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addRowButton, tableViewportRect.left + tableViewportRect.width / 2, rowControlCenter);
+        if (addRowButton && (state.mode === "row" || state.mode === "both")) {
+            addRowButton.classList.remove("fn__none");
+            addRowButton.classList.add("protyle-table-control__add--active");
+            addRowButton.style.width = `${Math.max(0, tableViewportRect.width)}px`;
+            addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            this.setPosition(addRowButton, tableViewportRect.left + tableViewportRect.width / 2, rowControlCenter);
         }
-        if ((state.mode === "column" || state.mode === "both") && columnControlVisible) {
-            this.addColumnButton.classList.remove("fn__none");
-            this.addColumnButton.classList.add("protyle-table-control__add--active");
-            this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.addColumnButton.style.height = `${Math.max(0, tableViewportRect.height)}px`;
-            this.setPosition(this.addColumnButton,
+        if (addColumnButton && (state.mode === "column" || state.mode === "both") && columnControlVisible) {
+            addColumnButton.classList.remove("fn__none");
+            addColumnButton.classList.add("protyle-table-control__add--active");
+            addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            addColumnButton.style.height = `${Math.max(0, tableViewportRect.height)}px`;
+            this.setPosition(addColumnButton,
                 addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                 tableViewportRect.top + tableViewportRect.height / 2);
         }
-        if (state.mode === "both" && columnControlVisible) {
-            this.addBothButton.classList.remove("fn__none");
-            this.addBothButton.classList.add("protyle-table-control__add--active");
-            this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addBothButton,
+        if (addBothButton && state.mode === "both" && columnControlVisible) {
+            addBothButton.classList.remove("fn__none");
+            addBothButton.classList.add("protyle-table-control__add--active");
+            addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            this.setPosition(addBothButton,
                 addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                 rowControlCenter);
         }
@@ -1340,6 +1586,7 @@ export class TableControl {
 
     private render() {
         this.renderPinnedTableFrames();
+        this.touch?.render();
         if (this.resizeState?.dragging && this.resizeState.table.isConnected) {
             this.renderResize();
             return;
@@ -1357,8 +1604,10 @@ export class TableControl {
             item.classList.add("fn__none");
             item.classList.remove("protyle-table-control__add--active");
         });
-        this.resizeLabel.classList.add("fn__none");
-        if (visible) {
+        if (!this.columnResizeCleanup) {
+            this.resizeLabel.classList.add("fn__none");
+        }
+        if (visible && !this.touch) {
             const gridRect = getTableGridRect(table);
             const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
@@ -1431,7 +1680,7 @@ export class TableControl {
                     rowControlCenter);
             }
         }
-        if (!this.dragState && !this.selection && caretCell && getTableNode(caretCell) && !this.protyle.disabled) {
+        if (!this.touch && !this.dragState && !this.selection && caretCell && getTableNode(caretCell) && !this.protyle.disabled) {
             const table = caretCell.closest("table") as HTMLTableElement;
             const viewportRect = table ? this.getTableGridViewportRect(table) : undefined;
             if (viewportRect) {
@@ -1492,7 +1741,7 @@ export class TableControl {
                 const bottom = Math.max(...rects.map(rect => rect.bottom));
                 const rect = {left, top, right, bottom, width: right - left, height: bottom - top};
                 this.appendSelectionRect(rect, selectionViewportRect, selectionGridRect);
-                if (!this.dragState) {
+                if (!this.touch && !this.dragState) {
                     this.positionCellHandle(rect, selectionViewportRect);
                 }
             }
@@ -1500,7 +1749,7 @@ export class TableControl {
             this.getSelectedCells().forEach(item => {
                 this.appendSelectionRect(item.getBoundingClientRect(), selectionViewportRect, selectionGridRect);
             });
-            if (!this.dragState && this.selection.mode === "cell") {
+            if (!this.touch && !this.dragState && this.selection.mode === "cell") {
                 this.positionCellHandle(this.selection.activeCell.getBoundingClientRect(), selectionViewportRect);
             }
         }
@@ -1520,6 +1769,17 @@ export class TableControl {
                 const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
                 const mergedSelection = this.selection.mode !== "cell" && merged;
                 const rectangle = this.selection.mode !== "cell" || this.isRectangle();
+                if (this.touch) {
+                    menu.append(new MenuItem({
+                        id: "tableSelectAll",
+                        icon: "iconSelectAll",
+                        label: window.siyuan.languages.selectAll,
+                        click: () => {
+                            const grid = buildTableGrid(this.selection.table);
+                            this.selectCellRange(grid.grid[0][0], grid.grid[grid.rowCount - 1][grid.columnCount - 1]);
+                        },
+                    }).element);
+                }
                 menu.append(new MenuItem({
                     icon: "iconCopy",
                     label: window.siyuan.languages.copy,
@@ -1643,7 +1903,7 @@ export class TableControl {
                         }).element);
                     }
                 }
-                session.show(() => menu.popup({x, y}));
+                session.show(() => this.touch ? menu.fullscreen() : menu.popup({x, y}));
 
             },
         });
@@ -1813,6 +2073,10 @@ export class TableControl {
     }
 
     private execClipboardCommand(command: "copy" | "cut") {
+        if (this.touch) {
+            void this.writeTouchClipboard(command === "cut");
+            return;
+        }
         if (!this.selection?.activeCell.isConnected) {
             return;
         }
@@ -1824,6 +2088,10 @@ export class TableControl {
     }
 
     private copySelectionAsRichText() {
+        if (this.touch) {
+            void this.writeTouchClipboard(false, true);
+            return;
+        }
         const cells = this.getSelectedCells();
         const first = cells[0];
         const last = cells[cells.length - 1];
@@ -1848,20 +2116,57 @@ export class TableControl {
             return;
         }
         const cell = this.getSelectedCells()[0] || this.selection.activeCell;
+        const selection = this.selection;
+        const cells = this.getSelectedCells();
+        const oldHTML = selection.node.outerHTML;
         const range = getEditorRange(cell);
         range.selectNodeContents(cell);
         range.collapse(true);
         focusByRange(range);
-        if (document.queryCommandSupported("paste")) {
+        if (!this.touch && document.queryCommandSupported("paste")) {
             document.execCommand("paste");
         } else {
             try {
                 const text = await readClipboard();
+                if (this.touch && (!cell.isConnected || this.protyle.disabled || this.selection !== selection ||
+                    selection.node.outerHTML !== oldHTML || !this.hasSameSelectedCells(cells))) {
+                    return;
+                }
+                if (this.touch) {
+                    focusByRange(range);
+                }
                 paste(this.protyle, Object.assign(text, {target: cell}));
             } catch (error) {
                 console.log(error);
             }
         }
+    }
+
+    private async writeTouchClipboard(cut = false, richText = false) {
+        const selection = this.selection;
+        const content = this.getSelectionClipboardContent();
+        if (!selection || !content || cut && (this.protyle.disabled || !this.canMutateSelection())) {
+            return;
+        }
+        const oldHTML = selection.node.outerHTML;
+        const cells = this.getSelectedCells();
+        const rich = buildBlockDOMClipboardRichData(this.protyle.lute, content.textSiyuan);
+        const result = await writeClipboardData({textPlain: content.text, textHTML: rich.textHTML,
+            textSiyuan: richText ? undefined : rich.textSiyuan}, {fallbackToPlainText: !cut});
+        if (result.status === "failed") {
+            showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+            return;
+        }
+        // 等待剪贴板授权期间选区或内容可能变化，只有原始快照仍有效时才执行剪切。
+        if (cut && this.selection === selection && selection.node.isConnected &&
+            selection.node.outerHTML === oldHTML && !this.protyle.disabled && this.hasSameSelectedCells(cells)) {
+            this.deleteSelection(true);
+        }
+    }
+
+    private hasSameSelectedCells(cells: HTMLTableCellElement[]) {
+        const current = this.getSelectedCells();
+        return cells.length === current.length && cells.every((cell, index) => cell === current[index]);
     }
 
     private appendCellMenus(rectangle: boolean) {
@@ -1932,7 +2237,7 @@ export class TableControl {
     }
 
     private setCellStyle(property: string, value: string) {
-        if (!this.selection) {
+        if (this.protyle.disabled || !this.selection) {
             return;
         }
         setTableCellStyle(this.protyle, this.selection.node, this.getSelectedCells(), property, value);
@@ -1940,7 +2245,7 @@ export class TableControl {
     }
 
     private setSelectedColumnWidth(minWidth?: number) {
-        if (!this.selection || this.selection.mode !== "column") {
+        if (this.protyle.disabled || !this.selection || this.selection.mode !== "column") {
             return;
         }
         const oldHTML = this.selection.node.outerHTML;
@@ -1962,7 +2267,7 @@ export class TableControl {
     }
 
     private distributeSelectedColumnWidths() {
-        if (!this.selection || this.selection.mode !== "column") {
+        if (this.protyle.disabled || !this.selection || this.selection.mode !== "column") {
             return;
         }
         const columns = this.getSelectedColumns();
@@ -1994,7 +2299,7 @@ export class TableControl {
     }
 
     private clearCells() {
-        if (!this.selection) {
+        if (this.protyle.disabled || !this.selection) {
             return;
         }
         const oldHTML = this.selection.node.outerHTML;
@@ -2029,7 +2334,7 @@ export class TableControl {
     }
 
     private deleteSelection(clearOnly: boolean) {
-        if (!this.selection || (this.selection.mode === "cell" && !this.isRectangle())) {
+        if (this.protyle.disabled || !this.selection || (this.selection.mode === "cell" && !this.isRectangle())) {
             return;
         }
         if (clearOnly && this.selection.mode === "cell") {
@@ -2058,7 +2363,7 @@ export class TableControl {
     }
 
     private duplicateRowsOrColumns() {
-        if (!this.selection || this.selection.mode === "cell" || !this.canMutateSelection()) {
+        if (this.protyle.disabled || !this.selection || this.selection.mode === "cell" || !this.canMutateSelection()) {
             return;
         }
         const selection = this.selection;
@@ -2135,7 +2440,7 @@ export class TableControl {
     }
 
     private mergeCells() {
-        if (!this.selection || !this.isRectangle()) {
+        if (this.protyle.disabled || !this.selection || !this.isRectangle() || !this.isSelectionInOneSection()) {
             return;
         }
         const grid = buildTableGrid(this.selection.table);
@@ -2166,7 +2471,8 @@ export class TableControl {
     }
 
     public splitCell(cell: HTMLTableCellElement) {
-        if (!this.wysiwygElement.contains(cell) || !this.selectCellRange(cell, cell)) {
+        if (this.protyle.disabled || this.touch && !finishTableCellEditing(cell) ||
+            !this.wysiwygElement.contains(cell) || !this.selectCellRange(cell, cell)) {
             return;
         }
         const grid = buildTableGrid(this.selection.table);
@@ -2303,10 +2609,13 @@ export class TableControl {
             document.removeEventListener("pointermove", move);
             document.removeEventListener("pointerup", up);
             document.removeEventListener("pointercancel", cancel);
+            window.removeEventListener("blur", blur);
         };
+        const blur = () => this.cancelResize();
         document.addEventListener("pointermove", move);
         document.addEventListener("pointerup", up);
         document.addEventListener("pointercancel", cancel);
+        window.addEventListener("blur", blur);
     }
 
     private handleResizeMove(event: PointerEvent) {

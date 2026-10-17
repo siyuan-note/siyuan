@@ -8,6 +8,7 @@ import {createSectionRuntime} from "../util/sectionRuntime";
 import {shouldResetBottomBacklinkPanel} from "./editorRuntimeState";
 import {objEquals} from "../../util/functions";
 import {lineNumberRender} from "../../protyle/render/highlightRender";
+import {updatePageScrollButtons} from "../../protyle/scroll/pageButtons";
 /// #if MOBILE
 import {setTitleAutoDirection} from "../../protyle/render/autoDirection";
 /// #endif
@@ -17,6 +18,10 @@ const runtime = createSectionRuntime<Config.IEditor>({
     get: () => window.siyuan.config.editor,
     set: data => { window.siyuan.config.editor = data; },
     reactions: [{
+        name: "page-scroll-buttons",
+        changed: (old, next) => old.pageScrollButtons !== next.pageScrollButtons,
+        apply: updatePageScrollButtons,
+    }, {
         name: "backlink-panel",
         changed: () => true,
         apply: (old, next) => {
@@ -38,6 +43,7 @@ const runtime = createSectionRuntime<Config.IEditor>({
             setTitleAutoDirection(document.getElementById("toolbarName"), next.autoDirection);
             /// #endif
             getAllEditor().forEach(({protyle}) => {
+                if (old.blockGutterMode !== next.blockGutterMode) protyle.gutter?.element.classList.add("fn__none");
                 if (old.keepLoadedContent !== next.keepLoadedContent) protyle.scroll.keepLoadedContent = next.keepLoadedContent;
                 protyle.databaseAttributePanel?.updateDisplayConfig();
                 reloadProtyle(protyle, false);

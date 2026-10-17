@@ -60,6 +60,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/webp"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -668,7 +669,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	for _, tree := range trees {
 		treenode.RemapTabsActiveIDs(tree.Root, blockIDs)
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
-		treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
 				return ast.WalkContinue
 			}
@@ -1991,6 +1992,16 @@ func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yf
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
+	}
+	if first := ret.Root.FirstChild; first != nil && first.Type == ast.NodeYamlFrontMatter {
+		attrs := map[string]any{}
+		if content := first.ChildByType(ast.NodeYamlFrontMatterContent); content != nil {
+			if err := yaml.Unmarshal(content.Tokens, &attrs); err != nil {
+				// 无效的元数据按普通 Markdown 解析，保留开头分隔线之间的正文。
+				luteEngine.SetYamlFrontMatter(false)
+				ret = parse.Parse("", markdown, luteEngine.ParseOptions)
+			}
+		}
 	}
 	lute.NormalizeMarkdownTableCells(ret)
 	if footnotes {

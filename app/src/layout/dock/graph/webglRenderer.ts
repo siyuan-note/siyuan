@@ -472,7 +472,7 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         gl.vertexAttribDivisor(location, divisor);
     }
 
-    private createStaticBuffer(data: Float32Array) {
+    private createStaticBuffer(data: Float32Array<ArrayBuffer>) {
         const buffer = this.createBuffer();
         this.upload(buffer, data, this.gl.STATIC_DRAW);
         return buffer;

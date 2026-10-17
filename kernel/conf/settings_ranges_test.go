@@ -99,3 +99,26 @@ func TestNormalizeSettingsAgentRanges(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeSettingsEmbeddingRanges(t *testing.T) {
+	constructor := func() *Embedding { return NewAI().Embedding }
+	normalize := func(embedding *Embedding) *Embedding {
+		ai := NewAI()
+		ai.Embedding = embedding
+		return NormalizeAI(ai).Embedding
+	}
+	checkNormalizedIntValues(t, constructor, normalize, "Concurrency",
+		[][2]int{{-1, 8}, {0, 8}, {1, 1}, {8, 8}, {64, 64}, {65, 64}, {math.MaxInt, 64}})
+	checkNormalizedIntValues(t, constructor, normalize, "BatchSize",
+		[][2]int{{-1, 10}, {0, 10}, {1, 1}, {10, 10}, {128, 128}, {129, 128}, {math.MaxInt, 128}})
+	for _, body := range []string{`{}`, `{"embedding":null}`, `{"embedding":{"enabled":true,"apiKey":"existing"}}`} {
+		var ai AI
+		if err := json.Unmarshal([]byte(body), &ai); err != nil {
+			t.Fatal(err)
+		}
+		embedding := NormalizeAI(&ai).Embedding
+		if embedding.Concurrency != 8 || embedding.BatchSize != 10 {
+			t.Fatalf("legacy configuration %s has unexpected defaults: %+v", body, embedding)
+		}
+	}
+}

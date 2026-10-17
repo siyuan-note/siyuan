@@ -3,7 +3,7 @@ import {Menu} from "../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {upDownHint} from "../../../util/upDownHint";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getAVBlockRefSubtype} from "./cellValue";
 import {getAVColorStyle} from "./color";
 import {createAVPlainTextEditValue} from "./richTextValue";

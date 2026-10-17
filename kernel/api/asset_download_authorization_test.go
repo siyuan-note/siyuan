@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -31,7 +32,7 @@ func TestAPIContractDeferredAssetSymlinkWorkspace(t *testing.T) {
 	testDeferredAssetAPIAuthorizationAndMetadata(t, true)
 }
 
-func testDeferredAssetAPIAuthorizationAndMetadata(t *testing.T, symlinkWorkspace bool) {
+func setupDeferredAssetAPIWorkspace(t *testing.T, symlinkWorkspace bool, plainContent []byte) (map[string][]byte, []*entity.File) {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	originalConf := model.Conf
@@ -119,6 +120,9 @@ func testDeferredAssetAPIAuthorizationAndMetadata(t *testing.T, symlinkWorkspace
 		boxID + "/assets/private.bin": []byte("locked ciphertext fixture"),
 		boxID + "/.siyuan/conf.json":  boxConfData,
 	}
+	if plainContent != nil {
+		files["assets/plain.bin"] = plainContent
+	}
 	for name, data := range files {
 		absPath := filepath.Join(base, "full", "data", filepath.FromSlash(name))
 		if err = os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
@@ -142,6 +146,13 @@ func testDeferredAssetAPIAuthorizationAndMetadata(t *testing.T, symlinkWorkspace
 	if err != nil || len(deferred) != 2 {
 		t.Fatalf("expected two deferred assets: %+v, %v", deferred, err)
 	}
+	return files, deferred
+}
+
+func testDeferredAssetAPIAuthorizationAndMetadata(t *testing.T, symlinkWorkspace bool) {
+	t.Helper()
+	files, deferred := setupDeferredAssetAPIWorkspace(t, symlinkWorkspace, nil)
+	const boxID = "20260905123456-abcdefg"
 	statePath := filepath.Join(util.ConfDir, "asset-downloads.json")
 	stateBefore, err := os.ReadFile(statePath)
 	if err != nil {

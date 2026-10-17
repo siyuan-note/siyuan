@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"math/rand"
 	"os"
@@ -755,17 +756,13 @@ func applyFilterDefaultValues0(filters []*av.ViewFilter, attrView *av.AttributeV
 
 func cloneDefaultValues(values map[string]*av.Value) (ret map[string]*av.Value) {
 	ret = make(map[string]*av.Value, len(values))
-	for key, value := range values {
-		ret[key] = value
-	}
+	maps.Copy(ret, values)
 	return
 }
 
 func cloneBoolMap(values map[string]bool) (ret map[string]bool) {
 	ret = make(map[string]bool, len(values))
-	for key, value := range values {
-		ret[key] = value
-	}
+	maps.Copy(ret, values)
 	return
 }
 
@@ -867,16 +864,12 @@ func applyAttributeViewContextFilterDefaultValue(attrView *av.AttributeView, add
 
 func replaceDefaultValues(target, source map[string]*av.Value) {
 	clear(target)
-	for key, value := range source {
-		target[key] = value
-	}
+	maps.Copy(target, source)
 }
 
 func replaceBoolMap(target, source map[string]bool) {
 	clear(target)
-	for key, value := range source {
-		target[key] = value
-	}
+	maps.Copy(target, source)
 }
 
 func (tx *Transaction) doSortAttrViewGroup(operation *Operation) (ret *TxErr) {
@@ -2679,10 +2672,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	if 1 > pageSize {
 		pageSize = 16
 	}
-	start := (page - 1) * pageSize
-	if len(keyValues.Values) < start {
-		start = len(keyValues.Values)
-	}
+	start := min(len(keyValues.Values), (page-1)*pageSize)
 	end := min(len(keyValues.Values), start+pageSize)
 	keyValues.Values = keyValues.Values[start:end]
 	return
@@ -4841,7 +4831,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 	view := attrView.GetView(operation.ID)
 	if nil == view {
 		logging.LogErrorf("get view failed: %s", operation.BlockID)
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: av.ErrViewNotFound.Error()}
 	}
 	viewID := view.ID
 	previousViewID := operation.PreviousID
@@ -5665,7 +5655,7 @@ func (tx *Transaction) doSetAttrViewContextFilter(operation *Operation) (ret *Tx
 }
 
 // resolveAttributeViewFilterContext 将数据库块所在根文档映射为关联目标数据库的条目 ID。
-func resolveAttributeViewFilterContext(attrView *av.AttributeView, view *av.View,
+func resolveAttributeViewFilterContext(attrView *av.AttributeView, _ *av.View,
 	blockID string) (*av.FilterContext, error) {
 	if nil == attrView || "" == blockID {
 		return nil, nil
@@ -6110,7 +6100,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	operationData := operation.Data.(any)
+	operationData := operation.Data
 	data, err := gulu.JSON.MarshalJSON(operationData)
 	if err != nil {
 		return
@@ -6151,7 +6141,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 		return
 	}
 	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID,
-		operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.attributeViewAutomation)
+		operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.attributeViewAutomation, operation.attributeViewCollectionRuleID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -6170,7 +6160,7 @@ type insertAttrViewBlockResult struct {
 }
 
 func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string,
-	ignoreDefaultFill, databaseScope bool) (result *insertAttrViewBlockResult, err error) {
+	ignoreDefaultFill, databaseScope bool, collectionRuleIDs ...string) (result *insertAttrViewBlockResult, err error) {
 	result = &insertAttrViewBlockResult{}
 	if 0 == len(srcs) {
 		return
@@ -6245,7 +6235,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, databaseScope, tree, tx, result); nil != avErr {
+		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, databaseScope, tree, tx, result, collectionRuleIDs...); nil != avErr {
 			err = avErr
 			return
 		}
@@ -6268,7 +6258,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	return
 }
 
-func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill, databaseScope bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
+func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill, databaseScope bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult, collectionRuleIDs ...string) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		if err = validateAttributeViewBinding(avID, tree); err != nil {
@@ -6335,6 +6325,9 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, RefSubtype: blockRefSubtype, Created: now, Updated: now}}
 	if !isDetached {
 		blockValue.Block.ID = addingBoundBlockID
+		if len(collectionRuleIDs) > 0 {
+			blockValue.Block.CollectionRuleID = collectionRuleIDs[0]
+		}
 	}
 
 	blockValues.Values = append(blockValues.Values, blockValue)
@@ -8013,6 +8006,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 				}
 			}
 			blockVal.IsDetached = isDetached
+			blockVal.Block.CollectionRuleID = ""
 			if !isDetached {
 				if "" != blockVal.Block.ID && blockVal.Block.ID != newNodeID {
 					unbindBlockAv(tx, avID, blockVal.Block.ID)
@@ -8234,6 +8228,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	now := time.Now().UnixMilli()
 	oldIsDetached := blockVal.IsDetached
 	oldBoundBlockID := blockVal.Block.ID
+	oldCollectionRuleID := blockVal.Block.CollectionRuleID
 	if nil == context {
 		for _, value := range keyValues.Values {
 			if itemID == value.BlockID {
@@ -8291,6 +8286,12 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	updatedVal.BlockID = itemID
 	updatedVal.Type = valueType
 	updatedVal.CreatedAt = valueCreatedAt
+	if av.KeyTypeBlock == valueType && updatedVal.Block != nil {
+		updatedVal.Block.CollectionRuleID = ""
+		if !updatedVal.IsDetached && !oldIsDetached && updatedVal.Block.ID == oldBoundBlockID {
+			updatedVal.Block.CollectionRuleID = oldCollectionRuleID
+		}
+	}
 	if av.KeyTypeBlock == valueType && !updatedVal.IsDetached {
 		if updatedVal.Block == nil {
 			return nil, ErrBlockNotFound
@@ -8476,12 +8477,10 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		}
 	}
 
-	if nil != blockVal {
-		blockVal.Block.Updated = now
-		blockVal.SetUpdatedAt(now)
-		if isUpdatingBlockKey {
-			blockVal.IsDetached = val.IsDetached
-		}
+	blockVal.Block.Updated = now
+	blockVal.SetUpdatedAt(now)
+	if isUpdatingBlockKey {
+		blockVal.IsDetached = val.IsDetached
 	}
 	val.SetUpdatedAt(now)
 
@@ -8671,7 +8670,6 @@ func unbindBlockAv(tx *Transaction, avID, nodeID string) {
 		logging.LogWarnf("set node [%s] attrs failed: %s", nodeID, err)
 		return
 	}
-	return
 }
 
 func (tx *Transaction) doSortAttrViewBinding(operation *Operation) (ret *TxErr) {
@@ -8746,7 +8744,6 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 	}
 
 	bindBlockAv0(tx, avID, node, tree)
-	return
 }
 
 func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree) {
@@ -8778,7 +8775,6 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)
 		return
 	}
-	return
 }
 
 func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {

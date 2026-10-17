@@ -1,0 +1,6 @@
+.git
+.cache
+**/node_modules
+**/__pycache__
+app/build
+app/stage/build

@@ -1,8 +1,25 @@
+.export-img__options {
+  justify-content: flex-start;
+  gap: 8px;
+
+  > label {
+    flex-shrink: 0;
+  }
+
+  > input {
+    min-width: 120px;
+  }
+}
+
 .export-img {
   box-sizing: border-box;
   position: relative;
   border: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius-b);
+
+  a {
+    color: var(--b3-protyle-inline-link-color);
+  }
 
   // 图片导出只保留脑图内容，不包含悬停控件和选中状态。
   .mindmap-view {

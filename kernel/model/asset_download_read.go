@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -32,10 +33,10 @@ func ResolveAssetPathWithMissingLeaf(absPath string) (string, error) {
 	current := filepath.Clean(absPath)
 	var missing []string
 	for {
-		resolved, err := ResolveRealPath(current)
+		resolved, err := util.ResolveRealPath(current)
 		if err == nil {
-			for i := len(missing) - 1; i >= 0; i-- {
-				resolved = filepath.Join(resolved, missing[i])
+			for _, m := range slices.Backward(missing) {
+				resolved = filepath.Join(resolved, m)
 			}
 			return resolved, nil
 		}
@@ -104,8 +105,8 @@ func deferredAssetPathFromFiles(relativePath, boxID string, includeEncrypted boo
 			}
 			root, rootErr := ResolveAssetPathWithMissingLeaf(filepath.Join(util.DataDir, resolvedBoxID, "assets"))
 			resolved, resolveErr := ResolveAssetPathWithMissingLeaf(absPath)
-			notebookRoot, notebookErr := ResolveRealPath(filepath.Join(util.DataDir, resolvedBoxID))
-			dataRoot, dataErr := ResolveRealPath(util.DataDir)
+			notebookRoot, notebookErr := util.ResolveRealPath(filepath.Join(util.DataDir, resolvedBoxID))
+			dataRoot, dataErr := util.ResolveRealPath(util.DataDir)
 			if rootErr != nil || resolveErr != nil || notebookErr != nil || dataErr != nil ||
 				!gulu.File.IsSubPath(dataRoot, notebookRoot) ||
 				!gulu.File.IsSubPath(notebookRoot, root) || !gulu.File.IsSubPath(root, resolved) {
@@ -214,7 +215,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			if err := treenode.MaterializeTableCellRichExport(tree.Root); err != nil {
 				return err
 			}
-			defer treenode.MaterializeTabTitles(tree.Root)()
+			defer treenode.MaterializeInlineTitles(tree.Root)()
 		}
 		if includeFootnotes && confExportSnapshot.BlockRefMode == 4 && tree.Root.Type == ast.NodeDocument {
 			// 按单文件导出的脚注展开规则收集资源，不受是否另行导出关联文档影响
@@ -234,7 +235,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 				trees[footnoteTree.ID] = &footnoteTree
 			}
 		}
-		treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			confSearchSnapshot := Conf.LoadSearch()
 
 			if !entering || node.Type != ast.NodeBlockQueryEmbedScript {
@@ -274,7 +275,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			avBoxID = tree.Box
 		}
 		avIDs := hashset.New()
-		treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			if entering && node.Type == ast.NodeAttributeView && node.AttributeViewID != "" {
 				walkRelationAvs(node.AttributeViewID, avBoxID, avIDs)
 			}

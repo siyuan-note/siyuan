@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"maps"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -85,6 +86,10 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	}
 
 	t.Cleanup(func() {
+		FlushTxQueue()
+		backgroundRefreshWaitGroup.Wait()
+		// 测试文档即将删除，其待处理索引不能留给后续用例刷新。
+		sql.ClearQueue()
 		cache.RemoveTreeData(sourceTree.ID)
 		cache.RemoveTreeData(targetTree.ID)
 		cache.RemoveDocIAL(sourceTree.Path)
@@ -149,9 +154,7 @@ func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			invalidIAL := make(map[string]string, len(ial))
-			for key, value := range ial {
-				invalidIAL[key] = value
-			}
+			maps.Copy(invalidIAL, ial)
 			if "" == test.id {
 				delete(invalidIAL, "id")
 			} else {

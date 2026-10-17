@@ -182,7 +182,7 @@ func TestTLSCertManagerRefreshesCertificateOnceForConcurrentHandshakes(t *testin
 	errs := make([]error, handshakeCount)
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(handshakeCount)
-	for i := 0; i < handshakeCount; i++ {
+	for i := range handshakeCount {
 		go func(index int) {
 			defer waitGroup.Done()
 			certificates[index], errs[index] = manager.GetCertificate(&tls.ClientHelloInfo{

@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20261002211013"
+		"updated": "20261016200946"
 	},
 	"Children": [
 		{
@@ -473,7 +473,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223639-0fnf9vp",
-				"updated": "20250115151427"
+				"updated": "20261016200946"
 			},
 			"Children": [
 				{
@@ -576,7 +576,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223639-8217o1r",
-				"updated": "20260809232000"
+				"updated": "20261016200946"
 			},
 			"Children": [
 				{
@@ -815,6 +815,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261015174914-f8d6sn4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015174914-f8d6sn4",
+				"updated": "20261015174914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the Export as image dialog, turn off Export title image to exclude the title image while preserving body images. This option is enabled by default, is independent of Add document title, remembers your choice, and applies to the preview, exported file, and Copy as PNG in the dialog. The original document is unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261016200946-x83csqx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016200946-x83csqx",
+				"updated": "20261016200946"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF export also has an independent Export title image switch. It is enabled by default and remembers your choice separately from image exports, without affecting the document title or body images. Set it in the PDF preview window on desktop or in the print settings dialog on mobile. Desktop saves the choice when exporting; mobile saves it when confirming the print settings."
 				}
 			]
 		},

@@ -1,9 +1,11 @@
 import {getTabTitle, getTabTitleBlock} from "../render/tabsRender";
+import {initializeListMindmapConnectorStyle, retagMindmapBranch} from "../render/listMindmap/model";
+import {getDefaultListMindmapConnectorStyle} from "../render/listMindmap/preferences";
 
-export type TTabsListConversion = "List2Tabs" | "Tabs2UL" | "Tabs2OL" | "Tabs2TL";
+export type TTabsListConversion = "List2Tabs" | "Tabs2UL" | "Tabs2OL" | "Tabs2TL" | "Tabs2Mindmap";
 
 export const isTabsListConversion = (type: string): type is TTabsListConversion =>
-    ["List2Tabs", "Tabs2UL", "Tabs2OL", "Tabs2TL"].includes(type);
+    ["List2Tabs", "Tabs2UL", "Tabs2OL", "Tabs2TL", "Tabs2Mindmap"].includes(type);
 
 const blockChildren = (element: Element): Element[] => Array.from(
     (element.getAttribute("data-type") === "NodeTabItem" ?
@@ -139,7 +141,7 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
                 titleBlock.removeAttribute("tabs-title");
                 titleBlock.querySelector(".tab-item-title").classList.remove("tab-item-title", "callout-title");
                 blocks.unshift(titleBlock);
-            } else if (title?.innerHTML) {
+            } else if (title) {
                 const titleBlock = newParagraph(lute);
                 titleBlock.querySelector("[contenteditable]").innerHTML = title.innerHTML;
                 titleBlock.querySelectorAll("wbr").forEach(caret => caret.remove());
@@ -169,6 +171,10 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
             result.querySelector(toTabs ? ".tab-item-content [contenteditable=\"true\"]" : "[contenteditable=\"true\"]")
                 ?.insertAdjacentHTML("afterbegin", "<wbr>");
         }
+    }
+    if (type === "Tabs2Mindmap") {
+        initializeListMindmapConnectorStyle(result, getDefaultListMindmapConnectorStyle());
+        retagMindmapBranch(result, true);
     }
     return result;
 };

@@ -6,7 +6,7 @@
 		"id": "20201227201128-m1wrouw",
 		"title": "Docker hosting",
 		"type": "doc",
-		"updated": "20260921003419"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -294,7 +294,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227201751-5d6snqe",
-				"updated": "20260918190000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -312,30 +312,107 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201227201751-tbpaexo",
-				"updated": "20210301202831"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The entry point is set when building the Docker image: "
+					"Data": "The image uses "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/kernel\" ]"
+					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/entrypoint.sh\"]"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", use "
+					"Data": " and defaults to "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run b3log/siyuan"
+					"TextMarkTextContent": "CMD [\"serve\"]"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " with parameters to start:"
+					"Data": ". Arguments after the image name replace that default command, so include "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " explicitly when supplying kernel parameters."
+				}
+			]
+		},
+		{
+			"ID": "20261016112115-t8sj2l3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016112115-t8sj2l3",
+				"updated": "20261016112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before starting, create the host workspace directory and configure authentication. The examples inherit a strong lock screen password from the exported host variable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; a new Docker workspace refuses to start without a password or a valid configuration for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190002-oidcen1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC login"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For example, enter your own password privately in Bash below. Do not put real passwords in shared files or shell history. Anyone who can inspect the container environment can read this value."
+				}
+			]
+		},
+		{
+			"ID": "20261016112115-v44c8li",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261016112115-v44c8li",
+				"updated": "20261016112115"
+			},
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "YmFzaA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "read -r -s -p \"Lock screen password: \" SIYUAN_ACCESS_AUTH_CODE\nprintf '\\n'\nexport SIYUAN_ACCESS_AUTH_CODE\n: \"${SIYUAN_ACCESS_AUTH_CODE:?Set a nonempty lock screen password}\"\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},
@@ -397,7 +474,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210301202938-prn2v5a",
-				"updated": "20260918190000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -418,7 +495,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE b3log/siyuan serve --workspace=workspace_dir_container"
 				},
 				{
 					"Type": "NodeText",
@@ -435,7 +512,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to the container creation command in addition to the hosting port mapping. Docker uses host-port:container-port mappings; if you change the publish service port, update the container port accordingly and use the host port to access the service. Use a fixed publish service port rather than 0"
+					"Data": " to the container creation command in addition to the hosting port mapping. Docker uses host-port:container-port mappings; if you change the publish service port, update the container port accordingly and use the host port to access the service. Use a fixed publish service port rather than 0."
 				}
 			]
 		},
@@ -537,30 +614,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201227201751-yyfayag",
-				"updated": "20231108220523"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace_dir_host"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace_dir_container"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ are configured as "
+					"Data": "For example, after creating "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -569,16 +628,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, the corresponding startup commands is: "
+					"Data": " on the host, use "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE -e PUID=1000 -e PGID=1000 b3log/siyuan serve --workspace=/siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": ". The host path may differ from the container path. After startup, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "http://server-ip:6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and sign in with the password you entered; check the container logs if startup fails."
 				}
 			]
 		},
@@ -588,7 +656,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211112103107-kqrmi1a",
-				"updated": "20211112103113"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -602,30 +670,66 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211112103104-jfoive7",
-				"updated": "20220521231639"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the image, the normal user "
+					"Data": "The entrypoint starts with the privileges needed to create or reuse a user/group and recursively set ownership of "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan"
+					"TextMarkTextContent": "/opt/siyuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  "
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
+					"TextMarkTextContent": "/home/siyuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". The parameter "
+					"Data": ", and the workspace. It then uses "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "su-exec"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to run the kernel as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "PUID:PGID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", both "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " by default. To match host ownership, pass "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-e PUID=1000 -e PGID=1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with the appropriate numeric IDs. Do not add "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -634,7 +738,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " is required when starting the container."
+					"Data": ": it prevents the entrypoint from preparing permissions. The ownership change also affects the mounted host directory."
 				}
 			]
 		},
@@ -886,7 +990,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230406105311-sq5f3qj",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -901,7 +1005,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230406105311-jvtmuhi",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -913,7 +1017,7 @@
 					},
 					"Properties": {
 						"id": "20230406105311-qz00ob2",
-						"updated": "20260903150000"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -921,7 +1025,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406105311-gvr6z7v",
-								"updated": "20260903150000"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -937,7 +1041,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "."
+									"Data": ""
 								}
 							]
 						}

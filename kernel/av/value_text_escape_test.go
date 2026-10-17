@@ -14,7 +14,7 @@ func TestValueTextRichEscapedContentRoundTrip(t *testing.T) {
 				Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown,
 				Content: `<span data-type="` + mark + `" data-href="https://example.com">` + html.EscapeHTMLStr(content) + `</span>`,
 			}}
-			for i := 0; i < 3; i++ {
+			for i := range 3 {
 				if err := value.NormalizeRichContent(); err != nil {
 					t.Fatal(err)
 				}

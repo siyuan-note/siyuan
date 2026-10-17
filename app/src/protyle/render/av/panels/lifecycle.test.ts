@@ -12,7 +12,9 @@ const createPanel = (mobile = false) => {
     const observers: Array<() => void> = [];
     let context: IAVPanelContext;
     let existing = false;
-    const menu = {isConnected: true, clientWidth: 100, dataset: {}, querySelector: (): null => null};
+    const menuClasses = new Set<string>();
+    const menu = {isConnected: true, clientWidth: 100, dataset: {}, querySelector: (): null => null,
+        classList: {contains: (name: string) => menuClasses.has(name)}};
     const panel = {isConnected: true, lastElementChild: menu, parentElement: {},
         remove: () => { existing = false; panel.isConnected = false; calls.push("remove"); },
         addEventListener: (name: string, callback: (event: unknown) => unknown) => events.set(name, callback)};
@@ -36,14 +38,31 @@ const createPanel = (mobile = false) => {
         exports, require: () => dependencies,
         document: {querySelector: () => existing ? panel : null, body: {insertAdjacentHTML: () => { existing = true; calls.push("insert"); }}},
         window: {siyuan: {zIndex: 0, menus: {menu: {remove: () => calls.push("menu.remove"), element: {classList: classes}}}},
-            addEventListener: () => calls.push("resize.bind"), removeEventListener: () => calls.push("resize.unbind")},
+            addEventListener: (name: string, callback: (event: unknown) => unknown) => {
+                calls.push("resize.bind");
+                events.set(name, callback);
+            }, removeEventListener: () => calls.push("resize.unbind")},
         MutationObserver: class { constructor(callback: () => void) { observers.push(callback); } observe() {} disconnect() {} },
         setTimeout: (callback: () => void) => callback(),
     });
     const open = exports.openMenuPanel as typeof import("../openMenuPanel").openMenuPanel;
     const click = (detail: unknown) => events.get("click")({detail, target: {dataset: {}, closest: (): null => null}, preventDefault: () => {}, stopPropagation: () => {}});
-    return {open, options, calls, click, observers, get context() { return context; }, setExisting: () => { existing = true; }};
+    return {open, options, calls, click, observers, menuClasses, resize: () => events.get("resize")({}),
+        get context() { return context; }, setExisting: () => { existing = true; }};
 };
+
+test("window resizing uses the automation height constraint only while its panel is open", () => {
+    const h = createPanel();
+    h.open(h.options);
+    h.calls.length = 0;
+    h.menuClasses.add("av__automation-panel");
+    h.resize();
+    assert.deepEqual(h.calls, ["setAutomationMenuPosition"]);
+    h.calls.length = 0;
+    h.menuClasses.delete("av__automation-panel");
+    h.resize();
+    assert.deepEqual(h.calls, ["setPosition"]);
+});
 
 test("opening an existing panel destroys it without fetching or binding another panel", () => {
     const h = createPanel();

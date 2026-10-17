@@ -29,6 +29,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -51,11 +52,9 @@ func CheckHostSSRF(host string) error {
 	if err != nil {
 		return errors.New("failed to resolve host: " + err.Error())
 	}
-	for _, ip := range ips {
-		// 与 SSRFSafeDialer 共用 isPrivateIP，覆盖 NAT64、6to4、Teredo 等 IPv6 过渡地址。
-		if isPrivateIP(ip) {
-			return errors.New("access to private/internal IP is prohibited")
-		}
+	// 与 SSRFSafeDialer 共用 isPrivateIP，覆盖 NAT64、6to4、Teredo 等 IPv6 过渡地址。
+	if slices.ContainsFunc(ips, isPrivateIP) {
+		return errors.New("access to private/internal IP is prohibited")
 	}
 	return nil
 }

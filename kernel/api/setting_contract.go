@@ -106,6 +106,8 @@ func settingEmbeddingPayload(value *conf.Embedding) *apicontract.SettingEmbeddin
 	result.Name = value.Name
 	result.Timeout = value.Timeout
 	result.Dimensions = value.Dimensions
+	result.Concurrency = value.Concurrency
+	result.BatchSize = value.BatchSize
 	return result
 }
 
@@ -367,6 +369,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.CodeLineWrap = value.CodeLineWrap
 	result.CodeLigatures = value.CodeLigatures
 	result.DisplayBookmarkIcon = value.DisplayBookmarkIcon
+	result.BlockGutterMode = value.BlockGutterMode
 	result.DisplayNetImgMark = value.DisplayNetImgMark
 	result.DisplayImgName = value.DisplayImgName
 	result.DisplayImgAlt = value.DisplayImgAlt
@@ -394,6 +397,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.FloatWindowMode = value.FloatWindowMode
 	result.FloatWindowDelay = value.FloatWindowDelay
 	result.KeepLoadedContent = value.KeepLoadedContent
+	result.PageScrollButtons = value.PageScrollButtons
 	result.DynamicLoadBlocks = value.DynamicLoadBlocks
 	result.Justify = value.Justify
 	result.RTL = value.RTL
@@ -402,6 +406,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.SpellcheckLanguages = value.SpellcheckLanguages
 	result.HashTagSearch = value.HashTagSearch
 	result.OnlySearchForDoc = value.OnlySearchForDoc
+	result.AutoCloseRefBrackets = value.AutoCloseRefBrackets
 	result.BacklinkExpandCount = value.BacklinkExpandCount
 	result.BackmentionExpandCount = value.BackmentionExpandCount
 	result.BacklinkMentionExclude = value.BacklinkMentionExclude
@@ -479,7 +484,6 @@ func settingExportPayload(value *conf.Export) *apicontract.SettingExport {
 	result.FileAnnotationRefMode = value.FileAnnotationRefMode
 	result.PandocBin = value.PandocBin
 	result.PandocParams = value.PandocParams
-	result.DocxTemplate = value.DocxTemplate
 	result.RemoveAssetsID = value.RemoveAssetsID
 	result.MarkdownYFM = value.MarkdownYFM
 	result.InlineMemo = value.InlineMemo

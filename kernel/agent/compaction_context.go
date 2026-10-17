@@ -14,6 +14,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -121,19 +122,20 @@ func projectCompactionContext(messages []AgentMessage, covered int) []AgentMessa
 		covered = 0
 	}
 	var projected []AgentMessage
-	for i := len(history) - 1; i >= 0; i-- {
-		if history[i].Role == "user" {
+	for i, h := range slices.Backward(history) {
+		if h.Role == "user" {
 			if i < covered {
-				projected = append(projected, history[i])
+				projected = append(projected, h)
 			}
 			break
 		}
 	}
 	index := 0
 	for _, message := range messages {
-		if message.Role == "system" {
+		switch message.Role {
+		case "system":
 			projected = append(projected, message)
-		} else if message.Role == "user" || message.Role == "assistant" {
+		case "user", "assistant":
 			if index >= covered {
 				projected = append(projected, message)
 			}
@@ -200,8 +202,8 @@ func compactionCandidateMessageCounts(messages []AgentMessage, covered int, prot
 }
 
 func sessionUserMessageIndex(messages []AgentMessage) int {
-	for i := len(messages) - 1; i >= 0; i-- {
-		if messages[i].Role == "user" {
+	for i, message := range slices.Backward(messages) {
+		if message.Role == "user" {
 			return i
 		}
 	}

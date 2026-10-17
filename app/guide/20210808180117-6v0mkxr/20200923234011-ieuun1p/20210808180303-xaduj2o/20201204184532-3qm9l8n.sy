@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20260922175505"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -128,7 +128,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20260619110501"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -146,7 +146,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091444-ycq0a40",
-				"updated": "20210502205109"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -161,7 +161,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". If you have an understanding of this, you can implement some program logic in it, such as comparison logic , Iterative logic, etc. In addition, to avoid syntax conflicts, template syntax uses "
+					"Data": ". If you have an understanding of this, you can implement some program logic in it, such as comparison logic, Iterative logic, etc. In addition, to avoid syntax conflicts, template syntax uses "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -286,7 +286,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20260619110501"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1253,7 +1253,7 @@
 					},
 					"Properties": {
 						"id": "20240308162632-3ec0qtk",
-						"updated": "20240308162632"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1261,7 +1261,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162632-akk8sxn",
-								"updated": "20250828155241"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1275,7 +1275,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function returns the current week"
+									"Data": "​: Returns the ISO 8601 week number of the input date (1–53); for example, 2021-01-01 belongs to week 53"
 								}
 							]
 						}
@@ -1290,7 +1290,7 @@
 					},
 					"Properties": {
 						"id": "20250828155216-zn0i9zg",
-						"updated": "20250828155216"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1298,7 +1298,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828155216-p5tgk3f",
-								"updated": "20250828155232"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1312,7 +1312,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function returns the current month"
+									"Data": "​: Returns the calendar month containing the Thursday of the input date’s ISO week; for example, 2021-01-01 returns 12. For the calendar month, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"01\""
 								}
 							]
 						}
@@ -1327,7 +1332,7 @@
 					},
 					"Properties": {
 						"id": "20250828155242-k9x8rc7",
-						"updated": "20250828155242"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1335,7 +1340,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828155242-zwalrdw",
-								"updated": "20250828155246"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1349,7 +1354,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function returns the current year"
+									"Data": "​: Returns the ISO week-numbering year of the input date; for example, 2021-01-01 returns 2020. For the calendar year, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"2006\""
 								}
 							]
 						}

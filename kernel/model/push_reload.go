@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -42,6 +43,19 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+var backgroundRefreshWaitGroup sync.WaitGroup
+
+// runBackgroundRefresh 跟踪延迟刷新任务，便于工作区释放前等待任务结束。
+func runBackgroundRefresh(delay time.Duration, refresh func()) {
+	backgroundRefreshWaitGroup.Go(func() {
+		time.Sleep(delay)
+		// 与编辑事务串行刷新，避免异步分组写回覆盖撤销、重做后的数据。
+		flushLock.Lock()
+		defer flushLock.Unlock()
+		refresh()
+	})
+}
 
 func PushReloadSnippet(snippet *conf.Snpt) {
 	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
@@ -194,10 +208,9 @@ func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
 	}
 
 	refreshDocInfo0(tree, size)
-	go func() {
-		time.Sleep(128 * time.Millisecond)
+	runBackgroundRefresh(128*time.Millisecond, func() {
 		refreshParentDocInfo(tree)
-	}()
+	})
 }
 
 func refreshParentDocInfo(tree *parse.Tree) {
@@ -507,9 +520,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 		if ok {
 			updatedTrees[refTreeID] = refTree
 		}
-		for id, node := range changedRefNodes {
-			updatedRefNodes[id] = node
-		}
+		maps.Copy(updatedRefNodes, changedRefNodes)
 		for _, update := range updates {
 			appendSetRefDynamicTextTask(refTreeID, update.blockID, update.defNode.id, update.defNode.refText, refTree.Box)
 		}

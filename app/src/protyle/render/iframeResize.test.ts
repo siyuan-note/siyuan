@@ -73,7 +73,10 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
         const exports = {};
         modules[id] = exports;
         if (!source) {
-            return new Proxy(exports, {get: (_target, key) => check.fail(`Unexpected insertion dependency: ${id}.${String(key)}`)});
+            return new Proxy(exports, {get: (_target, key) => {
+                if (key === "__esModule") return false;
+                return check.fail(`Unexpected insertion dependency: ${id}.${String(key)}`);
+            }});
         }
         new Function("exports", "require", source)(exports, (specifier: string) => load(
             require("node:path").posix.normalize(require("node:path").posix.join(id, "..", specifier))
@@ -355,7 +358,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     const bridge = {} as {initTouchDragBridge: () => void};
     new Function("exports", "require", bridgeSource)(bridge, (id: string) => id === "./touchDragBridgeCore" ? bridgeCore : {
         Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 460, TIMEOUT_MOUSE_DRAG_DELAY: 150},
-        isInAndroid: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
+        isInAndroid: () => false, isInHarmony: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
     });
     Object.assign(window, {siyuan: {touchDragActive: false}});
     bridge.initTouchDragBridge();
@@ -597,7 +600,7 @@ test("external resize handles preserve source, independent axes, historical dime
     visit(source);
     assert.ok(resize);
     const resizeSource = transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
-        .outputText.replace(/^function resize\(\) \{/, "").replace(/\}\s*$/, "");
+        .outputText + "\nreturn resize.call(this);";
     const renderSource = transpileModule(readFileSync("src/protyle/render/iframeResize.ts", "utf8").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const css = compileString('@use "protyle/protyle"; @use "component/typography"; @use "business/resize";',
@@ -625,7 +628,7 @@ test("external resize handles preserve source, independent axes, historical dime
     const hintFile = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
     const hintDeclaration = hintFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
     assert.ok(hintDeclaration && isClassDeclaration(hintDeclaration));
-    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand"].includes(member.name?.getText(hintFile)))
+    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand", "consumeRefBracketClose"].includes(member.name?.getText(hintFile)))
         .map(member => member.getText(hintFile)).join("\n");
     const hintSource = transpileModule(`class Hint { ${hintMethods} }`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const menuFile = createSourceFile("menu.ts", readFileSync("src/menus/protyle.ts", "utf8"), ScriptTarget.ES2021, true);

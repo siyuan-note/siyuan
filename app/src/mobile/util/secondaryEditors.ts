@@ -30,7 +30,7 @@ export const flushMobileSecondaryEditor = (editor: Protyle) => {
             if (record.flushing === flushing) {
                 record.flushing = undefined;
             }
-        }, () => undefined);
+        }, (): undefined => undefined);
     }
     return flushing;
 };

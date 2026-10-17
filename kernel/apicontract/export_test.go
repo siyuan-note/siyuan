@@ -113,3 +113,38 @@ func TestExportPreviewJSEmbedCompatibility(t *testing.T) {
 		t.Fatal("invalid JavaScript embed option accepted")
 	}
 }
+
+func TestExportPreviewTitleImageCompatibility(t *testing.T) {
+	for _, extra := range []string{"", `,"pdf":null`, `,"pdf":false`, `,"pdf":true`} {
+		request, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || request.PDF != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected PDF preview mode: %+v %v", request, err)
+		}
+	}
+	if _, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id","pdf":"true"}`)); err == nil {
+		t.Fatal("invalid PDF preview mode accepted")
+	}
+	for _, extra := range []string{"", `,"excludeTitleImage":null`, `,"excludeTitleImage":false`, `,"excludeTitleImage":true`} {
+		request, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || request.ExcludeTitleImage != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected title image option: %+v %v", request, err)
+		}
+	}
+	for _, value := range []string{`"true"`, `1`, `[]`, `{}`} {
+		if _, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id","excludeTitleImage":` + value + `}`)); err == nil {
+			t.Fatalf("invalid title image option accepted: %s", value)
+		}
+	}
+}
+
+func TestProcessPDFAssetExportCompatibility(t *testing.T) {
+	for _, extra := range []string{"", `,"exportAssets":null`, `,"exportAssets":false`, `,"exportAssets":true`} {
+		request, err := ProcessPDF.Decode(strings.NewReader(`{"id":"id","path":"file.pdf","removeAssets":false,"watermark":false` + extra + `}`))
+		if err != nil || request.ExportAssets != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected PDF asset export option: %+v %v", request, err)
+		}
+	}
+	if _, err := ProcessPDF.Decode(strings.NewReader(`{"id":"id","path":"file.pdf","removeAssets":false,"watermark":false,"exportAssets":"true"}`)); err == nil {
+		t.Fatal("invalid PDF asset export option accepted")
+	}
+}

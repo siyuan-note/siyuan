@@ -1,4 +1,6 @@
 import type {IFlashcardV2RenderModel, IFlashcardV2RevealController} from "./flashcardV2Render";
+import {toFlashcardV2JSON} from "./flashcardV2Contract";
+import type {JSONValue} from "../types/api";
 
 export interface IFlashcardV2PluginAnswerController {
     check: () => unknown;
@@ -68,13 +70,13 @@ export const unregisterFlashcardV2PluginTypes = (namespace: string) => {
     });
 };
 
-export const snapshotFlashcardV2AnswerResult = (value: unknown) => {
+export const snapshotFlashcardV2AnswerResult = (value: unknown): JSONValue | undefined => {
     if (value === undefined) {
         return;
     }
     try {
         const serialized = JSON.stringify(value);
-        return serialized === undefined ? undefined : JSON.parse(serialized) as unknown;
+        return serialized === undefined ? undefined : toFlashcardV2JSON(JSON.parse(serialized));
     } catch (error) {
         console.error("Flashcard plugin answer result is not JSON serializable", error);
     }

@@ -6,7 +6,7 @@
 		"id": "20240517031132-jmr5ihm",
 		"title": "Publish service",
 		"type": "doc",
-		"updated": "20260918190000"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -342,7 +342,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613195415-pbh6hjr",
-				"updated": "20260613195415"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -371,7 +371,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613195415-996cb6x",
-				"updated": "20260613195415"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -666,7 +666,7 @@
 					},
 					"Properties": {
 						"id": "20260613195415-7uieb9g",
-						"updated": "20260613195415"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -674,7 +674,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613195415-k9sglmf",
-								"updated": "20260613195415"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -684,7 +684,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Notebooks or documents without access control settings are published at the public level by default"
+									"Data": ": Ordinary notebooks are public by default only when no access restrictions apply. Documents also inherit applicable password, hidden, and disabled-publishing rules from parent documents and the notebook. Encrypted notebooks cannot be published, even when unlocked"
 								}
 							]
 						}
@@ -698,7 +698,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160303-piyz4rj",
-				"updated": "20260315160303"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -718,7 +718,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160303-b2t92la",
-				"updated": "20260315160303"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -730,7 +730,7 @@
 					},
 					"Properties": {
 						"id": "20260315160303-zlheijx",
-						"updated": "20260315160303"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -738,12 +738,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160303-z9g657o",
-								"updated": "20260315160303"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Once the publishing service is enabled, visitors have access to the entire workspace content by default; please ensure that your workspace does not contain any sensitive information."
+									"Data": "Once the publishing service is enabled, visitors have access to the entire workspace content by default; please ensure that your workspace does not contain any sensitive information"
 								}
 							]
 						}

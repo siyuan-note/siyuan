@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -265,12 +266,10 @@ var exportNotebooksMd = contractHandler(apicontract.ExportNotebooksMd, func(c *g
 		ret.Code = -1
 		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-	for _, notebook := range notebooks {
-		if model.IsEncryptedBox(notebook) {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(395)
-			return contractFailure[apicontract.ExportNamedZipData](ret)
-		}
+	if slices.ContainsFunc(notebooks, model.IsEncryptedBox) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(395)
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	if err := request.Validate(); err != nil {
 		ret.Code = -1
@@ -335,12 +334,10 @@ var exportNotebooksSY = contractHandler(apicontract.ExportNotebooksSY, func(c *g
 		ret.Code = -1
 		return contractFailure[apicontract.ExportZipData](ret)
 	}
-	for _, notebook := range notebooks {
-		if model.IsEncryptedBox(notebook) {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(395)
-			return contractFailure[apicontract.ExportZipData](ret)
-		}
+	if slices.ContainsFunc(notebooks, model.IsEncryptedBox) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(395)
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 	zipPath := model.ExportNotebooksSY(notebooks)
 	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
@@ -623,7 +620,8 @@ var exportPreviewHTML = contractHandler(apicontract.ExportPreviewHTML, func(c *g
 	}
 	addTitle, customTitle := exportTitleOptions(request.ExportTitleOptions)
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
-	name, content, node := model.ExportPreviewHTMLWithTitle(id, keepFold, merge, addTitle, customTitle, request.KeepJSEmbed, mergeHeadingOptions)
+	name, content, node := model.ExportPreviewHTMLWithTitle(id, keepFold, merge, addTitle, customTitle, request.KeepJSEmbed,
+		(request.Image || request.PDF) && request.ExcludeTitleImage, mergeHeadingOptions)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -741,6 +739,17 @@ func holdEncryptedExportRequests(c *gin.Context, ids []string, ret *gulu.Result)
 
 var processPDF = contractHandler(apicontract.ProcessPDF, func(c *gin.Context, request apicontract.ProcessPDFRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if request.ExportAssets {
+		if !filepath.IsAbs(request.Path) {
+			return apicontract.Failure[apicontract.Null](-1, "path must be absolute for PDF asset export")
+		}
+		if rejectEncryptedBoxPath(request.Path) {
+			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(383))
+		}
+		if !holdEncryptedExportRequest(c, request.ID, ret) {
+			return contractFailure[apicontract.Null](ret)
+		}
+	}
 
 	id := request.ID
 	pdfPath := request.Path
@@ -750,7 +759,7 @@ var processPDF = contractHandler(apicontract.ProcessPDF, func(c *gin.Context, re
 	removeAssets := request.RemoveAssets
 	watermark := request.Watermark
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
-	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark, mergeHeadingOptions)
+	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark, request.ExportAssets, mergeHeadingOptions)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

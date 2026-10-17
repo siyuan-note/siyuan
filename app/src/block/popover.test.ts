@@ -12,7 +12,7 @@ const browserCases = async (source: string) => {
     const requests: ((response: unknown) => void)[] = [];
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
-    const ocrRequests: ((text: string | undefined) => void)[] = [];
+    const ocrRequests: ((text: string | undefined | {text: string, failed: boolean}) => void)[] = [];
     class Panel {
         element = document.createElement("div");
         editors: {protyle: IProtyle}[] = [];
@@ -38,7 +38,8 @@ const browserCases = async (source: string) => {
     const dependencies = {
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
-        getImageOCRText: () => new Promise<string | undefined>(resolve => ocrRequests.push(resolve)),
+        getImageOCRResult: () => new Promise<{text: string, failed: boolean} | undefined>(resolve => ocrRequests.push(result =>
+            resolve(typeof result === "string" ? {text: result, failed: false} : result))),
         hideTooltip: () => {},
         showTooltip: (text: string) => { tooltip = text; },
         fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
@@ -63,7 +64,8 @@ const browserCases = async (source: string) => {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
         menus: {menu: {element: document.createElement("div")}},
         blockPanels: [],
-        languages: {ocrResult: "OCR text", emptyContent: "No related content found"},
+        languages: {ocrResult: "OCR text", ocrNoText: "No OCR text", ocrFailed: "OCR recognition failed",
+            emptyContent: "No related content found", modifiedAt: "Modified", createdAt: "Created"},
     } as unknown as typeof window.siyuan;
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
@@ -180,7 +182,7 @@ const browserCases = async (source: string) => {
     Object.defineProperties(image, {naturalWidth: {value: 1920}, naturalHeight: {value: 1080}});
     image.style.width = "100px";
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
-    check.equal(tooltip, 'photo &lt;name>.png<div class="fn__hr"></div>PNG · 1920 × 1080');
+    check.equal(tooltip, "photo &lt;name>.png<br>PNG · 1920 × 1080");
     check.equal(assetRequests.length, 1);
     assetRequests[0].receive({code: 0, data: {hSize: "2 MiB"}});
     check.match(tooltip, /PNG · 1920 × 1080 · 2 MiB$/);
@@ -202,7 +204,7 @@ const browserCases = async (source: string) => {
     check.equal(tooltip, unavailable);
     ocrRequests[2](" \n ");
     await Promise.resolve();
-    check.match(tooltip, /OCR text:<br>No related content found$/);
+    check.equal(tooltip, unavailable, "empty OCR leaves only the existing image information");
     image.setAttribute("data-src", "https://example.com/photo.webp");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.match(tooltip, /photo.webp.*WEBP · 1920 × 1080/);
@@ -242,6 +244,54 @@ const browserCases = async (source: string) => {
     check.ok(tooltip.endsWith("1<br>2<br>3<br>4<br>5<br>6"), "six complete lines remain unchanged");
     check.equal(image.title, "");
     check.equal(image.alt, "");
+    window.siyuan.config.ocr = {provider: "paddleocr", model: "tiny", auto: false,
+        showText: false, showEmpty: false, showError: false};
+    const previousOCRRequests = ocrRequests.length;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(ocrRequests.length, previousOCRRequests, "disabled tooltip options skip OCR reads but retain asset information");
+    check.match(tooltip, /PNG · 1920 × 1080/);
+    window.siyuan.config.ocr.showEmpty = true;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests.at(-1)("");
+    await Promise.resolve();
+    check.match(tooltip, /No OCR text$/);
+    window.siyuan.config.ocr.showError = true;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests.at(-1)({text: "old text", failed: true});
+    await Promise.resolve();
+    check.match(tooltip, /OCR recognition failed$/);
+    check.equal(tooltip.includes("old text"), false);
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests.at(-1)(undefined);
+    await Promise.resolve();
+    check.doesNotMatch(tooltip, /No OCR text|OCR recognition failed/, "read failures are not recognition failures");
+    window.siyuan.config.ocr.showText = true;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    window.siyuan.config.ocr.showText = false;
+    ocrRequests.at(-1)("late preview");
+    await Promise.resolve();
+    check.equal(tooltip.includes("late preview"), false, "late responses use the latest tooltip preferences");
+    const link = document.createElement("span");
+    link.setAttribute("data-type", "a");
+    link.setAttribute("data-href", "https://example.com/file.pdf");
+    link.setAttribute("data-title", "Link title");
+    document.body.append(link);
+    link.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, '<span style="word-break: break-all">https://example.com/file.pdf</span><br><span>Link title</span>');
+    link.setAttribute("data-href", "assets/file.pdf");
+    link.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    assetRequests.at(-1).receive({code: 0, data: {hSize: "1 KiB", hUpdated: "Updated", hCreated: "Created"}});
+    check.equal(tooltip, '<span style="word-break: break-all">assets/file.pdf</span> 1 KiB<br><span>Link title</span><br>Modified Updated<br>Created Created');
+    link.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    assetRequests.at(-1).receive({code: 1});
+    check.equal(tooltip, '<span style="word-break: break-all">assets/file.pdf</span><br><span>Link title</span>');
+    const url = document.createElement("span");
+    url.className = "av__celltext--url ariaLabel";
+    url.setAttribute("aria-label", "https://example.com/");
+    url.setAttribute("data-name", "Column title");
+    document.body.append(url);
+    url.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, '<span style="word-break: break-all">https://example.com/</span><br><span>Column title</span>');
     return "Popover interaction cases passed";
 };
 

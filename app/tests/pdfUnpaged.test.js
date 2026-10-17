@@ -51,11 +51,14 @@ const runElectron = async () => {
                                 '<div style="padding-left:68px">' + '1234567890 '.repeat(12) + '</div></div></div></div>').join("") + '</div></div>';
                         const Protyle = {highlightRender() {}, async mathRender() {}};
                         const waitForImages = async () => {};
-                        const keepFoldElement = {}, addTitleElement = {}, customTitleElement = {},
+                        const keepFoldElement = {}, addTitleElement = {}, titleImageElement = {checked: false}, customTitleElement = {},
                             mergeSubdocsElement = {}, mergeDocHeadingModeElement = {},
                             mergeContentHeadingModeElement = {}, watermarkElement = {}, removeAssetsElement = {};
                         const response = {data: {name: "test"}};
+                        const getHeadingPageBreakLevels = () => [];
+                        const updateHeadingPageBreaks = () => {};
                         ${prepare}
+                        if (exportConfig.titleImage !== false) throw new Error("PDF export must retain the title image choice");
                         actionElement.remove();
                         return exportConfig.pdfOptions;
                     })()`);

@@ -10,14 +10,15 @@ const fixture = (mobile = false, code = 0) => {
     const requests: Array<{url: string; body: any}> = [];
     const events: unknown[] = [];
     const api = {} as typeof import("./resourceConfig");
-    const selected = source.replace(/\/\/\/ #if MOBILE\s+([\s\S]*?)\/\/\/ #else\s+([\s\S]*?)\/\/\/ #endif/g,
-        (_match, mobileCode: string, desktopCode: string) => mobile ? mobileCode : desktopCode);
+    const selected = source.replace(/\/\/\/ #if !MOBILE\s+([\s\S]*?)\/\/\/ #endif/g,
+        (_match, desktopCode: string) => mobile ? "" : desktopCode);
     runInNewContext(transpileModule(selected, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
         exports: api, window: {siyuan: {languages: {imported: "Imported"}}}, require: (module: string) => {
             switch (module) {
                 case "../../util/fetch": return {
                     fetchPost: async (url: string, body: any, callback?: (response: any) => void) => {
                         requests.push({url, body});
+                        if (code === -2) throw new Error("Network failed");
                         if (code >= 0) callback?.({code, msg: "Failed"});
                     },
                     fetchSyncPost: async (url: string, body: any) => { requests.push({url, body}); return {code}; },
@@ -28,8 +29,8 @@ const fixture = (mobile = false, code = 0) => {
                 case "../setting/maintenance": return {runSettingsMaintenance: async (action: () => Promise<void>) => {
                     events.push("prepare"); await action(); events.push("finish");
                 }};
-                case "../../layout/util": return {exportLayout: ({errorExit, cb}: {errorExit: boolean; cb: () => void}) => {
-                    events.push(["layout", errorExit]); cb();
+                case "../../layout/util": return {suspendLayoutSaving: async () => {
+                    events.push("suspend"); return () => events.push("resume");
                 }};
                 default: throw new Error(module);
             }
@@ -75,13 +76,17 @@ for (const mobile of [false, true]) {
             assert.equal(f.requests[0].url, "/api/system/importConf");
             assert.equal(f.requests[0].body.getAll("file").length, 1);
             assert.equal(f.requests[0].body.get("file"), file);
-            assert.deepEqual(f.events, [...(prepared ? ["prepare"] : []), "Imported",
-                ...(mobile ? [] : [["layout", true]]), ["exit", undefined], ...(prepared ? ["finish"] : [])]);
+            assert.deepEqual(f.events, [...(prepared ? ["prepare"] : []), ...(mobile ? [] : ["suspend"]),
+                "Imported", ["exit", undefined], ...(prepared ? ["finish"] : [])]);
         }
         for (const code of [-1, 1]) {
             const f = fixture(mobile, code);
             await f.api.importConfiguration(file);
-            assert.deepEqual(f.events, code > 0 ? ["Failed"] : []);
+            assert.deepEqual(f.events, [...(mobile ? [] : ["suspend"]), ...(code > 0 ? ["Failed"] : []),
+                ...(mobile ? [] : ["resume"])]);
         }
+        const failed = fixture(mobile, -2);
+        await assert.rejects(failed.api.importConfiguration(file), /Network failed/);
+        assert.deepEqual(failed.events, mobile ? [] : ["suspend", "resume"]);
     });
 }

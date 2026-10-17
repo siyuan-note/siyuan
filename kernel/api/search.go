@@ -311,7 +311,16 @@ var searchRefBlock = contractHandler(apicontract.SearchRefBlock, func(c *gin.Con
 	// 加密笔记本内的块引搜索走 InBox 版（只搜该 box 自己的加密 db，阻止跨加密边界引用）
 	var blocks []*model.Block
 	var newDoc bool
-	if notebook != "" && model.IsEncryptedBox(notebook) {
+	if params.ExactDocTitle {
+		boxID := ""
+		if notebook != "" && model.IsEncryptedBox(notebook) {
+			boxID = notebook
+		}
+		blocks, newDoc, err = model.SearchExactRefDocTitle(id, rootID, keyword, boxID)
+		if err != nil {
+			return apicontract.SearchRefBlock.FailureWithData(-1, err.Error(), echo)
+		}
+	} else if notebook != "" && model.IsEncryptedBox(notebook) {
 		blocks, newDoc = model.SearchRefBlockInBox(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase, notebook)
 	} else {
 		blocks, newDoc = model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)

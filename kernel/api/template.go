@@ -164,11 +164,11 @@ func isPathInTemplatesDir(p string) bool {
 	if !gulu.File.IsSubPath(templatesRoot, abs) {
 		return false
 	}
-	realRoot, err := filepath.EvalSymlinks(templatesRoot)
+	realRoot, err := util.ResolveRealPath(templatesRoot)
 	if nil != err {
 		return false
 	}
-	realPath, err := filepath.EvalSymlinks(abs)
+	realPath, err := util.ResolveRealPath(abs)
 	if nil != err {
 		return false
 	}

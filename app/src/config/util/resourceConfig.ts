@@ -5,7 +5,7 @@ import {exitSiYuan} from "../../dialog/processSystem";
 import {showMessage} from "../../dialog/message";
 import {runSettingsMaintenance} from "../setting/maintenance";
 /// #if !MOBILE
-import {exportLayout} from "../../layout/util";
+import {suspendLayoutSaving} from "../../layout/util";
 /// #endif
 
 const layoutEndpoint = "/api/system/setUILayout";
@@ -42,17 +42,26 @@ export const saveOutlineState = (docID: string, expandIds: string[]) =>
 
 // 配置导入共用成功通知和重启流程，设置窗口可在导入前完成维护任务准备。
 export const importConfiguration = (file: File, prepareMaintenance = false) => {
-    const importFile = () => fetchPost("/api/system/importConf", new ContractFormData({file: [file]}), (response) => {
-        if (response.code !== 0) {
-            showMessage(response.msg);
-            return;
-        }
-        showMessage(window.siyuan.languages.imported);
-        /// #if MOBILE
-        void exitSiYuan();
-        /// #else
-        void exportLayout({errorExit: true, cb: exitSiYuan});
+    const importFile = async () => {
+        let imported = false;
+        let resumeLayout = () => {};
+        /// #if !MOBILE
+        resumeLayout = await suspendLayoutSaving();
         /// #endif
-    });
+        try {
+            await fetchPost("/api/system/importConf", new ContractFormData({file: [file]}), (response) => {
+                if (response.code !== 0) {
+                    showMessage(response.msg);
+                    return;
+                }
+                imported = true;
+                showMessage(window.siyuan.languages.imported);
+                void exitSiYuan();
+            });
+        } finally {
+            // 导入成功后保持暂停直到重启，失败时继续保存当前布局。
+            if (!imported) resumeLayout();
+        }
+    };
     return prepareMaintenance ? runSettingsMaintenance(importFile) : importFile();
 };

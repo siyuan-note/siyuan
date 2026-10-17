@@ -6,7 +6,7 @@
 		"id": "20211226122358-hctqcn5",
 		"title": "Kernel 參數",
 		"type": "doc",
-		"updated": "20260917190844"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122447-mz36qeo",
-				"updated": "20211226011025"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -40,30 +40,82 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122447-zrnua6j",
-				"updated": "20211228132920"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "用於指定工作空間文件夾路徑，不指定時的預設值是 ",
-					"Properties": {
-						"id": ""
-					}
+					"Data": " 透過 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
 					"TextMarkType": "code",
-					"TextMarkTextContent": "~/SiYuan/"
+					"TextMarkTextContent": "--workspace"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。",
-					"Properties": {
-						"id": ""
-					}
+					"Data": " 指定工作空間。未指定時依序使用環境變數 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_WORKSPACE_PATH"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、最後一個已註冊工作空間、系統預設目錄：macOS 為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/Library/Application Support/SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，Windows 為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "%USERPROFILE%\\SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，其他平台為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--home-dir"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會改變設定與預設路徑使用的使用者主目錄。一般單次 CLI 指令的選擇規則不同，詳見 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612191214-ymtlxn2",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "命令列"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -73,7 +125,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122447-zfdaq9r",
-				"updated": "20211226011025"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -98,15 +150,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122447-8jh9v5s",
-				"updated": "20211226122436"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Kernel 工作目錄路徑，不指定時按 Kernel 可執行文件入口自動獲取。",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "stage/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的程式資源目錄，未指定時根據核心執行檔自動尋找。它與 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 指定的資料目錄不同。"
 				}
 			]
 		},
@@ -174,7 +250,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122447-k8827y1",
-				"updated": "20211226011025"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -199,15 +275,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122447-5lookgq",
-				"updated": "20211228125034"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "用於指定瀏覽器存取",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "用於設定瀏覽器"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -221,10 +294,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，設置後會覆蓋 conf.json 中的 authCode。",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "。非空 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會覆寫 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/conf.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "；省略或傳入空值時回退至 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。最終值為空不會清除已儲存的密碼。"
 				}
 			]
 		},

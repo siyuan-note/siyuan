@@ -320,7 +320,7 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 		if targetExists {
 			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true
-				return result, fmt.Errorf("result_unknown: install marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
+				return result, util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("install marketplace package failed: %w; rollback failed: %s", err, rollbackErr))
 			}
 		}
 		return
@@ -328,7 +328,7 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	result.InstalledRevision, err = installedPackageRevision(installPath)
 	if err != nil || result.InstalledRevision != stagingRevision {
 		preserveOperationPath = true
-		return result, errors.New("result_unknown: installed package changed after replacement; recovery copy preserved")
+		return result, util.NewTextFileError(util.TextFileResultUnknown, errors.New("installed package changed after replacement; recovery copy preserved"))
 	}
 	return
 }

@@ -18,6 +18,7 @@ const copy = (options: {selected?: string[], rangeBlocks?: string[], collapsed?:
     let rangeReads = 0;
     let prevented = false;
     const dependencies = {
+        hasClosestBlock: (element: unknown) => element,
         matchHotKey: (value: string) => value === "embed",
         getEditorRange: () => range,
         getBlockElementsByRange: (value: unknown) => {

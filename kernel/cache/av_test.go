@@ -139,7 +139,7 @@ func TestAVCacheRejectsStaleAsyncAdmission(t *testing.T) {
 	entered, release := make(chan struct{}), make(chan struct{})
 	controlled, err := ristretto.NewCache(&ristretto.Config{
 		NumCounters: 100, MaxCost: 1 << 20, BufferItems: 64,
-		Cost: func(value interface{}) int64 {
+		Cost: func(value any) int64 {
 			close(entered)
 			<-release
 			return 1
@@ -190,5 +190,74 @@ func TestAVCacheRemovalKeepsNotebookIsolation(t *testing.T) {
 		if _, ok := GetAVDataInBox("database", box); ok {
 			t.Fatalf("database cache remained readable in notebook %q", box)
 		}
+	}
+}
+
+func TestAVCacheReplacementRemainsInvalidatable(t *testing.T) {
+	ClearAVCache()
+	t.Cleanup(ClearAVCache)
+	const id = "replacement"
+	var version uint64
+	for i := 1; i <= 64; i++ {
+		version = SetAVDataWithVersionInBox(id, "box", bytes.Repeat([]byte("x"), i))
+	}
+	avCache.Wait()
+	raw, current, ok := GetAVDataWithVersionInBox(id, "box")
+	if !ok || len(raw) != 64 || current != version {
+		t.Fatal("latest raw replacement was lost")
+	}
+	for i := 1; i <= 64; i++ {
+		if !SetAVNormalizedDataInBox(id, "box", version, raw, bytes.Repeat([]byte("n"), i)) {
+			t.Fatal("normalized replacement was dropped")
+		}
+	}
+	avCache.Wait()
+	if normalized, ok := GetAVNormalizedDataInBox(id, "box", version); !ok || len(normalized) != 64 {
+		t.Fatal("latest normalized replacement was lost")
+	}
+	RemoveAVData(id)
+	avCache.Wait()
+	if _, ok := GetAVDataInBox(id, "box"); ok || len(avCacheKeys) != 0 {
+		t.Fatal("replacement survived invalidation")
+	}
+	if SetAVNormalizedDataInBox(id, "box", version, raw, []byte("stale")) {
+		t.Fatal("stale normalization survived invalidation")
+	}
+}
+
+func TestAVCacheGrowingReplacementRespectsBudget(t *testing.T) {
+	for _, normalized := range []bool{false, true} {
+		t.Run(map[bool]string{false: "raw", true: "normalized"}[normalized], func(t *testing.T) {
+			ClearAVCache()
+			previous := avCache.MaxCost()
+			avCache.UpdateMaxCost(1600)
+			t.Cleanup(func() { ClearAVCache(); avCache.UpdateMaxCost(previous) })
+			raw := bytes.Repeat([]byte("x"), 400)
+			var version uint64
+			for _, id := range []string{"a", "b", "c"} {
+				version = SetAVDataWithVersionInBox(id, "box", raw)
+				avCache.Wait()
+				if _, ok := GetAVDataInBox(id, "box"); !ok {
+					t.Fatal("initial data was not admitted")
+				}
+			}
+			if normalized {
+				SetAVNormalizedDataInBox("c", "box", version, raw, bytes.Repeat([]byte("n"), 900))
+			} else {
+				SetAVDataInBox("c", "box", bytes.Repeat([]byte("x"), 1300))
+			}
+			avCache.Wait()
+			used := 0
+			for _, id := range []string{"a", "b", "c"} {
+				if data, current, ok := GetAVDataWithVersionInBox(id, "box"); ok {
+					used += len(data)
+					derived, _ := GetAVNormalizedDataInBox(id, "box", current)
+					used += len(derived)
+				}
+			}
+			if used > 1600 {
+				t.Fatalf("growing replacement exceeded budget: %d > 1600", used)
+			}
+		})
 	}
 }

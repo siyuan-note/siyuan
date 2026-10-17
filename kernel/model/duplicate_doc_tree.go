@@ -227,7 +227,7 @@ func remapDuplicateDocTreeReferences(root *ast.Node, ids map[string]string) {
 		}
 		return link
 	}
-	treenode.WalkWithTabTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -310,8 +310,8 @@ func (plan *duplicateDocTreePlan) commit(writeTree func(*parse.Tree) (uint64, er
 				err = errors.Join(err, removeErr)
 			}
 		}
-		for i := len(attempted) - 1; i >= 0; i-- {
-			tree := attempted[i]
+		for i, tree := range slices.Backward(attempted) {
+
 			abs := filepath.Join(util.DataDir, tree.Box, tree.Path)
 			if removeErr := os.Remove(abs); removeErr != nil && !os.IsNotExist(removeErr) {
 				err = errors.Join(err, removeErr)

@@ -20,6 +20,8 @@ describe("mobile touch gesture", () => {
         assert.equal(shouldStartLongPressMultiSelect("SPAN", "strong a", false, false), false);
         assert.equal(shouldStartLongPressMultiSelect("PROTYLE-HTML", undefined, true, false), false);
         assert.equal(shouldStartLongPressMultiSelect("IMG", undefined, false, true), false);
+        assert.equal(shouldStartLongPressMultiSelect("TD", undefined, false, false, true), false);
+        assert.equal(shouldStartLongPressMultiSelect("SPAN", "strong", false, false, true), false);
     });
 
     it("starts multi-select for ordinary block content", () => {

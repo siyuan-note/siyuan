@@ -172,15 +172,13 @@ func init() {
 		return
 	}
 	GetGraph.decodeFailure = func(err error) Response[GlobalGraphData] {
-		var failure *graphQueryDecodeError
-		if errors.As(err, &failure) {
+		if failure, ok := errors.AsType[*graphQueryDecodeError](err); ok {
 			return GetGraph.FailureWithData(-1, err.Error(), GraphQueryEcho[GlobalGraphResult](failure.reqID))
 		}
 		return Failure[GlobalGraphData](-1, err.Error())
 	}
 	GetLocalGraph.decodeFailure = func(err error) Response[LocalGraphData] {
-		var failure *graphQueryDecodeError
-		if errors.As(err, &failure) {
+		if failure, ok := errors.AsType[*graphQueryDecodeError](err); ok {
 			return GetLocalGraph.FailureWithData(-1, err.Error(), GraphQueryEcho[LocalGraphResult](failure.reqID))
 		}
 		return Failure[LocalGraphData](-1, err.Error())

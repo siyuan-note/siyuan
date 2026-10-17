@@ -32,7 +32,8 @@
     --input-hover-border-color: Highlight;
     --link-outline: 1.5px solid LinkText;
 
-    .textWidgetAnnotation :is(input, textarea):required,
+    .textWidgetAnnotation input:required,
+    .textWidgetAnnotation textarea:required,
     .choiceWidgetAnnotation select:required,
     .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:required {
       outline: 1.5px solid selectedItem;
@@ -142,7 +143,8 @@
   /* A field rendered to its own canvas shows that canvas and keeps its editable
      element hidden. Once the field is modified the canvas is outdated, so it's
      hidden and the element is shown instead. */
-  .hasOwnCanvas:not(.sandboxModified) :is(input, textarea) {
+  .hasOwnCanvas:not(.sandboxModified) input,
+  .hasOwnCanvas:not(.sandboxModified) textarea {
     display: none;
   }
 
@@ -186,7 +188,8 @@
     left: 0;
   }
 
-  .textWidgetAnnotation :is(input, textarea),
+  .textWidgetAnnotation input,
+  .textWidgetAnnotation textarea,
   .choiceWidgetAnnotation select,
   .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
     background-color: rgba(0, 54, 255, 0.13);
@@ -200,7 +203,8 @@
     width: 100%;
   }
 
-  .textWidgetAnnotation :is(input, textarea):required,
+  .textWidgetAnnotation input:required,
+  .textWidgetAnnotation textarea:required,
   .choiceWidgetAnnotation select:required,
   .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:required {
     outline: 1.5px solid red;
@@ -214,7 +218,8 @@
     resize: none;
   }
 
-  .textWidgetAnnotation :is(input, textarea)[disabled],
+  .textWidgetAnnotation input[disabled],
+  .textWidgetAnnotation textarea[disabled],
   .choiceWidgetAnnotation select[disabled],
   .buttonWidgetAnnotation:is(.checkBox, .radioButton) input[disabled] {
     background: none;
@@ -222,18 +227,21 @@
     cursor: not-allowed;
   }
 
-  .textWidgetAnnotation :is(input, textarea):hover,
+  .textWidgetAnnotation input:hover,
+  .textWidgetAnnotation textarea:hover,
   .choiceWidgetAnnotation select:hover,
   .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:hover {
     border: 2px solid var(--input-hover-border-color);
   }
-  .textWidgetAnnotation :is(input, textarea):hover,
+  .textWidgetAnnotation input:hover,
+  .textWidgetAnnotation textarea:hover,
   .choiceWidgetAnnotation select:hover,
   .buttonWidgetAnnotation.checkBox input:hover {
     border-radius: 2px;
   }
 
-  .textWidgetAnnotation :is(input, textarea):focus,
+  .textWidgetAnnotation input:focus,
+  .textWidgetAnnotation textarea:focus,
   .choiceWidgetAnnotation select:focus {
     background: none;
     border: 2px solid var(--input-focus-border-color);

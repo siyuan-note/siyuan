@@ -1,0 +1,36 @@
+@use "component/button";
+@use "component/dialog";
+
+:root {
+  color-scheme: light dark;
+}
+
+.startup-error {
+  z-index: 2147483647;
+  color: var(--b3-theme-on-background, CanvasText);
+  background-color: var(--b3-theme-background, Canvas);
+
+  &__container {
+    width: 34em;
+    max-height: calc(100% - 32px);
+  }
+
+  &__details {
+    max-height: 45vh;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  &__actions {
+    gap: 8px;
+  }
+
+  &__button {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

@@ -646,7 +646,9 @@ func graphDailyNoteFilter(local bool) string {
 	for _, p := range dailyNotesPaths {
 		// 转义单引号，避免日记存储路径闭合 SQL 字符串字面量造成注入
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-xr4h-j7cg-q8pc
-		buf.WriteString(" AND ref.hpath NOT LIKE '" + strings.ReplaceAll(p, "'", "''") + "%'")
+		buf.WriteString(" AND ref.hpath NOT LIKE '")
+		buf.WriteString(strings.ReplaceAll(p, "'", "''"))
+		buf.WriteString("%'")
 	}
 	return buf.String()
 }
@@ -685,7 +687,9 @@ func nodeTitleLabel(node *GraphNode, blockContent string) {
 func query2Stmt(queryStr string) (ret string) {
 	buf := bytes.Buffer{}
 	if ast.IsNodeIDPattern(queryStr) {
-		buf.WriteString("id = '" + queryStr + "'")
+		buf.WriteString("id = '")
+		buf.WriteString(queryStr)
+		buf.WriteString("'")
 	} else {
 		var tags []string
 		luteEngine := util.NewLute()
@@ -711,7 +715,8 @@ func query2Stmt(queryStr string) (ret string) {
 			if "" == part {
 				continue
 			}
-			buf.WriteString("(content LIKE " + conf.SearchLikePattern(part))
+			buf.WriteString("(content LIKE ")
+			buf.WriteString(conf.SearchLikePattern(part))
 			buf.WriteString(Conf.Search.Load().NAMFilter(part))
 			buf.WriteString(")")
 			if i < len(parts)-1 {
@@ -724,14 +729,18 @@ func query2Stmt(queryStr string) (ret string) {
 				buf.WriteString(" OR ")
 			}
 			for i, tag := range tags {
-				buf.WriteString("(content LIKE " + conf.SearchLikePattern("#"+tag+"#") + ")")
+				buf.WriteString("(content LIKE ")
+				buf.WriteString(conf.SearchLikePattern("#" + tag + "#"))
+				buf.WriteString(")")
 				if i < len(tags)-1 {
 					buf.WriteString(" AND ")
 				}
 			}
 			buf.WriteString(" OR ")
 			for i, tag := range tags {
-				buf.WriteString("ial LIKE '%tags=\"%" + conf.EscapeSearchLikePattern(tag) + "%\"%' ESCAPE '\\'")
+				buf.WriteString("ial LIKE '%tags=\"%")
+				buf.WriteString(conf.EscapeSearchLikePattern(tag))
+				buf.WriteString("%\"%' ESCAPE '\\'")
 				if i < len(tags)-1 {
 					buf.WriteString(" AND ")
 				}

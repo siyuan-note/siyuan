@@ -26,10 +26,10 @@ func replanPluginProject(ctx context.Context, grant *PluginDevelopmentGrant, all
 		return nil, err
 	}
 	if manifest.SourcePath != grant.SourcePath || manifest.SourceRevision != grant.SourceRevision {
-		return nil, errors.New("revision_conflict: changing import provenance requires a new plugin development task")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("changing import provenance requires a new plugin development task"))
 	}
 	if manifest.mutationPending() {
-		return nil, errors.New("result_unknown: resolve interrupted source mutation before preparing a new plan")
+		return nil, NewTextFileError(TextFileResultUnknown, errors.New("resolve interrupted source mutation before preparing a new plan"))
 	}
 	if err = validateProjectBaseline(grant, manifest); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func replanPluginProject(ctx context.Context, grant *PluginDevelopmentGrant, all
 	inventory := projectInventory(files)
 	revision := PluginProjectTreeRevision(inventory)
 	if expected == "" || expected != revision || revision != PluginProjectTreeRevision(manifest.Current) {
-		return nil, errors.New("revision_conflict: replan requires expectedSourceRevision and unchanged recorded source")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("replan requires expectedSourceRevision and unchanged recorded source"))
 	}
 	set := map[string]bool{}
 	for _, name := range allowed {
@@ -54,7 +54,7 @@ func replanPluginProject(ctx context.Context, grant *PluginDevelopmentGrant, all
 	}
 	for name := range files {
 		if !set[name] {
-			return nil, fmt.Errorf("invalid_path: existing file %s must remain in the approved write scope, including when it will be explicitly deleted", name)
+			return nil, NewTextFileError(TextFileInvalidPath, fmt.Errorf("existing file %s must remain in the approved write scope, including when it will be explicitly deleted", name))
 		}
 	}
 	if manifest.PlanHash == grant.PlanHash {
@@ -83,7 +83,7 @@ func replanPluginProject(ctx context.Context, grant *PluginDevelopmentGrant, all
 		return nil, err
 	}
 	if PluginProjectTreeRevision(projectInventory(again)) != expected {
-		return nil, errors.New("revision_conflict: source changed while preparing new checkpoint")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("source changed while preparing new checkpoint"))
 	}
 	for _, name := range allowed {
 		if err = source.MkdirAll(path.Dir(name), 0700); err != nil {
@@ -104,7 +104,7 @@ func replanPluginProject(ctx context.Context, grant *PluginDevelopmentGrant, all
 // 调用方持有项目锁，且已确认没有待完成写入；清单原子切换后才能删除上一基线。
 func cleanPluginProjectCheckpoints(grant *PluginDevelopmentGrant, manifest *pluginProjectManifest, retain ...string) error {
 	if manifest.Preparing || manifest.mutationPending() {
-		return errors.New("result_unknown: pending project recovery evidence must be preserved")
+		return NewTextFileError(TextFileResultUnknown, errors.New("pending project recovery evidence must be preserved"))
 	}
 	if err := validateProjectBaseline(grant, manifest); err != nil {
 		return err
@@ -139,7 +139,7 @@ func cleanPluginProjectCheckpoints(grant *PluginDevelopmentGrant, manifest *plug
 		return private.RemoveAll(name)
 	}
 	if err = remove("baseline"); err != nil {
-		return fmt.Errorf("backup_failed: obsolete checkpoint cleanup failed; current baseline preserved: %w", err)
+		return NewTextFileError(TextFileBackupFailed, fmt.Errorf("obsolete checkpoint cleanup failed; current baseline preserved: %w", err))
 	}
 	entries, err := fs.ReadDir(private.FS(), ".")
 	if err != nil {
@@ -149,7 +149,7 @@ func cleanPluginProjectCheckpoints(grant *PluginDevelopmentGrant, manifest *plug
 		name := entry.Name()
 		if suffix, ok := strings.CutPrefix(name, ".checkpoint-"); ok && len(suffix) == 26 && strings.Trim(suffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567") == "" {
 			if err = remove(name); err != nil {
-				return fmt.Errorf("backup_failed: staged checkpoint cleanup failed: %w", err)
+				return NewTextFileError(TextFileBackupFailed, fmt.Errorf("staged checkpoint cleanup failed: %w", err))
 			}
 		}
 	}
@@ -161,7 +161,7 @@ func cleanPluginProjectCheckpoints(grant *PluginDevelopmentGrant, manifest *plug
 		return err
 	}
 	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
-		return errors.New("backup_failed: checkpoint directory must be an unlinked directory")
+		return NewTextFileError(TextFileBackupFailed, errors.New("checkpoint directory must be an unlinked directory"))
 	}
 	entries, err = fs.ReadDir(private.FS(), "checkpoints")
 	if err != nil {
@@ -172,7 +172,7 @@ func cleanPluginProjectCheckpoints(grant *PluginDevelopmentGrant, manifest *plug
 			continue
 		}
 		if err = remove(path.Join("checkpoints", entry.Name())); err != nil {
-			return fmt.Errorf("backup_failed: obsolete checkpoint cleanup failed; current baseline preserved: %w", err)
+			return NewTextFileError(TextFileBackupFailed, fmt.Errorf("obsolete checkpoint cleanup failed; current baseline preserved: %w", err))
 		}
 	}
 	return nil

@@ -17,36 +17,28 @@
 package api
 
 import (
-	"net/http"
-
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
-func inspectInvalidFlashcardSources(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var inspectInvalidFlashcardSources = contractHandler(apicontract.InspectInvalidFlashcardSources, func(c *gin.Context, input apicontract.EmptyRequest) apicontract.Response[apicontract.FlashcardV2InvalidSourcesReport] {
 	report, err := model.InspectInvalidFlashcardV2Sources(c.Request.Context())
 	if err != nil {
-		setFlashcardAPIError(ret, err)
-		return
+		return apicontract.Failure[apicontract.FlashcardV2InvalidSourcesReport](-1, err.Error())
 	}
-	ret.Data = report
-}
+	return flashcardPayloadResponse[apicontract.FlashcardV2InvalidSourcesReport](report)
+})
 
-func deleteInvalidFlashcardSources(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	request := &flashcardv2.DeleteInvalidSourcesRequest{}
-	if !bindFlashcardRequest(c, ret, request) {
-		return
-	}
-	result, err := model.DeleteInvalidFlashcardV2Sources(c.Request.Context(), *request)
+var deleteInvalidFlashcardSources = contractHandler(apicontract.DeleteInvalidFlashcardSources, func(c *gin.Context, input apicontract.FlashcardV2DeleteInvalidSourcesRequest) apicontract.Response[apicontract.FlashcardV2DeleteInvalidSourcesResult] {
+	request, err := convertFlashcardPayload[flashcardv2.DeleteInvalidSourcesRequest](input)
 	if err != nil {
-		setFlashcardAPIError(ret, err)
-		return
+		return apicontract.Failure[apicontract.FlashcardV2DeleteInvalidSourcesResult](-1, err.Error())
 	}
-	ret.Data = result
-}
+	result, err := model.DeleteInvalidFlashcardV2Sources(c.Request.Context(), request)
+	if err != nil {
+		return apicontract.Failure[apicontract.FlashcardV2DeleteInvalidSourcesResult](-1, err.Error())
+	}
+	return flashcardPayloadResponse[apicontract.FlashcardV2DeleteInvalidSourcesResult](result)
+})

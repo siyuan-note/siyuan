@@ -11,7 +11,7 @@ const sources = () => {
         statement.declarationList.declarations.some(declaration =>
             ["turnsIntoTransaction", "turnsIntoOneTransaction"].includes(declaration.name.getText(parsed))));
     assert.equal(statements.length, 2);
-    return ts.transpileModule((read("protyle/toolbar/blockTypeCore.ts") + "\n" +
+    return ts.transpileModule((read("protyle/wysiwyg/calloutType.ts") + "\n" + read("protyle/toolbar/blockTypeCore.ts") + "\n" +
         statements.map(statement => statement.getText(parsed)).join("\n")).replace(/^export /gm, ""),
     {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText;
 };

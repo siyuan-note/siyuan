@@ -34,6 +34,15 @@ class GitReader:
 
 
 class SourceExportTests(unittest.TestCase):
+    def test_docker_and_harmony_use_the_same_pinned_commit(self):
+        root = Path(__file__).resolve().parents[1]
+        dockerfile = root.joinpath("Dockerfile").read_text(encoding="utf-8")
+        commits = [line.removeprefix("ARG ONNX_COMMIT=") for line in dockerfile.splitlines()
+                   if line.startswith("ARG ONNX_COMMIT=")]
+        self.assertEqual(commits, [harmony.REVISION])
+        self.assertEqual(len(harmony.REVISION), 40)
+        int(harmony.REVISION, 16)
+
     def test_export_reads_pinned_blobs_and_skips_submodules(self):
         tree = b"100644 blob abc\tcmake/source.txt\0" + b"160000 commit def\tcmake/external/onnx\0"
         with tempfile.TemporaryDirectory() as directory:

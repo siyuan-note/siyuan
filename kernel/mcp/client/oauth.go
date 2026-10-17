@@ -274,7 +274,7 @@ func (h *mcpOAuthHandler) Authorize(ctx context.Context, req *http.Request, resp
 	if len(scopes) == 0 {
 		scopes = append(scopes, asm.ScopesSupported...)
 	}
-	for _, scope := range strings.Fields(bearerChallengeParam(challenges, "scope")) {
+	for scope := range strings.FieldsSeq(bearerChallengeParam(challenges, "scope")) {
 		if !slices.Contains(scopes, scope) {
 			scopes = append(scopes, scope)
 		}

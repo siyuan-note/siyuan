@@ -1,4 +1,4 @@
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {hideTooltip} from "../../dialog/tooltip";
 import {getImageTitle, setImageTitle} from "./imageTitle";
 import {hasClosestBlock} from "../util/hasClosest";

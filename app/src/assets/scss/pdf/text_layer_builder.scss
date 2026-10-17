@@ -33,7 +33,8 @@
     touch-action: none;
   }
 
-  :is(span, br) {
+  span,
+  br {
     color: transparent;
     position: absolute;
     white-space: pre;

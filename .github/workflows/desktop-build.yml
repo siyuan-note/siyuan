@@ -41,6 +41,29 @@ jobs:
           cache: true
       - run: go version
 
+      - name: Set up Linux musl compiler
+        id: musl-compiler
+        if: fromJSON(inputs.config).goos == 'linux'
+        shell: bash
+        env:
+          GOARCH: ${{ fromJSON(inputs.config).goarch }}
+        run: |
+          case "$GOARCH" in
+            amd64)
+              target_prefix=x86_64-linux-musl
+              sha256=c5d410d9f82a4f24c549fe5d24f988f85b2679b452413a9f7e5f7b956f2fe7ea
+              ;;
+            arm64)
+              target_prefix=aarch64-linux-musl
+              sha256=c909817856d6ceda86aa510894fa3527eac7989f0ef6e87b5721c58737a06c38
+              ;;
+            *) echo "Unsupported Linux architecture: $GOARCH"; exit 1 ;;
+          esac
+          curl --fail --location --retry 3 "https://github.com/musl-cc/musl.cc/releases/download/v0.0.1/${target_prefix}-cross.tgz" -o "$RUNNER_TEMP/musl-cross.tgz"
+          printf '%s  %s\n' "$sha256" "$RUNNER_TEMP/musl-cross.tgz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/musl-cross.tgz" -C "$RUNNER_TEMP"
+          echo "cc=$RUNNER_TEMP/${target_prefix}-cross/bin/${target_prefix}-gcc" >> "$GITHUB_OUTPUT"
+
       - name: Set up goversioninfo
         run: go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo && go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
         if: "contains( fromJSON(inputs.config).goos, 'windows')"
@@ -99,6 +122,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
 
       - name: Building Kernel
+        if: fromJSON(inputs.config).goos != 'linux'
         run: go build -tags "fts5 sqlcipher" -o "${{ fromJSON(inputs.config).kernel_path }}" -ldflags "${{ fromJSON(inputs.config).build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ fromJSON(inputs.config).build_args_suffix }}"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
@@ -106,6 +130,36 @@ jobs:
           CGO_ENABLED: 1
           GOOS: ${{ fromJSON(inputs.config).goos }}
           GOARCH: ${{ fromJSON(inputs.config).goarch }}
+
+      - name: Building Linux Kernel
+        if: fromJSON(inputs.config).goos == 'linux'
+        run: go build -buildmode=pie -tags "fts5 sqlcipher" -o "${{ fromJSON(inputs.config).kernel_path }}" -ldflags "${{ fromJSON(inputs.config).build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ fromJSON(inputs.config).build_args_suffix }} -extldflags -static-pie" .
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+        env:
+          GO111MODULE: on
+          CGO_ENABLED: 1
+          CC: ${{ steps.musl-compiler.outputs.cc }}
+          GOOS: linux
+          GOARCH: ${{ fromJSON(inputs.config).goarch }}
+
+      - name: Verify static Linux Kernel
+        if: fromJSON(inputs.config).goos == 'linux'
+        shell: bash
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+        env:
+          KERNEL_PATH: ${{ fromJSON(inputs.config).kernel_path }}
+          LC_ALL: C
+        run: |
+          program_headers="$(readelf -lW "$KERNEL_PATH")"
+          dynamic_section="$(readelf -dW "$KERNEL_PATH")"
+          # 静态内核不应包含动态加载器或共享库依赖。
+          if [[ "$program_headers" == *INTERP* || "$dynamic_section" == *"(NEEDED)"* ]]; then
+            echo "Linux kernel must be statically linked"
+            echo "$program_headers"
+            echo "$dynamic_section"
+            exit 1
+          fi
+          "$KERNEL_PATH" --version
 
       - name: Snapshot raw ARM editor runtime
         id: editor-runtime

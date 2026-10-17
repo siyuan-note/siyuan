@@ -80,6 +80,31 @@ test("undo from a node editor restores that node or its previous sibling", async
     assert.equal(selected.pop(), "existing", "undoing node insertion focuses the previous sibling");
 });
 
+test("text history records the edited node even when selection changes before its save", async () => {
+    const nodes = new Map([["root", {id: "root", children: [{id: "child"}]}],
+        ["child", {id: "child", parentId: "root", children: []}]]);
+    const list = {isConnected: true, dataset: {nodeId: "map"}, outerHTML: "before"};
+    const operations: {undo: Record<string, string>, redo: Record<string, string>}[] = [];
+    const context: any = {
+        canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root")}),
+        cleanListMindmapHTML: (html: string) => html, getListMindmapSiblingIDs: () => new Map(),
+        normalizeListMindmapSummaryMetadata: () => {},
+        updateTransaction: (_owner: unknown, _list: unknown, _before: string, undo: Record<string, string>,
+                            additional: {context: Record<string, string>}) => operations.push({undo, redo: additional.context}),
+        console, showMessage: assert.fail, window: {siyuan: {languages: {listMindmapInvalid: "save failed"}}},
+    };
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {owner: {}, list, refresh() {},
+        view: {getSelectedId: () => "root"}});
+    const undo = {undoFocusId: "paragraph", undoFocusStart: "2", undoFocusEnd: "2"};
+    const redo = {...undo, undoFocusStart: "5", undoFocusEnd: "5"};
+    assert.equal(await target.change(() => { list.outerHTML = "after"; }, true, "child", {undo, redo}), true);
+    assert.equal(operations[0].undo.undoFocusId, "child", "undo must reopen the edited child instead of the selected root");
+    assert.equal(operations[0].redo.undoFocusId, "child");
+    assert.deepEqual(JSON.parse(operations[0].undo.undoFocusMindmapSelection), undo);
+    assert.deepEqual(JSON.parse(operations[0].redo.undoFocusMindmapSelection), redo);
+});
+
 test("mind map transaction focus survives insertion, deletion and repeated undo/redo", async () => {
     type FocusContext = {undoFocusId: string, undoFocusStart: string, undoFocusEnd: string};
     type State = {id: string, children: string[]}[];
@@ -89,8 +114,9 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     let state: State = [{id: "root", children: ["existing"]}, {id: "existing", children: []}];
     let selectedID = "existing";
     let target: any;
+    type ModelNode = {id: string; children: ModelNode[]; parentId: string};
     const getModel = () => {
-        const nodes = new Map(state.map(node => [node.id, {id: node.id, children: [], parentId: ""}]));
+        const nodes = new Map<string, ModelNode>(state.map((node): [string, ModelNode] => [node.id, {id: node.id, children: [], parentId: ""}]));
         state.forEach(node => {
             nodes.get(node.id).children = node.children.map(id => {
                 const child = nodes.get(id);

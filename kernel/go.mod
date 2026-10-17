@@ -7,7 +7,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
-	github.com/88250/gulu v1.2.3-0.20260831011033-1a37069fad34
+	github.com/88250/gulu v1.2.3-0.20261016025619-193697a1830b
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.1.2
 	github.com/ConradIrwin/font v0.2.2-0.20260202161408-44ae4cf5fb22
@@ -100,7 +100,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20261011125927-8bf47cd864f7
+require github.com/88250/lute v1.7.9-0.20261016025608-6d44a08f8718
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

@@ -25,6 +25,10 @@ const LIST_CONVERSION_TYPES: Record<TListSubtype, Partial<Record<TListSubtype, s
     t: {u: "TL2UL", o: "TL2OL"},
 };
 
+const LIST_CONVERSION_TYPE_SET = new Set(Object.values(LIST_CONVERSION_TYPES).flatMap(Object.values));
+
+export const isListConversionType = (type: string) => LIST_CONVERSION_TYPE_SET.has(type);
+
 export const getAppendListContext = (nodeElement: HTMLElement,
                                      editorElement: HTMLElement): TAppendListContext | undefined => {
     let currentElement: HTMLElement | null = nodeElement;
@@ -127,7 +131,7 @@ export const shouldCreateListItemChildOnEnter = (isPrimaryBlock: boolean, isLast
 export const getFollowingOrderedListMarkerUpdates = (currentMarker: string, followingMarkers: string[]) => {
     const currentIndex = Number.parseInt(currentMarker, 10);
     if (Number.isNaN(currentIndex)) {
-        return followingMarkers.map(() => undefined);
+        return followingMarkers.map((): undefined => undefined);
     }
     return followingMarkers.map((marker, index) => {
         const expectedMarker = `${currentIndex + index + 2}.`;

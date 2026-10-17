@@ -179,7 +179,9 @@ func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apico
 		preserveMCPServerIDs(oldServers, ai.MCP.Servers)
 	}
 	ai = conf.NormalizeAI(ai)
-	model.Conf.SetAI(ai)
+	if err = model.Conf.SetAI(c.Request.Context(), ai); err != nil {
+		return apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
+	}
 	mcpserver.RefreshToolExposure()
 
 	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。
@@ -366,6 +368,12 @@ func applyEditorSetting(c *gin.Context, request apicontract.SetEditorRequest) (r
 	}
 	if !request.HasFieldFold("displayImgAlt") {
 		editor.DisplayImgAlt = model.Conf.Editor.Load().DisplayImgAlt
+	}
+	if !request.HasFieldFold("pageScrollButtons") {
+		editor.PageScrollButtons = model.Conf.Editor.Load().PageScrollButtons
+	}
+	if !request.HasFieldFold("blockGutterMode") {
+		editor.BlockGutterMode = model.Conf.Editor.Load().BlockGutterMode
 	}
 
 	issues, applyErr := model.ApplyConfSection("editor", editor)

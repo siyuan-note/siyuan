@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/internal/configcompat"
 )
 
 // Schema 是生成器和响应验证共用的 JSON Schema 子集；不支持的 Go 类型直接报错。
@@ -93,6 +95,20 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[FlashcardV2JSON]() {
+		return b.schema(reflect.TypeFor[JSONValue](), input)
+	}
+	if t == reflect.TypeFor[FlashcardV2SourceHistoryData]() {
+		list, err := b.schema(reflect.TypeFor[FlashcardV2SourceHistoryList](), input)
+		if err != nil {
+			return nil, err
+		}
+		version, err := b.schema(reflect.TypeFor[FlashcardV2SourceHistoryVersion](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{list, version}}, nil
+	}
 	if t == reflect.TypeFor[AnkiConnectResponse]() {
 		return b.ankiConnectResponseSchema()
 	}
@@ -102,6 +118,12 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 			return nil, err
 		}
 		return &Schema{AnyOf: []*Schema{info, object(map[string]*Schema{})}}, nil
+	}
+	if t == reflect.TypeFor[configcompat.BlockGutterMode]() {
+		if input {
+			return &Schema{AnyOf: []*Schema{{Type: "boolean"}, {Type: "integer"}}}, nil
+		}
+		return &Schema{Type: "boolean"}, nil
 	}
 	if schema, err := transactionPayloadSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
@@ -469,8 +491,7 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 }
 
 func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error {
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
+	for field := range t.Fields() {
 		if !field.IsExported() && !field.Anonymous {
 			continue
 		}
@@ -505,7 +526,7 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 		}
 		options := "," + field.Tag.Get("api") + ","
 		has := func(option string) bool { return strings.Contains(options, ","+option+",") }
-		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
+		for option := range strings.SplitSeq(field.Tag.Get("api"), ",") {
 			switch {
 			case option == "", option == "optional", option == "nullable", option == "nonnullable":
 			case option == "legacyobject":
@@ -548,10 +569,10 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 		if has("nonnullable") {
 			child = nonnullable(child)
 		}
-		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
+		for option := range strings.SplitSeq(field.Tag.Get("api"), ",") {
 			if strings.HasPrefix(option, "enum=") {
 				child.Enum = nil
-				for _, value := range strings.Split(strings.TrimPrefix(option, "enum="), "|") {
+				for value := range strings.SplitSeq(strings.TrimPrefix(option, "enum="), "|") {
 					child.Enum = append(child.Enum, value)
 				}
 			}

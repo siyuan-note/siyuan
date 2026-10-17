@@ -1,4 +1,4 @@
-import {copyImageOCRText, openImageOCR} from "../asset/imageOCR";
+import {clearImageOCRText, copyImageOCRText, openImageOCR} from "../asset/imageOCR";
 import {reImageAIOCR} from "../asset/imageAIOCR";
 import {getImageOCRAvailability} from "../asset/imageOCRAvailability";
 import {getImageOCRStatus, invalidateImageOCRStatus} from "../asset/imageOCRStatus";
@@ -17,10 +17,11 @@ export const createImageOCRMenu = (image: HTMLElement, notebookID: string): IMen
         getStatus: () => getImageOCRStatus(path),
         openResult: () => openImageOCR(image.getAttribute("data-src")),
         copyText: () => { copyImageOCRText(image.getAttribute("data-src")); },
+        clearText: () => { void clearImageOCRText(image.getAttribute("data-src")); },
         runAI: () => { void reImageAIOCR(image.getAttribute("data-src")); },
         runLocal: () => {
             const currentPath = image.getAttribute("data-src");
-            fetchPost("/api/asset/ocr", {path: currentPath}, () => invalidateImageOCRStatus(currentPath));
+            void fetchPost("/api/asset/ocr", {path: currentPath}).finally(() => invalidateImageOCRStatus(currentPath));
         },
     });
 };

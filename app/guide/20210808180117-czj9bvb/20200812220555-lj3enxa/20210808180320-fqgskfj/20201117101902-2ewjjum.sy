@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -91,7 +91,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201224120447-e6zyfti",
-				"updated": "20201224120447"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -106,7 +106,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201224120447-znjkoy5",
-				"updated": "20210503152123"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -190,7 +190,7 @@
 					},
 					"Properties": {
 						"id": "20201224120447-s8m8new",
-						"updated": "20201224120447"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -239,7 +239,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20201224120447-0y91i5d",
-								"updated": "20201224120447"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -252,7 +252,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%引用%' AND type = 'p') }}\n"
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%引用%' AND type = 'p' }}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -406,7 +406,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201224120447-ickbh88",
-				"updated": "20240731204712"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -460,7 +460,7 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20201224120447-veyqmvr",
-				"updated": "20240731204356"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -471,7 +471,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#内容块/嵌入#%' OR content LIKE '%#内容块/引用#%') AND hpath NOT LIKE '%嵌入内容块%'"
+					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#内容块/嵌入#%' OR content LIKE '%#内容块/引用#%') AND hpath NOT LIKE '%嵌入内容块%' AND type = 'p'"
 				},
 				{
 					"Type": "NodeCloseBrace"
@@ -639,7 +639,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202058-4nvpz56",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -653,7 +653,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-q54zwf8",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -667,7 +667,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 前缀执行 JavaScript 代码，动态决定要嵌入哪些块，适合 SQL 查询无法满足的复杂场景"
+					"Data": "​ 前缀执行 JavaScript 代码，动态决定要嵌入哪些块，适合 SQL 查询无法满足的复杂场景。"
 				}
 			]
 		},
@@ -691,7 +691,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-1tfila8",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -705,7 +705,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-paqopye",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -719,7 +719,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 开头的代码即可进入 JS 模式"
+					"Data": "​ 开头的代码即可进入 JS 模式。"
 				}
 			]
 		},
@@ -729,7 +729,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-u31815k",
-				"updated": "20260612202058"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -749,7 +749,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20260612202058-ef6nmf4",
-				"updated": "20260612202058"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -828,7 +828,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "(url, data, callback?) =&gt; void"
+									"TextMarkTextContent": "(url, data?, headers?, process?, signal?) =&gt; Promise&lt;IWebSocketData&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -842,7 +842,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "发起同步 POST 请求"
+									"Data": "发起异步 POST 请求，使用 await 或 .then() 读取响应；第三个参数是请求头对象，不是回调函数"
 								}
 							]
 						}
@@ -1018,7 +1018,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-8ljs229",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1032,12 +1032,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-7u53ctj",
-				"updated": "20260612202058"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "需要"
+					"Data": "要自动渲染内容块，请"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1100,12 +1100,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-81vbloa",
-				"updated": "20260612202058"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "返回数组中 ID 的顺序即为最终显示顺序"
+					"Data": "返回数组中 ID 的顺序即为最终显示顺序。"
 				}
 			]
 		},
@@ -1115,7 +1115,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-dt9gwb2",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1185,7 +1185,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-wp4nan2",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1198,7 +1198,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" });\nreturn resp.data.blocks.map(b => b.id);\n"
+					"Data": "//!js\nconst resp = await fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" });\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1211,12 +1211,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-2v9xnq8",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "获取当前文档下所有子块："
+					"Data": "获取当前文档的直接子块："
 				}
 			]
 		},
@@ -1226,7 +1226,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-wvrepjj",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1239,7 +1239,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b => b.id);\n"
+					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = await fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nreturn resp.data.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1267,7 +1267,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-6kivtwm",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1280,7 +1280,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
+					"Data": "//!js\nconst resp = await fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1294,7 +1294,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-7o8g0fu",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1311,7 +1311,7 @@
 			},
 			"Properties": {
 				"id": "20260612202058-ih0e8zv",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1436,7 +1436,7 @@
 					},
 					"Properties": {
 						"id": "20260612202058-vuy2gbe",
-						"updated": "20260810212846"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1444,16 +1444,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202058-c32za6h",
-								"updated": "20260810212846"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "错误提示"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：JS 执行异常或返回非数组时，显示\"引用已过期\""
+									"Data": "渲染与错误提示：返回块 ID 数组时自动渲染对应内容块，无结果时显示“引用已过期”；返回非数组时保留脚本自定义的 DOM 并结束加载；执行异常时显示实际错误信息"
 								}
 							]
 						}

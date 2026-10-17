@@ -439,12 +439,13 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             </label>
             <label class="fn__flex b3-label config-item" data-type="openAIApiType">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiType,
-        '<span class="fn__none" data-type="responsesCompatibility"></span>')}
+        '<span class="fn__none" data-type="protocolCompatibility"></span>')}
                 <span class="fn__space"></span>
                 <select class="b3-select fn__flex-center fn__size200" data-provider-field="protocol">
                     <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions</option>
                     <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses</option>
                     <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>Anthropic Messages</option>
+                    <option value="gemini-interactions"${draft.protocol === "gemini-interactions" ? " selected" : ""}>Gemini Interactions</option>
                 </select>
             </label>
             <label class="fn__flex b3-label config-item">
@@ -520,13 +521,22 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     let chatGPTAccountReady = false;
     let draggingModelIndex: number | undefined;
     let dropModelTarget: {index: number; after: boolean} | undefined;
-    const updateResponsesCompatibility = () => {
-        const compatibility = view.querySelector<HTMLElement>("[data-type='responsesCompatibility']");
+    const updateProtocolCompatibility = () => {
+        const preset = findPreset(draft);
+        const geminiAvailable = !preset || preset.id === "gemini" || preset.category === "custom";
+        const geminiOption = view.querySelector<HTMLOptionElement>("[data-provider-field='protocol'] option[value='gemini-interactions']");
+        // 已有选择保留显示并提示不兼容，避免打开配置时悄悄修改协议。
+        geminiOption.hidden = !geminiAvailable && draft.protocol !== "gemini-interactions";
+        geminiOption.disabled = !geminiAvailable;
+        const compatibility = view.querySelector<HTMLElement>("[data-type='protocolCompatibility']");
         if (!compatibility) {
             return;
         }
-        const support = getResponsesSupport(draft.baseURL);
-        compatibility.classList.toggle("fn__none", draft.protocol !== "openai-responses" || support === "supported");
+        const support = draft.protocol === "gemini-interactions"
+            ? (geminiAvailable ? "supported" : "unsupported")
+            : getResponsesSupport(draft.baseURL);
+        compatibility.classList.toggle("fn__none",
+            !["openai-responses", "gemini-interactions"].includes(draft.protocol) || support === "supported");
         compatibility.classList.toggle("ft__error", support === "unsupported");
         compatibility.textContent = support === "unsupported"
             ? window.siyuan.languages.incompatible
@@ -555,7 +565,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         fetchModelsButton.disabled = disabled;
     };
     updateModelActionButtons();
-    updateResponsesCompatibility();
+    updateProtocolCompatibility();
     renderDraftModels(modelsContainer, draft.models, availableModels);
 
     const clearModelDropTarget = () => {
@@ -813,7 +823,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             }
             if (providerField === "baseURL") {
                 updateModelActionButtons();
-                updateResponsesCompatibility();
+                updateProtocolCompatibility();
             }
             return;
         }
@@ -853,7 +863,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             draft.baseURL = getProviderProtocolBaseURL(draft.baseURL, draft.protocol);
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']").value = draft.baseURL;
             updateModelActionButtons();
-            updateResponsesCompatibility();
+            updateProtocolCompatibility();
             return;
         }
         if (target.dataset.modelField !== "enabled") {

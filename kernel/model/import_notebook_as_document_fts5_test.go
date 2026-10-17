@@ -160,7 +160,7 @@ func setupNotebookDocumentImportDatabase(t *testing.T) {
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
 	t.Cleanup(func() {
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.ConfDir = originalConfDir
 		util.QueueDir = originalQueueDir
 		util.DBPath = originalDBPath

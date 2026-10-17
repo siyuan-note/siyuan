@@ -17,12 +17,9 @@
 package api
 
 import (
-	"fmt"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"github.com/siyuan-note/siyuan/kernel/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/logging"
 )
 
 func ServeAPI(ginServer *gin.Engine) {
@@ -76,23 +73,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	registerArchiveRoutes(ginServer)
 	registerUiRoutes(ginServer)
 }
-
-func deprecatedResponse(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
-
-	msg := fmt.Sprintf("[%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-		c.Request.RequestURI)
-	logging.LogWarn(msg)
-
-	return apicontract.Failure[apicontract.Null](-1, msg)
-}
-
-var resetBlockAttrs = contractHandler(apicontract.ResetBlockAttrs, deprecatedResponse)
-
-var searchAttributeViewNonRelationKey = contractHandler(apicontract.SearchAttributeViewNonRelationKey, deprecatedResponse)
-
-var setLocalStorage = contractHandler(apicontract.SetLocalStorage, deprecatedResponse)
-
-var deprecatedReloadUI = contractHandler(apicontract.DeprecatedReloadUI, deprecatedResponse)
 
 // registerOauthRoutes 注册本域的契约路由。
 func registerOauthRoutes(ginServer *gin.Engine) {
@@ -176,7 +156,6 @@ func registerSystemRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getWorkspaceInfo", contractRouteHandlers(apicontract.GetWorkspaceInfo, getWorkspaceInfo)...)
 	ginServer.Handle("POST", "/api/system/getWorkspaceStorage", contractRouteHandlers(apicontract.GetWorkspaceStorage, getWorkspaceStorage)...)
 	ginServer.Handle("POST", "/api/system/getRuntimeInfo", contractRouteHandlers(apicontract.GetRuntimeInfo, getRuntimeInfo)...)
-	ginServer.Handle("POST", "/api/system/reloadUI", contractRouteHandlers(apicontract.DeprecatedReloadUI, deprecatedReloadUI)...)
 	ginServer.Handle("POST", "/api/system/addMicrosoftDefenderExclusion", contractRouteHandlers(apicontract.AddMicrosoftDefenderExclusion, addMicrosoftDefenderExclusion)...)
 	ginServer.Handle("POST", "/api/system/ignoreAddMicrosoftDefenderExclusion", contractRouteHandlers(apicontract.IgnoreAddMicrosoftDefenderExclusion, ignoreAddMicrosoftDefenderExclusion)...)
 	ginServer.Handle("POST", "/api/system/vacuumDataIndex", contractRouteHandlers(apicontract.VacuumDataIndex, vacuumDataIndex)...)
@@ -247,7 +226,6 @@ func registerStorageRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/getLocalStorage", contractRouteHandlers(apicontract.GetLocalStorage, getLocalStorage)...)
 	ginServer.Handle("POST", "/api/storage/getLocalStorageVal", contractRouteHandlers(apicontract.GetLocalStorageVal, getLocalStorageVal)...)
 	ginServer.Handle("POST", "/api/storage/getLocalStorageVals", contractRouteHandlers(apicontract.GetLocalStorageVals, getLocalStorageVals)...)
-	ginServer.Handle("POST", "/api/storage/setLocalStorage", contractRouteHandlers(apicontract.SetLocalStorage, setLocalStorage)...)
 	ginServer.Handle("POST", "/api/storage/setLocalStorageVal", contractRouteHandlers(apicontract.SetLocalStorageVal, setLocalStorageVal)...)
 	ginServer.Handle("POST", "/api/storage/setLocalStorageVals", contractRouteHandlers(apicontract.SetLocalStorageVals, setLocalStorageVals)...)
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVal", contractRouteHandlers(apicontract.RemoveLocalStorageVal, removeLocalStorageVal)...)
@@ -536,7 +514,6 @@ func registerRefRoutes(ginServer *gin.Engine) {
 // registerAttrRoutes 注册本域的契约路由。
 func registerAttrRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/attr/getBookmarkLabels", contractRouteHandlers(apicontract.GetBookmarkLabels, getBookmarkLabels)...)
-	ginServer.Handle("POST", "/api/attr/resetBlockAttrs", contractRouteHandlers(apicontract.ResetBlockAttrs, resetBlockAttrs)...)
 	ginServer.Handle("POST", "/api/attr/setBlockAttrs", contractRouteHandlers(apicontract.SetBlockAttrs, setBlockAttrs)...)
 	ginServer.Handle("POST", "/api/attr/batchSetBlockAttrs", contractRouteHandlers(apicontract.BatchSetBlockAttrs, batchSetBlockAttrs)...)
 	ginServer.Handle("POST", "/api/attr/getBlockAttrs", contractRouteHandlers(apicontract.GetBlockAttrs, getBlockAttrs)...)
@@ -563,6 +540,8 @@ func registerSyncRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/setSyncProviderWebDAV", contractRouteHandlers(apicontract.SetSyncProviderWebDAV, setSyncProviderWebDAV)...)
 	ginServer.Handle("POST", "/api/sync/setSyncProviderLocal", contractRouteHandlers(apicontract.SetSyncProviderLocal, setSyncProviderLocal)...)
 	ginServer.Handle("POST", "/api/sync/clearSyncProviderConfig", contractRouteHandlers(apicontract.ClearSyncProviderConfig, clearSyncProviderConfig)...)
+	ginServer.Handle("POST", "/api/sync/getSyncProviderConfigRules", contractRouteHandlers(apicontract.GetSyncProviderConfigRules, getSyncProviderConfigRules)...)
+	ginServer.Handle("POST", "/api/sync/testSyncProviderS3", contractRouteHandlers(apicontract.TestSyncProviderS3, testSyncProviderS3)...)
 	ginServer.Handle("POST", "/api/sync/setCloudSyncDir", contractRouteHandlers(apicontract.SetCloudSyncDir, setCloudSyncDir)...)
 	ginServer.Handle("POST", "/api/sync/setSyncAssetDownloadMode", contractRouteHandlers(apicontract.SetSyncAssetDownloadMode, setSyncAssetDownloadMode)...)
 	ginServer.Handle("POST", "/api/sync/createCloudSyncDir", contractRouteHandlers(apicontract.CreateCloudSyncDir, createCloudSyncDir)...)
@@ -610,6 +589,8 @@ func registerAssetRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/setFileAnnotation", contractRouteHandlers(apicontract.SetFileAnnotation, setFileAnnotation)...)
 	ginServer.Handle("POST", "/api/asset/getFileAnnotation", contractRouteHandlers(apicontract.GetFileAnnotation, getFileAnnotation)...)
 	ginServer.Handle("POST", "/api/asset/getUnusedAssets", contractRouteHandlers(apicontract.GetUnusedAssets, getUnusedAssets)...)
+	ginServer.Handle("POST", "/api/asset/getUnusedEncryptedBoxAssets", contractRouteHandlers(apicontract.GetUnusedEncryptedBoxAssets, getUnusedEncryptedBoxAssets)...)
+	ginServer.Handle("POST", "/api/asset/removeUnusedEncryptedBoxAssets", contractRouteHandlers(apicontract.RemoveUnusedEncryptedBoxAssets, removeUnusedEncryptedBoxAssets)...)
 	ginServer.Handle("POST", "/api/asset/getMissingAssets", contractRouteHandlers(apicontract.GetMissingAssets, getMissingAssets)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAsset", contractRouteHandlers(apicontract.RemoveUnusedAsset, removeUnusedAsset)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAssets", contractRouteHandlers(apicontract.RemoveUnusedAssets, removeUnusedAssets)...)
@@ -866,9 +847,11 @@ func registerAvRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/batchSetAttributeViewBlockAttrs", contractRouteHandlers(apicontract.BatchSetAttributeViewBlockAttrs, batchSetAttributeViewBlockAttrs)...)
 	ginServer.Handle("POST", "/api/av/searchAttributeView", contractRouteHandlers(apicontract.SearchAttributeView, searchAttributeView)...)
 	ginServer.Handle("POST", "/api/av/getAttributeView", contractRouteHandlers(apicontract.GetAttributeView, getAttributeView)...)
+	ginServer.Handle("POST", "/api/av/previewAttributeViewCollection", contractRouteHandlers(apicontract.PreviewAttributeViewCollection, previewAttributeViewCollection)...)
+	ginServer.Handle("POST", "/api/av/reviewAttributeViewCollection", contractRouteHandlers(apicontract.ReviewAttributeViewCollection, reviewAttributeViewCollection)...)
+	ginServer.Handle("POST", "/api/av/previewAttributeViewTemplate", contractRouteHandlers(apicontract.PreviewAttributeViewTemplate, previewAttributeViewTemplate)...)
 	ginServer.Handle("POST", "/api/av/getAttributeViewPasteRows", contractRouteHandlers(apicontract.GetAttributeViewPasteRows, getAttributeViewPasteRows)...)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRelationKey", contractRouteHandlers(apicontract.SearchAttributeViewRelationKey, searchAttributeViewRelationKey)...)
-	ginServer.Handle("POST", "/api/av/searchAttributeViewNonRelationKey", contractRouteHandlers(apicontract.SearchAttributeViewNonRelationKey, searchAttributeViewNonRelationKey)...)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRollupDestKeys", contractRouteHandlers(apicontract.SearchAttributeViewRollupDestKeys, searchAttributeViewRollupDestKeys)...)
 	ginServer.Handle("POST", "/api/av/getAttributeViewFilterSort", contractRouteHandlers(apicontract.GetAttributeViewFilterSort, getAttributeViewFilterSort)...)
 	ginServer.Handle("POST", "/api/av/setAttrViewFilters", contractRouteHandlers(apicontract.SetAttrViewFilters, setAttrViewFilters)...)
@@ -970,45 +953,45 @@ func registerUiRoutes(ginServer *gin.Engine) {
 // registerFlashcardRoutes 注册闪卡接口并保留其鉴权和只读保护。
 func registerFlashcardRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/flashcard/ankiConnect", contractRouteHandlers(apicontract.AnkiConnect, ankiConnect)...)
-	ginServer.Handle("POST", "/api/flashcard/getMigrationStatus", model.CheckAuth, model.CheckAdminRole, getFlashcardMigrationStatus)
-	ginServer.Handle("POST", "/api/flashcard/previewAnkiPackage", model.CheckAuth, model.CheckAdminRole, previewAnkiFlashcardPackage)
-	ginServer.Handle("POST", "/api/flashcard/importAnkiPackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importAnkiFlashcardPackage)
-	ginServer.Handle("POST", "/api/flashcard/previewMigration", model.CheckAuth, model.CheckAdminRole, previewFlashcardMigration)
-	ginServer.Handle("POST", "/api/flashcard/activateMigration", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, activateFlashcardMigration)
-	ginServer.Handle("POST", "/api/flashcard/getEntity", model.CheckAuth, model.CheckAdminRole, getFlashcardEntity)
-	ginServer.Handle("POST", "/api/flashcard/listEntities", model.CheckAuth, model.CheckAdminRole, listFlashcardEntities)
-	ginServer.Handle("POST", "/api/flashcard/mutateEntities", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mutateFlashcardEntities)
-	ginServer.Handle("POST", "/api/flashcard/reconcileSource", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reconcileFlashcardSource)
-	ginServer.Handle("POST", "/api/flashcard/createBasicSource", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createBasicFlashcardSource)
+	ginServer.Handle("POST", "/api/flashcard/getMigrationStatus", contractRouteHandlers(apicontract.GetFlashcardMigrationStatus, getFlashcardMigrationStatus)...)
+	ginServer.Handle("POST", "/api/flashcard/previewAnkiPackage", contractRouteHandlers(apicontract.PreviewAnkiFlashcardPackage, previewAnkiFlashcardPackage)...)
+	ginServer.Handle("POST", "/api/flashcard/importAnkiPackage", contractRouteHandlers(apicontract.ImportAnkiFlashcardPackage, importAnkiFlashcardPackage)...)
+	ginServer.Handle("POST", "/api/flashcard/previewMigration", contractRouteHandlers(apicontract.PreviewFlashcardMigration, previewFlashcardMigration)...)
+	ginServer.Handle("POST", "/api/flashcard/activateMigration", contractRouteHandlers(apicontract.ActivateFlashcardMigration, activateFlashcardMigration)...)
+	ginServer.Handle("POST", "/api/flashcard/getEntity", contractRouteHandlers(apicontract.GetFlashcardEntity, getFlashcardEntity)...)
+	ginServer.Handle("POST", "/api/flashcard/listEntities", contractRouteHandlers(apicontract.ListFlashcardEntities, listFlashcardEntities)...)
+	ginServer.Handle("POST", "/api/flashcard/mutateEntities", contractRouteHandlers(apicontract.MutateFlashcardEntities, mutateFlashcardEntities)...)
+	ginServer.Handle("POST", "/api/flashcard/reconcileSource", contractRouteHandlers(apicontract.ReconcileFlashcardSource, reconcileFlashcardSource)...)
+	ginServer.Handle("POST", "/api/flashcard/createBasicSource", contractRouteHandlers(apicontract.CreateBasicFlashcardSource, createBasicFlashcardSource)...)
 	ginServer.Handle("POST", "/api/flashcard/createQuickSources", contractRouteHandlers(apicontract.CreateQuickFlashcardSources, createQuickFlashcardSources)...)
-	ginServer.Handle("POST", "/api/flashcard/manageSourceLifecycle", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, manageFlashcardSourceLifecycle)
-	ginServer.Handle("POST", "/api/flashcard/inspectInvalidSources", model.CheckAuth, model.CheckAdminRole, inspectInvalidFlashcardSources)
-	ginServer.Handle("POST", "/api/flashcard/deleteInvalidSources", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deleteInvalidFlashcardSources)
-	ginServer.Handle("POST", "/api/flashcard/listConflicts", model.CheckAuth, model.CheckAdminRole, listFlashcardConflicts)
-	ginServer.Handle("POST", "/api/flashcard/resolveConflict", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, resolveFlashcardConflict)
-	ginServer.Handle("POST", "/api/flashcard/createAdvancedSource", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createAdvancedFlashcardSource)
-	ginServer.Handle("POST", "/api/flashcard/updateAdvancedSource", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateAdvancedFlashcardSource)
-	ginServer.Handle("POST", "/api/flashcard/updateBasicDirection", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateBasicFlashcardDirection)
+	ginServer.Handle("POST", "/api/flashcard/manageSourceLifecycle", contractRouteHandlers(apicontract.ManageFlashcardSourceLifecycle, manageFlashcardSourceLifecycle)...)
+	ginServer.Handle("POST", "/api/flashcard/inspectInvalidSources", contractRouteHandlers(apicontract.InspectInvalidFlashcardSources, inspectInvalidFlashcardSources)...)
+	ginServer.Handle("POST", "/api/flashcard/deleteInvalidSources", contractRouteHandlers(apicontract.DeleteInvalidFlashcardSources, deleteInvalidFlashcardSources)...)
+	ginServer.Handle("POST", "/api/flashcard/listConflicts", contractRouteHandlers(apicontract.ListFlashcardConflicts, listFlashcardConflicts)...)
+	ginServer.Handle("POST", "/api/flashcard/resolveConflict", contractRouteHandlers(apicontract.ResolveFlashcardConflict, resolveFlashcardConflict)...)
+	ginServer.Handle("POST", "/api/flashcard/createAdvancedSource", contractRouteHandlers(apicontract.CreateAdvancedFlashcardSource, createAdvancedFlashcardSource)...)
+	ginServer.Handle("POST", "/api/flashcard/updateAdvancedSource", contractRouteHandlers(apicontract.UpdateAdvancedFlashcardSource, updateAdvancedFlashcardSource)...)
+	ginServer.Handle("POST", "/api/flashcard/updateBasicDirection", contractRouteHandlers(apicontract.UpdateBasicFlashcardDirection, updateBasicFlashcardDirection)...)
 	ginServer.Handle("POST", "/api/flashcard/queryCards", contractRouteHandlers(apicontract.QueryFlashcards, queryFlashcards)...)
-	ginServer.Handle("POST", "/api/flashcard/previewReviewSet", model.CheckAuth, model.CheckAdminRole, previewFlashcardReviewSet)
-	ginServer.Handle("POST", "/api/flashcard/summarizeReviewSets", model.CheckAuth, model.CheckAdminRole, summarizeFlashcardReviewSets)
-	ginServer.Handle("POST", "/api/flashcard/startSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, startFlashcardSession)
-	ginServer.Handle("POST", "/api/flashcard/getSessionQueue", model.CheckAuth, model.CheckAdminRole, getFlashcardSessionQueue)
-	ginServer.Handle("POST", "/api/flashcard/updateSessionCard", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateFlashcardSessionCard)
-	ginServer.Handle("POST", "/api/flashcard/reviewCard", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reviewFlashcard)
-	ginServer.Handle("POST", "/api/flashcard/undoReview", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, undoFlashcardReview)
-	ginServer.Handle("POST", "/api/flashcard/manageCards", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, manageFlashcards)
+	ginServer.Handle("POST", "/api/flashcard/previewReviewSet", contractRouteHandlers(apicontract.PreviewFlashcardReviewSet, previewFlashcardReviewSet)...)
+	ginServer.Handle("POST", "/api/flashcard/summarizeReviewSets", contractRouteHandlers(apicontract.SummarizeFlashcardReviewSets, summarizeFlashcardReviewSets)...)
+	ginServer.Handle("POST", "/api/flashcard/startSession", contractRouteHandlers(apicontract.StartFlashcardSession, startFlashcardSession)...)
+	ginServer.Handle("POST", "/api/flashcard/getSessionQueue", contractRouteHandlers(apicontract.GetFlashcardSessionQueue, getFlashcardSessionQueue)...)
+	ginServer.Handle("POST", "/api/flashcard/updateSessionCard", contractRouteHandlers(apicontract.UpdateFlashcardSessionCard, updateFlashcardSessionCard)...)
+	ginServer.Handle("POST", "/api/flashcard/reviewCard", contractRouteHandlers(apicontract.ReviewFlashcard, reviewFlashcard)...)
+	ginServer.Handle("POST", "/api/flashcard/undoReview", contractRouteHandlers(apicontract.UndoFlashcardReview, undoFlashcardReview)...)
+	ginServer.Handle("POST", "/api/flashcard/manageCards", contractRouteHandlers(apicontract.ManageFlashcards, manageFlashcards)...)
 	ginServer.Handle("POST", "/api/flashcard/setCardEditLater", contractRouteHandlers(apicontract.SetFlashcardEditLater, setFlashcardEditLater)...)
-	ginServer.Handle("POST", "/api/flashcard/setTagAssignments", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFlashcardTagAssignments)
-	ginServer.Handle("POST", "/api/flashcard/setReviewSetMemberships", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFlashcardReviewSetMemberships)
-	ginServer.Handle("POST", "/api/flashcard/saveTag", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveFlashcardTag)
-	ginServer.Handle("POST", "/api/flashcard/getStudyPolicy", model.CheckAuth, model.CheckAdminRole, getFlashcardStudyPolicy)
-	ginServer.Handle("POST", "/api/flashcard/saveStudyPolicy", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveFlashcardStudyPolicy)
-	ginServer.Handle("POST", "/api/flashcard/finishSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, finishFlashcardSession)
-	ginServer.Handle("POST", "/api/flashcard/getCardHistory", model.CheckAuth, model.CheckAdminRole, getFlashcardHistory)
-	ginServer.Handle("POST", "/api/flashcard/getSourceHistory", model.CheckAuth, model.CheckAdminRole, getFlashcardSourceHistory)
-	ginServer.Handle("POST", "/api/flashcard/restoreSourceHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, restoreFlashcardSourceHistory)
-	ginServer.Handle("POST", "/api/flashcard/getStatistics", model.CheckAuth, model.CheckAdminRole, getFlashcardStatistics)
-	ginServer.Handle("POST", "/api/flashcard/deleteReviewSet", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deleteFlashcardReviewSet)
-	ginServer.Handle("POST", "/api/flashcard/getRenderModel", model.CheckAuth, model.CheckAdminRole, getFlashcardRenderModel)
+	ginServer.Handle("POST", "/api/flashcard/setTagAssignments", contractRouteHandlers(apicontract.SetFlashcardTagAssignments, setFlashcardTagAssignments)...)
+	ginServer.Handle("POST", "/api/flashcard/setReviewSetMemberships", contractRouteHandlers(apicontract.SetFlashcardReviewSetMemberships, setFlashcardReviewSetMemberships)...)
+	ginServer.Handle("POST", "/api/flashcard/saveTag", contractRouteHandlers(apicontract.SaveFlashcardTag, saveFlashcardTag)...)
+	ginServer.Handle("POST", "/api/flashcard/getStudyPolicy", contractRouteHandlers(apicontract.GetFlashcardStudyPolicy, getFlashcardStudyPolicy)...)
+	ginServer.Handle("POST", "/api/flashcard/saveStudyPolicy", contractRouteHandlers(apicontract.SaveFlashcardStudyPolicy, saveFlashcardStudyPolicy)...)
+	ginServer.Handle("POST", "/api/flashcard/finishSession", contractRouteHandlers(apicontract.FinishFlashcardSession, finishFlashcardSession)...)
+	ginServer.Handle("POST", "/api/flashcard/getCardHistory", contractRouteHandlers(apicontract.GetFlashcardHistory, getFlashcardHistory)...)
+	ginServer.Handle("POST", "/api/flashcard/getSourceHistory", contractRouteHandlers(apicontract.GetFlashcardSourceHistory, getFlashcardSourceHistory)...)
+	ginServer.Handle("POST", "/api/flashcard/restoreSourceHistory", contractRouteHandlers(apicontract.RestoreFlashcardSourceHistory, restoreFlashcardSourceHistory)...)
+	ginServer.Handle("POST", "/api/flashcard/getStatistics", contractRouteHandlers(apicontract.GetFlashcardStatistics, getFlashcardStatistics)...)
+	ginServer.Handle("POST", "/api/flashcard/deleteReviewSet", contractRouteHandlers(apicontract.DeleteFlashcardReviewSet, deleteFlashcardReviewSet)...)
+	ginServer.Handle("POST", "/api/flashcard/getRenderModel", contractRouteHandlers(apicontract.GetFlashcardRenderModel, getFlashcardRenderModel)...)
 }

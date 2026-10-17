@@ -9,10 +9,12 @@ import (
 
 func TestFileQueryLimits(t *testing.T) {
 	workspace := setupProbeWorkspace(t)
-	for i := 0; i < 205; i++ {
+	for i := range 205 {
 		writeProbeFile(t, filepath.Join(workspace, "data", "query", fmt.Sprintf("%03d.txt", i)), "match\n")
 	}
 	writeProbeFile(t, filepath.Join(workspace, "data", "lines.txt"), strings.Repeat("match\n", 205))
+	// 子用例只读取共享夹具，限制查询并发，避免同时遍历大量文件。
+	querySlots := make(chan struct{}, 2)
 	for _, operation := range []string{"list", "find", "grep", "grep-file"} {
 		for _, tc := range []struct {
 			name  string
@@ -25,6 +27,9 @@ func TestFileQueryLimits(t *testing.T) {
 			{"positive", float64(3), 3},
 		} {
 			t.Run(operation+"/"+tc.name, func(t *testing.T) {
+				t.Parallel()
+				querySlots <- struct{}{}
+				defer func() { <-querySlots }()
 				args := map[string]any{"path": "data/query", "pattern": "match"}
 				if tc.limit != nil {
 					args["limit"] = tc.limit

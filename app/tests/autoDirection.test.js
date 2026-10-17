@@ -272,6 +272,7 @@ const runListCases = async () => {
         const marker = first.querySelector(".protyle-action").getBoundingClientRect();
         assert.ok(Math.abs(rtl ? marker.right - box.right : marker.left - box.left) < 1);
         first.style.direction = "rtl";
+        await settle();
         const manualMarker = first.querySelector(".protyle-action").getBoundingClientRect();
         assert.ok(Math.abs(manualMarker.right - box.right) < 1);
         setAutoDirection(root, true);
@@ -295,6 +296,123 @@ const runListCases = async () => {
     destroyAutoDirection(preview);
 };
 
+const runManualDirectionCases = async (staticExport) => {
+    const assert = require("node:assert/strict");
+    const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+    const {setAutoDirection, destroyAutoDirection} = window.direction;
+    const {renderBlockDirection} = window.blockDirection;
+    const lute = window.Lute.New();
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetKramdownIAL(true);
+    const html = lute.Md2BlockDOM("- Parent\n  - Child\n- Sibling\n");
+    const rtlClass = "protyle-block--rtl";
+    for (const rich of [false, true]) {
+        document.body.innerHTML = '<div class="protyle"><div></div></div>';
+        const root = document.body.firstElementChild.firstElementChild;
+        root.className = rich ? "table__cell-rich" : "protyle-wysiwyg";
+        root.innerHTML = html;
+        if (rich) {
+            root.querySelectorAll("[data-node-id]").forEach(element => {
+                element.removeAttribute("data-node-id");
+                element.setAttribute("data-table-cell-node", "");
+            });
+        }
+        let list = root.querySelector(".list");
+        list.setAttribute("style", "direction: rtl; color: rgb(1, 2, 3)");
+        const original = root.innerHTML;
+        const markdown = lute.BlockDOM2Md(original);
+        const check = (rtl) => {
+            root.querySelectorAll(".li").forEach(item => {
+                const content = item.querySelector(":scope > .p");
+                const style = getComputedStyle(content);
+                assert.equal(style.marginLeft, rtl ? "0px" : "34px");
+                assert.equal(style.marginRight, rtl ? "34px" : "0px");
+                const marker = item.querySelector(":scope > .protyle-action").getBoundingClientRect();
+                const rect = item.getBoundingClientRect();
+                assert.ok(Math.abs(rtl ? marker.right - rect.right : marker.left - rect.left) < 1);
+            });
+        };
+        if (!staticExport) {
+            setAutoDirection(root, false);
+            assert.ok(list.classList.contains(rtlClass));
+        }
+        for (const [width, fontSize] of [[720, 16], [280, 32]]) {
+            root.style.width = `${width}px`;
+            root.style.fontSize = `${fontSize}px`;
+            check(true);
+        }
+        assert.equal(list.getAttribute("style"), "direction: rtl; color: rgb(1, 2, 3)");
+        assert.equal(lute.BlockDOM2Md(root.innerHTML), markdown);
+        assert.doesNotMatch(lute.SpinBlockDOM(root.innerHTML), /protyle-block--rtl/);
+        if (staticExport) {
+            list.style.direction = "ltr";
+            check(false);
+            continue;
+        }
+
+        // 属性更新及删除不依赖自动方向开关，也不重写原始样式。
+        list.style.direction = "ltr";
+        await settle();
+        check(false);
+        assert.equal(list.classList.contains(rtlClass), false);
+        list.setAttribute("style", "direction:rtl!important");
+        await settle();
+        check(true);
+        assert.equal(list.getAttribute("style"), "direction:rtl!important");
+        list.removeAttribute("style");
+        await settle();
+        check(false);
+
+        // 菜单和快捷键共用的事务入口在调用返回前同步布局。
+        if (!rich) {
+            window.updateBatchTransaction([list], {}, element => { element.style.direction = "rtl"; });
+            check(true);
+            const transaction = window.directionTransactions.at(-1);
+            assert.doesNotMatch(lute.SpinBlockDOM(transaction.operations[0].data), /protyle-block--rtl/);
+            list.outerHTML = transaction.undoOperations[0].data;
+            await settle();
+            check(false);
+            root.querySelector(".list").outerHTML = transaction.operations[0].data;
+            await settle();
+            check(true);
+        }
+
+        // 模拟重载、撤销重做和克隆粘贴；已有标记必须按恢复后的 style 重新推导。
+        root.innerHTML = original;
+        await settle();
+        check(true);
+        list = root.querySelector(".list");
+        const clone = list.cloneNode(true);
+        clone.style.direction = "ltr";
+        list.replaceWith(clone);
+        await settle();
+        check(false);
+        assert.equal(clone.classList.contains(rtlClass), false);
+        clone.style.direction = "rtl";
+        renderBlockDirection(clone);
+        check(true);
+        setAutoDirection(root, true);
+        check(true);
+        setAutoDirection(root, false);
+        check(true);
+
+        // 重复渲染及无关样式更新不能反复写入类名或造成观察器循环。
+        let classChanges = 0;
+        const observer = new MutationObserver(records => { classChanges += records.length; });
+        observer.observe(root, {subtree: true, attributes: true, attributeFilter: ["class"]});
+        renderBlockDirection(root);
+        renderBlockDirection(root);
+        root.style.outlineWidth = "1px";
+        clone.style.color = "red";
+        await settle();
+        assert.equal(classChanges, 0);
+        observer.disconnect();
+        destroyAutoDirection(root);
+        assert.equal(root.querySelector(`.${rtlClass}`), null);
+        assert.equal(clone.style.direction, "rtl");
+    }
+};
+
 const runElectron = async () => {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -313,8 +431,17 @@ const runElectron = async () => {
             path.join(__dirname, "../src/assets/scss/protyle/_content.scss")).css);
         await win.webContents.executeJavaScript(readFileSync(path.join(__dirname, "../stage/protyle/js/lute/lute.min.js"), "utf8"));
         await win.webContents.executeJavaScript(`(() => {
+            const module = {exports: {}};
+            new Function("exports", ${JSON.stringify(ts.transpileModule(
+                readFileSync(path.join(__dirname, "../src/protyle/render/blockDirection.ts"), "utf8"), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+                }).outputText)})(module.exports);
             const exports = {};
-            ${compiled}
+            new Function("exports", "require", ${JSON.stringify(compiled)})(exports, name => {
+                if (name === "./blockDirection") return module.exports;
+                throw new Error(name);
+            });
+            window.blockDirection = module.exports;
             window.direction = exports;
         })()`);
         await win.webContents.executeJavaScript(`(${runCases.toString()})()`);
@@ -326,6 +453,33 @@ const runElectron = async () => {
         }).outputText;
         await win.webContents.executeJavaScript(`(() => {const exports = {}; ${dragSource}; window.listDrag = exports;})()`);
         await win.webContents.executeJavaScript(`(${runListCases.toString()})()`);
+        const transactionSource = ts.createSourceFile("transaction.ts", readFileSync(
+            path.join(__dirname, "../src/protyle/wysiwyg/transaction.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+        const batch = transactionSource.statements.find(statement => ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(declaration => declaration.name.getText() === "updateBatchTransaction"));
+        const batchJS = ts.transpileModule(batch.getText(), {
+            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+        }).outputText;
+        await win.webContents.executeJavaScript(`(() => {
+            window.directionTransactions = [];
+            window.updateBatchTransaction = new Function("renderBlockDirection", "Constants", "cleanHeadingNumberHTML", "transaction",
+                "const exports = {}; " + ${JSON.stringify(batchJS)} + "; return exports.updateBatchTransaction;")(
+                window.blockDirection.renderBlockDirection, {ATTRIBUTE_EDITING: "data-editing"}, html => html,
+                (protyle, operations, undoOperations) => window.directionTransactions.push({operations, undoOperations}));
+        })()`);
+        for (const entry of ["base", "mobile", "export"]) {
+            const css = require("sass").compile(path.join(__dirname, "../src/assets/scss", `${entry}.scss`), {
+                logger: require("sass").Logger.silent,
+            }).css;
+            const key = await win.webContents.insertCSS(css);
+            for (const theme of ["daylight", "midnight"]) {
+                const themeKey = await win.webContents.insertCSS(readFileSync(
+                    path.join(__dirname, "../appearance/themes", theme, "theme.css"), "utf8"));
+                await win.webContents.executeJavaScript(`(${runManualDirectionCases.toString()})(${entry === "export"})`);
+                await win.webContents.removeInsertedCSS(themeKey);
+            }
+            await win.webContents.removeInsertedCSS(key);
+        }
         console.log("Automatic direction cases passed");
     } catch (error) {
         console.error(error);

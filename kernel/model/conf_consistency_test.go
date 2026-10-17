@@ -118,10 +118,10 @@ func TestConfNormalizeIsSharedAndIdempotent(t *testing.T) {
 		normalizeAppConf(whole)
 		section.normalize(single)
 		a, _ := json.Marshal(reflect.ValueOf(whole).Elem().FieldByNameFunc(func(name string) bool {
-			return jsonFieldName(reflect.TypeOf(*whole), name) == section.name
+			return jsonFieldName(reflect.TypeFor[AppConf](), name) == section.name
 		}).Interface())
 		b, _ := json.Marshal(reflect.ValueOf(single).Elem().FieldByNameFunc(func(name string) bool {
-			return jsonFieldName(reflect.TypeOf(*single), name) == section.name
+			return jsonFieldName(reflect.TypeFor[AppConf](), name) == section.name
 		}).Interface())
 		if string(a) != string(b) {
 			t.Fatalf("section %s differs between startup and write normalization:\n%s\n%s", section.name, a, b)
@@ -217,7 +217,7 @@ func TestConfSectionSnapshotsAreConsistent(t *testing.T) {
 	held := Conf.Sync.Load()
 	heldInterval, heldMode := held.Interval, held.Mode
 	var wg sync.WaitGroup
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()

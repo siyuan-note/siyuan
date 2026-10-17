@@ -24,7 +24,7 @@ func TestFileQueryLimits(t *testing.T) {
 	if err := os.Mkdir(query, 0755); err != nil {
 		t.Fatal(err)
 	}
-	for i := 0; i < 205; i++ {
+	for i := range 205 {
 		if err := os.WriteFile(filepath.Join(query, fmt.Sprintf("%03d.txt", i)), []byte("match\n"), 0644); err != nil {
 			t.Fatal(err)
 		}

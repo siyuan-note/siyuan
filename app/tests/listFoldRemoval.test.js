@@ -14,7 +14,7 @@ const rendererSource = () => {
         assert.equal(statements.length, names.length, file);
         return statements.map(statement => statement.getText(source)).join("\n");
     };
-    const extractClick = (file, condition, call = "toggleListFold(") => {
+    const extractClick = (file, condition, call = "toggleListFold(", prefixNames = []) => {
         const source = ts.createSourceFile(file,
             readFileSync(path.join(__dirname, "../src/protyle", `${file}.ts`), "utf8"),
             ts.ScriptTarget.Latest, true);
@@ -22,7 +22,16 @@ const rendererSource = () => {
         const visit = node => {
             if (ts.isIfStatement(node) && condition(node.expression.getText(source)) &&
                 node.thenStatement.getText(source).includes(call)) {
-                matches.push(node.thenStatement.getText(source));
+                let prefix = "";
+                for (let parent = node.parent; parent; parent = parent.parent) {
+                    if (ts.isBlock(parent)) {
+                        prefix = parent.statements.filter(statement => ts.isVariableStatement(statement) &&
+                            statement.declarationList.declarations.some(declaration => prefixNames.includes(declaration.name.getText(source))))
+                            .map(statement => statement.getText(source)).join("\n");
+                        break;
+                    }
+                }
+                matches.push(prefix ? `{${prefix}\n${node.thenStatement.getText(source)}}` : node.thenStatement.getText(source));
             }
             ts.forEachChild(node, visit);
         };
@@ -93,7 +102,7 @@ const rendererSource = () => {
                 ${extractClick("wysiwyg/index", condition => condition.includes("shouldFoldEmbeddedListByAlt") && condition.includes("hasClosestByClassName(target"), "event.preventDefault()")}
         };
         export const clickGutter = (protyle, foldElement, buttonElement) => ${extractClick("gutter/index",
-        condition => condition.includes('buttonElement.getAttribute("data-type") === "NodeListItem"'))};
+        condition => condition.includes('buttonElement.getAttribute("data-type") === "NodeListItem"'), "toggleListFold(", ["foldButton", "foldArrow"])};
         export const clickArrow = (protyle, foldElement, buttonElement) => ${extractClick("gutter/index",
         condition => condition === "event.altKey", 'toggleListFold(protyle, foldElement, "children")')};
         export const clickDot = (protyle, actionElement) => ${extractClick("wysiwyg/index",

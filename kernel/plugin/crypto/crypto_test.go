@@ -134,7 +134,7 @@ func TestHKDFRFC5869(t *testing.T) {
 		Info: mustHex(t, "f0f1f2f3f4f5f6f7f8f9"),
 	}
 
-	got, err := DeriveBits(alg, key, intPtr(42*8))
+	got, err := DeriveBits(alg, key, new(42*8))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -150,9 +150,9 @@ func TestPBKDF2RFC6070(t *testing.T) {
 		Type: KeyTypeSecret, Usages: []KeyUsage{UsageDeriveBits},
 		Algorithm: KeyAlgorithm{Name: AlgPBKDF2}, secret: []byte("password"),
 	}
-	alg := Algorithm{Name: AlgPBKDF2, Hash: AlgSHA1, Salt: []byte("salt"), Iterations: intPtr(2)}
+	alg := Algorithm{Name: AlgPBKDF2, Hash: AlgSHA1, Salt: []byte("salt"), Iterations: new(2)}
 
-	got, err := DeriveBits(alg, key, intPtr(20*8))
+	got, err := DeriveBits(alg, key, new(20*8))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +169,7 @@ func TestDeriveBitsRejectsInvalidLength(t *testing.T) {
 	}
 	alg := Algorithm{Name: AlgHKDF, Hash: AlgSHA256, Salt: []byte{}, Info: []byte{}}
 
-	for _, length := range []*int{nil, intPtr(0), intPtr(7)} {
+	for _, length := range []*int{nil, new(0), new(7)} {
 		if _, err := DeriveBits(alg, key, length); errorName(t, err) != ErrNameOperation {
 			t.Fatalf("length %v: error = %v, want OperationError", length, err)
 		}
@@ -181,9 +181,9 @@ func TestPBKDF2RejectsZeroIterations(t *testing.T) {
 		Type: KeyTypeSecret, Usages: []KeyUsage{UsageDeriveBits},
 		Algorithm: KeyAlgorithm{Name: AlgPBKDF2}, secret: []byte("password"),
 	}
-	alg := Algorithm{Name: AlgPBKDF2, Hash: AlgSHA256, Salt: []byte("salt"), Iterations: intPtr(0)}
+	alg := Algorithm{Name: AlgPBKDF2, Hash: AlgSHA256, Salt: []byte("salt"), Iterations: new(0)}
 
-	if _, err := DeriveBits(alg, key, intPtr(128)); errorName(t, err) != ErrNameOperation {
+	if _, err := DeriveBits(alg, key, new(128)); errorName(t, err) != ErrNameOperation {
 		t.Fatalf("error = %v, want OperationError", err)
 	}
 }
@@ -209,8 +209,8 @@ func TestDeriveKeyProducesUsableKey(t *testing.T) {
 		Type: KeyTypeSecret, Usages: []KeyUsage{UsageDeriveKey},
 		Algorithm: KeyAlgorithm{Name: AlgPBKDF2}, secret: []byte("password"),
 	}
-	alg := Algorithm{Name: AlgPBKDF2, Hash: AlgSHA256, Salt: []byte("salt"), Iterations: intPtr(16)}
-	derived := Algorithm{Name: AlgAESGCM, Length: intPtr(256)}
+	alg := Algorithm{Name: AlgPBKDF2, Hash: AlgSHA256, Salt: []byte("salt"), Iterations: new(16)}
+	derived := Algorithm{Name: AlgAESGCM, Length: new(256)}
 
 	key, err := DeriveKey(alg, base, derived, true, []KeyUsage{UsageEncrypt, UsageDecrypt})
 	if err != nil {

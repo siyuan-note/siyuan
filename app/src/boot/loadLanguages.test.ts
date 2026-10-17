@@ -61,3 +61,18 @@ it("passes a valid language pack to startup", async () => {
         globalThis.fetch = originalFetch;
     }
 });
+
+it("routes failed language loading to the independent startup error view", async () => {
+    const originalFetch = globalThis.fetch;
+    const originalError = console.error;
+    globalThis.fetch = async () => new Response("", {status: 404});
+    console.error = () => {};
+    let failure: unknown;
+    try {
+        await loadLanguages("ar", "test", () => assert.fail("unexpected startup"), error => failure = error);
+        assert.match(String(failure), /HTTP 404/);
+    } finally {
+        globalThis.fetch = originalFetch;
+        console.error = originalError;
+    }
+});

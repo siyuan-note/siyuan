@@ -7,7 +7,7 @@
 		"id": "20240530101000-vejnh1k",
 		"title": "クエリ構文",
 		"type": "doc",
-		"updated": "20260803163243"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -266,7 +266,7 @@
 			"Properties": {
 				"ID": "20240530101000-0o1hul2",
 				"id": "20240530101000-kt180bu",
-				"updated": "20240530101000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -297,7 +297,7 @@
 			"Properties": {
 				"ID": "20240530101000-yrc1tk4",
 				"id": "20240530101000-0e6zt6f",
-				"updated": "20240530101000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -310,7 +310,7 @@
 					"Properties": {
 						"ID": "20240530101000-k0mq0my",
 						"id": "20240530101000-d5ksxdw",
-						"updated": "20240530101000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -319,7 +319,7 @@
 							"Properties": {
 								"ID": "20240530101000-1y6xxln",
 								"id": "20240530101000-fu8ks02",
-								"updated": "20240530101000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -338,7 +338,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026quot;"
+									"TextMarkTextContent": "&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -347,7 +347,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026quot;"
+									"TextMarkTextContent": "&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -365,7 +365,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "foo \u0026quot;bar\u0026quot;"
+									"TextMarkTextContent": "foo &quot;bar&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -374,7 +374,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "'foo \u0026quot;bar\u0026quot;'"
+									"TextMarkTextContent": "'foo &quot;bar&quot;'"
 								},
 								{
 									"Type": "NodeText",
@@ -383,11 +383,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026quot;foo\u0026quot;\u0026quot;bar\u0026quot;\u0026quot;\u0026quot;"
+									"TextMarkTextContent": "&quot;foo&quot;&quot;bar&quot;&quot;&quot;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ とします。"
+									"Data": "​ とします"
 								}
 							]
 						}
@@ -739,7 +739,7 @@
 			"Properties": {
 				"ID": "20240530101000-twrdids",
 				"id": "20240530101000-afrxy9q",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -855,7 +855,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;query1\u0026gt; AND \u0026lt;query2\u0026gt;"
+									"TextMarkTextContent": "&lt;query1&gt; AND &lt;query2&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -890,7 +890,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;query1\u0026gt; OR \u0026lt;query2\u0026gt;"
+									"TextMarkTextContent": "&lt;query1&gt; OR &lt;query2&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -925,7 +925,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;query1\u0026gt; NOT \u0026lt;query2\u0026gt;"
+									"TextMarkTextContent": "&lt;query1&gt; NOT &lt;query2&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -978,7 +978,7 @@
 			"Properties": {
 				"ID": "20240530101000-tc5p4t0",
 				"id": "20240530101000-4fbhmqz",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -991,7 +991,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "-- \"one\" または \"two\" のいずれかひとつを含み、\"three\" を含まないドキュメントにマッチします\n'one OR two NOT three'\n\n-- \"one\" を含むすべてのドキュメント、または \"two\" を含み \"three\" を含まないドキュメントにマッチします\n'one OR (two NOT three)'\n"
+					"Data": "-- NOT は OR より優先されます。括弧でグループを明示してください。\n-- \"one\" または \"two\" のいずれかひとつを含み、\"three\" を含まないドキュメントにマッチします\n'(one OR two) NOT three'\n\n-- \"one\" を含むすべてのドキュメント、または \"two\" を含み \"three\" を含まないドキュメントにマッチします\n'one OR (two NOT three)'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1030,7 +1030,7 @@
 			"Properties": {
 				"ID": "20240530101000-bfjv9cg",
 				"id": "20240530101000-zkldc3i",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1043,7 +1043,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "'one two three'         -- 'one AND two AND three'\n'three \"one two\"'       -- 'three AND \"one two\"'\n'NEAR(one two) three'   -- 'NEAR(one two) AND three'\n'one OR two three'      -- 'one OR two AND three'\n\n'(one OR two) three'    -- 構文エラー！ (カッコ内の OR 演算子はサポートされていません)\n'func(one two)'         -- 構文エラー！ (func 関数はサポートされていません)\n"
+					"Data": "'one two three'         -- 'one AND two AND three'\n'three \"one two\"'       -- 'three AND \"one two\"'\n'NEAR(one two) three'   -- 'NEAR(one two) AND three'\n'one OR two three'      -- 'one OR two AND three'\n\n'(one OR two) three'    -- 構文エラー！ (括弧の後には明示的な AND が必要です)\n'func(one two)'         -- 構文エラー！ (func 関数はサポートされていません)\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1108,7 +1108,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "MATCH '{content name alias memo}:\u0026quot; + query"
+					"TextMarkTextContent": "MATCH '{content name alias memo}:&quot; + query"
 				},
 				{
 					"Type": "NodeText",

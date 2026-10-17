@@ -121,16 +121,21 @@ func IsLocalHost(host string) bool {
 //
 // 内核在同一端口上通过 cmux 同时承载 HTTP 与 HTTPS，入站方向由 request.TLS 区分；
 // 固定端口反代以 HTTPS 回源内核，由它写入的 ClientTLSHeader 标记客户端侧的真实连接方式。
-// 该头部仅在直连对端为本机时采信，避免调用方伪造 https 让 Cookie 被错误标记为 Secure。
+// 该头部仅在直连对端为本机时优先采信，区分客户端协议与回源协议，其他连接只判断实际 TLS 状态。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
 func IsTLSRequest(request *http.Request) bool {
 	if nil == request {
 		return false
 	}
-	if nil != request.TLS {
-		return true
+	if IsLocalHost(request.RemoteAddr) {
+		switch request.Header.Get(ClientTLSHeader) {
+		case ClientTLSHeaderValue:
+			return true
+		case ClientTLSHeaderPlaintextValue:
+			return false
+		}
 	}
-	return ClientTLSHeaderValue == request.Header.Get(ClientTLSHeader) && IsLocalHost(request.RemoteAddr)
+	return nil != request.TLS
 }
 
 // IsValidRedirectHost 校验 Host 是否为可以直接拼接跳转地址的合法 authority。

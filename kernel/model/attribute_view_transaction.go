@@ -129,6 +129,15 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 			for _, paused := range automation.paused {
 				util.PushMsg(paused.message(), 7000)
 			}
+			if !tx.isReplay && tx.state.Load() == 2 {
+				if message := automation.successMessage(); message != "" {
+					notify := tx.pushAutomationMessage
+					if notify == nil {
+						notify = util.PushMsg
+					}
+					notify(message, 5000)
+				}
+			}
 		}
 		for avID := range tx.invalidatedAvHistory {
 			GlobalUndoLog.ClearAttributeView(avID)

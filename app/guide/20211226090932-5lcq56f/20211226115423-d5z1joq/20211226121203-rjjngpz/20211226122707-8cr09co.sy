@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20261011203418"
+		"updated": "20261016112108"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501135134-xpy851g",
-				"updated": "20220501135134"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615115939-r7gtut8",
-				"updated": "20220615115939"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -56,7 +56,7 @@
 					},
 					"Properties": {
 						"id": "20220615115939-7unbokt",
-						"updated": "20220615115939"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -64,12 +64,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615115939-8i4106r",
-								"updated": "20220615115939"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文件歷史：按原始文件方式保存在 "
+									"Data": "文件歷史：按原始檔案位元組儲存在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -78,7 +78,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夾下，人類可讀，可手動拷貝到 data 對應位置恢復"
+									"Data": " 資料夾下。普通筆記本歷史是明文，加密筆記本歷史保留密文；優先透過思源復原，並核對下文的筆記本和金鑰要求"
 								}
 							]
 						}
@@ -93,7 +93,7 @@
 					},
 					"Properties": {
 						"id": "20220615115939-oh1df2d",
-						"updated": "20220615115939"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -101,12 +101,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615115939-qpaond0",
-								"updated": "20220615115939"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料快照：按文件分塊、加密並壓縮保存在 "
+									"Data": "資料快照：按檔案分塊、加密並壓縮儲存在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -115,7 +115,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夾下，人類不可讀，無法手動恢復"
+									"Data": " 資料夾下，應透過思源復原，不能把單個倉庫檔案直接複製到 data 中復原"
 								}
 							]
 						}
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120005-e50u8z7",
-				"updated": "20260803163402"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120005-zarefxu",
-				"updated": "20260809232000"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135134-p6jpw7s",
-				"updated": "20260809232000"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20220501135134-8h6nsrg",
-						"updated": "20260809232000"
+						"updated": "20261016112108"
 					},
 					"Children": [
 						{
@@ -204,7 +204,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135134-wmi0mal",
-								"updated": "20260809232000"
+								"updated": "20261016112108"
 							},
 							"Children": [
 								{
@@ -223,7 +223,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "文檔"
+									"TextMarkTextContent": "文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "檔案管理"
 								},
 								{
 									"Type": "NodeText",
@@ -236,7 +245,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中調整間隔，歷史資料夾後綴為 -update。"
+									"Data": " 中調整間隔，歷史資料夾後綴為 -update"
 								}
 							]
 						}
@@ -639,7 +648,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122720-u1qd8zw",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -653,12 +662,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122720-kwrhgnd",
-				"updated": "20220615120111"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在資料歷史界面左側時間列表欄中，每一條歷史記錄右側都有一個回復按鈕，點擊以後將彈出確認對話框，如果確認回復的話將使用文件歷史覆蓋現有文件。"
+					"Data": "點擊歷史記錄右側的回復按鈕並確認後，會使用文件歷史覆蓋現有檔案。請先預覽可預覽的記錄。查看或回復加密文件時，原加密筆記本必須存在並已解鎖。復原已刪除的加密筆記本是另一條復原路徑，還需要相符的筆記本及全域金鑰備份和主密碼，詳見"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "主密碼和金鑰備份",
+					"TextMarkBlockRefID": "20260907120000-tw00031",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -667,12 +687,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501134148-pwadtx4",
-				"updated": "20220501134148"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果有非常多的文件需要回復，建議手動在文件系統上複製。歷史文件夾的內部結構和 data 內部結構一致，比如："
+					"Data": "優先透過思源復原。如需手動複製進行批次復原，請先核對來源和目標；加密筆記本必須保留原筆記本 ID、目錄結構和相符的金鑰資料，不要將其密文複製到普通筆記本中。歷史目錄與對應的 data 路徑結構一致，例如："
 				}
 			]
 		},
@@ -835,7 +855,7 @@
 			},
 			"Properties": {
 				"id": "20220501134148-72i6ahu",
-				"updated": "20220615111326"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -849,7 +869,7 @@
 					},
 					"Properties": {
 						"id": "20220501134148-x9vfl7n",
-						"updated": "20220501134148"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -857,12 +877,32 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501134148-lkuf38f",
-								"updated": "20220501134148"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "退出思源，然後全量複製備份一下整個工作空間，避免後續誤操作導致資料丟失"
+									"Data": "使用按需下載時，先在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkTextContent": "資源檔案下載",
+									"TextMarkBlockRefID": "20260905184908-43b5is5",
+									"TextMarkBlockRefSubtype": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "全部下載"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 並完成下載，再正常退出思源，完整備份整個工作空間，包括設定、歷史、倉庫和加密筆記本金鑰備份，然後再進行覆蓋操作"
 								}
 							]
 						}
@@ -879,7 +919,7 @@
 					},
 					"Properties": {
 						"id": "20220501134148-c7pkprg",
-						"updated": "20220501134148"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -887,7 +927,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501134148-uuoffm8",
-								"updated": "20220501134148"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -901,7 +941,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夾，將 "
+									"Data": " 資料夾，僅將 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -910,7 +950,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夾下的資料直接複製到 data 文件夾進行覆蓋"
+									"Data": " 中需要復原的檔案複製到 data 下對應路徑，保持筆記本 ID、檔名和目錄結構不變；加密歷史須保留相符的筆記本與金鑰資料"
 								}
 							]
 						}
@@ -927,7 +967,7 @@
 					},
 					"Properties": {
 						"id": "20220501134148-tl7cuni",
-						"updated": "20220615111326"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -935,12 +975,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501134148-nq2ogsm",
-								"updated": "20220615111326"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "啟動思源後手動執行重建索引"
+									"Data": "啟動思源，解鎖復原的加密筆記本，手動重建索引並檢查復原後的文件和資源檔案"
 								}
 							]
 						}
@@ -954,7 +994,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-r88wlzt",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -968,12 +1008,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-9i9j08p",
-				"updated": "20220615120134"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "預設自動保存最近 30 天生成的文件歷史，可通過 "
+					"Data": "文件歷史預設保留 30 天，可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -987,7 +1027,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "文檔"
+					"TextMarkTextContent": "文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "檔案管理"
 				},
 				{
 					"Type": "NodeText",
@@ -1000,7 +1049,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 進行調整，超過該期限的文件歷史會被自動刪除。"
+					"Data": " 中調整，超過期限的文件歷史會被自動刪除。"
 				}
 			]
 		},
@@ -1009,12 +1058,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-aiy219j",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你想清空所有文件歷史資料，可以點擊 "
+					"Data": "如需刪除全部文件歷史，可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1028,7 +1077,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "文檔"
+					"TextMarkTextContent": "文件"
 				},
 				{
 					"Type": "NodeText",
@@ -1037,11 +1086,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "清空所有歷史"
+					"TextMarkTextContent": "檔案管理"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，或者手動刪除 "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "刪除所有歷史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 處點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。也可先退出思源，再手動刪除 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1050,7 +1117,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夾，然後在 "
+					"Data": " 資料夾，隨後在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1059,16 +1126,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "重建歷史索引"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": " 中重建歷史索引。不要刪除仍用於加密筆記本復原的歷史。"
 				}
 			]
 		},
@@ -1078,7 +1136,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120134-cdqs2gt",
-				"updated": "20260927191121"
+				"updated": "20261016111710"
 			},
 			"Children": [
 				{
@@ -1093,7 +1151,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-y8wnvbq",
-				"updated": "20220615120134"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1107,12 +1165,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-8tlqarl",
-				"updated": "20220615120134"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "第一次使用資料快照前需要在 "
+					"Data": "第一次使用資料快照前，需要在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1139,7 +1197,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "。請妥善保存該倉庫密鑰；它與加密筆記本的主密碼、金鑰備份相互獨立。"
 				}
 			]
 		},
@@ -1292,7 +1350,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-165fbc0",
-				"updated": "20250115153525"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1459,12 +1517,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-iv1q02i",
-				"updated": "20220615120134"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "瀏覽資料快照時只能通過快照建立時間和備註進行區別，所以備註信息應該盡量詳細一些，以備後續能夠準確識別不同的資料快照。"
+					"Data": "填寫詳細備註方便日後辨識快照，但備註不會阻止清理。需要長期保留的快照應加上標記，並另行獨立備份。"
 				}
 			]
 		},
@@ -1839,7 +1897,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-5vxnykd",
-				"updated": "20261011203418"
+				"updated": "20261016111710"
 			},
 			"Children": [
 				{
@@ -1849,12 +1907,53 @@
 			]
 		},
 		{
+			"ID": "20261016111431-8gcdbb1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-8gcdbb1",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地快照會根據 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "帳號與同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "本機資料倉庫清理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的設定自動清理，預設保留天數為 180 天、每天保留 2 個。保留期限內的過去日期快照會按每日數量稀疏保留，當天快照和標記等引用指向的快照不受自動淘汰影響。這是本地保留規則，並不保證每個快照都保留滿 180 天，也不同於雲端備份策略。下述手動清理會刪除所有未引用的快照，不受此保留期限保護。"
+				}
+			]
+		},
+		{
 			"ID": "20230422102151-dz30xx1",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
 				"id": "20230422102151-dz30xx1",
-				"updated": "20261011203418"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -2052,7 +2151,7 @@
 					},
 					"Properties": {
 						"id": "20230422102151-m9pt89m",
-						"updated": "20230422102151"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -2060,12 +2159,59 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422102151-9b7anw1",
-								"updated": "20230422102151"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "手動刪除 "
+									"Data": "重設倉庫時優先使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "帳號與同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "重置資料倉庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，該入口會檢查資源下載完整性。操作前先在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkTextContent": "資源檔案下載",
+									"TextMarkBlockRefID": "20260905184908-43b5is5",
+									"TextMarkBlockRefSubtype": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "全部下載"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 並完成下載，保存倉庫密鑰並備份完整工作空間。手動刪除 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2074,7 +2220,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 文件夾可以清空全部資料快照"
+									"Data": "​ 會繞過檢查並刪除包括標記快照在內的全部本地快照；只有完成這些前提並正常退出思源後才考慮此操作"
 								}
 							]
 						}

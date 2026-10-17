@@ -3,7 +3,7 @@ import {Constants} from "../constants";
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {getAssetExtension} from "../util/pathName";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {getHTMLAssetIFrameSrc, isHTMLFilePath} from "./html";
 import {isBrowserRenderableImagePath} from "../util/imageURL";

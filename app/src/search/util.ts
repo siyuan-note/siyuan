@@ -195,17 +195,17 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
             <textarea id="searchInput" rows="1" class="b3-text-field b3-text-field--text search__input" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
         </div>
         <div class="block__icons">
-            <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9south">
+            <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon block__icon--show ariaLabel" data-position="9south">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <span class="fn__space"></span>
             ${genQueryHTML(config.method, "searchSyntaxCheck")}
             <span class="fn__space"></span>
-            <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon ariaLabel${window.siyuan.isPublish ? " fn__none" : ""}" data-position="9south">
+            <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon block__icon--show ariaLabel${window.siyuan.isPublish ? " fn__none" : ""}" data-position="9south">
                 <svg><use xlink:href="#iconReplace"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9south">
+            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon block__icon--show ariaLabel" data-position="9south">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
             </span>
             <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
@@ -230,7 +230,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         </div>
         <div class="fn__space"></div>
         <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;margin-right: 8px"><use xlink:href="#iconRefresh"></use></svg>
-        <span id="replaceFilter" aria-label="${window.siyuan.languages.replaceType}" class="block__icon ariaLabel fn__flex-center" data-position="9south">
+        <span id="replaceFilter" aria-label="${window.siyuan.languages.replaceType}" class="block__icon block__icon--show ariaLabel fn__flex-center" data-position="9south">
             <svg><use xlink:href="#iconFilter"></use></svg>
         </span>
         <span class="fn__space"></span>
@@ -1140,7 +1140,7 @@ export const genQueryHTML = (method: number, id: string) => {
             methodIcon = "Sparkles";
             break;
     }
-    return `<span id="${id}" aria-label="${window.siyuan.languages.searchMethod} ${methodTip}" class="block__icon ariaLabel" data-position="9south">
+    return `<span id="${id}" aria-label="${window.siyuan.languages.searchMethod} ${methodTip}" class="block__icon block__icon--show ariaLabel" data-position="9south">
     <svg><use xlink:href="#icon${methodIcon}"></use></svg>
 </span>`;
 };

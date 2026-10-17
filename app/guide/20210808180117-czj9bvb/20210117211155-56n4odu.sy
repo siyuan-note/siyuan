@@ -7,7 +7,7 @@
 		"id": "20210117211155-56n4odu",
 		"title": "数据安全",
 		"type": "doc",
-		"updated": "20230828111922"
+		"updated": "20261016111431"
 	},
 	"Children": [
 		{
@@ -135,7 +135,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210117213252-rjh6iu2"
+				"id": "20210117213252-rjh6iu2",
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -144,7 +145,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "明文存储"
+					"Data": "普通笔记本的本地存储"
 				}
 			]
 		},
@@ -153,12 +154,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210525214530-69ml3fo",
-				"updated": "20210525214719"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源使用明文方式将数据存储在本地文件系统上，这意味着："
+					"Data": "普通笔记本的文档和资源文件以明文保存在本地文件系统中，这意味着："
 				}
 			]
 		},
@@ -173,7 +174,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210117213258-m2gevi3"
+				"id": "20210117213258-m2gevi3",
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -188,7 +190,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210117213526-cy3oj8v"
+						"id": "20210117213526-cy3oj8v",
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -196,12 +199,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210302223430-44dbhvt",
-								"updated": "20210525214730"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "任何能够使用操作系统的人或软件都读取其中的数据"
+									"Data": "拥有这些本地文件读取权限的人或软件可以读取其内容"
 								}
 							]
 						}
@@ -241,12 +244,33 @@
 			]
 		},
 		{
+			"ID": "20261016111431-ejwdf0a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-ejwdf0a",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "加密笔记本",
+					"TextMarkBlockRefID": "20260907120000-crycn01",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "会加密持久化的文档、资源文件、数据库定义和索引。这不等于加密整个工作空间或设备：解锁后的内存内容、临时文件、剪贴板、明文导出文件及部分元数据不在这一保证内。仍须使用受信任的操作系统，完整安全边界请参阅加密笔记本专章。"
+				}
+			]
+		},
+		{
 			"ID": "20210117211513-nelhsjf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210117211513-nelhsjf",
-				"updated": "20210721110530"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -260,12 +284,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721110555-81sqopb",
-				"updated": "20230828111922"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源云端同步使用"
+					"Data": "思源云端同步对数据快照使用"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -276,7 +300,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，密码在本地通过内置密钥加密保存，除使用者之外的任何第三方均无法在云端获得明文数据。"
+					"Data": "。数据仓库密钥以 Base64 编码形式保存在本地配置文件 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/conf/conf.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中；Base64 编码不等于加密，请保护好工作空间配置和设备。数据仓库密钥与加密笔记本的主密码、密钥备份相互独立，不能替代后两者。"
 				}
 			]
 		},

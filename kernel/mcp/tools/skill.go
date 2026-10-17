@@ -290,13 +290,17 @@ func skillInstall(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("installed %d skill(s):\n", len(result.Names)))
+	fmt.Fprintf(&sb, "installed %d skill(s):\n", len(result.Names))
 	for i, name := range result.Names {
 		desc := ""
 		if i < len(result.Descriptions) {
 			desc = result.Descriptions[i]
 		}
-		sb.WriteString("- **" + name + "**: " + desc + "\n")
+		sb.WriteString("- **")
+		sb.WriteString(name)
+		sb.WriteString("**: ")
+		sb.WriteString(desc)
+		sb.WriteString("\n")
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: sb.String()}},
@@ -352,7 +356,7 @@ func skillRename(args map[string]any) (CallToolResult, error) {
 	}, nil
 }
 
-func skillList(args map[string]any) (CallToolResult, error) {
+func skillList(_ map[string]any) (CallToolResult, error) {
 	skills := util.DiscoverSkills(model.EnabledUserSkills())
 	if len(skills) == 0 {
 		return CallToolResult{
@@ -363,7 +367,11 @@ func skillList(args map[string]any) (CallToolResult, error) {
 	var sb strings.Builder
 	sb.WriteString("available skills:\n")
 	for _, s := range skills {
-		sb.WriteString("- **" + s.Name + "**: " + s.Description + "\n")
+		sb.WriteString("- **")
+		sb.WriteString(s.Name)
+		sb.WriteString("**: ")
+		sb.WriteString(s.Description)
+		sb.WriteString("\n")
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: sb.String()}},
@@ -378,7 +386,11 @@ func skillListDesc() string {
 	var sb strings.Builder
 	sb.WriteString("Available skills:\n")
 	for _, s := range skills {
-		sb.WriteString("- **" + s.Name + "**: " + s.Description + "\n")
+		sb.WriteString("- **")
+		sb.WriteString(s.Name)
+		sb.WriteString("**: ")
+		sb.WriteString(s.Description)
+		sb.WriteString("\n")
 	}
 	return sb.String()
 }

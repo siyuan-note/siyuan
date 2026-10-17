@@ -6,6 +6,7 @@ import {Constants} from "../constants";
 import type {App} from "../index";
 import {Protyle} from "../protyle";
 import {fetchPost} from "../util/fetch";
+import {isFlashcardV2Object, readFlashcardV2Revision} from "./flashcardV2Contract";
 import {isMobile} from "../util/functions";
 import {genUUID} from "../util/genID";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -33,6 +34,7 @@ import {
     renderFlashcardV2MultiLine,
     renderFlashcardV2AnkiTemplate
 } from "./flashcardV2Render";
+import {readFlashcardV2RenderModel} from "./flashcardV2Render";
 import {
     getFlashcardV2PluginType,
     type IFlashcardV2PluginAnswerController,
@@ -394,7 +396,7 @@ const prepareFlashcardV2Playback = (model: IFlashcardV2RenderModel, front: Eleme
         activate: (side) => {
             if (spec(side)?.mediaAutoplay) {
                 root(side).querySelectorAll<HTMLMediaElement>("audio,video").forEach((media) => {
-                    void media.play().catch(() => undefined);
+                    void media.play().catch((): void => undefined);
                 });
             }
             speak(side, true);
@@ -445,6 +447,13 @@ interface IFlashcardV2SessionTag {
     name: string;
 }
 
+const isFlashcardV2SessionTag = (value: unknown): value is IFlashcardV2SessionTag => isFlashcardV2Object(value) &&
+    typeof value.id === "string" && typeof value.name === "string" &&
+    (value.parentID === undefined || typeof value.parentID === "string");
+
+const isFlashcardV2Flag = (value: unknown): value is {flag: number, name: string} => isFlashcardV2Object(value) &&
+    typeof value.flag === "number" && typeof value.name === "string";
+
 const flashcardV2SessionTagPath = (tag: IFlashcardV2SessionTag, tags: Map<string, IFlashcardV2SessionTag>) => {
     const names = [tag.name];
     const seen = new Set([tag.id]);
@@ -467,7 +476,7 @@ const openFlashcardV2SessionTags = (targetType: "source" | "card", targetID: str
         entityType: "tag",
         options: {limit: 1000, offset: 0},
     }, (response) => {
-        const tags = (response.data.entities as Array<{ payload: IFlashcardV2SessionTag }>)
+        const tags = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardV2SessionTag))
             .map((revision) => revision.payload);
         const selected = new Set(selectedTagIDs);
         const byID = new Map(tags.map((tag) => [tag.id, tag]));
@@ -561,7 +570,7 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
         if (!isCurrent()) {
             return;
         }
-        const model = modelResponse.data as IFlashcardV2RenderModel;
+        const model = readFlashcardV2RenderModel(modelResponse.data);
         const dynamicReferences: IFlashcardV2SourceReference[] = (current.dynamicOptions || [])
             .filter((option) => option.entityType === "block")
             .map((option, optionIndex) => ({
@@ -987,7 +996,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 entityType: "flagDefinition",
                 options: {limit: 7, offset: 0},
             }, (response) => {
-                (response.data.entities as Array<{ payload: { flag: number, name: string } }>).forEach((revision) => {
+                response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardV2Flag)).forEach((revision) => {
                     flagDefinitions.set(revision.payload.flag, revision.payload.name);
                 });
             });

@@ -8,7 +8,8 @@ import type {IDatabaseRowOpenData} from "./openDatabaseRow";
 const data: IDatabaseRowOpenData = {
     avID: "database", databaseBlockID: "carrier", notebookID: "notebook", itemID: "current",
     valueID: "current-value", title: "Current", isDetached: true,
-    navigation: {viewID: "view", query: "filter", groupID: "group", calendarRange: {start: 1, end: 10, timeZone: "UTC"}},
+    navigation: {viewID: "view", query: "filter", groupID: "group", calendarRange: {start: 1, end: 10, timeZone: "UTC"},
+        temporarySort: {column: "created", order: "DESC"}},
 };
 const row = (id: string, detached = true) => ({id, cells: [{id: id + "-value", valueType: "block",
     value: {type: "block", isDetached: detached, block: {id: detached ? undefined : id + "-block", content: id}}}]});
@@ -26,11 +27,14 @@ const load = (fetch: (request: Record<string, any>) => unknown, stored?: IAV) =>
                 assert.equal(request.query, "filter");
                 assert.equal(request.createIfNotExist, false);
                 assert.equal(request.calendarRange.timeZone, "UTC");
+                assert.equal(request.temporarySort.column, "created");
+                assert.equal(request.temporarySort.order, "DESC");
                 return fetch(request);
             }};
         }
         if (name === "./renderData") { return {isAVRenderData: (value: IAV) => !!value?.view}; }
         if (name === "./virtualScroll") { return {getAVData: () => stored}; }
+        if (name === "./readonlyState") { return {getReadonlyAVSort: () => data.navigation.temporarySort}; }
         return {};
     }});
     return exports;
@@ -97,6 +101,9 @@ test("navigation context captures the source view and search without enabling li
     assert.equal(context.viewID, "view");
     assert.equal(context.query, "filter");
     assert.equal(context.groupID, "group");
+    assert.equal(context.temporarySort, undefined);
+    source.disabled = true;
+    assert.equal(api.getDatabaseRowNavigation(source, data).temporarySort, data.navigation.temporarySort);
     source.options.history = {created: "archive"};
     assert.equal(api.getDatabaseRowNavigation(source, data), undefined);
 });

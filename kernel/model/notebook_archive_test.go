@@ -56,7 +56,7 @@ func notebookArchiveTestBox(t *testing.T, boxID string, kek []byte) []byte {
 	if err = os.MkdirAll(filepath.Join(directory, ".siyuan"), 0700); err != nil {
 		t.Fatal(err)
 	}
-	for name, value := range map[string]interface{}{"conf.json": boxConf, notebookCryptoBackupFilename: crypt} {
+	for name, value := range map[string]any{"conf.json": boxConf, notebookCryptoBackupFilename: crypt} {
 		data, _ := json.Marshal(value)
 		if err = os.WriteFile(filepath.Join(directory, ".siyuan", name), data, 0600); err != nil {
 			t.Fatal(err)

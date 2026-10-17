@@ -120,7 +120,6 @@ type SyncProviderIntroDef = {
 
 type SyncThirdPartyProviderDef = SyncProviderIntroDef & {
     configKey: SyncProviderConfigKey;
-    requiredFields: string[];
     api: string;
     getConfig: () => Config.ISync[SyncProviderConfigKey];
     fields: SyncProviderFieldDef[];
@@ -176,7 +175,6 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
     2: {
         isProviderConfigAllowed: isPaidUser,
         configKey: "s3",
-        requiredFields: ["endpoint", "accessKey", "secretKey", "bucket", "region"],
 
         getConfig: () => window.siyuan.config.sync.s3,
         genIntro: () => `<div class="b3-label b3-label--inner">
@@ -208,7 +206,6 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
     3: {
         isProviderConfigAllowed: isPaidUser,
         configKey: "webdav",
-        requiredFields: ["endpoint"],
 
         getConfig: () => window.siyuan.config.sync.webdav,
         genIntro: () => `<div class="b3-label b3-label--inner">
@@ -234,7 +231,6 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
     4: {
         isProviderConfigAllowed: isPaidUser,
         configKey: "local",
-        requiredFields: ["endpoint"],
 
         getConfig: () => window.siyuan.config.sync.local,
         genIntro: () => `<div class="b3-label b3-label--inner">
@@ -360,10 +356,10 @@ const renderProviderConfig = (root: Element) => {
     }
 };
 
-const genProviderField = (field: SyncProviderFieldDef): string => {
+const genProviderField = (field: SyncProviderFieldDef, warning = ""): string => {
     switch (field.type) {
         case "input":
-            return genProviderFlexInput(field.label, field.id, field.attrs);
+            return genProviderFlexInput(field.label, field.id, field.attrs, warning);
         case "password":
             return genProviderFlexPassword(field.label, field.id);
         case "select":
@@ -372,11 +368,12 @@ const genProviderField = (field: SyncProviderFieldDef): string => {
     }
 };
 
-const genProviderFlexInput = (label: string, id: string, attrs = "") => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
+const genProviderFlexInput = (label: string, id: string, attrs = "", warning = "") => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
     <label for="${id}" class="fn__flex-center fn__size200">${label}</label>
     <div class="fn__space"></div>
-    <div class="fn__flex-1"><input spellcheck="false" id="${id}" class="b3-text-field fn__block" aria-describedby="sync-${id}-error"${attrs ? ` ${attrs}` : ""}>
-    <div id="sync-${id}-error" class="ft__error fn__none" role="status"></div></div>
+    <div class="fn__flex-1"><input spellcheck="false" id="${id}" class="b3-text-field fn__block" aria-describedby="sync-${id}-error${warning ? ` sync-${id}-warning` : ""}"${attrs ? ` ${attrs}` : ""}>
+    <div id="sync-${id}-error" class="ft__error fn__none" role="status"><div class="fn__hr"></div><span></span></div>${warning ? `
+    <div id="sync-${id}-warning" class="ft__error fn__none" role="status"><div class="fn__hr"></div><span>${warning}</span></div>` : ""}</div>
 </div>`;
 
 const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
@@ -385,7 +382,7 @@ const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-l
     <div class="fn__flex-1"><div class="b3-form__icona fn__block">
         <input spellcheck="false" id="${id}" type="password" class="b3-text-field b3-form__icona-input" aria-describedby="sync-${id}-error">
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
-    </div><div id="sync-${id}-error" class="ft__error fn__none" role="status"></div></div>
+    </div><div id="sync-${id}-error" class="ft__error fn__none" role="status"><div class="fn__hr"></div><span></span></div></div>
 </div>`;
 
 const genProviderFlexSelect = (label: string, id: string, optionsHtml: string) => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
@@ -435,17 +432,18 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
 
 let syncProviderDialog: Dialog | undefined;
 
-const validateSyncProviderFields = (configElement: Element, def: SyncThirdPartyProviderDef) => {
+const validateSyncProviderFields = (configElement: Element, def: SyncThirdPartyProviderDef, requiredFields: readonly string[]) => {
     let valid = true;
     def.fields.filter(field => field.type !== "select").forEach(field => {
         const key = field.id;
         const input = configElement.querySelector<HTMLInputElement>(`#${key}`);
-        const missing = !input.value.trim() && (def.requiredFields.includes(key) || input.type === "number");
+        const missing = !input.value.trim() && (requiredFields.includes(key) || input.type === "number");
         const message = missing ? window.siyuan.languages._kernel[142] :
             input.type === "number" && !input.checkValidity() ? input.validationMessage : "";
         input.setAttribute("aria-invalid", String(!!message));
         const error = configElement.querySelector<HTMLElement>(`#sync-${key}-error`);
-        error.textContent = message;
+        // 提示文本节点前有间隔元素，只替换文案节点
+        (error.lastElementChild as HTMLElement).textContent = message;
         error.classList.toggle("fn__none", !message);
         valid &&= !message;
     });
@@ -466,19 +464,28 @@ const openSyncProviderConfigDialog = (root: Element) => {
         return;
     }
     const L = window.siyuan.languages;
-    const warning = def.configKey === "s3" ? `<div data-type="s3-endpoint-warning" class="b3-label b3-label--inner ft__error fn__none" role="status">${L.s3EndpointBucketWarning}</div>` : "";
+    const warning = def.configKey === "s3" ? L.s3EndpointBucketWarning : "";
+    // 测试连接仅用于 S3：探测会写入并删除探针对象，WebDAV 与本地目录没有等价的列举语义
+    const testButton = def.configKey === "s3" ? `<div class="fn__space"></div>
+    <button class="b3-button b3-button--outline" data-action="test"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${L.testConnection}</span></button>` : "";
+    let closed = false;
+    let rulesVersion = 0;
+    let rulesTimer: ReturnType<typeof setTimeout>;
     const dialog = new Dialog({
         title: `${L.syncConfig} - ${def.configKey === "s3" ? "S3" : def.configKey === "webdav" ? "WebDAV" : L.localFileSystem}`,
         width: isMobile() ? "92vw" : "680px",
         containerClassName: "config-sync-dialog",
-        content: `<div class="b3-dialog__content config-sync-form">${def.fields.map(genProviderField).join("")}${warning}
+        content: `<div class="b3-dialog__content config-sync-form">${def.fields.map(field => genProviderField(field, field.id === "endpoint" ? warning : "")).join("")}
 <div data-type="sync-config-error" class="ft__error fn__none" role="status"></div></div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button><div class="fn__flex-1"></div><div class="fn__space"></div>
+    <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button>${testButton}<div class="fn__flex-1"></div><div class="fn__space"></div>
     <button class="b3-button b3-button--cancel" data-action="cancel">${L.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text" data-action="save">${L.save}</button>
 </div>`,
         destroyCallback: () => {
+            closed = true;
+            rulesVersion++;
+            clearTimeout(rulesTimer);
             if (syncProviderDialog === dialog) {
                 syncProviderDialog = undefined;
             }
@@ -488,23 +495,65 @@ const openSyncProviderConfigDialog = (root: Element) => {
     const configElement = dialog.element;
     const template = {...def.getConfig()};
     fillSyncProviderConfigValues(configElement, template);
+    const testElement = configElement.querySelector<HTMLButtonElement>('[data-action="test"]');
+    const testLabel = testElement?.querySelector("span");
     const fields = def.fields.map(field => configElement.querySelector<HTMLInputElement | HTMLSelectElement>(`#${field.id}`));
     const initialValues = fields.map(field => field.value);
     const destroy = dialog.destroy.bind(dialog);
     let pending = false;
     let confirming = false;
     let validationShown = false;
+    let requiredFields: string[] = [];
+    let rulesFailed = false;
     const setPending = (value: boolean) => {
         pending = value;
+        if (value) {
+            rulesVersion++;
+            clearTimeout(rulesTimer);
+            rulesFailed = false;
+        }
         configElement.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
             element.disabled = value || (window.siyuan.config.readonly && element.getAttribute("data-action") !== "cancel");
         });
         configElement.setAttribute("aria-busy", String(value));
     };
-    const setError = (message: string) => {
+    const setStatus = (message: string, success = false) => {
         const error = configElement.querySelector<HTMLElement>('[data-type="sync-config-error"]');
         error.textContent = message;
         error.classList.toggle("fn__none", !message);
+        error.classList.toggle("ft__success", !!message && success);
+        error.classList.toggle("ft__error", !!message && !success);
+    };
+    const setError = (message: string) => setStatus(message);
+    const loadRules = async () => {
+        const version = ++rulesVersion;
+        const response = await fetchSyncPost("/api/sync/getSyncProviderConfigRules", {
+            provider,
+            endpoint: configElement.querySelector<HTMLInputElement>("#endpoint").value,
+            bucket: configElement.querySelector<HTMLInputElement>("#bucket")?.value || "",
+        }).catch(error => {
+            if (closed || version !== rulesVersion) return;
+            throw error;
+        });
+        if (!response || closed || version !== rulesVersion) return;
+        if (response.code !== 0) throw new Error(response.msg || L.syncConfigSaveFailed);
+        requiredFields = response.data.requiredFields;
+        configElement.querySelector("#sync-endpoint-warning")?.classList.toggle("fn__none", !response.data.endpointBucketWarning);
+        if (validationShown) validateSyncProviderFields(configElement, def, requiredFields);
+        return response.data;
+    };
+    const refreshRules = () => {
+        void loadRules().then(rules => {
+            if (rules && rulesFailed) {
+                rulesFailed = false;
+                setError("");
+            }
+        }).catch(() => {
+            if (!closed && !pending) {
+                rulesFailed = true;
+                setError(L.loadingError);
+            }
+        });
     };
     dialog.destroy = () => {
         if (pending || confirming) {
@@ -532,7 +581,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
             return;
         }
         validationShown = true;
-        if (!validateSyncProviderFields(configElement, def)) {
+        if (!validateSyncProviderFields(configElement, def, requiredFields)) {
             setError(L.syncConfigNotSaved);
             configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
             return;
@@ -540,6 +589,15 @@ const openSyncProviderConfigDialog = (root: Element) => {
         setPending(true);
         setError("");
         try {
+            const rules = await loadRules();
+            if (!rules || window.siyuan.config.readonly) {
+                setError(L.syncConfigSaveFailed);
+                return;
+            }
+            if (!validateSyncProviderFields(configElement, def, rules.requiredFields)) {
+                setError(L.syncConfigNotSaved);
+                return;
+            }
             let saved = false;
             await configApi.set(`sync.${def.configKey}`, readProviderConfigFields(configElement, template), () => {
                 saved = true;
@@ -551,10 +609,71 @@ const openSyncProviderConfigDialog = (root: Element) => {
             setError(error?.message || L.syncConfigSaveFailed);
         } finally {
             setPending(false);
+            if (!closed) configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
         }
     };
     configElement.querySelector('[data-action="save"]').addEventListener("click", () => { void save(); });
     configElement.querySelector('[data-action="cancel"]').addEventListener("click", () => dialog.destroy());
+    // 测试连接只探测当前草稿，不保存配置；失败分为确定错误与网络未知，避免把无法判定的情况报成配置问题
+    const testConnection = async () => {
+        if (pending || confirming || window.siyuan.config.readonly || !testElement || !testLabel) {
+            return;
+        }
+        validationShown = true;
+        if (!validateSyncProviderFields(configElement, def, requiredFields)) {
+            setError(L.syncConfigNotSaved);
+            configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+            return;
+        }
+        setError("");
+        setPending(true);
+        testLabel.textContent = L.testConnectionTesting;
+        try {
+            // 必填清单来自内核，规则尚未返回时它是空的，空值会漏过本地校验并被内核报成配置错误，因此先取规则
+            let rules: Awaited<ReturnType<typeof loadRules>>;
+            try {
+                rules = await loadRules();
+            } catch {
+                if (!closed) {
+                    setError(L.loadingError);
+                }
+                return;
+            }
+            if (closed) {
+                return;
+            }
+            if (!rules) {
+                setError(L.loadingError);
+                return;
+            }
+            if (!validateSyncProviderFields(configElement, def, rules.requiredFields)) {
+                setError(L.syncConfigNotSaved);
+                configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+                return;
+            }
+            const response = await fetchSyncPost("/api/sync/testSyncProviderS3", {
+                s3: readProviderConfigFields(configElement, template),
+            });
+            if (closed) {
+                return;
+            }
+            if (response.code !== 0) {
+                setError(response.msg || L.testConnectionFail);
+            } else if ("ok" === response.data.kind) {
+                setStatus(L.testConnectionSuccess, true);
+            } else {
+                setStatus(response.data.msg ? L.testConnectionFailMsg.replace("${msg}", response.data.msg) : L.testConnectionFail);
+            }
+        } catch {
+            if (!closed) {
+                setError(L.testConnectionFail);
+            }
+        } finally {
+            testLabel.textContent = L.testConnection;
+            setPending(false);
+        }
+    };
+    testElement?.addEventListener("click", () => { void testConnection(); });
     configElement.querySelector('[data-action="clear"]').addEventListener("click", () => {
         if (pending || confirming || window.siyuan.config.readonly) {
             return;
@@ -588,9 +707,14 @@ const openSyncProviderConfigDialog = (root: Element) => {
         }, () => { confirming = false; }, true, undefined, L.clearSyncConfig);
     });
     configElement.addEventListener("input", () => {
-        updateS3EndpointWarning(configElement);
+        rulesVersion++;
+        clearTimeout(rulesTimer);
+        configElement.querySelector("#sync-endpoint-warning")?.classList.toggle("fn__none", true);
+        // 配置已改变，旧的测试结果不再对应当前草稿
+        setStatus("");
+        rulesTimer = setTimeout(refreshRules, 300);
         if (validationShown) {
-            validateSyncProviderFields(configElement, def);
+            validateSyncProviderFields(configElement, def, requiredFields);
         }
     });
     configElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -613,6 +737,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
         input.type = input.type === "password" ? "text" : "password";
         icon.setAttribute("xlink:href", input.type === "password" ? "#iconEye" : "#iconEyeoff");
     });
+    refreshRules();
     fields[0].focus();
 };
 
@@ -623,25 +748,6 @@ const fillSyncProviderConfigValues = (configElement: Element, data: Config.ISync
             el.value = String(data[key]);
         }
     });
-    updateS3EndpointWarning(configElement);
-};
-
-const updateS3EndpointWarning = (configElement: Element) => {
-    const warning = configElement.querySelector('[data-type="s3-endpoint-warning"]');
-    if (!warning) {
-        return;
-    }
-    const endpoint = configElement.querySelector<HTMLInputElement>("#endpoint").value.trim();
-    const bucket = configElement.querySelector<HTMLInputElement>("#bucket").value.trim().toLowerCase();
-    let suspicious = false;
-    try {
-        const url = new URL(endpoint.includes("://") ? endpoint : `https://${endpoint}`);
-        suspicious = !!bucket && ["http:", "https:"].includes(url.protocol) &&
-            url.hostname.toLowerCase().startsWith(`${bucket}.`);
-    } catch {
-        // 不完整的地址由配置校验处理，这里只提示重复桶名。
-    }
-    warning.classList.toggle("fn__none", !suspicious);
 };
 
 const readProviderConfigFields = <T extends object>(configElement: Element, template: T): T => {

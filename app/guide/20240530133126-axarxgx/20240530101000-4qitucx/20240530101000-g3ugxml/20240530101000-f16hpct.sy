@@ -7,7 +7,7 @@
 		"id": "20240530101000-f16hpct",
 		"title": "Docker サーバー",
 		"type": "doc",
-		"updated": "20260921003419"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -361,7 +361,7 @@
 			"Properties": {
 				"ID": "20240530101000-hmjllir",
 				"id": "20240530101000-e245wms",
-				"updated": "20260918190000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -376,30 +376,107 @@
 			"Properties": {
 				"ID": "20240530101000-tv9g19f",
 				"id": "20240530101000-5xcd2gc",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Docker イメージはビルド時にエントリポイント "
+					"Data": "イメージの入口は "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "ENTRYPOINT [ &quot;/opt/siyuan/kernel&quot; ]"
+					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/entrypoint.sh\"]"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ が設定されています。このイメージは "
+					"Data": "、デフォルトコマンドは "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run b3log/siyuan"
+					"TextMarkTextContent": "CMD [\"serve\"]"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ コマンドにパラメータを指定して実行します:"
+					"Data": " です。イメージ名の後の引数はデフォルトコマンド全体を置き換えるため、カーネル引数を指定するときは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を明示してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261016112115-xr14c1k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016112115-xr14c1k",
+				"updated": "20261016112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "起動前にホスト側のワークスペースディレクトリを作成し、認証を設定してください。以下の例は、ホストでエクスポートした "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 環境変数から強力な画面ロックパスワードを受け取ります。新しい Docker ワークスペースは、パスワードまたは有効な"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190003-oidcja1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC ログイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "がなければ起動を拒否します。たとえば、Bash では次の手順で自分で選んだパスワードを非表示で入力できます。実際のパスワードを共有ファイルやコマンド履歴に残さないでください。コンテナ環境を検査できる人は、この値を読み取れます。"
+				}
+			]
+		},
+		{
+			"ID": "20261016112115-xqmnr5v",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261016112115-xqmnr5v",
+				"updated": "20261016112115"
+			},
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "YmFzaA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "read -r -s -p \"画面ロックパスワード：\" SIYUAN_ACCESS_AUTH_CODE\nprintf '\\n'\nexport SIYUAN_ACCESS_AUTH_CODE\n: \"${SIYUAN_ACCESS_AUTH_CODE:?空でない画面ロックパスワードを設定してください}\"\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},
@@ -469,7 +546,7 @@
 			"Properties": {
 				"ID": "20240530101000-cld3snp",
 				"id": "20240530101000-tusg4ak",
-				"updated": "20260918190000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -490,7 +567,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE b3log/siyuan serve --workspace=workspace_dir_container"
 				},
 				{
 					"Type": "NodeText",
@@ -507,7 +584,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を追加してください。Docker のポートマッピングはホスト側ポート:コンテナ側ポートの形式です。公開サービスのポートを変更した場合はコンテナ側ポートも変更し、アクセス時にはホスト側ポートを使用してください。公開サービスには固定ポートを指定し、0 に設定しないでください"
+					"Data": " を追加してください。Docker のポートマッピングはホスト側ポート:コンテナ側ポートの形式です。公開サービスのポートを変更した場合はコンテナ側ポートも変更し、アクセス時にはホスト側ポートを使用してください。公開サービスには固定ポートを指定し、0 に設定しないでください。"
 				}
 			]
 		},
@@ -630,30 +707,12 @@
 			"Properties": {
 				"ID": "20240530101000-k8rte7r",
 				"id": "20240530101000-b8tylhp",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "簡略化のため、ホストマシンとコンテナ上のワークスペースディレクトリのパスを一致させることを推奨します。たとえば、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace_dir_host"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ と "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace_dir_container"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ の両方を "
+					"Data": "たとえば、ホストに "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -662,16 +721,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ に設定すれば、起動コマンドは次のようになります: "
+					"Data": " を作成してから "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE -e PUID=1000 -e PGID=1000 b3log/siyuan serve --workspace=/siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": " を実行します。ホストとコンテナのパスは異なっていても構いません。起動後に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "http://server-ip:6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、入力したパスワードでログインします。起動に失敗した場合はコンテナログを確認してください。"
 				}
 			]
 		},
@@ -682,7 +750,7 @@
 			"Properties": {
 				"ID": "20240530101000-elwalz1",
 				"id": "20240530101000-cifxjjw",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -697,30 +765,66 @@
 			"Properties": {
 				"ID": "20240530101000-hsf648s",
 				"id": "20240530101000-os9yh35",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "このイメージはデフォルトで作成された一般ユーザー "
+					"Data": "入口スクリプトは、ユーザーとグループの作成または再利用、および "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan"
+					"TextMarkTextContent": "/opt/siyuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ (uid 1000/gid 1000) によってカーネルプロセスを起動しています。そのため、ホストマシン上にワークスペースディレクトリを作成する際は、そのディレクトリの所有ユーザーグループを "
+					"Data": "、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
+					"TextMarkTextContent": "/home/siyuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ に設定してください。コンテナを起動する際はパラメータ "
+					"Data": "、ワークスペースの所有権の再帰的な設定に必要な権限で起動します。その後 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "su-exec"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "PUID:PGID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " としてカーネルを実行します。両方のデフォルトは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " です。ホストの所有者に合わせるには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-e PUID=1000 -e PGID=1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の数値を適切な ID に置き換えて指定します。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -729,7 +833,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ が必要です。"
+					"Data": " を付けると入口スクリプトが権限を準備できなくなるため、付けないでください。所有権の変更はマウントしたホストディレクトリにも反映されます。"
 				}
 			]
 		},
@@ -1001,7 +1105,7 @@
 			"Properties": {
 				"ID": "20240530101000-8bjgcwz",
 				"id": "20240530101000-av0hc90",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -1017,7 +1121,7 @@
 			"Properties": {
 				"ID": "20240530101000-c39mqvp",
 				"id": "20240530101000-95f1jst",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -1030,7 +1134,7 @@
 					"Properties": {
 						"ID": "20240530101000-9bey4kd",
 						"id": "20240530101000-49rpkzp",
-						"updated": "20260903150000"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -1039,7 +1143,7 @@
 							"Properties": {
 								"ID": "20240530101000-ymg86bk",
 								"id": "20240530101000-790mb98",
-								"updated": "20260903150000"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -1055,7 +1159,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "を参照してください。"
+									"Data": "を参照してください"
 								}
 							]
 						}

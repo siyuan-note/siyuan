@@ -4,8 +4,8 @@
     "noEmit": true,
     "skipLibCheck": false,
     "target": "ES2021",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "lib": ["ES2021", "DOM"],
     "types": []
   },

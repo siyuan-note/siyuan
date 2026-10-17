@@ -94,6 +94,29 @@ describe("upload insert position", () => {
         assert.deepEqual(position.context, {undoFocusId: "target"});
     });
 
+    it("uses an explicit consumer owner without relaxing document identity or target validity", () => {
+        const editor = new TestElement();
+        editor.isConnected = false;
+        const owner = new TestElement();
+        let available = true;
+        const protyle = {element: editor, block: {rootID: "doc"}, notebookId: "box"} as unknown as IProtyle;
+        const target = captureUploadDocument(protyle, {element: owner as unknown as Element,
+            isAvailable: () => available});
+        assert.equal(isUploadDocumentAvailable(protyle, target), true);
+        available = false;
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+        available = true;
+        protyle.block.rootID = "other";
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+        protyle.block.rootID = "doc";
+        protyle.notebookId = "other";
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+        protyle.notebookId = "box";
+        owner.isConnected = false;
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+        assert.equal(isUploadDocumentAvailable(protyle, captureUploadDocument(protyle)), false);
+    });
+
     it("uses the live range while its original boundaries remain in the editor", () => {
         const start = new TestElement();
         const end = new TestElement();

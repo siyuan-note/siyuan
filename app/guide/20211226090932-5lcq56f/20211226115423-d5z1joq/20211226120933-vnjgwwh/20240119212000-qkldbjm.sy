@@ -6,7 +6,7 @@
 		"id": "20240119212000-qkldbjm",
 		"title": "忽略搜尋",
 		"type": "doc",
-		"updated": "20241001011824"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119212033-a0oemkx",
-				"updated": "20241001011824"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -157,12 +157,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240119212033-ju37jxr",
-				"updated": "20240119212033"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "這些 ignore 設定檔中的每一行會被當作 SQL path NOT LIKE 的條件，例如："
+					"Data": "這些 ignore 設定檔中的每一行必須是一條完整的 SQL 過濾條件，多行使用 AND 組合，例如："
 				}
 			]
 		},

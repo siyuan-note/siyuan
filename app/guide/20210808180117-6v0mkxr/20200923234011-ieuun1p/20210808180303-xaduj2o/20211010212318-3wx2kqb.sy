@@ -6,7 +6,7 @@
 		"id": "20211010212318-3wx2kqb",
 		"title": "Virtual reference",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010212319-jz4ue2g",
-				"updated": "20211010212319"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211010212319-b0948bh",
-				"updated": "20211010212551"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Virtual reference is a kind of \"block ref\" that is automatically detected based on the anchor text of the existing block ref or the name of the block, but it is not actually linked to the block, but only marked in the editor, and supports floating window preview ."
+					"Data": "Virtual reference is a kind of \"block ref\" that is automatically detected based on the anchor text of the existing block ref or the name of the block, but it is not actually linked to the block, but only marked in the editor, and supports floating window preview."
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010212319-glx3lpn",
-				"updated": "20211010212319"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211010212319-bnndiez",
-				"updated": "20211010212456"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -78,6 +78,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Bidirectional Links"
 				},
 				{
 					"Type": "NodeText",
@@ -170,7 +179,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20221003214846-p9q1wvx",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -186,7 +195,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221003214937-bqvm7yz",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -198,7 +207,7 @@
 					},
 					"Properties": {
 						"id": "20221003214937-hfdshei",
-						"updated": "20260809232000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -206,12 +215,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221003214937-w913xwl",
-								"updated": "20260809232000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Virtual references are not updated immediately. Wait for the search index to finish, then refresh or reopen the document. Rebuild the index only when the keywords still do not update."
+									"Data": "Virtual references are not updated immediately. Wait for the search index to finish, then refresh or reopen the document. Rebuild the index only when the keywords still do not update"
 								}
 							]
 						}

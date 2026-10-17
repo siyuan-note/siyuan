@@ -1,16 +1,25 @@
 export interface IUploadDocument {
     rootID: string;
     notebookID: string;
+    target?: {
+        element: Element;
+        isAvailable: () => boolean;
+    };
 }
 
-export const captureUploadDocument = (protyle: IProtyle): IUploadDocument => ({
+export const captureUploadDocument = (protyle: IProtyle, target?: IUploadDocument["target"]): IUploadDocument => ({
     rootID: protyle.block?.rootID,
     notebookID: protyle.notebookId,
+    target,
 });
 
+export const getUploadDocumentElement = (protyle: IProtyle, target?: IUploadDocument) =>
+    target?.target?.element || protyle.element;
+
 export const isUploadDocumentAvailable = (protyle: IProtyle, target: IUploadDocument) => {
-    return protyle.element.isConnected && target?.rootID === protyle.block?.rootID &&
-        target?.notebookID === protyle.notebookId;
+    return getUploadDocumentElement(protyle, target).isConnected &&
+        target?.rootID === protyle.block?.rootID && target?.notebookID === protyle.notebookId &&
+        (!target?.target || target.target.isAvailable());
 };
 
 export interface IUploadInsertPosition {

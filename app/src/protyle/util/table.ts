@@ -17,7 +17,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {
     getProjectedTableHeadRowCount,
     getTableHeadRowCount,

@@ -12,7 +12,7 @@ const BASE64_IMAGE_MIME_EXTENSIONS: Record<string, string> = {
 
 export type TIconValueKind = "unicode" | "custom" | "dynamic" | "network" | "invalid";
 export interface IBase64Image {
-    bytes: Uint8Array,
+    bytes: Uint8Array<ArrayBuffer>,
     extension: string,
     mimeType: string,
 }

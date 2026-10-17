@@ -366,6 +366,7 @@ export class MobileFiles extends Model {
 
             const touch = event.touches[0];
             const target = touch.target as HTMLElement;
+            if (this.pinnedDocs.element.contains(target)) return;
             const liElement = target.closest(".b3-list-item") as HTMLElement;
             if (!liElement) return;
 

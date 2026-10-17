@@ -7,7 +7,7 @@
 		"id": "20240530101000-cpm26sr",
 		"title": "データ可用性の保証",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20261016111431"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-gemdixd",
 				"id": "20240530101000-hju8n1m",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-4r38tjf",
 				"id": "20240530101000-k0rqy1f",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -165,7 +165,7 @@
 					"Properties": {
 						"ID": "20240530101000-nkz0vx0",
 						"id": "20240530101000-a1q0tns",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -174,12 +174,12 @@
 							"Properties": {
 								"ID": "20240530101000-29d9d5r",
 								"id": "20240530101000-tqbcujx",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "データのエクスポートとインポートをサポート"
+									"Data": "data ディレクトリを含む Data アーカイブのエクスポートとインポートに対応していますが、設定、ファイル履歴、ローカルリポジトリを含むワークスペース全体のバックアップではありません"
 								}
 							]
 						}
@@ -239,7 +239,7 @@
 			"Properties": {
 				"ID": "20240530101000-c1ay3p3",
 				"id": "20240530101000-mpn2wd4",
-				"updated": "20260803165036"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -277,7 +277,7 @@
 			"Properties": {
 				"ID": "20240530101000-b04m0f8",
 				"id": "20240530101000-rbpy8yh",
-				"updated": "20260803165036"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 					"Properties": {
 						"ID": "20240530101000-44zvvcx",
 						"id": "20240530101000-k1rgbx6",
-						"updated": "20260803163243"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -345,7 +345,7 @@
 							"Properties": {
 								"ID": "20240530101000-udd885v",
 								"id": "20240530101000-z7cb4zm",
-								"updated": "20260803163243"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -388,7 +388,7 @@
 									"Properties": {
 										"ID": "20240530101000-akguhci",
 										"id": "20240530101000-o3dtpkx",
-										"updated": "20260803163243"
+										"updated": "20261016111431"
 									},
 									"Children": [
 										{
@@ -397,13 +397,9 @@
 											"Properties": {
 												"ID": "20240530101000-u7jut00",
 												"id": "20240530101000-23vu06z",
-												"updated": "20260803163243"
+												"updated": "20261016111431"
 											},
 											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​ "
-												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
@@ -416,7 +412,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "クラウド"
+													"TextMarkTextContent": "アカウントと同期"
 												},
 												{
 													"Type": "NodeText",
@@ -429,7 +425,11 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " ​ を有効にすると、競合が発生した両方のファイルが保持され手動で解決できます"
+													"Data": "​ も有効にできます"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
 												}
 											]
 										}
@@ -449,7 +449,7 @@
 					"Properties": {
 						"ID": "20240530101000-nyzun0d",
 						"id": "20240530101000-mf4c8af",
-						"updated": "20260803165036"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -458,17 +458,13 @@
 							"Properties": {
 								"ID": "20240530101000-8udeowr",
 								"id": "20240530101000-uhpkagj",
-								"updated": "20260803165036"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "​ "
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "データ履歴"
+									"TextMarkTextContent": "履歴"
 								},
 								{
 									"Type": "NodeText",
@@ -481,7 +477,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": "​ からクラウドスナップショットを閲覧・ダウンロードできます。幅の広いウィンドウではクラウド欄を使い、狭いウィンドウでは "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -490,7 +486,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ から、クラウドスナップショットの閲覧とダウンロードが行えます"
+									"Data": "​ に切り替えます"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

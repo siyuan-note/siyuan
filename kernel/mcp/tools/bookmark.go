@@ -61,25 +61,25 @@ func bookmarkHandler(args map[string]any) (CallToolResult, error) {
 	}, nil
 }
 
-func bookmarkList(args map[string]any) (CallToolResult, error) {
+func bookmarkList(_ map[string]any) (CallToolResult, error) {
 	bookmarks := model.BuildBookmark()
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Bookmarks (%d):\n\n", len(*bookmarks)))
+	fmt.Fprintf(&sb, "Bookmarks (%d):\n\n", len(*bookmarks))
 	for _, b := range *bookmarks {
-		sb.WriteString(fmt.Sprintf("- %s: %d blocks\n", b.Name, b.Count))
+		fmt.Fprintf(&sb, "- %s: %d blocks\n", b.Name, b.Count)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func bookmarkLabels(args map[string]any) (CallToolResult, error) {
+func bookmarkLabels(_ map[string]any) (CallToolResult, error) {
 	labels := model.BookmarkLabels()
 	if len(labels) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no bookmark labels found"}}}, nil
 	}
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Bookmark labels (%d):\n\n", len(labels)))
+	fmt.Fprintf(&sb, "Bookmark labels (%d):\n\n", len(labels))
 	for _, l := range labels {
-		sb.WriteString(fmt.Sprintf("- %s\n", l))
+		fmt.Fprintf(&sb, "- %s\n", l)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

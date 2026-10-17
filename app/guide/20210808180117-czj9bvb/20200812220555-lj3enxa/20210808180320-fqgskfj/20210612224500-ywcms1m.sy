@@ -6,7 +6,7 @@
 		"id": "20210612224500-ywcms1m",
 		"title": "内容块属性",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -274,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613004117-1jnl9m0",
-				"updated": "20251201102135"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -288,7 +288,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613004135-7td7u1o",
-				"updated": "20251201102135"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -311,7 +311,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 进行设置，属性名仅允许使用小写英文字母和阿拉伯数字并且需要以字母开头（例如 "
+					"Data": "​ 进行设置，属性名须以小写英文字母开头，可包含小写英文字母、数字和连字符（-）；输入的大写字母会自动转为小写（例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -326,6 +326,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "day1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "project-id"
 				},
 				{
 					"Type": "NodeText",

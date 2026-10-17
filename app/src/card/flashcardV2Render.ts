@@ -1,4 +1,6 @@
 import {escapeAttr, escapeHtml} from "../util/escape";
+import type {FlashcardV2CardRenderModel} from "../types/api";
+import {isFlashcardV2Object, isFlashcardV2Strings, readFlashcardV2Payload} from "./flashcardV2Contract";
 
 export interface IFlashcardV2SourceReference {
     id?: string;
@@ -111,7 +113,7 @@ export interface IFlashcardV2RenderModel {
         primaryRefID?: string;
         sourceType: string;
         generationConfig?: IClozeGenerationConfig | IOrderedGenerationConfig | IImageOcclusionConfig |
-            IChoiceGenerationConfig | IMultiLineGenerationConfig | ITypedAnswerGenerationConfig;
+            IChoiceGenerationConfig | IMultiLineGenerationConfig | ITypedAnswerGenerationConfig | Record<string, unknown>;
         pluginNamespace?: string;
         pluginDataVersion?: number;
         pluginData?: {
@@ -138,6 +140,71 @@ export interface IFlashcardV2RenderModel {
         fields: Array<{ id: string, name: string }>;
     };
 }
+
+const optionalField = (value: unknown, kind: "string" | "number" | "boolean") =>
+    value === undefined || typeof value === kind;
+
+const isFlashcardV2RenderSpec = (value: unknown): value is IFlashcardV2RenderSpec => {
+    if (!isFlashcardV2Object(value)) {
+        return false;
+    }
+    if (![value.type, value.markup, value.fieldID, value.role].every((item) => optionalField(item, "string")) ||
+        ![value.fieldIDs, value.roles].every((item) => item === undefined || isFlashcardV2Strings(item)) ||
+        !optionalField(value.mediaAutoplay, "boolean")) {
+        return false;
+    }
+    if (value.answerCheck !== undefined) {
+        const check = value.answerCheck;
+        if (!isFlashcardV2Object(check) ||
+            check.acceptedAnswers !== undefined && !isFlashcardV2Strings(check.acceptedAnswers) ||
+            ![check.caseSensitive, check.trimWhitespace, check.collapseWhitespace, check.ignorePunctuation,
+                check.ignoreDiacritics].every((item) => optionalField(item, "boolean")) ||
+            ![check.fuzzyMaxDistance, check.fuzzyMaxRatio].every((item) => optionalField(item, "number"))) {
+            return false;
+        }
+    }
+    if (value.tts !== undefined) {
+        const tts = value.tts;
+        if (!isFlashcardV2Object(tts) || !optionalField(tts.lang, "string") ||
+            ![tts.enabled, tts.autoPlay].every((item) => optionalField(item, "boolean")) ||
+            ![tts.rate, tts.pitch].every((item) => optionalField(item, "number")) ||
+            tts.fieldIDs !== undefined && !isFlashcardV2Strings(tts.fieldIDs)) {
+            return false;
+        }
+    }
+    return true;
+};
+
+const isFlashcardV2ContextPolicy = (value: unknown): value is IFlashcardV2RenderModel["template"]["contextPolicy"] =>
+    isFlashcardV2Object(value) && [value.breadcrumb, value.documentTitle]
+        .every((item) => optionalField(item, "boolean")) &&
+    [value.ancestorDepth, value.adjacentBefore, value.adjacentAfter].every((item) => optionalField(item, "number"));
+
+const isFlashcardV2PluginData = (value: unknown): value is IFlashcardV2RenderModel["source"]["pluginData"] =>
+    isFlashcardV2Object(value) && optionalField(value.textFallback, "string");
+
+// 接口的扩展 JSON 保留原值，内置渲染字段在使用前检查形状。
+export const readFlashcardV2RenderModel = (model: FlashcardV2CardRenderModel): IFlashcardV2RenderModel => ({
+    ...model,
+    card: {...model.card, variantData: model.card.variantData == null ? undefined :
+        readFlashcardV2Payload(model.card.variantData, isFlashcardV2Object)},
+    source: {
+        ...model.source,
+        generationConfig: model.source.generationConfig == null ? undefined :
+            readFlashcardV2Payload(model.source.generationConfig, isFlashcardV2Object),
+        pluginData: model.source.pluginData == null ? undefined :
+            readFlashcardV2Payload(model.source.pluginData, isFlashcardV2PluginData),
+    },
+    template: {
+        ...model.template,
+        frontSpec: model.template.frontSpec == null ? undefined :
+            readFlashcardV2Payload(model.template.frontSpec, isFlashcardV2RenderSpec),
+        backSpec: model.template.backSpec == null ? undefined :
+            readFlashcardV2Payload(model.template.backSpec, isFlashcardV2RenderSpec),
+        contextPolicy: model.template.contextPolicy == null ? undefined :
+            readFlashcardV2Payload(model.template.contextPolicy, isFlashcardV2ContextPolicy),
+    },
+});
 
 export interface IFlashcardV2OcclusionPlan {
     steps: string[][];

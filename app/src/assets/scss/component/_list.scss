@@ -117,8 +117,8 @@
   }
 
   &-item {
-    line-height: 28px;
-    min-height: 28px;
+    line-height: var(--b3-ui-list-height, 28px);
+    min-height: var(--b3-ui-list-height, 28px);
     padding: 0 4px;
     display: flex;
     cursor: pointer;

@@ -247,7 +247,7 @@ func isEncryptedNotebookWorkspacePathWith(p, workspaceDir, dataDir string, isEnc
 	if err != nil || rel == "." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || rel == ".." {
 		return false
 	}
-	boxID := strings.Split(rel, string(filepath.Separator))[0]
+	boxID, _, _ := strings.Cut(rel, string(filepath.Separator))
 	return isEncryptedBox(boxID)
 }
 

@@ -77,7 +77,7 @@ func newFixedPortReverseProxy(target *url.URL) *httputil.ReverseProxy {
 			// 反代以 HTTPS 回源内核，内核据此会把明文客户端的连接误判为 TLS，
 			// 因此显式标记客户端侧的真实连接方式；调用方伪造的同名头部一律清除。
 			// 这里必须判断原始请求（request.In）而不是改写后的请求：改写后的请求是 HTTPS 回源。
-			request.Out.Header.Del(util.ClientTLSHeader)
+			request.Out.Header.Set(util.ClientTLSHeader, util.ClientTLSHeaderPlaintextValue)
 			if request.In.TLS != nil {
 				request.Out.Header.Set(util.ClientTLSHeader, util.ClientTLSHeaderValue)
 			}

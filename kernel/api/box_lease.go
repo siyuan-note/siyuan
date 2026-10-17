@@ -17,7 +17,9 @@
 package api
 
 import (
+	"context"
 	"errors"
+	"slices"
 	"sort"
 
 	"github.com/88250/lute/ast"
@@ -27,10 +29,21 @@ import (
 )
 
 const requestBoxLeasesKey = "siyuan-request-box-leases"
+const requestBoxOperationScopeKey = "siyuan-request-box-operation-scope"
 
 func boxLeaseMiddleware(c *gin.Context) {
 	defer releaseRequestBoxLeases(c)
 	c.Next()
+}
+
+// encryptedBoxRequestScope 将模型层取得的单个租约保留到响应写入完成，避免同一请求重复计数。
+func encryptedBoxRequestScope(c *gin.Context) context.Context {
+	if _, exists := c.Get(requestBoxOperationScopeKey); !exists {
+		ctx, release := model.WithEncryptedBoxOperationScope(c.Request.Context())
+		c.Request = c.Request.WithContext(ctx)
+		c.Set(requestBoxOperationScopeKey, release)
+	}
+	return c.Request.Context()
 }
 
 func holdEncryptedBoxRequest(c *gin.Context, boxID string) error {
@@ -38,10 +51,8 @@ func holdEncryptedBoxRequest(c *gin.Context, boxID string) error {
 		return nil
 	}
 	leases := requestBoxLeases(c)
-	for _, heldBoxID := range leases {
-		if heldBoxID == boxID {
-			return nil
-		}
+	if slices.Contains(leases, boxID) {
+		return nil
 	}
 
 	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
@@ -101,8 +112,8 @@ func requestBoxLeases(c *gin.Context) []string {
 
 func releaseEncryptedBoxRequest(c *gin.Context, boxID string) {
 	leases := requestBoxLeases(c)
-	for i := len(leases) - 1; i >= 0; i-- {
-		if leases[i] != boxID {
+	for i, lease := range slices.Backward(leases) {
+		if lease != boxID {
 			continue
 		}
 		leases = append(leases[:i], leases[i+1:]...)
@@ -113,9 +124,15 @@ func releaseEncryptedBoxRequest(c *gin.Context, boxID string) {
 }
 
 func releaseRequestBoxLeases(c *gin.Context) {
+	if value, exists := c.Get(requestBoxOperationScopeKey); exists {
+		if release, ok := value.(func()); ok {
+			release()
+			c.Set(requestBoxOperationScopeKey, nil)
+		}
+	}
 	leases := requestBoxLeases(c)
-	for i := len(leases) - 1; i >= 0; i-- {
-		model.ReleaseEncryptedBoxOperation(leases[i])
+	for _, lease := range slices.Backward(leases) {
+		model.ReleaseEncryptedBoxOperation(lease)
 	}
 	c.Set(requestBoxLeasesKey, []string{})
 }

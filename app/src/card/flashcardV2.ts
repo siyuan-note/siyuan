@@ -4,6 +4,8 @@ import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
+import {isFlashcardV2Object, isFlashcardV2Strings, readFlashcardV2Payload, readFlashcardV2Revision, toFlashcardV2JSON} from "./flashcardV2Contract";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
@@ -204,6 +206,53 @@ interface IFlashcardStudyPolicy {
     createdAt: number;
     updatedAt: number;
 }
+
+const isFlashcardTag = (value: unknown): value is IFlashcardTag => isFlashcardV2Object(value) &&
+    typeof value.id === "string" && typeof value.name === "string" &&
+    (value.parentID === undefined || typeof value.parentID === "string");
+
+const isFlashcardTemplate = (value: unknown): value is IFlashcardTemplate => isFlashcardV2Object(value) &&
+    typeof value.id === "string" && typeof value.name === "string";
+
+const isFlashcardFlagDefinition = (value: unknown): value is IFlashcardFlagDefinition =>
+    isFlashcardTemplate(value) && "flag" in value && typeof value.flag === "number";
+
+const isFlashcardQueryExpression = (value: unknown): value is IFlashcardQueryExpression => {
+    if (!isFlashcardV2Object(value) || !["matchAll", "and", "or", "not", "predicate"].includes(String(value.operator))) {
+        return false;
+    }
+    return (value.children === undefined || Array.isArray(value.children) && value.children.every(isFlashcardQueryExpression)) &&
+        (value.field === undefined || typeof value.field === "string") &&
+        (value.comparator === undefined || typeof value.comparator === "string");
+};
+
+const isFlashcardQuery = (value: unknown): value is IFlashcardQueryAST => isFlashcardV2Object(value) &&
+    typeof value.version === "number" && isFlashcardQueryExpression(value.root);
+
+const isFlashcardReviewSet = (value: unknown): value is IReviewSet => isFlashcardV2Object(value) &&
+    typeof value.id === "string" && typeof value.name === "string" &&
+    typeof value.newLimit === "number" && typeof value.reviewLimit === "number" &&
+    (value.defaultReviewMode === "normal" || value.defaultReviewMode === "reinforcement") &&
+    (value.legacyDeckID === undefined || typeof value.legacyDeckID === "string") &&
+    (value.queryAST === undefined || isFlashcardQuery(value.queryAST)) &&
+    (value.order === undefined || isFlashcardV2Object(value.order) &&
+        ["priorityDue", "due", "added", "random"].includes(String(value.order.mode)));
+
+const isFlashcardPreset = (value: unknown): value is IFlashcardPreset => isFlashcardV2Object(value) &&
+    typeof value.id === "string" && typeof value.name === "string" &&
+    value.schedulerVersion === "go-fsrs-v3.3.1-fsrs6" &&
+    [value.requestRetention, value.maximumInterval, value.newLimit, value.reviewLimit, value.leechThreshold]
+        .every((item) => typeof item === "number") &&
+    [value.buryNewSiblings, value.buryReviewSiblings].every((item) => typeof item === "boolean") &&
+    Array.isArray(value.weights) && value.weights.every((item) => typeof item === "number") &&
+    ["tag", "suspend", "tagAndSuspend"].includes(String(value.leechAction));
+
+const isFlashcardStudyPolicy = (value: unknown): value is IFlashcardStudyPolicy => isFlashcardV2Object(value) &&
+    typeof value.id === "string" && (value.scopeType === "document" || value.scopeType === "notebook") &&
+    typeof value.scopeID === "string" && typeof value.priority === "string" &&
+    typeof value.createdAt === "number" && typeof value.updatedAt === "number" &&
+    (value.targetDate === undefined || typeof value.targetDate === "number") &&
+    (value.defaultPresetID === undefined || typeof value.defaultPresetID === "string");
 
 interface IFlashcardManagementFilters {
     blockIDs?: string[];
@@ -530,7 +579,7 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
         entityType: "tag",
         options: {limit: 1000, offset: 0},
     }, (response) => {
-        const tags = (response.data.entities as Array<IFlashcardEntityRevision<IFlashcardTag>>)
+        const tags = (response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardTag)))
             .map((item) => item.payload);
         const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
         const current = revision?.payload;
@@ -616,11 +665,11 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
                         expectedRevisionID: revision?.revisionID,
                         requireAbsent: revision === undefined,
                         updatedAt: operation.changedAt,
-                        payload,
+                        payload: toFlashcardV2JSON(payload),
                     }],
                 }, (mutationResponse) => {
                     saved = true;
-                    callback(mutationResponse.data.revisions[0] as IFlashcardEntityRevision<IReviewSet>);
+                    callback(readFlashcardV2Revision(mutationResponse.data.revisions[0], isFlashcardReviewSet));
                     dialog.destroy();
                 });
                 return saved;
@@ -723,11 +772,11 @@ const openFlashcardV2PresetEditor = (revision: IFlashcardEntityRevision<IFlashca
                     expectedRevisionID: revision?.revisionID,
                     requireAbsent: revision === undefined,
                     updatedAt: operation.changedAt,
-                    payload,
+                    payload: toFlashcardV2JSON(payload),
                 }],
             }, (response) => {
                 saved = true;
-                callback(response.data.revisions[0] as IFlashcardEntityRevision<IFlashcardPreset>);
+                callback(readFlashcardV2Revision(response.data.revisions[0], isFlashcardPreset));
                 dialog.destroy();
             });
             return saved;
@@ -742,7 +791,7 @@ export const openFlashcardV2Presets = () => {
             entityType: "schedulerPreset",
             options: {limit: 1000, offset: 0},
         }, (response) => {
-            const revisions = response.data.entities as Array<IFlashcardEntityRevision<IFlashcardPreset>>;
+            const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardPreset));
             const dialog = new Dialog({
                 title: window.siyuan.languages.flashcardPreset,
                 width: isMobile() ? "92vw" : "640px",
@@ -963,7 +1012,7 @@ const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => v
         entityType: "reviewSet",
         options: {limit: 1000, offset: 0},
     }, (response) => {
-        const reviewSets = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
+        const reviewSets = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
         if (reviewSets.length === 0) {
             return;
         }
@@ -1152,7 +1201,7 @@ ${type === "preset" ? presetOptions : priorityOptions}
         entityType: "schedulerPreset",
         options: {limit: 1000, offset: 0},
     }, (response) => {
-        const revisions = response.data.entities as Array<IFlashcardEntityRevision<IFlashcardPreset>>;
+        const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardPreset));
         openDialog(revisions.map((revision) => revision.payload));
     });
 };
@@ -1168,7 +1217,7 @@ const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID:
         scopeID,
     }, (response) => {
         const current = response.data.found ?
-            response.data.revision as IFlashcardEntityRevision<IFlashcardStudyPolicy> : undefined;
+            readFlashcardV2Revision(response.data.revision, isFlashcardStudyPolicy) : undefined;
         const options = ["exam", "learning", "retaining", "paused", "unset"]
             .map((priority) => `<option value="${priority}">${escapeHtml(priorityLabel(priority))}</option>`).join("");
         const dialog = new Dialog({
@@ -1323,7 +1372,7 @@ const openFlashcardV2TagEditor = (revision: IFlashcardEntityRevision<IFlashcardT
             expectedRevisionID: revision.revisionID,
             updatedAt: Date.now(),
         }, (response) => {
-            callback(response.data as IFlashcardEntityRevision<IFlashcardTag>);
+            callback(readFlashcardV2Revision(response.data, isFlashcardTag));
             dialog.destroy();
         });
     });
@@ -1336,7 +1385,7 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
         entityType: "tag",
         options: {limit: 1000, offset: 0},
     }, (response) => {
-        const revisions = response.data.entities as Array<IFlashcardEntityRevision<IFlashcardTag>>;
+        const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardTag));
         const tags = revisions.map((revision) => revision.payload);
         const targetIDs = Array.isArray(targetID) ? targetID : [targetID];
         const initialSelection = initialAssignments ? getFlashcardV2TagSelection(targetIDs, initialAssignments) : {
@@ -1426,7 +1475,7 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
                 name,
                 updatedAt: Date.now(),
             }, (saveResponse) => {
-                const revision = saveResponse.data as IFlashcardEntityRevision<IFlashcardTag>;
+                const revision = readFlashcardV2Revision(saveResponse.data, isFlashcardTag);
                 revisions.push(revision);
                 tags.push(revision.payload);
                 selected.add(tagID);
@@ -1674,14 +1723,14 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
                         options: {limit: 7, offset: 0},
                     }, (flagResponse) => {
                         openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, {
-                            tags: (tagResponse.data.entities as Array<IFlashcardEntityRevision<IFlashcardTag>>)
+                            tags: (tagResponse.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardTag)))
                                 .map((item) => item.payload),
-                            presets: (presetResponse.data.entities as
-                                Array<IFlashcardEntityRevision<IFlashcardPreset>>).map((item) => item.payload),
-                            templates: (templateResponse.data.entities as
-                                Array<IFlashcardEntityRevision<IFlashcardTemplate>>).map((item) => item.payload),
-                            flagDefinitions: flagResponse.data.entities as
-                                Array<IFlashcardEntityRevision<IFlashcardFlagDefinition>>,
+                            presets: presetResponse.data.entities.map((revision) =>
+                                readFlashcardV2Revision(revision, isFlashcardPreset).payload),
+                            templates: templateResponse.data.entities.map((revision) =>
+                                readFlashcardV2Revision(revision, isFlashcardTemplate).payload),
+                            flagDefinitions: flagResponse.data.entities.map((revision) =>
+                                readFlashcardV2Revision(revision, isFlashcardFlagDefinition)),
                         }, grouped);
                     });
                 });
@@ -2129,11 +2178,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         return;
                     }
                     fetchPost("/api/flashcard/getRenderModel", {cardID: sourceCard.card.id}, (renderResponse) => {
-                        const model = renderResponse.data as {
-                            source: {sourceType: string, generationConfig: IFlashcardV2AdvancedGenerationConfig},
-                            references: Array<{entityType: string, entityID: string, role: string, sort: number}>,
-                            template: {generationRule: {mode: string}},
-                        };
+                        const model = renderResponse.data;
                         fetchPost("/api/flashcard/getEntity", {
                             entityType: "cardSource",
                             entityID: item.dataset.sourceId,
@@ -2149,9 +2194,9 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                                 sourceID: item.dataset.sourceId,
                                 expectedRevisionID: revision.revisionID,
                                 sourceType: model.source.sourceType,
-                                generationConfig: model.source.generationConfig,
+                                generationConfig: readFlashcardV2Payload(model.source.generationConfig, isFlashcardV2AdvancedGenerationConfig),
                                 references,
-                                modeHint: model.template.generationRule.mode,
+                                modeHint: readFlashcardV2Payload(model.template.generationRule, isFlashcardV2GenerationRule).mode,
                             }, reloadPage);
                         });
                     });
@@ -2356,7 +2401,7 @@ export const openFlashcardV2ReviewPicker = (app: App) => {
             entityType: "reviewSet",
             options: {limit: 1000, offset: 0},
         }, (response) => {
-            const revisions = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
+            const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
             let multiple = false;
             let next: (() => void) | undefined;
             const dialog = new Dialog({
@@ -2463,7 +2508,7 @@ export const openFlashcardV2ReviewSets = (app: App) => {
             entityType: "reviewSet",
             options: {limit: 1000, offset: 0},
         }, (response) => {
-            const revisions = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
+            const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
             const summaries: Record<string, IFlashcardReviewSetSummary> = {};
             const dialog = new Dialog({
                 title: window.siyuan.languages.flashcardReviewSet,
@@ -2564,7 +2609,7 @@ export const openFlashcardV2BasicSource = (blockIDs: string[]) => {
             entityType: "reviewSet",
             options: {limit: 1000, offset: 0},
         }, (response) => {
-            const revisions = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
+            const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
             const dialog = new Dialog({
                 title: window.siyuan.languages.riffCard,
                 width: isMobile() ? "92vw" : "520px",
@@ -2670,6 +2715,40 @@ interface IFlashcardV2AdvancedGenerationConfig {
     trimWhitespace?: boolean;
     collapseWhitespace?: boolean;
 }
+
+const isFlashcardV2GenerationRule = (value: unknown): value is {mode: string} => isFlashcardV2Object(value) &&
+    typeof value.mode === "string";
+
+const isFlashcardV2AdvancedGenerationConfig = (value: unknown): value is IFlashcardV2AdvancedGenerationConfig => {
+    if (!isFlashcardV2Object(value)) {
+        return false;
+    }
+    const optionalList = (items: unknown, valid: (item: unknown) => boolean) =>
+        items === undefined || Array.isArray(items) && items.every(valid);
+    const orderedItem = (item: unknown): item is {id: string, displayOrder: number} => isFlashcardV2Object(item) &&
+        typeof item.id === "string" && typeof item.displayOrder === "number";
+    if (!optionalList(value.occlusions, (item) => orderedItem(item) && "groupIDs" in item && isFlashcardV2Strings(item.groupIDs)) ||
+        !optionalList(value.groups, (item) => orderedItem(item) &&
+            (!("shapeIDs" in item) || isFlashcardV2Strings(item.shapeIDs))) ||
+        !optionalList(value.steps, (item) => orderedItem(item) && "occlusionIDs" in item && isFlashcardV2Strings(item.occlusionIDs)) ||
+        !optionalList(value.options, orderedItem)) {
+        return false;
+    }
+    if (!optionalList(value.shapes, (item) => isFlashcardV2Object(item) && typeof item.id === "string" &&
+        ["rectangle", "ellipse", "polygon"].includes(String(item.type)) &&
+        [item.x, item.y, item.width, item.height].every((number) => number === undefined || typeof number === "number") &&
+        optionalList(item.points, (point) => isFlashcardV2Object(point) &&
+            typeof point.x === "number" && typeof point.y === "number"))) {
+        return false;
+    }
+    return [value.frontMode, value.mode, value.revealMode].every((item) => item === undefined || typeof item === "string") &&
+        [value.randomize, value.caseSensitive, value.ignoreDiacritics, value.trimWhitespace, value.collapseWhitespace]
+            .every((item) => item === undefined || typeof item === "boolean") &&
+        [value.dynamicDistractorCount, value.fuzzyMaxDistance, value.fuzzyMaxRatio]
+            .every((item) => item === undefined || typeof item === "number") &&
+        (value.correctOptionIDs === undefined || isFlashcardV2Strings(value.correctOptionIDs)) &&
+        (value.distractorQuery === undefined || isFlashcardQuery(value.distractorQuery));
+};
 
 interface IFlashcardV2AdvancedEdit {
     sourceID: string;
@@ -3079,7 +3158,7 @@ const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashca
             entityType: "reviewSet",
             options: {limit: 1000, offset: 0},
         }, (response) => {
-            const revisions = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
+            const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
             const openDialog = (doms: Record<string, string>, imageSource?: { assetID: string, blockID: string }) => {
                 const pluginTypes = listFlashcardV2PluginTypes().filter((item) => item.registration.create);
                 const preparedInline = prepareFlashcardV2InlineOcclusions(blockIDs, doms);
@@ -3426,17 +3505,21 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                             preparedInline.updates.length = 0;
                         }
                         let saved = false;
-                        await fetchPost(edit ? "/api/flashcard/updateAdvancedSource" :
-                            "/api/flashcard/createAdvancedSource", {
-                            ...payload,
-                            operationID: operation.operationID,
-                            createdAt: edit ? undefined : operation.changedAt,
-                            updatedAt: edit ? operation.changedAt : undefined,
-                        }, () => {
+                        const onSaved = () => {
                             saved = true;
                             dialog.destroy();
                             callback?.();
-                        });
+                        };
+                        const request = {...payload, operationID: operation.operationID};
+                        if (edit) {
+                            await fetchPost("/api/flashcard/updateAdvancedSource", {
+                                ...request, updatedAt: operation.changedAt,
+                            }, onSaved);
+                        } else {
+                            await fetchPost("/api/flashcard/createAdvancedSource", {
+                                ...request, createdAt: operation.changedAt,
+                            }, onSaved);
+                        }
                         return saved;
                     });
                 });
@@ -3514,8 +3597,7 @@ export const openFlashcardV2AnkiPreview = () => {
         if (!file) {
             return;
         }
-        const formData = new FormData();
-        formData.append("file", file);
+        const formData = new ContractFormData({file});
         fetchPost("/api/flashcard/previewAnkiPackage", formData, (response) => {
             const preview = response.data as IAnkiPackagePreview;
             const notebooks = window.siyuan.notebooks.filter((notebook) => !notebook.closed && !notebook.encrypted);
@@ -3559,10 +3641,7 @@ ${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${esca
                     return;
                 }
                 ensureFlashcardV2(() => {
-                    const importData = new FormData();
-                    importData.append("file", file);
-                    importData.append("notebookID", notebookID);
-                    importData.append("operationID", genUUID());
+                    const importData = new ContractFormData({file, notebookID, operationID: genUUID()});
                     buttons[1].disabled = true;
                     importController = new AbortController();
                     fetchPost("/api/flashcard/importAnkiPackage", importData, (importResponse) => {

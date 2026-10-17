@@ -28,7 +28,7 @@ import (
 // siyuan.secrets.resolve(tpl) 仅替换模板里的 {{secrets.NAME}} 占位符，
 // siyuan.vars.resolve(tpl) 仅替换 {{vars.NAME}}。两者各自只返回替换后的字符串，
 // 不向插件暴露密钥/变量清单。同步执行（纯内存操作，无 I/O）。
-func injectSecretsVars(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+func injectSecretsVars(_ *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("injectSecretsVars: %v", r)

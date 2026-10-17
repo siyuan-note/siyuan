@@ -44,8 +44,11 @@ const fixture = (deferSnippetScripts = false) => {
         getHostCapabilities: () => ({customAppearance: true}),
         ensureLute: async () => { calls.push({type: "lute"}); },
         onAgentStreamingMarkdownStorageChanged: (key: string) => calls.push({type: "storage", value: key}),
-        onPageScrollButtonsStorageChanged: (key: string) => {
-            if (key === "page-buttons") calls.push({type: "page-buttons", value: storage[key]});
+        onCompactModeStorageChanged: (key: string) => {
+            if (key === "compact") calls.push({type: "compact", value: storage[key]});
+        },
+        refreshCompactMode: async (guard: () => boolean) => {
+            if (guard()) calls.push({type: "compact-refresh"});
         },
         genNotebookOption: (id: string, _box: string, shorthand: boolean, filter: (notebook: unknown) => boolean) => {
             calls.push({type: "options", value: {id, shorthand, filter}});
@@ -195,15 +198,22 @@ test("settings receive all zoom storage messages without persistence or owner to
     assert.equal(f.storage.zoom, undefined);
 });
 
-test("settings propagate page scroll preferences after all storage message variants", () => {
+test("settings apply compact mode after every storage update and stop refreshing after disposal", async () => {
     const f = fixture();
     const send = (cmd: string, data: unknown) => f.runtime.handleMessage({cmd, data} as IWebSocketData);
-    send("setLocalStorageVal", {key: "page-buttons", val: true});
-    send("removeLocalStorageVal", {key: "page-buttons"});
-    send("setLocalStorageVals", {keyVals: {"page-buttons": false}});
-    send("removeLocalStorageVals", {keys: ["page-buttons"]});
-    assert.deepEqual(f.calls.filter(call => call.type === "page-buttons").map(call => call.value),
+    send("setLocalStorageVal", {key: "compact", val: true});
+    send("removeLocalStorageVal", {key: "compact"});
+    send("setLocalStorageVals", {keyVals: {compact: false}});
+    send("removeLocalStorageVals", {keys: ["compact"]});
+    assert.deepEqual(f.calls.filter(call => call.type === "compact").map(call => call.value),
         [true, undefined, false, undefined]);
+    await f.runtime.reconnect();
+    assert.equal(f.calls.filter(call => call.type === "compact-refresh").length, 1);
+    f.setActive(false);
+    send("setLocalStorageVal", {key: "compact", val: true});
+    await f.runtime.reconnect();
+    assert.equal(f.storage.compact, undefined);
+    assert.equal(f.calls.filter(call => call.type === "compact-refresh").length, 1);
 });
 
 test("snippets assign configuration first and wait for Lute before rendering JS", async () => {

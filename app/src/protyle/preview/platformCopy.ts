@@ -74,7 +74,7 @@ const preserveSpaces = (line: string) => line
 export const getWechatCodeLines = (text: string) => text.split(/\r\n|\r|\n/).map(preserveSpaces);
 
 export const buildExpandedTableGrid = <T extends ITableGridCell>(rows: T[][]) => {
-    const grid: Array<Array<T | undefined>> = rows.map(() => []);
+    const grid: Array<Array<T | undefined>> = rows.map((): Array<T | undefined> => []);
     let columnCount = 0;
     rows.forEach((cells, rowIndex) => {
         let columnIndex = 0;

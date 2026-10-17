@@ -6,7 +6,7 @@
 		"id": "20260617123409-cmygnqa",
 		"title": "Table Calculation",
 		"type": "doc",
-		"updated": "20260617123642"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617123606-hmer6rw",
-				"updated": "20260617123606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123606-099e9jn",
-				"updated": "20260617123606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -696,7 +696,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617123606-a1r19o6",
-				"updated": "20260617123606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -708,7 +708,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260617123606-lynr37v",
-						"updated": "20260617123606"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -722,7 +722,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ depends on the column type: single-value columns such as number and text count one value per row; multi-value columns such as multi-select and asset count each option separately (consistent with the native \"Count values\" semantics)."
+							"Data": "​ depends on the column type: empty cells are skipped, and single-value columns such as number and text count one value per nonempty cell; multi-value columns such as multi-select and asset count each option separately (consistent with the native \"Count values\" semantics)."
 						}
 					]
 				}
@@ -802,7 +802,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123606-tlytmd9",
-				"updated": "20260617123606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -835,7 +835,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260617123606-51zc0nr",
-				"updated": "20260617123606"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1055,7 +1055,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Rows starting with \"TODO\""
+									"Data": "Distinct option count (multi-select column)"
 								}
 							]
 						},
@@ -1064,8 +1064,9 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "`.action{len"
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (uniq .strings)}"
 								}
 							]
 						}

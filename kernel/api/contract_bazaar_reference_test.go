@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -11,12 +12,6 @@ func bazaarPackageRatingsResponseData(ratings map[string]*bazaar.PackageRating,
 	eligiblePackageNames []string) map[string]any {
 	return map[string]any{
 		"ratings":              ratings,
-		"eligiblePackageNames": eligiblePackageNames,
-	}
-}
-func bazaarPackageUserRatingsResponseData(userRatings map[string]int, eligiblePackageNames []string) map[string]any {
-	return map[string]any{
-		"userRatings":          userRatings,
 		"eligiblePackageNames": eligiblePackageNames,
 	}
 }

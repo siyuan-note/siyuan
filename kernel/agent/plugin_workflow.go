@@ -410,9 +410,10 @@ func handlePluginWorkflowQuestion(ctx context.Context, args map[string]any, sess
 		}
 	}
 	questionKey, yesKey, noKey := "agentPluginFlowQuestion", "agentPluginFlowYes", "agentPluginFlowNo"
-	if action == "plan" {
+	switch action {
+	case "plan":
 		questionKey, yesKey, noKey = "agentPluginPlanQuestion", "confirm", "cancel"
-	} else if action == "recover" {
+	case "recover":
 		questionKey, yesKey, noKey = "agentPluginRecoveryQuestion", "confirm", "cancel"
 	}
 	question, err := pluginWorkflowTerm(language, questionKey)
@@ -438,7 +439,8 @@ func handlePluginWorkflowQuestion(ctx context.Context, args map[string]any, sess
 			return errors.New("the official plugin development skill is disabled")
 		}
 		state := runtime.PluginWorkflow
-		if action == "choose" {
+		switch action {
+		case "choose":
 			newTask, _ := workflow["newTask"].(bool)
 			reconsider, _ := workflow["reconsider"].(bool)
 			if state != nil && !newTask && !reconsider && state.Choice != "" &&
@@ -455,7 +457,7 @@ func handlePluginWorkflowQuestion(ctx context.Context, args map[string]any, sess
 			state.Choice, state.Loaded, state.Approved, state.Paused = "", false, false, false
 			state.RecoveryApproved = false
 			state.SkillVersion, state.SkillDigest = info.Version, info.Digest
-		} else if action == "recover" {
+		case "recover":
 			if state == nil || state.TaskID != taskID || state.Choice != "yes" || !state.Loaded || state.Plan == nil ||
 				state.SkillVersion != info.Version || state.SkillDigest != info.Digest {
 				return errors.New("recovery requires the same loaded skill and a previously approved plugin proposal")
@@ -463,7 +465,7 @@ func handlePluginWorkflowQuestion(ctx context.Context, args map[string]any, sess
 			state.Approved, state.Paused, state.RecoveryApproved = false, true, false
 			state.RecoveryPlanHash = state.Plan.Hash
 			question += "\n\n" + state.Plan.Display + "\n\n" + state.Plan.Hash
-		} else {
+		default:
 			if state == nil || state.TaskID != taskID || state.Choice != "yes" || !state.Loaded ||
 				state.SkillVersion != info.Version || state.SkillDigest != info.Digest {
 				return errors.New("choose the official workflow and load its current skill before proposing a plan")
@@ -526,17 +528,18 @@ func handlePluginWorkflowQuestion(ctx context.Context, args map[string]any, sess
 			return nil
 		}
 		accepted := answer.Answers[0] == yes
-		if action == "choose" {
+		switch action {
+		case "choose":
 			state.Choice, state.ChoiceQuestionID = "no", questionID
 			if accepted {
 				state.Choice = "yes"
 			}
-		} else if action == "recover" {
+		case "recover":
 			if state.Plan == nil || state.Plan.Hash != state.RecoveryPlanHash {
 				return errors.New("recovery proposal changed while awaiting confirmation")
 			}
 			state.RecoveryApproved, state.RecoveryQuestionID = accepted, questionID
-		} else {
+		default:
 			if state.PendingPlan == nil {
 				return errors.New("plugin proposal snapshot is unavailable")
 			}

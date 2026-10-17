@@ -3,7 +3,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {genUUID} from "../../util/genID";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import {exportLayout, reloadUI, resetLayout} from "../../layout/util";
+import {exportLayout, reloadUI, resetLayout, suspendLayoutSaving} from "../../layout/util";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {subscribeGlobalPluginState, applyPluginReload} from "../../plugin/globalState";
 import {loadPlugin, unloadPlugin} from "../../plugin/loader";
@@ -15,6 +15,7 @@ import {getDockEntryOrderSnapshot} from "../entryVisibility/dockOrder";
 import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
 import {hasNativeSettingTasks} from "./taskBlocker";
 import {openBazaarPath} from "../bazaar/openPath";
+import {acceptSettingInterfaceRevision, watchSettingInterface} from "./interface";
 import type {App} from "../../index";
 import type {ISettingsWindowHost} from "./windowContext";
 import type {TSettingTab} from "./tabs";
@@ -57,6 +58,7 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
                                          plugin?: ISettingsWindowHost["plugin"], key = "builtin") => {
     /// #if !BROWSER
     if (!ownerActive) return;
+    if (key === "builtin") watchSettingInterface();
     openSequence++;
     if (!listening) {
         listening = true;
@@ -105,6 +107,7 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
     const host: ISettingsWindowHost = {
         app, title, isActive, dispose: close,
         exportLayout: options => { assertActive(); return exportLayout(options); },
+        suspendLayoutSaving: () => { assertActive(); return suspendLayoutSaving(); },
         reload: () => { assertActive(); return reloadUI(); },
         resetLayout: () => { assertActive(); return resetLayout(); },
         getDockOrderSnapshot: () => { assertActive(); return getDockEntryOrderSnapshot(); },
@@ -179,7 +182,8 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
             dispose(false, false);
             return;
         }
-        if (!isActive() || (plugin && !plugin.isOpen())) {
+        if (!isActive() || (plugin && !plugin.isOpen()) ||
+            (key === "builtin" && !acceptSettingInterfaceRevision(prepared.revision))) {
             try {
                 ipcRenderer.send("siyuan-settings-close", {key, token});
             } finally {

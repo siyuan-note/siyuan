@@ -5,15 +5,21 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
-                            transactionSource: string, copyPlainSource: string) => {
+                            transactionSource: string, copyPlainSource: string, gutterSource: string, mouseDownSource: string,
+                            commandSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const changes: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
+    const fragmentOwners = new WeakSet<IProtyle>();
+    let mobile = true;
     const enteredCells: Element[] = [];
+    let gutterHidden = false;
+    const gutterRenderTarget = new Function("hideElements", gutterSource + "\nreturn render;")(
+        () => { gutterHidden = true; });
     const focusByRange = (range: Range) => {
         getSelection().removeAllRanges();
         getSelection().addRange(range);
@@ -25,15 +31,22 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     }});
     const dependencies = {
         Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"},
-        dayjs: () => ({format: () => "20260924120000"}), isMobile: () => true,
+        dayjs: () => ({format: () => "20260924120000"}), isMobile: () => mobile,
         normalizeSemanticInlineElements: noop, removeEmptySemanticInlineElement: noop,
         getSemanticMarkerPrefixLengthForNode: () => 0, getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         turnIntoTaskList: () => false, headingTurnIntoList: () => false, isProtyleListItemFirstParagraph: () => false,
-        mathRender: noop, hideElements: noop, scrollCenter: noop, focusByRange,
+        mathRender: noop, hideElements: (names: string[]) => {
+            if (names.includes("gutter")) {
+                gutterHidden = true;
+            }
+        }, scrollCenter: noop, focusByRange,
         transaction: (_owner: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
             changes.push({doOperations, undoOperations});
         },
         updateTransaction: (owner: IProtyle, block: Element, oldHTML: string) => {
+            if (fragmentOwners.has(owner)) {
+                return;
+            }
             changes.push({
                 doOperations: [{action: "update", id: block.getAttribute("data-node-id"), data: api.cleanTableCellRichHTML(block.outerHTML)}],
                 undoOperations: [{action: "update", id: block.getAttribute("data-node-id"), data: api.cleanTableCellRichHTML(oldHTML)}],
@@ -43,14 +56,16 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     };
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
-        "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, " +
+        "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
-        "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM};")(...Object.values(dependencies)) as
+        "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
+        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
-        typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection");
+        typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
+        typeof import("../util/hasClosest") & typeof import("../wysiwyg/list") & typeof import("../wysiwyg/taskListMarker");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -146,9 +161,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             hidden.className = "fn__none";
             api.updateTableCellContentLayout(host, options.initialBlockHTML);
             wysiwyg.addEventListener("input", () => options.onChange());
+            const protyle = {block: {}, options: {action: []},
+                toolbar: {element: hidden, subElement: hidden}, undo: {clear: noop}} as unknown as IProtyle;
+            fragmentOwners.add(protyle);
             return {
                 wysiwyg, hintElement: hidden,
-                protyle: {block: {}, toolbar: {element: hidden, subElement: hidden}, undo: {clear: noop}},
+                protyle,
                 getBlockHTML: () => wysiwyg.innerHTML, destroy: noop,
                 focus: () => {
                     wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]').focus();
@@ -189,6 +207,193 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const rich of [false, true]) {
+        const {owner, element, table} = fixture();
+        const cell = table.querySelector("th");
+        if (rich) {
+            api.setTableCellRich(cell, "first\n\nsecond");
+        }
+        await open(owner, cell);
+        const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+        const blocks = Array.from(host.querySelectorAll<HTMLElement>("[data-node-id]"));
+        check.ok(blocks.length > 0);
+        const child = blocks[0];
+        const range = document.createRange();
+        range.selectNodeContents(child.querySelector('[contenteditable="true"]'));
+        focusByRange(range);
+        check.equal(api.hasClosestBlock(range.startContainer), child, "local editing retains the fragment identity");
+        check.equal(api.hasClosestBlock(range.startContainer, true), table, "document commands resolve the table identity");
+        const writes: {ids: string[], type: string}[] = [];
+        const duplicated: Element[][] = [];
+        const general = window.siyuan.config.keymap.editor.general;
+        const bindings = new Proxy({}, {get: (_target, key) => key});
+        window.siyuan.config.keymap.editor.general = bindings;
+        window.siyuan.config.keymap.general = bindings;
+        const commandDependencies = {...api,
+            matchHotKey: (binding: string, event: KeyboardEvent) => binding === event.key,
+            getEditorRange: () => getSelection().getRangeAt(0),
+            getBlockElementsByRange: () => blocks,
+            getAllEditor: () => [{protyle: owner}], getActiveTab: noop,
+            documentKeydown: () => false, handleDocumentBoundaryHotkey: () => false,
+            cloneCommandRange: (range: Range) => range?.cloneRange(),
+            getDockElement: noop, resolveCommandFocus: () => "editor", getFrontend: () => "desktop",
+            createCommandContextSnapshot: (value: unknown) => value,
+            copyTextByType: (ids: string[], type: string) => writes.push({ids, type}),
+            getContentByInlineHTML: (range: Range, callback: (text: string) => void) => callback(range.toString()),
+            writeText: (text: string) => writes.push({ids: [text], type: "text"}),
+            duplicateBlock: (elements: Element[]) => duplicated.push(elements),
+        };
+        const commands = new Function(...Object.keys(commandDependencies), commandSource +
+            "\nreturn {commonHotkey, editKeydown, captureCommandContext, hasCommandEditorTarget};")(...Object.values(commandDependencies));
+        const event = (key: string) => ({key, target: child, preventDefault: noop, stopPropagation: noop});
+        for (const [key, type] of [["copyID", "id"], ["copyProtocol", "protocol"],
+            ["copyProtocolInMd", "protocolMd"], ["copyBlockEmbed", "blockEmbed"]]) {
+            writes.length = 0;
+            commands.commonHotkey(owner, event(key), child);
+            check.deepEqual(writes, [{ids: [table.dataset.nodeId], type}]);
+        }
+        writes.length = 0;
+        check.equal(commands.editKeydown({}, event("copyBlockRef")), true);
+        check.deepEqual(writes, [{ids: [`((${table.dataset.nodeId} "${range.toString().trim()}"))`], type: "text"}]);
+        range.collapse(true);
+        writes.length = 0;
+        commands.editKeydown({}, event("copyBlockRef"));
+        check.deepEqual(writes, [{ids: [table.dataset.nodeId], type: "ref"}]);
+        blocks.forEach(block => block.classList.add("protyle-wysiwyg--select"));
+        writes.length = 0;
+        commands.editKeydown({}, event("copyBlockRef"));
+        check.deepEqual(writes, [{ids: [table.dataset.nodeId], type: "ref"}], "selected cell fragments are deduplicated");
+        commands.editKeydown({}, event("duplicate"));
+        check.deepEqual(duplicated, [[table]]);
+        const context = commands.captureCommandContext({app: {}, source: "commandPanel", protyle: owner, range});
+        check.equal(context.block.id, table.dataset.nodeId);
+        check.deepEqual(context.selectedBlocks.map((block: {id: string}) => block.id), [table.dataset.nodeId]);
+        check.equal(commands.hasCommandEditorTarget(context), true, "normalized cell selections retain a valid command target");
+        window.siyuan.config.keymap.editor.general = general;
+        await finish(element);
+    }
+
+    for (const isMobile of [false, true]) {
+        mobile = isMobile;
+        for (const marker of [" ", "X"]) {
+            for (const switchCell of [false, true]) {
+                const {owner, element, table} = fixture();
+                const cell = table.querySelectorAll("td")[1];
+                api.setTableCellRich(cell, `- [ ] First\n  - [${marker}] Nested\n- [ ] Last`);
+                cell.querySelector(".table__cell-rich").innerHTML = api.getTableCellRichBlockDOM(cell);
+                if (switchCell) {
+                    await open(owner, table.querySelector("th"));
+                }
+                const action = cell.querySelectorAll(".protyle-action--task")[1];
+                await open(owner, cell, undefined, {x: 10, y: 20, target: action.querySelector("use")});
+                const tasks = cell.querySelectorAll('[data-type="NodeListItem"][data-subtype="t"]');
+                check.deepEqual(Array.from(tasks, task => task.getAttribute("data-task") ?? " "),
+                    [" ", marker === " " ? "X" : " ", " "], "the first click toggles only the nested task");
+                check.equal(changes.length, 1, "one click creates one outer table transaction");
+                const saved = document.createElement("div");
+                saved.innerHTML = operationHTML(changes[0].doOperations[0]);
+                const before = document.createElement("div");
+                before.innerHTML = operationHTML(changes[0].undoOperations[0]);
+                const completed = (table: Element) => {
+                    const content = document.createElement("div");
+                    content.innerHTML = api.getTableCellRichBlockDOM(table.querySelectorAll("td")[1]);
+                    return Array.from(content.querySelectorAll('[data-type="NodeListItem"][data-subtype="t"]'),
+                        task => task.classList.contains("protyle-task--done"));
+                };
+                check.deepEqual(completed(saved), [false, marker === " ", false], "the saved table retains the toggled state");
+                check.deepEqual(completed(before), [false, marker === "X", false], "undo retains the original task state");
+                await finish(element);
+            }
+        }
+    }
+    mobile = true;
+
+    for (const index of [0, 1]) {
+        const {owner, element, table} = fixture();
+        const cell = table.querySelectorAll("th")[index];
+        const rendered: Element[] = [];
+        owner.gutter = {render: (protyle: IProtyle, block: Element, target: Element) => {
+            check.equal(protyle, owner);
+            rendered.push(gutterRenderTarget(protyle, block, target));
+        }} as IProtyle["gutter"];
+        gutterHidden = false;
+        await open(owner, cell);
+        check.equal(rendered.at(-1), table, "opening a cell retains the owning table gutter");
+        check.equal(gutterHidden, false);
+        const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+        const child = host.querySelector<HTMLElement>("[data-node-id]");
+        for (const type of ["mouseover", "pointerover"]) {
+            rendered.length = 0;
+            child.dispatchEvent(new Event(type, {bubbles: true}));
+            check.equal(gutterHidden, false, `${type} must not hide the owning table gutter`);
+            check.equal(rendered.at(-1), table, `${type} restores the owning table gutter`);
+        }
+        check.equal(gutterRenderTarget(owner, child, child), table, "cell fragments cannot expose their own block menu");
+        await finish(element);
+    }
+
+    // 执行外层编辑器的完整鼠标监听器，区分单元格点击与真正的跨单元格拖选。
+    for (const mobile of [false, true]) {
+        const {owner, element, wysiwyg, table} = fixture();
+        const absent = () => false;
+        const services = {
+            ...dependencies, buildTableGrid: api.buildTableGrid,
+            isMobile: () => mobile, isPhablet: absent, isHiddenTabContent: absent,
+            getAVTemplateInteractiveElement: absent, getAVSelectionRoot: absent, isAVDragSelectSupported: absent,
+            shouldFoldEmbeddedListByAlt: absent, shouldOpenListItemAttr: absent, isTableLikeView: absent,
+            isOnlyMeta: absent, repairHiddenTabSelection: noop, clearSelect: noop,
+            countBlockWord: noop, hideAllElements: noop, globalClickHideMenu: noop,
+            dragOverScroll: noop, stopScrollAnimation: noop,
+        };
+        element.style.cssText = "width:640px;height:480px";
+        wysiwyg.style.cssText = "padding:20px 64px;box-sizing:border-box";
+        table.querySelectorAll<HTMLElement>("th, td").forEach(cell => {
+            cell.style.cssText = "width:100px;height:40px";
+        });
+        owner.options.render = {breadcrumb: false};
+        owner.selectElement = document.createElement("div");
+        owner.toolbar.isMultiSelectMode = absent;
+        const selectedRanges: HTMLTableCellElement[][] = [];
+        owner.wysiwyg.tableControl = {setHidden: noop, clear: noop, hasTouchSelection: absent, selectCellRange: (...cells: HTMLTableCellElement[]) => {
+            selectedRanges.push(cells);
+            return true;
+        }} as unknown as IProtyle["wysiwyg"]["tableControl"];
+        new Function("protyle", "services", `const {${Object.keys(services).join(",")}} = services;\n` + mouseDownSource)
+            .call(owner.wysiwyg, owner, services);
+        const errors: string[] = [];
+        const collectError = (event: ErrorEvent) => errors.push(event.message);
+        window.addEventListener("error", collectError);
+        const mouse = (target: HTMLElement, type: string) => {
+            const rect = target.getBoundingClientRect();
+            target.dispatchEvent(new MouseEvent(type, {bubbles: true, cancelable: true, button: 0,
+                clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2}));
+            check.deepEqual(errors, []);
+        };
+        const cells = Array.from(table.querySelectorAll<HTMLTableCellElement>("th, td"));
+        for (const index of [0, 1, 3, 4, 0]) {
+            gutterHidden = false;
+            getSelection().removeAllRanges();
+            mouse(cells[index], "mousedown");
+            check.equal(gutterHidden, false, "pressing a cell preserves the table gutter");
+            mouse(cells[index], "mousemove");
+            check.equal(gutterHidden, false, "movement within the pressed cell preserves the table gutter");
+            mouse(cells[index], "mouseup");
+            check.equal(gutterHidden, false, "releasing a cell preserves the table gutter");
+            await open(owner, cells[index]);
+            check.equal(gutterHidden, false, "opening the next cell does not interrupt the table gutter");
+        }
+        getSelection().removeAllRanges();
+        mouse(cells[1], "mousedown");
+        mouse(cells[4], "mousemove");
+        check.equal(gutterHidden, true, "cross-cell selection still hides the gutter");
+        check.ok(table.querySelector(".table__select").getAttribute("style"));
+        mouse(cells[4], "mouseup");
+        check.deepEqual(selectedRanges, [[cells[1], cells[4]]]);
+        check.equal(wysiwyg.classList.contains("fn__pointer-none"), false);
+        window.removeEventListener("error", collectError);
+        await finish(element);
+    }
 
     {
         const {element, table} = fixture();
@@ -621,12 +826,17 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
             ["focusByWbr", "focusByOffset", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange", "getDOMOffset", "createRangeByOffsets"]
                 .includes(declaration.name.getText(selection))))
         .map(statement => statement.getText(selection)).join("\n");
+    const list = createSourceFile("list.ts", read("../wysiwyg/list.ts"), ScriptTarget.Latest, true);
+    const taskSource = list.statements.filter(isVariableStatement).filter(statement =>
+        statement.declarationList.declarations.some(declaration =>
+            declaration.name.getText(list) === "setTaskListItemMarker"))
+        .map(statement => statement.getText(list)).join("\n");
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
         "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../wysiwyg/tableVirtualization.ts",
         "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts"]
-        .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource);
+        .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const members = wysiwyg.statements.find(isClassDeclaration).members.filter(member =>
         ["inputTimeout", "pendingInputTimeouts", "runningInputTasks", "scheduleInput", "runInput", "flushPendingInput"]
@@ -640,10 +850,45 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
         statement.declarationList.declarations.some(declaration =>
             ["updateTransaction", "promiseTransaction"].includes(declaration.name.getText(transactionFile))))
         .map(statement => statement.getText(transactionFile)).join("\n"));
+    const commandSource = [["../wysiwyg/commonHotkey.ts", "commonHotkey"],
+        ["../../boot/globalEvent/keydown.ts", "editKeydown"], ["../../command/context.ts", "getBlockContext"],
+        ["../../command/context.ts", "captureCommandContext"], ["../../command/contextTargets.ts", "getCommandBlocks"],
+        ["../../command/contextTargets.ts", "hasCommandEditorTarget"]].map(([file, name]) => {
+        const parsed = createSourceFile(file, read(file), ScriptTarget.Latest, true);
+        return compile(parsed.statements.filter(isVariableStatement).filter(statement =>
+            statement.declarationList.declarations.some(declaration => declaration.name.getText(parsed) === name))
+            .map(statement => statement.getText(parsed)).join("\n"));
+    }).join("\n");
     const wysiwygSource = read("../wysiwyg/index.ts");
     const copyEnd = wysiwygSource.indexOf("copyPlainText(textPlain.slice(0, -1));") + "copyPlainText(textPlain.slice(0, -1));".length;
     const copyStart = wysiwygSource.lastIndexOf('let textPlain = "";', copyEnd);
     const copyPlainSource = compile(wysiwygSource.substring(copyStart, copyEnd));
+    const gutterFile = createSourceFile("gutter.ts", read("../gutter/index.ts"), ScriptTarget.Latest, true);
+    const gutterClass = gutterFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Gutter");
+    assert.ok(isClassDeclaration(gutterClass));
+    const gutterRender = gutterClass.members.find(member => member.name?.getText(gutterFile) === "render");
+    const gutterText = gutterRender.getText(gutterFile);
+    const gutterStart = gutterText.indexOf("const cellFragment");
+    const gutterEnd = gutterText.indexOf("// https://github.com/siyuan-note/siyuan/issues/4659", gutterStart);
+    assert.ok(gutterStart >= 0 && gutterEnd > gutterStart);
+    const gutterSource = compile("function render(protyle, element, target) {" +
+        gutterText.substring(gutterStart, gutterEnd) + "return element; }");
+    let mouseDownBinding: import("typescript").CallExpression;
+    const findMouseDown = (node: import("typescript").Node) => {
+        if (isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
+            node.arguments[0]?.getText(wysiwyg) === '"mousedown"') {
+            mouseDownBinding = node;
+        }
+        forEachChild(node, findMouseDown);
+    };
+    findMouseDown(wysiwyg);
+    assert.ok(mouseDownBinding);
+    const mouseDownSource = ["../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../wysiwyg/blockDragSelect.ts",
+        "../util/tableSelection.ts", "../util/tableVirtualizationDOM.ts"]
+        .map(file => compile(read(file))).join("\n") + "\n" +
+        "const {getBlockSelectionModeElement, clearBlockSelectionMode} = (() => {" +
+        compile(read("../wysiwyg/blockSelection.ts")) +
+        "return {getBlockSelectionModeElement, clearBlockSelectionMode};})();\n" + compile(mouseDownBinding.getText(wysiwyg));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-input-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -658,7 +903,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource, commandSource]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

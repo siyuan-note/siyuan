@@ -67,6 +67,41 @@ func TestUnusedAssetsPathPrefixes(t *testing.T) {
 	}
 }
 
+func TestAssetListReferences(t *testing.T) {
+	for _, kind := range []string{"attribute", "widget", "html"} {
+		t.Run(kind, func(t *testing.T) {
+			root := &ast.Node{Type: ast.NodeDocument}
+			switch kind {
+			case "attribute":
+				paragraph := &ast.Node{Type: ast.NodeParagraph}
+				paragraph.SetIALAttr("custom-data-assets-list", "assets/a.png assets/b.png,assets/c.png")
+				root.AppendChild(paragraph)
+			case "widget":
+				widget := &ast.Node{Type: ast.NodeWidget}
+				widget.SetIALAttr("data-assets", "assets/a.png assets/b.png,assets/c.png")
+				root.AppendChild(widget)
+			case "html":
+				root.AppendChild(&ast.Node{Type: ast.NodeHTMLBlock, Tokens: []byte(`<div custom-data-assets-list="assets/a.png assets/b.png,assets/c.png"></div>`)})
+			}
+			dests := getAssetsLinkDestsWithOptions(root, false, nil, assetLinkScanOptions{expandAssetLists: true}, normalizeAssetScanLinkDest)
+			for _, want := range []string{"assets/a.png", "assets/b.png", "assets/c.png"} {
+				found := false
+				for _, dest := range dests {
+					found = found || dest == want
+				}
+				if !found {
+					t.Errorf("missing resource %s in %v", want, dests)
+				}
+			}
+		})
+	}
+	paragraph := &ast.Node{Type: ast.NodeParagraph}
+	paragraph.SetIALAttr("custom-data-assets", "assets/space name.png")
+	if got := getAssetsLinkDests(paragraph, false, normalizeAssetScanLinkDest); !reflect.DeepEqual(got, []string{"assets/space name.png"}) {
+		t.Fatalf("ordinary reference extraction split a filename: %v", got)
+	}
+}
+
 func TestNormalizeAssetScanLinkDest(t *testing.T) {
 	for _, test := range []struct{ input, want string }{
 		{"/assets/a.png?x=1#part", "assets/a.png?x=1#part"},

@@ -15,6 +15,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"io"
+	"maps"
 	"mime"
 	"net/http"
 	"net/http/httptest"
@@ -477,9 +478,7 @@ func checkRepoInputCompatibility(t *testing.T, name, valid string, legacy func(*
 	for key := range base {
 		for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				changed[k] = v
-			}
+			maps.Copy(changed, base)
 			changed[key] = json.RawMessage(value)
 			data, _ := json.Marshal(changed)
 			bodies = append(bodies, data)
@@ -575,7 +574,7 @@ func TestRepoFileWireCompatibility(t *testing.T) {
 func TestRepoContractTransport(t *testing.T) {
 	log := &dejavu.Log{ID: "index", Memo: "memo", Created: 9223372036854775807, HCreated: "created", Files: []*entity.File{nil, {ID: "file", Path: "box/doc.sy", Size: 42, Updated: 2, Chunks: []string{"chunk"}}}, Count: 1, Size: 42, HSize: "42B", SystemID: "system", SystemName: "name", SystemOS: "os", Tag: "tag", HTagUpdated: "updated"}
 	snapshot := &model.Snapshot{Log: log, TypesCount: []*model.TypeCount{nil, {Type: "sy", Count: 1}}, RequiresDownload: true}
-	for _, pair := range [][2]interface{}{{log, repoLog(log)}, {snapshot, repoSnapshots([]*model.Snapshot{snapshot})[0]}, {[]*dejavu.Log{nil, log}, repoLogs([]*dejavu.Log{nil, log})}, {([]*dejavu.Log)(nil), repoLogs(nil)}, {[]*dejavu.Log{}, repoLogs([]*dejavu.Log{})}, {[]*model.DiffFile{nil, {FileID: "f", IndexID: "i", Title: "t", Path: "p", HPath: "h", HSize: "s", Updated: 5}}, repoDiffFiles([]*model.DiffFile{nil, {FileID: "f", IndexID: "i", Title: "t", Path: "p", HPath: "h", HSize: "s", Updated: 5}})}} {
+	for _, pair := range [][2]any{{log, repoLog(log)}, {snapshot, repoSnapshots([]*model.Snapshot{snapshot})[0]}, {[]*dejavu.Log{nil, log}, repoLogs([]*dejavu.Log{nil, log})}, {([]*dejavu.Log)(nil), repoLogs(nil)}, {[]*dejavu.Log{}, repoLogs([]*dejavu.Log{})}, {[]*model.DiffFile{nil, {FileID: "f", IndexID: "i", Title: "t", Path: "p", HPath: "h", HSize: "s", Updated: 5}}, repoDiffFiles([]*model.DiffFile{nil, {FileID: "f", IndexID: "i", Title: "t", Path: "p", HPath: "h", HSize: "s", Updated: 5}})}} {
 		left, _ := json.Marshal(pair[0])
 		right, _ := json.Marshal(pair[1])
 		if !bytes.Equal(left, right) {

@@ -393,7 +393,6 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
             app: protyle.app,
             position: options?.position || "right",
             removeCurrentTab: options && !options.keepAVPanel ? undefined : false,
-            openNewTab: options ? options.keepAVPanel ? false : undefined : true,
             keepAVPanel: options?.keepAVPanel,
             custom: {
                 id: "siyuan-database-row",

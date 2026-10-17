@@ -20,7 +20,7 @@ const getOCRPreview = (text: string) => {
     return preview;
 };
 
-export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?: string) => {
+export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?: string, ocrFailed = false) => {
     const source = image.getAttribute("data-src") || image.getAttribute("src") || "";
     const path = source.split(/[?#]/)[0];
     const inline = /^(data|blob):/.test(path);
@@ -40,10 +40,25 @@ export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?
     // 原始尺寸不受编辑器缩放和图片排版宽度影响。
     const dimensions = image.naturalWidth && image.naturalHeight ? `${image.naturalWidth} × ${image.naturalHeight}` : "";
     const information = [format, dimensions, size].filter(Boolean).map(value => escapeHtml(value)).join(" · ");
-    const tooltip = text + (text && information ? '<div class="fn__hr"></div>' : "") + information;
-    if (ocrText === undefined) {
+    let tooltip = text + (text && information ? "<br>" : "") + information;
+    const config = window.siyuan.config.ocr;
+    const append = (content: string) => {
+        tooltip += (tooltip ? "<br>" : "") + content;
+    };
+    if (ocrFailed && config?.showError) {
+        append(escapeHtml(window.siyuan.languages.ocrFailed));
+    }
+    const preview = ocrText === undefined ? "" : getOCRPreview(ocrText);
+    if (!preview) {
+        if (ocrText !== undefined && !ocrFailed && config?.showEmpty) {
+            append(escapeHtml(window.siyuan.languages.ocrNoText));
+        }
         return tooltip;
     }
-    const ocr = escapeHtml(getOCRPreview(ocrText) || window.siyuan.languages.emptyContent).replace(/\n/g, "<br>");
-    return tooltip + '<div class="fn__hr"></div>' + escapeHtml(window.siyuan.languages.ocrResult) + ":<br>" + ocr;
+    if (config?.showText === false) {
+        return tooltip;
+    }
+    const ocr = escapeHtml(preview).replace(/\n/g, "<br>");
+    append(escapeHtml(window.siyuan.languages.ocrResult) + ":<br>" + ocr);
+    return tooltip;
 };

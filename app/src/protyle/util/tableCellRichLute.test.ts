@@ -297,7 +297,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     };
     const enter = new Function(...Object.keys(dependencies), enterSource + "\nreturn enter;")(
         ...Object.values(dependencies)) as typeof import("../wysiwyg/enter").enter;
-    const fill = new Function(...Object.keys(dependencies), hintSource + "\nreturn Hint.prototype.fill;")(...Object.values(dependencies));
+    const Hint = new Function(...Object.keys(dependencies), hintSource + "\nreturn Hint;")(...Object.values(dependencies));
+    const fill = Hint.prototype.fill;
     const fragment = {wysiwyg, protyle, hintElement, getBlockHTML: () => wysiwyg.innerHTML};
     const keyDependencies = {...dependencies, host, cell, table: cell.closest("table"), fragment, owner: protyle, signal: new AbortController().signal,
         captureBeforeChange: () => {}, composing: false, matchHotKey: () => false, finish: () => {},
@@ -482,7 +483,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     for (const prefix of ["", "existing "]) {
         const range = prepare(prefix + "/");
         range.setStart(range.startContainer, prefix.length);
-        const context = {source: "hint", splitChar: "/", lastIndex: -1, fixImageCursor: () => {}};
+        const context = {source: "hint", splitChar: "/", lastIndex: -1, fixImageCursor: () => {},
+            consumeRefBracketClose: Hint.prototype.consumeRefBracketClose};
         fill.call(context, "```", protyle, false);
         const code = verifyCode(wysiwyg, window.siyuan.storage.codeLanguage);
         check.equal(calls.rendered, code);
@@ -793,9 +795,10 @@ test("table cells insert code through slash and Enter without losing soft breaks
         "\nreturn getTextWithoutSemanticMarkers;})();";
     const hint = createSourceFile("hint.ts", read("../hint/index.ts"), ScriptTarget.Latest, true);
     const hintClass = hint.statements.find(isClassDeclaration);
-    const fill = hintClass.members.find(member => isMethodDeclaration(member) && member.name.getText(hint) === "fill");
+    const fill = hintClass.members.filter(member => isMethodDeclaration(member) &&
+        ["fill", "consumeRefBracketClose"].includes(member.name.getText(hint))).map(member => member.getText(hint)).join("\n");
     const hintSource = compile(read("../../block/superBlock.ts") +
-        "\nconst isProtyleListItemFragment = () => false; class Hint {" + fill.getText(hint) + "}");
+        "\nconst isProtyleListItemFragment = () => false; class Hint {" + fill + "}");
     const editor = read("../render/tableCellRichEditor.ts");
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;

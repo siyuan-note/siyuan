@@ -5,7 +5,40 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
+
+func TestWriteFileByMmapModificationTime(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "data.sy")
+	if err := os.WriteFile(file, []byte("2026-10-16"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	old := time.Now().Add(-10 * time.Second).Truncate(time.Second)
+	if err := os.Chtimes(file, old, old); err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteFileByMmap(file, []byte("2026-10-15")); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(file)
+	if err != nil || info.ModTime().Unix() == old.Unix() {
+		t.Fatalf("equal-length write did not update modification time: %v", err)
+	}
+	data, err := os.ReadFile(file)
+	if err != nil || string(data) != "2026-10-15" {
+		t.Fatalf("equal-length write did not persist content: %v", err)
+	}
+	if err = os.Chtimes(file, old, old); err != nil {
+		t.Fatal(err)
+	}
+	if err = WriteFileByMmap(file, data); err != nil {
+		t.Fatal(err)
+	}
+	info, err = os.Stat(file)
+	if err != nil || !info.ModTime().Equal(old) {
+		t.Fatalf("identical write changed modification time: %v", err)
+	}
+}
 
 func TestWriteFileByMmapSizeTransitions(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "data.sy")

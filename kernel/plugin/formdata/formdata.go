@@ -32,8 +32,8 @@ import (
 var (
 	// stateType 与 iteratorStateType 用于在 Object.Export() 前先以 Object.ExportType() 做品牌判定，
 	// 原因见 kernel/plugin/abort 中 signalStateType 的注释。
-	stateType         = reflect.TypeOf((*State)(nil))
-	iteratorStateType = reflect.TypeOf((*iteratorState)(nil))
+	stateType         = reflect.TypeFor[*State]()
+	iteratorStateType = reflect.TypeFor[*iteratorState]()
 )
 
 // multipartNameEscaper 按 HTML 规范转义 Content-Disposition 的 name 与 filename 参数：只把 LF、CR、双引号替换为百分号编码。
@@ -365,11 +365,16 @@ func (s *State) EncodeMultipart() (body []byte, contentType string) {
 
 	var buffer bytes.Buffer
 	for _, e := range s.entries {
-		buffer.WriteString("--" + boundary + "\r\n")
-		buffer.WriteString(`Content-Disposition: form-data; name="` +
-			multipartNameEscaper.Replace(crlfReplacer.Replace(e.name)) + `"`)
+		buffer.WriteString("--")
+		buffer.WriteString(boundary)
+		buffer.WriteString("\r\n")
+		buffer.WriteString(`Content-Disposition: form-data; name="`)
+		buffer.WriteString(multipartNameEscaper.Replace(crlfReplacer.Replace(e.name)))
+		buffer.WriteString(`"`)
 		if e.fileState == nil {
-			buffer.WriteString("\r\n\r\n" + crlfReplacer.Replace(e.value) + "\r\n")
+			buffer.WriteString("\r\n\r\n")
+			buffer.WriteString(crlfReplacer.Replace(e.value))
+			buffer.WriteString("\r\n")
 			continue
 		}
 
@@ -377,11 +382,17 @@ func (s *State) EncodeMultipart() (body []byte, contentType string) {
 		if fileType == "" {
 			fileType = "application/octet-stream"
 		}
-		buffer.WriteString(`; filename="` + multipartNameEscaper.Replace(e.fileState.name) + `"` +
-			"\r\nContent-Type: " + fileType + "\r\n\r\n")
+		buffer.WriteString(`; filename="`)
+		buffer.WriteString(multipartNameEscaper.Replace(e.fileState.name))
+		buffer.WriteString(`"`)
+		buffer.WriteString("\r\nContent-Type: ")
+		buffer.WriteString(fileType)
+		buffer.WriteString("\r\n\r\n")
 		buffer.Write(e.fileState.data)
 		buffer.WriteString("\r\n")
 	}
-	buffer.WriteString("--" + boundary + "--\r\n")
+	buffer.WriteString("--")
+	buffer.WriteString(boundary)
+	buffer.WriteString("--\r\n")
 	return buffer.Bytes(), "multipart/form-data; boundary=" + boundary
 }

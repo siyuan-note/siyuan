@@ -149,6 +149,47 @@ test("plugin switches remain pending until plugin loading completes even after t
     assert.equal(finishes, 1);
 });
 
+for (const settingsWindow of [false, true]) {
+    test(`plugin switches update the requesting window's app (settingsWindow=${settingsWindow})`, async () => {
+        const app = {plugins: []};
+        const settingsApp = {plugins: []};
+        const calls = [];
+        let response = {code: 0, data: {name: "plugin"}};
+        const host = {
+            loadPlugin() { assert.fail("plugin load delegated to the owner"); },
+            unloadPlugin() { assert.fail("plugin unload delegated to the owner"); },
+        };
+        const bazaar = loadMethods(["_setPluginEnabled"], {
+            Constants: {SIYUAN_APPID: "requester"}, console,
+            window: {siyuan: {config: {bazaar: {petalDisabled: false}}, ws: {app: settingsApp}}},
+            getSettingsWindowHost: () => settingsWindow ? host : undefined,
+            loadPlugin: async (...args) => calls.push(["load", ...args]),
+            unloadPlugin: async (...args) => calls.push(["unload", ...args]),
+            showMessage: message => calls.push(["message", message]),
+            fetchPost: async (url, data, callback) => {
+                assert.equal(url, "/api/petal/setPetalEnabled");
+                assert.equal(data.app, "requester");
+                callback(response);
+            },
+        });
+        Object.assign(bazaar, {_pluginEnablePending: new Set(), _updateReadmePluginAction() {}, _getPackageDetail() {}});
+        const item = {name: "plugin", enabled: true};
+        const setEnabled = enabled => new Promise(resolve => bazaar._setPluginEnabled(app, item, enabled, resolve));
+        await setEnabled(false);
+        assert.equal(item.enabled, false);
+        await setEnabled(true);
+        assert.equal(item.enabled, true);
+        const requester = settingsWindow ? settingsApp : app;
+        assert.deepEqual(calls, [["unload", requester, "plugin"], ["load", requester, response.data]]);
+        response = {code: -1, msg: "rejected"};
+        await setEnabled(false);
+        assert.equal(item.enabled, true);
+        assert.deepEqual(calls.at(-1), ["message", "rejected"]);
+        assert.equal(calls.length, 3);
+        assert.equal(bazaar._pluginEnablePending.size, 0);
+    });
+}
+
 test("a timed-out update check becomes retryable and cannot replace a newer request state", async () => {
     const requests = [];
     const bazaar = loadMethods(["_checkUpdate"], {

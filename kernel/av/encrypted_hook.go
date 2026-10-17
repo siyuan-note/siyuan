@@ -295,6 +295,14 @@ func encryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 		AVLockAcquire(boxID)
 		defer AVLockRelease(boxID)
 	}
+	return encryptAVDataLocked(boxID, avID, data)
+}
+
+// encryptAVDataLocked 在调用方持有笔记本读锁时加密数据库定义。
+func encryptAVDataLocked(boxID, avID string, data []byte) ([]byte, error) {
+	if AVDEKProvider == nil {
+		return data, nil
+	}
 	dek, err := AVDEKProvider(boxID)
 	if err != nil {
 		return nil, err // 加密但未解锁，拒绝写盘避免明文泄漏
@@ -303,6 +311,7 @@ func encryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
+	defer clear(avKey)
 	aad := avAAD(boxID, avID)
 	return util.EncryptWithAAD(avKey, data, []byte(aad))
 }
@@ -329,7 +338,13 @@ func decryptAVDataLocked(boxID, avID string, data []byte) ([]byte, error) {
 	if dek == nil {
 		return data, nil // 非加密 box
 	}
+	return DecryptAVDataWithDEK(boxID, avID, dek, data)
+}
+
+// DecryptAVDataWithDEK 使用已取得的密钥认证数据库定义，不重新取得笔记本锁或发布明文缓存。
+func DecryptAVDataWithDEK(boxID, avID string, dek, data []byte) ([]byte, error) {
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
+	defer clear(avKey)
 	aad := avAAD(boxID, avID)
 	return util.DecryptWithAAD(avKey, data, []byte(aad))
 }

@@ -292,7 +292,6 @@ func PurgePublishAccess() {
 		}
 	}
 	SetPublishAccess(tempPublishAccess)
-	return
 }
 
 func CheckPathAccessableByPublishIgnore(box string, path string, publishIgnore PublishAccess) bool {

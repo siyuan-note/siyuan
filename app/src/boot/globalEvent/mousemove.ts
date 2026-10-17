@@ -210,11 +210,19 @@ export const windowMouseMove = (event: MouseEvent) => {
         if (!targetBlockElement) {
             return;
         }
+        const listElement = hasClosestBlock(eventPath0);
+        const renderGutter = (protyle: IProtyle) => {
+            // 经过列表序标或留白移向块标时，保留当前子块的操作入口。
+            if (!listElement || !isContainerGutterBridge(protyle.gutter.element, listElement, eventPath0,
+                event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
+                protyle.gutter.render(protyle, targetBlockElement);
+            }
+        };
         const allModels = getAllModels();
         let findNode = false;
         allModels.editor.find(item => {
             if (item.editor.protyle.wysiwyg.element.contains(eventPath0)) {
-                item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement);
+                renderGutter(item.editor.protyle);
                 findNode = true;
                 return true;
             }
@@ -223,7 +231,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             window.siyuan.blockPanels.find(item => {
                 item.editors.find(eItem => {
                     if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement);
+                        renderGutter(eItem.protyle);
                         findNode = true;
                         return true;
                     }
@@ -237,7 +245,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             allModels.backlink.find(item => {
                 item.editors.find(eItem => {
                     if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement);
+                        renderGutter(eItem.protyle);
                         findNode = true;
                         return true;
                     }
@@ -275,7 +283,6 @@ export const windowMouseMove = (event: MouseEvent) => {
 
     const blockElement = hasClosestByClassName(target, "table");
     if (blockElement && blockElement.style.cursor !== "col-resize" &&
-        !hasClosestByClassName(blockElement, "protyle-wysiwyg__embed") &&
         !hasClosestByClassName(blockElement, "protyle-custom")) {
         const cellElement = (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD")) as HTMLTableCellElement;
         const tableElement = blockElement.querySelector("table");

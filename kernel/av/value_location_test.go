@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-func locationCoordinate(value float64) *float64 { return &value }
-
 func TestLocationValueValidationAndDisplay(t *testing.T) {
 	for _, test := range []struct {
 		name     string
@@ -20,17 +18,17 @@ func TestLocationValueValidationAndDisplay(t *testing.T) {
 		{"missing", nil, "", true, false},
 		{"name", &ValueLocation{Name: " Home "}, "Home", false, false},
 		{"raw only", &ValueLocation{OriginalInput: "source"}, "", true, false},
-		{"zero", &ValueLocation{Latitude: locationCoordinate(0), Longitude: locationCoordinate(0)}, "0, 0 [WGS84]", false, false},
-		{"negative zero", &ValueLocation{Latitude: locationCoordinate(math.Copysign(0, -1)), Longitude: locationCoordinate(math.Copysign(0, -1))}, "0, 0 [WGS84]", false, false},
-		{"named zero", &ValueLocation{Name: "Home", Latitude: locationCoordinate(0), Longitude: locationCoordinate(0)}, "Home; 0, 0 [WGS84]", false, false},
-		{"lower latitude upper longitude", &ValueLocation{Latitude: locationCoordinate(-90), Longitude: locationCoordinate(180)}, "-90, 180 [WGS84]", false, false},
-		{"upper latitude lower longitude", &ValueLocation{Latitude: locationCoordinate(90), Longitude: locationCoordinate(-180)}, "90, -180 [WGS84]", false, false},
-		{"latitude missing", &ValueLocation{Longitude: locationCoordinate(0)}, "", false, true},
-		{"longitude missing", &ValueLocation{Latitude: locationCoordinate(0)}, "", false, true},
-		{"latitude range", &ValueLocation{Latitude: locationCoordinate(90.001), Longitude: locationCoordinate(0)}, "", false, true},
-		{"longitude range", &ValueLocation{Latitude: locationCoordinate(0), Longitude: locationCoordinate(-180.001)}, "", false, true},
-		{"nan", &ValueLocation{Latitude: locationCoordinate(math.NaN()), Longitude: locationCoordinate(0)}, "", false, true},
-		{"infinity", &ValueLocation{Latitude: locationCoordinate(0), Longitude: locationCoordinate(math.Inf(1))}, "", false, true},
+		{"zero", &ValueLocation{Latitude: new(float64(0)), Longitude: new(float64(0))}, "0, 0 [WGS84]", false, false},
+		{"negative zero", &ValueLocation{Latitude: new(math.Copysign(0, -1)), Longitude: new(math.Copysign(0, -1))}, "0, 0 [WGS84]", false, false},
+		{"named zero", &ValueLocation{Name: "Home", Latitude: new(float64(0)), Longitude: new(float64(0))}, "Home; 0, 0 [WGS84]", false, false},
+		{"lower latitude upper longitude", &ValueLocation{Latitude: new(float64(-90)), Longitude: new(float64(180))}, "-90, 180 [WGS84]", false, false},
+		{"upper latitude lower longitude", &ValueLocation{Latitude: new(float64(90)), Longitude: new(float64(-180))}, "90, -180 [WGS84]", false, false},
+		{"latitude missing", &ValueLocation{Longitude: new(float64(0))}, "", false, true},
+		{"longitude missing", &ValueLocation{Latitude: new(float64(0))}, "", false, true},
+		{"latitude range", &ValueLocation{Latitude: new(90.001), Longitude: new(float64(0))}, "", false, true},
+		{"longitude range", &ValueLocation{Latitude: new(float64(0)), Longitude: new(-180.001)}, "", false, true},
+		{"nan", &ValueLocation{Latitude: new(math.NaN()), Longitude: new(float64(0))}, "", false, true},
+		{"infinity", &ValueLocation{Latitude: new(float64(0)), Longitude: new(math.Inf(1))}, "", false, true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if err := test.location.Normalize(); (err != nil) != test.invalid {
@@ -51,7 +49,7 @@ func TestLocationValueValidationAndDisplay(t *testing.T) {
 }
 
 func TestLocationFilterSortAndStatistics(t *testing.T) {
-	value := &Value{Type: KeyTypeLocation, Location: &ValueLocation{Name: "Home", Latitude: locationCoordinate(0), Longitude: locationCoordinate(0), OriginalInput: "private provenance"}}
+	value := &Value{Type: KeyTypeLocation, Location: &ValueLocation{Name: "Home", Latitude: new(float64(0)), Longitude: new(float64(0)), OriginalInput: "private provenance"}}
 	for _, test := range []struct {
 		operator FilterOperator
 		text     string
@@ -82,7 +80,7 @@ func TestLocationFilterSortAndStatistics(t *testing.T) {
 	if value.Compare(other, nil) != 0 {
 		t.Fatal("provenance affected sort order")
 	}
-	other.Location.Longitude = locationCoordinate(1)
+	other.Location.Longitude = new(float64(1))
 	if value.Compare(other, nil) == 0 {
 		t.Fatal("coordinates did not distinguish values")
 	}
@@ -121,7 +119,7 @@ func TestLocationFilterSortAndStatistics(t *testing.T) {
 
 func TestLocationPersistedSpecAndValidation(t *testing.T) {
 	location := func() *Value {
-		return &Value{Type: KeyTypeLocation, Location: &ValueLocation{Latitude: locationCoordinate(0), Longitude: locationCoordinate(0)}}
+		return &Value{Type: KeyTypeLocation, Location: &ValueLocation{Latitude: new(float64(0)), Longitude: new(float64(0))}}
 	}
 	for _, test := range []struct {
 		name string
@@ -160,7 +158,7 @@ func TestLocationPersistedSpecAndValidation(t *testing.T) {
 	}
 	valid := location()
 	invalid := location()
-	invalid.Location.Latitude = locationCoordinate(91)
+	invalid.Location.Latitude = new(float64(91))
 	view := &AttributeView{Spec: LocationSpec, KeyValues: []*KeyValues{{Values: []*Value{valid, invalid}}}}
 	before, _ := json.Marshal(view)
 	err := view.NormalizeLocations()
@@ -204,7 +202,7 @@ func TestLocationConditionalColorsAndAutomationFilters(t *testing.T) {
 
 func TestLocationTemplatePreservation(t *testing.T) {
 	key := &Key{ID: "location", Type: KeyTypeLocation}
-	value := &Value{Type: KeyTypeLocation, Location: &ValueLocation{Name: "Home", Latitude: locationCoordinate(0), Longitude: locationCoordinate(0), OriginalInput: "source"}}
+	value := &Value{Type: KeyTypeLocation, Location: &ValueLocation{Name: "Home", Latitude: new(float64(0)), Longitude: new(float64(0)), OriginalInput: "source"}}
 	view := &AttributeView{Spec: LocationSpec, KeyValues: []*KeyValues{{Key: key, Values: []*Value{value}}}}
 	if err := view.NormalizeLocations(); err != nil {
 		t.Fatal(err)
@@ -230,7 +228,7 @@ func TestLocationJSONRejectsUnknownFieldsWithoutMutation(t *testing.T) {
 		`{"latitude":0,"longitude":0,"coordinateSystem":null}`,
 		`{"name":"Changed","unknown":true}`,
 	} {
-		location := &ValueLocation{Name: "Home", Latitude: locationCoordinate(1), Longitude: locationCoordinate(2), OriginalInput: "source"}
+		location := &ValueLocation{Name: "Home", Latitude: new(float64(1)), Longitude: new(float64(2)), OriginalInput: "source"}
 		before, _ := json.Marshal(location)
 		if err := json.Unmarshal([]byte(payload), location); err == nil {
 			t.Fatalf("unknown location field accepted: %s", payload)

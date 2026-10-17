@@ -7,7 +7,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"strings"
 )
 
 func isPluginProjectAction(action string) bool {
@@ -34,7 +33,7 @@ func bazaarProjectError(err error, partial any) (CallToolResult, error) {
 	if err == nil {
 		return bazaarProjectJSON(partial)
 	}
-	unknown := strings.Contains(err.Error(), "result_unknown")
+	unknown := util.IsTextFileError(err, util.TextFileResultUnknown)
 	if partial == nil && !unknown {
 		return blockToolError(err.Error())
 	}

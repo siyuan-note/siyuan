@@ -4,12 +4,13 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {genStackHtml} from "../render/render";
 const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [true, false]) {
-    test(`appearance registration includes toolbar settings on first load (mobile=${mobile})`, () => {
+    test(`appearance settings expose toolbar controls and all color managers (mobile=${mobile})`, () => {
         const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceTab.ts"), "utf8");
         const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
         const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -20,15 +21,28 @@ for (const mobile of [true, false]) {
                 mounted = true;
             },
         };
+        const openedColors: string[] = [];
+        const windowContext = {siyuan: {
+            languages: new Proxy({}, {get: (_, key) => String(key)}),
+            config: {langs: [] as unknown[], readonly: false},
+            isPublish: false,
+        }};
         const moduleExports: {registerAppearanceTab?: (tab: unknown) => void} = {};
         runInNewContext(code, {
             exports: moduleExports,
-            window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {langs: []}}},
-            require: (name: string) => name === "../entryVisibility/ui" ? toolbarSettings :
+            window: windowContext,
+            require: (name: string) => name === "./compactMode" ? {
+                isCompactModeAvailable: () => !mobile,
+                isCompactModeEnabled: () => false,
+                setCompactModeEnabled: () => {},
+            } : name === "../entryVisibility/ui" ? toolbarSettings :
+                name === "../../protyle/toolbar/inlineStyleDialog" ? {
+                    openInlineStyleDialog: (type: string) => openedColors.push(type),
+                } : name === "../render/render" ? {genStackHtml} :
                 new Proxy({}, {get: () => () => ({})}),
         });
         const groups: string[] = [];
-        const slots: Array<{key: string; html: () => string; afterMount: () => void}> = [];
+        const slots: Array<{key: string; keywords: string[]; html: () => string; afterMount: (root?: unknown) => void}> = [];
         const switches: Array<{id: string; spec: {title: string; readConfig?: () => boolean; save?: unknown}}> = [];
         const group = new Proxy({}, {
             get: (_, method) => (...args: unknown[]) => {
@@ -52,11 +66,34 @@ for (const mobile of [true, false]) {
         assert.equal(slots.some(item => item.key === "mobileBottomBar"), mobile);
         assert.equal(slots.some(item => item.key === "mobileBarsAutoHide"), mobile);
         assert.equal(slots.some(item => item.key === "mobileSidebarAccess"), mobile);
-        const pageScrollSwitch = switches.find(item => item.id === "pageScrollButtons");
-        assert.ok(pageScrollSwitch);
-        assert.equal(pageScrollSwitch.spec.title, "showPageScrollButtons");
-        assert.equal(typeof pageScrollSwitch.spec.readConfig, "function");
-        assert.equal(typeof pageScrollSwitch.spec.save, "function");
+        assert.equal(switches.some(item => item.id === "pageScrollButtons" || item.id === "editor.pageScrollButtons"), false);
+        assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
+        const colors = slots.find(item => item.key === "manageColors");
+        assert.ok(colors);
+        assert.equal(colors.keywords.join(","), "manageColors,color,colorFont,colorPrimary");
+        const html = colors.html();
+        assert.equal((html.match(/<button /g) || []).length, 3);
+        assert.equal((html.match(/xlink:href="#iconSettings"/g) || []).length, 3);
+        const buttons = new Map(["style1", "color", "backgroundColor"].map(type => {
+            const selector = `#manageColors-${type}`;
+            assert.ok(html.includes(`id="${selector.slice(1)}"`));
+            return [selector, {disabled: true, click: () => {},
+                addEventListener(_name: string, listener: () => void) { this.click = listener; }}] as const;
+        }));
+        const root = {querySelector: (selector: string) => buttons.get(selector)};
+        colors.afterMount(root);
+        buttons.forEach(button => {
+            assert.equal(button.disabled, false);
+            button.click();
+        });
+        assert.deepEqual(openedColors, ["style1", "color", "backgroundColor"]);
+        windowContext.siyuan.config.readonly = true;
+        colors.afterMount(root);
+        buttons.forEach(button => assert.equal(button.disabled, true));
+        windowContext.siyuan.config.readonly = false;
+        windowContext.siyuan.isPublish = true;
+        colors.afterMount(root);
+        buttons.forEach(button => assert.equal(button.disabled, true));
     });
 }
 

@@ -387,8 +387,7 @@
 
   & > [data-av-id] {
     display: grid;
-    gap: 0 24px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
 
     .custom-attr__avheader,
     .fn__hr,
@@ -421,13 +420,6 @@
     .b3-button[data-type="addColumn"] {
       margin-left: 0;
     }
-  }
-}
-
-@container (max-width: 900px) {
-  .protyle-db-attr__body > [data-av-id],
-  .protyle-db-row__body > [data-av-id] {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 

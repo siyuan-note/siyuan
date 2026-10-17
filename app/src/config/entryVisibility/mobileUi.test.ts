@@ -468,6 +468,7 @@ const runEntryUiCases = async (mobileBuild: boolean) => {
         "config/entryVisibility/profile", "config/entryVisibility/mobileToolbarContext",
         "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
+        "protyle/wysiwyg/calloutType",
         "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration"];
     if (mobileBuild) {
         modules.push("config/setting/windowContext");

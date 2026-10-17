@@ -57,7 +57,7 @@ func TestRPCContractParserCompatibility(t *testing.T) {
 	}
 }
 
-func compareRPCJSON(t *testing.T, label string, expected, actual interface{}) {
+func compareRPCJSON(t *testing.T, label string, expected, actual any) {
 	t.Helper()
 	left, err := json.Marshal(expected)
 	if err != nil {
@@ -67,7 +67,7 @@ func compareRPCJSON(t *testing.T, label string, expected, actual interface{}) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var leftValue, rightValue interface{}
+	var leftValue, rightValue any
 	if err := json.Unmarshal(left, &leftValue); err != nil {
 		t.Fatal(err)
 	}

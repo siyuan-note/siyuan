@@ -1,0 +1,7 @@
+{
+  // 内核依赖 fts5 与 sqlcipher 构建标签；缺失时 gopls 不会编译带这些标签的文件，
+  // 会把其中的引用视为不存在，从而误报「未使用」并漏掉真实错误。
+  // 该设置由 Go 扩展自动传播给 gopls（见 go.buildTags 说明），且会在 gopls.build.buildFlags
+  // 未指定时生效，因此无需用户另行配置。
+  "go.buildTags": "fts5 sqlcipher"
+}

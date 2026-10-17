@@ -30,6 +30,8 @@ const loadModule = <T>(file: string, extra: Record<string, unknown> = {}) => {
     const modules: Record<string, unknown> = {
         ...Object.fromEntries(unusedDependencies.map(name => [name, new Proxy({}, {
             get: (_target, member) => {
+                if (member === "__esModule") return true;
+                if (member === "default") return modules[name];
                 throw new Error(`Unexpected dependency use in ${file}: ${name}.${String(member)}`);
             },
         })])),

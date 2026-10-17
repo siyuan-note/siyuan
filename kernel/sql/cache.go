@@ -17,6 +17,7 @@
 package sql
 
 import (
+	"maps"
 	"strings"
 	"sync"
 	"time"
@@ -55,10 +56,12 @@ var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 
 var blockCacheKeys = map[string]map[string]*blockCacheEntry{}
 var blockCacheKeysMu sync.Mutex
+var blockCacheSequence uint64
 
 type blockCacheEntry struct {
-	key   string
-	block *Block
+	key      string
+	cacheKey uint64
+	block    *Block
 }
 
 // blockCacheCost 估算块结构、字符串和失效索引的驻留字节数，内部条目成本由缓存另行计入。
@@ -111,11 +114,24 @@ func putBlockCache(block *Block) {
 		removeBlockCache(cloned.ID)
 		return
 	}
-	// 删除后重新准入，让变大的条目也接受字节预算检查。
-	blockCache.Del(key)
 	entry := &blockCacheEntry{key: key, block: cloned}
-	addBlockCacheKey(cloned.ID, key, entry)
-	if !blockCache.Set(key, entry, cost) {
+	// 每次刷新使用独立准入键，保留字节预算检查，并隔离旧条目的异步删除。
+	blockCacheKeysMu.Lock()
+	blockCacheSequence++
+	entry.cacheKey = blockCacheSequence
+	keys := blockCacheKeys[cloned.ID]
+	if keys == nil {
+		keys = map[string]*blockCacheEntry{}
+		blockCacheKeys[cloned.ID] = keys
+	}
+	previous := keys[key]
+	keys[key] = entry
+	accepted := blockCache.Set(entry.cacheKey, entry, cost)
+	blockCacheKeysMu.Unlock()
+	if previous != nil {
+		blockCache.Del(previous.cacheKey)
+	}
+	if !accepted {
 		removeBlockCacheKey(cloned.ID, key, entry)
 	}
 }
@@ -129,7 +145,13 @@ func getBlockCacheInBox(id, boxID string) (ret *Block) {
 		return
 	}
 
-	b, _ := blockCache.Get(blockCacheKey(id, boxID))
+	blockCacheKeysMu.Lock()
+	defer blockCacheKeysMu.Unlock()
+	entry := blockCacheKeys[id][blockCacheKey(id, boxID)]
+	if entry == nil {
+		return
+	}
+	b, _ := blockCache.Get(entry.cacheKey)
 	if nil != b {
 		if entry, ok := b.(*blockCacheEntry); ok {
 			ret = entry.block
@@ -143,21 +165,10 @@ func removeBlockCache(id string) {
 	keys := blockCacheKeys[id]
 	delete(blockCacheKeys, id)
 	blockCacheKeysMu.Unlock()
-	for key := range keys {
-		blockCache.Del(key)
+	for _, entry := range keys {
+		blockCache.Del(entry.cacheKey)
 	}
 	removeRefCacheByDefID(id)
-}
-
-func addBlockCacheKey(id, key string, entry *blockCacheEntry) {
-	blockCacheKeysMu.Lock()
-	defer blockCacheKeysMu.Unlock()
-	keys := blockCacheKeys[id]
-	if keys == nil {
-		keys = map[string]*blockCacheEntry{}
-		blockCacheKeys[id] = keys
-	}
-	keys[key] = entry
 }
 
 func removeBlockCacheKey(id, key string, entry *blockCacheEntry) {
@@ -245,9 +256,7 @@ func getRefsCacheByDefIDInBox(defID, boxID string,
 			cacheable = append(cacheable, ref)
 		}
 	}
-	for blockID, ref := range partial {
-		merged[blockID] = ref
-	}
+	maps.Copy(merged, partial)
 	ret = ret[:0]
 	for _, ref := range merged {
 		ret = append(ret, ref)
@@ -291,9 +300,7 @@ func putRefCacheIfGeneration(defID, boxID string, generation refCacheGeneration,
 	key := refCacheKey(defID, boxID)
 	if cached, ok := defIDRefsCache.Get(key); ok {
 		if entry, valid := cached.(*refCacheEntry); valid {
-			for blockID, ref := range entry.refs {
-				complete[blockID] = ref
-			}
+			maps.Copy(complete, entry.refs)
 		}
 	}
 	defIDRefsCache.SetDefault(key, &refCacheEntry{refs: complete, complete: true})

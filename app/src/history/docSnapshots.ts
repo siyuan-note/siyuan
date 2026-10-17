@@ -2,7 +2,7 @@ import type {App} from "../index";
 import type {DocHistorySnapshot, DocHistorySnapshotEntry} from "../types/api";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {openSnapshotDetail} from "./snapshotDetail";
 
 const views = new WeakMap<Element, DocHistorySnapshots>();

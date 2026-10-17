@@ -22,7 +22,7 @@ async function extractPackagedPandoc(appOutDir, packager, platform, arch) {
       return;
     }
     if (error.code === "ENOENT") {
-      throw new Error(`Packaged Pandoc archive not found: ${archivePath}`);
+      throw new Error(`Packaged Pandoc archive not found: ${archivePath}`, {cause: error});
     }
     throw error;
   }
@@ -44,7 +44,7 @@ async function extractPackagedPandoc(appOutDir, packager, platform, arch) {
     await fsPromises.rm(archivePath);
     console.log(`Extracted packaged Pandoc: ${pandocBin}`);
   } catch (error) {
-    throw new Error(`Failed to extract packaged Pandoc: ${error.message}`);
+    throw new Error(`Failed to extract packaged Pandoc: ${error.message}`, {cause: error});
   }
 }
 

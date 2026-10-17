@@ -451,10 +451,10 @@ func IsSensitivePath(p string) bool {
 	if p == "" {
 		return false
 	}
-	if IsPluginDevelopmentRawPathForbidden(p, false) {
+	if isSensitivePath(p, false) {
 		return true
 	}
-	if isSensitivePath(p, false) {
+	if IsPluginDevelopmentRawPathForbidden(p, false) {
 		return true
 	}
 	// 仅对工作空间外的路径解析符号链接，防止用符号链接绕过黑名单指向敏感目标。
@@ -476,31 +476,59 @@ func IsSensitiveHTMLAssetPath(p string) bool {
 	if p == "" {
 		return false
 	}
-	if IsPluginDevelopmentRawPathForbidden(p, false) {
+	if isSensitivePath(p, true) || IsPluginDevelopmentRawPathForbidden(p, false) {
 		return true
 	}
-	return isSensitivePath(p, true) || isSensitivePath(ResolveLongestExistingParent(p), true)
+	return isSensitivePath(ResolveLongestExistingParent(p), true)
 }
+
+// deviceNamespacePath 标记无法归一化的设备命名空间路径。
+//
+// 未能可靠归一化的命名空间路径一律按敏感路径处理，避免设备别名绕过黑名单匹配。
+// 该值不是合法 Windows 路径的形态，故按字面量比较即可，无需解析。
+const deviceNamespacePath = "<device-namespace>"
 
 // resolveNamespaceAlias 把 Windows 路径命名空间别名归一化为常规 Win32 路径，供黑名单匹配与工作空间归属判断使用。
 //
 // 扩展长度前缀 `\\?\`（含 `\\?\UNC\`）与设备命名空间前缀 `\\.\` 经 filepath.Clean 后原样保留，
 // 既无法命中按前缀比较的黑名单，也会被文件系统归属判断当作工作空间外的路径，从而绕过敏感路径保护。
 // 本机管理共享（`\\localhost\<盘符>$\...` 或 `\\<本机主机名>\<盘符>$\...`）指向本地卷，同样归一化为盘符路径。
+//
+// 命名空间前缀后只接受绝对盘符路径和完整 UNC 路径，其余形式返回 deviceNamespacePath，由调用方按敏感路径拒绝。
+// 先统一斜杠并识别命名空间，再清理路径，避免对象管理器别名被当作普通相对路径参与黑名单匹配。
 func resolveNamespaceAlias(p string) string {
 	if runtime.GOOS != "windows" || p == "" {
 		return p
 	}
 
-	// 仅剥离 `\\?\` 与 `\\.\` 前缀，保留其后的 `UNC\` 标记，以便下面还原 UNC 根路径
-	for _, prefix := range []string{`\\?\`, `\\.\`} {
-		if strings.HasPrefix(p, prefix) {
-			p = p[len(prefix):]
-			break
+	p = strings.ReplaceAll(p, "/", `\`)
+	for _, prefix := range []string{`\\?`, `\\.`, `\??`} {
+		if p != prefix && !strings.HasPrefix(p, prefix+`\`) {
+			continue
 		}
-	}
-	if strings.HasPrefix(p, `UNC\`) {
-		p = `\\` + p[len(`UNC\`):]
+		if len(p) <= len(prefix)+1 {
+			return deviceNamespacePath
+		}
+		rest := p[len(prefix)+1:]
+		switch {
+		case len(rest) >= 3 && isASCIILetter(rest[0]) && rest[1] == ':' && rest[2] == '\\':
+			p = rest
+		case len(rest) >= 4 && strings.EqualFold(rest[:4], `UNC\`):
+			// UNC 必须包含有效的主机名和共享名，不能归一化为另一个设备命名空间或相对路径。
+			parts := strings.SplitN(rest[4:], `\`, 3)
+			if len(parts) < 2 {
+				return deviceNamespacePath
+			}
+			for _, part := range parts[:2] {
+				if part == "" || part == "." || part == ".." || strings.ContainsAny(part, `<>:"|?*`) {
+					return deviceNamespacePath
+				}
+			}
+			p = `\\` + rest[4:]
+		default:
+			return deviceNamespacePath
+		}
+		break
 	}
 
 	cleaned := filepath.Clean(p)
@@ -528,10 +556,10 @@ func localAdminShareDrive(p string) (drive string, prefixLen int) {
 
 	host := rest[:sep]
 	rest = rest[sep+1:]
-	shareSep := strings.Index(rest, `\`)
+	before, _, ok := strings.Cut(rest, `\`)
 	share := rest
-	if 0 <= shareSep {
-		share = rest[:shareSep]
+	if ok {
+		share = before
 	}
 	if len(share) != 2 || share[1] != '$' || !isASCIILetter(share[0]) {
 		return "", 0
@@ -602,6 +630,9 @@ func isSystemTempPath(lowerPath string) bool {
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string, htmlAsset bool) bool {
 	p = resolveNamespaceAlias(p)
+	if p == deviceNamespacePath {
+		return true
+	}
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
 	workspaceDir := WorkspaceDir
@@ -609,7 +640,7 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	if !inWorkspace && workspaceDir != "" {
 		// 静态资源使用解析后的真实路径，工作空间也需采用相同形式判断归属及 conf、temp 目录。
 		// 仅解析工作空间根目录，不能将指向外部敏感文件的资源符号链接视为工作空间内文件。
-		if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && gulu.File.IsSubPath(resolved, p) {
+		if resolved, err := ResolveRealPath(workspaceDir); err == nil && gulu.File.IsSubPath(resolved, p) {
 			workspaceDir = resolved
 			inWorkspace = true
 		}
@@ -687,21 +718,21 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	// 自定义配置主目录不能使系统用户主目录中的凭据失去保护。
 	if homeDirOverridden && systemHomeDir != "" && systemHomeDir != HomeDir {
 		homeDirs = append(homeDirs, systemHomeDir)
-		if resolved, err := filepath.EvalSymlinks(systemHomeDir); err == nil && resolved != systemHomeDir {
+		if resolved, err := ResolveRealPath(systemHomeDir); err == nil && resolved != systemHomeDir {
 			homeDirs = append(homeDirs, resolved)
 		}
 	}
 	homeCheckPaths := []string{toCheckPathLower}
 	if HomeDir != "" {
 		// 主目录自身也可能是别名，工作空间规范路径必须同时匹配其真实目录中的敏感位置。
-		if resolved, err := filepath.EvalSymlinks(HomeDir); err == nil && resolved != HomeDir {
+		if resolved, err := ResolveRealPath(HomeDir); err == nil && resolved != HomeDir {
 			homeDirs = append(homeDirs, resolved)
 		}
 	}
 	// 工作空间别名可能位于自定义主目录中，但指向系统主目录中的敏感位置。
 	// 只映射工作空间根目录，保留对尚未创建的目标及工作空间内路径的检查。
 	if inWorkspace && workspaceDir == WorkspaceDir {
-		if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && resolved != workspaceDir {
+		if resolved, err := ResolveRealPath(workspaceDir); err == nil && resolved != workspaceDir {
 			if rel, err := filepath.Rel(workspaceDir, p); err == nil {
 				homeCheckPaths = append(homeCheckPaths, strings.ToLower(filepath.Join(resolved, rel)))
 			}
@@ -714,6 +745,10 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 					return true
 				}
 			}
+		}
+		// 仅豁免工作空间所在的平台应用数据目录，私有目录和凭据规则仍然生效。
+		if inWorkspace {
+			continue
 		}
 		for _, entry := range platformSensitiveHomeEntries[runtime.GOOS] {
 			prefix := strings.ToLower(filepath.Join(homeDir, entry.name))
@@ -742,7 +777,7 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	return false
 }
 
-// ResolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
+// ResolveLongestExistingParent 解析 absPath 中最长已存在部分的符号链接或目录联接，拼回剩余路径。
 // 例如 absPath = /workspace/data/link/newdir/file，其中 /workspace/data/link 是指向
 // /workspace/data/<encBoxID>/ 的 symlink，newdir/file 尚不存在：
 // 返回 /workspace/data/<encBoxID>/newdir/file。
@@ -760,7 +795,7 @@ func ResolveLongestExistingParent(absPath string) string {
 		dir = parent
 	}
 	if dir == cleaned {
-		if resolved, err := filepath.EvalSymlinks(cleaned); err == nil {
+		if resolved, err := ResolveRealPath(cleaned); err == nil {
 			return resolved
 		}
 		return cleaned
@@ -768,7 +803,7 @@ func ResolveLongestExistingParent(absPath string) string {
 	if dir == "/" || dir == "." {
 		return cleaned
 	}
-	resolvedDir, err := filepath.EvalSymlinks(dir)
+	resolvedDir, err := ResolveRealPath(dir)
 	if err != nil {
 		return cleaned
 	}

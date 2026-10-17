@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20261016112115"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-vn1tvf6",
 				"id": "20240530101000-yllodqo",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -32,12 +32,12 @@
 			"Properties": {
 				"ID": "20240530101000-geiuqut",
 				"id": "20240530101000-jea0mtn",
-				"updated": "20260803163243"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​ "
+					"Data": "起動中のアプリで "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -46,16 +46,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "情報"
+					"TextMarkTextContent": "認証"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "サーバー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -64,7 +73,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -73,16 +82,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ からブラウザで SiYuan を直接使用できます。LAN で使用する場合は、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "127.0.0.1"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ を LAN の IP アドレスに置き換えてください。"
+					"Data": " を開くと、このコンピューターのブラウザで利用できます。カーネルを起動したまま、開かれたアドレスとポートを使用してください。"
 				}
 			]
 		},
@@ -92,12 +92,68 @@
 			"Properties": {
 				"ID": "20240530101000-ehzd9yn",
 				"id": "20240530101000-8fajyrp",
-				"updated": "20240530101000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "LAN での利用に加えて、以下の 2 つの方法で公衆ネットワークでも利用できます:"
+					"Data": "同じ LAN の別端末から利用するには、まず画面ロックパスワードまたは有効な"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190003-oidcja1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC ログイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を設定し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "サーバー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ネットワークサービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にして、アプリ終了後に SiYuan を開き直します。アドレスの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をカーネルのあるコンピューターの LAN IP に置き換え、表示されたポートをそのまま使用します。ファイアウォールでもそのポートを許可してください。インターネット経由では次の方法で公開できます："
 				}
 			]
 		},
@@ -244,7 +300,7 @@
 			"Properties": {
 				"ID": "20240530101000-zvy840s",
 				"id": "20240530101000-b6ssy52",
-				"updated": "20260803163243"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -259,13 +315,9 @@
 			"Properties": {
 				"ID": "20240530101000-irzzx5o",
 				"id": "20240530101000-xf6aq6t",
-				"updated": "20260803163243"
+				"updated": "20261016112115"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​ "
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
@@ -273,16 +325,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "情報"
+					"TextMarkTextContent": "認証"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ からブラウザ画面ロック用のパスワードを設定できます。空欄のままにするとロックは有効になりません。これは、オフィスや公衆ネットワークなどのオープンなネットワークで役に立ち、パスワード認証を通過した場合のみワークスペースにアクセスできます。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ログインとトークン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画面ロックパスワード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で画面ロックパスワードを設定します。空欄にするとパスワードログインは無効になりますが、通常のローカル以外からのアクセスにはパスワードまたは有効な OIDC 設定が必要です。他の端末にカーネルを公開する前に認証を設定してください。"
 				}
 			]
 		},

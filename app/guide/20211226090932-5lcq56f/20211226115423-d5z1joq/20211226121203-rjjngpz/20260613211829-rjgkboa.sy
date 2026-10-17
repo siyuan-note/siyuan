@@ -6,7 +6,7 @@
 		"id": "20260613211829-rjgkboa",
 		"title": "內容統計",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -239,7 +239,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613211901-0c24oh4",
-				"updated": "20260613211902"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -258,7 +258,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260613211901-ehsm39v",
-				"updated": "20260730184353"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -313,7 +313,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文件中 Unicode 字元的總數，漢字、字母、數字、標點、空格等均計入"
+									"Data": "文件可統計文字中的 Unicode 字元數，漢字、字母、數字和標點計入，空格、換行等空白字元不計入"
 								}
 							]
 						}

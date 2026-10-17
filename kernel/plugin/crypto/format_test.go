@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"maps"
 	"testing"
 )
 
@@ -36,7 +37,7 @@ type formatCase struct {
 
 func asymmetricFormatCases() []formatCase {
 	rsa := func(name string, hash string) Algorithm {
-		return Algorithm{Name: name, Hash: hash, ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}
+		return Algorithm{Name: name, Hash: hash, ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}}
 	}
 
 	return []formatCase{
@@ -282,7 +283,7 @@ func TestImportRejectsMismatchedKeyMaterial(t *testing.T) {
 
 	// 用 RSA 的密钥冒充 Ed25519。
 	rsaPair, err := GenerateKey(Algorithm{Name: AlgRSASSAPKCS1, Hash: AlgSHA256,
-		ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}, true, []KeyUsage{UsageSign, UsageVerify})
+		ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}}, true, []KeyUsage{UsageSign, UsageVerify})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -392,9 +393,7 @@ func TestECJWKRejectsInvalidPrivateKey(t *testing.T) {
 			"d = n":              base64.RawURLEncoding.EncodeToString(mustHex(t, order)),
 		} {
 			invalid := map[string]any{}
-			for member, value := range firstJWK {
-				invalid[member] = value
-			}
+			maps.Copy(invalid, firstJWK)
 			invalid["d"] = d
 
 			data, marshalErr := json.Marshal(invalid)

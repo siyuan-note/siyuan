@@ -123,7 +123,7 @@ func (b *Bundle) typeScript(schema *Schema) string {
 	}
 }
 
-func (b *Bundle) TypeScript(legacy []Route, documentation map[string]string) []byte {
+func (b *Bundle) TypeScript(documentation map[string]string) []byte {
 	var output strings.Builder
 	output.WriteString("// 此文件由内核契约生成，请运行 pnpm run api:generate 更新。\n\n")
 	for _, name := range sortedKeys(b.Definitions) {
@@ -134,24 +134,6 @@ func (b *Bundle) TypeScript(legacy []Route, documentation map[string]string) []b
 		fmt.Fprintf(&output, "export type %s = %s;\n\n", name, b.typeScript(b.Definitions[name]))
 	}
 	for _, method := range []string{"GET", "POST"} {
-		legacyPaths := map[string]bool{}
-		for _, route := range legacy {
-			if route.Method == method || route.Method == "ANY" {
-				legacyPaths[route.Path] = true
-			}
-		}
-		fmt.Fprintf(&output, "export type APILegacy%sPath =\n", method)
-		for i, path := range sortedKeys(legacyPaths) {
-			separator := " |"
-			if i == len(legacyPaths)-1 {
-				separator = ";"
-			}
-			fmt.Fprintf(&output, "    %s%s\n", quote(path), separator)
-		}
-		if len(legacyPaths) == 0 {
-			output.WriteString("    never;\n")
-		}
-		output.WriteString("\n")
 		fmt.Fprintf(&output, "export interface API%sRoutes {\n", method)
 		for _, endpoint := range b.Endpoints {
 			if endpoint.Method != method {
@@ -159,7 +141,7 @@ func (b *Bundle) TypeScript(legacy []Route, documentation map[string]string) []b
 			}
 			if text := documentation[endpoint.Handler]; text != "" {
 				output.WriteString("    /**\n")
-				for _, line := range strings.Split(strings.ReplaceAll(text, "*/", "*\\/"), "\n") {
+				for line := range strings.SplitSeq(strings.ReplaceAll(text, "*/", "*\\/"), "\n") {
 					if line == "" {
 						output.WriteString("     *\n")
 					} else {
@@ -293,7 +275,6 @@ export type FetchPost<Legacy = APILegacyResponse> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIPOSTRoutes
         ? [...APIRequestArgs<APIPOSTRoutes[Path]>, ...APIPostTail<APIPOSTRoutes[Path]>]
-        : Path extends APILegacyPOSTPath ? LegacyPostArgs<Legacy>
         : string extends Path ? LegacyPostArgs<Legacy> : never
 ) => Promise<void>;
 
@@ -301,7 +282,6 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIPOSTRoutes
         ? [...APIRequestArgs<APIPOSTRoutes[Path]>, ...APISyncTail]
-        : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
 ) => Promise<Path extends keyof APIPOSTRoutes
     ? APIPOSTRoutes[Path] extends {output: "binary" | "proxy" | "pluginService"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError

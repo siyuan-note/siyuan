@@ -153,7 +153,7 @@ func exportMdZip(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported md zip to: %s", zipPath)}}}, nil
 }
 
-func exportData(args map[string]any) (CallToolResult, error) {
+func exportData(_ map[string]any) (CallToolResult, error) {
 	zipPath, err := model.ExportData()
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export data failed: " + err.Error()}}, IsError: true}, nil

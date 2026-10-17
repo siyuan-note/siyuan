@@ -60,20 +60,6 @@ type TJsonRpcHandler<T = any> = (...args: TJsonRpcMethodParams) => Promise<T> | 
 
 declare module "blueimp-md5"
 
-declare class Highlight {
-    constructor(...range: Range[]);
-
-    add(range: Range): void
-
-    clear(): void
-
-    forEach(callbackfn: (value: Range, key: number) => void): void;
-}
-
-declare namespace CSS {
-    const highlights: Map<string, Highlight>;
-}
-
 interface CSSStyleDeclarationElectron extends CSSStyleDeclaration {
     WebkitAppRegion: string;
 }
@@ -96,6 +82,7 @@ interface Window {
         };
         dispose(element: Element): void;
         getInstanceById(id: string): {
+            setTheme: (theme: string) => void
             resize: () => void
             clear: () => void
             getOption: () => { series: { type: string }[] }
@@ -214,7 +201,6 @@ interface Window {
     };
     siyuan: ISiyuan;
     JSAndroid: {
-        ready?: Promise<void>
         openAuthURL(url: string): void
         returnDesktop(): void
         openExternal(url: string): void
@@ -1062,6 +1048,11 @@ interface IBazaarRating {
     distribution: TBazaarRatingDistribution;
 }
 
+interface IBazaarPackageChoice {
+    packageType: string;
+    name: string;
+}
+
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
@@ -1076,7 +1067,7 @@ interface IBazaarItem {
     deprecated?: boolean;
     deprecatedReason?: Record<string, string>;
     preferredDeprecatedReason?: string;
-    alternatives?: string[];
+    choices?: IBazaarPackageChoice[];
     iconURL: string;
     stars: number;
     author: string;

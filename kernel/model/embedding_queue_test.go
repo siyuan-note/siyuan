@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -90,7 +91,7 @@ func TestEmbeddingQueueStopsUnsentJobs(t *testing.T) {
 		embeddingStop.Store(true)
 		calls.Add(1)
 	})
-	if queries.Load() != 1 || calls.Load() < 1 || calls.Load() > embeddingMaxConcurrency {
+	if queries.Load() != 1 || calls.Load() < 1 || calls.Load() > conf.DefaultEmbeddingConcurrency {
 		t.Fatalf("queries=%d, calls=%d", queries.Load(), calls.Load())
 	}
 	if embeddingErrNotified.Load() {
@@ -155,5 +156,96 @@ func TestEmbeddingRebuildDiscardsInflightFailure(t *testing.T) {
 	}
 	if embeddingStop.Load() || embeddingErrNotified.Load() {
 		t.Fatal("a request from before rebuilding must not stop the new index")
+	}
+}
+
+func TestEmbeddingQueueConfiguredBatches(t *testing.T) {
+	for _, entry := range []struct {
+		concurrency, batchSize, total int
+	}{
+		{8, 10, 205},
+		{1, 64, 200},
+		{2, 3, 205},
+		{1, 128, 200},
+		{64, 10, 640},
+		{64, 128, 8192},
+	} {
+		t.Run(fmt.Sprintf("%d/%d", entry.concurrency, entry.batchSize), func(t *testing.T) {
+			prepareEmbeddingQueueTest(t)
+			Conf.AI.Load().Embedding.Concurrency = entry.concurrency
+			Conf.AI.Load().Embedding.BatchSize = entry.batchSize
+			var written atomic.Int64
+			var batchesMu sync.Mutex
+			var sizes []int
+			started := make(chan struct{}, entry.concurrency)
+			release, done := make(chan struct{}), make(chan struct{})
+			query := func(_ string, args ...any) ([]map[string]any, error) {
+				limit := args[2].(int)
+				offset := int(written.Load())
+				rows := make([]map[string]any, min(limit, entry.total-offset))
+				for i := range rows {
+					rows[i] = map[string]any{"id": fmt.Sprint(offset + i), "content": "pending content"}
+				}
+				return rows, nil
+			}
+			go func() {
+				defer close(done)
+				processPendingEmbeddingRows(query, func(texts []string, _ []map[string]any, _ uint64) {
+					batchesMu.Lock()
+					sizes = append(sizes, len(texts))
+					batchesMu.Unlock()
+					select {
+					case started <- struct{}{}:
+					default:
+					}
+					<-release
+					written.Add(int64(len(texts)))
+				})
+			}()
+			for range entry.concurrency {
+				select {
+				case <-started:
+				case <-time.After(5 * time.Second):
+					close(release)
+					<-done
+					t.Fatal("configured workers could not start a full batch concurrently")
+				}
+			}
+			close(release)
+			select {
+			case <-done:
+			case <-time.After(5 * time.Second):
+				t.Fatal("queue did not finish")
+			}
+			wantBatches := (entry.total + entry.batchSize - 1) / entry.batchSize
+			if written.Load() != int64(entry.total) || len(sizes) != wantBatches {
+				t.Fatalf("written=%d, batch sizes=%v", written.Load(), sizes)
+			}
+			for i, size := range sizes {
+				want := min(entry.batchSize, entry.total-i*entry.batchSize)
+				if size != want {
+					t.Fatalf("batch %d: got %d blocks, want %d", i, size, want)
+				}
+			}
+		})
+	}
+}
+
+func TestEmbeddingQueueBoundsUnnormalizedConfiguration(t *testing.T) {
+	prepareEmbeddingQueueTest(t)
+	Conf.AI.Load().Embedding.Concurrency = math.MaxInt
+	Conf.AI.Load().Embedding.BatchSize = math.MaxInt
+	queried := false
+	processPendingEmbeddingRows(func(_ string, args ...any) ([]map[string]any, error) {
+		queried = true
+		if limit := args[2].(int); limit != 64*128 {
+			t.Errorf("unbounded page size: %d", limit)
+		}
+		return nil, nil
+	}, func([]string, []map[string]any, uint64) {
+		t.Error("empty queue must not submit a request")
+	})
+	if !queried {
+		t.Fatal("queue did not query pending blocks")
 	}
 }

@@ -6,7 +6,7 @@
 		"id": "20211226122728-cnqf7rz",
 		"title": "區塊超連結",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -155,7 +155,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122740-u3u7oza",
-				"updated": "20260803165036"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -170,7 +170,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122740-ndxef8x",
-				"updated": "20260803165036"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -219,7 +219,7 @@
 					},
 					"Properties": {
 						"id": "20220407101252-wamwefo",
-						"updated": "20220407101441"
+						"updated": "20261016202635"
 					},
 					"Children": [
 						{
@@ -242,7 +242,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20220407101310-bgqqmi9",
-								"updated": "20220407101441"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
@@ -253,7 +253,8 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20220407101310-fahpj3n"
+										"id": "20220407101310-fahpj3n",
+										"updated": "20261016111305"
 									},
 									"Children": [
 										{
@@ -283,7 +284,8 @@
 											"Type": "NodeList",
 											"ListData": {},
 											"Properties": {
-												"id": "20220407101310-8yliefs"
+												"id": "20220407101310-8yliefs",
+												"updated": "20261016111305"
 											},
 											"Children": [
 												{
@@ -294,20 +296,22 @@
 														"Marker": "Kg=="
 													},
 													"Properties": {
-														"id": "20220407101310-rqkhv3e"
+														"id": "20220407101310-rqkhv3e",
+														"updated": "20261016111305"
 													},
 													"Children": [
 														{
 															"ID": "20220407101310-m2ypc07",
 															"Type": "NodeParagraph",
 															"Properties": {
-																"id": "20220407101310-m2ypc07"
+																"id": "20220407101310-m2ypc07",
+																"updated": "20261016111305"
 															},
 															"Children": [
 																{
 																	"Type": "NodeTextMark",
 																	"TextMarkType": "code",
-																	"TextMarkTextContent": "MimeType=MimeType=x-scheme-handler/siyuan;"
+																	"TextMarkTextContent": "MimeType=x-scheme-handler/siyuan;"
 																}
 															]
 														}
@@ -371,7 +375,7 @@
 									},
 									"Properties": {
 										"id": "20220407101310-m7boufe",
-										"updated": "20220407101441"
+										"updated": "20261016202635"
 									},
 									"Children": [
 										{
@@ -418,7 +422,8 @@
 											"ID": "20220407101310-9st6ipm",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20220407101310-9st6ipm"
+												"id": "20220407101310-9st6ipm",
+												"updated": "20261016202635"
 											},
 											"Children": [
 												{
@@ -433,7 +438,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "。"
+													"Data": ""
 												}
 											]
 										}

@@ -33,6 +33,7 @@ interface ListMindmapEditorOptions {
     onAdd: (kind: "child" | "sibling") => Promise<void>;
     onFinish: () => void;
     onUndo: (redo: boolean, selection?: Record<string, string>) => void;
+    isPanTarget?: (event: PointerEvent) => boolean;
     replaceFirstParagraph?: string;
     selection?: Record<string, string>;
 }
@@ -261,9 +262,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished || composing) {
             return false;
         }
-        // 编辑器中创建的列表会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
+        // 编辑器中创建的列表和脑图会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
         if (!finishSession &&
-            Array.from(fragment.wysiwyg.children).some(element => element.getAttribute("data-type") === "NodeList")) {
+            Array.from(fragment.wysiwyg.children).some(element =>
+                ["NodeList", nestedBranchType(node)].includes(element.getAttribute("data-type")))) {
             return false;
         }
         const html = cleanListMindmapHTML(fragment.getBlockHTML());
@@ -404,7 +406,11 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove", "click", "dblclick",
         "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout", "keyup"]
         .forEach(type => host.addEventListener(type, event => event.stopPropagation(), {signal}));
-    host.addEventListener("keydown", event => event.stopPropagation(), {signal});
+    host.addEventListener("keydown", event => {
+        if (event.defaultPrevented || event.isComposing || composing || !(event.ctrlKey || event.metaKey || event.altKey)) {
+            event.stopPropagation();
+        }
+    }, {signal});
     host.addEventListener("keydown", event => {
         if (event.target instanceof Element &&
             fragment.wysiwyg.contains(event.target.closest(".mindmap-view"))) {
@@ -482,7 +488,9 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog");
     };
     document.addEventListener("pointerdown", event => {
-        if (!belongs(event.target as Node)) {
+        if (options.isPanTarget?.(event)) {
+            captureBeforeChange();
+        } else if (!belongs(event.target as Node)) {
             finish();
         } else {
             // 工具栏浮层位于节点 host 外，格式命令执行前仍需保存原文字选区。

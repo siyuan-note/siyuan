@@ -7,7 +7,7 @@
 		"id": "20210117215840-jcl17fx",
 		"title": "Data Security",
 		"type": "doc",
-		"updated": "20230422123335"
+		"updated": "20261016111431"
 	},
 	"Children": [
 		{
@@ -131,12 +131,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721113914-z3cmj85",
-				"updated": "20210721113914"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Plaintext storage"
+					"Data": "Local storage in ordinary notebooks"
 				}
 			]
 		},
@@ -145,12 +145,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721113914-3zwi0oa",
-				"updated": "20210721114144"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan uses plaintext to store data on the local file system, which means:"
+					"Data": "Ordinary notebooks store their documents and assets in plaintext on the local file system. This means:"
 				}
 			]
 		},
@@ -160,7 +160,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721113914-cpc36qq",
-				"updated": "20210721113914"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -171,19 +171,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210721113914-9g01tnu"
+						"id": "20210721113914-9g01tnu",
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
 							"ID": "20210721113914-bkvbciw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210721113914-bkvbciw"
+								"id": "20210721113914-bkvbciw",
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Anyone or software who can use the operating system can read the data in it"
+									"Data": "Anyone or software with permission to read these local files can read their contents"
 								}
 							]
 						}
@@ -218,12 +220,33 @@
 			]
 		},
 		{
+			"ID": "20261016111431-s2z8kvc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-s2z8kvc",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Encrypted notebooks",
+					"TextMarkBlockRefID": "20260907120000-cryen01",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " encrypt persisted documents, assets, database definitions, and indexes. This does not encrypt the entire workspace or device: unlocked content in memory, temporary files, clipboard contents, plaintext exports, and some metadata remain outside that guarantee. A trusted operating system is still required; see the encrypted-notebook guide for the full security boundary."
+				}
+			]
+		},
+		{
 			"ID": "20210721113914-ccvr8nz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721113914-ccvr8nz",
-				"updated": "20210721113914"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -237,12 +260,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721113914-knx9uy7",
-				"updated": "20220703223247"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan cloud synchronization use "
+					"Data": "SiYuan cloud sync uses "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -253,7 +276,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the password is stored locally with a built-in key encryption, any third party other than the user cannot get the plaintext in the cloud data."
+					"Data": " for data snapshots. The data repository key is saved locally in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/conf/conf.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " as Base64-encoded configuration data; Base64 is not encryption. Protect the workspace configuration and the device. This repository key is separate from the encrypted-notebook master password and key backups, and cannot replace them."
 				}
 			]
 		},
@@ -263,7 +295,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721113914-yk8x9s1",
-				"updated": "20210721113914"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -278,7 +310,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721113914-m1bcp7i",
-				"updated": "20230422122808"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -290,7 +322,7 @@
 					},
 					"Properties": {
 						"id": "20210721113914-fg1idfp",
-						"updated": "20230422122808"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -298,12 +330,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210721113914-rmfboog",
-								"updated": "20230422122808"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Regularly back up data, refer to 321 Backup Guidelines (Minimum 3 copies, 2 media, and 1 offline storage)"
+									"Data": "Regularly back up data, refer to 321 Backup Guidelines (Minimum 3 copies, 2 media, and 1 off-site copy)"
 								}
 							]
 						}
@@ -343,7 +375,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220626214041-sz90qpf",
-				"updated": "20220626214041"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -372,7 +404,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220626214041-mu28gc4",
-				"updated": "20220626214041"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -387,7 +419,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220626214041-susd3su",
-				"updated": "20220626214653"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -399,7 +431,7 @@
 					},
 					"Properties": {
 						"id": "20220626214041-r7wqevv",
-						"updated": "20220626214653"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -407,12 +439,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220626214041-0ji5vg8",
-								"updated": "20220626214131"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The local host operating system is a fully trusted environment. This is the most basic premise of data security, and it can only be guaranteed based on this premise."
+									"Data": "The local host operating system is a fully trusted environment. This is the most basic premise of data security, and it can only be guaranteed based on this premise"
 								}
 							]
 						},
@@ -422,7 +454,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20220626214041-0m7kunu",
-								"updated": "20220626214653"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -462,7 +494,7 @@
 									},
 									"Properties": {
 										"id": "20220626214041-4a0wgmi",
-										"updated": "20220626214649"
+										"updated": "20261016111431"
 									},
 									"Children": [
 										{
@@ -470,12 +502,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220626214041-xd159p7",
-												"updated": "20220626214649"
+												"updated": "20261016111431"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Rriginal data is not leaked"
+													"Data": "Original data is not leaked"
 												}
 											]
 										}

@@ -140,9 +140,10 @@ func currentPaddleConfig() ocr.PaddleConfig {
 	value := Conf.GetOCR()
 	directory := filepath.Join(util.WorkingDir, "stage", "ocr", "runtime", runtime.GOOS+"-"+runtime.GOARCH)
 	filename := "libonnxruntime.so"
-	if runtime.GOOS == "windows" {
+	switch runtime.GOOS {
+	case "windows":
 		filename = "onnxruntime.dll"
-	} else if runtime.GOOS == "darwin" {
+	case "darwin":
 		filename = "libonnxruntime.dylib"
 	}
 	result := ocr.PaddleConfig{Directory: ocrModelDirectory(value.Model), Library: filepath.Join(directory, filename), Thresholds: ocr.Thresholds(value.Thresholds)}
@@ -171,13 +172,22 @@ func OCRAsset(ctx context.Context, path string) (string, []map[string]string, er
 	return ocrAsset(ctx, path, Conf.GetOCR(), false)
 }
 
-func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (string, []map[string]string, error) {
+func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (_ string, _ []map[string]string, resultErr error) {
 	if value.Provider == "ai" {
 		text, err := aiOCRAsset(ctx, path, value, automatic)
 		return text, []map[string]string{}, err
 	}
+	path = strings.SplitN(strings.TrimSpace(path), "#", 2)[0]
+	canonical, boxID, err := assetPathAndBox(path, "")
+	if err != nil {
+		return "", nil, err
+	}
+	if boxID != "" {
+		canonical += "?box=" + url.QueryEscape(boxID)
+	}
+	request := beginOCRRequest(canonical)
+	defer func() { request.finish(value, automatic, resultErr) }()
 	InitOCR()
-	path = strings.SplitN(path, "#", 2)[0]
 	if IsEncryptedOCRAsset(path) {
 		return "", nil, errors.New(Conf.Language(380))
 	}
@@ -200,18 +210,10 @@ func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) 
 	if err != nil {
 		return "", nil, err
 	}
-	canonical, boxID, err := assetPathAndBox(path, "")
-	if err != nil {
-		return "", nil, err
-	}
-	if boxID != "" {
-		canonical += "?box=" + url.QueryEscape(boxID)
-	}
-	if automatic && !canSaveAutomaticOCR(value, canonical) {
+	text := util.GetOcrJsonText(rows)
+	if !request.save(text, value, automatic) {
 		return "", nil, context.Canceled
 	}
-	text := util.GetOcrJsonText(rows)
-	SetOCRAssetText(canonical, text)
 	return text, rows, nil
 }
 
@@ -219,8 +221,16 @@ func SetOCRAssetText(path, text string) {
 	if IsEncryptedOCRAsset(path) {
 		return
 	}
-	path = util.OCRAssetKey(path)
+	path = util.OCRAssetKey(strings.TrimSpace(path))
+	ocrRequests.Lock()
+	delete(ocrRequests.active, path)
 	util.SetAssetText(path, text)
+	clearOCRFailure(path)
+	ocrRequests.Unlock()
+	indexOCRAssetText(path)
+}
+
+func indexOCRAssetText(path string) {
 	documents, err := sql.QueryOCRAssetDocuments(path)
 	if err != nil {
 		logging.LogErrorf("query OCR asset documents failed: %s", err)

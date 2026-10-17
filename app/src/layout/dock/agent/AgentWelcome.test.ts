@@ -46,6 +46,25 @@ test("dynamic greetings preserve two lines and escape localized text with and wi
     }
 });
 
+// 问候语行末为全角收尾标点时，语言文件在该行行首写入一个 EN SPACE（U+2002），
+// 抵消其半个字身的右侧空白，使居中后可见文字不偏移；半角标点无此空白，文案不带补宽。
+// 该规则由文案自行承载，下面这条用例是它唯一的守卫。
+test("greeting lines ending with full-width punctuation carry the leading trim pad in every locale", () => {
+    const trailing = /[。，、；：？！．）」』】》〉］｝]$/;
+    for (const file of readdirSync("appearance/langs").filter(file => file.endsWith(".json"))) {
+        const languages = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));
+        const keys = Object.keys(languages).filter(key => key === "agentWelcomeGreeting" ||
+            /^agentWelcome(?:First|Return|Morning|Day|Evening|Late)\d$/.test(key));
+        assert.ok(keys.length >= 25, `${file}: greeting keys are present`);
+        for (const key of keys) {
+            for (const line of languages[key].split("\n")) {
+                // 有补宽当且仅当行末为全角收尾标点，两侧都不允许失配
+                assert.equal(line.startsWith("\u2002"), trailing.test(line), `${file}: ${key} "${line}"`);
+            }
+        }
+    }
+});
+
 test("every locale supplies the complete two-line greeting groups", () => {
     for (const file of readdirSync("appearance/langs").filter(file => file.endsWith(".json"))) {
         const languages = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));

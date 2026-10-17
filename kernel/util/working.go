@@ -46,7 +46,7 @@ var Mode = "prod"
 // SystemTempDir 保存工作空间初始化重定向之前的系统临时目录。
 var SystemTempDir = os.TempDir()
 
-const Ver = "3.8.7-beta.3"
+const Ver = "3.8.8-alpha.3"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {
@@ -73,6 +73,7 @@ var (
 	bootProgress = atomic.Int32{} // 启动进度，从 0 到 100
 	bootDetails  string           // 启动细节描述
 	HttpServer   *http.Server     // HTTP 伺服器实例
+	HttpsServer  *http.Server     // HTTPS 伺服器实例
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
 
 	SafeMode = false // 是否以安全模式启动：禁用代码片段、插件、自定义主题与图标
@@ -593,9 +594,9 @@ func initMime() {
 func GetDataAssetsAbsPath() (ret string) {
 	ret = filepath.Join(DataDir, "assets")
 	if IsSymlinkPath(ret) {
-		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
+		// 跟随资源目录的符号链接和目录联接。
 		var err error
-		ret, err = filepath.EvalSymlinks(ret)
+		ret, err = ResolveRealPath(ret)
 		if err != nil {
 			logging.LogErrorf("read assets link failed: %s", err)
 		}
@@ -618,6 +619,7 @@ func tryLockWorkspace() {
 	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
 	ok, err := WorkspaceLock.TryLock()
 	if ok {
+		ClearWorkspaceExitMarker()
 		return
 	}
 	if err != nil {

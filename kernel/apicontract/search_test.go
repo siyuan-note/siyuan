@@ -111,3 +111,28 @@ func TestSearchRefDeferredParameters(t *testing.T) {
 		t.Fatalf("ref input changed: %+v, %v, %v", params, err, decodeErr)
 	}
 }
+
+func TestSearchRefExactDocTitleContract(t *testing.T) {
+	for _, body := range []string{
+		`{"id":"block","rootID":"root","k":"title","beforeLen":0}`,
+		`{"id":"block","rootID":"root","k":"title","beforeLen":0,"exactDocTitle":false}`,
+		`{"id":"block","rootID":"root","k":"title","beforeLen":0,"exactDocTitle":null}`,
+		`{"id":"block","rootID":"root","k":"title","beforeLen":0,"exactDocTitle":true}`,
+	} {
+		request, err := SearchRefBlock.Decode(strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		params, err := request.Parameters()
+		if err != nil || params.ExactDocTitle != strings.Contains(body, `"exactDocTitle":true`) {
+			t.Fatalf("exact title option changed: %+v, %v", params, err)
+		}
+	}
+	request, err := SearchRefBlock.Decode(strings.NewReader(`{"id":"block","rootID":"root","k":"title","beforeLen":0,"exactDocTitle":"true"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = request.Parameters(); err == nil {
+		t.Fatal("invalid exact title flag accepted")
+	}
+}

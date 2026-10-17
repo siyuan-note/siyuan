@@ -17,6 +17,8 @@
 package model
 
 import (
+	"slices"
+
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -105,8 +107,8 @@ func mergeSubDocs(rootTree *parse.Tree, options MergeHeadingOptions, addRootTitl
 
 func walkBlock(insertPoint *ast.Node, block *Block, level int, options MergeHeadingOptions, addRootTitle bool) (err error) {
 	level++
-	for i := len(block.Children) - 1; i >= 0; i-- {
-		c := block.Children[i]
+	for _, c := range slices.Backward(block.Children) {
+
 		if err = walkBlock(insertPoint, c, level, options, addRootTitle); err != nil {
 			return
 		}

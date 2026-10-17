@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {ipcRenderer, webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
 import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
-import {newCenterEmptyTab, resizeTabs, setTabPosition} from "../layout/tabUtil";
+import {newCenterEmptyTab, resizeTabs} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {enqueueAppearanceUpdate, initAssets, setInlineStyle} from "../util/assets";
@@ -12,7 +12,7 @@ import {initDesktopHost, initWindow} from "../boot/onGetConfig";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
-import {initWindowOpenOverride} from "../protyle/util/compatibility";
+import {applyPlatformClasses, initWindowOpenOverride} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -23,6 +23,7 @@ import {Wnd} from "../layout/Wnd";
 
 
 export const init = async (app: App) => {
+    applyPlatformClasses();
     await initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
@@ -75,25 +76,21 @@ export const init = async (app: App) => {
             });
             afterLayout(app);
             activateWindowWorkspace();
-            // 等待 dock 面板动画结束
-            setTimeout(() => {
-                setTabPosition();
-            }, Constants.TIMEOUT_TRANSITION);
             resolve();
         });
     });
     initStatus(true);
-    initWindow(app);
+    const windowReady = initWindow(app);
     initWindowOpenOverride(app);
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif
     appearanceConfigApi.apply(window.siyuan.config.appearance);
-    initAssets();
+    initAssets(true);
     await enqueueAppearanceUpdate(async () => {
         await setInlineStyle();
     });
-    renderSnippet();
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
@@ -115,7 +112,7 @@ export const init = async (app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
-    return layoutReady;
+    await Promise.all([layoutReady, windowReady, snippetReady]);
 };
 
 const afterLayout = (app: App) => {

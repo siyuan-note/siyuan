@@ -360,11 +360,8 @@ func GetSyncLANStatus() SyncLANStatus {
 	connectedCount := 0
 	if nil != manager {
 		connectedCount = manager.ConnectedPeerCount()
-		discoveredCount = manager.DiscoveredPeerCount()
 		// 已认证设备必然已经被发现，避免两次状态采样之间完成认证时出现数量倒序。
-		if discoveredCount < connectedCount {
-			discoveredCount = connectedCount
-		}
+		discoveredCount = max(manager.DiscoveredPeerCount(), connectedCount)
 	}
 	enabled := false
 	maxConcurrentReqs := 16

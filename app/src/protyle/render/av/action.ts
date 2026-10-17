@@ -38,7 +38,7 @@ import {focusByRange} from "../../util/selectionOffsets";
 import {showMessage} from "../../../dialog/message";
 import {previewAttrViewImages} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender, initUnfoldedGroupTables, setAVGroupFolded as setGroupFolded} from "./render";
 import {addView, openViewMenu} from "./view";
@@ -60,6 +60,7 @@ import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {setPublishAVFolds, setPublishAVView} from "./publishState";
 import {setReadonlyAVFolds, setReadonlyAVView} from "./readonlyState";
+import {openReadonlyAVSortMenu} from "./readonlySort";
 import {
     finishCardCoverPosition,
     isCardCoverPositioning,
@@ -343,7 +344,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (linkElement && richTextElement.contains(linkElement)) {
-            href = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"));
+            href = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"), false, true);
         }
         if (href) {
             openLink(protyle.app, href, event, event.ctrlKey || event.metaKey);
@@ -440,8 +441,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-sort" && !protyle.disabled) {
-            openMenuPanel({protyle, blockElement, type: "sorts"});
+        } else if (type === "av-sort") {
+            if (protyle.disabled) {
+                openReadonlyAVSortMenu(blockElement as HTMLElement, protyle, target);
+            } else {
+                openMenuPanel({protyle, blockElement, type: "sorts"});
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

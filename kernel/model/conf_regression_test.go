@@ -39,7 +39,7 @@ func TestConfAllSectionsShareStartupAndWriteNormalization(t *testing.T) {
 				t.Fatal(err)
 			}
 			var value any
-			typ := reflect.TypeOf(*input)
+			typ := reflect.TypeFor[AppConf]()
 			for i := 0; i < typ.NumField(); i++ {
 				if jsonFieldName(typ, typ.Field(i).Name) == namespace {
 					data, _ := json.Marshal(reflect.ValueOf(input).Elem().Field(i).Interface())
@@ -133,14 +133,14 @@ func TestConfConcurrentReadersHoldCoherentSnapshots(t *testing.T) {
 	group.Add(2)
 	go func() {
 		defer group.Done()
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			UpdateSyncConf(func(value *conf.Sync) { value.Interval = 200; value.CloudName = "200" })
 			UpdateSyncConf(func(value *conf.Sync) { value.Interval = 100; value.CloudName = "100" })
 		}
 	}()
 	go func() {
 		defer group.Done()
-		for i := 0; i < 100000; i++ {
+		for range 100000 {
 			snapshot := Conf.Sync.Load()
 			if snapshot.Interval == 100 && snapshot.CloudName != "100" || snapshot.Interval == 200 && snapshot.CloudName != "200" {
 				t.Error("reader observed fields from different commits")

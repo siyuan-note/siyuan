@@ -16,14 +16,30 @@
 
 //go:build windows
 
-package model
+package util
 
 import (
+	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"golang.org/x/sys/windows"
 )
+
+// isLinkFileInfo 识别符号链接和 Windows 的目录名称替代重解析点。
+func isLinkFileInfo(info fs.FileInfo) bool {
+	if info.Mode()&os.ModeSymlink != 0 {
+		return true
+	}
+	if info.Mode()&os.ModeIrregular == 0 || info.IsDir() {
+		return false
+	}
+	attributes, ok := info.Sys().(*syscall.Win32FileAttributeData)
+	const directoryLink = syscall.FILE_ATTRIBUTE_DIRECTORY | syscall.FILE_ATTRIBUTE_REPARSE_POINT
+	return ok && attributes.FileAttributes&directoryLink == directoryLink
+}
 
 // ResolveRealPath 使用文件句柄解析符号链接和目录联接，返回现有文件的最终绝对路径。
 func ResolveRealPath(path string) (string, error) {

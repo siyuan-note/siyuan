@@ -17,10 +17,11 @@ import {findMindmapDrop} from "./drop";
 import {destroyTabsRender, tabsRender} from "../tabsRender";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
-import {clampMindmapPanOffset} from "./pan";
+import {clampMindmapPanOffset, clampMindmapPanPosition, MindmapPanRect} from "./pan";
 import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindmapSummarySelection, getListMindmapSummarySnapshot,
     layoutListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
+import {buildListMindmapConnectors} from "./connectors";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -31,6 +32,7 @@ export interface ListMindmapViewOptions {
     labels?: Record<string, string>;
     cdn?: string;
     onOpenLink?: (href: string, event: MouseEvent) => void;
+    onPreviewImage?: (src: string) => void;
     colors?: () => {label: string, value: string}[];
     nodeColors?: () => {
         label: string, color: string, backgroundColor: string,
@@ -53,6 +55,7 @@ export interface ListMindmapViewOptions {
     onFoldSiblings?: (id: string) => Promise<boolean>;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
+    onSettingsMenu?: (anchor: HTMLElement) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
     onTaskMenu?: (id: string, anchor: HTMLElement) => void;
     onTabTaskToggle?: (id: string, itemId: string) => void;
@@ -287,6 +290,10 @@ export class ListMindmapView {
             "dblclick", "contextmenu", "dragstart", "dragover", "drop", "beforeinput", "input", "compositionstart",
             "compositionupdate", "compositionend", "copy", "cut", "paste", "focusin", "focusout", "keydown", "keyup",
             "wheel"].forEach(type => this.listen(options.host, type, event => {
+                // 未由脑图处理的按键交给应用快捷键入口，组合输入仍留在节点编辑器内。
+                if (type === "keydown" && !event.defaultPrevented && !(event as KeyboardEvent).isComposing) {
+                    return;
+                }
                 if (type === "click" && !event.defaultPrevented && !this.options.onOpenLink &&
                     (event.target as Element).closest(".mindmap-view__content a[href]")) {
                     return;
@@ -390,6 +397,9 @@ export class ListMindmapView {
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (this.editingId && this.isPanTarget(event)) {
+            return;
+        }
         if (this.summarySelecting && (this.viewport.contains(target) || this.summaryControls.contains(target))) {
             return;
         }
@@ -502,6 +512,10 @@ export class ListMindmapView {
             return;
         }
         if (!this.readOnly) {
+            if (this.options.onSettingsMenu) {
+                add("settings", "listMindmapConnectors", "iconLine", () => this.options.onSettingsMenu(this.buttons.get("settings")));
+                this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
+            }
             add("summary", "listMindmapSummary", "iconGroups", () => {
                 this.finishThen(() => {
                     const selecting = !this.summarySelecting;
@@ -856,13 +870,45 @@ export class ListMindmapView {
             if (!viewport.width || !viewport.height || !rect.width || !rect.height) {
                 return;
             }
-            const margin = 16;
-            const x = rect.left < viewport.left + margin ? viewport.left + margin - rect.left :
-                rect.right > viewport.right - margin ? viewport.right - margin - rect.right : 0;
-            const y = rect.top < viewport.top + margin ? viewport.top + margin - rect.top :
-                rect.bottom > viewport.bottom - margin ? viewport.bottom - margin - rect.bottom : 0;
+            const scaleX = viewport.width / (this.viewport.offsetWidth || viewport.width);
+            const scaleY = viewport.height / (this.viewport.offsetHeight || viewport.height);
+            const marginX = 16 * scaleX;
+            const marginY = 16 * scaleY;
+            const x = rect.left < viewport.left + marginX ? viewport.left + marginX - rect.left :
+                rect.right > viewport.right - marginX ? viewport.right - marginX - rect.right : 0;
+            let top = viewport.top + marginY;
+            const toolbarStyle = getComputedStyle(this.toolbar);
+            // 顶部仅避让可见控件及展开的缩放面板，保留工具栏左侧空白区域。
+            if (!this.toolbar.hidden && toolbarStyle.display !== "none" && toolbarStyle.visibility !== "hidden" &&
+                Number(toolbarStyle.opacity) !== 0) {
+                this.toolbar.querySelectorAll<HTMLElement>(".block__icon, .mindmap-view__zoom, .mindmap-view__zoom-actions")
+                    .forEach(control => {
+                        const bounds = control.getBoundingClientRect();
+                        const style = getComputedStyle(control);
+                        if (bounds.width && bounds.height && bounds.bottom > viewport.top && bounds.top < viewport.bottom &&
+                            rect.left + x < bounds.right && rect.right + x > bounds.left &&
+                            style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0) {
+                            top = Math.max(top, bounds.bottom + marginY);
+                        }
+                    });
+            }
+            let bottom = viewport.bottom - marginY;
+            // 底部浮层按实际尺寸避让，横向定位后仍不相交的节点无需额外上移。
+            [this.inspector, this.summaryControls].forEach(panel => {
+                if (panel.hidden) {
+                    return;
+                }
+                const bounds = panel.getBoundingClientRect();
+                if (bounds.width && bounds.height && bounds.bottom > viewport.top && bounds.top < viewport.bottom &&
+                    rect.left + x < bounds.right && rect.right + x > bounds.left) {
+                    bottom = Math.min(bottom, bounds.top - marginY);
+                }
+            });
+            // 可用高度不足以完整显示节点时，优先保留节点顶部的正文。
+            const y = rect.top < top ? top - rect.top :
+                rect.bottom > bottom ? Math.max(top - rect.top, bottom - rect.bottom) : 0;
             if (x || y) {
-                const bounded = this.boundedPan(this.offsetX + x, this.offsetY + y);
+                const bounded = this.boundedPan(this.offsetX + x / scaleX, this.offsetY + y / scaleY);
                 this.offsetX = bounded.x;
                 this.offsetY = bounded.y;
                 this.draw();
@@ -885,6 +931,7 @@ export class ListMindmapView {
         }
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
+        this.revealNode(id);
     }
 
     public setEditing(id?: string) {
@@ -1681,26 +1728,20 @@ export class ListMindmapView {
                 baseWidth,
             };
         };
-        this.edges.forEach((edge) => {
-            const from = this.positions.get(edge.from);
-            const to = this.positions.get(edge.to);
-            if (!from || !to) {
-                return;
-            }
-            const style = {...this.model.metadata.nodes[this.model.root.id], ...this.model.metadata.nodes[edge.to]};
-            const startX = from.x + from.width;
-            const startY = from.y + (edge.from === this.model.root.id ? from.height / 2 : from.height);
-            const endX = to.x;
-            const endY = to.y + to.height;
-            const center = (startX + endX) / 2;
-            const path = new Path2D();
-            path.moveTo(startX, startY);
-            path.bezierCurveTo(center, startY, center, endY, endX, endY);
-            path.lineTo(to.x + to.width, endY);
-            this.linePaths.push({id: edge.to, relation: false, path});
+        const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
+            this.model.metadata.connectorStyle || "bezier", () => new Path2D());
+        const rootStyle = this.model.metadata.nodes[this.model.root.id] || {};
+        const trunkStyle = resolveLineStyle(lineStyles, rootStyle.lineColor, rootStyle.lineWidth, defaultLine, false, false);
+        context.strokeStyle = trunkStyle.color;
+        context.lineWidth = trunkStyle.width;
+        context.setLineDash(rootStyle.lineDash ? [6, 4] : []);
+        connectors.trunks.forEach(path => context.stroke(path));
+        connectors.branches.forEach(({id, path}) => {
+            const style = {...rootStyle, ...this.model.metadata.nodes[id]};
+            this.linePaths.push({id, relation: false, path});
             context.beginPath();
-            const selected = this.selectedEdge === edge.to;
-            const hovered = this.hoveredLine === `edge:${edge.to}`;
+            const selected = this.selectedEdge === id;
+            const hovered = this.hoveredLine === `edge:${id}`;
             const lineStyle = resolveLineStyle(lineStyles, style.lineColor, style.lineWidth, defaultLine, selected, hovered);
             context.strokeStyle = lineStyle.color;
             context.lineWidth = lineStyle.width;
@@ -2061,6 +2102,16 @@ export class ListMindmapView {
         }
     };
 
+    public isPanTarget(event: PointerEvent) {
+        const target = event.target as HTMLElement;
+        return !this.locked && !this.pinching && !this.summarySelecting && !this.relationFrom &&
+            (event.pointerType !== "touch" || event.isPrimary) && [0, 2].includes(event.button) &&
+            this.viewport.contains(target) && target.closest(".mindmap-view") === this.options.host &&
+            !target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing") &&
+            (this.panning || event.button === 2 ||
+                !target.closest(".mindmap-view__node, .mindmap-view__summary") && !this.findLine(event));
+    }
+
     private pointerDown = (event: PointerEvent) => {
         if (this.locked || this.pinching || event.pointerType === "touch" && !event.isPrimary) {
             return;
@@ -2080,6 +2131,12 @@ export class ListMindmapView {
         const element = target.closest<HTMLElement>(".mindmap-view__node");
         const id = element?.dataset.mindmapId;
         this.preparePointer(event);
+        if (this.editingId && this.isPanTarget(event)) {
+            // 平移只改变画布位置，保留节点编辑器及其文字选区。
+            event.preventDefault();
+            this.beginPointer(event);
+            return;
+        }
         this.finishThen(() => {
             if (this.pendingPointerId === event.pointerId) {
                 this.beginPointer(event, id);
@@ -2166,7 +2223,9 @@ export class ListMindmapView {
         if (id) {
             this.selectNode(id);
         }
-        this.options.host.focus({preventScroll: true});
+        if (!this.editingId || id) {
+            this.options.host.focus({preventScroll: true});
+        }
         this.pointer = {
             pointerId: event.pointerId,
             rightButton: event.button === 2,
@@ -2409,7 +2468,13 @@ export class ListMindmapView {
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
         } else if (!moved && !id && !pointer.rightButton && !this.readOnly && !this.panning) {
-            this.selectLine(event);
+            if (this.editingId) {
+                this.clearSelection();
+            }
+            this.finishThen(() => {
+                this.options.host.focus({preventScroll: true});
+                this.selectLine(event);
+            });
         }
     };
 
@@ -2555,10 +2620,23 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.readOnly || this.relationFrom || this.summarySelecting || this.panning || this.pinching) {
+        if (this.relationFrom || this.summarySelecting || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;
+        if (target.tagName === "IMG" && !target.classList.contains("emoji") &&
+            !target.closest('[data-subtype="plantuml"]') &&
+            !this.viewport.contains(target.closest(".mindmap-view__node--editing")) && this.options.onPreviewImage) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.cancelPointer();
+            const src = target.getAttribute("src");
+            this.finishThen(() => this.options.onPreviewImage(src));
+            return;
+        }
+        if (this.readOnly) {
+            return;
+        }
         const summary = target.closest<HTMLElement>(".mindmap-view__summary");
         if (summary) {
             this.editSummaryLabel(summary.dataset.summaryId);
@@ -2725,9 +2803,8 @@ export class ListMindmapView {
             return;
         }
         if (!this.fullscreenMarker && !event.shiftKey && !event.deltaX && event.deltaY) {
-            const {left, top, right, bottom} = this.contentBounds();
-            if (left * this.scale + this.offsetX >= 0 && right * this.scale + this.offsetX <= this.viewport.clientWidth &&
-                top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
+            const {top, bottom} = this.contentBounds();
+            if (top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
                 return;
             }
         }
@@ -2745,11 +2822,14 @@ export class ListMindmapView {
     };
 
     private boundedPan(x: number, y: number) {
-        const {left, top, right, bottom} = this.contentBounds();
-        return {
-            x: clampMindmapPanOffset(x, left, right, this.scale, this.viewport.clientWidth),
-            y: clampMindmapPanOffset(y, top, bottom, this.scale, this.viewport.clientHeight),
-        };
+        const rectangles = this.contentRectangles();
+        const {left, top, right, bottom} = this.contentBounds(rectangles);
+        const axis = x === this.offsetX && y !== this.offsetY ? "y" :
+            y === this.offsetY && x !== this.offsetX ? "x" : undefined;
+        return clampMindmapPanPosition(
+            clampMindmapPanOffset(x, left, right, this.scale, this.viewport.clientWidth),
+            clampMindmapPanOffset(y, top, bottom, this.scale, this.viewport.clientHeight),
+            rectangles, this.scale, this.viewport.clientWidth, this.viewport.clientHeight, axis);
     }
 
     private zoomAt(scale: number, x = this.viewport.clientWidth / 2, y = this.viewport.clientHeight / 2) {
@@ -2766,7 +2846,26 @@ export class ListMindmapView {
         this.draw();
     }
 
-    private contentBounds() {
+    private contentRectangles(): MindmapPanRect[] {
+        const rectangles: MindmapPanRect[] = [];
+        this.positions.forEach(node => rectangles.push({x: node.x, y: node.y - 1, width: node.width, height: node.height + 1}));
+        this.summaryPositions.forEach(summary => rectangles.push({
+            x: summary.labelX, y: summary.labelY, width: summary.width, height: summary.height,
+        }));
+        this.relationElements.forEach(element => {
+            if (!element.hidden && element.style.visibility !== "hidden") {
+                const x = parseFloat(element.style.left);
+                const y = parseFloat(element.style.top);
+                if (Number.isFinite(x) && Number.isFinite(y)) {
+                    rectangles.push({x: x - element.offsetWidth / 2, y: y - element.offsetHeight / 2,
+                        width: element.offsetWidth, height: element.offsetHeight});
+                }
+            }
+        });
+        return rectangles;
+    }
+
+    private contentBounds(rectangles = this.contentRectangles()) {
         // 按实际可见节点、关系线和文字计算边界，不包含布局预留的空白。
         let left = Infinity;
         let top = Infinity;
@@ -2778,21 +2877,10 @@ export class ListMindmapView {
             right = Math.max(right, x + width);
             bottom = Math.max(bottom, y + height);
         };
-        this.positions.forEach(node => include(node.x, node.y - 1, node.width, node.height + 1));
+        rectangles.forEach(rectangle => include(rectangle.x, rectangle.y, rectangle.width, rectangle.height));
         this.relationRoutes.forEach(points => points.forEach(point => include(point.x, point.y)));
         this.summaryPositions.forEach(summary => {
             include(summary.x - 10, summary.top, summary.labelX + summary.width - summary.x + 10, summary.bottom - summary.top);
-            include(summary.labelX, summary.labelY, summary.width, summary.height);
-        });
-        this.relationElements.forEach(element => {
-            if (!element.hidden && element.style.visibility !== "hidden") {
-                const x = parseFloat(element.style.left);
-                const y = parseFloat(element.style.top);
-                if (Number.isFinite(x) && Number.isFinite(y)) {
-                    include(x - element.offsetWidth / 2, y - element.offsetHeight / 2,
-                        element.offsetWidth, element.offsetHeight);
-                }
-            }
         });
         return {left, top, right, bottom};
     }
@@ -2954,12 +3042,20 @@ export class ListMindmapView {
                     if (!(this.folded.get(node.id) ?? node.collapsed)) {
                         next = node.children[0]?.id;
                     }
-                } else if (parent) {
-                    const index = parent.children.findIndex(child => child.id === node.id);
-                    next = parent.children[index + (event.key === "ArrowUp" ? -1 : 1)]?.id;
+                } else {
+                    // 按层遍历可见节点，让上下导航跨越父节点，并跳过折叠分支。
+                    let level = [this.model.root];
+                    while (level.length) {
+                        const index = level.findIndex(item => item.id === node.id);
+                        if (index >= 0) {
+                            next = level[index + (event.key === "ArrowUp" ? -1 : 1)]?.id;
+                            break;
+                        }
+                        level = level.flatMap(item => (this.folded.get(item.id) ?? item.collapsed) ? [] : item.children);
+                    }
                 }
                 if (next) {
-                    this.selectNode(next);
+                    this.focusNode(next);
                 }
             }
         } else if (!this.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&

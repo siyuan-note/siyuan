@@ -62,7 +62,7 @@ func local() {
 		{Method: "POST", Path: "/first", Handler: "firstHandler", Request: request, Response: response},
 		{Method: "POST", Path: "/second", Handler: "secondHandler", Request: request, Response: response},
 	}}
-	generated := string(bundle.TypeScript(nil, documentation))
+	generated := string(bundle.TypeScript(documentation))
 	single := "    /**\n     * 独立接口说明。\n     *\n     * 第二段包含字面量 *\\/。\n     */\n"
 	first := "    /**\n     * 分组内第一个接口。\n     */\n"
 	if strings.Count(generated, single+`    "/single": {`) != 2 ||
@@ -70,7 +70,7 @@ func local() {
 		t.Fatal("endpoint documentation missing or attached to the wrong route")
 	}
 	withoutDocumentation := strings.ReplaceAll(strings.ReplaceAll(generated, single, ""), first, "")
-	if withoutDocumentation != string(bundle.TypeScript(nil, nil)) {
+	if withoutDocumentation != string(bundle.TypeScript(nil)) {
 		t.Fatal("documentation changed the generated type declarations")
 	}
 }

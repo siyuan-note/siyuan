@@ -202,7 +202,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
             break;
         case "move":
             if (!isFileFocus && range) {
-                const nodeElement = hasClosestBlock(range.startContainer);
+                const nodeElement = hasClosestBlock(range.startContainer, true);
                 if (protyle.title?.editElement.contains(range.startContainer) || !nodeElement ||
                     window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
                     movePathTo({
@@ -222,6 +222,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                     if (selectElements.length === 0) {
                         selectElements = [nodeElement];
                     }
+                    selectElements = Array.from(new Set(selectElements.map(element => hasClosestBlock(element, true) || element)));
                     movePathTo({
                         cb: (toPath) => {
                             void hintMoveBlock(toPath[0], selectElements, protyle);

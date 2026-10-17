@@ -17,6 +17,13 @@
 // 开发环境下隐藏 Electron 安全清单控制台提示 https://www.electronjs.org/docs/latest/tutorial/security
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
 
+// 桌面启动器关闭输出管道后，终端日志失败不应中断文件日志或应用启动。
+const console = new (require("console").Console)({
+    stdout: process.stdout,
+    stderr: process.stderr,
+    ignoreErrors: true,
+});
+
 const {
     net,
     app,
@@ -38,6 +45,7 @@ const {
 } = require("electron");
 const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
 const {appendChromiumSwitch} = require("./chromiumSwitches");
+const {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery} = require("./workspaceExit");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -89,7 +97,8 @@ const {
 } = require("./accessibility");
 
 const {
-    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, getLinuxInputMethodOverride, configureLinuxInputMethod,
+    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, readLinuxInputMethodArguments,
+    prepareLinuxInputMethodLaunch, linuxInputMethodRelaunchEnvironment,
 } = require("./linuxInputMethod");
 
 process.noAsar = true;
@@ -101,6 +110,40 @@ const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
 const linuxInputMethodSettingPath = path.join(confDir, "linux-input-method.json");
 const accessibilitySettingPath = path.join(confDir, "accessibility.json");
+
+// 在单实例锁、窗口和内核启动前完成兼容模式重启，不修改已经选定的原生后端。
+let linuxInputMethodOverride = null;
+let linuxInputMethodArgumentsError = null;
+let linuxInputMethodEnabled = false;
+let linuxInputMethodLaunchArguments = process.argv;
+if (process.platform === "linux") {
+    try {
+        linuxInputMethodEnabled = readLinuxInputMethodSetting(linuxInputMethodSettingPath);
+    } catch (error) {
+        writeLog("read Linux input method setting failed: " + error.message);
+    }
+    try {
+        const launch = prepareLinuxInputMethodLaunch(readLinuxInputMethodArguments(), linuxInputMethodEnabled,
+            process.platform, process.env[linuxInputMethodRelaunchEnvironment]);
+        linuxInputMethodOverride = launch.override;
+        linuxInputMethodLaunchArguments = launch.args;
+        if (launch.relaunchArgs) {
+            if (launch.relaunchToken) {
+                process.env[linuxInputMethodRelaunchEnvironment] = launch.relaunchToken;
+            } else {
+                delete process.env[linuxInputMethodRelaunchEnvironment];
+            }
+            if (app.relaunch({args: launch.relaunchArgs}) === false) {
+                throw new Error("Linux input method relaunch failed");
+            }
+            app.exit(0);
+        }
+    } catch (error) {
+        linuxInputMethodArgumentsError = error;
+        writeLog("prepare Linux input method launch failed: " + error.message);
+    }
+}
+
 const appCrashLogPath = path.join(confDir, "app.crash.log");
 const appCrashMarkerPath = path.join(confDir, "app.crash.json");
 const systemShutdownNone = 0;
@@ -130,7 +173,6 @@ const notebookSystemLock = createNotebookSystemLock({
 });
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
-const pendingWindowIds = new Set();
 createSettingsTaskBridge({
     ipcMain,
     getTarget: id => getWindowKernelTarget(id),
@@ -142,6 +184,8 @@ const settingsWindowPolicy = createSettingsWindows({
     screen,
     icon: path.join(appDir, "stage", "icon-large.png"),
     getTarget: id => getWindowKernelTarget(id),
+    getWindows: origin => BrowserWindow.getAllWindows().filter(win =>
+        initializedWindowIds.has(win.webContents.id) && windowKernelTargets.get(win.webContents.id)?.origin === origin),
     show: win => showWindow(win),
     log: message => writeLog(message),
     initialize: (win, target) => {
@@ -771,8 +815,11 @@ if (!app.isPackaged) {
     argStart = 2;
 }
 
-for (let i = argStart; i < process.argv.length; i++) {
-    let arg = process.argv[i];
+for (let i = argStart; i < linuxInputMethodLaunchArguments.length; i++) {
+    let arg = linuxInputMethodLaunchArguments[i];
+    if (arg === "--") {
+        break;
+    }
     if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") ||
         arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg.startsWith("--connection-session=") || arg === "--remote" ||
         arg.startsWith("--remote=") || arg === "--trust-remote-extensions" ||
@@ -805,18 +852,6 @@ try {
     writeLog("read accessibility setting failed: " + error.message);
 }
 configureAccessibility(app.commandLine, accessibilityEnabled);
-
-// Linux 输入法兼容设置在窗口创建前应用，显式显示后端参数保持优先。
-const linuxInputMethodOverride = getLinuxInputMethodOverride(app.commandLine);
-let linuxInputMethodEnabled = false;
-if (process.platform === "linux") {
-    try {
-        linuxInputMethodEnabled = readLinuxInputMethodSetting(linuxInputMethodSettingPath);
-    } catch (error) {
-        writeLog("read Linux input method setting failed: " + error.message);
-    }
-    configureLinuxInputMethod(app.commandLine, linuxInputMethodEnabled, process.platform);
-}
 
 try {
     firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
@@ -1780,11 +1815,17 @@ const validateUpdateInstallPackage = (request, requestedInstallPkgPath) => {
     }
 
     try {
-        const installDir = fs.realpathSync(path.join(request.workspaceDir, "temp", "install"));
         const installPkgPath = fs.realpathSync(requestedInstallPkgPath);
-        const relativePkgPath = path.relative(installDir, installPkgPath);
-        if (!relativePkgPath || path.isAbsolute(relativePkgPath) || path.dirname(relativePkgPath) !== ".") {
-            writeLog("rejected update install package outside the workspace install directory [path=" + installPkgPath + "]");
+        const installDirs = [path.join(confDir, "install"), path.join(request.workspaceDir, "temp", "install")];
+        const contained = installDirs.some((directory) => {
+            if (!fs.existsSync(directory)) {
+                return false;
+            }
+            const relativePkgPath = path.relative(fs.realpathSync(directory), installPkgPath);
+            return relativePkgPath && !path.isAbsolute(relativePkgPath) && path.dirname(relativePkgPath) === ".";
+        });
+        if (!contained) {
+            writeLog("rejected update install package outside the install directories [path=" + installPkgPath + "]");
             return;
         }
 
@@ -2300,8 +2341,6 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
                 if (!preserveRemoteDocumentCSP) {
                     delete details.responseHeaders[key];
                 }
-            } else if ("access-control-allow-origin" === key.toLowerCase()) {
-                delete details.responseHeaders[key];
             }
         }
         cb({responseHeaders: details.responseHeaders});
@@ -2475,6 +2514,9 @@ const loadBootWindow = (disableAppearance = false) => {
         bootAppearanceFallback = true;
     }
     const query = {v: appVer, port: kernelPort, lang: getArg("--lang") || resolveAppLanguage(app.getPreferredSystemLanguages())};
+    if (bootWindow.previousExitWaiting) {
+        query.previousExitWaiting = bootWindow.previousExitWaiting;
+    }
     if (remoteKernelTarget) {
         query.remote = remoteKernelTarget.origin;
         query.appearance = "0";
@@ -2564,17 +2606,75 @@ const showLocalBootWindow = () => {
     }
 };
 
-const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
+const initKernel = async (workspace, port, lang, safeMode, preparedBoot) => {
+    // 每次尝试保留独立的退出状态，避免上一轮未完成的请求干扰新内核。
+    const startup = {};
+    const cancelStartup = () => {
+        startup.canceled = true;
+        // 其他工作空间可能阻止应用退出，主动关闭本次启动页，避免留下无法继续的等待窗口。
+        if (startup.window && bootWindow === startup.window && !startup.window.isDestroyed()) {
+            startup.window.destroy();
+        }
+    };
+    app.on("before-quit", cancelStartup);
+    let retryDeadline;
+    try {
+        for (;;) {
+            const result = await initKernelAttempt(startup.window ? startup.workspace : workspace,
+                port, lang, safeMode, preparedBoot, startup);
+            if (result !== "workspace-locked") {
+                return result;
+            }
+            const currentBootWindow = startup.window;
+            const canceled = () => startup.canceled || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+            if (canceled()) return false;
+            // 只限制锁冲突的自动重试；已进入正常退出的同步恢复仍使用原有等待期限。
+            retryDeadline ??= Date.now() + 90000;
+            const failLocked = () => {
+                exitApp(startup.port, showWorkspaceLocked());
+                if (!currentBootWindow.isDestroyed()) currentBootWindow.destroy();
+                return false;
+            };
+            if (Date.now() >= retryDeadline) return failLocked();
+            try {
+                const languages = loadAppMenuLanguages(lang || resolveAppLanguage(app.getPreferredSystemLanguages()));
+                currentBootWindow.previousExitWaiting = languages.workspaceLockWaiting;
+                await currentBootWindow.webContents.executeJavaScript(
+                    `window.setPreviousExitWaiting(${JSON.stringify(languages.workspaceLockWaiting)})`);
+                writeLog("workspace is locked, waiting to retry kernel startup");
+                for (let elapsed = 0; elapsed < 1000 && !canceled(); elapsed += 100) {
+                    await sleep(100);
+                }
+                if (canceled()) return false;
+                if (Date.now() >= retryDeadline) return failLocked();
+            } catch (error) {
+                writeLog("wait to retry kernel startup failed: " + error);
+                return canceled() ? false : failLocked();
+            }
+        }
+    } finally {
+        app.removeListener("before-quit", cancelStartup);
+    }
+};
+
+const showWorkspaceLocked = () => {
+    if (workspaces && 0 < workspaces.length) {
+        showWindow(workspaces[0].browserWindow);
+    }
+    return showErrorWindow("工作空间已被锁定", "The workspace is locked", "<div>该工作空间正在被使用，请尝试在任务管理器中结束 SiYuan-Kernel 进程或者重启操作系统后再启动思源。</div><div>The workspace is being used, please try to end the SiYuan-Kernel process in the task manager or restart the operating system and then start SiYuan.</div>");
+};
+
+const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startup) => {
     return new Promise(async (resolve) => {
         const currentWorkspace = [workspace, process.env.SIYUAN_WORKSPACE_PATH, lastWorkspacePath]
             .find(item => typeof item === "string" && item);
         const workspaceLogPath = currentWorkspace ? path.resolve(currentWorkspace, "temp", "siyuan.log") : "";
         const kernelLogPath = path.join(confDir, "kernel.log");
         // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
-        if (!preparedBoot) {
+        if (!startup.window && !preparedBoot) {
             createBootWindow();
         }
-        if (!await showAppleSiliconWarning(lang)) {
+        if (!startup.window && !await showAppleSiliconWarning(lang)) {
             bootWindow.destroy();
             app.quit();
             resolve(false);
@@ -2589,7 +2689,13 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             return;
         }
 
-        if (preparedBoot) {
+        if (startup.window) {
+            if (startup.canceled || startup.window.isDestroyed() || bootWindow !== startup.window) {
+                resolve(false);
+                return;
+            }
+            kernelPort = startup.port;
+        } else if (preparedBoot) {
             kernelPort = await preparedBoot.ready;
         } else {
             await getAvailablePort(port);
@@ -2600,13 +2706,72 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             resolve(false);
             return;
         }
-        if (!preparedBoot) {
+        if (!startup.window && !preparedBoot) {
             showLocalBootWindow();
         }
         const currentKernelPort = kernelPort;
         const currentBootWindow = bootWindow;
+        startup.window = currentBootWindow;
+        startup.port = currentKernelPort;
+        startup.workspace = currentWorkspace;
         let kernelExited = false;
-        const bootCanceled = () => kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+        let kernelStarted = false;
+        const bootCanceled = () => startup.canceled || kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+        if (!isDevEnv || workspaces.length > 0) {
+            let waiting = !!currentBootWindow.previousExitWaiting;
+            const language = lang || resolveAppLanguage(app.getPreferredSystemLanguages());
+            const languages = loadAppMenuLanguages(language);
+            try {
+                const ready = await waitForPreviousWorkspaceExit(currentWorkspace, {
+                    canceled: bootCanceled,
+                    hasActiveWindow: () => workspaces.some(item => item.workspaceDir === currentWorkspace &&
+                        item.browserWindow && !item.browserWindow.isDestroyed()),
+                    recover: (marker, signal, force) => requestWorkspaceExitRecovery(currentWorkspace, marker, signal, net.fetch,
+                        undefined, force),
+                    onRecoveryFailed: async syncFailed => {
+                        if (bootCanceled()) return false;
+                        const {response} = await dialog.showMessageBox(currentBootWindow, {
+                            type: "warning",
+                            message: syncFailed ? languages._kernel[96] : languages.previousExitWaitFailed,
+                            buttons: syncFailed ? [languages.retry, languages.cancel, languages._kernel[97]] :
+                                [languages.retry, languages.cancel],
+                            defaultId: 0,
+                            cancelId: 1,
+                        });
+                        if (bootCanceled()) return false;
+                        return response === 2 && syncFailed ? "force" : response === 0;
+                    },
+                    onWaiting: async () => {
+                        waiting = true;
+                        writeLog("waiting for previous workspace exit");
+                        currentBootWindow.previousExitWaiting = languages.previousExitWaiting;
+                        await currentBootWindow.webContents.executeJavaScript(
+                            `window.setPreviousExitWaiting(${JSON.stringify(languages.previousExitWaiting)})`);
+                    },
+                });
+                if (!ready || bootCanceled()) {
+                    if (!bootCanceled()) currentBootWindow.destroy();
+                    resolve(false);
+                    return;
+                }
+                if (waiting) {
+                    currentBootWindow.previousExitWaiting = "";
+                    await currentBootWindow.webContents.executeJavaScript("window.setPreviousExitWaiting(\"\")");
+                    if (bootCanceled()) {
+                        resolve(false);
+                        return;
+                    }
+                }
+            } catch (error) {
+                writeLog("wait for previous workspace exit failed: " + error);
+                if (!bootCanceled()) {
+                    showErrorWindow(languages.previousExitWaiting, "", escapeHTML(languages.previousExitWaitFailed));
+                    currentBootWindow.destroy();
+                }
+                resolve(false);
+                return;
+            }
+        }
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");
@@ -2640,6 +2805,11 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                 }
                 const expectedExit = expectedKernelExitPorts.delete(kernelPortKey);
                 writeLog(`kernel [pid=${kernelProcess.pid}, port=${currentKernelPort}] exited with code [${code}], signal [${signal}], expected [${expectedExit}]`);
+                if (code === 24 && !expectedExit && !kernelStarted) {
+                    resolve(startup.canceled || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow
+                        ? false : "workspace-locked");
+                    return;
+                }
                 if (0 !== code && !expectedExit) {
                     let errorWindowId;
                     switch (code) {
@@ -2650,11 +2820,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                             errorWindowId = showErrorWindow("监听端口 " + currentKernelPort + " 失败", "Failed to listen to port " + currentKernelPort, "<div>监听 " + currentKernelPort + " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " + currentKernelPort + ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
                             break;
                         case 24: // 工作空间已被锁定，尝试切换到第一个打开的工作空间
-                            if (workspaces && 0 < workspaces.length) {
-                                showWindow(workspaces[0].browserWindow);
-                            }
-
-                            errorWindowId = showErrorWindow("工作空间已被锁定", "The workspace is locked", "<div>该工作空间正在被使用，请尝试在任务管理器中结束 SiYuan-Kernel 进程或者重启操作系统后再启动思源。</div><div>The workspace is being used, please try to end the SiYuan-Kernel process in the task manager or restart the operating system and then start SiYuan.</div>");
+                            errorWindowId = showWorkspaceLocked();
                             break;
                         case 25:
                             errorWindowId = showErrorWindow("初始化工作空间失败", "Failed to create workspace directory", "<div>工作空间文件夹权限不足，请查看 <a href=\"#\" data-log-path>~/.config/siyuan/kernel.log</a> 获取详细报错信息</div><div>Insufficient permissions for the workspace folder. Please check <a href=\"#\" data-log-path>~/.config/siyuan/kernel.log</a> for detailed error information.</div>", "⚠️", kernelLogPath);
@@ -2717,6 +2883,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             return;
         }
         if (0 === apiData.code) {
+            kernelStarted = true;
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
                 writeLog(`kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`);
@@ -2917,7 +3084,7 @@ const initRemoteKernel = async (target) => {
             storages: remoteKernelActiveStorageTypes,
         });
     } catch (error) {
-        throw new Error("failed to clear remote kernel active storage: " + error.message);
+        throw new Error("failed to clear remote kernel active storage: " + error.message, {cause: error});
     }
 
     writeLog("connecting to remote kernel [origin=" + target.origin + "]");
@@ -3046,7 +3213,7 @@ app.whenReady().then(() => {
             if (pendingConnectionArgs || updateInstallPromise || systemShutdownState !== systemShutdownNone) {
                 return;
             }
-            pendingConnectionArgs = connectionArgs(process.argv.slice(1), target, remoteKernelTarget?.origin);
+            pendingConnectionArgs = connectionArgs(linuxInputMethodLaunchArguments.slice(1), target, remoteKernelTarget?.origin);
             try {
                 await closeConnectionWindows(BrowserWindow.getAllWindows().filter(window =>
                     windowKernelTargets.has(window.webContents.id) &&
@@ -3291,6 +3458,9 @@ app.whenReady().then(() => {
             if (process.platform !== "linux" || !initializedWindowIds.has(event.sender.id) ||
                 !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
                 throw new Error("Linux input method setting is unavailable");
+            }
+            if (linuxInputMethodArgumentsError) {
+                throw linuxInputMethodArgumentsError;
             }
             if (data.cmd === "setLinuxInputMethodSetting") {
                 writeLinuxInputMethodSetting(linuxInputMethodSettingPath, data.enabled);
@@ -3967,19 +4137,28 @@ app.whenReady().then(() => {
             }
             const existingWindow = windowWorkspaces.get(kernelTarget.origin, workspaceID);
             if (existingWindow) {
-                if (!pendingWindowIds.has(existingWindow.webContents.id)) {
-                    showWindow(existingWindow);
-                }
+                showWindow(existingWindow);
                 return;
             }
         }
+        const themeMode = data.themeMode === "dark" ? "dark" : "light";
+        const backgroundColor = /^#[\da-f]{6}$/i.test(data.backgroundColor) ? data.backgroundColor :
+            (themeMode === "dark" ? "#1e1e1e" : "#ffffff");
+        const foregroundColor = /^#[\da-f]{6}$/i.test(data.foregroundColor) ? data.foregroundColor :
+            (themeMode === "dark" ? "#d4d4d4" : "#222222");
+        windowURL.searchParams.set("windowThemeMode", themeMode);
+        windowURL.searchParams.set("windowBackground", backgroundColor);
+        windowURL.searchParams.set("windowForeground", foregroundColor);
         const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
         const geometry = workspaceID ? normalizeWindowGeometry(data.windowGeometry, screen) : undefined;
         const win = new BrowserWindow({
             title: "SiYuan",
+            // 先在隐藏状态完成定位和加载，等画面就绪或短暂延迟后再显示，
+            // 避免窗口映射早于首帧提交时出现系统填充的近白色占位帧。
             show: false,
+            backgroundColor,
             trafficLightPosition: {x: 8, y: 13},
             width: Math.floor(data.width || mainScreen.size.width * 0.7),
             height: Math.floor(data.height || mainScreen.size.height * 0.9),
@@ -3991,7 +4170,6 @@ app.whenReady().then(() => {
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
             webPreferences: {
-                backgroundThrottling: false,
                 contextIsolation: false,
                 nodeIntegration: true,
                 nodeIntegrationInSubFrames: false,
@@ -4010,58 +4188,6 @@ app.whenReady().then(() => {
             windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
         }
 
-        // 原生窗口和主题内容均完成绘制后再显示，最大化和全屏也延后到此时执行。
-        const windowId = win.webContents.id;
-        pendingWindowIds.add(windowId);
-        let painted = false;
-        let initialized = false;
-        const stopWaiting = () => {
-            clearTimeout(readyTimeout);
-            ipcMain.removeListener("siyuan-window-ready", onWindowReady);
-            pendingWindowIds.delete(windowId);
-        };
-        const revealWindow = () => {
-            if (!painted || !initialized || win.isDestroyed() || !pendingWindowIds.has(windowId)) {
-                return;
-            }
-            stopWaiting();
-            if (geometry && data.windowGeometry.maximized) {
-                win.maximize();
-            }
-            if (geometry && data.windowGeometry.fullscreen) {
-                win.setFullScreen(true);
-            }
-            showWindow(win);
-            win.webContents.setBackgroundThrottling(true);
-        };
-        const onWindowReady = readyEvent => {
-            if (readyEvent.sender.id === windowId) {
-                initialized = true;
-                revealWindow();
-            }
-        };
-        ipcMain.on("siyuan-window-ready", onWindowReady);
-        win.once("ready-to-show", () => {
-            painted = true;
-            revealWindow();
-        });
-        win.webContents.on("did-finish-load", () => {
-            if (getWindowPathname(win) !== "/stage/build/app/window.html") {
-                initialized = true;
-                revealWindow();
-            }
-        });
-        // 初始化失败时显示窗口供用户处理，避免留下无法访问的隐藏窗口。
-        const readyTimeout = setTimeout(() => {
-            if (!win.isDestroyed()) {
-                writeLog("siyuan-window-ready timeout, force showing detached window");
-                painted = true;
-                initialized = true;
-                revealWindow();
-            }
-        }, 60000);
-        win.once("closed", stopWaiting);
-
         if (!geometry && data.position) {
             win.setPosition(data.position.x, data.position.y);
         } else if (!geometry) {
@@ -4070,11 +4196,45 @@ app.whenReady().then(() => {
         win.setAlwaysOnTop(data.alwaysOnTop, "win32" === process.platform ? "pop-up-menu" : "floating");
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
+        // 显示时机：首帧（ready-to-show）或短延迟，谁先到用谁。
+        // ready-to-show 在本应用里可能晚到 1 秒以上，定时器保证窗口及时出现；
+        // 两者都晚于创建，因此首帧直接是主题背景，不会闪白。
+        const revealDelay = 150;
+        let revealed = false;
+        let revealTimer;
+        const revealWindow = () => {
+            if (revealed || win.isDestroyed()) {
+                return;
+            }
+            revealed = true;
+            clearTimeout(revealTimer);
+            // 隐藏窗口上最大化或进入全屏会直接映射窗口，因此和显示一起执行。
+            if (geometry && data.windowGeometry.maximized) {
+                win.maximize();
+            }
+            if (geometry && data.windowGeometry.fullscreen) {
+                win.setFullScreen(true);
+            }
+            showWindow(win);
+        };
+        win.once("ready-to-show", revealWindow);
+        revealTimer = setTimeout(revealWindow, revealDelay);
+        // 渲染异常时仍显示窗口，避免留下无法访问的隐藏窗口。
+        const forceRevealTimer = setTimeout(() => {
+            if (!revealed) {
+                writeLog("detached window ready-to-show timeout, show it anyway");
+                revealWindow();
+            }
+        }, 60000);
+        win.once("closed", () => {
+            clearTimeout(revealTimer);
+            clearTimeout(forceRevealTimer);
+        });
         win.loadURL(windowURL.href);
         windowNavigate(win, "window", kernelTarget.origin, kernelTarget.mode === "remote");
         win.on("close", (event) => {
-            if (kernelTarget.mode === "remote" && (getWindowPathname(win) !== "/stage/build/app/window.html" ||
-                !initializedWindowIds.has(win.webContents.id))) {
+            if (!initializedWindowIds.has(win.webContents.id) ||
+                (kernelTarget.mode === "remote" && getWindowPathname(win) !== "/stage/build/app/window.html")) {
                 event.preventDefault();
                 markExpectedRendererExit(win);
                 win.destroy();

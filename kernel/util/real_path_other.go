@@ -16,9 +16,17 @@
 
 //go:build !windows
 
-package model
+package util
 
-import "path/filepath"
+import (
+	"io/fs"
+	"os"
+	"path/filepath"
+)
+
+func isLinkFileInfo(info fs.FileInfo) bool {
+	return info.Mode()&os.ModeSymlink != 0
+}
 
 func ResolveRealPath(path string) (string, error) {
 	return filepath.EvalSymlinks(path)

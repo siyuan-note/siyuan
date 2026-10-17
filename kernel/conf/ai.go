@@ -110,14 +110,24 @@ type ImageGeneration struct {
 	OutputFormat   string `json:"outputFormat"`
 }
 
+// 嵌入索引调度的默认值和资源上限，与设置控件范围保持一致。
+const (
+	DefaultEmbeddingConcurrency = 8
+	MaxEmbeddingConcurrency     = 64
+	DefaultEmbeddingBatchSize   = 10
+	MaxEmbeddingBatchSize       = 128
+)
+
 type Embedding struct {
-	ID         string `json:"id"`
-	Enabled    bool   `json:"enabled"`
-	APIKey     string `json:"apiKey"`
-	BaseURL    string `json:"baseURL"`
-	Name       string `json:"name"`
-	Timeout    int    `json:"timeout"`
-	Dimensions int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
+	ID          string `json:"id"`
+	Enabled     bool   `json:"enabled"`
+	APIKey      string `json:"apiKey"`
+	BaseURL     string `json:"baseURL"`
+	Name        string `json:"name"`
+	Timeout     int    `json:"timeout"`
+	Dimensions  int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
+	Concurrency int    `json:"concurrency"`
+	BatchSize   int    `json:"batchSize"`
 }
 
 // Decision 按供应商隔离凭证，平铺字段仅用于兼容旧配置输入。
@@ -267,7 +277,8 @@ type Rerank struct {
 }
 
 type Provider struct {
-	AuthType       string            `json:"authType,omitempty"`
+	AuthType string `json:"authType,omitempty"`
+	// AccountID 是本机绑定的运行时投影；工作空间配置持久化和设置导出时排除。
 	AccountID      string            `json:"accountID,omitempty"`
 	Headers        map[string]string `json:"headers,omitempty"`
 	ID             string            `json:"id"`
@@ -278,6 +289,15 @@ type Provider struct {
 	Protocol       string            `json:"protocol,omitempty"`
 	RequestTimeout int               `json:"requestTimeout"`
 	Models         []*Model          `json:"models"`
+}
+
+// ClearChatGPTAccountIDs 清除可复制配置中的本机账户引用，不修改登录凭证。
+func (ai *AI) ClearChatGPTAccountIDs() {
+	for _, provider := range ai.Providers {
+		if provider != nil {
+			provider.AccountID = ""
+		}
+	}
 }
 
 // Model is the provider-scoped model registry entry. MaxTokens/Temperature/
@@ -313,7 +333,7 @@ type MCPServer struct {
 }
 
 func defaultEmbedding() *Embedding {
-	return &Embedding{Timeout: 30}
+	return &Embedding{Timeout: 30, Concurrency: DefaultEmbeddingConcurrency, BatchSize: DefaultEmbeddingBatchSize}
 }
 
 func defaultRerank() *Rerank {
@@ -657,7 +677,7 @@ func (ai *AI) Normalize() {
 	serverIDs := map[string]bool{}
 	for i := range ai.MCP.Servers {
 		if ai.MCP.Servers[i].ID == "" || serverIDs[ai.MCP.Servers[i].ID] {
-			data := []byte(fmt.Sprintf("mcp:%d:%s:%s", i, ai.MCP.Servers[i].Name, ai.MCP.Servers[i].Type))
+			data := fmt.Appendf(nil, "mcp:%d:%s:%s", i, ai.MCP.Servers[i].Name, ai.MCP.Servers[i].Type)
 			ai.MCP.Servers[i].ID = uuid.NewSHA1(uuid.NameSpaceOID, data).String()
 		}
 		serverIDs[ai.MCP.Servers[i].ID] = true
@@ -778,6 +798,9 @@ func (ai *AI) Normalize() {
 			if util.IsAnthropicMessagesProtocol(p.Protocol) {
 				p.BaseURL = "https://api.anthropic.com/v1"
 			}
+			if util.IsGeminiInteractionsProtocol(p.Protocol) {
+				p.BaseURL = "https://generativelanguage.googleapis.com/v1beta"
+			}
 		}
 		p.DisplayName = strings.TrimSpace(p.DisplayName)
 		p.APIKey = strings.TrimSpace(p.APIKey)
@@ -830,6 +853,14 @@ func (ai *AI) Normalize() {
 	if ai.Embedding.Dimensions < 0 {
 		ai.Embedding.Dimensions = 0 // 负值非法，归零表示用模型默认维度
 	}
+	if ai.Embedding.Concurrency < 1 {
+		ai.Embedding.Concurrency = DefaultEmbeddingConcurrency
+	}
+	ai.Embedding.Concurrency = min(ai.Embedding.Concurrency, MaxEmbeddingConcurrency)
+	if ai.Embedding.BatchSize < 1 {
+		ai.Embedding.BatchSize = DefaultEmbeddingBatchSize
+	}
+	ai.Embedding.BatchSize = min(ai.Embedding.BatchSize, MaxEmbeddingBatchSize)
 	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 		ai.Embedding.ID = normalizedAIID("embedding")
 	}

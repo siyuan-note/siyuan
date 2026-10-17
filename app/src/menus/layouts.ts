@@ -10,7 +10,7 @@ import {upDownHint} from "../util/upDownHint";
 import {isBrowser} from "../util/functions";
 import {editWindowWorkspace, getWindowWorkspaces, openWindowWorkspace, removeWindowWorkspace} from "../window/workspace";
 import {MenuItem} from "./Menu";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {captureWindowGeometry, restoreWindowGeometry} from "../window/geometry";
 import type {IWindowGeometry} from "../window/geometry";
 /// #if !BROWSER
@@ -261,12 +261,31 @@ export const getLayoutSubMenu = (): IMenu[] => {
                     element.dataset.name = target.name;
                 }
                 const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
+                checkbox.type = target.type === "main" ? "radio" : "checkbox";
+                if (target.type === "main") {
+                    checkbox.name = "main-window-layout";
+                }
                 checkbox.className = "window-workspace__check";
                 checkbox.checked = target.type === "main" ? selectedMain === target.name : selectedWindows.has(target.id);
                 checkbox.setAttribute("aria-label", name);
-                checkbox.addEventListener("click", event => event.stopPropagation());
-                checkbox.addEventListener("keydown", event => event.stopPropagation());
+                checkbox.addEventListener("click", event => {
+                    event.stopPropagation();
+                    // 再次点击已选主窗口布局时取消选择，允许仅打开新窗口布局。
+                    if (target.type === "main" && selectedMain === target.name) {
+                        checkbox.checked = false;
+                        selectedMain = "";
+                        updateSelection();
+                    }
+                });
+                checkbox.addEventListener("keydown", event => {
+                    event.stopPropagation();
+                    if (target.type === "main" && event.key === " ") {
+                        event.preventDefault();
+                        if (!event.repeat) {
+                            checkbox.click();
+                        }
+                    }
+                });
                 checkbox.addEventListener("change", () => {
                     if (target.type === "main") {
                         selectedMain = checkbox.checked ? target.name : "";

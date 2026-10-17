@@ -66,6 +66,9 @@ func TestFTSAndHPathMatchesIntegration(t *testing.T) {
 		ids = append(ids, id)
 		sources = append(sources, source)
 	}
+	if err = rows.Err(); err != nil {
+		t.Fatal(err)
+	}
 	if err = rows.Close(); err != nil {
 		t.Fatal(err)
 	}

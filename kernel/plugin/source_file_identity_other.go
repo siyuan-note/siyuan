@@ -20,6 +20,6 @@ package plugin
 
 import "os"
 
-func readPluginSourceFileIdentity(info os.FileInfo) (device, inode uint64, ctime int64) {
+func readPluginSourceFileIdentity(_ os.FileInfo) (device, inode uint64, ctime int64) {
 	return
 }

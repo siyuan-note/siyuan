@@ -30,6 +30,12 @@ func validListMindmapMetadata(data map[string]any) bool {
 			return false
 		}
 	}
+	if value, exists := data["connectorStyle"]; exists {
+		style, ok := value.(string)
+		if !ok || !slices.Contains([]string{"spline", "orthogonal", "bezier", "rounded"}, style) {
+			return false
+		}
+	}
 	if summaries, exists := data["summaries"]; exists && !validListMindmapSummaries(summaries, data["version"] == float64(2)) {
 		return false
 	}

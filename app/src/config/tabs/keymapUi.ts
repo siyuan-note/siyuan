@@ -21,6 +21,12 @@ import {Menu} from "../../plugin/Menu";
 import {trackSettingSave} from "../setting/pending";
 import {getSettingsOwnerApp} from "../setting/windowContext";
 import type {App} from "../../index";
+import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
+
+const getKeymapLabel = (key: string) => {
+    const callout = CALLOUT_PRESETS.find(item => item.id === key);
+    return callout ? `${window.siyuan.languages.callout} - ${callout.title}` : window.siyuan.languages[key];
+};
 
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
@@ -155,7 +161,7 @@ const buildKeymapKeywords = (): string[] => [
 const buildKeymapCommandTexts = (): string[] => {
     const out: string[] = [];
     const pushKey = (key: string) => {
-        const text = window.siyuan.languages[key];
+        const text = getKeymapLabel(key);
         if (text) {
             out.push(text);
         }
@@ -271,11 +277,12 @@ const genKeymapItem = (keys: string) => {
     // 使用固定的 Constants.SIYUAN_KEYMAP 来保证每次生成的选项顺序一致
     // 避免在设置快捷键之后关闭设置重新打开设置之后选项顺序改变
     for (const key of Object.keys(template)) {
-        if (!window.siyuan.languages[key]) {
+        const label = getKeymapLabel(key);
+        if (!label) {
             continue;
         }
         const item = config[key] ?? template[key];
-        html.push(genKeymapRowHtml(window.siyuan.languages[key], keys + Constants.ZWSP + key, item));
+        html.push(genKeymapRowHtml(label, keys + Constants.ZWSP + key, item));
     }
     return html.join("");
 };
@@ -399,6 +406,7 @@ const bindKeymapList = (root: HTMLElement) => {
         cancelRecording();
         keymapListElement.dataset.keymapFilter = button.dataset.keymapFilterValue;
         refreshBindings();
+        searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap || "");
     });
     const saveRow = (row: HTMLElement, keys: string[], reset = false) => {
         renderRowBindings(row, keys);
@@ -703,19 +711,14 @@ const refreshKeymapBindings = (root: HTMLElement) => {
     });
     const list = root.querySelector<HTMLElement>("#keymapList");
     const hasConflict = Boolean(list.querySelector('[data-conflict="true"]'));
-    if (!hasConflict && list.dataset.keymapFilter === "conflict") {
-        list.dataset.keymapFilter = "all";
-    }
     list.querySelectorAll<HTMLElement>("[data-keymap-filter-value]").forEach(button => {
         const active = button.dataset.keymapFilterValue === list.dataset.keymapFilter;
         button.classList.toggle("b3-chip--current", active);
         button.setAttribute("aria-pressed", String(active));
         if (button.dataset.keymapFilterValue === "conflict") {
-            button.classList.toggle("fn__none", !hasConflict);
+            button.classList.toggle("fn__none", !hasConflict && !active);
         }
     });
-    searchKeymapList(list, list.querySelector<HTMLInputElement>("#keymapInput").value,
-        list.querySelector<HTMLInputElement>("#searchByKey").dataset.keymap || "");
 };
 
 let keymapSaveQueue = Promise.resolve();

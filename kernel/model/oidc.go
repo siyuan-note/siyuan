@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -86,14 +87,6 @@ type oidcStartInput struct {
 	Flow       string `json:"flow"`
 	To         string `json:"to"`
 	RememberMe bool   `json:"rememberMe"`
-}
-
-type oidcMobileCallbackInput struct {
-	CallbackURL string `json:"callbackURL"`
-}
-
-type oidcPollInput struct {
-	PollToken string `json:"pollToken"`
 }
 
 func OIDCValidateStart(c *gin.Context, request apicontract.SystemOIDCRequest) (ret apicontract.Response[apicontract.SystemOIDCStartData]) {
@@ -483,10 +476,8 @@ func ValidateOIDCConfiguration(config *conf.OIDC) error {
 		if rule.Operator != conf.OIDCClaimOperatorEquals && rule.Operator != conf.OIDCClaimOperatorContains {
 			return errors.New("Unsupported OIDC claim rule operator")
 		}
-		for _, value := range rule.Values {
-			if value == "" {
-				return errors.New("OIDC claim rule values cannot be empty")
-			}
+		if slices.Contains(rule.Values, "") {
+			return errors.New("OIDC claim rule values cannot be empty")
 		}
 	}
 	return nil

@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {moveConditionalColorRule} from "./conditionalColor";
+import * as filterDropdown from "./filterDropdown";
 
 test("returning from the color menu during field loading does not restore or bind a detached panel", async () => {
     let finishLoading: () => void;
@@ -51,7 +52,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
     const target = {dataset: {ruleId: "c"}, getBoundingClientRect: () => ({top: 100, height: 40})};
     const filterRoot = {};
     const option = {};
-    const dropdown = {style: {display: "block"}, contains: (element: unknown) => element === option,
+    const dropdown = {dataset: {path: "0"}, style: {display: "block"}, contains: (element: unknown) => element === option,
         closest: () => filterRoot};
     const root = {
         innerHTML: "", contains: (element: unknown) => element === source || element === target,
@@ -70,6 +71,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
         exports: methods, window,
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./filter": {prepareFilterColumns: async () => {}},
+            "./filterDropdown": filterDropdown,
             "./view": {getFieldsByData: () => [{id: "text", type: "text"}]},
             "../../../util/escape": {escapeAttr: String},
             "./conditionalColor": {getConditionalBackground: () => "", moveConditionalColorRule},
@@ -78,7 +80,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
             }},
         })[name] || {}),
     });
-    const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map(id => ({id, target: "item", color: null,
+    const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map((id): IAVConditionalColorRule => ({id, target: "item", color: null,
         matchOption: false, filter: {column: "text", operator: "Is not empty"}}));
     await methods.openConditionalColorsMenu({
         protyle: {options: {}} as IProtyle,
@@ -100,9 +102,9 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
     Object.assign(option, {closest: (): HTMLElement => null});
     dismiss({target: option});
     assert.equal(dropdown.style.display, "block");
-    dismiss({target: {closest: () => ({closest: () => filterRoot})}});
+    dismiss({target: {closest: () => ({dataset: {path: "0"}, closest: () => filterRoot})}});
     assert.equal(dropdown.style.display, "block");
-    dismiss({target: {closest: () => ({closest: () => ({})})}});
+    dismiss({target: {closest: () => ({dataset: {path: "0"}, closest: () => ({})})}});
     assert.equal(dropdown.style.display, "none");
     const event = {target: {closest: () => target}, clientY: 139, preventDefault() {}, stopPropagation() {}};
     listeners.get("drop")(event);

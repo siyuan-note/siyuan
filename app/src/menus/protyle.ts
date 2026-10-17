@@ -49,7 +49,7 @@ import {openNewWindowById} from "../window/openNewWindow";
 import {openBacklink, openGraph} from "../layout/dock/util";
 /// #endif
 import {getSearch, isMobile} from "../util/functions";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {renderImageDisplay} from "../protyle/render/imageDisplay";
@@ -99,7 +99,8 @@ import {
     stripSemanticMarkersFromRangeText,
 } from "../protyle/util/inlineElementMarker";
 
-const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = [], session?: IMenuSession) => {
+const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = [], session?: IMenuSession,
+                         initial = false) => {
     fetchPost("/api/search/searchAsset", {
         k,
         exts,
@@ -124,7 +125,9 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         }
         const show = () => {
             /// #if MOBILE
-            window.siyuan.menus.menu.fullscreen();
+            if (initial) {
+                window.siyuan.menus.menu.fullscreen();
+            }
             /// #else
             window.siyuan.menus.menu.popup(position);
             /// #endif
@@ -134,7 +137,7 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         } else {
             show();
         }
-        if (!k) {
+        if (!k && !isMobile()) {
             inputElement.select();
         }
     });
@@ -265,7 +268,7 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
                     }
                 }
             });
-            renderAssetList(element, "", position, exts, session);
+            renderAssetList(element, "", position, exts, session, true);
         }
     });
 };

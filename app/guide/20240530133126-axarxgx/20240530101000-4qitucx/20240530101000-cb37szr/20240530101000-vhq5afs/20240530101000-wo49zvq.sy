@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111950"
 	},
 	"Children": [
 		{
@@ -211,7 +211,7 @@
 			"Properties": {
 				"ID": "20240530101000-a9tnmh8",
 				"id": "20240530101000-0goc24t",
-				"updated": "20260803170332"
+				"updated": "20261016111950"
 			},
 			"Children": [
 				{
@@ -249,7 +249,7 @@
 			"Properties": {
 				"ID": "20240530101000-ib4zmc2",
 				"id": "20240530101000-i91y7b2",
-				"updated": "20260803163402"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -262,7 +262,7 @@
 					"Properties": {
 						"ID": "20240530101000-tgo0voe",
 						"id": "20240530101000-k0qwuca",
-						"updated": "20260803163402"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -271,7 +271,7 @@
 							"Properties": {
 								"ID": "20240530101000-0lkjgdt",
 								"id": "20240530101000-ouo791x",
-								"updated": "20260803163402"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -290,7 +290,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "クラウド"
+									"TextMarkTextContent": "アカウントと同期"
 								},
 								{
 									"Type": "NodeText",
@@ -303,7 +303,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ オプションをオフにします"
+									"Data": "​ オプションをオフにします"
 								}
 							]
 						}
@@ -375,7 +375,7 @@
 			"Properties": {
 				"ID": "20240530101000-ha2h5uo",
 				"id": "20240530101000-tj09nja",
-				"updated": "20260803170332"
+				"updated": "20261016111950"
 			},
 			"Children": [
 				{
@@ -418,7 +418,7 @@
 					"Properties": {
 						"ID": "20240530101000-16g7gcd",
 						"id": "20240530101000-v679ihj",
-						"updated": "20260803170332"
+						"updated": "20261016111950"
 					},
 					"Children": [
 						{
@@ -427,12 +427,12 @@
 							"Properties": {
 								"ID": "20240530101000-dg237pl",
 								"id": "20240530101000-s7kb83y",
-								"updated": "20260803170332"
+								"updated": "20261016111950"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "データ量が多い場合に新しいデバイスで同期設定を行う際は、"
+									"Data": "データ量が多い場合は、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -446,7 +446,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "エクスポート"
+									"TextMarkTextContent": "アプリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ"
 								},
 								{
 									"Type": "NodeText",
@@ -459,7 +468,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ でエクスポートされたデータを、"
+									"Data": "​ でデータをエクスポートし、新しいデバイスに転送してください。そのデバイスの同じ設定ページで "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -468,7 +477,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ でインポートする方法をおすすめします"
+									"Data": "​ を使ってインポートしてから同期を設定します"
 								}
 							]
 						}
@@ -482,7 +491,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261011151543-f2vsvp5",
-				"updated": "20261011151543"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -496,7 +505,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261011151543-94ddrfk",
-				"updated": "20261011151543"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -515,7 +524,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で S3、WebDAV、またはローカルファイルシステム（デスクトップ版のみ）を選び、同期サービスの設定欄にある設定ボタンを押します。必要な項目を入力して "
+					"Data": " で S3、WebDAV、またはローカルファイルシステムを選び、同期サービスの設定欄にある設定ボタンを押します。ローカルファイルシステムはデスクトップ標準カーネルと Docker カーネルで利用でき、モバイルカーネルにはありません。指定するのはカーネルが動作するマシンまたはコンテナ内のパスであり、ブラウザーを開いている端末のパスではありません。入力後に "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -572,7 +581,7 @@
 			"Properties": {
 				"ID": "20240530101000-sa83wf1",
 				"id": "20240530101000-01df0kh",
-				"updated": "20260803163402"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -587,12 +596,12 @@
 			"Properties": {
 				"ID": "20240530101000-frum6h7",
 				"id": "20240530101000-lmow4gl",
-				"updated": "20260803163402"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​ "
+					"Data": "​"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -606,7 +615,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "クラウド"
+					"TextMarkTextContent": "アカウントと同期"
 				},
 				{
 					"Type": "NodeText",
@@ -619,7 +628,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ では 3 つの同期モードがサポートされています:"
+					"Data": "​ では 3 つの同期モードがサポートされています:"
 				}
 			]
 		},
@@ -630,7 +639,7 @@
 			"Properties": {
 				"ID": "20240530101000-fjz8n5c",
 				"id": "20240530101000-gox5i3i",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -643,7 +652,7 @@
 					"Properties": {
 						"ID": "20240530101000-13fmrst",
 						"id": "20240530101000-72qfx37",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -668,7 +677,7 @@
 							"Properties": {
 								"ID": "20240530101000-5t62tcl",
 								"id": "20240530101000-ukwsc84",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -681,7 +690,7 @@
 									"Properties": {
 										"ID": "20240530101000-6nfwn7h",
 										"id": "20240530101000-hjldwpq",
-										"updated": "20240530101000"
+										"updated": "20261016111431"
 									},
 									"Children": [
 										{
@@ -690,12 +699,12 @@
 											"Properties": {
 												"ID": "20240530101000-7e6hhps",
 												"id": "20240530101000-s7h960c",
-												"updated": "20240530101000"
+												"updated": "20261016111431"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "起動時と終了時に同期され、アプリケーションの使用中は同期アルゴリズムにしたがって自動的に同期されます"
+													"Data": "起動時と通常の終了時に同期し、使用中はローカルデータの変更が止まってから設定された間隔後に同期します。既定の間隔は 30 秒です"
 												}
 											]
 										}
@@ -876,7 +885,7 @@
 			"Properties": {
 				"ID": "20240530101000-q5e6vx7",
 				"id": "20240530101000-ayipniy",
-				"updated": "20260918195936"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1068,7 +1077,7 @@
 			"Properties": {
 				"ID": "20240530101000-n0hjtca",
 				"id": "20240530101000-b3qw7ig",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1083,7 +1092,7 @@
 					"Properties": {
 						"ID": "20240530101000-5mcca2s",
 						"id": "20240530101000-o8qcws7",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1092,12 +1101,39 @@
 							"Properties": {
 								"ID": "20240530101000-4drsllw",
 								"id": "20240530101000-l4xj1ow",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "データの変更後 30 秒間アイドル状態が続くとデータの比較が行われ、変更が検出されると同期が実行されます"
+									"Data": "最後のデータ変更から "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アカウントと同期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "同期間隔"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で指定した時間後に同期を予定します。既定値は 30 秒で、30～43200 秒に設定できます。さらに変更すると待ち時間が最初から始まります"
 								}
 							]
 						}
@@ -1114,7 +1150,7 @@
 			"Properties": {
 				"ID": "20240530101000-hqypxbz",
 				"id": "20240530101000-rqa32bn",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1129,7 +1165,7 @@
 					"Properties": {
 						"ID": "20240530101000-lljjeaw",
 						"id": "20240530101000-4k3zyng",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1138,16 +1174,105 @@
 							"Properties": {
 								"ID": "20240530101000-kxzlp0y",
 								"id": "20240530101000-q1ly6dc",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "データの変更が検出されなかった場合は、5 分、8 分、16 分、32 分...と比較間隔を徐々に長くします。データの変更が検出されると同期が実行されて 1 に戻ります"
+									"Data": "データの変更が見つからない場合、自動確認の間隔が長くなります。再び変更されると、設定された同期間隔に従って同期を予定します"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-ku2g3co",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261016111431-ku2g3co",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リアルタイム同期と LAN 同期アクセラレーション"
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-72qretz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-72qretz",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アカウントと同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "リアルタイム同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は SiYuan 公式クラウドからの通知を利用し、自動モードで同期をより早く開始します。Docker カーネルでは利用できません。手動モードや完全手動モードの設定を無視することはなく、編集の競合をなくすものでもありません。"
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-myut6e6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-myut6e6",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アカウントと同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "LAN 同期アクセラレーション"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は、同じリポジトリキーとクラウド同期先を使う到達可能な LAN 内の端末から、暗号化データオブジェクトを優先して取得します。クラウドが引き続き同期の正規データ源であり、LAN 転送が利用できない場合はクラウドへ切り替わるため、完全オフラインの端末間同期の代わりにはなりません。Docker カーネルでは LAN 同期アクセラレーションを利用できません。LAN 通知による同期開始は自動モードに限られます。"
 				}
 			]
 		},
@@ -1158,7 +1283,7 @@
 			"Properties": {
 				"ID": "20240530101000-vbzlluh",
 				"id": "20240530101000-2pxbi4l",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1173,12 +1298,12 @@
 			"Properties": {
 				"ID": "20240530101000-50zbg4m",
 				"id": "20240530101000-xdkiwt8",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上記の動作原理から、SiYuan は複数のデバイス間でデータを同期する際は交互に行う必要があることがわかります。複数のデバイスで同時に同期しようとするとデータの競合が発生し、予期せぬ上書きが起こる可能性があります。"
+					"Data": "競合を減らすには、デバイス A で同期を完了し、次にデバイス B でも同期を完了してから編集してください。同じファイルを同時に編集すると競合し、一方のバージョンが他方を上書きする可能性があります。リアルタイム同期や LAN 同期アクセラレーションでもこのリスクはなくなりません。"
 				}
 			]
 		},
@@ -1189,7 +1314,7 @@
 			"Properties": {
 				"ID": "20240530101000-hnhjuyk",
 				"id": "20240530101000-k8lwanc",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1207,7 +1332,7 @@
 			"Properties": {
 				"ID": "20240530101000-903yqr9",
 				"id": "20240530101000-rwhhwv1",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1222,7 +1347,7 @@
 					"Properties": {
 						"ID": "20240530101000-r525dra",
 						"id": "20240530101000-myt9vth",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1231,12 +1356,12 @@
 							"Properties": {
 								"ID": "20240530101000-ejo1pk9",
 								"id": "20240530101000-azkr3z2",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デバイス A で編集して同期を実行すると、クラウド上のデータがデバイス A のデータで上書きされ、両者のデータが一致した状態になります"
+									"Data": "デバイス A で編集後に同期し、変更がクラウドに反映されるまで待ちます"
 								}
 							]
 						}
@@ -1254,7 +1379,7 @@
 					"Properties": {
 						"ID": "20240530101000-6xlvmcd",
 						"id": "20240530101000-cvkts61",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1263,12 +1388,12 @@
 							"Properties": {
 								"ID": "20240530101000-94ljcw4",
 								"id": "20240530101000-cb9jrjx",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デバイス B で同期を実行すると、クラウド上のデータでデバイス B のデータが上書きされ、クラウド、デバイス A、デバイス B のデータがすべて一致した状態になります"
+									"Data": "デバイス B で編集する前に同期し、A の変更を受信し終わるまで待ちます"
 								}
 							]
 						}
@@ -1286,7 +1411,7 @@
 					"Properties": {
 						"ID": "20240530101000-0oyacia",
 						"id": "20240530101000-twua02k",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1295,12 +1420,12 @@
 							"Properties": {
 								"ID": "20240530101000-ttoam86",
 								"id": "20240530101000-684azxo",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デバイス B で編集して同期を実行すると、クラウド上のデータがデバイス B のデータで上書きされ、両者のデータが一致した状態になります"
+									"Data": "デバイス B で編集後に再度同期し、その変更がクラウドに反映されるまで待ちます"
 								}
 							]
 						}
@@ -1318,7 +1443,7 @@
 					"Properties": {
 						"ID": "20240530101000-osaj0mr",
 						"id": "20240530101000-2f40wg3",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1327,12 +1452,12 @@
 							"Properties": {
 								"ID": "20240530101000-m0zx96w",
 								"id": "20240530101000-c7ax5sa",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デバイス A で同期を実行すると、クラウド上のデータでデバイス A のデータが上書きされ、クラウド、デバイス A、デバイス B のデータがすべて一致した状態になります"
+									"Data": "デバイス A に戻ったら、同期して B の変更を受信してから編集を続けます"
 								}
 							]
 						}
@@ -1346,12 +1471,12 @@
 			"Properties": {
 				"ID": "20240530101000-p4s4ojx",
 				"id": "20240530101000-nd3g396",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "このシナリオでは、デバイス A とデバイス B が交互に同期を行うことでデータ同期が常に正常に完了することが保証されます。"
+					"Data": "交互に編集し、毎回の同期が成功したことを確認すると、競合を減らし、両方のデバイスの内容を一致させやすくなります。"
 				}
 			]
 		},
@@ -1362,7 +1487,7 @@
 			"Properties": {
 				"ID": "20240530101000-t4225fj",
 				"id": "20240530101000-8v63pt5",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1380,7 +1505,7 @@
 			"Properties": {
 				"ID": "20240530101000-11drhzl",
 				"id": "20240530101000-80o6mmq",
-				"updated": "20240530101000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1395,7 +1520,7 @@
 					"Properties": {
 						"ID": "20240530101000-rqbs1kq",
 						"id": "20240530101000-l7mb1fh",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1404,12 +1529,12 @@
 							"Properties": {
 								"ID": "20240530101000-j6iyvdw",
 								"id": "20240530101000-3xegsr1",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デバイス A でファイル a を編集した後同期します"
+									"Data": "デバイス A でファイル a を編集して同期を完了します"
 								}
 							]
 						}
@@ -1427,7 +1552,7 @@
 					"Properties": {
 						"ID": "20240530101000-98dxjss",
 						"id": "20240530101000-v8y5g69",
-						"updated": "20240530101000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1436,12 +1561,12 @@
 							"Properties": {
 								"ID": "20240530101000-neyvns1",
 								"id": "20240530101000-9ygwkl0",
-								"updated": "20240530101000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デバイス B でファイル a を編集した後同期します"
+									"Data": "A の変更を受信する前に、デバイス B で古いファイル a を編集し、その後同期します"
 								}
 							]
 						}

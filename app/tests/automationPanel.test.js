@@ -42,7 +42,21 @@ const runCases = async (sources, css, mobile) => {
     window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, menus: {menu: {remove() {}}}};
     const mocks = {
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
-        "plugin/Menu": {Menu: class {items = []; addItem(item) {this.items.push(item);} open() {fieldMenu = {items: this.items};}}},
+        "plugin/Menu": {Menu: class {
+            items = [];
+            element = document.createElement("div");
+            addItem(item) {
+                this.items.push(item);
+                if (item.bind) {
+                    this.element.innerHTML = item.label;
+                    item.bind(this.element);
+                }
+            }
+            open() { this.element.className = "b3-menu"; document.body.append(this.element); fieldMenu = {items: this.items, element: this.element}; }
+            close() { this.element.remove(); }
+            showSubMenu() {}
+        }},
+        "util/functions": {isMobile: () => mobile},
         "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
             (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
             {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
@@ -93,23 +107,44 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(sections[0].contains(get("[data-trigger]")));
     assert.ok(sections[1].contains(get("[data-source-conditions]")));
     assert.ok(sections[2].contains(get("[data-actions]")));
-    assert.equal(get("[data-rule]").labels[0].textContent.includes(lang.automationRule), true);
-    assert.equal(get("[data-enabled]").labels[0].textContent.trim(), "");
+    assert.equal(get('[data-action="rules"]').getAttribute("aria-label"), lang.automationRule);
     assert.equal(get("[data-enabled]").getAttribute("aria-label"), lang.enable);
     assert.ok(get("[data-enabled]").classList.contains("ariaLabel"), "the enable switch exposes its label as a tooltip");
     assert.equal(get("[data-trigger-field] option").textContent, lang.automationAnyField);
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     assert.equal(transactions.length, 0, "opening settings must preserve the stored rule");
-    const nameRect = get("[data-name]").getBoundingClientRect();
+    const nameRect = get('[data-action="rules"]').getBoundingClientRect();
     const enabledRect = get("[data-enabled]").getBoundingClientRect();
     assert.ok(Math.abs((nameRect.top + nameRect.bottom) / 2 - (enabledRect.top + enabledRect.bottom) / 2) <= 1,
-        "the enable switch aligns with the name input rather than its label");
-    const ruleRect = get("[data-rule]").getBoundingClientRect();
-    for (const action of ["add-rule", "remove-rule"]) {
+        "the enable switch aligns with the rule name");
+    const ruleRect = nameRect;
+    for (const action of ["add-rule"]) {
         const button = get(`[data-action="${action}"]`).getBoundingClientRect();
         assert.ok(Math.abs((ruleRect.top + ruleRect.bottom) / 2 - (button.top + button.bottom) / 2) <= 1,
             "rule actions align with the selector rather than its label");
     }
+    await click('[data-action="rules"]');
+    const rulePopup = fieldMenu.element;
+    rulePopup.querySelector("[data-rename]").click();
+    const renameInput = rulePopup.querySelector("[data-rules] input");
+    renameInput.value = "Cancelled";
+    renameInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    assert.equal(transactions.length, 0, "Escape cancels renaming");
+    rulePopup.querySelector("[data-rename]").click();
+    const nextName = rulePopup.querySelector("[data-rules] input");
+    nextName.value = "Renamed completion";
+    nextName.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    assert.equal(latest().name, "Renamed completion");
+    assert.equal(transactions.at(-1).undo[0].data.rules[0].name, "Record completion time");
+    const searchRules = rulePopup.querySelector("[data-search]");
+    searchRules.value = "missing";
+    searchRules.dispatchEvent(new Event("input"));
+    assert.equal(rulePopup.querySelectorAll("[data-id]").length, 0);
+    searchRules.value = "renamed";
+    searchRules.dispatchEvent(new Event("input"));
+    assert.equal(rulePopup.querySelectorAll("[data-id]").length, 1);
+    rulePopup.querySelector(".b3-list-item__text").click();
+    await tick();
     const removals = [
         ['[data-source-conditions] [data-condition="0"]', '[data-source-conditions] [data-action="remove-condition"]'],
         ['[data-actions] [data-index="0"]', '[data-actions] [data-action="remove-action"]'],
@@ -347,10 +382,7 @@ const runCases = async (sources, css, mobile) => {
         for (const fontSize of ["", "28px"]) {
             menu.style.fontSize = fontSize;
             await tick();
-            const selectorRect = get("[data-rule]").getBoundingClientRect();
-            const nameInputRect = get("[data-name]").getBoundingClientRect();
-            assert.ok(Math.abs(selectorRect.left - nameInputRect.left) <= 1 && Math.abs(selectorRect.right - nameInputRect.right) <= 1,
-                `${mobile}/${width}/${fontSize}: rule selector and name input share their left and right edges`);
+            assert.ok(get('[data-action="rules"]').getBoundingClientRect().width > 0);
             for (const element of [menu, get(".av__automation-body"), ...menu.querySelectorAll("section, [data-index]")]) {
                 assert.ok(element.scrollWidth <= element.clientWidth + 1, `${mobile}/${width}/${fontSize}: content overflows`);
             }
@@ -420,6 +452,22 @@ const runCases = async (sources, css, mobile) => {
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
     await click('[data-remove="attribute"]');
     assert.equal(latest().blockSource.attributes.length, 0);
+    await click('[data-action="add-rule"]');
+    const secondID = transactions.at(-1).perform[0].data.rules[1].id;
+    await click('[data-action="rules"]');
+    fieldMenu.element.querySelector('[data-id="rule"] [data-more]').click();
+    assert.equal(fieldMenu.element.querySelector('[data-id="rule"] .b3-menu__submenu').style.display, "block");
+    fieldMenu.element.querySelector('[data-id="rule"] [data-delete]').click();
+    await tick();
+    assert.equal(transactions.at(-1).perform[0].data.rules.length, 1);
+    assert.equal(transactions.at(-1).perform[0].data.rules[0].id, secondID, "deleting another rule preserves the current rule");
+    assert.equal(transactions.at(-1).undo[0].data.rules.length, 2);
+    await click('[data-action="rules"]');
+    fieldMenu.element.querySelector("[data-delete]").click();
+    await tick();
+    assert.equal(transactions.at(-1).perform[0].data.rules.length, 0);
+    assert.ok(get('[data-action="rules"]'), "deleting the current rule opens a fresh disabled draft");
+    assert.equal(get("[data-enabled]").checked, false);
     window.removeEventListener("resize", resizeMenu);
 };
 
@@ -445,7 +493,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;

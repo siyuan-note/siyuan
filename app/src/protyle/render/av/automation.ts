@@ -11,6 +11,7 @@ import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
 import {collectionSourceIncomplete, mountBlockCollectionSource, openBlockCollectionPreview} from "./blockCollection";
 import {automationTimeZone, mountAutomationTemplate} from "./automationTemplate";
+import {openAutomationRules} from "./automationRules";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
     value?: IAVCellValue;
@@ -309,8 +310,8 @@ export const openAutomationMenu = async (options: {
         }
         const scrollTop = scrollElement.scrollTop;
         body.innerHTML = `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTip}</div>
-<div class="av__automation-row">${rule ? `<label class="av__automation-control fn__flex-1"><span class="ft__on-surface av__automation-control-label">${lang.automationRule}</span><select class="b3-select av__automation-rule-select" data-rule>${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select></label>` : ""}<div class="av__automation-row av__automation-tools">${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div></div>
-${rule ? `<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="ft__on-surface av__automation-control-label">${lang.name}</span><input class="b3-text-field av__automation-rule-name" data-name value="${escapeAttr(rule.name)}"></label><label class="av__automation-row av__automation-enabled"><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}></label></div>
+<div class="av__automation-row">${rule ? `<button type="button" class="b3-button b3-button--cancel fn__flex-1 av__automation-source-action" data-action="rules" aria-label="${escapeAttr(lang.automationRule)}"><span class="fn__ellipsis" data-rule-name>${escapeHtml(rule.name)}</span><svg><use xlink:href="#iconDown"></use></svg></button><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}</div>
+${rule ? `
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationAutoSaveTip}</div>
 <div class="ft__on-surface ft__smaller fn__none av__automation-status" role="status" data-status></div>
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">1</span><span class="av__automation-section-title">${lang.automationWhen}</span></div>
@@ -389,36 +390,11 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
         // 重建期间内容高度可能暂时变小，所有字段挂载并完成定位后再恢复滚动位置。
         scrollElement.scrollTop = scrollTop;
     };
-    body.addEventListener("input", event => {
-        if ((event.target as HTMLElement).matches("[data-name]")) {
-            rules[index].name = (event.target as HTMLInputElement).value;
-            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = rules[index].name;
-        }
-    });
-    body.addEventListener("blur", event => {
-        const target = event.target as HTMLInputElement;
-        if (target.matches("[data-name]")) {
-            rules[index].name = target.value.trim() || lang.databaseAutomations;
-            target.value = rules[index].name;
-            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = target.value;
-            save();
-        }
-    }, true);
     body.addEventListener("change", event => {
         const target = event.target as HTMLInputElement;
         const rule = rules[index];
         const action = rule?.actions[Number(target.closest<HTMLElement>("[data-index]")?.dataset.index)];
-        if (target.matches("[data-rule]")) {
-            index = Number(target.value);
-            void render();
-            return;
-        } else if (target.matches("[data-name]")) {
-            rule.name = target.value.trim() || lang.databaseAutomations;
-            target.value = rule.name;
-            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = rule.name;
-            save();
-            return;
-        } else if (target.matches("[data-enabled]")) {
+        if (target.matches("[data-enabled]")) {
             rule.enabled = target.checked;
             save();
             const preview = body.querySelector<HTMLButtonElement>('[data-action="preview-collection"]');
@@ -497,6 +473,24 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
         const actionIndex = Number(target.closest<HTMLElement>("[data-index]")?.dataset.index);
         const action = rule?.actions[actionIndex];
         switch (target.dataset.action) {
+            case "rules":
+                openAutomationRules(target, rules, rule.id, id => {
+                    index = rules.findIndex(item => item.id === id);
+                    void render();
+                }, (id, name) => {
+                    const renamed = rules.find(item => item.id === id);
+                    renamed.name = name;
+                    save(null);
+                    body.querySelector("[data-rule-name]").textContent = rules[index].name;
+                }, id => {
+                    const currentID = rules[index].id;
+                    rules.splice(rules.findIndex(item => item.id === id), 1);
+                    index = Math.max(0, rules.findIndex(item => item.id === currentID));
+                    save(null);
+                    if (!rules.length) { rules.push(createRule()); }
+                    void render();
+                });
+                return;
             case "preview-collection":
                 void openBlockCollectionPreview(protyle, avID, blockElement.dataset.nodeId, rule.id);
                 return;
@@ -504,16 +498,6 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
                 rules.push(createRule());
                 index = rules.length - 1;
                 break;
-            case "remove-rule":
-                rules.splice(index, 1);
-                index = Math.min(index, rules.length - 1);
-                save(null);
-                if (!rules.length) {
-                    rules.push(createRule());
-                    index = 0;
-                }
-                void render();
-                return;
             case "add-action":
                 rule.actions.push({type: "edit", target: "current", fields: {}});
                 break;

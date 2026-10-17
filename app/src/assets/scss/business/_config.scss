@@ -171,6 +171,12 @@
   > .fn__flex-1 {
     min-width: 0;
   }
+
+  > label {
+    // 与输入框顶部对齐，避免提示文本出现后整行变高导致文案随之居中下移
+    align-self: flex-start;
+    padding-top: 4px;
+  }
 }
 
 .config-sync-form {
@@ -183,10 +189,18 @@
 }
 
 @media screen and (max-width: 750px) {
-  .config-sync-field > .fn__flex-1 {
-    flex: none;
-    width: 100%;
-    margin-top: 8px;
+  .config-sync-field {
+    > label {
+      // 窄屏下输入框整行落到文案下方，恢复默认的垂直居中
+      align-self: auto;
+      padding-top: 0;
+    }
+
+    > .fn__flex-1 {
+      flex: none;
+      width: 100%;
+      margin-top: 8px;
+    }
   }
 }
 

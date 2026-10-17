@@ -38,7 +38,7 @@ func mcpOAuthError(err error) apicontract.Response[apicontract.BinaryContent] {
 		status, code = 400, "invalid_request"
 	case errors.Is(err, mcpoauth.ErrDisabled):
 		status, code = 404, "temporarily_unavailable"
-	case err != nil && err.Error() == "unsupported_grant_type":
+	case errors.Is(err, mcpoauth.ErrGrantType):
 		status, code = 400, "unsupported_grant_type"
 	}
 	return mcpOAuthJSON(status, apicontract.MCPOAuthError{Error: code})

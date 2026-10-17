@@ -25,7 +25,7 @@ func publishPluginProjectDelivery(grant *util.PluginDevelopmentGrant, artifact *
 	name := "plugin-project-" + grant.TaskID + "-" + artifact.PackageHash + ".zip"
 	if info, statErr := root.Lstat(name); statErr == nil {
 		if !util.PluginProjectRegularFile(info) {
-			return errors.New("invalid_path: delivery copy is linked or special")
+			return util.NewTextFileError(util.TextFileInvalidPath, errors.New("delivery copy is linked or special"))
 		}
 		file, openErr := util.OpenFileNoFollow(root, name)
 		if openErr != nil {
@@ -34,7 +34,7 @@ func publishPluginProjectDelivery(grant *util.PluginDevelopmentGrant, artifact *
 		actual, statErr := file.Stat()
 		if statErr != nil || !os.SameFile(info, actual) {
 			file.Close()
-			return errors.New("revision_conflict: delivery copy identity changed")
+			return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("delivery copy identity changed"))
 		}
 		if openErr = util.CheckSingleLinkRegularFile(file); openErr != nil {
 			file.Close()
@@ -43,7 +43,7 @@ func publishPluginProjectDelivery(grant *util.PluginDevelopmentGrant, artifact *
 		data, readErr := io.ReadAll(io.LimitReader(file, MaxLocalPackageArchiveSize+1))
 		file.Close()
 		if readErr != nil || util.PluginProjectDigest(data) != artifact.PackageHash {
-			return errors.New("revision_conflict: existing delivery copy changed")
+			return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("existing delivery copy changed"))
 		}
 	} else {
 		if !errors.Is(statErr, os.ErrNotExist) {

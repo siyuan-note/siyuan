@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -17,6 +18,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/model/mcpoauth"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -88,6 +90,19 @@ func oauthHTTPRequest(t *testing.T, r *gin.Engine, method, path, body, contentTy
 	return response
 }
 
+func TestAPIContractMCPOAuthWrappedGrantType(t *testing.T) {
+	r := gin.New()
+	r.POST("/oauth/mcp/token", contractHandler(apicontract.MCPOAuthToken,
+		func(_ *gin.Context, _ apicontract.MCPOAuthTokenRequest) apicontract.Response[apicontract.BinaryContent] {
+			return mcpOAuthError(fmt.Errorf("token service: %w", mcpoauth.ErrGrantType))
+		}))
+	res := oauthHTTPRequest(t, r, "POST", "/oauth/mcp/token", "grant_type=bogus",
+		"application/x-www-form-urlencoded", "", nil, "")
+	if res.Code != http.StatusBadRequest || res.Body.String() != `{"error":"unsupported_grant_type"}` {
+		t.Fatal(res.Code, res.Body.String())
+	}
+}
+
 func TestAPIContractMCPOAuthFlow(t *testing.T) {
 	r := oauthTestRouter(t)
 	call := func(method, path, body, contentType, auth string, cookies []*http.Cookie, origin string) *httptest.ResponseRecorder {
@@ -109,6 +124,11 @@ func TestAPIContractMCPOAuthFlow(t *testing.T) {
 		t.Fatal(registered.Body.String(), err)
 	}
 	c := created.Data
+	unsupportedForm := url.Values{"grant_type": {"bogus"}, "resource": {"https://note.example.com/mcp"}, "client_id": {c.ID}, "client_secret": {c.Secret}}
+	unsupported := call("POST", "/oauth/mcp/token", unsupportedForm.Encode(), "application/x-www-form-urlencoded", "", nil, "")
+	if unsupported.Code != http.StatusBadRequest || unsupported.Body.String() != `{"error":"unsupported_grant_type"}` {
+		t.Fatal(unsupported.Code, unsupported.Body.String())
+	}
 	for _, path := range []string{"/.well-known/oauth-protected-resource/mcp", "/.well-known/oauth-protected-resource", "/.well-known/oauth-authorization-server"} {
 		res := call("GET", path, "", "", "", nil, "")
 		if res.Code != 200 || strings.Contains(res.Body.String(), `"code":`) || !strings.Contains(res.Body.String(), "https://note.example.com") {

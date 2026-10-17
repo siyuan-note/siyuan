@@ -116,7 +116,7 @@ func TestBazaarProjectManagedArchiveCannotUseLegacyInstall(t *testing.T) {
 }
 
 func TestBazaarProjectUnknownErrorsRetainExecutionState(t *testing.T) {
-	result, err := bazaarProjectError(errors.New("result_unknown: staged replacement may be partial"), map[string]any{"installedRevision": "observed"})
+	result, err := bazaarProjectError(util.NewTextFileError(util.TextFileResultUnknown, errors.New("staged replacement may be partial")), map[string]any{"installedRevision": "observed"})
 	if err != nil || !result.IsError || !result.ExecutionUnknown || !strings.Contains(probeText(result), "observed") {
 		t.Fatal(result, err)
 	}

@@ -23,7 +23,7 @@ import (
 const MissingInstalledRevision = "missing"
 
 var (
-	ErrInstalledRevisionConflict = errors.New("revision_conflict: installed package changed")
+	ErrInstalledRevisionConflict = util.NewTextFileError(util.TextFileRevisionConflict, errors.New("installed package changed"))
 	ErrPackageHashConflict       = errors.New("package_hash_conflict: package archive changed")
 )
 

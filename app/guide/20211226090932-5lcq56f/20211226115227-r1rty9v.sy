@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20261017212429"
+		"updated": "20261017234852"
 	},
 	"Children": [
 		{
@@ -1064,7 +1064,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231338-vlg2lgm",
-				"updated": "20260809232000"
+				"updated": "20261017234852"
 			},
 			"Children": [
 				{
@@ -1078,12 +1078,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017212429-ke3nbw0",
-				"updated": "20261017212429"
+				"updated": "20261017234852"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "預設使用精簡區塊標。若要顯示目前區塊及其所屬容器的所有區塊標，可在 "
+					"Data": "預設使用精簡區塊標。只有一個列表項時，也會保留列表區塊和列表項區塊標。若要顯示目前區塊及其所屬容器的所有區塊標，可在 "
 				},
 				{
 					"Type": "NodeTextMark",

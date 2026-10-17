@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20261017212429"
+		"updated": "20261017234852"
 	},
 	"Children": [
 		{
@@ -1068,7 +1068,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231348-sx3l5qp",
-				"updated": "20260809232000"
+				"updated": "20261017234852"
 			},
 			"Children": [
 				{
@@ -1082,12 +1082,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017212429-ykfqzzo",
-				"updated": "20261017212429"
+				"updated": "20261017234852"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Compact indicators are used by default. To show indicators for the current block and all its containers, open "
+					"Data": "Compact indicators are used by default. Lists with only one item retain both the list and list item indicators. To show indicators for the current block and all its containers, open "
 				},
 				{
 					"Type": "NodeTextMark",

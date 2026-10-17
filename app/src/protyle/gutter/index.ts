@@ -1610,7 +1610,7 @@ export class Gutter {
                 label: window.siyuan.languages.multiSelect,
                 click: () => {
                     const blockElement = getMobileBlockSelectionElement(nodeElement as HTMLElement,
-                        window.siyuan.config.editor.blockGutterMode === 1);
+                        window.siyuan.config.editor.blockGutterMode === 1 || type === "NodeListItem");
                     hideElements(["select"], protyle);
                     window.getSelection()?.removeAllRanges();
                     protyle.toolbar.showMultiSelectMode(protyle, blockElement);
@@ -3783,6 +3783,11 @@ export class Gutter {
                     }
 
                     let topElement = selectedElement || (fullGutter || tabsHeader || mindmapElement ? nodeElement : getTopAloneElement(nodeElement));
+                    const listItemElement = nodeElement.closest('[data-type="NodeListItem"]');
+                    if (!fullGutter && !isMultiSelect && listItemElement && topElement.contains(listItemElement)) {
+                        // 精简模式保留列表项入口，其内部段落仍合并到列表项块标。
+                        topElement = listItemElement;
+                    }
                     if (!fullGutter && listItemContainer && topElement.contains(listItemContainer)) {
                         topElement = nodeElement === listItemContainer.parentElement ? nodeElement : listItemContainer;
                     }

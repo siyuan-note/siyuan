@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20261017212429"
+		"updated": "20261017234852"
 	},
 	"Children": [
 		{
@@ -1060,7 +1060,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501230739-whydmx1",
-				"updated": "20260809232000"
+				"updated": "20261017234852"
 			},
 			"Children": [
 				{
@@ -1074,12 +1074,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017212429-ssbwd82",
-				"updated": "20261017212429"
+				"updated": "20261017234852"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "默认使用精简块标。若要显示当前块及其所属容器的全部块标，可在 "
+					"Data": "默认使用精简块标。只有一个列表项时，也会保留列表块和列表项块标。若要显示当前块及其所属容器的全部块标，可在 "
 				},
 				{
 					"Type": "NodeTextMark",

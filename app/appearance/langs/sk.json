@@ -2099,7 +2099,7 @@
 	"dataRepoKey": "Kľúč dátového skladu",
 	"dataRepoPurge": "Vyčistiť lokálny dátový sklad",
 	"dataRepoPurgeTip": "Odstrániť všetky nepotrebné snímky",
-	"dataRepoPurgeConfirm": "Všetky miestne historické snímky bez odkazov a súvisiace dátové objekty sa natrvalo odstránia. Snímky zachované pomocou odkazov, napríklad najnovšia snímka, základ synchronizácie a ručne označené snímky, zostanú zachované.<br><br>Ručné čistenie sa neriadi nastaveniami automatického čistenia pre počet dní uchovávania ani počet snímok uchovávaných za deň. Odstránené miestne snímky už nebude možné použiť na obnovenie historických údajov.<br><br>Naozaj chcete vykonať čistenie?",
+	"dataRepoPurgeConfirm": "Všetky miestne historické snímky bez odkazov a súvisiace dátové objekty sa natrvalo odstránia. Snímky zachované pomocou odkazov, napríklad najnovšia snímka, základ synchronizácie a ručne označené snímky, zostanú zachované.<div class=\"fn__hr\"></div>Ručné čistenie sa neriadi nastaveniami automatického čistenia pre počet dní uchovávania ani počet snímok uchovávaných za deň. Odstránené miestne snímky už nebude možné použiť na obnovenie historických údajov.<div class=\"fn__hr\"></div>Naozaj chcete vykonať čistenie?",
 	"purge": "Vyčistiť",
 	"plsChoose": "Najprv vyberte",
 	"freeSub": "Bezplatné skúšobné predplatné",

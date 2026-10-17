@@ -2099,7 +2099,7 @@
 	"dataRepoKey": "Klucz repozytorium danych",
 	"dataRepoPurge": "Oczyszczanie lokalnego repozytorium danych",
 	"dataRepoPurgeTip": "Usuń wszystkie nieodwołane zrzuty i powiązane obiekty danych",
-	"dataRepoPurgeConfirm": "Wszystkie lokalne historyczne zrzuty bez odwołań i powiązane obiekty danych zostaną trwale usunięte. Zrzuty zachowywane przez odwołania, takie jak najnowszy zrzut, podstawa synchronizacji i zrzuty oznaczone ręcznie, zostaną zachowane.<br><br>Ręczne oczyszczanie nie uwzględnia ustawień automatycznego oczyszczania dotyczących liczby dni przechowywania ani liczby zrzutów zachowywanych dziennie. Usuniętych lokalnych zrzutów nie będzie już można użyć do przywrócenia danych historycznych.<br><br>Czy na pewno chcesz przeprowadzić oczyszczanie?",
+	"dataRepoPurgeConfirm": "Wszystkie lokalne historyczne zrzuty bez odwołań i powiązane obiekty danych zostaną trwale usunięte. Zrzuty zachowywane przez odwołania, takie jak najnowszy zrzut, podstawa synchronizacji i zrzuty oznaczone ręcznie, zostaną zachowane.<div class=\"fn__hr\"></div>Ręczne oczyszczanie nie uwzględnia ustawień automatycznego oczyszczania dotyczących liczby dni przechowywania ani liczby zrzutów zachowywanych dziennie. Usuniętych lokalnych zrzutów nie będzie już można użyć do przywrócenia danych historycznych.<div class=\"fn__hr\"></div>Czy na pewno chcesz przeprowadzić oczyszczanie?",
 	"purge": "Oczyść",
 	"plsChoose": "Proszę najpierw wybrać",
 	"freeSub": "Bezpłatna subskrypcja próbna",

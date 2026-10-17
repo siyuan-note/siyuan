@@ -2099,7 +2099,7 @@
 	"dataRepoKey": "Daten-Repo-Schlüssel",
 	"dataRepoPurge": "Lokales Daten-Repo bereinigen",
 	"dataRepoPurgeTip": "Alle nicht referenzierten Schnappschüsse und zugehörigen Datenobjekte löschen.",
-	"dataRepoPurgeConfirm": "Alle nicht referenzierten lokalen historischen Schnappschüsse und zugehörigen Datenobjekte werden dauerhaft gelöscht. Durch Referenzen erhaltene Schnappschüsse, etwa der neueste Schnappschuss, die Synchronisationsbasis und manuell markierte Schnappschüsse, bleiben erhalten.<br><br>Die manuelle Bereinigung berücksichtigt weder die Aufbewahrungsdauer noch die Anzahl der Schnappschüsse pro Tag aus den Einstellungen der automatischen Bereinigung. Gelöschte lokale Schnappschüsse können nicht mehr zur Wiederherstellung früherer Daten verwendet werden.<br><br>Möchten Sie die Bereinigung durchführen?",
+	"dataRepoPurgeConfirm": "Alle nicht referenzierten lokalen historischen Schnappschüsse und zugehörigen Datenobjekte werden dauerhaft gelöscht. Durch Referenzen erhaltene Schnappschüsse, etwa der neueste Schnappschuss, die Synchronisationsbasis und manuell markierte Schnappschüsse, bleiben erhalten.<div class=\"fn__hr\"></div>Die manuelle Bereinigung berücksichtigt weder die Aufbewahrungsdauer noch die Anzahl der Schnappschüsse pro Tag aus den Einstellungen der automatischen Bereinigung. Gelöschte lokale Schnappschüsse können nicht mehr zur Wiederherstellung früherer Daten verwendet werden.<div class=\"fn__hr\"></div>Möchten Sie die Bereinigung durchführen?",
 	"purge": "Bereinigen",
 	"plsChoose": "Bitte zuerst auswählen",
 	"freeSub": "Kostenlose Testversion",

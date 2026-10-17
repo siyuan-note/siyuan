@@ -2099,7 +2099,7 @@
 	"dataRepoKey": "Chave do repositório de dados",
 	"dataRepoPurge": "Limpar repositório de dados local",
 	"dataRepoPurgeTip": "Excluir todos os instantâneos não referenciados e objetos de dados relacionados",
-	"dataRepoPurgeConfirm": "Todos os instantâneos históricos locais não referenciados e os objetos de dados relacionados serão excluídos permanentemente. Os instantâneos mantidos por referências, como o instantâneo mais recente, a base de sincronização e os instantâneos marcados manualmente, serão preservados.<br><br>A limpeza manual não segue as configurações de limpeza automática de dias de retenção ou de quantidade de instantâneos mantidos por dia. Os instantâneos locais excluídos não poderão mais ser usados para restaurar dados históricos.<br><br>Tem certeza de que deseja realizar a limpeza?",
+	"dataRepoPurgeConfirm": "Todos os instantâneos históricos locais não referenciados e os objetos de dados relacionados serão excluídos permanentemente. Os instantâneos mantidos por referências, como o instantâneo mais recente, a base de sincronização e os instantâneos marcados manualmente, serão preservados.<div class=\"fn__hr\"></div>A limpeza manual não segue as configurações de limpeza automática de dias de retenção ou de quantidade de instantâneos mantidos por dia. Os instantâneos locais excluídos não poderão mais ser usados para restaurar dados históricos.<div class=\"fn__hr\"></div>Tem certeza de que deseja realizar a limpeza?",
 	"purge": "Limpar",
 	"plsChoose": "Por favor, escolha primeiro",
 	"freeSub": "Assinatura de Teste Gratuita",

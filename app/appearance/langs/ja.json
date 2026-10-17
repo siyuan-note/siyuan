@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "ブロックアイコンの表示モード",
+	"blockGutterModeTip": "既定は簡略表示です。完全表示では、現在のブロックと、それを含むすべてのコンテナのアイコンを表示します",
+	"blockGutterCompact": "簡略",
+	"blockGutterFull": "完全",
 	"automationCollectionTarget": "収集対象",
 	"automationCollectionTargetBlock": "タグを含むブロック",
 	"automationCollectionTargetContainer": "コンテナブロック",

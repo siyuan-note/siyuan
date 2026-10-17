@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20261016191102"
+		"updated": "20261017212429"
 	},
 	"Children": [
 		{
@@ -1070,6 +1070,56 @@
 				{
 					"Type": "NodeText",
 					"Data": "有的區塊（比如在列表項中的段落區塊）找不到區塊標怎麼辦？"
+				}
+			]
+		},
+		{
+			"ID": "20261017212429-ke3nbw0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017212429-ke3nbw0",
+				"updated": "20261017212429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "預設使用精簡區塊標。若要顯示目前區塊及其所屬容器的所有區塊標，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊標顯示模式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇「完整」，透過各層區塊標直接開啟對應區塊的選單或拖曳該區塊。"
 				}
 			]
 		},

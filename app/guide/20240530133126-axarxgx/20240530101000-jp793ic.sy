@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261017212429"
 	},
 	"Children": [
 		{
@@ -1126,6 +1126,56 @@
 					"Properties": {
 						"id": ""
 					}
+				}
+			]
+		},
+		{
+			"ID": "20261017212429-yem61n3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017212429-yem61n3",
+				"updated": "20261017212429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "既定では簡略表示です。現在のブロックと、それを含むすべてのコンテナのアイコンを表示するには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "動作"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックアイコンの表示モード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で「完全」を選択します。各アイコンから対応するブロックのメニューを開いたり、そのブロックをドラッグしたりできます。"
 				}
 			]
 		},

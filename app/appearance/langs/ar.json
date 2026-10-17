@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "وضع مؤشرات الكتل",
+	"blockGutterModeTip": "الوضع المختصر هو الافتراضي؛ يعرض الوضع الكامل مؤشرات الكتلة الحالية وجميع حاوياتها",
+	"blockGutterCompact": "مختصر",
+	"blockGutterFull": "كامل",
 	"automationCollectionTarget": "هدف التجميع",
 	"automationCollectionTargetBlock": "الكتلة التي تحتوي على الوسم",
 	"automationCollectionTargetContainer": "كتلة الحاوية",

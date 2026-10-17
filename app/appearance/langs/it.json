@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Modalità degli indicatori di blocco",
+	"blockGutterModeTip": "Compatta per impostazione predefinita; la modalità completa mostra gli indicatori del blocco corrente e di tutti i suoi contenitori",
+	"blockGutterCompact": "Compatta",
+	"blockGutterFull": "Completa",
 	"automationCollectionTarget": "Oggetto da raccogliere",
 	"automationCollectionTargetBlock": "Blocco contenente il tag",
 	"automationCollectionTargetContainer": "Blocco contenitore",

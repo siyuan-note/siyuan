@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "מצב סמני בלוקים",
+	"blockGutterModeTip": "מצב מצומצם כברירת מחדל; מצב מלא מציג סמנים לבלוק הנוכחי ולכל המכלים שלו",
+	"blockGutterCompact": "מצומצם",
+	"blockGutterFull": "מלא",
 	"automationCollectionTarget": "יעד האיסוף",
 	"automationCollectionTargetBlock": "בלוק המכיל את התגית",
 	"automationCollectionTargetContainer": "בלוק מכל",

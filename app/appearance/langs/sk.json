@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Režim indikátorov blokov",
+	"blockGutterModeTip": "Predvolene kompaktný; úplný režim zobrazuje indikátory aktuálneho bloku a všetkých jeho kontajnerov",
+	"blockGutterCompact": "Kompaktný",
+	"blockGutterFull": "Úplný",
 	"automationCollectionTarget": "Objekt zbierania",
 	"automationCollectionTargetBlock": "Blok obsahujúci značku",
 	"automationCollectionTargetContainer": "Kontajnerový blok",

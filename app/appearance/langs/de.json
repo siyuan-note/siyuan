@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Modus der Blockmarkierungen",
+	"blockGutterModeTip": "Standardmäßig kompakt; der vollständige Modus zeigt Markierungen für den aktuellen Block und alle seine Container",
+	"blockGutterCompact": "Kompakt",
+	"blockGutterFull": "Vollständig",
 	"automationCollectionTarget": "Sammelziel",
 	"automationCollectionTargetBlock": "Block mit dem Tag",
 	"automationCollectionTargetContainer": "Containerblock",

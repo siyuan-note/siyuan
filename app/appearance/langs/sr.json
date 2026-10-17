@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Режим ознака блокова",
+	"blockGutterModeTip": "Подразумевано сажет; потпуни режим приказује ознаке тренутног блока и свих његових контејнера",
+	"blockGutterCompact": "Сажет",
+	"blockGutterFull": "Потпун",
 	"automationCollectionTarget": "Објекат прикупљања",
 	"automationCollectionTargetBlock": "Блок који садржи ознаку",
 	"automationCollectionTargetContainer": "Контејнерски блок",

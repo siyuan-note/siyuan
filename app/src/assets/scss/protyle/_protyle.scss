@@ -147,6 +147,22 @@
     pointer-events: none;
   }
 
+  &--full {
+    display: flex;
+    flex-wrap: wrap;
+    width: max-content;
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+
+    > button {
+      flex-shrink: 0;
+    }
+  }
+
+  &[data-scrollable="true"] span {
+    touch-action: pan-y;
+  }
+
   button {
     border: 0;
     background-color: transparent;

@@ -195,6 +195,7 @@ type SettingFlashcard struct {
 }
 
 // SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
+// blockGutterMode 为 0 时精简块标，为 1 时显示当前块及其容器层级；默认及越界值为 0，旧接口省略时保留当前值。
 type SettingEditor struct {
 	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
 	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
@@ -211,6 +212,7 @@ type SettingEditor struct {
 	CodeLineWrap                    bool                 `json:"codeLineWrap" api:"optional,nullable"`
 	CodeLigatures                   bool                 `json:"codeLigatures" api:"optional,nullable"`
 	DisplayBookmarkIcon             bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
+	BlockGutterMode                 int                  `json:"blockGutterMode" api:"optional,nullable"`
 	DisplayNetImgMark               bool                 `json:"displayNetImgMark" api:"optional,nullable"`
 	DisplayImgName                  bool                 `json:"displayImgName" api:"optional,nullable"`
 	DisplayImgAlt                   bool                 `json:"displayImgAlt" api:"optional,nullable"`

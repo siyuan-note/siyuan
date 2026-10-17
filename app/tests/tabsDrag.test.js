@@ -18,8 +18,9 @@ const sources = () => {
     };
     return [
         extract("protyle/util/editorCommonEvent.ts", ["getDragSourceParentID", "getDragSourceNextID", "moveTo"]),
+        extract("protyle/util/dragDocument.ts", ["replaceDragUndoOperation"]),
         extract("protyle/util/foldHeadingMove.ts", ["isFoldedHeading", "getHeadingLevel", "shouldUnfoldMovedHeading"]),
-        extract("protyle/wysiwyg/getBlock.ts", ["getParentBlock", "getPreviousBlockSibling", "getNextBlockSibling", "getTopAloneElement"]),
+        extract("protyle/wysiwyg/getBlock.ts", ["getParentBlock", "getPreviousBlockSibling", "getNextBlockSibling", "getTopAloneElement", "getSbChildBlockCount"]),
         (() => {
             const file = ts.createSourceFile("tabsRender.ts", readFileSync(path.join(__dirname,
                 "../src/protyle/render/tabsRender.ts"), "utf8"), ts.ScriptTarget.Latest, true);
@@ -43,6 +44,8 @@ const cases = async (source) => {
     const check = require("node:assert/strict");
     const lute = window.Lute.New();
     lute.SetTabs(true);
+    lute.SetCallout(true);
+    lute.SetSuperBlock(true);
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
     const genEmptyElement = (_wbr, _start, id) => {
@@ -130,14 +133,18 @@ const cases = async (source) => {
             if (operation.action === "insert") {
                 const template = document.createElement("template");
                 template.innerHTML = lute.SpinBlockDOM(operation.data);
-                moving = template.content.firstElementChild;
+                // 解析独立列表项时会生成列表包装，事务按操作 ID 插入实际目标。
+                moving = template.content.querySelector(`[data-node-id="${operation.id}"]`);
+                check.ok(moving, JSON.stringify(operation));
             }
             if (operation.nextID) {
                 find(operation.nextID).before(moving);
             } else if (operation.previousID) {
                 find(operation.previousID).after(moving);
             } else {
-                find(operation.parentID).prepend(moving);
+                const parent = find(operation.parentID);
+                check.ok(parent, JSON.stringify(operation));
+                (parent.querySelector(":scope > .callout-content, :scope > .tab-item-content") || parent).prepend(moving);
             }
         }
     });
@@ -232,6 +239,29 @@ const cases = async (source) => {
         replay(operations.undoOperations);
         check.deepEqual(Array.from(stored.children).map(node => node.dataset.nodeId), originalIDs);
     }
+    for (const markdown of ["- Only item\n\nTarget", "1. Only item\n\nTarget", "- [ ] Only item\n\nTarget",
+        "- First item\n- Second item\n\nTarget", "> Only quote\n\nTarget", "> [!NOTE]\n> Only callout\n\nTarget",
+        "{{{row\nOnly child\n}}}\n\nTarget", "- > Only nested quote\n\nTarget"]) {
+        root.innerHTML = lute.Md2BlockDOM(markdown);
+        protyle.block.showAll = true;
+        const container = root.firstElementChild;
+        const paragraph = container.querySelector('[data-type="NodeParagraph"]');
+        check.ok(paragraph, markdown);
+        const originalIDs = Array.from(root.querySelectorAll("[data-node-id]")).map(node => node.dataset.nodeId);
+        const originalParent = paragraph.parentElement.closest("[data-node-id]").dataset.nodeId;
+        stored.innerHTML = root.innerHTML;
+        const operations = await moveTo(protyle, [paragraph], root.lastElementChild, true, "afterend", false);
+        replay(operations.doOperations);
+        check.equal(find(paragraph.dataset.nodeId).parentElement, stored, "a child gutter drags only its own paragraph");
+        for (let repeat = 0; repeat < 2; repeat++) {
+            replay(operations.undoOperations);
+            check.equal(find(paragraph.dataset.nodeId).parentElement.closest("[data-node-id]").dataset.nodeId, originalParent,
+                "undo restores the paragraph to its original container");
+            check.deepEqual(Array.from(stored.querySelectorAll("[data-node-id]")).map(node => node.dataset.nodeId), originalIDs,
+                "undo preserves every original block ID without adding placeholders");
+            replay(operations.doOperations);
+        }
+    }
     root.innerHTML = lute.Md2BlockDOM("## Heading\n\nChild\n\n### Nested\n\nNested child\n\n## Boundary");
     root.firstElementChild.setAttribute("fold", "1");
     check.equal(getDragSourceNextID(root.firstElementChild, [root.firstElementChild]), root.lastElementChild.dataset.nodeId);
@@ -269,7 +299,7 @@ const run = async () => {
 if (process.versions.electron && process.type === "browser") {
     run().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").test("repeated tab drags preserve active IDs through attribute replay, undo and redo", {
+    require("node:test").test("tab and content block drags preserve IDs through attribute replay, undo and redo", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

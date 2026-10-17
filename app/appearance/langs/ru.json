@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Режим значков блоков",
+	"blockGutterModeTip": "По умолчанию компактный; полный режим показывает значки текущего блока и всех его контейнеров",
+	"blockGutterCompact": "Компактный",
+	"blockGutterFull": "Полный",
 	"automationCollectionTarget": "Объект сбора",
 	"automationCollectionTargetBlock": "Блок с тегом",
 	"automationCollectionTargetContainer": "Блок-контейнер",

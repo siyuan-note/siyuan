@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Blok göstergesi modu",
+	"blockGutterModeTip": "Varsayılan olarak sade; tam mod, geçerli bloğun ve onu içeren tüm kapsayıcıların göstergelerini gösterir",
+	"blockGutterCompact": "Sade",
+	"blockGutterFull": "Tam",
 	"automationCollectionTarget": "Toplanacak nesne",
 	"automationCollectionTargetBlock": "Etiketi içeren blok",
 	"automationCollectionTargetContainer": "Kapsayıcı blok",

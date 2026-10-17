@@ -365,6 +365,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.CodeLineWrap = value.CodeLineWrap
 	result.CodeLigatures = value.CodeLigatures
 	result.DisplayBookmarkIcon = value.DisplayBookmarkIcon
+	result.BlockGutterMode = value.BlockGutterMode
 	result.DisplayNetImgMark = value.DisplayNetImgMark
 	result.DisplayImgName = value.DisplayImgName
 	result.DisplayImgAlt = value.DisplayImgAlt

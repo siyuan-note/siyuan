@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "ब्लॉक संकेतक मोड",
+	"blockGutterModeTip": "डिफ़ॉल्ट रूप से संक्षिप्त; पूर्ण मोड में वर्तमान ब्लॉक और उसके सभी कंटेनर के संकेतक दिखते हैं",
+	"blockGutterCompact": "संक्षिप्त",
+	"blockGutterFull": "पूर्ण",
 	"automationCollectionTarget": "संग्रह लक्ष्य",
 	"automationCollectionTargetBlock": "टैग वाला ब्लॉक",
 	"automationCollectionTargetContainer": "कंटेनर ब्लॉक",

@@ -372,6 +372,9 @@ func applyEditorSetting(c *gin.Context, request apicontract.SetEditorRequest) (r
 	if !request.HasFieldFold("pageScrollButtons") {
 		editor.PageScrollButtons = model.Conf.Editor.Load().PageScrollButtons
 	}
+	if !request.HasFieldFold("blockGutterMode") {
+		editor.BlockGutterMode = model.Conf.Editor.Load().BlockGutterMode
+	}
 
 	issues, applyErr := model.ApplyConfSection("editor", editor)
 	recordSettingIssues(c, issues)

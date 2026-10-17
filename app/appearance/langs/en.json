@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Block indicator mode",
+	"blockGutterModeTip": "Compact by default; full mode shows indicators for the current block and all its containers",
+	"blockGutterCompact": "Compact",
+	"blockGutterFull": "Full",
 	"automationCollectionTarget": "Collect",
 	"automationCollectionTargetBlock": "Block containing the tag",
 	"automationCollectionTargetContainer": "Container block",

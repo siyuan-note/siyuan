@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "블록 표시 모드",
+	"blockGutterModeTip": "기본값은 간소화이며, 전체 모드는 현재 블록과 이를 포함하는 모든 컨테이너의 표시를 보여줍니다",
+	"blockGutterCompact": "간소화",
+	"blockGutterFull": "전체",
 	"automationCollectionTarget": "수집 대상",
 	"automationCollectionTargetBlock": "태그가 있는 블록",
 	"automationCollectionTargetContainer": "컨테이너 블록",

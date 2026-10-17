@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Tryb wskaźników bloków",
+	"blockGutterModeTip": "Domyślnie kompaktowy; tryb pełny pokazuje wskaźniki bieżącego bloku i wszystkich jego kontenerów",
+	"blockGutterCompact": "Kompaktowy",
+	"blockGutterFull": "Pełny",
 	"automationCollectionTarget": "Obiekt zbierania",
 	"automationCollectionTargetBlock": "Blok zawierający tag",
 	"automationCollectionTargetContainer": "Blok kontenera",

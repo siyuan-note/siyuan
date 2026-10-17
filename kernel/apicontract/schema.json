@@ -40357,6 +40357,16 @@
             }
           ]
         },
+        "blockGutterMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "blockRefDynamicAnchorTextMaxLen": {
           "anyOf": [
             {
@@ -44452,6 +44462,9 @@
             }
           ]
         },
+        "blockGutterMode": {
+          "type": "integer"
+        },
         "blockRefDynamicAnchorTextMaxLen": {
           "type": "integer"
         },
@@ -44724,6 +44737,7 @@
         "backlinkSort",
         "backmentionExpandCount",
         "backmentionSort",
+        "blockGutterMode",
         "blockRefDynamicAnchorTextMaxLen",
         "checkBlockRef",
         "codeFontFamilies",
@@ -44980,6 +44994,16 @@
           ]
         },
         "backmentionSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockGutterMode": {
           "anyOf": [
             {
               "type": "integer"

@@ -59,6 +59,7 @@ type Editor struct {
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
 	CodeLigatures                   bool           `json:"codeLigatures"`                   // 代码块是否连字
 	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示内容块角标
+	BlockGutterMode                 int            `json:"blockGutterMode"`                 // 块标显示模式，0：精简，1：完整
 	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
 	DisplayImgName                  bool           `json:"displayImgName"`                  // 是否显示图片文件名
 	DisplayImgAlt                   bool           `json:"displayImgAlt"`                   // 是否显示图片提示文本

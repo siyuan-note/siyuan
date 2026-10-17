@@ -30,6 +30,10 @@ class TestElement {
     constructor(private classes: string[] = [], public parentElement?: TestElement) {}
 
     closest(selector: string): TestElement | null {
+        if (selector === ".protyle-gutters[data-scrollable='true']" &&
+            this.classes.includes("protyle-gutters") && this.dataset.scrollable === "true") {
+            return this;
+        }
         return this.classes.includes(selector.slice(1)) ? this : this.parentElement?.closest(selector) || null;
     }
 
@@ -57,7 +61,7 @@ class TestElement {
 class TestHTMLElement extends TestElement {}
 
 const createBridge = (rowClass = "b3-menu__item", panelClass = "av__panel", mobile = false,
-                      options: {browser?: boolean, container?: string} = {}) => {
+                      options: {browser?: boolean, container?: string, scrollable?: boolean} = {}) => {
     let now = 1000;
     let hidden = false;
     let nextTimer = 0;
@@ -67,6 +71,9 @@ const createBridge = (rowClass = "b3-menu__item", panelClass = "av__panel", mobi
     const listeners = new Map<string, Array<(event: object) => void>>();
     const body = new TestHTMLElement();
     const panel = new TestHTMLElement([panelClass], body);
+    if (options.scrollable) {
+        panel.dataset.scrollable = "true";
+    }
     const button = panelClass === "protyle-gutters" ? new TestHTMLElement([], panel) : panel;
     if (panelClass === "protyle-gutters") {
         button.tagName = "BUTTON";
@@ -370,6 +377,21 @@ test("desktop touch block gutters keep direct dragging", () => {
     assert.equal(bridge.dispatch("touchmove", bridge.row, 140, 50), true);
     assert.deepEqual(bridge.row.events, ["dragstart"]);
 });
+
+for (const mobile of [false, true]) {
+    test(`scrollable full gutters preserve swiping and long-press dragging (mobile=${mobile})`, () => {
+        const bridge = createBridge("", "protyle-gutters", mobile, {scrollable: true});
+        bridge.dispatch("touchstart", bridge.row);
+        assert.equal(bridge.dispatch("touchmove", bridge.row, 140, 50), false);
+        bridge.advance(500);
+        assert.deepEqual(bridge.row.events, []);
+        bridge.dispatch("touchend", bridge.row, 140);
+        bridge.dispatch("touchstart", bridge.row);
+        bridge.advance(500);
+        assert.equal(bridge.dispatch("touchmove", bridge.row, 140), true);
+        assert.equal(bridge.row.events.filter(type => type === "dragstart").length, 1);
+    });
+}
 
 test("mobile mouse block gutters keep direct dragging", () => {
     const bridge = createBridge("", "protyle-gutters", true);

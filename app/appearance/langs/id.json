@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Mode indikator blok",
+	"blockGutterModeTip": "Ringkas secara bawaan; mode lengkap menampilkan indikator blok saat ini dan semua wadahnya",
+	"blockGutterCompact": "Ringkas",
+	"blockGutterFull": "Lengkap",
 	"automationCollectionTarget": "Objek pengumpulan",
 	"automationCollectionTargetBlock": "Blok yang berisi tag",
 	"automationCollectionTargetContainer": "Blok wadah",

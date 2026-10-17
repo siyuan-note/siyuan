@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "Modo dos indicadores de bloco",
+	"blockGutterModeTip": "Compacto por padrão; o modo completo mostra os indicadores do bloco atual e de todos os seus contêineres",
+	"blockGutterCompact": "Compacto",
+	"blockGutterFull": "Completo",
 	"automationCollectionTarget": "Objeto da coleta",
 	"automationCollectionTargetBlock": "Bloco que contém a etiqueta",
 	"automationCollectionTargetContainer": "Bloco contêiner",

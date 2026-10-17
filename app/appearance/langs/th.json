@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "โหมดตัวบ่งชี้บล็อก",
+	"blockGutterModeTip": "ค่าเริ่มต้นเป็นแบบย่อ โดยโหมดเต็มจะแสดงตัวบ่งชี้ของบล็อกปัจจุบันและคอนเทนเนอร์ทั้งหมดที่ครอบบล็อกนั้น",
+	"blockGutterCompact": "ย่อ",
+	"blockGutterFull": "เต็ม",
 	"automationCollectionTarget": "เป้าหมายการรวบรวม",
 	"automationCollectionTargetBlock": "บล็อกที่มีแท็ก",
 	"automationCollectionTargetContainer": "บล็อกคอนเทนเนอร์",

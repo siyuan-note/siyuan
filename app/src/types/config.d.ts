@@ -646,6 +646,8 @@ declare namespace Config {
          * Whether to display the bookmark icon
          */
         displayBookmarkIcon: boolean;
+        /** 块标显示模式，0：精简，1：完整；默认及越界值为 0，旧接口省略时保留当前值 */
+        blockGutterMode: number;
         /**
          * Whether to display the network image mark
          */

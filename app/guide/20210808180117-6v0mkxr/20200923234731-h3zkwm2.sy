@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20261016191102"
+		"updated": "20261017212429"
 	},
 	"Children": [
 		{
@@ -1074,6 +1074,56 @@
 				{
 					"Type": "NodeText",
 					"Data": "What if some blocks (such as paragraph blocks in list items) cannot find the block icon?"
+				}
+			]
+		},
+		{
+			"ID": "20261017212429-ykfqzzo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017212429-ykfqzzo",
+				"updated": "20261017212429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Compact indicators are used by default. To show indicators for the current block and all its containers, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Block indicator mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select Full. Each indicator opens the corresponding block menu and provides a drag handle."
 				}
 			]
 		},

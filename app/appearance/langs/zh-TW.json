@@ -1,4 +1,8 @@
 {
+	"blockGutterMode": "區塊標顯示模式",
+	"blockGutterModeTip": "預設精簡顯示，完整模式顯示目前區塊及其所屬容器的所有區塊標",
+	"blockGutterCompact": "精簡",
+	"blockGutterFull": "完整",
 	"automationCollectionTarget": "收集對象",
 	"automationCollectionTargetBlock": "標籤所在區塊",
 	"automationCollectionTargetContainer": "容器區塊",

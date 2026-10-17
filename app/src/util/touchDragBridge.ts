@@ -454,6 +454,7 @@ const createDragState = (draggableElement: HTMLElement, target: Element, point: 
             draggableElement.closest(".av__gallery-item") !== null ||
             draggableElement.closest(".av__group-title") !== null ||
             draggableElement.closest(".av__cell--header") !== null ||
+            draggableElement.closest(".protyle-gutters[data-scrollable='true']") !== null ||
             draggableElement.closest(".layout-tab-bar") !== null ||
             draggableElement.closest(".protyle-action") !== null, isMouse, !!isInAndroid()),
         longPressCancelled: false,

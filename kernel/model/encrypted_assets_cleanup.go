@@ -131,10 +131,11 @@ func withEncryptedAssetCleanup(ctx context.Context, boxID string, operation func
 	if !ast.IsNodeIDPattern(boxID) || !IsEncryptedBox(boxID) {
 		return errors.New("an encrypted notebook ID is required")
 	}
-	if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+	release, err := AcquireEncryptedBoxOperations(ctx, []string{boxID})
+	if err != nil {
 		return errors.New(Conf.Language(314))
 	}
-	defer ReleaseEncryptedBoxOperation(boxID)
+	defer release()
 	if err := lockAssetRelink(ctx, &syncLock); err != nil {
 		return err
 	}
@@ -172,12 +173,12 @@ func withEncryptedAssetCleanup(ctx context.Context, boxID string, operation func
 	return operation(dek)
 }
 
-// admitEncryptedAssetCleanup 暂停新请求，已有读写冲突时由笔记本写锁立即拒绝清理，避免读锁重入死锁。
+// admitEncryptedAssetCleanup 仅允许当前响应的单个租约进入清理，拒绝尚未持读锁的在途操作。
 func admitEncryptedAssetCleanup(boxID string) (func(), error) {
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
 	defer lifecycle.lock.Unlock()
-	if lifecycle.assetCleanup {
+	if lifecycle.assetCleanup || lifecycle.activeOperations != 1 {
 		return nil, errors.New(Conf.Language(239))
 	}
 	lifecycle.assetCleanup = true
@@ -224,6 +225,37 @@ func scanEncryptedBoxUnusedAssets(ctx context.Context, boxID string, dek []byte)
 	}
 	assets := map[string]string{}
 	assetRoot := filepath.Join(root, "assets")
+	deferred, err := DeferredSyncAssets()
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range deferred {
+		if err = ctx.Err(); err != nil {
+			return nil, err
+		}
+		if !strings.HasPrefix(file.Path, "/"+boxID+"/assets/") {
+			continue
+		}
+		absPath := filepath.Join(util.DataDir, filepath.FromSlash(strings.TrimPrefix(file.Path, "/")))
+		key, keyErr := assetPathMapKey(assetRoot, absPath, false)
+		if keyErr != nil {
+			return nil, keyErr
+		}
+		skip := false
+		for p := absPath; p != assetRoot; p = filepath.Dir(p) {
+			if isSkipFile(filepath.Base(p)) || filelock.IsHidden(p) {
+				skip = true
+				break
+			}
+		}
+		if skip {
+			continue
+		}
+		assets[key] = absPath
+		for dir, absDir := path.Dir(key), filepath.Dir(absPath); dir != "assets"; dir, absDir = path.Dir(dir), filepath.Dir(absDir) {
+			assets[dir+"/"] = absDir
+		}
+	}
 	err = walkEncryptedCleanupFiles(ctx, assetRoot, true, func(p string, entry fs.DirEntry) error {
 		if entry.IsDir() {
 			if p == assetRoot {
@@ -301,7 +333,7 @@ func scanEncryptedBoxUnusedAssets(ctx context.Context, boxID string, dek []byte)
 		if projectionErr := treenode.RefreshTableCellRichProjection(tree.Root); projectionErr != nil {
 			return projectionErr
 		}
-		for _, dest := range getAssetsLinkDestsWithOptions(tree.Root, false, nil, false, normalizeAssetScanLinkDest) {
+		for _, dest := range getAssetsLinkDestsWithOptions(tree.Root, false, nil, assetLinkScanOptions{expandAssetLists: true}, normalizeAssetScanLinkDest) {
 			collect(dest)
 		}
 		collect(treenode.GetDocTitleImgPath(tree.Root))
@@ -356,16 +388,36 @@ func scanEncryptedBoxUnusedAssets(ctx context.Context, boxID string, dek []byte)
 	if err != nil {
 		return nil, fmt.Errorf("read agent asset references failed: %w", err)
 	}
-	for _, dest := range removeReferencedAssetPaths(assets, dests) {
-		if strings.HasSuffix(strings.ToLower(dest), ".pdf") {
-			delete(assets, dest+".sya")
+	// PDF 正文可以尚未下载或暂时缺失，标注保护只依据持久化引用。
+	var companions []string
+	for dest := range dests {
+		if index := strings.IndexAny(dest, "?#"); index >= 0 {
+			dest = dest[:index]
 		}
+		decoded, _ := url.PathUnescape(dest)
+		if strings.HasSuffix(strings.ToLower(dest), ".pdf") || strings.HasSuffix(strings.ToLower(decoded), ".pdf") {
+			companions = append(companions, dest+".sya")
+		}
+	}
+	for _, dest := range companions {
+		dests[dest] = true
+	}
+	for _, dest := range removeReferencedAssetPaths(assets, dests) {
 		delete(assets, dest)
 	}
 	ret = []*UnusedItem{}
 	for p, absPath := range assets {
+		if err = ctx.Err(); err != nil {
+			return nil, err
+		}
 		if strings.HasSuffix(p, "/") {
 			continue
+		}
+		if err = validateEncryptedCleanupPath(util.DataDir, absPath); err != nil {
+			return nil, err
+		}
+		if err = EnsureAssetLocal(absPath); err != nil {
+			return nil, err
 		}
 		file, openErr := os.Open(absPath)
 		if openErr != nil {
@@ -397,7 +449,7 @@ func collectEncryptedCleanupJSON(data []byte, luteEngine *lute.Lute, collect fun
 			}
 			collect(typed)
 			tree := parse.Parse("", []byte(typed), luteEngine.ParseOptions)
-			for _, dest := range getAssetsLinkDestsWithOptions(tree.Root, false, nil, false) {
+			for _, dest := range getAssetsLinkDestsWithOptions(tree.Root, false, nil, assetLinkScanOptions{expandAssetLists: true}) {
 				collect(dest)
 			}
 		case []any:

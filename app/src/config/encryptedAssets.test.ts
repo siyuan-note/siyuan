@@ -45,6 +45,7 @@ const setup = (mobile = false) => {
     ]};
     let releaseScan: (() => void) | undefined;
     let delay = false;
+    let maintenanceFailure = false;
     let previewClears = 0;
     const previews: string[][] = [];
     const siyuan = {config: {readonly: false}, notebooks: [{id: "secret", encrypted: true, closed: false}],
@@ -81,7 +82,11 @@ const setup = (mobile = false) => {
         escapeHtml: (text: string) => text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
         getNotebookName: () => "Private notebook",
         isMobile: () => mobile,
-        runSettingsMaintenance: (action: () => Promise<unknown>) => { const task = action(); pending.push(task); return task; },
+        runSettingsMaintenance: (action: () => Promise<unknown>) => {
+            const task = maintenanceFailure ? Promise.resolve() : action();
+            pending.push(task);
+            return task;
+        },
     };
     runInNewContext(compiled, {exports, require: () => dependencies,
         window: {siyuan}});
@@ -94,6 +99,7 @@ const setup = (mobile = false) => {
         delay: () => { delay = true; },
         release: () => { delay = false; releaseScan?.(); },
         fail: () => { response = {code: -1, data: []}; },
+        failMaintenance: (fail: boolean) => { maintenanceFailure = fail; },
         previewClears: () => previewClears,
     };
 };
@@ -122,6 +128,28 @@ for (const mobile of [false, true]) {
         assert.ok(state.previewClears() >= 2);
     });
 }
+
+test("maintenance preparation failure releases cleanup controls and permits retry", async () => {
+    const state = setup();
+    state.open();
+    await state.settle();
+    state.controls.all.checked = true;
+    state.controls.all.dispatch("change");
+    state.controls.delete.dispatch("click");
+    state.failMaintenance(true);
+    state.callbacks[0]();
+    await state.settle();
+    assert.equal(state.requests.some(request => request.url.endsWith("removeUnusedEncryptedBoxAssets")), false);
+    assert.equal(state.controls.refresh.disabled, false);
+    state.failMaintenance(false);
+    state.controls.all.checked = true;
+    state.controls.all.dispatch("change");
+    state.controls.delete.dispatch("click");
+    state.callbacks[1]();
+    await state.settle();
+    assert.equal(state.requests.filter(request => request.url.endsWith("removeUnusedEncryptedBoxAssets")).length, 1);
+    assert.equal(state.controls.refresh.disabled, false);
+});
 
 test("closing during a scan prevents publishing late decrypted filenames", async () => {
     const state = setup();

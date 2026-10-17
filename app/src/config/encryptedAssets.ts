@@ -133,16 +133,14 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
             busy = true;
             update();
             void runSettingsMaintenance(async () => {
-                try {
-                    const response = await fetchSyncPost("/api/asset/removeUnusedEncryptedBoxAssets", {notebook, paths});
-                    if (response.code === 0 && active()) {
-                        showMessage(lang.deleted);
-                    }
-                } finally {
-                    busy = false;
-                    if (active()) {
-                        await scan();
-                    }
+                const response = await fetchSyncPost("/api/asset/removeUnusedEncryptedBoxAssets", {notebook, paths});
+                if (response.code === 0 && active()) {
+                    showMessage(lang.deleted);
+                }
+            }).finally(async () => {
+                busy = false;
+                if (active()) {
+                    await scan();
                 }
             });
         });

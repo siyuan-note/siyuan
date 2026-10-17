@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -104,6 +105,161 @@ func TestEncryptedAssetCleanupReferences(t *testing.T) {
 	// 全局清理继续跳过目标笔记本。
 	if global, err := UnusedAssets(false); err != nil || len(global) != 0 {
 		t.Fatalf("global cleanup included encrypted assets: %+v, %v", global, err)
+	}
+}
+
+func TestEncryptedAssetCleanupMultipleAttributeAssets(t *testing.T) {
+	boxID, docPath, dek := setupEncryptedCleanupTest(t)
+	originals := map[string][]byte{}
+	for _, name := range []string{"a.png", "b.png", "space name.png", "comma,name.png"} {
+		originals[name] = writeEncryptedCleanupAsset(t, boxID, name, dek, false)
+	}
+	writeEncryptedCleanupAsset(t, boxID, "unused.png", dek, false)
+	writeEncryptedCleanupDoc(t, boxID, docPath, dek,
+		`{"Type":"NodeParagraph","ID":"20261017000001-abcdefg","Properties":{"custom-data-assets-list":"assets/a.png assets/b.png,assets/a.png?box=`+boxID+`","custom-data-assets-space":"assets/space name.png","custom-data-assets-comma":"assets/comma,name.png"},"Children":[]}`)
+	items, err := UnusedEncryptedBoxAssets(context.Background(), boxID)
+	if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" {
+		t.Fatalf("attribute resources were classified as unused: %+v, %v", items, err)
+	}
+	if _, err = RemoveUnusedEncryptedBoxAssets(context.Background(), boxID, []string{"assets/a.png", "assets/b.png"}); err == nil {
+		t.Fatal("accepted referenced attribute resources for deletion")
+	}
+	for name, original := range originals {
+		got, err := os.ReadFile(filepath.Join(util.DataDir, boxID, "assets", name))
+		if err != nil || !bytes.Equal(got, original) {
+			t.Fatalf("changed referenced resource %s: %v", name, err)
+		}
+	}
+}
+
+func TestEncryptedAssetCleanupRejectsActiveWriter(t *testing.T) {
+	boxID, _, dek := setupEncryptedCleanupTest(t)
+	original := writeEncryptedCleanupAsset(t, boxID, "unused.png", dek, false)
+	avID := "20261017000002-abcdefg"
+	view := &av.AttributeView{ID: avID, Spec: av.PlainTextSpec, Views: []*av.View{}, KeyValues: []*av.KeyValues{}}
+	av.SetAVBoxID(avID, boxID)
+	t.Cleanup(func() { av.SetAVBoxID(avID, "") })
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+		t.Fatal(err)
+	}
+	released := false
+	defer func() {
+		if !released {
+			ReleaseEncryptedBoxOperation(boxID)
+		}
+	}()
+	view.KeyValues = append(view.KeyValues, &av.KeyValues{
+		Key: &av.Key{ID: "20261017000003-abcdefg", Name: "asset", Type: av.KeyTypeMAsset},
+		Values: []*av.Value{{ID: "20261017000004-abcdefg", Type: av.KeyTypeMAsset,
+			MAsset: []*av.ValueAsset{{Type: av.AssetTypeImage, Name: "image", Content: "assets/unused.png"}}}},
+	})
+	// 写入已取得响应租约，但仍处于读改写阶段，尚未持有保存所需的笔记本读锁。
+	if _, err := UnusedEncryptedBoxAssets(context.Background(), boxID); err == nil {
+		t.Fatal("scan accepted a pending writer")
+	}
+	if removed, err := RemoveUnusedEncryptedBoxAssets(context.Background(), boxID, []string{"assets/unused.png"}); err == nil || len(removed) != 0 {
+		t.Fatalf("cleanup accepted a pending writer: %v, %v", removed, err)
+	}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	ReleaseEncryptedBoxOperation(boxID)
+	released = true
+	if items, err := UnusedEncryptedBoxAssets(context.Background(), boxID); err != nil || len(items) != 0 {
+		t.Fatalf("completed writer's reference was lost: %+v, %v", items, err)
+	}
+	got, err := os.ReadFile(filepath.Join(util.DataDir, boxID, "assets", "unused.png"))
+	if err != nil || !bytes.Equal(got, original) {
+		t.Fatalf("pending writer's asset changed: %v", err)
+	}
+}
+
+func TestEncryptedAssetCleanupDeferredAssets(t *testing.T) {
+	full, partial, fullData := prepareAssetDownloadRepoTest(t)
+	boxID, docID := "20261017000000-abcdefg", "20261017000001-abcdefg"
+	dek := bytes.Repeat([]byte{0x31}, 32)
+	doc, err := EncryptFile(boxID, docID+".sy", dek, []byte(`{"Type":"NodeDocument","ID":"`+docID+`","Spec":"2","Properties":{"id":"`+docID+`","title":"fixture"},"Children":[{"Type":"NodeParagraph","Children":[{"Type":"NodeTextMark","TextMarkType":"a","TextMarkAHref":"assets/used.pdf?page=2","TextMarkTextContent":"PDF"},{"Type":"NodeTextMark","TextMarkType":"a","TextMarkAHref":"assets/folder/","TextMarkTextContent":"folder"}]}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeEncryptedCleanupFile(t, filepath.Join(fullData, boxID, docID+".sy"), doc)
+	originals := map[string][]byte{}
+	for _, name := range []string{"unused.png", "used.pdf", "used.pdf.sya", "folder/kept.png"} {
+		data, err := EncryptAsset(boxID, filepath.Base(name), "original-"+filepath.Base(name), dek, []byte("payload"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		originals[name] = data
+		writeEncryptedCleanupFile(t, filepath.Join(fullData, boxID, "assets", name), data)
+	}
+	if _, err = full.Index("encrypted fixture", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = full.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = partial.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	markRuntimeEncryptedBox(boxID)
+	setDEKForTest(boxID, append([]byte(nil), dek...))
+	setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+	t.Cleanup(func() {
+		cachedDEKsLock.Lock()
+		delete(cachedDEKs, boxID)
+		cachedDEKsLock.Unlock()
+		forgetRuntimeEncryptedBox(boxID)
+		setEncryptedBoxState(boxID, EncryptedBoxStateLocked)
+	})
+	assetRoot := filepath.Join(util.DataDir, boxID, "assets")
+	for _, name := range []string{"unused.png", "used.pdf", "folder/kept.png"} {
+		if _, err = os.Stat(filepath.Join(assetRoot, name)); !os.IsNotExist(err) {
+			t.Fatalf("fixture resource was not deferred: %s, %v", name, err)
+		}
+	}
+	items, err := UnusedEncryptedBoxAssets(context.Background(), boxID)
+	if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" || items[0].Name != "original-unused.png" {
+		t.Fatalf("incorrect deferred cleanup candidates: %+v, %v", items, err)
+	}
+	for _, name := range []string{"used.pdf", "folder/kept.png"} {
+		if _, err = os.Stat(filepath.Join(assetRoot, name)); !os.IsNotExist(err) {
+			t.Fatalf("scan downloaded a referenced resource: %s, %v", name, err)
+		}
+	}
+	if _, err = RemoveUnusedEncryptedBoxAssets(context.Background(), boxID, []string{"assets/used.pdf.sya"}); err == nil {
+		t.Fatal("accepted annotations belonging to a referenced deferred PDF")
+	}
+	got, err := os.ReadFile(filepath.Join(assetRoot, "used.pdf.sya"))
+	if err != nil || !bytes.Equal(got, originals["used.pdf.sya"]) {
+		t.Fatalf("referenced PDF annotations changed: %v", err)
+	}
+	removed, err := RemoveUnusedEncryptedBoxAssets(context.Background(), boxID, []string{"assets/unused.png"})
+	if err != nil || !reflect.DeepEqual(removed, []string{"assets/unused.png"}) {
+		t.Fatalf("deferred cleanup failed: %v, %v", removed, err)
+	}
+	histories, _ := filepath.Glob(filepath.Join(util.HistoryDir, "*-clean", boxID, "assets", "unused.png"))
+	if len(histories) != 1 {
+		t.Fatalf("missing deferred resource history: %v", histories)
+	}
+	got, err = os.ReadFile(histories[0])
+	if err != nil || !bytes.Equal(got, originals["unused.png"]) {
+		t.Fatal("deferred history did not preserve ciphertext")
+	}
+	if items, err = UnusedEncryptedBoxAssets(context.Background(), boxID); err != nil || len(items) != 0 {
+		t.Fatalf("deleted deferred resource reappeared: %+v, %v", items, err)
+	}
+}
+
+func TestEncryptedAssetCleanupMissingPDFKeepsAnnotations(t *testing.T) {
+	boxID, docPath, dek := setupEncryptedCleanupTest(t)
+	writeEncryptedCleanupDoc(t, boxID, docPath, dek,
+		`{"Type":"NodeParagraph","Children":[{"Type":"NodeTextMark","TextMarkType":"a","TextMarkAHref":"assets/missing%2Epdf?page=2","TextMarkTextContent":"PDF"}]}`)
+	writeEncryptedCleanupAsset(t, boxID, "missing.pdf.sya", dek, false)
+	if items, err := UnusedEncryptedBoxAssets(context.Background(), boxID); err != nil || len(items) != 0 {
+		t.Fatalf("missing PDF's annotations were not protected: %+v, %v", items, err)
 	}
 }
 

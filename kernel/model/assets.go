@@ -2614,12 +2614,17 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	itemFilter attributeViewItemFilter,
 	normalize ...func(string) string,
 ) (ret []string) {
-	return getAssetsLinkDestsWithOptions(node, includeServePath, itemFilter, true, normalize...)
+	return getAssetsLinkDestsWithOptions(node, includeServePath, itemFilter, assetLinkScanOptions{resolveAttributeViews: true}, normalize...)
 }
 
-// getAssetsLinkDestsWithOptions 允许独立扫描数据库定义的调用方关闭节点中的数据库加载。
+type assetLinkScanOptions struct {
+	resolveAttributeViews bool
+	expandAssetLists      bool
+}
+
+// getAssetsLinkDestsWithOptions 控制数据库加载与资源列表展开；保守展开仅用于已有完整资源清单的扫描。
 func getAssetsLinkDestsWithOptions(
-	node *ast.Node, includeServePath bool, itemFilter attributeViewItemFilter, resolveAttributeViews bool,
+	node *ast.Node, includeServePath bool, itemFilter attributeViewItemFilter, options assetLinkScanOptions,
 	normalize ...func(string) string,
 ) (ret []string) {
 	ret = []string{}
@@ -2630,11 +2635,7 @@ func getAssetsLinkDestsWithOptions(
 			for _, kv := range n.KramdownIAL {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
-					dest := normalizeScannedAsset(kv[1], normalize)
-					if "" == dest || !util.IsAssetLinkDest([]byte(dest), includeServePath) {
-						continue
-					}
-					ret = append(ret, dest)
+					ret = append(ret, assetListLinkDests(kv[1], includeServePath, options.expandAssetLists, normalize...)...)
 				}
 			}
 		}
@@ -2672,7 +2673,7 @@ func getAssetsLinkDestsWithOptions(
 				ret = append(ret, dest)
 			}
 		} else if ast.NodeAttributeView == n.Type {
-			if !resolveAttributeViews {
+			if !options.resolveAttributeViews {
 				return ast.WalkContinue
 			}
 			attrView, _ := av.ParseAttributeView(n.AttributeViewID)
@@ -2688,13 +2689,9 @@ func getAssetsLinkDestsWithOptions(
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				dataAssets = normalizeScannedAsset(dataAssets, normalize)
-				if !util.IsAssetLinkDest([]byte(dataAssets), includeServePath) {
-					return ast.WalkContinue
-				}
-				ret = append(ret, dataAssets)
+				ret = append(ret, assetListLinkDests(dataAssets, includeServePath, options.expandAssetLists, normalize...)...)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				ret = append(ret, htmlAssetLinkDests(n.Tokens, includeServePath, normalize...)...)
+				ret = append(ret, htmlAssetLinkDestsWithOptions(n.Tokens, includeServePath, options.expandAssetLists, normalize...)...)
 			}
 		}
 		return ast.WalkContinue
@@ -2709,7 +2706,28 @@ func getAssetsLinkDestsWithOptions(
 	return
 }
 
+var assetListPattern = regexp.MustCompile(`[^\s,]+`)
+
+// assetListLinkDests 同时保留完整路径与列表项，兼容文件名中的空格、逗号和多值资源属性。
+func assetListLinkDests(raw string, includeServePath, expand bool, normalize ...func(string) string) (ret []string) {
+	values := []string{raw}
+	if expand {
+		values = append(values, assetListPattern.FindAllString(raw, -1)...)
+	}
+	for _, value := range values {
+		dest := normalizeScannedAsset(value, normalize)
+		if dest != "" && util.IsAssetLinkDest([]byte(dest), includeServePath) {
+			ret = append(ret, dest)
+		}
+	}
+	return
+}
+
 func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(string) string) (ret []string) {
+	return htmlAssetLinkDestsWithOptions(tokens, includeServePath, false, normalize...)
+}
+
+func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetLists bool, normalize ...func(string) string) (ret []string) {
 	// 逐个读取标签属性，兼容内联标签片段并只解码一层 HTML 实体。
 	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
 	for {
@@ -2718,6 +2736,10 @@ func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
 			for _, attr := range tokenizer.Token().Attr {
+				if expandAssetLists && (attr.Key == "data-assets" || strings.HasPrefix(attr.Key, "custom-data-assets")) {
+					ret = append(ret, assetListLinkDests(attr.Val, includeServePath, true, normalize...)...)
+					continue
+				}
 				dest := normalizeScannedAsset(strings.TrimSpace(attr.Val), normalize)
 				if util.IsAssetLinkDest([]byte(dest), includeServePath) {
 					ret = append(ret, dest)

@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"slices"
 	"sort"
@@ -28,10 +29,21 @@ import (
 )
 
 const requestBoxLeasesKey = "siyuan-request-box-leases"
+const requestBoxOperationScopeKey = "siyuan-request-box-operation-scope"
 
 func boxLeaseMiddleware(c *gin.Context) {
 	defer releaseRequestBoxLeases(c)
 	c.Next()
+}
+
+// encryptedBoxRequestScope 将模型层取得的单个租约保留到响应写入完成，避免同一请求重复计数。
+func encryptedBoxRequestScope(c *gin.Context) context.Context {
+	if _, exists := c.Get(requestBoxOperationScopeKey); !exists {
+		ctx, release := model.WithEncryptedBoxOperationScope(c.Request.Context())
+		c.Request = c.Request.WithContext(ctx)
+		c.Set(requestBoxOperationScopeKey, release)
+	}
+	return c.Request.Context()
 }
 
 func holdEncryptedBoxRequest(c *gin.Context, boxID string) error {
@@ -112,6 +124,12 @@ func releaseEncryptedBoxRequest(c *gin.Context, boxID string) {
 }
 
 func releaseRequestBoxLeases(c *gin.Context) {
+	if value, exists := c.Get(requestBoxOperationScopeKey); exists {
+		if release, ok := value.(func()); ok {
+			release()
+			c.Set(requestBoxOperationScopeKey, nil)
+		}
+	}
 	leases := requestBoxLeases(c)
 	for _, lease := range slices.Backward(leases) {
 		model.ReleaseEncryptedBoxOperation(lease)

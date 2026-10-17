@@ -113,7 +113,6 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 	return ret
 }
 
-var relinkAssetListPattern = regexp.MustCompile(`[^\s,]+`)
 var relinkCSSURLPattern = regexp.MustCompile(`(?i)url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]*))\s*\)`)
 var relinkHTMLAttrPattern = regexp.MustCompile("([^\\s=<>/]+)(\\s*=\\s*)(\"[^\"]*\"|'[^']*'|[^\\s>]+)")
 
@@ -122,7 +121,7 @@ func (r *assetRelinker) list(raw, kind string, location apicontract.AssetReferen
 	if p, err := relinkPath(raw); err == nil && (p == r.oldPath || r.routes[p] != nil) {
 		return r.reference(raw, kind, location)
 	}
-	return relinkAssetListPattern.ReplaceAllStringFunc(raw, func(value string) string {
+	return assetListPattern.ReplaceAllStringFunc(raw, func(value string) string {
 		return r.reference(value, kind, location)
 	})
 }

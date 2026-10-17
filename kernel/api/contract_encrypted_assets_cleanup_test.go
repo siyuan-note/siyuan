@@ -26,6 +26,7 @@ func TestAPIContractEncryptedAssetCleanupAdmission(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	t.Cleanup(func() { model.Conf = previous })
 	engine := gin.New()
+	engine.Use(boxLeaseMiddleware)
 	engine.POST("/api/asset/getUnusedEncryptedBoxAssets", getUnusedEncryptedBoxAssets)
 	engine.POST("/api/asset/removeUnusedEncryptedBoxAssets", removeUnusedEncryptedBoxAssets)
 	for _, endpoint := range []string{"getUnusedEncryptedBoxAssets", "removeUnusedEncryptedBoxAssets"} {
@@ -110,6 +111,13 @@ func TestAPIContractEncryptedAssetCleanupRoundTrip(t *testing.T) {
 	}
 	engine := gin.New()
 	engine.Use(boxLeaseMiddleware)
+	engine.Use(func(c *gin.Context) {
+		c.Next()
+		// 外层响应尚未退出，独立清理必须被当前请求保留的租约拒绝。
+		if _, err := model.UnusedEncryptedBoxAssets(context.Background(), boxID); err == nil {
+			t.Error("cleanup response released its notebook lease before middleware completion")
+		}
+	})
 	engine.POST("/api/asset/getUnusedEncryptedBoxAssets", getUnusedEncryptedBoxAssets)
 	engine.POST("/api/asset/removeUnusedEncryptedBoxAssets", removeUnusedEncryptedBoxAssets)
 	call := func(endpoint, body string) []byte {
@@ -119,6 +127,21 @@ func TestAPIContractEncryptedAssetCleanupRoundTrip(t *testing.T) {
 		requireAPIContract(t, "POST", endpoint, recorder)
 		return recorder.Body.Bytes()
 	}
+	func() {
+		if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+			t.Fatal(err)
+		}
+		defer model.ReleaseEncryptedBoxOperation(boxID)
+		for _, endpoint := range []string{"getUnusedEncryptedBoxAssets", "removeUnusedEncryptedBoxAssets"} {
+			data := call("/api/asset/"+endpoint, `{"notebook":"`+boxID+`","paths":["assets/unused.png"]}`)
+			var response struct {
+				Code int `json:"code"`
+			}
+			if err := json.Unmarshal(data, &response); err != nil || response.Code != -1 {
+				t.Fatalf("cleanup accepted another active request: %s, %v", data, err)
+			}
+		}
+	}()
 	var listed struct {
 		Code int                            `json:"code"`
 		Data []*apicontract.AssetUnusedItem `json:"data"`

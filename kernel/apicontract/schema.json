@@ -6880,6 +6880,9 @@
         "name": {
           "type": "string"
         },
+        "notifyOnSuccess": {
+          "type": "boolean"
+        },
         "timeZone": {
           "type": "string"
         },
@@ -6951,6 +6954,16 @@
         },
         "name": {
           "type": "string"
+        },
+        "notifyOnSuccess": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "timeZone": {
           "type": "string"

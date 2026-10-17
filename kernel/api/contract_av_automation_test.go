@@ -155,6 +155,8 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		Actions: []*av.AutomationAction{{Type: "collect", Target: "current", Fields: map[string]*av.AutomationValue{
 			fixture.textKeyID: {Mode: "static", Value: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "collected"}}},
 		}}}}
+	notify := false
+	collection.NotifyOnSuccess = &notify
 	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
 		Data: &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{collection}}}}); err != nil {
 		t.Fatal(err)

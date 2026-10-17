@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Notify on success",
+	"automationResultRule": "Automation \"${1}\" completed: ${2}",
+	"automationResultSummary": "Database automations completed: ${1}",
+	"automationResultAdded": "Entries added: ${1}",
+	"automationResultUpdated": "Entries updated: ${1}",
+	"automationResultCollected": "Blocks collected: ${1}",
+	"automationResultRemoved": "Entries removed: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Clean up unreferenced assets",
 	"tableSelectRange": "Select cell range",
 	"listMindmapConnectors": "Connectors",

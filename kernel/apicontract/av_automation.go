@@ -24,6 +24,8 @@ type AVAutomationRule struct {
 	Actions     []*AVAutomationAction    `json:"actions"`
 	BlockSource *AVAutomationBlockSource `json:"blockSource,omitempty" api:"optional"`
 	TimeZone    string                   `json:"timeZone,omitempty" api:"optional"`
+	// 缺省或 null 表示开启；仅控制实际变更后的成功通知，不影响错误提示。
+	NotifyOnSuccess *bool `json:"notifyOnSuccess,omitempty" api:"optional"`
 }
 
 // AVAutomationBlockSource 监听范围取笔记本与文档的并集，文档包含子文档；范围至少选择一项。

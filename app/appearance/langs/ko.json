@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "실행 성공 시 알림",
+	"automationResultRule": "자동화 “${1}” 실행 완료: ${2}",
+	"automationResultSummary": "데이터베이스 자동화 실행 완료: ${1}",
+	"automationResultAdded": "추가된 항목: ${1}",
+	"automationResultUpdated": "업데이트된 항목: ${1}",
+	"automationResultCollected": "수집된 블록: ${1}",
+	"automationResultRemoved": "제거된 항목: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "참조되지 않은 리소스 정리",
 	"tableSelectRange": "셀 범위 선택",
 	"listMindmapConnectors": "연결선",

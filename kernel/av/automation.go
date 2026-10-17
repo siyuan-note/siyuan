@@ -15,15 +15,16 @@ type AutomationConfig struct {
 }
 
 type AutomationRule struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Enabled     bool                   `json:"enabled"`
-	Trigger     string                 `json:"trigger"` // added、changed 或 block
-	KeyID       string                 `json:"keyID,omitempty"`
-	Conditions  []*ViewFilter          `json:"conditions,omitempty"`
-	Actions     []*AutomationAction    `json:"actions"`
-	BlockSource *AutomationBlockSource `json:"blockSource,omitempty"`
-	TimeZone    string                 `json:"timeZone,omitempty"`
+	ID              string                 `json:"id"`
+	Name            string                 `json:"name"`
+	Enabled         bool                   `json:"enabled"`
+	Trigger         string                 `json:"trigger"` // added、changed 或 block
+	KeyID           string                 `json:"keyID,omitempty"`
+	Conditions      []*ViewFilter          `json:"conditions,omitempty"`
+	Actions         []*AutomationAction    `json:"actions"`
+	BlockSource     *AutomationBlockSource `json:"blockSource,omitempty"`
+	TimeZone        string                 `json:"timeZone,omitempty"`
+	NotifyOnSuccess *bool                  `json:"notifyOnSuccess,omitempty"`
 }
 
 // AutomationBlockSource 的范围取并集，各类条件取交集；文档范围包含其子文档。

@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "सफल होने पर सूचना दें",
+	"automationResultRule": "स्वचालन “${1}” पूरा हुआ: ${2}",
+	"automationResultSummary": "डेटाबेस स्वचालन पूरा हुआ: ${1}",
+	"automationResultAdded": "जोड़ी गई प्रविष्टियाँ: ${1}",
+	"automationResultUpdated": "अपडेट की गई प्रविष्टियाँ: ${1}",
+	"automationResultCollected": "एकत्र किए गए ब्लॉक: ${1}",
+	"automationResultRemoved": "हटाई गई प्रविष्टियाँ: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "असंदर्भित संसाधनों को साफ़ करें",
 	"tableSelectRange": "सेल श्रेणी चुनें",
 	"listMindmapConnectors": "कनेक्टर",

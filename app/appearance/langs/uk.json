@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Сповіщати про успішне виконання",
+	"automationResultRule": "Автоматизацію «${1}» виконано: ${2}",
+	"automationResultSummary": "Автоматизації бази даних виконано: ${1}",
+	"automationResultAdded": "Додано записів: ${1}",
+	"automationResultUpdated": "Оновлено записів: ${1}",
+	"automationResultCollected": "Зібрано блоків: ${1}",
+	"automationResultRemoved": "Вилучено записів: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Очистити ресурси без посилань",
 	"tableSelectRange": "Вибрати діапазон клітинок",
 	"listMindmapConnectors": "З’єднувальні лінії",

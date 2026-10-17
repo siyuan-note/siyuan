@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "実行成功時に通知",
+	"automationResultRule": "自動化「${1}」を実行しました：${2}",
+	"automationResultSummary": "データベースの自動化が完了しました：${1}",
+	"automationResultAdded": "追加項目数：${1}",
+	"automationResultUpdated": "更新項目数：${1}",
+	"automationResultCollected": "収集ブロック数：${1}",
+	"automationResultRemoved": "削除項目数：${1}",
+	"automationResultSeparator": "、",
 	"cleanUnusedAssets": "未参照のリソースをクリーンアップ",
 	"tableSelectRange": "セル範囲を選択",
 	"listMindmapConnectors": "接続線",

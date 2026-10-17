@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Başarıyla tamamlandığında bildir",
+	"automationResultRule": "“${1}” otomasyonu tamamlandı: ${2}",
+	"automationResultSummary": "Veritabanı otomasyonları tamamlandı: ${1}",
+	"automationResultAdded": "Eklenen kayıtlar: ${1}",
+	"automationResultUpdated": "Güncellenen kayıtlar: ${1}",
+	"automationResultCollected": "Toplanan bloklar: ${1}",
+	"automationResultRemoved": "Çıkarılan kayıtlar: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Başvurulmayan kaynakları temizle",
 	"tableSelectRange": "Hücre aralığı seç",
 	"listMindmapConnectors": "Bağlantı çizgileri",

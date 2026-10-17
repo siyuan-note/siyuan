@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Melden bij succes",
+	"automationResultRule": "Automatisering ‘${1}’ voltooid: ${2}",
+	"automationResultSummary": "Databaseautomatiseringen voltooid: ${1}",
+	"automationResultAdded": "Toegevoegde items: ${1}",
+	"automationResultUpdated": "Bijgewerkte items: ${1}",
+	"automationResultCollected": "Verzamelde blokken: ${1}",
+	"automationResultRemoved": "Verwijderde items: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Niet-verwezen bronnen opruimen",
 	"tableSelectRange": "Celbereik selecteren",
 	"listMindmapConnectors": "Verbindingslijnen",

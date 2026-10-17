@@ -326,6 +326,7 @@ func (tx *Transaction) runAttributeViewCollections() error {
 	type collectionChange struct {
 		viewID, boxID, blockID, itemID string
 		rule                           *av.AutomationRule
+		notifyRule                     *av.AutomationRule
 	}
 	var changes []collectionChange
 	beforeNodes, afterNodes := map[string]*ast.Node{}, map[string]*ast.Node{}
@@ -391,6 +392,7 @@ func (tx *Transaction) runAttributeViewCollections() error {
 			}
 			var entering *av.AutomationRule
 			matching, previouslyMatching, ownerEnabled := false, false, false
+			var ownerRule *av.AutomationRule
 			row := view.GetBlockValueByBoundID(blockID)
 			for _, rule := range rules {
 				before := collectionBlockMatches(rule.BlockSource, beforeNodes[blockID], beforeTrees[blockID])
@@ -402,12 +404,13 @@ func (tx *Transaction) runAttributeViewCollections() error {
 				}
 				if row != nil && row.Block.CollectionRuleID == rule.ID {
 					ownerEnabled = true
+					ownerRule = rule
 				}
 			}
 			// 手动条目不接管、不覆盖；仍有其他规则匹配时保留自动条目及用户字段。
 			if row != nil {
 				if !matching && previouslyMatching && ownerEnabled {
-					changes = append(changes, collectionChange{viewID: id, boxID: boxID, itemID: row.BlockID})
+					changes = append(changes, collectionChange{viewID: id, boxID: boxID, itemID: row.BlockID, notifyRule: ownerRule})
 				}
 				continue
 			}
@@ -430,10 +433,14 @@ func (tx *Transaction) runAttributeViewCollections() error {
 			if err = tx.addCollectedItem(view, change.rule, change.blockID, change.boxID); err != nil {
 				return err
 			}
+			if !slices.Contains(state.requested[change.viewID][change.rule.ID], change.blockID) {
+				tx.automationResult(change.boxID, change.viewID, change.rule).record("collected", change.viewID, change.blockID)
+			}
 		} else if row := view.GetBlockValue(change.itemID); row != nil {
 			if err = tx.removeCollectedItem(view, row, change.boxID); err != nil {
 				return err
 			}
+			tx.automationResult(change.boxID, change.viewID, change.notifyRule).record("removed", change.viewID, change.itemID)
 		}
 	}
 	return nil
@@ -458,7 +465,7 @@ func (tx *Transaction) addCollectedItem(view *av.AttributeView, rule *av.Automat
 		return err
 	}
 	return tx.runAutomationAction(&attributeViewAutomationSource{before: view, boxID: boxID}, current, id,
-		&av.AutomationAction{Type: "edit", Target: "current", Fields: rule.Actions[0].Fields}, rule.TimeZone)
+		&av.AutomationAction{Type: "edit", Target: "current", Fields: rule.Actions[0].Fields}, rule.TimeZone, nil)
 }
 
 func (tx *Transaction) removeCollectedItem(view *av.AttributeView, row *av.Value, _ string) error {

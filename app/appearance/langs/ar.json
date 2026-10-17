@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "الإشعار عند النجاح",
+	"automationResultRule": "اكتملت الأتمتة «${1}»: ${2}",
+	"automationResultSummary": "اكتملت أتمتة قاعدة البيانات: ${1}",
+	"automationResultAdded": "العناصر المضافة: ${1}",
+	"automationResultUpdated": "العناصر المحدّثة: ${1}",
+	"automationResultCollected": "الكتل المجمّعة: ${1}",
+	"automationResultRemoved": "العناصر المُزالة: ${1}",
+	"automationResultSeparator": "؛ ",
 	"cleanUnusedAssets": "تنظيف الموارد غير المشار إليها",
 	"tableSelectRange": "تحديد نطاق خلايا",
 	"listMindmapConnectors": "خطوط التوصيل",

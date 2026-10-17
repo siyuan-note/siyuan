@@ -40,7 +40,7 @@ func toContractAVAutomationConfig(value *av.AutomationConfig) *apicontract.AVAut
 			return nil
 		}
 		return &apicontract.AVAutomationRule{ID: rule.ID, Name: rule.Name, Enabled: rule.Enabled, Trigger: rule.Trigger,
-			TimeZone:    rule.TimeZone,
+			TimeZone: rule.TimeZone, NotifyOnSuccess: rule.NotifyOnSuccess,
 			BlockSource: toContractAVAutomationBlockSource(rule.BlockSource),
 			KeyID:       rule.KeyID, Conditions: avContractSlice(rule.Conditions, toContractAVViewFilter),
 			Actions: avContractSlice(rule.Actions, func(action *av.AutomationAction) *apicontract.AVAutomationAction {

@@ -264,9 +264,9 @@ export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | nul
 
 export type AVAutomationConfigInput = { "rules": Array<AVAutomationRuleInput | null>; "spec": number; };
 
-export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
 
-export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean | null; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
 
 export type AVAutomationTemplatePreviewRequestInput = { "avID": string; "inputs"?: Record<string, string>; "itemID": string; "keyID": string; "targetAvID"?: string; "template": string; "timeZone": string; "triggerTime"?: string; };
 
@@ -7817,6 +7817,8 @@ export interface APIPOSTRoutes {
      * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1、2 或 3，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
      * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
+     * 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
+     * 手动收集、无变化、撤销重放和失败回滚不发送成功通知。
      * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
      * 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
      * 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。

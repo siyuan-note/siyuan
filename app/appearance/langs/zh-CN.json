@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "执行成功时通知",
+	"automationResultRule": "自动化「${1}」已执行：${2}",
+	"automationResultSummary": "数据库自动化执行完成：${1}",
+	"automationResultAdded": "新增 ${1} 个条目",
+	"automationResultUpdated": "更新 ${1} 个条目",
+	"automationResultCollected": "收集 ${1} 个块",
+	"automationResultRemoved": "移出 ${1} 个条目",
+	"automationResultSeparator": "，",
 	"cleanUnusedAssets": "清理未引用资源",
 	"tableSelectRange": "选择区域",
 	"listMindmapConnectors": "连线",

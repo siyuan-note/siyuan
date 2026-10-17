@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Bei Erfolg benachrichtigen",
+	"automationResultRule": "Automatisierung „${1}“ abgeschlossen: ${2}",
+	"automationResultSummary": "Datenbankautomatisierungen abgeschlossen: ${1}",
+	"automationResultAdded": "Hinzugefügte Einträge: ${1}",
+	"automationResultUpdated": "Aktualisierte Einträge: ${1}",
+	"automationResultCollected": "Gesammelte Blöcke: ${1}",
+	"automationResultRemoved": "Entfernte Einträge: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Nicht referenzierte Ressourcen bereinigen",
 	"tableSelectRange": "Zellbereich auswählen",
 	"listMindmapConnectors": "Verbindungslinien",

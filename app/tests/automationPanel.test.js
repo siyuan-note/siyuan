@@ -115,6 +115,12 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(get("[data-trigger-field] option").textContent, lang.automationAnyField);
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     assert.equal(transactions.length, 0, "opening settings must preserve the stored rule");
+    assert.equal(get("[data-notify-success]").checked, true, "legacy rules notify by default");
+    get("[data-notify-success]").click();
+    assert.equal(latest().notifyOnSuccess, false);
+    assert.equal(latest().enabled, false, "notification settings do not enable a rule");
+    get("[data-notify-success]").click();
+    assert.equal(latest().notifyOnSuccess, true);
     const nameRect = get('[data-action="rules"]').getBoundingClientRect();
     const enabledRect = get("[data-enabled]").getBoundingClientRect();
     assert.ok(Math.abs((nameRect.top + nameRect.bottom) / 2 - (enabledRect.top + enabledRect.bottom) / 2) <= 1,
@@ -131,11 +137,13 @@ const runCases = async (sources, css, mobile) => {
     const renameInput = rulePopup.querySelector("[data-rules] input");
     renameInput.value = "Cancelled";
     renameInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
-    assert.equal(transactions.length, 0, "Escape cancels renaming");
+    const writesBeforeRename = transactions.length;
+    assert.equal(latest().name, "Record completion time", "Escape cancels renaming");
     rulePopup.querySelector("[data-rename]").click();
     const nextName = rulePopup.querySelector("[data-rules] input");
     nextName.value = "Renamed completion";
     nextName.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    assert.equal(transactions.length, writesBeforeRename + 1);
     assert.equal(latest().name, "Renamed completion");
     assert.equal(transactions.at(-1).undo[0].data.rules[0].name, "Record completion time");
     const searchRules = rulePopup.querySelector("[data-search]");

@@ -39,6 +39,7 @@ type attributeViewAutomationState struct {
 	count      int
 	recordUndo bool
 	paused     []automationPausedRule
+	results    map[string]*automationRuleResult
 }
 
 type automationUnavailableReference struct {
@@ -270,8 +271,9 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 	}
 	// 先确定全部触发条件，关联关键词也不会读到前一自动动作修改后的标题。
 	for _, entry := range triggered {
+		result := tx.automationResult(entry.source.boxID, entry.current.ID, entry.rule)
 		for _, action := range entry.rule.Actions {
-			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action, entry.rule.TimeZone); err != nil {
+			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action, entry.rule.TimeZone, result); err != nil {
 				return fmt.Errorf("automation [%s]: %w", entry.rule.ID, err)
 			}
 		}
@@ -537,7 +539,7 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 }
 
 func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource, current *av.AttributeView,
-	itemID string, action *av.AutomationAction, timeZone string) error {
+	itemID string, action *av.AutomationAction, timeZone string, result *automationRuleResult) error {
 	target, err := tx.automationTarget(current, action, source.boxID)
 	if err != nil {
 		return err
@@ -567,6 +569,7 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 			return err
 		}
 		ids = []string{id}
+		result.record("added", target.ID, id)
 	} else {
 		switch action.Target {
 		case "current":
@@ -654,6 +657,9 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 				Data: automationValuePatch(previous)}
 			if err = tx.applyAutomationOperation(op, inverse); err != nil {
 				return err
+			}
+			if action.Type != "add" {
+				result.record("updated", target.ID, id)
 			}
 		}
 	}

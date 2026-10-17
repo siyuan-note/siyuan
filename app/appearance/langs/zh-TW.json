@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "執行成功時通知",
+	"automationResultRule": "自動化「${1}」已執行：${2}",
+	"automationResultSummary": "資料庫自動化執行完成：${1}",
+	"automationResultAdded": "新增 ${1} 個項目",
+	"automationResultUpdated": "更新 ${1} 個項目",
+	"automationResultCollected": "收集 ${1} 個區塊",
+	"automationResultRemoved": "移出 ${1} 個項目",
+	"automationResultSeparator": "，",
 	"cleanUnusedAssets": "清理未引用資源",
 	"tableSelectRange": "選取區域",
 	"listMindmapConnectors": "連線",

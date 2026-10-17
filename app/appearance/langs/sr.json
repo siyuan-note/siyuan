@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Обавести о успешном извршавању",
+	"automationResultRule": "Аутоматизација „${1}“ је завршена: ${2}",
+	"automationResultSummary": "Аутоматизације базе података су завршене: ${1}",
+	"automationResultAdded": "Додате ставке: ${1}",
+	"automationResultUpdated": "Ажуриране ставке: ${1}",
+	"automationResultCollected": "Прикупљени блокови: ${1}",
+	"automationResultRemoved": "Уклоњене ставке: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Очисти ресурсе без референци",
 	"tableSelectRange": "Изабери опсег ћелија",
 	"listMindmapConnectors": "Линије повезивања",

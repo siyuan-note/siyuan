@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Upozorniť pri úspechu",
+	"automationResultRule": "Automatizácia „${1}“ dokončená: ${2}",
+	"automationResultSummary": "Automatizácie databázy dokončené: ${1}",
+	"automationResultAdded": "Pridané položky: ${1}",
+	"automationResultUpdated": "Aktualizované položky: ${1}",
+	"automationResultCollected": "Zhromaždené bloky: ${1}",
+	"automationResultRemoved": "Odstránené položky: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Vyčistiť neodkazované zdroje",
 	"tableSelectRange": "Vybrať rozsah buniek",
 	"listMindmapConnectors": "Spojnice",

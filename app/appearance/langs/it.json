@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Notifica in caso di successo",
+	"automationResultRule": "Automazione «${1}» completata: ${2}",
+	"automationResultSummary": "Automazioni del database completate: ${1}",
+	"automationResultAdded": "Voci aggiunte: ${1}",
+	"automationResultUpdated": "Voci aggiornate: ${1}",
+	"automationResultCollected": "Blocchi raccolti: ${1}",
+	"automationResultRemoved": "Voci rimosse: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Pulisci le risorse senza riferimenti",
 	"tableSelectRange": "Seleziona intervallo di celle",
 	"listMindmapConnectors": "Collegamenti",

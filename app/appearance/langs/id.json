@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Beri tahu saat berhasil",
+	"automationResultRule": "Otomatisasi “${1}” selesai: ${2}",
+	"automationResultSummary": "Otomatisasi basis data selesai: ${1}",
+	"automationResultAdded": "Entri ditambahkan: ${1}",
+	"automationResultUpdated": "Entri diperbarui: ${1}",
+	"automationResultCollected": "Blok dikumpulkan: ${1}",
+	"automationResultRemoved": "Entri dikeluarkan: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Bersihkan aset tanpa referensi",
 	"tableSelectRange": "Pilih rentang sel",
 	"listMindmapConnectors": "Penghubung",

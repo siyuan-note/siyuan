@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Notifier en cas de succès",
+	"automationResultRule": "Automatisation « ${1} » terminée : ${2}",
+	"automationResultSummary": "Automatisations de la base de données terminées : ${1}",
+	"automationResultAdded": "Entrées ajoutées : ${1}",
+	"automationResultUpdated": "Entrées mises à jour : ${1}",
+	"automationResultCollected": "Blocs collectés : ${1}",
+	"automationResultRemoved": "Entrées retirées : ${1}",
+	"automationResultSeparator": " ; ",
 	"cleanUnusedAssets": "Nettoyer les ressources non référencées",
 	"tableSelectRange": "Sélectionner une plage de cellules",
 	"listMindmapConnectors": "Connecteurs",

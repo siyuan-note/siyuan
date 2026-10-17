@@ -2763,6 +2763,7 @@ type Transaction struct {
 	blockSwapOriginalTrees       []*parse.Tree
 	attributeViewRollback        *attributeViewRollback
 	attributeViewAutomations     *attributeViewAutomationState
+	pushAutomationMessage        func(string, int) string
 	attributeViewCollections     *attributeViewCollectionState
 	attributeViewItemCreation    bool
 	invalidatedAvHistory         map[string]bool
@@ -3095,6 +3096,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.removeCreatedDoc, tx.writeTransactionTree = nil, nil
 	tx.luteEngine = nil
 	tx.attributeViewAutomations = nil
+	tx.pushAutomationMessage = nil
 	tx.attributeViewCollections = nil
 	tx.attributeViewItemCreation = false
 }

@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Powiadamiaj po pomyślnym wykonaniu",
+	"automationResultRule": "Automatyzacja „${1}” zakończona: ${2}",
+	"automationResultSummary": "Automatyzacje bazy danych zakończone: ${1}",
+	"automationResultAdded": "Dodane wpisy: ${1}",
+	"automationResultUpdated": "Zaktualizowane wpisy: ${1}",
+	"automationResultCollected": "Zebrane bloki: ${1}",
+	"automationResultRemoved": "Usunięte wpisy: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Usuń nieużywane zasoby",
 	"tableSelectRange": "Wybierz zakres komórek",
 	"listMindmapConnectors": "Łączniki",

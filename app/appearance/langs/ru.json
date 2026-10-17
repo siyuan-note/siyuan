@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "Уведомлять об успешном выполнении",
+	"automationResultRule": "Автоматизация «${1}» выполнена: ${2}",
+	"automationResultSummary": "Автоматизации базы данных выполнены: ${1}",
+	"automationResultAdded": "Добавлено записей: ${1}",
+	"automationResultUpdated": "Обновлено записей: ${1}",
+	"automationResultCollected": "Собрано блоков: ${1}",
+	"automationResultRemoved": "Удалено записей: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "Очистить ресурсы без ссылок",
 	"tableSelectRange": "Выбрать диапазон ячеек",
 	"listMindmapConnectors": "Соединительные линии",

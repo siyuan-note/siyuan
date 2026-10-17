@@ -314,6 +314,7 @@ export const openAutomationMenu = async (options: {
         body.innerHTML = `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTip}</div>
 <div class="av__automation-row">${rule ? `<button type="button" class="b3-button b3-button--cancel fn__flex-1 av__automation-source-action" data-action="rules" aria-label="${escapeAttr(lang.automationRule)}"><span class="fn__ellipsis" data-rule-name>${escapeHtml(rule.name)}</span><svg><use xlink:href="#iconDown"></use></svg></button><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}</div>
 ${rule ? `
+<label class="av__automation-row"><span class="fn__flex-1">${lang.automationNotifySuccess}</span><input type="checkbox" class="b3-switch" data-notify-success${rule.notifyOnSuccess !== false ? " checked" : ""}></label>
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationAutoSaveTip}</div>
 <div class="ft__on-surface ft__smaller fn__none av__automation-status" role="status" data-status></div>
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">1</span><span class="av__automation-section-title">${lang.automationWhen}</span></div>
@@ -396,7 +397,11 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
         const target = event.target as HTMLInputElement;
         const rule = rules[index];
         const action = rule?.actions[Number(target.closest<HTMLElement>("[data-index]")?.dataset.index)];
-        if (target.matches("[data-enabled]")) {
+        if (target.matches("[data-notify-success]")) {
+            rule.notifyOnSuccess = target.checked;
+            save(null);
+            return;
+        } else if (target.matches("[data-enabled]")) {
             rule.enabled = target.checked;
             save();
             const preview = body.querySelector<HTMLButtonElement>('[data-action="preview-collection"]');

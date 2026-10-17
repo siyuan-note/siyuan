@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "הודעה לאחר הצלחה",
+	"automationResultRule": "האוטומציה „${1}” הושלמה: ${2}",
+	"automationResultSummary": "האוטומציות של מסד הנתונים הושלמו: ${1}",
+	"automationResultAdded": "רשומות שנוספו: ${1}",
+	"automationResultUpdated": "רשומות שעודכנו: ${1}",
+	"automationResultCollected": "בלוקים שנאספו: ${1}",
+	"automationResultRemoved": "רשומות שהוסרו: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "ניקוי משאבים ללא הפניות",
 	"tableSelectRange": "בחירת טווח תאים",
 	"listMindmapConnectors": "קווי חיבור",

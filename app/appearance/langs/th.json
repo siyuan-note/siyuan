@@ -1,4 +1,12 @@
 {
+	"automationNotifySuccess": "แจ้งเตือนเมื่อสำเร็จ",
+	"automationResultRule": "ระบบอัตโนมัติ “${1}” ทำงานเสร็จแล้ว: ${2}",
+	"automationResultSummary": "ระบบอัตโนมัติของฐานข้อมูลทำงานเสร็จแล้ว: ${1}",
+	"automationResultAdded": "รายการที่เพิ่ม: ${1}",
+	"automationResultUpdated": "รายการที่อัปเดต: ${1}",
+	"automationResultCollected": "บล็อกที่รวบรวม: ${1}",
+	"automationResultRemoved": "รายการที่นำออก: ${1}",
+	"automationResultSeparator": "; ",
 	"cleanUnusedAssets": "ล้างทรัพยากรที่ไม่มีการอ้างอิง",
 	"tableSelectRange": "เลือกช่วงเซลล์",
 	"listMindmapConnectors": "เส้นเชื่อม",

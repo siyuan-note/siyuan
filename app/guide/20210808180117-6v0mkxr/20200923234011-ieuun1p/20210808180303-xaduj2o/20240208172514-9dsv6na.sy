@@ -3901,6 +3901,20 @@
 			]
 		},
 		{
+			"ID": "20261017202044-s3bkzez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017202044-s3bkzez",
+				"updated": "20261017202044"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notify on success is enabled by default and can be set independently for each rule. It reports actual additions, updates, collections, or removals after the entire transaction commits; several rules share one summary, counting only rules with notifications enabled. Updating several fields of one entry counts as one updated entry. Block collection and removal use the same rule setting. Turning notifications off does not stop execution or hide errors. Unmatched conditions, missing targets, unchanged values, repeated matches, manual collection, undo, redo, and failed transactions do not produce success messages."
+				}
+			]
+		},
+		{
 			"ID": "20261002224707-ayryj7q",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -1,6 +1,7 @@
 ARG ALPINE_IMAGE=alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
 ARG GO_IMAGE=golang:1.26-alpine@sha256:3082400e369fa24d5fc60bca20edab3f6d604e0c5a690ec66b295eff4dd87ade
 ARG ONNX_VERSION=1.24.3
+ARG ONNX_IMAGE=onnx-artifact
 
 FROM --platform=$BUILDPLATFORM node:22@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8 AS node-build
 
@@ -70,7 +71,12 @@ git init /onnxruntime
 cd /onnxruntime
 git remote add origin https://github.com/microsoft/onnxruntime
 git config http.version HTTP/1.1
-retry git fetch --depth=1 --no-tags origin "${ONNX_COMMIT}"
+git config remote.origin.promisor true
+git config remote.origin.partialclonefilter blob:none
+# 运行库不构建单元测试，避免下载体积较大的测试模型；编译源码和许可文件保持完整。
+git sparse-checkout init --no-cone
+git sparse-checkout set --no-cone '/*' '!/onnxruntime/test/testdata/' '!/winml/test/'
+retry git fetch --filter=blob:none --depth=1 --no-tags origin "${ONNX_COMMIT}"
 git checkout --detach FETCH_HEAD
 test "$(git rev-parse HEAD)" = "${ONNX_COMMIT}"
 # 源码版本不匹配时，在下载子模块和编译各平台之前停止。
@@ -78,16 +84,32 @@ test "$(cat VERSION_NUMBER)" = "${ONNX_VERSION}"
 retry git -c http.version=HTTP/1.1 submodule update --init --recursive --depth=1
 EORUN
 
-FROM ${ALPINE_IMAGE} AS onnx-build
-ARG TARGETARCH
+FROM ${ALPINE_IMAGE} AS onnx-toolchain-native
 ARG TARGETPLATFORM
-ARG ONNX_VERSION
-ARG ONNX_TOOLCHAIN_REV=1
+ARG ONNX_TOOLCHAIN_REV=2
 # ONNX 阶段只依赖 C++ 工具链和固定源码；更新工具链时递增修订号以刷新安装层。
 RUN echo "${TARGETPLATFORM} toolchain revision ${ONNX_TOOLCHAIN_REV}" \
     && apk add --no-cache bash cmake make g++ git patch python3 py3-pip py3-packaging linux-headers \
     && apk info -v | sort > /onnx-toolchain.txt
+
+FROM onnx-toolchain-native AS onnx-toolchain-amd64
+FROM onnx-toolchain-native AS onnx-toolchain-arm64
+
+FROM --platform=$BUILDPLATFORM ${ALPINE_IMAGE} AS onnx-toolchain-arm
+ARG TARGETPLATFORM
+ARG ONNX_TOOLCHAIN_REV=2
+RUN echo "${TARGETPLATFORM} toolchain revision ${ONNX_TOOLCHAIN_REV}" \
+    && apk add --no-cache bash cmake make g++ clang lld git patch python3 py3-pip py3-packaging linux-headers \
+    && apk info -v | sort > /onnx-toolchain.txt
+
+# ARM32 使用构建机编译器；其他平台保留目标环境编译，支持非原生的多平台构建。
+FROM onnx-toolchain-${TARGETARCH} AS onnx-build
+ARG TARGETARCH
+ARG TARGETPLATFORM
+ARG TARGETVARIANT
+ARG ONNX_VERSION
 COPY --from=onnx-source /onnxruntime /onnxruntime
+COPY scripts/docker-onnx-toolchain.cmake scripts/docker-onnx-build.sh /
 # Release 构建不生成栈回溯，将 execinfo.h 限定为 Debug 构建所需的头文件。
 RUN <<EORUN
 #!/bin/sh -e
@@ -105,22 +127,25 @@ EOPATCH
 EORUN
 ARG ONNX_BUILD_PARALLEL=2
 # 并行度只影响编译层，允许发布环境按可用资源调整。
-RUN python3 /onnxruntime/tools/ci_build/build.py --build_dir /onnxruntime/build \
-    --config Release --update --build --parallel ${ONNX_BUILD_PARALLEL} --build_shared_lib \
-    --skip_tests --allow_running_as_root --compile_no_warning_as_error \
-    --cmake_extra_defines onnxruntime_BUILD_UNIT_TESTS=OFF \
-    && grep -q '^onnxruntime_BUILD_UNIT_TESTS:BOOL=OFF$' /onnxruntime/build/Release/CMakeCache.txt \
-    && mkdir -p /onnx-artifacts \
-    && cp "/onnxruntime/build/Release/libonnxruntime.so.${ONNX_VERSION}" /onnx-artifacts/libonnxruntime.so \
-    && cp /onnxruntime/LICENSE /onnxruntime/ThirdPartyNotices.txt /onnx-toolchain.txt /onnx-artifacts/ \
-    && rm -rf /onnxruntime/build
+RUN /bin/sh /docker-onnx-build.sh
+
+FROM ${ALPINE_IMAGE} AS onnx-artifact
+ARG ONNX_INPUT_KEY
+ARG TARGETPLATFORM
+ARG ONNX_VERSION
+LABEL org.siyuan.onnx.inputs="${ONNX_INPUT_KEY}" org.siyuan.onnx.platform="${TARGETPLATFORM}" org.siyuan.onnx.version="${ONNX_VERSION}"
+RUN apk add --no-cache libstdc++
+COPY --from=onnx-build /onnx-artifacts /onnx-artifacts
+
+# 发布构建传入不可变的产物摘要；未指定时仍支持从源码独立构建。
+FROM ${ONNX_IMAGE} AS onnx-runtime
 
 FROM go-source AS ocr-build
 ARG TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     mkdir -p /ocr/linux-${TARGETARCH} \
     && go build -trimpath -ldflags "-s -w" -o /ocr/linux-${TARGETARCH}/siyuan-ocr ./ocr/cmd/ocr-worker
-COPY --from=onnx-build /onnx-artifacts/ /ocr/linux-${TARGETARCH}/
+COPY --from=onnx-runtime /onnx-artifacts/ /ocr/linux-${TARGETARCH}/
 
 FROM ${ALPINE_IMAGE}
 LABEL maintainer="Liang Ding<845765@qq.com>"

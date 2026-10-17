@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -24,6 +25,7 @@ def module(name, file):
 
 release = module("docker_release", "verify-docker-release.py")
 cache = module("docker_cache", "check-docker-cache.py")
+onnx = module("docker_onnx", "build-docker-onnx.py")
 IMAGE = "b3log/siyuan@sha256:" + "a" * 64
 
 
@@ -501,6 +503,12 @@ class CacheTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             cache.onnx_steps(line, {"linux/arm64"})
 
+    def test_single_platform_build_logs_without_platform_prefix_are_supported(self):
+        line = "#38 [onnx-build 5/5] RUN /bin/sh /docker-onnx-build.sh\n#38 CACHED"
+        self.assertEqual(cache.onnx_steps(line, {"linux/arm/v7"}), {"linux/arm/v7": True})
+        with self.assertRaises(ValueError):
+            cache.onnx_steps(line)
+
     def test_selected_platform_and_parallelism_are_used_for_all_four_cache_acceptance_cases(self):
         def build(context, cache_ref, directory, name, *, platforms, **kwargs):
             self.assertEqual(platforms, {"linux/arm/v7"})
@@ -510,6 +518,9 @@ class CacheTests(unittest.TestCase):
             root = Path(directory)
             dockerfile = root / "Dockerfile"
             dockerfile.write_text("FROM alpine AS onnx-build\n", encoding="utf-8")
+            (root / "scripts").mkdir()
+            for name in ("docker-onnx-build.sh", "docker-onnx-toolchain.cmake"):
+                (root / "scripts" / name).write_text("fixture\n", encoding="utf-8")
             with patch("sys.argv", ["check-docker-cache.py", "--dockerfile", str(dockerfile),
                                     "--cache-repository", "b3log/siyuan", "--records", str(root / "records"),
                                     "--platform", "linux/arm/v7", "--onnx-parallel", "4"]), \
@@ -555,6 +566,97 @@ class CacheTests(unittest.TestCase):
                         cache.main()
                     build.assert_not_called()
                     self.assertFalse(records.exists())
+
+
+class ONNXArtifactTests(unittest.TestCase):
+    def context(self, directory):
+        root = Path(directory)
+        (root / "scripts").mkdir()
+        for name in ("Dockerfile", *onnx.FILES):
+            (root / name).write_bytes((onnx.ROOT / name).read_bytes())
+        return root
+
+    def test_application_and_go_changes_reuse_artifacts_but_onnx_inputs_invalidate_them(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.context(directory)
+            dockerfile = root / "Dockerfile"
+            original = dockerfile.read_text(encoding="utf-8")
+            key, version = onnx.inputs(root, "linux/arm/v7")
+            self.assertEqual(version, "1.24.3")
+            dockerfile.write_text(original.replace("go build -tags", "go build -trimpath -tags"), encoding="utf-8")
+            self.assertEqual(onnx.inputs(root, "linux/arm/v7")[0], key)
+            self.assertNotEqual(onnx.inputs(root, "linux/arm/v8")[0], key)
+            dockerfile.write_text(original.replace("ARG ONNX_TOOLCHAIN_REV=2", "ARG ONNX_TOOLCHAIN_REV=3"), encoding="utf-8")
+            self.assertNotEqual(onnx.inputs(root, "linux/arm/v7")[0], key)
+            dockerfile.write_text(original, encoding="utf-8")
+            with (root / onnx.FILES[0]).open("a", encoding="utf-8") as stream:
+                stream.write("\nchanged\n")
+            self.assertNotEqual(onnx.inputs(root, "linux/arm/v7")[0], key)
+
+    def test_registry_authentication_and_network_failures_do_not_trigger_a_build(self):
+        for message in ("unauthorized", "connection timed out", "invalid response", "registry endpoint not found",
+                        "authorization failed: b3log/siyuan:onnx-test: not found"):
+            with self.subTest(message=message), patch.object(onnx, "run", return_value=
+                    subprocess.CompletedProcess([], 1, "", message)):
+                with self.assertRaises(RuntimeError):
+                    onnx.resolve("b3log/siyuan:onnx-test")
+        with patch.object(onnx, "run", return_value=subprocess.CompletedProcess([], 1, "", "manifest unknown")):
+            self.assertIsNone(onnx.resolve("b3log/siyuan:onnx-test"))
+
+    def test_valid_artifact_is_reused_by_digest_without_rebuilding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.context(directory)
+            with patch.object(onnx, "resolve", return_value=IMAGE), patch.object(onnx, "validate") as validate, \
+                    patch.object(onnx, "build") as build:
+                report = onnx.ensure(root, "b3log/siyuan", "linux/arm/v7", 4, root)
+            build.assert_not_called()
+            self.assertTrue(report["reused"])
+            self.assertEqual(report["image"], IMAGE)
+            validate.assert_called_once_with(IMAGE, "linux/arm/v7", report["inputs"], "1.24.3")
+
+    def test_registry_descriptor_is_resolved_to_an_immutable_reference(self):
+        response = subprocess.CompletedProcess([], 0, json.dumps({"digest": IMAGE.partition("@")[2]}), "")
+        with patch.object(onnx, "run", return_value=response) as run:
+            self.assertEqual(onnx.resolve("b3log/siyuan:onnx-test"), IMAGE)
+        self.assertEqual(run.call_args.args[0][-1], "{{json .Manifest}}")
+
+    def test_missing_artifact_builds_only_onnx_then_resolves_and_validates_its_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.context(directory)
+            with patch.object(onnx, "resolve", side_effect=[None, IMAGE]), patch.object(onnx, "validate") as validate, \
+                    patch.object(onnx, "build") as build:
+                report = onnx.ensure(root, "b3log/siyuan", "linux/arm/v7", 4, root)
+            command = build.call_args.args[0]
+            self.assertEqual(command[command.index("--target") + 1], "onnx-artifact")
+            self.assertIn("ONNX_BUILD_PARALLEL=4", command)
+            self.assertIn("ONNX_INPUT_KEY=" + report["inputs"], command)
+            self.assertFalse(report["reused"])
+            validate.assert_called_once()
+
+    def test_build_streams_and_preserves_output_before_reporting_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "build.log"
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output), self.assertRaises(subprocess.CalledProcessError):
+                onnx.build([sys.executable, "-c", "print('compiler failed', flush=True); raise SystemExit(7)"], log)
+            self.assertEqual(output.getvalue(), "compiler failed\n")
+            self.assertEqual(log.read_text(encoding="utf-8"), "compiler failed\n")
+
+    def test_artifact_with_wrong_inputs_version_or_architecture_stops_before_execution(self):
+        correct = {"Os": "linux", "Architecture": "arm", "Config": {"Labels": {
+            "org.siyuan.onnx.inputs": "key", "org.siyuan.onnx.platform": "linux/arm/v7",
+            "org.siyuan.onnx.version": "1.24.3"}}}
+        for change in (lambda value: value.update(Architecture="amd64"),
+                       lambda value: value["Config"]["Labels"].update({"org.siyuan.onnx.inputs": "old"}),
+                       lambda value: value["Config"]["Labels"].update({"org.siyuan.onnx.version": "1.0.0"}),
+                       lambda value: value["Config"]["Labels"].update({"org.siyuan.onnx.platform": "linux/arm/v8"})):
+            metadata = copy.deepcopy(correct)
+            change(metadata)
+            with patch.object(onnx, "run", side_effect=[subprocess.CompletedProcess([], 0, "", ""),
+                    subprocess.CompletedProcess([], 0, json.dumps([metadata]), "")]) as run:
+                with self.assertRaises(ValueError):
+                    onnx.validate(IMAGE, "linux/arm/v7", "key", "1.24.3")
+                self.assertEqual(run.call_count, 2)
 
 
 class SourceDownloadTests(unittest.TestCase):
@@ -612,7 +714,9 @@ sleep() { printf 'sleep %s\n' "$*" >> "$TRACE"; }
         code, trace, commit = self.execute(fetch_failures=2)
         self.assertEqual(code, 0)
         self.assertEqual(sum(line.startswith("init ") for line in trace), 1)
-        self.assertEqual(trace.count("fetch --depth=1 --no-tags origin " + commit), 3)
+        self.assertEqual(trace.count("fetch --filter=blob:none --depth=1 --no-tags origin " + commit), 3)
+        self.assertIn("config remote.origin.promisor true", trace)
+        self.assertIn("sparse-checkout set --no-cone /* !/onnxruntime/test/testdata/ !/winml/test/", trace)
         self.assertEqual([line for line in trace if line.startswith("sleep ")], ["sleep 10", "sleep 20"])
         self.assertIn("checkout --detach FETCH_HEAD", trace)
         self.assertIn("remote add origin https://github.com/microsoft/onnxruntime", trace)

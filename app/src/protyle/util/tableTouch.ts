@@ -318,7 +318,7 @@ export class TableTouchControl {
         if (event.defaultPrevented || !this.actions.enabled() || event.button !== 0 ||
             event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || target.closest(TABLE_TOUCH_INTERACTIVE_SELECTOR) ||
             !cell?.closest('[data-type="NodeTable"]') || cell.closest(".protyle-wysiwyg") !== editor ||
-            cell.parentElement !== table.rows[0]) {
+            cell.closest(`tr[${TABLE_VIRTUAL_ROWS}]`)) {
             return false;
         }
         const columns = Array.from(table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col"));
@@ -326,7 +326,7 @@ export class TableTouchControl {
         if (Math.min(Math.abs(rect.left - event.clientX), Math.abs(rect.right - event.clientX)) > 8) {
             return false;
         }
-        // 首次点按仅激活表头边界，正文中的滑动和点按继续用于滚动与编辑。
+        // 点击可见的单元格分隔线后激活列宽调整，合并单元格内部没有分隔线的位置不响应。
         const index = columns.findIndex(column => Math.abs(column.getBoundingClientRect().right - event.clientX) <= 8);
         if (index < 0 || !this.actions.activate(cell)) {
             return false;
@@ -344,9 +344,8 @@ export class TableTouchControl {
         const {table, viewport} = state;
         const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[boundary.column];
         const edge = column?.getBoundingClientRect().right;
-        const header = boundary.cell.getBoundingClientRect();
-        const top = Math.max(header.top, viewport.top);
-        const bottom = Math.min(header.bottom, viewport.bottom);
+        const top = viewport.top;
+        const bottom = viewport.bottom;
         if (typeof edge !== "number" || edge <= viewport.left || edge > viewport.right + 1 || bottom <= top) {
             return;
         }

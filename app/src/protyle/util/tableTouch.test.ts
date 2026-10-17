@@ -313,6 +313,9 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.core.hasTouchSelection(), false, "activating a divider does not select the column's cells");
         check.equal(width.querySelector("svg"), null);
         check.equal(width.getBoundingClientRect().left + width.getBoundingClientRect().width / 2, headerRect.right);
+        check.equal(width.getBoundingClientRect().top, headerRect.top);
+        check.equal(width.getBoundingClientRect().bottom, f.cell(3, 0).getBoundingClientRect().bottom,
+            "the active divider spans all visible rows");
         const before = f.table.querySelector("col").getAttribute("style");
         const count = transactions.length;
         pointer(width, "pointerdown", 120, 60);
@@ -336,7 +339,17 @@ const browserCases = async (sources: Record<string, string>) => {
         f.cell(1, 0).dispatchEvent(new MouseEvent("click", {bubbles: true,
             clientX: bodyRect.right, clientY: bodyRect.top + bodyRect.height / 2}));
         f.render();
-        check.equal(f.touch("[data-action='width']"), null, "body dividers remain available for editing and scrolling");
+        const bodyWidth = f.touch("[data-action='width']");
+        check.ok(bodyWidth, "body dividers can activate column width adjustment");
+        const y = bodyRect.top + bodyRect.height / 2;
+        check.equal(document.elementFromPoint(bodyRect.right, y)?.closest('[data-action="width"]'), bodyWidth,
+            "the active divider receives pointer input in body rows");
+        const bodyColumnWidth = f.table.querySelector("col").getBoundingClientRect().width;
+        pointer(bodyWidth, "pointerdown", bodyRect.right, y);
+        pointer(document, "pointermove", bodyRect.right + 30, y);
+        pointer(document, "pointerup", bodyRect.right + 30, y);
+        check.equal((f.table.querySelector("col") as HTMLElement).style.width, `${Math.round(bodyColumnWidth + 30)}px`);
+        check.equal(transactions.length, count + 2, "dragging from a body row creates one width transaction");
         f.dispose();
     }
     for (const kind of ["merged", "no-header", "disabled", "block", "link"]) {
@@ -359,7 +372,7 @@ const browserCases = async (sources: Record<string, string>) => {
             clientX: rect.right, clientY: rect.top + rect.height / 2}));
         f.render();
         check.equal(!!f.touch("[data-action='width']"), kind === "no-header",
-            `${kind} only exposes real, editable top-row dividers`);
+            `${kind} only exposes real, editable cell dividers`);
         f.dispose();
     }
     {

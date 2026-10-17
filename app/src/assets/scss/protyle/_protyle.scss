@@ -1450,7 +1450,7 @@ table + .protyle-action__table {
   &__width {
     width: 28px;
     cursor: col-resize;
-    touch-action: none;
+    touch-action: pan-y;
 
     &::before {
       width: 2px;

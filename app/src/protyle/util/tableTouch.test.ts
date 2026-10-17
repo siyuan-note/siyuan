@@ -537,6 +537,86 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.table.rows.length, 3, "shrinking preserves all nonempty rows");
         f.dispose();
     }
+    for (const action of ["add-row", "add-column", "add-both"]) {
+        const f = fixture();
+        f.table.style.marginBottom = "0";
+        const focus = f.cell(1, 1);
+        const range = document.createRange();
+        range.selectNodeContents(focus);
+        range.collapse(true);
+        focusByRange(range);
+        document.dispatchEvent(new Event("selectionchange"));
+        f.render();
+        let handles = ["add-row", "add-column", "add-both"].map(type => f.touch(`[data-action='${type}']`));
+        const active = f.touch(`[data-action='${action}']`);
+        const rect = active.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const before = f.table.innerHTML;
+        const count = transactions.length;
+        pointer(active, "pointerdown", x, y);
+        pointer(document, "pointermove", x + 60, y + 90);
+        await frames(3);
+        const checkPositions = () => {
+            const table = f.table.getBoundingClientRect();
+            const row = f.touch("[data-action='add-row']").getBoundingClientRect();
+            const column = f.touch("[data-action='add-column']").getBoundingClientRect();
+            const both = f.touch("[data-action='add-both']").getBoundingClientRect();
+            if (action !== "add-column") {
+                check.equal(row.top + row.height / 2, Math.round(table.bottom + 18), `${action}: row + follows the bottom edge during drag`);
+                check.equal(row.width, table.width);
+            } else {
+                check.equal(f.touch("[data-action='add-row']").classList.contains("fn__none"), true);
+            }
+            if (action !== "add-row") {
+                check.equal(column.left + column.width / 2, Math.round(table.right + 18), `${action}: column + follows the right edge during drag`);
+                check.equal(column.height, table.height);
+            } else {
+                check.equal(f.touch("[data-action='add-column']").classList.contains("fn__none"), true);
+            }
+            if (action === "add-both") {
+                check.equal(both.left + both.width / 2, Math.round(table.right + 18));
+                check.equal(both.top + both.height / 2, Math.round(table.bottom + 18));
+            } else {
+                check.equal(f.touch("[data-action='add-both']").classList.contains("fn__none"), true);
+            }
+            check.equal(f.touch(".protyle-table-control__touch-handle:not(.fn__none)"), null,
+                "size dragging hides row and column selection handles like desktop");
+            handles.forEach(handle => check.equal(handle.isConnected, true, "dragging retains the original input targets"));
+        };
+        checkPositions();
+        pointer(document, "pointermove", x - 30, y - 20);
+        await frames(3);
+        checkPositions();
+        pointer(document, "pointercancel", x - 30, y - 20);
+        await frames(3);
+        check.equal(f.table.innerHTML, before, "canceling a size drag restores the original table");
+        check.equal(transactions.length, count);
+        const restored = f.touch("[data-action='add-both']").getBoundingClientRect();
+        check.equal(restored.left + restored.width / 2, f.table.getBoundingClientRect().right + 18);
+        check.equal(restored.top + restored.height / 2, f.table.getBoundingClientRect().bottom + 18);
+        if (action === "add-both") {
+            handles = ["add-row", "add-column", "add-both"].map(type => f.touch(`[data-action='${type}']`));
+            const button = f.touch("[data-action='add-both']");
+            pointer(button, "pointerdown", x, y);
+            f.root.style.width = "300px";
+            pointer(document, "pointermove", x + 180, y + 90);
+            await frames(3);
+            check.equal(button.classList.contains("fn__none"), true, "an offscreen right edge does not leave controls over cells");
+            f.root.style.width = "360px";
+            pointer(document, "pointermove", x + 60, y + 90);
+            await frames(3);
+            check.equal(button.classList.contains("fn__none"), false, "controls return when the right edge fits again");
+            checkPositions();
+            pointer(document, "pointerup", x + 60, y + 90);
+            button.click();
+            await frames(3);
+            check.equal(transactions.length, count + 1, "a finished size drag creates one transaction without an extra add click");
+            check.equal(f.table.rows.length, 6);
+            check.equal(f.table.rows[0].cells.length, 4);
+        }
+        f.dispose();
+    }
     {
         const f = fixture();
         f.root.style.height = `${window.innerHeight}px`;
@@ -713,6 +793,32 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(ran, false, "unfinished composition blocks structural menu actions");
     }
     mobile = false;
+    for (const mode of ["row", "column", "both"]) {
+        const f = fixture();
+        f.table.style.marginBottom = "0";
+        Reflect.set(f.core, "hoverCell", f.cell(1, 1));
+        const before = f.table.innerHTML;
+        const event = new PointerEvent("pointerdown", {pointerId: 10, button: 0, clientX: 300, clientY: 226});
+        f.invoke("startResize", event, `add-${mode}`);
+        pointer(document, "pointermove", 360, 316, 10);
+        await frames(3);
+        const row = f.touch("[data-type='add-row']");
+        const column = f.touch("[data-type='add-column']");
+        check.equal(row.classList.contains("fn__none"), mode === "column");
+        check.equal(column.classList.contains("fn__none"), mode === "row");
+        if (mode !== "column") {
+            const rect = row.getBoundingClientRect();
+            check.equal(rect.top + rect.height / 2, Math.round(f.table.getBoundingClientRect().bottom + 18));
+        }
+        if (mode !== "row") {
+            const rect = column.getBoundingClientRect();
+            check.equal(rect.left + rect.width / 2, Math.round(f.table.getBoundingClientRect().right + 18));
+        }
+        pointer(document, "pointercancel", 360, 316, 10);
+        await frames(3);
+        check.equal(f.table.innerHTML, before, "desktop size-drag cancellation preserves the table");
+        f.dispose();
+    }
     {
         const f = fixture();
         check.equal(f.touch(".protyle-table-control__toolbar"), null, "desktop retains its existing controls");

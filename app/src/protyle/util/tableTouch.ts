@@ -253,6 +253,14 @@ export class TableTouchControl {
         this.renderEndpoints(state);
     }
 
+    public renderResize() {
+        this.controls.querySelectorAll<HTMLElement>(".protyle-table-control__handle, .protyle-table-control__width-guide")
+            .forEach(control => control.classList.add("fn__none"));
+        this.endpoints.forEach(button => button.classList.add("fn__none"));
+        return ["add-row", "add-column", "add-both"].map(type =>
+            this.controls.querySelector<HTMLButtonElement>(`[data-action="${type}"]`));
+    }
+
     private renderEndpoints(state?: ITableTouchState) {
         this.endpoints.forEach(button => button.classList.add("fn__none"));
         const selection = state?.selection;

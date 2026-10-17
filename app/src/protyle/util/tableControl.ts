@@ -560,7 +560,7 @@ export class TableControl {
     }
 
     private getTouchState(): ITableTouchState | undefined {
-        const cell = this.selection?.activeCell || this.caretCell || this.hoverCell;
+        const cell = [this.selection?.activeCell, this.caretCell, this.hoverCell].find(item => item?.isConnected);
         const node = getTableNode(cell);
         if (this.protyle.disabled || !cell?.isConnected || !node || !this.wysiwygElement.contains(cell) ||
             this.protyle.element.closest(".fn__none, [inert]")) {
@@ -1489,10 +1489,12 @@ export class TableControl {
         if (!state) {
             return;
         }
-        [this.rowHandle, this.columnHandle, this.cellHandle, this.addRowButton, this.addColumnButton,
-            this.addBothButton].forEach(item => {
-            item.classList.add("fn__none");
-            item.classList.remove("protyle-table-control__add--active");
+        const [addRowButton, addColumnButton, addBothButton] = this.touch?.renderResize() ||
+            [this.addRowButton, this.addColumnButton, this.addBothButton];
+        [this.rowHandle, this.columnHandle, this.cellHandle, addRowButton, addColumnButton,
+            addBothButton].forEach(item => {
+            item?.classList.add("fn__none");
+            item?.classList.remove("protyle-table-control__add--active");
         });
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
         const gridRect = getTableGridRect(state.table);
@@ -1506,28 +1508,28 @@ export class TableControl {
         const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
             isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                 TABLE_ADD_CONTROL_GAP);
-        if (state.mode === "row" || state.mode === "both") {
-            this.addRowButton.classList.remove("fn__none");
-            this.addRowButton.classList.add("protyle-table-control__add--active");
-            this.addRowButton.style.width = `${Math.max(0, tableViewportRect.width)}px`;
-            this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addRowButton, tableViewportRect.left + tableViewportRect.width / 2, rowControlCenter);
+        if (addRowButton && (state.mode === "row" || state.mode === "both")) {
+            addRowButton.classList.remove("fn__none");
+            addRowButton.classList.add("protyle-table-control__add--active");
+            addRowButton.style.width = `${Math.max(0, tableViewportRect.width)}px`;
+            addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            this.setPosition(addRowButton, tableViewportRect.left + tableViewportRect.width / 2, rowControlCenter);
         }
-        if ((state.mode === "column" || state.mode === "both") && columnControlVisible) {
-            this.addColumnButton.classList.remove("fn__none");
-            this.addColumnButton.classList.add("protyle-table-control__add--active");
-            this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.addColumnButton.style.height = `${Math.max(0, tableViewportRect.height)}px`;
-            this.setPosition(this.addColumnButton,
+        if (addColumnButton && (state.mode === "column" || state.mode === "both") && columnControlVisible) {
+            addColumnButton.classList.remove("fn__none");
+            addColumnButton.classList.add("protyle-table-control__add--active");
+            addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            addColumnButton.style.height = `${Math.max(0, tableViewportRect.height)}px`;
+            this.setPosition(addColumnButton,
                 addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                 tableViewportRect.top + tableViewportRect.height / 2);
         }
-        if (state.mode === "both" && columnControlVisible) {
-            this.addBothButton.classList.remove("fn__none");
-            this.addBothButton.classList.add("protyle-table-control__add--active");
-            this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addBothButton,
+        if (addBothButton && state.mode === "both" && columnControlVisible) {
+            addBothButton.classList.remove("fn__none");
+            addBothButton.classList.add("protyle-table-control__add--active");
+            addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
+            this.setPosition(addBothButton,
                 addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                 rowControlCenter);
         }

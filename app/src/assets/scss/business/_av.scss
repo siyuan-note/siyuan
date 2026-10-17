@@ -2075,6 +2075,14 @@
         width: 520px;
         min-width: min(340px, calc(100vw - 32px));
         max-width: calc(100vw - 32px);
+        max-height: var(--av-automation-max-height, calc(100vh - 60px));
+        display: flex;
+        flex-direction: column;
+
+        > .b3-menu__items {
+          min-height: 0;
+          max-height: none;
+        }
       }
 
       &__items {

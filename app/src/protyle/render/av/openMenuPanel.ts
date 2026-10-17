@@ -6,6 +6,7 @@ import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {setPosition} from "../../../util/setPosition";
+import {setAutomationMenuPosition} from "./automationPosition";
 import {setColOption} from "./select";
 import {prepareFilterColumns} from "./filter";
 import {Constants} from "../../../constants";
@@ -156,7 +157,11 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             delete menuElement.dataset.positionTop;
             delete menuElement.dataset.positionBottom;
             delete menuElement.dataset.positionX;
-            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+            if (menuElement.classList.contains("av__automation-panel")) {
+                setAutomationMenuPosition(menuElement, tabRect);
+            } else {
+                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+            }
         } : undefined;
         if (resizeMenu) {
             window.addEventListener("resize", resizeMenu);

@@ -49,12 +49,14 @@ fetchPost("/api/setting/setEditor", {blockGutterMode: true}, response => {
     if (response.code === 0 && response.data) {
         const enabled: boolean = response.data.blockGutterMode;
         // @ts-expect-error 块标开关响应统一为布尔值。
-        const legacyMode: number = response.data.blockGutterMode;
-        void [enabled, legacyMode];
+        const numericMode: number = response.data.blockGutterMode;
+        void [enabled, numericMode];
     }
 });
+// @ts-expect-error 块标开关不接受整数。
 fetchPost("/api/setting/setEditor", {blockGutterMode: 1});
 fetchPost("/api/setting/patch", {editor: {blockGutterMode: false}});
+// @ts-expect-error 局部更新也不接受整数块标配置。
 fetchPost("/api/setting/patch", {editor: {blockGutterMode: 0}});
 // @ts-expect-error 块标开关不接受字符串。
 fetchPost("/api/setting/setEditor", {blockGutterMode: "true"});

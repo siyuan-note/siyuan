@@ -8,8 +8,6 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-
-	"github.com/siyuan-note/siyuan/kernel/internal/configcompat"
 )
 
 // Schema 是生成器和响应验证共用的 JSON Schema 子集；不支持的 Go 类型直接报错。
@@ -95,12 +93,6 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
-	if t == reflect.TypeFor[configcompat.BlockGutterMode]() {
-		if input {
-			return &Schema{AnyOf: []*Schema{{Type: "boolean"}, {Type: "integer"}}}, nil
-		}
-		return &Schema{Type: "boolean"}, nil
-	}
 	if schema, err := transactionPayloadSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
 	}

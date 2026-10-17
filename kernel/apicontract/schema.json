@@ -40499,14 +40499,7 @@
         "blockGutterMode": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -45152,14 +45145,7 @@
         "blockGutterMode": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
+              "type": "boolean"
             },
             {
               "type": "null"

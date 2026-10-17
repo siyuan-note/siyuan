@@ -3,9 +3,11 @@ package model
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
+	"github.com/aws/smithy-go"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -48,9 +50,9 @@ func TestSyncProviderS3(s3 *conf.S3) (kind, msg string) {
 
 	client := newS3ProbeClient(candidate)
 	// 探针放在数据分块前缀下：同步每次都会写入与列举该前缀，权限判定更有代表性；
-	// 随机子目录不会与 40 位十六进制对象 ID 冲突，未引用时也会被云端清理回收。
-	probeDir := "objects/.siyuan-probe-" + util.RandString(8) + "/"
-	probeKey := probeDir + "probe"
+	// .s 不是十六进制对象前缀，并遵循清理流程按对象 ID 前两字符拆分目录的规则。
+	probePrefix := "objects/.s/siyuan-probe-" + util.RandString(16) + "-"
+	probeKey := probePrefix + "probe"
 	if _, err := client.UploadBytes(probeKey, []byte("siyuan"), true); nil != err {
 		return syncProbeFailure(err)
 	}
@@ -59,7 +61,7 @@ func TestSyncProviderS3(s3 *conf.S3) (kind, msg string) {
 		_ = client.RemoveObject(probeKey)
 	}()
 
-	objects, err := client.ListObjects(probeDir)
+	objects, err := client.ListObjects(probePrefix)
 	if nil != err {
 		return syncProbeFailure(err)
 	}
@@ -69,7 +71,7 @@ func TestSyncProviderS3(s3 *conf.S3) (kind, msg string) {
 	// 部分兼容实现在写入后短时间内列不到新对象，重试后再判定，避免把可用配置报成错误
 	for attempt := 1; attempt < syncProbeListAttempts; attempt++ {
 		time.Sleep(syncProbeListRetryDelay)
-		objects, err = client.ListObjects(probeDir)
+		objects, err = client.ListObjects(probePrefix)
 		if nil != err {
 			return syncProbeFailure(err)
 		}
@@ -103,15 +105,27 @@ func syncProbeFailure(err error) (kind, msg string) {
 		errors.Is(err, cloud.ErrCloudObjectNotFound) {
 		return SyncProbeConfig, err.Error()
 	}
-	lower := strings.ToLower(err.Error())
-	for _, hint := range []string{
-		"no such host", "hostname resolution", "no address associated with hostname", "connection failed",
-		"timeout", "context deadline exceeded", "connection refused", "connection reset",
-		"broken pipe", "network is unreachable",
-	} {
-		if strings.Contains(lower, hint) {
+	var responseErr interface{ HTTPStatusCode() int }
+	if errors.As(err, &responseErr) && (responseErr.HTTPStatusCode() >= 500 ||
+		responseErr.HTTPStatusCode() == http.StatusTooManyRequests) {
+		return SyncProbeNetwork, err.Error()
+	}
+	var apiErr smithy.APIError
+	if errors.As(err, &apiErr) {
+		if apiErr.ErrorFault() == smithy.FaultServer {
 			return SyncProbeNetwork, err.Error()
 		}
+		switch apiErr.ErrorCode() {
+		case "AccessDenied", "InvalidAccessKeyId", "SignatureDoesNotMatch", "NoSuchBucket", "NoSuchKey", "NotFound",
+			"InvalidBucketName", "InvalidRegion", "AuthorizationHeaderMalformed", "PermanentRedirect":
+			return SyncProbeConfig, err.Error()
+		}
 	}
-	return SyncProbeConfig, err.Error()
+	if responseErr != nil {
+		switch responseErr.HTTPStatusCode() {
+		case http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound:
+			return SyncProbeConfig, err.Error()
+		}
+	}
+	return SyncProbeNetwork, err.Error()
 }

@@ -1,26 +1,33 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
 
+	"github.com/aws/smithy-go"
+	smithyhttp "github.com/aws/smithy-go/transport/http"
+	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
 // probeServer 是最小的 S3 兼容端点：记录写入、列举与删除，用于验证探测结论。
 type probeServer struct {
-	mu         sync.Mutex
-	objects    map[string][]byte
-	written    []string
-	listKeyFn  func(prefix string) string
-	listFails  bool
-	bucketMiss bool
-	listLag    int
+	mu          sync.Mutex
+	objects     map[string][]byte
+	written     []string
+	listKeyFn   func(prefix string) string
+	listFails   bool
+	bucketMiss  bool
+	listLag     int
+	deleteFails int
 }
 
 func (server *probeServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -40,9 +47,26 @@ func (server *probeServer) ServeHTTP(writer http.ResponseWriter, request *http.R
 		server.written = append(server.written, key)
 		writer.WriteHeader(http.StatusOK)
 	case http.MethodDelete:
+		if server.deleteFails > 0 {
+			server.deleteFails--
+			writer.Header().Set("Content-Type", "application/xml")
+			writer.WriteHeader(http.StatusForbidden)
+			_, _ = writer.Write([]byte(`<Error><Code>AccessDenied</Code><Message>denied</Message></Error>`))
+			return
+		}
 		delete(server.objects, key)
 		writer.WriteHeader(http.StatusNoContent)
 	case http.MethodGet:
+		if !request.URL.Query().Has("prefix") {
+			if data, exists := server.objects[key]; exists {
+				_, _ = writer.Write(data)
+			} else {
+				writer.Header().Set("Content-Type", "application/xml")
+				writer.WriteHeader(http.StatusNotFound)
+				_, _ = writer.Write([]byte(`<Error><Code>NoSuchKey</Code><Message>not found</Message></Error>`))
+			}
+			return
+		}
 		if server.listFails {
 			writer.Header().Set("Content-Type", "application/xml")
 			writer.WriteHeader(http.StatusNotFound)
@@ -74,6 +98,69 @@ func (server *probeServer) ServeHTTP(writer http.ResponseWriter, request *http.R
 	}
 }
 
+// TestSyncProbeFailureClassification 保留鉴权和桶配置错误，并将服务故障、限流和未知错误归为无法判定。
+func TestSyncProbeFailureClassification(t *testing.T) {
+	responseError := func(status int) error {
+		return &smithyhttp.ResponseError{
+			Response: &smithyhttp.Response{Response: &http.Response{StatusCode: status}},
+			Err:      errors.New("unexpected response"),
+		}
+	}
+	for _, tc := range []struct {
+		name string
+		err  error
+		want string
+	}{
+		{"auth", cloud.ErrCloudAuthFailed, SyncProbeConfig},
+		{"missing bucket", &smithy.GenericAPIError{Code: "NoSuchBucket", Message: "missing"}, SyncProbeConfig},
+		{"invalid key", &smithy.GenericAPIError{Code: "InvalidAccessKeyId", Message: "invalid"}, SyncProbeConfig},
+		{"signature", &smithy.GenericAPIError{Code: "SignatureDoesNotMatch", Message: "invalid"}, SyncProbeConfig},
+		{"service unavailable", &smithy.GenericAPIError{Code: "ServiceUnavailable", Message: "unavailable", Fault: smithy.FaultServer}, SyncProbeNetwork},
+		{"throttling", &smithy.GenericAPIError{Code: "SlowDown", Message: "reduce requests", Fault: smithy.FaultClient}, SyncProbeNetwork},
+		{"unknown", errors.New("unexpected response"), SyncProbeNetwork},
+		{"transport", errors.New("unexpected EOF"), SyncProbeNetwork},
+		{"HTTP unavailable", responseError(http.StatusServiceUnavailable), SyncProbeNetwork},
+		{"HTTP throttling", responseError(http.StatusTooManyRequests), SyncProbeNetwork},
+		{"HTTP invalid request", responseError(http.StatusBadRequest), SyncProbeConfig},
+		{"HTTP forbidden", responseError(http.StatusForbidden), SyncProbeConfig},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			err := fmt.Errorf("probe failed: %w", tc.err)
+			if kind, msg := syncProbeFailure(err); kind != tc.want || msg != err.Error() {
+				t.Fatalf("got %q: %s, want %q with original message", kind, msg, tc.want)
+			}
+		})
+	}
+}
+
+// TestSyncProbeCloudPurge 使用当前依赖的实际清理流程，确认直接删除失败后探针仍可回收。
+func TestSyncProbeCloudPurge(t *testing.T) {
+	previousConf := Conf
+	Conf = &AppConf{Lang: "en"}
+	t.Cleanup(func() { Conf = previousConf })
+	backend := &probeServer{objects: map[string][]byte{"repo/indexes/unreferenced": []byte("unused")}, deleteFails: 1}
+	server := httptest.NewServer(backend)
+	defer server.Close()
+	config := probeConfig(server.URL)
+	if kind, msg := TestSyncProviderS3(config); kind != SyncProbeOK {
+		t.Fatalf("probe failed: %s: %s", kind, msg)
+	}
+	if len(backend.objects) != 2 {
+		t.Fatalf("expected a leftover probe and index, got %v", backend.objects)
+	}
+	directory := t.TempDir()
+	repo, err := dejavu.NewRepo(filepath.Join(directory, "data"), filepath.Join(directory, "repo"),
+		filepath.Join(directory, "history"), filepath.Join(directory, "temp"), "probe-test", "probe-test", "test",
+		[]byte("0123456789abcdef"), nil, newS3ProbeClient(config))
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err := repo.PurgeCloud()
+	if err != nil || stat == nil || stat.Objects != 1 || len(backend.objects) != 0 {
+		t.Fatalf("probe was not purged: stat=%+v err=%v remaining=%v", stat, err, backend.objects)
+	}
+}
+
 func probeConfig(endpoint string) *conf.S3 {
 	return &conf.S3{
 		Endpoint: endpoint, AccessKey: "key", SecretKey: "secret", Bucket: "notes", Region: "auto",
@@ -96,8 +183,8 @@ func TestTestSyncProviderS3(t *testing.T) {
 		t.Fatalf("probe object was left behind: %v", healthy.objects)
 	}
 	// 探针位于数据分块前缀下，才能覆盖同步所需的写入与列举权限，并随未引用对象一起被清理
-	if 1 != len(healthy.written) || !strings.HasPrefix(healthy.written[0], "repo/objects/.siyuan-probe-") ||
-		!strings.HasSuffix(healthy.written[0], "/probe") {
+	if 1 != len(healthy.written) || !strings.HasPrefix(healthy.written[0], "repo/objects/.s/siyuan-probe-") ||
+		!strings.HasSuffix(healthy.written[0], "-probe") {
 		t.Fatalf("probe key is outside the object prefix: %v", healthy.written)
 	}
 

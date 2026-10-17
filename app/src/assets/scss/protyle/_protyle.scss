@@ -1246,6 +1246,12 @@ table + .protyle-action__table {
   }
 }
 
+html[data-frontend="mobile"] .protyle-wysiwyg [data-type="NodeTable"] > div:first-child,
+html[data-frontend="browser-mobile"] .protyle-wysiwyg [data-type="NodeTable"] > div:first-child {
+  padding-top: 16px;
+  padding-left: 16px;
+}
+
 .protyle-table-control {
   position: fixed;
   inset: 0;
@@ -1432,6 +1438,55 @@ table + .protyle-action__table {
     z-index: 3;
     background-color: var(--b3-theme-primary);
     pointer-events: none;
+  }
+
+  &--touch {
+    > .protyle-table-control__handle,
+    > .protyle-table-control__add {
+      display: none;
+    }
+  }
+
+  &__touch-button,
+  &__endpoint {
+    position: fixed;
+    z-index: 3;
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  &__endpoint {
+    z-index: 4;
+
+    &::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      background-color: var(--b3-theme-primary);
+      border: 2px solid var(--b3-theme-background);
+      border-radius: 50%;
+    }
+  }
+
+  &__toolbar {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 4px;
+    padding: 8px;
+    background-color: var(--b3-theme-background);
+    border-radius: var(--b3-border-radius);
+    box-shadow: var(--b3-point-shadow);
+    pointer-events: auto;
   }
 }
 .image-ocr {

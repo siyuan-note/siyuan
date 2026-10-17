@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261017142635"
 	},
 	"Children": [
 		{
@@ -1935,6 +1935,48 @@
 				{
 					"Type": "NodeText",
 					"Data": "If the table contains merged cells or headers, it will be copied as HTML or exported as Markdown."
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-7s38p0k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-7s38p0k",
+				"updated": "20261017142635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, tap a cell to edit its text. Use the selection button beside the cell or the block menu in the keyboard toolbar to select a cell range. Drag either corner handle to expand or shrink the selection; dragging near the viewport edge scrolls the table. Swiping cell content still scrolls, and holding text still selects text."
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-d2uc99x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-d2uc99x",
+				"updated": "20261017142635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tap a handle above a column or beside a row to select that column or row. Enable Multi-select in the bottom toolbar to add or remove nonadjacent cells, rows, or columns. Use More to merge cells, set styles and alignment, or operate on selected rows and columns. Tap Done to leave selection mode."
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-wrzqg7l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-wrzqg7l",
+				"updated": "20261017142635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the column-width handle to change a column's width. Select columns and use More to auto-fit their widths or distribute them evenly. Tap the plus controls at the table edges to add rows or columns, or drag the edge controls to add several at once or remove trailing empty rows and columns. Shrinking preserves nonempty content and merged cells."
 				}
 			]
 		},

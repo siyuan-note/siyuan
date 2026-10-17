@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Select cell range",
+	"tableSelectionDone": "Done",
 	"listMindmapConnectors": "Connectors",
 	"listMindmapDefaultConnectorStyle": "Default connector style for new maps",
 	"listMindmapConnectorStyle": "Connector style",

@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Выбрать диапазон ячеек",
+	"tableSelectionDone": "Готово",
 	"listMindmapConnectors": "Соединительные линии",
 	"listMindmapDefaultConnectorStyle": "Стиль соединений по умолчанию для новых карт",
 	"listMindmapConnectorStyle": "Стиль соединительных линий",

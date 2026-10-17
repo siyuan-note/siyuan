@@ -1,0 +1,375 @@
+import type {ITableGrid} from "./table";
+import {escapeAttr} from "../../util/escape";
+import {TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
+
+type SelectionMode = "cell" | "row" | "column";
+
+export interface ITableTouchState {
+    cell: HTMLTableCellElement;
+    table: HTMLTableElement;
+    grid: ITableGrid;
+    viewport: {left: number, top: number, right: number, bottom: number};
+    selection?: {
+        mode: SelectionMode;
+        cells: HTMLTableCellElement[];
+        indexes: Set<number>;
+        rectangle: boolean;
+    };
+}
+
+interface ITableTouchActions {
+    state: () => ITableTouchState | undefined;
+    select: (cell: HTMLTableCellElement, mode: SelectionMode, toggle: boolean, extend?: boolean) => boolean;
+    range: (anchor: HTMLTableCellElement, active: HTMLTableCellElement) => void;
+    drag: (event: PointerEvent, cell: HTMLTableCellElement, mode: "row" | "column", handle: HTMLElement) => void;
+    resize: (event: PointerEvent, cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both") => void;
+    add: (cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both") => void;
+    width: (event: PointerEvent, cell: HTMLTableCellElement, column: number) => void;
+    menu: () => void;
+    copy: () => void;
+    clear: () => void;
+    finish: () => void;
+    render: () => void;
+}
+
+// 触摸层只管理入口和手势，表格修改、合并边界与事务由共享控制器处理。
+export class TableTouchControl {
+    private controls = document.createElement("div");
+    private toolbar = document.createElement("div");
+    private endpoints: HTMLButtonElement[];
+    private multiSelect = false;
+    private controller = new AbortController();
+    private gesture?: AbortController;
+    private scrollFrame: number;
+    private dragging = false;
+
+    constructor(editor: HTMLElement, container: HTMLElement, private content: () => HTMLElement,
+                private actions: ITableTouchActions) {
+        container.classList.add("protyle-table-control--touch");
+        container.dataset.preventSwipe = "true";
+        this.controls.dataset.tableTouchControls = "true";
+        this.toolbar.className = "protyle-table-control__toolbar fn__none";
+        this.toolbar.innerHTML = `<button class="block__icon block__icon--show block__icon--touch" data-action="multi" aria-label="${escapeAttr(window.siyuan.languages.multiSelect)}"><svg><use xlink:href="#iconSelect"></use></svg></button>
+<button class="block__icon block__icon--show block__icon--touch" data-action="copy" aria-label="${escapeAttr(window.siyuan.languages.copy)}"><svg><use xlink:href="#iconCopy"></use></svg></button>
+<button class="block__icon block__icon--show block__icon--touch" data-action="clear" aria-label="${escapeAttr(window.siyuan.languages.clear)}"><svg><use xlink:href="#iconClear"></use></svg></button>
+<button class="block__icon block__icon--show block__icon--touch" data-action="more" aria-label="${escapeAttr(window.siyuan.languages.more)}"><svg><use xlink:href="#iconMore"></use></svg></button>
+<button class="b3-button b3-button--text" data-action="done">${window.siyuan.languages.tableSelectionDone}</button>`;
+        this.toolbar.setAttribute("role", "toolbar");
+        this.toolbar.setAttribute("aria-label", window.siyuan.languages.table);
+        this.endpoints = ["start", "end"].map(endpoint => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "block__icon block__icon--show protyle-table-control__endpoint fn__none";
+            button.dataset.endpoint = endpoint;
+            button.setAttribute("aria-label", window.siyuan.languages.tableSelectRange);
+            return button;
+        });
+        container.append(this.controls, ...this.endpoints, this.toolbar);
+        const signal = this.controller.signal;
+        this.toolbar.addEventListener("pointerdown", event => event.preventDefault(), {signal});
+        this.toolbar.addEventListener("click", event => {
+            const action = (event.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
+            if (action === "multi") {
+                this.multiSelect = !this.multiSelect;
+                this.actions.render();
+            } else if (action === "copy") {
+                this.actions.copy();
+            } else if (action === "clear") {
+                this.actions.clear();
+            } else if (action === "more") {
+                this.actions.menu();
+            } else if (action === "done") {
+                this.actions.finish();
+            }
+        }, {signal});
+        this.endpoints.forEach(button => button.addEventListener("pointerdown", event =>
+            this.startRangeDrag(event, button.dataset.endpoint === "start"), {signal}));
+        // 点击改变选区，滑动内容仍交给浏览器滚动，不在 pointerdown 阶段阻止默认行为。
+        editor.addEventListener("click", event => {
+            const state = this.actions.state();
+            const cell = (event.target as Element).closest<HTMLTableCellElement>("th, td");
+            if (!state?.selection || !cell || cell.closest("table") !== state.table) {
+                return;
+            }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            this.actions.select(cell, this.multiSelect ? state.selection.mode : "cell", this.multiSelect);
+        }, {capture: true, signal});
+        window.addEventListener("blur", () => this.cancelGesture(), {signal});
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                this.cancelGesture();
+            }
+        }, {signal});
+    }
+
+    public reset() {
+        this.multiSelect = false;
+        this.cancelGesture();
+    }
+
+    public destroy() {
+        this.reset();
+        this.controller.abort();
+        this.controls.remove();
+        this.toolbar.remove();
+        this.endpoints.forEach(button => button.remove());
+    }
+
+    public render() {
+        const state = this.actions.state();
+        this.toolbar.classList.toggle("fn__none", !state?.selection);
+        const multi = this.toolbar.querySelector('[data-action="multi"]');
+        multi.setAttribute("aria-pressed", String(this.multiSelect));
+        multi.classList.toggle("block__icon--active", this.multiSelect);
+        const copy = this.toolbar.querySelector<HTMLButtonElement>('[data-action="copy"]');
+        copy.disabled = !!state?.selection && state.selection.mode === "cell" && !state.selection.rectangle;
+        if (this.dragging) {
+            this.renderEndpoints(state);
+            return;
+        }
+        this.endpoints.forEach(button => button.classList.add("fn__none"));
+        this.controls.replaceChildren();
+        if (!state || state.viewport.right <= state.viewport.left || state.viewport.bottom <= state.viewport.top) {
+            return;
+        }
+        const {viewport, grid, cell, table, selection} = state;
+        const visibleInfos = grid.cellInfos.filter(info => info.cell.isConnected &&
+            !info.cell.classList.contains("fn__none"));
+        const rows = new Set<number>();
+        const columns = new Set<number>();
+        visibleInfos.forEach(info => {
+            const rect = info.cell.getBoundingClientRect();
+            if (rect.bottom <= viewport.top || rect.top >= viewport.bottom ||
+                rect.right <= viewport.left || rect.left >= viewport.right) {
+                return;
+            }
+            if (!rows.has(info.row)) {
+                rows.add(info.row);
+                const row = this.button(window.siyuan.languages.row, "iconDrag", viewport.left - 14,
+                    (Math.max(rect.top, viewport.top) + Math.min(rect.bottom, viewport.bottom)) / 2);
+                row.dataset.mode = "row";
+                row.setAttribute("aria-pressed", String(selection?.mode === "row" && selection.indexes.has(info.row)));
+                row.classList.toggle("block__icon--active", selection?.mode === "row" && selection.indexes.has(info.row));
+                row.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "row", row));
+            }
+            // 列控件只按逻辑列创建一次，支持没有表头的表格。
+            if (!columns.has(info.col)) {
+                columns.add(info.col);
+                const column = this.button(window.siyuan.languages.column, "iconDrag",
+                    (Math.max(rect.left, viewport.left) + Math.min(rect.right, viewport.right)) / 2, viewport.top - 14);
+                column.dataset.mode = "column";
+                column.setAttribute("aria-pressed", String(selection?.mode === "column" && selection.indexes.has(info.col)));
+                column.classList.toggle("block__icon--active", selection?.mode === "column" && selection.indexes.has(info.col));
+                column.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "column", column));
+            }
+        });
+        if (!selection) {
+            const rect = cell.getBoundingClientRect();
+            if (rect.bottom > viewport.top && rect.top < viewport.bottom && rect.right > viewport.left && rect.left < viewport.right) {
+                const select = this.button(window.siyuan.languages.tableSelectRange, "iconSelect",
+                    Math.min(rect.right, viewport.right) - 14, Math.min(rect.bottom, viewport.bottom) - 14);
+                select.dataset.action = "select";
+                select.addEventListener("pointerdown", event => event.preventDefault());
+                select.addEventListener("click", () => this.actions.select(cell, "cell", false));
+            }
+        }
+        const activeColumn = grid.cellInfos.find(info => info.cell === cell)?.col;
+        const column = typeof activeColumn === "number" ?
+            table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[activeColumn] : undefined;
+        const widthRect = column?.getBoundingClientRect() || cell.getBoundingClientRect();
+        if (typeof activeColumn === "number" && widthRect.right > viewport.left && widthRect.right <= viewport.right + 1) {
+            const width = this.button(window.siyuan.languages.width, "iconWidth", widthRect.right, viewport.top - 14);
+            width.dataset.action = "width";
+            width.addEventListener("pointerdown", event => {
+                event.preventDefault();
+                this.holdControls(event);
+                this.actions.width(event, cell, activeColumn);
+            });
+        }
+        const tableRect = table.getBoundingClientRect();
+        if (tableRect.bottom <= viewport.bottom + 1) {
+            this.addResize(cell, "add-row", viewport.left + (viewport.right - viewport.left) / 2, tableRect.bottom + 14);
+        }
+        if (tableRect.right <= viewport.right + 1) {
+            this.addResize(cell, "add-column", tableRect.right + 14, viewport.top + (viewport.bottom - viewport.top) / 2);
+        }
+        if (tableRect.bottom <= viewport.bottom + 1 && tableRect.right <= viewport.right + 1) {
+            this.addResize(cell, "add-both", tableRect.right + 14, tableRect.bottom + 14);
+        }
+        this.renderEndpoints(state);
+    }
+
+    private renderEndpoints(state?: ITableTouchState) {
+        this.endpoints.forEach(button => button.classList.add("fn__none"));
+        const selection = state?.selection;
+        if (selection?.cells.length && (selection.mode !== "cell" || selection.rectangle)) {
+            const {grid, viewport} = state;
+            const cells = new Set(selection.cells);
+            const infos = grid.cellInfos.filter(info => cells.has(info.cell));
+            if (!infos.length) {
+                return;
+            }
+            const first = infos.reduce((a, b) => a.row < b.row || a.row === b.row && a.col < b.col ? a : b);
+            const last = infos.reduce((a, b) => a.row + a.rowspan > b.row + b.rowspan ||
+                a.row + a.rowspan === b.row + b.rowspan && a.col + a.colspan > b.col + b.colspan ? a : b);
+            [first.cell.getBoundingClientRect(), last.cell.getBoundingClientRect()].forEach((rect, index) => {
+                const x = index === 0 ? rect.left : rect.right;
+                const y = index === 0 ? rect.top : rect.bottom;
+                if (x >= viewport.left - 1 && x <= viewport.right + 1 && y >= viewport.top - 1 && y <= viewport.bottom + 1) {
+                    const button = this.endpoints[index];
+                    button.style.left = `${x}px`;
+                    button.style.top = `${y}px`;
+                    button.classList.remove("fn__none");
+                }
+            });
+        }
+    }
+
+    private button(label: string, icon: string, left: number, top: number) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "block__icon block__icon--show protyle-table-control__touch-button";
+        button.setAttribute("aria-label", label);
+        button.innerHTML = `<svg><use xlink:href="#${icon}"></use></svg>`;
+        button.style.left = `${Math.max(16, Math.min(window.innerWidth - 16, left))}px`;
+        button.style.top = `${Math.max(16, Math.min(window.innerHeight - 72, top))}px`;
+        this.controls.append(button);
+        return button;
+    }
+
+    private selectHandle(event: PointerEvent, cell: HTMLTableCellElement, mode: "row" | "column", handle: HTMLElement) {
+        if (event.button !== 0) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        const state = this.actions.state();
+        // 拖动已选行列时保留整个选区，多选开关开启后点击手柄切换选中状态。
+        const selected = state?.selection?.mode === mode && state.selection.cells.includes(cell);
+        if ((!selected || this.multiSelect) && !this.actions.select(cell, mode, this.multiSelect)) {
+            return;
+        }
+        if (!this.multiSelect) {
+            this.holdControls(event);
+            this.actions.drag(event, cell, mode, handle);
+        }
+    }
+
+    private addResize(cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both", x: number, y: number) {
+        const button = this.button(type === "add-column" ? window.siyuan.languages.tableAddColumnTip :
+            window.siyuan.languages.tableAddRowTip, type === "add-both" ? "iconMove" : "iconAdd", x, y);
+        button.dataset.action = type;
+        button.addEventListener("pointerdown", event => {
+            event.preventDefault();
+            this.holdControls(event);
+            this.actions.resize(event, cell, type);
+        });
+        button.addEventListener("click", () => this.actions.add(cell, type));
+    }
+
+    private holdControls(event: PointerEvent) {
+        this.cancelGesture();
+        this.dragging = true;
+        this.gesture = new AbortController();
+        const end = (up: PointerEvent) => {
+            if (up.pointerId === event.pointerId) {
+                this.cancelGesture();
+                this.actions.render();
+            }
+        };
+        document.addEventListener("pointerup", end, {signal: this.gesture.signal});
+        document.addEventListener("pointercancel", end, {signal: this.gesture.signal});
+    }
+
+    private startRangeDrag(event: PointerEvent, start: boolean) {
+        const state = this.actions.state();
+        if (event.button !== 0 || !state?.selection?.cells.length) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.cancelGesture();
+        const cells = new Set(state.selection.cells);
+        const infos = state.grid.cellInfos.filter(info => cells.has(info.cell));
+        const top = Math.min(...infos.map(info => info.row));
+        const left = Math.min(...infos.map(info => info.col));
+        const bottom = Math.max(...infos.map(info => info.row + info.rowspan - 1));
+        const right = Math.max(...infos.map(info => info.col + info.colspan - 1));
+        const anchor = state.grid.grid[start ? bottom : top]?.[start ? right : left];
+        if (!anchor) {
+            return;
+        }
+        this.dragging = true;
+        const controller = new AbortController();
+        this.gesture = controller;
+        const signal = controller.signal;
+        let point = {clientX: event.clientX, clientY: event.clientY};
+        const update = () => {
+            const current = this.actions.state();
+            if (!current?.selection) {
+                this.cancelGesture();
+                return;
+            }
+            const viewport = current.viewport;
+            const x = Math.min(Math.max(point.clientX, viewport.left + 2), viewport.right - 2);
+            const y = Math.min(Math.max(point.clientY, viewport.top + 2), viewport.bottom - 2);
+            const target = document.elementsFromPoint(x, y).map(element => element.closest<HTMLTableCellElement>("th, td"))
+                .find(candidate => candidate?.closest("table") === current.table);
+            if (target?.closest("table") === current.table && !target.closest(`tr[${TABLE_VIRTUAL_ROWS}]`)) {
+                if (state.selection.mode === "cell") {
+                    this.actions.range(anchor, target);
+                } else {
+                    this.actions.select(anchor, state.selection.mode, false);
+                    this.actions.select(target, state.selection.mode, false, true);
+                }
+            }
+        };
+        document.addEventListener("pointermove", move => {
+            if (move.pointerId !== event.pointerId) {
+                return;
+            }
+            move.preventDefault();
+            point = move;
+            update();
+        }, {signal, passive: false});
+        const end = (up: PointerEvent) => {
+            if (up.pointerId === event.pointerId) {
+                this.cancelGesture();
+                this.actions.render();
+            }
+        };
+        document.addEventListener("pointerup", end, {signal});
+        document.addEventListener("pointercancel", end, {signal});
+        const scroll = () => {
+            const current = this.actions.state();
+            if (!this.gesture || !current?.selection) {
+                return;
+            }
+            const {viewport} = current;
+            const delta = (value: number, min: number, max: number) => value < min + 28 ? -10 : value > max - 28 ? 10 : 0;
+            const dx = delta(point.clientX, viewport.left, viewport.right);
+            const dy = delta(point.clientY, viewport.top, viewport.bottom);
+            if (dx || dy) {
+                current.table.parentElement.scrollLeft += dx;
+                const wrapper = current.table.parentElement;
+                const scrollTop = wrapper.scrollTop;
+                wrapper.scrollTop += dy;
+                if (wrapper.scrollTop === scrollTop) {
+                    this.content().scrollTop += dy;
+                }
+                update();
+                this.actions.render();
+            }
+            this.scrollFrame = requestAnimationFrame(scroll);
+        };
+        this.scrollFrame = requestAnimationFrame(scroll);
+    }
+
+    private cancelGesture() {
+        this.gesture?.abort();
+        this.gesture = undefined;
+        this.dragging = false;
+        cancelAnimationFrame(this.scrollFrame);
+    }
+}

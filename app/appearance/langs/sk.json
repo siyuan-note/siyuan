@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Vybrať rozsah buniek",
+	"tableSelectionDone": "Hotovo",
 	"listMindmapConnectors": "Spojnice",
 	"listMindmapDefaultConnectorStyle": "Predvolený štýl spojníc pre nové mapy",
 	"listMindmapConnectorStyle": "Štýl spojníc",

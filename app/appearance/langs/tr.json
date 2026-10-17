@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Hücre aralığı seç",
+	"tableSelectionDone": "Bitti",
 	"listMindmapConnectors": "Bağlantı çizgileri",
 	"listMindmapDefaultConnectorStyle": "Yeni haritalar için varsayılan bağlantı stili",
 	"listMindmapConnectorStyle": "Bağlantı çizgisi stili",

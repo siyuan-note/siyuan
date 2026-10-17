@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "選取區域",
+	"tableSelectionDone": "完成",
 	"listMindmapConnectors": "連線",
 	"listMindmapDefaultConnectorStyle": "新建預設連線樣式",
 	"listMindmapConnectorStyle": "連線樣式",

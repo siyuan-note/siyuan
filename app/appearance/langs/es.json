@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Seleccionar rango de celdas",
+	"tableSelectionDone": "Listo",
 	"listMindmapConnectors": "Conectores",
 	"listMindmapDefaultConnectorStyle": "Estilo de conexión predeterminado para mapas nuevos",
 	"listMindmapConnectorStyle": "Estilo de conexión",

@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "सेल श्रेणी चुनें",
+	"tableSelectionDone": "पूर्ण",
 	"listMindmapConnectors": "कनेक्टर",
 	"listMindmapDefaultConnectorStyle": "नए मानचित्रों के लिए डिफ़ॉल्ट कनेक्टर शैली",
 	"listMindmapConnectorStyle": "जोड़ने वाली रेखा की शैली",

@@ -355,7 +355,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         owner.selectElement = document.createElement("div");
         owner.toolbar.isMultiSelectMode = absent;
         const selectedRanges: HTMLTableCellElement[][] = [];
-        owner.wysiwyg.tableControl = {setHidden: noop, clear: noop, selectCellRange: (...cells: HTMLTableCellElement[]) => {
+        owner.wysiwyg.tableControl = {setHidden: noop, clear: noop, hasTouchSelection: absent, selectCellRange: (...cells: HTMLTableCellElement[]) => {
             selectedRanges.push(cells);
             return true;
         }} as unknown as IProtyle["wysiwyg"]["tableControl"];

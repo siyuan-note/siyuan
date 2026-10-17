@@ -90,7 +90,7 @@ import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons
 import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
 import {hintSlash} from "../../protyle/hint/extend";
 import {getFrequentSlashItems} from "../../protyle/hint/frequentSlashStorage";
-import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
+import {finishTableCellEditing, getTableCellRichContext, prepareTableCellMenuItems} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
 import {getIconByType} from "../../editor/getIcon";
 import {MOBILE_TOOLBAR_ACTION_NAMES, MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "./toolbarActions";
@@ -1376,6 +1376,7 @@ const updateVideoMaxHeight = () => {
 };
 
 export const initKeyboardToolbar = () => {
+    window.addEventListener("siyuan-mobile-table-action", () => activeBlur(true));
     window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
@@ -1940,14 +1941,38 @@ export const initKeyboardToolbar = () => {
                     keyboardPanelClosing = false;
                     hideKeyboardToolbarUtil();
                     if (!protyle.gutter && getTableCellRichContext(protyle)) {
-                        const {MenuItem} = await import("../../menus/Menu");
+                        const [{MenuItem}, {tableMenu}] = await Promise.all([
+                            import("../../menus/Menu"), import("../../menus/protyle"),
+                        ]);
                         if (!session.isCurrent()) {
                             return;
                         }
                         if (!nodeElement.isConnected || protyle.disabled || !getTableCellRichContext(protyle)) {
                             return;
                         }
+                        const context = getTableCellRichContext(protyle);
+                        const table = context.cell.closest('[data-type="NodeTable"]');
+                        const tableRange = document.createRange();
+                        tableRange.selectNodeContents(context.cell);
+                        tableRange.collapse(true);
+                        const tableMenus = tableMenu(context.owner, table, context.cell, tableRange, true).menus;
+                        prepareTableCellMenuItems(tableMenus, () => finishTableCellEditing(context.cell));
                         window.siyuan.menus.menu.remove();
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "tableSelectRange",
+                            icon: "iconSelect",
+                            label: window.siyuan.languages.tableSelectRange,
+                            click: () => {
+                                context.owner.wysiwyg.tableControl?.startTouchSelection(context.cell);
+                            },
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "table",
+                            icon: "iconTable",
+                            label: window.siyuan.languages.table,
+                            submenu: tableMenus,
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "insertBefore",
                             icon: "iconBefore",

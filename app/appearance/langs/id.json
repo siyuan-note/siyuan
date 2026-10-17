@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Pilih rentang sel",
+	"tableSelectionDone": "Selesai",
 	"listMindmapConnectors": "Penghubung",
 	"listMindmapDefaultConnectorStyle": "Gaya penghubung bawaan untuk peta baru",
 	"listMindmapConnectorStyle": "Gaya garis penghubung",

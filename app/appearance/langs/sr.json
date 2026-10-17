@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "Изабери опсег ћелија",
+	"tableSelectionDone": "Готово",
 	"listMindmapConnectors": "Линије повезивања",
 	"listMindmapDefaultConnectorStyle": "Подразумевани стил веза за нове мапе",
 	"listMindmapConnectorStyle": "Стил спојних линија",

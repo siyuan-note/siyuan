@@ -1,4 +1,6 @@
 {
+	"tableSelectRange": "セル範囲を選択",
+	"tableSelectionDone": "完了",
 	"listMindmapConnectors": "接続線",
 	"listMindmapDefaultConnectorStyle": "新規マップの既定の接続線スタイル",
 	"listMindmapConnectorStyle": "接続線のスタイル",

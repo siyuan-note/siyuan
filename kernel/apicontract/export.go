@@ -146,6 +146,8 @@ type ExportBrowserHTMLRequest struct {
 	Name   string `json:"name" api:"trim"`
 }
 type ProcessPDFRequest struct {
+	// ExportAssets 按 PDF 实际资源链接处理附件及外部文件，默认关闭以兼容已有调用。
+	ExportAssets            bool   `json:"exportAssets" api:"optional,nullable"`
 	ID                      string `json:"id" api:"trim"`
 	Path                    string `json:"path" api:"trim"`
 	Merge                   bool   `json:"merge" api:"optional,nullable"`

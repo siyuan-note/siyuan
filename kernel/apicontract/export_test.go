@@ -136,3 +136,15 @@ func TestExportPreviewTitleImageCompatibility(t *testing.T) {
 		}
 	}
 }
+
+func TestProcessPDFAssetExportCompatibility(t *testing.T) {
+	for _, extra := range []string{"", `,"exportAssets":null`, `,"exportAssets":false`, `,"exportAssets":true`} {
+		request, err := ProcessPDF.Decode(strings.NewReader(`{"id":"id","path":"file.pdf","removeAssets":false,"watermark":false` + extra + `}`))
+		if err != nil || request.ExportAssets != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected PDF asset export option: %+v %v", request, err)
+		}
+	}
+	if _, err := ProcessPDF.Decode(strings.NewReader(`{"id":"id","path":"file.pdf","removeAssets":false,"watermark":false,"exportAssets":"true"}`)); err == nil {
+		t.Fatal("invalid PDF asset export option accepted")
+	}
+}

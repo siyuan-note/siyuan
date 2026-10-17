@@ -1608,7 +1608,7 @@ export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetIn
 
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
 
-export type ProcessPDFRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "path": string; "removeAssets": boolean; "watermark": boolean; };
+export type ProcessPDFRequestInput = { "exportAssets"?: boolean | null; "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "path": string; "removeAssets": boolean; "watermark": boolean; };
 
 export type ProxyFailure = { "code": number; "msg": string; };
 
@@ -4911,6 +4911,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * exportAssets=true 时仅复制 PDF 实际资源链接需要的外部文件，同名文件另存并更新链接，不覆盖已有文件。
+     * removeAssets=true 时把链接目标嵌入为附件，不在输出目录复制或清理资源；页面图片不额外复制。
+     * exportAssets 省略、null 或 false 保持已有处理方式；启用时保留加密笔记本读取租约，禁止写入加密目录。
+     * 启用时 path 必须为绝对路径，资源读取或 PDF 写入失败会报错，并撤销本次新建的外部资源文件。
+     */
     "/api/export/processPDF": {
         request: ProcessPDFRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

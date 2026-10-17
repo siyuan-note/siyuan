@@ -13,6 +13,10 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	pdfapi "github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+	pdfmodel "github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -125,6 +129,82 @@ func TestAPIContractExportTitleImage(t *testing.T) {
 		after, err := os.ReadFile(path)
 		if err != nil || string(before) != string(after) {
 			t.Fatalf("preview modified source: %v", err)
+		}
+	}
+	previousHome := util.HomeDir
+	util.HomeDir = t.TempDir()
+	defer func() { util.HomeDir = previousHome }()
+	for _, embed := range []bool{false, true} {
+		output := t.TempDir()
+		pdfPath := filepath.Join(output, "document.pdf")
+		ctx, err := pdfapi.ReadContextFile("../testdata/parsertest.pdf")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = pdfapi.WriteContextFile(ctx, pdfPath); err != nil {
+			t.Fatal(err)
+		}
+		code, msg, data := exportContractRequest(t, "processPDF", processPDF,
+			fmt.Sprintf(`{"id":%q,"path":%q,"removeAssets":%t,"watermark":false,"exportAssets":true}`, docID, pdfPath, embed))
+		if code != 0 || string(data) != "null" {
+			t.Fatalf("PDF resource export failed: %d %s %s", code, msg, data)
+		}
+		if _, err = os.Stat(filepath.Join(output, "assets")); !os.IsNotExist(err) {
+			t.Fatalf("PDF without asset links created a sidecar: %v", err)
+		}
+	}
+	assetDir := filepath.Join(util.DataDir, boxID, "assets")
+	if err := os.MkdirAll(assetDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(assetDir, "linked.bin"), []byte("linked"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, embed := range []bool{false, true} {
+		output := t.TempDir()
+		pdfPath := filepath.Join(output, "failed.pdf")
+		ctx, err := pdfapi.ReadContextFile("../testdata/parsertest.pdf")
+		if err != nil {
+			t.Fatal(err)
+		}
+		annotations := []pdfmodel.AnnotationRenderer{}
+		for i, name := range []string{"linked.bin", "missing.bin"} {
+			annotations = append(annotations, pdfmodel.NewLinkAnnotation(*types.NewRectangle(20, 20, 100, 40), "",
+				fmt.Sprintf("linked-%d", i), "", 0, nil, nil, "http://127.0.0.1:6806/assets/"+name, nil, false, 0, pdfmodel.BSSolid))
+		}
+		if _, err = pdfcpu.AddAnnotationsMap(ctx, map[int][]pdfmodel.AnnotationRenderer{1: annotations}, false); err != nil {
+			t.Fatal(err)
+		}
+		if err = pdfapi.WriteContextFile(ctx, pdfPath); err != nil {
+			t.Fatal(err)
+		}
+		beforePDF, err := os.ReadFile(pdfPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.Mkdir(filepath.Join(output, "assets"), 0755); err != nil {
+			t.Fatal(err)
+		}
+		prior := filepath.Join(output, "assets", "existing.txt")
+		if err = os.WriteFile(prior, []byte("keep"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		code, _, _ := exportContractRequest(t, "processPDF", processPDF,
+			fmt.Sprintf(`{"id":%q,"path":%q,"removeAssets":%t,"watermark":false,"exportAssets":true}`, docID, pdfPath, embed))
+		if code != -1 {
+			t.Fatalf("failed asset export reported success: %d", code)
+		}
+		afterPDF, err := os.ReadFile(pdfPath)
+		if err != nil || string(beforePDF) != string(afterPDF) {
+			t.Fatalf("failed export modified PDF: %v", err)
+		}
+		files, err := os.ReadDir(filepath.Join(output, "assets"))
+		if err != nil || len(files) != 1 || files[0].Name() != "existing.txt" {
+			t.Fatalf("rollback changed unrelated assets: %v %v", files, err)
+		}
+		priorData, err := os.ReadFile(prior)
+		if err != nil || string(priorData) != "keep" {
+			t.Fatalf("existing output modified: %q %v", priorData, err)
 		}
 	}
 }

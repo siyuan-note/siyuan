@@ -739,6 +739,17 @@ func holdEncryptedExportRequests(c *gin.Context, ids []string, ret *gulu.Result)
 
 var processPDF = contractHandler(apicontract.ProcessPDF, func(c *gin.Context, request apicontract.ProcessPDFRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if request.ExportAssets {
+		if !filepath.IsAbs(request.Path) {
+			return apicontract.Failure[apicontract.Null](-1, "path must be absolute for PDF asset export")
+		}
+		if rejectEncryptedBoxPath(request.Path) {
+			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(383))
+		}
+		if !holdEncryptedExportRequest(c, request.ID, ret) {
+			return contractFailure[apicontract.Null](ret)
+		}
+	}
 
 	id := request.ID
 	pdfPath := request.Path
@@ -748,7 +759,7 @@ var processPDF = contractHandler(apicontract.ProcessPDF, func(c *gin.Context, re
 	removeAssets := request.RemoveAssets
 	watermark := request.Watermark
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
-	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark, mergeHeadingOptions)
+	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark, request.ExportAssets, mergeHeadingOptions)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

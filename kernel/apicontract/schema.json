@@ -35526,6 +35526,16 @@
     "ProcessPDFRequestInput": {
       "type": "object",
       "properties": {
+        "exportAssets": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },

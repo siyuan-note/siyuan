@@ -20,6 +20,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	pdfapi "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -30,17 +31,21 @@ import (
 )
 
 func TestAPIContractExportNotebookResponseLease(t *testing.T) {
-	if os.Getenv("SIYUAN_TEST_EXPORT_RESPONSE_LEASE") != "1" {
+	mode := os.Getenv("SIYUAN_TEST_EXPORT_RESPONSE_LEASE")
+	if mode != "temp" && mode != "pdf" {
 		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 		defer cancel()
-		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAPIContractExportNotebookResponseLease$", "-test.v")
-		command.Env = append(os.Environ(), "SIYUAN_TEST_EXPORT_RESPONSE_LEASE=1")
-		if output, err := command.CombinedOutput(); err != nil {
-			t.Fatalf("export lease subprocess failed: %v\n%s", err, output)
+		for _, childMode := range []string{"temp", "pdf"} {
+			command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAPIContractExportNotebookResponseLease$", "-test.v")
+			command.Env = append(os.Environ(), "SIYUAN_TEST_EXPORT_RESPONSE_LEASE="+childMode)
+			if output, err := command.CombinedOutput(); err != nil {
+				t.Fatalf("export lease subprocess (%s) failed: %v\n%s", childMode, err, output)
+			}
 		}
 		return
 	}
 	root := t.TempDir()
+	util.HomeDir = root
 	util.ServerURL = &url.URL{Scheme: "http"}
 	util.DataDir, util.TempDir, util.ConfDir, util.HistoryDir = filepath.Join(root, "data"), filepath.Join(root, "temp"), filepath.Join(root, "conf"), filepath.Join(root, "history")
 	util.QueueDir = filepath.Join(util.TempDir, "queue")
@@ -115,10 +120,23 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	engine := gin.New()
 	engine.Use(model.ControlConcurrency, boxLeaseMiddleware)
 	engine.POST("/api/export/exportTempContent", exportTempContent)
+	engine.POST("/api/export/processPDF", processPDF)
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var release sync.Once
 	defer release.Do(func() { close(writer.proceed) })
 	request := httptest.NewRequest("POST", "/api/export/exportTempContent", strings.NewReader(`{"id":"`+boxID+`","content":"EXPORT-SECRET"}`))
+	if mode == "pdf" {
+		pdfPath := filepath.Join(root, "output.pdf")
+		ctx, err := pdfapi.ReadContextFile("../testdata/parsertest.pdf")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = pdfapi.WriteContextFile(ctx, pdfPath); err != nil {
+			t.Fatal(err)
+		}
+		request = httptest.NewRequest("POST", "/api/export/processPDF", strings.NewReader(
+			fmt.Sprintf(`{"id":%q,"path":%q,"removeAssets":true,"watermark":false,"exportAssets":true}`, boxID, pdfPath)))
+	}
 	done := make(chan struct{})
 	go func() { engine.ServeHTTP(writer, request); close(done) }()
 	var body []byte
@@ -131,7 +149,7 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 		Code int                       `json:"code"`
 		Data apicontract.ExportURLData `json:"data"`
 	}
-	if err = json.Unmarshal(body, &response); err != nil || response.Code != 0 || !strings.Contains(response.Data.URL, boxID+"/temp/") {
+	if err = json.Unmarshal(body, &response); err != nil || response.Code != 0 || mode == "temp" && !strings.Contains(response.Data.URL, boxID+"/temp/") {
 		t.Fatalf("managed export was not produced: %s %v", body, err)
 	}
 	locked := make(chan struct{})
@@ -163,7 +181,7 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 			t.Fatalf("locked notebook preview changed or exposed content: %d %s", code, lockedPreview)
 		}
 	}
-	requireAPIContract(t, "POST", "/api/export/exportTempContent", writer.ResponseRecorder)
+	requireAPIContract(t, "POST", request.URL.Path, writer.ResponseRecorder)
 	entries, err := os.ReadDir(filepath.Join(util.TempDir, "export", boxID, "temp"))
 	if err != nil && !os.IsNotExist(err) {
 		t.Fatal(err)

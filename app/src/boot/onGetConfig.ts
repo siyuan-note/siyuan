@@ -285,58 +285,23 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 return;
             }
             pdfFilePath = responseUnique.data.path;
-            fetchPost("/api/export/exportHTML", {
+            fs.writeFileSync(pdfFilePath, pdfData);
+            const processed = await fetchSyncPost("/api/export/processPDF", {
                 id: ipcData.rootId,
-                pdf: true,
-                addTitle: ipcData.addTitle,
-                customTitle: ipcData.customTitle,
+                exportAssets: true,
                 merge: ipcData.mergeSubdocs,
                 mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
                 mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
-                savePath,
-            }, () => {
-                fs.writeFileSync(pdfFilePath, pdfData);
-                ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
-                fetchPost("/api/export/processPDF", {
-                    id: ipcData.rootId,
-                    merge: ipcData.mergeSubdocs,
-                    mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
-                    mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
-                    path: pdfFilePath,
-                    removeAssets: ipcData.removeAssets,
-                    watermark: ipcData.watermark
-                }, async () => {
-                    afterExport(pdfFilePath, msgId);
-                    if (ipcData.removeAssets) {
-                        const removePromise = (dir: string) => {
-                            return new Promise(function (resolve) {
-                                fs.stat(dir, function (err, stat) {
-                                    if (!stat) {
-                                        return;
-                                    }
-
-                                    if (stat.isDirectory()) {
-                                        fs.readdir(dir, function (err, files) {
-                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                            Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                fs.rm(dir, resolve);
-                                            });
-                                        });
-                                    } else {
-                                        fs.unlink(dir, resolve);
-                                    }
-                                });
-                            });
-                        };
-
-                        const assetsDir = path.join(savePath, "assets");
-                        await removePromise(assetsDir);
-                        if (1 > fs.readdirSync(assetsDir).length) {
-                            fs.rmdirSync(assetsDir);
-                        }
-                    }
-                });
+                path: pdfFilePath,
+                removeAssets: ipcData.removeAssets,
+                watermark: ipcData.watermark
             });
+            if (processed.code !== 0) {
+                showMessage(processed.msg, 0, "error", msgId);
+                return;
+            }
+            ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
+            afterExport(pdfFilePath, msgId);
         } catch (e) {
             console.error(e);
             showMessage(window.siyuan.languages.exportPDFLowMemory, 0, "error", msgId);

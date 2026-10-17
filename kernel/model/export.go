@@ -1691,7 +1691,7 @@ func processIFrameWithFilter(tree *parse.Tree, filter func(src string) bool) {
 	})
 }
 
-func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingOptions ...MergeHeadingOptions) (err error) {
+func ProcessPDF(id, p string, merge, removeAssets, watermark, exportAssets bool, mergeHeadingOptions ...MergeHeadingOptions) (err error) {
 	if err = prepareExportBlockAssets(id, merge); err != nil {
 		return
 	}
@@ -1700,6 +1700,9 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingO
 
 		tree, _ := LoadTreeByBlockID(id)
 		if nil == tree {
+			if exportAssets {
+				return ErrBlockNotFound
+			}
 			return nil
 		}
 		numberHeadings := headingNumberEnabled(tree, confEditorSnapshot.HeadingNumber)
@@ -1709,6 +1712,9 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingO
 			tree, mergeErr = mergeSubDocs(tree, mergeHeadingOptionsOrDefault(mergeHeadingOptions), Conf.Export.Load().AddTitle)
 			if nil != mergeErr {
 				logging.LogErrorf("merge sub docs failed: %s", mergeErr)
+				if exportAssets {
+					return mergeErr
+				}
 				return nil
 			}
 		}
@@ -1724,6 +1730,9 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingO
 		font.UserFontDir = filepath.Join(util.HomeDir, ".config", "siyuan", "fonts")
 		if mkdirErr := os.MkdirAll(font.UserFontDir, 0755); nil != mkdirErr {
 			logging.LogErrorf("mkdir [%s] failed: %s", font.UserFontDir, mkdirErr)
+			if exportAssets {
+				return mkdirErr
+			}
 			return nil
 		}
 		if loadErr := api.LoadUserFonts(); nil != loadErr {
@@ -1733,19 +1742,55 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingO
 		pdfCtx, ctxErr := api.ReadContextFile(p)
 		if nil != ctxErr {
 			logging.LogErrorf("read pdf context failed: %s", ctxErr)
+			if exportAssets {
+				return ctxErr
+			}
 			return nil
 		}
 
+		var exported *pdfExportAssets
+		if exportAssets {
+			exported = &pdfExportAssets{directory: filepath.Join(filepath.Dir(p), "assets"), boxID: tree.Box}
+		}
+		completed := false
+		defer func() {
+			if !completed && exported != nil {
+				exported.rollback()
+			}
+		}()
 		processPDFBookmarks(pdfCtx, headings, headingNumbers, tree.Box)
-		processPDFLinkEmbedAssets(pdfCtx, assetDests, tree.Box, removeAssets)
+		if assetErr := processPDFLinkEmbedAssets(pdfCtx, assetDests, tree.Box, removeAssets, exported); assetErr != nil {
+			return assetErr
+		}
 		processPDFWatermark(pdfCtx, watermark)
 
 		pdfcpuVer := model.VersionStr
 		model.VersionStr = "SiYuan v" + util.Ver + " (pdfcpu " + pdfcpuVer + ")"
-		if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
+		var writeErr error
+		if exportAssets {
+			temporary, createErr := os.CreateTemp(filepath.Dir(p), ".siyuan-pdf-*")
+			if createErr != nil {
+				return createErr
+			}
+			temporaryPath := temporary.Name()
+			defer os.Remove(temporaryPath)
+			if writeErr = temporary.Close(); writeErr == nil {
+				writeErr = api.WriteContextFile(pdfCtx, temporaryPath)
+			}
+			if writeErr == nil {
+				writeErr = os.Rename(temporaryPath, p)
+			}
+		} else {
+			writeErr = api.WriteContextFile(pdfCtx, p)
+		}
+		if writeErr != nil {
 			logging.LogErrorf("write pdf context failed: %s", writeErr)
+			if exportAssets {
+				return writeErr
+			}
 			return nil
 		}
+		completed = true
 		return nil
 	})
 	return
@@ -1946,7 +1991,7 @@ func headingTitleWithNumber(title, headingID string, headingNumbers map[string]s
 
 // processPDFLinkEmbedAssets 处理资源文件超链接，根据 removeAssets 参数决定是否将资源文件嵌入到 PDF 中。
 // 导出 PDF 时支持将资源文件作为附件嵌入 https://github.com/siyuan-note/siyuan/issues/7414
-func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID string, removeAssets bool) {
+func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID string, removeAssets bool, exported *pdfExportAssets) error {
 	var assetAbsPaths []string
 	for _, dest := range assetDests {
 		if absPath, _ := GetAssetAbsPathInBox(dest, boxID); "" != absPath {
@@ -1954,20 +1999,31 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		}
 	}
 
-	if 1 > len(assetAbsPaths) {
-		return
+	if 1 > len(assetAbsPaths) && exported == nil {
+		return nil
 	}
 
 	assetLinks := pdfListAssetLinks(pdfCtx)
 	if 1 > len(assetLinks) {
-		return
+		return nil
+	}
+	if exported != nil {
+		sort.Slice(assetLinks, func(i, j int) bool {
+			if assetLinks[i].annotation.Page != assetLinks[j].annotation.Page {
+				return assetLinks[i].annotation.Page < assetLinks[j].annotation.Page
+			}
+			return assetLinks[i].objectNumber < assetLinks[j].objectNumber
+		})
 	}
 
 	assetLinkObjectNumbers := map[int][]int{}
 	for _, assetLink := range assetLinks {
 		if 1 > assetLink.objectNumber {
 			logging.LogWarnf("asset link annotation on page [%d] is not an indirect object", assetLink.annotation.Page)
-			return
+			if exported != nil {
+				return fmt.Errorf("invalid PDF asset link on page %d", assetLink.annotation.Page)
+			}
+			return nil
 		}
 		assetLinkObjectNumbers[assetLink.annotation.Page] = append(
 			assetLinkObjectNumbers[assetLink.annotation.Page], assetLink.objectNumber)
@@ -1979,11 +2035,17 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 			pdfCtx, types.IntSet{page: true}, nil, objectNumbers, false)
 		if nil != removeErr {
 			logging.LogWarnf("remove asset link annotations on page [%d] failed: %s", page, removeErr)
-			return
+			if exported != nil {
+				return removeErr
+			}
+			return nil
 		}
 		if !removed {
 			logging.LogWarnf("no asset link annotation removed on page [%d]", page)
-			return
+			if exported != nil {
+				return fmt.Errorf("PDF asset link not removed on page %d", page)
+			}
+			return nil
 		}
 	}
 
@@ -2001,14 +2063,31 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		}
 		link.URI, _ = url.PathUnescape(link.URI)
 		sourceURI := link.URI
+		if exported != nil {
+			var sourceErr error
+			sourceURI, sourceErr = pdfAssetSourceURI(assetLink.annotation.URI)
+			if sourceErr != nil {
+				return sourceErr
+			}
+		}
 		if idx := strings.Index(link.URI, "?"); 0 < idx {
 			link.URI = link.URI[:idx]
 		}
 
 		if !removeAssets {
+			if exported != nil {
+				var copyErr error
+				link.URI, copyErr = exported.copy(sourceURI)
+				if copyErr != nil {
+					return copyErr
+				}
+				if parsed, parseErr := url.Parse(assetLink.annotation.URI); parseErr == nil && parsed.Fragment != "" {
+					link.URI += "#" + parsed.EscapedFragment()
+				}
+			}
 			// 不移除资源文件夹的话将超链接指向资源文件夹
 			// 加密资源的 link.URI 需要保留 ?box= 上下文，否则导出的 PDF 链接无法解析
-			if idx := strings.Index(sourceURI, "?"); 0 < idx {
+			if idx := strings.Index(sourceURI, "?"); exported == nil && 0 < idx {
 				if strings.Contains(sourceURI[idx:], "box=") {
 					link.URI = sourceURI
 				}
@@ -2026,6 +2105,9 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 
 		absPath, getErr := GetAssetAbsPathInBox(sourceURI, boxID)
 		if nil != getErr {
+			if exported != nil {
+				return getErr
+			}
 			continue
 		}
 		embedPath := absPath
@@ -2034,17 +2116,26 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 			plain, readErr := readAssetBytesInBox(assetBoxID, sourceURI, false)
 			if nil != readErr {
 				logging.LogWarnf("read encrypted asset [%s] failed: %s", sourceURI, readErr)
+				if exported != nil {
+					return readErr
+				}
 				continue
 			}
 			// 加密笔记本的临时资源归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
 			pdfAssetsDir := filepath.Join(util.TempDir, "export", assetBoxID, "pdf-assets")
 			if mkErr := os.MkdirAll(pdfAssetsDir, 0755); mkErr != nil {
 				logging.LogWarnf("mkdir pdf-assets [%s] failed: %s", pdfAssetsDir, mkErr)
+				if exported != nil {
+					return mkErr
+				}
 				continue
 			}
 			embedPath = filepath.Join(pdfAssetsDir, gulu.Rand.String(7)+"-"+filepath.Base(AssetPathWithoutQuery(sourceURI)))
 			if writeErr := filelock.WriteFile(embedPath, plain); nil != writeErr {
 				logging.LogWarnf("write temp embedded asset [%s] failed: %s", embedPath, writeErr)
+				if exported != nil {
+					return writeErr
+				}
 				continue
 			}
 			defer os.Remove(embedPath)
@@ -2053,6 +2144,9 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		ir, newErr := pdfCtx.XRefTable.NewEmbeddedFileStreamDict(embedPath)
 		if nil != newErr {
 			logging.LogWarnf("new embedded file stream dict failed: %s", newErr)
+			if exported != nil {
+				return newErr
+			}
 			continue
 		}
 
@@ -2060,12 +2154,18 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, fn, "attached by SiYuan", *ir)
 		if nil != newErr {
 			logging.LogWarnf("new file spec dict failed: %s", newErr)
+			if exported != nil {
+				return newErr
+			}
 			continue
 		}
 
 		ir, indErr := pdfCtx.XRefTable.IndRefForNewObject(fileSpecDict)
 		if nil != indErr {
 			logging.LogWarnf("ind ref for new object failed: %s", indErr)
+			if exported != nil {
+				return indErr
+			}
 			continue
 		}
 
@@ -2096,18 +2196,27 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		ann, indErr := pdfCtx.XRefTable.IndRefForNewObject(d)
 		if nil != indErr {
 			logging.LogWarnf("ind ref for new object failed: %s", indErr)
+			if exported != nil {
+				return indErr
+			}
 			continue
 		}
 
 		pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(link.Page)
 		if nil != pageErr {
 			logging.LogWarnf("page dict ind ref failed: %s", pageErr)
+			if exported != nil {
+				return pageErr
+			}
 			continue
 		}
 
 		d, defErr := pdfCtx.DereferenceDict(*pageDictIndRef)
 		if nil != defErr {
 			logging.LogWarnf("dereference dict failed: %s", defErr)
+			if exported != nil {
+				return defErr
+			}
 			continue
 		}
 
@@ -2121,6 +2230,9 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 	if 0 < len(linkMap) {
 		if _, addErr := pdfcpu.AddAnnotationsMap(pdfCtx, linkMap, false); nil != addErr {
 			logging.LogErrorf("add annotations map failed: %s", addErr)
+			if exported != nil {
+				return addErr
+			}
 		}
 	}
 
@@ -2129,12 +2241,18 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(page)
 		if nil != pageErr {
 			logging.LogWarnf("page dict ind ref failed: %s", pageErr)
+			if exported != nil {
+				return pageErr
+			}
 			continue
 		}
 
 		pageDict, defErr := pdfCtx.DereferenceDict(*pageDictIndRef)
 		if nil != defErr {
 			logging.LogWarnf("dereference dict failed: %s", defErr)
+			if exported != nil {
+				return defErr
+			}
 			continue
 		}
 
@@ -2161,17 +2279,24 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 
 		o, err := pdfCtx.Dereference(ir)
 		if err != nil || o == nil {
+			if exported != nil {
+				return fmt.Errorf("invalid PDF annotation array: %v", err)
+			}
 			continue
 		}
 
 		annots, _ := o.(types.Array)
 		entry, ok := pdfCtx.FindTableEntryForIndRef(&ir)
 		if !ok {
+			if exported != nil {
+				return fmt.Errorf("PDF annotation array not found")
+			}
 			continue
 		}
 		entry.Object = append(annots, array...)
 		pdfCtx.EnsureVersionForWriting()
 	}
+	return nil
 }
 
 func ExportStdMarkdown(id string, opts *ExportOptions) string {

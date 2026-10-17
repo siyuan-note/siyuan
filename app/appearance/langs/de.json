@@ -294,7 +294,7 @@
 	"entryResetAllOrders": "Alle Reihenfolgen zurücksetzen",
 	"displayImgAlt": "Bildhinweistext anzeigen",
 	"displayImgName": "Bilddateinamen anzeigen",
-	"s3EndpointBucketWarning": "Endpoint enthält möglicherweise bereits den Bucket-Namen, was das Auflisten und Bereinigen von Cloud-Snapshots beeinträchtigen kann. Prüfen Sie die Konfiguration; sichern Sie vorhandene synchronisierte Daten und prüfen Sie deren Speicherpfad, bevor Sie die Konfiguration ändern",
+	"s3EndpointBucketWarning": "Endpoint enthält einen Pfad, der Bucket-Name enthält einen Pfad oder der Hostname beginnt mit dem Bucket-Namen; dies kann das Auflisten und Bereinigen von Cloud-Snapshots beeinträchtigen. Gehört dieser Teil nicht zum Dienst-Endpunkt, verwenden Sie einen Endpunkt ohne Bucket-Namen; sichern Sie vorhandene synchronisierte Daten und prüfen Sie deren Speicherpfad, bevor Sie die Konfiguration ändern, und bestätigen Sie sie mit dem Verbindungstest",
 	"embedHTMLFileBelow": "HTML-Datei darunter einbetten",
 	"horizontalSuperBlock": "Horizontaler Superblock",
 	"verticalSuperBlock": "Vertikaler Superblock",

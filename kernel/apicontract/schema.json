@@ -53226,6 +53226,34 @@
       ],
       "additionalProperties": false
     },
+    "TestSyncProviderS3Data": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "msg"
+      ],
+      "additionalProperties": false
+    },
+    "TestSyncProviderS3RequestInput": {
+      "type": "object",
+      "properties": {
+        "s3": {
+          "$ref": "#/$defs/SyncS3Input"
+        }
+      },
+      "required": [
+        "s3"
+      ],
+      "additionalProperties": false
+    },
     "Transaction": {
       "type": "object",
       "properties": {
@@ -168270,6 +168298,85 @@
               },
               "data": {
                 "$ref": "#/$defs/SyncWebDAVData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/testSyncProviderS3",
+      "handler": "testSyncProviderS3",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TestSyncProviderS3RequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TestSyncProviderS3Data"
               },
               "msg": {
                 "type": "string"

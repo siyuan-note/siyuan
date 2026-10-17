@@ -37,9 +37,10 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
     const status = {textContent: "", classList: {toggle() {} }};
     let warningHidden = true;
     const warning = {classList: {toggle: (_name: string, hidden: boolean) => { warningHidden = hidden; }}};
-    const buttons = Object.fromEntries(["save", "cancel", "clear"].map(action => [action, {
+    const buttons = Object.fromEntries(["save", "cancel", "clear", "test"].map(action => [action, {
         disabled: false, callback: () => {}, addEventListener(_event: string, callback: () => void) {this.callback = callback;},
         getAttribute(name: string) { return name === "data-action" ? action : null; },
+        querySelector: (selector: string) => selector === "span" ? {textContent: ""} : null,
     }]));
     const element = {
         querySelector(selector: string) {
@@ -70,9 +71,11 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         URL, CSS: {escape: (value: string) => value}, exports,
         setTimeout: (callback: () => void) => {rulesTimer = callback; return 1;},
         clearTimeout: () => {rulesTimer = undefined;},
-        document: {querySelector: () => ({closest: () => replacement})},
         window: {siyuan: {config, languages: {syncConfigNotSaved: "Required fields missing", syncConfigSaveFailed: "Not confirmed",
-            loadingError: "Loading failed", _kernel: {142: "Input cannot be empty"}}}},
+            loadingError: "Loading failed", testConnection: "Test connection", testConnectionTesting: "Testing...",
+            testConnectionSuccess: "Connection successful", testConnectionFail: "Connection failed",
+            testConnectionFailMsg: "Connection failed: ${msg}", _kernel: {142: "Input cannot be empty"}}}},
+        document: {querySelector: () => ({closest: () => replacement})},
         require(name: string) {
             if (name === "../../dialog") {
                 return {Dialog: class {
@@ -250,6 +253,62 @@ test("read-only transitions do not re-enable writes after a pending save", async
     ui.click("clear");
     assert.equal(ui.requests.length, 1);
     assert.equal(ui.confirmations.length, 0);
+});
+
+test("test connection probes the draft without saving the configuration", async () => {
+    const ui = setup();
+    ui.inputs.endpoint.value = "https://s3.example.com/notes/";
+    ui.click("test");
+    await settle();
+    assert.equal(ui.requests.length, 1);
+    assert.equal(ui.requests[0].url, "/api/sync/testSyncProviderS3");
+    assert.equal(ui.requests[0].data.s3.endpoint, "https://s3.example.com/notes/");
+    assert.equal(ui.requests[0].data.s3.bucket, "notes");
+    ui.requests[0].resolve({code: 0, data: {kind: "config", msg: "probe object was not listed"}});
+    await settle();
+    assert.equal(ui.status.textContent, "Connection failed: probe object was not listed");
+    assert.equal(ui.inputs.endpoint.disabled, false);
+    assert.equal(ui.buttons.test.disabled, false);
+    assert.equal(ui.closed(), 0);
+});
+
+test("test connection reports success and clears the result when the draft changes", async () => {
+    const ui = setup();
+    ui.click("test");
+    await settle();
+    ui.requests[0].resolve({code: 0, data: {kind: "ok", msg: ""}});
+    await settle();
+    assert.equal(ui.status.textContent, "Connection successful");
+    ui.input();
+    assert.equal(ui.status.textContent, "");
+});
+
+test("test connection waits for kernel rules before validating the draft", async () => {
+    const ui = setup(2, false, true);
+    ui.inputs.endpoint.value = "";
+    ui.click("test");
+    await settle();
+    // 打开对话框时的规则请求被暂停，点击测试会另起一次并等它返回
+    assert.equal(ui.ruleRequests.length, 2);
+    assert.equal(ui.requests.length, 0);
+    ui.ruleRequests[1].resolve({code: 0, data: ui.rules});
+    await settle();
+    // 规则返回后空字段才由内核必填清单拦住，不会把空值交给探测接口
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.inputs.endpoint.attributes["aria-invalid"], "true");
+    assert.equal(ui.status.textContent, "Required fields missing");
+    assert.equal(ui.buttons.test.disabled, false);
+});
+
+test("test connection reports a rule loading failure without probing", async () => {
+    const ui = setup(2, false, true);
+    ui.click("test");
+    await settle();
+    ui.ruleRequests[1].reject();
+    await settle();
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.status.textContent, "Loading failed");
+    assert.equal(ui.buttons.test.disabled, false);
 });
 
 test("draft stays bound to the opened provider even if another window changes the provider", async () => {

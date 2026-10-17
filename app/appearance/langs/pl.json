@@ -294,7 +294,7 @@
 	"entryResetAllOrders": "Resetuj wszystkie kolejności",
 	"displayImgAlt": "Pokazuj tekst podpowiedzi obrazów",
 	"displayImgName": "Pokazuj nazwy plików obrazów",
-	"s3EndpointBucketWarning": "Endpoint może już zawierać nazwę zasobnika, co może zakłócać wyświetlanie i czyszczenie migawek w chmurze. Sprawdź konfigurację; jeśli istnieją już zsynchronizowane dane, wykonaj ich kopię zapasową i sprawdź ścieżkę przechowywania przed zmianą konfiguracji",
+	"s3EndpointBucketWarning": "Endpoint zawiera ścieżkę, nazwa zasobnika zawiera ścieżkę lub nazwa hosta zaczyna się od nazwy zasobnika, co może zakłócać wyświetlanie i czyszczenie migawek w chmurze. Jeśli ta część nie należy do punktu końcowego usługi, użyj punktu końcowego bez nazwy zasobnika; jeśli istnieją już zsynchronizowane dane, wykonaj kopię zapasową i sprawdź ścieżkę przechowywania przed zmianą konfiguracji, a następnie potwierdź testem połączenia",
 	"embedHTMLFileBelow": "Osadź plik HTML poniżej",
 	"horizontalSuperBlock": "Poziomy super blok",
 	"verticalSuperBlock": "Pionowy super blok",

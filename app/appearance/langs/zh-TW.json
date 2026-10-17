@@ -294,7 +294,7 @@
 	"entryResetAllOrders": "重設全部排序",
 	"displayImgAlt": "顯示圖片提示文字",
 	"displayImgName": "顯示圖片檔名",
-	"s3EndpointBucketWarning": "Endpoint 可能重複包含儲存桶名稱，導致雲端快照列舉與清理異常。請核對設定；若已有同步資料，請先備份並確認儲存路徑，再修改設定",
+	"s3EndpointBucketWarning": "Endpoint 包含路徑、Bucket 含路徑或主機名以儲存桶名稱開頭，雲端快照列舉與清理可能異常。若該部分不屬於伺服器位址本身，請改為不帶儲存桶名稱的伺服器位址；若已有同步資料，請先備份並確認儲存路徑，再修改設定，並可用測試連線確認",
 	"embedHTMLFileBelow": "在下方嵌入 HTML 檔案",
 	"horizontalSuperBlock": "橫向超級區塊",
 	"verticalSuperBlock": "縱向超級區塊",

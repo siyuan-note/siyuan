@@ -2392,6 +2392,10 @@ export type TemplatePlan = { "count": number; "id": string; "nodes": Array<Templ
 
 export type TemplatePlanNode = { "depth": number; "hPath": string; "id": string; "parentID": string; "title": string; };
 
+export type TestSyncProviderS3Data = { "kind": string; "msg": string; };
+
+export type TestSyncProviderS3RequestInput = { "s3": SyncS3Input; };
+
 export type Transaction = { "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
 
 export type TransactionAttributeChangeInput = { "data-av-type"?: string | null; "new"?: Record<string, string> | null; "old"?: Record<string, string> | null; };
@@ -7175,7 +7179,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 返回服务类型 2（S3）、3（WebDAV）或 4（本地文件系统）的共用必填清单。
-     * endpoint、bucket 可省略；仅 S3 返回地址主机名重复包含桶名的提示，提示不阻断保存或同步。
+     * endpoint、bucket 可省略；仅 S3 返回 Endpoint 可能让对象键多出前缀的提示，提示不阻断保存或同步。
      * 此接口只做内存中的静态判定，不读取或保存用户配置，不接收凭据，不访问云端或文件系统。
      * 未知服务返回 code -1；规则提示不替代保存时的完整校验和资源来源保护。只读模式下也可调用。
      */
@@ -7322,6 +7326,19 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 使用请求中的候选配置探测云端：写入探针对象、按前缀列举并比对、尽力删除探针，不读取或保存用户配置。
+     * 请求字段与保存接口一致；缺少必填项或地址无效时同样返回 code 0，由 kind 为 config 表示，避免与网络故障混淆。
+     * kind 为 ok 表示写入与列举指向同一个对象键；config 表示可确定的配置错误；network 表示网络或服务端不可达，无法判定配置。
+     * 探测会在桶内创建再删除 repo/objects/.siyuan-probe-<随机值>/probe，需要该前缀的写入与列举权限；未删除的探针会作为未引用对象被云端清理回收。只读模式下也可调用。
+     */
+    "/api/sync/testSyncProviderS3": {
+        request: TestSyncProviderS3RequestInput;
+        response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/addCustomEmoji": {
         request: SystemCustomEmojiRequestInput;

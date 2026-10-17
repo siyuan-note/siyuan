@@ -294,7 +294,7 @@
 	"entryResetAllOrders": "Reset all orders",
 	"displayImgAlt": "Show image tooltip text",
 	"displayImgName": "Show image file names",
-	"s3EndpointBucketWarning": "Endpoint may already contain the bucket name, which can disrupt cloud snapshot listing and cleanup. Check the configuration; if synced data already exists, back it up and verify its storage path before changing the configuration",
+	"s3EndpointBucketWarning": "Endpoint contains a path, the bucket name contains a path, or the hostname starts with the bucket name, which can disrupt cloud snapshot listing and cleanup. If that part is not part of the service endpoint, use an endpoint without the bucket name; if synced data already exists, back it up and verify its storage path before changing the configuration, and confirm with a connection test",
 	"embedHTMLFileBelow": "Embed HTML file below",
 	"horizontalSuperBlock": "Horizontal super block",
 	"verticalSuperBlock": "Vertical super block",

@@ -1083,6 +1083,16 @@ var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAsset
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
 // 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
 var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// GetUnusedEncryptedBoxAssets 扫描单个已解锁加密笔记本的文档、全部数据库定义及智能体会话引用。
+// 任意扫描失败返回 -1，不返回不完整候选。锁定目标使用既有 314 语言消息；结果不截断。
+// name 为响应期间可见的原始文件名，item 为 assets 相对路径，path 带目标 box 查询参数。
+var GetUnusedEncryptedBoxAssets = define[EncryptedBoxAssetsRequest, []*AssetUnusedItem]("getUnusedEncryptedBoxAssets", "/api/asset/getUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RemoveUnusedEncryptedBoxAssets 重新验证用户确认的候选，备份认证后的原始密文后整批删除。
+// 失败补偿恢复源文件，未提交的中断批次在启动同步前恢复；清理历史只索引脱敏元数据。
+// 不改变现有全局清理行为，不修改加密格式，不生成全局资源索引或明文缓存。
+var RemoveUnusedEncryptedBoxAssets = define[RemoveEncryptedBoxAssetsRequest, AssetPathsData]("removeUnusedEncryptedBoxAssets", "/api/asset/removeUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。

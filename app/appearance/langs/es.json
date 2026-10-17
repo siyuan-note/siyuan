@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Limpiar recursos sin referencias",
 	"tableSelectRange": "Seleccionar rango de celdas",
 	"tableSelectionDone": "Listo",
 	"listMindmapConnectors": "Conectores",

@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Очистить ресурсы без ссылок",
 	"tableSelectRange": "Выбрать диапазон ячеек",
 	"tableSelectionDone": "Готово",
 	"listMindmapConnectors": "Соединительные линии",

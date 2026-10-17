@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "참조되지 않은 리소스 정리",
 	"tableSelectRange": "셀 범위 선택",
 	"tableSelectionDone": "완료",
 	"listMindmapConnectors": "연결선",

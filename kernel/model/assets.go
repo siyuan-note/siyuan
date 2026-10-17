@@ -2614,6 +2614,14 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	itemFilter attributeViewItemFilter,
 	normalize ...func(string) string,
 ) (ret []string) {
+	return getAssetsLinkDestsWithOptions(node, includeServePath, itemFilter, true, normalize...)
+}
+
+// getAssetsLinkDestsWithOptions 允许独立扫描数据库定义的调用方关闭节点中的数据库加载。
+func getAssetsLinkDestsWithOptions(
+	node *ast.Node, includeServePath bool, itemFilter attributeViewItemFilter, resolveAttributeViews bool,
+	normalize ...func(string) string,
+) (ret []string) {
 	ret = []string{}
 	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {
@@ -2664,6 +2672,9 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 				ret = append(ret, dest)
 			}
 		} else if ast.NodeAttributeView == n.Type {
+			if !resolveAttributeViews {
+				return ast.WalkContinue
+			}
 			attrView, _ := av.ParseAttributeView(n.AttributeViewID)
 			if nil == attrView {
 				return ast.WalkContinue

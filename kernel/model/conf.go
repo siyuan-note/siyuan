@@ -276,6 +276,9 @@ func (conf *AppConf) SetUser(user *conf.User) {
 }
 
 func InitConf() {
+	if err := recoverEncryptedAssetCleanupOperations(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover encrypted asset cleanup failed: %s", err)
+	}
 	initLang()
 	if err := recoverSettingsReset(); err != nil {
 		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover settings reset failed: %s", err)

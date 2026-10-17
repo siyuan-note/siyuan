@@ -587,6 +587,8 @@ func registerAssetRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/setFileAnnotation", contractRouteHandlers(apicontract.SetFileAnnotation, setFileAnnotation)...)
 	ginServer.Handle("POST", "/api/asset/getFileAnnotation", contractRouteHandlers(apicontract.GetFileAnnotation, getFileAnnotation)...)
 	ginServer.Handle("POST", "/api/asset/getUnusedAssets", contractRouteHandlers(apicontract.GetUnusedAssets, getUnusedAssets)...)
+	ginServer.Handle("POST", "/api/asset/getUnusedEncryptedBoxAssets", contractRouteHandlers(apicontract.GetUnusedEncryptedBoxAssets, getUnusedEncryptedBoxAssets)...)
+	ginServer.Handle("POST", "/api/asset/removeUnusedEncryptedBoxAssets", contractRouteHandlers(apicontract.RemoveUnusedEncryptedBoxAssets, removeUnusedEncryptedBoxAssets)...)
 	ginServer.Handle("POST", "/api/asset/getMissingAssets", contractRouteHandlers(apicontract.GetMissingAssets, getMissingAssets)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAsset", contractRouteHandlers(apicontract.RemoveUnusedAsset, removeUnusedAsset)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAssets", contractRouteHandlers(apicontract.RemoveUnusedAssets, removeUnusedAssets)...)

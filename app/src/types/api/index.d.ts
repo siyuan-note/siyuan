@@ -976,6 +976,8 @@ export type EmbedStat = { "complete": boolean; "cycleCount": number; "depthLimit
 
 export type EmptyRequestInput = Record<string, never>;
 
+export type EncryptedBoxAssetsRequestInput = { "notebook": string; };
+
 export type EncryptedNotebookFollowSystemLockRequestInput = { "enabled": boolean; };
 
 export type EncryptedNotebookStatus = { "id": string; "name": string; "state": "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "unlocked": boolean; };
@@ -1649,6 +1651,8 @@ export type RemoveBookmarkRequestInput = { "bookmark": string; };
 export type RemoveCloudRepoTagSnapshotRequestInput = { "tag": string; };
 
 export type RemoveCriterionRequestInput = { "name": string; };
+
+export type RemoveEncryptedBoxAssetsRequestInput = { "notebook": string; "paths": Array<string>; };
 
 export type RemoveFileRequestInput = { "app"?: string | null; "path": string; };
 
@@ -3261,6 +3265,18 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 扫描单个已解锁加密笔记本的文档、全部数据库定义及智能体会话引用。
+     * 任意扫描失败返回 -1，不返回不完整候选。锁定目标使用既有 314 语言消息；结果不截断。
+     * name 为响应期间可见的原始文件名，item 为 assets 相对路径，path 带目标 box 查询参数。
+     */
+    "/api/asset/getUnusedEncryptedBoxAssets": {
+        request: EncryptedBoxAssetsRequestInput;
+        response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
     "/api/asset/importOCRModels": {
         request: ImportOCRModelsRequestInput;
         response: { "code": 0; "data": OCRModel; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3324,6 +3340,18 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AssetPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 重新验证用户确认的候选，备份认证后的原始密文后整批删除。
+     * 失败补偿恢复源文件，未提交的中断批次在启动同步前恢复；清理历史只索引脱敏元数据。
+     * 不改变现有全局清理行为，不修改加密格式，不生成全局资源索引或明文缓存。
+     */
+    "/api/asset/removeUnusedEncryptedBoxAssets": {
+        request: RemoveEncryptedBoxAssetsRequestInput;
+        response: { "code": 0; "data": AssetPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

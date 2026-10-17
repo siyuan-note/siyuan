@@ -362,6 +362,28 @@ var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.C
 	return apicontract.Success(assetUnusedItems(unusedAssets))
 })
 
+var getUnusedEncryptedBoxAssets = contractHandler(apicontract.GetUnusedEncryptedBoxAssets, func(c *gin.Context, request apicontract.EncryptedBoxAssetsRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
+	if err := holdEncryptedBoxRequest(c, request.Notebook); err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, model.Conf.Language(314))
+	}
+	items, err := model.UnusedEncryptedBoxAssets(c.Request.Context(), request.Notebook)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
+	return apicontract.Success(assetUnusedItems(items))
+})
+
+var removeUnusedEncryptedBoxAssets = contractHandler(apicontract.RemoveUnusedEncryptedBoxAssets, func(c *gin.Context, request apicontract.RemoveEncryptedBoxAssetsRequest) apicontract.Response[apicontract.AssetPathsData] {
+	if err := holdEncryptedBoxRequest(c, request.Notebook); err != nil {
+		return apicontract.Failure[apicontract.AssetPathsData](-1, model.Conf.Language(314))
+	}
+	paths, err := model.RemoveUnusedEncryptedBoxAssets(c.Request.Context(), request.Notebook, request.Paths)
+	if err != nil {
+		return apicontract.Failure[apicontract.AssetPathsData](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.AssetPathsData{Paths: paths})
+})
+
 var getMissingAssets = contractHandler(apicontract.GetMissingAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
 	missingAssets := model.MissingAssets()

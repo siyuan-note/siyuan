@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryen01",
 		"title": "Encrypted Notebook",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261017144106"
 	},
 	"Children": [
 		{
@@ -1014,7 +1014,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-5ru0ol2",
-				"updated": "20261012014859"
+				"updated": "20261017144106"
 			},
 			"Children": [
 				{
@@ -1035,6 +1035,85 @@
 				{
 					"Type": "NodeText",
 					"Data": "When you paste content containing local attachments from a normal notebook into an unlocked encrypted notebook, SiYuan creates encrypted attachment copies and updates the pasted links. The original attachments remain unchanged for the source document. Attachments already in the target notebook are reused. If copying fails, the paste is canceled. Open file location for an encrypted attachment shows its temporary decrypted copy."
+				}
+			]
+		},
+		{
+			"ID": "20261017144106-ls2hwxk",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261017144106-ls2hwxk",
+				"updated": "20261017144106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Clean up unreferenced assets"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261017144106-4haij5x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017144106-4haij5x",
+				"updated": "20261017144106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After unlocking the target notebook, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document panel"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Notebook"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clean up unreferenced assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", review the scan results, select the assets to clean up, and confirm deletion. On desktop, right-clicking the notebook opens the same menu."
+				}
+			]
+		},
+		{
+			"ID": "20261017144106-0r98a62",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017144106-0r98a62",
+				"updated": "20261017144106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The scan covers only the current encrypted notebook. If any document or database cannot be read, cleanup stops. Assets are fully backed up as ciphertext before deletion and can be restored after unlocking through the asset cleanup records in Data history, subject to the history retention period. Global cleanup continues to exclude encrypted notebooks."
 				}
 			]
 		},

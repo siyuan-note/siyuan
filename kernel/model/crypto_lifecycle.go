@@ -54,6 +54,7 @@ type encryptedBoxLifecycle struct {
 	state            EncryptedBoxState
 	acceptOperations bool
 	activeOperations int
+	assetCleanup     bool
 }
 
 func holdEncryptedBoxTransition(boxID string) func() {
@@ -154,6 +155,9 @@ func AcquireEncryptedBoxOperation(boxID string) error {
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
 	defer lifecycle.lock.Unlock()
+	for lifecycle.assetCleanup && lifecycle.state == EncryptedBoxStateUnlocked {
+		lifecycle.condition.Wait()
+	}
 	if lifecycle.state == EncryptedBoxStateLocked && IsBoxUnlocked(boxID) {
 		lifecycle.state = EncryptedBoxStateUnlocked
 		lifecycle.acceptOperations = true

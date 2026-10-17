@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "清理未引用资源",
 	"tableSelectRange": "选择区域",
 	"tableSelectionDone": "完成",
 	"listMindmapConnectors": "连线",

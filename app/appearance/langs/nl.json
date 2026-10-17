@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Niet-verwezen bronnen opruimen",
 	"tableSelectRange": "Celbereik selecteren",
 	"tableSelectionDone": "Gereed",
 	"listMindmapConnectors": "Verbindingslijnen",

@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Bersihkan aset tanpa referensi",
 	"tableSelectRange": "Pilih rentang sel",
 	"tableSelectionDone": "Selesai",
 	"listMindmapConnectors": "Penghubung",

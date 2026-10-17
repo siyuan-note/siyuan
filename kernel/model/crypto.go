@@ -197,6 +197,11 @@ func acquireBoxWriteLock(boxID string) {
 	muI.(*sync.RWMutex).Lock()
 }
 
+func tryAcquireBoxWriteLock(boxID string) bool {
+	muI, _ := boxLifecycleLocks.LoadOrStore(boxID, &sync.RWMutex{})
+	return muI.(*sync.RWMutex).TryLock()
+}
+
 func releaseBoxWriteLock(boxID string) {
 	if muI, ok := boxLifecycleLocks.Load(boxID); ok {
 		muI.(*sync.RWMutex).Unlock()

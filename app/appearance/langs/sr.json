@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Очисти ресурсе без референци",
 	"tableSelectRange": "Изабери опсег ћелија",
 	"tableSelectionDone": "Готово",
 	"listMindmapConnectors": "Линије повезивања",

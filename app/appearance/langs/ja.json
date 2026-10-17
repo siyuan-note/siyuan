@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "未参照のリソースをクリーンアップ",
 	"tableSelectRange": "セル範囲を選択",
 	"tableSelectionDone": "完了",
 	"listMindmapConnectors": "接続線",

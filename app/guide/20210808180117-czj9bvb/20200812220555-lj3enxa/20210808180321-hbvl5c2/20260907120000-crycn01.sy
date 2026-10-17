@@ -6,7 +6,7 @@
 		"id": "20260907120000-crycn01",
 		"title": "加密笔记本",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261017144106"
 	},
 	"Children": [
 		{
@@ -1014,7 +1014,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-7v78dj5",
-				"updated": "20261012014859"
+				"updated": "20261017144106"
 			},
 			"Children": [
 				{
@@ -1035,6 +1035,85 @@
 				{
 					"Type": "NodeText",
 					"Data": "将包含本地附件的普通笔记本内容粘贴到已解锁的加密笔记本时，思源会自动创建加密附件副本，并更新粘贴内容中的链接。原附件保留不变，继续供原文档使用。同一加密笔记本中的附件直接复用；复制失败时中止粘贴。加密附件的“打开文件位置”定位的是解密临时副本。"
+				}
+			]
+		},
+		{
+			"ID": "20261017144106-76oanrr",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261017144106-76oanrr",
+				"updated": "20261017144106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "清理未引用资源"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261017144106-eyzvkv2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017144106-eyzvkv2",
+				"updated": "20261017144106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "解锁目标笔记本后，打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档面板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "笔记本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清理未引用资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，查看扫描结果，勾选需要清理的资源，再确认删除。桌面端也可以右键单击笔记本打开同一菜单。"
+				}
+			]
+		},
+		{
+			"ID": "20261017144106-kp6get0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017144106-kp6get0",
+				"updated": "20261017144106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "扫描仅针对当前加密笔记本，任何文档或数据库读取失败都会中止清理。删除前完整备份资源密文，可在解锁后通过数据历史的资源文件清理记录恢复；历史受保留天数限制。全局清理继续排除加密笔记本。"
 				}
 			]
 		},

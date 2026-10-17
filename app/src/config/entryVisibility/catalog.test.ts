@@ -1213,6 +1213,13 @@ test("notebook pin entries follow settings and precede sorting", () => {
     }
 });
 
+test("encrypted notebook cleanup follows replace and precedes close", () => {
+    const keys = getEntryCatalogChildren("docTree.notebook").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("replace"), keys.indexOf("close") + 1),
+        ["replace", "cleanUnusedAssets", "separator_1", "close"]);
+    assert.equal(getEntryCatalogNode("docTree.notebook.cleanUnusedAssets")?.simple, true);
+});
+
 test("document tree pin entries follow attributes and precede sorting", () => {
     const keys = getEntryCatalogChildren("docTree.document").map(item => item.key);
     assert.deepEqual(keys.slice(keys.indexOf("attr"), keys.indexOf("sort") + 1), ["attr", "pinDoc", "unpinDoc", "sort"]);

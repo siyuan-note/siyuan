@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Başvurulmayan kaynakları temizle",
 	"tableSelectRange": "Hücre aralığı seç",
 	"tableSelectionDone": "Bitti",
 	"listMindmapConnectors": "Bağlantı çizgileri",

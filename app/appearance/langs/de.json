@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Nicht referenzierte Ressourcen bereinigen",
 	"tableSelectRange": "Zellbereich auswählen",
 	"tableSelectionDone": "Fertig",
 	"listMindmapConnectors": "Verbindungslinien",

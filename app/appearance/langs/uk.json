@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Очистити ресурси без посилань",
 	"tableSelectRange": "Вибрати діапазон клітинок",
 	"tableSelectionDone": "Готово",
 	"listMindmapConnectors": "З’єднувальні лінії",

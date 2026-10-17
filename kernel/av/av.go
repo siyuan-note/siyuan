@@ -1092,6 +1092,11 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
 	// 通过 fallback 查找 AV 定义的实际路径（普通 box 全局，加密笔记本笔记本级）
 	avJSONPath, avBoxID := FindAttributeViewPath(av.ID)
+	releaseBox, lockErr := holdAVBoxReadLock(avBoxID)
+	if lockErr != nil {
+		return lockErr
+	}
+	defer releaseBox()
 	if avJSONPath == "" {
 		// 文件不存在（首次创建），使用全局路径，boxID 为空（普通 box）
 		// 加密笔记本的首次创建由 handler 层通过 SetAVBoxID 预设路径
@@ -1119,7 +1124,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		if diskData, readErr := filelock.ReadFile(avJSONPath); nil == readErr {
 			// 加密笔记本的磁盘数据是密文，需先解密再比对
 			if avBoxID != "" {
-				diskData, _ = decryptAVData(avBoxID, av.ID, diskData)
+				diskData, _ = decryptAVDataLocked(avBoxID, av.ID, diskData)
 			}
 			if len(diskData) == len(data) && bytes.Equal(diskData, data) {
 				cacheAttributeViewData(av, avBoxID, data)
@@ -1131,7 +1136,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	// 加密笔记本的数据需加密后再写盘
 	writeData := data
 	if avBoxID != "" {
-		writeData, err = encryptAVData(avBoxID, av.ID, data)
+		writeData, err = encryptAVDataLocked(avBoxID, av.ID, data)
 		if err != nil {
 			logging.LogErrorf("encrypt attribute view [%s] failed: %s", av.ID, err)
 			return

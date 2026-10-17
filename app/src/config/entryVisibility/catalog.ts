@@ -757,6 +757,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("riffCard", lang("riffCard"), false),
             node("search", lang("search")),
             node("replace", lang("replace")),
+            node("cleanUnusedAssets", lang("cleanUnusedAssets")),
             separator("separator_1"),
             node("close", lang("close")),
             node("delete", lang("delete")),

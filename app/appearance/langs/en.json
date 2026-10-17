@@ -1,4 +1,5 @@
 {
+	"cleanUnusedAssets": "Clean up unreferenced assets",
 	"tableSelectRange": "Select cell range",
 	"tableSelectionDone": "Done",
 	"listMindmapConnectors": "Connectors",

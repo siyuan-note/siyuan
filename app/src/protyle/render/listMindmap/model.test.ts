@@ -2651,6 +2651,67 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(host.querySelector<HTMLElement>(".mindmap-view__node").getBoundingClientRect().bottom <=
         fitInspector.getBoundingClientRect().top, "fit keeps content above the visible inspector");
     fitInspector.hidden = true;
+
+    // 横向裁切不规则脑图后，滚轮和触摸平移仍保留实际节点，并在边界继续滚动文档。
+    {
+        let markdown = "* Root\n";
+        for (let depth = 1; depth <= 7; depth++) {
+            markdown += `${"  ".repeat(depth)}* Branch ${depth}\n`;
+        }
+        for (let index = 0; index < 12; index++) {
+            markdown += `${"  ".repeat(8)}* Leaf ${index}\n`;
+        }
+        const panModel = api.readListMindmap(reset(markdown));
+        const scrollHost = document.createElement("div");
+        scrollHost.className = "protyle-content";
+        scrollHost.style.cssText = "height: 340px; overflow-y: auto;";
+        const panHost = document.createElement("div");
+        panHost.style.cssText = "width: 400px; height: 300px;";
+        const followingContent = document.createElement("div");
+        followingContent.style.height = "3000px";
+        scrollHost.append(panHost, followingContent);
+        document.body.append(scrollHost);
+        const panView = new api.ListMindmapView({...options, host: panHost, model: panModel});
+        await settle();
+        panView.zoomAt(1);
+        const rootPosition = panView.positions.get(panModel.root.id);
+        panView.offsetX = 16 - rootPosition.x;
+        panView.offsetY = 120 - rootPosition.y;
+        panView.draw();
+        const viewport = panHost.querySelector<HTMLElement>(".mindmap-view__viewport");
+        const fixedX = panView.offsetX;
+        const checkVisibleNode = () => {
+            const bounds = viewport.getBoundingClientRect();
+            check.ok(Array.from(panHost.querySelectorAll<HTMLElement>(".mindmap-view__node")).some(element => {
+                const rect = element.getBoundingClientRect();
+                return !element.hidden && rect.left < bounds.right && rect.right > bounds.left &&
+                    rect.top < bounds.bottom && rect.bottom > bounds.top;
+            }), "at least one actual node remains visible after panning the cropped map");
+            check.equal(panView.offsetX, fixedX, "vertical movement does not shift the horizontal position");
+        };
+        for (const deltaY of [100000, -100000]) {
+            const event = new WheelEvent("wheel", {deltaY, bubbles: true, cancelable: true});
+            viewport.dispatchEvent(event);
+            check.equal(event.defaultPrevented, true);
+            checkVisibleNode();
+            const next = new WheelEvent("wheel", {deltaY, bubbles: true, cancelable: true});
+            viewport.dispatchEvent(next);
+            check.equal(next.defaultPrevented, false, "the next wheel event is handed back to document scrolling");
+        }
+        panView.offsetY = 120 - rootPosition.y;
+        panView.draw();
+        panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]').click();
+        const touch = {pointerId: 601, pointerType: "touch", isPrimary: true, button: 0,
+            clientX: 100, clientY: 100, bubbles: true, cancelable: true};
+        viewport.dispatchEvent(new PointerEvent("pointerdown", touch));
+        viewport.dispatchEvent(new PointerEvent("pointermove", {...touch, clientY: -1900}));
+        checkVisibleNode();
+        check.ok(scrollHost.scrollTop > 0, "touch overflow scrolls the real document container");
+        viewport.dispatchEvent(new PointerEvent("pointerup", {...touch, clientY: -1900}));
+        panView.destroy();
+        scrollHost.remove();
+    }
+
     lute.SetTabs(true);
     const tabsContainer = document.createElement("div");
     tabsContainer.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nOne\n@tab Second\n\nTwo\n:::\n");

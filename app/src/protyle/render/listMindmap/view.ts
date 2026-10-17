@@ -17,7 +17,7 @@ import {findMindmapDrop} from "./drop";
 import {destroyTabsRender, tabsRender} from "../tabsRender";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
-import {clampMindmapPanOffset} from "./pan";
+import {clampMindmapPanOffset, clampMindmapPanPosition, MindmapPanRect} from "./pan";
 import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindmapSummarySelection, getListMindmapSummarySnapshot,
     layoutListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
@@ -2771,9 +2771,8 @@ export class ListMindmapView {
             return;
         }
         if (!this.fullscreenMarker && !event.shiftKey && !event.deltaX && event.deltaY) {
-            const {left, top, right, bottom} = this.contentBounds();
-            if (left * this.scale + this.offsetX >= 0 && right * this.scale + this.offsetX <= this.viewport.clientWidth &&
-                top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
+            const {top, bottom} = this.contentBounds();
+            if (top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
                 return;
             }
         }
@@ -2791,11 +2790,14 @@ export class ListMindmapView {
     };
 
     private boundedPan(x: number, y: number) {
-        const {left, top, right, bottom} = this.contentBounds();
-        return {
-            x: clampMindmapPanOffset(x, left, right, this.scale, this.viewport.clientWidth),
-            y: clampMindmapPanOffset(y, top, bottom, this.scale, this.viewport.clientHeight),
-        };
+        const rectangles = this.contentRectangles();
+        const {left, top, right, bottom} = this.contentBounds(rectangles);
+        const axis = x === this.offsetX && y !== this.offsetY ? "y" :
+            y === this.offsetY && x !== this.offsetX ? "x" : undefined;
+        return clampMindmapPanPosition(
+            clampMindmapPanOffset(x, left, right, this.scale, this.viewport.clientWidth),
+            clampMindmapPanOffset(y, top, bottom, this.scale, this.viewport.clientHeight),
+            rectangles, this.scale, this.viewport.clientWidth, this.viewport.clientHeight, axis);
     }
 
     private zoomAt(scale: number, x = this.viewport.clientWidth / 2, y = this.viewport.clientHeight / 2) {
@@ -2812,7 +2814,26 @@ export class ListMindmapView {
         this.draw();
     }
 
-    private contentBounds() {
+    private contentRectangles(): MindmapPanRect[] {
+        const rectangles: MindmapPanRect[] = [];
+        this.positions.forEach(node => rectangles.push({x: node.x, y: node.y - 1, width: node.width, height: node.height + 1}));
+        this.summaryPositions.forEach(summary => rectangles.push({
+            x: summary.labelX, y: summary.labelY, width: summary.width, height: summary.height,
+        }));
+        this.relationElements.forEach(element => {
+            if (!element.hidden && element.style.visibility !== "hidden") {
+                const x = parseFloat(element.style.left);
+                const y = parseFloat(element.style.top);
+                if (Number.isFinite(x) && Number.isFinite(y)) {
+                    rectangles.push({x: x - element.offsetWidth / 2, y: y - element.offsetHeight / 2,
+                        width: element.offsetWidth, height: element.offsetHeight});
+                }
+            }
+        });
+        return rectangles;
+    }
+
+    private contentBounds(rectangles = this.contentRectangles()) {
         // 按实际可见节点、关系线和文字计算边界，不包含布局预留的空白。
         let left = Infinity;
         let top = Infinity;
@@ -2824,21 +2845,10 @@ export class ListMindmapView {
             right = Math.max(right, x + width);
             bottom = Math.max(bottom, y + height);
         };
-        this.positions.forEach(node => include(node.x, node.y - 1, node.width, node.height + 1));
+        rectangles.forEach(rectangle => include(rectangle.x, rectangle.y, rectangle.width, rectangle.height));
         this.relationRoutes.forEach(points => points.forEach(point => include(point.x, point.y)));
         this.summaryPositions.forEach(summary => {
             include(summary.x - 10, summary.top, summary.labelX + summary.width - summary.x + 10, summary.bottom - summary.top);
-            include(summary.labelX, summary.labelY, summary.width, summary.height);
-        });
-        this.relationElements.forEach(element => {
-            if (!element.hidden && element.style.visibility !== "hidden") {
-                const x = parseFloat(element.style.left);
-                const y = parseFloat(element.style.top);
-                if (Number.isFinite(x) && Number.isFinite(y)) {
-                    include(x - element.offsetWidth / 2, y - element.offsetHeight / 2,
-                        element.offsetWidth, element.offsetHeight);
-                }
-            }
         });
         return {left, top, right, bottom};
     }

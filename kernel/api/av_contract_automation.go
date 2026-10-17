@@ -19,6 +19,18 @@ var previewAttributeViewCollection = contractHandler(apicontract.PreviewAttribut
 		return apicontract.Success(data)
 	})
 
+var reviewAttributeViewCollection = contractHandler(apicontract.ReviewAttributeViewCollection,
+	func(c *gin.Context, request apicontract.AVCollectionReviewRequest) apicontract.Response[*apicontract.AVCollectionReview] {
+		if err := holdAttributeViewRequest(c, "", request.AvID); err != nil {
+			return apicontract.Failure[*apicontract.AVCollectionReview](-1, err.Error())
+		}
+		data, err := model.ReviewAttributeViewCollection(request.AvID, request.Page)
+		if err != nil {
+			return apicontract.Failure[*apicontract.AVCollectionReview](-1, err.Error())
+		}
+		return apicontract.Success(data)
+	})
+
 var previewAttributeViewTemplate = contractHandler(apicontract.PreviewAttributeViewTemplate,
 	func(c *gin.Context, request apicontract.AVAutomationTemplatePreviewRequest) apicontract.Response[*apicontract.AVValue] {
 		if err := holdAttributeViewRequest(c, "", request.AvID); err != nil {

@@ -127,8 +127,8 @@ func TestBlockCollectionTagTargetUndoAndPreservation(t *testing.T) {
 	if err := PerformTxSync(remove); err != nil {
 		t.Fatal(err)
 	}
-	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) != nil {
-		t.Fatal("lost tag did not remove entry")
+	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) == nil {
+		t.Fatal("lost tag removed the existing entry")
 	}
 	undo := &Transaction{DoOperations: cloneOperations(remove.UndoOperations), UndoOperations: cloneOperations(remove.DoOperations), isReplay: true}
 	if err := PerformTxSync(undo); err != nil {

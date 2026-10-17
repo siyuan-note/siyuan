@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261017234820"
+		"updated": "20261018000619"
 	},
 	"Children": [
 		{
@@ -3905,12 +3905,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017202044-s3bkzez",
-				"updated": "20261017202044"
+				"updated": "20261018000619"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Notify on success is enabled by default and can be set independently for each rule. It reports actual additions, updates, collections, or removals after the entire transaction commits; several rules share one summary, counting only rules with notifications enabled. Updating several fields of one entry counts as one updated entry. Block collection and removal use the same rule setting. Turning notifications off does not stop execution or hide errors. Unmatched conditions, missing targets, unchanged values, repeated matches, manual collection, undo, redo, and failed transactions do not produce success messages."
+					"Data": "Notify on success is enabled by default and can be set independently for each rule. It reports actual additions, updates, or collections after the entire transaction commits; several rules share one summary, counting only rules with notifications enabled. Updating several fields of one entry counts as one updated entry. Turning notifications off does not stop execution or hide errors. Unmatched conditions, missing targets, unchanged values, repeated matches, manual collection or cleanup, undo, redo, and failed transactions do not produce success messages."
 				}
 			]
 		},
@@ -4568,12 +4568,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017195341-czg1ilm",
-				"updated": "20261017195341"
+				"updated": "20261018000619"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A main block type includes all its subtypes. You can instead select heading levels H1-H6, unordered/ordered/task lists or list items, and built-in or custom callout types. Lists and list items match independently; multiple choices use OR, and an empty selection allows every type. Selecting a main type replaces its selected subtypes. Changing a block subtype uses the same matching logic for automatic collection, removal, and preview. Subtype filters require automation format 3; existing format 1 and 2 rules remain readable, and older clients reject format 3 without rewriting the database."
+					"Data": "A main block type includes all its subtypes. You can instead select heading levels H1-H6, unordered/ordered/task lists or list items, and built-in or custom callout types. Lists and list items match independently; multiple choices use OR, and an empty selection allows every type. Selecting a main type replaces its selected subtypes. Changing a block subtype uses the same matching logic for automatic collection, cleanup review, and preview. Subtype filters require automation format 3; existing format 1 and 2 rules remain readable, and older clients reject format 3 without rewriting the database."
 				}
 			]
 		},
@@ -4596,16 +4596,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-4gexoxe",
-				"updated": "20261017202821"
+				"updated": "20261018000619"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When a block first matches, a new entry is added. Repeated matches preserve the entry and its field values. When it stops matching, an automatically collected entry is removed, while the source block remains. Manually added entries are preserved, as are entries still matching another enabled collection rule. Disabling or deleting the rule that created an entry leaves that entry in place."
-				},
-				{
-					"Type": "NodeText",
-					"Data": " Removal includes field values entered or edited manually after collection; editing those values does not detach the entry from the collection rule. Changing rule conditions does not immediately clean up existing entries or reset their fields."
+					"Data": "When a block first matches, a new entry is added. Automatic collection only adds entries. Source changes, moving out of scope, changing conditions or collection targets, and disabling or deleting rules preserve existing entries and their field values. Matching again preserves the same entry and manually edited fields."
 				}
 			]
 		},
@@ -4614,12 +4610,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-u9c28d4",
-				"updated": "20261016202856"
+				"updated": "20261018000619"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Adding a removed tag again creates a new entry and initializes its fields; it does not recover the removed entry’s field values. Undo and redo restore the exact original transaction, including entry IDs and field values. If collection or removal fails, the triggering source edit also fails and previously saved content is retained."
+					"Data": "Use Review collected entries in block collection settings to check existing entries against all enabled block collection rules. Manual and automatically collected bound entries are checked alike; matching any rule keeps an entry. Detached entries, unavailable sources, and entries without usable rules remain unchanged. Remove unmatched entries on this page previews the count and asks for confirmation. Execution rechecks the rules, source, and binding before removing only entries confirmed unmatched, including their field values; source blocks remain. Undo and redo restore the original entry IDs and all fields. After explicit removal, a later new match creates an initialized entry instead of recovering the removed field values. Collection and cleanup commit or roll back with their transaction."
 				}
 			]
 		},

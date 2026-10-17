@@ -12,6 +12,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -182,8 +183,8 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	call("/api/av/previewAttributeViewCollection", map[string]any{"avID": database.ID, "ruleID": collection.ID, "page": 1}, previewAttributeViewCollection)
 	call("/api/block/updateBlock", map[string]any{"id": collected.Block.ID, "dataType": "markdown", "data": "Source without tag"}, updateBlock)
 	stored, _ = av.ParseAttributeView(database.ID)
-	if stored.GetBlockValue(collected.BlockID) != nil {
-		t.Fatal("block update API left an unmatched collected row")
+	if stored.GetBlockValue(collected.BlockID) == nil {
+		t.Fatal("block update API removed an existing entry after mismatch")
 	}
 	collection.BlockSource.Tags = nil
 	collection.BlockSource.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-collect", Operator: "equals", Value: "yes"}}
@@ -198,8 +199,8 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	}
 	call("/api/attr/batchSetBlockAttrs", map[string]any{"blockAttrs": []map[string]any{{"id": collected.Block.ID, "attrs": map[string]string{"custom-collect": ""}}}}, batchSetBlockAttrs)
 	stored, _ = av.ParseAttributeView(database.ID)
-	if stored.GetBlockValueByBoundID(collected.Block.ID) != nil {
-		t.Fatal("batch attribute API left an unmatched row")
+	if stored.GetBlockValueByBoundID(collected.Block.ID) == nil {
+		t.Fatal("batch attribute API removed a preserved row")
 	}
 	collection.BlockSource.Attributes = nil
 	collection.BlockSource.Types = []string{"h:h1"}
@@ -212,7 +213,7 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	stored, _ = av.ParseAttributeView(database.ID)
 	var heading *av.Value
 	for _, row := range stored.GetBlockKeyValues().Values {
-		if row.Block.CollectionRuleID == collection.ID {
+		if row.Block.CollectionRuleID == collection.ID && row.Block.ID != collected.Block.ID {
 			heading = row
 			break
 		}
@@ -226,8 +227,8 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	}
 	call("/api/block/updateBlock", map[string]any{"id": heading.Block.ID, "dataType": "markdown", "data": "## Collected heading"}, updateBlock)
 	stored, _ = av.ParseAttributeView(database.ID)
-	if stored.GetBlockValueByBoundID(heading.Block.ID) != nil {
-		t.Fatal("heading subtype change did not remove row")
+	if stored.GetBlockValueByBoundID(heading.Block.ID) == nil {
+		t.Fatal("heading subtype change removed a preserved row")
 	}
 	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
 	if err != nil || len(preview.Blocks) != 0 {
@@ -249,8 +250,8 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	}
 	call("/api/attr/setBlockAttrs", map[string]any{"id": tree.ID, "attrs": map[string]string{"custom-state": "blocked"}}, setBlockAttrs)
 	stored, _ = av.ParseAttributeView(database.ID)
-	if stored.GetBlockValueByBoundID(tree.ID) != nil {
-		t.Fatal("OR tag group bypassed an unmatched attribute group")
+	if stored.GetBlockValueByBoundID(tree.ID) == nil {
+		t.Fatal("OR mismatch removed a preserved document")
 	}
 	collection.BlockSource = &av.AutomationBlockSource{DocumentIDs: []string{tree.ID}, Types: []string{"b"},
 		Tags: []string{"collect"}, TagTarget: "container"}
@@ -327,15 +328,43 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		Data: &av.AutomationConfig{Spec: 4, Rules: []*av.AutomationRule{collection}}}}); err != nil {
 		t.Fatal(err)
 	}
-	for index, id := range paragraphs {
+	for _, id := range paragraphs {
 		call("/api/block/updateBlock", map[string]any{"id": id, "dataType": "markdown", "data": "Without tag"}, updateBlock)
 		stored, _ = av.ParseAttributeView(database.ID)
-		if (stored.GetBlockValueByBoundID(quoteID) != nil) != (index == 0) {
-			t.Fatal("container must remain until its last matching source disappears")
+		if stored.GetBlockValueByBoundID(quoteID) == nil {
+			t.Fatal("container mismatch removed the preserved entry")
 		}
 	}
 	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
 	if err != nil || len(preview.Blocks) != 0 {
 		t.Fatalf("unmatched container preview: %+v %v", preview, err)
+	}
+	response = callAttributeViewContextFilterAPI(t, "/api/av/reviewAttributeViewCollection", map[string]any{"avID": database.ID, "page": 1}, reviewAttributeViewCollection)
+	requireAPIContract(t, http.MethodPost, "/api/av/reviewAttributeViewCollection", response)
+	var reviewed struct {
+		Data apicontract.AVCollectionReview
+	}
+	if err = json.Unmarshal(response.Body.Bytes(), &reviewed); err != nil {
+		t.Fatal(err)
+	}
+	var quoteItem *apicontract.AVCollectionCleanupItem
+	for _, item := range reviewed.Data.Items {
+		if item.BlockID == quoteID && item.Status == "unmatched" {
+			quoteItem = &apicontract.AVCollectionCleanupItem{ItemID: item.ItemID, BlockID: item.BlockID}
+		}
+	}
+	if quoteItem == nil {
+		t.Fatal("review endpoint did not report the preserved unmatched quote")
+	}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "cleanupAttrViewBlocks", AvID: database.ID,
+		Data: &apicontract.AVCollectionCleanup{RuleVersion: reviewed.Data.RuleVersion, Items: []*apicontract.AVCollectionCleanupItem{quoteItem}}}}); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(quoteID) != nil {
+		t.Fatal("confirmed cleanup did not remove the reviewed quote entry")
+	}
+	if _, err = model.LoadTreeByBlockID(quoteID); err != nil {
+		t.Fatal("cleanup removed original quote", err)
 	}
 }

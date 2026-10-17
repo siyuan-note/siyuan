@@ -3,6 +3,7 @@ import type {Transaction, TransactionOperation, UnknownTransactionAction} from "
 const transactionActions: Record<IOperation["action"], true> = {
     "setAttrViewAutomations": true,
     "collectAttrViewBlocks": true,
+    "cleanupAttrViewBlocks": true,
     "setAttrViewConditionalColors": true,
     "setAttrViewCalendar": true,
     "updateAttrs": true,

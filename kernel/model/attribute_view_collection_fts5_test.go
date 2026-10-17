@@ -80,8 +80,8 @@ func TestBlockCollectionTransitionsAndUndo(t *testing.T) {
 	if err := PerformTxSync(remove); err != nil {
 		t.Fatal(err)
 	}
-	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) != nil {
-		t.Fatal("unmatched row remains")
+	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) == nil {
+		t.Fatal("source mismatch removed an existing entry")
 	}
 	if _, err := LoadTreeByBlockID(fixture.sourceID); err != nil {
 		t.Fatal("collection deleted the original block", err)
@@ -102,8 +102,8 @@ func TestBlockCollectionTransitionsAndUndo(t *testing.T) {
 	}
 	view = readAttributeViewItemsTest(t, view.ID)
 	row = view.GetBlockValueByBoundID(fixture.sourceID)
-	if row == nil || row.BlockID == itemID || view.GetValue(keyID, row.BlockID).Text.Content != "New" {
-		t.Fatal("re-adding tag must create a new initialized row")
+	if row == nil || row.BlockID != itemID || view.GetValue(keyID, row.BlockID).Text.Content != "Edited" {
+		t.Fatal("re-adding tag reset or replaced the preserved entry")
 	}
 }
 
@@ -127,8 +127,13 @@ func TestBlockCollectionMultipleRulesAndManualRows(t *testing.T) {
 	if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "")); err != nil {
 		t.Fatal(err)
 	}
-	if len(readAttributeViewItemsTest(t, view.ID).GetBlockKeyValues().Values) != 0 {
-		t.Fatal("last matching rule did not remove row")
+	if len(readAttributeViewItemsTest(t, view.ID).GetBlockKeyValues().Values) != 1 {
+		t.Fatal("last matching rule's mismatch removed an existing entry")
+	}
+	stored := readAttributeViewItemsTest(t, view.ID)
+	if err := PerformAttributeViewOperations([]*Operation{{Action: "removeAttrViewBlock", AvID: view.ID,
+		SrcIDs: []string{stored.GetBlockValueByBoundID(fixture.sourceID).BlockID}}}); err != nil {
+		t.Fatal(err)
 	}
 	if err := PerformAttributeViewOperations([]*Operation{{Action: "insertAttrViewBlock", AvID: view.ID,
 		Srcs: []map[string]any{{"id": fixture.sourceID, "isDetached": false}}}}); err != nil {
@@ -363,8 +368,8 @@ func TestBlockCollectionAnyTagTransitions(t *testing.T) {
 			t.Fatal(err)
 		}
 		if tags == "none" {
-			if row != nil || len(preview.Blocks) != 0 {
-				t.Fatal("OR mismatch kept a row or preview match")
+			if row == nil || row.BlockID != itemID || len(preview.Blocks) != 0 {
+				t.Fatal("OR mismatch removed a preserved row or remained in matching preview")
 			}
 		} else {
 			if row == nil || len(preview.Blocks) != 1 {
@@ -407,8 +412,8 @@ func TestBlockCollectionCreateAndMoveAcrossScope(t *testing.T) {
 	if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "move", ID: node.ID, ParentID: fixture.targetID}}}); err != nil {
 		t.Fatal(err)
 	}
-	if readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(node.ID) != nil {
-		t.Fatal("move out of scope did not remove collected row")
+	if readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(node.ID) == nil {
+		t.Fatal("move out of scope removed the preserved entry")
 	}
 	rule.BlockSource.DocumentIDs, rule.BlockSource.NotebookIDs = nil, []string{fixture.box.ID}
 	if err = av.SaveAttributeView(view); err != nil {

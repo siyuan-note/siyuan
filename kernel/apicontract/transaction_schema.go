@@ -36,6 +36,7 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewNewItemTemplates", reflect.TypeFor[TransactionNewItemTemplates](), reflect.TypeFor[Null]()},
 	{"setAttrViewAutomations", reflect.TypeFor[AVAutomationConfig](), reflect.TypeFor[Null]()},
 	{"collectAttrViewBlocks", reflect.TypeFor[AVCollectBlocks](), reflect.TypeFor[Null]()},
+	{"cleanupAttrViewBlocks", reflect.TypeFor[AVCollectionCleanup](), reflect.TypeFor[Null]()},
 	{"setAttrViewConditionalColors", reflect.TypeFor[[]*AVConditionalColorRule](), reflect.TypeFor[Null]()},
 	{"setAttrViewFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewContextFilter", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},

@@ -224,7 +224,7 @@ func TestAutomationCollectionSuccessNotifications(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if len(messages) != 2 || !strings.Contains(messages[0], "Blocks collected: 1") || strings.Contains(messages[0], "updated") || !strings.Contains(messages[1], "Entries removed: 1") {
+	if len(messages) != 1 || !strings.Contains(messages[0], "Blocks collected: 1") || strings.Contains(messages[0], "updated") || strings.Contains(messages[0], "removed") {
 		t.Fatalf("unexpected collection notifications: %v", messages)
 	}
 	view = readAttributeViewItemsTest(t, view.ID)
@@ -240,8 +240,8 @@ func TestAutomationCollectionSuccessNotifications(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if len(messages) != 2 {
-		t.Fatal("muted collection or removal sent a notification")
+	if len(messages) != 1 {
+		t.Fatal("muted or preserved collection sent a notification")
 	}
 	view = readAttributeViewItemsTest(t, view.ID)
 	rule := view.Automations.Rules[0]
@@ -262,7 +262,7 @@ func TestAutomationCollectionSuccessNotifications(t *testing.T) {
 	if err := PerformTxSync(tx); err != nil {
 		t.Fatal(err)
 	}
-	if len(messages) != 2 || readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(fixture.sourceID) == nil {
+	if len(messages) != 1 || readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(fixture.sourceID) == nil {
 		t.Fatal("explicit collection notified or failed to collect")
 	}
 }

@@ -40,7 +40,8 @@ const runCases = async (sources, css, mobile) => {
     let collectionTypeInput;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
-    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, menus: {menu: {remove() {}}}};
+    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {},
+        menus: {menu: {element: document.createElement("div"), remove() {}}}};
     const mocks = {
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
         "plugin/Menu": {Menu: class {
@@ -63,14 +64,25 @@ const runCases = async (sources, css, mobile) => {
             showSubMenu() {}
         }},
         "util/functions": {isMobile: () => mobile},
+        "constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_CONFIRM: "confirm"}},
+        "util/genID": {genUUID: () => `dialog-${++nextID}`},
+        "util/zIndex": {getZIndex: () => 0, isAbove: () => false},
+        "dialog/moveResize": {moveResize() {}},
+        "dialog/anchoredInput": {getAnchoredInputMask() {}},
+        "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
         "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
             (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
+            url.includes("reviewAttributeViewCollection") ? {code: 0, data: {ruleVersion: "snapshot", matched: 7, unmatched: 7, unknown: 6, hasMore: false,
+                items: Array.from({length: 20}, (_, index) => ({itemID: `entry-${index}`, blockID: `block-${index}`,
+                    content: index === 0 ? "<img src=x onerror=alert(1)>" : `Collected entry ${index + 1} with manually maintained fields`,
+                    hPath: "/Tasks/" + "a-long-document-title".repeat(8), status: ["matched", "unmatched", "unknown"][index % 3]}))}} :
             {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
         fetchPost: (_url, _request, callback) => searches.push(() => callback({code: 0, data: {rows: {values: [
             {blockID: "related", block: {content: "Related"}},
         ]}}}))},
         "protyle/wysiwyg/transaction": {transaction: (_protyle, perform, undo) => transactions.push(structuredClone({perform, undo}))},
+        "protyle/util/transactionQueue": {waitForPendingTransactions: async () => {}},
         "protyle/render/av/view": {getFieldsByData: data => data.view.columns},
         "protyle/render/av/col": {getColIconByType: () => "iconDatabase"},
         "protyle/render/av/color": {getAVColorStyle: () => ""},
@@ -81,6 +93,7 @@ const runCases = async (sources, css, mobile) => {
     };
     const cache = {};
     const load = name => {
+        if (name === "dialog") name = "dialog/index";
         if (mocks[name]) return mocks[name];
         if (cache[name]) return cache[name];
         if (!sources[name]) return {};
@@ -570,6 +583,63 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(menu.querySelectorAll("[data-tags] .b3-chip").length, 1, "tag normalization removes duplicates");
     await click("[data-tags] .b3-chip__close");
     assert.deepEqual(latest().blockSource.tags, []);
+    const writesBeforeReview = transactions.length;
+    await click('[data-action="review-collection"]');
+    assert.equal(window.siyuan.dialogs.length, 1, "collection review uses the shared dialog on desktop and mobile");
+    const reviewDialog = window.siyuan.dialogs[0];
+    assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "source text is escaped");
+    assert.equal(transactions.length, writesBeforeReview, "reviewing entries does not mutate the database");
+    const reviewTheme = document.createElement("style");
+    document.head.append(reviewTheme);
+    for (const width of mobile ? [360, 740] : [420, 1000]) {
+        await require("electron").ipcRenderer.invoke("automation-size", width, 900);
+        for (const fontSize of [16, 24]) {
+            document.documentElement.style.setProperty("--b3-font-size", `${fontSize}px`);
+            for (const name of ["daylight", "midnight"]) {
+                reviewTheme.textContent = sources[name];
+                await tick();
+                await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-review`);
+                for (const element of reviewDialog.element.querySelectorAll(".b3-dialog__body, .b3-dialog__action, [data-results], button")) {
+                    assert.ok(element.scrollWidth <= element.clientWidth + 1,
+                        `${mobile}/${width}/${fontSize}: review content overflows ${element.className}: ${element.scrollWidth}/${element.clientWidth}`);
+                    const rect = element.getBoundingClientRect();
+                    assert.ok(rect.left >= -1 && rect.right <= window.innerWidth + 1, "review controls stay within the viewport");
+                }
+                const previous = reviewDialog.element.querySelector("[data-prev]").getBoundingClientRect();
+                const cleanup = reviewDialog.element.querySelector("[data-cleanup]").getBoundingClientRect();
+                if (cleanup.top > previous.bottom) {
+                    assert.ok(cleanup.top - previous.bottom >= 8, "wrapped review actions preserve their spacing");
+                }
+                reviewDialog.element.querySelector("[data-cleanup]").click();
+                await tick();
+                const confirmation = window.siyuan.dialogs[1];
+                for (const element of confirmation.element.querySelectorAll(".b3-dialog__body, button")) {
+                    assert.ok(element.scrollWidth <= element.clientWidth + 1, "confirmation wraps at narrow widths and large fonts");
+                }
+                await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-review-confirm`);
+                confirmation.element.querySelector("#cancelDialogConfirmBtn").click();
+                await tick();
+            }
+        }
+    }
+    reviewDialog.element.querySelector("[data-cleanup]").click();
+    await tick();
+    assert.equal(window.siyuan.dialogs.length, 2, "cleanup requires explicit confirmation");
+    await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${window.innerWidth}-midnight-review-confirm`);
+    document.querySelector("#cancelDialogConfirmBtn").click();
+    await tick();
+    assert.equal(transactions.length, writesBeforeReview, "canceling cleanup preserves all entries");
+    reviewDialog.element.querySelector("[data-cleanup]").click();
+    await tick();
+    document.querySelector("#confirmDialogConfirmBtn").click();
+    await tick();
+    const cleanup = transactions.at(-1).perform[0];
+    assert.equal(cleanup.action, "cleanupAttrViewBlocks");
+    assert.equal(cleanup.data.items.length, 7, "cleanup only submits the page's unmatched entries");
+    assert.equal(cleanup.data.ruleVersion, "snapshot");
+    reviewDialog.destroy();
+    reviewTheme.remove();
+    await tick();
     await click('[data-action="add-rule"]');
     const secondID = transactions.at(-1).perform[0].data.rules[1].id;
     await click('[data-action="rules"]');
@@ -605,7 +675,7 @@ if (process.versions.electron && process.type === "browser") {
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -614,7 +684,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "collectionReview", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;
@@ -622,6 +692,12 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
+            for (const name of ["dialog/index", "dialog/confirmDialog"]) {
+                sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,
+                    `../src/${name}.ts`), "utf8"), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
+                }).outputText;
+            }
             for (const name of ["escape", "setPosition", "upDownHint"]) {
                 sources[`util/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/util/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS},

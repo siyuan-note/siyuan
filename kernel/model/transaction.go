@@ -372,6 +372,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewAutomations(op)
 			case "collectAttrViewBlocks":
 				ret = tx.doCollectAttrViewBlocks(op)
+			case "cleanupAttrViewBlocks":
+				ret = tx.doCleanupAttrViewBlocks(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
 			case "setAttrViewContextFilter":

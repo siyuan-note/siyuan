@@ -40,10 +40,9 @@ type AVAutomationRule struct {
 // tagTarget 缺省或空字符串沿用默认行为；block 收集直接包含标签的块，不做列表项提升。
 // container 从标签来源块向上选择最近的满足类型及属性条件的容器，按块 ID 去重。
 // 文档仅在 types 显式包含 d 时作为目标容器；无标签条件时 tagTarget 不改变类型及属性筛选结果。
-// 切换收集对象不转换或移出已有条目；预览、收集及后续原文失配移出使用相同的匹配逻辑。
-// 仅从不匹配变为匹配时收集，原条目不会重置；失配时移出本功能创建的条目，保留源块。
-// 其他启用的收集规则仍匹配时保留条目；停用或删除创建规则会保留既有条目。
-// 再次匹配创建新条目并初始化字段，不恢复移出条目的字段；撤销重做仍恢复原事务快照。
+// 切换收集对象不转换或移出已有条目；预览、收集和主动清理检查使用相同的匹配逻辑。
+// 仅从不匹配变为匹配时收集，原条目不会重置；原文失配、修改条件、停用或删除规则均保留已有条目和字段。
+// 既有条目再次匹配时仍保留其字段；主动移出条目后再次匹配才新建并初始化，撤销重做恢复原事务快照。
 // 配置变更、启用规则、导入、同步和历史恢复不补收存量内容，也不串联触发其他自动化。
 type AVAutomationBlockSource struct {
 	NotebookIDs    []string                      `json:"notebookIDs,omitempty" api:"optional"`
@@ -134,4 +133,42 @@ type AVBlockCollectionMatch struct {
 type AVCollectBlocks struct {
 	RuleID   string   `json:"ruleID"`
 	BlockIDs []string `json:"blockIDs"`
+}
+
+// AVCollectionReviewRequest 检查当前数据库全部已有条目，按全部启用的普通块规则取并集。
+// 自动和手动绑定条目采用相同判断；无可用规则、规则无效、游离条目或源块不可读取均为 unknown。
+// page 从 1 开始，每页最多 100 项，计数覆盖整个数据库；不修改数据或自动补收。
+type AVCollectionReviewRequest struct {
+	AvID string `json:"avID"`
+	Page int    `json:"page" api:"optional"`
+}
+
+type AVCollectionReview struct {
+	Items       []*AVCollectionReviewItem `json:"items"`
+	HasMore     bool                      `json:"hasMore"`
+	RuleVersion string                    `json:"ruleVersion"`
+	Matched     int                       `json:"matched"`
+	Unmatched   int                       `json:"unmatched"`
+	Unknown     int                       `json:"unknown"`
+}
+
+type AVCollectionReviewItem struct {
+	ItemID  string `json:"itemID"`
+	BlockID string `json:"blockID"`
+	Content string `json:"content"`
+	HPath   string `json:"hPath"`
+	Status  string `json:"status" api:"enum=matched|unmatched|unknown"`
+}
+
+type AVCollectionCleanupItem struct {
+	ItemID  string `json:"itemID"`
+	BlockID string `json:"blockID"`
+}
+
+// cleanupAttrViewBlocks 只处理用户确认的最多 100 个条目，ruleVersion 必须与检查时相同。
+// 执行时重新检查条目绑定及当前源内容，任一规则匹配或无法判断时保留；规则变化时整次拒绝。
+// 仅移出条目及字段，不删除原文；与原事务一并提交或回滚，撤销重做恢复原始条目和全部字段。
+type AVCollectionCleanup struct {
+	RuleVersion string                     `json:"ruleVersion"`
+	Items       []*AVCollectionCleanupItem `json:"items"`
 }

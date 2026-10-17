@@ -120,6 +120,35 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 	if err != nil || len(preview.Blocks) != 1 || !preview.Blocks[0].Collected {
 		t.Fatal("encrypted preview failed", err)
 	}
+	review, err := ReviewAttributeViewCollection(view.ID, 1)
+	if err != nil || review.Matched != 1 || review.Unmatched != 0 {
+		t.Fatalf("encrypted review failed: %+v %v", review, err)
+	}
+	itemID := stored.GetBlockValueByBoundID(sourceID).BlockID
+	if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "setAttrs", ID: sourceID,
+		Data: `{"custom-state":"inactive"}`}}}); err != nil {
+		t.Fatal(err)
+	}
+	review, err = ReviewAttributeViewCollection(view.ID, 1)
+	if err != nil || review.Unmatched != 1 || review.Items[0].ItemID != itemID {
+		t.Fatalf("encrypted mismatch did not preserve the collected entry: %+v %v", review, err)
+	}
+	cleanupOp := collectionCleanupOperation(view.ID, review)
+	cleanupTx := &Transaction{fromAPI: true, DoOperations: []*Operation{cleanupOp}, UndoOperations: []*Operation{cleanupOp}}
+	if err = PerformTxSync(cleanupTx); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = av.ParseAttributeViewForIndexInBox(view.ID, boxID)
+	if err != nil || stored.GetBlockValue(itemID) != nil {
+		t.Fatal("encrypted cleanup failed", err)
+	}
+	if err = PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(cleanupTx.UndoOperations)}); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = av.ParseAttributeViewForIndexInBox(view.ID, boxID)
+	if err != nil || stored.GetBlockValue(itemID) == nil {
+		t.Fatal("encrypted cleanup undo did not restore the original entry", err)
+	}
 	avPath := filepath.Join(util.DataDir, boxID, "storage", "av", view.ID+".json")
 	docPath := filepath.Join(util.DataDir, boxID, tree.Path)
 	for _, path := range []string{avPath, docPath} {
@@ -147,6 +176,12 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 		cache.ClearAVCache()
 		if _, err = PreviewAttributeViewCollection(view.ID, view.Automations.Rules[0].ID, 1); err == nil {
 			t.Fatal("preview accepted inaccessible ciphertext")
+		}
+		if _, err = ReviewAttributeViewCollection(view.ID, 1); err == nil {
+			t.Fatal("review accepted inaccessible ciphertext")
+		}
+		if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{cleanupOp}}); err == nil {
+			t.Fatal("cleanup accepted inaccessible ciphertext")
 		}
 		if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "setAttrs", ID: sourceID, Data: `{"custom-state":"inactive"}`}}}); err == nil {
 			t.Fatal("collection accepted inaccessible ciphertext")

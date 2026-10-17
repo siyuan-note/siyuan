@@ -13,6 +13,8 @@ export interface ITableTouchState {
     cell: HTMLTableCellElement;
     table: HTMLTableElement;
     grid: ITableGrid;
+    row: {index: number, top: number, bottom: number};
+    column: {index: number, left: number, right: number};
     viewport: {left: number, top: number, right: number, bottom: number};
     selection?: {
         mode: SelectionMode;
@@ -212,41 +214,27 @@ export class TableTouchControl {
         if (!state || state.viewport.right <= state.viewport.left || state.viewport.bottom <= state.viewport.top) {
             return;
         }
-        const {viewport, grid, cell, table, selection} = state;
-        const visibleInfos = grid.cellInfos.filter(info => info.cell.isConnected &&
-            !info.cell.classList.contains("fn__none"));
-        const rows = new Set<number>();
-        const columns = new Set<number>();
-        visibleInfos.forEach(info => {
-            const rect = info.cell.getBoundingClientRect();
-            if (rect.bottom <= viewport.top || rect.top >= viewport.bottom ||
-                rect.right <= viewport.left || rect.left >= viewport.right) {
-                return;
-            }
-            if (!rows.has(info.row)) {
-                rows.add(info.row);
-                const row = this.button(window.siyuan.languages.row, "iconDrag", viewport.left,
-                    (Math.max(rect.top, viewport.top) + Math.min(rect.bottom, viewport.bottom)) / 2, false);
-                row.className = "protyle-table-control__handle protyle-table-control__handle--row protyle-table-control__touch-handle";
-                row.style.height = `${Math.min(rect.bottom, viewport.bottom) - Math.max(rect.top, viewport.top)}px`;
-                row.dataset.mode = "row";
-                row.setAttribute("aria-pressed", String(selection?.mode === "row" && selection.indexes.has(info.row)));
-                row.classList.toggle("protyle-table-control__handle--active", selection?.mode === "row" && selection.indexes.has(info.row));
-                row.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "row", row));
-            }
-            // 列控件只按逻辑列创建一次，支持没有表头的表格。
-            if (!columns.has(info.col)) {
-                columns.add(info.col);
-                const column = this.button(window.siyuan.languages.column, "iconDrag",
-                    (Math.max(rect.left, viewport.left) + Math.min(rect.right, viewport.right)) / 2, viewport.top, false);
-                column.className = "protyle-table-control__handle protyle-table-control__handle--column protyle-table-control__touch-handle";
-                column.style.width = `${Math.min(rect.right, viewport.right) - Math.max(rect.left, viewport.left)}px`;
-                column.dataset.mode = "column";
-                column.setAttribute("aria-pressed", String(selection?.mode === "column" && selection.indexes.has(info.col)));
-                column.classList.toggle("protyle-table-control__handle--active", selection?.mode === "column" && selection.indexes.has(info.col));
-                column.addEventListener("pointerdown", event => this.selectHandle(event, info.cell, "column", column));
-            }
-        });
+        const {viewport, cell, table, selection} = state;
+        const rowRect = state.row;
+        if (rowRect.bottom > viewport.top && rowRect.top < viewport.bottom) {
+            const row = this.button(window.siyuan.languages.row, "iconDrag", viewport.left,
+                (Math.max(rowRect.top, viewport.top) + Math.min(rowRect.bottom, viewport.bottom)) / 2, false);
+            row.className = "protyle-table-control__handle protyle-table-control__handle--row protyle-table-control__handle--active protyle-table-control__touch-handle";
+            row.style.height = `${Math.min(rowRect.bottom, viewport.bottom) - Math.max(rowRect.top, viewport.top)}px`;
+            row.dataset.mode = "row";
+            row.setAttribute("aria-pressed", String(selection?.mode === "row" && selection.indexes.has(rowRect.index)));
+            row.addEventListener("pointerdown", event => this.selectHandle(event, cell, "row", row));
+        }
+        const columnRect = state.column;
+        if (columnRect.right > viewport.left && columnRect.left < viewport.right) {
+            const column = this.button(window.siyuan.languages.column, "iconDrag",
+                (Math.max(columnRect.left, viewport.left) + Math.min(columnRect.right, viewport.right)) / 2, viewport.top, false);
+            column.className = "protyle-table-control__handle protyle-table-control__handle--column protyle-table-control__handle--active protyle-table-control__touch-handle";
+            column.style.width = `${Math.min(columnRect.right, viewport.right) - Math.max(columnRect.left, viewport.left)}px`;
+            column.dataset.mode = "column";
+            column.setAttribute("aria-pressed", String(selection?.mode === "column" && selection.indexes.has(columnRect.index)));
+            column.addEventListener("pointerdown", event => this.selectHandle(event, cell, "column", column));
+        }
         this.renderColumnBoundary(state);
         const tableRect = table.getBoundingClientRect();
         const addOffset = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2;

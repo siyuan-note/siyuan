@@ -1531,10 +1531,6 @@ table + .protyle-action__table {
     &.protyle-table-control__handle--column::after {
       top: -12px;
     }
-
-    &:not(:hover):not(.protyle-table-control__handle--active)::before {
-      opacity: 1;
-    }
   }
 }
 .image-ocr {

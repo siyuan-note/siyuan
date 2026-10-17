@@ -567,6 +567,13 @@ export class TableControl {
             return;
         }
         const table = cell.closest("table");
+        const grid = this.selectionGrid || this.gridCache.get(table).grid;
+        const info = grid.cellInfos.find(item => item.cell === cell);
+        const row = info && table.rows[info.row]?.getBoundingClientRect();
+        const column = info && this.getColumnRect(table, grid, info.col);
+        if (!row || !column) {
+            return;
+        }
         const viewport = this.getTableGridViewportRect(table);
         const visualViewport = window.visualViewport;
         viewport.left = Math.max(viewport.left, visualViewport?.offsetLeft || 0);
@@ -574,7 +581,9 @@ export class TableControl {
         viewport.top = Math.max(viewport.top, visualViewport?.offsetTop || 0);
         viewport.bottom = Math.min(viewport.bottom, (visualViewport?.height || window.innerHeight) +
             (visualViewport?.offsetTop || 0), window.innerHeight);
-        return {cell, table, viewport, grid: this.selectionGrid || this.gridCache.get(table).grid,
+        return {cell, table, viewport, grid,
+            row: {index: info.row, top: row.top, bottom: row.bottom},
+            column: {index: info.col, left: column.left, right: column.right},
             selection: this.selection ? {
                 mode: this.selection.mode,
                 cells: this.getSelectedCells(),

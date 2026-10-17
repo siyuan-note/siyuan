@@ -194,6 +194,72 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.touch("[data-action='width']"), null, "an editing caret does not expose a ruler button");
         f.dispose();
     }
+    {
+        const f = fixture();
+        const focus = (cell: HTMLTableCellElement) => {
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(true);
+            focusByRange(range);
+            document.dispatchEvent(new Event("selectionchange"));
+            f.render();
+        };
+        for (const [row, col] of [[1, 1], [2, 2]]) {
+            const cell = f.cell(row, col);
+            focus(cell);
+            const handles = f.root.querySelectorAll(".protyle-table-control__touch-handle");
+            check.equal(handles.length, 2, "only the focused row and column expose handles");
+            handles.forEach(handle => {
+                check.equal(handle.classList.contains("protyle-table-control__handle--active"), true,
+                    "focused handles always use the shared blue dotted style");
+                check.equal(handle.getAttribute("aria-pressed"), "false", "focus does not imply a row or column selection");
+            });
+            const rect = cell.getBoundingClientRect();
+            const rowHandle = f.touch("[data-mode='row']").getBoundingClientRect();
+            const columnHandle = f.touch("[data-mode='column']").getBoundingClientRect();
+            check.equal(rowHandle.top + rowHandle.height / 2, rect.top + rect.height / 2);
+            check.equal(columnHandle.left + columnHandle.width / 2, rect.left + rect.width / 2);
+        }
+        for (const mode of ["row", "column"] as const) {
+            f.core.clear();
+            const cell = f.cell(2, 2);
+            focus(cell);
+            const handle = f.touch(`[data-mode='${mode}']`);
+            const rect = handle.getBoundingClientRect();
+            pointer(handle, "pointerdown", rect.left + rect.width / 2, rect.top + rect.height / 2);
+            pointer(document, "pointerup", rect.left + rect.width / 2, rect.top + rect.height / 2);
+            f.render();
+            check.equal(f.invoke("getTouchState").cell, cell, "selecting an axis preserves the focused cell on the other axis");
+            check.equal(f.touch(`[data-mode='${mode}']`).getAttribute("aria-pressed"), "true");
+        }
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        const merged = f.cell(1, 1);
+        merged.colSpan = 2;
+        f.cell(1, 2).remove();
+        merged.rowSpan = 2;
+        f.cell(2, 2).remove();
+        f.cell(2, 1).remove();
+        f.core.startTouchSelection(merged);
+        f.render();
+        const state = f.invoke("getTouchState");
+        const row = f.table.rows[1].getBoundingClientRect();
+        const col = f.table.querySelectorAll("col")[1].getBoundingClientRect();
+        check.deepEqual(state.row, {index: 1, top: row.top, bottom: row.bottom});
+        check.deepEqual(state.column, {index: 1, left: col.left, right: col.right},
+            "merged cells use logical row and column geometry shared with desktop");
+        f.table.style.minWidth = "270px";
+        f.table.parentElement.style.width = "90px";
+        f.render();
+        check.equal(f.touch("[data-mode='column']"), null, "an offscreen focused column has no misplaced handle");
+        check.notEqual(f.touch("[data-mode='row']"), null, "the visible focused row retains its handle");
+        f.table.parentElement.scrollLeft = 150;
+        f.render();
+        check.notEqual(f.touch("[data-mode='column']"), null, "scrolling the focused column into view restores its handle");
+        f.dispose();
+    }
     for (const kind of ["tap", "move", "cancel", "scroll", "multiple", "blur", "disabled", "block", "removed"]) {
         const f = fixture();
         const cell = f.cell(1, 0);
@@ -278,10 +344,11 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.root.scrollTop, 0, "dragging near a fully visible table edge does not scroll the document");
         f.root.scrollTop = 20;
         await frames(4);
-        const header = f.cell(0, 0).getBoundingClientRect();
+        const focusedRow = f.cell(3, 1).parentElement.getBoundingClientRect();
         const column = f.touch("[data-mode='column']").getBoundingClientRect();
         const row = f.touch("[data-mode='row']").getBoundingClientRect();
-        check.equal(row.top + row.height / 2, (Math.max(header.top, column.top + column.height / 2) + header.bottom) / 2,
+        check.equal(row.top + row.height / 2,
+            (Math.max(focusedRow.top, column.top + column.height / 2) + focusedRow.bottom) / 2,
             "row handles follow scrolling while an endpoint is being dragged");
         pointer(document, "pointercancel");
         f.dispose();

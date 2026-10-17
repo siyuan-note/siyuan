@@ -118,8 +118,11 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
         }
         const oldValue = cloneAVCellValueSnapshot(currentValue);
         oldValue.block.icon = oldValue.block.icon || "";
-        void updateCellsValue(protyle, blockElement, {...oldValue.block, icon: unicode},
-            undefined, undefined, undefined, false, false, false, [{
+        // 图标更新保留条目的绑定状态，兼容仍带有块 ID 的旧版非绑定条目。
+        void updateCellsValue(protyle, blockElement, {
+            ...oldValue,
+            block: {...oldValue.block, icon: unicode},
+        }, undefined, undefined, undefined, false, false, false, [{
                 groupID: "", rowID, colID, rowIndex: 0, colIndex: -1,
                 cell: {...currentCell, id: currentCell?.id || cellElement.dataset.id, value: oldValue},
                 column: {id: colID, type: "block"} as IAVColumn,

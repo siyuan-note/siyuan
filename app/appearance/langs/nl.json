@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "Verzameldoel",
 	"automationCollectionTargetBlock": "Blok met de tag",
 	"automationCollectionTargetContainer": "Containerblok",
-	"automationCollectionTargetDefaultTip": "Bij tagvoorwaarden hoort de eerste alinea van een lijstitem bij dat item; andere blokken controleren hun eigen tags",
+	"automationCollectionTargetDefaultTip": "Geef bij tags in het eerste inhoudsblok voorrang aan het passende lijstitem; verzamel anders het passende blok met de tag",
 	"automationCollectionTargetBlockTip": "Bij tagvoorwaarden het blok met de tag verzamelen op basis van het type en de kenmerken",
 	"automationCollectionTargetContainerTip": "Bij tagvoorwaarden de dichtstbijzijnde container met het juiste type en de juiste kenmerken verzamelen; documenten moeten expliciet worden geselecteerd",
 	"automationCollectionTargetChangeTip": "Wijzigen behoudt bestaande items en velden; controleer de nieuwe resultaten in het voorbeeld",

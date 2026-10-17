@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "Collect",
 	"automationCollectionTargetBlock": "Block containing the tag",
 	"automationCollectionTargetContainer": "Container block",
-	"automationCollectionTargetDefaultTip": "With tag conditions, the first paragraph of a list item belongs to the list item; other blocks match their own tags",
+	"automationCollectionTargetDefaultTip": "Prefer the eligible list item for tags in its first content block; otherwise collect the eligible tagged block",
 	"automationCollectionTargetBlockTip": "With tag conditions, collect the block containing the tag using its type and attributes",
 	"automationCollectionTargetContainerTip": "With tag conditions, collect the nearest container matching the type and attributes; documents must be explicitly selected",
 	"automationCollectionTargetChangeTip": "Changing this option preserves existing entries and fields; preview the collection to check the new results",

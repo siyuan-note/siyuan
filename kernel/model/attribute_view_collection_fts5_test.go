@@ -245,20 +245,35 @@ func TestBlockCollectionInlineTagsAndAttributes(t *testing.T) {
 	root.AppendChild(list)
 	tree := &parse.Tree{ID: rootID, Root: root, Box: "notebook", Path: "/parent/" + rootID + ".sy"}
 	source := &av.AutomationBlockSource{DocumentIDs: []string{"parent"}, Tags: []string{"todo"}}
-	if !collectionBlockMatches(source, list, tree) || collectionBlockMatches(source, root, tree) || collectionBlockMatches(source, paragraph, tree) {
+	if !collectionMatches(source, tree)[list.ID] || collectionMatches(source, tree)[root.ID] || collectionMatches(source, tree)[paragraph.ID] {
 		t.Fatal("inline tags must not collect ancestor containers or duplicate a list item's first paragraph")
 	}
 	source.Types = []string{"p"}
-	if !collectionBlockMatches(source, paragraph, tree) || collectionBlockMatches(source, list, tree) {
+	if !collectionMatches(source, tree)[paragraph.ID] || collectionMatches(source, tree)[list.ID] {
 		t.Fatal("explicit paragraph selection was not respected")
 	}
+	source.Types = []string{"p", "i"}
+	matches := collectionMatches(source, tree)
+	if len(matches) != 1 || !matches[list.ID] {
+		t.Fatalf("default selection duplicated a list item and its first paragraph: %v", matches)
+	}
+	source.Types = []string{"p"}
 	paragraph.SetIALAttr("custom-state", "A&B")
 	source.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-state", Operator: "equals", Value: "A&B"}}
-	if !collectionBlockMatches(source, paragraph, tree) {
+	source.Types = []string{"p", "i"}
+	if matches = collectionMatches(source, tree); len(matches) != 1 || !matches[paragraph.ID] {
+		t.Fatal("default selection did not filter the final object's attributes")
+	}
+	list.SetIALAttr("custom-state", "A&B")
+	if matches = collectionMatches(source, tree); len(matches) != 1 || !matches[list.ID] {
+		t.Fatal("eligible list item must take precedence over its first paragraph")
+	}
+	source.Types = []string{"p"}
+	if !collectionMatches(source, tree)[paragraph.ID] {
 		t.Fatal("custom attribute matching used escaped storage text")
 	}
 	source.Attributes[0].Operator = "notExists"
-	if collectionBlockMatches(source, paragraph, tree) {
+	if collectionMatches(source, tree)[paragraph.ID] {
 		t.Fatal("existing attribute matched absence condition")
 	}
 }
@@ -279,6 +294,7 @@ func TestBlockCollectionSubtypes(t *testing.T) {
 	} {
 		node := &ast.Node{ID: ast.NewNodeID(), Type: test.typ, HeadingLevel: test.level,
 			ListData: &ast.ListData{Typ: test.listType}, CalloutType: test.sub}
+		tree.Root = node
 		main := treenode.TypeAbbr(node.Type.String())
 		for _, types := range [][]string{nil, {main}, {"l:u"}, {"i:t"}, {"h:h1", "h:h2"}, {"callout:WARNING"}, {"callout:CUSTOM"}} {
 			source := &av.AutomationBlockSource{DocumentIDs: []string{rootID}, Types: types}
@@ -286,7 +302,7 @@ func TestBlockCollectionSubtypes(t *testing.T) {
 			for _, typ := range types {
 				want = want || typ == main || test.sub != "" && typ == main+":"+test.sub
 			}
-			if got := collectionBlockMatches(source, node, tree); got != want {
+			if got := collectionMatches(source, tree)[node.ID]; got != want {
 				t.Fatalf("%s:%s with %v: %v want %v", main, test.sub, types, got, want)
 			}
 		}
@@ -309,20 +325,20 @@ func TestBlockCollectionConditionCombinations(t *testing.T) {
 		{"", "", false}, {"and", "and", false}, {"or", "and", false}, {"and", "or", false}, {"or", "or", true},
 	} {
 		source.TagMatch, source.AttributeMatch = modes.tags, modes.attrs
-		if got := collectionBlockMatches(source, node, tree); got != modes.want {
+		if got := collectionMatches(source, tree)[node.ID]; got != modes.want {
 			t.Fatalf("%+v: %v", modes, got)
 		}
 	}
 	source.Tags = []string{"missing"}
-	if collectionBlockMatches(source, node, tree) {
+	if collectionMatches(source, tree)[node.ID] {
 		t.Fatal("OR inside a group bypassed the other group")
 	}
 	source.Tags, source.Attributes = nil, nil
-	if !collectionBlockMatches(source, node, tree) {
+	if !collectionMatches(source, tree)[node.ID] {
 		t.Fatal("empty OR groups restricted matches")
 	}
 	source.Types = []string{"p"}
-	if collectionBlockMatches(source, node, tree) {
+	if collectionMatches(source, tree)[node.ID] {
 		t.Fatal("empty groups bypassed type filtering")
 	}
 }

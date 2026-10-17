@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "Объект сбора",
 	"automationCollectionTargetBlock": "Блок с тегом",
 	"automationCollectionTargetContainer": "Блок-контейнер",
-	"automationCollectionTargetDefaultTip": "При условиях по тегам первый абзац элемента списка относится к этому элементу; остальные блоки проверяют собственные теги",
+	"automationCollectionTargetDefaultTip": "Для тегов в первом блоке содержимого предпочитать подходящий элемент списка; иначе собирать подходящий блок с тегом",
 	"automationCollectionTargetBlockTip": "При условиях по тегам собирать блок с тегом с учётом его типа и атрибутов",
 	"automationCollectionTargetContainerTip": "При условиях по тегам собирать ближайший контейнер, соответствующий типу и атрибутам; документы нужно выбирать явно",
 	"automationCollectionTargetChangeTip": "Изменение сохраняет существующие записи и поля; проверьте новые результаты в предпросмотре",

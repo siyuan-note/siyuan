@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "Toplanacak nesne",
 	"automationCollectionTargetBlock": "Etiketi içeren blok",
 	"automationCollectionTargetContainer": "Kapsayıcı blok",
-	"automationCollectionTargetDefaultTip": "Etiket koşullarında liste öğesinin ilk paragrafı öğeye aittir; diğer bloklar kendi etiketleriyle eşleştirilir",
+	"automationCollectionTargetDefaultTip": "İlk içerik bloğundaki etiketlerde koşullara uyan liste öğesini tercih et; aksi hâlde koşullara uyan etiketli bloğu topla",
 	"automationCollectionTargetBlockTip": "Etiket koşullarında etiketi içeren bloğu türüne ve özniteliklerine göre topla",
 	"automationCollectionTargetContainerTip": "Etiket koşullarında tür ve öznitelik koşullarına uyan en yakın kapsayıcıyı topla; belgeler açıkça seçilmelidir",
 	"automationCollectionTargetChangeTip": "Değişiklik mevcut kayıtları ve alanları korur; yeni sonuçları önizlemede kontrol edin",

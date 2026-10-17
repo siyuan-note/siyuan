@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "יעד האיסוף",
 	"automationCollectionTargetBlock": "בלוק המכיל את התגית",
 	"automationCollectionTargetContainer": "בלוק מכל",
-	"automationCollectionTargetDefaultTip": "כאשר מוגדרים תנאי תגיות, הפסקה הראשונה בפריט רשימה שייכת לפריט; בלוקים אחרים בודקים את התגיות שלהם",
+	"automationCollectionTargetDefaultTip": "לתגיות בבלוק התוכן הראשון יש להעדיף את פריט הרשימה המתאים; אחרת יש לאסוף את הבלוק המתויג המתאים",
 	"automationCollectionTargetBlockTip": "כאשר מוגדרים תנאי תגיות, יש לאסוף את הבלוק המכיל את התגית לפי הסוג והמאפיינים שלו",
 	"automationCollectionTargetContainerTip": "כאשר מוגדרים תנאי תגיות, יש לאסוף את המכל הקרוב ביותר התואם לסוג ולמאפיינים; יש לבחור מסמכים במפורש",
 	"automationCollectionTargetChangeTip": "שינוי האפשרות שומר על הרשומות והשדות הקיימים; ניתן לבדוק את התוצאות החדשות בתצוגה המקדימה",

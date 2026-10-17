@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "هدف التجميع",
 	"automationCollectionTargetBlock": "الكتلة التي تحتوي على الوسم",
 	"automationCollectionTargetContainer": "كتلة الحاوية",
-	"automationCollectionTargetDefaultTip": "عند استخدام شروط الوسوم، تنتمي الفقرة الأولى من عنصر القائمة إلى العنصر؛ وتطابق الكتل الأخرى وسومها الخاصة",
+	"automationCollectionTargetDefaultTip": "لوسوم أول كتلة محتوى، فضّل عنصر القائمة المطابق للشروط؛ وإلا فاجمع الكتلة الموسومة المطابقة",
 	"automationCollectionTargetBlockTip": "عند استخدام شروط الوسوم، اجمع الكتلة التي تحتوي على الوسم وفق نوعها وسماتها",
 	"automationCollectionTargetContainerTip": "عند استخدام شروط الوسوم، اجمع أقرب حاوية تطابق النوع والسمات؛ ويجب تحديد المستندات صراحةً",
 	"automationCollectionTargetChangeTip": "يحافظ تغيير الخيار على الإدخالات والحقول الحالية؛ راجع النتائج الجديدة في المعاينة",

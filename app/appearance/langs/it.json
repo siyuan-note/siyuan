@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "Oggetto da raccogliere",
 	"automationCollectionTargetBlock": "Blocco contenente il tag",
 	"automationCollectionTargetContainer": "Blocco contenitore",
-	"automationCollectionTargetDefaultTip": "Con condizioni sui tag, il primo paragrafo di una voce di elenco appartiene alla voce; gli altri blocchi verificano i propri tag",
+	"automationCollectionTargetDefaultTip": "Per i tag nel primo blocco di contenuto, preferisci la voce di elenco idonea; altrimenti raccogli il blocco con tag idoneo",
 	"automationCollectionTargetBlockTip": "Con condizioni sui tag, raccogli il blocco contenente il tag in base al tipo e agli attributi",
 	"automationCollectionTargetContainerTip": "Con condizioni sui tag, raccogli il contenitore più vicino che soddisfa tipo e attributi; i documenti vanno selezionati esplicitamente",
 	"automationCollectionTargetChangeTip": "La modifica conserva le voci e i campi esistenti; controlla i nuovi risultati nell’anteprima",

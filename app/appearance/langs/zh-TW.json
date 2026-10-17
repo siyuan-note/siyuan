@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "收集對象",
 	"automationCollectionTargetBlock": "標籤所在區塊",
 	"automationCollectionTargetContainer": "容器區塊",
-	"automationCollectionTargetDefaultTip": "有標籤條件時，清單項目首段預設歸屬清單項目，其他區塊比對自身標籤",
+	"automationCollectionTargetDefaultTip": "首個內容區塊的標籤優先收集符合條件的清單項目，否則收集符合條件的標籤所在區塊",
 	"automationCollectionTargetBlockTip": "有標籤條件時，依標籤所在區塊的類型與屬性篩選並收集",
 	"automationCollectionTargetContainerTip": "有標籤條件時，收集最近且符合類型與屬性條件的容器；文件需明確選取",
 	"automationCollectionTargetChangeTip": "切換不會轉換既有項目或修改其欄位，可透過預覽確認新的收集結果",

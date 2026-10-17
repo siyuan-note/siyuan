@@ -47,29 +47,6 @@ func collectionScopeMatches(source *av.AutomationBlockSource, tree *parse.Tree) 
 	return false
 }
 
-func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tree *parse.Tree) bool {
-	if node == nil || !node.IsBlock() || !ast.IsNodeIDPattern(node.ID) || !collectionScopeMatches(source, tree) {
-		return false
-	}
-	if !collectionBlockConditionsMatch(source, node) {
-		return false
-	}
-	if len(source.Tags) == 0 {
-		return true
-	}
-	root := node
-	if source.TagTarget == "" {
-		if node.Type == ast.NodeListItem {
-			root = treenode.FirstLeafBlock(node)
-		}
-		if node.Type == ast.NodeParagraph && node.Parent != nil && node.Parent.Type == ast.NodeListItem &&
-			treenode.FirstLeafBlock(node.Parent) == node && !slices.Contains(source.Types, "p") {
-			return false
-		}
-	}
-	return collectionTagsMatch(source, root)
-}
-
 func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node) bool {
 	if len(source.Types) > 0 {
 		typ := treenode.TypeAbbr(node.Type.String())
@@ -113,7 +90,7 @@ func collectionTagsMatch(source *av.AutomationBlockSource, root *ast.Node) bool 
 	})
 }
 
-// 每个标签来源只选择最近的合格容器；整棵树共用结果，避免嵌套容器反复扫描子树。
+// 先匹配标签来源，再选择唯一的合格对象；类型和属性始终约束最终收集对象。
 func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[string]bool {
 	ret := map[string]bool{}
 	if !collectionScopeMatches(source, tree) {
@@ -130,18 +107,41 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 		if !node.IsBlock() || !ast.IsNodeIDPattern(node.ID) {
 			return ast.WalkContinue
 		}
-		if source.TagTarget != "container" || len(source.Tags) == 0 {
-			if collectionBlockMatches(source, node, tree) {
+		if len(source.Tags) == 0 {
+			if collectionBlockConditionsMatch(source, node) {
 				ret[node.ID] = true
 			}
 			return ast.WalkContinue
 		}
-		if node.IsContainerBlock() && (node.Type != ast.NodeDocument || slices.Contains(source.Types, "d")) &&
+		if source.TagTarget == "container" && node.IsContainerBlock() &&
+			(node.Type != ast.NodeDocument || slices.Contains(source.Types, "d")) &&
 			collectionBlockConditionsMatch(source, node) {
 			containers = append(containers, node)
 		}
-		if len(containers) > 0 && collectionTagsMatch(source, node) {
-			ret[containers[len(containers)-1].ID] = true
+		if !collectionTagsMatch(source, node) {
+			return ast.WalkContinue
+		}
+		var target *ast.Node
+		switch source.TagTarget {
+		case "container":
+			if len(containers) > 0 {
+				target = containers[len(containers)-1]
+			}
+		case "block":
+			if collectionBlockConditionsMatch(source, node) {
+				target = node
+			}
+		default:
+			parent := node.Parent
+			if parent != nil && parent.Type == ast.NodeListItem && treenode.FirstLeafBlock(parent) == node &&
+				collectionBlockConditionsMatch(source, parent) {
+				target = parent
+			} else if collectionBlockConditionsMatch(source, node) {
+				target = node
+			}
+		}
+		if target != nil && ast.IsNodeIDPattern(target.ID) {
+			ret[target.ID] = true
 		}
 		return ast.WalkContinue
 	})

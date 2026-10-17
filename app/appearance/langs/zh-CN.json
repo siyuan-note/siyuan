@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "收集对象",
 	"automationCollectionTargetBlock": "标签所在块",
 	"automationCollectionTargetContainer": "容器块",
-	"automationCollectionTargetDefaultTip": "有标签条件时，列表项首段默认归属列表项，其他块匹配自身标签",
+	"automationCollectionTargetDefaultTip": "首个内容块的标签优先收集符合条件的列表项，否则收集符合条件的标签所在块",
 	"automationCollectionTargetBlockTip": "有标签条件时，按标签所在块的类型和属性筛选并收集",
 	"automationCollectionTargetContainerTip": "有标签条件时，收集最近的符合类型和属性条件的容器；文档需要显式选择",
 	"automationCollectionTargetChangeTip": "切换不会转换已有条目或修改其字段，可通过预览确认新的收集结果",

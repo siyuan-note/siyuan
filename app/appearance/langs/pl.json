@@ -6,7 +6,7 @@
 	"automationCollectionTarget": "Obiekt zbierania",
 	"automationCollectionTargetBlock": "Blok zawierający tag",
 	"automationCollectionTargetContainer": "Blok kontenera",
-	"automationCollectionTargetDefaultTip": "Przy warunkach tagów pierwszy akapit elementu listy należy do tego elementu; pozostałe bloki sprawdzają własne tagi",
+	"automationCollectionTargetDefaultTip": "Dla tagów w pierwszym bloku treści preferuj element listy spełniający warunki; w przeciwnym razie zbierz pasujący blok z tagiem",
 	"automationCollectionTargetBlockTip": "Przy warunkach tagów zbieraj blok zawierający tag według jego typu i atrybutów",
 	"automationCollectionTargetContainerTip": "Przy warunkach tagów zbieraj najbliższy kontener zgodny z typem i atrybutami; dokumenty wymagają jawnego wyboru",
 	"automationCollectionTargetChangeTip": "Zmiana zachowuje istniejące wpisy i pola; sprawdź nowe wyniki w podglądzie",

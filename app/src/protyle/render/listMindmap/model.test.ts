@@ -1117,6 +1117,98 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenMenuTransform,
         "a hidden menu does not reduce the node's visible area");
+
+    // 顶部控件按悬停、焦点和全屏的实际可见状态避让，缩放画布保持相同的局部间距。
+    const navigationToolbar = navigationHost.querySelector<HTMLElement>(".mindmap-view__toolbar");
+    const navigationFit = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
+    const moveNavigationPointer = async (inside: boolean) => {
+        navigationHost.scrollIntoView({block: "start"});
+        const bounds = navigationHost.getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("mindmap-view-native-input", [{
+            type: "mouseMove", x: inside ? Math.round(bounds.left + 20) : 2,
+            y: inside ? Math.round(bounds.top + 100) : 2,
+        }]);
+        await settle();
+    };
+    const placeAtToolbar = (left?: number) => {
+        const controlBounds = navigationFit().getBoundingClientRect();
+        const viewportBounds = navigationViewport.getBoundingClientRect();
+        const rect = addedNode.getBoundingClientRect();
+        const scaleX = viewportBounds.width / navigationViewport.offsetWidth;
+        const scaleY = viewportBounds.height / navigationViewport.offsetHeight;
+        const targetLeft = left ?? Math.min(controlBounds.left, viewportBounds.right - rect.width - 16 * scaleX);
+        navigationView.offsetX += (targetLeft - rect.left) / scaleX;
+        navigationView.offsetY += (viewportBounds.top + 16 * scaleY - rect.top) / scaleY;
+        navigationView.draw();
+    };
+    for (const mode of ["hover", "focus", "fullscreen"]) {
+        for (const width of [760, 400, 300]) {
+            const scale = width === 300 ? .5 : 1;
+            navigationView.setReadOnly(width !== 400);
+            navigationHost.classList.toggle("fullscreen", mode === "fullscreen");
+            navigationHost.style.width = `${width}px`;
+            navigationHost.style.transform = `scale(${scale})`;
+            navigationView.refreshLayout();
+            navigationHost.focus();
+            await moveNavigationPointer(mode === "hover");
+            if (mode === "focus") {
+                navigationFit().focus();
+            }
+            check.equal(getComputedStyle(navigationToolbar).opacity, "1", `${mode} shows the toolbar`);
+            placeAtToolbar();
+            const before = addedNode.getBoundingClientRect();
+            check.ok(before.top < navigationFit().getBoundingClientRect().bottom, "target starts behind a toolbar control");
+            navigationView.refreshLayout();
+            if (mode === "focus") {
+                navigationView.revealNode(addedItem.dataset.nodeId);
+            } else {
+                navigationView.selectNode(beta);
+                navigationHost.dispatchEvent(new KeyboardEvent("keydown", {
+                    key: "ArrowDown", bubbles: true, cancelable: true,
+                }));
+            }
+            await settle();
+            check.ok(addedNode.getBoundingClientRect().top >= navigationFit().getBoundingClientRect().bottom + 15 * scale,
+                `node stays below visible toolbar controls, mode=${mode}, width=${width}`);
+        }
+    }
+    navigationHost.classList.remove("fullscreen");
+    navigationHost.style.width = "760px";
+    navigationHost.style.transform = "";
+    navigationView.refreshLayout();
+    navigationHost.focus();
+    await moveNavigationPointer(true);
+    placeAtToolbar(navigationViewport.getBoundingClientRect().left + 20);
+    const toolbarGapTransform = [navigationView.offsetX, navigationView.offsetY];
+    check.ok(addedNode.getBoundingClientRect().right < navigationToolbar.querySelector("button").getBoundingClientRect().left);
+    navigationView.focusNode(addedItem.dataset.nodeId);
+    await settle();
+    check.deepEqual([navigationView.offsetX, navigationView.offsetY], toolbarGapTransform,
+        "the toolbar's left spacer does not obstruct a node");
+    navigationToolbar.querySelector<HTMLElement>(".mindmap-view__zoom").focus();
+    await moveNavigationPointer(false);
+    const zoomActions = navigationToolbar.querySelector<HTMLElement>(".mindmap-view__zoom-actions");
+    const zoomBounds = zoomActions.getBoundingClientRect();
+    check.ok(zoomBounds.width > 0 && zoomBounds.height > 0, "focused zoom controls show their popup");
+    placeAtToolbar(zoomBounds.left);
+    navigationView.revealNode(addedItem.dataset.nodeId);
+    await settle();
+    check.ok(addedNode.getBoundingClientRect().top >= zoomActions.getBoundingClientRect().bottom + 15,
+        "the visible zoom popup also leaves clearance for the node");
+    navigationHost.focus();
+    await moveNavigationPointer(false);
+    check.equal(getComputedStyle(navigationToolbar).opacity, "0");
+    placeAtToolbar();
+    const hiddenToolbarTransform = [navigationView.offsetX, navigationView.offsetY];
+    const hiddenToolbarNode = addedNode.getBoundingClientRect();
+    const hiddenToolbarViewport = navigationViewport.getBoundingClientRect();
+    check.ok(hiddenToolbarNode.left >= hiddenToolbarViewport.left + 15 &&
+        hiddenToolbarNode.right <= hiddenToolbarViewport.right - 15 &&
+        hiddenToolbarNode.top >= hiddenToolbarViewport.top + 15, "hidden-toolbar target starts within the viewport margins");
+    navigationView.focusNode(addedItem.dataset.nodeId);
+    await settle();
+    check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenToolbarTransform,
+        "a hidden toolbar does not move a visible node");
     navigationView.destroy();
     navigationHost.remove();
 

@@ -876,6 +876,22 @@ export class ListMindmapView {
             const marginY = 16 * scaleY;
             const x = rect.left < viewport.left + marginX ? viewport.left + marginX - rect.left :
                 rect.right > viewport.right - marginX ? viewport.right - marginX - rect.right : 0;
+            let top = viewport.top + marginY;
+            const toolbarStyle = getComputedStyle(this.toolbar);
+            // 顶部仅避让可见控件及展开的缩放面板，保留工具栏左侧空白区域。
+            if (!this.toolbar.hidden && toolbarStyle.display !== "none" && toolbarStyle.visibility !== "hidden" &&
+                Number(toolbarStyle.opacity) !== 0) {
+                this.toolbar.querySelectorAll<HTMLElement>(".block__icon, .mindmap-view__zoom, .mindmap-view__zoom-actions")
+                    .forEach(control => {
+                        const bounds = control.getBoundingClientRect();
+                        const style = getComputedStyle(control);
+                        if (bounds.width && bounds.height && bounds.bottom > viewport.top && bounds.top < viewport.bottom &&
+                            rect.left + x < bounds.right && rect.right + x > bounds.left &&
+                            style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0) {
+                            top = Math.max(top, bounds.bottom + marginY);
+                        }
+                    });
+            }
             let bottom = viewport.bottom - marginY;
             // 底部浮层按实际尺寸避让，横向定位后仍不相交的节点无需额外上移。
             [this.inspector, this.summaryControls].forEach(panel => {
@@ -889,8 +905,8 @@ export class ListMindmapView {
                 }
             });
             // 可用高度不足以完整显示节点时，优先保留节点顶部的正文。
-            const y = rect.top < viewport.top + marginY ? viewport.top + marginY - rect.top :
-                rect.bottom > bottom ? Math.max(viewport.top + marginY - rect.top, bottom - rect.bottom) : 0;
+            const y = rect.top < top ? top - rect.top :
+                rect.bottom > bottom ? Math.max(top - rect.top, bottom - rect.bottom) : 0;
             if (x || y) {
                 const bounded = this.boundedPan(this.offsetX + x / scaleX, this.offsetY + y / scaleY);
                 this.offsetX = bounded.x;

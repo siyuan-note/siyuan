@@ -16,7 +16,8 @@ globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outp
 
 const setup = () => {
     const frames: (() => void)[] = [];
-    const context: any = {clearTimeout, requestAnimationFrame: (action: () => void) => frames.push(action)};
+    const context: any = {clearTimeout, requestAnimationFrame: (action: () => void) => frames.push(action),
+        getComputedStyle: (element: any) => ({display: "block", visibility: "visible", opacity: "1", ...element.style})};
     runInNewContext(compiled, context);
     let focus = "editor";
     let finished = 0;
@@ -25,6 +26,7 @@ const setup = () => {
     const target = Object.assign(new context.View(), {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
         selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
+        toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         nodeElements: new Map(), offsetX: 0, offsetY: 0,
         viewport: {contains: (element: unknown) => !!element, setPointerCapture: () => {},
             offsetWidth: 400, offsetHeight: 300,
@@ -151,6 +153,69 @@ test("a node taller than the unobstructed area keeps its top visible", () => {
         ({left: 100, top: 100, right: 180, bottom: 320, width: 80, height: 220})});
     target.focusNode("new");
     assert.equal(100 + target.offsetY, 16);
+});
+
+test("node focus clears visible toolbar controls with their actual heights after layout", () => {
+    for (const bottom of [32, 60]) {
+        const {target, frames, drawn} = setup();
+        target.frame = 1;
+        target.toolbar.querySelectorAll = () => [{getBoundingClientRect: () =>
+            ({left: 280, top: 0, right: 400, bottom, width: 120, height: bottom})}];
+        target.nodeElements.set("new", {getBoundingClientRect: () =>
+            ({left: 300, top: 16, right: 380, bottom: 56, width: 80, height: 40})});
+        target.focusNode("new");
+        assert.equal(drawn(), 0);
+        frames.forEach(action => action());
+        assert.equal(16 + target.offsetY, bottom + 16);
+        assert.equal(target.offsetX, 0);
+    }
+});
+
+test("hidden toolbar controls and its empty horizontal area do not move a visible node", () => {
+    const bounds = {left: 280, top: 0, right: 400, bottom: 48, width: 120, height: 48};
+    for (const style of [{opacity: "0"}, {visibility: "hidden"}, {display: "none"}]) {
+        for (const hiddenControl of [false, true]) {
+            const {target, drawn} = setup();
+            const control = {style: hiddenControl ? style : {}, getBoundingClientRect: () => bounds};
+            target.toolbar.style = hiddenControl ? {} : style;
+            target.toolbar.querySelectorAll = () => [control];
+            target.nodeElements.set("new", {getBoundingClientRect: () =>
+                ({left: 300, top: 16, right: 380, bottom: 56, width: 80, height: 40})});
+            target.focusNode("new");
+            assert.equal(drawn(), 0);
+        }
+    }
+    const {target, drawn} = setup();
+    target.toolbar.querySelectorAll = () => [{getBoundingClientRect: () => bounds}];
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 100, top: 16, right: 180, bottom: 56, width: 80, height: 40})});
+    target.focusNode("new");
+    assert.equal(drawn(), 0);
+});
+
+test("horizontal reveal and outer scaling also clear toolbar controls at the destination", () => {
+    const {target} = setup();
+    target.viewport.getBoundingClientRect = () =>
+        ({left: 0, top: 0, right: 200, bottom: 150, width: 200, height: 150});
+    target.toolbar.querySelectorAll = () => [{getBoundingClientRect: () =>
+        ({left: 140, top: 0, right: 200, bottom: 24, width: 60, height: 24})}];
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 210, top: 8, right: 250, bottom: 28, width: 40, height: 20})});
+    target.focusNode("new");
+    assert.equal(target.offsetX, -116);
+    assert.equal(target.offsetY, 48);
+});
+
+test("bottom clearance preserves the node top below the toolbar when the node is too tall", () => {
+    const {target} = setup();
+    target.toolbar.querySelectorAll = () => [{getBoundingClientRect: () =>
+        ({left: 80, top: 0, right: 320, bottom: 48, width: 240, height: 48})}];
+    target.inspector = {hidden: false, getBoundingClientRect: () =>
+        ({left: 80, right: 320, top: 210, bottom: 292, width: 240, height: 82})};
+    target.nodeElements.set("new", {getBoundingClientRect: () =>
+        ({left: 100, top: 100, right: 180, bottom: 320, width: 80, height: 220})});
+    target.focusNode("new");
+    assert.equal(100 + target.offsetY, 64);
 });
 
 test("mouse, right-button and primary touch panning preserve the editing focus", () => {

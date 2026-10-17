@@ -40,8 +40,8 @@ func TestWorkspaceExitRetryPreservesBatch(t *testing.T) {
 
 func TestExitSyncSkippedAndFailed(t *testing.T) {
 	prepareSyncDirectoryTest(t)
-	previousErrors := autoSyncErrCount
-	t.Cleanup(func() { autoSyncErrCount = previousErrors })
+	previousErrors := autoSyncErrCount.Load()
+	t.Cleanup(func() { autoSyncErrCount.Store(previousErrors) })
 	for _, mode := range []int{0, 3} {
 		Conf.Sync.Load().Enabled = mode != 0
 		Conf.Sync.Load().Mode = mode
@@ -54,7 +54,7 @@ func TestExitSyncSkippedAndFailed(t *testing.T) {
 	Conf.SetUser(&conf.User{UserId: "sync-test", UserSiYuanOneTimePayStatus: 1})
 	Conf.Repo.Load().Key = nil
 	Conf.Sync.Load().Perception = false
-	autoSyncErrCount = 8
+	autoSyncErrCount.Store(8)
 	if !checkSync(false, true, false) {
 		t.Fatal("exit retry was blocked by automatic sync backoff")
 	}

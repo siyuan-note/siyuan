@@ -2068,12 +2068,12 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
+	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
-	autoSyncErrCount = 0
 	BootSyncSucc.Store(0)
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
@@ -2141,12 +2141,12 @@ func syncRepoUpload() (err error) {
 		return
 	}
 
+	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
-	autoSyncErrCount = 0
 	BootSyncSucc.Store(0)
 
 	postProcessStart := time.Now()
@@ -2161,7 +2161,7 @@ var isBootSyncing = atomic.Bool{}
 
 func bootSyncRepo() (err error) {
 	if 1 > len(Conf.Repo.Load().Key) {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		msg := Conf.Language(26)
@@ -2175,7 +2175,7 @@ func bootSyncRepo() (err error) {
 	defer func() { handleCloudError(err) }()
 	repo, err := newSyncRepository()
 	if err != nil {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", html.EscapeString(err.Error()))
@@ -2232,7 +2232,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	if err != nil {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
@@ -2303,7 +2303,7 @@ func bootSyncRepo() (err error) {
 
 func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	if 1 > len(Conf.Repo.Load().Key) {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		msg := Conf.Language(26)
@@ -2317,7 +2317,7 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	defer func() { handleCloudError(err) }()
 	repo, err := newSyncRepository()
 	if err != nil {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
@@ -2333,14 +2333,14 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		if 1 > autoSyncErrCount || byHand {
+		if 1 > autoSyncErrCount.Load() || byHand {
 			util.PushErrMsg(msg, 0)
 		}
 		return
@@ -2368,14 +2368,14 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
-		autoSyncErrCount++
+		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		if 1 > autoSyncErrCount || byHand {
+		if 1 > autoSyncErrCount.Load() || byHand {
 			util.PushErrMsg(msg, 0)
 		}
 		return
@@ -2388,12 +2388,12 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 		trafficStat.PeerFallbackCount += prefetchTraffic.PeerFallbackCount
 	}
 
+	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
-	autoSyncErrCount = 0
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()

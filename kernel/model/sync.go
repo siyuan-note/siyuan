@@ -152,7 +152,7 @@ func SyncDataUpload() (err error) {
 var (
 	pendingSync      syncPendingState
 	syncSameCount    = atomic.Int32{}
-	autoSyncErrCount = 0
+	autoSyncErrCount = atomic.Int32{}
 	fixSyncInterval  = 5 * time.Minute
 
 	syncPlanTimeLock = sync.Mutex{}
@@ -419,9 +419,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if 7 < autoSyncErrCount && !byHand && !exit {
-		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")
-		util.PushErrMsg(Conf.Language(125), 1000*60*60)
+	if !byHand && !exit && notifyAutoSyncPaused() {
 		planSyncAfter(64 * time.Minute)
 		return false
 	}

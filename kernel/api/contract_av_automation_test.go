@@ -199,4 +199,36 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	if stored.GetBlockValueByBoundID(collected.Block.ID) != nil {
 		t.Fatal("batch attribute API left an unmatched row")
 	}
+	collection.BlockSource.Attributes = nil
+	collection.BlockSource.Types = []string{"h:h1"}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 3, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
+	call("/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+	call("/api/block/appendBlock", map[string]any{"parentID": tree.ID, "dataType": "markdown", "data": "# Collected heading"}, appendBlock)
+	stored, _ = av.ParseAttributeView(database.ID)
+	var heading *av.Value
+	for _, row := range stored.GetBlockKeyValues().Values {
+		if row.Block.CollectionRuleID == collection.ID {
+			heading = row
+			break
+		}
+	}
+	if heading == nil {
+		t.Fatal("heading subtype did not collect")
+	}
+	preview, err := model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
+	if err != nil || len(preview.Blocks) != 1 || preview.Blocks[0].ID != heading.Block.ID {
+		t.Fatalf("subtype preview: %+v %v", preview, err)
+	}
+	call("/api/block/updateBlock", map[string]any{"id": heading.Block.ID, "dataType": "markdown", "data": "## Collected heading"}, updateBlock)
+	stored, _ = av.ParseAttributeView(database.ID)
+	if stored.GetBlockValueByBoundID(heading.Block.ID) != nil {
+		t.Fatal("heading subtype change did not remove row")
+	}
+	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
+	if err != nil || len(preview.Blocks) != 0 {
+		t.Fatalf("unmatched subtype preview: %+v %v", preview, err)
+	}
 }

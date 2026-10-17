@@ -263,6 +263,36 @@ func TestBlockCollectionInlineTagsAndAttributes(t *testing.T) {
 	}
 }
 
+func TestBlockCollectionSubtypes(t *testing.T) {
+	rootID := ast.NewNodeID()
+	tree := &parse.Tree{ID: rootID, Box: "notebook", Path: "/" + rootID + ".sy"}
+	for _, test := range []struct {
+		typ             ast.NodeType
+		sub             string
+		listType, level int
+	}{
+		{ast.NodeList, "u", 0, 0}, {ast.NodeList, "o", 1, 0}, {ast.NodeList, "t", 3, 0},
+		{ast.NodeListItem, "u", 0, 0}, {ast.NodeListItem, "o", 1, 0}, {ast.NodeListItem, "t", 3, 0},
+		{ast.NodeHeading, "h1", 0, 1}, {ast.NodeHeading, "h2", 0, 2}, {ast.NodeHeading, "h6", 0, 6},
+		{ast.NodeCallout, "WARNING", 0, 0}, {ast.NodeCallout, "NOTE", 0, 0}, {ast.NodeCallout, "CUSTOM", 0, 0},
+		{ast.NodeParagraph, "", 0, 0},
+	} {
+		node := &ast.Node{ID: ast.NewNodeID(), Type: test.typ, HeadingLevel: test.level,
+			ListData: &ast.ListData{Typ: test.listType}, CalloutType: test.sub}
+		main := treenode.TypeAbbr(node.Type.String())
+		for _, types := range [][]string{nil, {main}, {"l:u"}, {"i:t"}, {"h:h1", "h:h2"}, {"callout:WARNING"}, {"callout:CUSTOM"}} {
+			source := &av.AutomationBlockSource{DocumentIDs: []string{rootID}, Types: types}
+			want := len(types) == 0
+			for _, typ := range types {
+				want = want || typ == main || test.sub != "" && typ == main+":"+test.sub
+			}
+			if got := collectionBlockMatches(source, node, tree); got != want {
+				t.Fatalf("%s:%s with %v: %v want %v", main, test.sub, types, got, want)
+			}
+		}
+	}
+}
+
 func TestBlockCollectionCreateAndMoveAcrossScope(t *testing.T) {
 	fixture, view, _ := setupBlockCollectionTest(t)
 	rule := view.Automations.Rules[0]

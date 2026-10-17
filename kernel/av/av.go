@@ -960,25 +960,8 @@ func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (r
 	if nil == err {
 		err = CheckSpec(ret)
 	}
-	if err == nil && ret.Automations != nil && ret.Automations.Spec != 1 && ret.Automations.Spec != 2 {
-		err = fmt.Errorf("unsupported database automation specification [%d]", ret.Automations.Spec)
-	}
-	if err == nil && ret.Automations != nil && ret.Automations.Spec == 1 {
-		for _, rule := range ret.Automations.Rules {
-			if rule == nil {
-				continue
-			}
-			for _, action := range rule.Actions {
-				if action == nil {
-					continue
-				}
-				for _, field := range action.Fields {
-					if field != nil && field.Mode == "template" {
-						err = fmt.Errorf("template assignments require automation spec 2")
-					}
-				}
-			}
-		}
+	if err == nil {
+		err = ret.Automations.ValidateSpec()
 	}
 	if nil == err {
 		err = ret.ValidateLayouts()

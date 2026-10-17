@@ -2,6 +2,8 @@ package av
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/88250/lute/ast"
 )
@@ -37,6 +39,63 @@ type AutomationBlockAttribute struct {
 	Name     string `json:"name"`
 	Operator string `json:"operator"`
 	Value    string `json:"value,omitempty"`
+}
+
+// IsAutomationBlockType 校验主类型或主类型与子类型的组合，提示块允许自定义类型名称。
+func IsAutomationBlockType(value string) bool {
+	typ, sub, qualified := strings.Cut(value, ":")
+	if !qualified {
+		return slices.Contains([]string{"d", "h", "l", "i", "c", "m", "t", "b", "s", "p", "html",
+			"query_embed", "av", "iframe", "widget", "tb", "video", "audio", "custom", "callout", "tabs", "tab",
+			"mindmap", "mindmap_item"}, typ)
+	}
+	switch typ {
+	case "h":
+		return slices.Contains([]string{"h1", "h2", "h3", "h4", "h5", "h6"}, sub)
+	case "l", "i":
+		return slices.Contains([]string{"u", "o", "t"}, sub)
+	case "callout":
+		return sub != "" && sub == strings.TrimSpace(sub) && len(sub) <= 256 && !strings.ContainsAny(sub, "\r\n\t")
+	}
+	return false
+}
+
+// RequiredSpec 保留普通规则的版本，仅在使用新增语义时要求支持该语义的读取器。
+func (rule *AutomationRule) RequiredSpec() int {
+	ret := 1
+	if rule.BlockSource != nil {
+		for _, typ := range rule.BlockSource.Types {
+			if strings.Contains(typ, ":") {
+				return 3
+			}
+		}
+	}
+	for _, action := range rule.Actions {
+		if action == nil {
+			continue
+		}
+		for _, value := range action.Fields {
+			if value != nil && value.Mode == "template" {
+				ret = 2
+			}
+		}
+	}
+	return ret
+}
+
+func (config *AutomationConfig) ValidateSpec() error {
+	if config == nil {
+		return nil
+	}
+	if config.Spec < 1 || config.Spec > 3 {
+		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
+	}
+	for _, rule := range config.Rules {
+		if rule != nil && rule.RequiredSpec() > config.Spec {
+			return fmt.Errorf("automation rule requires specification [%d]", rule.RequiredSpec())
+		}
+	}
+	return nil
 }
 
 type AutomationAction struct {

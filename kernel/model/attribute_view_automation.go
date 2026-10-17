@@ -764,7 +764,10 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 	if err = json.Unmarshal(data, &config); err != nil {
 		return fail(err)
 	}
-	if config.Spec != 1 && config.Spec != 2 || len(config.Rules) > 100 {
+	if err = config.ValidateSpec(); err != nil {
+		return fail(err)
+	}
+	if len(config.Rules) > 100 {
 		return fail(fmt.Errorf("unsupported automation configuration"))
 	}
 	if err = (&av.AttributeView{Automations: &config}).NormalizeLocations(); nil != err {

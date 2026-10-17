@@ -51,8 +51,15 @@ func collectionBlockMatches(source *av.AutomationBlockSource, node *ast.Node, tr
 	if node == nil || !node.IsBlock() || !ast.IsNodeIDPattern(node.ID) || !collectionScopeMatches(source, tree) {
 		return false
 	}
-	if len(source.Types) > 0 && !slices.Contains(source.Types, treenode.TypeAbbr(node.Type.String())) {
-		return false
+	if len(source.Types) > 0 {
+		typ := treenode.TypeAbbr(node.Type.String())
+		matched := slices.Contains(source.Types, typ)
+		if !matched && (typ == "h" || typ == "callout" || (typ == "l" || typ == "i") && node.ListData != nil) {
+			matched = slices.Contains(source.Types, typ+":"+treenode.SubTypeAbbr(node))
+		}
+		if !matched {
+			return false
+		}
 	}
 	for _, attr := range source.Attributes {
 		if attr == nil {
@@ -145,7 +152,7 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		}
 	}
 	for _, typ := range source.Types {
-		if !slices.Contains([]string{"d", "h", "l", "i", "c", "m", "t", "b", "s", "p", "html", "query_embed", "av", "iframe", "widget", "tb", "video", "audio", "custom", "callout", "tabs", "tab", "mindmap", "mindmap_item"}, typ) {
+		if !av.IsAutomationBlockType(typ) {
 			return fmt.Errorf("invalid block collection type [%s]", typ)
 		}
 	}

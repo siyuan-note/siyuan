@@ -9,6 +9,13 @@ import {movePathTo} from "../../../util/pathName";
 import {transaction} from "../../wysiwyg/transaction";
 import {waitForPendingTransactions} from "../../util/transactionQueue";
 import {openLink} from "../../../editor/openLink";
+import {openInputDialog} from "../../../dialog/inputDialog";
+
+export const toggleCollectionType = (types: string[], type: string) => {
+    if (types.includes(type)) { return types.filter(item => item !== type); }
+    const main = type.split(":")[0];
+    return [...types.filter(item => type.includes(":") ? item !== main : !item.startsWith(main + ":")), type];
+};
 
 export const collectionSourceIncomplete = (source: AVAutomationBlockSourceInput) => !source ||
     !(source.notebookIDs?.length || source.documentIDs?.length) ||
@@ -18,12 +25,16 @@ export const mountBlockCollectionSource = (host: HTMLElement, source: AVAutomati
                                            protyle: IProtyle, save: () => void, onResize: () => void) => {
     const lang = window.siyuan.languages;
     const types: Record<string, string> = {
-        d: lang.documentBlock, p: lang.paragraph, h: lang.headings, l: lang.list, i: lang.listItem,
+        d: lang.documentBlock, p: lang.paragraph, h: lang.headings, l: lang.list1, i: lang.listItem,
         c: lang.code, m: lang.math, t: lang.tableBlock, b: lang.quote, s: lang.superBlock,
-        html: lang.htmlBlock, query_embed: lang.blockEmbed, av: lang.database, iframe: lang.iframeBlock,
-        widget: lang.widget, tb: lang.line, video: lang.video, audio: lang.audio, custom: lang.customBlock,
+        html: lang.htmlBlock, query_embed: lang.blockEmbed, av: lang.databaseBlock, iframe: lang.iframeBlock,
+        widget: lang.widgetBlock, tb: lang.line, video: lang.videoBlock, audio: lang.audioBlock, custom: lang.customBlock,
         callout: lang.callout, tabs: lang.tabs, tab: lang.tabItem, mindmap: lang.mindmap, mindmap_item: lang.mindmapItem,
     };
+    for (let level = 1; level <= 6; level++) { types[`h:h${level}`] = lang[`heading${level}`]; }
+    Object.assign(types, {"l:u": lang.list, "l:o": lang["ordered-list"], "l:t": lang.check,
+        "i:u": lang.unorderedListItemBlock, "i:o": lang.orderedListItemBlock, "i:t": lang.taskListItemBlock});
+    ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"].forEach(type => types[`callout:${type}`] = `${lang.callout} - ${type}`);
     const names = new Map<string, string>();
     let revision = 0;
     const removeButton = (kind: string, index: number) => `<svg class="b3-menu__action b3-menu__action--show b3-menu__action--warning fn__pointer ariaLabel" data-remove="${kind}" data-index="${index}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(lang.delete)}"><use xlink:href="#iconClose"></use></svg>`;
@@ -80,10 +91,20 @@ ${attributes.map((attr, i) => `<div class="av__automation-control" data-attribut
             toggleMenu({target, build: () => {
                 menu = new Menu();
                 Object.entries(types).forEach(([type, label]) => menu.addItem({label, checked: source.types?.includes(type), click: () => {
-                    source.types = source.types?.includes(type) ? source.types.filter(item => item !== type) : [...(source.types || []), type];
+                    source.types = toggleCollectionType(source.types || [], type);
                     save();
                     void render();
                 }}));
+                menu.addItem({label: `${lang.callout} - ${lang.custom}`, click: () => { openInputDialog({
+                    title: lang.callout, label: lang.type, value: "", maxLength: 256, onConfirm: (value, dialog) => {
+                        const type = value.trim();
+                        if (!type || type.length > 256 || /[\r\n\t]/.test(type)) { return; }
+                        source.types = toggleCollectionType(source.types || [], `callout:${type}`);
+                        save();
+                        void render();
+                        dialog.destroy();
+                    },
+                }); }});
             }, show: () => {
                 const rect = target.getBoundingClientRect();
                 menu.open({x: rect.left, y: rect.bottom, h: rect.height, target});

@@ -2222,7 +2222,7 @@ The field types (`keyType`) are:
 
     * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`list`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
 
-    * `data.av.automations` optionally contains database-wide rules (`spec: 1`). A `block` trigger uses `blockSource` to select notebooks/documents, block types, tags, and custom attributes; its `collect` action binds matching source blocks to this database. Automatically created primary values may include `block.collectionRuleID`, which is maintained by the kernel. Existing manual rows are preserved; a new match after removal creates a new initialized row, while undo restores the original row and fields
+    * `data.av.automations` optionally contains database-wide rules (`spec: 1`, `2`, or `3`). A `block` trigger uses `blockSource` to select notebooks/documents, block types, tags, and custom attributes; its `collect` action binds matching source blocks to this database. Main types include every subtype; format 3 supports `h:h1` through `h:h6`, `l:u/o/t`, `i:u/o/t`, and `callout:TYPE` (case-sensitive, including custom types). Empty types impose no restriction, and multiple types use OR. Automatically created primary values may include `block.collectionRuleID`, which is maintained by the kernel. Existing manual rows are preserved; a new match after removal creates a new initialized row, while undo restores the original row and fields
 
 ### Get primary key values
 

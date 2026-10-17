@@ -37,6 +37,7 @@ const runCases = async (sources, css, mobile) => {
     const templatePreviews = [];
     const searches = [];
     let fieldMenu;
+    let collectionTypeInput;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
     window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, menus: {menu: {remove() {}}}};
@@ -57,6 +58,7 @@ const runCases = async (sources, css, mobile) => {
             showSubMenu() {}
         }},
         "util/functions": {isMobile: () => mobile},
+        "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
         "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
             (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
             {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
@@ -437,7 +439,15 @@ const runCases = async (sources, css, mobile) => {
         }
     }
     await click("[data-types] svg");
-    fieldMenu.items.forEach(item => item.click());
+    fieldMenu.items.find(item => item.label === lang.list1).click();
+    assert.deepEqual(latest().blockSource.types, ["l"]);
+    fieldMenu.items.find(item => item.label === lang["ordered-list"]).click();
+    assert.deepEqual(latest().blockSource.types, ["l:o"]);
+    assert.equal(transactions.at(-1).perform[0].data.spec, 3);
+    fieldMenu.items.at(-1).click();
+    collectionTypeInput.onConfirm("CUSTOM", {destroy() {}});
+    assert.deepEqual(latest().blockSource.types, ["l:o", "callout:CUSTOM"]);
+    fieldMenu.items.slice(0, -1).forEach(item => item.click());
     await tick();
     await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 420, 900);
     menu.style.fontSize = "28px";

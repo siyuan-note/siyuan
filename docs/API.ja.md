@@ -2346,7 +2346,10 @@ if (response.code === 0 && response.data) {
 | `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
 | `location` | `{"location":{"name":"Home","latitude":0,"longitude":0,"originalInput":"0, 0"}}` |
+| `mAsset`   | `{"mAsset": [{"type": "image", "name": "画像", "content": "https://example.com/image"}]}` |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
+
+`mAsset` の各要素は、`type: "image"` で画像を、`type: "file"` でファイルリンクを表示します。値の更新は `mAsset` 配列全体を置き換えるため、要素を追加する場合は既存の要素も含める必要があります。
 
 > ⚠️ `itemID` は**アイテム ID**、つまり[レンダリング](#レンダリング)が返すアイテムの `id` です。表形式では `rows[].id`、ギャラリーとカンバンでは `cards[].id` であり、グループ化が有効な場合は `groups[]` 内の対応するビューインスタンスにあります。また、主キー値の `value.blockID` とも同じです。紐づくアイテムの場合、紐づくブロック ID は主キー値の `value.block.id` にあります。両者は異なる概念であり、同一であると仮定してはいけません。誤った ID を渡すと、値はレンダリングされたセルに現れない孤立データとして保存されます。
 

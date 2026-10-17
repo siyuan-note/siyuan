@@ -2352,7 +2352,10 @@ if (response.code === 0 && response.data) {
 | `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
 | `location` | `{"location":{"name":"Home","latitude":0,"longitude":0,"originalInput":"0, 0"}}` |
+| `mAsset`   | `{"mAsset": [{"type": "image", "name": "图片", "content": "https://example.com/image"}]}` |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
+
+对于 `mAsset`，每项使用 `type: "image"` 渲染图片，或使用 `type: "file"` 渲染文件链接。更新值会替换整个 `mAsset` 数组，因此追加资源时必须包含已有条目。
 
 > ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格和列表为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
 

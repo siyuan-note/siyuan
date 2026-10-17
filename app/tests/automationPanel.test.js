@@ -363,7 +363,16 @@ const runCases = async (sources, css, mobile) => {
     editor.dispatchEvent(new Event("input", {bubbles: true}));
     editor.dispatchEvent(new Event("change", {bubbles: true}));
     assert.match(latest().actions[0].fields.finished.template, /AddDate 0 0 7/);
+    const assertFieldSpacing = () => {
+        const fields = get("[data-fields]");
+        const lastField = fields.lastElementChild;
+        const gap = get('[data-action="add-field"]').getBoundingClientRect().top - lastField.getBoundingClientRect().bottom;
+        assert.ok(gap >= 7 && gap <= 9, `the final field keeps a single 8px gap before the add button: ${gap}`);
+    };
+    assertFieldSpacing();
     get("[data-template-preview]").open = true;
+    await tick();
+    assertFieldSpacing();
     await change("[data-template-item]", "sample");
     await change("[data-template-time]", "2026-10-16T15:30");
     const writesBeforePreview = transactions.length;
@@ -391,6 +400,12 @@ const runCases = async (sources, css, mobile) => {
         await require("electron").ipcRenderer.invoke("automation-size", width, 900);
         for (const fontSize of ["", "28px"]) {
             menu.style.fontSize = fontSize;
+            await tick();
+            assertFieldSpacing();
+            get("[data-template-preview]").open = false;
+            await tick();
+            assertFieldSpacing();
+            get("[data-template-preview]").open = true;
             await tick();
             assert.ok(get('[data-action="rules"]').getBoundingClientRect().width > 0);
             for (const element of [menu, get(".av__automation-body"), ...menu.querySelectorAll("section, [data-index]")]) {

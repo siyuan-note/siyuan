@@ -3242,7 +3242,8 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
-  &-action:last-child {
+  &-action:last-child,
+  &-field:last-child {
     margin-bottom: 0;
   }
 

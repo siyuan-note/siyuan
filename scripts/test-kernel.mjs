@@ -108,6 +108,8 @@ const command = (args, cwd = kernel) => {
 
 export const runJSONJob = async ({name, args, cwd, expectedTests, executable = "go"}, output) => {
     const started = performance.now();
+    const startedAt = new Date().toISOString();
+    console.log(`${name}: START ${startedAt}`);
     const logPath = join(output, name + ".jsonl");
     const log = createWriteStream(logPath);
     const child = spawn(executable, args, {cwd, windowsHide: true, stdio: ["ignore", "pipe", "pipe"]});
@@ -157,14 +159,33 @@ export const runJSONJob = async ({name, args, cwd, expectedTests, executable = "
     await new Promise(resolve => log.end(resolve));
     const missing = expectedTests?.filter(test => !completed.has(test)) ?? [];
     const unexpected = expectedTests ? [...completed].filter(test => !expectedTests.includes(test)) : [];
-    const result = {name, code: code ?? 1, seconds: (performance.now() - started) / 1000, tests: completed.size,
+    const result = {name, code: code ?? 1, startedAt, endedAt: new Date().toISOString(),
+        seconds: (performance.now() - started) / 1000, tests: completed.size,
         failed: [...failed], missing, unexpected, logPath};
     if (result.code || failed.size || missing.length || unexpected.length) {
         result.code = 1;
         console.error(`${name} failed\n${tail.join("\n")}\nMissing: ${missing.join(", ")}\nUnexpected: ${unexpected.join(", ")}`);
     }
-    console.log(`${name}: ${result.code ? "FAIL" : "PASS"}, ${result.tests} tests, ${result.seconds.toFixed(1)}s`);
+    console.log(`${name}: ${result.code ? "FAIL" : "PASS"}, ${result.tests} tests, ${result.seconds.toFixed(1)}s; END ${result.endedAt}`);
     return result;
+};
+
+export const runCompilation = async (args, cwd = kernel, executable = "go") => {
+    const started = performance.now();
+    const startedAt = new Date().toISOString();
+    console.log(`compile: START ${startedAt}`);
+    let timing;
+    try {
+        await new Promise((resolve, reject) => {
+            const compiler = spawn(executable, args, {cwd, windowsHide: true, stdio: "inherit"});
+            compiler.on("error", reject);
+            compiler.on("close", code => code === 0 ? resolve() : reject(new Error("Sharded test compilation failed: " + code)));
+        });
+    } finally {
+        timing = {startedAt, endedAt: new Date().toISOString(), seconds: (performance.now() - started) / 1000};
+        console.log(`compile: END ${timing.endedAt}, ${timing.seconds.toFixed(1)}s`);
+    }
+    return timing;
 };
 
 export const runJobs = async (jobs, concurrency, run) => {
@@ -201,6 +222,7 @@ const main = async () => {
         throw new Error("--shards must be an integer between 1 and 16");
     }
     const started = performance.now();
+    const startedAt = new Date().toISOString();
     const workspace = mkdtempSync(join(tmpdir(), "siyuan-kernel-tests-"));
     const output = options.output ?? mkdtempSync(join(tmpdir(), "siyuan-kernel-results-"));
     mkdirSync(output, {recursive: true});
@@ -224,14 +246,8 @@ const main = async () => {
         const binaries = join(workspace, "binaries");
         mkdirSync(binaries);
         // 同一次 Go 构建共享依赖，每个包只链接一次，原生编译与测试运行分开控制并发。
-        await new Promise((resolve, reject) => {
-            const compiler = spawn("go", ["test", ...tags, "-p", String(packageParallelism), "-c", "-o", binaries,
-                ...configurations.map(configuration => "./" + configuration.name)], {
-                cwd: kernel, windowsHide: true, stdio: "inherit",
-            });
-            compiler.on("error", reject);
-            compiler.on("close", code => code === 0 ? resolve() : reject(new Error("Sharded test compilation failed: " + code)));
-        });
+        const compilation = await runCompilation(["test", ...tags, "-p", String(packageParallelism), "-c", "-o", binaries,
+            ...configurations.map(configuration => "./" + configuration.name)]);
         const jobs = [];
         const backgroundJobs = [];
         const inventory = {};
@@ -273,10 +289,12 @@ const main = async () => {
         if (otherJob) {
             results.unshift(...await otherJob);
         }
-        const summary = {seconds: (performance.now() - started) / 1000, modelTests: inventory.model.tests, shards: inventory.model.shards,
+        const summary = {startedAt, endedAt: new Date().toISOString(), seconds: (performance.now() - started) / 1000,
+            compilation, modelTests: inventory.model.tests, shards: inventory.model.shards,
             apiTests: inventory.api?.tests ?? 0, apiShards: inventory.api?.shards ?? 0, packages: inventory, results};
         writeFileSync(join(output, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
-        console.log(`Kernel tests: ${summary.seconds.toFixed(1)}s; summary: ${join(output, "summary.json")}`);
+        console.log(`Kernel tests: ${summary.seconds.toFixed(1)}s; START ${summary.startedAt}; END ${summary.endedAt}; ` +
+            `summary: ${join(output, "summary.json")}`);
         process.exitCode = results.some(result => result.code) ? 1 : 0;
     } finally {
         if (otherJob) {

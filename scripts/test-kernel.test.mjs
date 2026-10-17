@@ -3,7 +3,7 @@ import * as assert from "node:assert/strict";
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {dirname, join, resolve} from "node:path";
-import {listTests, orderJobs, planShards, preparePackageWorkspace, runJSONJob, runJobs, testPackageConfigurations} from "./test-kernel.mjs";
+import {listTests, orderJobs, planShards, preparePackageWorkspace, runCompilation, runJSONJob, runJobs, testPackageConfigurations} from "./test-kernel.mjs";
 
 const durations = {prefixLength: 6, defaultSeconds: 0.2, buckets: {
     TestSl: {seconds: 40, tests: 2}, TestMe: {seconds: 20, tests: 2}, TestFa: {seconds: 10, tests: 2},
@@ -79,6 +79,22 @@ test("unsharded compilation starts before measured shards and ties remain determ
     assert.deepEqual(orderJobs([...jobs].reverse()).map(job => job.name), jobs.map(job => job.name));
     assert.deepEqual(orderJobs(jobs.filter(job => job.name !== "other-packages")).map(job => job.name),
         ["mcp-tools-1", "util-1", "util-2"]);
+});
+
+test("compilation records its interval and logs the end even when the process fails to start or exits unsuccessfully", async t => {
+    const messages = [];
+    t.mock.method(console, "log", message => messages.push(message));
+    const directory = temporary(t);
+    const before = Date.now();
+    const timing = await runCompilation(["-e", ""], directory, process.execPath);
+    assert.ok(Date.parse(timing.startedAt) >= before);
+    assert.ok(Date.parse(timing.endedAt) >= Date.parse(timing.startedAt));
+    assert.ok(Date.parse(timing.endedAt) <= Date.now());
+    assert.ok(timing.seconds >= 0);
+    await assert.rejects(runCompilation(["-e", "process.exitCode = 3;"], directory, process.execPath), /compilation failed: 3/);
+    await assert.rejects(runCompilation([], directory, join(directory, "missing-executable")), /ENOENT/);
+    assert.equal(messages.filter(message => message.startsWith("compile: START ")).length, 3);
+    assert.equal(messages.filter(message => message.startsWith("compile: END ")).length, 3);
 });
 
 test("each model process has isolated relative writes while retaining repository fixtures", t => {
@@ -168,10 +184,18 @@ test("process failures, missing tests and truncated coverage cannot produce a pa
         const source = `process.stdout.write(${JSON.stringify(events.map(event => JSON.stringify(event)).join("\n") + "\n")}); process.exitCode = ${status};`;
         return runJSONJob({name, args: ["-e", source], executable: process.execPath, cwd: output, expectedTests}, output);
     };
-    assert.equal((await run("pass", [{Action: "pass", Test: "TestOne"}], 0, ["TestOne"])).code, 0);
+    const before = Date.now();
+    const passed = await run("pass", [{Action: "pass", Test: "TestOne"}], 0, ["TestOne"]);
+    assert.equal(passed.code, 0);
+    assert.ok(Date.parse(passed.startedAt) >= before);
+    assert.ok(Date.parse(passed.endedAt) >= Date.parse(passed.startedAt));
+    assert.ok(Date.parse(passed.endedAt) <= Date.now());
+    assert.ok(passed.seconds >= 0);
     const missing = await run("missing", [{Action: "pass", Test: "TestOne"}], 0, ["TestOne", "TestTwo"]);
     assert.equal(missing.code, 1);
     assert.deepEqual(missing.missing, ["TestTwo"]);
+    assert.ok(Date.parse(missing.startedAt) >= Date.parse(passed.endedAt));
+    assert.ok(Date.parse(missing.endedAt) >= Date.parse(missing.startedAt));
     assert.equal((await run("unexpected", [{Action: "pass", Test: "TestOther"}], 0, ["TestOne"])).code, 1);
     assert.equal((await run("failure", [{Action: "fail", Test: "TestOne"}], 0, ["TestOne"])).code, 1);
     assert.equal((await run("crash", [], 2, ["TestOne"])).code, 1);

@@ -2101,7 +2101,7 @@
 	"dataRepoKey": "Data-repo sleutel",
 	"dataRepoPurge": "Lokaal data-repo opschonen",
 	"dataRepoPurgeTip": "Verwijder alle niet-gerefereerde momentopnamen en gerelateerde gegevensobjecten",
-	"dataRepoPurgeConfirm": "Alle niet-gerefereerde lokale historische momentopnamen en gerelateerde gegevensobjecten worden permanent verwijderd. Momentopnamen die door verwijzingen behouden blijven, zoals de nieuwste momentopname, de synchronisatiebasis en handmatig getagde momentopnamen, worden bewaard.<br><br>Handmatig opschonen volgt niet de instellingen voor automatisch opschonen voor het aantal bewaardagen of het aantal momentopnamen per dag. Verwijderde lokale momentopnamen kunnen niet meer worden gebruikt om historische gegevens te herstellen.<br><br>Weet u zeker dat u wilt opschonen?",
+	"dataRepoPurgeConfirm": "Alle niet-gerefereerde lokale historische momentopnamen en gerelateerde gegevensobjecten worden permanent verwijderd. Momentopnamen die door verwijzingen behouden blijven, zoals de nieuwste momentopname, de synchronisatiebasis en handmatig getagde momentopnamen, worden bewaard.<div class=\"fn__hr\"></div>Handmatig opschonen volgt niet de instellingen voor automatisch opschonen voor het aantal bewaardagen of het aantal momentopnamen per dag. Verwijderde lokale momentopnamen kunnen niet meer worden gebruikt om historische gegevens te herstellen.<div class=\"fn__hr\"></div>Weet u zeker dat u wilt opschonen?",
 	"purge": "Opschonen",
 	"plsChoose": "Kies eerst",
 	"freeSub": "Gratis proefabonnement",

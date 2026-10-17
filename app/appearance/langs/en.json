@@ -2101,7 +2101,7 @@
 	"dataRepoKey": "Data repo key",
 	"dataRepoPurge": "Local data repo purge",
 	"dataRepoPurgeTip": "Delete all unreferenced snapshots and related data objects",
-	"dataRepoPurgeConfirm": "This will permanently delete all unreferenced local historical snapshots and related data objects. Snapshots retained by references, such as the latest snapshot, the sync baseline, and manually tagged snapshots, will be kept.<br><br>Manual purging does not follow the automatic purge settings for retention days or snapshots kept per day. Deleted local snapshots can no longer be used to restore historical data.<br><br>Are you sure you want to purge?",
+	"dataRepoPurgeConfirm": "This will permanently delete all unreferenced local historical snapshots and related data objects. Snapshots retained by references, such as the latest snapshot, the sync baseline, and manually tagged snapshots, will be kept.<div class=\"fn__hr\"></div>Manual purging does not follow the automatic purge settings for retention days or snapshots kept per day. Deleted local snapshots can no longer be used to restore historical data.<div class=\"fn__hr\"></div>Are you sure you want to purge?",
 	"purge": "Purge",
 	"plsChoose": "Please choose first",
 	"freeSub": "Free Trial Subscription",

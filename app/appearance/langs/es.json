@@ -2100,7 +2100,7 @@
 	"dataRepoKeyTip2": "Todos los dispositivos deben usar la misma clave; de lo contrario, los datos no se podrán sincronizar. Para cambiarla, primero restablezca el repositorio de datos y, a continuación, importe o genere una clave nueva",
 	"dataRepoKey": "Clave del repositorio de datos",
 	"dataRepoPurge": "Purga del repositorio de datos local",
-	"dataRepoPurgeConfirm": "Se eliminarán permanentemente todas las instantáneas históricas locales sin referencia y los objetos de datos relacionados. Se conservarán las instantáneas retenidas por referencias, como la instantánea más reciente, la base de sincronización y las instantáneas etiquetadas manualmente.<br><br>La purga manual no sigue los ajustes de purga automática relativos a los días de retención ni al número de instantáneas conservadas por día. Las instantáneas locales eliminadas ya no podrán usarse para restaurar datos históricos.<br><br>¿Está seguro de que desea realizar la purga?",
+	"dataRepoPurgeConfirm": "Se eliminarán permanentemente todas las instantáneas históricas locales sin referencia y los objetos de datos relacionados. Se conservarán las instantáneas retenidas por referencias, como la instantánea más reciente, la base de sincronización y las instantáneas etiquetadas manualmente.<div class=\"fn__hr\"></div>La purga manual no sigue los ajustes de purga automática relativos a los días de retención ni al número de instantáneas conservadas por día. Las instantáneas locales eliminadas ya no podrán usarse para restaurar datos históricos.<div class=\"fn__hr\"></div>¿Está seguro de que desea realizar la purga?",
 	"purge": "Purgar",
 	"dataRepoPurgeTip": "Purga todas las instantáneas sin referencia y los objetos de datos relacionados",
 	"plsChoose": "Por favor, elija primero",

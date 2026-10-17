@@ -41,6 +41,7 @@ const runCases = async (sources, css, mobile) => {
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
     window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, menus: {menu: {remove() {}}}};
     const mocks = {
+        "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
         "plugin/Menu": {Menu: class {items = []; addItem(item) {this.items.push(item);} open() {fieldMenu = {items: this.items};}}},
         "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
             (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
@@ -68,14 +69,16 @@ const runCases = async (sources, css, mobile) => {
             load(path.normalize(path.join(path.dirname(name), request))));
         return exports;
     };
+    const resizeMenu = () => {
+        if (mobile) {
+            void menu.offsetHeight;
+        } else {
+            load("protyle/render/av/automationPosition").setAutomationMenuPosition(menu, {right: window.innerWidth, bottom: 100});
+        }
+    };
+    window.addEventListener("resize", resizeMenu);
     await load("protyle/render/av/automation").openAutomationMenu({protyle: {options: {}, block: {rootID: "document"}},
-        blockElement: {dataset: {nodeId: "carrier"}}, avID: "source", menuElement: menu, onResize() {
-            if (mobile) {
-                void menu.offsetHeight;
-            } else {
-                load("util/setPosition").setPosition(menu, window.innerWidth - menu.clientWidth, 100, 30, 0, true);
-            }
-        }});
+        blockElement: {dataset: {nodeId: "carrier"}}, avID: "source", menuElement: menu, onResize: resizeMenu});
     const get = selector => {const element = menu.querySelector(selector); assert.ok(element, selector); return element;};
     const change = async (selector, value) => {
         const element = get(selector);
@@ -375,11 +378,55 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(get('[data-action="preview-collection"]').disabled, false);
     assert.equal(latest().actions[0].type, "collect");
     assert.deepEqual(database.automations.rules[0].conditions, [currentCondition]);
+    for (const width of mobile ? [360, 740] : [420, 1000]) {
+        await require("electron").ipcRenderer.invoke("automation-size", width, 900);
+        for (const name of ["daylight", "midnight"]) {
+            theme.textContent = sources[name];
+            for (const fontSize of ["", "28px"]) {
+                menu.style.fontSize = fontSize;
+                await tick();
+                const tagsRect = get("[data-tags]").getBoundingClientRect();
+                const typesRect = get("[data-types]").getBoundingClientRect();
+                const addRect = get("[data-add-attribute]").getBoundingClientRect();
+                assert.ok(tagsRect.left >= 0 && tagsRect.right <= window.innerWidth, "collection form stays inside the viewport");
+                for (const selector of ["[data-scope]", "[data-types]", "[data-add-attribute]"]) {
+                    const button = get(selector);
+                    assert.equal(button.getBoundingClientRect().left, tagsRect.left, "collection controls align with the form");
+                    assert.ok(button.scrollWidth <= button.clientWidth + 1, "collection controls wrap without horizontal overflow");
+                    button.focus();
+                    assert.equal(document.activeElement, button, "collection controls remain keyboard focusable");
+                }
+                assert.ok(typesRect.top - tagsRect.bottom <= 12, "tag field has no extra trailing margin");
+                assert.ok(addRect.top - typesRect.bottom <= 12, "empty attributes do not leave a gap");
+            }
+            menu.style.fontSize = "";
+            get("[data-source-conditions]").scrollIntoView({block: "center"});
+            await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-collection`);
+        }
+    }
+    await click("[data-types] svg");
+    fieldMenu.items.forEach(item => item.click());
+    await tick();
+    await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 420, 900);
+    menu.style.fontSize = "28px";
+    await tick();
+    assert.ok(latest().blockSource.types.length > 10);
+    assert.ok(get("[data-types]").scrollWidth <= get("[data-types]").clientWidth + 1, "many selected block types wrap");
+    await click("[data-add-attribute] svg");
+    assert.equal(latest().blockSource.attributes.length, 1);
+    await change("[data-attr-name]", "custom-status");
+    await change("[data-attr-operator]", "equals");
+    await change("[data-attr-value]", "ready");
+    assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
+    await click('[data-remove="attribute"] svg');
+    assert.equal(latest().blockSource.attributes.length, 0);
+    window.removeEventListener("resize", resizeMenu);
 };
 
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
+    app.commandLine.appendSwitch("disable-gpu");
     app.whenReady().then(async () => {
         const win = new BrowserWindow({show: false, width: 1000, height: 900,
             webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true}});
@@ -389,7 +436,7 @@ if (process.versions.electron && process.type === "browser") {
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -398,7 +445,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;

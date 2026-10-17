@@ -72,6 +72,30 @@ func TestNormalizeTypedMindmapMetadata(t *testing.T) {
 	}
 }
 
+func TestPruneListMindmapConnectorStyles(t *testing.T) {
+	for _, version := range []string{"1", "2"} {
+		for _, style := range []string{"spline", "orthogonal", "bezier", "rounded"} {
+			_, list, _ := mindmapTestTree()
+			original := `{"version":` + version + `,"connectorStyle":"` + style +
+				`","extension":9007199254740993,"nodes":{"child":{"lineColor":"red"},"deleted":{}},"relations":[]}`
+			list.SetIALAttr(listMindmapMetadataAttr, original)
+			next, changed := pruneListMindmapMetadata(list)
+			if !changed || strings.Contains(next, "deleted") || !strings.Contains(next, `"connectorStyle":"`+style+`"`) ||
+				!strings.Contains(next, `"lineColor":"red"`) || !strings.Contains(next, "9007199254740993") {
+				t.Fatalf("connector metadata was lost during pruning: %s", next)
+			}
+		}
+		for _, style := range []string{`null`, `""`, `"future-style"`, `0`, `false`, `{}`, `[]`} {
+			_, list, _ := mindmapTestTree()
+			original := `{"version":` + version + `,"connectorStyle":` + style + `,"nodes":{"deleted":{}},"relations":[]}`
+			list.SetIALAttr(listMindmapMetadataAttr, original)
+			if next, changed := pruneListMindmapMetadata(list); changed || next != original {
+				t.Fatalf("unsupported connector style was changed: %s", next)
+			}
+		}
+	}
+}
+
 func TestPruneListMindmapPreservesInvalidRoutes(t *testing.T) {
 	for _, route := range []string{
 		`null`, `{}`, `{"version":2,"points":[{"x":0,"y":0,"t":0.5}]}`,

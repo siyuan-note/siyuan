@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Linienstil",
+	"listMindmapConnectorSpline": "Verzweigte Kurve",
+	"listMindmapConnectorOrthogonal": "Rechtwinklig",
+	"listMindmapConnectorBezier": "Fächerkurve",
+	"listMindmapConnectorRounded": "Abgerundet rechtwinklig",
 	"transactionSaveUnconfirmed": "Der letzte Speichervorgang konnte nicht bestätigt werden. Lassen Sie diesen Editor geöffnet und kopieren Sie Ihre Änderungen, bevor Sie die Seite neu laden, um den gespeicherten Stand zu prüfen.",
 	"automationTemplateTip": "Berechnung in der Zeitzone der Regel; leere Ergebnisse löschen das Feld, Fehler machen die Änderung rückgängig",
 	"automationTemplatePreview": "Vorschauergebnis",

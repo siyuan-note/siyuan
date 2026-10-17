@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Stile dei collegamenti",
+	"listMindmapConnectorSpline": "Diramazione curva",
+	"listMindmapConnectorOrthogonal": "Ortogonale",
+	"listMindmapConnectorBezier": "Ventaglio curvo",
+	"listMindmapConnectorRounded": "Ortogonale arrotondato",
 	"transactionSaveUnconfirmed": "Impossibile confermare l'ultimo salvataggio. Mantieni aperto questo editor e copia le modifiche prima di ricaricare per verificare il contenuto salvato.",
 	"automationTemplateTip": "Calcolo nel fuso orario della regola; un risultato vuoto cancella il campo e gli errori annullano la modifica",
 	"automationTemplatePreview": "Risultato dell’anteprima",

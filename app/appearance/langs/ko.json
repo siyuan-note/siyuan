@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "연결선 스타일",
+	"listMindmapConnectorSpline": "곡선 분기",
+	"listMindmapConnectorOrthogonal": "직각선",
+	"listMindmapConnectorBezier": "부채꼴 곡선",
+	"listMindmapConnectorRounded": "둥근 직각선",
 	"transactionSaveUnconfirmed": "마지막 저장이 성공했는지 확인할 수 없습니다. 이 편집기를 열어 둔 채로 변경 내용을 복사한 후 새로고침하여 저장 결과를 확인하세요.",
 	"automationTemplateTip": "규칙의 시간대로 계산하며, 빈 결과는 필드를 지우고 오류가 발생하면 변경을 되돌립니다",
 	"automationTemplatePreview": "미리보기 결과",

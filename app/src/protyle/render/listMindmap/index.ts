@@ -54,6 +54,7 @@ import {processRender} from "../../util/processCode";
 import {highlightRender} from "../highlightRender";
 import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
+import {getListMindmapConnectorMenuItem} from "./connectorMenu";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void, focusRevision: number,
@@ -227,6 +228,36 @@ class ListMindmapController {
             onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
                 metadata.viewLocked = locked;
             }) : Promise.resolve(true),
+            onSettingsMenu: anchor => {
+                toggleMenu({
+                    target: anchor,
+                    build: (_menu, session) => {
+                        if (!canEdit(owner, list)) {
+                            return;
+                        }
+                        const menu = new Menu();
+                        menu.addItem(getListMindmapConnectorMenuItem(readListMindmap(list).metadata.connectorStyle || "bezier",
+                            style => {
+                                void this.metadata(metadata => {
+                                    if ((metadata.connectorStyle || "bezier") === style) {
+                                        return false;
+                                    }
+                                    if (style === "bezier") {
+                                        delete metadata.connectorStyle;
+                                    } else {
+                                        metadata.connectorStyle = style;
+                                    }
+                                });
+                            }, window.siyuan.languages));
+                        if (isMobile()) {
+                            session.show(() => menu.fullscreen("bottom"));
+                        } else {
+                            const rect = anchor.getBoundingClientRect();
+                            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                        }
+                    },
+                });
+            },
             onExpandLevelMenu: (anchor, select) => {
                 toggleMenu({
                     target: anchor,

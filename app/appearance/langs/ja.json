@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "接続線のスタイル",
+	"listMindmapConnectorSpline": "分岐曲線",
+	"listMindmapConnectorOrthogonal": "直角線",
+	"listMindmapConnectorBezier": "扇形曲線",
+	"listMindmapConnectorRounded": "角丸直角線",
 	"transactionSaveUnconfirmed": "直前の保存が成功したか確認できません。このエディターを開いたままにし、再読み込みして保存結果を確認する前に、変更内容をコピーしてください。",
 	"automationTemplateTip": "ルールのタイムゾーンで計算し、空の結果はフィールドを消去、エラー時は変更を取り消します",
 	"automationTemplatePreview": "プレビュー結果",

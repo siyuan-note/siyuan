@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Štýl spojníc",
+	"listMindmapConnectorSpline": "Zakrivené vetvenie",
+	"listMindmapConnectorOrthogonal": "Pravouhlý",
+	"listMindmapConnectorBezier": "Zakrivený vejár",
+	"listMindmapConnectorRounded": "Zaoblený pravouhlý",
 	"transactionSaveUnconfirmed": "Posledné uloženie sa nepodarilo potvrdiť. Nechajte tento editor otvorený a pred opätovným načítaním na kontrolu uloženého obsahu skopírujte svoje zmeny.",
 	"automationTemplateTip": "Výpočet v časovom pásme pravidla; prázdny výsledok vymaže pole a chyby vrátia zmenu späť",
 	"automationTemplatePreview": "Výsledok náhľadu",

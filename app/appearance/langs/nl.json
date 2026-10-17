@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Verbindingsstijl",
+	"listMindmapConnectorSpline": "Gebogen vertakking",
+	"listMindmapConnectorOrthogonal": "Rechthoekig",
+	"listMindmapConnectorBezier": "Gebogen waaier",
+	"listMindmapConnectorRounded": "Afgerond rechthoekig",
 	"transactionSaveUnconfirmed": "De laatste opslag kon niet worden bevestigd. Houd deze editor open en kopieer je wijzigingen voordat je opnieuw laadt om te controleren wat is opgeslagen.",
 	"automationTemplateTip": "Berekend in de tijdzone van de regel; lege uitvoer wist het veld en fouten draaien de wijziging terug",
 	"automationTemplatePreview": "Voorbeeldresultaat",

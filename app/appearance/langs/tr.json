@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Bağlantı çizgisi stili",
+	"listMindmapConnectorSpline": "Eğri dallanma",
+	"listMindmapConnectorOrthogonal": "Dik açılı",
+	"listMindmapConnectorBezier": "Yelpaze eğrisi",
+	"listMindmapConnectorRounded": "Yuvarlatılmış dik açılı",
 	"transactionSaveUnconfirmed": "Son kaydetme işlemi doğrulanamadı. Kaydedilen içeriği kontrol etmek için yeniden yüklemeden önce bu düzenleyiciyi açık tutun ve değişikliklerinizi kopyalayın.",
 	"automationTemplateTip": "Kuralın saat diliminde hesaplanır; boş sonuç alanı temizler ve hatalar değişikliği geri alır",
 	"automationTemplatePreview": "Önizleme sonucu",

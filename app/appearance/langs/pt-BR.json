@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Estilo das conexões",
+	"listMindmapConnectorSpline": "Ramificação curva",
+	"listMindmapConnectorOrthogonal": "Ortogonal",
+	"listMindmapConnectorBezier": "Leque curvo",
+	"listMindmapConnectorRounded": "Ortogonal arredondado",
 	"transactionSaveUnconfirmed": "Não foi possível confirmar o último salvamento. Mantenha este editor aberto e copie suas alterações antes de recarregar para conferir o conteúdo salvo.",
 	"automationTemplateTip": "Calculado no fuso horário da regra; resultados vazios limpam o campo e erros revertem a alteração",
 	"automationTemplatePreview": "Resultado da prévia",

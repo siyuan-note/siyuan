@@ -3,6 +3,8 @@ import {getOrderedListMarkerUpdates, isListConversionType} from "../../wysiwyg/l
 import type {MindmapManualRoute, MindmapRelationAnchor} from "./routing";
 import {getListMindmapSiblingIDs, isListMindmapSummaryCrossing, normalizeListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary} from "./summary";
+import {LIST_MINDMAP_CONNECTOR_STYLES} from "./connectors";
+import type {ListMindmapConnectorStyle} from "./connectors";
 
 export interface ListMindmapNodeStyle {
     textColor?: string;
@@ -36,6 +38,7 @@ export interface ListMindmapMetadata {
     version: 1 | 2;
     rootTitle?: string;
     viewLocked?: boolean;
+    connectorStyle?: ListMindmapConnectorStyle;
     nodes: Record<string, ListMindmapNodeStyle>;
     relations: ListMindmapRelation[];
     summaries?: ListMindmapSummary[];
@@ -103,6 +106,9 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
         throw invalidMetadata();
     }
     if (data.viewLocked !== undefined && typeof data.viewLocked !== "boolean") {
+        throw invalidMetadata();
+    }
+    if ("connectorStyle" in data && !LIST_MINDMAP_CONNECTOR_STYLES.some(style => style === data.connectorStyle)) {
         throw invalidMetadata();
     }
     const numberKeys = ["fontSize", "borderWidth", "borderRadius", "lineWidth"];

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261017003253"
+		"updated": "20261017110432"
 	},
 	"Children": [
 		{
@@ -1962,7 +1962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261017003253"
+				"updated": "20261017110432"
 			},
 			"Children": [
 				{
@@ -2007,6 +2007,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "點擊思維導圖工具列中的「鎖定視圖」後，禁止編輯、縮放和平移，在導圖上滑動或滾動滑鼠滾輪將捲動文件。點擊「解鎖視圖」可恢復操作。鎖定狀態隨區塊儲存。"
+				}
+			]
+		},
+		{
+			"ID": "20261017110432-qnsdugf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017110432-qnsdugf",
+				"updated": "20261017110432"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在心智圖工具列的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連線樣式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇曲線分岔、直角折線、曲線匯聚或圓角折線。選擇套用至整張心智圖，隨文件儲存，並支援復原和重做。切換只改變父子節點間的連線，不改變節點位置或關係線。直角樣式共用的垂直線沿用預設線色，不能單獨選取；水平分支仍可單獨選取和配色。思源格式的 HTML 與 PDF 預覽使用儲存的樣式。"
 				}
 			]
 		},

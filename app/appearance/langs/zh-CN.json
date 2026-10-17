@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "连线样式",
+	"listMindmapConnectorSpline": "曲线分叉",
+	"listMindmapConnectorOrthogonal": "正交折线",
+	"listMindmapConnectorBezier": "曲线汇聚",
+	"listMindmapConnectorRounded": "圆角折线",
 	"transactionSaveUnconfirmed": "无法确认最近一次保存是否成功。请保留当前编辑器，刷新核对保存结果前先复制修改内容。",
 	"automationTemplateTip": "按规则时区计算；空结果清空字段，错误会回滚本次修改",
 	"automationTemplatePreview": "预览结果",

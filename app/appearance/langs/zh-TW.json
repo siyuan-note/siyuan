@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "連線樣式",
+	"listMindmapConnectorSpline": "曲線分岔",
+	"listMindmapConnectorOrthogonal": "直角折線",
+	"listMindmapConnectorBezier": "曲線匯聚",
+	"listMindmapConnectorRounded": "圓角折線",
 	"transactionSaveUnconfirmed": "無法確認最近一次儲存是否成功。請保留目前的編輯器，重新載入以核對儲存結果前，先複製修改內容。",
 	"automationTemplateTip": "依規則時區計算；空結果清空欄位，錯誤會復原本次修改",
 	"automationTemplatePreview": "預覽結果",

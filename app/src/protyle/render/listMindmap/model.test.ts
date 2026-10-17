@@ -73,6 +73,22 @@ test("mindmap metadata rejects unknown formats and invalid values without replac
     }
 });
 
+test("connector presets extend both metadata versions without migrating legacy configurations", () => {
+    for (const version of [1, 2]) {
+        const legacy = JSON.stringify({version, nodes: {a: {lineColor: "red"}}, relations: [], extension: "keep"});
+        assert.equal(JSON.stringify(parseListMindmapMetadata(legacy)), legacy);
+        assert.equal(parseListMindmapMetadata(legacy).connectorStyle, undefined);
+        for (const connectorStyle of ["spline", "orthogonal", "bezier", "rounded"]) {
+            const value = JSON.stringify({...JSON.parse(legacy), connectorStyle});
+            assert.equal(JSON.stringify(parseListMindmapMetadata(value)), value);
+        }
+        for (const connectorStyle of [null, "", "future-style", 0, false, {}, []]) {
+            const value = JSON.stringify({...JSON.parse(legacy), connectorStyle});
+            assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+        }
+    }
+});
+
 test("manual relation routes are optional, versioned and validated without dropping extension fields", () => {
     const route = {version: 1, points: [{x: -40, y: 25.5, t: .4, extension: "keep"}], extension: "keep"};
     const metadata = {version: 1, nodes: {}, relations: [{id: "r", from: "a", to: "b", label: "", route}]};
@@ -921,6 +937,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let interactions = 0;
     let undo = 0;
     let redo = 0;
+    let settingsOpened = 0;
     let finishAllowed: boolean | Promise<boolean> = true;
     const options = {
         host, model,
@@ -948,6 +965,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onFold: (id: string) => folds.push(id),
         onUndo: () => undo++,
         onRedo: () => redo++,
+        onSettingsMenu: () => settingsOpened++,
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
         onRelationChange: (...args: unknown[]) => relationChanges.push(args),
@@ -1009,6 +1027,50 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const view = new api.ListMindmapView(options);
     await settle();
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
+    const settings = host.querySelector<HTMLButtonElement>('[aria-label="config"]');
+    check.equal(settings.getAttribute("aria-haspopup"), "menu");
+    settings.click();
+    check.equal(settingsOpened, 1, "the editable toolbar opens the shared settings menu");
+    const originalConnectorPositions = JSON.stringify([...view.positions]);
+    const connectorSource = list.getAttribute("custom-sy-list-mindmap-data");
+    for (const connectorStyle of ["spline", "orthogonal", "bezier", "rounded"]) {
+        model.metadata.connectorStyle = connectorStyle;
+        api.writeListMindmapMetadata(list, model.metadata);
+        const reloaded = api.readListMindmap(list);
+        check.equal(reloaded.metadata.connectorStyle, connectorStyle);
+        view.update(reloaded);
+        await settle();
+        check.equal(JSON.stringify([...view.positions]), originalConnectorPositions, "connector changes preserve node layout");
+        check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
+        if (connectorStyle === "orthogonal" || connectorStyle === "rounded") {
+            const from = view.positions.get(model.root.id);
+            const children = model.root.children.map((child: {id: string}) => view.positions.get(child.id));
+            const trunkX = (from.x + from.width + Math.min(...children.map((child: {x: number}) => child.x))) / 2;
+            const branchYs = children.map((child: {y: number, height: number}) => child.y + child.height);
+            const rect = viewport.getBoundingClientRect();
+            const eventAt = (x: number, y: number) => new MouseEvent("click", {
+                clientX: rect.left + view.offsetX + x * view.scale,
+                clientY: rect.top + view.offsetY + y * view.scale,
+            });
+            check.equal(view.findLine(eventAt(trunkX, (Math.min(...branchYs) + Math.max(...branchYs)) / 2)), undefined,
+                "the shared vertical trunk cannot be selected as an individual branch");
+            const child = children[children.length - 1];
+            const branch = eventAt((trunkX + child.x + child.width) / 2, child.y + child.height);
+            check.equal(view.findLine(branch).id, child.id, "the real canvas hit test selects each horizontal branch");
+        }
+        view.setReadOnly(true);
+        check.equal(host.querySelector('[aria-label="config"]'), null, "read-only views render saved styles without an edit menu");
+        check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
+        view.setReadOnly(false);
+    }
+    if (connectorSource === null) {
+        list.removeAttribute("custom-sy-list-mindmap-data");
+    } else {
+        list.setAttribute("custom-sy-list-mindmap-data", connectorSource);
+    }
+    delete model.metadata.connectorStyle;
+    view.update(model);
+    await settle();
     check.equal(viewport.getAttribute("data-prevent-swipe"), "true");
     const originalCapture = HTMLElement.prototype.setPointerCapture;
     const originalHasCapture = HTMLElement.prototype.hasPointerCapture;
@@ -3899,7 +3961,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         "return {tabsRender, destroyTabsRender, getTabTask, getTabTitle, getTabTitleBlock, revealTabsForTarget};})();\n";
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
-        compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
+        compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "connectors.ts")) +
+        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
         compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +

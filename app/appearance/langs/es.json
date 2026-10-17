@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Estilo de conexión",
+	"listMindmapConnectorSpline": "Bifurcación curva",
+	"listMindmapConnectorOrthogonal": "Ortogonal",
+	"listMindmapConnectorBezier": "Abanico curvo",
+	"listMindmapConnectorRounded": "Ortogonal redondeada",
 	"transactionSaveUnconfirmed": "No se puede confirmar el último guardado. Mantén este editor abierto y copia tus cambios antes de recargar para comprobar lo que se ha guardado.",
 	"automationTemplateTip": "Se calcula en la zona horaria de la regla; un resultado vacío borra el campo y los errores revierten el cambio",
 	"automationTemplatePreview": "Resultado de la vista previa",

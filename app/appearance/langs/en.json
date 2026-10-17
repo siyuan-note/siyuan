@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Connector style",
+	"listMindmapConnectorSpline": "Curved fork",
+	"listMindmapConnectorOrthogonal": "Orthogonal",
+	"listMindmapConnectorBezier": "Curved fan",
+	"listMindmapConnectorRounded": "Rounded orthogonal",
 	"transactionSaveUnconfirmed": "Unable to confirm the latest save. Keep this editor open and copy your changes before reloading to check the saved result.",
 	"automationTemplateTip": "Calculated in the rule's time zone; empty output clears the field, and errors roll back the change",
 	"automationTemplatePreview": "Preview result",

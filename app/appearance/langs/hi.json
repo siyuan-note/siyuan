@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "जोड़ने वाली रेखा की शैली",
+	"listMindmapConnectorSpline": "वक्र शाखाएँ",
+	"listMindmapConnectorOrthogonal": "समकोण",
+	"listMindmapConnectorBezier": "पंखे जैसा वक्र",
+	"listMindmapConnectorRounded": "गोल समकोण",
 	"transactionSaveUnconfirmed": "पिछली बार सहेजना सफल हुआ या नहीं, इसकी पुष्टि नहीं हो सकी। इस संपादक को खुला रखें और सहेजी गई सामग्री जाँचने के लिए दोबारा लोड करने से पहले अपने बदलाव कॉपी कर लें।",
 	"automationTemplateTip": "नियम के समय क्षेत्र में गणना होती है; खाली परिणाम फ़ील्ड साफ़ करता है और त्रुटि होने पर बदलाव वापस होता है",
 	"automationTemplatePreview": "पूर्वावलोकन परिणाम",

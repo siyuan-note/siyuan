@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Styl połączeń",
+	"listMindmapConnectorSpline": "Zakrzywione rozwidlenie",
+	"listMindmapConnectorOrthogonal": "Prostokątny",
+	"listMindmapConnectorBezier": "Zakrzywiony wachlarz",
+	"listMindmapConnectorRounded": "Zaokrąglony prostokątny",
 	"transactionSaveUnconfirmed": "Nie można potwierdzić ostatniego zapisu. Pozostaw ten edytor otwarty i skopiuj zmiany przed ponownym wczytaniem, aby sprawdzić zapisaną zawartość.",
 	"automationTemplateTip": "Obliczanie w strefie czasowej reguły; pusty wynik czyści pole, a błędy cofają zmianę",
 	"automationTemplatePreview": "Wynik podglądu",

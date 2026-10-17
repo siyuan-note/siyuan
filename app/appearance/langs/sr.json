@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Стил спојних линија",
+	"listMindmapConnectorSpline": "Закривљено гранање",
+	"listMindmapConnectorOrthogonal": "Правоугаони",
+	"listMindmapConnectorBezier": "Закривљена лепеза",
+	"listMindmapConnectorRounded": "Заобљени правоугаони",
 	"transactionSaveUnconfirmed": "Није могуће потврдити последње чување. Оставите овај уређивач отворен и копирајте измене пре поновног учитавања да бисте проверили сачувани садржај.",
 	"automationTemplateTip": "Израчунавање у временској зони правила; празан резултат брише поље, а грешке поништавају измену",
 	"automationTemplatePreview": "Резултат прегледа",

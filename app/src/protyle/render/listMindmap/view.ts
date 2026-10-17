@@ -21,6 +21,7 @@ import {clampMindmapPanOffset} from "./pan";
 import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindmapSummarySelection, getListMindmapSummarySnapshot,
     layoutListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
+import {buildListMindmapConnectors} from "./connectors";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -54,6 +55,7 @@ export interface ListMindmapViewOptions {
     onFoldSiblings?: (id: string) => Promise<boolean>;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
+    onSettingsMenu?: (anchor: HTMLElement) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
     onTaskMenu?: (id: string, anchor: HTMLElement) => void;
     onTabTaskToggle?: (id: string, itemId: string) => void;
@@ -510,6 +512,10 @@ export class ListMindmapView {
             return;
         }
         if (!this.readOnly) {
+            if (this.options.onSettingsMenu) {
+                add("settings", "config", "iconSettings", () => this.options.onSettingsMenu(this.buttons.get("settings")));
+                this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
+            }
             add("summary", "listMindmapSummary", "iconGroups", () => {
                 this.finishThen(() => {
                     const selecting = !this.summarySelecting;
@@ -1690,26 +1696,20 @@ export class ListMindmapView {
                 baseWidth,
             };
         };
-        this.edges.forEach((edge) => {
-            const from = this.positions.get(edge.from);
-            const to = this.positions.get(edge.to);
-            if (!from || !to) {
-                return;
-            }
-            const style = {...this.model.metadata.nodes[this.model.root.id], ...this.model.metadata.nodes[edge.to]};
-            const startX = from.x + from.width;
-            const startY = from.y + (edge.from === this.model.root.id ? from.height / 2 : from.height);
-            const endX = to.x;
-            const endY = to.y + to.height;
-            const center = (startX + endX) / 2;
-            const path = new Path2D();
-            path.moveTo(startX, startY);
-            path.bezierCurveTo(center, startY, center, endY, endX, endY);
-            path.lineTo(to.x + to.width, endY);
-            this.linePaths.push({id: edge.to, relation: false, path});
+        const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
+            this.model.metadata.connectorStyle || "bezier", () => new Path2D());
+        const rootStyle = this.model.metadata.nodes[this.model.root.id] || {};
+        const trunkStyle = resolveLineStyle(lineStyles, rootStyle.lineColor, rootStyle.lineWidth, defaultLine, false, false);
+        context.strokeStyle = trunkStyle.color;
+        context.lineWidth = trunkStyle.width;
+        context.setLineDash(rootStyle.lineDash ? [6, 4] : []);
+        connectors.trunks.forEach(path => context.stroke(path));
+        connectors.branches.forEach(({id, path}) => {
+            const style = {...rootStyle, ...this.model.metadata.nodes[id]};
+            this.linePaths.push({id, relation: false, path});
             context.beginPath();
-            const selected = this.selectedEdge === edge.to;
-            const hovered = this.hoveredLine === `edge:${edge.to}`;
+            const selected = this.selectedEdge === id;
+            const hovered = this.hoveredLine === `edge:${id}`;
             const lineStyle = resolveLineStyle(lineStyles, style.lineColor, style.lineWidth, defaultLine, selected, hovered);
             context.strokeStyle = lineStyle.color;
             context.lineWidth = lineStyle.width;

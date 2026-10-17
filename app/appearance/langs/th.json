@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "รูปแบบเส้นเชื่อม",
+	"listMindmapConnectorSpline": "เส้นโค้งแตกแขนง",
+	"listMindmapConnectorOrthogonal": "เส้นหักมุมฉาก",
+	"listMindmapConnectorBezier": "เส้นโค้งแผ่พัด",
+	"listMindmapConnectorRounded": "เส้นมุมฉากโค้งมน",
 	"transactionSaveUnconfirmed": "ไม่สามารถยืนยันได้ว่าการบันทึกล่าสุดสำเร็จ โปรดเปิดตัวแก้ไขนี้ค้างไว้และคัดลอกการเปลี่ยนแปลงก่อนโหลดใหม่เพื่อตรวจสอบเนื้อหาที่บันทึกไว้",
 	"automationTemplateTip": "คำนวณตามเขตเวลาของกฎ ผลลัพธ์ว่างจะล้างช่อง และข้อผิดพลาดจะย้อนการเปลี่ยนแปลง",
 	"automationTemplatePreview": "ผลการแสดงตัวอย่าง",

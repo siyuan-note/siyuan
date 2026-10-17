@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Стиль сполучних ліній",
+	"listMindmapConnectorSpline": "Вигнуте розгалуження",
+	"listMindmapConnectorOrthogonal": "Прямокутний",
+	"listMindmapConnectorBezier": "Вигнуте віяло",
+	"listMindmapConnectorRounded": "Заокруглений прямокутний",
 	"transactionSaveUnconfirmed": "Не вдалося підтвердити останнє збереження. Залиште цей редактор відкритим і скопіюйте зміни перед перезавантаженням, щоб перевірити збережений вміст.",
 	"automationTemplateTip": "Обчислення в часовому поясі правила; порожній результат очищає поле, помилки скасовують зміну",
 	"automationTemplatePreview": "Результат попереднього перегляду",

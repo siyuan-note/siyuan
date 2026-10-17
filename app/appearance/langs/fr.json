@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Style des connexions",
+	"listMindmapConnectorSpline": "Bifurcation courbe",
+	"listMindmapConnectorOrthogonal": "Orthogonal",
+	"listMindmapConnectorBezier": "Éventail courbe",
+	"listMindmapConnectorRounded": "Orthogonal arrondi",
 	"transactionSaveUnconfirmed": "Impossible de confirmer le dernier enregistrement. Gardez cet éditeur ouvert et copiez vos modifications avant de recharger pour vérifier le contenu enregistré.",
 	"automationTemplateTip": "Calcul dans le fuseau de la règle ; un résultat vide efface le champ et une erreur annule la modification",
 	"automationTemplatePreview": "Résultat de l’aperçu",

@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "סגנון קווי חיבור",
+	"listMindmapConnectorSpline": "הסתעפות מעוקלת",
+	"listMindmapConnectorOrthogonal": "זוויות ישרות",
+	"listMindmapConnectorBezier": "מניפה מעוקלת",
+	"listMindmapConnectorRounded": "זוויות ישרות מעוגלות",
 	"transactionSaveUnconfirmed": "לא ניתן לאשר שהשמירה האחרונה הצליחה. יש להשאיר את העורך הזה פתוח ולהעתיק את השינויים לפני טעינה מחדש כדי לבדוק מה נשמר.",
 	"automationTemplateTip": "החישוב לפי אזור הזמן של הכלל; תוצאה ריקה מנקה את השדה ושגיאות מבטלות את השינוי",
 	"automationTemplatePreview": "תוצאת התצוגה המקדימה",

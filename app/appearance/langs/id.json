@@ -1,4 +1,9 @@
 {
+	"listMindmapConnectorStyle": "Gaya garis penghubung",
+	"listMindmapConnectorSpline": "Cabang melengkung",
+	"listMindmapConnectorOrthogonal": "Siku-siku",
+	"listMindmapConnectorBezier": "Kipas melengkung",
+	"listMindmapConnectorRounded": "Siku-siku membulat",
 	"transactionSaveUnconfirmed": "Penyimpanan terakhir belum dapat dipastikan berhasil. Biarkan editor ini terbuka dan salin perubahan Anda sebelum memuat ulang untuk memeriksa hasil yang tersimpan.",
 	"automationTemplateTip": "Dihitung dalam zona waktu aturan; hasil kosong mengosongkan kolom dan kesalahan membatalkan perubahan",
 	"automationTemplatePreview": "Hasil pratinjau",

@@ -47439,6 +47439,18 @@
       },
       "additionalProperties": false
     },
+    "SettingGetSectionRequestInput": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "namespace"
+      ],
+      "additionalProperties": false
+    },
     "SettingIconRequestInput": {
       "type": "object",
       "properties": {
@@ -47559,19 +47571,15 @@
       "type": "object",
       "properties": {
         "data": {
-          "anyOf": [
-            {
-              "type": "object",
-              "additionalProperties": {
-                "$ref": "#/$defs/JSONValue"
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/JSONValue"
+          }
         }
       },
+      "required": [
+        "data"
+      ],
       "additionalProperties": false
     },
     "SettingLogin2faRequestInput": {
@@ -48382,9 +48390,14 @@
         }
       },
       "required": [
+        "aiModelId",
         "auto",
         "model",
-        "provider"
+        "provider",
+        "reasoningEffort",
+        "showEmpty",
+        "showError",
+        "thresholds"
       ],
       "additionalProperties": false
     },
@@ -49770,6 +49783,36 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SettingSectionData": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemAppConf"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "settingTasks": {
+          "$ref": "#/$defs/SettingTaskState"
+        }
+      },
+      "required": [
+        "conf",
+        "namespace",
+        "revision"
+      ],
       "additionalProperties": false
     },
     "SettingSnpt": {
@@ -51819,6 +51862,9 @@
         "isPublish": {
           "type": "boolean"
         },
+        "revision": {
+          "type": "integer"
+        },
         "settingTasks": {
           "$ref": "#/$defs/SettingTaskState"
         },
@@ -51829,6 +51875,7 @@
       "required": [
         "conf",
         "isPublish",
+        "revision",
         "start"
       ],
       "additionalProperties": false
@@ -162837,6 +162884,84 @@
               },
               "data": {
                 "$ref": "#/$defs/SettingPublishData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/getSection",
+      "handler": "getSettingSection",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingGetSectionRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingSectionData"
               },
               "msg": {
                 "type": "string"

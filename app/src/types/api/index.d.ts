@@ -2076,6 +2076,8 @@ export type SettingFlashcard = { "blockquote": boolean; "callout": boolean; "dec
 
 export type SettingFlashcardInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
+export type SettingGetSectionRequestInput = { "namespace": string; };
+
 export type SettingIconRequestInput = { "icon": string; };
 
 export type SettingImageGeneration = { "modelId": string; "outputFormat": string; "quality": string; "requestTimeout": number; "size": string; };
@@ -2084,7 +2086,7 @@ export type SettingImageGenerationInput = { "modelId"?: string | null; "outputFo
 
 export type SettingIssue = { "field": string; "message": string; "severity": string; };
 
-export type SettingKeymapRequestInput = { "data"?: { [key: string]: JSONValue } | null; };
+export type SettingKeymapRequestInput = { "data": { [key: string]: JSONValue }; };
 
 export type SettingLogin2faRequestInput = { "code": string; "token": string; };
 
@@ -2112,7 +2114,7 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
-export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string; "showEmpty"?: boolean; "showError"?: boolean; "showText"?: boolean; "thresholds"?: OCRThresholds; };
+export type SettingOCR = { "aiModelId": string; "auto": boolean; "model": string; "provider": string; "reasoningEffort": string; "showEmpty": boolean; "showError": boolean; "showText"?: boolean; "thresholds": OCRThresholds; };
 
 export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "showEmpty"?: boolean | null; "showError"?: boolean | null; "showText"?: boolean | null; "thresholds"?: OCRThresholdsInput | null; };
 
@@ -2151,6 +2153,8 @@ export type SettingSecretInput = { "allowedHosts"?: Array<string> | null; "name"
 export type SettingSecrets = { "items": Array<SettingSecret | null> | null; };
 
 export type SettingSecretsInput = { "items"?: Array<SettingSecretInput | null> | null; };
+
+export type SettingSectionData = { "conf": SystemAppConf | null; "namespace": string; "revision": number; "settingTasks"?: SettingTaskState; };
 
 export type SettingSnpt = { "enabledCSS": boolean; "enabledJS": boolean; };
 
@@ -2282,7 +2286,7 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "settingTasks"?: SettingTaskState; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
@@ -6790,6 +6794,17 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 读取单个配置段，字段与脱敏规则与 /api/system/getConf 一致，仅返回请求的配置段以减少传输量。
+     * namespace 必须是已注册的配置段；需要完整配置的启动和重连场景仍使用 /api/system/getConf。
+     */
+    "/api/setting/getSection": {
+        request: SettingGetSectionRequestInput;
+        response: { "code": 0; "data": SettingSectionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
     "/api/setting/login2faCloudUser": {
         request: SettingLogin2faRequestInput;
         response: Login2faEnvelope | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6847,7 +6862,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
-     * web 省略时保留当前配置；初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
+     * web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
      * 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
      * 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
      * ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
@@ -6891,8 +6906,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 使用与启动、导入相同的规范化规则并同步保存。锚文本长度 1–5120 保持不变，小于 1 回退 64。
-     * 字体大小超出 9–72 回退 16；省略字体列表和图片标题字段时继续保留原有兼容行为。
+     * 使用与启动、导入相同的规范化规则并同步保存。
+     * 锚文本长度 1–5120 保持不变，小于 1 回退 64；字体大小超出 9–72 回退 16。
      * backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
      * databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
      */
@@ -6941,7 +6956,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
+     * 使用与启动、导入相同的路径和数值规范化规则。
      * maxListCount 小于 1 回退 512，largeFileWarningSize 小于 2 回退 8，两者大于 10240 时截断至 10240。
      */
     "/api/setting/setFiletree": {
@@ -6969,6 +6984,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 整体替换快捷键配置：data 必须提交完整的快捷键对象，只提交部分分组会清空未提交的快捷键。
+     * 单条快捷键请使用 /api/setting/patch 的 keymap 命名空间，该接口按对象递归合并。
+     */
     "/api/setting/setKeymap": {
         request: SettingKeymapRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6976,6 +6995,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 认证账户须提交完整数组，传 null 或空数组表示清空账户。
+     */
     "/api/setting/setPublish": {
         request: SetPublishRequestInput;
         response: { "code": 0; "data": SettingPublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6984,9 +7006,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32。
-     * limit 大于 10240 时截断至 10240。
-     * 省略汉字敏感、自定义块和脑图选项时保留当前值；反链提及关键词上限小于 1 回退 512。
+     * 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32，大于 10240 时截断至 10240。
+     * 反链提及关键词上限小于 1 回退 512。
      */
     "/api/setting/setSearch": {
         request: SetSearchRequestInput;

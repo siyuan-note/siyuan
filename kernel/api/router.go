@@ -694,6 +694,7 @@ func registerTransactionsRoutes(ginServer *gin.Engine) {
 // registerSettingRoutes 注册本域的契约路由。
 func registerSettingRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/patch", contractRouteHandlers(apicontract.PatchSetting, patchSetting)...)
+	ginServer.Handle("POST", "/api/setting/getSection", contractRouteHandlers(apicontract.GetSettingSection, getSettingSection)...)
 	ginServer.Handle("POST", "/api/setting/resetSettings", contractRouteHandlers(apicontract.ResetSettings, resetSettings)...)
 	ginServer.Handle("POST", "/api/setting/confirmSettingsReset", contractRouteHandlers(apicontract.ConfirmSettingsReset, confirmSettingsReset)...)
 	ginServer.Handle("POST", "/api/setting/setEditor", contractRouteHandlers(apicontract.SetEditor, setEditor)...)

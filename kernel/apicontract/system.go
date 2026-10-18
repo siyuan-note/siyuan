@@ -50,6 +50,8 @@ type SystemConfData struct {
 	IsPublish bool           `json:"isPublish"`
 	// SettingTasks 为当前仍执行的设置维护任务，前端初始化和重连时恢复任务阻塞。
 	SettingTasks *SettingTaskState `json:"settingTasks,omitempty"`
+	// Revision 是读取开始前的配置提交序号，客户端据此丢弃已包含在本次读取中的通知。
+	Revision uint64 `json:"revision"`
 }
 
 type SettingTask struct {

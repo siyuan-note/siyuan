@@ -800,41 +800,12 @@ func preserveImportedAISecrets(imported, current *conf.AI) {
 var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemConfData]) {
 	ret = apicontract.Success(apicontract.SystemConfData{})
 
-	maskedConf, err := model.GetMaskedConf()
+	// 先记录提交序号再读取配置：序号不大于该值的通知都已包含在本次响应中。
+	revision := model.ConfSettingRevision.Load()
+	maskedConf, isPublish, err := visibleConf(c)
 	if err != nil {
 		ret = apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 		return
-	}
-
-	if !maskedConf.Sync.Load().Enabled || (0 == maskedConf.Sync.Load().Provider && !model.IsSubscriber()) {
-		maskedConf.Sync.Load().Stat = model.Conf.Language(53)
-	}
-
-	// REF: https://github.com/siyuan-note/siyuan/issues/11364
-	role := model.GetGinContextRole(c)
-	isPublish := model.IsReadOnlyRole(role)
-	if isPublish {
-		maskedConf.ReadOnly = true
-	}
-	if !model.IsValidRole(role, []model.Role{
-		model.RoleAdministrator,
-	}) {
-		model.HideConfSecret(maskedConf)
-	}
-
-	if model.IsReadOnlyRoleContext(c) {
-		maskedConf.UILayout.Store(&conf.UILayout{})
-	}
-
-	// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息
-	// 原生客户端（桌面 Electron、移动端）UA 以 "SiYuan/" 开头，照常返回真实路径
-	// REF: https://github.com/siyuan-note/siyuan/issues/17410
-	if util.IsBrowserRequest(c) {
-		maskedConf.System.Load().WorkspaceDir = ""
-		maskedConf.System.Load().AppDir = ""
-		maskedConf.System.Load().ConfDir = ""
-		maskedConf.System.Load().DataDir = ""
-		maskedConf.System.Load().HomeDir = ""
 	}
 
 	config, err := systemConfPayload(maskedConf)
@@ -842,7 +813,7 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
 	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish,
-		SettingTasks: activeSettingTasks()})
+		SettingTasks: activeSettingTasks(), Revision: revision})
 	return
 })
 

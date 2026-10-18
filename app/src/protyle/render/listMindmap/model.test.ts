@@ -5,8 +5,11 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {execFile} from "node:child_process";
 import {promisify} from "node:util";
+import {runInNewContext} from "node:vm";
 import type {ListMindmapLayoutNode, ListMindmapNode} from "./model";
 import type {ListMindmapFoldTarget} from "./fold";
+import {routeMindmapRelation} from "./routing";
+import {layoutListMindmapSummaries} from "./summary";
 import {getListConversionType, type TListSubtype} from "../../wysiwyg/listContext";
 
 const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
@@ -49,13 +52,89 @@ test("relation label spacing only expands the requested branch boundary", () => 
     const root = measured("root", 100, 40, [measured("a"), measured("b"), measured("c")]);
     const expanded = layoutListMindmap(root, {verticalGaps: new Map([["b", 64]])}).nodes;
     assert.equal(expanded.get("b").y - expanded.get("a").y - 40, 64);
-    assert.equal(expanded.get("c").y - expanded.get("b").y - 40, 24);
+    assert.equal(expanded.get("c").y - expanded.get("b").y - 40, 16);
     const normal = layoutListMindmap(root).nodes;
-    assert.equal(normal.get("b").y - normal.get("a").y - 40, 24);
+    assert.equal(normal.get("b").y - normal.get("a").y - 40, 16);
     const horizontal = layoutListMindmap(root, {horizontalGaps: new Map([["b", 150]])}).nodes;
     assert.equal(horizontal.get("b").x - horizontal.get("root").x - 100, 150);
     assert.equal(horizontal.get("a").x - horizontal.get("root").x - 100, 40);
     assert.equal(horizontal.get("c").x - horizontal.get("root").x - 100, 40);
+});
+
+test("default sibling packing reduces height while preserving node sizes and control clearance", () => {
+    const root = measured("root", 100, 40, [measured("a", 80, 32), measured("b", 160, 80),
+        measured("c", 120, 160), measured("d", 60, 32)]);
+    const snapshot = JSON.stringify(root);
+    const previous = layoutListMindmap(root, {verticalGap: 24});
+    const compact = layoutListMindmap(root);
+    assert.ok(compact.height < previous.height);
+    assert.equal(compact.width, previous.width);
+    root.children.forEach((child, index) => {
+        const position = compact.nodes.get(child.id);
+        assert.equal(position.width, child.width);
+        assert.equal(position.height, child.height);
+        if (index) {
+            const above = compact.nodes.get(root.children[index - 1].id);
+            assert.ok(position.y > above.y + above.height + 14, "the lower hover corridor stays clear of its sibling");
+        }
+        assert.ok(position.x >= compact.nodes.get(root.id).x + root.width + 39,
+            "fold and add-child buttons retain their horizontal space");
+    });
+    assert.equal(JSON.stringify(root), snapshot);
+});
+
+test("compact view spacing retains draggable relations without expanding unrelated siblings", () => {
+    const typescript = require("typescript") as typeof import("typescript");
+    const source = typescript.createSourceFile("view.ts", readFileSync(path.join(__dirname, "view.ts"), "utf8"),
+        typescript.ScriptTarget.ES2021, true);
+    const declaration = source.statements.find(typescript.isClassDeclaration);
+    const refresh = declaration.members.find(member => member.name?.getText(source) === "refreshLayout");
+    const compiled = typescript.transpileModule(`class View {${refresh.getText(source)}} globalThis.View = View;`, {
+        compilerOptions: {target: typescript.ScriptTarget.ES2021},
+    }).outputText;
+    let frame: () => void;
+    const context: any = {layoutListMindmap, layoutListMindmapSummaries,
+        requestAnimationFrame: (callback: () => void) => { frame = callback; return 1; }};
+    runInNewContext(compiled, context);
+    const view = new context.View();
+    const root = measured("root", 100, 32, [measured("a", 100, 32), measured("b", 100, 32), measured("c", 100, 32)]);
+    const elements = new Map([root, ...root.children].map(node => [node.id,
+        {offsetWidth: node.width, offsetHeight: node.height, hidden: false, style: {}}]));
+    const model = {root, nodes: new Map([root, ...root.children].map(node => [node.id, node])),
+        metadata: {version: 1, nodes: {}, relations: [] as {id: string, from: string, to: string, label: string}[]}};
+    Object.assign(view, {model, options: {}, frame: 0, positions: new Map(), folded: new Map(),
+        nodeElements: elements, relationElements: new Map(), summaryElements: new Map(), relationRoutes: new Map(),
+        fallbackRoutes: new Set(), anchorFallbackRoutes: new Set(), offsetX: 0, offsetY: 0, scale: 1,
+        viewport: {clientWidth: 760, clientHeight: 460},
+        calculateRelationRoute: (_relation: unknown, from: Parameters<typeof routeMindmapRelation>[0],
+                                 to: Parameters<typeof routeMindmapRelation>[1]) =>
+            routeMindmapRelation(from, to, [...view.positions.values()]),
+        boundedPan: (x: number, y: number) => ({x, y}), draw: () => {},
+    });
+    const layout = () => { view.refreshLayout(); frame(); };
+    const gap = (from: string, to: string) => view.positions.get(to).y - view.positions.get(from).y -
+        view.positions.get(from).height;
+    layout();
+    const compactGap = gap("a", "b");
+    model.metadata.relations.push({id: "relation", from: "a", to: "b", label: ""});
+    const snapshot = JSON.stringify(model);
+    layout();
+    const points = view.relationRoutes.get("relation") as {x: number, y: number}[];
+    assert.ok(points.slice(1).some((point, index) =>
+        Math.hypot(point.x - points[index].x, point.y - points[index].y) >= 12),
+    "an unlabeled relation retains a segment long enough for its drag handle");
+    assert.ok(gap("a", "b") > compactGap);
+    assert.equal(gap("b", "c"), compactGap);
+    assert.equal(JSON.stringify(model), snapshot);
+    assert.equal(view.scale, 1);
+    model.metadata.relations[0].label = "Connection";
+    view.relationElements.set("relation", {offsetWidth: 120, offsetHeight: 20, hidden: true});
+    layout();
+    assert.ok(gap("a", "b") >= 20 + 32, "relation text reserves its measured height and clearance");
+    assert.equal(gap("b", "c"), compactGap);
+    model.metadata.relations = [];
+    layout();
+    assert.equal(gap("a", "b"), compactGap);
 });
 
 test("mindmap metadata rejects unknown formats and invalid values without replacing original data", () => {
@@ -2254,7 +2333,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     model.metadata.relations[0].label = "";
     view.update(model);
     await settle();
-    check.equal(siblingGap(), originalGap, "removing the label restores the default spacing");
+    check.ok(siblingGap() > originalGap, "an unlabeled relation keeps space for its drag handle");
+    check.ok(siblingGap() < beforeHandleGap, "removing the label releases its extra text spacing");
+    model.metadata.relations = [];
+    view.update(model);
+    await settle();
+    check.equal(siblingGap(), originalGap, "removing the relation restores the compact sibling spacing");
     model.metadata.relations = [
         {id: "forward", from: alpha, to: beta, label: ""},
         {id: "reverse", from: beta, to: alpha, label: ""},

@@ -243,9 +243,12 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         })),
     }));
     const openedLinks: string[] = [];
+    const splitOpens: IOpenFileOptions[] = [];
+    let foldedTarget = false;
     const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
         "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", "getAVTemplateInteractiveElement",
-        "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", blockSource + "\nreturn renderAVAttribute;")(
+        "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", "checkFold", "openFileById", "Constants",
+        blockSource + "\nreturn renderAVAttribute;")(
         (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
             callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
         }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
@@ -256,7 +259,10 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         (element: HTMLElement, attribute: string, value: string) => element?.closest(
             value ? `[${attribute}="${value}"]` : `[${attribute}]`),
         (element: HTMLElement) => element?.closest('[data-type="NodeAttributeView"]'),
-        (_app: unknown, link: string) => openedLinks.push(link));
+        (_app: unknown, link: string) => openedLinks.push(link),
+        (_id: string, callback: (zoomIn: boolean, action: string[], isRoot: boolean) => void) =>
+            callback(foldedTarget, foldedTarget ? ["all"] : ["context", "scroll"], false),
+        (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"});
     for (const className of ["custom-attr protyle-db-row__body", "custom-attr"]) {
         const body = document.createElement("div");
         body.className = className;
@@ -324,6 +330,33 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     topBody.querySelector<HTMLElement>('[data-av-id="database-a"] .popover__block span').click();
     check.equal(openedLinks.length, 2, "databases without carriers do not open an invalid link");
     check.equal(dialogClosed, 2, "databases without carriers keep the attribute dialog open");
+    const relation = document.createElement("span");
+    bubbled = false;
+    relation.className = "av__cell--relation";
+    relation.innerHTML = '<span data-type="block-ref" data-id="related-document"><span>Related</span></span>';
+    topBody.append(relation);
+    const relationLabel = relation.querySelector("span span");
+    for (const pointerType of ["mouse", "touch"]) {
+        relationLabel.dispatchEvent(new PointerEvent("click", {bubbles: true, cancelable: true, pointerType}));
+        check.equal(openedLinks.at(-1), "siyuan://blocks/related-document");
+        check.equal(splitOpens.length, 0, "plain clicks and taps keep normal navigation");
+    }
+    for (const modifiers of [{altKey: true}, {shiftKey: true}, {altKey: true, shiftKey: true}]) {
+        for (foldedTarget of [false, true]) {
+            const click = new MouseEvent("click", {bubbles: true, cancelable: true, ...modifiers});
+            relationLabel.dispatchEvent(click);
+            check.equal(click.defaultPrevented, true);
+            check.equal(bubbled, false, "relation navigation does not trigger parent handlers");
+            const options = splitOpens.at(-1);
+            check.equal(options.id, "related-document");
+            check.equal(options.position, modifiers.shiftKey ? "bottom" : "right");
+            check.equal(options.zoomIn, foldedTarget);
+            check.deepEqual(options.action, foldedTarget ? ["all", "highlight"] : ["context", "scroll", "highlight"]);
+            check.equal(options.scrollPosition, "start");
+        }
+    }
+    check.equal(openedLinks.length, 4, "modified relation clicks use split navigation");
+    check.equal(splitOpens.length, 6);
     dialogs.pop();
     dialog.remove();
     return "Attribute panel visibility cases passed";

@@ -1989,15 +1989,21 @@ export class WYSIWYG {
                 };
                 return false;
             }
-            // 图片、iframe、video、挂件缩放
+            // 图片、iframe、video、挂件和 Mermaid 缩放。
             if (!protyle.disabled && target.classList.contains("protyle-action__drag")) {
                 if (!nodeElement) {
                     return;
                 }
                 const html = nodeElement.outerHTML;
                 const isIFrame = ["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type);
+                const isMermaid = nodeElement.dataset.subtype === "mermaid";
                 let isCenter = true;
-                if ("NodeVideo" === nodeElement.dataset.type) {
+                if (isMermaid) {
+                    if (nodeElement.parentElement.classList.contains("sb")) {
+                        return;
+                    }
+                    isCenter = nodeElement.style.textAlign === "center";
+                } else if ("NodeVideo" === nodeElement.dataset.type) {
                     nodeElement.classList.add("iframe--drag");
                     if (["left", "right", ""].includes(nodeElement.style.textAlign)) {
                         isCenter = false;
@@ -2011,16 +2017,18 @@ export class WYSIWYG {
 
                 const x = event.clientX;
                 const imageFrame = target.closest(".protyle-image-resize");
-                const dragElement = isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
+                const dragElement = isMermaid ? nodeElement :
+                    isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
                     imageFrame ? imageFrame.parentElement.querySelector<HTMLImageElement>(":scope > img") :
                         target.previousElementSibling as HTMLElement;
                 if (!dragElement) {
                     nodeElement.classList.remove("iframe--drag");
                     return;
                 }
-                const dragWidth = dragElement.clientWidth;
+                const mermaidStyle = isMermaid ? getComputedStyle(nodeElement) : null;
+                const dragWidth = isMermaid ? parseFloat(mermaidStyle.width) : dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
-                const resizeAxis = isIFrame || dragElement.tagName === "IMG" ?
+                const resizeAxis = isMermaid ? "width" : isIFrame || dragElement.tagName === "IMG" ?
                     target.dataset.resizeAxis || (isIFrame ? "both" : "width") : "both";
                 if (target.classList.contains("protyle-block-resize")) {
                     target.classList.add("touch-resize-active");
@@ -2032,11 +2040,25 @@ export class WYSIWYG {
                 const imageMultiple = !imgElement.style.minWidth && nodeElement.style.textAlign !== "center" ? 1 : 2;
                 const imageMaxWidth = Math.max(17, (mostRight - imageRect.left -
                     (imageMultiple === 2 ? imageRect.width / 2 : 0)) * imageMultiple / imageScale);
+                const mermaidInsets = mermaidStyle?.boxSizing === "content-box" ?
+                    parseFloat(mermaidStyle.paddingLeft) + parseFloat(mermaidStyle.paddingRight) +
+                    parseFloat(mermaidStyle.borderLeftWidth) + parseFloat(mermaidStyle.borderRightWidth) : 0;
+                const mermaidScale = isMermaid ? imageRect.width / (dragWidth + mermaidInsets) || 1 : 1;
+                const mermaidParentStyle = isMermaid ? getComputedStyle(nodeElement.parentElement) : null;
+                const mermaidMaxWidth = isMermaid ? Math.max(17, nodeElement.parentElement.clientWidth -
+                    parseFloat(mermaidParentStyle.paddingLeft) - parseFloat(mermaidParentStyle.paddingRight) -
+                    mermaidInsets) : 0;
                 if (dragElement.tagName === "IMG") {
                     imgElement.classList.add("img--drag");
                     img3115(imgElement);
                 }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    if (isMermaid) {
+                        nodeElement.style.width = getImageResizeWidth(dragWidth, dragHeight,
+                            (moveEvent.clientX - x) / mermaidScale, 0, "width", isCenter ? 2 : 1, mermaidMaxWidth) + "px";
+                        nodeElement.style.flex = "none";
+                        return;
+                    }
                     if (dragElement.tagName === "IMG") {
                         const image = dragElement as HTMLImageElement;
                         const height = image.naturalWidth && image.naturalHeight ?

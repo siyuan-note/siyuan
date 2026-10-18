@@ -197,7 +197,7 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
     };
     runInNewContext(transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports: searchRuntime, require: () => ({})});
+    }).outputText, {exports: searchRuntime, require: () => ({syncSettingGroupCollapse() {}})});
     const builderRuntime = {} as {SettingBuilder: typeof SettingBuilder};
     runInNewContext(transpileModule(readFileSync("src/config/setting/builder.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},

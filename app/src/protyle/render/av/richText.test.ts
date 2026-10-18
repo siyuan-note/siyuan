@@ -333,9 +333,8 @@ describe("attribute view text source compatibility", () => {
             }
         }
         assert.deepEqual(AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS, ["sup"]);
-        assert.equal(sanitizeAVRichTextInlineMemoContent(
-            "&amp;lt;img src=x onerror=alert(1)&amp;gt;memo&lt;/img&gt;"
-        ), "");
+        const escapedMemo = "&amp;lt;img src=x onerror=alert(1)&amp;gt;memo&lt;/img&gt;";
+        assert.equal(sanitizeAVRichTextInlineMemoContent(escapedMemo), escapedMemo);
         assert.equal(sanitizeAVRichTextInlineMemoContent("2 < 3\tline\nnext\r\u200D\u200F"),
             "2 < 3\tline\nnext\r\u200D\u200F");
         assert.equal(sanitizeAVRichTextInlineMemoContent("heart <3"), "heart <3");
@@ -345,7 +344,7 @@ describe("attribute view text source compatibility", () => {
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo </span"), "");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo <!--"), "");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo <?xml"), "");
-        assert.equal(sanitizeAVRichTextInlineMemoContent("&lt;script&gt;"), "");
+        assert.equal(sanitizeAVRichTextInlineMemoContent("&lt;script&gt;"), "&lt;script&gt;");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo\u0000content"), "");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo\u007Fcontent"), "");
 

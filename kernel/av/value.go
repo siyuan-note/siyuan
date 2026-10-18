@@ -885,14 +885,15 @@ func isAllowedValueTextRichRelativeLinkTarget(target, decodedTarget string, pars
 }
 
 func isAllowedValueTextRichInlineMemoContent(content string) bool {
-	if !utf8.ValidString(content) || containsValueTextRichMemoControl(content) {
+	if !utf8.ValidString(content) || containsValueTextRichMemoControl(content) || containsValueTextRichHTMLTag(content) {
 		return false
 	}
 	decoded := content
 	for range 8 {
 		next := html.UnescapeString(decoded)
 		if next == decoded {
-			return !containsValueTextRichHTMLTag(decoded)
+			// 实体由渲染器保留编码，解码仅用于检查隐藏的控制字符。
+			return true
 		}
 		decoded = next
 		if containsValueTextRichMemoControl(decoded) {

@@ -154,16 +154,17 @@ export const sanitizeAVRichTextInlineMemoContent = (value: string) => {
         return "";
     }
 
-    for (let start = decoded.indexOf("<"); start >= 0; start = decoded.indexOf("<", start + 1)) {
+    // 实体保持编码后只会显示为文字；仅拒绝可被渲染器解释为标签的原始内容。
+    for (let start = value.indexOf("<"); start >= 0; start = value.indexOf("<", start + 1)) {
         let index = start + 1;
-        if (decoded[index] === "/") {
+        if (value[index] === "/") {
             index++;
-            if (/[A-Za-z]/.test(decoded[index] || "")) {
+            if (/[A-Za-z]/.test(value[index] || "")) {
                 return "";
             }
             continue;
         }
-        if (/[A-Za-z!?]/.test(decoded[index] || "")) {
+        if (/[A-Za-z!?]/.test(value[index] || "")) {
             return "";
         }
     }

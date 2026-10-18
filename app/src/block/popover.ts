@@ -25,6 +25,7 @@ import {
 } from "./popoverLifecycle";
 import {isBlockPanelTargetAvailable} from "./panelOwnership";
 import {isTouchHoverInput} from "../util/hoverInput";
+import {sanitizeInlineMemoContent} from "../protyle/util/inlineMemo";
 /// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
@@ -281,7 +282,7 @@ export const initBlockPopover = (app: App) => {
             }
             let tooltipSpace: number | undefined;
             if (!tip && aElement.getAttribute("data-type")?.includes("inline-memo")) {
-                tip = window.DOMPurify.sanitize(aElement.getAttribute("data-inline-memo-content"));
+                tip = sanitizeInlineMemoContent(aElement.getAttribute("data-inline-memo-content") || "");
                 tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
                 tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
             }

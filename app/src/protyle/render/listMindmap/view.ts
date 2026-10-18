@@ -461,7 +461,7 @@ export class ListMindmapView {
     private activatePointer = (event: PointerEvent) => {
         const target = event.target as Element;
         if (target.closest(".mindmap-view") !== this.options.host ||
-            this.buttons.get("interaction")?.contains(target) || this.buttons.get("lock")?.contains(target)) {
+            this.buttons.get("lock")?.contains(target)) {
             return;
         }
         if (event.pointerType !== "touch" || target.closest("button, input, select")) {
@@ -473,10 +473,6 @@ export class ListMindmapView {
         value = (value || !!this.fullscreenMarker) && !this.locked;
         this.interactionActive = value;
         this.options.host.classList.toggle("mindmap-view--active", value);
-        const button = this.buttons.get("interaction");
-        button?.classList.toggle("block__icon--active", value);
-        button?.setAttribute("aria-pressed", String(value));
-        button?.setAttribute("aria-label", this.label(value ? "listMindmapDeactivate" : "listMindmapActivate"));
         if (!value) {
             const selecting = !!this.relationFrom || this.summarySelecting;
             this.pinching = false;
@@ -559,15 +555,6 @@ export class ListMindmapView {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
             return;
         }
-        add("interaction", this.interactionActive ? "listMindmapDeactivate" : "listMindmapActivate", "iconEdit", () => {
-            this.setInteractionActive(!this.interactionActive);
-            if (this.interactionActive) {
-                this.options.host.focus({preventScroll: true});
-            }
-        });
-        this.buttons.get("interaction").setAttribute("aria-pressed", String(this.interactionActive));
-        this.buttons.get("interaction").classList.toggle("block__icon--active", this.interactionActive);
-        this.buttons.get("interaction").hidden = !!this.fullscreenMarker;
         if (!this.readOnly) {
             if (this.options.onSettingsMenu) {
                 add("settings", "listMindmapConnectors", "iconLine", () => this.options.onSettingsMenu(this.buttons.get("settings")));
@@ -3382,10 +3369,6 @@ export class ListMindmapView {
     private fullscreenChange = () => {
         const active = !!this.fullscreenMarker;
         this.setInteractionActive(active);
-        const interaction = this.buttons.get("interaction");
-        if (interaction) {
-            interaction.hidden = active;
-        }
         this.tooltip.hidden = true;
         const button = this.buttons.get("fullscreen");
         button.setAttribute("aria-label", this.label(active ? "exitFullscreen" : "fullscreen"));

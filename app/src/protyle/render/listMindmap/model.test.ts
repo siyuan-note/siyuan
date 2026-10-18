@@ -3089,10 +3089,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panView.offsetX = readingTransform[1];
         panView.offsetY = readingTransform[2];
         panView.draw();
-        panHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapActivate"]').click();
+        check.ok(Array.from(panHost.querySelectorAll(".mindmap-view__toolbar use"))
+            .every(icon => icon.getAttribute("xlink:href") !== "#iconEdit"), "canvas activation has no separate pencil button");
+        const hand = panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+        hand.click();
         check.equal(panView.interactionActive, true);
         check.equal(getComputedStyle(viewport).touchAction, "none");
-        check.equal(panHost.querySelector('[aria-label="listMindmapDeactivate"]').getAttribute("aria-pressed"), "true");
+        check.equal(hand.getAttribute("aria-pressed"), "true", "hand tool activates one-finger canvas panning");
         const fixedX = panView.offsetX;
         const checkVisibleNode = () => {
             const bounds = viewport.getBoundingClientRect();
@@ -3114,7 +3117,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }
         panView.offsetY = 120 - rootPosition.y;
         panView.draw();
-        panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]').click();
         viewport.dispatchEvent(new PointerEvent("pointerdown", touch));
         viewport.dispatchEvent(new PointerEvent("pointermove", {...touch, clientY: -1900}));
         checkVisibleNode();
@@ -3123,14 +3125,33 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
         check.equal(panView.interactionActive, false);
         check.equal(getComputedStyle(viewport).touchAction, "pan-y");
+        check.equal(hand.getAttribute("aria-pressed"), "false");
         sendPointer(viewport, "pointerdown", 100, 100);
         sendPointer(viewport, "pointerup", 100, 100);
         check.equal(panView.interactionActive, true, "desktop pointer input activates the canvas");
         document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
         check.equal(panView.interactionActive, false, "outside pointer input returns to reading");
-        panHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapActivate"]').click();
+        hand.click();
         panHost.dispatchEvent(new FocusEvent("focusout", {relatedTarget: followingContent}));
         check.equal(panView.interactionActive, false, "moving focus outside returns to reading");
+        panView.offsetX = 16 - rootPosition.x * panView.scale;
+        panView.offsetY = 120 - rootPosition.y * panView.scale;
+        panView.draw();
+        await settle();
+        const rootNode = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
+        const rootBounds = rootNode.getBoundingClientRect();
+        const rootFinger = {id: 1, x: rootBounds.left + rootBounds.width / 2, y: rootBounds.top + rootBounds.height / 2};
+        const beforeTouchEdit = edits.length;
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [rootFinger]},
+            {type: "touchEnd", touchPoints: []},
+            {type: "touchStart", touchPoints: [rootFinger]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(edits.length, beforeTouchEdit + 1, "native double-tap starts node editing directly from reading");
+        check.equal(panView.editingId, panModel.root.id);
+        check.equal(panView.interactionActive, true);
+        panView.setEditing(undefined);
         check.equal(panModel.list.outerHTML, sourceHTML, "interaction activation and panning do not change saved data");
         panView.destroy();
         scrollHost.remove();

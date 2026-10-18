@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261017113835"
+		"updated": "20261018163000"
 	},
 	"Children": [
 		{
@@ -1962,7 +1962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261017113835"
+				"updated": "20261018163000"
 			},
 			"Children": [
 				{
@@ -2000,12 +2000,13 @@
 			"ID": "20261018163000-b7er7oa",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-b7er7oa"
+				"id": "20261018163000-b7er7oa",
+				"updated": "20261018163000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "心智圖預設將滑鼠滾輪和單指滑動交給文件捲動。桌面版點擊心智圖即可操作畫布；行動版可點擊工具列中的「操作畫布」。操作中的畫布顯示醒目邊框，滾輪和單指拖曳用於平移畫布，到達平移邊界後也不會捲動文件。點擊心智圖外部、將鍵盤焦點移到外部、在畫布上按 Esc，或點擊「結束畫布操作」即可恢復閱讀。全螢幕時保持畫布操作，離開全螢幕後恢復閱讀。"
+					"Data": "心智圖預設將滑鼠滾輪和單指滑動交給文件捲動。桌面版點擊心智圖即可操作畫布；行動版可使用工具列中的「手形工具」進行單指平移，關閉手形工具後可選取、拖曳或按兩下編輯節點，也可在閱讀時直接按兩下節點進入編輯。操作中的畫布顯示醒目邊框，滾輪和單指拖曳用於平移畫布，到達平移邊界後也不會捲動文件。點擊心智圖外部、將鍵盤焦點移到外部，或在畫布上按 Esc 即可恢復閱讀。全螢幕時保持畫布操作，離開全螢幕後恢復閱讀。"
 				}
 			]
 		},

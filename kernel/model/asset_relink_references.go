@@ -208,7 +208,11 @@ func (r *assetRelinker) tree(tree *parse.Tree, location apicontract.AssetReferen
 				continue
 			}
 			if rewritten != decoded {
-				n.SetIALAttr(key, rewritten)
+				if n.Type == ast.NodeImage && key == treenode.LivePhotoVideoAttr {
+					treenode.SetImageLivePhotoVideo(n, rewritten)
+				} else {
+					n.SetIALAttr(key, rewritten)
+				}
 			}
 		}
 		switch n.Type {

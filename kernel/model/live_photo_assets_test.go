@@ -6,13 +6,93 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestLivePhotoRichTableResourceRewritePersistence(t *testing.T) {
+	previousData, previousProvider := util.DataDir, filesys.DEKProvider
+	previousAcquire, previousRelease := filesys.DEKLockAcquire, filesys.DEKLockRelease
+	util.DataDir = t.TempDir()
+	filesys.DEKProvider = func(string) ([]byte, error) { return nil, nil }
+	filesys.DEKLockAcquire, filesys.DEKLockRelease = nil, nil
+	t.Cleanup(func() {
+		cache.ClearTreeCache()
+		util.DataDir, filesys.DEKProvider = previousData, previousProvider
+		filesys.DEKLockAcquire, filesys.DEKLockRelease = previousAcquire, previousRelease
+	})
+	legacy, err := os.ReadFile("../treenode/testdata/table-cell-legacy.sy")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, rewrite := range map[string]func(*parse.Tree){
+		"relink": func(tree *parse.Tree) {
+			r, _ := newAssetRelinker("assets/old.mov", "assets/new.mov")
+			r.tree(tree, apicontract.AssetReference{})
+			if r.changes != 1 {
+				t.Fatalf("unexpected relink count: %d", r.changes)
+			}
+		},
+		"rewrite": func(tree *parse.Tree) {
+			rewriteTreeAssetReferences(tree, assetReferenceRewriteOptions{pathMap: map[string]string{"assets/old.mov": "assets/new.mov"}})
+		},
+		"rename": func(tree *parse.Tree) {
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.Type == ast.NodeImage {
+					setAssetsLinkDest(n, "assets/old.mov", "assets/new.mov")
+				}
+				return ast.WalkContinue
+			})
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			tree, err := filesys.LoadTreeByData(legacy, "20260908000000-box0001", "/20260908000000-root001.sy", util.NewLute())
+			if err != nil {
+				t.Fatal(err)
+			}
+			cell := tree.Root.FirstChild.LastChild.FirstChild
+			cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: `![first](assets/a.heic){: custom-sy-live-photo="1" custom-sy-live-photo-video="assets/old.mov?x=1&y=2"} ` +
+				`![second](assets/b.heic){: custom-sy-live-photo="1" custom-sy-live-photo-video="assets/other.mov"} assets/old.mov`}
+			treenode.UpgradeSpec(tree)
+			if err := treenode.RefreshTableCellRichProjection(tree.Root); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			rewrite(tree)
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatalf("save rewritten rich table: %v", err)
+			}
+			cache.ClearTreeCache()
+			loaded, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
+			if err != nil {
+				t.Fatal(err)
+			}
+			var videos []string
+			ast.Walk(loaded.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.Type == ast.NodeImage {
+					videos = append(videos, treenode.ImageLivePhotoVideo(n))
+				}
+				return ast.WalkContinue
+			})
+			if !reflect.DeepEqual(videos, []string{"assets/new.mov?x=1&y=2", "assets/other.mov"}) {
+				t.Fatalf("reloaded associations: %v", videos)
+			}
+			if !strings.Contains(loaded.Root.FirstChild.LastChild.FirstChild.TableCellRich.Content, " assets/old.mov") {
+				t.Fatal("plain text changed")
+			}
+		})
+	}
+}
 
 func TestLivePhotoAssetReferences(t *testing.T) {
 	const sourceBox = "20260812000000-source0"

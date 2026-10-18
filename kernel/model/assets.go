@@ -2859,7 +2859,7 @@ func getAssetsLinkDestsInTree(tree *parse.Tree, includeServePath bool) (nodes []
 func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
 	if ast.NodeImage == node.Type {
 		if video := treenode.ImageLivePhotoVideo(node); video != "" {
-			node.SetIALAttr(treenode.LivePhotoVideoAttr, strings.ReplaceAll(video, oldDest, dest))
+			treenode.SetImageLivePhotoVideo(node, strings.ReplaceAll(video, oldDest, dest))
 		}
 	} else if ast.NodeLinkDest == node.Type {
 		if bytes.HasPrefix(node.Tokens, []byte("//")) {

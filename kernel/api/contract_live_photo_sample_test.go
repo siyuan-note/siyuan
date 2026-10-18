@@ -42,7 +42,7 @@ func TestAPIContractLivePhotoBrowserSample(t *testing.T) {
 	var frames, encodes atomic.Int32
 	engine := gin.New()
 	engine.Use(boxLeaseMiddleware, func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
-	engine.GET("/", func(c *gin.Context) {
+	engine.GET("/stage/build/app/", func(c *gin.Context) {
 		c.Data(200, "text/html; charset=utf-8", []byte("<!doctype html><title>Isolated Live Photo verification</title>"))
 	})
 	engine.GET("/assets/live.mov", func(c *gin.Context) {

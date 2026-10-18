@@ -21,7 +21,7 @@ export const closeNotebookLivePhotos = (box: string) => {
 
 export const livePhotoAssetPath = (path: string) => {
     try {
-        const url = new URL(path, location.href);
+        const url = new URL(path, location.origin + "/");
         if (url.origin !== location.origin || !["http:", "https:"].includes(url.protocol) ||
             !url.pathname.startsWith("/assets/") || decodeURIComponent(url.pathname).includes("\\") ||
             decodeURIComponent(url.pathname).split("/").some(part => part === "..")) {

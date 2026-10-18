@@ -190,7 +190,7 @@ func rewriteTreeAssetReferences(tree *parse.Tree, options assetReferenceRewriteO
 		case ast.NodeImage:
 			reference := treenode.ImageLivePhotoVideo(node)
 			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {
-				node.SetIALAttr(treenode.LivePhotoVideoAttr, rewritten)
+				treenode.SetImageLivePhotoVideo(node, rewritten)
 			}
 		case ast.NodeLinkDest:
 			reference := node.TokensStr()
@@ -254,7 +254,7 @@ func rewriteAttributeViewRichAssetReferences(value *av.Value, options assetRefer
 		case ast.NodeImage:
 			reference := treenode.ImageLivePhotoVideo(node)
 			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {
-				node.SetIALAttr(treenode.LivePhotoVideoAttr, rewritten)
+				treenode.SetImageLivePhotoVideo(node, rewritten)
 				updated = true
 			}
 		case ast.NodeLinkDest:

@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Pencarian dan pengambilan web",
+	"aiWebSearchProvider": "Penyedia pencarian",
+	"aiWebSearchProviderTip": "DeepSeek mengembalikan 5 ringkasan; ambil halaman jika konten lengkap diperlukan",
+	"aiWebFetchProvider": "Penyedia pengambilan",
+	"aiWebFetchProviderTip": "DeepSeek hanya mengambil isi halaman; pengambilan langsung juga mengunduh berkas",
+	"aiWebFetchDirect": "Pengambilan langsung",
+	"aiWebDeepSeekKey": "Kunci API DeepSeek",
+	"aiWebDeepSeekKeyTip": "Digunakan bersama oleh Search dan Fetch; kueri dan URL tujuan dikirim ke DeepSeek dan dikenai biaya per permintaan",
 	"automationCollectionReview": "Periksa entri yang dikumpulkan",
 	"automationCollectionCleanup": "Keluarkan entri yang tidak cocok di halaman ini",
 	"automationCollectionReviewTip": "Periksa semua aturan pengumpulan blok yang aktif; kecocokan dengan satu aturan mempertahankan entri. Tautan manual dan otomatis diperiksa sama; entri terlepas atau tidak dapat ditentukan dipertahankan",

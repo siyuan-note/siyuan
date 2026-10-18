@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Websuche und Seitenabruf",
+	"aiWebSearchProvider": "Suchanbieter",
+	"aiWebSearchProviderTip": "DeepSeek liefert 5 Zusammenfassungen; bei Bedarf den vollständigen Seiteninhalt abrufen",
+	"aiWebFetchProvider": "Abrufanbieter",
+	"aiWebFetchProviderTip": "DeepSeek ruft nur Seiteninhalte ab; der direkte Abruf lädt auch Dateien herunter",
+	"aiWebFetchDirect": "Direkter Abruf",
+	"aiWebDeepSeekKey": "DeepSeek-API-Schlüssel",
+	"aiWebDeepSeekKeyTip": "Für Search und Fetch gemeinsam; Suchanfragen und Ziel-URLs werden an DeepSeek gesendet und Anfragen abgerechnet",
 	"automationCollectionReview": "Gesammelte Einträge prüfen",
 	"automationCollectionCleanup": "Nicht passende Einträge dieser Seite entfernen",
 	"automationCollectionReviewTip": "Alle aktiven Blocksammelregeln prüfen; ein Treffer genügt zum Behalten. Manuelle und automatische Bindungen werden gleich geprüft; ungebundene oder unbestimmbare Einträge bleiben erhalten",

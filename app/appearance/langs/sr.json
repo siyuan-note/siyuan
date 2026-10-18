@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Веб претрага и преузимање",
+	"aiWebSearchProvider": "Услуга претраге",
+	"aiWebSearchProviderTip": "DeepSeek враћа 5 сажетака; преузмите странице када је потребан цео садржај",
+	"aiWebFetchProvider": "Услуга преузимања",
+	"aiWebFetchProviderTip": "DeepSeek преузима само садржај страница; директно преузимање подржава и датотеке",
+	"aiWebFetchDirect": "Директно преузимање",
+	"aiWebDeepSeekKey": "DeepSeek API кључ",
+	"aiWebDeepSeekKeyTip": "Заједнички за Search и Fetch; упити и циљни URL-ови шаљу се DeepSeek-у и наплаћују по захтеву",
 	"automationCollectionReview": "Провери прикупљене ставке",
 	"automationCollectionCleanup": "Уклони неподударне ставке са ове странице",
 	"automationCollectionReviewTip": "Проверавају се сва активна правила прикупљања блокова; подударање са једним чува ставку. Ручна и аутоматска повезивања проверавају се једнако; неповезане и неодредиве ставке се чувају",

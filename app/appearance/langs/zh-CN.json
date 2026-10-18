@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "网页搜索与抓取",
+	"aiWebSearchProvider": "搜索服务",
+	"aiWebSearchProviderTip": "DeepSeek 返回 5 条摘要，需要正文时再抓取网页",
+	"aiWebFetchProvider": "抓取服务",
+	"aiWebFetchProviderTip": "DeepSeek 仅获取网页正文，直接抓取还支持下载文件",
+	"aiWebFetchDirect": "直接抓取",
+	"aiWebDeepSeekKey": "DeepSeek API 密钥",
+	"aiWebDeepSeekKeyTip": "Search 与 Fetch 共用，搜索词和目标 URL 会发送给 DeepSeek，按请求计费",
 	"automationCollectionReview": "检查收集结果",
 	"automationCollectionCleanup": "移出本页不匹配条目",
 	"automationCollectionReviewTip": "按全部启用的普通块收集规则检查，符合任一规则即保留；手动和自动绑定条目统一检查，游离或无法判断的条目保留",

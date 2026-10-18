@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "वेब खोज और सामग्री प्राप्ति",
+	"aiWebSearchProvider": "खोज सेवा",
+	"aiWebSearchProviderTip": "DeepSeek 5 सारांश देता है; पूरा पाठ चाहिए तो पृष्ठ की सामग्री प्राप्त करें",
+	"aiWebFetchProvider": "सामग्री प्राप्ति सेवा",
+	"aiWebFetchProviderTip": "DeepSeek केवल पृष्ठ का पाठ प्राप्त करता है; सीधे प्राप्त करने पर फ़ाइलें भी डाउनलोड होती हैं",
+	"aiWebFetchDirect": "सीधे प्राप्त करें",
+	"aiWebDeepSeekKey": "DeepSeek API कुंजी",
+	"aiWebDeepSeekKeyTip": "Search और Fetch के लिए साझा कुंजी; खोज शब्द और लक्ष्य URL DeepSeek को भेजे जाते हैं और प्रति अनुरोध शुल्क लगता है",
 	"automationCollectionReview": "संग्रहित प्रविष्टियों की समीक्षा करें",
 	"automationCollectionCleanup": "इस पृष्ठ की बेमेल प्रविष्टियाँ हटाएँ",
 	"automationCollectionReviewTip": "सभी सक्षम ब्लॉक संग्रह नियम जाँचे जाते हैं; किसी एक से मेल खाने पर प्रविष्टि रखी जाती है। मैन्युअल और स्वचालित लिंक समान रूप से जाँचे जाते हैं; बिना लिंक वाली या अनिर्धारित प्रविष्टियाँ रखी जाती हैं",

@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "ค้นหาและดึงข้อมูลเว็บ",
+	"aiWebSearchProvider": "ผู้ให้บริการค้นหา",
+	"aiWebSearchProviderTip": "DeepSeek ส่งคืนสรุป 5 รายการ และดึงหน้าเว็บเมื่อต้องการเนื้อหาฉบับเต็ม",
+	"aiWebFetchProvider": "ผู้ให้บริการดึงข้อมูล",
+	"aiWebFetchProviderTip": "DeepSeek ดึงเฉพาะเนื้อหาหน้าเว็บ ส่วนการดึงโดยตรงรองรับการดาวน์โหลดไฟล์ด้วย",
+	"aiWebFetchDirect": "ดึงข้อมูลโดยตรง",
+	"aiWebDeepSeekKey": "คีย์ API ของ DeepSeek",
+	"aiWebDeepSeekKeyTip": "ใช้ร่วมกันระหว่าง Search และ Fetch โดยส่งคำค้นและ URL เป้าหมายไปยัง DeepSeek และคิดค่าบริการต่อคำขอ",
 	"automationCollectionReview": "ตรวจสอบรายการที่รวบรวม",
 	"automationCollectionCleanup": "นำรายการที่ไม่ตรงเงื่อนไขในหน้านี้ออก",
 	"automationCollectionReviewTip": "ตรวจสอบกฎรวบรวมบล็อกที่เปิดใช้ทั้งหมด หากตรงกับกฎใดกฎหนึ่งจะเก็บรายการไว้ ตรวจสอบรายการที่ผูกด้วยตนเองและอัตโนมัติเท่าเทียมกัน และเก็บรายการที่ไม่ผูกหรือไม่สามารถระบุได้ไว้",

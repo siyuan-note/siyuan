@@ -17,6 +17,7 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -39,6 +40,10 @@ const (
 )
 
 func WebFetch(rawURL, format string) (string, error) {
+	return WebFetchContext(context.Background(), rawURL, format)
+}
+
+func WebFetchContext(ctx context.Context, rawURL, format string) (string, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
 		return "", errors.New("URL must start with http:// or https://")
@@ -51,7 +56,7 @@ func WebFetch(rawURL, format string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return "", err
 	}

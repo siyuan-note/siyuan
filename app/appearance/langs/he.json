@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "חיפוש ושליפת דפי אינטרנט",
+	"aiWebSearchProvider": "ספק חיפוש",
+	"aiWebSearchProviderTip": "DeepSeek מחזיר 5 תקצירים; יש לשלוף דפים כאשר נדרש התוכן המלא",
+	"aiWebFetchProvider": "ספק שליפה",
+	"aiWebFetchProviderTip": "DeepSeek שולף תוכן דפים בלבד; שליפה ישירה תומכת גם בהורדת קבצים",
+	"aiWebFetchDirect": "שליפה ישירה",
+	"aiWebDeepSeekKey": "מפתח API של DeepSeek",
+	"aiWebDeepSeekKeyTip": "משותף ל־Search ול־Fetch; שאילתות וכתובות URL נשלחות ל־DeepSeek והחיוב הוא לפי בקשה",
 	"automationCollectionReview": "בדיקת הרשומות שנאספו",
 	"automationCollectionCleanup": "הסרת הרשומות שאינן תואמות בדף זה",
 	"automationCollectionReviewTip": "נבדקים כל כללי איסוף הבלוקים הפעילים; התאמה לכלל אחד מספיקה לשמירת הרשומה. קישורים ידניים ואוטומטיים נבדקים באופן שווה; רשומות לא מקושרות או לא ניתנות לקביעה נשמרות",

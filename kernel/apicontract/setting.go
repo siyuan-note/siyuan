@@ -11,6 +11,7 @@ type SettingBazaar struct {
 }
 
 type SettingAI struct {
+	Web             *SettingAIWeb           `json:"web" api:"optional,nullable"`
 	MCP             *SettingMCP             `json:"mcp" api:"optional,nullable"`
 	Embedding       *SettingEmbedding       `json:"embedding" api:"optional,nullable"`
 	Rerank          *SettingRerank          `json:"rerank" api:"optional,nullable"`
@@ -19,6 +20,17 @@ type SettingAI struct {
 	Editing         *SettingEditing         `json:"editing" api:"optional,nullable"`
 	ImageGeneration *SettingImageGeneration `json:"imageGeneration" api:"optional,nullable"`
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
+}
+
+// SettingAIWeb 省略时沿用已保存的网页服务配置；初始搜索为 exa，抓取为 direct。
+// 可分别选择 deepseek，共用独立 API 密钥；超时默认 30 秒，上限 600 秒。
+// DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
+// Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
+type SettingAIWeb struct {
+	SearchProvider string `json:"searchProvider" api:"optional,nullable"`
+	FetchProvider  string `json:"fetchProvider" api:"optional,nullable"`
+	APIKey         string `json:"apiKey" api:"optional,nullable"`
+	Timeout        int    `json:"timeout" api:"optional,nullable"`
 }
 
 type SettingMCP struct {

@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Vyhľadávanie a načítanie webu",
+	"aiWebSearchProvider": "Poskytovateľ vyhľadávania",
+	"aiWebSearchProviderTip": "DeepSeek vracia 5 súhrnov; ak potrebujete úplný obsah, načítajte stránky",
+	"aiWebFetchProvider": "Poskytovateľ načítania",
+	"aiWebFetchProviderTip": "DeepSeek načíta iba obsah stránok; priame načítanie umožňuje aj sťahovanie súborov",
+	"aiWebFetchDirect": "Priame načítanie",
+	"aiWebDeepSeekKey": "API kľúč DeepSeek",
+	"aiWebDeepSeekKeyTip": "Spoločný pre Search a Fetch; dopyty a cieľové URL sa odosielajú do DeepSeek a účtujú sa za požiadavku",
 	"automationCollectionReview": "Skontrolovať zozbierané položky",
 	"automationCollectionCleanup": "Odstrániť nevyhovujúce položky tejto stránky",
 	"automationCollectionReviewTip": "Kontrolujú sa všetky aktívne pravidlá zbierania blokov; zhoda s jedným stačí na zachovanie položky. Ručné aj automatické prepojenia sa kontrolujú rovnako; neprepojené alebo neurčiteľné položky zostávajú",

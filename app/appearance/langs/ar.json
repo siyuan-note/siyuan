@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "البحث في الويب وجلب الصفحات",
+	"aiWebSearchProvider": "مزود البحث",
+	"aiWebSearchProviderTip": "يعيد DeepSeek خمسة ملخصات؛ اجلب الصفحات عند الحاجة إلى المحتوى الكامل",
+	"aiWebFetchProvider": "مزود الجلب",
+	"aiWebFetchProviderTip": "يجلب DeepSeek محتوى الصفحات فقط؛ ويدعم الجلب المباشر تنزيل الملفات أيضًا",
+	"aiWebFetchDirect": "الجلب المباشر",
+	"aiWebDeepSeekKey": "مفتاح API لـ DeepSeek",
+	"aiWebDeepSeekKeyTip": "مشترك بين Search وFetch؛ تُرسل الاستعلامات وعناوين URL المستهدفة إلى DeepSeek وتُحسب الرسوم لكل طلب",
 	"automationCollectionReview": "مراجعة الإدخالات المجمعة",
 	"automationCollectionCleanup": "إزالة الإدخالات غير المطابقة في هذه الصفحة",
 	"automationCollectionReviewTip": "تُفحص جميع قواعد جمع الكتل المفعّلة؛ تكفي مطابقة قاعدة واحدة للاحتفاظ بالإدخال. تُفحص الروابط اليدوية والتلقائية بالتساوي، وتُحفظ الإدخالات غير المرتبطة أو غير المحددة",

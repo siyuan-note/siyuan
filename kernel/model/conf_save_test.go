@@ -40,11 +40,12 @@ func TestSaveUsesEncryptedSnapshot(t *testing.T) {
 	app.System.Store(&appconf.System{SafeMode: true})
 	app.AI.Store(appconf.NewAI())
 	app.AI.Load().Providers = []*appconf.Provider{{APIKey: "plain-api-key"}}
+	app.AI.Load().Web.APIKey = "plain-web-key"
 	app.Secrets.Store(&appconf.Secrets{Items: []*appconf.Secret{{Name: "token", Value: "plain-secret"}}})
 	app.MCPOAuth = "encrypted-oauth-data"
 	app.Save()
 
-	if app.AI.Load().Providers[0].APIKey != "plain-api-key" || app.Secrets.Load().Items[0].Value != "plain-secret" || !app.System.Load().SafeMode {
+	if app.AI.Load().Web.APIKey != "plain-web-key" || app.AI.Load().Providers[0].APIKey != "plain-api-key" || app.Secrets.Load().Items[0].Value != "plain-secret" || !app.System.Load().SafeMode {
 		t.Fatalf("live configuration was mutated: %#v", app)
 	}
 	data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
@@ -55,7 +56,7 @@ func TestSaveUsesEncryptedSnapshot(t *testing.T) {
 	if err = gulu.JSON.UnmarshalJSON(data, stored); err != nil {
 		t.Fatal(err)
 	}
-	if stored.AI.Load().Providers[0].APIKey == "plain-api-key" || stored.Secrets.Load().Items[0].Value == "plain-secret" || stored.System.Load().SafeMode {
+	if stored.AI.Load().Web.APIKey == "plain-web-key" || stored.AI.Load().Providers[0].APIKey == "plain-api-key" || stored.Secrets.Load().Items[0].Value == "plain-secret" || stored.System.Load().SafeMode {
 		t.Fatalf("stored configuration was not sanitized: %#v", stored)
 	}
 	if stored.MCPOAuth != app.MCPOAuth {

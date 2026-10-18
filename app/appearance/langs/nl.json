@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Webzoeken en pagina's ophalen",
+	"aiWebSearchProvider": "Zoekdienst",
+	"aiWebSearchProviderTip": "DeepSeek geeft 5 samenvattingen terug; haal pagina's op als de volledige inhoud nodig is",
+	"aiWebFetchProvider": "Ophaaldienst",
+	"aiWebFetchProviderTip": "DeepSeek haalt alleen pagina-inhoud op; direct ophalen kan ook bestanden downloaden",
+	"aiWebFetchDirect": "Direct ophalen",
+	"aiWebDeepSeekKey": "DeepSeek-API-sleutel",
+	"aiWebDeepSeekKeyTip": "Gedeeld door Search en Fetch; zoekopdrachten en doel-URL's worden naar DeepSeek verzonden en per verzoek gefactureerd",
 	"automationCollectionReview": "Verzamelde items controleren",
 	"automationCollectionCleanup": "Niet-passende items op deze pagina verwijderen",
 	"automationCollectionReviewTip": "Controleer alle actieve regels voor blokverzameling; één overeenkomst is voldoende om een item te behouden. Handmatige en automatische koppelingen worden gelijk gecontroleerd; ontkoppelde of onbepaalde items blijven behouden",

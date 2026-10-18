@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Pesquisa e obtenção de páginas",
+	"aiWebSearchProvider": "Provedor de pesquisa",
+	"aiWebSearchProviderTip": "O DeepSeek retorna 5 resumos; obtenha as páginas quando precisar do conteúdo completo",
+	"aiWebFetchProvider": "Provedor de obtenção",
+	"aiWebFetchProviderTip": "O DeepSeek obtém apenas o conteúdo das páginas; a obtenção direta também baixa arquivos",
+	"aiWebFetchDirect": "Obtenção direta",
+	"aiWebDeepSeekKey": "Chave de API do DeepSeek",
+	"aiWebDeepSeekKeyTip": "Compartilhada por Search e Fetch; consultas e URLs de destino são enviadas ao DeepSeek, com cobrança por solicitação",
 	"automationCollectionReview": "Verificar entradas coletadas",
 	"automationCollectionCleanup": "Remover entradas não correspondentes desta página",
 	"automationCollectionReviewTip": "Verifica todas as regras ativas de coleta de blocos; uma correspondência basta para manter a entrada. Vínculos manuais e automáticos são verificados igualmente; entradas desvinculadas ou indeterminadas são mantidas",

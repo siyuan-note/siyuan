@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Поиск и загрузка веб-страниц",
+	"aiWebSearchProvider": "Сервис поиска",
+	"aiWebSearchProviderTip": "DeepSeek возвращает 5 кратких описаний; при необходимости загрузите полный текст страниц",
+	"aiWebFetchProvider": "Сервис загрузки",
+	"aiWebFetchProviderTip": "DeepSeek получает только текст страниц; прямая загрузка также позволяет скачивать файлы",
+	"aiWebFetchDirect": "Прямая загрузка",
+	"aiWebDeepSeekKey": "Ключ API DeepSeek",
+	"aiWebDeepSeekKeyTip": "Общий для Search и Fetch; запросы и целевые URL отправляются в DeepSeek, оплата взимается за запрос",
 	"automationCollectionReview": "Проверить собранные записи",
 	"automationCollectionCleanup": "Убрать неподходящие записи этой страницы",
 	"automationCollectionReviewTip": "Проверяются все включённые правила сбора блоков; совпадения с одним достаточно для сохранения записи. Ручные и автоматические привязки проверяются одинаково; непривязанные и неопределимые записи сохраняются",

@@ -17,6 +17,7 @@
 package util
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -67,6 +68,10 @@ type mcpContent struct {
 }
 
 func WebSearch(query, exaApiKey string) (string, error) {
+	return WebSearchContext(context.Background(), query, exaApiKey)
+}
+
+func WebSearchContext(ctx context.Context, query, exaApiKey string) (string, error) {
 	exaURL := defaultExaURL
 	if exaApiKey != "" {
 		exaURL += "?exaApiKey=" + url.QueryEscape(exaApiKey)
@@ -87,7 +92,7 @@ func WebSearch(query, exaApiKey string) (string, error) {
 		},
 	}
 
-	resp, err := httpclient.NewBrowserRequest().SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody).Post(exaURL)
+	resp, err := httpclient.NewBrowserRequest().SetContext(ctx).SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody).Post(exaURL)
 	if err != nil {
 		return "", errors.New("web search failed: " + err.Error())
 	}

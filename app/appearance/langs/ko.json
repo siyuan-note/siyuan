@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "웹 검색 및 가져오기",
+	"aiWebSearchProvider": "검색 서비스",
+	"aiWebSearchProviderTip": "DeepSeek은 요약 5개를 반환하며, 전체 내용이 필요하면 페이지를 가져옵니다",
+	"aiWebFetchProvider": "가져오기 서비스",
+	"aiWebFetchProviderTip": "DeepSeek은 페이지 본문만 가져오며, 직접 가져오기는 파일 다운로드도 지원합니다",
+	"aiWebFetchDirect": "직접 가져오기",
+	"aiWebDeepSeekKey": "DeepSeek API 키",
+	"aiWebDeepSeekKeyTip": "Search와 Fetch에서 공유하며, 검색어와 대상 URL이 DeepSeek으로 전송되고 요청별로 요금이 부과됩니다",
 	"automationCollectionReview": "수집 결과 확인",
 	"automationCollectionCleanup": "이 페이지의 불일치 항목 제외",
 	"automationCollectionReviewTip": "활성화된 모든 블록 수집 규칙을 확인하며 하나라도 일치하면 유지합니다. 수동 및 자동 연결 항목을 동일하게 확인하며, 연결되지 않았거나 판단할 수 없는 항목은 유지합니다",

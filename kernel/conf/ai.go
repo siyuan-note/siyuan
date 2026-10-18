@@ -32,6 +32,7 @@ import (
 )
 
 type AI struct {
+	Web             *AIWeb           `json:"web"`
 	MCP             *MCP             `json:"mcp"`
 	Embedding       *Embedding       `json:"embedding"`
 	Rerank          *Rerank          `json:"rerank"`
@@ -40,6 +41,30 @@ type AI struct {
 	Editing         *Editing         `json:"editing"`
 	ImageGeneration *ImageGeneration `json:"imageGeneration"`
 	Providers       []*Provider      `json:"providers"`
+}
+
+// AIWeb 独立配置网页搜索和抓取，DeepSeek 两个接口共用凭证，不跟随对话模型切换。
+type AIWeb struct {
+	SearchProvider string `json:"searchProvider"`
+	FetchProvider  string `json:"fetchProvider"`
+	APIKey         string `json:"apiKey"`
+	Timeout        int    `json:"timeout"`
+}
+
+func (web *AIWeb) Normalize() {
+	web.SearchProvider = strings.TrimSpace(web.SearchProvider)
+	web.FetchProvider = strings.TrimSpace(web.FetchProvider)
+	if web.SearchProvider == "" {
+		web.SearchProvider = "exa"
+	}
+	if web.FetchProvider == "" {
+		web.FetchProvider = "direct"
+	}
+	web.APIKey = strings.TrimSpace(web.APIKey)
+	if web.Timeout < 1 {
+		web.Timeout = 30
+	}
+	web.Timeout = min(web.Timeout, 600)
 }
 
 // DefaultAgentConfirmTimeout 是智能体确认超时时间的默认值（秒），也用于智能体提问的等待时长。
@@ -438,6 +463,7 @@ func NewAI() *AI {
 		Embedding:       defaultEmbedding(),
 		Rerank:          defaultRerank(),
 		Decision:        defaultDecision(),
+		Web:             &AIWeb{SearchProvider: "exa", FetchProvider: "direct", Timeout: 30},
 		Agent:           defaultAgent(),
 		Editing:         defaultEditing(),
 		ImageGeneration: defaultImageGeneration(),
@@ -871,6 +897,10 @@ func (ai *AI) Normalize() {
 		ai.Decision = defaultDecision()
 	}
 	ai.Decision.Normalize()
+	if ai.Web == nil {
+		ai.Web = &AIWeb{}
+	}
+	ai.Web.Normalize()
 	if ai.Rerank.Timeout < 1 {
 		ai.Rerank.Timeout = 30
 	}
@@ -954,6 +984,13 @@ func normalizeApprovalPolicy(policy *ApprovalPolicy) {
 }
 
 func (ai *AI) DecryptAPIKeys() {
+	if ai.Web != nil && ai.Web.APIKey != "" {
+		if dec := util.AESDecrypt(ai.Web.APIKey); dec != nil {
+			if plain, err := hex.DecodeString(string(dec)); err == nil {
+				ai.Web.APIKey = string(plain)
+			}
+		}
+	}
 	if ai.Decision != nil {
 		decrypt := func(key *string) {
 			if *key != "" {
@@ -1005,6 +1042,9 @@ func (ai *AI) DecryptAPIKeys() {
 }
 
 func (ai *AI) EncryptAPIKeys() {
+	if ai.Web != nil && ai.Web.APIKey != "" {
+		ai.Web.APIKey = util.AESEncrypt(ai.Web.APIKey)
+	}
 	if ai.Decision != nil {
 		ai.Decision.Normalize()
 		for _, profile := range ai.Decision.Profiles {

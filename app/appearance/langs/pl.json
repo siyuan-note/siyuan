@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Wyszukiwanie i pobieranie stron",
+	"aiWebSearchProvider": "Usługa wyszukiwania",
+	"aiWebSearchProviderTip": "DeepSeek zwraca 5 podsumowań; pobierz strony, gdy potrzebna jest pełna treść",
+	"aiWebFetchProvider": "Usługa pobierania",
+	"aiWebFetchProviderTip": "DeepSeek pobiera tylko treść stron; bezpośrednie pobieranie obsługuje również pliki",
+	"aiWebFetchDirect": "Pobieranie bezpośrednie",
+	"aiWebDeepSeekKey": "Klucz API DeepSeek",
+	"aiWebDeepSeekKeyTip": "Wspólny dla Search i Fetch; zapytania i docelowe adresy URL są wysyłane do DeepSeek, a opłaty naliczane za żądanie",
 	"automationCollectionReview": "Sprawdź zebrane wpisy",
 	"automationCollectionCleanup": "Usuń niepasujące wpisy z tej strony",
 	"automationCollectionReviewTip": "Sprawdzane są wszystkie aktywne reguły zbierania bloków; dopasowanie do jednej wystarcza, aby zachować wpis. Powiązania ręczne i automatyczne są sprawdzane tak samo; wpisy niepowiązane lub nieokreślone pozostają",

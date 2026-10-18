@@ -152,6 +152,10 @@ func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apico
 		return
 	}
 	if model.Conf.AI.Load() != nil {
+		if ai.Web == nil && model.Conf.AI.Load().Web != nil {
+			previousWeb := *model.Conf.AI.Load().Web
+			ai.Web = &previousWeb
+		}
 		if ai.Decision == nil {
 			ai.Decision = model.Conf.AI.Load().Decision.Clone()
 		} else {

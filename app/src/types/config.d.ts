@@ -144,6 +144,7 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
+        web: IAIWeb;
         providers: IProvider[];
         editing: IEditing;
         agent: IAgent;
@@ -152,6 +153,16 @@ declare namespace Config {
         embedding: IEmbedding;
         rerank: IRerank;
         decision: IDecision;
+    }
+
+    /** 网页服务独立于对话模型；省略配置时搜索使用 Exa、抓取使用直接请求。 */
+    export interface IAIWeb {
+        searchProvider: string;
+        fetchProvider: string;
+        /** DeepSeek Search 与 Fetch 共用的凭证，由内核加密保存。 */
+        apiKey: string;
+        /** DeepSeek 请求超时秒数，默认 30，范围 1–600。 */
+        timeout: number;
     }
 
     /**

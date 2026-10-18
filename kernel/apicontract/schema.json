@@ -39748,6 +39748,16 @@
               "type": "null"
             }
           ]
+        },
+        "web": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAIWebInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -42616,6 +42626,16 @@
               "type": "null"
             }
           ]
+        },
+        "web": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAIWeb"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -42626,7 +42646,8 @@
         "imageGeneration",
         "mcp",
         "providers",
-        "rerank"
+        "rerank",
+        "web"
       ],
       "additionalProperties": false
     },
@@ -42717,6 +42738,86 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingRerankInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "web": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAIWebInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAIWeb": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "fetchProvider": {
+          "type": "string"
+        },
+        "searchProvider": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "fetchProvider",
+        "searchProvider",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAIWebInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fetchProvider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "searchProvider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
             },
             {
               "type": "null"

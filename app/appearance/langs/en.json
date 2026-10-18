@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Web search and fetch",
+	"aiWebSearchProvider": "Search provider",
+	"aiWebSearchProviderTip": "DeepSeek returns 5 summaries; fetch pages when full content is needed",
+	"aiWebFetchProvider": "Fetch provider",
+	"aiWebFetchProviderTip": "DeepSeek retrieves page content only; direct fetch also downloads files",
+	"aiWebFetchDirect": "Direct fetch",
+	"aiWebDeepSeekKey": "DeepSeek API Key",
+	"aiWebDeepSeekKeyTip": "Shared by Search and Fetch; queries and target URLs are sent to DeepSeek and requests are billed",
 	"automationCollectionReview": "Review collected entries",
 	"automationCollectionCleanup": "Remove unmatched entries on this page",
 	"automationCollectionReviewTip": "Check all enabled block collection rules; a match with any rule keeps the entry. Manual and automatic bindings are checked equally; detached or indeterminate entries are kept",

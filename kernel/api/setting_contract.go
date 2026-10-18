@@ -32,6 +32,10 @@ func settingAIPayload(value *conf.AI) *apicontract.SettingAI {
 		return nil
 	}
 	result := &apicontract.SettingAI{}
+	if value.Web != nil {
+		result.Web = &apicontract.SettingAIWeb{SearchProvider: value.Web.SearchProvider,
+			FetchProvider: value.Web.FetchProvider, APIKey: value.Web.APIKey, Timeout: value.Web.Timeout}
+	}
 	result.MCP = settingMCPPayload(value.MCP)
 	result.Embedding = settingEmbeddingPayload(value.Embedding)
 	result.Rerank = settingRerankPayload(value.Rerank)

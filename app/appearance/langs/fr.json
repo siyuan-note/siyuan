@@ -1,4 +1,12 @@
 {
+	"aiWebTools": "Recherche et récupération web",
+	"aiWebSearchProvider": "Service de recherche",
+	"aiWebSearchProviderTip": "DeepSeek renvoie 5 résumés ; récupérez les pages si le contenu complet est nécessaire",
+	"aiWebFetchProvider": "Service de récupération",
+	"aiWebFetchProviderTip": "DeepSeek récupère uniquement le contenu des pages ; la récupération directe télécharge aussi des fichiers",
+	"aiWebFetchDirect": "Récupération directe",
+	"aiWebDeepSeekKey": "Clé API DeepSeek",
+	"aiWebDeepSeekKeyTip": "Partagée entre Search et Fetch ; les requêtes et les URL cibles sont envoyées à DeepSeek, avec une facturation par requête",
 	"automationCollectionReview": "Vérifier les entrées collectées",
 	"automationCollectionCleanup": "Retirer les entrées non correspondantes de cette page",
 	"automationCollectionReviewTip": "Toutes les règles actives de collecte sont vérifiées ; une correspondance suffit à conserver l’entrée. Les liaisons manuelles et automatiques sont traitées de même ; les entrées non liées ou indéterminées sont conservées",

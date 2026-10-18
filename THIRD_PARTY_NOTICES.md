@@ -48,11 +48,11 @@ The component list is informational and does not replace the license terms. Copy
 | KaTeX fonts | 0.19.0 | OFL-1.1 | [upstream](https://github.com/KaTeX/KaTeX/tree/v0.19.0/fonts) | app/stage/protyle/js/katex/fonts/ |
 | MathJax | 4.1.3 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-src) | app/stage/protyle/js/mathjax/ |
 | MathJax TeX font and font extensions | 4.1.3 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-fonts) | app/stage/protyle/js/mathjax/output/fonts/ |
-| Mermaid | 12.1.0 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
-| DOMPurify | 3.4.12 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 12.1.0 |
-| ELK.js | 0.9.3 | EPL-2.0 | [upstream](https://github.com/kieler/elkjs) | Bundled by Mermaid 12.1.0; app/stage/protyle/js/mermaid/LICENSE-elkjs.md |
-| lodash-es and Underscore-derived code | Bundled snapshot | MIT | [upstream](https://github.com/lodash/lodash) | Bundled by Mermaid 12.1.0 |
-| Cytoscape.js and retained embedded utilities | Bundled snapshot | MIT | [upstream](https://github.com/cytoscape/cytoscape.js) | Bundled by Mermaid 12.1.0 |
+| Mermaid | 12.2.0 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
+| DOMPurify | 3.4.12 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 12.2.0 |
+| ELK.js | 0.9.3 | EPL-2.0 | [upstream](https://github.com/kieler/elkjs) | Bundled by Mermaid 12.2.0; app/stage/protyle/js/mermaid/LICENSE-elkjs.md |
+| lodash-es and Underscore-derived code | Bundled snapshot | MIT | [upstream](https://github.com/lodash/lodash) | Bundled by Mermaid 12.2.0 |
+| Cytoscape.js and retained embedded utilities | Bundled snapshot | MIT | [upstream](https://github.com/cytoscape/cytoscape.js) | Bundled by Mermaid 12.2.0 |
 | @mermaid-js/layout-tidy-tree | 0.2.2 | MIT | [upstream](https://github.com/mermaid-js/mermaid-layouts) | app/stage/protyle/js/mermaid/mermaid-layout-tidy-tree.min.js |
 | non-layered-tidy-tree-layout | 2.0.2 | MIT | [upstream](https://github.com/zlluGitHub/non-layered-tidy-tree-layout) | Bundled by @mermaid-js/layout-tidy-tree |
 | @mermaid-js/mermaid-zenuml | 0.2.3 | MIT | [upstream](https://github.com/mermaid-js/mermaid/tree/develop/packages/mermaid-zenuml) | Lightweight SiYuan bundle in app/stage/protyle/js/mermaid/mermaid-zenuml.min.js |

@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Aktywuj płótno",
+	"listMindmapDeactivate": "Dezaktywuj płótno",
 	"automationCollectionManage": "Zarządzanie zbieraniem",
 	"automationCollectionRules": "Dopasowania reguł",
 	"automationCollectionEntries": "Wpisy bazy danych",

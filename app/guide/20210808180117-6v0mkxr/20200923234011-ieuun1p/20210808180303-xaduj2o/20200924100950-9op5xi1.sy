@@ -13126,6 +13126,19 @@
 			]
 		},
 		{
+			"ID": "20261018163000-tgvsr1a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-tgvsr1a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor, summary selection, or relationship-line drag is active, Esc first finishes or cancels that operation. In full screen, Esc exits full screen."
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-3srqnh0",
 			"Type": "NodeTable",
 			"Properties": {

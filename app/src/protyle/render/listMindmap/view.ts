@@ -166,7 +166,7 @@ export class ListMindmapView {
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
     private pinching = false;
-    private pinch?: {distance: number, scale: number};
+    private pinch?: {distance: number, scale: number, x: number, y: number};
     private pendingPointerId?: number;
     private endInteraction?: () => void;
     private linkTimer = 0;
@@ -174,6 +174,7 @@ export class ListMindmapView {
     private ghost?: HTMLDivElement;
     private scale = 1;
     private panning = false;
+    private interactionActive = false;
     private locked = false;
     private persistedLocked = false;
     private offsetX = 0;
@@ -193,6 +194,7 @@ export class ListMindmapView {
         this.locked = this.persistedLocked = !!options.model.metadata.viewLocked;
         this.selectedId = options.model.root.id;
         options.host.classList.add("mindmap-view");
+        options.host.classList.remove("mindmap-view--active");
         options.host.contentEditable = "false";
         options.host.setAttribute("role", "group");
         options.host.setAttribute("aria-label", this.label("mindmap"));
@@ -240,6 +242,12 @@ export class ListMindmapView {
         this.viewport.append(this.summaryBox);
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
+        this.listen(options.host, "pointerdown", this.activatePointer, {capture: true});
+        this.listen(options.host, "focusout", (event: FocusEvent) => {
+            if (event.relatedTarget instanceof Node && !options.host.contains(event.relatedTarget)) {
+                this.setInteractionActive(false);
+            }
+        });
         this.listen(options.host, "pointerover", this.showButtonTooltip);
         this.listen(options.host, "focusin", this.showButtonTooltip);
         ["pointerout", "focusout"].forEach(type => this.listen(options.host, type, this.hideButtonTooltip));
@@ -260,6 +268,7 @@ export class ListMindmapView {
         this.listen(window, "blur", () => {
             this.pinching = false;
             this.pinch = undefined;
+            this.setInteractionActive(false);
         });
         this.listen(this.viewport, "contextmenu", (event: MouseEvent) => {
             if (this.suppressPanContextMenu) {
@@ -397,6 +406,9 @@ export class ListMindmapView {
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (!this.options.host.contains(target)) {
+            this.setInteractionActive(false);
+        }
         if (this.editingId && this.isPanTarget(event)) {
             return;
         }
@@ -446,12 +458,48 @@ export class ListMindmapView {
         return this.locked;
     }
 
+    private activatePointer = (event: PointerEvent) => {
+        const target = event.target as Element;
+        if (target.closest(".mindmap-view") !== this.options.host ||
+            this.buttons.get("interaction")?.contains(target) || this.buttons.get("lock")?.contains(target)) {
+            return;
+        }
+        if (event.pointerType !== "touch" || target.closest("button, input, select")) {
+            this.setInteractionActive(true);
+        }
+    };
+
+    private setInteractionActive(value: boolean) {
+        value = (value || !!this.fullscreenMarker) && !this.locked;
+        this.interactionActive = value;
+        this.options.host.classList.toggle("mindmap-view--active", value);
+        const button = this.buttons.get("interaction");
+        button?.classList.toggle("block__icon--active", value);
+        button?.setAttribute("aria-pressed", String(value));
+        button?.setAttribute("aria-label", this.label(value ? "listMindmapDeactivate" : "listMindmapActivate"));
+        if (!value) {
+            const selecting = !!this.relationFrom || this.summarySelecting;
+            this.pinching = false;
+            this.pinch = undefined;
+            this.cancelPointer();
+            this.setPanning(false);
+            this.relationFrom = undefined;
+            this.relationPreview = undefined;
+            this.cancelSummarySelection();
+            this.inspector.hidden = true;
+            if (selecting) {
+                this.updateSelection();
+            }
+        }
+    }
+
     private get readOnly() {
         return this.locked || this.options.readOnly;
     }
 
     private setLocked(value: boolean) {
         this.locked = value;
+        this.setInteractionActive(false);
         this.pinching = false;
         this.pinch = undefined;
         this.setPanning(false);
@@ -511,6 +559,15 @@ export class ListMindmapView {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
             return;
         }
+        add("interaction", this.interactionActive ? "listMindmapDeactivate" : "listMindmapActivate", "iconEdit", () => {
+            this.setInteractionActive(!this.interactionActive);
+            if (this.interactionActive) {
+                this.options.host.focus({preventScroll: true});
+            }
+        });
+        this.buttons.get("interaction").setAttribute("aria-pressed", String(this.interactionActive));
+        this.buttons.get("interaction").classList.toggle("block__icon--active", this.interactionActive);
+        this.buttons.get("interaction").hidden = !!this.fullscreenMarker;
         if (!this.readOnly) {
             if (this.options.onSettingsMenu) {
                 add("settings", "listMindmapConnectors", "iconLine", () => this.options.onSettingsMenu(this.buttons.get("settings")));
@@ -518,6 +575,7 @@ export class ListMindmapView {
             }
             add("summary", "listMindmapSummary", "iconGroups", () => {
                 this.finishThen(() => {
+                    this.setInteractionActive(true);
                     const selecting = !this.summarySelecting;
                     this.cancelPointer();
                     this.cancelSummarySelection();
@@ -534,6 +592,7 @@ export class ListMindmapView {
                 });
             });
             add("relation", "connect", "iconRoute", () => {
+                this.setInteractionActive(true);
                 this.cancelSummarySelection();
                 this.setPanning(false);
                 this.inspector.hidden = true;
@@ -569,6 +628,7 @@ export class ListMindmapView {
         }
         add("pan", "cursorHand", "iconPan", () => {
             this.finishThen(() => {
+                this.setInteractionActive(true);
                 this.finishRelationEdit?.(true);
                 this.cancelPointer();
                 this.setPanning(!this.panning);
@@ -940,6 +1000,7 @@ export class ListMindmapView {
         if (this.destroyed || !this.model.nodes.has(id)) {
             return;
         }
+        this.setInteractionActive(true);
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
         this.revealNode(id);
@@ -951,6 +1012,7 @@ export class ListMindmapView {
         }
         this.editingId = id;
         if (id) {
+            this.setInteractionActive(true);
             this.destroyContentViews(id);
             this.selectNode(id);
             this.nodeElements.get(id)?.classList.add("mindmap-view__node--editing");
@@ -2081,7 +2143,9 @@ export class ListMindmapView {
         this.suppressLinkClick = true;
         this.pinching = true;
         const [first, second] = Array.from(event.touches);
-        this.pinch = {distance: Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY), scale: this.scale};
+        const bounds = this.viewport.getBoundingClientRect();
+        this.pinch = {distance: Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY), scale: this.scale,
+            x: (first.clientX + second.clientX) / 2 - bounds.left, y: (first.clientY + second.clientY) / 2 - bounds.top};
     };
 
     private pinchMove = (event: TouchEvent) => {
@@ -2094,9 +2158,14 @@ export class ListMindmapView {
         }
         const [first, second] = Array.from(event.touches);
         const bounds = this.viewport.getBoundingClientRect();
+        const x = (first.clientX + second.clientX) / 2 - bounds.left;
+        const y = (first.clientY + second.clientY) / 2 - bounds.top;
+        this.offsetX += x - this.pinch.x;
+        this.offsetY += y - this.pinch.y;
+        this.pinch.x = x;
+        this.pinch.y = y;
         this.zoomAt(this.pinch.scale * Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY) /
-            this.pinch.distance, (first.clientX + second.clientX) / 2 - bounds.left,
-            (first.clientY + second.clientY) / 2 - bounds.top);
+            this.pinch.distance, x, y);
     };
 
     private pinchEnd = (event: TouchEvent) => {
@@ -2116,6 +2185,7 @@ export class ListMindmapView {
     public isPanTarget(event: PointerEvent) {
         const target = event.target as HTMLElement;
         return !this.locked && !this.pinching && !this.summarySelecting && !this.relationFrom &&
+            (event.pointerType !== "touch" || this.interactionActive || !!this.fullscreenMarker) &&
             (event.pointerType !== "touch" || event.isPrimary) && [0, 2].includes(event.button) &&
             this.viewport.contains(target) && target.closest(".mindmap-view") === this.options.host &&
             !target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing") &&
@@ -2124,7 +2194,8 @@ export class ListMindmapView {
     }
 
     private pointerDown = (event: PointerEvent) => {
-        if (this.locked || this.pinching || event.pointerType === "touch" && !event.isPrimary) {
+        if (this.locked || this.pinching || event.pointerType === "touch" &&
+            (!event.isPrimary || !this.interactionActive && !this.fullscreenMarker)) {
             return;
         }
         clearTimeout(this.linkTimer);
@@ -2355,16 +2426,9 @@ export class ListMindmapView {
         this.viewport.classList.add("mindmap-view__viewport--dragging");
         if (!pointer.id) {
             const bounded = this.boundedPan(pointer.x + dx, pointer.y + dy);
-            const remainingY = pointer.y + dy - bounded.y;
             this.offsetX = bounded.x;
             this.offsetY = bounded.y;
             this.draw();
-            if (event.pointerType === "touch" && remainingY && !this.fullscreenMarker) {
-                const scrollHost = this.options.host.closest<HTMLElement>(".protyle-content");
-                if (scrollHost) {
-                    scrollHost.scrollTop -= remainingY;
-                }
-            }
             pointer.x = this.offsetX;
             pointer.y = this.offsetY;
             pointer.startX = event.clientX;
@@ -2648,6 +2712,7 @@ export class ListMindmapView {
         if (this.readOnly) {
             return;
         }
+        this.setInteractionActive(true);
         const summary = target.closest<HTMLElement>(".mindmap-view__summary");
         if (summary) {
             this.editSummaryLabel(summary.dataset.summaryId);
@@ -2804,7 +2869,7 @@ export class ListMindmapView {
         const unitY = mode === WheelEvent.DOM_DELTA_LINE ? 16 :
             mode === WheelEvent.DOM_DELTA_PAGE ? this.viewport.clientHeight : 1;
         // 浏览器将触控板捏合转换为带 Ctrl 的滚轮事件，和鼠标组合滚轮共用光标锚点缩放。
-        if (event.ctrlKey) {
+        if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             event.stopPropagation();
             const bounds = this.viewport.getBoundingClientRect();
@@ -2813,18 +2878,12 @@ export class ListMindmapView {
                 event.clientX - bounds.left, event.clientY - bounds.top);
             return;
         }
-        if (!this.fullscreenMarker && !event.shiftKey && !event.deltaX && event.deltaY) {
-            const {top, bottom} = this.contentBounds();
-            if (top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
-                return;
-            }
+        if (!this.interactionActive && !this.fullscreenMarker) {
+            return;
         }
         const next = this.boundedPan(this.offsetX - (event.shiftKey ?
             (event.deltaX ? event.deltaX : event.deltaY) * unitX : event.deltaX * unitX),
             this.offsetY - (event.shiftKey ? 0 : event.deltaY * unitY));
-        if (!this.fullscreenMarker && !event.shiftKey && event.deltaY && next.y === this.offsetY) {
-            return;
-        }
         event.preventDefault();
         event.stopPropagation();
         this.offsetX = next.x;
@@ -3148,10 +3207,15 @@ export class ListMindmapView {
             this.inspector.hidden = true;
             if (this.fullscreenMarker && !selectingSummary) {
                 this.exitFullscreen();
+            } else if (!selectingSummary) {
+                this.setInteractionActive(false);
             }
             this.updateSelection();
         } else {
             return;
+        }
+        if (event.key !== "Escape") {
+            this.setInteractionActive(true);
         }
         event.preventDefault();
         event.stopPropagation();
@@ -3317,6 +3381,11 @@ export class ListMindmapView {
 
     private fullscreenChange = () => {
         const active = !!this.fullscreenMarker;
+        this.setInteractionActive(active);
+        const interaction = this.buttons.get("interaction");
+        if (interaction) {
+            interaction.hidden = active;
+        }
         this.tooltip.hidden = true;
         const button = this.buttons.get("fullscreen");
         button.setAttribute("aria-label", this.label(active ? "exitFullscreen" : "fullscreen"));
@@ -3340,6 +3409,7 @@ export class ListMindmapView {
         this.resizeObserver.disconnect();
         this.disposers.forEach(dispose => dispose());
         this.exitFullscreen();
+        this.options.host.classList.remove("mindmap-view--active");
         this.nodeElements.forEach((_element, id) => this.destroyContentViews(id));
         this.nodeElements.clear();
         this.relationElements.clear();

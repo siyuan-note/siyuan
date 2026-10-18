@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Activer le canevas",
+	"listMindmapDeactivate": "Désactiver le canevas",
 	"automationCollectionManage": "Gestion de la collecte",
 	"automationCollectionRules": "Correspondances des règles",
 	"automationCollectionEntries": "Entrées de la base",

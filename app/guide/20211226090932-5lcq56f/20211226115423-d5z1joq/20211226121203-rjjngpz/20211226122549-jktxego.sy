@@ -13114,6 +13114,19 @@
 			]
 		},
 		{
+			"ID": "20261018163000-e1khci4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-e1khci4"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在畫布上按 Esc 可恢復閱讀，讓滾輪捲動文件。如果正在編輯節點、選取摘要範圍或拖曳關係線，Esc 會先結束或取消目前操作；全螢幕時按 Esc 離開全螢幕。"
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-f8y6pxv",
 			"Type": "NodeTable",
 			"Properties": {

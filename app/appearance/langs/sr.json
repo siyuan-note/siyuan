@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Активирај платно",
+	"listMindmapDeactivate": "Деактивирај платно",
 	"automationCollectionManage": "Управљање прикупљањем",
 	"automationCollectionRules": "Подударања правила",
 	"automationCollectionEntries": "Ставке базе података",

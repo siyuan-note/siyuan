@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Увімкнути керування полотном",
+	"listMindmapDeactivate": "Завершити керування полотном",
 	"automationCollectionManage": "Керування збиранням",
 	"automationCollectionRules": "Збіги за правилами",
 	"automationCollectionEntries": "Записи бази даних",

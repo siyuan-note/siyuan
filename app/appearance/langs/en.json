@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Activate canvas",
+	"listMindmapDeactivate": "Deactivate canvas",
 	"automationCollectionManage": "Collection management",
 	"automationCollectionRules": "Rule matches",
 	"automationCollectionEntries": "Database entries",

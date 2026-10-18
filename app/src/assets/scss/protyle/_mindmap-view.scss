@@ -42,6 +42,10 @@
   line-height: 1.5;
   outline: none;
 
+  &--active {
+    outline: 1px solid var(--b3-theme-primary);
+  }
+
   &--nested {
     width: 260px;
     --mindmap-view-height: 260px;
@@ -87,12 +91,14 @@
   }
 
   &.fullscreen &__toolbar,
+  &--active &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
     opacity: 1;
   }
 
   &.fullscreen &__toolbar .block__icon,
+  &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
   &__toolbar:focus-within .block__icon {
     pointer-events: auto;
@@ -192,7 +198,7 @@
     overflow: hidden;
     border-radius: inherit;
     cursor: default;
-    touch-action: none;
+    touch-action: pan-y;
     user-select: none;
 
     &--dragging {
@@ -202,6 +208,12 @@
     &--line-hover {
       cursor: pointer;
     }
+  }
+
+  &--active &__viewport,
+  &.fullscreen:not(.mindmap-view--locked) &__viewport {
+    touch-action: none;
+    cursor: grab;
   }
 
   &__canvas {
@@ -888,6 +900,7 @@
 @media print {
   .mindmap-view {
     break-inside: avoid;
+    outline: none;
     height: var(--mindmap-view-print-height, 420px);
     min-height: 0;
 

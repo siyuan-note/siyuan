@@ -22,12 +22,13 @@ const setup = () => {
     let focus = "editor";
     let finished = 0;
     let drawn = 0;
-    const host = {focus: () => focus = "canvas"};
+    const host = {focus: () => focus = "canvas", contains: () => true};
     const target = Object.assign(new context.View(), {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
         selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         nodeElements: new Map(), offsetX: 0, offsetY: 0,
+        interactionActive: true, setInteractionActive: () => {},
         viewport: {contains: (element: unknown) => !!element, setPointerCapture: () => {},
             offsetWidth: 400, offsetHeight: 300,
             getBoundingClientRect: () => ({left: 0, top: 0, right: 400, bottom: 300, width: 400, height: 300})},

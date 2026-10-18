@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Zeichenfläche aktivieren",
+	"listMindmapDeactivate": "Zeichenfläche deaktivieren",
 	"automationCollectionManage": "Sammlungsverwaltung",
 	"automationCollectionRules": "Regeltreffer",
 	"automationCollectionEntries": "Datenbankeinträge",

@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "操作画布",
+	"listMindmapDeactivate": "退出画布操作",
 	"automationCollectionManage": "收集管理",
 	"automationCollectionRules": "规则匹配",
 	"automationCollectionEntries": "数据库条目",

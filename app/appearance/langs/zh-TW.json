@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "操作畫布",
+	"listMindmapDeactivate": "結束畫布操作",
 	"automationCollectionManage": "收集管理",
 	"automationCollectionRules": "規則匹配",
 	"automationCollectionEntries": "資料庫條目",

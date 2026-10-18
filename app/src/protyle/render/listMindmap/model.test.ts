@@ -1288,6 +1288,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(addedNode.getBoundingClientRect().top >= zoomActions.getBoundingClientRect().bottom + 15,
         "the visible zoom popup also leaves clearance for the node");
     navigationHost.focus();
+    navigationHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     await moveNavigationPointer(false);
     check.equal(getComputedStyle(navigationToolbar).opacity, "0");
     placeAtToolbar();
@@ -1297,7 +1298,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(hiddenToolbarNode.left >= hiddenToolbarViewport.left + 15 &&
         hiddenToolbarNode.right <= hiddenToolbarViewport.right - 15 &&
         hiddenToolbarNode.top >= hiddenToolbarViewport.top + 15, "hidden-toolbar target starts within the viewport margins");
-    navigationView.focusNode(addedItem.dataset.nodeId);
+    navigationView.revealNode(addedItem.dataset.nodeId);
     await settle();
     check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenToolbarTransform,
         "a hidden toolbar does not move a visible node");
@@ -1363,6 +1364,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     navigationHost.style.transform = "";
     navigationToolbar.style.paddingTop = "";
     navigationHost.focus();
+    navigationHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     navigationView.refreshLayout();
     await moveNavigationPointer(false);
     check.equal(getComputedStyle(navigationToolbar).opacity, "0");
@@ -2636,7 +2638,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     host.querySelector<HTMLButtonElement>('[aria-label="listMindmapUnlock"]').click();
     await settle();
     check.equal(view.isLocked(), false);
-    check.equal(getComputedStyle(viewport).touchAction, "none");
+    check.equal(getComputedStyle(viewport).touchAction, "pan-y");
     nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(edits.length, editsBeforeLock, "unlocking a read-only document does not enable editing");
     view.setReadOnly(false);
@@ -2984,7 +2986,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.querySelector(".mindmap-view__ghost"), null);
     panButton.click();
     check.equal(panButton.getAttribute("aria-pressed"), "false");
-    check.equal(getComputedStyle(panViewport).cursor, "default");
+    check.equal(getComputedStyle(panViewport).cursor, "grab");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
     single.zoomAt(2.5);
     check.equal(single.scale, 2.5, "manual zoom can still enlarge a small map");
@@ -3004,7 +3006,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         fitInspector.getBoundingClientRect().top, "fit keeps content above the visible inspector");
     fitInspector.hidden = true;
 
-    // 横向裁切不规则脑图后，滚轮和触摸平移仍保留实际节点，并在边界继续滚动文档。
+    // 阅读时保留文档滚动，激活后平移受裁切的画布，边界处也维持滚动归属。
     {
         let markdown = "* Root\n";
         for (let depth = 1; depth <= 7; depth++) {
@@ -3031,6 +3033,66 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panView.offsetY = 120 - rootPosition.y;
         panView.draw();
         const viewport = panHost.querySelector<HTMLElement>(".mindmap-view__viewport");
+        const sourceHTML = panModel.list.outerHTML;
+        const readingTransform = [panView.scale, panView.offsetX, panView.offsetY];
+        check.equal(panView.interactionActive, false);
+        check.equal(getComputedStyle(viewport).touchAction, "pan-y");
+        const readingWheel = new WheelEvent("wheel", {deltaY: 120, bubbles: true, cancelable: true});
+        viewport.dispatchEvent(readingWheel);
+        check.equal(readingWheel.defaultPrevented, false);
+        check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform);
+        const touch = {pointerId: 601, pointerType: "touch", isPrimary: true, button: 0,
+            clientX: 100, clientY: 100, bubbles: true, cancelable: true};
+        const readingTouch = new PointerEvent("pointerdown", touch);
+        viewport.dispatchEvent(readingTouch);
+        check.equal(readingTouch.defaultPrevented, false);
+        check.equal(panView.pointer, undefined);
+        check.equal(panView.interactionActive, false);
+        scrollHost.scrollIntoView({block: "start"});
+        await settle();
+        const readingBounds = viewport.getBoundingClientRect();
+        const readingPoint = {x: Math.round(readingBounds.left + 100), y: Math.round(readingBounds.top + 220)};
+        check.equal(document.elementFromPoint(readingPoint.x, readingPoint.y)?.closest(".mindmap-view"), panHost,
+            JSON.stringify({readingPoint, readingBounds: readingBounds.toJSON(), height: window.innerHeight}));
+        await nativeInput([
+            {type: "mouseMove", ...readingPoint},
+            {type: "mouseWheel", ...readingPoint, deltaX: 0, deltaY: -100, canScroll: true},
+        ]);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        check.ok(scrollHost.scrollTop > 0, "native reading wheel scrolls the document over a clipped map");
+        scrollHost.scrollTop = 0;
+        const nativeTouch = (events: Record<string, unknown>[]) =>
+            require("electron").ipcRenderer.invoke("mindmap-view-native-touch", events);
+        const fingerAt = (id: number, dx = 0, dy = 0) => ({id, x: readingPoint.x + dx, y: readingPoint.y + dy});
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            ...[-20, -40, -60, -80, -100].map(dy => ({type: "touchMove", touchPoints: [fingerAt(1, 0, dy)]})),
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        await new Promise(resolve => setTimeout(resolve, 200));
+        check.ok(scrollHost.scrollTop > 0, "native one-finger reading swipe scrolls the document");
+        check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform);
+        check.equal(panView.interactionActive, false);
+        scrollHost.scrollTop = 0;
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1), fingerAt(2, 100)]},
+            {type: "touchMove", touchPoints: [fingerAt(1, 30, -20), fingerAt(2, 130, -20)]},
+            {type: "touchMove", touchPoints: [fingerAt(1, 10, -20), fingerAt(2, 150, -20)]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        await settle();
+        check.ok(panView.scale > readingTransform[0], "native two-finger input zooms the reading canvas");
+        check.notEqual(panView.offsetX, readingTransform[1], "native two-finger input pans the reading canvas");
+        check.equal(panView.interactionActive, false);
+        check.equal(scrollHost.scrollTop, 0, "explicit two-finger input does not scroll the document");
+        panView.scale = readingTransform[0];
+        panView.offsetX = readingTransform[1];
+        panView.offsetY = readingTransform[2];
+        panView.draw();
+        panHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapActivate"]').click();
+        check.equal(panView.interactionActive, true);
+        check.equal(getComputedStyle(viewport).touchAction, "none");
+        check.equal(panHost.querySelector('[aria-label="listMindmapDeactivate"]').getAttribute("aria-pressed"), "true");
         const fixedX = panView.offsetX;
         const checkVisibleNode = () => {
             const bounds = viewport.getBoundingClientRect();
@@ -3048,18 +3110,28 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             checkVisibleNode();
             const next = new WheelEvent("wheel", {deltaY, bubbles: true, cancelable: true});
             viewport.dispatchEvent(next);
-            check.equal(next.defaultPrevented, false, "the next wheel event is handed back to document scrolling");
+            check.equal(next.defaultPrevented, true, "active canvas keeps wheel input at the pan boundary");
         }
         panView.offsetY = 120 - rootPosition.y;
         panView.draw();
         panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]').click();
-        const touch = {pointerId: 601, pointerType: "touch", isPrimary: true, button: 0,
-            clientX: 100, clientY: 100, bubbles: true, cancelable: true};
         viewport.dispatchEvent(new PointerEvent("pointerdown", touch));
         viewport.dispatchEvent(new PointerEvent("pointermove", {...touch, clientY: -1900}));
         checkVisibleNode();
-        check.ok(scrollHost.scrollTop > 0, "touch overflow scrolls the real document container");
+        check.equal(scrollHost.scrollTop, 0, "active canvas does not hand touch overflow to the document");
         viewport.dispatchEvent(new PointerEvent("pointerup", {...touch, clientY: -1900}));
+        panHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        check.equal(panView.interactionActive, false);
+        check.equal(getComputedStyle(viewport).touchAction, "pan-y");
+        sendPointer(viewport, "pointerdown", 100, 100);
+        sendPointer(viewport, "pointerup", 100, 100);
+        check.equal(panView.interactionActive, true, "desktop pointer input activates the canvas");
+        document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+        check.equal(panView.interactionActive, false, "outside pointer input returns to reading");
+        panHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapActivate"]').click();
+        panHost.dispatchEvent(new FocusEvent("focusout", {relatedTarget: followingContent}));
+        check.equal(panView.interactionActive, false, "moving focus outside returns to reading");
+        check.equal(panModel.list.outerHTML, sourceHTML, "interaction activation and panning do not change saved data");
         panView.destroy();
         scrollHost.remove();
     }
@@ -4494,6 +4566,17 @@ app.whenReady().then(async () => {
         for (const event of events) {
             win.webContents.sendInputEvent(event);
             await new Promise(resolve => setTimeout(resolve, 20));
+        }
+    });
+    ipcMain.handle("mindmap-view-native-touch", async (_event, events) => {
+        await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true, maxTouchPoints: 2});
+        try {
+            for (const event of events) {
+                await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", event);
+                await new Promise(resolve => setTimeout(resolve, 30));
+            }
+        } finally {
+            await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: false});
         }
     });
     try {

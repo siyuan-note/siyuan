@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Aktifkan kanvas",
+	"listMindmapDeactivate": "Nonaktifkan kanvas",
 	"automationCollectionManage": "Pengelolaan pengumpulan",
 	"automationCollectionRules": "Kecocokan aturan",
 	"automationCollectionEntries": "Entri basis data",

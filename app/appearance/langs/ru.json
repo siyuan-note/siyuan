@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Включить управление холстом",
+	"listMindmapDeactivate": "Завершить управление холстом",
 	"automationCollectionManage": "Управление сбором",
 	"automationCollectionRules": "Совпадения по правилам",
 	"automationCollectionEntries": "Записи базы данных",

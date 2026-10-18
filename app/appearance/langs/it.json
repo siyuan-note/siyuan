@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Attiva area di disegno",
+	"listMindmapDeactivate": "Disattiva area di disegno",
 	"automationCollectionManage": "Gestione raccolta",
 	"automationCollectionRules": "Corrispondenze delle regole",
 	"automationCollectionEntries": "Voci del database",

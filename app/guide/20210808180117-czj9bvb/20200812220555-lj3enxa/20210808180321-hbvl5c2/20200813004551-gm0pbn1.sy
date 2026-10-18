@@ -13108,6 +13108,19 @@
 			]
 		},
 		{
+			"ID": "20261018163000-7w2zbxu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-7w2zbxu"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在画布上按 Esc 可恢复阅读，让滚轮滚动文档。如果正在编辑节点、选择概括范围或拖动关系线，Esc 会先结束或取消当前操作；全屏时按 Esc 退出全屏。"
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-fr0uxw6",
 			"Type": "NodeTable",
 			"Properties": {

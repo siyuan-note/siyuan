@@ -1,4 +1,6 @@
 {
+	"listMindmapActivate": "Ativar tela",
+	"listMindmapDeactivate": "Desativar tela",
 	"automationCollectionManage": "Gerenciamento de coleta",
 	"automationCollectionRules": "Correspondências das regras",
 	"automationCollectionEntries": "Entradas do banco de dados",

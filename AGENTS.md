@@ -42,6 +42,13 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 4. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
 5. **UI verification in a browser:** Open `/stage/build/desktop/` directly instead of `/`. The kernel selects the frontend bundle by User-Agent in `kernel/server/serve.go`, and a UA containing `Electron` is redirected to the Electron-only `/stage/build/app/`, which fails in a plain browser with `require is not defined`; VSCode's built-in browser sends such a UA. The Electron main window does not expose a remote debugging port by default
 6. **Verification scope:** Run the checks and regression tests applicable to the changed behavior, including non-API Go code, frontend interactions, and scripts. Select scope according to impact and risk; a full suite is not required for every task, and lint or formatting alone does not establish behavioral correctness. Use `app/scripts/test.mjs` and the relevant maintenance guides to identify test discovery and commands. For documentation-only changes, check accuracy, links, language alignment, and the diff rather than running auto-fixing code checks. Report passed, failed, and unrun checks with their limits; do not infer that tests passed solely from a successful CI job or release
+7. **Test synchronization:** Whenever code or files change, handle the corresponding tests and fixtures in the same change rather than leaving them for later
+   - Rename, move, merge, split, or delete a test file together with its source, and keep the file name reflecting the code it covers; a test file whose source no longer exists or whose name no longer matches is stale and must be repaired or removed
+   - When behavior changes intentionally, update the affected assertions, case names, and comments to the new contract instead of dropping the coverage; when behavior is removed, delete only the cases that cover the removed behavior and keep adjacent assertions
+   - Keep test doubles aligned with the code under test: remove mocks of exports, constants, flags, and helpers that no longer exist, and do not preserve assertions that only pass because a stale stub keeps them alive
+   - Do not use a test that already fails for unrelated reasons as permission to leave a new mismatch; state such failures separately and verify whether the task changed their outcome
+   - Merge test files only when they cover the same subject and merging removes duplication without losing cases or discoverability; otherwise keep the current split
+   - Run the affected tests after the synchronization, and name the files and cases that were updated, merged, or deleted
 
 ### Encrypted notebook compatibility
 
@@ -142,6 +149,14 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
     - Before finishing, verify both implementations and their shared dependencies, preserving platform-appropriate interactions. If no corresponding mobile feature exists or the change is desktop-only, state why mobile changes are not needed in the task response
 
 12. **UI copy and user guides:** Change wording only when needed, following nearby style and keeping necessary guidance and warnings. Put specific instructions beside the relevant control or in the corresponding guide section; do not overload general descriptions with feature lists or implementation details
+
+13. **Configuration defaults:** Put a new setting's default value in its constructor (`NewAppearance`, `NewEditor`, `NewFileTree`, etc.) and let the shared normalization functions fill missing containers and values. `InitConf` only projects runtime state and runs versioned migrations; do not add a startup function that patches a single default
+    - `conf.json` written by an older version has no key for a new field, and configuration sections unmarshal into zero values, so a plain `bool` is only correct when the default is `false`
+    - A default of `true` requires `*bool` (and a defaulted non-zero enumeration requires `*int`): initialize it in the constructor, keep the `nil` branch in normalization, and preserve an explicitly saved `false`. See `FileTree.CreateDocAtTop`, `Editor.CheckBlockRef`, and `Search.HanSensitive`
+    - Keep a default-`true` plain `bool` only when existing workspaces must stay `false` while new workspaces start `true`, as with `Appearance.MenuMouseScroll`: the constructor supplies the new-workspace value and the zero value supplies the existing-workspace one
+    - `POST /api/setting/set<Section>` merges the request into the current section: omitted fields keep their current value and `null` restores the default; declare `Merge` on `SettingWrite` instead of adding per-field preservation branches. Decoding starts from the section constructor defaults so `null` never falls back to a zero value
+    - Keep `*bool` on the API request and response declaration when the wire format must distinguish `null`, even if the persisted configuration uses a plain `bool`; see `apicontract.SettingFileTree`
+    - When an existing workspace must retain a legacy default that is not the zero value (for example `OCR.Auto`), resolve it in the load path that knows whether `conf.json` existed; do not read that fact from a global inside a constructor or normalization helper. Resolve a segment that exists but lacks the decisive field the same way as a missing segment
 
 ---
 

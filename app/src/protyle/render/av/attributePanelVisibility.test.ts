@@ -18,7 +18,8 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
         _attrView: {dateCalendar: "Calendar", solarCalendar: "Gregorian", lunarCalendar: "Chinese lunar"},
     }}});
-    const Panel = new Function("cancelHeightAnimation", source + "\nreturn AVAttributePanel;")(() => {});
+    const Panel = new Function("cancelHeightAnimation", "escapeHtmlTextAndAttr", source + "\nreturn AVAttributePanel;")(
+        () => {}, (value: string) => value);
     const style = document.createElement("style");
     style.textContent = css + ".fn__none {display:none} .av__row {display:flex}";
     document.head.append(style);
@@ -104,6 +105,34 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     check.equal(pending.length, 1, "subsequent refreshes request fresh attributes");
     pending.shift()();
     boundPanel.element.remove();
+    config.editor.databaseAttrUseTabs = true;
+    const tabPanel = new Panel({disabled: false});
+    tabPanel.element.dataset.rendered = "true";
+    const tabBody = tabPanel.element.querySelector(".protyle-db-attr__body") as HTMLElement;
+    tabBody.innerHTML = ["first", "second"].map(id => `<div data-av-id="${id}">
+        <div class="custom-attr__avheader"><div class="block__logo"><span>${id}</span></div></div>
+    </div>`).join("");
+    document.body.append(tabPanel.element);
+    tabPanel.updateDisplayConfig();
+    const tabButtons = Array.from(tabBody.querySelectorAll<HTMLButtonElement>('[data-type="av-tab"]'));
+    const tabChanges = new MutationObserver(() => {});
+    tabChanges.observe(tabBody.querySelector(".protyle-db-attr__tabs"), {childList: true, subtree: true});
+    for (const pointerType of ["mouse", "touch"]) {
+        for (const index of [1, 0, 1]) {
+            tabButtons[index].focus();
+            tabButtons[index].querySelector("span").dispatchEvent(new PointerEvent("click", {bubbles: true, pointerType}));
+            check.equal(document.activeElement, tabButtons[index], "switching databases preserves keyboard focus");
+            check.equal(tabChanges.takeRecords().length, 0, "switching databases keeps hovered tab nodes connected");
+            tabButtons.forEach((button, buttonIndex) => {
+                check.equal(button.classList.contains("item--focus"), buttonIndex === index);
+                check.equal(tabBody.querySelector(`[data-av-id="${button.dataset.id}"]`).classList.contains("fn__none"),
+                    buttonIndex !== index);
+            });
+        }
+    }
+    tabChanges.disconnect();
+    tabPanel.element.remove();
+    config.editor.databaseAttrUseTabs = false;
     const transactions: unknown[][] = [];
     const escape = (value: string) => value || "";
     let mobile = false;

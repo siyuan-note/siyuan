@@ -17,6 +17,7 @@ const createPreview = async (mobile: boolean) => {
     let hidden = false;
     let hiddenOnClose = false;
     const openedBlocks: string[] = [];
+    const backgroundUpdates: string[] = [];
     let openBound: () => void;
     let failBound: () => void;
     let attributesReady: () => void;
@@ -74,6 +75,9 @@ const createPreview = async (mobile: boolean) => {
             mountedRow = row.itemID;
         }},
         "../protyle/ui/padding": {getEditorHorizontalPadding: () => ({left: 0, right: 0})},
+        "../../header/backgroundActions": {updateBackgroundActions: (protyle: {element: {dataset: {databaseRowId: string}}}) => {
+            backgroundUpdates.push(protyle.element.dataset.databaseRowId);
+        }},
         "../../../dialog": {Dialog: class {
             public element = root;
             constructor(options: {destroyCallback: () => void}) { destroy = options.destroyCallback; dialogs.push(this); }
@@ -165,7 +169,7 @@ const createPreview = async (mobile: boolean) => {
     return {data, title, root, content, requests, complete, refresh: () => refresh(),
         navigate: (next: IDatabaseRowOpenData) => navigate(next), destroy: () => destroy(),
         body: () => body, closed: () => closed, savedRow: () => model?.data.itemID,
-        mountedRow: () => mountedRow, hiddenOnClose: () => hiddenOnClose, openedBlocks,
+        mountedRow: () => mountedRow, hiddenOnClose: () => hiddenOnClose, openedBlocks, backgroundUpdates,
         openBound: () => openBound(), failBound: () => failBound(), attributesReady: () => attributesReady()};
 };
 
@@ -210,6 +214,7 @@ test("mobile detached-to-bound navigation keeps the preview until the target att
     const switching = preview.navigate({...preview.data, itemID: "bound", isDetached: false, boundBlockID: "block"});
     assert.equal(preview.closed(), 0);
     preview.openBound();
+    assert.deepEqual(preview.backgroundUpdates, ["block"], "mobile row opening updates actions after assigning its bound block");
     assert.equal(preview.closed(), 0);
     preview.attributesReady();
     assert.equal(await switching, true);

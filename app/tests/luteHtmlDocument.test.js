@@ -1,6 +1,7 @@
 const {test} = require("node:test");
 const assert = require("node:assert/strict");
 require("../stage/protyle/js/lute/lute.min.js");
+const {Lute} = globalThis;
 
 test("HTML documents convert with DOCTYPE and leading comments", () => {
     for (const prefix of ["", "<!DOCTYPE html>", "<!-- comment --><!doctype html>"]) {

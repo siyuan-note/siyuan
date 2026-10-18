@@ -220,9 +220,9 @@ export const openAutomationMenu = async (options: {
     };
     const chooseField = (target: HTMLElement, fields: IAVColumn[], callback: (field: IAVColumn) => void) => {
         const menu = new Menu();
-        fields.forEach(field => menu.addItem({label: escapeHtml(field.name), click: () => callback(field)}));
+        fields.forEach(field => menu.addItem({iconHTML: "", label: escapeHtml(field.name), click: () => callback(field)}));
         if (!fields.length) {
-            menu.addItem({type: "readonly", label: lang.emptyContent});
+            menu.addItem({type: "readonly", iconHTML: "", label: lang.emptyContent});
         }
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height});

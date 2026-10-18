@@ -152,7 +152,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
         let menu: Menu;
         toggleMenu({target, build: () => {
             menu = new Menu();
-            items.forEach(item => menu.addItem({label: item.label, checked: item.value === current, click: () => select(item.value)}));
+            items.forEach(item => menu.addItem({iconHTML: "", label: item.label, checked: item.value === current, click: () => select(item.value)}));
         }, show: () => {
             const rect = target.getBoundingClientRect();
             menu.open({x: rect.left, y: rect.bottom, h: rect.height, target});

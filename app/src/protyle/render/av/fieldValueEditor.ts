@@ -341,6 +341,7 @@ export const openFieldRelationMenu = (target: HTMLElement, column: IAVColumn) =>
             return;
         }
         options.forEach(option => menu.addItem({
+            iconHTML: "",
             label: escapeHtml(option.content),
             checked: selectedSet.has(option.id),
             click: element => {
@@ -360,7 +361,7 @@ export const openFieldRelationMenu = (target: HTMLElement, column: IAVColumn) =>
             },
         }));
         if (!options.length) {
-            menu.addItem({type: "readonly", label: window.siyuan.languages.emptyContent});
+            menu.addItem({type: "readonly", iconHTML: "", label: window.siyuan.languages.emptyContent});
         }
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});

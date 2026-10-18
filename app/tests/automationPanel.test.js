@@ -598,6 +598,11 @@ const runCases = async (sources, css, mobile) => {
     const draftWrites = transactions.length;
     await click("[data-add-attribute] svg");
     assert.equal(transactions.length, draftWrites, "adding an attribute starts an unsaved draft");
+    const attributeName = get("[data-attr-name]");
+    assert.equal(document.activeElement, attributeName, "adding an attribute focuses its name");
+    assert.equal(attributeName.value, "custom-");
+    assert.deepEqual([attributeName.selectionStart, attributeName.selectionEnd], [7, 7],
+        "the caret starts after the custom attribute prefix");
     await change("[data-attr-name]", "custom-status");
     await click("[data-attr-operator]");
     fieldMenu.items.find(item => item.label === lang.filterOperatorIs).click();

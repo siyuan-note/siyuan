@@ -193,7 +193,9 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
             if (editing < 0 && source.attributes?.length >= 20) { return; }
             draft = editing >= 0 ? {...source.attributes[editing]} : {name: "custom-", operator: "exists"};
             renderEditor();
-            editor.querySelector<HTMLInputElement>("input").focus();
+            const input = editor.querySelector<HTMLInputElement>("[data-attr-name]");
+            input.focus();
+            if (editing < 0) { input.setSelectionRange(input.value.length, input.value.length); }
         } else if (target.dataset.removeFilter) {
             const index = Number(target.dataset.index);
             if (target.dataset.removeFilter === "type") { source.types.splice(index, 1); }

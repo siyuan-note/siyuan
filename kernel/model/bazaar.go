@@ -548,6 +548,10 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 
 // installBazaarPackage 下载并安装集市包
 func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName string) (meta installMeta, err error) {
+	return installBazaarPackageContext(context.Background(), pkgType, repoURL, repoHash, repoRef, packageName)
+}
+
+func installBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash, repoRef, packageName string) (meta installMeta, err error) {
 	installPath, jsonFileName, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {
 		return
@@ -556,7 +560,7 @@ func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName strin
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins"}
+	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins", Context: ctx}
 	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.Load().ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
@@ -657,7 +661,15 @@ var pushBazaarChanged = func(pkgType string) {
 
 // InstallBazaarPackage 安装集市包，themeOptions 仅在 pkgType 为 "themes" 时生效
 func InstallBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName string, themeOptions *ThemeInstallOptions) error {
-	meta, err := installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName)
+	return InstallBazaarPackageContext(context.Background(), pkgType, repoURL, repoHash, repoRef, packageName, themeOptions)
+}
+
+// InstallBazaarPackageContext 在下载、解压和替换前响应请求取消，替换完成后仍执行运行时刷新。
+func InstallBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash, repoRef, packageName string, themeOptions *ThemeInstallOptions) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	meta, err := installBazaarPackageContext(ctx, pkgType, repoURL, repoHash, repoRef, packageName)
 	if err != nil {
 		return err
 	}

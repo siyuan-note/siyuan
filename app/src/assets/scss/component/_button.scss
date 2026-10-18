@@ -49,6 +49,21 @@
     }
   }
 
+  &--progress-text {
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: var(--b3-progress, 0%);
+      border-radius: inherit;
+      background-color: var(--b3-theme-on-primary);
+      opacity: .2;
+      pointer-events: none;
+    }
+  }
+
   &--mid {
     padding: 2px 8px;
   }

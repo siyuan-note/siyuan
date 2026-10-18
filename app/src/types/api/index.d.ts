@@ -4114,6 +4114,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarIcon": {
         request: InstallBazaarIconRequestInput;
@@ -4124,6 +4125,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarPlugin": {
         request: InstallBazaarPluginRequestInput;
@@ -4134,6 +4136,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTemplate": {
         request: InstallBazaarTemplateRequestInput;
@@ -4144,6 +4147,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTheme": {
         request: InstallBazaarThemeRequestInput;
@@ -4154,6 +4158,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarWidget": {
         request: InstallBazaarWidgetRequestInput;

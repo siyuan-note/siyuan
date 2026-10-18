@@ -3,6 +3,7 @@ import {refreshSettingConfig} from "../../config/setting/sync";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
 import {closeNotebookLivePhotos} from "../../protyle/preview/livePhoto";
 import {
+    downloadProgress,
     forceQuit,
     processBacklinkIndexCommit,
     processSync,
@@ -186,6 +187,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 if (data.data.keys.includes(Constants.LOCAL_MOBILE_SIDE_PANEL)) {
                     dispatchMobileSidePanelConfigChange();
                 }
+                break;
+            case "downloadProgress":
+                downloadProgress(data.data);
                 break;
             case"progress":
                 progressLoading(data);

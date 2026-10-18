@@ -42,6 +42,7 @@ import {
 } from "./bazaar/packageConfig";
 import {genBazaarPackagePanelHTML} from "./bazaar/html";
 import {bindBazaarEvents} from "./bazaar/events";
+import {renderBazaarInstall} from "./bazaar/installTask";
 import {
     bindRatingUserChange,
     genCardRatingHTML,
@@ -1179,6 +1180,7 @@ type="checkbox">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
+        renderBazaarInstall(bazaar.element);
         const previewElement = readmeElement.querySelector<HTMLElement>(".item__preview");
         if (previewElement) {
             // 加载期间保留预览区域，仅在加载失败后移除容器

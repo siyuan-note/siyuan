@@ -163,3 +163,41 @@ func TestDeepSeekWebFailureCancellationAndSize(t *testing.T) {
 		}
 	})
 }
+
+func TestDeepSeekWebFetchPreservesTextStructureAndMarkdownEscapes(t *testing.T) {
+	content := "# Heading\n\nFirst **paragraph**.\n\nSecond paragraph with [link](https://example.com).\n\n" +
+		"- First item\n- Second item\n\n```html\n<button>I'm a button</button>\n<div>another line</div>\n```\n\n" +
+		"| Column one | Column two |\n| --- | --- |\n| Cell one | Cell two |\n\n" +
+		"\\# literal heading\n\n\\*literal asterisks\\*\n\nShort last paragraph."
+	body, _ := json.Marshal(map[string]string{"content": content})
+	mockDeepSeekWeb(t, 200, string(body), nil)
+	markdown, err := DeepSeekWebFetch(context.Background(), DeepSeekWebOptions{APIKey: "test-key"}, "https://8.8.8.8", "markdown")
+	if err != nil || markdown != content {
+		t.Fatalf("provider Markdown was rewritten: %q %v", markdown, err)
+	}
+	text, err := DeepSeekWebFetch(context.Background(), DeepSeekWebOptions{APIKey: "test-key"}, "https://8.8.8.8", "text")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{"Heading\n", "First paragraph.\n", "Second paragraph with link.\n",
+		"First item\n", "Second item\n", "<button>I'm a button</button>\n<div>another line</div>",
+		"Column one\tColumn two", "Cell one\tCell two", "# literal heading", "*literal asterisks*"} {
+		if !strings.Contains(text, fragment) {
+			t.Fatalf("text lost a block boundary or literal content %q: %q", fragment, text)
+		}
+	}
+	if strings.Contains(text, "**") || strings.Contains(text, "```") {
+		t.Fatalf("Markdown formatting leaked into plain text: %q", text)
+	}
+	for _, content := range []string{"Short content.", "<script>hidden()</script>"} {
+		body, _ := json.Marshal(map[string]string{"content": content})
+		mockDeepSeekWeb(t, 200, string(body), nil)
+		text, err := DeepSeekWebFetch(context.Background(), DeepSeekWebOptions{APIKey: "test-key"}, "https://8.8.8.8", "text")
+		if content == "Short content." && (err != nil || text != content) {
+			t.Fatalf("short content was rejected or changed: %q %v", text, err)
+		}
+		if content != "Short content." && (err == nil || text != "") {
+			t.Fatalf("empty sanitized content was accepted: %q %v", text, err)
+		}
+	}
+}

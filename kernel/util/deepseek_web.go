@@ -14,6 +14,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/siyuan-note/httpclient"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 const deepSeekWebURL = "https://api.deepseek.com/v1/tools/"
@@ -166,8 +168,9 @@ func DeepSeekWebFetch(ctx context.Context, options DeepSeekWebOptions, rawURL, f
 	}
 	result := *response.Content
 	if format == "text" {
-		engine := NewLute()
-		result, err = safeHTML2Text(engine, SanitizeHTML(engine.MarkdownStr("", result)))
+		engine := NewStdLute()
+		engine.SetCodeSyntaxHighlight(false)
+		result, err = deepSeekWebText(SanitizeHTML(engine.MarkdownStr("", result)))
 		if err != nil {
 			return "", errors.New("DeepSeek Markdown to text conversion failed")
 		}
@@ -176,4 +179,38 @@ func DeepSeekWebFetch(ctx context.Context, options DeepSeekWebOptions, rawURL, f
 		return "", errors.New("DeepSeek fetch returned no meaningful page text")
 	}
 	return truncateRunes(result, maxWebFetchChars), nil
+}
+
+// 按 HTML 结构提取文本，保留块间换行、表格单元格间隔和代码中的字面字符。
+func deepSeekWebText(source string) (string, error) {
+	document, err := html.Parse(strings.NewReader(source))
+	if err != nil {
+		return "", err
+	}
+	var output strings.Builder
+	var walk func(*html.Node, bool)
+	walk = func(node *html.Node, preserveWhitespace bool) {
+		preserveWhitespace = preserveWhitespace || node.Type == html.ElementNode &&
+			(node.DataAtom == atom.Pre || node.DataAtom == atom.Code)
+		if node.Type == html.TextNode {
+			if preserveWhitespace || strings.TrimSpace(node.Data) != "" || !strings.ContainsAny(node.Data, "\r\n\t") {
+				output.WriteString(node.Data)
+			}
+		}
+		for child := node.FirstChild; child != nil; child = child.NextSibling {
+			walk(child, preserveWhitespace)
+		}
+		if node.Type != html.ElementNode {
+			return
+		}
+		switch node.DataAtom {
+		case atom.P, atom.Div, atom.H1, atom.H2, atom.H3, atom.H4, atom.H5, atom.H6,
+			atom.Li, atom.Ul, atom.Ol, atom.Blockquote, atom.Pre, atom.Tr, atom.Table, atom.Br, atom.Hr:
+			output.WriteByte('\n')
+		case atom.Td, atom.Th:
+			output.WriteByte('\t')
+		}
+	}
+	walk(document, false)
+	return strings.TrimSpace(output.String()), nil
 }

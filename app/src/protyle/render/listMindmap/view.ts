@@ -856,6 +856,26 @@ export class ListMindmapView {
             this.options.host.querySelector<HTMLElement>(`[data-mindmap-source-id="${id}"]`);
     }
 
+    private getToolbarBounds() {
+        const bounds: DOMRect[] = [];
+        const toolbarStyle = getComputedStyle(this.toolbar);
+        if (this.toolbar.hidden || toolbarStyle.display === "none" || toolbarStyle.visibility === "hidden" ||
+            Number(toolbarStyle.opacity) === 0) {
+            return bounds;
+        }
+        // 顶部遮挡范围只包含可见控件及展开的缩放面板，不包含左侧空白区域。
+        this.toolbar.querySelectorAll<HTMLElement>(".block__icon, .mindmap-view__zoom, .mindmap-view__zoom-actions")
+            .forEach(control => {
+                const rect = control.getBoundingClientRect();
+                const style = getComputedStyle(control);
+                if (rect.width && rect.height && style.display !== "none" && style.visibility !== "hidden" &&
+                    Number(style.opacity) !== 0) {
+                    bounds.push(rect);
+                }
+            });
+        return bounds;
+    }
+
     public revealNode(id: string) {
         const node = this.nodeElements.get(id);
         if (!node || node.hidden) {
@@ -877,21 +897,12 @@ export class ListMindmapView {
             const x = rect.left < viewport.left + marginX ? viewport.left + marginX - rect.left :
                 rect.right > viewport.right - marginX ? viewport.right - marginX - rect.right : 0;
             let top = viewport.top + marginY;
-            const toolbarStyle = getComputedStyle(this.toolbar);
-            // 顶部仅避让可见控件及展开的缩放面板，保留工具栏左侧空白区域。
-            if (!this.toolbar.hidden && toolbarStyle.display !== "none" && toolbarStyle.visibility !== "hidden" &&
-                Number(toolbarStyle.opacity) !== 0) {
-                this.toolbar.querySelectorAll<HTMLElement>(".block__icon, .mindmap-view__zoom, .mindmap-view__zoom-actions")
-                    .forEach(control => {
-                        const bounds = control.getBoundingClientRect();
-                        const style = getComputedStyle(control);
-                        if (bounds.width && bounds.height && bounds.bottom > viewport.top && bounds.top < viewport.bottom &&
-                            rect.left + x < bounds.right && rect.right + x > bounds.left &&
-                            style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0) {
-                            top = Math.max(top, bounds.bottom + marginY);
-                        }
-                    });
-            }
+            this.getToolbarBounds().forEach(bounds => {
+                if (bounds.bottom > viewport.top && bounds.top < viewport.bottom &&
+                    rect.left + x < bounds.right && rect.right + x > bounds.left) {
+                    top = Math.max(top, bounds.bottom + marginY);
+                }
+            });
             let bottom = viewport.bottom - marginY;
             // 底部浮层按实际尺寸避让，横向定位后仍不相交的节点无需额外上移。
             [this.inspector, this.summaryControls].forEach(panel => {
@@ -2907,7 +2918,16 @@ export class ListMindmapView {
         // 先更新关系文字的位置，再按画布上下留白缩放并居中。
         this.draw();
         const {left, top, right, bottom} = this.contentBounds();
-        const insetTop = 16;
+        const viewport = this.viewport.getBoundingClientRect();
+        const scaleY = viewport.height / (this.viewport.offsetHeight || viewport.height) || 1;
+        let insetTop = 16;
+        // 整图适配在顶部控件下方缩放居中，外层缩放的屏幕尺寸换算为画布局部尺寸。
+        this.getToolbarBounds().forEach(bounds => {
+            if (bounds.right > viewport.left && bounds.left < viewport.right &&
+                bounds.bottom > viewport.top && bounds.top < viewport.bottom) {
+                insetTop = Math.max(insetTop, (bounds.bottom - viewport.top) / scaleY + 16);
+            }
+        });
         // 底部为菜单、外侧间距和横向滚动条留出空间，避免选中节点时画布跳动。
         const insetBottom = 66;
         const availableWidth = Math.max(1, width - 48);
@@ -2915,7 +2935,9 @@ export class ListMindmapView {
         this.scale = Math.min(maxScale, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
             availableHeight / Math.max(1, bottom - top))));
         this.offsetX = width / 2 - (left + right) * this.scale / 2;
-        this.offsetY = insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
+        // 达到最小缩放仍无法容纳整图时，优先保证顶部正文避开工具栏。
+        this.offsetY = (bottom - top) * this.scale > availableHeight ? insetTop - top * this.scale :
+            insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
         this.draw();
     }
 

@@ -1209,6 +1209,75 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenToolbarTransform,
         "a hidden toolbar does not move a visible node");
+
+    // 高脑图实际点击适应画布后，整图在工具栏下方缩放居中，重复点击保持稳定。
+    const fittingSource = document.createElement("div");
+    fittingSource.innerHTML = lute.Md2BlockDOM("* Root\n" +
+        Array.from({length: 20}, (_value, index) => `  * Branch ${index}\n`).join(""));
+    navigationView.update(api.readListMindmap(fittingSource.firstElementChild as HTMLElement));
+    navigationHost.style.height = "420px";
+    const activateNavigationFit = async (keyboard: boolean) => {
+        navigationHost.scrollIntoView({block: "start"});
+        const bounds = navigationFit().getBoundingClientRect();
+        const point = {x: Math.round(bounds.left + bounds.width / 2), y: Math.round(bounds.top + bounds.height / 2)};
+        if (keyboard) {
+            navigationFit().focus();
+        }
+        await require("electron").ipcRenderer.invoke("mindmap-view-native-input", keyboard ? [
+            {type: "keyDown", keyCode: "Return"}, {type: "char", keyCode: "\r"}, {type: "keyUp", keyCode: "Return"},
+        ] : [
+            {type: "mouseMove", ...point},
+            {type: "mouseDown", ...point, button: "left", clickCount: 1},
+            {type: "mouseUp", ...point, button: "left", clickCount: 1},
+        ]);
+        await settle();
+    };
+    for (const mode of ["hover", "focus", "fullscreen"]) {
+        for (const width of [760, 400, 300]) {
+            const outerScale = width === 300 ? .5 : 1;
+            navigationView.setReadOnly(width !== 400);
+            navigationHost.classList.toggle("fullscreen", mode === "fullscreen");
+            navigationHost.style.width = `${width}px`;
+            navigationHost.style.transform = `scale(${outerScale})`;
+            navigationToolbar.style.paddingTop = width === 400 ? "18px" : "";
+            navigationView.refreshLayout();
+            navigationHost.focus();
+            await moveNavigationPointer(mode === "hover");
+            navigationView.scale = 1;
+            navigationView.offsetX = 100;
+            navigationView.offsetY = -100;
+            navigationView.draw();
+            await activateNavigationFit(mode === "focus");
+            check.equal(getComputedStyle(navigationToolbar).opacity, "1");
+            check.ok(navigationView.scale < 1 && navigationView.scale > .15,
+                `the tall map needs an unconstrained fit, mode=${mode}, width=${width}, scale=${navigationView.scale}`);
+            const viewportBounds = navigationViewport.getBoundingClientRect();
+            const toolbarBottom = Math.max(...navigationView.getToolbarBounds().filter((bounds: DOMRect) =>
+                bounds.right > viewportBounds.left && bounds.left < viewportBounds.right).map((bounds: DOMRect) => bounds.bottom));
+            const fittedContent = navigationView.contentBounds();
+            const contentTop = viewportBounds.top + (fittedContent.top * navigationView.scale + navigationView.offsetY) * outerScale;
+            const contentBottom = viewportBounds.top + (fittedContent.bottom * navigationView.scale + navigationView.offsetY) * outerScale;
+            check.ok(contentTop >= toolbarBottom + 15 * outerScale,
+                `fit leaves the whole map below the toolbar, mode=${mode}, width=${width}`);
+            check.ok(contentBottom <= viewportBounds.bottom - 65 * outerScale, "fit preserves the bottom panel clearance");
+            const fittedTransform = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
+            await activateNavigationFit(mode === "focus");
+            check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
+                "repeated fit activation preserves scale and centering");
+        }
+    }
+    navigationHost.classList.remove("fullscreen");
+    navigationHost.style.width = "760px";
+    navigationHost.style.transform = "";
+    navigationToolbar.style.paddingTop = "";
+    navigationHost.focus();
+    navigationView.refreshLayout();
+    await moveNavigationPointer(false);
+    check.equal(getComputedStyle(navigationToolbar).opacity, "0");
+    navigationView.fit();
+    const hiddenFitBounds = navigationView.contentBounds();
+    check.ok(Math.abs(hiddenFitBounds.top * navigationView.scale + navigationView.offsetY - 16) < 1,
+        "fitting with a hidden toolbar keeps the normal top margin");
     navigationView.destroy();
     navigationHost.remove();
 

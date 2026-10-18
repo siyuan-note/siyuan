@@ -36,11 +36,13 @@ const runCases = async (sources, css, mobile) => {
     const transactions = [];
     const templatePreviews = [];
     const searches = [];
+    const scopePreviews = [];
+    const scopeRequests = [];
     let fieldMenu;
     let collectionTypeInput;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
-    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {},
+    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {}, blockPanels: [],
         menus: {menu: {element: document.createElement("div"), remove() {}}}};
     const mocks = {
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
@@ -71,6 +73,8 @@ const runCases = async (sources, css, mobile) => {
         "dialog/anchoredInput": {getAnchoredInputMask() {}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
+        "block/Panel": {BlockPanel: class {constructor(options) {scopePreviews.push(options);}}},
+        "util/pathName": {movePathTo: options => scopeRequests.push(options)},
         "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
             (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
             url.includes("reviewAttributeViewCollection") ? {code: 0, data: {ruleVersion: "snapshot", matched: 7, unmatched: 7, unknown: 6, hasMore: false,
@@ -122,6 +126,14 @@ const runCases = async (sources, css, mobile) => {
     };
     const click = async selector => {get(selector).dispatchEvent(new MouseEvent("click", {bubbles: true})); await tick();};
     const latest = () => transactions.at(-1).perform[0].data.rules[0];
+    const assertSearchAlignment = (popup, inputSelector, listSelector) => {
+        const input = popup.querySelector(inputSelector).getBoundingClientRect();
+        const list = popup.querySelector(listSelector);
+        const row = list.querySelector(".b3-list-item:not(.fn__none)").getBoundingClientRect();
+        assert.ok(Math.abs(input.left - row.left) <= 1, "search and list entries share their left edge");
+        assert.ok(Math.abs(input.right - row.right - (list.offsetWidth - list.clientWidth)) <= 1,
+            `search and entries share their right inset: ${input.right}/${row.right}`);
+    };
     const assertChipActionSpacing = (listSelector, buttonSelector) => {
         const chips = Array.from(get(listSelector).querySelectorAll(".b3-chip"));
         assert.ok(chips.length > 0, "spacing checks require visible chips");
@@ -160,6 +172,7 @@ const runCases = async (sources, css, mobile) => {
     }
     await click('[data-action="rules"]');
     const rulePopup = fieldMenu.element;
+    assertSearchAlignment(rulePopup, "[data-search]", "[data-rules]");
     rulePopup.querySelector("[data-rename]").click();
     const renameInput = rulePopup.querySelector("[data-rules] input");
     renameInput.value = "Cancelled";
@@ -460,6 +473,35 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(get("[data-source-conditions]").closest("section").textContent.includes(lang.automationBlockConditions), true);
     assert.equal(menu.querySelector("[data-add-condition]"), null);
     assert.ok(get("[data-scope]"));
+    assert.equal(get("[data-scope-control] > .av__automation-control-label").textContent, lang.automationCollectionScope);
+    assert.equal(get("[data-scope-control] > .av__automation-control-label").closest("button"), null);
+    assert.ok(get("[data-scope]").textContent.includes(lang.addAttr), "scope has its own add button like the other groups");
+    assert.ok(get("[data-scope]").compareDocumentPosition(get(".av__automation-source-list")) & Node.DOCUMENT_POSITION_PRECEDING,
+        "the add scope action follows existing entries");
+    const writesBeforeScopePreview = transactions.length;
+    const sourceButton = get("[data-preview-document]");
+    assert.equal(sourceButton.tagName, "BUTTON");
+    await click("[data-preview-document]");
+    sourceButton.focus();
+    assert.equal(document.activeElement, sourceButton, "scope document titles are keyboard focusable");
+    await require("electron").ipcRenderer.invoke("automation-enter");
+    await tick();
+    assert.equal(scopePreviews.length, 2, "scope documents support pointer and native keyboard button activation");
+    assert.equal(scopePreviews[0].targetElement, sourceButton);
+    assert.deepEqual(scopePreviews[0].refDefs, [{refID: "document"}]);
+    assert.equal(scopePreviews[0].isBacklink, false);
+    assert.equal(menu.isConnected, true, "preview preserves the automation panel");
+    assert.ok(menu.querySelector("[data-trigger]"));
+    assert.equal(transactions.length, writesBeforeScopePreview, "preview does not change collection configuration");
+    assert.equal(get(".popover__block").dataset.id, "document", "the document icon keeps its hover preview");
+    await click("[data-scope]");
+    scopeRequests[0].cb(["/", "/new-document.sy", "/new-document.sy"], ["notebook", "notebook", "notebook"]);
+    await tick();
+    assert.deepEqual(latest().blockSource.notebookIDs, ["notebook"]);
+    assert.deepEqual(latest().blockSource.documentIDs, ["document", "new-document"], "scope additions retain existing entries and deduplicate");
+    await click('[data-remove="document"][data-index="1"]');
+    await click('[data-remove="notebook"]');
+    assert.deepEqual(latest().blockSource.documentIDs, ["document"]);
     assert.equal(get('[data-action="preview-collection"]').disabled, true);
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     get("[data-enabled]").click();
@@ -500,6 +542,34 @@ const runCases = async (sources, css, mobile) => {
     }
     await click("[data-types] svg");
     const typePopup = fieldMenu.element;
+    const typeList = typePopup.querySelector("[data-type-list]");
+    const customCallout = typePopup.querySelector("[data-custom-callout]");
+    assert.equal(typeList.lastElementChild, customCallout, "custom callout is the final scrollable list entry");
+    for (const width of mobile ? [360, 740] : [420, 1000]) {
+        await require("electron").ipcRenderer.invoke("automation-size", width, 900);
+        for (const name of ["daylight", "midnight"]) {
+            theme.textContent = sources[name];
+            for (const size of [16, 24]) {
+                typePopup.style.fontSize = `${size}px`;
+                typeList.scrollTop = 0;
+                await tick();
+                assertSearchAlignment(typePopup, "[data-type-search]", "[data-type-list]");
+                const first = typeList.firstElementChild.getBoundingClientRect();
+                for (const item of typeList.children) {
+                    assert.ok(Math.abs(item.getBoundingClientRect().width - first.width) <= 1, "all type rows stretch to the same full width");
+                }
+                assert.ok(typeList.scrollHeight > typeList.clientHeight, "long type lists scroll inside the popup");
+                assert.ok(customCallout.getBoundingClientRect().top > typeList.getBoundingClientRect().bottom,
+                    "custom callout is not pinned below the search list");
+                typeList.scrollTop = typeList.scrollHeight;
+                assert.ok(customCallout.getBoundingClientRect().bottom <= typeList.getBoundingClientRect().bottom + 1,
+                    "the final custom action is reachable by scrolling");
+            }
+            typeList.scrollTop = 0;
+            await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-types`);
+        }
+    }
+    typePopup.style.fontSize = "";
     typePopup.querySelector('[data-collection-type="l"]').click();
     assert.deepEqual(latest().blockSource.types, ["l"]);
     assertChipActionSpacing("[data-type-chips]", "[data-types]");
@@ -672,10 +742,16 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             ipcMain.handle("automation-size", (_event, width, height) => win.setContentSize(width, height));
+            ipcMain.handle("automation-enter", () => {
+                win.webContents.focus();
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "ENTER"});
+                win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "ENTER"});
+            });
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-types)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());

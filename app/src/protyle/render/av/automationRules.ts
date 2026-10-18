@@ -17,9 +17,9 @@ export const openAutomationRules = (target: HTMLElement, rules: RuleSummary[], c
     let menu: Menu;
     toggleMenu({target, build: () => {
         menu = new Menu();
-    menu.addItem({type: "empty", label: `<div class="b3-menu__filter fn__flex-column">
+    menu.addItem({type: "empty", label: `<div class="b3-menu__filter av__automation-menu fn__flex-column">
 <input class="b3-text-field" data-search placeholder="${escapeAttr(lang.searchPlaceholder)}" aria-label="${escapeAttr(lang.search)}">
-<div class="fn__hr"></div><div class="b3-list b3-list--background fn__flex-1" data-rules></div></div>`, bind: element => {
+<div class="b3-list b3-list--background av__automation-menu-list fn__flex-1" data-rules></div></div>`, bind: element => {
         const search = element.querySelector<HTMLInputElement>("[data-search]");
         const list = element.querySelector<HTMLElement>("[data-rules]");
         const render = () => {

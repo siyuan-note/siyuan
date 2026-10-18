@@ -3339,3 +3339,21 @@ img.av__cellassetimg {
   max-height: 60vh;
   overflow: auto;
 }
+
+.av__automation-menu {
+  > .b3-text-field {
+    flex-shrink: 0;
+    margin: 0 8px 4px;
+  }
+}
+
+.av__automation-menu-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+
+  > .b3-list-item {
+    flex-shrink: 0;
+  }
+}

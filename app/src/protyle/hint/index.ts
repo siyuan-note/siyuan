@@ -19,6 +19,7 @@ import {
 } from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
+import {searchRef} from "./searchRef";
 import {getSlashEntryKey, TSlashMenuItem} from "./slashMenu";
 import {getFrequentSlashItems, recordSlashExecution} from "./frequentSlashStorage";
 import {escapeAttr} from "../../util/escape";
@@ -891,27 +892,33 @@ export class Hint {
         if (isEncryptedBox(protyle.notebookId)) {
             searchParam.notebook = protyle.notebookId;
         }
-        fetchPost("/api/search/searchRefBlock", searchParam, (response) => {
-            createTarget.promise.then((hideConfiguredCreate) => {
+        searchRef(searchParam).then((response) => {
+            if (!response) {
+                if (createTarget.isCurrent()) {
+                    this.genHTML([], protyle, true, source);
+                }
+                return;
+            }
+            return createTarget.promise.then((hideConfiguredCreate) => {
                 if (!createTarget.isCurrent()) {
                     return;
                 }
                 let searchHTML = "";
-                if (response.data.newDoc && !hideConfiguredCreate) {
-                    const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
+                if (response.newDoc && !hideConfiguredCreate) {
+                    const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.k}${Lute.Caret}'))`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.k}</mark></span></div></button>`;
                 }
-                if (response.data.newDoc) {
-                    const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
+                if (response.newDoc) {
+                    const newFileName = Lute.UnEscapeHTMLStr(response.k);
                     const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.k}</mark></span></div></button>`;
                     const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div></button>`;
+<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.k}</mark></span></div></button>`;
                 }
-                response.data.blocks.forEach((item: IBlock, index: number) => {
+                response.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;
                     if (source === "av") {
                         // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
@@ -933,6 +940,10 @@ ${genHintItemHTML(item)}
                 this.element.lastElementChild.innerHTML = searchHTML;
                 setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right));
             });
+        }).catch(() => {
+            if (createTarget.isCurrent()) {
+                this.genHTML([], protyle, true, source);
+            }
         });
     }
 

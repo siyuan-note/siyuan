@@ -458,22 +458,26 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 		if 32 < len(refs) {
 			refs = refs[:32]
 		}
-		var btsID []string
+		var defBlockIDs []string
 		for _, ref := range refs {
-			btsID = append(btsID, ref.DefBlockRootID)
+			defBlockIDs = append(defBlockIDs, ref.DefBlockID)
 		}
-		btsID = gulu.Str.RemoveDuplicatedElem(btsID)
-		bts := treenode.GetBlockTreesInBox(btsID, boxID)
+		bts := treenode.GetBlockTreesInBox(defBlockIDs, boxID)
 
 		for _, ref := range refs {
-			tree := cachedTrees[ref.DefBlockRootID]
+			// 按目标块的当前索引定位文档，兼容引用记录中尚未更新的所属文档信息。
+			bt := bts[ref.DefBlockID]
+			if nil == bt {
+				continue
+			}
+			tree := cachedTrees[bt.RootID]
 			if nil == tree {
-				tree, _ = loadTreeByBlockTree(bts[ref.DefBlockRootID])
+				tree, _ = loadTreeByBlockTree(bt)
 			}
 			if nil == tree {
 				continue
 			}
-			cachedTrees[ref.RootID] = tree
+			cachedTrees[bt.RootID] = tree
 
 			node := treenode.GetNodeInTree(tree, ref.DefBlockID)
 			if nil == node {

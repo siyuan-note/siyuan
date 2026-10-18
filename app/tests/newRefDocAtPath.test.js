@@ -58,6 +58,7 @@ const fixture = () => {
         registerBuiltinSlashHint: value => value,
         path: path,
     };
+    Object.assign(deps, load("protyle/hint/searchRef", deps, window, Lute));
     const paths = load("util/pathName", {...deps, path}, window, Lute);
     Object.assign(deps, load("util/newFileSelection", deps, window, Lute), {
         ...paths,

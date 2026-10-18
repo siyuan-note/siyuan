@@ -7,6 +7,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {isDisabledFeature, updateHotkeyTip} from "../util/compatibility";
 import {blockRender} from "../render/blockRender";
 import {Constants} from "../../constants";
+import {searchRef} from "./searchRef";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {focusBlock, getEditorRange} from "../util/selection";
@@ -726,42 +727,49 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
         refParam.exactDocTitle = true;
     }
     const dailyNotes = source === "hint" ? getDailyNoteHints(key, protyle).catch((): IHintData[] => []) : Promise.resolve([] as IHintData[]);
-    fetchPost("/api/search/searchRefBlock", refParam, (response) => {
-        Promise.all([createTarget.promise, dailyNotes]).then(([hideConfiguredCreate, dateHints]) => {
+    searchRef(refParam).then((response) => {
+        if (!response) {
+            if (createTarget.isCurrent()) {
+                protyle.hint.genHTML([], protyle, true, source);
+            }
+            return;
+        }
+        return Promise.all([createTarget.promise, dailyNotes]).then(([hideConfiguredCreate, dateHints]) => {
             if (!createTarget.isCurrent()) {
                 return;
             }
-            if (response.code !== 0 || (closeContext && !protyle.hint.isRefCloseContextCurrent(protyle, closeContext))) {
+            if (closeContext && !protyle.hint.isRefCloseContextCurrent(protyle, closeContext)) {
+                protyle.hint.genHTML([], protyle, true, source);
                 return;
             }
             const dataList: IHintData[] = [];
             let createItemCount = 0;
             dataList.push(...dateHints);
             createItemCount += dateHints.length;
-            if (response.data.newDoc) {
-                const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
+            if (response.newDoc) {
+                const newFileName = Lute.UnEscapeHTMLStr(response.k);
                 if (!hideConfiguredCreate) {
                     dataList.push({
                         value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
                         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div>`,
+<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.k}</mark></span></div>`,
                     });
                     createItemCount++;
                 }
                 dataList.push({
                     value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
                     html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div>`,
+<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.k}</mark></span></div>`,
                 });
                 createItemCount++;
                 dataList.push({
                     value: `((newFileAtPath "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
                     html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div>`,
+<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.k}</mark></span></div>`,
                 });
                 createItemCount++;
             }
-            response.data.blocks.forEach((item: IBlock) => {
+            response.blocks.forEach((item: IBlock) => {
                 const name = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");
                 let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${name}</span>`;
                 if (source === "search") {
@@ -780,7 +788,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             });
             if (closeContext) {
                 // 依次选择标题完全一致的文档、日记、新建文档
-                const commitItem = response.data.blocks.length > 0 ? dataList[createItemCount] :
+                const commitItem = response.blocks.length > 0 ? dataList[createItemCount] :
                     (createItemCount > 0 ? dataList[0] : undefined);
                 if (commitItem) {
                     protyle.hint.fillRefClose(commitItem.value, protyle, closeContext);
@@ -801,6 +809,10 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             }
             protyle.hint.genHTML(dataList, protyle, true, source);
         });
+    }).catch(() => {
+        if (createTarget.isCurrent()) {
+            protyle.hint.genHTML([], protyle, true, source);
+        }
     });
     return [];
 };

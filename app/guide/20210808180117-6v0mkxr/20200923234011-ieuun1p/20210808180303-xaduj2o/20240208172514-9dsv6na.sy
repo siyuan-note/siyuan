@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261018122129"
+		"updated": "20261018144949"
 	},
 	"Children": [
 		{
@@ -4554,12 +4554,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017204817-jfdo45b",
-				"updated": "20261017234820"
+				"updated": "20261018144949"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The Collect menu beside the tag conditions offers Default, Block containing the tag, and Container block. Default prefers the enclosing list item when its first content block contains the tags and it meets the type and attribute conditions; otherwise it uses the eligible tagged block. Selecting both paragraph and list-item types still produces only one target for the same tag source. Block containing the tag filters and collects the actual tagged block by its type and attributes. Container block collects the nearest container meeting the selected type and attribute conditions, deduplicating by block ID; documents are eligible only when explicitly selected. All required tags must occur in the same source block, rather than being combined across children. With no tag conditions, this option has no effect. Preview shows the final collection targets. Changing this option preserves existing entries and fields without converting their bound blocks. The two explicit modes require automation format 4; older formats remain readable, and older clients reject format 4 without rewriting the database."
+					"Data": "The Collect menu above Block types offers Default, Block containing the tag, and Container block. Default prefers the enclosing list item when its first content block contains the tags and it meets the type and attribute conditions; otherwise it uses the eligible tagged block. Selecting both paragraph and list-item types still produces only one target for the same tag source. Block containing the tag filters and collects the actual tagged block by its type and attributes. Container block collects the nearest container meeting the selected type and attribute conditions, deduplicating by block ID; documents are eligible only when explicitly selected. All required tags must occur in the same source block, rather than being combined across children. With no tag conditions, this option has no effect. Preview shows the final collection targets. Changing this option preserves existing entries and fields without converting their bound blocks. The two explicit modes require automation format 4; older formats remain readable, and older clients reject format 4 without rewriting the database."
 				}
 			]
 		},

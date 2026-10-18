@@ -52,13 +52,21 @@ const runCases = async (sources, css, mobile) => {
             addItem(item) {
                 this.items.push(item);
                 if (item.bind) {
-                    this.element.innerHTML = item.label;
-                    item.bind(this.element);
+                    this.element.innerHTML = '<div class="b3-menu__items"><div></div></div>';
+                    const custom = this.element.firstElementChild.firstElementChild;
+                    custom.innerHTML = item.label;
+                    item.bind(custom);
                 }
             }
             open() {
                 document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
-                this.element.className = "b3-menu";
+                this.element.className = `b3-menu${mobile ? " b3-menu--fullscreen b3-menu--sheet" : ""}`;
+                if (mobile) {
+                    this.element.style.top = "auto";
+                    this.element.style.bottom = "0";
+                    this.element.style.height = "56vh";
+                    this.element.style.transform = "translateY(0)";
+                }
                 document.body.append(this.element);
                 fieldMenu = {items: this.items, element: this.element};
             }
@@ -147,6 +155,11 @@ const runCases = async (sources, css, mobile) => {
         assert.ok(Math.abs(input.left - row.left) <= 1, "search and list entries share their left edge");
         assert.ok(Math.abs(input.right - row.right - (list.offsetWidth - list.clientWidth)) <= 1,
             `search and entries share their right inset: ${input.right}/${row.right}`);
+        const items = list.closest(".b3-menu__items");
+        const filter = list.closest(".b3-menu__filter");
+        const edge = popup.getBoundingClientRect().left + parseFloat(getComputedStyle(popup).borderLeftWidth) +
+            parseFloat(getComputedStyle(items).paddingLeft) + parseFloat(getComputedStyle(filter).paddingLeft);
+        assert.ok(Math.abs(input.left - edge) <= 1, "search and rows use the common menu inset without a second margin");
     };
     const assertChipActionSpacing = (listSelector, buttonSelector) => {
         const chips = Array.from(get(listSelector).querySelectorAll(".b3-chip"));
@@ -486,6 +499,11 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(get("[data-rule-change-tip]").textContent, lang.automationCollectionRuleChangeTip);
     assert.equal(get("[data-source-conditions]").closest("section").textContent.includes(lang.automationBlockConditions), true);
     assert.equal(menu.querySelector("[data-add-condition]"), null);
+    const targetControl = get("[data-tag-target]").closest(".av__automation-control");
+    const typeControl = get("[data-types]").closest(".av__automation-control");
+    const tagControl = get("[data-tags]").closest(".av__automation-control");
+    assert.equal(targetControl.nextElementSibling, typeControl, "collection target precedes block types");
+    assert.equal(typeControl.nextElementSibling, tagControl, "tag conditions follow block types");
     assert.ok(get("[data-scope]"));
     assert.equal(get("[data-scope-control] > .av__automation-control-label").textContent, lang.automationCollectionScope);
     assert.equal(get("[data-scope-control] > .av__automation-control-label").closest("button"), null);
@@ -568,6 +586,14 @@ const runCases = async (sources, css, mobile) => {
                 typeList.scrollTop = 0;
                 await tick();
                 assertSearchAlignment(typePopup, "[data-type-search]", "[data-type-list]");
+                const popupWidth = typePopup.getBoundingClientRect().width;
+                if (!mobile) {
+                    assert.ok(popupWidth <= (size === 16 ? 242 : 338), "type menu stays compact while scaling for larger text");
+                }
+                assert.ok(popupWidth <= window.innerWidth, "compact menu stays within narrow viewports");
+                const popupRect = typePopup.getBoundingClientRect();
+                assert.ok(popupRect.top >= -1 && popupRect.bottom <= window.innerHeight + 1,
+                    "opened search menus stay vertically inside the viewport");
                 const first = typeList.firstElementChild.getBoundingClientRect();
                 for (const item of typeList.children) {
                     assert.ok(Math.abs(item.getBoundingClientRect().width - first.width) <= 1, "all type rows stretch to the same full width");
@@ -578,9 +604,9 @@ const runCases = async (sources, css, mobile) => {
                 typeList.scrollTop = typeList.scrollHeight;
                 assert.ok(customCallout.getBoundingClientRect().bottom <= typeList.getBoundingClientRect().bottom + 1,
                     "the final custom action is reachable by scrolling");
+                typeList.scrollTop = 0;
+                await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-${size === 16 ? "types" : "types-large"}`);
             }
-            typeList.scrollTop = 0;
-            await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-types`);
         }
     }
     typePopup.style.fontSize = "";
@@ -797,7 +823,7 @@ if (process.versions.electron && process.type === "browser") {
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-review-unknown|-review-rules|-types)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-review-unknown|-review-rules|-types|-types-large)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());

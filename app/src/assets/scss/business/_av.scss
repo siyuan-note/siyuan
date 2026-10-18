@@ -3343,7 +3343,7 @@ img.av__cellassetimg {
 .av__automation-menu {
   > .b3-text-field {
     flex-shrink: 0;
-    margin: 0 8px 4px;
+    margin: 0 0 4px;
   }
 }
 
@@ -3355,7 +3355,14 @@ img.av__cellassetimg {
 
   > .b3-list-item {
     flex-shrink: 0;
+    margin-inline: 0;
   }
+}
+
+.b3-menu:not(.b3-menu--fullscreen) .av__automation-menu--types {
+  width: 14em;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 32px));
 }
 
 .av__collection-manager {

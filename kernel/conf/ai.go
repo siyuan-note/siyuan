@@ -61,10 +61,7 @@ func (web *AIWeb) Normalize() {
 		web.FetchProvider = "direct"
 	}
 	web.APIKey = strings.TrimSpace(web.APIKey)
-	if web.Timeout < 1 {
-		web.Timeout = 30
-	}
-	web.Timeout = min(web.Timeout, 600)
+	web.Timeout = util.NormalizeWebTimeout(web.Timeout)
 }
 
 // DefaultAgentConfirmTimeout 是智能体确认超时时间的默认值（秒），也用于智能体提问的等待时长。

@@ -48,7 +48,11 @@ const (
 // 防止智能体被诱导发起 SSRF 攻击。web_fetch 与 http_request 共用此校验。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rg26-cg95-gq6p
 func CheckHostSSRF(host string) error {
-	ips, err := net.LookupIP(host)
+	return checkHostSSRFContext(context.Background(), host)
+}
+
+func checkHostSSRFContext(ctx context.Context, host string) error {
+	ips, err := net.DefaultResolver.LookupIP(ctx, "ip", host)
 	if err != nil {
 		return errors.New("failed to resolve host: " + err.Error())
 	}

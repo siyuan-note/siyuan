@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -34,6 +35,8 @@ const (
 	defaultExaURL     = "https://mcp.exa.ai/mcp"
 	maxWebSearchChars = 50000
 )
+
+var webSearchHTTPClient = httpclient.NewBrowserRequest().GetClient().Clone().SetTimeout(0)
 
 type mcpRequest struct {
 	JSONRPC string    `json:"jsonrpc"`
@@ -68,10 +71,12 @@ type mcpContent struct {
 }
 
 func WebSearch(query, exaApiKey string) (string, error) {
-	return WebSearchContext(context.Background(), query, exaApiKey)
+	return WebSearchContext(context.Background(), query, exaApiKey, 0)
 }
 
-func WebSearchContext(ctx context.Context, query, exaApiKey string) (string, error) {
+func WebSearchContext(ctx context.Context, query, exaApiKey string, timeout int) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(NormalizeWebTimeout(timeout))*time.Second)
+	defer cancel()
 	exaURL := defaultExaURL
 	if exaApiKey != "" {
 		exaURL += "?exaApiKey=" + url.QueryEscape(exaApiKey)
@@ -92,7 +97,8 @@ func WebSearchContext(ctx context.Context, query, exaApiKey string) (string, err
 		},
 	}
 
-	resp, err := httpclient.NewBrowserRequest().SetContext(ctx).SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody).Post(exaURL)
+	resp, err := webSearchHTTPClient.R().SetRetryCount(1).SetRetryFixedInterval(3*time.Second).
+		SetContext(ctx).SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody).Post(exaURL)
 	if err != nil {
 		return "", errors.New("web search failed: " + err.Error())
 	}

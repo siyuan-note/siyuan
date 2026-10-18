@@ -28,6 +28,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -40,10 +41,12 @@ const (
 )
 
 func WebFetch(rawURL, format string) (string, error) {
-	return WebFetchContext(context.Background(), rawURL, format)
+	return WebFetchContext(context.Background(), rawURL, format, 0)
 }
 
-func WebFetchContext(ctx context.Context, rawURL, format string) (string, error) {
+func WebFetchContext(ctx context.Context, rawURL, format string, timeout int) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(NormalizeWebTimeout(timeout))*time.Second)
+	defer cancel()
 	u, err := url.Parse(rawURL)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
 		return "", errors.New("URL must start with http:// or https://")
@@ -52,7 +55,7 @@ func WebFetchContext(ctx context.Context, rawURL, format string) (string, error)
 		return "", errors.New("URL has no host")
 	}
 
-	if err := CheckHostSSRF(u.Hostname()); err != nil {
+	if err := checkHostSSRFContext(ctx, u.Hostname()); err != nil {
 		return "", err
 	}
 
@@ -61,7 +64,10 @@ func WebFetchContext(ctx context.Context, rawURL, format string) (string, error)
 		return "", err
 	}
 	req.Header.Set("Accept", "text/markdown, text/html;q=0.9, application/xhtml+xml;q=0.9, application/xml;q=0.8, */*;q=0.7")
-	resp, err := ssrfSafeClient.Do(req)
+	// 复用安全传输层，由请求上下文控制整次抓取，避免共享客户端的默认期限截断较长配置。
+	client := *ssrfSafeClient
+	client.Timeout = 0
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", errors.New("fetch failed: " + err.Error())
 	}

@@ -11,13 +11,15 @@ if (!process.versions.electron) {
         const {installWebPageFetchIPC} = require("./webPageFetch");
         let handler;
         let calls = 0;
+        const timeouts = [];
         const frame = {};
         const sender = {mainFrame: frame, session: {resolveProxy: async url => "PROXY " + url}};
         installWebPageFetchIPC({handle: (name, callback) => {
             assert.equal(name, "siyuan-web-page-fetch");
             handler = callback;
-        }}, async (url, resolveProxy, caller) => {
+        }}, async (url, resolveProxy, caller, timeoutMs) => {
             calls++;
+            timeouts.push(timeoutMs);
             assert.equal(caller, sender);
             return resolveProxy(url);
         }, candidate => candidate === sender);
@@ -29,6 +31,10 @@ if (!process.versions.electron) {
         assert.equal(calls, 0);
         assert.equal(await handler({sender, senderFrame: frame}, {url: "https://example.com"}), "PROXY https://example.com");
         assert.equal(calls, 1);
+        for (const timeout of [-1, 0, 1, 60, 600, 999, "60", null]) {
+            await handler({sender, senderFrame: frame}, {url: "https://example.com", timeout});
+        }
+        assert.deepEqual(timeouts, [undefined, undefined, undefined, 1000, 60000, 600000, 600000, undefined, undefined]);
     });
     test("rendered page fetch executes JavaScript with isolated sessions and bounded failures", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-web-fetch-test-"));
@@ -69,6 +75,8 @@ if (!process.versions.electron) {
                 </script>`);
             } else if (request.url === "/body") {
                 setTimeout(() => response.end(`<p>JavaScript rendered content ${"dynamic text ".repeat(12)}</p><pre><code><span>const</span> value = <span>42</span>;</code></pre><a href="/next">Next page</a><p>${typeof require} fixture</p>`), 150);
+            } else if (request.url === "/delayed") {
+                setTimeout(() => response.end(`<main>${"Delayed content ".repeat(12)}</main>`), 400);
             } else if (request.url === "/environment") {
                 response.end(`<main><script>alert("Hidden page dialog"); document.write("Node: " + typeof require + " " + typeof process +
                     " Network: " + ["RTCPeerConnection", "webkitRTCPeerConnection", "WebTransport", "WebSocket"].map(name => typeof window[name]).join(" "));
@@ -141,6 +149,8 @@ if (!process.versions.electron) {
             assert.match(markdown, /# Heading/);
             assert.match(markdown, /const value = 42;/);
             assert.doesNotMatch(markdown, /setTimeout|<script/);
+            await assert.rejects(fetchPage("http://public.test/delayed", resolveProxy, undefined, 100), /timed out/);
+            assert.match((await fetchPage("http://public.test/delayed", resolveProxy, undefined, 1500)).text, /Delayed content/);
             const environment = await fetchPage("http://public.test/environment", resolveProxy);
             assert.match(environment.text, /Node: undefined undefined/);
             assert.match(environment.text, /Network: undefined undefined undefined undefined/);

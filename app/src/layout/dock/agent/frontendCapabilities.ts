@@ -120,7 +120,7 @@ if (!mobileFrontend && !isBrowser()) {
             }
             try {
                 const page: {html: string, text: string, plain: boolean} = await require("electron").ipcRenderer.invoke(
-                    "siyuan-web-page-fetch", {url: args.url});
+                    "siyuan-web-page-fetch", {url: args.url, timeout: window.siyuan.config.ai.web?.timeout});
                 const content = page.plain || args.format === "text" ? page.text : Lute.New().HTML2Md(page.html);
                 if (!content.trim()) {
                     return {error: "No meaningful content found in the rendered page"};

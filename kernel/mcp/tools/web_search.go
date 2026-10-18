@@ -50,7 +50,7 @@ func webSearchHandler(ctx context.Context, args map[string]any) (CallToolResult,
 	case "deepseek":
 		result, err = util.DeepSeekWebSearch(ctx, util.DeepSeekWebOptions{APIKey: config.APIKey, Timeout: config.Timeout}, query)
 	case "exa", "":
-		result, err = util.WebSearchContext(ctx, query, "")
+		result, err = util.WebSearchContext(ctx, query, "", config.Timeout)
 	default:
 		err = fmt.Errorf("unknown web search provider: %s", config.SearchProvider)
 	}

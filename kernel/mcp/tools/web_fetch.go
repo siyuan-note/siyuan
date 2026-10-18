@@ -55,7 +55,7 @@ func webFetchHandler(ctx context.Context, args map[string]any) (CallToolResult, 
 	case "deepseek":
 		result, err = util.DeepSeekWebFetch(ctx, util.DeepSeekWebOptions{APIKey: config.APIKey, Timeout: config.Timeout}, rawURL, format)
 	case "direct", "":
-		result, err = util.WebFetchContext(ctx, rawURL, format)
+		result, err = util.WebFetchContext(ctx, rawURL, format, config.Timeout)
 	default:
 		err = fmt.Errorf("unknown web fetch provider: %s", config.FetchProvider)
 	}

@@ -53,7 +53,7 @@ const extractPageDOM = () => {
 const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000, idleMs = 500,
     postLoadMs = 5000, extractionMs = 2000}) => {
     let active = 0;
-    return async (rawURL, resolveProxy, caller) => {
+    return async (rawURL, resolveProxy, caller, requestTimeoutMs = timeoutMs) => {
         const url = parsePageURL(rawURL);
         if (active >= 3) {
             throw new Error("Too many concurrent rendered page fetches; retry after a current fetch finishes");
@@ -248,7 +248,7 @@ const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000
                     }
                 });
                 contents.once("render-process-gone", () => fail(new Error("Page renderer exited")));
-                totalTimer = setTimeout(() => fail(new Error("Page fetch timed out")), timeoutMs);
+                totalTimer = setTimeout(() => fail(new Error("Page fetch timed out")), requestTimeoutMs);
                 window.loadURL(url.href).catch(error => {
                     if (error.code !== "ERR_ABORTED" && error.code !== "ERR_BLOCKED_BY_CLIENT") {
                         fail(error);
@@ -284,7 +284,9 @@ const installWebPageFetchIPC = (ipcMain, fetchPage, isTrustedSender) => {
             typeof data?.url !== "string" || data.url.length > 8192) {
             throw new Error("Rendered page fetch is unavailable");
         }
-        return fetchPage(data.url, url => event.sender.session.resolveProxy(url), event.sender);
+        const timeoutMs = Number.isFinite(data.timeout) && data.timeout >= 1 ?
+            Math.min(Math.floor(data.timeout), 600) * 1000 : undefined;
+        return fetchPage(data.url, url => event.sender.session.resolveProxy(url), event.sender, timeoutMs);
     });
 };
 

@@ -45,11 +45,7 @@ func deepSeekWebRequest(ctx context.Context, options DeepSeekWebOptions, action 
 	if key == "" {
 		return errors.New("DeepSeek web API key is not configured")
 	}
-	timeout := options.Timeout
-	if timeout < 1 {
-		timeout = 30
-	}
-	timeout = min(timeout, 600)
+	timeout := NormalizeWebTimeout(options.Timeout)
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 	defer cancel()
 	body, err := json.Marshal(payload)

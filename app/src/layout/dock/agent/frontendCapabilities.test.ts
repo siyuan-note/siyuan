@@ -23,7 +23,7 @@ for (const platform of ["desktop", "browser", "mobile"]) {
         const fetchedPages: unknown[] = [];
         let page = {html: "<main>Rendered</main>", text: "Rendered", plain: false};
         let fetchError: Error | undefined;
-        const siyuan = {dialogs: [dialog], config: {ai: {embedding: {enabled: true}}}};
+        const siyuan = {dialogs: [dialog], config: {ai: {embedding: {enabled: true}, web: {timeout: 60}}}};
         const dependencies: Record<string, unknown> = {
             "../../../config": {openSetting: () => { actions.push("settings"); return dialog; }},
             "../../getAll": {getAllEditor: () => [{protyle: {wysiwyg: {element: {querySelector: (): null => null}}}}, editor]},
@@ -84,7 +84,8 @@ for (const platform of ["desktop", "browser", "mobile"]) {
             assert.equal(fetchedPages.length, 0);
             assert.equal((await fetchPage.handler({url: "https://example.com"}, {} as App)).result, "# Rendered");
             assert.equal((await fetchPage.handler({url: "https://example.com", format: "text"}, {} as App)).result, "Rendered");
-            assert.deepEqual(fetchedPages.map(args => JSON.parse(JSON.stringify(args))), [{url: "https://example.com"}, {url: "https://example.com"}]);
+            assert.deepEqual(fetchedPages.map(args => JSON.parse(JSON.stringify(args))),
+                [{url: "https://example.com", timeout: 60}, {url: "https://example.com", timeout: 60}]);
             page = {html: "", text: "# Original Markdown", plain: true};
             assert.equal((await fetchPage.handler({url: "https://example.com"}, {} as App)).result, "# Original Markdown");
             page.text = "\u{1F600}".repeat(50001);

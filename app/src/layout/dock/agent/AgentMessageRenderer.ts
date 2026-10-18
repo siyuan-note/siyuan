@@ -104,7 +104,7 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
             const label = (opt.label as string) || "";
             const desc = (opt.description as string) || "";
             html += '<label class="agent-chat__question-option">' +
-                '<input type="' + inputType + '" name="' + inputName + '" value="' + escapeHtml(label) + '">' +
+                '<input type="' + inputType + '" name="' + inputName + '" value="' + escapeHtmlTextAndAttr(label) + '">' +
                 '<span class="agent-chat__question-option-content">' +
                 '<span class="agent-chat__question-option-label">' + escapeHtml(label) + "</span>";
             if (desc) {

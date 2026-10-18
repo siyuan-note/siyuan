@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "마우스 움직임으로 메뉴 스크롤",
+	"menuMouseScrollTip": "메뉴 내용이 표시 가능한 높이를 초과하면 메뉴 안에서 마우스를 위아래로 움직여 내용을 스크롤합니다",
 	"aiWebSearchExaTip": "Exa로 웹 페이지 검색",
 	"aiWebFetchDirectTip": "JavaScript를 실행하지 않고 페이지 내용을 직접 가져오거나 파일 다운로드",
 	"aiWebTools": "웹 검색 및 가져오기",

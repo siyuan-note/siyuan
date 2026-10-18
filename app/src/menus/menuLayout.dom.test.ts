@@ -13,11 +13,13 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     let mobile = false;
     const modules: Record<string, {exports: any}> = {};
     const externals = {
-        "protyle/util/compatibility": {getEventName: () => "click", updateHotkeyTip: (value: string) => value},
+        "protyle/util/compatibility": {getEventName: () => "click", isInMobileApp: () => false,
+            updateHotkeyTip: (value: string) => value},
         "util/functions": {isMobile: () => mobile},
         "util/zIndex": {isScrollAboveMenu: () => false},
         "layout/getTopBarHeight": {getTopBarHeight: () => 32},
-        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap"}},
+        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
+            LOCAL_MENU_MOUSE_SCROLL: "menuMouseScroll"}},
         "protyle/undo": {electronUndo() {}},
         "util/escape": {escapeAttr: (value: string) => value},
         "menus/menuKeyboard": {setMenuInputCurrent() {}},
@@ -59,7 +61,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         .fn__none { display: none !important; }
     `;
     document.head.append(style);
-    Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0,
+    Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0, storage: {},
         mobile: {size: {portrait: {height1: innerHeight}}}, menus: {}}});
     const {Menu, MenuItem}: typeof import("./Menu") = load("menus/Menu");
     const {Menu: PluginMenu}: typeof import("../plugin/Menu") = load("plugin/Menu");
@@ -216,6 +218,166 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     check.equal(independent.element.isConnected, false);
     dispose(shared);
 
+    const pointer = (element: HTMLElement, ratio: number, pointerType = "mouse", buttons = 0) => {
+        const rect = element.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height * ratio;
+        const target = document.elementFromPoint(x, y);
+        check.ok(target && element.contains(target), "Pointer must hit the intended menu panel");
+        target.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerType, buttons, clientX: x, clientY: y}));
+        return {x, y};
+    };
+    const following = createMenu();
+    let clicked = -1;
+    for (let i = 0; i < 80; i++) {
+        following.addItem({label: `Mouse item ${i}`, click: () => { clicked = i; return true; }});
+    }
+    following.popup({x: 60, y: 40});
+    await settle();
+    const followingItems = following.element.lastElementChild as HTMLElement;
+    const maxScroll = () => followingItems.scrollHeight - followingItems.clientHeight;
+    pointer(followingItems, .3);
+    pointer(followingItems, .6);
+    check.equal(followingItems.scrollTop, 0, "The preference defaults to off");
+    window.siyuan.storage.menuMouseScroll = true;
+    pointer(followingItems, .3);
+    check.equal(followingItems.scrollTop, 0, "Entering establishes an anchor without jumping");
+    pointer(followingItems, .55);
+    const middleScroll = followingItems.scrollTop;
+    check.ok(middleScroll > 0 && middleScroll < maxScroll(), "Movement in the middle of the menu scrolls its contents");
+    const middlePoint = pointer(followingItems, .55);
+    await settle();
+    check.equal(followingItems.scrollTop, middleScroll, "A stationary pointer does not keep scrolling");
+    const hit = document.elementFromPoint(middlePoint.x, middlePoint.y).closest<HTMLElement>(".b3-menu__item");
+    check.ok(hit.classList.contains("b3-menu__item--current"), "Highlight follows the item under the pointer after scrolling");
+    hit.click();
+    check.equal(clicked, Number(hit.textContent.trim().replace("Mouse item ", "")), "Click activates the highlighted item");
+    pointer(followingItems, .8);
+    check.ok(followingItems.scrollTop > middleScroll);
+    pointer(followingItems, .55);
+    check.ok(Math.abs(followingItems.scrollTop - middleScroll) <= 1, "Reversing direction scrolls back");
+    pointer(followingItems, .99);
+    check.equal(followingItems.scrollTop, maxScroll(), "The last item is reachable");
+    pointer(followingItems, .01);
+    check.equal(followingItems.scrollTop, 0, "The first item is reachable");
+    pointer(followingItems, .5, "touch");
+    pointer(followingItems, .8, "touch");
+    check.equal(followingItems.scrollTop, 0, "Touch movement preserves native scrolling");
+    pointer(followingItems, .3);
+    pointer(followingItems, .7, "mouse", 1);
+    check.equal(followingItems.scrollTop, 0, "Dragging does not scroll the menu");
+    pointer(followingItems, .3);
+    pointer(followingItems, .55);
+    followingItems.scrollTop = 100;
+    followingItems.dispatchEvent(new WheelEvent("wheel", {bubbles: true, deltaY: -30}));
+    pointer(followingItems, .6);
+    check.equal(followingItems.scrollTop, 100, "Wheel scrolling establishes a new anchor");
+    pointer(followingItems, .7);
+    const beforeLeave = followingItems.scrollTop;
+    following.element.dispatchEvent(new PointerEvent("pointerleave"));
+    pointer(followingItems, .4);
+    check.equal(followingItems.scrollTop, beforeLeave, "Reentering does not jump");
+    following.addItem({label: "Loaded later"});
+    await settle();
+    check.equal(followingItems.scrollTop, beforeLeave, "Layout measurement preserves the existing scroll position");
+    const beforeMutationMove = followingItems.scrollTop;
+    pointer(followingItems, .6);
+    check.equal(followingItems.scrollTop, beforeMutationMove, "Dynamic content establishes a new anchor");
+    window.siyuan.storage.menuMouseScroll = false;
+    pointer(followingItems, .8);
+    check.equal(followingItems.scrollTop, beforeMutationMove, "Disabling takes effect on an open menu");
+    window.siyuan.storage.menuMouseScroll = true;
+    followingItems.scrollTop = 0;
+    following.resetMouseScroll();
+    const nativePointer = (type: string, x: number, y: number) =>
+        require("electron").ipcRenderer.invoke("menu-test-pointer", type, Math.round(x), Math.round(y));
+    await nativePointer("mouseMove", 0, 0);
+    await settle();
+    const nativeRect = followingItems.getBoundingClientRect();
+    const nativeX = nativeRect.left + nativeRect.width / 2;
+    await nativePointer("mouseMove", nativeX, nativeRect.top + nativeRect.height * .3);
+    await settle();
+    const nativeY = nativeRect.top + nativeRect.height * .55;
+    await nativePointer("mouseMove", nativeX, nativeY);
+    await settle();
+    check.ok(followingItems.scrollTop > 0, "Real browser mouse movement scrolls the whole menu");
+    const nativeHit = document.elementFromPoint(Math.round(nativeX), Math.round(nativeY)).closest<HTMLElement>(".b3-menu__item");
+    check.ok(nativeHit.classList.contains("b3-menu__item--current"), "Native hover matches the scrolled target");
+    await nativePointer("mouseDown", nativeX, nativeY);
+    await nativePointer("mouseUp", nativeX, nativeY);
+    check.equal(clicked, Number(nativeHit.textContent.trim().replace("Mouse item ", "")), "Native click selects the visible item");
+    dispose(following);
+
+    window.siyuan.storage.menuMouseScroll = true;
+    const mouseSubmenus = createMenu();
+    mouseSubmenus.addItem({label: "Scrollable children", submenu: Array.from({length: 80}, (_, i) => ({label: `Child ${i}`}))});
+    addItems(mouseSubmenus, 50);
+    mouseSubmenus.popup({x: 40, y: 40});
+    await settle();
+    const mouseParent = mouseSubmenus.element.lastElementChild.firstElementChild;
+    mouseParent.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    const mouseSubmenu = mouseParent.querySelector<HTMLElement>(".b3-menu__submenu");
+    const mouseChildren = mouseSubmenu.lastElementChild as HTMLElement;
+    pointer(mouseChildren, .3);
+    pointer(mouseChildren, .65);
+    check.ok(mouseChildren.scrollTop > 0, "Submenus support movement across their own visible area");
+    const mouseRootItems = mouseSubmenus.element.lastElementChild as HTMLElement;
+    check.equal(mouseRootItems.scrollTop, 0, "Moving within a submenu leaves its parent stationary");
+    pointer(mouseRootItems, .3);
+    pointer(mouseRootItems, .65);
+    check.ok(mouseRootItems.scrollTop > 0);
+    check.equal(mouseParent.classList.contains("b3-menu__item--show"), false, "Scrolling the parent closes its detached submenu");
+    dispose(mouseSubmenus);
+
+    const lazyMouse = createMenu();
+    for (let i = 0; i < 60; i++) {
+        lazyMouse.addItem({label: `Lazy ${i}`, loadSubmenu: async () => [{label: `Loaded ${i}`}]});
+    }
+    lazyMouse.popup({x: 40, y: 40});
+    await settle();
+    const lazyItems = lazyMouse.element.lastElementChild as HTMLElement;
+    pointer(lazyItems, .3);
+    pointer(lazyItems, .6);
+    await settle();
+    const lazyScroll = lazyItems.scrollTop;
+    check.ok(lazyScroll > 0, "Asynchronous submenu loading preserves the parent's scroll position");
+    const loadedMenu = lazyItems.querySelector(".b3-menu__item--show > .b3-menu__submenu");
+    check.match(loadedMenu.textContent, /Loaded \d+/, "The item under a scrolled pointer loads its asynchronous submenu");
+    pointer(lazyItems, .75);
+    check.ok(lazyItems.scrollTop > lazyScroll, "Loading a child does not interrupt scrolling of its unchanged parent");
+    dispose(lazyMouse);
+
+    const form = createMenu();
+    form.addItem({type: "empty", label: '<input class="b3-text-field" style="height:32px"><div style="height:80px;overflow:auto"><div style="height:400px">Custom list</div></div>'});
+    addItems(form, 50);
+    form.popup({x: 40, y: 40});
+    await settle();
+    const formItems = form.element.lastElementChild as HTMLElement;
+    const input = formItems.querySelector("input");
+    input.focus();
+    pointer(formItems, .4);
+    pointer(formItems, .7);
+    check.equal(formItems.scrollTop, 0, "Editing a menu input keeps the form stationary");
+    input.blur();
+    const customList = input.nextElementSibling as HTMLElement;
+    pointer(customList, .2);
+    pointer(customList, .7);
+    check.equal(formItems.scrollTop, 0, "Nested scrollable widgets keep their own interaction");
+    dispose(form);
+
+    const pluginShared = createMenu();
+    const followingPlugin = new PluginMenu(undefined, undefined, true);
+    for (let i = 0; i < 80; i++) followingPlugin.addItem({label: `Plugin scroll ${i}`});
+    followingPlugin.open({x: 40, y: 40});
+    await settle();
+    const pluginItems = followingPlugin.element.lastElementChild as HTMLElement;
+    pointer(pluginItems, .3);
+    pointer(pluginItems, .7);
+    check.ok(pluginItems.scrollTop > 0, "Independent plugin menus share the same mouse scrolling behavior");
+    followingPlugin.close();
+    check.equal(followingPlugin.element.isConnected, false);
+    dispose(pluginShared);
+
     mobile = true;
     const sheet = createMenu();
     sheet.element.classList.add("b3-menu--fit");
@@ -228,6 +390,10 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     sheet.resetPosition = () => { sheetResets++; resetSheet(); };
     addItems(sheet, 10);
     await settle();
+    const sheetItems = sheet.element.lastElementChild as HTMLElement;
+    pointer(sheetItems, .3);
+    pointer(sheetItems, .7);
+    check.equal(sheetItems.scrollTop, 0, "Mobile sheets ignore mouse-follow scrolling even with a saved preference");
     check.ok(sheet.element.getBoundingClientRect().height > sheetHeight);
     check.ok(sheet.element.getBoundingClientRect().height <= innerHeight * .9 + .5);
     check.equal(sheetResets, 1);
@@ -242,11 +408,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     return "Menu layout cases passed";
 };
 
-test("menus adapt to dynamic content, viewport changes, themes and mobile sheets", {
+test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuGroup", "menus/sheetOpen",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen",
         "util/setPosition", "protyle/util/hasClosest", "plugin/Menu"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
@@ -262,6 +428,8 @@ app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 1000, height: 800, useContentSize: true,
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
     ipcMain.handle("resize-menu-test", (_event, width, height) => win.setContentSize(width, height));
+    ipcMain.handle("menu-test-pointer", (event, type, x, y) =>
+        event.sender.sendInputEvent({type, x, y, button: "left", clickCount: 1}));
     try {
         await win.loadURL("about:blank");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(source)}));

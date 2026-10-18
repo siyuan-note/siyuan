@@ -53,6 +53,7 @@ import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/uti
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
 import {isCompactModeAvailable, isCompactModeEnabled, setCompactModeEnabled} from "./compactMode";
+import {isMenuMouseScrollAvailable, isMenuMouseScrollEnabled, setMenuMouseScrollEnabled} from "./menuMouseScroll";
 import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
 import type {TInlineStyleType} from "../../protyle/toolbar/inlineStyle";
 
@@ -1005,6 +1006,14 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });
+    if (isMenuMouseScrollAvailable()) {
+        group.switch("menuMouseScroll", {
+            title: window.siyuan.languages.menuMouseScroll,
+            desc: window.siyuan.languages.menuMouseScrollTip,
+            readConfig: isMenuMouseScrollEnabled,
+            save: value => setMenuMouseScrollEnabled(value as boolean),
+        });
+    }
     /// #if !MOBILE
     group.select("editor.floatWindowMode", {
         title: window.siyuan.languages.floatWindowMode,

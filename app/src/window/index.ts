@@ -4,6 +4,7 @@ import {Constants} from "../constants";
 import {refreshSettingConfig} from "../config/setting/sync";
 import {onAgentStreamingMarkdownStorageChanged} from "../config/tabs/ai/agentStreamingMarkdown";
 import {onCompactModeStorageChanged, refreshCompactMode} from "../config/tabs/compactMode";
+import {onMenuMouseScrollStorageChanged, refreshMenuMouseScroll} from "../config/tabs/menuMouseScroll";
 import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
 import {Model} from "../layout/Model";
@@ -65,6 +66,7 @@ class App {
             callback: () => {
                 if (window.siyuan.isReady) {
                     void refreshCompactMode().catch(error => console.error("Could not refresh compact mode", error));
+                    void refreshMenuMouseScroll().catch(error => console.error("Could not refresh menu mouse scrolling", error));
                 }
             },
             msgCallback: (data) => {
@@ -136,6 +138,7 @@ class App {
                                     window.siyuan.storage[data.data.key] = data.data.val;
                                     onAgentStreamingMarkdownStorageChanged(data.data.key);
                                     onCompactModeStorageChanged(data.data.key);
+                                    onMenuMouseScrollStorageChanged(data.data.key);
                                     onWindowWorkspaceStorageChanged(data.data.key);
                                 }
                                 break;
@@ -144,6 +147,7 @@ class App {
                                     window.siyuan.storage[k] = data.data.keyVals[k];
                                     onAgentStreamingMarkdownStorageChanged(k);
                                     onCompactModeStorageChanged(k);
+                                    onMenuMouseScrollStorageChanged(k);
                                     onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;
@@ -151,6 +155,7 @@ class App {
                                 delete window.siyuan.storage[data.data.key];
                                 onAgentStreamingMarkdownStorageChanged(data.data.key);
                                 onCompactModeStorageChanged(data.data.key);
+                                onMenuMouseScrollStorageChanged(data.data.key);
                                 onWindowWorkspaceStorageChanged(data.data.key);
                                 break;
                             case "removeLocalStorageVals":
@@ -158,6 +163,7 @@ class App {
                                     delete window.siyuan.storage[k];
                                     onAgentStreamingMarkdownStorageChanged(k);
                                     onCompactModeStorageChanged(k);
+                                    onMenuMouseScrollStorageChanged(k);
                                     onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;

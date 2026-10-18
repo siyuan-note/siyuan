@@ -221,6 +221,7 @@ export abstract class Constants {
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
     public static readonly LOCAL_TABS_READING = "local-tabs-reading";
     public static readonly LOCAL_COMPACT_MODE = "local-compact-mode";
+    public static readonly LOCAL_MENU_MOUSE_SCROLL = "local-menu-mouse-scroll";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";

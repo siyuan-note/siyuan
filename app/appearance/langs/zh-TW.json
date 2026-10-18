@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "選單隨滑鼠移動捲動",
+	"menuMouseScrollTip": "選單內容超出可用高度時，在選單內上下移動滑鼠即可捲動選單內容",
 	"aiWebSearchExaTip": "透過 Exa 搜尋網頁",
 	"aiWebFetchDirectTip": "直接取得網頁內容或下載檔案，不執行 JavaScript",
 	"aiWebTools": "網頁搜尋與擷取",

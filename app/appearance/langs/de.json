@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Menüs durch Mausbewegung scrollen",
+	"menuMouseScrollTip": "Bewege die Maus innerhalb eines zu langen Menüs nach oben oder unten, um dessen Inhalt zu scrollen",
 	"aiWebSearchExaTip": "Webseiten mit Exa durchsuchen",
 	"aiWebFetchDirectTip": "Seiteninhalte direkt abrufen oder Dateien herunterladen, ohne JavaScript auszuführen",
 	"aiWebTools": "Websuche und Seitenabruf",

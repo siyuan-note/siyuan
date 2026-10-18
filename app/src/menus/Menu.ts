@@ -1,7 +1,8 @@
-import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
+import {getEventName, isInMobileApp, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {isScrollAboveMenu} from "../util/zIndex";
 import {getAnchoredMenuPosition} from "./menuPosition";
+import {bindMenuMouseScroll} from "./menuMouseScroll";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "./sheetOpen";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -33,6 +34,7 @@ export class Menu {
     public element: HTMLElement;
     public data: any;   // 用于记录当前菜单的数据
     public removeCB: () => void;
+    private clearMouseScroll: () => void;
     private wheelEvent: string;
     private position: IPosition;
     private sheetTouchStartX: number | undefined;
@@ -61,6 +63,10 @@ export class Menu {
         this.preventDefault = this.preventDefault.bind(this);
 
         this.element = element || document.getElementById("commonMenu");
+        if (!isMobile()) {
+            this.clearMouseScroll = bindMenuMouseScroll(this.element, () =>
+                !isInMobileApp() && window.siyuan.storage?.[Constants.LOCAL_MENU_MOUSE_SCROLL] === true);
+        }
         // 内容增删或文字变化后重新定位；不监听分组类和定位样式，避免更新触发循环。
         new MutationObserver((records) => {
             updateMenuGroupsOnMutation(records);
@@ -153,6 +159,7 @@ export class Menu {
             }
             itemElement.classList.add("b3-menu__item--show");
             if (!isSubMenuShown) {
+                itemElement.dispatchEvent(new CustomEvent(CUSTOM_EVENT_LOAD_SUBMENU));
                 if (this.element.classList.contains("b3-menu--sheet")) {
                     this.setSheetHeight();
                 } else if (!this.element.classList.contains("b3-menu--fullscreen")) {
@@ -160,6 +167,10 @@ export class Menu {
                 }
             }
         });
+    }
+
+    public resetMouseScroll() {
+        this.clearMouseScroll?.();
     }
 
     private getFullscreenScrim() {
@@ -530,6 +541,7 @@ export class Menu {
     }
 
     private removeImmediately() {
+        this.resetMouseScroll();
         // 菜单动作和菜单替换只清理状态，避免跳转或弹窗后抢回编辑焦点。
         this.restoreKeyboard = undefined;
         this.preserveSheetKeyboard = false;
@@ -584,6 +596,7 @@ export class Menu {
     }
 
     public popup(options: IPosition) {
+        this.resetMouseScroll();
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         if (isMobile()) {
@@ -645,11 +658,15 @@ export class Menu {
             this.position.h = rect.height;
             this.position.w = rect.width;
         }
+        const scrollPositions = Array.from(this.element.querySelectorAll<HTMLElement>(".b3-menu__items"),
+            items => ({items, top: items.scrollTop}));
         this.setPopupPosition();
         this.element.querySelectorAll(".b3-menu__item--show > .b3-menu__submenu").forEach((item: HTMLElement) => {
             // 可能有多层子菜单，都要重新定位
             this.showSubMenu(item);
         });
+        // 测量时会临时取消限高，恢复滚动位置以保留异步菜单加载期间的浏览进度。
+        scrollPositions.forEach(({items, top}) => { items.scrollTop = top; });
     }
 
     private startTrackingTargetPosition() {
@@ -946,6 +963,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
     if (window.siyuan.menus.menu.element.classList.contains("fn__none") || event.isComposing) {
         return false;
     }
+    window.siyuan.menus.menu.resetMouseScroll?.();
     const target = event.target as HTMLElement;
     const eventCode = Constants.KEYCODELIST[event.keyCode];
     if (window.siyuan.menus.menu.element.contains(target) && ["INPUT", "TEXTAREA"].includes(target.tagName)) {

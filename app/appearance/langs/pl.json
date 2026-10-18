@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Przewijanie menu ruchem myszy",
+	"menuMouseScrollTip": "Gdy zawartość menu przekracza dostępną wysokość, przesuwaj mysz w górę lub w dół wewnątrz menu, aby je przewijać",
 	"aiWebSearchExaTip": "Wyszukuj strony internetowe za pomocą Exa",
 	"aiWebFetchDirectTip": "Pobieraj treść stron lub pliki bezpośrednio, bez wykonywania JavaScript",
 	"aiWebTools": "Wyszukiwanie i pobieranie stron",

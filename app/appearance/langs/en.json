@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Scroll menus with mouse movement",
+	"menuMouseScrollTip": "Move the mouse up or down within an overflowing menu to scroll its contents",
 	"aiWebSearchExaTip": "Search web pages with Exa",
 	"aiWebFetchDirectTip": "Retrieve page content or download files directly, without running JavaScript",
 	"aiWebTools": "Web search and fetch",

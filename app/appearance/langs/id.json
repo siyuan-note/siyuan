@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Gulir menu dengan gerakan tetikus",
+	"menuMouseScrollTip": "Gerakkan tetikus ke atas atau ke bawah di dalam menu yang melebihi tinggi yang tersedia untuk menggulir isinya",
 	"aiWebSearchExaTip": "Cari halaman web dengan Exa",
 	"aiWebFetchDirectTip": "Ambil isi halaman atau unduh berkas secara langsung tanpa menjalankan JavaScript",
 	"aiWebTools": "Pencarian dan pengambilan web",

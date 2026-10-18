@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Faire défiler les menus avec le mouvement de la souris",
+	"menuMouseScrollTip": "Déplacez la souris vers le haut ou le bas dans un menu trop long pour faire défiler son contenu",
 	"aiWebSearchExaTip": "Rechercher des pages web avec Exa",
 	"aiWebFetchDirectTip": "Récupérer le contenu des pages ou télécharger des fichiers directement, sans exécuter JavaScript",
 	"aiWebTools": "Recherche et récupération web",

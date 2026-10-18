@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "菜单跟随鼠标滚动",
+	"menuMouseScrollTip": "菜单内容超出可用高度时，在菜单内上下移动鼠标即可滚动菜单内容",
 	"aiWebSearchExaTip": "通过 Exa 搜索网页",
 	"aiWebFetchDirectTip": "直接获取网页内容或下载文件，不执行 JavaScript",
 	"aiWebTools": "网页搜索与抓取",

@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Rolar menus com o movimento do mouse",
+	"menuMouseScrollTip": "Mova o mouse para cima ou para baixo dentro de um menu que exceda a altura disponível para rolar seu conteúdo",
 	"aiWebSearchExaTip": "Pesquisar páginas da web com o Exa",
 	"aiWebFetchDirectTip": "Obter conteúdo de páginas ou baixar arquivos diretamente, sem executar JavaScript",
 	"aiWebTools": "Pesquisa e obtenção de páginas",

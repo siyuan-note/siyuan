@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Menüleri fare hareketiyle kaydır",
+	"menuMouseScrollTip": "Menü içeriği kullanılabilir yüksekliği aştığında, içeriği kaydırmak için fareyi menü içinde yukarı veya aşağı hareket ettirin",
 	"aiWebSearchExaTip": "Exa ile web sayfalarını arayın",
 	"aiWebFetchDirectTip": "JavaScript çalıştırmadan sayfa içeriğini doğrudan alın veya dosya indirin",
 	"aiWebTools": "Web araması ve içerik alma",

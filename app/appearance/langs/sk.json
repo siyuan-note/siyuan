@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "Posúvanie ponúk pohybom myši",
+	"menuMouseScrollTip": "Ak obsah ponuky presahuje dostupnú výšku, posúvajte ho pohybom myši nahor alebo nadol v ponuke",
 	"aiWebSearchExaTip": "Vyhľadávanie webových stránok pomocou Exa",
 	"aiWebFetchDirectTip": "Priame načítanie obsahu stránok alebo sťahovanie súborov bez spúšťania JavaScriptu",
 	"aiWebTools": "Vyhľadávanie a načítanie webu",

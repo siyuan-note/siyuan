@@ -50,6 +50,12 @@ const fixture = (deferSnippetScripts = false) => {
         refreshCompactMode: async (guard: () => boolean) => {
             if (guard()) calls.push({type: "compact-refresh"});
         },
+        onMenuMouseScrollStorageChanged: (key: string) => {
+            if (key === "mouse-scroll") calls.push({type: "mouse-scroll", value: storage[key]});
+        },
+        refreshMenuMouseScroll: async (guard: () => boolean) => {
+            if (guard()) calls.push({type: "mouse-scroll-refresh"});
+        },
         genNotebookOption: (id: string, _box: string, shorthand: boolean, filter: (notebook: unknown) => boolean) => {
             calls.push({type: "options", value: {id, shorthand, filter}});
             return '<option value="">Current</option><option value="a">Renamed</option>';
@@ -214,6 +220,24 @@ test("settings apply compact mode after every storage update and stop refreshing
     await f.runtime.reconnect();
     assert.equal(f.storage.compact, undefined);
     assert.equal(f.calls.filter(call => call.type === "compact-refresh").length, 1);
+});
+
+test("settings synchronize menu mouse scrolling for single and batch preference changes and reconnects", async () => {
+    const f = fixture();
+    const send = (cmd: string, data: unknown) => f.runtime.handleMessage({cmd, data} as IWebSocketData);
+    send("setLocalStorageVal", {key: "mouse-scroll", val: true});
+    send("removeLocalStorageVal", {key: "mouse-scroll"});
+    send("setLocalStorageVals", {keyVals: {"mouse-scroll": false}});
+    send("removeLocalStorageVals", {keys: ["mouse-scroll"]});
+    assert.deepEqual(f.calls.filter(call => call.type === "mouse-scroll").map(call => call.value),
+        [true, undefined, false, undefined]);
+    await f.runtime.reconnect();
+    assert.equal(f.calls.filter(call => call.type === "mouse-scroll-refresh").length, 1);
+    f.setActive(false);
+    send("setLocalStorageVal", {key: "mouse-scroll", val: true});
+    await f.runtime.reconnect();
+    assert.equal(f.storage["mouse-scroll"], undefined);
+    assert.equal(f.calls.filter(call => call.type === "mouse-scroll-refresh").length, 1);
 });
 
 test("snippets assign configuration first and wait for Lute before rendering JS", async () => {

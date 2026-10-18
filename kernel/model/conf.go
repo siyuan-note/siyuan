@@ -476,6 +476,9 @@ func InitConf() {
 	}
 	if boxes, listErr := ListNotebooks(); listErr == nil {
 		prepareOnboardingForEmptyWorkspace(Conf.Onboarding.Load(), util.ReadOnly, len(boxes))
+		if err := initMenuMouseScrollPreference(confFileExists, len(boxes)); err != nil {
+			logging.LogWarnf("initialize menu mouse scrolling preference failed: %s", err)
+		}
 	}
 
 	if 0 < len(Conf.Repo.Load().Key) {

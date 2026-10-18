@@ -55,6 +55,7 @@ for (const file of ["src/index.ts", "src/window/index.ts", "src/mobile/util/onMe
 export const receive = data => {switch(data.cmd){${clauses.join("\n")}}};`), {
             exports: receiver, window, ...preference,
             onCompactModeStorageChanged() {},
+            onMenuMouseScrollStorageChanged() {},
             onWindowWorkspaceStorageChanged: key => platformCalls.push(key),
             MOBILE_BARS_CONFIG_KEY: "mobile-bars", Constants: {LOCAL_MOBILE_BOTTOM_BAR: "mobile-bottom", LOCAL_MOBILE_SIDE_PANEL: "mobile-side"},
             showMobileBars: () => platformCalls.push("bars"), renderMobileBottomBar: () => platformCalls.push("bottom"),

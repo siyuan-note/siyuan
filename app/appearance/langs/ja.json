@@ -1,4 +1,6 @@
 {
+	"menuMouseScroll": "マウスの動きに合わせてメニューをスクロール",
+	"menuMouseScrollTip": "メニューの内容が表示可能な高さを超える場合、メニュー内でマウスを上下に動かすと内容をスクロールできます",
 	"aiWebSearchExaTip": "Exa で Web ページを検索します",
 	"aiWebFetchDirectTip": "JavaScript を実行せず、ページ内容を直接取得したりファイルをダウンロードしたりします",
 	"aiWebTools": "Web 検索と取得",

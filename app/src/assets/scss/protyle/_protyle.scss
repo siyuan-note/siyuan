@@ -846,6 +846,10 @@
     opacity: 0;
   }
 
+  &--hide-actions &__action {
+    display: none;
+  }
+
   &__icon {
     height: 80px;
     width: 80px;

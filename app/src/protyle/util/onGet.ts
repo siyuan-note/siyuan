@@ -44,6 +44,7 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {updateBackgroundActions} from "../header/backgroundActions";
 import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
 import {applyPublishFoldStates} from "./viewFold";
 /// #if MOBILE
@@ -483,14 +484,7 @@ const setHTML = (options: {
         return;
     }
 
-    /// #if MOBILE
-    if (protyle.background) {
-        protyle.background.element.classList.toggle(
-            "protyle-background--mobileshow",
-            !options.action.includes(Constants.CB_GET_ALL)
-        );
-    }
-    /// #endif
+    updateBackgroundActions(protyle);
 
     if (protyle.options.render.breadcrumb) {
         protyle.breadcrumb.toggleExit(!options.action.includes(Constants.CB_GET_ALL));

@@ -80,6 +80,8 @@
     z-index: 5;
     opacity: 0;
     pointer-events: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 8px;
     overflow: visible;
   }

@@ -1824,6 +1824,44 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
     const fitButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
     check.equal(fitButton.querySelector("use").getAttribute("xlink:href"), "#iconFocus");
+    const originalHostStyle = host.style.cssText;
+    const toolbarZoom = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
+    const toolbarPopup = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom-actions");
+    for (const width of [96, 180, 260, 360, 700]) {
+        for (const fontSize of [14, 32]) {
+            host.style.width = `${width}px`;
+            host.style.fontSize = `${fontSize}px`;
+            toolbarZoom.focus();
+            const bounds = host.getBoundingClientRect();
+            for (const control of Array.from(toolbar.children) as HTMLElement[]) {
+                if (control.classList.contains("mindmap-view__spacer")) {
+                    continue;
+                }
+                const rect = control.getBoundingClientRect();
+                check.ok(rect.left >= bounds.left && rect.right <= bounds.right,
+                    `toolbar control stays inside the map, width=${width}, fontSize=${fontSize}`);
+            }
+            const firstButton = toolbar.querySelector("button").getBoundingClientRect();
+            const lastButton = toolbar.lastElementChild.getBoundingClientRect();
+            check.equal(lastButton.top > firstButton.top, width < 360, "narrow toolbars wrap controls");
+            check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
+            if (width === 180) {
+                const popupBounds = toolbarPopup.getBoundingClientRect();
+                check.ok(popupBounds.bottom > toolbar.getBoundingClientRect().bottom,
+                    "zoom popup extends below the wrapping toolbar");
+                const slider = toolbarPopup.querySelector<HTMLInputElement>("input");
+                const sliderBounds = slider.getBoundingClientRect();
+                check.equal(document.elementFromPoint(sliderBounds.left + sliderBounds.width / 2,
+                    sliderBounds.top + sliderBounds.height / 2), slider, "zoom slider is not clipped or covered");
+                slider.value = "125";
+                slider.dispatchEvent(new Event("input", {bubbles: true}));
+                check.equal(view.scale, 1.25, "zoom controls remain usable after wrapping");
+            }
+        }
+    }
+    host.style.cssText = originalHostStyle;
+    host.focus();
+    view.zoomAt(1);
     fitButton.dispatchEvent(new PointerEvent("pointerover", {bubbles: true}));
     check.equal(host.querySelector<HTMLElement>('[role="tooltip"]').hidden, false);
     check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapFit");

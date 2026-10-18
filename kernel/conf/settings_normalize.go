@@ -51,9 +51,6 @@ func NormalizeFileTree(fileTree *FileTree) *FileTree {
 	if fileTree.CreateDocAtTop == nil {
 		fileTree.CreateDocAtTop = new(true)
 	}
-	if fileTree.BoxDocEnabled == nil {
-		fileTree.BoxDocEnabled = new(false)
-	}
 	fileTree.RecentDocsMaxListCount = max(MinFileTreeRecentDocsListCount, min(MaxFileTreeRecentDocsListCount, fileTree.RecentDocsMaxListCount))
 	switch fileTree.RecentDocsSort {
 	case "viewedAt", "created", "updated", "openAt", "closedAt":

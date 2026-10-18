@@ -238,34 +238,6 @@ func (decision *Decision) Normalize() {
 	decision.Endpoint, decision.APIKey, decision.Name, decision.Timeout = "", "", "", 0
 }
 
-// MergePrevious 合并旧客户端输入或单个供应商更新，保留其他配置和活动供应商。
-func (decision *Decision) MergePrevious(previous *Decision) {
-	if previous == nil {
-		return
-	}
-	old := previous.Clone()
-	old.Normalize()
-	if decision.Profiles == nil {
-		old.Enabled = decision.Enabled
-		if decision.Provider != "" {
-			old.Provider = decision.Provider
-		}
-		if decision.Endpoint != "" || decision.APIKey != "" || decision.Name != "" || decision.Timeout != 0 {
-			old.Profiles["typesafe"] = &DecisionProfile{decision.Endpoint, decision.APIKey, decision.Name, decision.Timeout}
-		}
-		*decision = *old
-		return
-	}
-	if strings.TrimSpace(decision.Provider) == "" {
-		decision.Provider = old.Provider
-	}
-	for provider, profile := range old.Profiles {
-		if _, exists := decision.Profiles[provider]; !exists {
-			decision.Profiles[provider] = profile
-		}
-	}
-}
-
 func (decision *Decision) Clone() *Decision {
 	if decision == nil {
 		return nil

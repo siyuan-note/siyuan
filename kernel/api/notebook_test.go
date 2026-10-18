@@ -43,7 +43,7 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	*model.Conf.FileTree.Load().BoxDocEnabled = true
+	model.Conf.FileTree.Load().BoxDocEnabled = true
 	t.Cleanup(func() {
 		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
 			t.Errorf("restore publish access failed: %v", err)

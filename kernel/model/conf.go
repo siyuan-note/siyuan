@@ -476,7 +476,6 @@ func InitConf() {
 	}
 	if boxes, listErr := ListNotebooks(); listErr == nil {
 		prepareOnboardingForEmptyWorkspace(Conf.Onboarding.Load(), util.ReadOnly, len(boxes))
-		initMenuMouseScrollPreference(Conf.Appearance.Load(), confFileExists, len(boxes))
 	}
 
 	if 0 < len(Conf.Repo.Load().Key) {
@@ -593,13 +592,8 @@ func normalizeFileTreeDefaultIcon(fileTree *conf.FileTree, confFileExists bool) 
 	if nil == fileTree {
 		fileTree = conf.NewFileTree()
 		if confFileExists {
-			fileTree.UseSVGDefaultIcon = new(bool)
+			fileTree.UseSVGDefaultIcon = false
 		}
-		return fileTree
-	}
-	if nil == fileTree.UseSVGDefaultIcon {
-		useSVGDefaultIcon := !confFileExists
-		fileTree.UseSVGDefaultIcon = &useSVGDefaultIcon
 	}
 	return fileTree
 }

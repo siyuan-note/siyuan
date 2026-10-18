@@ -225,7 +225,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		model.Conf.Lang = "en"
 		util.TimeLangs = map[string]map[string]any{"en": language.Time}
 	}
-	*model.Conf.FileTree.Load().BoxDocEnabled = true
+	model.Conf.FileTree.Load().BoxDocEnabled = true
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

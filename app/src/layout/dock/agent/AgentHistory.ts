@@ -48,6 +48,7 @@ export type AgentHistoryReference = { id: string; title: string };
 
 export type AgentHistoryUserEntry = {
     content: string;
+    timestamp?: number;
     blockHTML?: string;
     references?: AgentHistoryReference[];
 };
@@ -60,6 +61,7 @@ export type AgentHistoryEditData = {
 
 export const applyAgentUserEdit = (entry: AgentHistoryUserEntry, data: AgentHistoryEditData) => {
     entry.content = data.text;
+    entry.timestamp = Date.now();
     entry.blockHTML = data.blockHTML;
     entry.references = data.references.length > 0 ? data.references.slice() : undefined;
 };

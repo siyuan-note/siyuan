@@ -127,9 +127,12 @@ describe("AgentHistory", () => {
         assert.equal(isAgentRegenerateStateCurrent("session-1", "session-1", 2, 2, false, true), false);
     });
 
-    it("updates rich user message data together", () => {
+    it("updates rich user message data and send time together", (t) => {
+        const timestamp = 1792300000000;
+        t.mock.method(Date, "now", () => timestamp);
         const entry = {
             content: "Old content",
+            timestamp: 1,
             blockHTML: "<div>Old content</div>",
             references: [{id: "block-1", title: "Old reference"}],
         };
@@ -141,6 +144,7 @@ describe("AgentHistory", () => {
         });
         assert.deepEqual(entry, {
             content: "| A | B |",
+            timestamp,
             blockHTML: '<div data-type="NodeTable">table</div>',
             references,
         });

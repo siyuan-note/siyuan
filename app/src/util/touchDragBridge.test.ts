@@ -86,6 +86,7 @@ const createBridge = (rowClass = "b3-menu__item", panelClass = "av__panel", mobi
     const handle = new TestElement(["fn__grab"], row);
     const handleIcon = new TestElement([], handle);
     const runtime = {touchDragActive: false, touchDragGhost: null as HTMLElement | null};
+    const selection = {rangeCount: 1, removeAllRanges() { this.rangeCount = 0; }};
     const exports: {initTouchDragBridge?: () => void} = {};
     runInNewContext(compiled(!!options.browser, mobile), {
         exports,
@@ -133,6 +134,7 @@ const createBridge = (rowClass = "b3-menu__item", panelClass = "av__panel", mobi
             },
             querySelectorAll: (): Element[] => [],
             elementFromPoint: () => dropTarget,
+            getSelection: () => selection,
         },
     });
     exports.initTouchDragBridge();
@@ -187,7 +189,7 @@ const createBridge = (rowClass = "b3-menu__item", panelClass = "av__panel", mobi
         frames.clear();
         callbacks.forEach(callback => callback(now));
     };
-    return {row, label, handleIcon, runtime, dispatch, advance, flushFrames,
+    return {row, label, handleIcon, runtime, selection, dispatch, advance, flushFrames,
         setDropTarget: (target: TestElement | null) => dropTarget = target};
 };
 
@@ -335,6 +337,47 @@ test("small finger movements keep the block gutter long press pending", () => {
     assert.deepEqual(bridge.row.events, ["dragstart", "dragend"]);
     assert.equal(bridge.row.draggable, "true");
 });
+
+test("mobile block gutter dragging excludes native text selection until completion", () => {
+    const bridge = createBridge("", "protyle-gutters", true);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), false);
+    bridge.dispatch("touchstart", bridge.row);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), true);
+    assert.equal(bridge.selection.rangeCount, 1, "keep the source range available until dragstart resolves the blocks");
+    bridge.advance(460);
+    assert.equal(bridge.selection.rangeCount, 0);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), true);
+    bridge.selection.rangeCount = 1;
+    bridge.dispatch("selectionchange", bridge.label);
+    assert.equal(bridge.selection.rangeCount, 0, "native handles cannot recreate a text range during block dragging");
+    bridge.dispatch("touchmove", bridge.row, 140);
+    bridge.dispatch("touchend", bridge.row, 140);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), false);
+    bridge.selection.rangeCount = 1;
+    bridge.dispatch("selectionchange", bridge.label);
+    assert.equal(bridge.selection.rangeCount, 1);
+});
+
+test("canceling a pending mobile block gutter gesture restores native selection", () => {
+    const bridge = createBridge("", "protyle-gutters", true, {scrollable: true});
+    bridge.dispatch("touchstart", bridge.row);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), true);
+    assert.equal(bridge.dispatch("touchmove", bridge.row, 140, 50), false);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), false);
+    assert.equal(bridge.selection.rangeCount, 1);
+    bridge.dispatch("touchcancel", bridge.row);
+    assert.equal(bridge.dispatch("selectstart", bridge.label), false);
+});
+
+for (const mobile of [false, true]) {
+    test(`other drag sources preserve native text selection (mobile=${mobile})`, () => {
+        const bridge = createBridge("b3-list-item", "sy__file", mobile);
+        bridge.dispatch("touchstart", bridge.label);
+        bridge.dispatch("touchmove", bridge.label, 140, 500);
+        assert.equal(bridge.dispatch("selectstart", bridge.label), false);
+        assert.equal(bridge.selection.rangeCount, 1);
+    });
+}
 
 for (const cancel of ["touchcancel", "blur", "visibilitychange", "additional touch"]) {
     for (const active of [false, true]) {

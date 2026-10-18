@@ -752,6 +752,8 @@ const startBridgeDrag = (point: DragPoint) => {
     const dragStartEvent = createBridgeDragEvent("dragstart", point, dt);
     // 部分拖拽处理会在 dragstart 中再次检查 draggable 属性，派发合成事件时短暂恢复。
     dispatchWithNativeDragEnabled(dragState, () => dragState.draggableElement.dispatchEvent(dragStartEvent));
+    // 块标先根据原文本选区确定拖动范围，再清除原生选区，避免选词手柄接管后续触摸。
+    clearGutterTextSelection();
 
     dragState.ghostElement = window.siyuan.touchDragGhost || null;
     if (dragState.ghostElement) {
@@ -880,6 +882,15 @@ const clearGutterLongPressTimer = (state: DragState | null) => {
     if (state?.gutterLongPress?.timer !== undefined) {
         window.clearTimeout(state.gutterLongPress.timer);
         state.gutterLongPress.timer = undefined;
+    }
+};
+
+const clearGutterTextSelection = () => {
+    if (dragState?.gutterLongPress && dragState.isDragging) {
+        const selection = document.getSelection();
+        if (selection?.rangeCount) {
+            selection.removeAllRanges();
+        }
     }
 };
 
@@ -1227,6 +1238,13 @@ export const initTouchDragBridge = () => {
     document.addEventListener("keydown", handleDragKey, {capture: true});
     document.addEventListener("keyup", handleDragKey, {capture: true});
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("selectstart", event => {
+        // 候选块标手势只阻止原生选词，完整块标栏仍可在长按前滑动滚动。
+        if (dragState?.gutterLongPress && !dragState.longPressCancelled) {
+            event.preventDefault();
+        }
+    }, {capture: true});
+    document.addEventListener("selectionchange", clearGutterTextSelection);
     window.addEventListener("blur", () => {
         if (dragState?.gutterLongPress) {
             completeBridgeDrag(undefined, true);

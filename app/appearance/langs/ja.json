@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Exa で Web ページを検索します",
+	"aiWebFetchDirectTip": "JavaScript を実行せず、ページ内容を直接取得したりファイルをダウンロードしたりします",
 	"aiWebTools": "Web 検索と取得",
 	"aiWebSearchProvider": "検索サービス",
 	"aiWebSearchProviderTip": "DeepSeek は要約を 5 件返します。全文が必要な場合はページを取得します",

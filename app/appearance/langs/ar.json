@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "البحث في صفحات الويب باستخدام Exa",
+	"aiWebFetchDirectTip": "جلب محتوى الصفحات أو تنزيل الملفات مباشرة دون تشغيل JavaScript",
 	"aiWebTools": "البحث في الويب وجلب الصفحات",
 	"aiWebSearchProvider": "مزود البحث",
 	"aiWebSearchProviderTip": "يعيد DeepSeek خمسة ملخصات؛ اجلب الصفحات عند الحاجة إلى المحتوى الكامل",

@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Exa ile web sayfalarını arayın",
+	"aiWebFetchDirectTip": "JavaScript çalıştırmadan sayfa içeriğini doğrudan alın veya dosya indirin",
 	"aiWebTools": "Web araması ve içerik alma",
 	"aiWebSearchProvider": "Arama sağlayıcısı",
 	"aiWebSearchProviderTip": "DeepSeek 5 özet döndürür; tam içerik gerektiğinde sayfaları alın",

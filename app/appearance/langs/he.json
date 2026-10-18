@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "חיפוש דפי אינטרנט באמצעות Exa",
+	"aiWebFetchDirectTip": "שליפת תוכן דפים או הורדת קבצים ישירות, ללא הפעלת JavaScript",
 	"aiWebTools": "חיפוש ושליפת דפי אינטרנט",
 	"aiWebSearchProvider": "ספק חיפוש",
 	"aiWebSearchProviderTip": "DeepSeek מחזיר 5 תקצירים; יש לשלוף דפים כאשר נדרש התוכן המלא",

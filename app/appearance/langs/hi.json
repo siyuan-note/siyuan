@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Exa से वेब पृष्ठ खोजें",
+	"aiWebFetchDirectTip": "JavaScript चलाए बिना सीधे पृष्ठ की सामग्री प्राप्त करें या फ़ाइलें डाउनलोड करें",
 	"aiWebTools": "वेब खोज और सामग्री प्राप्ति",
 	"aiWebSearchProvider": "खोज सेवा",
 	"aiWebSearchProviderTip": "DeepSeek 5 सारांश देता है; पूरा पाठ चाहिए तो पृष्ठ की सामग्री प्राप्त करें",

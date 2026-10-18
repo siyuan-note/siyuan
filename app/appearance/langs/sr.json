@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Претражујте веб странице помоћу услуге Exa",
+	"aiWebFetchDirectTip": "Директно преузимање садржаја страница или датотека, без извршавања JavaScript-а",
 	"aiWebTools": "Веб претрага и преузимање",
 	"aiWebSearchProvider": "Услуга претраге",
 	"aiWebSearchProviderTip": "DeepSeek враћа 5 сажетака; преузмите странице када је потребан цео садржај",

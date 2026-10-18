@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "透過 Exa 搜尋網頁",
+	"aiWebFetchDirectTip": "直接取得網頁內容或下載檔案，不執行 JavaScript",
 	"aiWebTools": "網頁搜尋與擷取",
 	"aiWebSearchProvider": "搜尋服務",
 	"aiWebSearchProviderTip": "DeepSeek 傳回 5 筆摘要，需要正文時再擷取網頁",

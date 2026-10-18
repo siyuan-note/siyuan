@@ -1,16 +1,36 @@
 import type {SettingTabBuilder} from "../../setting/builder";
 
+const webProviderDescription = (kind: "search" | "fetch", provider: string) => {
+    if (kind === "search") {
+        return provider === "deepseek" ? window.siyuan.languages.aiWebSearchProviderTip : window.siyuan.languages.aiWebSearchExaTip;
+    }
+    return provider === "deepseek" ? window.siyuan.languages.aiWebFetchProviderTip : window.siyuan.languages.aiWebFetchDirectTip;
+};
+
+const mountWebProviderDescription = (root: HTMLElement, kind: "search" | "fetch") => {
+    const select = root.querySelector<HTMLSelectElement>(`[id="ai.web.${kind}Provider"]`);
+    const description = select?.closest(".config-item")?.querySelector<HTMLElement>(".b3-label__text");
+    if (!select || !description) {
+        return;
+    }
+    const update = () => description.textContent = webProviderDescription(kind, select.value);
+    update();
+    select.addEventListener("change", update);
+};
+
 export const registerAiWebGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("web", window.siyuan.languages.aiWebTools);
     group.select("ai.web.searchProvider", {
         title: window.siyuan.languages.aiWebSearchProvider,
-        desc: window.siyuan.languages.aiWebSearchProviderTip,
+        desc: webProviderDescription("search", window.siyuan.config.ai.web?.searchProvider),
         options: [{value: "exa", label: "Exa"}, {value: "deepseek", label: "DeepSeek"}],
+        afterMount: root => mountWebProviderDescription(root, "search"),
     });
     group.select("ai.web.fetchProvider", {
         title: window.siyuan.languages.aiWebFetchProvider,
-        desc: window.siyuan.languages.aiWebFetchProviderTip,
+        desc: webProviderDescription("fetch", window.siyuan.config.ai.web?.fetchProvider),
         options: [{value: "direct", label: window.siyuan.languages.aiWebFetchDirect}, {value: "deepseek", label: "DeepSeek"}],
+        afterMount: root => mountWebProviderDescription(root, "fetch"),
     });
     group.textBlock("ai.web.apiKey", {
         title: window.siyuan.languages.aiWebDeepSeekKey,

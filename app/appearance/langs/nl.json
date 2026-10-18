@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Webpagina's zoeken met Exa",
+	"aiWebFetchDirectTip": "Pagina-inhoud rechtstreeks ophalen of bestanden downloaden, zonder JavaScript uit te voeren",
 	"aiWebTools": "Webzoeken en pagina's ophalen",
 	"aiWebSearchProvider": "Zoekdienst",
 	"aiWebSearchProviderTip": "DeepSeek geeft 5 samenvattingen terug; haal pagina's op als de volledige inhoud nodig is",

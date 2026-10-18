@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Поиск веб-страниц с помощью Exa",
+	"aiWebFetchDirectTip": "Получение содержимого страниц или скачивание файлов напрямую, без выполнения JavaScript",
 	"aiWebTools": "Поиск и загрузка веб-страниц",
 	"aiWebSearchProvider": "Сервис поиска",
 	"aiWebSearchProviderTip": "DeepSeek возвращает 5 кратких описаний; при необходимости загрузите полный текст страниц",

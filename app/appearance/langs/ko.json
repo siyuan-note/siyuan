@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Exa로 웹 페이지 검색",
+	"aiWebFetchDirectTip": "JavaScript를 실행하지 않고 페이지 내용을 직접 가져오거나 파일 다운로드",
 	"aiWebTools": "웹 검색 및 가져오기",
 	"aiWebSearchProvider": "검색 서비스",
 	"aiWebSearchProviderTip": "DeepSeek은 요약 5개를 반환하며, 전체 내용이 필요하면 페이지를 가져옵니다",

@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Wyszukuj strony internetowe za pomocą Exa",
+	"aiWebFetchDirectTip": "Pobieraj treść stron lub pliki bezpośrednio, bez wykonywania JavaScript",
 	"aiWebTools": "Wyszukiwanie i pobieranie stron",
 	"aiWebSearchProvider": "Usługa wyszukiwania",
 	"aiWebSearchProviderTip": "DeepSeek zwraca 5 podsumowań; pobierz strony, gdy potrzebna jest pełna treść",

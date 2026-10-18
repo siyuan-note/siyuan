@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "ค้นหาหน้าเว็บด้วย Exa",
+	"aiWebFetchDirectTip": "ดึงเนื้อหาหน้าเว็บหรือดาวน์โหลดไฟล์โดยตรง โดยไม่เรียกใช้ JavaScript",
 	"aiWebTools": "ค้นหาและดึงข้อมูลเว็บ",
 	"aiWebSearchProvider": "ผู้ให้บริการค้นหา",
 	"aiWebSearchProviderTip": "DeepSeek ส่งคืนสรุป 5 รายการ และดึงหน้าเว็บเมื่อต้องการเนื้อหาฉบับเต็ม",

@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Search web pages with Exa",
+	"aiWebFetchDirectTip": "Retrieve page content or download files directly, without running JavaScript",
 	"aiWebTools": "Web search and fetch",
 	"aiWebSearchProvider": "Search provider",
 	"aiWebSearchProviderTip": "DeepSeek returns 5 summaries; fetch pages when full content is needed",

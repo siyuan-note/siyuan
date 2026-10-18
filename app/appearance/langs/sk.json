@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Vyhľadávanie webových stránok pomocou Exa",
+	"aiWebFetchDirectTip": "Priame načítanie obsahu stránok alebo sťahovanie súborov bez spúšťania JavaScriptu",
 	"aiWebTools": "Vyhľadávanie a načítanie webu",
 	"aiWebSearchProvider": "Poskytovateľ vyhľadávania",
 	"aiWebSearchProviderTip": "DeepSeek vracia 5 súhrnov; ak potrebujete úplný obsah, načítajte stránky",

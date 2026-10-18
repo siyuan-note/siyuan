@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Cerca pagine web con Exa",
+	"aiWebFetchDirectTip": "Recupera il contenuto delle pagine o scarica file direttamente, senza eseguire JavaScript",
 	"aiWebTools": "Ricerca e recupero web",
 	"aiWebSearchProvider": "Servizio di ricerca",
 	"aiWebSearchProviderTip": "DeepSeek restituisce 5 riepiloghi; recupera le pagine quando serve il contenuto completo",

@@ -1,4 +1,6 @@
 {
+	"aiWebSearchExaTip": "Cari halaman web dengan Exa",
+	"aiWebFetchDirectTip": "Ambil isi halaman atau unduh berkas secara langsung tanpa menjalankan JavaScript",
 	"aiWebTools": "Pencarian dan pengambilan web",
 	"aiWebSearchProvider": "Penyedia pencarian",
 	"aiWebSearchProviderTip": "DeepSeek mengembalikan 5 ringkasan; ambil halaman jika konten lengkap diperlukan",

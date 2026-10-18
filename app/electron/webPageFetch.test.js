@@ -50,6 +50,45 @@ if (!process.versions.electron) {
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 200});
         }
     });
+    test("rendered fetch drops subresources beyond total and concurrent budgets without dropping content", async () => {
+        const {EventEmitter} = require("node:events");
+        const {createWebPageFetcher} = require("./webPageFetch");
+        for (const concurrent of [false, true]) {
+            let handle;
+            let lookups = 0;
+            const fetchSession = Object.assign(new EventEmitter(), {
+                setPermissionRequestHandler() {}, setPermissionCheckHandler() {}, setDevicePermissionHandler() {},
+                protocol: {handle: (_scheme, callback) => handle = callback, unhandle() {}},
+                webRequest: {onBeforeRequest() {}}, closeAllConnections: async () => {}, clearStorageData: async () => {},
+            });
+            class TestWindow {
+                webContents = Object.assign(new EventEmitter(), {
+                    getUserAgent: () => "test", setUserAgent() {}, setWebRTCIPHandlingPolicy() {}, setWindowOpenHandler() {},
+                    debugger: {attach() {}, sendCommand: async () => {}},
+                    executeJavaScriptInIsolatedWorld: async () => ({html: "<main>Usable content</main>", text: "Usable content ".repeat(10)}),
+                });
+                async loadURL(url) {
+                    if (url === "about:blank") return;
+                    const request = () => handle(new Request("http://resource.test/"));
+                    if (concurrent) {
+                        await Promise.all(Array.from({length: 140}, request));
+                    } else {
+                        for (let index = 0; index < 1030; index++) {
+                            await request();
+                        }
+                    }
+                    this.webContents.emit("did-finish-load");
+                }
+                isDestroyed() { return false; }
+                destroy() {}
+            }
+            const fetchPage = createWebPageFetcher({BrowserWindow: TestWindow, session: {fromPartition: () => fetchSession},
+                lookup: async () => { lookups++; throw new Error("Unavailable resource"); }, idleMs: 0, timeoutMs: 2000});
+            const result = await fetchPage("http://page.test/");
+            assert.match(result.text, /Usable content/);
+            assert.equal(lookups, concurrent ? 128 : 1024);
+        }
+    });
 } else {
     const {app, BrowserWindow, session} = require("electron");
     const http = require("node:http");
@@ -103,6 +142,19 @@ if (!process.versions.electron) {
                 response.end();
             } else if (request.url === "/private-resource") {
                 response.end(`<main>${"text ".repeat(30)}</main><script>fetch("http://127.0.0.1/private")</script>`);
+            } else if (request.url === "/failed-resources") {
+                response.end(`<main>${"Usable page content ".repeat(12)}</main><script>
+                    fetch("http://missing.test/resource").catch(() => {});
+                    fetch("/private").catch(() => {});
+                    fetch("/download").catch(() => {});
+                    fetch("file:///unavailable").catch(() => {});
+                </script>`);
+            } else if (request.url === "/many-resources") {
+                response.end(`<main>${"Request-heavy page content ".repeat(12)}</main><script>
+                    for (let index = 0; index < 1100; index++) {
+                        fetch("/resource?index=" + index).catch(() => {});
+                    }
+                </script>`);
             } else if (request.url === "/empty") {
                 response.end("<div id=app></div><script>window.empty = true</script>");
             } else if (request.url === "/status") {
@@ -138,7 +190,12 @@ if (!process.versions.electron) {
         const fetchPage = createWebPageFetcher({BrowserWindow: function (options) {
             windows.push(options);
             return new BrowserWindow(options);
-        }, session, lookup: async () => [{address: "93.184.216.34"}], timeoutMs: 2500, postLoadMs: 700, idleMs: 200});
+        }, session, lookup: async host => {
+            if (host === "missing.test") {
+                throw new Error("DNS lookup failed");
+            }
+            return [{address: "93.184.216.34"}];
+        }, timeoutMs: 2500, postLoadMs: 700, idleMs: 200});
         const resolveProxy = async () => `PROXY 127.0.0.1:${proxy.address().port}`;
         try {
             await session.defaultSession.cookies.set({url: "http://public.test", name: "mainSecret", value: "private"});
@@ -165,8 +222,11 @@ if (!process.versions.electron) {
             assert.equal(workers.text, "Worker blocked");
             assert.equal(requests.some(request => request.url === "/worker.js"), false);
             await fetchPage("http://public.test/static", resolveProxy);
+            for (const route of ["private-resource", "failed-resources", "many-resources"]) {
+                assert.match((await fetchPage(`http://public.test/${route}`, resolveProxy)).text, /content|text/);
+            }
             for (const [route, error] of [["download", /download/i], ["private", /private/],
-                ["private-resource", /private/], ["empty", /No meaningful content/], ["stall", /timed out/], ["status", /HTTP 404/]]) {
+                ["empty", /No meaningful content/], ["stall", /timed out/], ["status", /HTTP 404/]]) {
                 await assert.rejects(fetchPage(`http://public.test/${route}`, resolveProxy), error);
             }
             await assert.rejects(fetchPage("file:///test", resolveProxy), /HTTP/);

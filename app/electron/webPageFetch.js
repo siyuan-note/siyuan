@@ -72,6 +72,7 @@ const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000
         let loaded = false;
         let plain = false;
         let mainDocumentURL = url.href.split("#")[0];
+        let mainDocumentPending = true;
         let requestCount = 0;
         const requests = new Set();
         let fail;
@@ -84,17 +85,21 @@ const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000
             // HTTP 协议处理器在实际拨号时固定公网 IP，重定向、子资源和页面脚本请求均走同一路径。
             for (const scheme of ["http", "https"]) {
                 fetchSession.protocol.handle(scheme, async request => {
+                    const mainDocument = mainDocumentPending && request.url === mainDocumentURL;
+                    if (mainDocument) {
+                        mainDocumentPending = false;
+                    }
                     const token = Symbol();
                     requests.add(token);
                     clearTimeout(idleTimer);
                     try {
-                        if (++requestCount > 256 || requests.size > 64) {
+                        if (++requestCount > 1024 || requests.size > 128) {
                             throw new Error("Page made too many network requests");
                         }
                         const headers = new Headers(request.headers);
                         headers.set("DNT", "1");
                         headers.set("Sec-GPC", "1");
-                        if (request.url === mainDocumentURL) {
+                        if (mainDocument) {
                             headers.set("Accept", "text/markdown, text/html;q=0.9, application/xhtml+xml;q=0.9, */*;q=0.7");
                         }
                         const response = await requestPage(new Request(request, {headers}),
@@ -102,7 +107,7 @@ const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000
                         if (/^attachment(?:;|$)/i.test(response.headers.get("content-disposition") || "")) {
                             throw new Error("Page downloads are not allowed");
                         }
-                        if (request.url === mainDocumentURL) {
+                        if (mainDocument) {
                             if (response.status >= 400) {
                                 throw new Error(`HTTP ${response.status}`);
                             }
@@ -115,7 +120,10 @@ const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000
                         response.headers.append("Content-Security-Policy", "worker-src 'none'; frame-src 'none'; object-src 'none'");
                         return response;
                     } catch (error) {
-                        fail?.(error);
+                        // 子资源仍受相同的地址和资源限制，失败时仅丢弃该资源，保留已加载的正文。
+                        if (mainDocument) {
+                            fail?.(error);
+                        }
                         return Response.error();
                     } finally {
                         requests.delete(token);
@@ -214,28 +222,33 @@ const createWebPageFetcher = ({BrowserWindow, session, lookup, timeoutMs = 30000
                         parsePageURL(details.url);
                         if (details.resourceType === "mainFrame") {
                             mainDocumentURL = details.url;
+                            mainDocumentPending = true;
                         }
                         callback({cancel: finished});
                     } catch (error) {
                         callback({cancel: true});
-                        fail(error);
+                        if (details.resourceType === "mainFrame") {
+                            fail(error);
+                        }
                     }
                 });
                 fetchSession.on("will-download", event => {
                     event.preventDefault();
                     fail(new Error("Page downloads are not allowed"));
                 });
-                const checkNavigation = (event, destination) => {
+                const checkNavigation = event => {
                     try {
-                        parsePageURL(destination);
+                        parsePageURL(event.url);
                     } catch (error) {
                         event.preventDefault();
-                        fail(error);
+                        if (event.isMainFrame) {
+                            fail(error);
+                        }
                     }
                 };
                 contents.on("will-navigate", checkNavigation);
                 contents.on("will-redirect", checkNavigation);
-                contents.on("will-frame-navigate", event => checkNavigation(event, event.url));
+                contents.on("will-frame-navigate", checkNavigation);
                 contents.on("did-finish-load", markLoaded);
                 contents.on("did-fail-load", (_event, code, description, _url, mainFrame) => {
                     if (!mainFrame) {

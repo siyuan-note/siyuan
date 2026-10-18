@@ -1598,6 +1598,9 @@ export class Gutter {
             embedContext.targetElement.querySelectorAll(":scope > [data-type=\"NodeListItem\"]").length === 1;
         const allowRemoval = allowStructuralMutation && !isOnlyTargetListItem;
         const type = nodeElement.getAttribute("data-type");
+        if (type === "NodeAttributeView") {
+            window.siyuan.menus.menu.element.setAttribute("data-sheet-expandable", "true");
+        }
         const subType = nodeElement.getAttribute("data-subtype");
         const turnIntoSubmenu: IMenu[] = [];
         hideElements(["select"], protyle);

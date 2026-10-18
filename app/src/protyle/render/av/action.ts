@@ -293,6 +293,7 @@ const openAVEditFieldMenu = (protyle: IProtyle, blockElement: HTMLElement, ancho
     const menu = new Menu();
     getAVEditFieldMenuItems(protyle, blockElement).forEach(item => menu.addItem(item));
     if (isMobile()) {
+        menu.element.setAttribute("data-sheet-expandable", "true");
         menu.fullscreen();
     } else {
         const rect = anchorElement.getBoundingClientRect();
@@ -896,6 +897,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
+    menu.element.setAttribute("data-sheet-expandable", "true");
     const selectedItemInfos = getAVSelectedItemInfos(blockElement);
     const selectedItems = getAVSelectedItems(blockElement);
     const primaryRows = selectedItemInfos

@@ -1590,7 +1590,6 @@ body.mobile-topbar--merged {
   &--sheet {
     // 菜单入口可能指定宽度，移动端底部菜单始终铺满视口
     top: auto !important;
-    bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: auto !important;
@@ -1619,14 +1618,12 @@ body.mobile-topbar--merged {
   > .b3-menu {
     // 数据库面板切换内容时会重新写入锚点坐标，底部布局不随锚点变化
     top: auto !important;
-    bottom: 0 !important;
+    bottom: var(--b3-menu-sheet-bottom, 0px);
     left: 0 !important;
     right: 0 !important;
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
-    max-height: 90vh !important;
-    max-height: 90dvh !important;
     box-sizing: border-box;
     border: 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
@@ -1636,6 +1633,10 @@ body.mobile-topbar--merged {
     overflow: visible;
     transform: none;
     will-change: auto;
+
+    &.b3-menu--expanded {
+      border-radius: 0;
+    }
 
     > .b3-menu__items {
       max-height: none;
@@ -1723,6 +1724,12 @@ body.mobile-topbar--merged {
         padding: 0;
       }
 
+      &--actions {
+        height: 56px;
+        min-height: 56px;
+        padding: 8px 16px 0;
+      }
+
       > .b3-menu__label {
         text-align: left;
         color: var(--b3-theme-on-surface-light);
@@ -1731,6 +1738,10 @@ body.mobile-topbar--merged {
 
       > .block__icon {
         color: var(--b3-theme-on-surface-light);
+      }
+
+      > .block__icon--menu-back {
+        display: none;
       }
 
       > [data-type="go-config"] {

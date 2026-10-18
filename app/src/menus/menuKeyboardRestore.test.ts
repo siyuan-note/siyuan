@@ -37,7 +37,8 @@ const setup = () => {
     const timers = new Map<number, () => void>();
     const frames = new Map<number, () => void>();
     const events: string[] = [];
-    const first = {...createElement(), querySelector: () => ({innerHTML: ""})};
+    const first = {...createElement(), querySelector: (selector: string) =>
+        selector === ".b3-menu__label" ? {innerHTML: ""} : null};
     const element = {
         ...createElement(),
         firstElementChild: first,

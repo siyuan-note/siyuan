@@ -220,6 +220,12 @@
     transition: transform .15s cubic-bezier(0, 0, .2, 1), height .15s cubic-bezier(0, 0, .2, 1);
     will-change: transform;
 
+    &.b3-menu--expanded {
+      max-height: calc(100vh - env(safe-area-inset-top));
+      max-height: calc(100dvh - env(safe-area-inset-top));
+      border-radius: 0;
+    }
+
     .b3-menu {
       &__title {
         background-color: var(--b3-theme-surface);
@@ -257,6 +263,26 @@
             display: none;
           }
         }
+
+        &--actions {
+          height: 56px;
+          padding: 8px 16px 0;
+          align-items: center;
+
+          > .b3-menu__label {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+      }
+
+      &__actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
       }
 
       &__items {

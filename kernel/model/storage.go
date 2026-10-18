@@ -38,29 +38,6 @@ import (
 
 var localStorageLock = sync.Mutex{}
 
-// 首次创建空工作空间时初始化菜单滚动偏好，保留已有工作空间和用户保存的选择。
-func initMenuMouseScrollPreference(confFileExists bool, notebookCount int) error {
-	if confFileExists || notebookCount != 0 || util.ReadOnly {
-		return nil
-	}
-	localStorageLock.Lock()
-	defer localStorageLock.Unlock()
-
-	storage, err := readLocalStorage()
-	if err != nil {
-		return err
-	}
-	if storage == nil {
-		return errors.New("local storage must be a JSON object")
-	}
-	const key = "local-menu-mouse-scroll"
-	if _, configured := storage[key]; configured {
-		return nil
-	}
-	storage[key] = true
-	return setLocalStorage(storage)
-}
-
 func GetLocalStorage() (ret map[string]any) {
 	ret, _ = getLocalStorageWithError()
 	return

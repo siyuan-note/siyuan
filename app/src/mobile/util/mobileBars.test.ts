@@ -5,7 +5,6 @@ import {resolve} from "node:path";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {bindMobileBarsScroll, clearMobileBarsScroll} from "./mobileBars";
-import {MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
 import * as mobileBarsState from "./mobileBarsState";
 
 class TestClassList {
@@ -198,8 +197,8 @@ describe("mobile bars", () => {
         const originalWindow = globalThis.window;
         const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
         let frame: FrameRequestCallback;
-        const storage = {[MOBILE_BARS_CONFIG_KEY]: {autoHide: true}};
-        Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {storage}}});
+        const appearance = {mobileBars: {autoHide: true}};
+        Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {config: {appearance}}}});
         Object.defineProperty(globalThis, "requestAnimationFrame", {
             configurable: true,
             value: (callback: FrameRequestCallback) => {
@@ -262,11 +261,11 @@ describe("mobile bars", () => {
             scrollTo(0);
             assertPosition(0);
             assert.equal(breadcrumbElement.attributes.has("inert"), false);
-            storage[MOBILE_BARS_CONFIG_KEY].autoHide = false;
+            appearance.mobileBars.autoHide = false;
             scrollTo(100);
             assertPosition(0);
             assert.equal(breadcrumbElement.attributes.get("aria-hidden"), "false");
-            storage[MOBILE_BARS_CONFIG_KEY].autoHide = true;
+            appearance.mobileBars.autoHide = true;
             scrollTo(148);
             assertPosition(1);
         } finally {

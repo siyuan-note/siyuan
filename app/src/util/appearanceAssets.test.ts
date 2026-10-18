@@ -41,6 +41,7 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
     };
     const html = element({"data-theme-mode": "light"});
     const appearance = {
+        pdfTheme: {light: "light", dark: "dark", annoColor: "var(--b3-pdf-background1)"},
         lang: "en", mode: 0, modeOS: false, themeLight: "custom", themeDark: "midnight", themeVer: "1.0.0",
         icon: "custom", iconVer: "1.0.0", themeJS: false,
         lightThemes: [{name: "custom", label: "Custom", frontends: ["all"]}],

@@ -169,6 +169,8 @@ declare namespace Config {
      * AI agent global settings
      */
     export interface IAgent {
+        /** 流式输出渲染 Markdown，默认关闭，重置普通设置时随 AI 配置保留 */
+        streamingMarkdown: boolean;
         modelId: string;
         sessionTimeout: number;
         streamIdleTimeout: number;
@@ -337,6 +339,14 @@ declare namespace Config {
      * SiYuan appearance related configuration
      */
     export interface IAppearance {
+        /** 用户偏好保存在 conf.json；升级不读取旧 local.json 键，外观重置时恢复默认值 */
+        compactMode: boolean;
+        /** 默认关闭；新建空工作空间默认开启 */
+        menuMouseScroll: boolean;
+        pdfTheme: {light: string; dark: string; annoColor: string};
+        outlineKeepCurrentExpand: boolean;
+        /** 三项默认开启，侧栏滑动与按钮至少保留一种 */
+        mobileBars: {autoHide: boolean; sidebarSwipe: boolean; sidebarButtons: boolean};
         /** 背景渐变，未配置时根据工作空间名称自动配色 */
         bodyGradient?: {
             mode: string;
@@ -957,6 +967,8 @@ declare namespace Config {
      * Document tree related configuration
      */
     export interface IFileTree {
+        /** 默认 viewedAt，未知值回落默认值；文档树设置重置时恢复默认 */
+        recentDocsSort: string;
         /**
          * Whether to allow the creation of sub-documents deeper than 7 levels
          */

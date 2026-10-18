@@ -9,7 +9,7 @@ import {createSectionRuntime} from "../util/sectionRuntime";
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [true, false]) {
-    for (const change of ["gradient", "duplicate", "theme", "initial", "font", "font-reset"] as const) {
+    for (const change of ["gradient", "duplicate", "theme", "initial", "font", "font-reset", "compact", "scroll", "pdf", "outline", "mobile-bars"] as const) {
         test(`appearance updates preserve gradient controls without skipping theme initialization (${change}, mobile=${mobile})`, async () => {
             const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceRuntime.ts"), "utf8");
             const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
@@ -21,6 +21,9 @@ for (const mobile of [true, false]) {
             const next = change === "initial" ? appearance : {
                 ...appearance,
                 mode: change === "theme" ? 1 : 0,
+                compactMode: change === "compact", menuMouseScroll: change === "scroll",
+                pdfTheme: change === "pdf" ? {light: "dark"} : undefined,
+                outlineKeepCurrentExpand: change === "outline", mobileBars: change === "mobile-bars" ? {autoHide: false} : undefined,
                 bodyGradient: {mode: change === "duplicate" ? "auto" : "custom"},
                 globalFontFamilies: change === "font" ? [{family: "Arial", weight: 700}] : [],
             };
@@ -50,7 +53,7 @@ for (const mobile of [true, false]) {
             moduleExports.appearanceConfigApi.apply(next);
             await pending;
             assert.equal(siyuan.config.appearance, next);
-            const updatesInPlace = change === "gradient" || change === "duplicate";
+            const updatesInPlace = ["gradient", "duplicate", "compact", "scroll", "pdf", "outline", "mobile-bars"].includes(change);
             assert.equal(calls.includes("syncBodyGradient"), updatesInPlace);
             assert.equal(calls.includes("setBodyHighlight"), updatesInPlace);
             assert.equal(calls.includes("loadAssets"), !updatesInPlace);

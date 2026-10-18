@@ -1,3 +1,4 @@
+import {fileConfigApi} from "../../config/tabs/fileRuntime";
 import {fetchPost} from "../../util/fetch";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {Constants} from "../../constants";
@@ -6,7 +7,6 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openModel} from "./model";
 import {openMobileFileById} from "../editor";
 import type {App} from "../../index";
-import {setStorageVal} from "../../protyle/util/compatibility";
 
 interface IRecentDoc {
     rootID: string;
@@ -28,7 +28,7 @@ ${getFileTreeIconHTML(item.icon, "file", "b3-list-item__graphic", true)}
 };
 
 export const getRecentDocs = (app: App) => {
-    const sortBy = window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type as TRecentDocsSort;
+    const sortBy = window.siyuan.config.fileTree.recentDocsSort as TRecentDocsSort;
     fetchPost("/api/storage/getRecentDocs", {sortBy}, (response) => {
         let recentDocs = response.data as IRecentDoc[];
         openModel({
@@ -72,8 +72,9 @@ export const getRecentDocs = (app: App) => {
                         recentDocs = newResponse.data as IRecentDoc[];
                         renderRecentDocs(recentDocs, listElement, searchElement.value);
                     });
-                    window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type = newSortBy;
-                    setStorageVal(Constants.LOCAL_RECENT_DOCS, window.siyuan.storage[Constants.LOCAL_RECENT_DOCS]);
+                    if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                        void fileConfigApi.patch("recentDocsSort", newSortBy);
+                    }
                 });
                 listElement.addEventListener("click", (event) => {
                     const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");

@@ -173,7 +173,7 @@ class SecondaryToolbar {
     this.#bindListeners(buttons);
     if (!isMobile()) {
       this.#resetMouseScroll = bindMenuMouseScroll(options.toolbar, () =>
-        !isInMobileApp() && window.siyuan.storage?.[Constants.LOCAL_MENU_MOUSE_SCROLL] === true);
+        !isInMobileApp() && window.siyuan.config.appearance?.menuMouseScroll === true);
     }
 
     this.reset();

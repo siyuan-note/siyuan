@@ -1,6 +1,6 @@
-import {setStorageVal} from "../../protyle/util/compatibility";
+import {patchAppearancePreference} from "../../config/tabs/appearancePreferences";
 import {escapeHtml} from "../../util/escape";
-import {isMobileBarsAutoHide, MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
+import {isMobileBarsAutoHide} from "./mobileBarsConfig";
 import {showMobileBars} from "./mobileBars";
 
 export const genMobileBarsSettingHTML = () => `<label class="b3-label fn__flex config-item">
@@ -13,9 +13,16 @@ export const genMobileBarsSettingHTML = () => `<label class="b3-label fn__flex c
 
 export const mountMobileBarsSetting = (root: HTMLElement) => {
     root.querySelector<HTMLInputElement>("#mobileBarsAutoHide")?.addEventListener("change", (event) => {
-        const config = {...window.siyuan.storage[MOBILE_BARS_CONFIG_KEY], autoHide: (event.target as HTMLInputElement).checked};
-        window.siyuan.storage[MOBILE_BARS_CONFIG_KEY] = config;
-        setStorageVal(MOBILE_BARS_CONFIG_KEY, config);
-        showMobileBars();
+        void patchAppearancePreference("mobileBars.autoHide", (event.target as HTMLInputElement).checked).then(() => {
+            syncMobileBarsSetting(root);
+            showMobileBars();
+        });
+    });
+};
+
+export const syncMobileBarsSetting = (root: ParentNode = document) => {
+    root.querySelectorAll<HTMLInputElement>("#mobileBarsAutoHide").forEach(input => {
+        input.checked = isMobileBarsAutoHide();
+        input.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
     });
 };

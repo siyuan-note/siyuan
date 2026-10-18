@@ -39975,6 +39975,16 @@
             }
           ]
         },
+        "compactMode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "darkThemes": {
           "anyOf": [
             {
@@ -40115,6 +40125,26 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMobileBarsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "anyOf": [
             {
@@ -40139,6 +40169,26 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingNotificationsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPDFThemeInput"
             },
             {
               "type": "null"
@@ -41680,6 +41730,16 @@
             }
           ]
         },
+        "recentDocsSort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "refCreateSaveBox": {
           "anyOf": [
             {
@@ -43051,6 +43111,9 @@
         "streamIdleTimeout": {
           "type": "integer"
         },
+        "streamingMarkdown": {
+          "type": "boolean"
+        },
         "temperature": {
           "type": "number"
         }
@@ -43066,6 +43129,7 @@
         "sessionTimeout",
         "skills",
         "streamIdleTimeout",
+        "streamingMarkdown",
         "temperature"
       ],
       "additionalProperties": false
@@ -43167,6 +43231,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "streamingMarkdown": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -43276,6 +43350,9 @@
         "codeBlockThemeLight": {
           "type": "string"
         },
+        "compactMode": {
+          "type": "boolean"
+        },
         "darkThemes": {
           "anyOf": [
             {
@@ -43381,6 +43458,19 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "type": "boolean"
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMobileBars"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "type": "integer"
         },
@@ -43391,6 +43481,19 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingNotifications"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "type": "boolean"
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPDFTheme"
             },
             {
               "type": "null"
@@ -43425,6 +43528,7 @@
         "closeButtonBehavior",
         "codeBlockThemeDark",
         "codeBlockThemeLight",
+        "compactMode",
         "darkThemes",
         "entryVisibility",
         "globalFontFamilies",
@@ -43435,9 +43539,13 @@
         "icons",
         "lang",
         "lightThemes",
+        "menuMouseScroll",
+        "mobileBars",
         "mode",
         "modeOS",
         "notifications",
+        "outlineKeepCurrentExpand",
+        "pdfTheme",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -43525,6 +43633,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compactMode": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -43671,6 +43789,26 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMobileBarsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "anyOf": [
             {
@@ -43695,6 +43833,26 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingNotificationsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPDFThemeInput"
             },
             {
               "type": "null"
@@ -46733,6 +46891,9 @@
         "recentDocsMaxListCount": {
           "type": "integer"
         },
+        "recentDocsSort": {
+          "type": "string"
+        },
         "refCreateSaveBox": {
           "type": "string"
         },
@@ -46793,6 +46954,7 @@
         "openFilesUseCurrentTab",
         "parentDocTitleClickMode",
         "recentDocsMaxListCount",
+        "recentDocsSort",
         "refCreateSaveBox",
         "refCreateSavePath",
         "removeDocWithoutConfirm",
@@ -46972,6 +47134,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recentDocsSort": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -47910,6 +48082,83 @@
       },
       "additionalProperties": false
     },
+    "SettingMobileBars": {
+      "type": "object",
+      "properties": {
+        "autoHide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarSwipe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "autoHide",
+        "sidebarButtons",
+        "sidebarSwipe"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMobileBarsInput": {
+      "type": "object",
+      "properties": {
+        "autoHide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarSwipe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingModel": {
       "type": "object",
       "properties": {
@@ -48217,6 +48466,62 @@
         "model",
         "provider"
       ],
+      "additionalProperties": false
+    },
+    "SettingPDFTheme": {
+      "type": "object",
+      "properties": {
+        "annoColor": {
+          "type": "string"
+        },
+        "dark": {
+          "type": "string"
+        },
+        "light": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "annoColor",
+        "dark",
+        "light"
+      ],
+      "additionalProperties": false
+    },
+    "SettingPDFThemeInput": {
+      "type": "object",
+      "properties": {
+        "annoColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dark": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "light": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SettingPatchData": {

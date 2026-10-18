@@ -74,6 +74,7 @@ const DefaultAgentSessionTimeout = 1800
 const MaxAgentSessionTimeout = 3600
 
 type Agent struct {
+	StreamingMarkdown   bool              `json:"streamingMarkdown"` // 智能体流式输出时渲染 Markdown
 	ModelID             string            `json:"modelId"`
 	SessionTimeout      int               `json:"sessionTimeout"`
 	StreamIdleTimeout   int               `json:"streamIdleTimeout"`

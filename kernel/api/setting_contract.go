@@ -158,6 +158,7 @@ func settingAgentPayload(value *conf.Agent) *apicontract.SettingAgent {
 		return nil
 	}
 	result := &apicontract.SettingAgent{}
+	result.StreamingMarkdown = value.StreamingMarkdown
 	result.ModelID = value.ModelID
 	result.SessionTimeout = value.SessionTimeout
 	result.StreamIdleTimeout = value.StreamIdleTimeout
@@ -502,6 +503,7 @@ func settingFileTreePayload(value *conf.FileTree) *apicontract.SettingFileTree {
 		return nil
 	}
 	result := &apicontract.SettingFileTree{}
+	result.RecentDocsSort = value.RecentDocsSort
 	result.AlwaysSelectOpenedFile = value.AlwaysSelectOpenedFile
 	result.OpenFilesUseCurrentTab = value.OpenFilesUseCurrentTab
 	result.CloseTabOnDoubleClick = value.CloseTabOnDoubleClick
@@ -584,6 +586,15 @@ func settingAppearancePayload(value *conf.Appearance) *apicontract.SettingAppear
 		return nil
 	}
 	result := &apicontract.SettingAppearance{}
+	result.CompactMode = value.CompactMode
+	result.MenuMouseScroll = value.MenuMouseScroll
+	result.OutlineKeepCurrentExpand = value.OutlineKeepCurrentExpand
+	if value.PDFTheme != nil {
+		result.PDFTheme = &apicontract.SettingPDFTheme{Light: value.PDFTheme.Light, Dark: value.PDFTheme.Dark, AnnoColor: value.PDFTheme.AnnoColor}
+	}
+	if value.MobileBars != nil {
+		result.MobileBars = &apicontract.SettingMobileBars{AutoHide: value.MobileBars.AutoHide, SidebarSwipe: value.MobileBars.SidebarSwipe, SidebarButtons: value.MobileBars.SidebarButtons}
+	}
 	result.BodyGradient = settingBodyGradientPayload(value.BodyGradient)
 	if value.GlobalFontFamilies != nil {
 		result.GlobalFontFamilies = make([]*apicontract.SettingEditorFont, len(value.GlobalFontFamilies))

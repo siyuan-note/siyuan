@@ -109,7 +109,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             const remountTabs = new Set<TSettingTab>();
             for (const namespace of namespaces.has("*") ? [...simple, "editor", "export", "keymap", "appearance", "ai", "sync"] : namespaces) {
                 const tab = getSettingTabDefs().find(definition => definition.id === (tabs[namespace] || namespace));
-                if (tab && tab.id !== "ocr") remountTabs.add(tab.id);
+                if (tab && tab.id !== "ocr" && tab.id !== "appearance") remountTabs.add(tab.id);
             }
             if (accessChanged) remountTabs.add("access");
             remountTabs.forEach(tab => { void remountOpenSettingTab(tab); });

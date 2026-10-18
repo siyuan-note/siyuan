@@ -221,8 +221,8 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     getAllModels().graph.forEach(item => {
         item.searchGraph();
     });
-    const pdfTheme = window.siyuan.config.appearance.mode === 0 ? window.siyuan.storage[Constants.LOCAL_PDFTHEME].light :
-        window.siyuan.storage[Constants.LOCAL_PDFTHEME].dark;
+    const pdfTheme = window.siyuan.config.appearance.mode === 0 ? window.siyuan.config.appearance.pdfTheme.light :
+        window.siyuan.config.appearance.pdfTheme.dark;
     document.querySelectorAll(".pdf__outer").forEach(item => {
         const darkElement = item.querySelector("#pdfDark");
         const lightElement = item.querySelector("#pdfLight");

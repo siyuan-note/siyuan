@@ -170,8 +170,10 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - Define custom attribute name constants in `app/src/constants.ts`, alongside similar constants in `Constants`, rather than in individual feature modules
 
 9. **Frontend preference storage:** Do not use browser `localStorage` directly, including `window.localStorage` and `globalThis.localStorage`
-   - Read preferences from `window.siyuan.storage`; when changing a preference, update its in-memory value and persist it with `setStorageVal` from `app/src/protyle/util/compatibility.ts`
-   - SiYuan persists these values in the workspace's `data/storage/local.json`; do not use browser `storage` events to observe changes to this store
+   - New user-facing preferences, including settings switches and explicit reader or panel preferences, default to `conf.json`; define them in the corresponding configuration namespace, normalize them in the kernel, and write through `createConfigNamespaceApi().patch`
+   - Reserve `local.json` for growing mappings keyed by document, view, or transaction IDs; transient or session state such as scroll positions, dialog geometry, and restored tabs; usage history and reading positions; and plugin runtime state
+   - Writing frequency does not determine storage: `uiLayout` is already a frequently updated configuration namespace with silent notifications. Neither `conf.json` nor `local.json` participates in data sync; configuration export includes `conf.json`
+   - Read local state from `window.siyuan.storage`; when changing it, update its in-memory value and persist it with `setStorageVal` from `app/src/protyle/util/compatibility.ts`. SiYuan persists these values in the workspace's `data/storage/local.json`; do not use browser `storage` events to observe changes to this store
 
 10. **Frontend platform identification:**
    - Use the mutually exclusive `body` class names written by `applyPlatformClasses()` in `app/src/protyle/util/compatibility.ts`: `body--mac`, `body--windows`, `body--linux`, `body--ios`, `body--android`, and `body--harmony`

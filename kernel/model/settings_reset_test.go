@@ -134,7 +134,7 @@ func TestSettingsResetPreservesDataAndProtectedConfiguration(t *testing.T) {
 	if err = json.Unmarshal(data, &stored); err != nil {
 		t.Fatal(err)
 	}
-	if stored["local-zoom"] != nil || stored["local-mobile-bars"] != nil || stored["local-layouts"] == nil || stored["plugin-unknown"] == nil {
+	if stored["local-zoom"] != nil || stored["local-mobile-bars"] == nil || stored["local-layouts"] == nil || stored["plugin-unknown"] == nil {
 		t.Fatal("local storage whitelist was not respected")
 	}
 	data, err = os.ReadFile(settingsResetPaths()[0])

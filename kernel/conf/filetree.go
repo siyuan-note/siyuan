@@ -21,6 +21,7 @@ import (
 )
 
 type FileTree struct {
+	RecentDocsSort           string `json:"recentDocsSort"`           // 最近文档排序方式
 	AlwaysSelectOpenedFile   bool   `json:"alwaysSelectOpenedFile"`   // 是否自动选中当前打开的文件
 	OpenFilesUseCurrentTab   bool   `json:"openFilesUseCurrentTab"`   // 在当前页签打开文件
 	CloseTabOnDoubleClick    bool   `json:"closeTabOnDoubleClick"`    // 是否使用双击关闭页签
@@ -51,6 +52,7 @@ type FileTree struct {
 
 func NewFileTree() *FileTree {
 	return &FileTree{
+		RecentDocsSort:           "viewedAt",
 		AlwaysSelectOpenedFile:   false,
 		OpenFilesUseCurrentTab:   false,
 		CloseTabOnDoubleClick:    false,

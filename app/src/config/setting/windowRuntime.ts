@@ -7,9 +7,7 @@ import {isMac} from "../../protyle/util/compatibility";
 import {setToolbarLeftMac} from "../../util/functions";
 import {ensureLute} from "../../protyle/util/lute";
 import {renderSnippet} from "../util/snippets";
-import {onAgentStreamingMarkdownStorageChanged} from "../tabs/ai/agentStreamingMarkdown";
-import {onCompactModeStorageChanged, refreshCompactMode} from "../tabs/compactMode";
-import {onMenuMouseScrollStorageChanged, refreshMenuMouseScroll} from "../tabs/menuMouseScroll";
+import {refreshSettingConfig} from "./sync";
 import type {ISettingsWindowHost} from "./windowContext";
 
 let notebookRefresh = () => Promise.resolve();
@@ -177,9 +175,6 @@ export const createSettingsWindowRuntime = (isActive: () => boolean, deferSnippe
     };
 
     const onStorageChanged = (keys: string[]) => {
-        keys.forEach(onAgentStreamingMarkdownStorageChanged);
-        keys.forEach(onCompactModeStorageChanged);
-        keys.forEach(onMenuMouseScrollStorageChanged);
         if (keys.includes(Constants.LOCAL_ZOOM)) {
             zoomRevision++;
             applyZoom();
@@ -224,8 +219,7 @@ export const createSettingsWindowRuntime = (isActive: () => boolean, deferSnippe
 
     const reconnect = async () => {
         if (!isActive()) return;
-        await Promise.all([refreshNotebooks(), refreshSnippets(true), refreshZoom(), refreshCompactMode(isActive),
-            refreshMenuMouseScroll(isActive)]);
+        await Promise.all([refreshNotebooks(), refreshSnippets(true), refreshZoom(), refreshSettingConfig()]);
     };
     return {applyZoom, refreshNotebooks, refreshSnippets, enableSnippetScripts, handleMessage, reconnect};
 };

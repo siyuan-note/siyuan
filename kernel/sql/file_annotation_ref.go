@@ -57,12 +57,18 @@ func QueryRefIDsByAnnotationIDInBox(annotationID, boxID string) (refIDs []string
 		return
 	}
 	defer rows.Close()
+	// 同一块中的多个格式片段可以引用同一标注，按首次出现顺序返回引用块。
+	seen := map[string]bool{}
 	for rows.Next() {
 		var id string
 		if err = rows.Scan(&id); err != nil {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return
 		}
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
 		refIDs = append(refIDs, id)
 	}
 	return

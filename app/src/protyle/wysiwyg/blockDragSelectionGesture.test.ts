@@ -134,14 +134,21 @@ test("new gestures preserve modifier clicks, right clicks, double clicks and han
 });
 
 test("ordinary touch scrolling never changes into block selection after waiting", () => {
-    const f = fixture();
-    f.touch("touchstart");
-    assert.equal(f.touch("touchmove", 50).defaultPrevented, false);
-    f.advance(2000);
-    f.touch("touchmove", 220);
-    f.touch("touchend", 220);
-    assert.deepEqual(f.selections, []);
-    assert.equal(f.document.count(), 0);
+    for (const multiSelect of [false, true]) {
+        const f = fixture();
+        if (multiSelect) {
+            f.enterMultiSelect();
+        }
+        assert.equal(f.touch("touchstart").defaultPrevented, false);
+        assert.equal(f.touch("touchmove", 50).defaultPrevented, false);
+        f.advance(2000);
+        assert.equal(f.touch("touchmove", 220).defaultPrevented, false);
+        assert.equal(f.touch("touchend", 220).defaultPrevented, false);
+        assert.deepEqual(f.selections, []);
+        assert.equal(f.document.count(), 0);
+        assert.equal(f.scrollElement.count(), 0);
+        assert.deepEqual(f.scrolls, []);
+    }
 });
 
 test("a sustained touch can cross block boundaries without changing a short native word selection", () => {
@@ -158,16 +165,30 @@ test("a sustained touch can cross block boundaries without changing a short nati
     assert.equal(f.document.count(), 0);
 });
 
-test("multi-select touch suppresses native scrolling and supports dragging after long-press activation", () => {
+test("multi-select touch supports dragging after long-press activation and keeps later taps native", () => {
     const f = fixture();
     f.touch("touchstart");
+    f.advance(1500);
     f.enterMultiSelect();
     assert.equal(f.touch("touchmove", 50).defaultPrevented, true);
     f.touch("touchmove", 220);
     f.touch("touchend", 220);
     assert.deepEqual(f.selections, [["a", "a"], ["a", "c"]]);
-    assert.equal(f.touch("touchstart").defaultPrevented, true);
+    assert.equal(f.touch("touchstart").defaultPrevented, false);
     assert.equal(f.touch("touchend").defaultPrevented, false);
+});
+
+test("a fresh touch in multi-select mode requires a sustained press before extending the selection", () => {
+    const f = fixture();
+    f.enterMultiSelect();
+    assert.equal(f.touch("touchstart").defaultPrevented, false);
+    f.advance(1500);
+    assert.equal(f.touch("touchmove", 50).defaultPrevented, true);
+    assert.equal(f.touch("touchmove", 220).defaultPrevented, true);
+    assert.equal(f.touch("touchend", 220).defaultPrevented, true);
+    assert.deepEqual(f.selections, [["a", "a"], ["a", "c"]]);
+    assert.deepEqual(f.finishes, [{source: "touch", cancelled: false}]);
+    assert.equal(f.document.count(), 0);
 });
 
 test("multi-touch, native cancellation, lost buttons, escape, blur and disposal release gesture listeners", () => {
@@ -176,6 +197,7 @@ test("multi-touch, native cancellation, lost buttons, escape, blur and disposal 
         if (end === "multi-touch" || end === "touchcancel") {
             f.enterMultiSelect();
             f.touch("touchstart");
+            f.advance(1500);
             f.touch("touchmove", 120);
             f.document.send(end === "multi-touch" ? "touchstart" : "touchcancel", {touches: [{}, {}]});
         } else {

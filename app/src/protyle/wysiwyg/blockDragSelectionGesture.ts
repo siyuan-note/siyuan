@@ -114,8 +114,8 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
                 Math.abs(touch.clientY - gesture.point.clientY) < Constants.SIZE_DRAG_THRESHOLD) {
                 return;
             }
-            // 普通滑动交给浏览器滚动；多选模式或持续长按后的滑动才尝试扩选。
-            if (!options.isMultiSelectMode() && Date.now() - gesture.time < Constants.TIMEOUT_MULTIPLE_SELECT) {
+            // 普通滑动交给浏览器滚动，多选模式下也需持续长按后才尝试扩选。
+            if (Date.now() - gesture.time < Constants.TIMEOUT_MULTIPLE_SELECT) {
                 cancel();
                 return;
             }
@@ -179,10 +179,7 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
             return;
         }
         const touch = event.touches[0];
-        if (start(event.target as HTMLElement, touch, "touch", touch.identifier) && options.isMultiSelectMode()) {
-            // 多选模式中的触摸从按下时阻止原生滚动，松手未移动仍交给现有点选处理。
-            event.preventDefault();
-        }
+        start(event.target as HTMLElement, touch, "touch", touch.identifier);
     };
     const click = (event: MouseEvent) => {
         if (Date.now() < suppressClickUntil) {

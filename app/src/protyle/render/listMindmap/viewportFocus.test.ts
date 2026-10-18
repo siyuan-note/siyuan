@@ -8,7 +8,7 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const names = ["focusNode", "getToolbarBounds", "revealNode", "isPanTarget", "dismissControls", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
+const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "dismissControls", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
 const methods = view.members.filter(item => item.name && names.includes(item.name.getText(source)));
 assert.equal(methods.length, names.length);
 const compiled = transpileModule(`class View { ${methods.map(item => item.getText(source)).join("\n")} }
@@ -28,7 +28,8 @@ const setup = () => {
         selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         nodeElements: new Map(), offsetX: 0, offsetY: 0,
-        interactionActive: true, setInteractionActive: () => {},
+        interactionActive: true, setInteractionActive: (value: boolean) => target.interactionActive = value,
+        buttons: new Map(),
         viewport: {contains: (element: unknown) => !!element, setPointerCapture: () => {},
             offsetWidth: 400, offsetHeight: 300,
             getBoundingClientRect: () => ({left: 0, top: 0, right: 400, bottom: 300, width: 400, height: 300})},
@@ -219,9 +220,10 @@ test("bottom clearance preserves the node top below the toolbar when the node is
     assert.equal(100 + target.offsetY, 64);
 });
 
-test("mouse, right-button and primary touch panning preserve the editing focus", () => {
+test("hand-tool, right-button and primary touch panning preserve the editing focus", () => {
     for (const overrides of [{}, {button: 2}, {pointerType: "touch"}]) {
         const {target, event, focus, finished} = setup();
+        target.panning = !Object.keys(overrides).length;
         const down = event("background", overrides);
         target.dismissControls(down);
         target.pointerDown(down);
@@ -238,22 +240,69 @@ test("mouse, right-button and primary touch panning preserve the editing focus",
     }
 });
 
+test("Ctrl and Meta right dragging preserves reading state, node selection and editor focus", () => {
+    for (const key of ["ctrlKey", "metaKey"]) {
+        for (const interactionActive of [false, true]) {
+            const {target, event, focus, finished} = setup();
+            target.interactionActive = interactionActive;
+            const down = event("background", {button: 2, [key]: true});
+            target.dismissControls(down);
+            target.activatePointer(down);
+            target.pointerDown(down);
+            assert.equal(target.interactionActive, interactionActive);
+            assert.equal(target.selectedId, "new");
+            assert.equal(target.pointer.pan, true);
+            assert.equal(focus(), "editor");
+            assert.equal(finished(), 0);
+            target.pointer.moved = true;
+            target.pointerUp(down);
+            assert.equal(focus(), "editor");
+            assert.equal(finished(), 0);
+            assert.equal(target.interactionActive, interactionActive);
+        }
+        const {target, event, finished} = setup();
+        target.locked = true;
+        target.interactionActive = false;
+        const down = event("background", {button: 2, [key]: true});
+        target.activatePointer(down);
+        target.pointerDown(down);
+        assert.equal(target.pointer, undefined, "temporary gestures cannot bypass a saved view lock");
+        assert.equal(target.interactionActive, false);
+        assert.equal(finished(), 0);
+        for (const mode of ["relationFrom", "summarySelecting"]) {
+            const {target, event, finished} = setup();
+            target[mode] = mode === "relationFrom" ? "new" : true;
+            const down = event("background", {button: 2, [key]: true});
+            target.dismissControls(down);
+            target.activatePointer(down);
+            target.pointerDown(down);
+            assert.equal(target.selectedId, "new");
+            assert.equal(target[mode], mode === "relationFrom" ? "new" : true);
+            assert.equal(target.pointer.pan, true);
+            assert.equal(finished(), 0, "temporary panning does not finish a pending annotation");
+        }
+    }
+});
+
 test("a background click still finishes editing while a canceled drag leaves it active", () => {
     const {target, event, focus, finished} = setup();
     const down = event();
     target.pointerDown(down);
     target.pointerUp(down);
-    assert.equal(finished(), 1);
+    assert.equal(finished(), 2);
     assert.equal(focus(), "canvas");
     target.editingId = "new";
+    target.panning = true;
     target.pointerDown(event());
     target.cancelPointer();
     assert.equal(target.editingId, "new");
-    assert.equal(finished(), 1);
+    assert.equal(finished(), 2);
 });
 
 test("nodes, controls, nested maps, lines and non-pan modes retain their own interactions", () => {
     const {target, event} = setup();
+    assert.equal(target.isPanTarget(event()), false, "ordinary left dragging cannot pan the background");
+    assert.equal(target.isPanTarget(event("background", {pointerType: "touch"})), true);
     for (const kind of [".mindmap-view__node", "button", ".mindmap-view__node--editing", ".mindmap-view__summary"]) {
         assert.equal(target.isPanTarget(event(kind)), false, kind);
     }

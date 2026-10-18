@@ -78,6 +78,7 @@ export interface ListMindmapViewOptions {
 interface PointerState {
     pointerId: number;
     rightButton?: boolean;
+    pan?: boolean;
     id?: string;
     startX: number;
     startY: number;
@@ -409,7 +410,7 @@ export class ListMindmapView {
         if (!this.options.host.contains(target)) {
             this.setInteractionActive(false);
         }
-        if (this.editingId && this.isPanTarget(event)) {
+        if ((this.editingId || this.isTemporaryPan(event)) && this.isPanTarget(event)) {
             return;
         }
         if (this.summarySelecting && (this.viewport.contains(target) || this.summaryControls.contains(target))) {
@@ -461,7 +462,7 @@ export class ListMindmapView {
     private activatePointer = (event: PointerEvent) => {
         const target = event.target as Element;
         if (target.closest(".mindmap-view") !== this.options.host ||
-            this.buttons.get("lock")?.contains(target)) {
+            this.buttons.get("lock")?.contains(target) || this.isTemporaryPan(event)) {
             return;
         }
         if (event.pointerType !== "touch" || target.closest("button, input, select")) {
@@ -2169,15 +2170,20 @@ export class ListMindmapView {
         }
     };
 
+    private isTemporaryPan(event: PointerEvent) {
+        return event.button === 2 && (event.ctrlKey || event.metaKey);
+    }
+
     public isPanTarget(event: PointerEvent) {
         const target = event.target as HTMLElement;
-        return !this.locked && !this.pinching && !this.summarySelecting && !this.relationFrom &&
+        return !this.locked && !this.pinching && (event.button === 2 || !this.summarySelecting && !this.relationFrom) &&
             (event.pointerType !== "touch" || this.interactionActive || !!this.fullscreenMarker) &&
             (event.pointerType !== "touch" || event.isPrimary) && [0, 2].includes(event.button) &&
             this.viewport.contains(target) && target.closest(".mindmap-view") === this.options.host &&
             !target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing") &&
             (this.panning || event.button === 2 ||
-                !target.closest(".mindmap-view__node, .mindmap-view__summary") && !this.findLine(event));
+                event.pointerType === "touch" && !target.closest(".mindmap-view__node, .mindmap-view__summary") &&
+                !this.findLine(event));
     }
 
     private pointerDown = (event: PointerEvent) => {
@@ -2199,8 +2205,12 @@ export class ListMindmapView {
         this.suppressPanContextMenu = event.button === 2;
         const element = target.closest<HTMLElement>(".mindmap-view__node");
         const id = element?.dataset.mindmapId;
+        if (event.pointerType !== "touch") {
+            // 画布接管指针时阻止浏览器启动文字划选，节点编辑器保留原生选区。
+            event.preventDefault();
+        }
         this.preparePointer(event);
-        if (this.editingId && this.isPanTarget(event)) {
+        if ((this.editingId || this.isTemporaryPan(event)) && this.isPanTarget(event)) {
             // 平移只改变画布位置，保留节点编辑器及其文字选区。
             event.preventDefault();
             this.beginPointer(event);
@@ -2292,12 +2302,13 @@ export class ListMindmapView {
         if (id) {
             this.selectNode(id);
         }
-        if (!this.editingId || id) {
+        if ((!this.editingId || id) && !this.isTemporaryPan(event)) {
             this.options.host.focus({preventScroll: true});
         }
         this.pointer = {
             pointerId: event.pointerId,
             rightButton: event.button === 2,
+            pan: this.panning || event.button === 2 || event.pointerType === "touch",
             id: !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
             startX: event.clientX,
             startY: event.clientY,
@@ -2408,6 +2419,9 @@ export class ListMindmapView {
             if (!this.routeDragFrame) {
                 this.routeDragFrame = requestAnimationFrame(() => this.previewRouteDrag());
             }
+            return;
+        }
+        if (!pointer.id && !pointer.pan) {
             return;
         }
         this.viewport.classList.add("mindmap-view__viewport--dragging");

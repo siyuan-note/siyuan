@@ -2986,7 +2986,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.querySelector(".mindmap-view__ghost"), null);
     panButton.click();
     check.equal(panButton.getAttribute("aria-pressed"), "false");
-    check.equal(getComputedStyle(panViewport).cursor, "grab");
+    check.equal(getComputedStyle(panViewport).cursor, "default");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
     single.zoomAt(2.5);
     check.equal(single.scale, 2.5, "manual zoom can still enlarge a small map");
@@ -3089,6 +3089,75 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panView.offsetX = readingTransform[1];
         panView.offsetY = readingTransform[2];
         panView.draw();
+        scrollHost.contentEditable = "true";
+        // 模拟主题允许选择预览文字，验证拖动画布仍不会启动浏览器文字划选。
+        viewport.style.userSelect = "text";
+        getSelection().removeAllRanges();
+        const blankStart = {x: Math.round(readingBounds.left + 100), y: Math.round(readingBounds.top + 220)};
+        const blankEnd = centerPoint(panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`));
+        await nativeInput([
+            {type: "mouseMove", ...blankStart},
+            {type: "mouseDown", ...blankStart, button: "left", clickCount: 1},
+            {type: "mouseMove", ...blankEnd, button: "left"},
+            {type: "mouseUp", ...blankEnd, button: "left", clickCount: 1},
+        ]);
+        check.equal(getSelection().toString(), "", "native canvas dragging does not select preview text in an editable document");
+        check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform,
+            "ordinary left dragging on blank canvas does not pan");
+        panHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        viewport.style.removeProperty("user-select");
+        scrollHost.contentEditable = "false";
+        const reader = document.createElement("input");
+        reader.value = "Document reading selection";
+        reader.style.cssText = "position:fixed;top:0;left:0";
+        document.body.append(reader);
+        for (const modifier of ["control", "meta"]) {
+            panView.setReadOnly(modifier === "meta");
+            panView.selectNode(panModel.root.id);
+            panView.inspector.hidden = true;
+            reader.focus({preventScroll: true});
+            reader.setSelectionRange(2, 8);
+            await settle();
+            const node = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
+            const point = centerPoint(node);
+            const end = {x: point.x + 30, y: point.y + 20};
+            const before = [panView.offsetX, panView.offsetY];
+            await nativeInput([
+                {type: "mouseMove", ...point},
+                {type: "mouseDown", ...point, button: "right", clickCount: 1, modifiers: [modifier]},
+                {type: "mouseMove", ...end, button: "right", modifiers: [modifier]},
+                {type: "mouseUp", ...end, button: "right", clickCount: 1, modifiers: [modifier]},
+            ]);
+            check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 30, before[1] + 20]);
+            check.equal(panView.interactionActive, false, "temporary right dragging preserves reading mode");
+            check.equal(document.activeElement, reader, "temporary right dragging does not steal document focus");
+            check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
+            check.equal(panView.getSelectedId(), panModel.root.id);
+            let receivedWheel: WheelEvent;
+            let scrollingFinished = false;
+            viewport.addEventListener("wheel", event => receivedWheel = event, {once: true});
+            scrollHost.addEventListener("scrollend", () => scrollingFinished = true, {once: true});
+            await nativeInput([
+                {type: "keyUp", keyCode: modifier === "control" ? "Control" : "Meta"},
+                {type: "mouseMove", ...end, modifiers: []},
+                {type: "mouseWheel", ...end, deltaX: 0, deltaY: -80, canScroll: true, modifiers: []},
+            ]);
+            const deadline = performance.now() + 1000;
+            while ((!scrollHost.scrollTop || !scrollingFinished) && performance.now() < deadline) {
+                await frame();
+            }
+            check.ok(scrollHost.scrollTop > 0, "ordinary wheel input still scrolls the document after temporary panning: " +
+                JSON.stringify({modifier, point: end, target: document.elementFromPoint(end.x, end.y)?.className,
+                    wheel: receivedWheel && {ctrlKey: receivedWheel.ctrlKey, metaKey: receivedWheel.metaKey,
+                        defaultPrevented: receivedWheel.defaultPrevented}}));
+            scrollHost.scrollTop = 0;
+            await settle();
+            panView.offsetX = readingTransform[1];
+            panView.offsetY = readingTransform[2];
+            panView.draw();
+        }
+        reader.remove();
+        panView.setReadOnly(false);
         check.ok(Array.from(panHost.querySelectorAll(".mindmap-view__toolbar use"))
             .every(icon => icon.getAttribute("xlink:href") !== "#iconEdit"), "canvas activation has no separate pencil button");
         const hand = panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
@@ -4584,12 +4653,14 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});
     });
     ipcMain.handle("mindmap-view-native-input", async (_event, events) => {
+        win.webContents.focus();
         for (const event of events) {
             win.webContents.sendInputEvent(event);
             await new Promise(resolve => setTimeout(resolve, 20));
         }
     });
     ipcMain.handle("mindmap-view-native-touch", async (_event, events) => {
+        win.webContents.focus();
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true, maxTouchPoints: 2});
         try {
             for (const event of events) {

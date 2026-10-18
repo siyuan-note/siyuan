@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261017003000"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -4363,7 +4363,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261016013311"
+				"updated": "20261018200107"
 			},
 			"Children": [
 				{
@@ -13097,7 +13097,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261017003000"
+				"updated": "20261018200107"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13117,6 +13117,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "在画布上按 Esc 可恢复阅读，让滚轮滚动文档。如果正在编辑节点、选择概括范围或拖动关系线，Esc 会先结束或取消当前操作；全屏时按 Esc 退出全屏。"
+				}
+			]
+		},
+		{
+			"ID": "20261018200107-yv270lj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018200107-yv270lj",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 Ctrl（macOS 为 Command）并用鼠标右键拖动画布可临时平移，不会改变键盘焦点或激活阅读中的画布，之后普通滚轮仍滚动文档。视图锁定时此手势不可用。普通模式下空白区域的左键拖动不会平移画布；启用手形工具后可用左键拖动平移。"
 				}
 			]
 		},

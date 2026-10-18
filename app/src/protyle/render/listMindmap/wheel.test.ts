@@ -165,7 +165,7 @@ test("active mobile touch panning retains visible content without scrolling the 
         ["clipped", {x: 600, y: 901, width: 100, height: 99}],
     ]);
     const document = {scrollTop: 0};
-    target.pointer = {pointerId: 1, x: 0, y: 0, startX: 100, startY: 100};
+    target.pointer = {pointerId: 1, pan: true, x: 0, y: 0, startX: 100, startY: 100};
     target.viewport.classList = {add: () => {}};
     target.options = {host: {closest: () => document}};
     target.setHoveredLine = () => {};

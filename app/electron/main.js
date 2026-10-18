@@ -90,6 +90,8 @@ const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = 
 const {createSettingsWindows} = require("./settingsWindows");
 const {createSettingsTaskBridge} = require("./settingsTasks");
 const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
+const {createWebPageFetcher, installWebPageFetchIPC} = require("./webPageFetch");
+const fetchRenderedWebPage = createWebPageFetcher({BrowserWindow, session});
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -3445,6 +3447,8 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
+    installWebPageFetchIPC(ipcMain, fetchRenderedWebPage,
+        sender => initializedWindowIds.has(sender.id) && !!getWindowKernelTarget(sender.id));
     ipcMain.handle("siyuan-get", async (event, data) => {
         if (data.cmd === "getWindowGeometry" || data.cmd === "setWindowGeometry") {
             const window = getWindowByContentId(event.sender.id);

@@ -22,7 +22,7 @@ import (
 
 var WebFetchTool = &Tool{
 	Name:        "web_fetch",
-	Description: "Fetch a web page and convert to Markdown or text. url (http/https), format: markdown (default) or text.",
+	Description: "Fetch a web page over raw HTTP without executing JavaScript or using a browser session, and convert to Markdown or text. url (http/https), format: markdown (default) or text. For client-rendered pages, use native/frontend/web_page_fetch when available in the desktop Electron app.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

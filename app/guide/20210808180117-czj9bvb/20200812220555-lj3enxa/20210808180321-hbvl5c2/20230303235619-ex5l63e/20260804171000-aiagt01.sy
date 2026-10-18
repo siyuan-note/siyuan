@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261018102417"
 	},
 	"Children": [
 		{
@@ -951,6 +951,63 @@
 				{
 					"Type": "NodeText",
 					"Data": "。调用外部 MCP 工具可能发送本地数据、修改外部系统或产生费用，应根据确认卡片核对具体影响。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-ch6z3dh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018102417-ch6z3dh",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "抓取网页"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261018102417-czenpo4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-czenpo4",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以让智能体读取公开网页，归纳内容或保存到笔记。web_fetch 工具通过 HTTP 请求获取内容，不执行 JavaScript。桌面应用中的智能体还可以抓取渲染后的网页，用于读取由 JavaScript 生成的正文。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-fykajop",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-fykajop",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "渲染抓取会执行网页脚本，并从本机桌面端发起网络请求，连接远程内核时也是如此。它沿用当前窗口的代理配置，使用独立的临时会话，不携带已有的 Cookie 或登录状态。请核对请求的网址，并根据工具权限设置确认操作。内网地址和下载会被拒绝。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-770stzg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-770stzg",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "渲染抓取需要桌面实例保持连接。浏览器端、移动端和外部 MCP 客户端继续使用 HTTP 抓取。正文为空或超时时会返回错误，较长结果会截断至 50,000 个字符。需要登录、嵌入页面、工作线程或持续浏览器连接的网页仍可能无法读取。"
 				}
 			]
 		},

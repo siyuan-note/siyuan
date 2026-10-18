@@ -2005,7 +2005,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block."
+                    "Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block. When directly embedding a complete mind map block or a document containing it, unlock the map to edit its nodes and styles. Changes update the source block and other embedded copies. Read-only and history previews remain non-editable."
 				}
 			]
 		},

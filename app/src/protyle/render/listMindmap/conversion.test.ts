@@ -12,6 +12,7 @@ const setup = () => {
     const calls: string[] = [];
     const root = {};
     let embedded = false;
+    let allowChildOperation = false;
     const owner = {block: {rootID: "doc"}, notebookId: "box", disabled: false, lite: false, fragment: false,
         options: {action: [] as string[]}, wysiwyg: {element: root, flushPendingInput: async () => { calls.push("flush"); }}};
     const attributes = new Map([["data-node-id", "map"], ["data-type", "NodeMindmap"]]);
@@ -25,6 +26,7 @@ const setup = () => {
     const pending = new Promise((done, fail) => { resolve = done; reject = fail; });
     const dependencies = {
         Constants: {CB_GET_HISTORY: "history"}, normalizeHTMLAssetIFrameBlockDOM: (html: string) => html,
+        getEmbedChildOperationContext: () => allowChildOperation ? {resultElement: {dataset: {rootId: "source-doc"}}} : undefined,
         isProtyleListItemFragment: (protyle: typeof owner) => protyle.fragment,
         fetchSyncPost: (url: string, data: unknown) => {
             assert.equal(url, "/api/block/getBlockDOM");
@@ -43,7 +45,7 @@ const setup = () => {
     const prepare = new Function(...Object.keys(dependencies), source + "; return prepareListMindmapConversion;")(
         ...Object.values(dependencies));
     return {owner, list, calls, attributes, fullAttributes, prepare, resolve, reject,
-        embed: () => { embedded = true; }};
+        embed: (allow = false) => { embedded = true; allowChildOperation = allow; }};
 };
 const flush = async () => { for (let index = 0; index < 6; index++) { await Promise.resolve(); } };
 
@@ -78,6 +80,20 @@ test("an editable list-item fragment keeps its local full content without a serv
     state.owner.fragment = true;
     assert.ok(await state.prepare(state.owner, state.list));
     assert.deepEqual(state.calls, ["flush", "wait"]);
+});
+
+test("editable embedded roots complete their source even inside a local list-item fragment", async () => {
+    for (const lite of [false, true]) {
+        const state = setup();
+        state.embed(true);
+        state.owner.lite = lite;
+        state.owner.fragment = lite;
+        const promise = state.prepare(state.owner, state.list);
+        await flush();
+        assert.deepEqual(state.calls, ["flush", "wait", "fetch"]);
+        state.resolve({code: 0, data: {dom: "full"}});
+        assert.deepEqual(await promise, {outerHTML: "completed"});
+    }
 });
 
 test("late source reads cannot overwrite edits or a changed document", async () => {

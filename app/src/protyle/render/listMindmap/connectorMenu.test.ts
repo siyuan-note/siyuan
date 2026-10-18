@@ -29,7 +29,8 @@ test("desktop and mobile connector menus persist one undoable change and preserv
     for (const mobile of [false, true]) {
         let data = {version: 2, nodes: {child: {lineColor: "red"}}, relations: [] as unknown[], extension: "keep"};
         const original = JSON.stringify(data);
-        const list = {isConnected: true, dataset: {nodeId: "map"}, get outerHTML() { return JSON.stringify(data); }};
+        const list = {isConnected: true, dataset: {nodeId: "map"}, closest: (): null => null,
+            get outerHTML() { return JSON.stringify(data); }};
         const transactions: {before: string, after: string}[] = [];
         let editable = true;
         let item: IMenu;

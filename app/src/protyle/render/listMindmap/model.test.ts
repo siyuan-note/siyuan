@@ -213,7 +213,7 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
 });
 
 const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string, dragSource: string,
-                            inputSource: string) => {
+                            inputSource: string, controllerSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
@@ -221,7 +221,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         "addListMindmapSummaryRanges, getListMindmapSummarySnapshot, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
         "initializeListMindmapConnectorStyle, LIST_MINDMAP_DEFAULT_CONNECTOR_STYLE_KEY, " +
-        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock, getListMindmapElements, registerListMindmapRoot, restoreListMindmapFocus};")(
+        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, completeTabsListSource, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock, getListMindmapElements, registerListMindmapRoot, restoreListMindmapFocus};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -235,6 +235,98 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const lute = Lute.New();
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
+    window.siyuan = {languages: new Proxy({}, {get: (_target, key) => String(key)}),
+        config: {editor: {}, keymap: {editor: {general: {}, list: {}}}}, storage: {}} as unknown as typeof window.siyuan;
+    for (const mobile of [false, true]) {
+        const root = document.createElement("div");
+        root.className = "protyle-wysiwyg";
+        root.innerHTML = lute.Md2BlockDOM("- Original\n  - Folded child\n");
+        const original = root.firstElementChild as HTMLElement;
+        api.retagMindmapBranch(original, true);
+        original.firstElementChild.setAttribute("fold", "1");
+        const full = original.outerHTML;
+        const copies = ["first", "second"].map(id => {
+            const query = document.createElement("div");
+            query.dataset.type = "NodeBlockQueryEmbed";
+            query.dataset.nodeId = id;
+            query.innerHTML = '<div class="protyle-wysiwyg__embed" data-allow-child-operation="true" ' +
+                'data-root-id="source-document">' + full + "</div>";
+            const result = query.firstElementChild as HTMLElement;
+            result.dataset.id = original.dataset.nodeId;
+            root.append(query);
+            return result.firstElementChild as HTMLElement;
+        });
+        document.body.append(root);
+        const owner = {block: {rootID: "host-document"}, notebookId: "box", lute, options: {action: [] as string[], render: {}},
+            wysiwyg: {element: root, flushPendingInput: async () => {}},
+            toolbar: {isMultiSelectMode: () => false}};
+        const operations: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
+        const controllers: any[] = [];
+        const historyRoots: string[] = [];
+        const dependencies = {...api,
+            Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
+                CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
+            isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
+            isMobile: () => mobile, waitForPendingTransactions: async () => {},
+            fetchSyncPost: async () => ({code: 0, data: {dom: full}}),
+            normalizeHTMLAssetIFrameBlockDOM: (html: string) => html,
+            cleanHeadingNumberHTML: (html: string) => html, cleanTableCellRichHTML: (html: string) => html,
+            cleanBlockSelectionModeHTML: (html: string) => html,
+            syncListMindmapHeight: () => {}, bindListMindmapResize: () => ({refresh() {}, destroy() {}}),
+            showMessage: () => check.fail("Embedded edit failed"), globalClickHideMenu: () => {},
+            hideAllElements: () => {}, hideElements: () => {}, suspendBlockPopover: () => () => {},
+            getInlineStylesCache: () => ({}), getVisibleOrderedStyleKeys: (): string[] => [],
+            openListMindmapEditor: (options: any) => { editorOptions = options; return {finish: async () => true, destroy() {}}; },
+            genListItemElement: () => {
+                const holder = document.createElement("div");
+                holder.innerHTML = lute.Md2BlockDOM("- Added\n");
+                return holder.firstElementChild.firstElementChild;
+            },
+            processRender: () => {}, highlightRender: () => {}, avRender: () => {}, blockRender: () => {},
+            disposeCustomBlocksInElement: () => {},
+            transaction: (_owner: unknown, forward: IOperation[], backward: IOperation[]) => {
+                operations.push({doOperations: forward, undoOperations: backward});
+                const operation = forward[0];
+                check.equal(operation.id, original.dataset.nodeId);
+                root.firstElementChild.outerHTML = operation.data as string;
+                controllers.slice(1).forEach(controller => check.equal(controller.replay(operation.data), true));
+            },
+            requestUndo: async (_owner: unknown, rootID: string) => {
+                historyRoots.push(rootID);
+                controllers.forEach(controller => check.equal(controller.replay(operations.at(-1).undoOperations[0].data), true));
+            },
+            requestRedo: async (_owner: unknown, rootID: string) => {
+                historyRoots.push(rootID);
+                controllers.forEach(controller => check.equal(controller.replay(operations.at(-1).doOperations[0].data), true));
+            },
+        };
+        let editorOptions: any;
+        const embedded = new Function(...Object.keys(dependencies), controllerSource +
+            "; return {ListMindmapController, completeList, canEdit};")(...Object.values(dependencies));
+        copies[0].querySelector('[data-type="NodeMindmap"]').remove();
+        check.equal(await embedded.completeList(owner, copies[0]), "complete");
+        check.match(copies[0].textContent, /Folded child/);
+        copies.forEach(copy => controllers.push(new embedded.ListMindmapController(owner, copy)));
+        const target = controllers[0];
+        const itemID = copies[0].firstElementChild.getAttribute("data-node-id");
+        await target.view.options.onNodeStyle(itemID, {backgroundColor: "#ff0000"});
+        check.equal(api.readListMindmap(copies[1]).metadata.nodes[itemID].backgroundColor, "#ff0000");
+        check.equal(operations[0].undoOperations[0].context.undoFocusEmbedId, "first");
+        check.equal(operations[0].undoOperations[0].context.undoFocusIndex, "1");
+        check.match(operations[0].doOperations[0].data as string, /Folded child/);
+        await target.view.options.onAdd(itemID, "child");
+        check.equal(editorOptions.rootID, "source-document");
+        check.match(copies[1].textContent, /Added/);
+        await target.finish();
+        target.activeEditor = undefined;
+        await target.undo(false);
+        check.doesNotMatch(copies[0].textContent, /Added/);
+        await target.undo(true);
+        check.match(copies[0].textContent, /Added/);
+        check.deepEqual(historyRoots, ["source-document", "source-document"]);
+        controllers.forEach(controller => controller.destroy());
+        root.remove();
+    }
     const holder = document.createElement("div");
     const reset = (markdown: string) => {
         holder.innerHTML = lute.Md2BlockDOM(markdown);
@@ -4295,6 +4387,15 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_typography.scss")).css;
     const indexSource = typescript.createSourceFile("index.ts", readFileSync(path.join(__dirname, "index.ts"), "utf8"),
         typescript.ScriptTarget.Latest, true);
+    const transactionSource = typescript.createSourceFile("transaction.ts",
+        readFileSync(path.join(__dirname, "../../wysiwyg/transaction.ts"), "utf8"), typescript.ScriptTarget.Latest, true);
+    const updateTransaction = transactionSource.statements.find(statement => typescript.isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(item => item.name.getText(transactionSource) === "updateTransaction"));
+    const controllerSource = compile(path.join(__dirname, "../../util/hasClosest.ts")) +
+        compile(path.join(__dirname, "../../wysiwyg/getBlock.ts")) + compile(path.join(__dirname, "index.ts")) +
+        typescript.transpileModule(updateTransaction.getText(transactionSource).replace(/^export /, ""), {
+            compilerOptions: {target: typescript.ScriptTarget.ES2021},
+        }).outputText;
     const controller = indexSource.statements.find(typescript.isClassDeclaration);
     const taskMethods = controller.members.filter(member => ["setTask", "setTabTask", "queueTask", "change"]
         .includes(member.name?.getText(indexSource)));
@@ -4361,7 +4462,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)}, ${JSON.stringify(inputSource)})`)});
+        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)}, ${JSON.stringify(inputSource)}, ${JSON.stringify(controllerSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

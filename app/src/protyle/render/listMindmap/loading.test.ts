@@ -31,7 +31,7 @@ const browserCases = async (source: string, css: string, constructorSource: stri
         getListMindmapElements: (root: Element) => Array.from(root.querySelectorAll('[data-type="NodeMindmap"]')),
         isFoldedRenderContent: (element: Element) => !!element.closest('[fold="1"]'),
         syncListMindmapHeight: syncHeight,
-        canEdit: () => true,
+        canEdit: (owner: {disabled?: boolean}) => !owner.disabled,
         isProtyleListItemFragment: (owner: {fragment?: boolean}) => owner.fragment === true,
         completeList: () => {
             requests++;
@@ -134,6 +134,28 @@ const browserCases = async (source: string, css: string, constructorSource: stri
         root.remove();
     }
     check.deepEqual(errors, []);
+    for (const lite of [false, true]) {
+        const root = document.createElement("div");
+        root.className = "protyle-wysiwyg";
+        root.innerHTML = '<div class="protyle-wysiwyg__embed"><div data-type="NodeMindmap" data-node-id="embedded">' +
+            "<div>Partial source</div></div></div>";
+        document.body.append(root);
+        const owner = {lite, fragment: lite, disabled: true, wysiwyg: {element: root}};
+        const previousRequests = requests;
+        init(owner);
+        await frame();
+        check.equal(requests, previousRequests, "read-only embeds do not load editable source");
+        owner.disabled = false;
+        roots.get(owner).refresh();
+        await frame();
+        check.equal(requests, previousRequests + 1, "permission changes must hydrate before enabling editing");
+        resolveLoad("complete");
+        await flush();
+        await frame();
+        check.equal(requests, previousRequests + 1, "completed source is reused by later refreshes");
+        roots.get(owner).destroy();
+        root.remove();
+    }
     const remounted = document.createElement("div");
     remounted.innerHTML = '<div data-node-id="source">Preserved source</div>' +
         '<div class="mindmap-view" aria-busy="true">Stale loading</div><div class="mindmap-view">Stale rendered</div>';

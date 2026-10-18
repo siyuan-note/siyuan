@@ -25,6 +25,7 @@ import {getUndoFocusContext, restoreFocusContext} from "../../util/selection";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
+    rootID?: string;
     node: ListMindmapNode;
     host: HTMLElement;
     canEdit: () => boolean;
@@ -74,7 +75,8 @@ const retainIndependentBlocks = (html: string, node: ListMindmapNode) => {
         child.getAttribute("data-type") !== nestedBranchType(node)).forEach(child => {
         const blocks = [child, ...Array.from(child.querySelectorAll(independentBlockSelector))];
         blocks.forEach(block => {
-            if (block.matches(independentBlockSelector) && !block.closest(".protyle-wysiwyg__embed")) {
+            if (block.matches(independentBlockSelector) &&
+                block.closest(".protyle-wysiwyg__embed") === node.element.closest(".protyle-wysiwyg__embed")) {
                 current.set(block.getAttribute("data-node-id"), block);
             }
         });
@@ -104,6 +106,7 @@ const matchesCustomizedEditorShortcut = (event: KeyboardEvent) => {
 // 编辑器挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
 export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const {owner, node, host} = options;
+    const rootID = options.rootID || owner.block.rootID;
     const initialBlockHTML = nodeContent(node);
     if (!options.canEdit() || !node.element?.isConnected) {
         return;
@@ -172,7 +175,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             lute: owner.lute, lockedOptions: {toolbar, hint},
         },
         afterSetContent: (protyle, element) => {
-            protyle.block.rootID = owner.block.rootID;
+            protyle.block.rootID = rootID;
             protyle.block.parentID = node.id;
             protyle.path = owner.path;
             setCustomBlockRootReady(element, true);
@@ -198,7 +201,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             saveTimer = window.setTimeout((): void => { void commit(); }, 350);
         },
     });
-    fragment.protyle.block.rootID = owner.block.rootID;
+    fragment.protyle.block.rootID = rootID;
     const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement];
     const overlayRoot = host.closest(".mindmap-view") || document.body;
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。

@@ -40,11 +40,16 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         block.textContent = text;
         return block.outerHTML;
     };
-    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string, branchType = "NodeList") => {
+    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string,
+                    branchType = "NodeList", embedded = false) => {
         let transactionOwner: (operations: Array<{action: string; id: string; parentID?: string;
             previousID?: string; nextID?: string}>) => unknown;
         const container = document.createElement("section");
         container.dataset.type = branchType;
+        const rootID = embedded ? "source-document" : "document";
+        if (embedded) {
+            container.classList.add("protyle-wysiwyg__embed");
+        }
         const element = document.createElement("div");
         element.dataset.type = `${branchType}Item`;
         element.dataset.nodeId = "item";
@@ -138,7 +143,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                           _complete: unknown, options: {source: string}) => {
                 check.equal(target, protyle);
                 check.equal(options.source, "paste");
-                check.equal(target.block.rootID, "document");
+                check.equal(target.block.rootID, rootID);
                 check.equal(target.toolbar.range, undefined);
                 state.uploads.push(files);
             },
@@ -181,6 +186,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         const owner = {app: {}, notebookId: "notebook", block: {rootID: "document"}};
         const editor = open({
             owner,
+            rootID,
             node: {element}, host, replaceFirstParagraph,
             canEdit: () => element.isConnected,
             onResize: noop,
@@ -199,7 +205,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             },
         });
         check.ok(editor);
-        check.equal(protyle.block.rootID, "document");
+        check.equal(protyle.block.rootID, rootID);
         const type = async (value: string) => {
             wysiwyg.innerHTML = textHTML(value);
             await settle();
@@ -432,7 +438,8 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     await conflictingTabs.remove();
 
     // 数据库和嵌入结果在编辑期间重新渲染，不会挡住普通文字保存或覆盖新的独立块状态。
-    for (const type of ["NodeAttributeView", "NodeBlockQueryEmbed"]) {
+    for (const [type, embedded] of ["NodeAttributeView", "NodeBlockQueryEmbed"].flatMap(type =>
+        [false, true].map(embedded => [type, embedded] as const))) {
         const special = document.createElement("div");
         special.dataset.type = type;
         special.dataset.nodeId = "special";
@@ -442,7 +449,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             special.dataset.content = "select * from blocks";
         }
         special.textContent = "Old projection";
-        const current = create(textHTML("Initial") + special.outerHTML);
+        const current = create(textHTML("Initial") + special.outerHTML, undefined, "NodeList", embedded);
         current.element.lastElementChild.setAttribute("updated", "20260923120000");
         current.element.lastElementChild.textContent = "Latest projection";
         current.wysiwyg.lastElementChild.setAttribute("data-render", "true");

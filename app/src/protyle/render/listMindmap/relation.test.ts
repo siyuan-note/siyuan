@@ -30,7 +30,8 @@ test("manual route save and reset use one transaction and reject stale relation 
     const original = JSON.stringify(data);
     const transactions: {before: string, after: string}[] = [];
     const messages: string[] = [];
-    const list = {isConnected: true, dataset: {nodeId: "map-relations"}, get outerHTML() { return JSON.stringify(data); }};
+    const list = {isConnected: true, dataset: {nodeId: "map-relations"}, closest: (): null => null,
+        get outerHTML() { return JSON.stringify(data); }};
     const context: any = {
         canEdit: () => true,
         getListMindmapSiblingIDs: () => new Map(),

@@ -14,6 +14,8 @@
   [data-type="NodeList"][data-mindmap-view-rendered="true"]:not([fold="1"]),
   [data-type="NodeMindmap"][data-mindmap-view-rendered="true"]:not([fold="1"]) {
     height: auto !important;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   [data-type="NodeList"][data-mindmap-view-rendered="true"] > [data-type="NodeListItem"],

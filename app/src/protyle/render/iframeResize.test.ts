@@ -536,6 +536,28 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     host.classList.add("fullscreen");
     check.equal(getComputedStyle(host.querySelector(".mindmap-view__resize")).display, "none");
     host.classList.remove("fullscreen");
+    for (const type of ["NodeMindmap", "NodeList"]) {
+        mindmap.dataset.type = type;
+        mindmap.className = type === "NodeList" ? "list" : "mindmap";
+        mindmap.setAttribute("custom-sy-list-mindmap", "1");
+        for (const width of ["", "1000px"]) {
+            mindmap.style.width = width;
+            const sourceStyle = mindmap.getAttribute("style");
+            for (const padding of ["24px", "20%", "24px"]) {
+                root.style.paddingLeft = padding;
+                root.style.paddingRight = padding;
+                const available = root.clientWidth - parseFloat(getComputedStyle(root).paddingLeft) -
+                    parseFloat(getComputedStyle(root).paddingRight);
+                check.ok(mindmap.getBoundingClientRect().width <= available + 1,
+                    `${type} fits the document after changing adaptive width (${width}, ${padding})`);
+                check.ok(host.getBoundingClientRect().width <= mindmap.getBoundingClientRect().width);
+                check.equal(mindmap.getAttribute("style"), sourceStyle, "layout preserves the saved source dimensions");
+            }
+        }
+    }
+    mindmap.style.width = "";
+    root.style.paddingLeft = "";
+    root.style.paddingRight = "";
     block.querySelectorAll(".protyle-block-resize").forEach(handle => handle.classList.add("touch-resize-active"));
     return "IFrame, widget and mind map resize cases passed";
 };

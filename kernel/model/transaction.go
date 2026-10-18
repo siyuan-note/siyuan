@@ -3066,6 +3066,7 @@ func (tx *Transaction) commit() (err error) {
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
 	IncSync()
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
+	tx.appendAutomationBlockAttrs()
 	tx.state.Store(2)
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）

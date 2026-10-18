@@ -126,6 +126,18 @@ func (tx *Transaction) invalidateAttributeViewHistory(avID string) {
 func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 	if !rollback {
 		if automation := tx.attributeViewAutomations; automation != nil {
+			var attrs []*Operation
+			for _, operation := range tx.DoOperations {
+				if operation == automation.blockAttrs[operation.ID] {
+					attrs = append(attrs, operation)
+				}
+			}
+			if len(attrs) > 0 {
+				// 块 API 不广播完整事务，提交后仍需独立同步属性。
+				event := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+				event.Data = []*Transaction{{DoOperations: attrs, UndoOperations: []*Operation{}}}
+				util.PushEvent(event)
+			}
 			for _, paused := range automation.paused {
 				util.PushMsg(paused.message(), 7000)
 			}

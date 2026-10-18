@@ -162,6 +162,7 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		Data: &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{collection}}}}); err != nil {
 		t.Fatal(err)
 	}
+	t.Run("collection broadcast", func(t *testing.T) { testAutomationCollectionBroadcast(t, fixture) })
 	call("/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
 	call("/api/av/previewAttributeViewCollection", map[string]any{"avID": database.ID, "ruleID": collection.ID}, previewAttributeViewCollection)
 	call("/api/block/appendBlock", map[string]any{"parentID": tree.ID, "dataType": "markdown", "data": "Source #collect#"}, appendBlock)

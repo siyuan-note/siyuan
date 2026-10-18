@@ -224,6 +224,27 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	}
 
 	util.PushEvent(evt)
+	if pushMode == util.PushModeBroadcastExcludeSelf {
+		// 发起编辑器只补充自动操作，正文继续使用本地输入和光标。
+		var automatic []*model.Transaction
+		for _, tx := range transactions {
+			var operations []*model.Operation
+			for _, operation := range tx.DoOperations {
+				if operation.IsAutomaticAttributeViewOperation() {
+					operations = append(operations, operation)
+				}
+			}
+			if len(operations) > 0 {
+				automatic = append(automatic, &model.Transaction{Timestamp: tx.Timestamp,
+					DoOperations: operations, UndoOperations: []*model.Operation{}})
+			}
+		}
+		if len(automatic) > 0 {
+			evt.PushMode = util.PushModeSingleSelf
+			evt.Data = automatic
+			util.PushEvent(evt)
+		}
+	}
 }
 
 // undoState 查询指定文档的撤销/重做可用性及栈顶关联的 mutatedRootIDs。
@@ -401,7 +422,8 @@ func holdBlockSwapReplayRequests(c *gin.Context, tx *model.Transaction, rootIDs 
 func shouldBroadcastAttrViewTransactions(transactions []*model.Transaction) bool {
 	for _, tx := range transactions {
 		for _, operation := range tx.DoOperations {
-			if nil != operation && "setAttrViewName" != operation.Action && strings.Contains(strings.ToLower(operation.Action), "attrview") {
+			if nil != operation && !operation.IsAutomaticAttributeViewOperation() &&
+				"setAttrViewName" != operation.Action && strings.Contains(strings.ToLower(operation.Action), "attrview") {
 				return true
 			}
 		}

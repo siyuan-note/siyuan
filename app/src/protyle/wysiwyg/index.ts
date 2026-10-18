@@ -247,6 +247,7 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
 import {bindImageTitleEditor} from "../render/imageTitleEditor";
+import {bindImageResize, getImageResizeWidth} from "../render/imageResize";
 import {isDirectCalloutStructureClick} from "./calloutClick";
 import {
     BLOCK_SELECTION_CLASS,
@@ -422,6 +423,7 @@ export class WYSIWYG {
     private disposeTouchCaret?: () => void;
     private disposeListMarkerCaret?: () => void;
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
+    private disposeImageResize?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -552,6 +554,7 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.imageTitleEditor = bindImageTitleEditor(protyle, this.element);
+        this.disposeImageResize = bindImageResize(this.element);
         this.bindEvent(protyle);
         this.disposeListMarkerCaret = bindListMarkerCaret(this.element, () => !protyle.disabled &&
             !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
@@ -603,6 +606,7 @@ export class WYSIWYG {
     public destroy() {
         this.disposeFocusMemory?.();
         this.imageTitleEditor?.destroy();
+        this.disposeImageResize?.();
         this.persistComposition?.();
         this.persistComposition = undefined;
         this.disposeHeadingFoldIndicators?.();
@@ -1992,7 +1996,6 @@ export class WYSIWYG {
                 }
                 const html = nodeElement.outerHTML;
                 const isIFrame = ["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type);
-                const resizeAxis = isIFrame ? target.dataset.resizeAxis || "both" : "both";
                 let isCenter = true;
                 if ("NodeVideo" === nodeElement.dataset.type) {
                     nodeElement.classList.add("iframe--drag");
@@ -2004,36 +2007,53 @@ export class WYSIWYG {
                     if (!nodeElement.style.margin) {
                         isCenter = false;
                     }
-                } else if (target.parentElement.parentElement.getAttribute("data-type") === "img") {
-                    target.parentElement.parentElement.classList.add("img--drag");
                 }
 
                 const x = event.clientX;
+                const imageFrame = target.closest(".protyle-image-resize");
                 const dragElement = isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
-                    target.previousElementSibling as HTMLElement;
+                    imageFrame ? imageFrame.parentElement.querySelector<HTMLImageElement>(":scope > img") :
+                        target.previousElementSibling as HTMLElement;
                 if (!dragElement) {
                     nodeElement.classList.remove("iframe--drag");
                     return;
                 }
                 const dragWidth = dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
+                const resizeAxis = isIFrame || dragElement.tagName === "IMG" ?
+                    target.dataset.resizeAxis || (isIFrame ? "both" : "width") : "both";
                 if (target.classList.contains("protyle-block-resize")) {
                     target.classList.add("touch-resize-active");
                 }
 
                 const imgElement = dragElement.parentElement.parentElement;
+                const imageRect = dragElement.getBoundingClientRect();
+                const imageScale = imageRect.width / dragWidth || 1;
+                const imageMultiple = !imgElement.style.minWidth && nodeElement.style.textAlign !== "center" ? 1 : 2;
+                const imageMaxWidth = Math.max(17, (mostRight - imageRect.left -
+                    (imageMultiple === 2 ? imageRect.width / 2 : 0)) * imageMultiple / imageScale);
                 if (dragElement.tagName === "IMG") {
+                    imgElement.classList.add("img--drag");
                     img3115(imgElement);
                 }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {
+                        const image = dragElement as HTMLImageElement;
+                        const height = image.naturalWidth && image.naturalHeight ?
+                            dragWidth * image.naturalHeight / image.naturalWidth : dragHeight;
+                        const width = getImageResizeWidth(dragWidth, height,
+                            (moveEvent.clientX - x) / imageScale, (moveEvent.clientY - y) / imageScale,
+                            resizeAxis, imageMultiple, imageMaxWidth);
+                        dragElement.style.width = "";
                         dragElement.style.height = "";
+                        dragElement.removeAttribute("width");
+                        dragElement.removeAttribute("height");
+                        dragElement.parentElement.style.width = width + "px";
+                        return;
                     }
                     if (resizeAxis !== "height" && moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
-                        const multiple = ((dragElement.tagName === "IMG" && !imgElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
-                        if (dragElement.tagName === "IMG") {
-                            dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
-                        } else if (dragElement.tagName === "IFRAME") {
+                        const multiple = isCenter ? 2 : 1;
+                        if (dragElement.tagName === "IFRAME") {
                             // 只清理当前轴的历史尺寸，另一轴继续沿用原数据。
                             dragElement.style.width = "";
                             dragElement.removeAttribute("width");
@@ -2042,7 +2062,7 @@ export class WYSIWYG {
                             dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         }
                     }
-                    if (resizeAxis !== "width" && dragElement.tagName !== "IMG") {
+                    if (resizeAxis !== "width") {
                         if (moveEvent.clientY > y - dragHeight + 8 && moveEvent.clientY < mostBottom) {
                             if (dragElement.tagName === "IFRAME") {
                                 dragElement.style.height = "";
@@ -2063,7 +2083,7 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     nodeElement.classList.remove("iframe--drag");
                     target.classList.remove("touch-resize-active");
-                    target.parentElement.parentElement.classList.remove("img--drag");
+                    imgElement.classList.remove("img--drag");
                     if (target.classList.contains("protyle-action__drag") && nodeElement) {
                         focusBlock(nodeElement);
                         updateTransaction(protyle, nodeElement, html);

@@ -621,7 +621,9 @@ test("external resize handles preserve source, independent axes, historical dime
     };
     visit(source);
     assert.ok(resize);
-    const resizeSource = transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
+    const imageResizeSource = transpileModule(readFileSync("src/protyle/render/imageResize.ts", "utf8").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const resizeSource = imageResizeSource + transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
         .outputText + "\nreturn resize.call(this);";
     const renderSource = transpileModule(readFileSync("src/protyle/render/iframeResize.ts", "utf8").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;

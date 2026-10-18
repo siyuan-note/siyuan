@@ -749,7 +749,7 @@ func markPendingWorkspaceExit() {
 }
 
 func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
-	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
+	diagnostic := util.WatchOperation("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
@@ -904,7 +904,7 @@ func ExitKernel() {
 	}
 
 	go func() {
-		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for frontend exit event")
+		diagnostic := util.WatchOperation("exit kernel servers", "wait for frontend exit event")
 		time.Sleep(500 * time.Millisecond)
 		diagnostic.Stage("close HTTP servers")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

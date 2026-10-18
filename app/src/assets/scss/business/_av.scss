@@ -3357,3 +3357,36 @@ img.av__cellassetimg {
     flex-shrink: 0;
   }
 }
+
+.av__collection-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .layout-tab-bar {
+    flex-shrink: 0;
+  }
+
+  .item {
+    min-width: 0;
+    height: auto;
+    min-height: 40px;
+
+    .item__text {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+.av__collection-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+
+  > .b3-button {
+    flex-shrink: 0;
+    max-width: 40%;
+  }
+}

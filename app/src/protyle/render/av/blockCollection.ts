@@ -1,11 +1,7 @@
-import type {AVAutomationBlockSourceInput, AVBlockCollectionMatch} from "../../../types/api";
-import {Dialog} from "../../../dialog";
+import type {AVAutomationBlockSourceInput} from "../../../types/api";
 import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
-import {isMobile} from "../../../util/functions";
 import {movePathTo} from "../../../util/pathName";
-import {transaction} from "../../wysiwyg/transaction";
-import {waitForPendingTransactions} from "../../util/transactionQueue";
 import {mountCollectionConditions} from "./collectionConditions";
 import {BlockPanel} from "../../../block/Panel";
 
@@ -85,43 +81,4 @@ ${notebooks.length || documents.length ? `<div class="av__automation-source-list
         }
     });
     void render();
-};
-
-export const openBlockCollectionPreview = async (protyle: IProtyle, avID: string, blockID: string, ruleID: string) => {
-    const lang = window.siyuan.languages;
-    await waitForPendingTransactions(protyle);
-    const dialog = new Dialog({title: lang.automationCollectionPreview, width: isMobile() ? "92vw" : "680px",
-        content: `<div class="b3-dialog__content av__collection-preview"><div class="av__automation-preview-results" data-results></div></div><div class="b3-dialog__action"><button type="button" class="b3-button b3-button--cancel" data-prev>${lang.previous}</button><span class="fn__space"></span><button type="button" class="b3-button b3-button--cancel" data-next>${lang.next}</button><span class="fn__flex-1"></span><button type="button" class="b3-button b3-button--text" data-collect>${lang.automationCollectPage}</button></div>`});
-    let page = 1;
-    let matches: AVBlockCollectionMatch[] = [];
-    let busy = false;
-    const previous = dialog.element.querySelector<HTMLButtonElement>("[data-prev]");
-    const next = dialog.element.querySelector<HTMLButtonElement>("[data-next]");
-    const collect = dialog.element.querySelector<HTMLButtonElement>("[data-collect]");
-    const load = async () => {
-        busy = true;
-        previous.disabled = next.disabled = collect.disabled = true;
-        const result = await fetchSyncPost("/api/av/previewAttributeViewCollection", {avID, ruleID, page});
-        if (!dialog.element.isConnected) { return; }
-        busy = false;
-        const host = dialog.element.querySelector<HTMLElement>("[data-results]");
-        if (result.code !== 0) { host.textContent = result.msg; return; }
-        matches = result.data.blocks;
-        host.innerHTML = matches.map(item => `<div class="av__automation-field"><a href="siyuan://blocks/${escapeAttr(item.id)}" class="ft__breakword av__automation-preview-content">${escapeHtml(item.content || item.id)}</a><div class="ft__on-surface ft__smaller ft__breakword av__automation-preview-description">${escapeHtml(item.hPath)}${item.collected ? ` - ${lang.automationCollectionCollected}` : ""}</div></div>`).join("") || `<div class="ft__on-surface av__automation-preview-empty">${lang.emptyContent}</div>`;
-        previous.disabled = page === 1;
-        next.disabled = !result.data.hasMore;
-        collect.disabled = !matches.some(item => !item.collected);
-    };
-    previous.addEventListener("click", () => { if (!busy) { page--; void load(); } });
-    next.addEventListener("click", () => { if (!busy) { page++; void load(); } });
-    collect.addEventListener("click", async () => {
-        if (busy) { return; }
-        busy = true;
-        previous.disabled = next.disabled = collect.disabled = true;
-        const operation = {action: "collectAttrViewBlocks" as const, avID, blockID, data: {ruleID, blockIDs: matches.filter(item => !item.collected).map(item => item.id)}};
-        transaction(protyle, [operation], [operation]);
-        await waitForPendingTransactions(protyle);
-        await load();
-    });
-    await load();
 };

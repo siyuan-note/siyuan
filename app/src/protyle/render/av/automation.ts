@@ -9,10 +9,10 @@ import {closeInlineFilterDropdowns} from "./filterDropdown";
 import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue, openFieldLocationEditor} from "./fieldValueEditor";
 import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
-import {collectionSourceIncomplete, mountBlockCollectionSource, openBlockCollectionPreview} from "./blockCollection";
+import {collectionSourceIncomplete, mountBlockCollectionSource} from "./blockCollection";
 import {automationTimeZone, mountAutomationTemplate} from "./automationTemplate";
 import {openAutomationRules} from "./automationRules";
-import {openCollectionReview} from "./collectionReview";
+import {openCollectionManager} from "./collectionReview";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
     value?: IAVCellValue;
@@ -69,6 +69,7 @@ export const openAutomationMenu = async (options: {
 </button>
 <button class="b3-menu__separator"></button>
 <div class="av__automation">
+    <button type="button" class="b3-button b3-button--outline b3-button--wrap" data-action="manage-collection">${lang.automationCollectionManage}</button>
     <div class="av__automation-body" data-body></div>
 </div></div>`;
     const panel = menuElement.querySelector<HTMLElement>(".av__automation");
@@ -89,7 +90,12 @@ export const openAutomationMenu = async (options: {
             menuElement.querySelector<HTMLElement>('[data-type="go-config"]').click();
         }
     };
-    panel.addEventListener("click", event => event.stopPropagation());
+    panel.addEventListener("click", event => {
+        if ((event.target as Element).closest('[data-action="manage-collection"]')) {
+            void openCollectionManager(protyle, avID, blockElement.dataset.nodeId);
+        }
+        event.stopPropagation();
+    });
     panel.addEventListener("change", event => event.stopPropagation());
     onResize();
     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
@@ -186,10 +192,6 @@ export const openAutomationMenu = async (options: {
         const enabled = body.querySelector<HTMLInputElement>("[data-enabled]");
         if (enabled && rule) {
             enabled.checked = rule.enabled;
-        }
-        const preview = body.querySelector<HTMLButtonElement>('[data-action="preview-collection"]');
-        if (preview) {
-            preview.disabled = !rule?.enabled || !!issue;
         }
     };
     const save = (rule = rules[index]) => {
@@ -325,7 +327,7 @@ ${rule.trigger === "block" ? `<div class="ft__on-surface ft__smaller av__automat
 ${rule.trigger === "changed" ? `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationChangedTip}</div>` : ""}</section>
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">2</span><span class="av__automation-section-title">${rule.trigger === "block" ? lang.automationBlockConditions : lang.automationConditions}</span></div>
 ${rule.trigger === "block" ? "" : `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationConditionsTip}</div>`}<div data-source-conditions></div></section>
-<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">3</span><span class="av__automation-section-title">${lang.automationThen}</span></div><div data-actions></div>${rule.trigger === "block" ? `<button type="button" class="b3-button b3-button--outline" data-action="preview-collection"${rule.enabled ? "" : " disabled"}>${lang.automationCollectionPreview}</button><button type="button" class="b3-button b3-button--cancel b3-button--wrap" data-action="review-collection">${lang.automationCollectionReview}</button>` : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddAction}</button>`}</section>` : ""}`;
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">3</span><span class="av__automation-section-title">${lang.automationThen}</span></div><div data-actions></div>${rule.trigger === "block" ? "" : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddAction}</button>`}</section>` : ""}`;
         if (!rule) {
             onResize();
             scrollElement.scrollTop = scrollTop;
@@ -407,8 +409,6 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
         } else if (target.matches("[data-enabled]")) {
             rule.enabled = target.checked;
             save();
-            const preview = body.querySelector<HTMLButtonElement>('[data-action="preview-collection"]');
-            if (preview) { preview.disabled = !rule.enabled; }
             return;
         } else if (target.matches("[data-trigger]")) {
             const wasBlock = rule.trigger === "block";
@@ -500,12 +500,6 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
                     if (!rules.length) { rules.push(createRule()); }
                     void render();
                 });
-                return;
-            case "preview-collection":
-                void openBlockCollectionPreview(protyle, avID, blockElement.dataset.nodeId, rule.id);
-                return;
-            case "review-collection":
-                void openCollectionReview(protyle, avID, blockElement.dataset.nodeId);
                 return;
             case "add-rule":
                 rules.push(createRule());

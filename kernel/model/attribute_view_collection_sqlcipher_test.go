@@ -29,7 +29,7 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 }
 
 func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) {
-	fixture, view, _ := setupBlockCollectionTest(t)
+	fixture, view, keyID := setupBlockCollectionTest(t)
 	boxID := fixture.box.ID
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
 	if err != nil {
@@ -120,7 +120,7 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 	if err != nil || len(preview.Blocks) != 1 || !preview.Blocks[0].Collected {
 		t.Fatal("encrypted preview failed", err)
 	}
-	review, err := ReviewAttributeViewCollection(view.ID, 1)
+	review, err := ReviewAttributeViewCollection(view.ID, 1, "")
 	if err != nil || review.Matched != 1 || review.Unmatched != 0 {
 		t.Fatalf("encrypted review failed: %+v %v", review, err)
 	}
@@ -129,7 +129,7 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 		Data: `{"custom-state":"inactive"}`}}}); err != nil {
 		t.Fatal(err)
 	}
-	review, err = ReviewAttributeViewCollection(view.ID, 1)
+	review, err = ReviewAttributeViewCollection(view.ID, 1, "")
 	if err != nil || review.Unmatched != 1 || review.Items[0].ItemID != itemID {
 		t.Fatalf("encrypted mismatch did not preserve the collected entry: %+v %v", review, err)
 	}
@@ -149,6 +149,45 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 	if err != nil || stored.GetBlockValue(itemID) == nil {
 		t.Fatal("encrypted cleanup undo did not restore the original entry", err)
 	}
+	if target == "" {
+		for _, detached := range []bool{false, true} {
+			rowID, source := ast.NewNodeID(), ast.NewNodeID()
+			stored.GetBlockKeyValues().Values = append(stored.GetBlockKeyValues().Values, &av.Value{
+				KeyID: stored.GetBlockKeyValues().Key.ID, BlockID: rowID, Type: av.KeyTypeBlock, IsDetached: detached,
+				Block: &av.ValueBlock{ID: source, Content: "Retained entry"}})
+			values, _ := stored.GetKeyValues(keyID)
+			values.Values = append(values.Values, &av.Value{KeyID: keyID, BlockID: rowID, Type: av.KeyTypeText,
+				Text: &av.ValueText{Content: "Edited field"}})
+			if err = av.SaveAttributeView(stored); err != nil {
+				t.Fatal(err)
+			}
+			review, err = ReviewAttributeViewCollection(view.ID, 1, "unknown")
+			if err != nil || len(review.Items) != 1 || review.Items[0].ItemID != rowID {
+				t.Fatalf("unknown encrypted review: %+v %v", review, err)
+			}
+			remove := &Operation{Action: "removeAttrViewBlock", AvID: view.ID, SrcIDs: []string{rowID}}
+			undo := &Operation{Action: "insertAttrViewBlock", AvID: view.ID,
+				Srcs: []map[string]any{{"itemID": rowID, "id": source, "isDetached": detached}}}
+			manual := &Transaction{fromAPI: true, DoOperations: []*Operation{remove}, UndoOperations: []*Operation{undo}}
+			if err = PerformTxSync(manual); err != nil {
+				t.Fatal(err)
+			}
+			if err = PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(manual.UndoOperations)}); err != nil {
+				t.Fatal(err)
+			}
+			stored, err = av.ParseAttributeViewForIndexInBox(view.ID, boxID)
+			if err != nil || stored.GetBlockValue(rowID) == nil || stored.GetValue(keyID, rowID).Text.Content != "Edited field" {
+				t.Fatal("unknown encrypted undo lost entry fields", err)
+			}
+			if err = PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(manual.DoOperations)}); err != nil {
+				t.Fatal(err)
+			}
+			stored, err = av.ParseAttributeViewForIndexInBox(view.ID, boxID)
+			if err != nil || stored.GetBlockValue(rowID) != nil {
+				t.Fatal("unknown encrypted redo failed", err)
+			}
+		}
+	}
 	avPath := filepath.Join(util.DataDir, boxID, "storage", "av", view.ID+".json")
 	docPath := filepath.Join(util.DataDir, boxID, tree.Path)
 	for _, path := range []string{avPath, docPath} {
@@ -162,6 +201,38 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 	}
 	beforeDoc, _ := os.ReadFile(docPath)
 	beforeView, _ := os.ReadFile(avPath)
+	if target == "" {
+		corruptDoc := append([]byte(nil), beforeDoc...)
+		corruptDoc[len(corruptDoc)-1] ^= 1
+		if err = os.WriteFile(docPath, corruptDoc, 0600); err != nil {
+			t.Fatal(err)
+		}
+		cache.ClearAVCache()
+		cache.RemoveTreeDataInBox(tree.ID, boxID)
+		review, err = ReviewAttributeViewCollection(view.ID, 1, "unknown")
+		if err != nil || len(review.Items) != 1 || review.Items[0].Reason != "unreadable" {
+			t.Fatalf("unreadable encrypted source: %+v %v", review, err)
+		}
+		manual := &Transaction{fromAPI: true,
+			DoOperations: []*Operation{{Action: "removeAttrViewBlock", AvID: view.ID, SrcIDs: []string{itemID}}},
+			UndoOperations: []*Operation{{Action: "insertAttrViewBlock", AvID: view.ID,
+				Srcs: []map[string]any{{"itemID": itemID, "id": sourceID, "isDetached": false}}}}}
+		if err = PerformTxSync(manual); err == nil {
+			t.Fatal("manual removal accepted unauthenticated source content")
+		}
+		preserved, readErr := os.ReadFile(avPath)
+		if readErr != nil || !bytes.Equal(beforeView, preserved) {
+			t.Fatal("failed manual removal modified the database", readErr)
+		}
+		preserved, readErr = os.ReadFile(docPath)
+		if readErr != nil || !bytes.Equal(corruptDoc, preserved) {
+			t.Fatal("failed manual removal modified source ciphertext", readErr)
+		}
+		if err = os.WriteFile(docPath, beforeDoc, 0600); err != nil {
+			t.Fatal(err)
+		}
+		cache.RemoveTreeDataInBox(tree.ID, boxID)
+	}
 	for _, failure := range []string{"locked", "corrupt"} {
 		if failure == "locked" {
 			cachedDEKsLock.Lock()
@@ -177,7 +248,7 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 		if _, err = PreviewAttributeViewCollection(view.ID, view.Automations.Rules[0].ID, 1); err == nil {
 			t.Fatal("preview accepted inaccessible ciphertext")
 		}
-		if _, err = ReviewAttributeViewCollection(view.ID, 1); err == nil {
+		if _, err = ReviewAttributeViewCollection(view.ID, 1, ""); err == nil {
 			t.Fatal("review accepted inaccessible ciphertext")
 		}
 		if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{cleanupOp}}); err == nil {

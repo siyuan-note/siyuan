@@ -312,9 +312,9 @@ export type AVCollectionCleanupItemInput = { "blockID": string; "itemID": string
 
 export type AVCollectionReview = { "hasMore": boolean; "items": Array<AVCollectionReviewItem | null> | null; "matched": number; "ruleVersion": string; "unknown": number; "unmatched": number; };
 
-export type AVCollectionReviewItem = { "blockID": string; "content": string; "hPath": string; "itemID": string; "status": "matched" | "unmatched" | "unknown"; };
+export type AVCollectionReviewItem = { "blockID": string; "content": string; "hPath": string; "isDetached": boolean; "itemID": string; "reason"?: "invalidItem" | "detached" | "noRules" | "invalidRule" | "unavailable" | "unreadable"; "status": "matched" | "unmatched" | "unknown"; };
 
-export type AVCollectionReviewRequestInput = { "avID": string; "page"?: number; };
+export type AVCollectionReviewRequestInput = { "avID": string; "page"?: number; "status"?: "" | "matched" | "unmatched" | "unknown"; };
 
 export type AVConditionalColorRule = { "color": AVValueSelect | null; "filter": AVViewFilter | null; "id": string; "matchOption": boolean; "target": "item" | "property"; };
 
@@ -3805,6 +3805,10 @@ export interface APIPOSTRoutes {
     /**
      * 按全部启用收集规则的并集检查已有条目，返回 matched、unmatched、unknown 和规则版本。
      * 手动及自动绑定条目统一判断；游离、无可用规则或无法判断时保留，不隐式清理或补收。
+     * status 可选，按分类筛选后每页最多 100 项；省略时保留混合分页，全库计数不受筛选影响。
+     * unknown 条目通过 reason 说明原因；isDetached 表示游离条目，主动移出使用普通条目移出事务。
+     * reason 的 invalidItem、detached、noRules、invalidRule 分别表示绑定信息不完整、游离、无启用规则和规则无效，
+     * unavailable 表示源块不可用，unreadable 表示源内容读取失败；原因不包含原始错误或私密路径。
      * 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
      */
     "/api/av/reviewAttributeViewCollection": {

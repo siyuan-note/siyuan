@@ -356,6 +356,25 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	if quoteItem == nil {
 		t.Fatal("review endpoint did not report the preserved unmatched quote")
 	}
+	for _, status := range []string{"matched", "unmatched", "unknown"} {
+		filtered := callAttributeViewContextFilterAPI(t, "/api/av/reviewAttributeViewCollection",
+			map[string]any{"avID": database.ID, "page": 1, "status": status}, reviewAttributeViewCollection)
+		requireAPIContract(t, http.MethodPost, "/api/av/reviewAttributeViewCollection", filtered)
+		var result struct {
+			Data apicontract.AVCollectionReview
+		}
+		if err = json.Unmarshal(filtered.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Data.Matched != reviewed.Data.Matched || result.Data.Unmatched != reviewed.Data.Unmatched || result.Data.Unknown != reviewed.Data.Unknown {
+			t.Fatal("category filter changed global counts")
+		}
+		for _, item := range result.Data.Items {
+			if item.Status != status {
+				t.Fatalf("wrong category: %+v", item)
+			}
+		}
+	}
 	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "cleanupAttrViewBlocks", AvID: database.ID,
 		Data: &apicontract.AVCollectionCleanup{RuleVersion: reviewed.Data.RuleVersion, Items: []*apicontract.AVCollectionCleanupItem{quoteItem}}}}); err != nil {
 		t.Fatal(err)

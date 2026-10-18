@@ -75,13 +75,27 @@ const runCases = async (sources, css, mobile) => {
         "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
         "block/Panel": {BlockPanel: class {constructor(options) {scopePreviews.push(options);}}},
         "util/pathName": {movePathTo: options => scopeRequests.push(options)},
-        "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
-            (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
-            url.includes("reviewAttributeViewCollection") ? {code: 0, data: {ruleVersion: "snapshot", matched: 7, unmatched: 7, unknown: 6, hasMore: false,
-                items: Array.from({length: 20}, (_, index) => ({itemID: `entry-${index}`, blockID: `block-${index}`,
+        "util/fetch": {fetchSyncPost: async (url, request) => {
+            if (url.includes("previewAttributeViewTemplate")) {
+                templatePreviews.push(request);
+                return {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}};
+            }
+            if (url.includes("getHPathByID")) return {code: 0, data: "/Tasks"};
+            if (url === "/api/av/reviewAttributeViewCollection") {
+                const items = Array.from({length: 20}, (_, index) => ({itemID: `entry-${index}`,
+                    blockID: index % 3 === 2 ? "" : `block-${index}`, isDetached: index % 3 === 2,
                     content: index === 0 ? "<img src=x onerror=alert(1)>" : `Collected entry ${index + 1} with manually maintained fields`,
-                    hPath: "/Tasks/" + "a-long-document-title".repeat(8), status: ["matched", "unmatched", "unknown"][index % 3]}))}} :
-            {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
+                    hPath: "/Tasks/" + "a-long-document-title".repeat(8),
+                    reason: index % 3 === 2 ? "detached" : undefined, status: ["matched", "unmatched", "unknown"][index % 3]}));
+                return {code: 0, data: {ruleVersion: "snapshot", matched: 7, unmatched: 7, unknown: 6, hasMore: false,
+                    items: items.filter(item => !request.status || item.status === request.status)}};
+            }
+            if (url.includes("previewAttributeViewCollection")) return {code: 0, data: {hasMore: false, blocks: [
+                {id: "bound", content: "Bound block", hPath: "/Tasks", collected: true},
+                {id: "new", content: "Unbound block", hPath: "/Tasks", collected: false},
+            ]}};
+            return {code: 0, data: {av: request.id === "source" ? database : targetDatabase}};
+        },
         fetchPost: (_url, _request, callback) => searches.push(() => callback({code: 0, data: {rows: {values: [
             {blockID: "related", block: {content: "Related"}},
         ]}}}))},
@@ -502,11 +516,11 @@ const runCases = async (sources, css, mobile) => {
     await click('[data-remove="document"][data-index="1"]');
     await click('[data-remove="notebook"]');
     assert.deepEqual(latest().blockSource.documentIDs, ["document"]);
-    assert.equal(get('[data-action="preview-collection"]').disabled, true);
+    assert.equal(get('[data-action="manage-collection"]').disabled, false, "management remains available without an enabled rule");
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     get("[data-enabled]").click();
     assert.equal(latest().enabled, true);
-    assert.equal(get('[data-action="preview-collection"]').disabled, false);
+    assert.equal(menu.querySelector('[data-action="preview-collection"]'), null, "rule actions do not contain database-level management");
     assert.equal(latest().actions[0].type, "collect");
     assert.deepEqual(database.automations.rules[0].conditions, [currentCondition]);
     for (const width of mobile ? [360, 740] : [420, 1000]) {
@@ -659,7 +673,8 @@ const runCases = async (sources, css, mobile) => {
     await click("[data-tags] .b3-chip__close");
     assert.deepEqual(latest().blockSource.tags, []);
     const writesBeforeReview = transactions.length;
-    await click('[data-action="review-collection"]');
+    database.automations.rules = [structuredClone(latest())];
+    await click('[data-action="manage-collection"]');
     assert.equal(window.siyuan.dialogs.length, 1, "collection review uses the shared dialog on desktop and mobile");
     const reviewDialog = window.siyuan.dialogs[0];
     assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "source text is escaped");
@@ -712,6 +727,32 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(cleanup.action, "cleanupAttrViewBlocks");
     assert.equal(cleanup.data.items.length, 7, "cleanup only submits the page's unmatched entries");
     assert.equal(cleanup.data.ruleVersion, "snapshot");
+    reviewDialog.element.querySelector('[data-collection-status="matched"]').click();
+    await tick();
+    assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "matching source text is escaped");
+    assert.equal(reviewDialog.element.querySelectorAll("[data-remove-item]").length, 0, "matching entries have no removal action");
+    reviewDialog.element.querySelector('[data-collection-status="unknown"]').click();
+    await tick();
+    assert.ok(reviewDialog.element.querySelector("[data-results]").textContent.includes(lang.automationCollectionReasonDetached));
+    assert.equal(reviewDialog.element.querySelector("[data-cleanup]").classList.contains("fn__none"), true);
+    await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 420, 900);
+    await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${window.innerWidth}-midnight-review-unknown`);
+    reviewDialog.element.querySelector("[data-remove-item]").click();
+    await tick();
+    document.querySelector("#confirmDialogConfirmBtn").click();
+    await tick();
+    assert.equal(transactions.at(-1).perform[0].action, "removeAttrViewBlock");
+    assert.equal(transactions.at(-1).undo[0].action, "insertAttrViewBlock");
+    reviewDialog.element.querySelector('[data-collection-view="rules"]').click();
+    await tick();
+    assert.equal(reviewDialog.element.querySelector("[data-status-tabs]").classList.contains("fn__none"), true);
+    assert.equal(reviewDialog.element.querySelector("[data-collection-rule]").options.length, 1);
+    assert.ok(reviewDialog.element.querySelector("[data-results]").textContent.includes(lang.automationCollectionNotCollected));
+    await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${window.innerWidth}-midnight-review-rules`);
+    reviewDialog.element.querySelector("[data-collect]").click();
+    await tick();
+    assert.equal(transactions.at(-1).perform[0].action, "collectAttrViewBlocks");
+    assert.deepEqual(transactions.at(-1).perform[0].data.blockIDs, ["new"]);
     reviewDialog.destroy();
     reviewTheme.remove();
     await tick();
@@ -756,7 +797,7 @@ if (process.versions.electron && process.type === "browser") {
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-types)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-review-unknown|-review-rules|-types)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());

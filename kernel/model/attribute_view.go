@@ -6619,13 +6619,13 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 				}
 				// Remove av block also remove node attr https://github.com/siyuan-note/siyuan/issues/9091#issuecomment-1709824006
 				if !val.IsDetached && nil != val.Block {
-					bt := treenode.GetBlockTree(val.Block.ID)
-					if nil == bt {
-						for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-							if encBT := treenode.GetBlockTreeInBox(val.Block.ID, encBoxID); nil != encBT {
-								bt = encBT
-								break
+					bt := attributeViewBindingBlockTree(val.Block.ID, av.GetAVBoxID(avID))
+					if bt != nil && (tx == nil || tx.trees[bt.RootID] == nil) {
+						if _, statErr := os.Stat(filepath.Join(util.DataDir, bt.BoxID, bt.Path)); statErr != nil {
+							if !errors.Is(statErr, os.ErrNotExist) {
+								return statErr
 							}
+							bt = nil
 						}
 					}
 					if nil != bt {

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261018120429"
+		"updated": "20261018122129"
 	},
 	"Children": [
 		{
@@ -4610,12 +4610,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-u9c28d4",
-				"updated": "20261018000619"
+				"updated": "20261018122129"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use Review collected entries in block collection settings to check existing entries against all enabled block collection rules. Manual and automatically collected bound entries are checked alike; matching any rule keeps an entry. Detached entries, unavailable sources, and entries without usable rules remain unchanged. Remove unmatched entries on this page previews the count and asks for confirmation. Execution rechecks the rules, source, and binding before removing only entries confirmed unmatched, including their field values; source blocks remain. Undo and redo restore the original entry IDs and all fields. After explicit removal, a later new match creates an initialized entry instead of recovering the removed field values. Collection and cleanup commit or roll back with their transaction."
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Automations"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collection management"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select Database entries to check all existing entries against the union of enabled block collection rules. Manual and automatically collected entries are checked alike. Matches rules, Does not match rules, and Cannot determine have separate counts and pages; the first opening prioritizes entries that do not match. Unknown entries explain why they cannot be classified. Remove unmatched entries on this page confirms the count and rechecks rules, sources, and bindings before removing only entries still confirmed unmatched. Nonmatching and unknown entries also offer individual removal. Removal keeps source blocks and supports undo and redo of the original entry IDs, fields, and ordering. Missing source blocks are not recreated; read or authentication failures preserve the data and return an error. A later new match creates an initialized entry rather than recovering removed field values."
 				}
 			]
 		},
@@ -4624,12 +4642,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-1ymbtr0",
-				"updated": "20261016202856"
+				"updated": "20261018122129"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Enabling or editing a rule does not collect existing blocks. Enable the completed rule and open “Preview matching blocks” to inspect the source documents and existing bindings. “Collect matches on this page” collects the displayed matches that are not already bound. Use the page controls to review further results; each page contains at most 100 blocks and may be smaller when many fields are initialized."
+					"Data": "Enabling or editing a rule does not collect existing blocks. In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Automations"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collection management"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " select Rule matches and choose an enabled collection rule to inspect matching source blocks and their collected or uncollected status. Collect matches on this page adds only the displayed uncollected matches. The page controls show the current page number. Each preview page contains at most 100 blocks and may be smaller when many fields are initialized."
 				}
 			]
 		},

@@ -7785,8 +7785,22 @@
         "hPath": {
           "type": "string"
         },
+        "isDetached": {
+          "type": "boolean"
+        },
         "itemID": {
           "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "invalidItem",
+            "detached",
+            "noRules",
+            "invalidRule",
+            "unavailable",
+            "unreadable"
+          ]
         },
         "status": {
           "type": "string",
@@ -7801,6 +7815,7 @@
         "blockID",
         "content",
         "hPath",
+        "isDetached",
         "itemID",
         "status"
       ],
@@ -7814,6 +7829,15 @@
         },
         "page": {
           "type": "integer"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "",
+            "matched",
+            "unmatched",
+            "unknown"
+          ]
         }
       },
       "required": [

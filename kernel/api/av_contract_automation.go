@@ -24,7 +24,7 @@ var reviewAttributeViewCollection = contractHandler(apicontract.ReviewAttributeV
 		if err := holdAttributeViewRequest(c, "", request.AvID); err != nil {
 			return apicontract.Failure[*apicontract.AVCollectionReview](-1, err.Error())
 		}
-		data, err := model.ReviewAttributeViewCollection(request.AvID, request.Page)
+		data, err := model.ReviewAttributeViewCollection(request.AvID, request.Page, request.Status)
 		if err != nil {
 			return apicontract.Failure[*apicontract.AVCollectionReview](-1, err.Error())
 		}

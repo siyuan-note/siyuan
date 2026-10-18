@@ -9,7 +9,7 @@ interface IMouseScrollAnchor {
     scrollHeight: number;
 }
 
-export const bindMenuMouseScroll = (menu: HTMLElement, enabled: () => boolean) => {
+export const bindMenuMouseScroll = (menu: HTMLElement, enabled: () => boolean, rootItems?: HTMLElement) => {
     let anchor: IMouseScrollAnchor;
     const reset = () => { anchor = undefined; };
     const interactive = "input, textarea, select, [contenteditable=\"true\"], [draggable=\"true\"]";
@@ -21,8 +21,10 @@ export const bindMenuMouseScroll = (menu: HTMLElement, enabled: () => boolean) =
         }
         const target = event.target as Element;
         const panel = target.closest(".b3-menu__submenu, .b3-menu");
-        const items = panel?.querySelector<HTMLElement>(":scope > .b3-menu__items");
-        if (!items || !menu.contains(items) || target.closest(interactive) ||
+        // 根据命中位置选择当前列表，避免切换列表时选到隐藏的同级容器。
+        const items = panel === menu && rootItems ? rootItems : target.closest<HTMLElement>(".b3-menu__items");
+        if (!items || items.parentElement !== panel || !menu.contains(items) || !items.contains(target) ||
+            panel?.contains(target.closest(interactive)) ||
             (items.contains(document.activeElement) && document.activeElement.matches(interactive))) {
             reset();
             return;

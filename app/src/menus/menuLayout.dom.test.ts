@@ -11,9 +11,16 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (sources: Record<string, string>, css: string) => {
     const check: typeof assert = require("node:assert/strict");
     let mobile = false;
+    let mobileApp = false;
+    const sessionRows = Array.from({length: 90}, (_, i) => ({id: String(i), title: `Session ${i}`}));
+    let sessionRequests = 0;
+    const calendarRows = Array.from({length: 50}, (_, i) => ({id: String(i), cells: [
+        {id: `block-${i}`, value: {id: `block-${i}`, type: "block", block: {content: `Undated ${i}`, id: `block-${i}`}}},
+        {id: `date-${i}`, value: {id: `date-${i}`, keyID: "date", type: "date", date: {}}},
+    ]}));
     const modules: Record<string, {exports: any}> = {};
     const externals = {
-        "protyle/util/compatibility": {getEventName: () => "click", isInMobileApp: () => false,
+        "protyle/util/compatibility": {getEventName: () => "click", isInMobileApp: () => mobileApp, isPhablet: () => false,
             updateHotkeyTip: (value: string) => value},
         "util/functions": {isMobile: () => mobile},
         "util/zIndex": {isScrollAboveMenu: () => false},
@@ -21,13 +28,60 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
             LOCAL_MENU_MOUSE_SCROLL: "menuMouseScroll"}},
         "protyle/undo": {electronUndo() {}},
-        "util/escape": {escapeAttr: (value: string) => value},
+        "util/escape": {escapeAttr: (value: string) => value || "", escapeHtml: (value: string) => value || ""},
         "menus/menuKeyboard": {setMenuInputCurrent() {}},
         "plugin/EventBusCore": {forEachPluginSubscriber() {}},
         "mobile/util/keyboardToolbar": {activeBlur() {}},
         "block/popoverLifecycle": {setPopoverMenuOpen() {}},
         "config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
         "menus/menuToggle": {},
+        "protyle/render/av/panels/registry": {getAVPanelDescriptor: () => ({
+            render: (context: {html: string}) => {
+                context.html = '<div class="b3-menu__items"><input style="height:32px">' +
+                    '<div style="height:2000px">Automation settings</div></div>';
+                return true;
+            },
+            bind: (context: {menuElement: HTMLElement}) => context.menuElement.classList.add("av__automation-panel"),
+        })},
+        "protyle/render/av/panels/drag": {bindAVPanelDrag() {}},
+        "protyle/render/av/panels/inputs": {bindAVPanelInputs() {}},
+        "protyle/render/av/viewType": {},
+        "protyle/wysiwyg/transaction": {},
+        "util/fetch": {fetchSyncPost: async (url: string) => {
+            check.equal(url, "/api/av/getAttributeViewCalendarUndated");
+            return {code: 0, data: {rows: calendarRows, total: calendarRows.length}};
+        }},
+        "protyle/render/av/automationPosition": {},
+        "protyle/render/av/select": {},
+        "protyle/render/av/filter": {},
+        "protyle/ui/hideElements": {},
+        "protyle/render/av/mobilePanel": {},
+        "protyle/render/av/view": {getFieldsByData: (): IAVColumn[] => []},
+        "protyle/util/selection": {},
+        "protyle/render/av/row": {},
+        "protyle/render/av/groups": {getPageSize: () => ({})},
+        "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
+        "protyle/render/av/panelTarget": {},
+        "protyle/render/av/selectPosition": {},
+        "protyle/render/av/calendar/date": {},
+        "protyle/render/av/calendar/hitTest": {},
+        "layout/dock/agent/SessionStore": {SessionStore: {list: async ({page = 1, pageSize = 30}) => {
+            sessionRequests++;
+            return {sessions: sessionRows.slice((page - 1) * pageSize, page * pageSize), total: sessionRows.length, page};
+        }}},
+        "layout/dock/agent/path": {},
+        "util/pathName": {},
+        "util/upDownHint": {},
+        "util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: false})},
+        "asset/pdf/internal_evt.js": {internalOpt: {}},
+        "asset/pdf/pdf_viewer.js": {PagesCountLimit: {FORCE_SCROLL_MODE_PAGE: 10000}},
+        "asset/pdf/ui_utils.js": {CursorTool: {SELECT: 0, HAND: 1},
+            ScrollMode: {VERTICAL: 0, HORIZONTAL: 1, WRAPPED: 2, PAGE: 3}, SpreadMode: {NONE: 0, ODD: 1, EVEN: 2},
+            toggleCheckedBtn: (button: HTMLElement, checked: boolean) => button.classList.toggle("toggled", checked),
+            toggleExpandedBtn: (button: HTMLElement, expanded: boolean, panel: HTMLElement) => {
+                button.setAttribute("aria-expanded", String(expanded));
+                panel.classList.toggle("fn__hidden", !expanded);
+            }},
     };
     const load = (name: string): any => {
         if (name in externals) {
@@ -59,6 +113,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         body { margin: 0; }
         button { font: inherit; }
         .fn__none { display: none !important; }
+        .fn__hidden { visibility: hidden !important; }
     `;
     document.head.append(style);
     Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0, storage: {},
@@ -223,7 +278,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height * ratio;
         const target = document.elementFromPoint(x, y);
-        check.ok(target && element.contains(target), "Pointer must hit the intended menu panel");
+        check.ok(target && element.contains(target),
+            `Pointer must hit ${element.className} at ${x}, ${y}; hit ${target?.className}`);
         target.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerType, buttons, clientX: x, clientY: y}));
         return {x, y};
     };
@@ -365,6 +421,37 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     check.equal(formItems.scrollTop, 0, "Nested scrollable widgets keep their own interaction");
     dispose(form);
 
+    const avMenu = createMenu();
+    const avBlock = document.createElement("div");
+    avBlock.className = "av";
+    avBlock.innerHTML = '<div class="av__views" style="position:fixed;left:200px;top:40px;width:100px;height:20px"></div>';
+    document.body.append(avBlock);
+    const {openMenuPanel}: typeof import("../protyle/render/av/openMenuPanel") = load("protyle/render/av/openMenuPanel");
+    openMenuPanel({type: "config", blockElement: avBlock, data: {} as IAV, protyle: {} as IProtyle});
+    await settle();
+    const avPanel = document.querySelector<HTMLElement>(".av__panel");
+    const avItems = avPanel.querySelector<HTMLElement>(".b3-menu__items");
+    check.ok(avPanel.querySelector(".av__automation-panel"));
+    check.ok(avItems.scrollHeight > avItems.clientHeight, "The database panel has overflowing form content");
+    window.siyuan.storage.menuMouseScroll = false;
+    pointer(avItems, .3);
+    pointer(avItems, .7);
+    check.equal(avItems.scrollTop, 0, "Database panels respect the disabled preference");
+    window.siyuan.storage.menuMouseScroll = true;
+    pointer(avItems, .3);
+    pointer(avItems, .7);
+    check.equal(avItems.scrollTop, 0, "Database forms stay stationary even with the preference enabled and no focused input");
+    avItems.scrollTop = 0;
+    const avInput = avItems.querySelector("input");
+    avInput.focus();
+    pointer(avItems, .3);
+    pointer(avItems, .7);
+    check.equal(avItems.scrollTop, 0, "Editing database form inputs keeps the panel stationary");
+    avInput.blur();
+    avPanel.remove();
+    avBlock.remove();
+    dispose(avMenu);
+
     const pluginShared = createMenu();
     const followingPlugin = new PluginMenu(undefined, undefined, true);
     for (let i = 0; i < 80; i++) followingPlugin.addItem({label: `Plugin scroll ${i}`});
@@ -378,7 +465,172 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     check.equal(followingPlugin.element.isConnected, false);
     dispose(pluginShared);
 
+    const multiple = createMenu();
+    addItems(multiple, 80);
+    multiple.popup({x: 40, y: 40});
+    await settle();
+    const hiddenItems = multiple.element.lastElementChild;
+    const visibleItems = hiddenItems.cloneNode(true) as HTMLElement;
+    hiddenItems.classList.add("fn__none");
+    multiple.element.append(visibleItems);
+    pointer(visibleItems, .3);
+    pointer(visibleItems, .7);
+    check.ok(visibleItems.scrollTop > 0, "A hidden sibling must not intercept the visible list's scrolling");
+    check.equal(hiddenItems.scrollTop, 0);
+    dispose(multiple);
+
+    const {getPdfViewerHTML} = load("asset/pdf/viewerTemplate");
+    const {SecondaryToolbar} = load("asset/pdf/secondary_toolbar.js");
+    const createPDFMenu = () => {
+        const host = document.createElement("div");
+        host.innerHTML = getPdfViewerHTML();
+        document.body.append(host);
+        const buttonIDs = {toggleButton: "secondaryToolbarToggleButton", presentationModeButton: "presentationMode",
+            openFileButton: "secondaryOpenFile", printButton: "secondaryPrint", downloadButton: "secondaryDownload",
+            viewBookmarkButton: "viewBookmark", firstPageButton: "firstPage", lastPageButton: "lastPage",
+            pageRotateCwButton: "pageRotateCw", pageRotateCcwButton: "pageRotateCcw", cursorSelectToolButton: "cursorSelectTool",
+            cursorHandToolButton: "cursorHandTool", scrollPageButton: "scrollPage", scrollVerticalButton: "scrollVertical",
+            scrollHorizontalButton: "scrollHorizontal", scrollWrappedButton: "scrollWrapped", spreadNoneButton: "spreadNone",
+            spreadOddButton: "spreadOdd", spreadEvenButton: "spreadEven", imageAltTextSettingsButton: "imageAltTextSettings",
+            documentPropertiesButton: "documentProperties"};
+        const buttons = Object.fromEntries(Object.entries(buttonIDs).map(([key, id]) =>
+            [key, host.querySelector<HTMLElement>(`#${id}`) || document.createElement("button")]));
+        const toolbar = host.querySelector<HTMLElement>("#secondaryToolbar");
+        toolbar.style.cssText = "position:fixed;left:40px;top:60px;width:300px";
+        const events: string[] = [];
+        const controller = new SecondaryToolbar({...buttons, toolbar}, {on() {}, dispatch: (name: string) => events.push(name)});
+        controller.setPagesCount(100);
+        controller.setPageNumber(5);
+        controller.open();
+        return {host, controller, events, buttons, items: toolbar.querySelector<HTMLElement>(".b3-menu__items")};
+    };
+    const pdfMenu = createPDFMenu();
+    window.siyuan.storage.menuMouseScroll = false;
+    pointer(pdfMenu.items, .3);
+    pointer(pdfMenu.items, .7);
+    check.equal(pdfMenu.items.scrollTop, 0, "PDF menus respect the disabled preference");
+    window.siyuan.storage.menuMouseScroll = true;
+    pointer(pdfMenu.items, .3);
+    pointer(pdfMenu.items, .7);
+    check.ok(pdfMenu.items.scrollTop > 0, "PDF toolbar menus support mouse scrolling");
+    const pdfScroll = pdfMenu.items.scrollTop;
+    pdfMenu.buttons.firstPageButton.click();
+    check.ok(pdfMenu.events.includes("firstpage"), "PDF menu commands still dispatch their original action");
+    pdfMenu.controller.open();
+    pointer(pdfMenu.items, .4);
+    check.equal(pdfMenu.items.scrollTop, pdfScroll, "Reopening a PDF menu resets its pointer anchor");
+    pdfMenu.host.remove();
+
+    const {getCalendarUndatedHTML, bindCalendarUndated} = load("protyle/render/av/calendar/undated");
+    const createCalendarMenu = () => {
+        const editor = document.createElement("div");
+        editor.contentEditable = "true";
+        const root = document.createElement("div");
+        root.className = "av";
+        root.contentEditable = "false";
+        root.dataset.avType = "calendar";
+        const state = {undatedOpen: false, undatedSearch: ""};
+        root.innerHTML = "<button data-calendar-undated-toggle></button>" + getCalendarUndatedHTML(state);
+        editor.append(root);
+        document.body.append(editor);
+        const panel = root.querySelector<HTMLElement>("[data-calendar-undated-panel]");
+        if (!mobile) {
+            panel.style.cssText = "position:fixed;left:40px;top:60px;width:300px";
+        }
+        const opened: string[] = [];
+        bindCalendarUndated({root, blockElement: root, data: {view: {calendar: {dateKeyID: "date"}}}, state, query: "",
+            onOpen: (row: {id: string}) => opened.push(row.id), onSchedule() {}});
+        const toggle = root.querySelector<HTMLButtonElement>("[data-calendar-undated-toggle]");
+        toggle.click();
+        return {editor, root, state, toggle, panel, opened, items: panel.querySelector<HTMLElement>("[data-calendar-undated-list]"),
+            search: panel.querySelector<HTMLInputElement>("input")};
+    };
+    const calendarMenu = createCalendarMenu();
+    await settle();
+    const searchTop = calendarMenu.search.getBoundingClientRect().top;
+    calendarMenu.search.value = "Draft search";
+    calendarMenu.search.setSelectionRange(2, 5);
+    window.siyuan.storage.menuMouseScroll = false;
+    pointer(calendarMenu.items, .3);
+    pointer(calendarMenu.items, .7);
+    check.equal(calendarMenu.items.scrollTop, 0, "Calendar lists respect the disabled preference");
+    window.siyuan.storage.menuMouseScroll = true;
+    pointer(calendarMenu.items, .3);
+    pointer(calendarMenu.items, .7);
+    check.ok(calendarMenu.items.scrollTop > 0, "Calendar undated lists support mouse scrolling");
+    check.equal(calendarMenu.search.getBoundingClientRect().top, searchTop, "Only calendar results scroll");
+    check.equal(calendarMenu.search.value, "Draft search");
+    check.equal(calendarMenu.search.selectionStart, 2);
+    check.equal(calendarMenu.search.selectionEnd, 5);
+    const calendarScroll = calendarMenu.items.scrollTop;
+    pointer(calendarMenu.items, .3, "mouse", 1);
+    pointer(calendarMenu.items, .7, "mouse", 1);
+    check.equal(calendarMenu.items.scrollTop, calendarScroll, "Mouse dragging does not scroll calendar results");
+    calendarMenu.toggle.click();
+    calendarMenu.toggle.click();
+    await settle();
+    const reopenedScroll = calendarMenu.items.scrollTop;
+    pointer(calendarMenu.items, .4);
+    check.equal(calendarMenu.items.scrollTop, reopenedScroll, "Reopening calendar results resets the pointer anchor");
+    calendarMenu.items.querySelector<HTMLButtonElement>("[data-calendar-undated-open]").click();
+    check.deepEqual(calendarMenu.opened, ["0"]);
+    calendarMenu.toggle.click();
+    calendarMenu.editor.remove();
+
+    const {AgentSessionPanel} = load("layout/dock/agent/AgentSessionPanel");
+    const trigger = document.createElement("button");
+    document.body.append(trigger);
+    const sessions = new AgentSessionPanel(trigger, document.body, () => "", () => "Untitled", {onRename: async () => {}});
+    await sessions.render();
+    const sessionRoot = document.querySelector<HTMLElement>(".agent-session-popup");
+    sessionRoot.style.cssText = "position:fixed;left:40px;top:60px;width:300px";
+    const sessionItems = sessionRoot.querySelector<HTMLElement>(".b3-list");
+    const sessionSearch = sessionRoot.querySelector<HTMLInputElement>("input");
+    window.siyuan.storage.menuMouseScroll = false;
+    pointer(sessionItems, .3);
+    pointer(sessionItems, .7);
+    check.equal(sessionItems.scrollTop, 0, "Session lists respect the disabled preference");
+    window.siyuan.storage.menuMouseScroll = true;
+    pointer(sessionItems, .3);
+    pointer(sessionItems, .7);
+    check.ok(sessionItems.scrollTop > 0, "Session lists use their custom scrolling container");
+    check.equal(document.activeElement, sessionSearch, "Scrolling results preserves the fixed search field's focus");
+    pointer(sessionItems, .95);
+    await settle();
+    check.ok(sessionRequests > 1, "Mouse scrolling preserves session pagination");
+    sessionItems.querySelector<HTMLElement>(".b3-list-item__action").click();
+    const rename = sessionItems.querySelector<HTMLInputElement>("input");
+    check.equal(document.activeElement, rename);
+    const renameScroll = sessionItems.scrollTop;
+    pointer(sessionItems, .3);
+    pointer(sessionItems, .7);
+    check.equal(sessionItems.scrollTop, renameScroll, "Renaming a session keeps the whole result list stationary");
+    rename.blur();
+    await settle();
+    const more = sessionItems.querySelector<HTMLElement>(".agent-session-more");
+    more.click();
+    const sessionSubmenu = more.querySelector<HTMLElement>(".b3-menu__items");
+    const beforeSubmenu = sessionItems.scrollTop;
+    pointer(sessionSubmenu, .3);
+    pointer(sessionSubmenu, .7);
+    check.equal(sessionItems.scrollTop, beforeSubmenu, "Session action submenus do not scroll their parent list");
+    sessions.destroy();
+    trigger.remove();
+
+    mobileApp = true;
+    const appPDF = createPDFMenu();
+    pointer(appPDF.items, .3);
+    pointer(appPDF.items, .7);
+    check.equal(appPDF.items.scrollTop, 0, "Native mobile apps ignore a saved desktop preference");
+    appPDF.host.remove();
+    mobileApp = false;
+
     mobile = true;
+    const mobilePDF = createPDFMenu();
+    pointer(mobilePDF.items, .3);
+    pointer(mobilePDF.items, .7);
+    check.equal(mobilePDF.items.scrollTop, 0, "Mobile PDF menus preserve their touch interaction");
+    mobilePDF.host.remove();
     const sheet = createMenu();
     sheet.element.classList.add("b3-menu--fit");
     addItems(sheet, 2);
@@ -405,6 +657,32 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     await settle();
     check.equal(sheetResets, 1, "Closing cancels the pending layout update");
     sheet.element.remove();
+
+    const mobileCommon = createMenu();
+    const mobileCalendar = createCalendarMenu();
+    await settle();
+    await Promise.all(mobileCommon.element.getAnimations().map(animation => animation.finished));
+    pointer(mobileCommon.element.lastElementChild as HTMLElement, .3);
+    pointer(mobileCommon.element.lastElementChild as HTMLElement, .7);
+    check.equal(mobileCalendar.items.scrollTop, 0, "Mobile calendar sheets preserve their touch interaction");
+    window.siyuan.menus.menu.closeSheet();
+    await settle();
+    mobileCalendar.editor.remove();
+    dispose(mobileCommon);
+
+    const mobileTrigger = document.createElement("button");
+    document.body.append(mobileTrigger);
+    const mobileSessions = new AgentSessionPanel(mobileTrigger, document.body, () => "", () => "Untitled", {}, true);
+    await mobileSessions.render();
+    const mobileSessionRoot = document.querySelector<HTMLElement>(".agent-session-popup--mobile");
+    mobileSessionRoot.getAnimations().forEach(animation => animation.cancel());
+    mobileSessionRoot.style.cssText = "position:fixed;left:40px;top:60px;width:300px;height:360px;transform:none";
+    const mobileSessionItems = mobileSessionRoot.querySelector<HTMLElement>(".b3-list");
+    pointer(mobileSessionItems, .3);
+    pointer(mobileSessionItems, .7);
+    check.equal(mobileSessionItems.scrollTop, 0, "Mobile session lists preserve their touch interaction");
+    mobileSessions.destroy();
+    mobileTrigger.remove();
     return "Menu layout cases passed";
 };
 
@@ -413,11 +691,15 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen",
-        "util/setPosition", "protyle/util/hasClosest", "plugin/Menu"].map(name => [name,
-        transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
+        "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel",
+        "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated",
+        "layout/dock/agent/AgentSessionPanel"].map(name => [name,
+        transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
         }).outputText]));
-    const css = compile(path.join(__dirname, "../assets/scss/component/_menu.scss"), {logger: Logger.silent}).css;
+    const css = ["component/_menu.scss", "component/_list.scss", "component/_text-field.scss", "util/_function.scss",
+        "business/_av.scss", "business/_av-calendar.scss", "business/_ai_agent.scss", "pdf/_pdf.scss"].map(name =>
+        compile(path.join(__dirname, "../assets/scss", name), {logger: Logger.silent}).css).join("\n");
     const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-menu-layout-test-"));
     const script = path.join(temporary, "run.cjs");

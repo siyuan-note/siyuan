@@ -8,8 +8,9 @@ module.exports = async ({annotations = false} = {}) => {
             export const initAnno = () => {}; export const destroyAnno = () => {};
             export const getPdfInstance = () => null; export const hlPDFRect = () => {};`,
         "../annoRuntime": "export const registerPdfInstance = () => {};",
-        "../../constants": "export const Constants = {PROTYLE_CDN: '/stage/protyle', SIZE_UNDO: 100, LOCAL_PDFTHEME: 'pdf'};",
-        "../../protyle/util/compatibility": "export const setStorageVal = async () => {}; export const updateHotkeyTip = x => x;",
+        "../../constants": "export const Constants = {PROTYLE_CDN: '/stage/protyle', SIZE_UNDO: 100, LOCAL_PDFTHEME: 'pdf', LOCAL_MENU_MOUSE_SCROLL: 'local-menu-mouse-scroll'};",
+        "../../protyle/util/compatibility": "export const setStorageVal = async () => {}; export const updateHotkeyTip = x => x; export const isInMobileApp = () => false;",
+        "../../util/functions": "export const isMobile = () => window.pdfTestMobile === true;",
         "../../protyle/util/hasClosest": "export const hasClosestByClassName = (el, name) => el.closest?.('.' + name);",
     };
     if (annotations) {

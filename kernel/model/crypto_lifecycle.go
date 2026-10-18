@@ -189,6 +189,7 @@ func beginEncryptedBoxLock(boxID string) {
 	lifecycle.lock.Lock()
 	lifecycle.state = EncryptedBoxStateLocking
 	lifecycle.acceptOperations = false
+	LivePhotoPreviews.Clear(boxID)
 	for lifecycle.activeOperations > 0 {
 		lifecycle.condition.Wait()
 	}

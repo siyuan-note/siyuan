@@ -1074,6 +1074,29 @@ var FindAssetReferences = define[FindAssetReferencesRequest, AssetReferencesData
 // 实际重链接成功写盘后清理文档及关联跨文档撤销记录；预览和写入失败不清理历史。
 var RelinkAsset = define[RelinkAssetRequest, AssetReferencesData]("relinkAsset", "/api/asset/relinkAsset", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAssets", "/api/asset/getDocImageAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 返回文档图片及各自关联的实况照片原始视频；保留图片顺序，不合并相同封面。
+var GetDocPreviewImages = define[AssetDocumentRequest, []DocumentPreviewImage]("getDocPreviewImages", "/api/asset/getDocPreviewImages", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按需生成 H.264/AAC 兼容预览，不修改原件，不同步缓存；输入限制为 64 MiB、十秒、600 帧和 4096×2160 像素。
+// 支持 SDR HEVC 4:2:0（8/10 位）或 AVC，以及 AAC 或 44.1/48 kHz 单声道、双声道整数 PCM。
+// clientEncode 为 true 且 encode 为 true 时，调用方顺序读取帧并提交 Annex B 编码；否则直接读取预览。
+// 客户端编码只对管理员开放，其他角色由内核生成预览，不能提交共享缓存内容。
+// 会话五分钟内有效，编码任务两分钟超时；加密笔记本只使用内存，锁定时取消任务、清除会话与缓存。
+var StartLivePhotoPreview = define[StartLivePhotoPreviewRequest, LivePhotoPreviewSession]("startLivePhotoPreview", "/api/asset/startLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 顺序读取零起始的 I420 帧，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+var GetLivePhotoFrame = define[LivePhotoFrameRequest, BinaryContent]("getLivePhotoFrame", "/api/asset/getLivePhotoFrame", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 422}, "POST")
+
+// 提交大端 uint32 帧数，随后逐帧提交大端 uint32 长度及 Annex B 数据；最多 64 MiB，帧数和尺寸必须匹配源片。
+// 验证并等待 MP4 封装完成后返回；失败结果不能进入共享缓存。
+var FinishLivePhotoPreview = define[FinishLivePhotoPreviewRequest, Null]("finishLivePhotoPreview", "/api/asset/finishLivePhotoPreview", AuthenticatedAccess|AdminAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 等待并读取 MP4 兼容预览，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+var GetLivePhotoPreview = define[LivePhotoPreviewRequest, BinaryContent]("getLivePhotoPreview", "/api/asset/getLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 422}, "POST")
+
+// 取消会话并释放在途转换资源，已完成的缓存仍可在下一次播放时复用。
+var CancelLivePhotoPreview = define[LivePhotoPreviewRequest, Null]("cancelLivePhotoPreview", "/api/asset/cancelLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")

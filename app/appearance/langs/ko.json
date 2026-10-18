@@ -1,4 +1,7 @@
 {
+	"livePhoto": "라이브 포토",
+	"livePhotoPreviewUnavailable": "이 라이브 포토를 미리 볼 수 없습니다. 원본 파일은 보존됩니다.",
+	"livePhotoPairUnavailable": "라이브 포토가 완전히 업로드되지 않았습니다. 다시 가져와 주세요.",
 	"automationCollectionManage": "수집 관리",
 	"automationCollectionRules": "규칙 일치",
 	"automationCollectionEntries": "데이터베이스 항목",

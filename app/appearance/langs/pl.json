@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Nie można odtworzyć tego zdjęcia Live Photo. Oryginalne pliki zostały zachowane.",
+	"livePhotoPairUnavailable": "Zdjęcie Live Photo nie zostało w pełni przesłane. Zaimportuj je ponownie.",
 	"automationCollectionManage": "Zarządzanie zbieraniem",
 	"automationCollectionRules": "Dopasowania reguł",
 	"automationCollectionEntries": "Wpisy bazy danych",

@@ -1,5 +1,6 @@
 import {onWindowWorkspaceStorageChanged} from "./workspace";
 import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
+import {closeNotebookLivePhotos} from "../protyle/preview/livePhoto";
 import {Constants} from "../constants";
 import {refreshSettingConfig} from "../config/setting/sync";
 import {onAgentStreamingMarkdownStorageChanged} from "../config/tabs/ai/agentStreamingMarkdown";
@@ -183,6 +184,7 @@ class App {
                             case "closeBox":
                             case "removeBox":
                                 closeNotebookHistoryDialogs(data.data.box);
+                                closeNotebookLivePhotos(data.data.box);
                                 removeBlockPanelEditors({notebookId: data.data.box});
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {

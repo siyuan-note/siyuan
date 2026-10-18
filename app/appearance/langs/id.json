@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Live Photo ini tidak dapat dipratinjau. File asli tetap tersimpan.",
+	"livePhotoPairUnavailable": "Live Photo belum terunggah sepenuhnya. Silakan impor kembali.",
 	"automationCollectionManage": "Pengelolaan pengumpulan",
 	"automationCollectionRules": "Kecocokan aturan",
 	"automationCollectionEntries": "Entri basis data",

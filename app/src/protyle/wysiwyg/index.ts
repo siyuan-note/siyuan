@@ -4798,7 +4798,9 @@ export class WYSIWYG {
             }
             if (target.tagName === "IMG" && !target.classList.contains("emoji") &&
                 !target.closest('[data-subtype="plantuml"]')) {
-                previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
+                previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID,
+                    target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
+                        target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "");
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/12691

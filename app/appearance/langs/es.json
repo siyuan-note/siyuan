@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "No se puede reproducir esta Live Photo. Se conservan los archivos originales.",
+	"livePhotoPairUnavailable": "La Live Photo no se ha subido por completo. Vuelve a importarla.",
 	"automationCollectionManage": "Gestión de recopilación",
 	"automationCollectionRules": "Coincidencias de reglas",
 	"automationCollectionEntries": "Entradas de la base de datos",

@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Impossible de lire cette Live Photo. Les fichiers originaux sont conservés.",
+	"livePhotoPairUnavailable": "La Live Photo n’a pas été entièrement envoyée. Veuillez la réimporter.",
 	"automationCollectionManage": "Gestion de la collecte",
 	"automationCollectionRules": "Correspondances des règles",
 	"automationCollectionEntries": "Entrées de la base",

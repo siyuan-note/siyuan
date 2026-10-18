@@ -32,7 +32,7 @@ export interface ListMindmapViewOptions {
     labels?: Record<string, string>;
     cdn?: string;
     onOpenLink?: (href: string, event: MouseEvent) => void;
-    onPreviewImage?: (src: string) => void;
+    onPreviewImage?: (src: string, video?: string) => void;
     colors?: () => {label: string, value: string}[];
     nodeColors?: () => {
         label: string, color: string, backgroundColor: string,
@@ -2707,7 +2707,9 @@ export class ListMindmapView {
             event.stopPropagation();
             this.cancelPointer();
             const src = target.getAttribute("src");
-            this.finishThen(() => this.options.onPreviewImage(src));
+            const video = target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
+                target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "";
+            this.finishThen(() => this.options.onPreviewImage(src, video));
             return;
         }
         if (this.readOnly) {

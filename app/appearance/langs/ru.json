@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Живое фото",
+	"livePhotoPreviewUnavailable": "Не удалось воспроизвести это живое фото. Исходные файлы сохранены.",
+	"livePhotoPairUnavailable": "Живое фото загружено не полностью. Импортируйте его ещё раз.",
 	"automationCollectionManage": "Управление сбором",
 	"automationCollectionRules": "Совпадения по правилам",
 	"automationCollectionEntries": "Записи базы данных",

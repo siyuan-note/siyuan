@@ -770,6 +770,7 @@ def module_license(module_path, license_files):
         "github.com/dop251/goja": "MIT AND BSD-3-Clause",
         "github.com/klauspost/compress": "BSD-3-Clause AND Apache-2.0 AND MIT",
         "github.com/mattn/go-sqlite3": "MIT AND BSD-3-Clause AND Public Domain",
+        "github.com/tphakala/go-aac": "LGPL-2.1-or-later AND BSD-3-Clause",
         "gopkg.in/yaml.v2": "Apache-2.0 AND MIT",
     }
     if module_path in mixed_license_overrides:

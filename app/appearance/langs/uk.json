@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Живе фото",
+	"livePhotoPreviewUnavailable": "Не вдалося відтворити це живе фото. Оригінальні файли збережено.",
+	"livePhotoPairUnavailable": "Живе фото завантажено не повністю. Імпортуйте його ще раз.",
 	"automationCollectionManage": "Керування збиранням",
 	"automationCollectionRules": "Збіги за правилами",
 	"automationCollectionEntries": "Записи бази даних",

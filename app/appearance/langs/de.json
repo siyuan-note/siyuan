@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Dieses Live Photo kann nicht wiedergegeben werden. Die Originaldateien bleiben erhalten.",
+	"livePhotoPairUnavailable": "Das Live Photo wurde nicht vollständig hochgeladen. Bitte erneut importieren.",
 	"automationCollectionManage": "Sammlungsverwaltung",
 	"automationCollectionRules": "Regeltreffer",
 	"automationCollectionEntries": "Datenbankeinträge",

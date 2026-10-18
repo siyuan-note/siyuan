@@ -1,4 +1,7 @@
 {
+	"livePhoto": "תמונה חיה",
+	"livePhotoPreviewUnavailable": "לא ניתן להציג תצוגה מקדימה של התמונה החיה. הקבצים המקוריים נשמרו.",
+	"livePhotoPairUnavailable": "העלאת התמונה החיה לא הושלמה. יש לייבא אותה שוב.",
 	"automationCollectionManage": "ניהול איסוף",
 	"automationCollectionRules": "התאמות לכללים",
 	"automationCollectionEntries": "רשומות מסד הנתונים",

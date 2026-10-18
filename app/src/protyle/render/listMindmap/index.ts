@@ -236,7 +236,7 @@ class ListMindmapController {
         this.view = new ListMindmapView({
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
-            onPreviewImage: src => previewDocImage(src, owner.block.rootID),
+            onPreviewImage: (src, video) => previewDocImage(src, owner.block.rootID, video),
             onInteractionStart: event => suspendBlockPopover(this.host, event),
             readOnly: !canEdit(owner, list),
             onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {

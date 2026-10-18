@@ -2,6 +2,7 @@ import {openMobileFileById} from "../editor";
 import {refreshSettingConfig} from "../../config/setting/sync";
 import {onAgentStreamingMarkdownStorageChanged} from "../../config/tabs/ai/agentStreamingMarkdown";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
+import {closeNotebookLivePhotos} from "../../protyle/preview/livePhoto";
 import {MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
 import {showMobileBars} from "./mobileBars";
 import {
@@ -131,6 +132,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "closeBox":
             case "removeBox": {
                 closeNotebookHistoryDialogs(data.data.box);
+                closeNotebookLivePhotos(data.data.box);
                 removeMobileBacklinkContent({notebookId: data.data.box});
                 removeMobileReferenceSheet({notebookId: data.data.box});
                 window.siyuan.mobile.tabs?.removeNotebook(data.data.box);

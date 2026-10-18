@@ -1,4 +1,7 @@
 {
+	"livePhoto": "लाइव फ़ोटो",
+	"livePhotoPreviewUnavailable": "इस लाइव फ़ोटो का पूर्वावलोकन नहीं हो सका। मूल फ़ाइलें सुरक्षित हैं।",
+	"livePhotoPairUnavailable": "लाइव फ़ोटो पूरी तरह अपलोड नहीं हुई। कृपया इसे फिर से आयात करें।",
 	"automationCollectionManage": "संग्रह प्रबंधन",
 	"automationCollectionRules": "नियम से मेल",
 	"automationCollectionEntries": "डेटाबेस प्रविष्टियाँ",

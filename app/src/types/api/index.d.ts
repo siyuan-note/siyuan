@@ -970,6 +970,8 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
+export type DocumentPreviewImage = { "notebook": string; "src": string; "video"?: string; };
+
 export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
 export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
@@ -1153,6 +1155,8 @@ export type FileTreeTrimIDRequestInput = { "id": string; };
 export type FindAssetReferencesRequestInput = { "path"?: string; "paths"?: Array<string>; };
 
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
+export type FinishLivePhotoPreviewRequestInput = { "file": Blob; "id": string; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -1397,6 +1401,16 @@ export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": s
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
+
+export type LivePhotoColor = { "fullRange": boolean; "matrix": number; "primaries": number; "transfer": number; };
+
+export type LivePhotoFrameRequestInput = { "id": string; "index": number; };
+
+export type LivePhotoFrameTime = { "duration": number; "timestamp": number; };
+
+export type LivePhotoPreviewRequestInput = { "id": string; };
+
+export type LivePhotoPreviewSession = { "color": LivePhotoColor; "encode": boolean; "frames": Array<LivePhotoFrameTime> | null; "height": number; "id": string; "width": number; };
 
 export type LoadPetalsRequestInput = { "frontend": string; "settingsWindow"?: boolean; };
 
@@ -2177,6 +2191,8 @@ export type SnippetsData = { "revision"?: string; "snippets": Array<Snippet | nu
 export type SortAttributeViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; };
 
 export type SortAttributeViewViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; "viewID"?: string | null; };
+
+export type StartLivePhotoPreviewRequestInput = { "clientEncode"?: boolean; "path": string; };
 
 export type StorageKeyRequestInput = { "key": string; };
 
@@ -3210,12 +3226,33 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 取消会话并释放在途转换资源，已完成的缓存仍可在下一次播放时复用。
+     */
+    "/api/asset/cancelLivePhotoPreview": {
+        request: LivePhotoPreviewRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
     "/api/asset/findAssetReferences": {
         request: FindAssetReferencesRequestInput;
         response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 提交大端 uint32 帧数，随后逐帧提交大端 uint32 长度及 Annex B 数据；最多 64 MiB，帧数和尺寸必须匹配源片。
+     * 验证并等待 MP4 封装完成后返回；失败结果不能进入共享缓存。
+     */
+    "/api/asset/finishLivePhotoPreview": {
+        request: FinishLivePhotoPreviewRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/asset/fullReindexAssetContent": {
         request: EmptyRequestInput;
@@ -3234,6 +3271,16 @@ export interface APIPOSTRoutes {
     "/api/asset/getDocImageAssets": {
         request: AssetDocumentRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 返回文档图片及各自关联的实况照片原始视频；保留图片顺序，不合并相同封面。
+     */
+    "/api/asset/getDocPreviewImages": {
+        request: AssetDocumentRequestInput;
+        response: { "code": 0; "data": Array<DocumentPreviewImage> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
@@ -3257,6 +3304,28 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 顺序读取零起始的 I420 帧，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+     */
+    "/api/asset/getLivePhotoFrame": {
+        request: LivePhotoFrameRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+        output: "binary";
+    };
+    /**
+     * 等待并读取 MP4 兼容预览，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+     */
+    "/api/asset/getLivePhotoPreview": {
+        request: LivePhotoPreviewRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+        output: "binary";
     };
     "/api/asset/getMissingAssets": {
         request: EmptyRequestInput;
@@ -3415,6 +3484,20 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 按需生成 H.264/AAC 兼容预览，不修改原件，不同步缓存；输入限制为 64 MiB、十秒、600 帧和 4096×2160 像素。
+     * 支持 SDR HEVC 4:2:0（8/10 位）或 AVC，以及 AAC 或 44.1/48 kHz 单声道、双声道整数 PCM。
+     * clientEncode 为 true 且 encode 为 true 时，调用方顺序读取帧并提交 Annex B 编码；否则直接读取预览。
+     * 客户端编码只对管理员开放，其他角色由内核生成预览，不能提交共享缓存内容。
+     * 会话五分钟内有效，编码任务两分钟超时；加密笔记本只使用内存，锁定时取消任务、清除会话与缓存。
+     */
+    "/api/asset/startLivePhotoPreview": {
+        request: StartLivePhotoPreviewRequestInput;
+        response: { "code": 0; "data": LivePhotoPreviewSession; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/asset/statAsset": {
         request: AssetPathRequestInput;

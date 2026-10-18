@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "この Live Photo を再生できません。元のファイルは保持されています。",
+	"livePhotoPairUnavailable": "Live Photo のアップロードが完了していません。もう一度インポートしてください。",
 	"automationCollectionManage": "収集管理",
 	"automationCollectionRules": "ルールの一致",
 	"automationCollectionEntries": "データベース項目",

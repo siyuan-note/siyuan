@@ -1,4 +1,7 @@
 {
+	"livePhoto": "صورة حية",
+	"livePhotoPreviewUnavailable": "تعذرت معاينة هذه الصورة الحية. تم الاحتفاظ بالملفات الأصلية.",
+	"livePhotoPairUnavailable": "لم يكتمل رفع الصورة الحية. يرجى استيرادها مجددًا.",
 	"automationCollectionManage": "إدارة التجميع",
 	"automationCollectionRules": "مطابقات القواعد",
 	"automationCollectionEntries": "إدخالات قاعدة البيانات",

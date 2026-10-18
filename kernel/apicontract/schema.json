@@ -23276,6 +23276,25 @@
       ],
       "additionalProperties": false
     },
+    "DocumentPreviewImage": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string"
+        },
+        "video": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "src"
+      ],
+      "additionalProperties": false
+    },
     "DownloadCloudSnapshotRequestInput": {
       "type": "object",
       "properties": {
@@ -26705,6 +26724,23 @@
         "ids",
         "k",
         "r"
+      ],
+      "additionalProperties": false
+    },
+    "FinishLivePhotoPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "id"
       ],
       "additionalProperties": false
     },
@@ -30830,6 +30866,116 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "LivePhotoColor": {
+      "type": "object",
+      "properties": {
+        "fullRange": {
+          "type": "boolean"
+        },
+        "matrix": {
+          "type": "integer"
+        },
+        "primaries": {
+          "type": "integer"
+        },
+        "transfer": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fullRange",
+        "matrix",
+        "primaries",
+        "transfer"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoFrameRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "index"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoFrameTime": {
+      "type": "object",
+      "properties": {
+        "duration": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "duration",
+        "timestamp"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoPreviewSession": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "$ref": "#/$defs/LivePhotoColor"
+        },
+        "encode": {
+          "type": "boolean"
+        },
+        "frames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/LivePhotoFrameTime"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "height": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "color",
+        "encode",
+        "frames",
+        "height",
+        "id",
+        "width"
+      ],
       "additionalProperties": false
     },
     "LoadPetalsRequestInput": {
@@ -50066,6 +50212,21 @@
         "avID",
         "keyID",
         "previousKeyID"
+      ],
+      "additionalProperties": false
+    },
+    "StartLivePhotoPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "clientEncode": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
       ],
       "additionalProperties": false
     },
@@ -124951,6 +125112,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/cancelLivePhotoPreview",
+      "handler": "cancelLivePhotoPreview",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/findAssetReferences",
       "handler": "findAssetReferences",
       "authorization": [
@@ -125015,6 +125254,85 @@
                   },
                   {
                     "$ref": "#/$defs/AssetReferencesData"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/finishLivePhotoPreview",
+      "handler": "finishLivePhotoPreview",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/FinishLivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -125290,6 +125608,94 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/getDocPreviewImages",
+      "handler": "getDocPreviewImages",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AssetDocumentRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/DocumentPreviewImage"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/getFileAnnotation",
       "handler": "getFileAnnotation",
       "authorization": [
@@ -125447,6 +125853,129 @@
           }
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/getLivePhotoFrame",
+      "handler": "getLivePhotoFrame",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LivePhotoFrameRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 422
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/getLivePhotoPreview",
+      "handler": "getLivePhotoPreview",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 422
     },
     {
       "method": "POST",
@@ -126806,6 +127335,84 @@
               },
               "data": {
                 "$ref": "#/$defs/SettingOCR"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/startLivePhotoPreview",
+      "handler": "startLivePhotoPreview",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/StartLivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/LivePhotoPreviewSession"
               },
               "msg": {
                 "type": "string"

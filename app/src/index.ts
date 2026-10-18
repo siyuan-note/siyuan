@@ -4,6 +4,7 @@ import {onAgentStreamingMarkdownStorageChanged} from "./config/tabs/ai/agentStre
 import {onCompactModeStorageChanged, refreshCompactMode} from "./config/tabs/compactMode";
 import {onMenuMouseScrollStorageChanged, refreshMenuMouseScroll} from "./config/tabs/menuMouseScroll";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
+import {closeNotebookLivePhotos} from "./protyle/preview/livePhoto";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
@@ -227,6 +228,7 @@ export class App {
                         case "closeBox":
                         case "removeBox":
                             closeNotebookHistoryDialogs(data.data.box);
+                            closeNotebookLivePhotos(data.data.box);
                             removeBlockPanelEditors({notebookId: data.data.box});
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {

@@ -1336,6 +1336,7 @@ func clearCorruptedNotebooks() {
 
 func clearWorkspaceTemp(preserveInstallPkgPath string) {
 	heif.ClearMemoryCache("")
+	LivePhotoPreviews.Clear("")
 	os.RemoveAll(filepath.Join(util.TempDir, "assets-cache"))
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))

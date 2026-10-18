@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Жива фотографија",
+	"livePhotoPreviewUnavailable": "Није могуће приказати ову живу фотографију. Оригиналне датотеке су сачуване.",
+	"livePhotoPairUnavailable": "Жива фотографија није у потпуности отпремљена. Увезите је поново.",
 	"automationCollectionManage": "Управљање прикупљањем",
 	"automationCollectionRules": "Подударања правила",
 	"automationCollectionEntries": "Ставке базе података",

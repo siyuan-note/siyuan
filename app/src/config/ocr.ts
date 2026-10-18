@@ -146,7 +146,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         root.querySelector("#ocrAIModel").closest(".config-item").classList.toggle("fn__none", !isAI);
         root.querySelector("#ocrReasoningEffort").closest(".config-item").classList.toggle("fn__none", !isAI);
         root.querySelector('[data-config-group-id="advanced"]')?.classList.toggle("fn__none", !isPaddleOCR);
-        root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
+        root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, .config-item button").forEach(element => {
             element.disabled = busy || (element.tagName === "BUTTON" && pendingSaves > 0);
         });
         root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || !isPaddleOCR;

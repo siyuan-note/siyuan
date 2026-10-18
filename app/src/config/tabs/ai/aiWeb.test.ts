@@ -34,7 +34,8 @@ test("web provider descriptions follow the selected services on opening and swit
         });
         const search = select("search", initial === "default" ? "exa" : "deepseek");
         const fetch = select("fetch", initial === "default" ? "direct" : "deepseek");
-        const root = {querySelector: (selector: string) => selector.includes("searchProvider") ? search : fetch};
+        const root = {querySelector: (selector: string) => selector.includes("searchProvider") ? search :
+            selector.includes("fetchProvider") ? fetch : null};
         const searchSpec = controls.get("ai.web.searchProvider");
         const fetchSpec = controls.get("ai.web.fetchProvider");
         searchSpec.afterMount(root);
@@ -54,6 +55,53 @@ test("web provider descriptions follow the selected services on opening and swit
             listeners.get("fetch")();
             assert.equal(descriptions.fetch.textContent, expected);
             assert.equal(descriptions.search.textContent, previousSearch);
+        }
+    }
+});
+
+test("the shared DeepSeek key appears for either provider and retains saved and draft values when hidden", () => {
+    const code = transpileModule(readFileSync("src/config/tabs/ai/aiWeb.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    for (const searchProvider of ["exa", "deepseek"]) {
+        for (const fetchProvider of ["direct", "deepseek"]) {
+            const controls = new Map<string, ProviderControl>();
+            const web = {searchProvider, fetchProvider, apiKey: "saved-key"};
+            const exports = {} as {registerAiWebGroup: (tab: unknown) => void};
+            runInNewContext(code, {exports, window: {siyuan: {config: {ai: {web}},
+                languages: new Proxy({}, {get: (_, key) => String(key)})}}});
+            const register = (id: string, spec: ProviderControl) => controls.set(id, spec);
+            exports.registerAiWebGroup({group: () => ({select: register, textBlock: register, number: () => {}})});
+            const listeners = new Map<string, () => void>();
+            const select = (kind: string, value: string) => ({value,
+                closest: () => ({querySelector: () => ({textContent: ""})}),
+                addEventListener: (_name: string, listener: () => void) => listeners.set(kind, listener),
+            });
+            const search = select("search", searchProvider);
+            const fetch = select("fetch", fetchProvider);
+            let hidden = false;
+            const key = {value: "draft-key", closest: () => ({classList: {toggle: (name: string, value: boolean) => {
+                assert.equal(name, "fn__none");
+                hidden = value;
+            }}})};
+            const root = {querySelector: (selector: string) => selector.includes("searchProvider") ? search :
+                selector.includes("fetchProvider") ? fetch : selector.includes("apiKey") ? key : null};
+            controls.get("ai.web.searchProvider").afterMount(root);
+            controls.get("ai.web.fetchProvider").afterMount(root);
+            controls.get("ai.web.apiKey").afterMount(root);
+            assert.equal(hidden, searchProvider !== "deepseek" && fetchProvider !== "deepseek");
+            for (const [searchValue, fetchValue, expectedHidden] of [
+                ["deepseek", "direct", false], ["deepseek", "deepseek", false],
+                ["exa", "deepseek", false], ["exa", "direct", true], ["deepseek", "direct", false],
+            ] as const) {
+                search.value = searchValue;
+                listeners.get("search")();
+                fetch.value = fetchValue;
+                listeners.get("fetch")();
+                assert.equal(hidden, expectedHidden);
+                assert.equal(key.value, "draft-key");
+                assert.equal(web.apiKey, "saved-key");
+            }
         }
     }
 });

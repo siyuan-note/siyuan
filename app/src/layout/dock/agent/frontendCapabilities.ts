@@ -100,6 +100,7 @@ let mobileFrontend = false;
 mobileFrontend = true;
 /// #endif
 
+/// #if !BROWSER && !MOBILE
 if (!mobileFrontend && !isBrowser()) {
     registerCapability({
         id: "native/frontend/web_page_fetch",
@@ -133,6 +134,7 @@ if (!mobileFrontend && !isBrowser()) {
         },
     });
 }
+/// #endif
 
 registerCapability({
     id: "native/frontend/open_setting",

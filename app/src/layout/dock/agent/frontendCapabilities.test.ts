@@ -57,6 +57,12 @@ for (const platform of ["desktop", "browser", "mobile"]) {
         const code = transpileModule(source, {compilerOptions: {
             module: ModuleKind.CommonJS, target: ScriptTarget.ES2021,
         }}).outputText;
+        if (platform === "desktop") {
+            assert.match(code, /require\("electron"\)/);
+        } else {
+            assert.doesNotMatch(code, /require\("electron"\)/);
+            assert.doesNotMatch(code, /siyuan-web-page-fetch/);
+        }
         const exports = {} as typeof import("./frontendCapabilities");
         runInNewContext(code, {exports, require: (name: string) => {
             assert.ok(name in dependencies, name);

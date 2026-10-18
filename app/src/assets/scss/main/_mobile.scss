@@ -1534,6 +1534,12 @@ body.mobile-topbar--merged {
     }
   }
 
+  &__font-family {
+    margin: 4px 8px 4px 0;
+    min-height: 40px;
+    text-align: left;
+  }
+
   &__font-size {
     align-items: center;
     box-sizing: border-box;

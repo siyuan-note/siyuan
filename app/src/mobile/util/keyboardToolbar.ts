@@ -73,7 +73,7 @@ import {
     getInlineFontFamilyLabel,
     getFontFamilyState,
     getInlineFontFamilyValue,
-    renderMobileFontFamilyMenu,
+    openFontFamilyMenu,
 } from "../../protyle/toolbar/fontFamilyMenu";
 import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../protyle/util/editorFocus";
@@ -103,6 +103,7 @@ import {getCaretOverflowDirection, getCaretScrollDelta} from "../../protyle/wysi
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
+let fontFamilyMenu: {element: HTMLElement, protyle: IProtyle} | undefined;
 let unmountLiteSlashMenu: (() => void) | undefined;
 
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
@@ -666,9 +667,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div data-id="fontFamily" class="keyboard__slash-title${disableFontFamily ? " fn__none" : ""}">${window.siyuan.languages.fontFamily}</div>
 <div data-id="fontFamilyWrap" class="keyboard__slash-block${disableFontFamily ? " fn__none" : ""}">
-    <button class="keyboard__slash-item" data-action="fontFamilyMenu">
-        <span class="keyboard__slash-icon" data-type="fontFamilyPreview">A</span>
-        <span class="keyboard__slash-text">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
+    <button class="b3-select keyboard__font-family fn__flex-1" data-action="fontFamilyMenu" data-menu="true" aria-haspopup="listbox" aria-expanded="false">
+        <span data-type="fontFamilyPreview">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
     </button>
 </div>
 <div data-id="fontSize" class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
@@ -888,6 +888,48 @@ const hideAndroidKeyboardForPanel = (protyle: IProtyle) => {
     }, 100);
 };
 
+const openMobileFontFamilyMenu = (protyle: IProtyle, target: HTMLElement, appearance = false) => {
+    if (!protyle || protyle.disabled || window.siyuan.config.readonly) {
+        return;
+    }
+    const range = protyle.toolbar.range.cloneRange();
+    const nodes = getFontNodeElements(protyle);
+    const state = getFontFamilyState(protyle, nodes);
+    const valid = () => getCurrentEditor()?.protyle === protyle && !protyle.disabled &&
+        !window.siyuan.config.readonly && target.isConnected &&
+        range.startContainer.isConnected && range.endContainer.isConnected;
+    preventKeyboardToolbarRender();
+    void openFontFamilyMenu(target, {
+        ...state,
+        isOpenValid: valid,
+        onInteraction: preventKeyboardToolbarRender,
+        onOpen: element => { fontFamilyMenu = {element, protyle}; },
+        onClose() {
+            const searchFocused = fontFamilyMenu?.element.contains(document.activeElement);
+            fontFamilyMenu = undefined;
+            if (searchFocused) {
+                activeBlur(true);
+            }
+        },
+        onSelect(family) {
+            if (!valid()) {
+                return;
+            }
+            protyle.toolbar.range = range;
+            fontEvent(protyle, nodes, "fontFamily", getInlineFontFamilyValue(family), false);
+            if (appearance) {
+                const toolbarElement = document.getElementById("keyboardToolbar");
+                const utilElement = toolbarElement.querySelector(".keyboard__util");
+                const scrollTop = utilElement.scrollTop;
+                renderTextMenu(protyle, toolbarElement);
+                utilElement.scrollTop = scrollTop;
+            } else {
+                restoreKeyboardToolbarRange(protyle, protyle.toolbar.range);
+            }
+        },
+    });
+};
+
 const resetKeyboardToolbarUtilButtons = () => {
     unmountLiteSlashMenu?.();
     unmountLiteSlashMenu = undefined;
@@ -933,6 +975,10 @@ const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
 };
 
 export const hideKeyboardToolbarUtilOnEditorClick = () => {
+    if (fontFamilyMenu && fontFamilyMenu.protyle === getCurrentEditor()?.protyle &&
+        fontFamilyMenu.element.contains(document.activeElement)) {
+        return;
+    }
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (!showUtil && (!toolbarElement || toolbarElement.clientHeight <= 100)) {
         return;
@@ -1102,6 +1148,12 @@ const showKeyboardToolbarElement = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
         !toolbarElement.contains(document.activeElement)) {
+        if (keyboardPanelTop !== undefined && fontFamilyMenu && fontFamilyMenu.protyle === getCurrentEditor()?.protyle &&
+            fontFamilyMenu.element.contains(document.activeElement)) {
+            // 字体搜索使用独立菜单，保留底层外观面板及选区。
+            notifyMobileKeyboardChange(true);
+            return;
+        }
         // 普通输入框可能保留文档选区，不能据此恢复编辑焦点或显示文档工具栏。
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
@@ -1627,38 +1679,9 @@ export const initKeyboardToolbar = () => {
         const target = event.target as HTMLElement;
         const liteSlashBtnElement = target.closest<HTMLElement>(".keyboard__util .protyle-hint .keyboard__slash-item[data-value]");
         const slashBtnElement = liteSlashBtnElement || hasClosestByClassName(target, "keyboard__slash-item");
-        if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
-            const range = protyle.toolbar.range.cloneRange();
-            const nodeElements = getFontNodeElements(protyle);
-            const fontFamilyState = getFontFamilyState(protyle, nodeElements);
-            const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
-            const isFontFamilyMenuValid = () => getCurrentEditor()?.protyle === protyle &&
-                toolbarElement.clientHeight > 100 && range.startContainer.isConnected &&
-                range.endContainer.isConnected && toolbarElement.querySelector('.keyboard__action[data-type="text"]')
-                    ?.classList.contains("protyle-toolbar__item--current") === true;
-            preventKeyboardToolbarRender();
-            void renderMobileFontFamilyMenu(utilElement, {
-                ...fontFamilyState,
-                isOpenValid: isFontFamilyMenuValid,
-                onBack() {
-                    if (!isFontFamilyMenuValid()) {
-                        return;
-                    }
-                    protyle.toolbar.range = range;
-                    renderTextMenu(protyle, toolbarElement);
-                    focusByRange(range);
-                },
-                onInteraction: preventKeyboardToolbarRender,
-                onSelect(family) {
-                    if (!isFontFamilyMenuValid()) {
-                        return;
-                    }
-                    protyle.toolbar.range = range;
-                    fontEvent(protyle, nodeElements, "fontFamily", getInlineFontFamilyValue(family), false);
-                    renderTextMenu(protyle, toolbarElement);
-                    focusByRange(protyle.toolbar.range);
-                }
-            });
+        const fontFamilyButton = target.closest<HTMLElement>('[data-action="fontFamilyMenu"]');
+        if (fontFamilyButton) {
+            openMobileFontFamilyMenu(protyle, fontFamilyButton, true);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -1824,7 +1847,11 @@ export const initKeyboardToolbar = () => {
                 protyle.toolbar.setInlineMark(protyle, type, "toolbar");
             }
             return;
-        } else if (type === "font-family" || type === "font-size") {
+        } else if (type === "font-family") {
+            hideKeyboardToolbarUtil();
+            openMobileFontFamilyMenu(protyle, buttonElement);
+            return;
+        } else if (type === "font-size") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil(true);
                 restoreKeyboardToolbarRange(protyle, range);
@@ -1853,32 +1880,12 @@ export const initKeyboardToolbar = () => {
                 finish();
             };
             preventKeyboardToolbarRender();
-            if (type === "font-family") {
-                const state = getFontFamilyState(protyle, nodes);
-                if (state.disabled) {
+            util.replaceChildren(createFontSizePicker(protyle, value => apply("fontSize", value), preventKeyboardToolbarRender, () => {
+                if (valid()) {
+                    protyle.toolbar.range = savedRange;
                     finish();
-                    return;
                 }
-                void renderMobileFontFamilyMenu(util, {
-                    ...state,
-                    isOpenValid: valid,
-                    onInteraction: preventKeyboardToolbarRender,
-                    onBack() {
-                        if (valid()) {
-                            protyle.toolbar.range = savedRange;
-                            finish();
-                        }
-                    },
-                    onSelect: family => apply("fontFamily", getInlineFontFamilyValue(family)),
-                });
-            } else {
-                util.replaceChildren(createFontSizePicker(protyle, value => apply("fontSize", value), preventKeyboardToolbarRender, () => {
-                    if (valid()) {
-                        protyle.toolbar.range = savedRange;
-                        finish();
-                    }
-                }));
-            }
+            }));
             showKeyboardToolbarUtil(protyle.contentElement.scrollTop);
             hideAndroidKeyboardForPanel(protyle);
             return;

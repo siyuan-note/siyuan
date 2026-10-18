@@ -67,7 +67,7 @@ test("inline font picker uses the same available fonts on desktop and mobile", a
     assert.equal(fonts[0].family, font.family);
     assert.equal(menu.getInlineFontFamilyLabel({family: font.family}), font.displayName);
     const source = readFileSync(resolve(process.cwd(), "src/protyle/toolbar/fontFamilyMenu.ts"), "utf8");
-    assert.equal(source.split("await loadFontFamilies(options.family)").length - 1, 2);
+    assert.equal(source.split("await loadFontFamilies(options.family)").length - 1, 1);
 });
 
 test("one unavailable font source does not hide the other source", async () => {

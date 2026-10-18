@@ -28,11 +28,12 @@ func TestAPIContractSettingAIWeb(t *testing.T) {
 	}
 	before := model.Conf.AI.Load().Web
 	code, message, _ = settingContractRequest(t, "setAI", setAI, `{"agent":{"maxRetries":2}}`)
-	if code != 0 || *model.Conf.AI.Load().Web != *before || model.Conf.AI.Load().Web == before {
-		t.Fatalf("legacy client lost or aliased web settings: %s", message)
+	web := model.Conf.AI.Load().Web
+	if code != 0 || *web != *before || web == before {
+		t.Fatalf("merge lost or aliased web settings: %s", message)
 	}
 	code, message, _ = settingContractRequest(t, "patch", patchSetting, `{"ai":{"web":{"fetchProvider":"deepseek"}}}`)
-	web := model.Conf.AI.Load().Web
+	web = model.Conf.AI.Load().Web
 	if code != 0 || web.FetchProvider != "deepseek" || web.SearchProvider != "deepseek" || web.APIKey != "test-key" || web.Timeout != 600 {
 		t.Fatalf("partial web setting save lost another field: %s", message)
 	}

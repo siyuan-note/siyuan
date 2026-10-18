@@ -60,24 +60,26 @@ func TestAPIContractOCRAIProviderSettings(t *testing.T) {
 	if len(data.Providers) != 3 || len(data.AIModels) != 1 || data.AIModels[0].ID != "vision" || data.AIModels[0].Provider != "Images" {
 		t.Fatalf("enabled model choices: %+v", data)
 	}
-	set := func(body string, success bool, automatic bool) {
+	set := func(body string, success bool, automatic bool, modelID string) {
 		var data apicontract.SettingOCR
 		code := requestOCRProvider(t, engine, "/api/asset/setOCRConfig", body, &data)
-		if (code == 0) != success || success && (data.Auto != automatic || data.AIModelID == nil || *data.AIModelID != "vision") {
+		if (code == 0) != success || success && (data.Auto != automatic || data.AIModelID != modelID) {
 			t.Fatalf("set OCR settings: code=%d data=%+v", code, data)
 		}
 	}
-	set(`{"provider":"ai","model":"tiny","auto":true,"aiModelId":"vision"}`, true, false)
-	set(`{"provider":"ai","model":"tiny","auto":true}`, true, true)
-	set(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":null}`, true, false)
-	set(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":"missing"}`, false, false)
+	set(`{"provider":"ai","model":"tiny","auto":true,"aiModelId":"vision"}`, true, false, "vision")
+	// 合并写入：省略 aiModelId 保持当前选择
+	set(`{"provider":"ai","model":"tiny","auto":true}`, true, true, "vision")
+	// null 表示清空选择，provider 为 ai 时无法通过校验
+	set(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":null}`, false, false, "vision")
+	set(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":"missing"}`, false, false, "vision")
 	provider.Models[0].Enabled = false
 	data = get()
-	if len(data.AIModels) != 0 || len(data.Providers) != 3 || data.Providers[2].Available || *data.Config.AIModelID != "vision" {
+	if len(data.AIModels) != 0 || len(data.Providers) != 3 || data.Providers[2].Available || data.Config.AIModelID != "vision" {
 		t.Fatalf("disabled selected model fell back: %+v", data)
 	}
-	set(`{"provider":"ai","model":"tiny","auto":false}`, true, false)
-	set(`{"provider":"tesseract","model":"tiny","auto":true}`, true, true)
+	set(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":"vision"}`, true, false, "vision")
+	set(`{"provider":"tesseract","model":"tiny","auto":true}`, true, true, "vision")
 	if len(get().Providers) != 2 {
 		t.Fatal("AI choice shown without enabled models")
 	}
@@ -136,18 +138,20 @@ func TestAPIContractOCRReasoningSettingsCompatibility(t *testing.T) {
 		success         bool
 	}{
 		{`,"reasoningEffort":"none"`, "none", true},
+		// 合并写入：省略保持当前值
 		{"", "none", true},
-		{`,"reasoningEffort":null`, "none", true},
+		// null 表示回到默认值
+		{`,"reasoningEffort":null`, "", true},
 		{`,"reasoningEffort":"high"`, "high", true},
 		{`,"reasoningEffort":"invalid"`, "high", false},
 		{`,"reasoningEffort":3`, "high", false},
 		{`,"reasoningEffort":""`, "", true},
 	} {
-		body := `{"provider":"ai","model":"tiny","auto":false` + test.field + `}`
+		body := `{"provider":"ai","model":"tiny","auto":false,"aiModelId":"vision"` + test.field + `}`
 		var response apicontract.SettingOCR
 		code := requestOCRProvider(t, engine, "/api/asset/setOCRConfig", body, &response)
 		if (code == 0) != test.success || model.Conf.GetOCR().ReasoningEffort != test.expected ||
-			test.success && (response.ReasoningEffort == nil || *response.ReasoningEffort != test.expected) {
+			test.success && response.ReasoningEffort != test.expected {
 			t.Fatalf("reasoning settings changed unexpectedly: %s, %+v", body, response)
 		}
 		data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))

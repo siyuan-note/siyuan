@@ -58,7 +58,7 @@ func TestAPIContractSettingNormalization(t *testing.T) {
 		}
 	}
 	code, message, _ := settingContractRequest(t, "setFlashcard", setFlashcard, `{"weights":"invalid","requestRetention":2,"maximumInterval":-1}`)
-	if code != 0 || model.Conf.Flashcard.Load().Weights != conf.DefaultFSRSWeights() || model.Conf.Flashcard.Load().NewCardLimit != 0 {
+	if code != 0 || model.Conf.Flashcard.Load().Weights != conf.DefaultFSRSWeights() || model.Conf.Flashcard.Load().NewCardLimit != conf.NewFlashcard().NewCardLimit {
 		t.Fatalf("flashcard normalization failed: %s", message)
 	}
 	code, message, _ = settingContractRequest(t, "setFiletree", setFiletree, `{"maxListCount":0,"largeFileWarningSize":1,"shorthandSavePath":"notes"}`)

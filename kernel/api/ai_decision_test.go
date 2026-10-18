@@ -122,6 +122,7 @@ func TestAPIContractSettingDecisionPartialSave(t *testing.T) {
 	decision.Provider = "openai"
 	decision.Profiles["openai"].APIKey = "openai-key"
 	decision.Profiles["typesafe"].APIKey = "typesafe-key"
+	// 省略 decision 时保持已有供应商和凭据，仅更新提交的字段
 	for _, body := range []string{
 		`{}`,
 		`{"decision":{"enabled":true,"endpoint":"https://legacy.example","apiKey":"legacy-key","name":"legacy","timeout":30}}`,

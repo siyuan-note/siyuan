@@ -7,13 +7,23 @@ const webProviderDescription = (kind: "search" | "fetch", provider: string) => {
     return provider === "deepseek" ? window.siyuan.languages.aiWebFetchProviderTip : window.siyuan.languages.aiWebFetchDirectTip;
 };
 
+const updateWebKeyVisibility = (root: HTMLElement) => {
+    const search = root.querySelector<HTMLSelectElement>("[id=\"ai.web.searchProvider\"]");
+    const fetch = root.querySelector<HTMLSelectElement>("[id=\"ai.web.fetchProvider\"]");
+    const usesDeepSeek = search?.value === "deepseek" || fetch?.value === "deepseek";
+    root.querySelector("[id=\"ai.web.apiKey\"]")?.closest(".config-item")?.classList.toggle("fn__none", !usesDeepSeek);
+};
+
 const mountWebProviderDescription = (root: HTMLElement, kind: "search" | "fetch") => {
     const select = root.querySelector<HTMLSelectElement>(`[id="ai.web.${kind}Provider"]`);
     const description = select?.closest(".config-item")?.querySelector<HTMLElement>(".b3-label__text");
     if (!select || !description) {
         return;
     }
-    const update = () => description.textContent = webProviderDescription(kind, select.value);
+    const update = () => {
+        description.textContent = webProviderDescription(kind, select.value);
+        updateWebKeyVisibility(root);
+    };
     update();
     select.addEventListener("change", update);
 };
@@ -37,6 +47,7 @@ export const registerAiWebGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.aiWebDeepSeekKeyTip,
         spellcheck: false,
         mode: "input-password",
+        afterMount: updateWebKeyVisibility,
     });
     group.number("ai.web.timeout", {
         title: window.siyuan.languages.apiTimeout,

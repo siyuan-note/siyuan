@@ -125,6 +125,24 @@ describe("asset upload result", () => {
         };
 
         assert.deepEqual(getAssetUploadPathsByInput(2, result), [undefined, "assets/b.png"]);
+        assert.deepEqual(getAssetUploadSuccesses(result, acceptedInput), [
+            {index: 1, name: "b.png", path: "assets/b.png"},
+        ]);
+    });
+
+    it("preserves legacy successes with unknown or ambiguous input positions without assigning a file index", () => {
+        const input: IAssetUploadInput = {kind: "local-files", files: [
+            {path: "C:\\first\\same.png", size: 1}, {path: "/second/same.png", size: 1},
+            {path: "/third/unique.png", size: 1},
+        ]};
+        const result = getAssetUploadSuccesses({succMap: {
+            "unique.png": "assets/unique.png", "same.png": "assets/same.png", "extra.png": "assets/extra.png",
+        }}, input);
+        assert.deepEqual(result, [
+            {index: 2, name: "unique.png", path: "assets/unique.png"},
+            {index: -2, name: "same.png", path: "assets/same.png"},
+            {index: -3, name: "extra.png", path: "assets/extra.png"},
+        ]);
     });
 
     it("does not guess legacy result positions for duplicate input names", () => {

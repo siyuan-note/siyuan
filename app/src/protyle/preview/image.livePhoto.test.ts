@@ -8,7 +8,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 
-test("image gallery selects each Live Photo association and releases playback on navigation", async () => {
+test("image gallery releases playing and converting Live Photos on navigation and slideshow", async () => {
     const root = realpathSync(tmpdir());
     const temporary = mkdtempSync(path.join(root, "siyuan-live-photo-gallery-"));
     const server = createServer((request, response) => {
@@ -30,6 +30,9 @@ test("image gallery selects each Live Photo association and releases playback on
         const browserCase = `(async () => {
             const starts = [];
             let stopped = 0;
+            let phase = "playing";
+            const closed = [];
+            const active = {playing:false,converting:false};
             const image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
             const entries = [{src:image,video:"assets/first.mov"},{src:image,video:"assets/second.mov"},{src:image}];
             window.siyuan = {languages:{livePhoto:"Live Photo",previous:"Previous",next:"Next"}};
@@ -40,7 +43,12 @@ test("image gallery selects each Live Photo association and releases playback on
                     const script=document.createElement("script");script.src=src;script.onload=resolve;script.onerror=reject;document.head.append(script);
                 }),
                 fetchPost: (_url,_data,callback) => callback({data:entries}),
-                createLivePhotoPlayer: (_host,video) => {starts.push(video);return () => {stopped++;};},
+                createLivePhotoPlayer: (_host,video) => {
+                    const current=phase;
+                    active[current]=true;
+                    starts.push(video);
+                    return () => {stopped++;closed.push(current);active[current]=false;};
+                },
                 isEncryptedBox: () => false,
             });
             ${source}
@@ -57,11 +65,20 @@ test("image gallery selects each Live Photo association and releases playback on
             viewer.view(0);
             await wait(()=>viewer.index===0 && viewer.viewed);
             button.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));
+            viewer.options.autoplay=false;
+            viewer.play();
+            if(active.playing || stopped!==2){throw new Error("slideshow retained previous playback");}
+            viewer.stop();
+            phase="converting";
+            button.click();
+            viewer.play();
+            if(active.converting || stopped!==3){throw new Error("slideshow retained pending conversion");}
+            viewer.stop();
             viewer.view(2);
             await wait(()=>viewer.index===2 && viewer.viewed);
             const hidden=button.classList.contains("fn__none");
             viewer.destroy();
-            return {starts,stopped,hidden};
+            return {starts,stopped,hidden,closed};
         })()`;
         const script = path.join(temporary, "main.cjs");
         writeFileSync(script, `
@@ -82,7 +99,8 @@ test("image gallery selects each Live Photo association and releases playback on
             env, windowsHide: true, timeout: 20000,
         });
         assert.deepEqual(JSON.parse(result.stdout.trim().split("\n").at(-1)), {
-            starts: ["assets/second.mov", "assets/first.mov"], stopped: 2, hidden: true,
+            starts: ["assets/second.mov", "assets/first.mov", "assets/first.mov"], stopped: 3, hidden: true,
+            closed: ["playing", "playing", "converting"],
         });
     } finally {
         server.close();

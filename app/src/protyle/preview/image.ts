@@ -47,6 +47,8 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
             stopLivePhoto?.();
             stopLivePhoto = undefined;
         };
+        imagesElement.addEventListener("play", stopLive);
+        imagesElement.addEventListener("playing", stopLive);
         const close = () => {
             stopLive();
             viewer.destroy();
@@ -174,6 +176,8 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
         const destroyViewer = viewer.destroy.bind(viewer);
         viewer.destroy = () => {
             stopLive();
+            imagesElement.removeEventListener("play", stopLive);
+            imagesElement.removeEventListener("playing", stopLive);
             destroyViewer();
         };
         window.siyuan.viewer = viewer;

@@ -160,7 +160,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
-    let successes = getAssetUploadSuccesses(response.data);
+    let successes = getAssetUploadSuccesses(response.data, input);
     const livePhotos = options?.livePhotoPairs && input?.kind === "files" ?
         getLivePhotoUploadPairs(options.livePhotoPairs, input.files, successes) : undefined;
     if (livePhotos) {

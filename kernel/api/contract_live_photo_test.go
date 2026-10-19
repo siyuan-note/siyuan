@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,7 +15,57 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/livephoto"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAPIContractLivePhotoPreviewSymlinkBoundary(t *testing.T) {
+	assets := setupAssetContractWorkspace(t)
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	const boxID = "20261019000000-box0002"
+	box := &model.Box{ID: boxID}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	outside := filepath.Join(t.TempDir(), "source.mov")
+	if err := os.WriteFile(outside, testutil.LivePhotoMOV(t), 0600); err != nil {
+		t.Fatal(err)
+	}
+	documentAssets := filepath.Join(util.DataDir, boxID, "20261019000001-doc0002", "assets")
+	if err := os.MkdirAll(documentAssets, 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, dir := range []string{assets, documentAssets} {
+		if err := os.Symlink(outside, filepath.Join(dir, "outside.mov")); err != nil {
+			t.Skipf("symlink unavailable: %v", err)
+		}
+	}
+	engine := gin.New()
+	engine.Use(boxLeaseMiddleware, func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
+	engine.POST("/api/asset/startLivePhotoPreview", startLivePhotoPreview)
+	for _, location := range []string{"global", "document"} {
+		t.Run(location, func(t *testing.T) {
+			if location == "document" {
+				if err := os.Remove(filepath.Join(assets, "outside.mov")); err != nil {
+					t.Fatal(err)
+				}
+				if _, err := model.GetAssetAbsPathInBox("assets/outside.mov", ""); err != nil {
+					t.Fatalf("fixture is not discoverable: %v", err)
+				}
+			}
+			data, _ := json.Marshal(apicontract.StartLivePhotoPreviewRequest{Path: "assets/outside.mov"})
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/startLivePhotoPreview", bytes.NewReader(data)))
+			requireAPIContract(t, "POST", "/api/asset/startLivePhotoPreview", recorder)
+			var response struct {
+				Code int
+				Data apicontract.LivePhotoPreviewSession
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code >= 0 || response.Data.ID != "" {
+				t.Fatalf("outside asset admitted: %s, %v", recorder.Body, err)
+			}
+		})
+	}
+}
 
 func TestAPIContractLivePhotoPreview(t *testing.T) {
 	assets := setupAssetContractWorkspace(t)
@@ -70,7 +121,57 @@ func TestAPIContractLivePhotoPreview(t *testing.T) {
 	if err != nil || !bytes.Equal(after, source) {
 		t.Fatal("source movie changed")
 	}
-	for _, invalid := range []string{"../live.mov", "https://example.com/live.mov", "assets/missing.mov"} {
+	for _, filename := range []string{"夏天.mov", "Summer day.mov", "plus+clip.mov", "literal%20.mov", "hash#clip.mov"} {
+		for _, boxID := range []string{"", "20261019000000-box0001"} {
+			t.Run(filename+"/"+boxID, func(t *testing.T) {
+				assetDir := assets
+				if boxID != "" {
+					assetDir = filepath.Join(util.DataDir, boxID, "assets")
+					box := &model.Box{ID: boxID}
+					if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+						t.Fatal(err)
+					}
+				}
+				if err := os.MkdirAll(assetDir, 0700); err != nil {
+					t.Fatal(err)
+				}
+				assetPath := filepath.Join(assetDir, filename)
+				if err := os.WriteFile(assetPath, source, 0600); err != nil {
+					t.Fatal(err)
+				}
+				requestPath := "assets/" + url.PathEscape(filename)
+				if boxID != "" {
+					requestPath += "?box=" + boxID + "&note=Summer+day%26box%3Dother"
+				}
+				started := call("startLivePhotoPreview", apicontract.StartLivePhotoPreviewRequest{Path: requestPath})
+				var response struct {
+					Code int
+					Data apicontract.LivePhotoPreviewSession
+				}
+				if err := json.Unmarshal(started.Body.Bytes(), &response); err != nil || response.Code != 0 || response.Data.ID == "" {
+					t.Fatalf("encoded asset: %s, %v", started.Body, err)
+				}
+				origin, err := model.LivePhotoPreviews.Origin(response.Data.ID)
+				if err != nil || origin != assetPath {
+					t.Fatalf("resolved asset: %s, want %s, %v", origin, assetPath, err)
+				}
+				preview := call("getLivePhotoPreview", apicontract.LivePhotoPreviewRequest{ID: response.Data.ID})
+				if preview.Code != 200 {
+					t.Fatalf("encoded asset preview: %s", preview.Body)
+				}
+				if _, err := livephoto.Open(preview.Body.Bytes()); err != nil {
+					t.Fatal(err)
+				}
+				call("cancelLivePhotoPreview", apicontract.LivePhotoPreviewRequest{ID: response.Data.ID})
+				after, err := os.ReadFile(assetPath)
+				if err != nil || !bytes.Equal(after, source) {
+					t.Fatal("renamed original movie changed")
+				}
+			})
+		}
+	}
+	for _, invalid := range []string{"../live.mov", "https://example.com/live.mov", "assets/missing.mov",
+		"assets/%GG.mov", "assets/%2e%2e/private.mov", "assets/live.mov?box=%GG", "assets/live.mov?box=invalid"} {
 		result := call("startLivePhotoPreview", apicontract.StartLivePhotoPreviewRequest{Path: invalid})
 		var failure struct{ Code int }
 		if err := json.Unmarshal(result.Body.Bytes(), &failure); err != nil || failure.Code == 0 {

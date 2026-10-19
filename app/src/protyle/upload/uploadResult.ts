@@ -1,11 +1,21 @@
 export const getAssetUploadSuccesses = (data?: {
     succFiles?: IAssetUploadSuccess[],
     succMap?: Record<string, string>
-}): IAssetUploadSuccess[] => {
+}, input?: IAssetUploadInput): IAssetUploadSuccess[] => {
     if (Array.isArray(data?.succFiles)) {
         return data.succFiles;
     }
-    return Object.entries(data?.succMap || {}).map(([name, path], index) => ({index, name, path}));
+    const inputIndexes = new Map<string, number>();
+    if (input) {
+        const names = input.kind === "files" ? input.files.map(file => file.name) :
+            input.files.map(file => file.path.split(/[\\/]/).pop() || "");
+        names.forEach((name, index) => inputIndexes.set(name, inputIndexes.has(name) ? -1 : index));
+    }
+    return Object.entries(data?.succMap || {}).map(([name, path], index) => {
+        const inputIndex = inputIndexes.get(name);
+        // 无法确定原始位置的成功项仍可插入，但不参与依赖上传索引的配对。
+        return {index: input ? (inputIndex >= 0 ? inputIndex : -index - 1) : index, name, path};
+    });
 };
 
 export const getAssetUploadPathsByInput = (inputCount: number,
@@ -16,14 +26,9 @@ export const getAssetUploadPathsByInput = (inputCount: number,
     if (Array.isArray(result.succFiles)) {
         result.succFiles.forEach(item => succeeded.set(item.index, item.path));
     } else if (result.succMap && result.acceptedInput) {
-        const names = result.acceptedInput.kind === "files" ?
-            result.acceptedInput.files.map(file => file.name) :
-            result.acceptedInput.files.map(file => file.path.split(/[\\/]/).pop() || "");
-        const nameCounts = new Map<string, number>();
-        names.forEach(name => nameCounts.set(name, (nameCounts.get(name) || 0) + 1));
-        names.forEach((name, index) => {
-            if (nameCounts.get(name) === 1 && Object.prototype.hasOwnProperty.call(result.succMap, name)) {
-                succeeded.set(index, result.succMap[name]);
+        getAssetUploadSuccesses({succMap: result.succMap}, result.acceptedInput).forEach(item => {
+            if (item.index >= 0) {
+                succeeded.set(item.index, item.path);
             }
         });
     }

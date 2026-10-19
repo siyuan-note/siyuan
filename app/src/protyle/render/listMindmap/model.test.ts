@@ -1469,6 +1469,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 check.equal(getComputedStyle(navigationToolbar).backgroundColor, "rgba(0, 0, 0, 0)",
                     "the unused toolbar area leaves the map visible");
                 for (const control of Array.from(group.children)) {
+                    if ((control as HTMLElement).hidden) {
+                        continue;
+                    }
                     const rect = control.getBoundingClientRect();
                     check.ok(rect.left >= groupBounds.left && rect.right <= groupBounds.right + 1 &&
                         rect.top >= groupBounds.top && rect.bottom <= groupBounds.bottom + 1,
@@ -1951,6 +1954,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             toolbarZoom.focus();
             const bounds = host.getBoundingClientRect();
             for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
+                if (control.hidden) {
+                    continue;
+                }
                 const rect = control.getBoundingClientRect();
                 check.ok(rect.left >= bounds.left && rect.right <= bounds.right,
                     `toolbar control stays inside the map, width=${width}, fontSize=${fontSize}`);

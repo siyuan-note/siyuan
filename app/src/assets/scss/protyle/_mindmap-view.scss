@@ -239,6 +239,18 @@
     pointer-events: none;
   }
 
+  &__document-frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    border: 2px dashed var(--b3-theme-primary);
+    color: var(--b3-theme-primary);
+    pointer-events: none;
+    z-index: 4;
+  }
+
   &__viewport--summary {
     cursor: crosshair;
   }
@@ -920,6 +932,7 @@
     min-height: 0;
 
     &__toolbar,
+    &__document-frame,
     &__resize,
     &__inspector,
     &__tooltip,

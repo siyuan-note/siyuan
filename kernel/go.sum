@@ -551,6 +551,8 @@ github.com/siyuan-note/dejavu v0.0.0-20260929110133-2612bd536470 h1:67W6Rm2i+oAX
 github.com/siyuan-note/dejavu v0.0.0-20260929110133-2612bd536470/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
 github.com/siyuan-note/dejavu v0.0.0-20261011111741-4465ef631977 h1:GQW/X2467LNPzESWrmAnfM1YA7XtovkZRJOVi7x45eA=
 github.com/siyuan-note/dejavu v0.0.0-20261011111741-4465ef631977/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
+github.com/siyuan-note/dejavu v0.0.0-20261019140134-d0b1127c4adf h1:UN7K475+Tq5a4WudQ97y5WYhVJJTUYocxWLpbcjlD1c=
+github.com/siyuan-note/dejavu v0.0.0-20261019140134-d0b1127c4adf/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044 h1:b1/Q4DSREDvGh1/NbzR9873EKrjakdoUtsNlghWxUOI=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044/go.mod h1:t6jXpJdrXzRsdQF+XGaw35f16JVZcDyIkk5/6//ywnY=
 github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce h1:356bfC3pucxXuYpZIwaQ3viVCbq5RbRuvBhb4xtoBR0=

@@ -38,7 +38,8 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, isIOSDevice, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {usesNativeTextMenu} from "../protyle/wysiwyg/nativeTextMenu";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {paste, pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
@@ -795,6 +796,16 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
 
 export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     const range = getEditorRange(nodeElement);
+    /// #if MOBILE
+    const rangeTarget = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+        range.startContainer as HTMLElement : range.startContainer.parentElement;
+    if (isIOSDevice() && rangeTarget && !isInEmbedBlock(rangeTarget) &&
+        usesNativeTextMenu(rangeTarget, protyle.wysiwyg.element)) {
+        // 所有正文菜单入口统一交给系统，避免异步菜单在选区切换后短暂覆盖文字。
+        protyle.toolbar.subElement.classList.add("fn__none");
+        return;
+    }
+    /// #endif
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_INLINE_CONTEXT);
     /// #if !MOBILE

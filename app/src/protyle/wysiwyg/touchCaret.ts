@@ -2,6 +2,7 @@ import {Constants} from "../../constants";
 import {focusByRange} from "../util/selectionOffsets";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindTouchNavigation} from "./touchNavigation";
+import {bindNativeTextMenu, cancelNativeTextMenu, requestNativeTextMenu} from "./nativeTextMenu";
 
 const TOUCH_CARET_EXCLUDED = "input, textarea, select, button, a, img, audio, video, iframe, " +
     ".protyle-action, .protyle-attr, .table, .av, .protyle-custom, [data-prevent-swipe], " +
@@ -32,10 +33,12 @@ const getTouchCharacterRange = (range: Range, point: {x: number, y: number}) => 
 export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boolean) => {
     const ownerDocument = element.ownerDocument;
     const ownerWindow = ownerDocument.defaultView;
+    const disposeNativeMenu = bindNativeTextMenu(element);
     let frame: number;
     let composing = false;
-    let touchCaret: {editable: HTMLElement, range: Range, character?: Range, startedUnfocused: boolean, time: number};
-    let previousTap: typeof touchCaret & {time: number, x: number, y: number, count: number, word?: Range | false};
+    let touchCaret: {editable: HTMLElement, range: Range, character?: Range, startedUnfocused: boolean,
+        time: number, touchTime: number, selection?: Range};
+    let previousTap: typeof touchCaret & {x: number, y: number, count: number, word?: Range | false, canceled?: boolean};
     let pendingTap: typeof previousTap;
     const cancelFrame = () => {
         if (frame !== undefined) {
@@ -45,6 +48,7 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
     };
     const cancel = () => {
         cancelFrame();
+        cancelNativeTextMenu(element);
         pendingTap = undefined;
     };
     const schedule = () => {
@@ -55,10 +59,25 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             frame = undefined;
             const selection = ownerDocument.getSelection();
             const activeElement = ownerDocument.activeElement;
+            const range = selection?.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+            // 只替换双击前未更新且不包含目标字符的旧选区，保留系统已经完成的新文字选择。
+            const staleSelection = tap.count === 2 && tap.selection && range && !range.collapsed &&
+                range.startContainer === tap.selection.startContainer && range.startOffset === tap.selection.startOffset &&
+                range.endContainer === tap.selection.endContainer && range.endOffset === tap.selection.endOffset &&
+                tap.character && !(range.isPointInRange(tap.character.startContainer, tap.character.startOffset) &&
+                    range.isPointInRange(tap.character.endContainer, tap.character.endOffset));
+            const activeInEditable = element.contains(activeElement) &&
+                (tap.editable.contains(activeElement) || activeElement.contains(tap.editable));
+            if (tap.count === 2 && !composing && canPlaceCaret() && activeInEditable && range &&
+                !range.collapsed && !staleSelection && tap.editable.contains(range.startContainer) &&
+                tap.editable.contains(range.endContainer)) {
+                requestNativeTextMenu(element, range);
+            }
             if (composing || !canPlaceCaret() || !tap.range.startContainer.isConnected ||
-                !tap.editable.isContentEditable || !element.contains(activeElement) ||
-                (!tap.editable.contains(activeElement) && !activeElement.contains(tap.editable)) ||
-                !selection?.isCollapsed || selection.rangeCount === 0 ||
+                !tap.editable.isContentEditable ||
+                (!activeInEditable && !(tap.count === 2 &&
+                    (activeElement === ownerDocument.body || element.contains(activeElement)))) ||
+                (!selection?.isCollapsed && !staleSelection) || selection.rangeCount === 0 ||
                 !element.contains(selection.anchorNode)) {
                 return;
             }
@@ -71,8 +90,12 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             if (tap.word === false || !tap.character?.startContainer.isConnected) {
                 return;
             }
+            if (!activeInEditable) {
+                tap.editable.focus({preventScroll: true});
+            }
             if (tap.word) {
                 focusByRange(tap.word);
+                requestNativeTextMenu(element, tap.word);
                 return;
             }
             const word = tap.character.cloneRange() as Range & {expand?: (unit: string) => void};
@@ -107,6 +130,7 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
                     .some(item => word.intersectsNode(item))) {
                 tap.word = word;
                 focusByRange(word);
+                requestNativeTextMenu(element, word);
             } else {
                 tap.word = false;
             }
@@ -142,6 +166,20 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             schedule();
         }
     };
+    const doubleClick = (event: MouseEvent) => {
+        const tap = previousTap;
+        if (event.defaultPrevented || composing || !canPlaceCaret() || !tap || tap.count > 2 ||
+            Date.now() - tap.time >= Constants.TIMEOUT_LONGPRESS ||
+            Math.hypot(event.clientX - tap.x, event.clientY - tap.y) >= Constants.SIZE_DRAG_THRESHOLD * 4 ||
+            !tap.range.startContainer.isConnected || !element.contains(tap.editable) ||
+            (event.target as HTMLElement).closest(TOUCH_CARET_EXCLUDED)) {
+            return;
+        }
+        // 原生双击可能取消第二次触摸或在键盘滚动后送达，沿用首次命中的正文补全选词。
+        previousTap = {...tap, count: 2};
+        pendingTap = previousTap;
+        schedule();
+    };
     const focusOut = (event: FocusEvent) => {
         if (event.relatedTarget && !element.contains(event.relatedTarget as Node)) {
             cancel();
@@ -160,21 +198,40 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             composing = false;
         }
     };
+    const rememberTouchStart = (point: {x: number, y: number}) => {
+        const repeated = previousTap && !previousTap.canceled && previousTap.editable === touchCaret.editable &&
+            touchCaret.touchTime - previousTap.touchTime >= 0 &&
+            touchCaret.touchTime - previousTap.touchTime < Constants.TIMEOUT_LONGPRESS &&
+            Math.hypot(point.x - previousTap.x, point.y - previousTap.y) < Constants.SIZE_DRAG_THRESHOLD * 4;
+        previousTap = {...(repeated ? previousTap : touchCaret), ...point, time: Date.now(),
+            touchTime: touchCaret.touchTime, count: repeated ? previousTap.count + 1 : 1};
+        // 按下时记录连续点击，原生手势缺少任一次 touchend 时仍能识别双击。
+        if (previousTap.count === 2) {
+            pendingTap = previousTap;
+            schedule();
+        }
+    };
     const touchStart = (event: TouchEvent) => {
         cancel();
         touchCaret = undefined;
         const target = event.target as HTMLElement;
         if (event.defaultPrevented || event.touches.length !== 1 || composing || !canPlaceCaret() ||
             target.closest(TOUCH_CARET_EXCLUDED)) {
+            if (previousTap) {
+                previousTap.canceled = true;
+            }
             return;
         }
         const point = {x: event.touches[0].clientX, y: event.touches[0].clientY};
-        if (previousTap?.count === 1 && previousTap.startedUnfocused &&
-            Date.now() - previousTap.time < Constants.TIMEOUT_LONGPRESS &&
+        const touchTime = Number.isFinite(event.timeStamp) ? event.timeStamp : Date.now();
+        if (previousTap?.count === 1 && !previousTap.canceled && previousTap.startedUnfocused &&
+            touchTime - previousTap.touchTime >= 0 &&
+            touchTime - previousTap.touchTime < Constants.TIMEOUT_LONGPRESS &&
             Math.hypot(point.x - previousTap.x, point.y - previousTap.y) < Constants.SIZE_DRAG_THRESHOLD * 4 &&
             previousTap.range.startContainer.isConnected && element.contains(previousTap.editable)) {
             // 键盘唤起后第二次点击可能命中正文空白，双击仍以第一次按下时的字符为目标。
-            touchCaret = {...previousTap, time: Date.now()};
+            touchCaret = {...previousTap, time: Date.now(), touchTime};
+            rememberTouchStart(point);
             return;
         }
         const editable = target.closest<HTMLElement>("[contenteditable]");
@@ -193,9 +250,15 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
         const activeElement = ownerDocument.activeElement;
         const startedUnfocused = !element.contains(activeElement) ||
             (!editable.contains(activeElement) && !activeElement.contains(editable));
-        touchCaret = {editable, range, character: getTouchCharacterRange(range, point), startedUnfocused, time: Date.now()};
+        const selection = ownerDocument.getSelection();
+        const savedSelection = selection?.rangeCount > 0 && !selection.isCollapsed &&
+            element.contains(selection.anchorNode) && element.contains(selection.focusNode) ?
+            selection.getRangeAt(0).cloneRange() : undefined;
+        touchCaret = {editable, range, character: getTouchCharacterRange(range, point),
+            startedUnfocused, time: Date.now(), touchTime, selection: savedSelection};
+        rememberTouchStart(point);
     };
-    const disposeNavigation = bindTouchNavigation(element, (_target, point) => {
+    const disposeNavigation = bindTouchNavigation(element, () => {
         cancel();
         const caret = touchCaret;
         touchCaret = undefined;
@@ -203,11 +266,7 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             !element.contains(caret.editable)) {
             return;
         }
-        const time = Date.now();
-        const repeated = previousTap && previousTap.editable === caret.editable &&
-            caret.time - previousTap.time < Constants.TIMEOUT_LONGPRESS &&
-            Math.hypot(point.x - previousTap.x, point.y - previousTap.y) < Constants.SIZE_DRAG_THRESHOLD * 4;
-        previousTap = {...(repeated ? previousTap : caret), time, ...point, count: repeated ? previousTap.count + 1 : 1};
+        previousTap.time = Date.now();
         // 三击及更多次连续点击保留系统的整段选择行为。
         if (previousTap.count > 2) {
             return;
@@ -221,24 +280,45 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
         pendingTap = previousTap;
         schedule();
     }, () => !!touchCaret);
-    const cancelEvents = ["pointerdown", "touchcancel", "beforeinput", "keydown", "scroll"];
-    cancelEvents.forEach(type => element.addEventListener(type, cancel, {capture: true, passive: true}));
+    const cancelGesture = () => {
+        cancel();
+        touchCaret = undefined;
+        if (previousTap) {
+            previousTap.canceled = true;
+        }
+    };
+    const touchMove = (event: TouchEvent) => {
+        if (event.touches.length !== 1 || (previousTap &&
+            Math.hypot(event.touches[0].clientX - previousTap.x, event.touches[0].clientY - previousTap.y) >=
+                Constants.SIZE_DRAG_THRESHOLD)) {
+            cancelGesture();
+        }
+    };
+    const cancelEvents = ["touchcancel", "beforeinput", "keydown", "scroll"];
+    cancelEvents.forEach(type => element.addEventListener(type, cancelGesture, {capture: true, passive: true}));
+    element.addEventListener("pointerdown", cancel, {capture: true, passive: true});
+    element.addEventListener("touchmove", touchMove, {capture: true, passive: true});
     element.addEventListener("touchstart", touchStart, {capture: true, passive: true});
     element.addEventListener("compositionstart", compositionStart);
     element.addEventListener("compositionend", compositionEnd);
     element.addEventListener("input", input);
     element.addEventListener("click", click);
+    element.addEventListener("dblclick", doubleClick);
     element.addEventListener("focusout", focusOut);
     ownerDocument.addEventListener("selectionchange", selectionChange);
     return () => {
         cancel();
+        disposeNativeMenu();
         disposeNavigation();
-        cancelEvents.forEach(type => element.removeEventListener(type, cancel, true));
+        cancelEvents.forEach(type => element.removeEventListener(type, cancelGesture, true));
+        element.removeEventListener("pointerdown", cancel, true);
+        element.removeEventListener("touchmove", touchMove, true);
         element.removeEventListener("touchstart", touchStart, true);
         element.removeEventListener("compositionstart", compositionStart);
         element.removeEventListener("compositionend", compositionEnd);
         element.removeEventListener("input", input);
         element.removeEventListener("click", click);
+        element.removeEventListener("dblclick", doubleClick);
         element.removeEventListener("focusout", focusOut);
         ownerDocument.removeEventListener("selectionchange", selectionChange);
     };

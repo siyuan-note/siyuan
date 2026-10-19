@@ -14,6 +14,7 @@ import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
+import {usesNativeTextMenu} from "./nativeTextMenu";
 import {bindListMarkerCaret} from "./listMarkerCaret";
 import {clearTouchBlockSelection} from "./touchBlockSelection";
 import {isDirectMathClick} from "../util/mathClick";
@@ -3733,6 +3734,12 @@ export class WYSIWYG {
             const target = event.detail.target || event.target as HTMLElement;
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             /// #if MOBILE
+            if (isIOSDevice() && selectElements.length === 0 && !isInEmbedBlock(target) &&
+                usesNativeTextMenu(target, this.element)) {
+                // 不在系统选词菜单上叠加正文浮层，保留原生选区和选择手柄。
+                protyle.toolbar.subElement.classList.add("fn__none");
+                return;
+            }
             if (event.isTrusted && !protyle.disabled && window.JSAndroid?.prepareWordSelection &&
                 selectElements.length === 0 && target.closest('[contenteditable="true"]') && !isInEmbedBlock(target)) {
                 const blockElement = hasClosestBlock(target);
@@ -4737,6 +4744,13 @@ export class WYSIWYG {
                 return;
             }
             const target = event.target as HTMLElement;
+            /// #if MOBILE
+            if (isIOSDevice() && usesNativeTextMenu(target, this.element)) {
+                // 双击选词与长按共用系统文字菜单，避免正文浮层覆盖后续触摸位置。
+                protyle.toolbar.subElement.classList.add("fn__none");
+                return;
+            }
+            /// #endif
             if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
                 const blockElement = hasClosestBlock(target) as HTMLElement;
                 const columnID = target.parentElement?.getAttribute("data-col-id");

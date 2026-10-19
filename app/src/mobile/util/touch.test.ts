@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as touchSelection from "./touchSelection";
+import * as touchGesture from "./touchGesture";
 
 const compiled = transpileModule(readFileSync("src/mobile/util/touch.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -14,6 +15,12 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
     let blurCount = 0;
     let focusCount = 0;
     let keyboardHidden = false;
+    let now = 1000;
+    let blockTouch = false;
+    let nativeMenu = false;
+    let multiSelectCount = 0;
+    const timers = new Map<number, () => void>();
+    let nextTimer = 0;
     const startContainer = {isConnected: true};
     const endContainer = {isConnected: true};
     let range = {
@@ -44,7 +51,10 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
     };
     const mobile: any = {};
     const element = {tagName: "DIV", dataset: {}, contains: () => inside, closest: (): null => null};
-    const editor = {protyle: {wysiwyg: {element}, toolbar: {isMultiSelectMode: () => false}}};
+    const editor = {protyle: {wysiwyg: {element}, options: {render: {gutter: false}}, toolbar: {
+        isMultiSelectMode: () => multiSelectCount > 0,
+        showMultiSelectMode: () => multiSelectCount++,
+    }}};
     const body = {};
     const document: any = {body, activeElement: body, querySelector: (): null => null,
         getElementById: () => ({classList: {contains: () => keyboardHidden}})};
@@ -60,10 +70,15 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
             activeBlur: () => blurCount++,
         },
         "../editor": {getCurrentEditor: () => editor},
-        "../../constants": {Constants: {TIMEOUT_MULTIPLE_SELECT: 1500}},
-        "../../protyle/util/hasClosest": {hasClosestBlock: (): null => null, hasClosestByAttribute: (): null => null,
+        "../../constants": {Constants: {TIMEOUT_MULTIPLE_SELECT: 1500, TIMEOUT_LONGPRESS: 460, SIZE_DRAG_THRESHOLD: 5}},
+        "../../protyle/util/hasClosest": {hasClosestBlock: () => blockTouch ? element : null, hasClosestByAttribute: (): null => null,
             hasClosestByClassName: (): null => null},
-        "../../protyle/util/compatibility": {isIPhone: () => false},
+        "../../protyle/util/compatibility": {isIPhone: () => false, isIOSDevice: () => nativeMenu,
+            isInAndroid: () => false, isInHarmony: () => false},
+        "../../protyle/wysiwyg/nativeTextMenu": {usesNativeTextMenu: () => nativeMenu},
+        "../../protyle/util/selection": {getRangeByPoint: () => range},
+        "./blockSelection": {getMobileBlockSelectionElement: (value: unknown) => value},
+        "./touchGesture": touchGesture,
         "./touchSelection": touchSelection,
         "../../protyle/util/inlineElementMarker": {stripSemanticMarkersFromRangeText: () => text},
     };
@@ -71,13 +86,17 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
         exports,
         require: (name: string) => modules[name] || {},
         document,
+        Node: {ELEMENT_NODE: 1},
+        Date: {now: () => now},
+        clearTimeout: (id: number) => timers.delete(id),
         getSelection: () => selection,
-        window: {innerWidth: 384, innerHeight: 808, getSelection: () => selection, siyuan: {mobile}},
+        window: {innerWidth: 384, innerHeight: 808, getSelection: () => selection, siyuan: {mobile},
+            setTimeout: (callback: () => void) => { timers.set(++nextTimer, callback); return nextTimer; }},
     });
-    const startBlankTouch = (target = element, count = 1) => {
+    const startBlankTouch = (target = element, count = 1, timeStamp = now, clientX = 100, clientY = 100) => {
         document.activeElement = editable;
-        exports.handleTouchStart({target, touches: Array.from({length: count}, () =>
-            ({target, clientX: 100, clientY: 100}))});
+        exports.handleTouchStart({target, timeStamp, touches: Array.from({length: count}, () =>
+            ({target, clientX, clientY}))});
     };
     const contextMenu = (target = element) => {
         const event = {target, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }};
@@ -85,8 +104,87 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
         return event;
     };
     return {exports, selection, range, mobile, document, editable, element, editor, startBlankTouch, contextMenu,
+        startBlockTouch: (timeStamp = now, clientX = 100, clientY = 100) => {
+            blockTouch = true;
+            startBlankTouch(element, 1, timeStamp, clientX, clientY);
+        },
+        nativeMenu: () => { nativeMenu = true; },
+        delay: (duration = 2000) => { now += duration; },
+        flushTimers: () => { for (const callback of timers.values()) callback(); timers.clear(); },
+        multiSelectCount: () => multiSelectCount,
         hideKeyboard: () => { keyboardHidden = true; }, focusCount: () => focusCount, blurCount: () => blurCount};
 };
+
+test("release cancels pending multi-select even when processing is delayed beyond the threshold", () => {
+    const f = fixture("", true);
+    f.startBlockTouch();
+    f.delay();
+    f.exports.handleTouchUp();
+    f.flushTimers();
+    assert.equal(f.multiSelectCount(), 0);
+});
+
+test("iOS repeated text taps cannot enter multi-select when the native gesture omits touchend", () => {
+    for (const initiallyCollapsed of [true, false]) {
+        const f = fixture("word", initiallyCollapsed);
+        f.nativeMenu();
+        f.startBlockTouch(1000);
+        f.delay();
+        f.startBlockTouch(1100);
+        f.range.collapsed = true;
+        f.flushTimers();
+        assert.equal(f.multiSelectCount(), 0);
+        f.startBlockTouch(1200);
+        f.flushTimers();
+        assert.equal(f.multiSelectCount(), 0);
+    }
+});
+
+test("separate iOS text presses and other platforms retain long-press multi-select", () => {
+    for (const kind of ["later", "elsewhere", "otherPlatform"]) {
+        const f = fixture("", true);
+        if (kind !== "otherPlatform") f.nativeMenu();
+        f.startBlockTouch(1000);
+        f.exports.handleTouchUp();
+        f.startBlockTouch(kind === "later" ? 1500 : 1100, kind === "elsewhere" ? 140 : 100);
+        f.flushTimers();
+        assert.equal(f.multiSelectCount(), 1, kind);
+    }
+});
+
+test("native text menus and visible text selections permanently cancel this press's multi-select", () => {
+    for (const mode of ["menu", "selection", "cancel", "focusout"]) {
+        const f = fixture("text", true);
+        f.startBlockTouch();
+        if (mode === "menu") {
+            f.nativeMenu();
+            f.contextMenu();
+        } else if (mode === "selection") {
+            f.range.collapsed = false;
+            f.exports.handleTouchSelectionChange();
+            f.range.collapsed = true;
+        } else if (mode === "focusout") {
+            f.exports.handleTouchFocusOut({target: f.editable});
+        } else {
+            f.exports.handleTouchCancel();
+        }
+        f.flushTimers();
+        assert.equal(f.multiSelectCount(), 0, mode);
+    }
+});
+
+test("an uninterrupted long press still enters block multi-select", () => {
+    const f = fixture("", true);
+    f.startBlockTouch();
+    f.flushTimers();
+    assert.equal(f.multiSelectCount(), 1);
+    let consumed = false;
+    f.exports.handleTouchEnd({target: f.element, timeStamp: 2000,
+        changedTouches: [{clientX: 100, clientY: 100}],
+        stopImmediatePropagation: () => {}, preventDefault: () => { consumed = true; }});
+    assert.equal(consumed, true);
+    assert.equal(f.multiSelectCount(), 1);
+});
 
 test("releasing a blank editor selection preserves the caret and keyboard", () => {
     const f = fixture();

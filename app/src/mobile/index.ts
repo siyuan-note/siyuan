@@ -25,6 +25,7 @@ import {
     handleTouchSelectionChange,
     handleTouchStart,
     handleTouchUp,
+    handleTouchFocusOut,
 } from "./util/touch";
 import {fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
@@ -274,6 +275,7 @@ class App {
             document.addEventListener("touchend", handleTouchEnd, false);
             document.addEventListener("touchcancel", handleTouchCancel, false);
             document.addEventListener("contextmenu", handleTouchContextMenu, true);
+            document.addEventListener("focusout", handleTouchFocusOut, true);
             document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
             window.addEventListener("keyup", () => {

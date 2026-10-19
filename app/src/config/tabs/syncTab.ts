@@ -7,7 +7,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {processSync} from "../../dialog/processSystem";
 import {writeText} from "../../protyle/util/compatibility";
-import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
+import {bindSyncCloudListEvent, refreshSyncCloudDirBlock, renderSyncCloudList, setKey} from "../../sync/syncGuide";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords, getSyncProviderConfigRowKeywords} from "./syncUi";
 import {mountLANSyncStatus, mountSyncAssetDownloadMode, mountSyncProvider} from "./syncRuntime";
@@ -184,6 +184,7 @@ const mountSyncCloudDir = (root: HTMLElement) => {
                 renderSyncCloudList(cloudListElement, true);
             }
         });
+        refreshSyncCloudDirBlock(root);
     }
 };
 

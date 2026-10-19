@@ -3152,6 +3152,32 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const viewport = panHost.querySelector<HTMLElement>(".mindmap-view__viewport");
         const sourceHTML = panModel.list.outerHTML;
         const readingTransform = [panView.scale, panView.offsetX, panView.offsetY];
+        for (const pointerType of ["mouse", "touch"]) {
+            let draws = 0;
+            const draw = panView.draw.bind(panView);
+            panView.draw = () => { draws++; draw(); };
+            const start = [panView.offsetX, panView.offsetY];
+            panView.pointer = {pointerId: 900, pan: true, x: start[0], y: start[1],
+                startX: 100, startY: 100, moved: true};
+            for (let step = 1; step <= 60; step++) {
+                panView.pointerMove({pointerId: 900, pointerType, clientX: 100 + step / 10,
+                    clientY: 100 + step / 10, preventDefault: () => {}});
+            }
+            check.equal(draws, 0, "rapid pan input is coalesced before paint");
+            check.ok(Math.abs(panView.offsetX - start[0] - 6) < 1e-9 &&
+                Math.abs(panView.offsetY - start[1] - 6) < 1e-9);
+            panView.cancelPointer();
+            await settle();
+            check.equal(draws, 1, "release before paint still draws the final position once");
+            const world = panHost.querySelector<HTMLElement>(".mindmap-view__world");
+            const matrix = new DOMMatrix(getComputedStyle(world).transform);
+            check.ok(Math.abs(matrix.e - panView.offsetX) < .001 && Math.abs(matrix.f - panView.offsetY) < .001,
+                "rendered nodes reach the final pointer position");
+            panView.draw = draw;
+        }
+        panView.offsetX = readingTransform[1];
+        panView.offsetY = readingTransform[2];
+        panView.draw();
         check.equal(panView.interactionActive, false);
         check.equal(getComputedStyle(viewport).touchAction, "pan-y");
         const readingWheel = new WheelEvent("wheel", {deltaY: 120, bubbles: true, cancelable: true});

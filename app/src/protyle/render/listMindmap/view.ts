@@ -182,6 +182,7 @@ export class ListMindmapView {
     private offsetY = 0;
     private foldAnchor?: {id: string, collapsed: boolean};
     private frame = 0;
+    private drawFrame = 0;
     private initialFit = true;
     private destroyed = false;
     private readonly resizeObserver: ResizeObserver;
@@ -1729,7 +1730,20 @@ export class ListMindmapView {
         });
     }
 
+    private requestDraw() {
+        if (this.destroyed || this.drawFrame) {
+            return;
+        }
+        // 高频指针事件只记录最新位置，每帧统一绘制节点和连线。
+        this.drawFrame = requestAnimationFrame(() => {
+            this.drawFrame = 0;
+            this.draw();
+        });
+    }
+
     private draw() {
+        cancelAnimationFrame(this.drawFrame);
+        this.drawFrame = 0;
         if (this.destroyed) {
             return;
         }
@@ -2430,7 +2444,7 @@ export class ListMindmapView {
             const bounded = this.boundedPan(pointer.x + dx, pointer.y + dy);
             this.offsetX = bounded.x;
             this.offsetY = bounded.y;
-            this.draw();
+            this.requestDraw();
             pointer.x = this.offsetX;
             pointer.y = this.offsetY;
             pointer.startX = event.clientX;
@@ -3401,6 +3415,8 @@ export class ListMindmapView {
             return;
         }
         this.destroyed = true;
+        cancelAnimationFrame(this.drawFrame);
+        this.drawFrame = 0;
         clearTimeout(this.linkTimer);
         this.cancelPointer();
         if (this.frame) {

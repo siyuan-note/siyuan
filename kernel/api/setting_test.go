@@ -102,6 +102,7 @@ func TestAPIContractSettingEditorLegacyFont(t *testing.T) {
 			{"explicit list wins", `{"fontFamily":"Verdana","fontWeight":600,"fontFamilies":[{"family":"Georgia","weight":500}]}`, "Georgia", 500, 1, ""},
 			{"case-insensitive list wins", `{"fontFamily":"Verdana","FontFamilies":[{"family":"Georgia","weight":500}]}`, "Georgia", 500, 1, ""},
 			{"null legacy font resets", `{"fontFamily":null}`, "", 400, 0, ""},
+			{"null font list rebuilds", `{"fontFamily":"Verdana","fontFamilies":null}`, "Verdana", 400, 1, ""},
 			{"explicit legacy display", `{"fontFamily":"Verdana","fontFamilyDisplay":"Verdana Regular"}`, "Verdana", 400, 1, "Verdana Regular"},
 		} {
 			t.Run(route.name+"/"+test.name, func(t *testing.T) {

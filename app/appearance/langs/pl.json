@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Nie można odtworzyć tego zdjęcia Live Photo. Oryginalne pliki zostały zachowane.",
+	"livePhotoPairUnavailable": "Zdjęcie Live Photo nie zostało w pełni przesłane. Zaimportuj je ponownie.",
 	"automationCollectionManage": "Zarządzanie zbieraniem",
 	"automationCollectionRules": "Dopasowania reguł",
 	"automationCollectionEntries": "Wpisy bazy danych",
@@ -3348,6 +3351,7 @@
 		"417": "Kompresja kontekstu agenta nie powiodła się. Rozmowa została zachowana; spróbuj ponownie: %s",
 		"418": "Ten model wymaga zachowania pełnej historii wywołań narzędzi w bieżącej turze. Wybierz model z większym oknem kontekstu lub podziel zadanie",
 		"419": "Kompresja kontekstu agenta osiągnęła limit żądań lub czasu. Rozmowa została zachowana",
-		"420": "Nie można wyświetlić listy indeksów synchronizacji w chmurze (%s). Nie oznacza to, że chmura jest pusta. Sprawdź sieć, konfigurację synchronizacji i uprawnienia do wyświetlania listy."
+		"420": "Nie można wyświetlić listy indeksów synchronizacji w chmurze (%s). Nie oznacza to, że chmura jest pusta. Sprawdź sieć, konfigurację synchronizacji i uprawnienia do wyświetlania listy.",
+		"421": "Inny obszar roboczy przetwarza pakiety aktualizacji. Sprawdź dostępność aktualizacji ponownie później"
 	}
 }

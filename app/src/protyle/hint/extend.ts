@@ -1,5 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {registerBuiltinSlashHint} from "./builtinSlash";
+import {canPickIOSPhotos} from "../upload/iosPhotos";
 import {getSuperBlockCommand} from "../../block/superBlock";
 import {insertHTML} from "../util/insertHTML";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
@@ -446,7 +447,13 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: "",
         id: "separator_3",
         html: "separator",
-    }, {
+    }, ...(canPickIOSPhotos() ? [{
+        filter: [window.siyuan.languages.insertImage, window.siyuan.languages.livePhoto, "Live Photo", "Photos"],
+        id: "insertIOSPhotos",
+        value: Constants.ZWSP + 3,
+        icon: "iconImage",
+        suffix: '<input class="b3-form__upload" data-native-photos="true" type="file" accept="image/*" multiple="multiple">',
+    }] : []), {
         filter: [window.siyuan.languages.insertAsset, "insert image or file", "upload", "插入图片或文件", "charutupianhuowenjian", "crtphwj", "上传", "sc"],
         id: "insertAsset",
         value: Constants.ZWSP + 3,

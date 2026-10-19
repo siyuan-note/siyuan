@@ -90,6 +90,24 @@ func TestAPIContractSettingPatchKeymapEnvelopeAndNullableFields(t *testing.T) {
 	}
 }
 
+func TestAPIContractSettingPatchKeymapCaseSensitiveCommands(t *testing.T) {
+	previousConf, previousReadOnly := model.Conf, util.ReadOnly
+	util.ReadOnly = true
+	t.Cleanup(func() { model.Conf, util.ReadOnly = previousConf, previousReadOnly })
+	model.Conf = model.NewAppConf()
+	keymap := conf.Keymap{"plugin": map[string]any{"sample": map[string]any{"openFile": map[string]any{"custom": "F1"}}}}
+	model.Conf.Keymap.Store(&keymap)
+	code, message, _ := settingContractRequest(t, "patch", patchSetting,
+		`{"keymap":{"plugin":{"sample":{"openfile":{"custom":"F2"}}}}}`)
+	if code != 0 {
+		t.Fatalf("keymap patch failed: %s", message)
+	}
+	actual, _ := json.Marshal(model.Conf.Keymap.Load())
+	if string(actual) != `{"plugin":{"sample":{"openFile":{"custom":"F1"},"openfile":{"custom":"F2"}}}}` {
+		t.Fatalf("independent command names were conflated: %s", actual)
+	}
+}
+
 func TestAPIContractSettingTaskSnapshots(t *testing.T) {
 	previousConf, previousTasks, previousRevision := model.Conf, settingTasks, settingTaskRevision
 	model.Conf = model.NewAppConf()

@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261018210230"
+		"updated": "20261018213321"
 	},
 	"Children": [
 		{
@@ -4770,12 +4770,44 @@
 			"Properties": {
 				"ID": "20240530101000-lbctees",
 				"id": "20240530101000-9x9ue7u",
-				"updated": "20240530101000"
+				"updated": "20261018213321"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "フローチャート"
+				}
+			]
+		},
+		{
+			"ID": "20261018213321-ho943st",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018213321-ho943st",
+				"updated": "20261018213321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mermaid ブロックの右端にあるハンドルをドラッグすると、幅を調整できます。幅を狭めた後、ブロックメニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "レイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "中央揃え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、ブロックを中央に配置できます。"
 				}
 			]
 		},

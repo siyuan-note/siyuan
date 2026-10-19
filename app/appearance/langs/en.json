@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "This Live Photo cannot be previewed. The original files are preserved.",
+	"livePhotoPairUnavailable": "The Live Photo was not fully uploaded. Please import it again.",
 	"automationCollectionManage": "Collection management",
 	"automationCollectionRules": "Rule matches",
 	"automationCollectionEntries": "Database entries",
@@ -3348,6 +3351,7 @@
 		"417": "Agent context compaction failed. Your conversation has been preserved; please retry: %s",
 		"418": "This model requires the current tool history to remain intact. Use a model with a larger context window or split the task",
 		"419": "Agent context compaction reached its request or time limit. Your conversation has been preserved",
-		"420": "Unable to list cloud sync indexes (%s). This does not mean the cloud is empty. Check the network, sync configuration, and listing permissions."
+		"420": "Unable to list cloud sync indexes (%s). This does not mean the cloud is empty. Check the network, sync configuration, and listing permissions.",
+		"421": "Another workspace is processing update packages. Please check for updates again later"
 	}
 }

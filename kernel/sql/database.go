@@ -803,41 +803,39 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		spans = append(spans, span)
 		walkStatus = ast.WalkSkipChildren
 
-		destNode := n.ChildByType(ast.NodeLinkDest)
-		if nil == destNode {
-			return
-		}
-
-		// assetsLinkDestsInTree
-
-		if !util.IsAssetLinkDest(destNode.Tokens, false) {
-			return
-		}
-
-		dest := gulu.Str.FromBytes(destNode.Tokens)
-		if idx := strings.Index(dest, "?"); idx > 0 {
-			dest = dest[:idx]
-		}
-
 		var title string
 		if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 			title = gulu.Str.FromBytes(titleNode.Tokens)
 		}
-
-		hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
-		name, _ := util.LastID(dest)
-		asset := &Asset{
-			ID:      ast.NewNodeID(),
-			BlockID: parentBlock.ID,
-			RootID:  rootID,
-			Box:     boxID,
-			DocPath: p,
-			Path:    dest,
-			Name:    name,
-			Title:   title,
-			Hash:    hash,
+		dests := []string{"", treenode.ImageLivePhotoVideo(n)}
+		if destNode := n.ChildByType(ast.NodeLinkDest); destNode != nil {
+			dests[0] = destNode.TokensStr()
 		}
-		assets = append(assets, asset)
+		for i, dest := range dests {
+			if !util.IsAssetLinkDest([]byte(dest), false) {
+				continue
+			}
+			if idx := strings.Index(dest, "?"); idx > 0 {
+				dest = dest[:idx]
+			}
+			assetTitle := title
+			if i > 0 {
+				assetTitle = ""
+			}
+			hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
+			name, _ := util.LastID(dest)
+			assets = append(assets, &Asset{
+				ID:      ast.NewNodeID(),
+				BlockID: parentBlock.ID,
+				RootID:  rootID,
+				Box:     boxID,
+				DocPath: p,
+				Path:    dest,
+				Name:    name,
+				Title:   assetTitle,
+				Hash:    hash,
+			})
+		}
 		return
 	case ast.NodeTextMark:
 		typ := treenode.TypeAbbr(n.Type.String()) + " " + n.TextMarkType
@@ -1507,7 +1505,7 @@ func cleanupInvalidRefs(database *sql.DB) (err error) {
 }
 
 func CloseDatabase() {
-	diagnostic := util.WatchOperationWithTiming("close databases", "close index queue")
+	diagnostic := util.WatchOperation("close databases", "close index queue")
 	defer diagnostic.Finish()
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，

@@ -25,8 +25,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         "util/functions": {isMobile: () => mobile},
         "util/zIndex": {isScrollAboveMenu: () => false},
         "layout/getTopBarHeight": {getTopBarHeight: () => 32},
-        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
-            LOCAL_MENU_MOUSE_SCROLL: "menuMouseScroll"}},
+        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap"}},
         "protyle/undo": {electronUndo() {}},
         "util/escape": {escapeAttr: (value: string) => value || "", escapeHtml: (value: string) => value || ""},
         "menus/menuKeyboard": {setMenuInputCurrent() {}},
@@ -116,7 +115,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         .fn__hidden { visibility: hidden !important; }
     `;
     document.head.append(style);
-    Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0, storage: {},
+    Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0, storage: {}, config: {appearance: {}},
         mobile: {size: {portrait: {height1: innerHeight}}}, menus: {}}});
     const {Menu, MenuItem}: typeof import("./Menu") = load("menus/Menu");
     const {Menu: PluginMenu}: typeof import("../plugin/Menu") = load("plugin/Menu");
@@ -295,7 +294,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     pointer(followingItems, .3);
     pointer(followingItems, .6);
     check.equal(followingItems.scrollTop, 0, "The preference defaults to off");
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     pointer(followingItems, .3);
     check.equal(followingItems.scrollTop, 0, "Entering establishes an anchor without jumping");
     pointer(followingItems, .55);
@@ -339,10 +338,10 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const beforeMutationMove = followingItems.scrollTop;
     pointer(followingItems, .6);
     check.equal(followingItems.scrollTop, beforeMutationMove, "Dynamic content establishes a new anchor");
-    window.siyuan.storage.menuMouseScroll = false;
+    window.siyuan.config.appearance.menuMouseScroll = false;
     pointer(followingItems, .8);
     check.equal(followingItems.scrollTop, beforeMutationMove, "Disabling takes effect on an open menu");
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     followingItems.scrollTop = 0;
     following.resetMouseScroll();
     const nativePointer = (type: string, x: number, y: number) =>
@@ -364,7 +363,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     check.equal(clicked, Number(nativeHit.textContent.trim().replace("Mouse item ", "")), "Native click selects the visible item");
     dispose(following);
 
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     const mouseSubmenus = createMenu();
     mouseSubmenus.addItem({label: "Scrollable children", submenu: Array.from({length: 80}, (_, i) => ({label: `Child ${i}`}))});
     addItems(mouseSubmenus, 50);
@@ -433,11 +432,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const avItems = avPanel.querySelector<HTMLElement>(".b3-menu__items");
     check.ok(avPanel.querySelector(".av__automation-panel"));
     check.ok(avItems.scrollHeight > avItems.clientHeight, "The database panel has overflowing form content");
-    window.siyuan.storage.menuMouseScroll = false;
+    window.siyuan.config.appearance.menuMouseScroll = false;
     pointer(avItems, .3);
     pointer(avItems, .7);
     check.equal(avItems.scrollTop, 0, "Database panels respect the disabled preference");
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     pointer(avItems, .3);
     pointer(avItems, .7);
     check.equal(avItems.scrollTop, 0, "Database forms stay stationary even with the preference enabled and no focused input");
@@ -505,11 +504,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         return {host, controller, events, buttons, items: toolbar.querySelector<HTMLElement>(".b3-menu__items")};
     };
     const pdfMenu = createPDFMenu();
-    window.siyuan.storage.menuMouseScroll = false;
+    window.siyuan.config.appearance.menuMouseScroll = false;
     pointer(pdfMenu.items, .3);
     pointer(pdfMenu.items, .7);
     check.equal(pdfMenu.items.scrollTop, 0, "PDF menus respect the disabled preference");
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     pointer(pdfMenu.items, .3);
     pointer(pdfMenu.items, .7);
     check.ok(pdfMenu.items.scrollTop > 0, "PDF toolbar menus support mouse scrolling");
@@ -550,11 +549,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const searchTop = calendarMenu.search.getBoundingClientRect().top;
     calendarMenu.search.value = "Draft search";
     calendarMenu.search.setSelectionRange(2, 5);
-    window.siyuan.storage.menuMouseScroll = false;
+    window.siyuan.config.appearance.menuMouseScroll = false;
     pointer(calendarMenu.items, .3);
     pointer(calendarMenu.items, .7);
     check.equal(calendarMenu.items.scrollTop, 0, "Calendar lists respect the disabled preference");
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     pointer(calendarMenu.items, .3);
     pointer(calendarMenu.items, .7);
     check.ok(calendarMenu.items.scrollTop > 0, "Calendar undated lists support mouse scrolling");
@@ -586,11 +585,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     sessionRoot.style.cssText = "position:fixed;left:40px;top:60px;width:300px";
     const sessionItems = sessionRoot.querySelector<HTMLElement>(".b3-list");
     const sessionSearch = sessionRoot.querySelector<HTMLInputElement>("input");
-    window.siyuan.storage.menuMouseScroll = false;
+    window.siyuan.config.appearance.menuMouseScroll = false;
     pointer(sessionItems, .3);
     pointer(sessionItems, .7);
     check.equal(sessionItems.scrollTop, 0, "Session lists respect the disabled preference");
-    window.siyuan.storage.menuMouseScroll = true;
+    window.siyuan.config.appearance.menuMouseScroll = true;
     pointer(sessionItems, .3);
     pointer(sessionItems, .7);
     check.ok(sessionItems.scrollTop > 0, "Session lists use their custom scrolling container");

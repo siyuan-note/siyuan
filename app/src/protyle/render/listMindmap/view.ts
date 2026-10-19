@@ -32,7 +32,7 @@ export interface ListMindmapViewOptions {
     labels?: Record<string, string>;
     cdn?: string;
     onOpenLink?: (href: string, event: MouseEvent) => void;
-    onPreviewImage?: (src: string) => void;
+    onPreviewImage?: (src: string, video?: string) => void;
     colors?: () => {label: string, value: string}[];
     nodeColors?: () => {
         label: string, color: string, backgroundColor: string,
@@ -1059,30 +1059,30 @@ export class ListMindmapView {
                 }
                 return path;
             };
-            // 只撑开关系线两端之间的分支边界，其他节点保留默认间距。
+            // 关系线两端保留拖拽线段和文字的空间，只撑开所跨分支，其他节点保留紧凑间距。
             this.model.metadata.relations.forEach(relation => {
-                if (!relation.label?.trim() || !result.nodes.has(relation.from) || !result.nodes.has(relation.to)) {
+                if (!result.nodes.has(relation.from) || !result.nodes.has(relation.to)) {
                     return;
                 }
-                const label = this.relationElements.get(relation.id);
+                const label = relation.label?.trim() ? this.relationElements.get(relation.id) : undefined;
                 if (label) {
                     label.hidden = false;
-                    const from = result.nodes.get(relation.from);
-                    const to = result.nodes.get(relation.to);
-                    const fromPath = ancestors(from.id);
-                    const toPath = ancestors(to.id);
-                    let common = 0;
-                    while (common < Math.min(fromPath.length, toPath.length) && fromPath[common] === toPath[common]) {
-                        common++;
-                    }
-                    if (common < fromPath.length && common < toPath.length) {
-                        const lower = from.y < to.y ? toPath[common] : fromPath[common];
-                        reserve(verticalGaps, lower, label.offsetHeight + 32);
-                    }
-                    if (from.x + from.width <= to.x || to.x + to.width <= from.x) {
-                        const right = from.x < to.x ? to : from;
-                        reserve(horizontalGaps, right.id, label.offsetWidth + 32);
-                    }
+                }
+                const from = result.nodes.get(relation.from);
+                const to = result.nodes.get(relation.to);
+                const fromPath = ancestors(from.id);
+                const toPath = ancestors(to.id);
+                let common = 0;
+                while (common < Math.min(fromPath.length, toPath.length) && fromPath[common] === toPath[common]) {
+                    common++;
+                }
+                if (common < fromPath.length && common < toPath.length) {
+                    const lower = from.y < to.y ? toPath[common] : fromPath[common];
+                    reserve(verticalGaps, lower, label ? label.offsetHeight + 32 : 24);
+                }
+                if (label && (from.x + from.width <= to.x || to.x + to.width <= from.x)) {
+                    const right = from.x < to.x ? to : from;
+                    reserve(horizontalGaps, right.id, label.offsetWidth + 32);
                 }
             });
             if (horizontalGaps.size || verticalGaps.size) {
@@ -2707,7 +2707,9 @@ export class ListMindmapView {
             event.stopPropagation();
             this.cancelPointer();
             const src = target.getAttribute("src");
-            this.finishThen(() => this.options.onPreviewImage(src));
+            const video = target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
+                target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "";
+            this.finishThen(() => this.options.onPreviewImage(src, video));
             return;
         }
         if (this.readOnly) {

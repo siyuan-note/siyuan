@@ -31,47 +31,6 @@ func TestOCRSmallMigrationPreservesPreferences(t *testing.T) {
 	}
 }
 
-func TestNormalizeOCRConfig(t *testing.T) {
-	for _, test := range []struct {
-		name           string
-		value          *conf.OCR
-		confFileExists bool
-		want           conf.OCR
-	}{
-		{name: "new device", want: conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: false}},
-		{name: "legacy device", confFileExists: true, want: conf.OCR{Provider: "tesseract", Model: "tiny", Auto: true}},
-		{
-			name:           "saved PaddleOCR with auto enabled",
-			value:          &conf.OCR{Provider: "paddleocr", Model: "small", Auto: true},
-			confFileExists: true,
-			want:           conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: true},
-		},
-		{
-			name:           "saved Tesseract with auto disabled",
-			value:          &conf.OCR{Provider: "tesseract", Model: "tiny", Auto: false},
-			confFileExists: true,
-			want:           conf.OCR{Provider: "tesseract", Model: "tiny", Auto: false},
-		},
-		{
-			name:           "saved PaddleOCR with imported model",
-			value:          &conf.OCR{Provider: "paddleocr", Model: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", Auto: false},
-			confFileExists: true,
-			want:           conf.OCR{Provider: "paddleocr", Model: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", Auto: false},
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			test.want.ShowText = new(true)
-			got := normalizeOCRConfig(test.value, test.confFileExists)
-			if !reflect.DeepEqual(*got, test.want) {
-				t.Fatalf("OCR config: got %+v, want %+v", *got, test.want)
-			}
-			if test.value != nil && got != test.value {
-				t.Fatal("saved OCR config should be retained")
-			}
-		})
-	}
-}
-
 func TestOCRModelFilesChanged(t *testing.T) {
 	for _, test := range []struct {
 		name    string

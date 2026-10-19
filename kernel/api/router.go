@@ -594,6 +594,12 @@ func registerAssetRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/removeUnusedAsset", contractRouteHandlers(apicontract.RemoveUnusedAsset, removeUnusedAsset)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAssets", contractRouteHandlers(apicontract.RemoveUnusedAssets, removeUnusedAssets)...)
 	ginServer.Handle("POST", "/api/asset/getDocImageAssets", contractRouteHandlers(apicontract.GetDocImageAssets, getDocImageAssets)...)
+	ginServer.Handle("POST", "/api/asset/getDocPreviewImages", contractRouteHandlers(apicontract.GetDocPreviewImages, getDocPreviewImages)...)
+	ginServer.Handle("POST", "/api/asset/startLivePhotoPreview", contractRouteHandlers(apicontract.StartLivePhotoPreview, startLivePhotoPreview)...)
+	ginServer.Handle("POST", "/api/asset/getLivePhotoFrame", contractRouteHandlers(apicontract.GetLivePhotoFrame, getLivePhotoFrame)...)
+	ginServer.Handle("POST", "/api/asset/finishLivePhotoPreview", contractRouteHandlers(apicontract.FinishLivePhotoPreview, finishLivePhotoPreview)...)
+	ginServer.Handle("POST", "/api/asset/getLivePhotoPreview", contractRouteHandlers(apicontract.GetLivePhotoPreview, getLivePhotoPreview)...)
+	ginServer.Handle("POST", "/api/asset/cancelLivePhotoPreview", contractRouteHandlers(apicontract.CancelLivePhotoPreview, cancelLivePhotoPreview)...)
 	ginServer.Handle("POST", "/api/asset/getDocAssets", contractRouteHandlers(apicontract.GetDocAssets, getDocAssets)...)
 	ginServer.Handle("POST", "/api/asset/renameAsset", contractRouteHandlers(apicontract.RenameAsset, renameAsset)...)
 	ginServer.Handle("POST", "/api/asset/findAssetReferences", contractRouteHandlers(apicontract.FindAssetReferences, findAssetReferences)...)
@@ -688,6 +694,7 @@ func registerTransactionsRoutes(ginServer *gin.Engine) {
 // registerSettingRoutes 注册本域的契约路由。
 func registerSettingRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/patch", contractRouteHandlers(apicontract.PatchSetting, patchSetting)...)
+	ginServer.Handle("POST", "/api/setting/getSection", contractRouteHandlers(apicontract.GetSettingSection, getSettingSection)...)
 	ginServer.Handle("POST", "/api/setting/resetSettings", contractRouteHandlers(apicontract.ResetSettings, resetSettings)...)
 	ginServer.Handle("POST", "/api/setting/confirmSettingsReset", contractRouteHandlers(apicontract.ConfirmSettingsReset, confirmSettingsReset)...)
 	ginServer.Handle("POST", "/api/setting/setEditor", contractRouteHandlers(apicontract.SetEditor, setEditor)...)

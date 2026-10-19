@@ -22,8 +22,8 @@ type SettingAI struct {
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
 }
 
-// SettingAIWeb 省略时沿用已保存的网页服务配置；初始搜索为 exa，抓取为 direct。
-// 可分别选择 deepseek，共用独立 API 密钥；超时默认 30 秒，上限 600 秒。
+// SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
+// 超时默认 30 秒，上限 600 秒。
 // DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
 // Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
 type SettingAIWeb struct {
@@ -100,6 +100,8 @@ type SettingDecisionProfile struct {
 }
 
 type SettingAgent struct {
+	// 默认关闭，保存在 conf.json；升级不读取前端旧键，重置普通设置时随 AI 配置保留。
+	StreamingMarkdown   bool                     `json:"streamingMarkdown" api:"optional,nullable"`
 	ModelID             string                   `json:"modelId" api:"optional,nullable"`
 	SessionTimeout      int                      `json:"sessionTimeout" api:"optional,nullable"`
 	StreamIdleTimeout   int                      `json:"streamIdleTimeout" api:"optional,nullable"`
@@ -206,9 +208,8 @@ type SettingFlashcard struct {
 	Weights          string  `json:"weights" api:"optional,nullable"`
 }
 
-// SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
-// blockGutterMode 控制是否显示完整块标，默认 false，输出及持久化均为布尔值。
-// 整段设置接口省略时保留当前值；null 表示关闭，其他非布尔类型拒绝更新。
+// SettingEditor 描述编辑器配置。displayImgName、displayImgAlt、blockGutterMode 和 pageScrollButtons 默认关闭，
+// null 表示回到默认值，其他非布尔类型拒绝更新。
 type SettingEditor struct {
 	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
 	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
@@ -337,9 +338,11 @@ type SettingExport struct {
 }
 
 type SettingFileTree struct {
-	AlwaysSelectOpenedFile bool `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
-	OpenFilesUseCurrentTab bool `json:"openFilesUseCurrentTab" api:"optional,nullable"`
-	CloseTabOnDoubleClick  bool `json:"closeTabOnDoubleClick" api:"optional,nullable"`
+	// 默认 viewedAt；支持 created、updated、openAt、closedAt，未知值回落 viewedAt。重置文档树设置时恢复默认。
+	RecentDocsSort         string `json:"recentDocsSort" api:"optional,nullable"`
+	AlwaysSelectOpenedFile bool   `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
+	OpenFilesUseCurrentTab bool   `json:"openFilesUseCurrentTab" api:"optional,nullable"`
+	CloseTabOnDoubleClick  bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
 	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
 	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
 	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`
@@ -371,7 +374,7 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
-	// 思维导图默认开启，思维导图项默认关闭；更新时省略或传 null 保留当前值。
+	// 思维导图默认开启，思维导图项默认关闭；null 表示回到默认值。
 	Mindmap                      *bool `json:"mindmap" api:"optional,nullable"`
 	MindmapItem                  *bool `json:"mindmapItem" api:"optional,nullable"`
 	CustomBlock                  *bool `json:"customBlock" api:"optional,nullable"`
@@ -415,28 +418,50 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
-	BodyGradient        *SettingBodyGradient      `json:"bodyGradient" api:"optional,nullable"`
-	GlobalFontFamilies  []*SettingEditorFont      `json:"globalFontFamilies" api:"optional,nullable"`
-	Mode                int                       `json:"mode" api:"optional,nullable"`
-	ModeOS              bool                      `json:"modeOS" api:"optional,nullable"`
-	DarkThemes          []*SettingAppearanceTheme `json:"darkThemes" api:"optional,nullable"`
-	LightThemes         []*SettingAppearanceTheme `json:"lightThemes" api:"optional,nullable"`
-	ThemeDark           string                    `json:"themeDark" api:"optional,nullable"`
-	ThemeLight          string                    `json:"themeLight" api:"optional,nullable"`
-	ThemeVer            string                    `json:"themeVer" api:"optional,nullable"`
-	Icons               []*SettingAppearanceIcon  `json:"icons" api:"optional,nullable"`
-	Icon                string                    `json:"icon" api:"optional,nullable"`
-	IconVer             string                    `json:"iconVer" api:"optional,nullable"`
-	CodeBlockThemeLight string                    `json:"codeBlockThemeLight" api:"optional,nullable"`
-	CodeBlockThemeDark  string                    `json:"codeBlockThemeDark" api:"optional,nullable"`
-	Lang                string                    `json:"lang" api:"optional,nullable"`
-	ThemeJS             bool                      `json:"themeJS" api:"optional,nullable"`
-	CloseButtonBehavior int                       `json:"closeButtonBehavior" api:"optional,nullable"`
-	HideToolbar         bool                      `json:"hideToolbar" api:"optional,nullable"`
-	HideStatusBar       bool                      `json:"hideStatusBar" api:"optional,nullable"`
-	StatusBar           *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
-	Notifications       *SettingNotifications     `json:"notifications" api:"optional,nullable"`
-	EntryVisibility     *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`
+	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。
+	// 重置外观设置时恢复默认；紧凑模式与菜单鼠标滚动默认关闭，新建空工作空间的菜单鼠标滚动默认开启。
+	CompactMode              bool                      `json:"compactMode" api:"optional,nullable"`
+	MenuMouseScroll          bool                      `json:"menuMouseScroll" api:"optional,nullable"`
+	PDFTheme                 *SettingPDFTheme          `json:"pdfTheme" api:"optional,nullable"`
+	OutlineKeepCurrentExpand bool                      `json:"outlineKeepCurrentExpand" api:"optional,nullable"`
+	MobileBars               *SettingMobileBars        `json:"mobileBars" api:"optional,nullable"`
+	BodyGradient             *SettingBodyGradient      `json:"bodyGradient" api:"optional,nullable"`
+	GlobalFontFamilies       []*SettingEditorFont      `json:"globalFontFamilies" api:"optional,nullable"`
+	Mode                     int                       `json:"mode" api:"optional,nullable"`
+	ModeOS                   bool                      `json:"modeOS" api:"optional,nullable"`
+	DarkThemes               []*SettingAppearanceTheme `json:"darkThemes" api:"optional,nullable"`
+	LightThemes              []*SettingAppearanceTheme `json:"lightThemes" api:"optional,nullable"`
+	ThemeDark                string                    `json:"themeDark" api:"optional,nullable"`
+	ThemeLight               string                    `json:"themeLight" api:"optional,nullable"`
+	ThemeVer                 string                    `json:"themeVer" api:"optional,nullable"`
+	Icons                    []*SettingAppearanceIcon  `json:"icons" api:"optional,nullable"`
+	Icon                     string                    `json:"icon" api:"optional,nullable"`
+	IconVer                  string                    `json:"iconVer" api:"optional,nullable"`
+	CodeBlockThemeLight      string                    `json:"codeBlockThemeLight" api:"optional,nullable"`
+	CodeBlockThemeDark       string                    `json:"codeBlockThemeDark" api:"optional,nullable"`
+	Lang                     string                    `json:"lang" api:"optional,nullable"`
+	ThemeJS                  bool                      `json:"themeJS" api:"optional,nullable"`
+	CloseButtonBehavior      int                       `json:"closeButtonBehavior" api:"optional,nullable"`
+	HideToolbar              bool                      `json:"hideToolbar" api:"optional,nullable"`
+	HideStatusBar            bool                      `json:"hideStatusBar" api:"optional,nullable"`
+	StatusBar                *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
+	Notifications            *SettingNotifications     `json:"notifications" api:"optional,nullable"`
+	EntryVisibility          *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`
+}
+
+// SettingPDFTheme 明亮界面默认 light，暗黑界面默认 dark；主题值只接受 light、dark。
+// 标注颜色为空时使用 var(--b3-pdf-background1)，允许保存用户选择的 CSS 颜色。
+type SettingPDFTheme struct {
+	Light     string `json:"light" api:"optional,nullable"`
+	Dark      string `json:"dark" api:"optional,nullable"`
+	AnnoColor string `json:"annoColor" api:"optional,nullable"`
+}
+
+// SettingMobileBars 三项默认开启，侧栏滑动与按钮不能同时关闭。
+type SettingMobileBars struct {
+	AutoHide       *bool `json:"autoHide" api:"optional,nullable"`
+	SidebarSwipe   *bool `json:"sidebarSwipe" api:"optional,nullable"`
+	SidebarButtons *bool `json:"sidebarButtons" api:"optional,nullable"`
 }
 
 type SettingBodyGradient struct {

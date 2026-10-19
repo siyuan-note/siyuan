@@ -1,9 +1,7 @@
 import {Constants} from "./constants";
 import {refreshSettingConfig} from "./config/setting/sync";
-import {onAgentStreamingMarkdownStorageChanged} from "./config/tabs/ai/agentStreamingMarkdown";
-import {onCompactModeStorageChanged, refreshCompactMode} from "./config/tabs/compactMode";
-import {onMenuMouseScrollStorageChanged, refreshMenuMouseScroll} from "./config/tabs/menuMouseScroll";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
+import {closeNotebookLivePhotos} from "./protyle/preview/livePhoto";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
@@ -93,8 +91,7 @@ export class App {
             type: "main",
             callback: () => {
                 if (window.siyuan.isReady) {
-                    void refreshCompactMode().catch(error => console.error("Could not refresh compact mode", error));
-                    void refreshMenuMouseScroll().catch(error => console.error("Could not refresh menu mouse scrolling", error));
+                    void refreshSettingConfig().catch(error => console.error("Could not refresh settings", error));
                 }
             },
             msgCallback: (data) => {
@@ -108,7 +105,7 @@ export class App {
                             appearanceConfigApi.apply(data.data);
                             break;
                         case "settingChanged":
-                            void refreshSettingConfig(data.data.namespace);
+                            void refreshSettingConfig(data.data.namespace, data.data.revision);
                             break;
                         case "refreshAppearance":
                             void refreshAppearance(data.data);
@@ -184,31 +181,19 @@ export class App {
                         case "setLocalStorageVal":
                             if (window.siyuan.storage) {
                                 window.siyuan.storage[data.data.key] = data.data.val;
-                                onAgentStreamingMarkdownStorageChanged(data.data.key);
-                                onCompactModeStorageChanged(data.data.key);
-                                onMenuMouseScrollStorageChanged(data.data.key);
                             }
                             break;
                         case "setLocalStorageVals":
                             Object.keys(data.data.keyVals).forEach((k) => {
                                 window.siyuan.storage[k] = data.data.keyVals[k];
-                                onAgentStreamingMarkdownStorageChanged(k);
-                                onCompactModeStorageChanged(k);
-                                onMenuMouseScrollStorageChanged(k);
                             });
                             break;
                         case "removeLocalStorageVal":
                             delete window.siyuan.storage[data.data.key];
-                            onAgentStreamingMarkdownStorageChanged(data.data.key);
-                            onCompactModeStorageChanged(data.data.key);
-                            onMenuMouseScrollStorageChanged(data.data.key);
                             break;
                         case "removeLocalStorageVals":
                             data.data.keys.forEach((k: string) => {
                                 delete window.siyuan.storage[k];
-                                onAgentStreamingMarkdownStorageChanged(k);
-                                onCompactModeStorageChanged(k);
-                                onMenuMouseScrollStorageChanged(k);
                             });
                             break;
                         case "rename":
@@ -227,6 +212,7 @@ export class App {
                         case "closeBox":
                         case "removeBox":
                             closeNotebookHistoryDialogs(data.data.box);
+                            closeNotebookLivePhotos(data.data.box);
                             removeBlockPanelEditors({notebookId: data.data.box});
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {

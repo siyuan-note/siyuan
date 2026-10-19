@@ -59,6 +59,7 @@ import {
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {getUploadInsertRange, uploadFiles} from "../upload";
+import {canPickIOSPhotos, pickIOSPhotos} from "../upload/iosPhotos";
 import {showMessage} from "../../dialog/message";
 import {captureUploadDocument, createUploadInsertPosition, isUploadDocumentAvailable} from "../upload/insertPosition";
 /// #if !MOBILE
@@ -734,9 +735,38 @@ export class Hint {
             };
             let insertPosition = captureInsertPosition();
             let uploadDocument = captureUploadDocument(protyle);
-            item.addEventListener("click", () => {
+            item.addEventListener("click", event => {
                 insertPosition = captureInsertPosition();
                 uploadDocument = captureUploadDocument(protyle);
+                if ((item as HTMLInputElement).dataset.nativePhotos === "true" && canPickIOSPhotos()) {
+                    event.preventDefault();
+                    const position = insertPosition;
+                    const target = uploadDocument;
+                    hideElements(["hint", "toolbar"], protyle);
+                    void pickIOSPhotos().then(({files, pairs}) => {
+                        if (files.length === 0) {
+                            return;
+                        }
+                        const range = isUploadDocumentAvailable(protyle, target) ? getUploadInsertRange(protyle, position) : undefined;
+                        if (!range || protyle.disabled || window.siyuan.isPublish ||
+                            protyle.options.history?.created || protyle.options.history?.snapshot) {
+                            showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+                            return;
+                        }
+                        range.deleteContents();
+                        range.collapse(true);
+                        uploadFiles(protyle, files, undefined, undefined, undefined, {
+                            document: target,
+                            insertPosition: createUploadInsertPosition(range,
+                                getUndoFocusContext(protyle.wysiwyg.element, range, true)),
+                            livePhotoPairs: pairs,
+                            allowedInputKinds: ["files"],
+                            requiredFileCount: files.length,
+                            source: "file-picker",
+                            target: "editor",
+                        });
+                    }).catch(() => showMessage(window.siyuan.languages.uploadError));
+                }
             });
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 if (event.target.files.length === 0) {

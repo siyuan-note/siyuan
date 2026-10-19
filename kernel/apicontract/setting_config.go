@@ -20,16 +20,6 @@ func (r settingConfig) ConfigJSON() []byte        { return append([]byte(nil), r
 func (r settingConfig) ConfigError() error        { return r.configError }
 func (r settingConfig) HasField(name string) bool { _, ok := r.fields[name]; return ok }
 
-// HasFieldFold 按配置结构的大小写兼容规则检查字段是否提交。
-func (r settingConfig) HasFieldFold(name string) bool {
-	for field := range r.fields {
-		if strings.EqualFold(field, name) {
-			return true
-		}
-	}
-	return false
-}
-
 func decodeSettingConfig(reader io.Reader, path string, removeApp bool) (r settingConfig, err error) {
 	var raw json.RawMessage
 	err = json.NewDecoder(reader).Decode(&raw)
@@ -92,8 +82,11 @@ type SettingPetalDisabledData struct {
 	GlobalPetalRevision uint64   `json:"globalPetalRevision"`
 	GlobalPetalChanged  bool     `json:"globalPetalChanged"`
 }
+
+// SettingKeymapRequest 承载完整的快捷键配置，data 与 conf.json 的 keymap 段同构且必须提交。
+// 内置快捷键由前端按平台补全，内核只保留提交的内容。
 type SettingKeymapRequest struct {
-	Data map[string]JSONValue `json:"data" api:"optional,nullable"`
+	Data map[string]JSONValue `json:"data"`
 }
 type SettingIconRequest struct {
 	Icon string `json:"icon" api:"trim"`

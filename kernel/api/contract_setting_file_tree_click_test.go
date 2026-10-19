@@ -26,12 +26,12 @@ func TestAPIContractSettingFileTreeClickMode(t *testing.T) {
 		docIcon, title int
 		echo           bool // setFiletree 响应回显应用后的取值
 	}{
-		// setFiletree 为整体替换，未提交的字段回到默认值
-		{"/api/setting/setFiletree", `{}`, 0, 0, true},
+		// 未提交的字段保持当前值
+		{"/api/setting/setFiletree", `{}`, 0, 1, true},
 		{"/api/setting/setFiletree", `{"docIconClickMode":1,"parentDocTitleClickMode":2}`, 1, 2, true},
 		{"/api/setting/setFiletree", `{"DocIconClickMode":1,"ParentDocTitleClickMode":1}`, 1, 1, true},
 		{"/api/setting/setFiletree", `{"docIconClickMode":2,"parentDocTitleClickMode":9}`, 0, 0, true},
-		{"/api/setting/setFiletree", `{"docIconClickMode":-1}`, 0, 0, true},
+		{"/api/setting/setFiletree", `{"docIconClickMode":-1}`, 0, 1, true},
 		// patch 在现有配置上合并，未提交的字段保留当前值，null 按零值处理
 		{"/api/setting/patch", `{"fileTree":{"docIconClickMode":1}}`, 1, 1, false},
 		{"/api/setting/patch", `{"fileTree":{"parentDocTitleClickMode":2}}`, 0, 2, false},

@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Live Photo ini tidak dapat dipratinjau. File asli tetap tersimpan.",
+	"livePhotoPairUnavailable": "Live Photo belum terunggah sepenuhnya. Silakan impor kembali.",
 	"automationCollectionManage": "Pengelolaan pengumpulan",
 	"automationCollectionRules": "Kecocokan aturan",
 	"automationCollectionEntries": "Entri basis data",
@@ -3348,6 +3351,7 @@
 		"417": "Pemadatan konteks agen gagal. Percakapan Anda telah disimpan; coba lagi: %s",
 		"418": "Model ini mengharuskan seluruh riwayat pemanggilan alat pada giliran saat ini tetap utuh. Gunakan model dengan jendela konteks yang lebih besar atau bagi tugasnya",
 		"419": "Pemadatan konteks agen mencapai batas permintaan atau waktu. Percakapan Anda telah disimpan",
-		"420": "Tidak dapat menampilkan daftar indeks sinkronisasi cloud (%s). Ini tidak berarti cloud kosong. Periksa jaringan, konfigurasi sinkronisasi, dan izin untuk menampilkan daftar."
+		"420": "Tidak dapat menampilkan daftar indeks sinkronisasi cloud (%s). Ini tidak berarti cloud kosong. Periksa jaringan, konfigurasi sinkronisasi, dan izin untuk menampilkan daftar.",
+		"421": "Ruang kerja lain sedang memproses paket pembaruan. Silakan periksa pembaruan lagi nanti"
 	}
 }

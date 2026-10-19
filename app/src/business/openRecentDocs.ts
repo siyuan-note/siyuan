@@ -1,9 +1,10 @@
+import {fileConfigApi} from "../config/tabs/fileRuntime";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
-import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {getAllDocks} from "../layout/getAll";
 import {getDockHotkey} from "../layout/dock/hotkey";
 import {Dialog} from "../dialog";
@@ -104,7 +105,7 @@ export const openRecentDocs = (openOnly = false) => {
         }
         return;
     }
-    const sortBy = window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type as TRecentDocsSort;
+    const sortBy = window.siyuan.config.fileTree.recentDocsSort as TRecentDocsSort;
     fetchPost("/api/storage/getRecentDocs", {sortBy}, (response) => {
         const dialog = new Dialog({
             positionId: Constants.DIALOG_RECENTDOCS,
@@ -167,8 +168,9 @@ export const openRecentDocs = (openOnly = false) => {
                 response = newResponse;
                 renderRecentDocsContent(newResponse.data, dialog.element, searchElement.value);
             });
-            window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type = sortSelect.value;
-            setStorageVal(Constants.LOCAL_RECENT_DOCS, window.siyuan.storage[Constants.LOCAL_RECENT_DOCS]);
+            if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                void fileConfigApi.patch("recentDocsSort", sortSelect.value);
+            }
         });
 
         renderRecentDocsContent(response.data, dialog.element);

@@ -1,7 +1,8 @@
 import {fetchPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {readText, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {readText, writeText} from "../protyle/util/compatibility";
+import {patchAppearancePreference} from "../config/tabs/appearancePreferences";
 import {getAllModels} from "../layout/getAll";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
@@ -173,7 +174,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             document.onselect = null;
             stopRectCreation();
 
-            const coords = getHightlightCoordsByRect(pdf, window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor || "var(--b3-pdf-background1)", rectResizeElement,
+            const coords = getHightlightCoordsByRect(pdf, window.siyuan.config.appearance.pdfTheme.annoColor || "var(--b3-pdf-background1)", rectResizeElement,
                 rectResizeElement.style.backgroundColor ? "text" : "border");
             rectResizeElement.classList.add("fn__none");
             if (coords) {
@@ -388,11 +389,11 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             return;
         }
         if (typeof event.detail === "string") {
-            window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor = event.detail === "0" ?
-                (window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor || "var(--b3-pdf-background1)")
+            const annoColor = event.detail === "0" ?
+                (window.siyuan.config.appearance.pdfTheme.annoColor || "var(--b3-pdf-background1)")
                 : `var(--b3-pdf-background${event.detail})`;
-            setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
-            const coords = getHightlightCoordsByRange(pdf, window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor);
+            void patchAppearancePreference("pdfTheme.annoColor", annoColor);
+            const coords = getHightlightCoordsByRange(pdf, annoColor);
             if (coords) {
                 coords.forEach((item, index) => {
                     const newElement = showHighlight(item, pdf);
@@ -411,8 +412,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             const type = target.getAttribute("data-type");
             if (target.classList.contains("color__square")) {
                 const color = target.style.backgroundColor;
-                window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor = color;
-                setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
+                void patchAppearancePreference("pdfTheme.annoColor", color);
                 if (rectElement) {
                     const config = getConfig(pdf);
                     const annoItem = config[rectElement.getAttribute("data-node-id")];

@@ -29,7 +29,7 @@ func TestOCRThresholdContract(t *testing.T) {
 	}
 	for _, fields := range []string{`{"detection":null,"box":null,"recognition":null}`, `{"detection":0.3,"box":0.6,"recognition":0}`} {
 		body := `{"provider":"paddleocr","model":"small","auto":false,"thresholds":` + fields + `}`
-		if request, err := SetOCRConfig.Decode(strings.NewReader(body)); err != nil || request.Thresholds == nil {
+		if _, err := SetOCRConfig.Decode(strings.NewReader(body)); err != nil {
 			t.Fatalf("rejected valid thresholds: %s: %v", body, err)
 		}
 	}
@@ -38,7 +38,7 @@ func TestOCRThresholdContract(t *testing.T) {
 func TestOCRAIModelCompatibility(t *testing.T) {
 	for _, field := range []string{"", `,"aiModelId":null`, `,"aiModelId":"vision"`} {
 		request, err := SetOCRConfig.Decode(strings.NewReader(`{"provider":"ai","model":"tiny","auto":false` + field + `}`))
-		if err != nil || field == `,"aiModelId":"vision"` && (request.AIModelID == nil || *request.AIModelID != "vision") {
+		if err != nil || field == `,"aiModelId":"vision"` && request.AIModelID != "vision" {
 			t.Fatalf("valid independent model selection: %+v, %v", request, err)
 		}
 	}

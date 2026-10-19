@@ -68,7 +68,7 @@ export class Menu {
         this.element = element || document.getElementById("commonMenu");
         if (!isMobile()) {
             this.clearMouseScroll = bindMenuMouseScroll(this.element, () =>
-                !isInMobileApp() && window.siyuan.storage?.[Constants.LOCAL_MENU_MOUSE_SCROLL] === true);
+                !isInMobileApp() && window.siyuan.config.appearance?.menuMouseScroll === true);
         }
         // 内容增删或文字变化后重新定位；不监听分组类和定位样式，避免更新触发循环。
         new MutationObserver((records) => {

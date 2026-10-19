@@ -43,9 +43,8 @@ func TestSettingKeymapOpaqueValues(t *testing.T) {
 		t.Fatalf("keymap payload: %s %v", encoded, err)
 	}
 	for _, body := range []string{`{}`, `{"data":null}`} {
-		request, err = SetKeymap.Decode(strings.NewReader(body))
-		if err != nil || request.Data != nil {
-			t.Fatalf("keymap omission: %+v %v", request, err)
+		if _, err = SetKeymap.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("keymap must reject incomplete data: %s", body)
 		}
 	}
 }

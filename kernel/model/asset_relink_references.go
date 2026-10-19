@@ -202,11 +202,17 @@ func (r *assetRelinker) tree(tree *parse.Tree, location apicontract.AssetReferen
 				rewritten = r.css(decoded, "title-image", loc)
 			} else if key == "data-assets" || strings.HasPrefix(key, "custom-data-assets") {
 				rewritten = r.list(decoded, "attribute", loc)
+			} else if n.Type == ast.NodeImage && key == treenode.LivePhotoVideoAttr {
+				rewritten = r.reference(decoded, "attribute", loc)
 			} else {
 				continue
 			}
 			if rewritten != decoded {
-				n.SetIALAttr(key, rewritten)
+				if n.Type == ast.NodeImage && key == treenode.LivePhotoVideoAttr {
+					treenode.SetImageLivePhotoVideo(n, rewritten)
+				} else {
+					n.SetIALAttr(key, rewritten)
+				}
 			}
 		}
 		switch n.Type {

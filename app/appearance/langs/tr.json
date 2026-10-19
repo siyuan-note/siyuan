@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Canlı Fotoğraf",
+	"livePhotoPreviewUnavailable": "Bu Canlı Fotoğraf önizlenemiyor. Özgün dosyalar korunuyor.",
+	"livePhotoPairUnavailable": "Canlı Fotoğraf tamamen yüklenemedi. Lütfen yeniden içe aktarın.",
 	"automationCollectionManage": "Toplama yönetimi",
 	"automationCollectionRules": "Kural eşleşmeleri",
 	"automationCollectionEntries": "Veritabanı girdileri",
@@ -3348,6 +3351,7 @@
 		"417": "Ajan bağlamı sıkıştırılamadı. Görüşmeniz korundu; yeniden deneyin: %s",
 		"418": "Bu model, mevcut turdaki araç çağrısı geçmişinin tamamının korunmasını gerektirir. Daha geniş bağlam penceresine sahip bir model kullanın veya görevi bölün",
 		"419": "Ajan bağlamı sıkıştırma işlemi istek veya süre sınırına ulaştı. Görüşmeniz korundu",
-		"420": "Bulut eşitleme dizinleri (%s) listelenemiyor. Bu, bulutun boş olduğu anlamına gelmez. Ağı, eşitleme yapılandırmasını ve listeleme izinlerini kontrol edin."
+		"420": "Bulut eşitleme dizinleri (%s) listelenemiyor. Bu, bulutun boş olduğu anlamına gelmez. Ağı, eşitleme yapılandırmasını ve listeleme izinlerini kontrol edin.",
+		"421": "Başka bir çalışma alanı güncelleme paketlerini işliyor. Lütfen daha sonra güncellemeleri tekrar kontrol edin"
 	}
 }

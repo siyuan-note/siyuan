@@ -970,6 +970,8 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
+export type DocumentPreviewImage = { "notebook": string; "src": string; "video"?: string; };
+
 export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
 export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
@@ -1153,6 +1155,8 @@ export type FileTreeTrimIDRequestInput = { "id": string; };
 export type FindAssetReferencesRequestInput = { "path"?: string; "paths"?: Array<string>; };
 
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
+export type FinishLivePhotoPreviewRequestInput = { "file": Blob; "id": string; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -1397,6 +1401,16 @@ export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": s
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
+
+export type LivePhotoColor = { "fullRange": boolean; "matrix": number; "primaries": number; "transfer": number; };
+
+export type LivePhotoFrameRequestInput = { "id": string; "index": number; };
+
+export type LivePhotoFrameTime = { "duration": number; "timestamp": number; };
+
+export type LivePhotoPreviewRequestInput = { "id": string; };
+
+export type LivePhotoPreviewSession = { "color": LivePhotoColor; "encode": boolean; "frames": Array<LivePhotoFrameTime> | null; "height": number; "id": string; "width": number; };
 
 export type LoadPetalsRequestInput = { "frontend": string; "settingsWindow"?: boolean; };
 
@@ -1860,7 +1874,7 @@ export type SearchWidgetResult = { "content": string; "name": string; };
 
 export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
 
-export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
+export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SetAssetAnnotationRequestInput = { "data": string; "path": string; };
 
@@ -1894,7 +1908,7 @@ export type SetEntryVisibilityRequestInput = { "active"?: string | null; "profil
 
 export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
-export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
+export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
 export type SetFlashcardRequestInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
@@ -1944,21 +1958,21 @@ export type SettingAIWeb = { "apiKey": string; "fetchProvider": string; "searchP
 
 export type SettingAIWebInput = { "apiKey"?: string | null; "fetchProvider"?: string | null; "searchProvider"?: string | null; "timeout"?: number | null; };
 
-export type SettingAgent = { "approvalPolicy": SettingApprovalPolicy | null; "capabilityPolicy": SettingCapabilityPolicy | null; "confirmTimeout": number; "maxCompletionTokens": number; "maxRetries": number; "maxToolCallRounds": number; "modelId": string; "sessionTimeout": number; "skills": SettingAgentSkills | null; "streamIdleTimeout": number; "temperature": number; };
+export type SettingAgent = { "approvalPolicy": SettingApprovalPolicy | null; "capabilityPolicy": SettingCapabilityPolicy | null; "confirmTimeout": number; "maxCompletionTokens": number; "maxRetries": number; "maxToolCallRounds": number; "modelId": string; "sessionTimeout": number; "skills": SettingAgentSkills | null; "streamIdleTimeout": number; "streamingMarkdown": boolean; "temperature": number; };
 
-export type SettingAgentInput = { "approvalPolicy"?: SettingApprovalPolicyInput | null; "capabilityPolicy"?: SettingCapabilityPolicyInput | null; "confirmTimeout"?: number | null; "maxCompletionTokens"?: number | null; "maxRetries"?: number | null; "maxToolCallRounds"?: number | null; "modelId"?: string | null; "sessionTimeout"?: number | null; "skills"?: SettingAgentSkillsInput | null; "streamIdleTimeout"?: number | null; "temperature"?: number | null; };
+export type SettingAgentInput = { "approvalPolicy"?: SettingApprovalPolicyInput | null; "capabilityPolicy"?: SettingCapabilityPolicyInput | null; "confirmTimeout"?: number | null; "maxCompletionTokens"?: number | null; "maxRetries"?: number | null; "maxToolCallRounds"?: number | null; "modelId"?: string | null; "sessionTimeout"?: number | null; "skills"?: SettingAgentSkillsInput | null; "streamIdleTimeout"?: number | null; "streamingMarkdown"?: boolean | null; "temperature"?: number | null; };
 
 export type SettingAgentSkills = { "builtinDisabled": Array<string> | null; "userEnabled": Array<string> | null; };
 
 export type SettingAgentSkillsInput = { "builtinDisabled"?: Array<string> | null; "userEnabled"?: Array<string> | null; };
 
-export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "menuMouseScroll": boolean; "mobileBars": SettingMobileBars | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": SettingPDFTheme | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type SettingAppearanceIcon = { "label": string; "name": string; };
 
 export type SettingAppearanceIconInput = { "label"?: string | null; "name"?: string | null; };
 
-export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
+export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SettingAppearanceTheme = { "frontends"?: Array<string>; "label": string; "name": string; };
 
@@ -2054,13 +2068,15 @@ export type SettingExport = { "addTitle": boolean; "blockEmbedMode": number; "bl
 
 export type SettingExportInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
-export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickMode": number; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocTitleClickMode": number; "recentDocsMaxListCount": number; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
+export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickMode": number; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocTitleClickMode": number; "recentDocsMaxListCount": number; "recentDocsSort": string; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
 
-export type SettingFileTreeInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
+export type SettingFileTreeInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
 export type SettingFlashcard = { "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
 
 export type SettingFlashcardInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
+
+export type SettingGetSectionRequestInput = { "namespace": string; };
 
 export type SettingIconRequestInput = { "icon": string; };
 
@@ -2070,7 +2086,7 @@ export type SettingImageGenerationInput = { "modelId"?: string | null; "outputFo
 
 export type SettingIssue = { "field": string; "message": string; "severity": string; };
 
-export type SettingKeymapRequestInput = { "data"?: { [key: string]: JSONValue } | null; };
+export type SettingKeymapRequestInput = { "data": { [key: string]: JSONValue }; };
 
 export type SettingLogin2faRequestInput = { "code": string; "token": string; };
 
@@ -2086,6 +2102,10 @@ export type SettingMarkdown = { "blockFullWidthTaskList": boolean | null; "codeB
 
 export type SettingMarkdownInput = { "blockFullWidthTaskList"?: boolean | null; "codeBlockMiddleDot"?: boolean | null; "inlineAsterisk"?: boolean | null; "inlineFullWidthStrikethrough"?: boolean | null; "inlineMark"?: boolean | null; "inlineMath"?: boolean | null; "inlineStrikethrough"?: boolean | null; "inlineSub"?: boolean | null; "inlineSup"?: boolean | null; "inlineTag"?: boolean | null; "inlineUnderscore"?: boolean | null; };
 
+export type SettingMobileBars = { "autoHide": boolean | null; "sidebarButtons": boolean | null; "sidebarSwipe": boolean | null; };
+
+export type SettingMobileBarsInput = { "autoHide"?: boolean | null; "sidebarButtons"?: boolean | null; "sidebarSwipe"?: boolean | null; };
+
 export type SettingModel = { "contextLength"?: number; "displayName"?: string; "enabled": boolean; "id": string; "name": string; };
 
 export type SettingModelInput = { "contextLength"?: number | null; "displayName"?: string | null; "enabled"?: boolean | null; "id"?: string | null; "name"?: string | null; };
@@ -2094,9 +2114,13 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
-export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string; "showEmpty"?: boolean; "showError"?: boolean; "showText"?: boolean; "thresholds"?: OCRThresholds; };
+export type SettingOCR = { "aiModelId": string; "auto": boolean; "model": string; "provider": string; "reasoningEffort": string; "showEmpty": boolean; "showError": boolean; "showText"?: boolean; "thresholds": OCRThresholds; };
 
 export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "showEmpty"?: boolean | null; "showError"?: boolean | null; "showText"?: boolean | null; "thresholds"?: OCRThresholdsInput | null; };
+
+export type SettingPDFTheme = { "annoColor": string; "dark": string; "light": string; };
+
+export type SettingPDFThemeInput = { "annoColor"?: string | null; "dark"?: string | null; "light"?: string | null; };
 
 export type SettingPatchData = { "issues": Array<SettingIssue> | null; };
 
@@ -2129,6 +2153,8 @@ export type SettingSecretInput = { "allowedHosts"?: Array<string> | null; "name"
 export type SettingSecrets = { "items": Array<SettingSecret | null> | null; };
 
 export type SettingSecretsInput = { "items"?: Array<SettingSecretInput | null> | null; };
+
+export type SettingSectionData = { "conf": SystemAppConf | null; "namespace": string; "revision": number; "settingTasks"?: SettingTaskState; };
 
 export type SettingSnpt = { "enabledCSS": boolean; "enabledJS": boolean; };
 
@@ -2177,6 +2203,8 @@ export type SnippetsData = { "revision"?: string; "snippets": Array<Snippet | nu
 export type SortAttributeViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; };
 
 export type SortAttributeViewViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; "viewID"?: string | null; };
+
+export type StartLivePhotoPreviewRequestInput = { "clientEncode"?: boolean; "path": string; };
 
 export type StorageKeyRequestInput = { "key": string; };
 
@@ -2258,7 +2286,7 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "settingTasks"?: SettingTaskState; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
@@ -3210,12 +3238,33 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 取消会话并释放在途转换资源，已完成的缓存仍可在下一次播放时复用。
+     */
+    "/api/asset/cancelLivePhotoPreview": {
+        request: LivePhotoPreviewRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
     "/api/asset/findAssetReferences": {
         request: FindAssetReferencesRequestInput;
         response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 提交大端 uint32 帧数，随后逐帧提交大端 uint32 长度及 Annex B 数据；最多 64 MiB，帧数和尺寸必须匹配源片。
+     * 验证并等待 MP4 封装完成后返回；失败结果不能进入共享缓存。
+     */
+    "/api/asset/finishLivePhotoPreview": {
+        request: FinishLivePhotoPreviewRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/asset/fullReindexAssetContent": {
         request: EmptyRequestInput;
@@ -3234,6 +3283,16 @@ export interface APIPOSTRoutes {
     "/api/asset/getDocImageAssets": {
         request: AssetDocumentRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 返回文档图片及各自关联的实况照片原始视频；保留图片顺序，不合并相同封面。
+     */
+    "/api/asset/getDocPreviewImages": {
+        request: AssetDocumentRequestInput;
+        response: { "code": 0; "data": Array<DocumentPreviewImage> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
@@ -3257,6 +3316,28 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 顺序读取零起始的 I420 帧，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+     */
+    "/api/asset/getLivePhotoFrame": {
+        request: LivePhotoFrameRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+        output: "binary";
+    };
+    /**
+     * 等待并读取 MP4 兼容预览，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+     */
+    "/api/asset/getLivePhotoPreview": {
+        request: LivePhotoPreviewRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+        output: "binary";
     };
     "/api/asset/getMissingAssets": {
         request: EmptyRequestInput;
@@ -3415,6 +3496,20 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 按需生成 H.264/AAC 兼容预览，不修改原件，不同步缓存；输入限制为 64 MiB、十秒、600 帧和 4096×2160 像素。
+     * 支持 SDR HEVC 4:2:0（8/10 位）或 AVC，以及 AAC 或 44.1/48 kHz 单声道、双声道整数 PCM。
+     * clientEncode 为 true 且 encode 为 true 时，调用方顺序读取帧并提交 Annex B 编码；否则直接读取预览。
+     * 客户端编码只对管理员开放，其他角色由内核生成预览，不能提交共享缓存内容。
+     * 会话五分钟内有效，编码任务两分钟超时；加密笔记本只使用内存，锁定时取消任务、清除会话与缓存。
+     */
+    "/api/asset/startLivePhotoPreview": {
+        request: StartLivePhotoPreviewRequestInput;
+        response: { "code": 0; "data": LivePhotoPreviewSession; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/asset/statAsset": {
         request: AssetPathRequestInput;
@@ -4023,6 +4118,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarIcon": {
         request: InstallBazaarIconRequestInput;
@@ -4033,6 +4129,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarPlugin": {
         request: InstallBazaarPluginRequestInput;
@@ -4043,6 +4140,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTemplate": {
         request: InstallBazaarTemplateRequestInput;
@@ -4053,6 +4151,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTheme": {
         request: InstallBazaarThemeRequestInput;
@@ -4063,6 +4162,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarWidget": {
         request: InstallBazaarWidgetRequestInput;
@@ -6694,6 +6794,17 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 读取单个配置段，字段与脱敏规则与 /api/system/getConf 一致，仅返回请求的配置段以减少传输量。
+     * namespace 必须是已注册的配置段；需要完整配置的启动和重连场景仍使用 /api/system/getConf。
+     */
+    "/api/setting/getSection": {
+        request: SettingGetSectionRequestInput;
+        response: { "code": 0; "data": SettingSectionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
     "/api/setting/login2faCloudUser": {
         request: SettingLogin2faRequestInput;
         response: Login2faEnvelope | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6751,7 +6862,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
-     * web 省略时保留当前配置；初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
+     * web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
      * 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
      * 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
      * ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
@@ -6795,8 +6906,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 使用与启动、导入相同的规范化规则并同步保存。锚文本长度 1–5120 保持不变，小于 1 回退 64。
-     * 字体大小超出 9–72 回退 16；省略字体列表和图片标题字段时继续保留原有兼容行为。
+     * 使用与启动、导入相同的规范化规则并同步保存。
+     * 锚文本长度 1–5120 保持不变，小于 1 回退 64；字体大小超出 9–72 回退 16。
      * backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
      * databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
      */
@@ -6845,7 +6956,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
+     * 使用与启动、导入相同的路径和数值规范化规则。
      * maxListCount 小于 1 回退 512，largeFileWarningSize 小于 2 回退 8，两者大于 10240 时截断至 10240。
      */
     "/api/setting/setFiletree": {
@@ -6873,6 +6984,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 整体替换快捷键配置：data 必须提交完整的快捷键对象，只提交部分分组会清空未提交的快捷键。
+     * 单条快捷键请使用 /api/setting/patch 的 keymap 命名空间，该接口按对象递归合并。
+     */
     "/api/setting/setKeymap": {
         request: SettingKeymapRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6880,6 +6995,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 认证账户须提交完整数组，传 null 或空数组表示清空账户。
+     */
     "/api/setting/setPublish": {
         request: SetPublishRequestInput;
         response: { "code": 0; "data": SettingPublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6888,9 +7006,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32。
-     * limit 大于 10240 时截断至 10240。
-     * 省略汉字敏感、自定义块和脑图选项时保留当前值；反链提及关键词上限小于 1 回退 512。
+     * 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32，大于 10240 时截断至 10240。
+     * 反链提及关键词上限小于 1 回退 512。
      */
     "/api/setting/setSearch": {
         request: SetSearchRequestInput;

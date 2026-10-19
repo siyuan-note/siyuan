@@ -35,6 +35,9 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         normalizeSemanticInlineElements: noop, removeEmptySemanticInlineElement: noop,
         getSemanticMarkerPrefixLengthForNode: () => 0, getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         turnIntoTaskList: () => false, headingTurnIntoList: () => false, isProtyleListItemFirstParagraph: () => false,
+        matchHotKey: (binding: {custom?: string}, event: KeyboardEvent) => !!binding?.custom &&
+            binding.custom === event.key && event.ctrlKey && !event.altKey && !event.shiftKey && !event.isComposing,
+        isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
         mathRender: noop, hideElements: (names: string[]) => {
             if (names.includes("gutter")) {
                 gutterHidden = true;
@@ -57,7 +60,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
-        "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
+        "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
         "hasClosestBlock, hasClosestByClassName, hasClosestByTag, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
@@ -116,7 +119,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         hintRef: noop, hintTag: noop, registerBuiltinSlashHint: (callback: unknown) => callback,
         getDefaultToolbar: (): string[] => [], updateOutlineCurrentBlock: noop,
         setMobileToolbarUndo: noop, setTableCellRichContext: noop, bindTableCellRichDrag: noop,
-        bindLiteCodeActions: noop, highlightRender: noop,
+        bindLiteCodeActions: noop, highlightRender: noop, renderTableCellRichElements: noop,
         isTableCellCaretAtBoundary: () => true,
         getAdjacentRichTableCell: (): undefined => undefined,
         getCaretGoalX: () => 80,
@@ -138,7 +141,6 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             image.dispatchEvent(new Event("input", {bubbles: true}));
             imageMenus++;
         },
-        matchHotKey: () => false,
         getUndoFocusContext: (_element: Element, range: Range) => {
             const table = (range.startContainer as Element).closest('[data-type="NodeTable"]');
             return {undoFocusId: table.getAttribute("data-node-id"), undoFocusIndex: "0", undoFocusStart: "0", undoFocusEnd: "0"};
@@ -207,6 +209,116 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    const generalKeymap = window.siyuan.config.keymap.editor.general;
+    window.siyuan.config.keymap.editor.general = {...generalKeymap,
+        alignLeft: {custom: "l"}, alignCenter: {custom: "e"}, alignRight: {custom: "r"},
+        undo: {custom: "z"}, redo: {custom: "y"},
+    };
+    for (const isMobile of [false, true]) {
+        mobile = isMobile;
+        for (const rich of [false, true]) {
+            for (const rowIndex of [0, 1]) {
+                for (const [key, alignment] of [["l", "left"], ["e", "center"], ["r", "right"]]) {
+                    const {owner, element, table} = fixture();
+                    const currentTable = table.querySelector("table");
+                    const cell = currentTable.rows[rowIndex].cells[1];
+                    if (rich) {
+                        api.setTableCellRich(cell, "first\n\nsecond");
+                    } else {
+                        cell.textContent = "second";
+                    }
+                    await open(owner, cell);
+                    let host = cell.querySelector<HTMLElement>(".table__cell-editor");
+                    const editables = host.querySelectorAll<HTMLElement>('[contenteditable="true"]');
+                    const editable = editables[editables.length - 1];
+                    api.focusByOffset(editable, 1, 4);
+                    const selection = api.captureRichCellSelection(host, getSelection());
+                    const errors: string[] = [];
+                    const onError = (error: ErrorEvent) => errors.push(error.error?.stack || error.message);
+                    window.addEventListener("error", onError);
+                    const event = new KeyboardEvent("keydown", {key, ctrlKey: true, bubbles: true, cancelable: true});
+                    editable.dispatchEvent(event);
+                    await tick();
+                    window.removeEventListener("error", onError);
+                    check.deepEqual(errors, []);
+                    check.equal(event.defaultPrevented, true, "alignment is consumed before the inner paragraph handles it");
+                    check.equal(changes.length, 1, "alignment creates one outer table transaction");
+                    host = cell.querySelector<HTMLElement>(".table__cell-editor");
+                    check.ok(host?.contains(getSelection().anchorNode), "alignment keeps the cell editor active");
+                    check.deepEqual(api.captureRichCellSelection(host, getSelection()), selection, "alignment preserves the text selection");
+                    const assertAlignment = (node: Element, expected: string) => {
+                        Array.from(node.querySelector("table").rows).forEach(row => {
+                            Array.from(row.cells).forEach((item, column) => {
+                                check.equal(item.style.textAlign, column === 1 ? expected : "", "only the current column is aligned");
+                            });
+                        });
+                    };
+                    assertAlignment(table, alignment);
+                    const change = changes[0];
+                    const replay = (operation: IOperation, expected: string) => {
+                        const saved = document.createElement("div");
+                        saved.innerHTML = lute.SpinBlockDOM(operationHTML(operation));
+                        assertAlignment(saved, expected);
+                        saved.querySelectorAll("wbr").forEach(marker => marker.remove());
+                        table.innerHTML = saved.firstElementChild.innerHTML;
+                    };
+                    owner.undo = {
+                        add: noop, clear: noop,
+                        undo: () => replay(change.undoOperations[0], ""),
+                        redo: () => replay(change.doOperations[0], alignment),
+                    };
+                    host.dispatchEvent(new KeyboardEvent("keydown", {key: "z", ctrlKey: true, bubbles: true, cancelable: true}));
+                    assertAlignment(table, "");
+                    await open(owner, table.querySelector("table").rows[rowIndex].cells[1]);
+                    host = table.querySelector<HTMLElement>(".table__cell-editor");
+                    host.dispatchEvent(new KeyboardEvent("keydown", {key: "y", ctrlKey: true, bubbles: true, cancelable: true}));
+                    assertAlignment(table, alignment);
+                    const restoredCell = table.querySelector("table").rows[rowIndex].cells[1];
+                    await open(owner, restoredCell);
+                    host = restoredCell.querySelector<HTMLElement>(".table__cell-editor");
+                    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+                    check.equal(restoredCell.querySelector(".table__cell-editor"), null);
+                    assertAlignment(table, alignment);
+                    check.equal(api.getTableCellRichBlockDOM(restoredCell).includes("second"), true, "leaving and reopening preserve the cell content");
+                    check.equal(changes.length, 1, "reopening and leaving do not add content transactions");
+                    await finish(element);
+                }
+            }
+        }
+        {
+            const {owner, element, table} = fixture();
+            const cell = table.querySelector("td");
+            await open(owner, cell);
+            const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+            const editable = host.querySelector<HTMLElement>('[contenteditable="true"]');
+            editable.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+            editable.textContent = "pending composition";
+            const composing = new KeyboardEvent("keydown", {key: "e", ctrlKey: true, bubbles: true, cancelable: true});
+            editable.dispatchEvent(composing);
+            check.equal(composing.defaultPrevented, false, "unfinished composition is not handed to the outer table");
+            check.equal(cell.contains(host), true);
+            check.equal(changes.length, 0);
+            editable.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+            await tick();
+            check.equal(changes.length, 1);
+            editable.textContent = "pending before alignment";
+            api.focusByOffset(editable, 4, 4);
+            editable.dispatchEvent(new KeyboardEvent("keydown", {key: "e", ctrlKey: true, bubbles: true, cancelable: true}));
+            await tick();
+            check.equal(changes.length, 3, "pending content is committed before the alignment transaction");
+            const saved = document.createElement("div");
+            saved.innerHTML = operationHTML(changes[2].doOperations[0]);
+            check.equal(saved.querySelector("td").textContent, "pending before alignment");
+            check.equal(saved.querySelector<HTMLElement>("td").style.textAlign, "center");
+            saved.innerHTML = operationHTML(changes[2].undoOperations[0]);
+            check.equal(saved.querySelector("td").textContent, "pending before alignment", "undoing alignment retains the latest content");
+            check.equal(saved.querySelector<HTMLElement>("td").style.textAlign, "");
+            await finish(element);
+        }
+    }
+    window.siyuan.config.keymap.editor.general = generalKeymap;
+    mobile = true;
 
     for (const rich of [false, true]) {
         const {owner, element, table} = fixture();
@@ -812,7 +924,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     return "Table cell input handoff cases passed";
 };
 
-test("table cell editors wait for outer input and table menu Enter is consumed", {
+test("table cell editors preserve input and alignment, and consume table menu Enter", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

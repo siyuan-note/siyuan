@@ -1,5 +1,5 @@
 import {Constants} from "../constants";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {patchAppearancePreference} from "../config/tabs/appearancePreferences";
 
 const PDF_JS_VERSION = "6.4.299-siyuan.1";
 
@@ -67,21 +67,17 @@ export const loadPdfViewerModule = () => {
 };
 
 export const bindPdfTheme = (element: HTMLElement) => {
-    const localPDF = window.siyuan.storage[Constants.LOCAL_PDFTHEME];
+    const localPDF = window.siyuan.config.appearance.pdfTheme;
     const darkElement = element.querySelector("#pdfDark") as HTMLElement;
     const lightElement = element.querySelector("#pdfLight") as HTMLElement;
     const outerElement = element.firstElementChild;
     const pdfTheme = window.siyuan.config.appearance.mode === 0 ? localPDF.light : localPDF.dark;
     const setTheme = (theme: "light" | "dark") => {
-        if (window.siyuan.config.appearance.mode === 0) {
-            localPDF.light = theme;
-        } else {
-            localPDF.dark = theme;
-        }
+        if (window.siyuan.config.readonly || window.siyuan.isPublish) return;
         outerElement.classList.toggle("pdf__outer--dark", theme === "dark");
         lightElement.classList.toggle("toggled", theme === "light");
         darkElement.classList.toggle("toggled", theme === "dark");
-        setStorageVal(Constants.LOCAL_PDFTHEME, localPDF);
+        void patchAppearancePreference(`pdfTheme.${window.siyuan.config.appearance.mode === 0 ? "light" : "dark"}`, theme);
     };
     outerElement.classList.toggle("pdf__outer--dark", pdfTheme === "dark");
     lightElement.classList.toggle("toggled", pdfTheme !== "dark");

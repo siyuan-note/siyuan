@@ -17,7 +17,6 @@ import {prepareExternalClipboardHTML} from "./richClipboard";
 import {isIOSPlatform, isIPadOSPlatform} from "./browserCompatibility";
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
 import {createDefaultMobileBottomBarConfig} from "../../mobile/util/mobileBottomBarConfig";
-import {createDefaultMobileBarsConfig, MOBILE_BARS_CONFIG_KEY} from "../../mobile/util/mobileBarsConfig";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -759,18 +758,9 @@ export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => vo
             rowTab: "",
             layoutTab: 0
         };
-        defaultStorage[Constants.LOCAL_PDFTHEME] = {
-            light: "light",
-            dark: "dark",
-            annoColor: "var(--b3-pdf-background1)"
-        };
         defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number, filespaths: IFilesPath[]}
         defaultStorage[Constants.LOCAL_PLUGIN_DOCKS] = {};  // { pluginName: {dockId: IPluginDockTab}}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
-        defaultStorage[Constants.LOCAL_OUTLINE] = {
-            keepCurrentExpand: false,
-            expandLevel: 6
-        };
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {
@@ -831,9 +821,6 @@ export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => vo
             version: 1,
             tabs: [],
         };
-        // 仅未保存过移动端偏好时启用默认侧栏按钮。
-        defaultStorage[MOBILE_BARS_CONFIG_KEY] = typeof response.data[MOBILE_BARS_CONFIG_KEY] === "undefined" ?
-            createDefaultMobileBarsConfig() : {autoHide: true};
         defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = createDefaultMobileBottomBarConfig();
         defaultStorage[Constants.LOCAL_MOBILE_SIDE_PANEL] = {
             version: 1,
@@ -868,19 +855,18 @@ export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => vo
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
         defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
-        defaultStorage[Constants.LOCAL_RECENT_DOCS] = {type: "viewedAt"};   // TRecentDocsSort
         defaultStorage[Constants.LOCAL_AV_CALENDAR_MODES] = {};
         defaultStorage[Constants.LOCAL_TABS_READING] = {};
 
-        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
+        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
-            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL, MOBILE_BARS_CONFIG_KEY,
+            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL,
             Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
-            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
+            Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH,
             Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES, Constants.LOCAL_TABS_READING].forEach((key) => {
             const value = response.data[key];
             if (typeof value === "string") {

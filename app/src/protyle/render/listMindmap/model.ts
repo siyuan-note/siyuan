@@ -479,7 +479,7 @@ export const convertListMindmapToList = (element: Element, type: string, lute: L
     return materializeListMindmapRoot(list, lute) ? lute.SpinBlockDOM(list.outerHTML) : converted;
 };
 
-// 按每层最大宽度对齐节点，并为每个分支保留完整的垂直空间，避免富文本节点相互遮挡。
+// 按父节点宽度排列分支，保留节点下方控件的操作空间，避免富文本节点相互遮挡。
 export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     horizontalGap?: number;
     verticalGap?: number;
@@ -488,8 +488,9 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     verticalGaps?: Map<string, number>;
     summaries?: {nodeIds: string[], height: number}[];
 } = {}) => {
+    // 横向间距容纳右侧两枚按钮，纵向间距避开节点下方 14px 的悬停区域。
     const horizontalGap = options.horizontalGap ?? 40;
-    const verticalGap = options.verticalGap ?? 24;
+    const verticalGap = options.verticalGap ?? 16;
     const padding = options.padding ?? 32;
     const gapBefore = (id: string) => Math.max(verticalGap, options.verticalGaps?.get(id) || 0);
     if ([horizontalGap, verticalGap, padding].some(value => !Number.isFinite(value) || value < 0)) {

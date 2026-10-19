@@ -70,6 +70,13 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 	appearance.HideStatusBar = true
 	appearance.ModeOS = false
 	appearance.Mode = 1
+	appearance.CompactMode = true
+	appearance.MenuMouseScroll = true
+	appearance.OutlineKeepCurrentExpand = true
+	appearance.PDFTheme = &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "red"}
+	appearance.MobileBars = &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(false), SidebarButtons: new(true)}
+	source.FileTree.Load().RecentDocsSort = "updated"
+	source.AI.Load().Agent.StreamingMarkdown = true
 	appearance.GlobalFontFamilies = []*conf.EditorFont{{Family: "serif"}}
 	appearance.EntryVisibility = &conf.EntryVisibility{Version: conf.EntryVisibilityVersion, Active: "portable",
 		Profiles: []*conf.EntryVisibilityProfile{{ID: "portable", Name: "Portable", Defaults: conf.EntryVisibilityProfileFull,
@@ -117,6 +124,12 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 				t.Fatalf("import failed: %d", code)
 			}
 			actualAppearance := target.Appearance.Load()
+			if !actualAppearance.CompactMode || !actualAppearance.MenuMouseScroll || !actualAppearance.OutlineKeepCurrentExpand ||
+				!reflect.DeepEqual(actualAppearance.PDFTheme, source.Appearance.Load().PDFTheme) ||
+				!reflect.DeepEqual(actualAppearance.MobileBars, source.Appearance.Load().MobileBars) ||
+				target.FileTree.Load().RecentDocsSort != "updated" || !target.AI.Load().Agent.StreamingMarkdown {
+				t.Fatal("reader and control preferences did not survive configuration transfer")
+			}
 			if target.Lang != "ja" || actualAppearance.Lang != "ja" || !actualAppearance.HideStatusBar || actualAppearance.Mode != 1 || actualAppearance.ModeOS ||
 				!reflect.DeepEqual(actualAppearance.EntryVisibility, source.Appearance.Load().EntryVisibility) ||
 				!reflect.DeepEqual(actualAppearance.GlobalFontFamilies, source.Appearance.Load().GlobalFontFamilies) ||
@@ -145,6 +158,13 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 				!reflect.DeepEqual(saved.OCR.Load(), source.OCR.Load()) || !reflect.DeepEqual(saved.Snippet.Load(), source.Snippet.Load()) ||
 				!reflect.DeepEqual(saved.Variables.Load(), source.Variables.Load()) || !reflect.DeepEqual(saved.UILayout.Load(), source.UILayout.Load()) {
 				t.Fatalf("imported preferences were not persisted: %v", err)
+			}
+			if !reflect.DeepEqual(saved.Appearance.Load().PDFTheme, source.Appearance.Load().PDFTheme) ||
+				!reflect.DeepEqual(saved.Appearance.Load().MobileBars, source.Appearance.Load().MobileBars) ||
+				!saved.Appearance.Load().CompactMode || !saved.Appearance.Load().MenuMouseScroll ||
+				!saved.Appearance.Load().OutlineKeepCurrentExpand || saved.FileTree.Load().RecentDocsSort != "updated" ||
+				!saved.AI.Load().Agent.StreamingMarkdown {
+				t.Fatal("imported reader and control preferences were not persisted")
 			}
 		})
 	}

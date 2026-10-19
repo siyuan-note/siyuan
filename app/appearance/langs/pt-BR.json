@@ -1,4 +1,7 @@
 {
+	"livePhoto": "Live Photo",
+	"livePhotoPreviewUnavailable": "Não foi possível reproduzir esta Live Photo. Os arquivos originais foram preservados.",
+	"livePhotoPairUnavailable": "A Live Photo não foi enviada por completo. Importe-a novamente.",
 	"automationCollectionManage": "Gerenciamento de coleta",
 	"automationCollectionRules": "Correspondências das regras",
 	"automationCollectionEntries": "Entradas do banco de dados",
@@ -3348,6 +3351,7 @@
 		"417": "A compactação do contexto do agente falhou. Sua conversa foi preservada; tente novamente: %s",
 		"418": "Este modelo exige manter intacto o histórico de chamadas de ferramentas do turno atual. Use um modelo com uma janela de contexto maior ou divida a tarefa",
 		"419": "A compactação do contexto do agente atingiu o limite de solicitações ou de tempo. Sua conversa foi preservada",
-		"420": "Não foi possível listar os índices de sincronização na nuvem (%s). Isso não significa que a nuvem esteja vazia. Verifique a rede, a configuração de sincronização e as permissões de listagem."
+		"420": "Não foi possível listar os índices de sincronização na nuvem (%s). Isso não significa que a nuvem esteja vazia. Verifique a rede, a configuração de sincronização e as permissões de listagem.",
+		"421": "Outro espaço de trabalho está processando pacotes de atualização. Verifique novamente se há atualizações mais tarde"
 	}
 }

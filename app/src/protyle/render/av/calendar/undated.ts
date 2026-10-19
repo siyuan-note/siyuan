@@ -52,7 +52,7 @@ export const bindCalendarUndated = (options: {
     const dateKeyID = (data.view as IAVTable).calendar.dateKeyID;
     const mobile = isMobile();
     const resetMouseScroll = mobile ? undefined : bindMenuMouseScroll(panel, () =>
-        !isInMobileApp() && window.siyuan.storage?.[Constants.LOCAL_MENU_MOUSE_SCROLL] === true);
+        !isInMobileApp() && window.siyuan.config.appearance?.menuMouseScroll === true);
     const normalizedQuery = query.trim();
     const cache = state.undatedCache?.dateKeyID === dateKeyID && state.undatedCache.query === normalizedQuery &&
         state.undatedCache.search === state.undatedSearch.trim() ? state.undatedCache : undefined;

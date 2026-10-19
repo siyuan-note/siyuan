@@ -142,7 +142,7 @@ const initialize = async () => {
         if (runtime.handleMessage(data)) return;
         switch (data.cmd) {
             case "logoutAuth": redirectToCheckAuth(); break;
-            case "settingChanged": void refreshSettingConfig(data.data.namespace); break;
+            case "settingChanged": void refreshSettingConfig(data.data.namespace, data.data.revision); break;
             case "setConf":
                 void refreshSettingConfig();
                 void runtime.refreshSnippets(true);

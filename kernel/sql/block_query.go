@@ -1047,19 +1047,30 @@ func GetBlocks(ids []string) (ret []*Block) {
 
 // queryBlocksInBatches 限制每批参数数量，并在读取下一批前关闭游标，保留笔记本查询边界。
 func queryBlocksInBatches(ids []string, boxID string, blocks map[string]*Block, populateCache bool) error {
+	return queryBlocksInBatchesContext(context.Background(), ids, boxID, blocks, populateCache)
+}
+
+func queryBlocksInBatchesContext(ctx context.Context, ids []string, boxID string, blocks map[string]*Block, populateCache bool) error {
 	const batchSize = 512
 	for start := 0; start < len(ids); start += batchSize {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		batch := ids[start:min(start+batchSize, len(ids))]
 		statement := "SELECT * FROM blocks WHERE id IN (" + strings.Repeat("?,", len(batch)-1) + "?)"
 		args := make([]any, len(batch))
 		for i, id := range batch {
 			args[i] = id
 		}
-		rows, err := queryForBox(boxID, statement, args...)
+		rows, err := queryForBoxContext(ctx, boxID, statement, args...)
 		if err != nil {
 			return err
 		}
 		for rows.Next() {
+			if err = ctx.Err(); err != nil {
+				rows.Close()
+				return err
+			}
 			if block := scanBlockRows(rows); block != nil {
 				if populateCache {
 					putBlockCache(block)

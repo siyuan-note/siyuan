@@ -429,6 +429,8 @@ type AttributeViewRenderOptions struct {
 
 // RenderAttributeViewWithTargetOptions 在分页前应用临时排序；临时排序和只读请求均不创建或保存数据库。
 func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	timing := util.BeginPerformance("database.view")
+	defer timing.Finish()
 	writable := !options.ReadOnly && options.TemporarySort == nil
 	createIfNotExist = createIfNotExist && writable
 	if !ast.IsNodeIDPattern(avID) {
@@ -439,7 +441,9 @@ func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, p
 		return
 	}
 
+	timing.Stage("wait_sync")
 	waitForSyncingStorages()
+	timing.Stage("load")
 
 	avBoxID, exactBox, resolveErr := resolveAttributeViewCarrierBoxID(blockID)
 	if nil != resolveErr {
@@ -493,6 +497,7 @@ func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, p
 		}
 	}
 
+	timing.Stage("render")
 	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, options.CalendarRange)
 	return
 }
@@ -521,6 +526,8 @@ const (
 )
 
 func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, err error) {
+	timing := util.BeginPerformance("database.fields")
+	defer timing.Finish()
 	if err = attrView.ValidateLayouts(); nil != err {
 		return
 	}
@@ -553,6 +560,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	renderContext.ReadOnly = !writable
 	defer renderContext.PushTemplateErrors()
 	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
+	timing.Stage("fields")
 	if deferTemplateValues {
 		viewable = sql.RenderViewWithDeferredTemplatesContext(attrView, view, query, ignoreRows, renderContext)
 	} else {
@@ -562,6 +570,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 		calendar.CalendarRange = calendarRanges[0]
 	}
 	var groupRenderSource *sql.GroupViewRenderSource
+	timing.Stage("rows_groups")
 	if !ignoreRows && view.IsGroupView() {
 		// 在父视图分页前保存完整条目索引，各分组复用已经生成的字段值。
 		groupRenderSource = sql.NewGroupViewRenderSource(viewable, query)
@@ -1068,6 +1077,9 @@ func attrViewFiltersUseRenderedValues(filters []*av.ViewFilter, renderTemplateKe
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
 	ignoreRows bool, targetItemID string,
 	renderContext *sql.AttributeViewRenderContext, filterContexts ...*av.FilterContext) (targetIndex, targetOffset int, err error) {
+	timing := util.BeginPerformance("database.rows")
+	defer timing.Finish()
+	timing.Count("page_size", int64(pageSize))
 	targetIndex = -1
 	if nil == viewable {
 		err = av.ErrViewNotFound
@@ -1079,6 +1091,11 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	if ignoreRows {
 		return
 	}
+	if timing != nil {
+		if collection, ok := viewable.(av.Collection); ok {
+			timing.Count("rows_before", int64(collection.CountItems()))
+		}
+	}
 
 	cachedAttrViews := map[string]*av.AttributeView{}
 	rollupFurtherCollections := sql.GetFurtherCollectionsWithContext(attrView, cachedAttrViews, renderContext)
@@ -1086,9 +1103,18 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	if 0 < len(filterContexts) {
 		filterContext = filterContexts[0]
 	}
+	timing.Stage("filter")
 	av.FilterWithContext(viewable, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
+	if timing != nil {
+		if collection, ok := viewable.(av.Collection); ok {
+			timing.Count("rows_filtered", int64(collection.CountItems()))
+		}
+	}
+	timing.Stage("sort")
 	av.Sort(viewable, attrView)
+	timing.Stage("calculate")
 	av.Calc(viewable, attrView)
+	timing.Stage("paginate")
 
 	// 日历按可见范围读取，不使用普通条目分页。
 	switch viewable.GetType() {
@@ -1137,6 +1163,12 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			targetOffset = start
 		}
 		kanban.Cards = kanban.Cards[start:end]
+	}
+	timing.Stage("colors")
+	if timing != nil {
+		if collection, ok := viewable.(av.Collection); ok {
+			timing.Count("rows_page", int64(collection.CountItems()))
+		}
 	}
 	av.RenderConditionalColors(viewable, view, attrView, rollupFurtherCollections, cachedAttrViews)
 	return

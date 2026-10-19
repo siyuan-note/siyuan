@@ -313,7 +313,6 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
             const requestFocusId = focusId ? Object.assign({}, focusId) : undefined;
             if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
                 return {
-                    method: requestConfig.method,
                     version,
                     run(signal: AbortSignal, isCurrent: () => boolean) {
                         return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
@@ -343,8 +342,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 }
             }
             return {
-                method: requestConfig.method,
                 version,
+                abortable: requestConfig.method !== 4,
                 run(signal: AbortSignal, isCurrent: () => boolean) {
                     return fetchPost(endpoint, searchParam, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
                         if (!isCurrent()) {

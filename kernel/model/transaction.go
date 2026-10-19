@@ -275,6 +275,9 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	if 1 > len(tx.DoOperations) {
 		return
 	}
+	timing := util.BeginPerformance("transaction")
+	timing.Count("operations", int64(len(tx.DoOperations)))
+	defer timing.Finish()
 	diagnostic := util.WatchOperation("editing transaction", "begin transaction")
 	defer diagnostic.Finish()
 
@@ -307,11 +310,13 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}()
 
 	diagnostic.Stage("prepare database automations")
+	timing.Stage("automations")
 	if err = tx.prepareAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
 	}
 	diagnostic.Stage("process bulk operations")
+	timing.Stage("apply")
 	isLargeInsert, ret := tx.processLargeInsert()
 	if ret != nil {
 		tx.rollback()
@@ -562,6 +567,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}
 
 	diagnostic.Stage("finalize database bindings and block structure")
+	timing.Stage("finalize")
 	if err = tx.runAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -581,6 +587,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	tx.UndoOperations = append(tx.UndoOperations, tx.attributeViewDeletionUndo...)
 
 	diagnostic.Stage("commit transaction")
+	timing.Stage("commit")
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		if 1 == tx.state.Load() {

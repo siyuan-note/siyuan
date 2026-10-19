@@ -216,17 +216,22 @@ func clearQueue() {
 var flushingTx = atomic.Bool{}
 
 func FlushQueue() {
+	timing := util.BeginPerformance("index.flush")
+	timing.Stage("wait_lock")
 	diagnostic := util.WatchOperation("flush database index", "wait for index lock")
 	defer diagnostic.Finish()
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
 	diagnostic.Stage("take queued operations")
+	timing.Stage("take_queue")
 	ops, indexSnapshot := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
 		return
 	}
+	defer timing.Finish()
+	timing.Count("operations", int64(total))
 
 	flushingTx.Store(true)
 	defer func() {
@@ -261,6 +266,17 @@ func FlushQueue() {
 	for _, op := range ops {
 		groupOpsTotal[op.action]++
 	}
+	if timing != nil {
+		var oldest time.Time
+		for _, op := range ops {
+			if !op.inQueueTime.IsZero() && (oldest.IsZero() || op.inQueueTime.Before(oldest)) {
+				oldest = op.inQueueTime
+			}
+		}
+		if !oldest.IsZero() {
+			timing.Count("oldest_wait_us", time.Since(oldest).Microseconds())
+		}
+	}
 
 	groupOpsCurrent := map[string]int{}
 	backlinkChange := newBacklinkIndexChange()
@@ -294,6 +310,7 @@ func FlushQueue() {
 		}
 
 		diagnostic.Stage("begin " + op.action)
+		timing.Stage("begin")
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
 			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
@@ -314,6 +331,7 @@ func FlushQueue() {
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
 		diagnostic.Stage("execute " + op.action)
+		timing.Stage("execute")
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
@@ -327,6 +345,7 @@ func FlushQueue() {
 		}
 
 		diagnostic.Stage("commit " + op.action)
+		timing.Stage("commit")
 		if err = commitTx(tx); err != nil {
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
@@ -369,12 +388,14 @@ func FlushQueue() {
 
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
 	diagnostic.Stage("notify index completion")
+	timing.Stage("notify")
 	util.BroadcastByType("main", "databaseIndexCommit", 0, "", backlinkChange.data())
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
 
 	// 刷新期间追加的操作仍在内存队列中，磁盘队列仅用于进程重启恢复，不能在这里重复执行。
 	diagnostic.Stage("persist index queue completion")
+	timing.Stage("persist_queue")
 	clearIndexQueue(indexSnapshot)
 }
 

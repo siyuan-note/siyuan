@@ -22,7 +22,7 @@ func TestDocumentTypeFilterFromSettings(t *testing.T) {
 	}
 }
 
-func documentSearchRows(t *testing.T, database *gosql.DB, statement string, args []any) [][]any {
+func documentSearchRows(t testing.TB, database *gosql.DB, statement string, args []any) [][]any {
 	t.Helper()
 	rows, err := database.Query(statement, args...)
 	if err != nil {
@@ -54,6 +54,57 @@ func documentSearchRows(t *testing.T, database *gosql.DB, statement string, args
 		t.Fatal(err)
 	}
 	return result
+}
+
+// BenchmarkDocumentSearch 固定每篇 100 块、跨块双词命中和 50 篇分页，测量热内存库查询及精确计数。
+func BenchmarkDocumentSearch(b *testing.B) {
+	setSearchCaseSensitive(b, false)
+	for _, size := range []int{10000, 100000, 1000000} {
+		b.Run(fmt.Sprint(size), func(b *testing.B) {
+			database := newSearchHPathTestDB(b)
+			if _, err := database.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)"); err != nil {
+				b.Fatal(err)
+			}
+			tx, err := database.Begin()
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer tx.Rollback()
+			insert, err := tx.Prepare("INSERT INTO blocks VALUES (?, '', ?, '', '20261019000000-box0001', ?, '', '', '', '', '', ?, '', '', 32, ?, '', '', 0, '20261019000000', '20261019000000')")
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer insert.Close()
+			for i := range size {
+				rootID := fmt.Sprintf("20261019000000-%07d", (i/100)*100)
+				content, typ := "common text repeated for baseline", "p"
+				switch i % 100 {
+				case 0:
+					typ = "d"
+				case 1:
+					content = "alpha content across blocks"
+				case 2:
+					content = "beta content across blocks"
+				}
+				if _, err = insert.Exec(fmt.Sprintf("20261019000000-%07d", i), rootID, "/"+rootID+".sy", content, typ); err != nil {
+					b.Fatal(err)
+				}
+			}
+			if err = tx.Commit(); err != nil {
+				b.Fatal(err)
+			}
+			statement := buildDocumentSearchStatement("alpha beta", []string{"alpha", "beta"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				rows := documentSearchRows(b, database, statement, nil)
+				if len(rows) != 50 {
+					b.Fatalf("expected 50 documents matching keywords across blocks, got %d", len(rows))
+				}
+			}
+			b.ReportMetric(float64(size), "blocks/op")
+		})
+	}
 }
 
 func TestDocumentSearchPartialIndexResults(t *testing.T) {

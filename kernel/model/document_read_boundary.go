@@ -15,6 +15,7 @@ func loadDocumentAtTransactionBoundary(id, boxID string, timing *util.Performanc
 	}
 	if source != nil {
 		timing.Count("source_snapshot", 1)
+		timing.Stage("parse_source")
 		return source.Parse(util.NewLute())
 	}
 	// 完整加载可能涉及生命周期等待、格式订正与补建父文档，沿用全局完成等待及原有锁顺序。
@@ -36,14 +37,16 @@ func captureDocumentSourceAtTransactionBoundary(id, boxID string, timing *util.P
 			return
 		}
 		source, err = filesys.CaptureCachedTreeSource(bt.BoxID, bt.Path)
-	})
+	}, timing)
 	return
 }
 
-func readAtTransactionBoundary(read func()) {
+func readAtTransactionBoundary(read func(), timing *util.Performance) {
+	timing.Stage("wait_transactions")
 	flushLock.RLock()
 	if txQueueSize() == 0 {
 		defer flushLock.RUnlock()
+		timing.Count("flushed_transactions", 0)
 		read()
 		return
 	}
@@ -54,7 +57,10 @@ func readAtTransactionBoundary(read func()) {
 		isFlushing.Store(false)
 		flushLock.Unlock()
 	}()
-	for _, transaction := range takeQueuedTransactions() {
+	timing.Stage("flush_transactions")
+	transactions := takeQueuedTransactions()
+	timing.Count("flushed_transactions", int64(len(transactions)))
+	for _, transaction := range transactions {
 		flushTx(transaction)
 	}
 	read()

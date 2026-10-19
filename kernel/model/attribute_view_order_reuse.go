@@ -29,22 +29,24 @@ func planAttributeViewOrderReuse(attrView *av.AttributeView, view *av.View, node
 		return nil
 	}
 	// 实际内存值也参与指纹，避免预览或临时编辑沿用持久化源版本下的旧顺序。
-	// 分块编码保留完整输入覆盖，避免为大型视图生成另一份完整 JSON 临时副本。
+	// 常见值以带长度边界的字节流编码，其他值分块使用完整 JSON。
 	digest := sha256.New()
 	encoder := json.NewEncoder(digest)
 	definition := *attrView
 	definition.KeyValues = nil
 	err := encoder.Encode(struct {
+		Format              string
 		Data                *av.AttributeView
 		View                *av.View
 		Carrier, Language   string
 		Writable            bool
 		Version, Generation uint64
 		KeyValues           int
-	}{&definition, view, nodeID, util.Lang, writable, version, generation, len(attrView.KeyValues)})
+	}{"stream1", &definition, view, nodeID, util.Lang, writable, version, generation, len(attrView.KeyValues)})
 	if err != nil {
 		return nil
 	}
+	valuesDigest := attributeViewOrderFingerprint{digest: digest}
 	for _, values := range attrView.KeyValues {
 		if err = encoder.Encode(struct {
 			Key   *av.Key
@@ -53,10 +55,8 @@ func planAttributeViewOrderReuse(attrView *av.AttributeView, view *av.View, node
 		}{values.Key, len(values.Values), values.Values == nil}); err != nil {
 			return nil
 		}
-		for start := 0; start < len(values.Values); start += 128 {
-			if err = encoder.Encode(values.Values[start:min(start+128, len(values.Values))]); err != nil {
-				return nil
-			}
+		if err = valuesDigest.writeValues(encoder, values.Values); err != nil {
+			return nil
 		}
 	}
 	var fingerprint [32]byte

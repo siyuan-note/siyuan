@@ -17,7 +17,7 @@
 | 操作 | 阶段边界和计数 |
 |---|---|
 | `transaction` | 开始、自动化、应用操作、整理、提交；操作数 |
-| `document.load` | 事务边界、捕获/加载/解析树、定位块、渲染响应；块数；`source_snapshot = 1` 表示普通缓存来源在事务锁外解析 |
+| `document.load` | `wait_transactions` 等待串行边界、`flush_transactions` 执行捕获批次、`load_tree` 捕获或完整加载、`parse_source` 在锁外解析缓存来源，之后定位块及渲染响应；块数、`flushed_transactions` 为本次读取主动执行的事务数，`source_snapshot = 1` 表示使用普通缓存来源 |
 | `document.save` | 准备/序列化、加密、比对、写入、通知；待保存字节数和实际写入字节数 |
 | `index.flush` | 等锁、提取队列、开始/执行/提交、通知、持久化队列完成状态；批次大小和最老入队任务的等待时间 |
 | `index.update` | 主块及完整附属投影、块比较、附属索引比较、写入；`blocks_total` 为已有索引块数，`blocks_projected` 为生成的主块数，`changeset = 1` 表示采用事务提示；变化块数、计划删除及插入的附属记录数 |
@@ -40,15 +40,19 @@
 
 普通缓存文档的打开先等待串行执行锁，包括已从队列取出但仍在执行的事务。有排队任务时，完成取得该锁后捕获的单个批次，并在释放锁前取得文档来源；该批次之后新到达的事务不会把这条路径延长到全局队列清空。空队列捕获可以共享读锁。写入、撤销/重放及既有全局刷新操作保持原有完成规则；这是全局编辑边界，尚未按文档路由事务。
 
+`wait_transactions` 包含其他写入已经开始执行时的锁等待；`flush_transactions` 和 `flushed_transactions` 只归属本次读取主动提取并执行的批次，不能将此前的在途事务计入该计数。这些记录用于区分等待、执行排队工作和来源处理的成本，不表示已经证明可以跳过其他文档事务。
+
 普通缓存文档在该边界复制独立解压的来源字节和父级标题，释放事务锁后再解析和渲染。后续编辑、移动、缓存失效或父文档改名不会改变已捕获来源，解析也不会重建之后被移除的文件。快照只用于本次读取，不新增常驻缓存。加密文档、缓存未命中及父链需要订正的情况继续使用原有全局队列等待和完整加载，包含认证、兼容订正和索引刷新；等待/加载前释放事务锁以保留生命周期锁顺序，这些回退路径没有有限批次保证。复制来源和读取父级标题也有随输入增长的成本。SQL 派生的引用计数、虚拟引用及其他响应元数据保持原有异步索引行为，这不是文件系统、SQL 和同步的联合快照。
 
 主块投影在每次投影内按物理兄弟列表统一解析标题父级。全部由已跟踪 `update` 操作构成的事务，可提供变更及删除子树的块 ID 和受影响容器。标题结构、行级 HTML、未跟踪写入、缺失或变化的根元数据，以及其他事务操作继续完整主块投影。队列只在同一笔记本、文档和路径内合并提示，保留删除、移动、重命名及其他索引操作的有序边界。提示只存在于进程内存，恢复时从完整已认证源文件执行幂等的完整更新。完整附属投影和整篇 `.sy` 的保存方式保持不变。
 
-视图顺序复用只用于实时普通源、至少 512 个游离条目、静态字段，以及分页前必须计算的封闭纯模板。覆盖表格、列表和无封面的画廊；查询、分组、上下文筛选、目标定位、汇总、日期/时间、关联、汇总字段、资源及外部或动态依赖继续原路径。普通视图及模板全部仅用于显示的视图不计算顺序指纹。键包含源版本和缓存代次、实际数据和视图定义、载体、语言及写入范围，临时数据或排序变化产生不同键。指纹分块编码属性值，仍校验并哈希完整输入，源数据解析也仍随源大小增长。
+视图顺序复用只用于实时普通源、至少 512 个游离条目、静态字段，以及分页前必须计算的封闭纯模板。覆盖表格、列表和无封面的画廊；查询、分组、上下文筛选、目标定位、汇总、日期/时间、关联、汇总字段、资源及外部或动态依赖继续原路径。普通视图及模板全部仅用于显示的视图不计算顺序指纹。键包含源版本和缓存代次、实际数据和视图定义、载体、语言及写入范围，临时数据或排序变化产生不同键。常见块、纯文本和模板值使用包含类型、指针存在性和长度边界的流式指纹，其余值继续分块编码完整 JSON，缓冲区不随单个普通字段内容增长。回归检查要求新增持久化值字段同时更新指纹覆盖。该表示只用于进程内缓存键，仍校验并哈希完整输入，源数据解析也仍随源大小增长；不能只以已保存的源版本判断临时值未变。
 
 顺序缓存只保留独立的不可变 ID 字符串，最多 16 个条目，逻辑字节预算为 4 MiB，包含元数据。命中后重新生成当前页的值，不共享渲染对象。既有源替换/删除及全局清理使顺序失效，并拒绝旧版本在途请求写回。加密源、历史路径和内存快照不进入该缓存。命中可减少重复的字段求值、筛选和排序，但不能让整个请求只与页大小相关。应分别对照首次开销、后续翻页和高频修改工作负载。
 
 精确计数复用只用于没有自定义忽略 SQL 的固定普通 FTS 查询。计数 SQL 和绑定字符串参数标识查询及范围；数据库、原生连接身份和 SQLite 的 `data_version`、`total_changes()`、`schema_version` 标识索引状态，版本只在同一连接上比较。自身写入及其他连接提交使复用失效，回滚可能造成无害的未命中。结果行和计数使用同一读取快照，建立快照前后的版本采样会在边界变化时停用复用，不按 TTL 推断正确性。计数缓存固定 512 个槽位，占用低于 128 KiB，不保留查询正文。关闭/重建数据库和 SQL 缓存清理拒绝旧请求准入。加密查询、自定义 SQL 和动态忽略条件保持原路径。取消释放快照及预留连接。参见 SQLite 的[版本语义](https://sqlite.org/pragma.html#pragma_data_version)和[快照隔离](https://sqlite.org/isolation.html)。
+
+搜索取消传入单块字段高亮和文档关键词归属判断。至多 4 KiB 的文本保留整段匹配，之后在生成高亮时检查取消。更大的可取消字面高亮按 64 KiB 窗口扫描，保留最长关键字的 UTF-8 重叠区，在每个匹配之间检查取消，并避免重复收集临时匹配数组；跨窗口、大小写、繁简和空匹配与完整匹配保持一致。取消不会返回未完成的字段或结果集合。结果加工只生成实际使用的高亮，需要相似度分数的其他调用保持原评分。正则编译、任意正则的单次匹配、整树或数据库定义解析及底层文件读取等单次内部调用仍非可抢占操作，因此没有统一的取消延迟上限。
 
 将内核与浏览器采样分别导出为 UTF-8 文件。在 `app/` 下汇总每次运行：
 
@@ -70,6 +74,9 @@ go test -tags fts5 ./sql -run '^$' -bench '^BenchmarkUpsertTreeAuxiliaryIndexes$
 go test ./model -run '^$' -bench '^BenchmarkDatabaseTemplateDependencies$' -benchmem -benchtime=200ms -count=3
 go test -tags fts5 ./sql -run '^$' -bench '^BenchmarkIndexProjection$' -benchmem -benchtime=200ms -count=3
 go test ./model -run '^$' -bench '^BenchmarkDatabaseViewOrderReuse$' -benchmem -benchtime=200ms -count=3
+go test ./model -run '^$' -bench '^BenchmarkAttributeViewOrderFingerprint$' -benchmem -benchtime=300ms -count=3
+go test ./search -run '^$' -bench '^BenchmarkMarkTextContext$' -benchmem -benchtime=200ms -count=3
+go test ./model -run '^$' -bench '^BenchmarkSearchProcessingContext$' -benchmem -benchtime=300ms -count=3
 go test -tags fts5 ./sql -run '^$' -bench '^BenchmarkFTSExactCountReuse$' -benchmem -benchtime=200ms -count=3
 go test -tags 'fts5 sqlcipher' ./model -run '^$' -bench '^Benchmark(DocumentReadBoundarySource|DocumentReadBoundaryEmpty|FlushTxQueueEmpty)$' -benchmem -benchtime=1s -count=3
 go test -tags 'fts5 sqlcipher' ./model -run '^$' -bench '^BenchmarkDocument(SearchCandidates|CandidateIndexWrite)$' -benchmem -benchtime=200ms -count=3
@@ -84,12 +91,31 @@ go test -tags 'fts5 sqlcipher' ./model -run '^$' -bench '^BenchmarkDocument(Sear
 | `BenchmarkDatabaseTemplateDependencies` | 1 千 / 1 万 / 5 万个游离条目，筛选/排序需要两个有依赖关系的模板，另有五个显示模板，每页 50 条 | 完整计算与按依赖计算对照，包含计划构建、字段渲染、筛选/排序和分页；每次迭代清除已渲染集合缓存 |
 | `BenchmarkIndexProjection` | 1 千 / 5 千 / 2 万个段落，一处普通正文变化 | 独立标题父级查找、请求内统一解析，以及两个主块投影对照；均包含完整附属投影，不含 SQL 写入 |
 | `BenchmarkDatabaseViewOrderReuse` | 100 / 1 千 / 1 万 / 5 万个游离条目，使用同一模板依赖夹具，每页 50 条 | 源解析及完整处理、顺序未命中或顺序复用；内容相同的对照快照共用原始/规范化缓存，但不参与跨请求复用；冷模式改变临时视图名称，包含指纹及准入成本 |
+| `BenchmarkAttributeViewOrderFingerprint` | 1 千 / 1 万 / 5 万条，同一模板依赖夹具，固定已解析的普通来源 | 资格检查、依赖规划及完整指纹；不含源解析或页面渲染，不能将其与独立整页基准的中位数精确相减 |
+| `BenchmarkMarkTextContext` | 20 / 2 万次重复 `alpha & beta `，匹配 `alpha` | 无取消来源与可取消来源的完整高亮；可取消来源在测量期间保持有效，用于评估正常请求的检查成本 |
+| `BenchmarkSearchProcessingContext` | 单个块的正文及首子块文本包含 20 / 2 万次重复 `alpha & beta `，并包含名称、别名、备注、标签和路径 | 有效可取消请求的完整块结果加工；包含高亮、截断及转义，不含查询、计数或前端 |
 | `BenchmarkFTSExactCountReuse` | 1 千 / 1 万 / 10 万 / 100 万个块，每篇 100 块；全部、0.1% 或无块命中，取前 50 块 | 热内存 FTS 行解码及精确块/文档计数；无缓存的分开读取与冷/热快照计数对照，冷模式包含缓存清理 |
 | `BenchmarkDocumentReadBoundarySource` | 1 千 / 5 千 / 2 万个扁平段落，每块 128 字节 ASCII 正文 | 单独捕获来源，或全局刷新与读取边界下的完整加载；热模式使用正文缓存，冷模式每次移除正文缓存；均复用操作系统文件缓存，不含排队积压和响应渲染 |
 | `BenchmarkDocumentSearchCandidates` | 1 万 / 10 万 / 100 万个块，每篇 100 块；全部文档、一篇文档或无文档命中 | 无候选、扫描块以生成根 ID，以及预建文档 trigram 索引三条路径的完整文档查询、计数和行解码；`candidate_build_ms` 和 `candidate_bytes` 单独记录索引构建和 SQLite 页面增长 |
 | `BenchmarkDocumentCandidateIndexWrite` | 一篇文档包含 100 / 1 千 / 2 万个块；交替修改一个块的 SQL 正文 | 单块表更新/提交，与该更新加全文档聚合及 trigram 替换对照；不含文档序列化、文件写入和产品已有块 FTS 更新；SQLite 改动包含索引内部写入 |
 
 可通过子基准筛选缩小规模，例如 `-bench '^BenchmarkDocumentSearch$/^10000$'`。数据库建立和夹具生成不在计时循环内。显示/模板基准在迭代间复用属性视图，顺序复用基准每次解析新视图；原始/规范化源缓存均已预热，不代表冷启动打开。`-benchmem` 测量 Go 分配，不是 SQLite 原生分配或总 RSS。基准结果是对应路径的基线，不是应用延迟或整体提速结论。FTS 必须包括低命中及无命中查询，因为版本/快照校验可能比它们的少量计数更贵。
+
+## 指纹与结果加工对照
+
+2026-10-19，在基于 `9539ed7d` 的后续工作树上，使用 Windows amd64、Intel i7-8750H、Go 1.27.2 及 `fts5 sqlcipher` 测量。对照通过 Go 源码覆盖恢复原指纹规划器，或恢复原搜索结果加工及高亮实现，其余代码和夹具一致。视图夹具为九个字段，其中两个模板依赖用于筛选/排序、五个模板仅用于显示，每页 50 条；每项为三组、每组执行三次后的中位数。结果加工使用 `BenchmarkSearchProcessingContext`，每组运行至少 300 ms，重复三组。
+
+| 路径 | 原实现 | 后续实现 |
+|---|---|---|
+| 1 千行，顺序缓存命中 | 41.6 ms | 25.8 ms |
+| 1 万行，顺序缓存命中 | 281 ms | 177 ms |
+| 1 万行，顺序缓存未命中 | 949 ms | 727 ms |
+| 1 万行，不复用顺序的对照路径 | 710 ms | 706 ms |
+| 260 字节正文的完整结果加工 | 38.3 µs | 34.4 µs |
+| 26 万字节正文的完整结果加工 | 25.7 ms | 21.7 ms |
+| 26 万字节正文，结果加工 Go 分配量 | 10.0 MB/op | 7.81 MB/op |
+
+单独的万行资格检查、依赖规划及完整指纹基准约为 42 ms，来源解析不包含在内。空队列事务边界约为 29 ns/op、零分配。顺序缓存未命中指临时视图名称改变，不是操作系统冷文件缓存。三组样本仍有波动，以上只说明固定路径的成本变化，不代表 P95、真实工作区交互、进程峰值内存或只与页大小相关的处理。
 
 ## 文档候选实验
 
@@ -140,7 +166,10 @@ go test ./util -run Performance -count=1
 go test -tags fts5 ./sql -run 'TestAuxiliary|TestUpsertTree|TestStaticTemplateKeyDependencies' -count=1
 go test ./model -run 'TestAttributeViewTemplatePlan|TestRenderAttributeViewUsesTemplateDependencyPlan|TestShouldDeferAttributeViewTemplateValues|TestRenderAttributeViewDefersDisplayOnlyTemplatesUntilAfterPagination' -count=1
 go test -tags 'fts5 sqlcipher' ./sql -run '^TestAuxiliaryIndexEncryptedUpdateAndReopen$' -count=1
-go test -tags 'fts5 sqlcipher' ./sql ./model -run 'TestTreeIndexChanges|TestIndexHeading|TestIndexProjection|TestTransactionIndexChanges|TestFTSCount|TestReusableTemplateKey|TestAttributeViewOrderReuse' -count=1
+go test -tags 'fts5 sqlcipher' ./sql ./model -run 'TestTreeIndexChanges|TestIndexHeading|TestIndexProjection|TestTransactionIndexChanges|TestFTSCount|TestReusableTemplateKey|TestAttributeViewOrder' -count=1
+go test ./search -run 'TestMarkTextContext' -count=1
+go test -tags 'fts5 sqlcipher' ./model -run 'TestSearchProcessing' -count=1
+go test ./search -run '^$' -fuzz '^FuzzMarkTextContextMatchesComplete$' -fuzztime=20s -parallel=2
 go test -race ./cache -run TestAVOrderedIDs -count=1
 go test -tags 'fts5 sqlcipher' ./model ./filesys -run 'TestDocumentReadBoundary|TestCachedTreeSource|TestAssetRelinkLockCancels|TestDocumentSearchCandidate' -count=1
 go test -race -tags 'fts5 sqlcipher' ./model ./filesys -run 'TestDocumentReadBoundary|TestCachedTreeSource|TestAssetRelinkLockCancels|TestQueuedTransactionWaitForCommit|TestFlushTxQueueWaitsForDequeuedTransaction|TestWaitForSubmittedTransactionBatch|TestTransactionCompletion' -count=1

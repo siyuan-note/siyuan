@@ -41,6 +41,9 @@ func compactAttributeViewSearchResultsContext(ctx context.Context, blocks []*Blo
 			continue
 		}
 		tree, err := LoadTreeByBlockIDInExactBox(block.ID, block.Box)
+		if ctx.Err() != nil {
+			return
+		}
 		if nil != err || nil == tree {
 			continue
 		}
@@ -53,6 +56,9 @@ func compactAttributeViewSearchResultsContext(ctx context.Context, blocks []*Blo
 			avBox = tree.Box
 		}
 		attrView, err := av.ParseAttributeViewForIndexInBox(node.AttributeViewID, avBox)
+		if ctx.Err() != nil {
+			return
+		}
 		if nil != err || nil == attrView {
 			continue
 		}

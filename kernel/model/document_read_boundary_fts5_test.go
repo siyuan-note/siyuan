@@ -208,7 +208,7 @@ func TestDocumentReadBoundaryReturnsBeforeLaterWriteAndKeepsUndoCompletion(t *te
 		queued := []*Transaction{later}
 		PerformTransactions(&queued)
 		snapshot, err = loadTreeByBlockIDInBox0(fixture.childID, "", false)
-	})
+	}, nil)
 	if err != nil || treenode.GetNodeInTree(snapshot, fixture.childID).Text() != "captured source" {
 		t.Fatalf("read did not retain the source at its boundary: %v", err)
 	}

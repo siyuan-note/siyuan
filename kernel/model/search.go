@@ -2669,16 +2669,24 @@ func loadFTSAndHPathMatchBlocks(ctx context.Context, matches []ftsAndHPathMatch,
 		if nil == sqlBlock {
 			continue
 		}
-		ret = append(ret, fromFTSAndHPathMatchSQLBlock(sqlBlock, match.source, rawQuery, beforeLen))
+		block := fromFTSAndHPathMatchSQLBlockContext(ctx, sqlBlock, match.source, rawQuery, beforeLen)
+		if err = ctx.Err(); err != nil {
+			return nil, err
+		}
+		ret = append(ret, block)
 	}
 	return
 }
 
 func fromFTSAndHPathMatchSQLBlock(sqlBlock *sql.Block, source int, rawQuery string, beforeLen int) *Block {
+	return fromFTSAndHPathMatchSQLBlockContext(context.Background(), sqlBlock, source, rawQuery, beforeLen)
+}
+
+func fromFTSAndHPathMatchSQLBlockContext(ctx context.Context, sqlBlock *sql.Block, source int, rawQuery string, beforeLen int) *Block {
 	if 0 == source {
-		return fromSQLBlockWithHPathTerms(sqlBlock, "", "", beforeLen)
+		return fromSQLBlockWithHPathTermsContext(ctx, sqlBlock, "", "", beforeLen)
 	}
-	return fromHPathSearchSQLBlock(sqlBlock, rawQuery, beforeLen)
+	return fromSQLBlockWithHPathTermsContext(ctx, sqlBlock, "", rawQuery, beforeLen)
 }
 
 func queryFTSSnippetBlocksByRowID(ctx context.Context, query string, rowIDs []int64, boxID string) (ret map[int64]*sql.Block, err error) {
@@ -2897,11 +2905,14 @@ func fullTextSearchByLikeWithRootInBox(ctx context.Context, query, boxFilter, pa
 		}
 		if 1 == result[i]["matchSource"].(int64) {
 			docContent, _ := result[i]["docContent"].(string)
-			contentTerms, hPathTerms := partitionSearchTerms(docContent, terms)
-			ret = append(ret, fromHPathSearchSQLBlockWithContentTerms(resultBlock, hPathTerms, contentTerms, beforeLen))
+			contentTerms, hPathTerms := partitionSearchTermsContext(ctx, docContent, terms)
+			ret = append(ret, fromSQLBlockWithHPathTermsContext(ctx, resultBlock, contentTerms, hPathTerms, beforeLen))
 		} else {
-			ret = append(ret, fromSQLBlockWithHPathTerms(resultBlock, terms, "", beforeLen))
+			ret = append(ret, fromSQLBlockWithHPathTermsContext(ctx, resultBlock, terms, "", beforeLen))
 		}
+	}
+	if ctx.Err() != nil {
+		return nil, 0, 0
 	}
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -3128,6 +3139,13 @@ func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) 
 }
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
+	return markSearchContext(context.Background(), text, keyword, beforeLen, true)
+}
+
+func markSearchContext(ctx context.Context, text, keyword string, beforeLen int, scoreResult bool) (marked string, score float64) {
+	if ctx.Err() != nil {
+		return
+	}
 	confSearchSnapshot := Conf.LoadSearch()
 
 	if 0 == len(keyword) {
@@ -3143,13 +3161,19 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 		keyword = strings.Join(keywords, search.TermSep)
 		marked = strings.ReplaceAll(text, search.SearchMarkLeft, "")
 		marked = strings.ReplaceAll(marked, search.SearchMarkRight, "")
-		_, marked = search.MarkText(marked, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
+		_, marked = search.MarkTextContext(ctx, marked, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
+		if ctx.Err() != nil {
+			return "", 0
+		}
 		marked = util.EscapeHTML(marked)
 		return
 	}
 
-	pos, marked := search.MarkText(text, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
-	if -1 < pos {
+	pos, marked := search.MarkTextContext(ctx, text, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
+	if ctx.Err() != nil {
+		return "", 0
+	}
+	if scoreResult && -1 < pos {
 		if 0 == pos {
 			score = 1
 		}
@@ -3162,14 +3186,24 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 }
 
 func partitionSearchTerms(text, terms string) (matched, unmatched string) {
+	return partitionSearchTermsContext(context.Background(), text, terms)
+}
+
+func partitionSearchTermsContext(ctx context.Context, text, terms string) (matched, unmatched string) {
 	var matchedTerms, unmatchedTerms []string
 	for _, term := range search.SplitKeyword(terms) {
-		pos, _ := search.MarkText(text, term, -1, Conf.Search.Load().CaseSensitive)
+		if ctx.Err() != nil {
+			return "", ""
+		}
+		pos, _ := search.MarkTextContext(ctx, text, term, -1, Conf.Search.Load().CaseSensitive)
 		if -1 < pos {
 			matchedTerms = append(matchedTerms, term)
 		} else {
 			unmatchedTerms = append(unmatchedTerms, term)
 		}
+	}
+	if ctx.Err() != nil {
+		return "", ""
 	}
 	return strings.Join(matchedTerms, search.TermSep), strings.Join(unmatchedTerms, search.TermSep)
 }
@@ -3183,7 +3217,11 @@ func fromSQLBlocksContext(ctx context.Context, sqlBlocks *[]*sql.Block, terms st
 		if ctx.Err() != nil {
 			return nil
 		}
-		ret = append(ret, fromSQLBlock(sqlBlock, terms, beforeLen))
+		block := fromSQLBlockWithHPathTermsContext(ctx, sqlBlock, terms, terms, beforeLen)
+		if ctx.Err() != nil {
+			return nil
+		}
+		ret = append(ret, block)
 	}
 	return
 }
@@ -3193,7 +3231,11 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 }
 
 func fromSQLBlockWithHPathTerms(sqlBlock *sql.Block, contentTerms, hPathTerms string, beforeLen int) (block *Block) {
-	if nil == sqlBlock {
+	return fromSQLBlockWithHPathTermsContext(context.Background(), sqlBlock, contentTerms, hPathTerms, beforeLen)
+}
+
+func fromSQLBlockWithHPathTermsContext(ctx context.Context, sqlBlock *sql.Block, contentTerms, hPathTerms string, beforeLen int) (block *Block) {
+	if nil == sqlBlock || ctx.Err() != nil {
 		return
 	}
 
@@ -3211,9 +3253,15 @@ func fromSQLBlockWithHPathTerms(sqlBlock *sql.Block, contentTerms, hPathTerms st
 		}
 	}
 
-	content, _ = markSearch(content, contentTerms, beforeLen)
+	content, _ = markSearchContext(ctx, content, contentTerms, beforeLen, false)
+	if ctx.Err() != nil {
+		return nil
+	}
 	content = maxContent(content, 5120)
-	tag, _ := markSearch(sqlBlock.Tag, contentTerms, beforeLen)
+	tag, _ := markSearchContext(ctx, sqlBlock.Tag, contentTerms, beforeLen, false)
+	if ctx.Err() != nil {
+		return nil
+	}
 	markdown := maxContent(sqlBlock.Markdown, 5120)
 	fContent := util.EscapeHTML(sqlBlock.FContent) // fContent 会用于和 content 对比，在反链计算时用于判断是否是列表项下第一个子块，所以也需要转义 https://github.com/siyuan-note/siyuan/issues/11001
 	block = &Block{
@@ -3249,21 +3297,27 @@ func fromSQLBlockWithHPathTerms(sqlBlock *sql.Block, contentTerms, hPathTerms st
 	if "" != hPathTerms {
 		hPathBeforeLen = -1
 	}
-	markBlockHPath(block, sqlBlock.HPath, hPathTerms, hPathBeforeLen)
-	if "" != block.Name {
-		block.Name, _ = markSearch(block.Name, contentTerms, 256)
+	markBlockHPathContext(ctx, block, sqlBlock.HPath, hPathTerms, hPathBeforeLen)
+	for _, field := range []*string{&block.Name, &block.Alias, &block.Memo} {
+		if ctx.Err() != nil {
+			return nil
+		}
+		if *field != "" {
+			*field, _ = markSearchContext(ctx, *field, contentTerms, 256, false)
+		}
 	}
-	if "" != block.Alias {
-		block.Alias, _ = markSearch(block.Alias, contentTerms, 256)
-	}
-	if "" != block.Memo {
-		block.Memo, _ = markSearch(block.Memo, contentTerms, 256)
+	if ctx.Err() != nil {
+		return nil
 	}
 	return
 }
 
 func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
-	hPath, _ = markSearch(hPath, terms, beforeLen)
+	markBlockHPathContext(context.Background(), block, hPath, terms, beforeLen)
+}
+
+func markBlockHPathContext(ctx context.Context, block *Block, hPath, terms string, beforeLen int) {
+	hPath, _ = markSearchContext(ctx, hPath, terms, beforeLen, false)
 	if !strings.HasPrefix(hPath, "/") {
 		hPath = "/" + hPath
 	}

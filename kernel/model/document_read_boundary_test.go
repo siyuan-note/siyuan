@@ -15,7 +15,7 @@ func TestDocumentReadBoundarySharesReadsAndExcludesWrites(t *testing.T) {
 	var readers sync.WaitGroup
 	for range 2 {
 		readers.Go(func() {
-			readAtTransactionBoundary(func() { entered <- struct{}{}; <-resume })
+			readAtTransactionBoundary(func() { entered <- struct{}{}; <-resume }, nil)
 		})
 	}
 	for range 2 {
@@ -58,7 +58,7 @@ func TestDocumentReadBoundaryFinishesCapturedBatchAndLeavesLaterTransactions(t *
 			next := []*Transaction{later}
 			PerformTransactions(&next)
 			observed <- finished(first) && finished(second) && !finished(later)
-		})
+		}, nil)
 		close(readDone)
 	}()
 	flushLock.Unlock()
@@ -77,7 +77,7 @@ func TestDocumentReadBoundaryReleasesLockAfterReadPanic(t *testing.T) {
 				t.Error("read panic was unexpectedly swallowed")
 			}
 		}()
-		readAtTransactionBoundary(func() { panic("injected snapshot read failure") })
+		readAtTransactionBoundary(func() { panic("injected snapshot read failure") }, nil)
 	}()
 	if !flushLock.TryLock() {
 		t.Fatal("failed source capture retained the transaction lock")
@@ -89,6 +89,6 @@ func BenchmarkDocumentReadBoundaryEmpty(b *testing.B) {
 	FlushTxQueue()
 	b.ReportAllocs()
 	for b.Loop() {
-		readAtTransactionBoundary(func() {})
+		readAtTransactionBoundary(func() {}, nil)
 	}
 }

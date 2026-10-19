@@ -66,3 +66,22 @@ func BenchmarkDatabaseViewOrderReuse(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkAttributeViewOrderFingerprint(b *testing.B) {
+	for _, size := range []int{1000, 10000, 50000} {
+		b.Run(fmt.Sprint(size), func(b *testing.B) {
+			load := setupAttributeViewOrderReuseFixture(b, av.LayoutTypeTable, size, 5)
+			database := load()
+			view := database.Views[0]
+			checkAttrView(database, view)
+			upgradeAttributeViewSpec(database)
+			b.ReportAllocs()
+			for b.Loop() {
+				if planAttributeViewOrderReuse(database, view, "", false) == nil {
+					b.Fatal("eligible source did not produce a fingerprint")
+				}
+			}
+			b.ReportMetric(float64(size), "rows/op")
+		})
+	}
+}

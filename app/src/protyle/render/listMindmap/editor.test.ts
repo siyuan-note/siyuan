@@ -331,6 +331,22 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     imageEditor.editor.pasteImages(images);
     check.equal(imageEditor.state.uploads.length, 1, "closed editors do not accept another upload");
     await imageEditor.remove();
+    for (const resized of [false, true]) {
+        const current = create('<div data-node-id="image-body" data-type="NodeParagraph"><span data-type="img" class="img">' +
+            '<span class="protyle-image-container" style="width: 180px;"><img src="assets/image.png" alt="description"></span></span></div>');
+        const image = current.wysiwyg.querySelector("img");
+        image.closest(".img").classList.add("img--select", "img--drag");
+        image.parentElement.classList.add("protyle-image-container--compact");
+        image.parentElement.insertAdjacentHTML("beforeend", '<span class="protyle-image-resize"><span class="touch-resize-active"></span></span>');
+        if (resized) {
+            image.parentElement.style.width = "140px";
+        }
+        check.equal(await current.editor.finish(), true);
+        check.equal(current.state.saves.length, resized ? 1 : 0, "image UI changes alone do not create a content save");
+        check.equal(current.element.querySelector(".img--select, .img--drag, .protyle-image-resize, .protyle-image-container--compact"), null);
+        check.equal(current.element.querySelector("img").parentElement.style.width, resized ? "140px" : "180px");
+        await current.remove();
+    }
     // 关闭等待内层编辑结束时启动上传，也不能提前销毁外层编辑器。
     const uploadingEditor = create();
     const nestedGate = gate();

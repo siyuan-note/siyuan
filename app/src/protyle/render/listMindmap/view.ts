@@ -804,9 +804,10 @@ export class ListMindmapView {
                         });
                         // 富文本单元格的列表标记保留为只读内容，其他编辑控件不进入预览。
                         clone.querySelectorAll(".protyle-attr, .protyle-action:not(.li[data-table-cell-node] > .protyle-action), " +
-                            ".protyle-action__table, .protyle-icons, .mindmap-view")
+                            ".protyle-action__table, .protyle-icons, .protyle-image-resize, .mindmap-view")
                             .forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
+                            item.classList.remove("img--select", "img--drag", "protyle-image-container--compact");
                             // 页签预览使用独立 DOM 标识切换正文，不携带可提交事务的块身份。
                             if (["NodeTabs", "NodeTabItem"].includes(item.getAttribute("data-type"))) {
                                 item.id = this.previewID + item.getAttribute("data-node-id");

@@ -2039,8 +2039,14 @@ export class WYSIWYG {
                 const imageRect = dragElement.getBoundingClientRect();
                 const imageScale = imageRect.width / dragWidth || 1;
                 const imageMultiple = !imgElement.style.minWidth && nodeElement.style.textAlign !== "center" ? 1 : 2;
-                const imageMaxWidth = Math.max(17, (mostRight - imageRect.left -
-                    (imageMultiple === 2 ? imageRect.width / 2 : 0)) * imageMultiple / imageScale);
+                const mindmapNode = dragElement.tagName === "IMG" ?
+                    nodeElement.closest<HTMLElement>(".mindmap-view__node--editing") : null;
+                const mindmapStyle = mindmapNode ? getComputedStyle(mindmapNode) : null;
+                // 节点按内容撑开，当前编辑器宽度不能作为放大图片的上限。
+                const imageMaxWidth = Math.max(17, mindmapNode && Number.isFinite(parseFloat(mindmapStyle.maxWidth)) ?
+                    parseFloat(mindmapStyle.maxWidth) - parseFloat(mindmapStyle.paddingRight) - parseFloat(mindmapStyle.borderRightWidth) -
+                    (imageRect.left - mindmapNode.getBoundingClientRect().left) / imageScale :
+                    (mostRight - imageRect.left - (imageMultiple === 2 ? imageRect.width / 2 : 0)) * imageMultiple / imageScale);
                 const mermaidInsets = mermaidStyle?.boxSizing === "content-box" ?
                     parseFloat(mermaidStyle.paddingLeft) + parseFloat(mermaidStyle.paddingRight) +
                     parseFloat(mermaidStyle.borderLeftWidth) + parseFloat(mermaidStyle.borderRightWidth) : 0;
@@ -2053,7 +2059,8 @@ export class WYSIWYG {
                     imgElement.classList.add("img--drag");
                     img3115(imgElement);
                 }
-                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                const resizeEvents = new AbortController();
+                const resizeMove = (moveEvent: MouseEvent) => {
                     if (isMermaid) {
                         nodeElement.style.width = getImageResizeWidth(dragWidth, dragHeight,
                             (moveEvent.clientX - x) / mermaidScale, 0, "width", isCenter ? 2 : 1, mermaidMaxWidth) + "px";
@@ -2098,7 +2105,15 @@ export class WYSIWYG {
                     }
                 };
 
+                // 脑图编辑器会隔离冒泡事件；捕获阶段继续缩放，保留触摸桥接直接调用的接口。
+                documentSelf.addEventListener("mousemove", resizeMove, {capture: true, signal: resizeEvents.signal});
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    if (moveEvent.eventPhase === Event.NONE) {
+                        resizeMove(moveEvent);
+                    }
+                };
                 documentSelf.onmouseup = () => {
+                    resizeEvents.abort();
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
@@ -2112,6 +2127,7 @@ export class WYSIWYG {
                         updateTransaction(protyle, nodeElement, html);
                     }
                 };
+                documentSelf.addEventListener("mouseup", documentSelf.onmouseup, {capture: true, signal: resizeEvents.signal});
                 return;
             }
             // table cell select

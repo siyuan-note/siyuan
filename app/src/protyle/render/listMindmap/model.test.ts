@@ -959,6 +959,23 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(api.readListMindmap(list).nodes.get(editable.id).children.length, 2);
     check.equal(childList.outerHTML, childHTML);
 
+    // 图片编辑状态不进入脑图快照，单独的正文片段也要清理，并保留实际图片尺寸和说明。
+    const imageSnapshot = document.createElement("div");
+    imageSnapshot.innerHTML = lute.Md2BlockDOM('![description](assets/image.png "caption")');
+    const snapshotImage = imageSnapshot.querySelector("img");
+    snapshotImage.parentElement.className = "protyle-image-container";
+    snapshotImage.parentElement.style.width = "180px";
+    const cleanImage = api.cleanListMindmapHTML(imageSnapshot.innerHTML);
+    snapshotImage.closest(".img").classList.add("img--select", "img--drag");
+    snapshotImage.parentElement.classList.add("protyle-image-container--compact");
+    snapshotImage.parentElement.insertAdjacentHTML("beforeend", '<span class="protyle-image-resize">' +
+        '<span class="protyle-block-resize touch-resize-active" data-resize-axis="both"></span></span>');
+    check.equal(api.cleanListMindmapHTML(imageSnapshot.innerHTML), cleanImage);
+    for (const state of ["img--select", "img--drag"]) {
+        check.equal(api.cleanListMindmapHTML(`<span class="img ${state}"><img src="assets/image.png"></span>`),
+            '<span class="img"><img src="assets/image.png"></span>');
+    }
+
     // 渲染和编辑标记不会进入持久化 DOM，列表视图属性及关系线配置仍然保留。
     list.setAttribute("custom-sy-list-mindmap", "1");
     list.setAttribute("data-mindmap-view-rendered", "true");

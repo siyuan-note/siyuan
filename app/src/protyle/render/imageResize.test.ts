@@ -159,6 +159,68 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
             check.equal(root.querySelectorAll(".protyle-block-resize").length, 3, "replay does not duplicate controls");
         }
     }
+    // 脑图隔离冒泡事件，图片缩放仍需收到节点内部的移动和松开事件。
+    for (const isolated of [false, true]) {
+        const image = await create();
+        tap(image);
+        const events = new AbortController();
+        if (isolated) {
+            for (const type of ["mousemove", "mouseup"]) {
+                root.addEventListener(type, event => event.stopPropagation(), {signal: events.signal});
+            }
+        }
+        updates.length = 0;
+        const width = image.clientWidth;
+        begin(image, "width", new MouseEvent("mousedown", {clientX: 300, clientY: 200}));
+        image.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: 280, clientY: 200}));
+        check.equal(image.clientWidth, width - 20, "native movement resizes once, including inside an isolated editor");
+        image.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+        check.equal(updates.length, 1, "releasing inside the image commits one resize");
+        check.equal(image.closest(".img").classList.contains("img--drag"), false);
+        check.equal(image.parentElement.querySelector(".touch-resize-active"), null);
+        check.equal(document.onmousemove, null);
+        image.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: 260, clientY: 200}));
+        check.equal(image.clientWidth, width - 20, "release removes the capture listener");
+        events.abort();
+    }
+    const mindmapNode = document.createElement("div");
+    mindmapNode.className = "mindmap-view__node mindmap-view__node--editing";
+    mindmapNode.style.position = "relative";
+    document.body.append(mindmapNode);
+    mindmapNode.append(root);
+    root.style.width = "max-content";
+    root.style.maxWidth = "100%";
+    root.style.padding = "0";
+    const isolatedEvents = new AbortController();
+    for (const type of ["mousemove", "mouseup"]) {
+        mindmapNode.addEventListener(type, event => event.stopPropagation(), {signal: isolatedEvents.signal});
+    }
+    for (const scale of [0.65, 1, 1.5]) {
+        for (const centered of [false, true]) {
+            const image = await create();
+            mindmapNode.style.transform = `scale(${scale})`;
+            const block = root.firstElementChild as HTMLElement;
+            block.style.textAlign = centered ? "center" : "";
+            await settle();
+            updates.length = 0;
+            begin(image, "width", new MouseEvent("mousedown", {clientX: 300, clientY: 200}));
+            image.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+                clientX: 300 + 40 * scale / (centered ? 2 : 1), clientY: 200}));
+            check.equal(image.clientWidth, 240, "mindmap images can grow beyond the current editor width at every canvas scale");
+            image.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: 3000, clientY: 200}));
+            check.ok(image.clientWidth > 240 && image.clientWidth <= 288,
+                `enlarging respects the node maximum width and padding: width=${image.clientWidth}, scale=${scale}, centered=${centered}`);
+            check.equal(mindmapNode.offsetWidth, 300, "the image can fill the node up to its width limit");
+            image.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+            check.equal(updates.length, 1);
+            check.equal(document.onmousemove, null);
+        }
+    }
+    isolatedEvents.abort();
+    mindmapNode.replaceWith(root);
+    root.style.width = "";
+    root.style.maxWidth = "";
+    root.style.padding = "";
     const bridgeCore = {};
     new Function("exports", coreSource)(bridgeCore);
     const bridge = {} as {initTouchDragBridge: () => void};
@@ -169,6 +231,10 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     });
     Object.assign(window, {siyuan: {touchDragActive: false}});
     bridge.initTouchDragBridge();
+    const touchIsolation = new AbortController();
+    for (const type of ["mousemove", "mouseup"]) {
+        root.addEventListener(type, event => event.stopPropagation(), {signal: touchIsolation.signal});
+    }
     for (const axis of ["width", "height", "both"]) {
         const image = await create();
         tap(image);
@@ -208,6 +274,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         check.equal(handle.classList.contains("touch-resize-active"), false);
         check.equal(getComputedStyle(handle).visibility, "visible", "cancelling a drag preserves selected handles");
     }
+    touchIsolation.abort();
     for (const [width, height] of [[24, 12], [200, 20], [40, 100]]) {
         const compact = await create();
         compact.style.width = width + "px";

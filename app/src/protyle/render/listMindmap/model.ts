@@ -344,7 +344,10 @@ export const readListMindmap = (list: HTMLElement): ListMindmapModel => {
 };
 
 const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
-    root.querySelectorAll(".mindmap-view, .list-mindmap").forEach(element => element.remove());
+    root.querySelectorAll(".mindmap-view, .list-mindmap, .protyle-image-resize").forEach(element => element.remove());
+    root.querySelectorAll(".img--select, .img--drag, .protyle-image-container--compact").forEach(element => {
+        element.classList.remove("img--select", "img--drag", "protyle-image-container--compact");
+    });
     // 页签导航和面板标识由渲染器生成，不参与正文比较或脑图节点事务。
     root.querySelectorAll(".tabs-header, .tabs-divider, .tabs-attributes").forEach(element => element.remove());
     root.querySelectorAll('[data-type="NodeTabs"], [data-type="NodeTabItem"]').forEach(element => {
@@ -377,7 +380,8 @@ const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
 };
 
 export const cleanListMindmapHTML = (html: string): string => {
-    if (!html.includes("mindmap-view") && !html.includes("list-mindmap") && !html.includes("NodeTabs")) {
+    if (!html.includes("mindmap-view") && !html.includes("list-mindmap") && !html.includes("NodeTabs") &&
+        !html.includes("protyle-image") && !html.includes("img--select") && !html.includes("img--drag")) {
         return html;
     }
     const template = document.createElement("template");

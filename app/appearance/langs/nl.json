@@ -3351,6 +3351,7 @@
 		"417": "Het comprimeren van de agentcontext is mislukt. Je gesprek is bewaard; probeer het opnieuw: %s",
 		"418": "Dit model vereist dat de volledige geschiedenis van hulpmiddelaanroepen in de huidige beurt behouden blijft. Gebruik een model met een groter contextvenster of splits de taak op",
 		"419": "Het comprimeren van de agentcontext heeft de aanvraag- of tijdslimiet bereikt. Je gesprek is bewaard",
-		"420": "De cloudsynchronisatie-indexen (%s) kunnen niet worden weergegeven. Dit betekent niet dat de cloud leeg is. Controleer het netwerk, de synchronisatie-instellingen en de machtigingen voor het opvragen van de lijst."
+		"420": "De cloudsynchronisatie-indexen (%s) kunnen niet worden weergegeven. Dit betekent niet dat de cloud leeg is. Controleer het netwerk, de synchronisatie-instellingen en de machtigingen voor het opvragen van de lijst.",
+		"421": "Een andere werkruimte verwerkt updatepakketten. Controleer later opnieuw op updates"
 	}
 }

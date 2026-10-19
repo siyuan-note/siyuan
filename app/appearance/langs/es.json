@@ -3351,6 +3351,7 @@
 		"417": "La compresión del contexto del agente ha fallado. La conversación se ha conservado; inténtelo de nuevo: %s",
 		"418": "Este modelo exige conservar íntegro el historial de llamadas a herramientas del turno actual. Utilice un modelo con una ventana de contexto mayor o divida la tarea",
 		"419": "La compresión del contexto del agente ha alcanzado el límite de solicitudes o de tiempo. La conversación se ha conservado",
-		"420": "No se pueden listar los índices de sincronización en la nube (%s). Esto no significa que la nube esté vacía. Compruebe la red, la configuración de sincronización y los permisos para listar."
+		"420": "No se pueden listar los índices de sincronización en la nube (%s). Esto no significa que la nube esté vacía. Compruebe la red, la configuración de sincronización y los permisos para listar.",
+		"421": "Otro espacio de trabajo está procesando paquetes de actualización. Vuelva a buscar actualizaciones más tarde"
 	}
 }

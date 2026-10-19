@@ -3351,6 +3351,7 @@
 		"417": "Die Kontextkomprimierung des Agenten ist fehlgeschlagen. Ihr Gespräch wurde beibehalten; versuchen Sie es erneut: %s",
 		"418": "Dieses Modell benötigt den vollständigen Werkzeugverlauf des aktuellen Gesprächsschritts. Verwenden Sie ein Modell mit größerem Kontextfenster oder teilen Sie die Aufgabe auf",
 		"419": "Die Kontextkomprimierung des Agenten hat die Anfrage- oder Zeitgrenze erreicht. Ihr Gespräch wurde beibehalten",
-		"420": "Die Cloud-Synchronisierungsindizes (%s) können nicht aufgelistet werden. Dies bedeutet nicht, dass die Cloud leer ist. Prüfen Sie das Netzwerk, die Synchronisierungseinstellungen und die Berechtigungen zum Auflisten."
+		"420": "Die Cloud-Synchronisierungsindizes (%s) können nicht aufgelistet werden. Dies bedeutet nicht, dass die Cloud leer ist. Prüfen Sie das Netzwerk, die Synchronisierungseinstellungen und die Berechtigungen zum Auflisten.",
+		"421": "Ein anderer Arbeitsbereich verarbeitet Updatepakete. Bitte später erneut nach Updates suchen"
 	}
 }

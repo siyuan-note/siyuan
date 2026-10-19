@@ -90,7 +90,6 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
-	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(103), 1000*7)
 	success := false
 	for _, downloadPkgURL := range pkg.URLs {
 		err = downloadInstallPkg(downloadPkgURL, &pkg.Metadata)
@@ -101,6 +100,7 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 			break
 		}
 		if errors.Is(err, errInstallPackageDownloadBusy) {
+			util.PushUpdateMsg("update-pkg-downloading", Conf.Language(421), 7000)
 			return
 		}
 	}
@@ -189,6 +189,7 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 	}
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
+	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(103), 7000)
 	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute).DisableInsecureSkipVerify().SetUserAgent(util.UserAgent)
 	callback := func(info req.DownloadInfo) {
 		progress := fmt.Sprintf("%.2f%%", float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)

@@ -3351,6 +3351,7 @@
 		"417": "Kompresia kontextu agenta zlyhala. Konverzácia bola zachovaná; skúste to znova: %s",
 		"418": "Tento model vyžaduje zachovanie celej histórie volaní nástrojov v aktuálnom ťahu. Použite model s väčším kontextovým oknom alebo rozdeľte úlohu",
 		"419": "Kompresia kontextu agenta dosiahla limit požiadaviek alebo času. Konverzácia bola zachovaná",
-		"420": "Nepodarilo sa získať zoznam indexov synchronizácie v cloude (%s). To neznamená, že cloud je prázdny. Skontrolujte sieť, nastavenia synchronizácie a oprávnenia na zobrazenie zoznamu."
+		"420": "Nepodarilo sa získať zoznam indexov synchronizácie v cloude (%s). To neznamená, že cloud je prázdny. Skontrolujte sieť, nastavenia synchronizácie a oprávnenia na zobrazenie zoznamu.",
+		"421": "Iný pracovný priestor spracúva aktualizačné balíky. Skontrolujte aktualizácie znova neskôr"
 	}
 }

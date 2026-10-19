@@ -758,7 +758,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 blockElement.getAttribute("data-av-id"),
                 blockElement.getAttribute("data-node-id"),
                 blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
+                blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
+                target.closest<HTMLElement>(".av__body")?.dataset.groupId
             );
             event.preventDefault();
             event.stopPropagation();

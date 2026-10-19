@@ -426,7 +426,8 @@ export const editAssetItem = (options: {
                     options.blockElement.getAttribute("data-av-id"),
                     options.blockElement.getAttribute("data-node-id"),
                     options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
+                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
+                    options.cellElements[0]?.closest<HTMLElement>(".av__body")?.dataset.groupId
                 );
             }
         });

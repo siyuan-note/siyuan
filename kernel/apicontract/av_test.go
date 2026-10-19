@@ -31,6 +31,22 @@ func TestAVRequestCompatibility(t *testing.T) {
 	}
 }
 
+func TestAVImagesGroupContract(t *testing.T) {
+	for _, body := range []string{`{"id":"av"}`, `{"id":"av","groupID":null}`, `{"id":"av","groupID":""}`} {
+		request, err := GetCurrentAttrViewImages.Decode(strings.NewReader(body))
+		if err != nil || request.GroupID != "" {
+			t.Fatalf("legacy image request: %+v %v", request, err)
+		}
+	}
+	request, err := GetCurrentAttrViewImages.Decode(strings.NewReader(`{"id":"av","groupID":"group"}`))
+	if err != nil || request.GroupID != "group" {
+		t.Fatalf("group image request: %+v %v", request, err)
+	}
+	if _, err := GetCurrentAttrViewImages.Decode(strings.NewReader(`{"id":"av","groupID":12}`)); err == nil {
+		t.Fatal("non-string group ID accepted")
+	}
+}
+
 func TestAVRelationItemNameChoiceCompatibility(t *testing.T) {
 	base := `"avID":"av","blockID":"block","keyID":"key","keyword":"Input","cells":[],"preview":{"templateID":"template","primaryKey":"Template","createdAt":123}`
 	for _, test := range []struct {

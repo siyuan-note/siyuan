@@ -355,6 +355,7 @@ type GetCurrentAttrViewImagesRequest struct {
 	BlockID string `json:"blockID" api:"optional,nullable,ignoretype"`
 	ViewID  string `json:"viewID" api:"optional,nullable"`
 	Query   string `json:"query" api:"optional,nullable"`
+	GroupID string `json:"groupID" api:"optional,nullable"`
 }
 
 type GetAttributeViewKeysRequest struct {

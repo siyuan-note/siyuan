@@ -2119,6 +2119,7 @@ The field types (`keyType`) are:
     * `blockID`: The database block that embeds the database. It resolves the active view, publish access, and the block-level context filter. Omit only for a detached database that does not require block context
     * `viewID`: Optional explicit view ID. When omitted, the view is resolved from `blockID`, then falls back to the first available view
     * `query`: Optional full-text filter for the primary-key values
+    * `groupID`: Optional group ID. Omitted, null, or empty keeps the whole-view behavior. Otherwise only images from that group are returned in group item order followed by the view's sorting rules, without pagination. An unknown group returns an error
 * Return value: an array of image asset paths from visible asset fields after applying the database block's context filter, the view's filters, and sorting
 
   ```json

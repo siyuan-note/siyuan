@@ -34,12 +34,10 @@ const compile = () => {
     return ts.transpileModule([
         read("util/hasClosest").replace(/^export /gm, ""),
         extract("wysiwyg/getBlock", ["getContenteditableElement", "getParentBlock", "getPreviousBlockSibling",
-            "getNextBlockSibling", "hasPreviousSibling", "hasNextSibling", "isEndOfBlock", "getFirstBlock",
-            "getLastBlock", "getNextBlock", "getPreviousBlock"]),
+            "getNextBlockSibling", "hasPreviousSibling", "hasNextSibling", "isEndOfBlock", "getNextBlock", "getPreviousBlock"]),
         extract("wysiwyg/blockSelection", ["BLOCK_SELECTION_CLASS", "BLOCK_SELECTION_MODE_CLASS", "clearSelectionState",
-            "getBlockSelectionModeElement", "getBlockOperationElements", "isContinuousBlockSelection",
+            "getBlockSelectionModeElement",
             "clearBlockSelection", "clearBlockSelectionMode"]),
-        extract("hint/tableInsertion", ["getTableBlockSelectionRange"]),
         extract("wysiwyg/commonHotkey", ["extendSelectionToBlockEdge", "getSelectionFocus", "upSelect", "downSelect",
             "getStartEndElement"]),
         extract("util/selectionOffsets", ["selectIsEditor", "getSelectionOffset", "focusByRange"]),
@@ -255,17 +253,17 @@ const runCases = async source => {
                 }
                 const table = editor.querySelector('[data-type="NodeTable"]');
                 check.ok(table, label + ": inserted table");
-                if (selection === "blocks" || selection.startsWith("keyboard")) {
-                    check.doesNotMatch(editor.textContent, /AAAA|BBBB|CCCC/, label + ": selected blocks replaced");
-                    check.match(editor.textContent, /outside/, label + ": unselected content retained");
-                    check.equal(editor.querySelector(".protyle-wysiwyg--select"), null, label + ": selection marks cleared");
-                    const context = undoOperations.find(operation => operation.context?.undoFocusId)?.context;
-                    check.equal(context?.undoFocusId, paragraphs[0].dataset.nodeId, label + ": block selection undo start");
-                    check.equal(context?.undoFocusEndId, paragraphs[2].dataset.nodeId, label + ": block selection undo end");
-                } else if (selection === "block-mode") {
-                    check.doesNotMatch(editor.textContent, /AAAA/, label + ": active block replaced");
-                    check.match(editor.textContent, /BBBB/, label + ": next block retained");
-                    check.equal(editor.querySelector(".protyle-wysiwyg--select-mode"), null, label + ": block mode cleared");
+                if (["blocks", "block-mode"].includes(selection) || selection.startsWith("keyboard")) {
+                    const retained = editor.cloneNode(true);
+                    retained.querySelector('[data-type="NodeTable"]').remove();
+                    check.equal(normalize(retained), original, label + ": block selection preserves all original content, IDs and attributes");
+                } else if (selection === "full") {
+                    check.doesNotMatch(editor.textContent, /AAAA|BBBB|CCCC/, label + ": full text selection replaced");
+                    check.match(editor.textContent, /outside/, label + ": unselected text retained");
+                } else if (selection.startsWith("partial-")) {
+                    check.doesNotMatch(editor.textContent, /BBBB/, label + ": selected middle paragraph replaced");
+                    check.equal(paragraphs[0].firstElementChild.textContent, "AA", label + ": start prefix retained");
+                    check.match(editor.textContent, /CC/, label + ": end suffix retained");
                 }
                 check.equal(openedCells.length, 1, label + ": table cell editor opened");
                 check.equal(openedCells[0], table.querySelector("th, td"), label + ": first cell focused");
@@ -305,10 +303,21 @@ const runCases = async source => {
             getSelection().collapse(first, 0);
             protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
             if (mobile) getSelection().collapse(outside.firstChild, 1);
-            const selectedOriginal = editor.innerHTML;
+            const selectedOriginal = normalize(editor);
+            const replayed = editor.cloneNode(true);
             hint.fillCommand(`| ${Lute.Caret} |\n| --- |`, protyle, !mobile);
-            check.equal(transactions.length, 0, boundary + ": selected unsupported boundary has no transaction");
-            check.equal(editor.innerHTML, selectedOriginal, boundary + ": unsupported block selection retained");
+            check.equal(transactions.length, 1, boundary + ": block selection uses the collapsed text caret");
+            const retained = editor.cloneNode(true);
+            retained.querySelector('[data-type="NodeTable"]').remove();
+            check.equal(normalize(retained), selectedOriginal, boundary + ": selected atomic blocks retained");
+            const {doOperations, undoOperations} = transactions[0];
+            const inserted = normalize(editor);
+            replay(replayed, doOperations);
+            check.equal(normalize(replayed), inserted, boundary + ": transaction matches editor");
+            replay(editor, undoOperations);
+            check.equal(normalize(editor), selectedOriginal, boundary + ": undo restores original");
+            replay(editor, doOperations);
+            check.equal(normalize(editor), inserted, boundary + ": redo restores insertion");
         }
         for (const crossParent of [false, true]) {
             editor.innerHTML = lute.Md2BlockDOM(crossParent ? "> AAAA\n\nBBBB\n\nCCCC" : "AAAA\n\nBBBB\n\nCCCC");
@@ -319,10 +328,21 @@ const runCases = async source => {
             protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
             if (mobile) getSelection().collapse(outside.firstChild, 1);
             transactions = [];
-            const original = editor.innerHTML;
+            const original = normalize(editor);
+            const replayed = editor.cloneNode(true);
             hint.fillCommand(`| ${Lute.Caret} |\n| --- |`, protyle, !mobile);
-            check.equal(transactions.length, 0, "discontinuous selection has no transaction");
-            check.equal(editor.innerHTML, original, "discontinuous selection preserves unselected gaps and selection");
+            check.equal(transactions.length, 1, "discontinuous block selection inserts at the text caret");
+            const retained = editor.cloneNode(true);
+            retained.querySelector('[data-type="NodeTable"]').remove();
+            check.equal(normalize(retained), original, "discontinuous selection preserves selected blocks and unselected gaps");
+            const {doOperations, undoOperations} = transactions[0];
+            const inserted = normalize(editor);
+            replay(replayed, doOperations);
+            check.equal(normalize(replayed), inserted, "discontinuous selection transaction matches editor");
+            replay(editor, undoOperations);
+            check.equal(normalize(editor), original, "discontinuous selection undo restores original");
+            replay(editor, doOperations);
+            check.equal(normalize(editor), inserted, "discontinuous selection redo restores insertion");
         }
     }
     return "Table insertion, undo and redo cases passed";

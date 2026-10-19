@@ -30,6 +30,7 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
     const moduleExports = {} as {
         renderSyncCloudList: (element: Element, reload: boolean, cb: (ready: boolean) => void) => void;
         bindSyncCloudListEvent: (element: Element, cb?: (ready: boolean) => void) => void;
+        refreshSyncCloudDirBlock: (root: Element) => void;
     };
     runInNewContext(code, {
         exports: moduleExports,
@@ -58,17 +59,41 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
         },
     });
     let click: (event: Event) => void;
-    const list = {
+    const createClassList = (classes: Set<string>) => ({
+        add: (name: string) => classes.add(name),
+        remove: (name: string) => classes.delete(name),
+        toggle: (name: string, force?: boolean) => {
+            const enabled = force ?? !classes.has(name);
+            if (enabled) {
+                classes.add(name);
+            } else {
+                classes.delete(name);
+            }
+            return enabled;
+        },
+    });
+    const listClasses = new Set(["fn__none"]);
+    const configButtonClasses = new Set<string>();
+    const configButton = {classList: createClassList(configButtonClasses)};
+    const block = {querySelector: (selector: string) => selector === '[data-action="config"]' ? configButton : null};
+    const elementList = {
         innerHTML: "",
-        firstElementChild: null,
+        firstElementChild: null as Element | null,
+        classList: createClassList(listClasses),
         addEventListener: (_name: string, cb: (event: Event) => void) => {
             click = cb;
         },
+    };
+    const list = elementList as unknown as Element;
+    const root = {
+        querySelector: (selector: string) => selector === "#syncCloudDirBlock" ? block :
+            selector === "#syncCloudList" ? list : null,
     } as unknown as Element;
     const readiness: boolean[] = [];
     return {
-        ...moduleExports, list, requests, sync, readiness,
+        ...moduleExports, list, elementList, listClasses, configButtonClasses, requests, sync, readiness,
         render: () => moduleExports.renderSyncCloudList(list, true, (ready) => readiness.push(ready)),
+        refreshCloudDir: () => moduleExports.refreshSyncCloudDirBlock(root),
         select: () => {
             moduleExports.bindSyncCloudListEvent(list);
             click({
@@ -89,12 +114,42 @@ const listResponse = (cloudName: string, checkedSyncDir: string): ListResponse =
 });
 
 for (const mobile of [false, true]) {
+    test(`S3 shows the configured bucket without the config toggle (mobile=${mobile})`, () => {
+        const guide = loadSyncGuide(mobile, 2);
+        guide.refreshCloudDir();
+        assert.equal(guide.requests.length, 0);
+        assert.equal(guide.listClasses.has("fn__none"), false);
+        assert.equal(guide.configButtonClasses.has("fn__none"), true);
+        assert.match(guide.elementList.innerHTML, /notes\.backup/);
+    });
+
+    test(`other providers keep the config toggle and stay collapsed (mobile=${mobile})`, () => {
+        const guide = loadSyncGuide(mobile, 0);
+        guide.refreshCloudDir();
+        assert.equal(guide.requests.length, 0);
+        assert.equal(guide.listClasses.has("fn__none"), true);
+        assert.equal(guide.configButtonClasses.has("fn__none"), false);
+        assert.equal(guide.elementList.innerHTML, "");
+    });
+
+    test(`switching from S3 to another provider restores the config toggle (mobile=${mobile})`, () => {
+        const guide = loadSyncGuide(mobile, 2);
+        guide.refreshCloudDir();
+        guide.sync.provider = 0;
+        guide.refreshCloudDir();
+        assert.equal(guide.listClasses.has("fn__none"), true);
+        assert.equal(guide.configButtonClasses.has("fn__none"), false);
+        assert.equal(guide.elementList.innerHTML, "");
+        assert.equal(guide.requests.length, 0);
+    });
+
     test(`S3 displays its configured bucket without requiring bucket listing (mobile=${mobile})`, () => {
         const guide = loadSyncGuide(mobile, 2);
         guide.render();
         assert.equal(guide.requests.length, 0);
         assert.match(guide.list.innerHTML, /notes\.backup/);
-        assert.doesNotMatch(guide.list.innerHTML, /type="radio"|data-type="(?:selectCloud|addCloud|removeCloud)"/);
+        assert.match(guide.list.innerHTML, /type="radio" name="cloudName" checked/);
+        assert.doesNotMatch(guide.list.innerHTML, /data-type="(?:selectCloud|addCloud|removeCloud)"/);
         assert.deepEqual(guide.readiness, [true]);
         assert.equal(guide.sync.cloudName, "work");
         guide.select();

@@ -2,7 +2,6 @@
 
 import copy
 import contextlib
-from datetime import datetime, timedelta, timezone
 import http.client
 import importlib.util
 import io
@@ -51,72 +50,45 @@ def report():
 
 
 class CandidateTagCleanupTests(unittest.TestCase):
-    def setUp(self):
-        self.now = datetime(2026, 10, 18, 12, tzinfo=timezone.utc)
-
-    def tag(self, name, days=0, **values):
-        return {"name": name, "last_updated": (self.now - timedelta(days=days)).isoformat(), **values}
+    def tag(self, name, **values):
+        return {"name": name, "last_updated": "2026-10-18T12:00:00Z", **values}
 
     def select(self, tags, published=False):
-        with contextlib.redirect_stdout(io.StringIO()):
-            return tag_cleanup.select_tags(tags, "123", "2", published=published, now=self.now)
+        return tag_cleanup.select_tags(tags, published=published)
 
     def test_only_complete_known_candidate_names_are_eligible(self):
         protected = ["v3.8.7", "v3.8.8-alpha.1", "latest", "buildcache-release-v2-amd64", "buildcache-onnx-v3-armv7",
                      "onnx-amd64-" + "a" * 64, "build-123-2", "build-123-2-amd64-extra", "build-123-2-unknown",
                      "prefix-build-123-2-amd64", "build-123-2-amd64\n", "build-123-2-../latest"]
-        tags = [self.tag(name, 30) for name in protected] + [self.tag("build-122-1-verified", 8)]
+        tags = [self.tag(name) for name in protected] + [self.tag("build-122-1-verified")]
         self.assertEqual(self.select(tags, True), ["build-122-1-verified"])
 
-    def test_success_cleans_all_platforms_and_prior_attempts_but_preserves_future_attempts(self):
-        current = [f"build-123-2-{platform}" for platform in ("amd64", "arm64", "armv7", "armv8", "verified")]
-        tags = [self.tag(name) for name in current] + [self.tag("build-123-1-amd64"),
-                self.tag("build-123-3-amd64", 30), self.tag("build-1234-2-amd64")]
-        self.assertEqual(self.select(tags, True), sorted(current + ["build-123-1-amd64"]))
+    def test_success_cleans_every_candidate_of_the_repository(self):
+        candidates = [f"build-123-2-{platform}" for platform in ("amd64", "arm64", "armv7", "armv8", "verified")]
+        tags = [self.tag(name) for name in candidates] + [self.tag("build-123-1-amd64"),
+                self.tag("build-123-3-amd64"), self.tag("build-1234-2-amd64")]
+        self.assertEqual(self.select(tags, True), sorted(candidates + ["build-123-1-amd64",
+                                                                       "build-123-3-amd64", "build-1234-2-amd64"]))
 
-    def test_failed_or_cancelled_run_preserves_its_candidates_and_sweeps_only_expired_other_runs(self):
-        tags = [self.tag("build-123-1-amd64", 20), self.tag("build-123-2-verified", 20),
-                self.tag("build-122-1-amd64", 8), self.tag("build-121-1-armv7", 6)]
-        self.assertEqual(self.select(tags), ["build-122-1-amd64"])
-
-    def test_retention_boundary_timezone_and_fractional_seconds(self):
-        tags = [self.tag("build-120-1-amd64", 7),
-                self.tag("build-121-1-amd64", last_updated="2026-10-11T20:00:00+08:00"),
-                self.tag("build-122-1-amd64", last_updated="2026-10-11T11:59:59.999999Z"),
-                self.tag("build-124-1-amd64", -1)]
-        self.assertEqual(self.select(tags), ["build-122-1-amd64"])
-
-    def test_missing_invalid_or_naive_age_metadata_is_preserved(self):
-        tags = [self.tag(f"build-{index}-1-amd64", last_updated=value)
-                for index, value in enumerate((None, "invalid", "2026-10-01T00:00:00", 42), start=1)]
-        tags.append({"name": "build-9-1-verified"})
+    def test_unpublished_run_preserves_every_candidate(self):
+        tags = [self.tag("build-123-1-amd64"), self.tag("build-123-2-verified"),
+                self.tag("build-122-1-amd64"), self.tag("build-121-1-armv7")]
         self.assertEqual(self.select(tags), [])
-        self.assertEqual(self.select([{"name": "build-123-2-verified"}], True), ["build-123-2-verified"])
-
-    def test_invalid_run_and_retention_never_delete(self):
-        for run_id, attempt, days in (("", "1", 7), ("123/", "1", 7), ("0", "1", 7),
-                                      ("123", "-1", 7), ("123", "1", 0), ("123", "1", -1)):
-            with self.subTest(run_id=run_id, attempt=attempt, days=days), \
-                    patch.object(tag_cleanup, "hub_request", return_value={"results": [], "next": None}) as request:
-                with self.assertRaises(ValueError):
-                    tag_cleanup.cleanup("b3log/siyuan", run_id, attempt, token="token", execute=True,
-                                        retention_days=days)
-                self.assertFalse(any(call.kwargs.get("method") == "DELETE" for call in request.call_args_list))
 
     def test_all_pages_are_read_before_tag_deletion_and_duplicates_are_deleted_once(self):
-        first = self.tag("build-122-1-amd64", 8)
-        second = self.tag("build-122-1-verified", 8)
+        first = self.tag("build-122-1-amd64")
+        second = self.tag("build-122-1-verified")
         calls = []
 
         def request(path, token, **kwargs):
             calls.append((path, token, kwargs.get("method", "GET")))
             if "page=1" in path:
-                return {"results": [first, self.tag("latest", 30)], "next": "https://other.invalid/page2"}
+                return {"results": [first, self.tag("latest")], "next": "https://other.invalid/page2"}
             if "page=2" in path:
                 return {"results": [first, second], "next": None}
 
         with patch.object(tag_cleanup, "hub_request", side_effect=request), contextlib.redirect_stdout(io.StringIO()):
-            selected = tag_cleanup.cleanup("b3log/siyuan", "123", "2", token="token", execute=True, now=self.now)
+            selected = tag_cleanup.cleanup("b3log/siyuan", token="token", execute=True, published=True)
         self.assertEqual(selected, [first["name"], second["name"]])
         self.assertEqual([call[2] for call in calls], ["GET", "GET", "DELETE", "DELETE"])
         self.assertTrue(all(path.startswith("/v2/repositories/b3log/siyuan/tags/") for path, _, _ in calls))
@@ -124,29 +96,29 @@ class CandidateTagCleanupTests(unittest.TestCase):
         self.assertTrue(all(token == "token" for _, token, _ in calls))
 
     def test_listing_failure_or_invalid_page_never_starts_deletion(self):
-        first = {"results": [self.tag("build-122-1-amd64", 8)], "next": "page2"}
+        first = {"results": [self.tag("build-122-1-amd64")], "next": "page2"}
         for second in (RuntimeError("listing failed"), {"next": None}, {"results": [None], "next": None}, first):
             with self.subTest(second=second), \
                     patch.object(tag_cleanup, "hub_request", side_effect=[first, second]) as request:
                 with self.assertRaises((ValueError, RuntimeError)):
-                    tag_cleanup.cleanup("b3log/siyuan", "123", "2", token="token", execute=True, now=self.now)
+                    tag_cleanup.cleanup("b3log/siyuan", token="token", execute=True, published=True)
                 self.assertEqual(request.call_count, 2)
                 self.assertFalse(any(call.kwargs.get("method") == "DELETE" for call in request.call_args_list))
 
     def test_preview_never_sends_deletions(self):
-        page = {"results": [self.tag("build-122-1-amd64", 8)], "next": None}
+        page = {"results": [self.tag("build-122-1-amd64")], "next": None}
         with patch.object(tag_cleanup, "hub_request", return_value=page) as request, \
                 contextlib.redirect_stdout(io.StringIO()) as output:
-            tag_cleanup.cleanup("b3log/siyuan", "123", "2", now=self.now)
+            tag_cleanup.cleanup("b3log/siyuan", published=True)
         request.assert_called_once()
         self.assertIn("Would delete b3log/siyuan:build-122-1-amd64", output.getvalue())
 
     def test_one_failed_delete_does_not_skip_other_tags(self):
-        page = {"results": [self.tag("build-122-1-amd64", 8), self.tag("build-122-1-verified", 8)], "next": None}
+        page = {"results": [self.tag("build-122-1-amd64"), self.tag("build-122-1-verified")], "next": None}
         with patch.object(tag_cleanup, "hub_request", side_effect=[page, RuntimeError("HTTP 403"), None]) as request, \
                 contextlib.redirect_stdout(io.StringIO()):
             with self.assertRaisesRegex(RuntimeError, "1 candidate tags"):
-                tag_cleanup.cleanup("b3log/siyuan", "123", "2", token="token", execute=True, now=self.now)
+                tag_cleanup.cleanup("b3log/siyuan", token="token", execute=True, published=True)
         self.assertEqual([call.kwargs.get("method") for call in request.call_args_list], [None, "DELETE", "DELETE"])
 
     def test_invalid_repository_or_missing_credentials_never_accesses_hub(self):
@@ -154,7 +126,7 @@ class CandidateTagCleanupTests(unittest.TestCase):
                                   ("b3log/siyuan", "")):
             with self.subTest(repository=repository, token=token), patch.object(tag_cleanup, "hub_request") as request:
                 with self.assertRaises(ValueError):
-                    tag_cleanup.cleanup(repository, "123", "2", token=token, execute=True)
+                    tag_cleanup.cleanup(repository, token=token, execute=True)
                 request.assert_not_called()
 
     def test_credentials_are_exchanged_for_bearer_and_not_used_for_tag_requests(self):
@@ -199,7 +171,7 @@ class CandidateTagCleanupTests(unittest.TestCase):
                     self.assertNotIn("sensitive", str(raised.exception))
 
     def test_cli_requires_credentials_for_execution_and_passes_publication_state(self):
-        args = ["cleanup-docker-tags.py", "--repository", "b3log/siyuan", "--run-id", "123", "--run-attempt", "2"]
+        args = ["cleanup-docker-tags.py", "--repository", "b3log/siyuan"]
         with patch("sys.argv", args + ["--execute"]), patch.dict(os.environ, {}, clear=True), \
                 patch.object(tag_cleanup, "cleanup") as cleanup, contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit):
@@ -209,8 +181,7 @@ class CandidateTagCleanupTests(unittest.TestCase):
                 patch.dict(os.environ, {"DOCKER_HUB_USER": "username", "DOCKER_HUB_PWD": "password"}), \
                 patch.object(tag_cleanup, "hub_token", return_value="token"), patch.object(tag_cleanup, "cleanup") as cleanup:
             tag_cleanup.main()
-        cleanup.assert_called_once_with("b3log/siyuan", "123", "2", token="token", execute=True,
-                                        published=True, retention_days=7)
+        cleanup.assert_called_once_with("b3log/siyuan", token="token", execute=True, published=True)
 
 
 class ManifestTests(unittest.TestCase):

@@ -279,6 +279,14 @@ func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
 }
 
 func loadTreeByBlockIDInBox0(id, boxID string, logNotFound bool) (ret *parse.Tree, err error) {
+	bt, err := lookupBlockTreeInBox(id, boxID, logNotFound)
+	if err != nil {
+		return nil, err
+	}
+	return loadTreeByBlockTree(bt)
+}
+
+func lookupBlockTreeInBox(id, boxID string, logNotFound bool) (ret *treenode.BlockTree, err error) {
 	if !ast.IsNodeIDPattern(id) {
 		stack := logging.ShortStack()
 		logging.LogErrorf("block id is invalid [id=%s], stack: [%s]", id, stack)
@@ -310,8 +318,7 @@ func loadTreeByBlockIDInBox0(id, boxID string, logNotFound bool) (ret *parse.Tre
 		return nil, ErrTreeNotFound
 	}
 
-	ret, err = loadTreeByBlockTree(bt)
-	return
+	return bt, nil
 }
 
 var searchTreeLimiter = rate.NewLimiter(rate.Every(3*time.Second), 1)

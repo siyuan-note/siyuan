@@ -110,7 +110,7 @@ func performTxSyncLocked(tx *Transaction) (err error) {
 var (
 	txQueue     []*Transaction
 	txQueueLock sync.Mutex
-	flushLock   sync.Mutex
+	flushLock   sync.RWMutex
 	isFlushing  atomic.Bool
 )
 

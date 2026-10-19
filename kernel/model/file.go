@@ -663,11 +663,9 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	//defer pprof.StopCPUProfile()
 
 	timing.Stage("wait_transactions")
-	FlushTxQueue() // 写入数据时阻塞，避免获取到的数据不一致
-	timing.Stage("load_tree")
 
 	inputIndex := index
-	tree, err := loadTreeByBlockIDInBox0(id, boxID, false)
+	tree, err := loadDocumentAtTransactionBoundary(id, boxID, timing)
 	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			if 0 == mode {

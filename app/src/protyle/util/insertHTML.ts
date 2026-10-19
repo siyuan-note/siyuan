@@ -925,6 +925,26 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     return true;
 };
 
+const focusInsertedBlock = (element: Element) => {
+    const listItemElement = element.parentElement;
+    const listElement = listItemElement?.parentElement;
+    const parentParagraphElement = listElement?.previousElementSibling;
+    if (element.getAttribute("data-type") === "NodeWidget" &&
+        listItemElement?.getAttribute("data-type") === "NodeListItem" &&
+        element.previousElementSibling?.classList.contains("protyle-action") &&
+        listElement?.getAttribute("data-type") === "NodeList" && listElement.firstElementChild === listItemElement &&
+        listElement.parentElement?.getAttribute("data-type") === "NodeListItem" &&
+        parentParagraphElement?.getAttribute("data-type") === "NodeParagraph") {
+        // 首个子项的挂件无法显示文本光标，使实际选区与父项末尾显示的光标保持一致。
+        const range = document.createRange();
+        range.selectNodeContents(getContenteditableElement(parentParagraphElement));
+        range.collapse(false);
+        focusByRange(range);
+        return;
+    }
+    focusBlock(element, undefined, false);
+};
+
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
                            useProtyleRange = false,
@@ -1583,7 +1603,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     } else if (lastElement) {
         // https://github.com/siyuan-note/siyuan/issues/5591
-        focusBlock(lastElement, undefined, false);
+        focusInsertedBlock(lastElement);
     }
     protyle.wysiwyg.element.querySelectorAll("wbr").forEach(item => {
         item.remove();

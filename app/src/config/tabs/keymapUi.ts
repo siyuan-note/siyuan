@@ -94,6 +94,9 @@ export const mountKeymapTab = async (root: HTMLElement, keywords?: string, _app?
             }
         });
         refreshKeymapBindings(root);
+        searchKeymapList(root.querySelector<HTMLElement>("#keymapList"),
+            root.querySelector<HTMLInputElement>("#keymapInput").value,
+            root.querySelector<HTMLElement>("#searchByKey").dataset.keymap || "");
         return;
     }
     if (root.innerHTML === "") {
@@ -414,6 +417,7 @@ const bindKeymapList = (root: HTMLElement) => {
             delete getKeymapItem(data, row.dataset.key.split(Constants.ZWSP)).bindings.priority;
         } : undefined);
         refreshBindings();
+        searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap || "");
     };
     keymapListElement.addEventListener("pointerdown", (event) => {
         if (recording && (event.target as HTMLElement).closest(".config-keymap__controls") &&
@@ -711,12 +715,15 @@ const refreshKeymapBindings = (root: HTMLElement) => {
     });
     const list = root.querySelector<HTMLElement>("#keymapList");
     const hasConflict = Boolean(list.querySelector('[data-conflict="true"]'));
+    if (!hasConflict && list.dataset.keymapFilter === "conflict") {
+        list.dataset.keymapFilter = "all";
+    }
     list.querySelectorAll<HTMLElement>("[data-keymap-filter-value]").forEach(button => {
         const active = button.dataset.keymapFilterValue === list.dataset.keymapFilter;
         button.classList.toggle("b3-chip--current", active);
         button.setAttribute("aria-pressed", String(active));
         if (button.dataset.keymapFilterValue === "conflict") {
-            button.classList.toggle("fn__none", !hasConflict && !active);
+            button.classList.toggle("fn__none", !hasConflict);
         }
     });
 };
@@ -754,6 +761,9 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
                 renderRowBindings(element, getKeymapBindings(getKeymapItem(savedKeymap, element.dataset.key.split(Constants.ZWSP))));
             });
             refreshKeymapBindings(root);
+            searchKeymapList(root.querySelector<HTMLElement>("#keymapList"),
+                root.querySelector<HTMLInputElement>("#keymapInput").value,
+                root.querySelector<HTMLElement>("#searchByKey").dataset.keymap || "");
             showMessage(window.siyuan.languages.keymapSaveFailed);
         }
     }));

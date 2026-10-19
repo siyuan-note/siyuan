@@ -1,18 +1,22 @@
 import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
 import {test} from "node:test";
+import {runInNewContext} from "node:vm";
+import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+const {createMockRequire} = require("../../../tests/fixtures/mockModules.cjs");
 
-const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
-    name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
-}));
-buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {configurable: true, value: "test"}));
-const {isEmptyTabPlaceholder}: typeof import("./tabsList") = require("./tabsList");
-buildGlobals.forEach(({name, descriptor}) => {
-    if (descriptor) {
-        Object.defineProperty(globalThis, name, descriptor);
-    } else {
-        Reflect.deleteProperty(globalThis, name);
-    }
+const api = {} as typeof import("./tabsList");
+runInNewContext(transpileModule(readFileSync("src/protyle/wysiwyg/tabsList.ts", "utf8"), {
+    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+}).outputText, {
+    exports: api,
+    require: createMockRequire({
+        "../render/tabsRender": {},
+        "../render/listMindmap/model": {},
+        "../render/listMindmap/preferences": {},
+    }),
 });
+const {isEmptyTabPlaceholder} = api;
 
 const paragraph = (attrs: Record<string, string>, text = "", rich = false) => ({
     attributes: Object.entries(attrs).map(([name, value]) => ({name, value})),

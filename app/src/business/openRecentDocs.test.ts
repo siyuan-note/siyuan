@@ -3,12 +3,13 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isArrowFunction, isBlock, isIfStatement, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+const {createMockRequire} = require("../../tests/fixtures/mockModules.cjs");
 
 const loadModule = (filename: string, globals: Record<string, unknown>, dependencies: Record<string, unknown> = {}, tail = "") => {
     const exports: any = {};
     runInNewContext(transpileModule(readFileSync(filename, "utf8") + tail, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports, require: (name: string) => dependencies[name] || {}, ...globals});
+    }).outputText, {exports, require: createMockRequire(dependencies), ...globals});
     return exports;
 };
 
@@ -49,11 +50,12 @@ const createHarness = () => {
     const pathRequests: Array<{id: string, resolve: (response: unknown) => void}> = [];
     const requests: Array<{url: string, data: any, receive: (response: unknown) => void}> = [];
     const cleanups: string[] = [];
+    const patches: unknown[][] = [];
     let dialogOptions: any;
-    const constants = {LOCAL_IMAGES: "images", LOCAL_RECENT_DOCS: "recent", DIALOG_RECENTDOCS: "recent-dialog"};
+    const constants = {LOCAL_IMAGES: "images", DIALOG_RECENTDOCS: "recent-dialog"};
     const siyuan = {
-        config: {fileTree: {useSVGDefaultIcon: true}, keymap: {general: {riffCard: {custom: ""}}}},
-        storage: {images: {file: "1f4c4"}, recent: {type: "viewedAt"}},
+        config: {fileTree: {useSVGDefaultIcon: true, recentDocsSort: "viewedAt"}, keymap: {general: {riffCard: {custom: ""}}}},
+        storage: {images: {file: "1f4c4"}},
         languages: {riffCard: "Cards", recentDocs: "Recent documents"},
         dialogs: [] as Array<{element: typeof root}>,
     };
@@ -64,6 +66,7 @@ const createHarness = () => {
         "../constants": {Constants: constants}, "../util/escape": escape, "./iconValue": iconValue,
     });
     const api = loadModule("src/business/openRecentDocs.ts", globals, {
+        "../config/tabs/fileRuntime": {fileConfigApi: {patch: async (...args: unknown[]) => { patches.push(args); }}},
         "../util/fetch": {
             fetchSyncPost: (_url: string, data: {id: string}) => new Promise(resolve => pathRequests.push({id: data.id, resolve})),
             fetchPost: (url: string, data: unknown, receive: (response: unknown) => void) => requests.push({url, data, receive}),
@@ -72,7 +75,9 @@ const createHarness = () => {
         "../constants": {Constants: constants},
         "../util/escape": escape,
         "../util/functions": {isWindow: () => false},
-        "../protyle/util/compatibility": {updateHotkeyTip: (value: string) => value, setStorageVal() {}},
+        "../protyle/util/compatibility": {updateHotkeyTip: (value: string) => value},
+        "../protyle/util/hasClosest": {},
+        "../protyle/ui/hideElements": {},
         "../layout/getAll": {getAllDocks: () => [{title: "Documents", type: "files", icon: "iconFiles"}]},
         "../layout/dock/hotkey": {getDockHotkey: () => ""},
         "../block/panelOwnership": {destroyDialogBlockPanels: (element: typeof root) => {
@@ -88,7 +93,7 @@ const createHarness = () => {
         }},
     }, "\nexports.render = renderRecentDocsContent;");
     const settle = async () => { await new Promise(resolve => setImmediate(resolve)); };
-    return {api, root, host, path, input, select, siyuan, pathRequests, requests, callbacks, cleanups, settle,
+    return {api, root, host, path, input, select, siyuan, pathRequests, requests, callbacks, cleanups, patches, settle,
         icons: () => icons, dialogOptions: () => dialogOptions};
 };
 
@@ -157,12 +162,14 @@ test("sort responses cannot restore older preview anchors or update a closing di
     const h = createHarness();
     h.api.openRecentDocs();
     assert.equal(h.requests[0].url, "/api/storage/getRecentDocs");
+    assert.equal(h.requests[0].data.sortBy, "viewedAt");
     h.requests[0].receive({data: []});
     assert.equal(h.dialogOptions().destroyCallback, undefined, "Dialog owns guarded focus restoration");
     h.select.value = "created";
     h.callbacks.get("select:change")();
     h.select.value = "closedAt";
     h.callbacks.get("select:change")();
+    assert.deepEqual(h.patches, [["recentDocsSort", "created"], ["recentDocsSort", "closedAt"]]);
     h.requests[2].receive({data: [{rootID: "latest", title: "Latest"}]});
     h.requests[1].receive({data: [{rootID: "old", title: "Old"}]});
     assert.deepEqual(h.pathRequests.map(item => item.id), ["latest"]);

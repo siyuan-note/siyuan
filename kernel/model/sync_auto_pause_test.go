@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -79,16 +80,30 @@ func TestAutoSyncPauseNotificationAndStatus(t *testing.T) {
 		_ = connection.SetReadDeadline(time.Now().Add(5 * time.Second))
 		var events []event
 		for {
-			var item event
-			if err := connection.ReadJSON(&item); err != nil {
+			var envelope struct {
+				Cmd  string
+				Msg  string
+				Data json.RawMessage
+			}
+			if err := connection.ReadJSON(&envelope); err != nil {
 				t.Fatal(err)
 			}
-			if item.Cmd == "barrier" {
+			if envelope.Cmd == "barrier" {
 				return events
 			}
-			if item.Cmd == "msg" || item.Cmd == "statusbar" || item.Cmd == "cmsg" {
+			if envelope.Cmd == "msg" || envelope.Cmd == "statusbar" || envelope.Cmd == "cmsg" {
+				item := event{Cmd: envelope.Cmd, Msg: envelope.Msg}
+				if err := json.Unmarshal(envelope.Data, &item.Data); err != nil {
+					t.Fatalf("decode %s notification: %v", envelope.Cmd, err)
+				}
 				events = append(events, item)
 			}
+		}
+	}
+	// 非通知事件可以携带标量或数组，过滤命令后才解析通知的对象载荷。
+	for _, frame := range []string{`{"cmd":"syncing","data":true}`, `{"cmd":"progress","data":"waiting"}`, `{"cmd":"transactions","data":[]}`} {
+		if err := push.Broadcast([]byte(frame)); err != nil {
+			t.Fatal(err)
 		}
 	}
 	autoSyncErrCount.Store(7)

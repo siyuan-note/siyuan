@@ -263,7 +263,7 @@ func TestAttributeViewBoundHistoryRestore(t *testing.T) {
 			if encrypted {
 				boxID = ast.NewNodeID()
 				markRuntimeEncryptedBox(boxID)
-				setDEKForTest(boxID, bytes.Repeat([]byte{0x67}, 32))
+				prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x67}, 32))
 				av.SetAVBoxID(before.ID, boxID)
 				tree.Box = boxID
 				t.Cleanup(func() {

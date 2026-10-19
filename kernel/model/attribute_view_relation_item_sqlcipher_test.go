@@ -33,7 +33,7 @@ func TestAttributeViewRelationItemEncrypted(t *testing.T) {
 	}
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x64}, 32)
-	setDEKForTest(boxID, key)
+	prepareUnlockedEncryptedBoxTest(t, boxID, key)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = &conf.BoxEncryption{Spec: boxEncryptionSpec}

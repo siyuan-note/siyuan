@@ -213,7 +213,7 @@ func TestAttributeViewOptionEncryptedReplay(t *testing.T) {
 			boxID := ast.NewNodeID()
 			dek := bytes.Repeat([]byte{0x64}, 32)
 			markRuntimeEncryptedBox(boxID)
-			setDEKForTest(boxID, dek)
+			prepareUnlockedEncryptedBoxTest(t, boxID, dek)
 			t.Cleanup(func() {
 				for _, view := range []*av.AttributeView{source, peer} {
 					av.SetAVBoxID(view.ID, "")

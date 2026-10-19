@@ -570,6 +570,15 @@ func bazaarAppearance(value *conf.Appearance) *apicontract.BazaarAppearance {
 		return nil
 	}
 	ret := &apicontract.BazaarAppearance{}
+	ret.CompactMode = value.CompactMode
+	ret.MenuMouseScroll = value.MenuMouseScroll
+	ret.OutlineKeepCurrentExpand = value.OutlineKeepCurrentExpand
+	if value.PDFTheme != nil {
+		ret.PDFTheme = &apicontract.BazaarPDFTheme{Light: value.PDFTheme.Light, Dark: value.PDFTheme.Dark, AnnoColor: value.PDFTheme.AnnoColor}
+	}
+	if value.MobileBars != nil {
+		ret.MobileBars = &apicontract.BazaarMobileBars{AutoHide: value.MobileBars.AutoHide, SidebarSwipe: value.MobileBars.SidebarSwipe, SidebarButtons: value.MobileBars.SidebarButtons}
+	}
 	ret.BodyGradient = bazaarBodyGradient(value.BodyGradient)
 	if value.GlobalFontFamilies != nil {
 		ret.GlobalFontFamilies = make([]*apicontract.BazaarEditorFont, len(value.GlobalFontFamilies))

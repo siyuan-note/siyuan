@@ -16458,6 +16458,9 @@
         "codeBlockThemeLight": {
           "type": "string"
         },
+        "compactMode": {
+          "type": "boolean"
+        },
         "darkThemes": {
           "anyOf": [
             {
@@ -16563,6 +16566,19 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "type": "boolean"
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarMobileBars"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "type": "integer"
         },
@@ -16573,6 +16589,19 @@
           "anyOf": [
             {
               "$ref": "#/$defs/BazaarNotifications"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "type": "boolean"
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarPDFTheme"
             },
             {
               "type": "null"
@@ -16607,6 +16636,7 @@
         "closeButtonBehavior",
         "codeBlockThemeDark",
         "codeBlockThemeLight",
+        "compactMode",
         "darkThemes",
         "entryVisibility",
         "globalFontFamilies",
@@ -16617,9 +16647,13 @@
         "icons",
         "lang",
         "lightThemes",
+        "menuMouseScroll",
+        "mobileBars",
         "mode",
         "modeOS",
         "notifications",
+        "outlineKeepCurrentExpand",
+        "pdfTheme",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -16971,6 +17005,47 @@
         }
       ]
     },
+    "BazaarMobileBars": {
+      "type": "object",
+      "properties": {
+        "autoHide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarSwipe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "autoHide",
+        "sidebarButtons",
+        "sidebarSwipe"
+      ],
+      "additionalProperties": false
+    },
     "BazaarNotifications": {
       "type": "object",
       "properties": {
@@ -17001,6 +17076,26 @@
         "docTreeMaxList",
         "tagMaxList",
         "workspaceNotSSD"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPDFTheme": {
+      "type": "object",
+      "properties": {
+        "annoColor": {
+          "type": "string"
+        },
+        "dark": {
+          "type": "string"
+        },
+        "light": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "annoColor",
+        "dark",
+        "light"
       ],
       "additionalProperties": false
     },

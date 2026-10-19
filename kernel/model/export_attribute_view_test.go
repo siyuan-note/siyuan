@@ -202,7 +202,7 @@ func TestAttributeViewExportDoesNotCrossEncryptedBoundary(t *testing.T) {
 		"en": {"key": "Key", "select": "Select", "table": "Table", "gallery": "Gallery"},
 	}
 	markRuntimeEncryptedBox(encryptedBoxID)
-	setDEKForTest(encryptedBoxID, bytes.Repeat([]byte{0x42}, 32))
+	prepareUnlockedEncryptedBoxTest(t, encryptedBoxID, bytes.Repeat([]byte{0x42}, 32))
 	t.Cleanup(func() {
 		util.Lang, util.AttrViewLangs = oldLang, oldAttrViewLangs
 		av.SetAVBoxID(encryptedAvID, "")

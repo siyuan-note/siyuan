@@ -94,6 +94,7 @@ const cases = async source => {
         getHostCapabilities: () => ({widgets: false, remoteKernel: true}),
         isDisabledFeature: () => true,
         isInAndroid: () => false,
+        canPickIOSPhotos: () => false,
         isBuiltinInlineStyleVisible: () => false,
         normalizeHTMLAssetIFrameBlockDOM: value => value,
         fetchSyncPost: async (url, data) => {

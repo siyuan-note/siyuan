@@ -1,6 +1,8 @@
 import {isTableLikeView} from "../render/av/viewType";
 import {Constants} from "../../constants";
 import {isBuiltinSlashHint} from "./builtinSlash";
+import {getTableBlockSelectionRange} from "./tableInsertion";
+import {getBlockOperationElements, getBlockSelectionModeElement} from "../wysiwyg/blockSelection";
 import {getSuperBlockCommandLayout} from "../../block/superBlock";
 import {genEmptySuperBlock} from "../../block/insertSuperBlock";
 import {
@@ -1054,6 +1056,20 @@ ${genHintItemHTML(item)}
 
     // 直接插入命令使用正文选区，不沿用候选面板的来源和触发位置。
     public fillCommand(value: string, protyle: IProtyle, updateRange = true, slashEntryKey?: string) {
+        if (value.startsWith("|")) {
+            const elements = getBlockOperationElements(protyle.wysiwyg.element,
+                getBlockSelectionModeElement(protyle.wysiwyg.element));
+            if (elements.length > 0) {
+                const range = getTableBlockSelectionRange(protyle.wysiwyg.element, elements);
+                if (!range) {
+                    return;
+                }
+                hideElements(["select"], protyle);
+                protyle.toolbar.range = range;
+                focusByRange(range);
+                updateRange = false;
+            }
+        }
         this.source = "hint";
         this.splitChar = "/";
         this.lastIndex = -1;

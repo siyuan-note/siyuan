@@ -145,6 +145,7 @@ for (const scenario of ["database shortcut", "database mobile toolbar", "tag sea
             }})},
             hideElements() {}, isProtyleListItemFragment: () => false,
             getEditorRange: () => { rangeReads++; return range; },
+            getBlockOperationElements: (): Element[] => [], getBlockSelectionModeElement: (): undefined => undefined,
             hasClosestBlock: (node: unknown) => node === original ? original : null,
             hasClosestByClassName: () => false,
             shouldCaptureHintUndoFocus, getUndoFocusContext: () => ({}),

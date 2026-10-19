@@ -19,11 +19,29 @@ const compile = () => {
     assert.ok(declaration);
     const methods = declaration.members.filter(member => ["fillCommand", "fill", "consumeRefBracketClose",
         "fixImageCursor", "openNewTableCell"].includes(member.name?.getText(hint))).map(member => member.getText(hint));
+    const keyboard = ts.createSourceFile("keydown", read("wysiwyg/keydown"), ts.ScriptTarget.Latest, true);
+    const keyboardCases = [];
+    const visit = node => {
+        if (ts.isIfStatement(node) && [
+            'matchHotKey("⇧↑", event)', 'matchHotKey("⇧↓", event)',
+            "matchHotKey(window.siyuan.config.keymap.editor.insert.table, event) && !isInEmbedBlock(nodeElement)",
+        ].includes(node.expression.getText(keyboard).replace(/\s+/g, " "))) keyboardCases.push(node.getText(keyboard));
+        ts.forEachChild(node, visit);
+    };
+    visit(keyboard);
+    assert.equal(keyboardCases.length, 3);
     // 使用真实命令、跨块事务、选区解析和块定位，只替换界面渲染及事务传输。
     return ts.transpileModule([
         read("util/hasClosest").replace(/^export /gm, ""),
         extract("wysiwyg/getBlock", ["getContenteditableElement", "getParentBlock", "getPreviousBlockSibling",
-            "getNextBlockSibling", "hasPreviousSibling", "hasNextSibling", "isEndOfBlock"]),
+            "getNextBlockSibling", "hasPreviousSibling", "hasNextSibling", "isEndOfBlock", "getFirstBlock",
+            "getLastBlock", "getNextBlock", "getPreviousBlock"]),
+        extract("wysiwyg/blockSelection", ["BLOCK_SELECTION_CLASS", "BLOCK_SELECTION_MODE_CLASS", "clearSelectionState",
+            "getBlockSelectionModeElement", "getBlockOperationElements", "isContinuousBlockSelection",
+            "clearBlockSelection", "clearBlockSelectionMode"]),
+        extract("hint/tableInsertion", ["getTableBlockSelectionRange"]),
+        extract("wysiwyg/commonHotkey", ["extendSelectionToBlockEdge", "getSelectionFocus", "upSelect", "downSelect",
+            "getStartEndElement"]),
         extract("util/selectionOffsets", ["selectIsEditor", "getSelectionOffset", "focusByRange"]),
         extract("util/selection", ["getBlockRanges", "getUndoFocusContext", "focusByWbr"]),
         extract("render/tabsVisibility", ["isHiddenTabContent"]),
@@ -33,8 +51,15 @@ const compile = () => {
         extract("hint/blockHintRange", ["shouldCaptureHintUndoFocus"]),
         extract("util/insertHTML", ["markFoldHeadingChildren", "insertHTML"]),
         extract("wysiwyg/transaction", ["updateTransaction"]),
+        `const keyboardHandler = (protyle, event) => {
+            const editorElement = protyle.wysiwyg.element;
+            const range = getEditorRange(editorElement);
+            const nodeElement = hasClosestBlock(range.startContainer);
+            const blockSelectionModeElement = getBlockSelectionModeElement(editorElement);
+            ${keyboardCases.join("\n")}
+        };`,
         `class Hint {${methods.join("\n")}}`,
-        "return {Hint};",
+        "return {Hint, keyboardHandler, clearBlockSelectionMode};",
     ].join("\n"), {compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS}}).outputText;
 };
 
@@ -74,7 +99,16 @@ const runCases = async source => {
         Lute,
         Constants: {BLOCK_HINT_KEYS: ["(("], INLINE_TYPE: [], ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"},
         dayjs: () => ({format: () => "20261019120000"}),
-        hideElements() {},
+        hideElements: (panels, protyle) => {
+            if (panels.includes("select")) clearBlockSelectionMode(protyle.wysiwyg.element, true);
+        },
+        isMac: () => false,
+        matchHotKey: (key, event) => key === "F6" ? event.key === "F6" :
+            key === "⇧↑" ? event.shiftKey && event.key === "ArrowUp" :
+                key === "⇧↓" ? event.shiftKey && event.key === "ArrowDown" : false,
+        getVerticalCaretRect: (_element, range) => range.getBoundingClientRect(),
+        countBlockWord() {},
+        preventScroll() {},
         isMobile: () => mobile,
         isProtyleListItemFragment: () => false,
         getEditorRange: () => getSelection().getRangeAt(0),
@@ -102,13 +136,21 @@ const runCases = async source => {
             return {openTableCellRichEditor: (_protyle, cell) => openedCells.push(cell)};
         },
     };
-    const {Hint} = new Function(...Object.keys(dependencies), source)(...Object.values(dependencies));
+    window.siyuan = {config: {keymap: {editor: {general: {expandUp: "alt-up", expandDown: "alt-down"},
+        insert: {table: "F6"}}}}};
+    const {Hint, keyboardHandler, clearBlockSelectionMode} = new Function(...Object.keys(dependencies), source)(...Object.values(dependencies));
     const hint = new Hint();
     const protyle = {toolbar: {getCurrentType: () => []}, wysiwyg: {element: editor},
-        block: {parentID: "document"}, lute};
+        block: {parentID: "document"}, lute, hint, contentElement: editor, scroll: {lastScrollTop: 0}};
+    editor.addEventListener("keydown", event => keyboardHandler(protyle, event));
     const normalize = element => {
         const clone = element.cloneNode(true);
         clone.querySelectorAll("wbr").forEach(item => item.remove());
+        clone.querySelectorAll(".protyle-wysiwyg--select, .protyle-wysiwyg--select-mode").forEach(item => {
+            item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--select-mode");
+            item.removeAttribute("select-start");
+            item.removeAttribute("select-end");
+        });
         clone.querySelectorAll("[data-editing], [updated]").forEach(item => {
             item.removeAttribute("data-editing");
             item.removeAttribute("updated");
@@ -145,7 +187,8 @@ const runCases = async source => {
     for (mobile of [false, true]) {
         for (const layout of ["paragraphs", "blockquote", "list", "ordered-list", "task-list"]) {
             for (const selection of ["partial-forward", "partial-backward", "full", "start-at-end", "end-at-start",
-                "element-boundary", "single", "collapsed"]) {
+                "element-boundary", "single", "collapsed", "blocks", "block-mode", "keyboard-up", "keyboard-down"]) {
+                if (selection.startsWith("keyboard") && (mobile || !["paragraphs", "blockquote"].includes(layout))) continue;
                 const label = `${mobile ? "mobile" : "desktop"}/${layout}/${selection}`;
                 const md = layout === "blockquote" ? "> AAAA\n>\n> BBBB\n>\n> CCCC\n\noutside" :
                     layout === "list" ? "- AAAA\n- BBBB\n- CCCC\n\noutside" :
@@ -166,6 +209,25 @@ const runCases = async source => {
                 if (selection === "element-boundary") {
                     getSelection().setBaseAndExtent(first.parentElement, first.parentElement.childNodes.length, last, 2);
                 }
+                if (selection === "blocks") {
+                    Array.from(paragraphs).slice(0, 3).forEach(item =>
+                        (item.closest(".li") || item).classList.add("protyle-wysiwyg--select"));
+                    getSelection().collapse(first, 2);
+                } else if (selection === "block-mode") {
+                    paragraphs[0].classList.add("protyle-wysiwyg--select-mode");
+                    getSelection().collapse(first, 2);
+                } else if (selection.startsWith("keyboard")) {
+                    const up = selection === "keyboard-up";
+                    getSelection().collapse(up ? last : first, up ? 0 : 4);
+                    for (let i = 0; i < 3; i++) {
+                        const event = new KeyboardEvent("keydown", {key: up ? "ArrowUp" : "ArrowDown",
+                            shiftKey: true, bubbles: true, cancelable: true});
+                        editor.dispatchEvent(event);
+                        check.ok(event.defaultPrevented, label + ": keyboard selection handled");
+                    }
+                    check.equal(editor.querySelectorAll(".protyle-wysiwyg--select").length, 3, label + ": three blocks selected");
+                    check.ok(getSelection().isCollapsed, label + ": native range collapsed by block selection");
+                }
                 protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
                 const rangeOwner = node => (node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement)
                     .closest("[data-node-id]").dataset.nodeId;
@@ -177,7 +239,11 @@ const runCases = async source => {
                 openedCells = [];
                 const original = normalize(editor);
                 const replayed = editor.cloneNode(true);
-                hint.fillCommand(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, protyle, !mobile);
+                if (selection.startsWith("keyboard")) {
+                    editor.dispatchEvent(new KeyboardEvent("keydown", {key: "F6", bubbles: true, cancelable: true}));
+                } else {
+                    hint.fillCommand(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, protyle, !mobile);
+                }
                 await Promise.resolve();
                 await Promise.resolve();
                 check.equal(transactions.length, 1, label + ": single transaction");
@@ -189,6 +255,18 @@ const runCases = async source => {
                 }
                 const table = editor.querySelector('[data-type="NodeTable"]');
                 check.ok(table, label + ": inserted table");
+                if (selection === "blocks" || selection.startsWith("keyboard")) {
+                    check.doesNotMatch(editor.textContent, /AAAA|BBBB|CCCC/, label + ": selected blocks replaced");
+                    check.match(editor.textContent, /outside/, label + ": unselected content retained");
+                    check.equal(editor.querySelector(".protyle-wysiwyg--select"), null, label + ": selection marks cleared");
+                    const context = undoOperations.find(operation => operation.context?.undoFocusId)?.context;
+                    check.equal(context?.undoFocusId, paragraphs[0].dataset.nodeId, label + ": block selection undo start");
+                    check.equal(context?.undoFocusEndId, paragraphs[2].dataset.nodeId, label + ": block selection undo end");
+                } else if (selection === "block-mode") {
+                    check.doesNotMatch(editor.textContent, /AAAA/, label + ": active block replaced");
+                    check.match(editor.textContent, /BBBB/, label + ": next block retained");
+                    check.equal(editor.querySelector(".protyle-wysiwyg--select-mode"), null, label + ": block mode cleared");
+                }
                 check.equal(openedCells.length, 1, label + ": table cell editor opened");
                 check.equal(openedCells[0], table.querySelector("th, td"), label + ": first cell focused");
                 const inserted = normalize(editor);
@@ -223,6 +301,28 @@ const runCases = async source => {
             hint.fillCommand(`| ${Lute.Caret} |\n| --- |`, protyle, !mobile);
             check.equal(transactions.length, 0, boundary + ": unsupported boundary has no transaction");
             check.equal(normalize(editor), original, boundary + ": unsupported boundary preserves content");
+            editor.querySelectorAll(":scope > [data-node-id]").forEach(item => item.classList.add("protyle-wysiwyg--select"));
+            getSelection().collapse(first, 0);
+            protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
+            if (mobile) getSelection().collapse(outside.firstChild, 1);
+            const selectedOriginal = editor.innerHTML;
+            hint.fillCommand(`| ${Lute.Caret} |\n| --- |`, protyle, !mobile);
+            check.equal(transactions.length, 0, boundary + ": selected unsupported boundary has no transaction");
+            check.equal(editor.innerHTML, selectedOriginal, boundary + ": unsupported block selection retained");
+        }
+        for (const crossParent of [false, true]) {
+            editor.innerHTML = lute.Md2BlockDOM(crossParent ? "> AAAA\n\nBBBB\n\nCCCC" : "AAAA\n\nBBBB\n\nCCCC");
+            const paragraphs = editor.querySelectorAll('[data-type="NodeParagraph"]');
+            paragraphs[0].classList.add("protyle-wysiwyg--select");
+            paragraphs[2].classList.add("protyle-wysiwyg--select");
+            getSelection().collapse(paragraphs[0].firstElementChild.firstChild, 0);
+            protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
+            if (mobile) getSelection().collapse(outside.firstChild, 1);
+            transactions = [];
+            const original = editor.innerHTML;
+            hint.fillCommand(`| ${Lute.Caret} |\n| --- |`, protyle, !mobile);
+            check.equal(transactions.length, 0, "discontinuous selection has no transaction");
+            check.equal(editor.innerHTML, original, "discontinuous selection preserves unselected gaps and selection");
         }
     }
     return "Table insertion, undo and redo cases passed";

@@ -33,7 +33,7 @@ import (
 )
 
 // UndoEntry 是撤销栈中的一条记录。跨文档操作（MutatedRootIDs 含多个 rootID）的 entry
-// 会以同一指针同时挂在这些 rootID 的栈上，撤销任一端时联动其它端移除引用。
+// 会以同一指针同时挂在这些 rootID 的栈上，撤销任一端时联动其他端移除引用。
 type UndoEntry struct {
 	id             string
 	doOperations   []*Operation
@@ -180,7 +180,7 @@ func (l *UndoLog) Undo(rootID string) *UndoEntry {
 	return entry
 }
 
-// UndoCommit 在逆操作成功执行后，联动从其它关联栈移除该 entry（按 id 匹配）。
+// UndoCommit 在逆操作成功执行后，联动从其他关联栈移除该 entry（按 id 匹配）。
 func (l *UndoLog) UndoCommit(entry *UndoEntry, rootID string) {
 	if nil == entry {
 		return
@@ -235,7 +235,7 @@ func (l *UndoLog) Redo(rootID string) *UndoEntry {
 	return entry
 }
 
-// RedoCommit 在重做成功执行后，联动把 entry 重新挂到其它关联栈顶。
+// RedoCommit 在重做成功执行后，联动把 entry 重新挂到其他关联栈顶。
 func (l *UndoLog) RedoCommit(entry *UndoEntry, rootID string) {
 	if nil == entry {
 		return
@@ -298,7 +298,7 @@ func (l *UndoLog) State(rootID string) (canUndo, canRedo bool, peekMutatedRootID
 	return
 }
 
-// Clear 清理撤销日志。rootID 非空时清该文档栈并联动移除其它栈中相关条目；为空时清空全部。
+// Clear 清理撤销日志。rootID 非空时清该文档栈并联动移除其他栈中相关条目；为空时清空全部。
 func (l *UndoLog) Clear(rootID string) {
 	l.clear(rootID)
 }
@@ -321,7 +321,7 @@ func (l *UndoLog) clear(rootID string) (rootIDs []string) {
 	if nil == s {
 		return
 	}
-	// 收集该栈中所有跨文档条目的 id，联动从其它栈移除
+	// 收集该栈中所有跨文档条目的 id，联动从其他栈移除
 	linkedIDs := map[string]bool{}
 	for _, e := range s.undoStack {
 		for _, r := range e.mutatedRootIDs {

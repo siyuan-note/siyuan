@@ -361,7 +361,7 @@ const bindKeymapList = (root: HTMLElement) => {
     searchKeymapElement.addEventListener("blur", () => {
         sendGlobalShortcut(window.siyuan.ws.app);
     });
-    // 捕获阶段优先于其它监听，确保 keydown 在 IME/全局逻辑之前处理
+    // 捕获阶段优先于其他监听，确保 keydown 在 IME/全局逻辑之前处理
     // 按键搜索框只录物理键位，不接收文本输入；readonly 可避免 IME 抢占 keydown
     searchKeymapElement.addEventListener("keydown", (event: KeyboardEvent) => {
         event.stopPropagation();

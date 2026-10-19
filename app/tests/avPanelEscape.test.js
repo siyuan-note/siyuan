@@ -143,7 +143,7 @@ const runCases = async (compiled, mobile) => {
     escape();
     check.equal(refreshedPanel.isConnected, false);
     check.deepEqual(focusCalls, [refreshed.block]);
-    // 配置面板和已隐藏或移除的来源不得借用其它文档的选中单元格。
+    // 配置面板和已隐藏或移除的来源不得借用其他文档的选中单元格。
     for (const condition of ["config", "hidden", "removed", "attribute"]) {
         const state = setup();
         const element = open(state, condition === "config" ? "config" : "relation",

@@ -357,7 +357,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         !hasClosestByClassName(eventTarget, "protyle", true)) {
         return false;
     }
-    // 优先使用事件所属编辑器，避免只读正文获得焦点后仍命中其它编辑器的选区。
+    // 优先使用事件所属编辑器，避免只读正文获得焦点后仍命中其他编辑器的选区。
     let protyle = getAllEditor().find(item => item.protyle.element.contains(eventTarget))?.protyle;
     let range: Range;
     if (getSelection().rangeCount > 0) {
@@ -462,7 +462,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         window.siyuan.config.keymap.editor.general.undo,
         window.siyuan.config.keymap.editor.general.redo,
     ].some(keymap => matchHotKey(keymap, event))) {
-        // 内容修改在编辑快捷键入口拦截，不阻断搜索、导航和其它全局操作。
+        // 内容修改在编辑快捷键入口拦截，不阻断搜索、导航和其他全局操作。
         event.preventDefault();
         return true;
     }

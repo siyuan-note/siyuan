@@ -1179,7 +1179,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             // 下拉面板已移到行外（fixed 定位），用 path 全局查找
             const dropdown = menuElement.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`) as HTMLElement;
             if (dropdown) {
-                // 收起其它已展开的下拉
+                // 收起其他已展开的下拉
                 menuElement.querySelectorAll('[data-type="selectDropdown"]').forEach((el: HTMLElement) => {
                     if (el !== dropdown) el.style.display = "none";
                 });
@@ -1206,7 +1206,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         if (!useEl) return;
         const isCheck = useEl.getAttribute("xlink:href") === "#iconCheck";
         if (isSingle && !isCheck) {
-            // 单选：点击新选项时，先取消该下拉内所有其它已选项
+            // 单选：点击新选项时，先取消该下拉内所有其他已选项
             dropdown.querySelectorAll('[data-type="selectOption"]').forEach((item: HTMLElement) => {
                 if (item !== option) {
                     const itemUseElement = item.querySelector(".av__select-option-check use");

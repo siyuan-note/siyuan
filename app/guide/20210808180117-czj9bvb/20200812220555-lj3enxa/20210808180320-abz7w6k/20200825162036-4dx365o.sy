@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261019194453"
+		"updated": "20261019201307"
 	},
 	"Children": [
 		{
@@ -1964,7 +1964,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261019142953"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
@@ -2003,12 +2003,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018163000-vnuug6c",
-				"updated": "20261018200107"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思维导图默认将鼠标滚轮和单指滑动交给文档滚动。桌面端点击导图即可操作画布；移动端可使用工具栏中的“手形工具”进行单指平移，关闭手形工具后可选择、拖动或双击编辑节点，也可在阅读时直接双击节点进入编辑。操作中的画布显示高亮边框，可用滚轮或鼠标右键拖动平移画布，启用手形工具后也可用左键拖动平移。普通模式下，空白区域的左键拖动不会平移画布。移动端操作时可用单指拖动平移画布，到达平移边界后也不会滚动文档。点击导图外部、将键盘焦点移到外部，或在画布上按 Esc 即可恢复阅读。全屏时保持画布操作，退出全屏后恢复阅读。"
+					"Data": "思维导图默认将鼠标滚轮和单指滑动交给文档滚动。桌面端点击导图、移动端轻点一次导图即可操作画布；移动端也可使用工具栏中的“手形工具”进行单指平移，关闭手形工具后可选择、拖动或双击编辑节点，也可在阅读时直接双击节点进入编辑。操作中的画布显示高亮边框，可用滚轮或鼠标右键拖动平移画布，启用手形工具后也可用左键拖动平移。普通模式下，空白区域的左键拖动不会平移画布。移动端操作时可用单指拖动平移画布，到达平移边界后也不会滚动文档。点击导图外部、将键盘焦点移到外部，或在画布上按 Esc 即可恢复阅读。全屏时保持画布操作，退出全屏后恢复阅读。"
 				}
 			]
 		},

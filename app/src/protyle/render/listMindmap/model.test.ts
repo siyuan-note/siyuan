@@ -3370,6 +3370,45 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(panView.editingId, panModel.root.id);
         check.equal(panView.interactionActive, true);
         panView.setEditing(undefined);
+        panView.setInteractionActive(false);
+        await settle();
+        const tapNode = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
+        const tapBounds = tapNode.getBoundingClientRect();
+        for (const point of [fingerAt(1), {id: 1, x: tapBounds.left + tapBounds.width / 2,
+            y: tapBounds.top + tapBounds.height / 2}]) {
+            const beforeTapEdit = edits.length;
+            let readingOnContact = false;
+            viewport.addEventListener("pointerdown", () => readingOnContact = !panView.interactionActive, {once: true});
+            await nativeTouch([
+                {type: "touchStart", touchPoints: [point]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+            check.equal(readingOnContact, true, "touch contact leaves document scrolling available");
+            check.equal(panView.interactionActive, true, "native single tap activates blank canvas and nodes");
+            check.equal(getComputedStyle(viewport).touchAction, "none");
+            check.equal(edits.length, beforeTapEdit, "single tap does not start node editing");
+            check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform);
+            panView.setInteractionActive(false);
+        }
+        panView.setReadOnly(true);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(panView.interactionActive, true, "single tap also activates a read-only canvas");
+        panView.setReadOnly(false);
+        panView.setLocked(true);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(panView.interactionActive, false, "single tap preserves the saved view lock");
+        panView.setLocked(false);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            {type: "touchCancel", touchPoints: []},
+        ]);
+        check.equal(panView.interactionActive, false, "cancelled touches do not activate the canvas");
         check.equal(panModel.list.outerHTML, sourceHTML, "interaction activation and panning do not change saved data");
         panView.destroy();
         scrollHost.remove();
@@ -4804,7 +4843,15 @@ app.whenReady().then(async () => {
     ipcMain.handle("mindmap-view-native-input", async (_event, events) => {
         win.webContents.focus();
         for (const event of events) {
-            win.webContents.sendInputEvent(event);
+            if (event.type === "mouseWheel") {
+                // 隐藏窗口通过调试协议注入滚轮，直接交给渲染器的输入路由。
+                await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                    type: "mouseWheel", x: event.x, y: event.y, buttons: 0,
+                    deltaX: -event.deltaX, deltaY: -event.deltaY,
+                });
+            } else {
+                win.webContents.sendInputEvent(event);
+            }
             await new Promise(resolve => setTimeout(resolve, 20));
         }
     });

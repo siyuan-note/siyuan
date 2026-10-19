@@ -251,6 +251,7 @@ export class ListMindmapView {
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
         this.listen(options.host, "pointerdown", this.activatePointer, {capture: true});
+        this.listen(options.host, "click", this.activatePointer, {capture: true});
         this.listen(options.host, "focusout", (event: FocusEvent) => {
             if (event.relatedTarget instanceof Node && !options.host.contains(event.relatedTarget)) {
                 this.setInteractionActive(false);
@@ -468,11 +469,12 @@ export class ListMindmapView {
 
     private activatePointer = (event: PointerEvent) => {
         const target = event.target as Element;
-        if (target.closest(".mindmap-view") !== this.options.host ||
+        if (this.pinching || target.closest(".mindmap-view") !== this.options.host ||
             this.buttons.get("lock")?.contains(target) || this.isTemporaryPan(event)) {
             return;
         }
-        if (event.pointerType !== "touch" || target.closest("button, input, select")) {
+        // 触屏在点按完成后激活，按下时仍允许浏览器处理文档滑动。
+        if (event.type === "click" || event.pointerType !== "touch" || target.closest("button, input, select")) {
             this.setInteractionActive(true);
         }
     };

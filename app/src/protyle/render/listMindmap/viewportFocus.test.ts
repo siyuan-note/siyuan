@@ -240,6 +240,24 @@ test("hand-tool, right-button and primary touch panning preserve the editing foc
     }
 });
 
+test("touch activation waits for a click and ignores an unfinished pinch or a nested map", () => {
+    const {target, event} = setup();
+    target.interactionActive = false;
+    const down = event("background", {type: "pointerdown", pointerType: "touch"});
+    target.activatePointer(down);
+    assert.equal(target.interactionActive, false);
+    const click = event("background", {type: "click", pointerType: "touch"});
+    target.activatePointer(click);
+    assert.equal(target.interactionActive, true);
+    target.interactionActive = false;
+    target.pinching = true;
+    target.activatePointer(click);
+    assert.equal(target.interactionActive, false);
+    target.pinching = false;
+    target.activatePointer({...click, target: {closest: () => ({})}});
+    assert.equal(target.interactionActive, false);
+});
+
 test("Ctrl and Meta right dragging preserves reading state, node selection and editor focus", () => {
     for (const key of ["ctrlKey", "metaKey"]) {
         for (const interactionActive of [false, true]) {

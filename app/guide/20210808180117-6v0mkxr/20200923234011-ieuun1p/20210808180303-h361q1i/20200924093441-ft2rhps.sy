@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261019194432"
+		"updated": "20261019201307"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261019142953"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
@@ -2000,12 +2000,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018163000-gjcy3xw",
-				"updated": "20261018200107"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Mind maps initially leave the mouse wheel and one-finger swipes to document scrolling. On desktop, click the map to activate canvas interaction. On mobile, use the Hand Tool for one-finger panning, or double-tap a node to edit it. Turn off the Hand Tool to select or drag nodes. An active canvas has a highlighted border. Use the wheel or drag with the right mouse button to pan; the Hand Tool also allows left-button panning. Ordinary left dragging on blank canvas does not pan. Active one-finger gestures pan the canvas on touch screens. At the pan boundary, input stays with the canvas instead of scrolling the document. Click outside the map, move keyboard focus outside it, or press Esc on the canvas to return to reading. Full-screen maps stay active until you exit full screen."
+					"Data": "Mind maps initially leave the mouse wheel and one-finger swipes to document scrolling. Click the map on desktop or tap it once on mobile to activate canvas interaction. On mobile, use the Hand Tool for one-finger panning, or double-tap a node to edit it. Turn off the Hand Tool to select or drag nodes. An active canvas has a highlighted border. Use the wheel or drag with the right mouse button to pan; the Hand Tool also allows left-button panning. Ordinary left dragging on blank canvas does not pan. Active one-finger gestures pan the canvas on touch screens. At the pan boundary, input stays with the canvas instead of scrolling the document. Click outside the map, move keyboard focus outside it, or press Esc on the canvas to return to reading. Full-screen maps stay active until you exit full screen."
 				}
 			]
 		},

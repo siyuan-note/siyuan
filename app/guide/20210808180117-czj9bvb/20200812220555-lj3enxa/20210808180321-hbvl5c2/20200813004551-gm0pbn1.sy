@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261019212821"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-w9nonqj",
-				"updated": "20261019212821"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -113,29 +113,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中为 Note、Tip、Important、Warning、Caution 五种提示块分别设置快捷键，默认均未绑定，移动端连接外接键盘后也可使用。行为参考引述块快捷键：转换当前块或选中的块，无法转换时插入空提示块。在提示块内，使用不同类型的快捷键会切换类型；使用相同类型的快捷键时，若仅有一个未折叠子块则取消提示块，若有多个子块或子块已折叠则在当前子块后插入空提示块。"
-				}
-			]
-		},
-		{
-			"ID": "20261019212821-61a1d4f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261019212821-61a1d4f",
-				"updated": "20261019212821"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "插入表格快捷键会用一个空表格替换选中的文字或连续的文本块，包括通过 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift + ↑/↓"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 选中的块。鼠标和键盘选择遵循相同规则，一次撤销可恢复被替换的内容。若要保留原文，请先取消选择，再将光标移到需要插表的位置。"
 				}
 			]
 		},

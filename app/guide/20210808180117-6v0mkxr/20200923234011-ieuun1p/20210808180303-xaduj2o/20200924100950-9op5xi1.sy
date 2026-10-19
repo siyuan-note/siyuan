@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261019212821"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20261019212821"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -113,29 +113,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " you can assign separate shortcuts to the Note, Tip, Important, Warning, and Caution callout blocks. All five are unassigned by default and also work with an external keyboard on mobile. Like the blockquote shortcut, they convert the current or selected blocks, or insert an empty callout when conversion is unavailable. Inside a callout, a different type changes its type; the same type removes the wrapper when it has one unfolded child, or inserts an empty callout after the current child when it has multiple children or a folded child."
-				}
-			]
-		},
-		{
-			"ID": "20261019212821-369b5d7",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261019212821-369b5d7",
-				"updated": "20261019212821"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The table insertion shortcut replaces selected text or a continuous selection of text blocks with one empty table, including blocks selected using "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift + ↑/↓"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ". Mouse and keyboard selections follow the same rule, and one undo restores the replaced content. To keep the original text, clear the selection and move the caret to the desired insertion position first."
 				}
 			]
 		},

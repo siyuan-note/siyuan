@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 
 Object.assign(globalThis, {SIYUAN_VERSION: "test", NODE_ENV: "test"});
 const {attachLivePhotoVideo, getLivePhotoUploadPairs} = require("./livePhotoPairs") as typeof import("./livePhotoPairs");
+const {getAssetUploadSuccesses} = require("./uploadResult") as typeof import("./uploadResult");
 
 test("Live Photo pairs follow uploaded file indices through reordering and deduplication", () => {
     const photoA = new File(["photo-a"], "same.heic");
@@ -32,6 +33,40 @@ test("partial uploads never create a standalone video or associate a different f
     const replaced = getLivePhotoUploadPairs([{photo, video}], [new File(["other"], "photo.heic"), video],
         [{index: 0, path: "assets/other.heic"}, {index: 1, path: "assets/photo.mov"}]);
     assert.equal(replaced.videos.size, 0);
+});
+
+test("legacy partial and reordered successes retain the matching photo and video", () => {
+    const files = ["a.heic", "a.mov", "b.heic", "b.mov"].map(name => new File([name], name));
+    const pairs = [{photo: files[0], video: files[1]}, {photo: files[2], video: files[3]}];
+    for (const succMap of [
+        {"a.heic": "assets/a.heic", "b.heic": "assets/b.heic", "b.mov": "assets/b.mov"},
+        {"b.mov": "assets/b.mov", "b.heic": "assets/b.heic", "a.heic": "assets/a.heic"},
+    ]) {
+        const successes = getAssetUploadSuccesses({succMap}, {kind: "files", files});
+        const result = getLivePhotoUploadPairs(pairs, files, successes);
+        assert.deepEqual([...result.videos], [[2, "assets/b.mov"]]);
+        assert.deepEqual(successes.filter(item => !result.hidden.has(item.index)).map(item => item.name).sort(),
+            ["a.heic", "b.heic"]);
+        assert.equal(result.incomplete, true);
+    }
+    const successes = getAssetUploadSuccesses({succMap: {
+        "b.mov": "assets/b.mov", "a.mov": "assets/a.mov", "b.heic": "assets/b.heic", "a.heic": "assets/a.heic",
+    }}, {kind: "files", files});
+    const result = getLivePhotoUploadPairs(pairs, files, successes);
+    assert.deepEqual([...result.videos], [[0, "assets/a.mov"], [2, "assets/b.mov"]]);
+    assert.equal(result.incomplete, false);
+});
+
+test("ambiguous legacy filenames keep the still image without pairing or inserting a standalone MOV", () => {
+    const files = ["same.heic", "same.mov", "same.heic", "same.mov"].map(name => new File([name], name));
+    const successes = getAssetUploadSuccesses({succMap: {
+        "same.heic": "assets/same.heic", "same.mov": "assets/same.mov",
+    }}, {kind: "files", files});
+    const result = getLivePhotoUploadPairs([{photo: files[0], video: files[1]}, {photo: files[2], video: files[3]}],
+        files, successes);
+    assert.equal(result.videos.size, 0);
+    assert.equal(result.incomplete, true);
+    assert.deepEqual(successes.filter(item => !result.hidden.has(item.index)).map(item => item.path), ["assets/same.heic"]);
 });
 
 test("uploaded image markup retains the paired path through editor normalization", () => {

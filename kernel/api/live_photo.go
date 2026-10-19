@@ -8,6 +8,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -33,7 +35,20 @@ func checkLivePhotoSession(c *gin.Context, id string) error {
 }
 
 var startLivePhotoPreview = contractHandler(apicontract.StartLivePhotoPreview, func(c *gin.Context, request apicontract.StartLivePhotoPreviewRequest) apicontract.Response[apicontract.LivePhotoPreviewSession] {
-	absPath, err := model.GetAssetAbsPathInBox(request.Path, "")
+	assetPath, rawQuery, hasQuery := strings.Cut(request.Path, "?")
+	assetPath, err := url.PathUnescape(assetPath)
+	if err != nil || strings.Contains(assetPath, "?") {
+		return apicontract.Failure[apicontract.LivePhotoPreviewSession](-1, "invalid Live Photo asset path")
+	}
+	if _, err = url.ParseQuery(rawQuery); err != nil {
+		return apicontract.Failure[apicontract.LivePhotoPreviewSession](-1, "invalid Live Photo asset query")
+	}
+	// 路径只按 URL 解码一次，查询参数交给资源解析器，权限校验和读取使用同一个地址。
+	request.Path = assetPath
+	if hasQuery {
+		request.Path += "?" + rawQuery
+	}
+	absPath, err := model.ResolveLivePhotoAssetPath(request.Path)
 	if err != nil {
 		return apicontract.Failure[apicontract.LivePhotoPreviewSession](-1, "Live Photo asset not found")
 	}

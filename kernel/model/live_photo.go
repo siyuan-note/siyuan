@@ -19,9 +19,28 @@ var LivePhotoPreviews = livephoto.NewManager(func() string {
 	return filepath.Join(util.TempDir, "assets-cache", "livephoto")
 })
 
+// ResolveLivePhotoAssetPath 沿用普通资源的真实路径校验，加密资源由带 box 的解析器验证边界。
+func ResolveLivePhotoAssetPath(assetPath string) (string, error) {
+	absPath, err := GetAssetAbsPathInBox(assetPath, "")
+	if err != nil {
+		return "", err
+	}
+	if !IsEncryptedAssetPath(absPath) {
+		relativePath, relErr := filepath.Rel(util.DataDir, absPath)
+		if relErr != nil {
+			return "", relErr
+		}
+		_, validatedPath, resolveErr := ResolveDataAssetPath(filepath.ToSlash(relativePath))
+		if resolveErr != nil || filepath.Clean(validatedPath) != filepath.Clean(absPath) {
+			return "", errors.New("Live Photo asset resolves outside assets directory")
+		}
+	}
+	return absPath, nil
+}
+
 // StartLivePhotoPreview 为在途任务取得独立租约，笔记本锁定先取消任务再排空租约。
 func StartLivePhotoPreview(assetPath string, clientEncode bool) (livephoto.Session, error) {
-	absPath, err := GetAssetAbsPathInBox(assetPath, "")
+	absPath, err := ResolveLivePhotoAssetPath(assetPath)
 	if err != nil {
 		return livephoto.Session{}, errors.New("Live Photo asset not found")
 	}

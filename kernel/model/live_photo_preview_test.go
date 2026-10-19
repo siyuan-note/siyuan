@@ -13,6 +13,54 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestLivePhotoAssetPathBoundaries(t *testing.T) {
+	for _, location := range []string{"global", "notebook", "document"} {
+		t.Run(location, func(t *testing.T) {
+			boxID, _ := setupUnusedAssetWorkspace(t)
+			assets := filepath.Join(util.DataDir, "assets")
+			if location == "notebook" {
+				assets = filepath.Join(util.DataDir, boxID, "assets")
+			} else if location == "document" {
+				assets = filepath.Join(util.DataDir, boxID, "20261019000001-doc0001", "assets")
+			}
+			if err := os.MkdirAll(assets, 0755); err != nil {
+				t.Fatal(err)
+			}
+			regular := filepath.Join(assets, "live.mov")
+			if err := os.WriteFile(regular, testutil.LivePhotoMOV(t), 0600); err != nil {
+				t.Fatal(err)
+			}
+			got, err := ResolveLivePhotoAssetPath("assets/live.mov")
+			if err != nil || filepath.Clean(got) != regular {
+				t.Fatalf("regular asset: %s, %v", got, err)
+			}
+			t.Run("symlink", func(t *testing.T) {
+				inside := filepath.Join(assets, "inside.mov")
+				if err := os.Symlink(regular, inside); err != nil {
+					t.Skipf("symlink unavailable: %v", err)
+				}
+				if got, err := ResolveLivePhotoAssetPath("assets/inside.mov"); err != nil || filepath.Clean(got) != inside {
+					t.Fatalf("inside symlink: %s, %v", got, err)
+				}
+				outside := filepath.Join(t.TempDir(), "outside.mov")
+				if err := os.WriteFile(outside, testutil.LivePhotoMOV(t), 0600); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(outside, filepath.Join(assets, "outside.mov")); err != nil {
+					t.Fatal(err)
+				}
+				if got, err := ResolveLivePhotoAssetPath("assets/outside.mov"); err == nil {
+					t.Fatalf("outside symlink resolved: %s", got)
+				}
+				if session, err := StartLivePhotoPreview("assets/outside.mov", false); err == nil {
+					LivePhotoPreviews.Cancel(session.ID)
+					t.Fatal("outside symlink admitted preview")
+				}
+			})
+		})
+	}
+}
+
 func TestEncryptedLivePhotoPreviewCompatibilityAndLock(t *testing.T) {
 	for _, legacy := range []bool{false, true} {
 		t.Run(map[bool]string{false: "current", true: "legacy"}[legacy], func(t *testing.T) {

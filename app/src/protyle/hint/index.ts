@@ -152,6 +152,7 @@ export class Hint {
     private emojiPanel?: EmojiPanelController;
     private emojiBrowseMode = false;
     private loadingAnimation?: Animation;
+    private loadingID = 0;
     private bindingDismissController?: AbortController;
 
     constructor(protyle: IProtyle) {
@@ -209,6 +210,7 @@ export class Hint {
     }
 
     public destroy() {
+        this.loadingID++;
         this.bindingDismissController?.abort();
         this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
@@ -664,6 +666,9 @@ export class Hint {
     }
 
     public genLoading(protyle: IProtyle, delay = 0, source = this.source) {
+        const loadingID = ++this.loadingID;
+        const context = getCreateTargetContext(protyle);
+        const rootID = protyle.block.rootID;
         this.source = source;
         this.bindingDismissController?.abort();
         if (source === "av" && getAVBindingCell(protyle.toolbar.range)?.dataset.rowId) {
@@ -716,6 +721,11 @@ export class Hint {
                 {visibility: "hidden"},
             ], {duration: delay});
         }
+        const loadingElement = this.element.querySelector(".fn__loading");
+        // 仅允许当前文档中仍可见的本次加载更新候选，避免旧请求影响后续面板。
+        return () => this.loadingID === loadingID && isSameCreateTargetContext(context, protyle) &&
+            protyle.block.rootID === rootID && this.element.isConnected &&
+            !this.element.classList.contains("fn__none") && this.element.contains(loadingElement);
     }
 
     public bindUploadEvent(protyle: IProtyle, element: HTMLElement) {

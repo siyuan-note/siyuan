@@ -207,6 +207,8 @@ func TestAPIContractSettingDecisionLegacySave(t *testing.T) {
 			}{
 				{`{"decision":{"apiKey":null}}`, ""},
 				{`{"decision":{"apiKey":"stale-key","profiles":{"typesafe":{"apiKey":"modern-key"}}}}`, "modern-key"},
+				// profiles 显式 null 表示重置，平铺字段仍需迁移到 typesafe。
+				{`{"decision":{"profiles":null,"apiKey":"reset-key"}}`, "reset-key"},
 			} {
 				body := test.body
 				if route.name == "patch" {
@@ -214,7 +216,7 @@ func TestAPIContractSettingDecisionLegacySave(t *testing.T) {
 				}
 				code, message, _ := settingContractRequest(t, route.name, route.handler, body)
 				if code != 0 || model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey != test.key {
-					t.Fatalf("legacy clearing or modern precedence failed: %s", message)
+					t.Fatalf("legacy clearing, reset or modern precedence failed: %s", message)
 				}
 			}
 		})

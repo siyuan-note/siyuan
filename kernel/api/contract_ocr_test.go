@@ -174,7 +174,7 @@ func TestAPIContractOCRNativeImportAndHeadlessRecognition(t *testing.T) {
 	engine := gin.New()
 	engine.POST("/api/asset/importOCRModels", importOCRModels)
 	engine.POST("/api/asset/ocr", ocr)
-	connection := connectOCRNotifications(t, engine)
+	connection := connectSettingNotifications(t, engine)
 	upload := func(invalid bool) apicontract.OCRModel {
 		t.Helper()
 		var body bytes.Buffer
@@ -419,7 +419,8 @@ func TestAPIContractOCRThresholdPersistence(t *testing.T) {
 	}
 }
 
-func connectOCRNotifications(t *testing.T, engine *gin.Engine) *websocket.Conn {
+// connectSettingNotifications 建立 main 会话并返回可读取推送的连接，供各设置通知测试共用。
+func connectSettingNotifications(t *testing.T, engine *gin.Engine) *websocket.Conn {
 	t.Helper()
 	push := melody.New()
 	connected := make(chan *melody.Session, 1)
@@ -431,7 +432,7 @@ func connectOCRNotifications(t *testing.T, engine *gin.Engine) *websocket.Conn {
 	engine.GET("/ws", func(c *gin.Context) { _ = push.HandleRequest(c.Writer, c.Request) })
 	server := httptest.NewServer(engine)
 	t.Cleanup(func() { push.Close(); server.Close() })
-	endpoint := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws?app=" + t.Name() + "&id=ocr-settings&type=main"
+	endpoint := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws?app=" + t.Name() + "&id=settings-notifications&type=main"
 	connection, response, err := websocket.DefaultDialer.Dial(endpoint, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -442,7 +443,7 @@ func connectOCRNotifications(t *testing.T, engine *gin.Engine) *websocket.Conn {
 	case session := <-connected:
 		t.Cleanup(func() { util.RemovePushChan(session) })
 	case <-time.After(5 * time.Second):
-		t.Fatal("OCR settings WebSocket did not connect")
+		t.Fatal("settings WebSocket did not connect")
 	}
 	return connection
 }
@@ -454,7 +455,7 @@ func TestAPIContractOCRSettingsNotifications(t *testing.T) {
 	t.Cleanup(func() { util.ConfDir = previousConfDir })
 	engine := gin.New()
 	engine.POST("/api/asset/setOCRConfig", setOCRConfig)
-	connection := connectOCRNotifications(t, engine)
+	connection := connectSettingNotifications(t, engine)
 	for _, auto := range []bool{true, false} {
 		body, err := json.Marshal(apicontract.SettingOCR{Provider: "tesseract", Model: "tiny", Auto: auto})
 		if err != nil {

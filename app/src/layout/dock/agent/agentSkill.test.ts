@@ -55,6 +55,8 @@ const browserCases = async (source: string) => {
     const hint = {
         element, source: "hint", enableExtend: true, enableSlash: true, splitChar: "/",
         consumeRefBracketClose: api.Hint.prototype.consumeRefBracketClose,
+        // 用例只覆盖命令填充，表格单元格接管由 fillCommand 用例覆盖
+        openNewTableCell: () => {},
         genHTML: (items: IHintData[], _protyle?: IProtyle, reset = false) => {
             if (reset && items.length === 0) {
                 element.classList.add("fn__none");

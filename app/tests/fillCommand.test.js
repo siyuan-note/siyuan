@@ -47,7 +47,7 @@ const compile = () => {
         extract("wysiwyg/list", ["updateListOrder"]),
         extract("wysiwyg/listContext", ["getOrderedListMarkerUpdates"]),
         extract("hint/blockHintRange", ["shouldCaptureHintUndoFocus"]),
-        extract("util/insertHTML", ["markFoldHeadingChildren", "insertHTML"]),
+        extract("util/insertHTML", ["markFoldHeadingChildren", "focusInsertedBlock", "insertHTML"]),
         extract("wysiwyg/transaction", ["updateTransaction"]),
         `const keyboardHandler = (protyle, event) => {
             const editorElement = protyle.wysiwyg.element;

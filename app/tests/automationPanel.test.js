@@ -237,14 +237,19 @@ const runCases = async (sources, css, mobile) => {
         ['[data-actions] [data-index="0"]', '[data-actions] [data-action="remove-action"]'],
         ['[data-field-id="finished"]', '[data-actions] [data-action="remove-field"]'],
     ];
-    assert.equal(matchMedia("(hover: none), (any-pointer: coarse)").matches, mobile, "touch devices have visible removal controls");
+    // 可见性由媒体查询决定：带触摸屏的桌面主机在未模拟触控时同样命中 coarse 指针
+    const touchControls = matchMedia("(hover: none), (any-pointer: coarse)").matches;
+    if (mobile) {
+        assert.ok(matchMedia("(hover: none)").matches, "touch emulation switches the hover capability");
+    }
     for (const [rowSelector, buttonSelector] of removals) {
         const button = get(buttonSelector);
         button.scrollIntoView({block: "center"});
         await require("electron").ipcRenderer.invoke("automation-pointer", window.innerWidth - 2, 2);
         await tick();
         const before = button.getBoundingClientRect();
-        assert.equal(getComputedStyle(button).opacity, mobile ? "1" : "0", "removal is contextual on desktop and visible on touch");
+        assert.equal(getComputedStyle(button).opacity, touchControls ? "1" : "0",
+            "removal is contextual on desktop and visible on touch");
         button.focus();
         assert.equal(getComputedStyle(button).opacity, "1", "keyboard focus reveals the removal button");
         button.blur();
@@ -416,8 +421,10 @@ const runCases = async (sources, css, mobile) => {
     await change("[data-mode]", "currentTime");
     const theme = document.createElement("style");
     await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 560, 620);
-    for (let attempt = 0; window.innerHeight !== 620 && attempt < 100; attempt++) { await tick(); }
-    assert.equal(window.innerHeight, 620, "the resized viewport is ready before testing assignment scrolling");
+    // 非 100% 缩放下窗口内容高度可能有 1 像素的取整偏差
+    for (let attempt = 0; Math.abs(window.innerHeight - 620) > 1 && attempt < 100; attempt++) { await tick(); }
+    assert.ok(Math.abs(window.innerHeight - 620) <= 1,
+        `the resized viewport is ready before testing assignment scrolling: ${window.innerHeight}`);
     get("[data-mode]").scrollIntoView({block: "center"});
     await tick();
     const scroller = get(".b3-menu__items");
@@ -498,7 +505,7 @@ const runCases = async (sources, css, mobile) => {
             await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}`);
             get('[data-action="add-action"]').scrollIntoView({block: "nearest"});
             await tick();
-            assert.ok(get('[data-action="add-action"]').getBoundingClientRect().bottom <= 901,
+            assert.ok(get('[data-action="add-action"]').getBoundingClientRect().bottom <= window.innerHeight + 1,
                 `${mobile}/${width}: actions remain reachable by scrolling: ${JSON.stringify(get('[data-action="add-action"]').getBoundingClientRect())}`);
             await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-actions`);
         }

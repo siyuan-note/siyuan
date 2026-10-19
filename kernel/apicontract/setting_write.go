@@ -18,6 +18,8 @@ const (
 type SettingWrite struct {
 	Namespace string // 变更通知中的配置命名空间，"*" 表示可能涉及多个配置段
 	Mode      SettingWriteMode
+	// Merge 声明请求体与配置段同构：解码前先合并进当前段，未提交的字段保持当前值，null 还原默认值。
+	Merge bool
 }
 
 // Declared 报告端点是否声明了配置写入。

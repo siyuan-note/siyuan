@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -28,18 +29,38 @@ func MergeConfJSON(base, patch []byte) ([]byte, error) {
 	if current == nil {
 		current = map[string]json.RawMessage{}
 	}
-	for key, value := range changes {
-		if bytes.HasPrefix(bytes.TrimSpace(value), []byte("{")) && bytes.HasPrefix(bytes.TrimSpace(current[key]), []byte("{")) {
-			merged, err := MergeConfJSON(current[key], value)
+	keys := make([]string, 0, len(changes))
+	for key := range changes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		value := changes[key]
+		target := mergeConfJSONKey(current, key)
+		if bytes.HasPrefix(bytes.TrimSpace(value), []byte("{")) && bytes.HasPrefix(bytes.TrimSpace(current[target]), []byte("{")) {
+			merged, err := MergeConfJSON(current[target], value)
 			if err != nil {
 				return nil, err
 			}
-			current[key] = merged
+			current[target] = merged
 		} else {
-			current[key] = value
+			current[target] = value
 		}
 	}
 	return json.Marshal(current)
+}
+
+// mergeConfJSONKey 把补丁键映射到既有配置的等价键，保留大小写不同的字段写法。
+func mergeConfJSONKey(current map[string]json.RawMessage, key string) string {
+	if _, exists := current[key]; exists {
+		return key
+	}
+	for existing := range current {
+		if strings.EqualFold(existing, key) {
+			return existing
+		}
+	}
+	return key
 }
 
 func (spec *SectionSpec[C]) patch(patch []byte) ([]Issue, error) {
@@ -79,6 +100,9 @@ func MergeConfSectionJSON(current any, patch []byte) ([]byte, error) {
 
 // ConfSectionPatchJSON 返回合并后的配置段，调用方在发布前保留契约校验与专用领域动作。
 func ConfSectionPatchJSON(namespace string, patch []byte) ([]byte, error) {
+	if nil == Conf {
+		return patch, nil
+	}
 	spec, ok := SectionSpecByNamespace(namespace)
 	if !ok {
 		return nil, fmt.Errorf("unsupported configuration section: %s", namespace)

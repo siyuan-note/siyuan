@@ -69,7 +69,7 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 		model.Conf.Search.Store(confSectionValue2)
 	}
 	model.Conf.Appearance.Store(conf.NewAppearance())
-	*model.Conf.FileTree.Load().BoxDocEnabled = true
+	model.Conf.FileTree.Load().BoxDocEnabled = true
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

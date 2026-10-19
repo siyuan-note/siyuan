@@ -22,8 +22,8 @@ type SettingAI struct {
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
 }
 
-// SettingAIWeb 省略时沿用已保存的网页服务配置；初始搜索为 exa，抓取为 direct。
-// 可分别选择 deepseek，共用独立 API 密钥；超时默认 30 秒，上限 600 秒。
+// SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
+// 超时默认 30 秒，上限 600 秒。
 // DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
 // Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
 type SettingAIWeb struct {
@@ -208,9 +208,8 @@ type SettingFlashcard struct {
 	Weights          string  `json:"weights" api:"optional,nullable"`
 }
 
-// SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
-// blockGutterMode 控制是否显示完整块标，默认 false，输出及持久化均为布尔值。
-// 整段设置接口省略时保留当前值；null 表示关闭，其他非布尔类型拒绝更新。
+// SettingEditor 描述编辑器配置。displayImgName、displayImgAlt、blockGutterMode 和 pageScrollButtons 默认关闭，
+// null 表示回到默认值，其他非布尔类型拒绝更新。
 type SettingEditor struct {
 	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
 	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
@@ -375,7 +374,7 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
-	// 思维导图默认开启，思维导图项默认关闭；更新时省略或传 null 保留当前值。
+	// 思维导图默认开启，思维导图项默认关闭；null 表示回到默认值。
 	Mindmap                      *bool `json:"mindmap" api:"optional,nullable"`
 	MindmapItem                  *bool `json:"mindmapItem" api:"optional,nullable"`
 	CustomBlock                  *bool `json:"customBlock" api:"optional,nullable"`

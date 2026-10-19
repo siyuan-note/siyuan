@@ -20,7 +20,7 @@ import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
 	CompactMode              bool                `json:"compactMode"`              // 桌面端紧凑模式
-	MenuMouseScroll          bool                `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动
+	MenuMouseScroll          bool                `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
 	PDFTheme                 *PDFTheme           `json:"pdfTheme"`                 // PDF 阅读主题与标注颜色
 	OutlineKeepCurrentExpand bool                `json:"outlineKeepCurrentExpand"` // 大纲保持当前标题展开
 	MobileBars               *MobileBars         `json:"mobileBars"`               // 移动端工具栏与侧栏访问偏好
@@ -86,6 +86,7 @@ func NewAppearance() *Appearance {
 // NewAppearanceForContainer 使用显式容器参数选择状态栏默认项。
 func NewAppearanceForContainer(mobile bool) *Appearance {
 	return &Appearance{
+		MenuMouseScroll:     true,
 		PDFTheme:            NewPDFTheme(),
 		MobileBars:          NewMobileBars(),
 		GlobalFontFamilies:  []*EditorFont{},

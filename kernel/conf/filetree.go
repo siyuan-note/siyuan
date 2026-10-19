@@ -27,8 +27,8 @@ type FileTree struct {
 	CloseTabOnDoubleClick    bool   `json:"closeTabOnDoubleClick"`    // 是否使用双击关闭页签
 	DocIconClickMode         int    `json:"docIconClickMode"`         // 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档
 	ParentDocTitleClickMode  int    `json:"parentDocTitleClickMode"`  // 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档
-	BoxDocEnabled            *bool  `json:"boxDocEnabled"`            // 是否启用顶层笔记本文档
-	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon"`        // 是否使用 SVG 默认图标
+	BoxDocEnabled            bool   `json:"boxDocEnabled"`            // 是否启用顶层笔记本文档
+	UseSVGDefaultIcon        bool   `json:"useSVGDefaultIcon"`        // 是否使用 SVG 默认图标
 	RefCreateSaveBox         string `json:"refCreateSaveBox"`         // 块引时新建文档存储笔记本
 	RefCreateSavePath        string `json:"refCreateSavePath"`        // 块引时新建文档存储路径
 	DocCreateSaveBox         string `json:"docCreateSaveBox"`         // 新建文档存储笔记本
@@ -58,8 +58,8 @@ func NewFileTree() *FileTree {
 		CloseTabOnDoubleClick:    false,
 		DocIconClickMode:         0,
 		ParentDocTitleClickMode:  0,
-		BoxDocEnabled:            new(bool),
-		UseSVGDefaultIcon:        new(true),
+		BoxDocEnabled:            false,
+		UseSVGDefaultIcon:        true,
 		Sort:                     util.SortModeCustom,
 		MaxListCount:             512,
 		MaxOpenTabCount:          8,

@@ -1067,7 +1067,7 @@ var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", A
 var AIOCR = define[AssetPathRequest, AssetTextData]("aiOCR", "/api/ai/ocr", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetOCRConfig = define[EmptyRequest, OCRConfigData]("getOCRConfig", "/api/asset/getOCRConfig", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-var SetOCRConfig = define[SettingOCR, SettingOCR]("setOCRConfig", "/api/asset/setOCRConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ocr"}}, "POST")
+var SetOCRConfig = define[SettingOCR, SettingOCR]("setOCRConfig", "/api/asset/setOCRConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ocr", Merge: true}}, "POST")
 var ImportOCRModels = define[ImportOCRModelsRequest, OCRModel]("importOCRModels", "/api/asset/importOCRModels", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 // 重命名普通笔记本资源，并同步字面量及百分号编码的文档、数据库引用。
@@ -1142,27 +1142,27 @@ var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("inser
 var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
-var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet"}}, "POST")
-var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar"}}, "POST")
+var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet", Merge: true}}, "POST")
+var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
-// web 省略时保留当前配置；初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
+// web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
 // 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
 // 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
 // ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
-var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai"}}, "POST")
-var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets"}}, "POST")
-var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "variables"}}, "POST")
+var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai", Merge: true}}, "POST")
+var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets", Merge: true}}, "POST")
+var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "variables", Merge: true}}, "POST")
 
 // SetFlashcard 使用与启动、导入相同的规范化规则；保留零张上限，非法记忆参数和权重恢复默认值。
 // reviewMode 仅接受 0、1、2，越界值回退 0。
-var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard", "/api/setting/setFlashcard", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "flashcard"}}, "POST")
+var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard", "/api/setting/setFlashcard", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "flashcard", Merge: true}}, "POST")
 
-// SetEditor 使用与启动、导入相同的规范化规则并同步保存。锚文本长度 1–5120 保持不变，小于 1 回退 64。
-// 字体大小超出 9–72 回退 16；省略字体列表和图片标题字段时继续保留原有兼容行为。
+// SetEditor 使用与启动、导入相同的规范化规则并同步保存。
+// 锚文本长度 1–5120 保持不变，小于 1 回退 64；字体大小超出 9–72 回退 16。
 // backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
 // databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
-var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor"}}, "POST")
+var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor", Merge: true}}, "POST")
 
 // PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
 // export.blockRefMode 的旧值 0、1、5 按旧设置接口的兼容语义转换为 4；启动迁移由配置版本控制。
@@ -1176,27 +1176,36 @@ var PatchSetting = define[PatchSettingRequest, *SettingPatchData]("patchSetting"
 // SetExport 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
 // blockEmbedMode 仅接受 0、1，越界值回退 1；fileAnnotationRefMode 仅接受 0、1，越界值回退 0。
 // blockRefMode 的其他取值及字段省略、null 的解析行为保持不变。
-var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "export"}}, "POST")
+var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "export", Merge: true}}, "POST")
 
-// SetFiletree 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
+// SetFiletree 使用与启动、导入相同的路径和数值规范化规则。
 // maxListCount 小于 1 回退 512，largeFileWarningSize 小于 2 回退 8，两者大于 10240 时截断至 10240。
-var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/api/setting/setFiletree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "fileTree"}}, "POST")
+var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/api/setting/setFiletree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "fileTree", Merge: true}}, "POST")
 
-// SetSearch 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32。
-// limit 大于 10240 时截断至 10240。
-// 省略汉字敏感、自定义块和脑图选项时保留当前值；反链提及关键词上限小于 1 回退 512。
-var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "search"}}, "POST")
+// SetSearch 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32，大于 10240 时截断至 10240。
+// 反链提及关键词上限小于 1 回退 512。
+var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "search", Merge: true}}, "POST")
 
 // SetAppearance 限定关闭按钮行为：closeButtonBehavior 仅接受 0、1，越界值回退 0。
-var SetAppearance = define[SetAppearanceRequest, *SettingAppearance]("setAppearance", "/api/setting/setAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance"}}, "POST")
+var SetAppearance = define[SetAppearanceRequest, *SettingAppearance]("setAppearance", "/api/setting/setAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance", Merge: true}}, "POST")
 
 // SetEntryVisibility 的版本 7 方案可用 defaults 指定 simple 或 full，未覆盖的显隐跟随该内置方案。
 // 省略 defaults 的方案及旧版本方案保留独立显隐语义；entries 中的布尔值始终优先，未知入口和插件排序保留。
 var SetEntryVisibility = define[SetEntryVisibilityRequest, *SettingEntryVisibility]("setEntryVisibility", "/api/setting/setEntryVisibility", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance"}}, "POST")
-var SetPublish = define[SetPublishRequest, SettingPublishData]("setPublish", "/api/setting/setPublish", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "publish"}}, "POST")
+
+// SetPublish 认证账户须提交完整数组，传 null 或空数组表示清空账户。
+var SetPublish = define[SetPublishRequest, SettingPublishData]("setPublish", "/api/setting/setPublish", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "publish", Merge: true}}, "POST")
+
+// GetSettingSection 读取单个配置段，字段与脱敏规则与 /api/system/getConf 一致，仅返回请求的配置段以减少传输量。
+// namespace 必须是已注册的配置段；需要完整配置的启动和重连场景仍使用 /api/system/getConf。
+var GetSettingSection = define[SettingGetSectionRequest, SettingSectionData]("getSettingSection", "/api/setting/getSection", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
 var GetBootAppearances = define[EmptyRequest, SettingBootAppearancesData]("getBootAppearances", "/api/setting/getBootAppearances", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SetBootAppearance = define[SettingBootAppearanceRequest, *SettingBootAppearanceSelection]("setBootAppearance", "/api/setting/setBootAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance", Mode: SettingSilent}}, "POST")
 var SetBazaarPetalDisabled = define[SettingPetalDisabledRequest, SettingPetalDisabledData]("setBazaarPetalDisabled", "/api/setting/setBazaarPetalDisabled", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar"}}, "POST")
+
+// SetKeymap 整体替换快捷键配置：data 必须提交完整的快捷键对象，只提交部分分组会清空未提交的快捷键。
+// 单条快捷键请使用 /api/setting/patch 的 keymap 命名空间，该接口按对象递归合并。
 var SetKeymap = define[SettingKeymapRequest, Null]("setKeymap", "/api/setting/setKeymap", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "keymap"}}, "POST")
 
 // 接收可选的 exit（默认 false），要求管理员权限并禁止只读写入。

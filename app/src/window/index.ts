@@ -77,7 +77,7 @@ class App {
                                 appearanceConfigApi.apply(data.data);
                                 break;
                             case "settingChanged":
-                                void refreshSettingConfig(data.data.namespace);
+                                void refreshSettingConfig(data.data.namespace, data.data.revision);
                                 break;
                             case "refreshAppearance":
                                 void refreshAppearance(data.data);

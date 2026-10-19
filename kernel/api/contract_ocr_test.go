@@ -301,7 +301,8 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		{`{"provider":"unknown","model":"tiny","auto":true}`, false},
 		{`{"provider":"paddleocr","model":"../../outside","auto":true}`, false},
 		{`{"provider":"tesseract","model":"tiny","auto":"false"}`, false},
-		{`{"provider":"tesseract","model":"tiny"}`, false},
+		// 合并写入：省略的必填字段取当前配置，请求仍可成功
+		{`{"provider":"tesseract","model":"tiny"}`, true},
 	} {
 		previousRevision := model.ConfSettingRevision.Load()
 		recorder := httptest.NewRecorder()
@@ -362,12 +363,14 @@ func TestAPIContractOCRThresholdPersistence(t *testing.T) {
 		custom  bool
 	}{
 		{`,"thresholds":{"detection":0.4,"box":0.7,"recognition":0.9}`, true, true},
+		// 省略的阈值保持当前值
 		{"", true, true},
-		{`,"thresholds":null`, true, true},
 		{`,"thresholds":{"detection":0,"box":0.7,"recognition":0.9}`, false, true},
 		{`,"thresholds":{"detection":0.4,"box":1,"recognition":0.9}`, false, true},
 		{`,"thresholds":{"detection":0.4,"box":0.7,"recognition":1.1}`, false, true},
+		// null 表示恢复默认值
 		{`,"thresholds":{"detection":null,"box":null,"recognition":null}`, true, false},
+		{`,"thresholds":null`, true, false},
 	} {
 		body := `{"provider":"tesseract","model":"tiny","auto":false` + test.fields + `}`
 		recorder := httptest.NewRecorder()
@@ -386,10 +389,10 @@ func TestAPIContractOCRThresholdPersistence(t *testing.T) {
 		got := model.Conf.GetOCR().Thresholds
 		if test.custom {
 			if got.Detection == nil || *got.Detection != 0.4 || got.Box == nil || *got.Box != 0.7 || got.Recognition == nil || *got.Recognition != 0.9 {
-				t.Fatalf("saved thresholds lost: %+v", got)
+				t.Fatalf("saved thresholds lost for %q: %+v", test.fields, got)
 			}
 		} else if got != (conf.OCRThresholds{}) {
-			t.Fatalf("reset did not restore defaults: %+v", got)
+			t.Fatalf("reset did not restore defaults for %q: %+v", test.fields, got)
 		}
 		persisted, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
 		if err != nil {

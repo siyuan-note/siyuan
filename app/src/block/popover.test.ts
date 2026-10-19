@@ -245,6 +245,7 @@ const browserCases = async (source: string) => {
     check.equal(image.title, "");
     check.equal(image.alt, "");
     window.siyuan.config.ocr = {provider: "paddleocr", model: "tiny", auto: false,
+        aiModelId: "", reasoningEffort: "", thresholds: {detection: null, box: null, recognition: null},
         showText: false, showEmpty: false, showError: false};
     const previousOCRRequests = ocrRequests.length;
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));

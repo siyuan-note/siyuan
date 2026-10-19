@@ -33,7 +33,7 @@ func TestAPIContractSettingExportNormalization(t *testing.T) {
 			{`{"blockRefMode":0}`, 4}, {`{"blockRefMode":1}`, 4}, {`{"blockRefMode":5}`, 4},
 			{`{"blockRefMode":2}`, 2}, {`{"blockRefMode":3}`, 3}, {`{"blockRefMode":4}`, 4},
 			{`{"blockRefMode":-1}`, -1}, {`{"blockRefMode":6}`, 6},
-			{`{"blockRefMode":null}`, 4}, {`{"addTitle":false}`, 4},
+			{`{"blockRefMode":null}`, 4}, {`{"addTitle":false}`, 3},
 		} {
 			t.Run(route.name+"/"+entry.body, func(t *testing.T) {
 				model.Conf = model.NewAppConf()
@@ -56,8 +56,8 @@ func TestAPIContractSettingExportNormalization(t *testing.T) {
 					if err := json.Unmarshal(data, &response); err != nil {
 						t.Fatal(err)
 					}
-					if !reflect.DeepEqual(&response, model.Conf.Export.Load()) || response.BlockRefTextLeft != "" {
-						t.Fatal("replacement response differs from the applied export settings")
+					if !reflect.DeepEqual(&response, model.Conf.Export.Load()) || response.BlockRefTextLeft != "[" {
+						t.Fatal("response differs from the applied export settings")
 					}
 				} else if model.Conf.Export.Load().BlockRefTextLeft != "[" {
 					t.Fatal("patch lost an omitted export setting")

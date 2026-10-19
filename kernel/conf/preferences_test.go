@@ -44,4 +44,8 @@ func TestPreferenceDefaultsAndNormalization(t *testing.T) {
 	if NewAI().Agent.StreamingMarkdown || NormalizeAI(&AI{}).Agent.StreamingMarkdown {
 		t.Fatal("streaming Markdown must default to disabled")
 	}
+	// 新工作空间默认启用菜单鼠标滚动，已有工作空间缺少该字段时保持解析后的 false。
+	if !NewAppearance().MenuMouseScroll || (&Appearance{}).MenuMouseScroll {
+		t.Fatal("menu mouse scroll default changed")
+	}
 }

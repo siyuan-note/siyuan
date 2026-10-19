@@ -558,6 +558,71 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     mindmap.style.width = "";
     root.style.paddingLeft = "";
     root.style.paddingRight = "";
+    const layoutRoot = document.createElement("div");
+    layoutRoot.className = "protyle-wysiwyg";
+    document.body.appendChild(layoutRoot);
+    for (const mobile of [false, true]) {
+        const mobileStyle = document.createElement("style");
+        if (mobile) {
+            mobileStyle.textContent = mobileCSS;
+            document.head.appendChild(mobileStyle);
+        }
+        for (const type of ["NodeIFrame", "NodeWidget", "NodeMindmap", "NodeList"]) {
+            const isMindmap = type === "NodeMindmap" || type === "NodeList";
+            // 原生脑图和旧列表脑图都验证嵌入结果，避免导图宽度回归。
+            const modes = isMindmap ? ["embedded", "embedded-list"] : ["normal", "list", "embedded", "embedded-list"];
+            for (const mode of modes) {
+                for (const rtl of [false, true]) {
+                    layoutRoot.classList.toggle("protyle-block--rtl", rtl);
+                    for (const savedWidth of ["", "200px", "1000px"]) {
+                        layoutRoot.innerHTML = mode.includes("list") ? lute.Md2BlockDOM("- Parent\n  - Child") : "";
+                        const parent = mode.includes("list") ? layoutRoot.querySelector(".li .li") : layoutRoot;
+                        const block = document.createElement("div");
+                        block.dataset.nodeId = Lute.NewNodeID();
+                        block.dataset.type = type;
+                        block.className = isMindmap ? (type === "NodeList" ? "list" : "mindmap") : "iframe";
+                        block.style.width = savedWidth;
+                        block.style.height = "180px";
+                        if (isMindmap) {
+                            block.dataset.mindmapViewRendered = "true";
+                            block.setAttribute("custom-sy-list-mindmap", "1");
+                            block.innerHTML = '<div class="mindmap-view"><div class="mindmap-view__toolbar"></div><div class="mindmap-view__viewport"></div></div>';
+                        } else {
+                            // 兼容保存在 iframe 上的历史尺寸，不改写源数据。
+                            block.innerHTML = '<div class="iframe-content"><iframe src="about:blank" style="width:900px;height:180px"></iframe></div>';
+                        }
+                        if (mode.includes("embedded")) {
+                            const query = document.createElement("div");
+                            query.className = "render-node";
+                            query.dataset.type = "NodeBlockQueryEmbed";
+                            query.dataset.nodeId = Lute.NewNodeID();
+                            query.innerHTML = '<div class="protyle-icons"></div><div class="protyle-wysiwyg__embed"></div>';
+                            parent.insertBefore(query, parent.querySelector(":scope > .protyle-attr"));
+                            query.lastElementChild.appendChild(block);
+                        } else {
+                            parent.insertBefore(block, parent.querySelector(":scope > .protyle-attr"));
+                        }
+                        const savedHTML = block.outerHTML;
+                        // 连续缩小、恢复编辑器宽度，模拟侧栏开关和分屏。
+                        for (const width of [720, 320, 240, 720]) {
+                            layoutRoot.style.width = `${width}px`;
+                            const context = `${type}/${mode}/mobile=${mobile}/rtl=${rtl}/saved=${savedWidth}/width=${width}`;
+                            const bounds = block.parentElement.getBoundingClientRect();
+                            const rect = block.getBoundingClientRect();
+                            check.ok(rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1,
+                                `${context}: block fits its containing result or list item`);
+                            const content = block.querySelector("iframe, .mindmap-view").getBoundingClientRect();
+                            check.ok(content.left >= rect.left - 1 && content.right <= rect.right + 1,
+                                `${context}: rendered content fits the block`);
+                            check.equal(block.outerHTML, savedHTML, `${context}: layout preserves saved dimensions`);
+                        }
+                    }
+                }
+            }
+        }
+        mobileStyle.remove();
+    }
+    layoutRoot.remove();
     block.querySelectorAll(".protyle-block-resize").forEach(handle => handle.classList.add("touch-resize-active"));
     return "IFrame, widget and mind map resize cases passed";
 };
@@ -607,7 +672,7 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
     }
 };
 
-test("external resize handles preserve source, independent axes, historical dimensions and clipping", {
+test("external resize handles preserve source, axes, historical dimensions and narrow container bounds", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 90000,
 }, async () => {

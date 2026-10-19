@@ -216,6 +216,11 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         margin-left: 34px;
       }
 
+      > [data-type="NodeIFrame"],
+      > [data-type="NodeWidget"] {
+        max-width: calc(100% - 34px);
+      }
+
       & > [data-node-id]:not(.p):not(.code-block),
       & > [data-table-cell-node]:not(.p):not(.code-block) {
         padding-right: 0;

@@ -114,6 +114,7 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     check.equal(getComputedStyle(status()).marginTop, "0px", "idle state must not reserve status spacing");
     check.equal(getComputedStyle(root.querySelector<HTMLElement>(".workspace-storage__header")).paddingBottom, "0px",
         "idle state must not reserve header spacing");
+    await captures("desktop-initial-idle");
     button().dispatchEvent(new Event("click"));
     check.equal(requests.length, 1);
     check.equal(button().disabled, true);
@@ -252,6 +253,7 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
         const context = `${locale}-${mobile ? "mobile" : "desktop"}-${width}-${fontSize}`;
         mount();
         check.equal(requests.length, requestIndex, `${context}: opening the settings must not scan`);
+        await captures(`${context}-idle`);
         button().click();
         if (mobile && locale === "zh-CN") {
             check.ok(!loading().classList.contains("fn__none"));

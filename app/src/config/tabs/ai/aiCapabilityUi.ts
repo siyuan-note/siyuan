@@ -4,6 +4,8 @@ import {listCapabilityManifests} from "../../../layout/dock/agent/frontendCapabi
 import {
     AgentActionApprovalDecision,
     AgentApprovalDecision,
+    approvalOverridesForPatch,
+    capabilityOverridesForPatch,
     getCapabilityActionApproval,
     resolveCapabilityApproval,
     updateCapabilityActionApproval,
@@ -128,11 +130,18 @@ const addUnavailableCapabilities = (capabilities: ICapabilityInfo[], scope: Capa
 
 const saveCapabilityPolicy = (scope: CapabilityScope, policy: Config.ICapabilityPolicy, onApplied: () => void) => {
     const path = scope === "agent" ? "agent.capabilityPolicy" : "mcp.exposurePolicy";
-    aiConfigApi.patch(path, policy, onApplied);
+    const current = getCapabilityPolicy(scope);
+    aiConfigApi.patch(path, {
+        ...policy,
+        overrides: capabilityOverridesForPatch(current.overrides, policy.overrides),
+    }, onApplied);
 };
 
 const saveApprovalPolicy = (policy: Config.IAgent["approvalPolicy"], onApplied: () => void) => {
-    aiConfigApi.patch("agent.approvalPolicy", policy, onApplied);
+    aiConfigApi.patch("agent.approvalPolicy", {
+        ...policy,
+        overrides: approvalOverridesForPatch(getApprovalPolicy().overrides, policy.overrides),
+    }, onApplied);
 };
 
 const setCapabilitiesDecision = (scope: CapabilityScope, ids: string[], decision: CapabilityDecision,

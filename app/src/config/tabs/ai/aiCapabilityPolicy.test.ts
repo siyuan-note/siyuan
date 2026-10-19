@@ -2,6 +2,8 @@ import * as assert from "node:assert/strict";
 import test from "node:test";
 import {
     IAgentApprovalPolicy,
+    approvalOverridesForPatch,
+    capabilityOverridesForPatch,
     getCapabilityActionApproval,
     resolveCapabilityApproval,
     updateCapabilityActionApproval,
@@ -61,4 +63,32 @@ test("empty inherited approval entries are removed", () => {
     policy = updateCapabilityActionApproval(policy, "native/backend/search", "fulltext", "");
 
     assert.equal(policy.overrides["native/backend/search"], undefined);
+});
+
+test("removed capability overrides are submitted as empty decisions", () => {
+    // 设置补丁按对象合并，省略的键不会从 overrides 中移除，被删除的条目必须改写为空决策交给内核清除。
+    assert.deepEqual(capabilityOverridesForPatch({asset: "deny", block: "deny"}, {block: "deny"}),
+        {asset: "", block: "deny"});
+    assert.deepEqual(capabilityOverridesForPatch({}, {asset: "allow"}), {asset: "allow"});
+});
+
+test("removed approval overrides are submitted as empty decisions", () => {
+    const policy: IAgentApprovalPolicy = {
+        default: "risk",
+        overrides: {
+            "native/backend/search": {default: "confirm", actions: {semantic: "allow"}},
+            "native/backend/block": {default: "allow", actions: {}},
+        },
+    };
+
+    const actionRemoved = updateCapabilityActionApproval(policy, "native/backend/search", "semantic", "");
+    assert.deepEqual(approvalOverridesForPatch(policy.overrides, actionRemoved.overrides), {
+        "native/backend/search": {default: "confirm", actions: {semantic: ""}},
+        "native/backend/block": {default: "allow", actions: {}},
+    });
+
+    const entryRemoved = updateCapabilityApproval(policy, "native/backend/block", "risk");
+    assert.equal(entryRemoved.overrides["native/backend/block"], undefined);
+    assert.deepEqual(approvalOverridesForPatch(policy.overrides, entryRemoved.overrides)["native/backend/block"],
+        {default: "", actions: {}});
 });

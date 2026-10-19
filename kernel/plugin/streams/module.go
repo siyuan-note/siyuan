@@ -41,7 +41,7 @@ type Host struct {
 }
 
 // Enable 把 ReadableStream、WritableStream、TransformStream 及其默认 controller/reader/writer，以及
-// CountQueuingStrategy、ByteLengthQueuingStrategy 挂到 runtime 的 globalThis，调用方式与本沙箱其它 Web API
+// CountQueuingStrategy、ByteLengthQueuingStrategy 挂到 runtime 的 globalThis，调用方式与本沙箱其他 Web API
 // 一致，失败时 panic。返回的 Host 供同一 runtime 内的 Go 桥接代码使用（见 bridge.go），调用方应保留它。
 func Enable(rt *goja.Runtime) (h *Host) {
 	defer func() {

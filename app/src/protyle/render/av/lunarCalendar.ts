@@ -50,7 +50,7 @@ export const lunarToSolar = (lunar: ILunarDate, hours = 0, minutes = 0): number 
         return undefined;
     }
     const result = new Date(civil.getUTCFullYear(), civil.getUTCMonth(), civil.getUTCDate(), hours, minutes);
-    // 夏令时造成不存在的本地时间时返回错误，不把输入静默调整为其它时间。
+    // 夏令时造成不存在的本地时间时返回错误，不把输入静默调整为其他时间。
     if (result.getFullYear() !== civil.getUTCFullYear() || result.getMonth() !== civil.getUTCMonth() ||
         result.getDate() !== civil.getUTCDate() || result.getHours() !== hours || result.getMinutes() !== minutes) {
         return undefined;

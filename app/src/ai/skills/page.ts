@@ -40,7 +40,7 @@ export const createSkillManagerPage = (settingRoot: HTMLElement, content: string
             previousFocus.focus({preventScroll: true});
         }
     };
-    // 设置页被其它导航销毁时同步释放页面监听器。
+    // 设置页被其他导航销毁时同步释放页面监听器。
     const observer = new MutationObserver(() => {
         if (!view.isConnected) {
             destroy();

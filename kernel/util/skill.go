@@ -610,10 +610,10 @@ func normalizeSkillURL(raw string) (normalizedSkillSource, error) {
 	case "github.com":
 		return normalizeGitHubURL(u)
 	case "raw.githubusercontent.com":
-		// 直接 GET 单个 SKILL.md（或其它文本文件）
+		// 直接 GET 单个 SKILL.md（或其他文本文件）
 		return normalizedSkillSource{downloadURL: u.String()}, nil
 	default:
-		// 其它直链（release zip、自建站点等）：直接 GET，是否 zip 交由 Content-Type 判定
+		// 其他直链（release zip、自建站点等）：直接 GET，是否 zip 交由 Content-Type 判定
 		return normalizedSkillSource{downloadURL: u.String()}, nil
 	}
 }

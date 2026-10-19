@@ -26,7 +26,7 @@ export const openAgentInstructions = () => {
                 const input = currentDialog.element.querySelector<HTMLTextAreaElement>("textarea");
                 button.disabled = true;
                 input.disabled = true;
-                // 失败时保留编辑内容和原修订，禁止静默覆盖其它窗口或同步产生的新版本。
+                // 失败时保留编辑内容和原修订，禁止静默覆盖其他窗口或同步产生的新版本。
                 fetchPost("/api/ai/agent/setInstructions", {content, revision}, () => {
                     currentDialog.destroy();
                 }).finally(() => {

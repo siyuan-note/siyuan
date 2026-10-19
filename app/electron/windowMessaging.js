@@ -13,7 +13,7 @@ const isRendererWindowCommand = (data) => {
 };
 
 // 仅允许同工作区窗口之间投递：发送方必须是已登记的窗口，收件方必须与发送方指向同一内核目标。
-// 这样远端内核窗口无法影响其它工作区，本地发送方也无法影响另一个工作区
+// 这样远端内核窗口无法影响其他工作区，本地发送方也无法影响另一个工作区
 const dispatchWindowMessage = (data, options) => {
     const {senderWebContentsId, getKernelTarget, getAllWindows} = options;
     if (!isRendererWindowCommand(data)) {

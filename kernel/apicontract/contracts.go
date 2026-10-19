@@ -326,7 +326,7 @@ var (
 	ReindexHistory            = define[EmptyRequest, Null]("reindexHistory", "/api/history/reindexHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	ClearWorkspaceHistory     = define[EmptyRequest, Null]("clearWorkspaceHistory", "/api/history/clearWorkspaceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	BatchSetBlockAttrs        = define[BatchSetBlockAttrsRequest, Null]("batchSetBlockAttrs", "/api/attr/batchSetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	GetTag                    = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag"}}, "POST")
+	GetTag                    = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag", Mode: SettingSilent}}, "POST")
 )
 
 var (
@@ -353,11 +353,12 @@ var (
 	// 保存本机加密笔记本锁屏策略，成功后广播 system 设置变更通知，供其他客户端重新读取配置。
 	SetEncryptedNotebookFollowSystemLock = define[EncryptedNotebookFollowSystemLockRequest, Null]("setEncryptedNotebookFollowSystemLock", "/api/notebook/setEncryptedNotebookFollowSystemLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	LockEncryptedNotebooksOnSystemLock   = define[EmptyRequest, Null]("lockEncryptedNotebooksOnSystemLock", "/api/notebook/lockEncryptedNotebooksOnSystemLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	SetNotebookCryptoAutoLock            = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "notebookCrypto"}}, "POST")
-	ChangeMasterPassword                 = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	ExportNotebookCryptoBackup           = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-	TouchEncryptedNotebooks              = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-	GetNotebookArchiveCandidates         = define[EmptyRequest, NotebookArchiveCandidatesData]("getNotebookArchiveCandidates", "/api/notebook/getNotebookArchiveCandidates", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+	// 自动锁定分钟数由内核内存值驱动锁定行为，写入后无需广播供其他客户端重读。
+	SetNotebookCryptoAutoLock    = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "notebookCrypto", Mode: SettingSilent}}, "POST")
+	ChangeMasterPassword         = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	ExportNotebookCryptoBackup   = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+	TouchEncryptedNotebooks      = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+	GetNotebookArchiveCandidates = define[EmptyRequest, NotebookArchiveCandidatesData]("getNotebookArchiveCandidates", "/api/notebook/getNotebookArchiveCandidates", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	// 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
 	// 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
 	PrepareNotebookArchive = define[PrepareNotebookArchiveRequest, NotebookArchiveData]("prepareNotebookArchive", "/api/notebook/prepareNotebookArchive", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -520,16 +521,18 @@ var SetLocalStorageVals = define[StorageSetKeysRequest, Null]("setLocalStorageVa
 var RemoveLocalStorageVal = define[StorageRemoveRequest, Null]("removeLocalStorageVal", "/api/storage/removeLocalStorageVal", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "localStorage", Mode: SettingSilent}}, "POST")
 var RemoveLocalStorageVals = define[StorageRemoveKeysRequest, Null]("removeLocalStorageVals", "/api/storage/removeLocalStorageVals", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "localStorage", Mode: SettingSilent}}, "POST")
 var GetOutlineStorage = define[OutlineStorageRequest, map[string]JSONValue]("getOutlineStorage", "/api/storage/getOutlineStorage", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-var SetOutlineStorage = define[OutlineStorageSetRequest, Null]("setOutlineStorage", "/api/storage/setOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var RemoveOutlineStorage = define[OutlineStorageRequest, Null]("removeOutlineStorage", "/api/storage/removeOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+
+// 写入 data/storage 下独立存储的端点都不是 conf.json 的配置段，因此只持锁不广播。
+var SetOutlineStorage = define[OutlineStorageSetRequest, Null]("setOutlineStorage", "/api/storage/setOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var RemoveOutlineStorage = define[OutlineStorageRequest, Null]("removeOutlineStorage", "/api/storage/removeOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var GetViewState = define[StorageKeyRequest, map[string]JSONValue]("getViewState", "/api/storage/getViewState", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var GetRecentDocs = define[RecentDocsRequest, []*RecentDoc]("getRecentDocs", "/api/storage/getRecentDocs", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
 
 var GetCriteria = define[EmptyRequest, []*Criterion]("getCriteria", "/api/storage/getCriteria", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
-var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 
 var UpdateRecentDocOpenTime = define[RecentDocUpdateRequest, Null]("updateRecentDocOpenTime", "/api/storage/updateRecentDocOpenTime", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var UpdateRecentDocViewTime = define[RecentDocUpdateRequest, Null]("updateRecentDocViewTime", "/api/storage/updateRecentDocViewTime", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -540,8 +543,10 @@ var GetDocOutline = define[OutlineRequest, []*SearchPath]("getDocOutline", "/api
 var GetDocHeadingNumbers = define[HeadingNumbersRequest, map[string]string]("getDocHeadingNumbers", "/api/outline/getDocHeadingNumbers", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/api/storage/getInlineStyles", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
-var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+
+// 行级样式与数据库调色板变化由 reloadInlineStyles 专用推送通知其他窗口，不走配置段刷新。
+var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 
 var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -637,9 +642,10 @@ var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph
 
 var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "graph"}}, "POST")
 
-var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph"}}, "POST")
+// 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知，包装层不再补发。
+var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
 
-var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph"}}, "POST")
+var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
 
 var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/api/ref/refreshBacklink", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1151,6 +1157,7 @@ var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/sett
 // web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
 // 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
 // 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
+// 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
 // ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
 var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai", Merge: true}}, "POST")
 var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets", Merge: true}}, "POST")
@@ -1164,6 +1171,7 @@ var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard"
 // 锚文本长度 1–5120 保持不变，小于 1 回退 64；字体大小超出 9–72 回退 16。
 // backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
 // databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
+// 只提交 fontFamily、fontWeight 时按新的首选字体重建 fontFamilies；显式提交 fontFamilies 时以该列表为准。
 var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor", Merge: true}}, "POST")
 
 // PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
@@ -1175,9 +1183,9 @@ var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/sett
 // sync.assetDownloadMode 的非法值仍拒绝写入；repo.indexRetentionDays 的正值不设上限。
 var PatchSetting = define[PatchSettingRequest, *SettingPatchData]("patchSetting", "/api/setting/patch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "*", Mode: SettingSelfManaged}}, "POST")
 
-// SetExport 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
+// SetExport 合并提交的导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
 // blockEmbedMode 仅接受 0、1，越界值回退 1；fileAnnotationRefMode 仅接受 0、1，越界值回退 0。
-// blockRefMode 的其他取值及字段省略、null 的解析行为保持不变。
+// blockRefMode 的其他取值原样保留；省略的字段保持当前值，null 还原默认值。
 var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "export", Merge: true}}, "POST")
 
 // SetFiletree 使用与启动、导入相同的路径和数值规范化规则。
@@ -1189,6 +1197,7 @@ var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/
 var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "search", Merge: true}}, "POST")
 
 // SetAppearance 限定关闭按钮行为：closeButtonBehavior 仅接受 0、1，越界值回退 0。
+// entryVisibility 省略时保持当前方案，null 还原默认显隐方案。
 var SetAppearance = define[SetAppearanceRequest, *SettingAppearance]("setAppearance", "/api/setting/setAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance", Merge: true}}, "POST")
 
 // SetEntryVisibility 的版本 7 方案可用 defaults 指定 simple 或 full，未覆盖的显隐跟随该内置方案。

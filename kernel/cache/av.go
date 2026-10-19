@@ -18,6 +18,7 @@ package cache
 
 import (
 	"bytes"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -204,6 +205,7 @@ func ClearAVCache() {
 	avSearchDataCacheLock.Lock()
 	defer avSearchDataCacheLock.Unlock()
 	avCacheGeneration.Add(1)
+	clearAVOrderedIDs("")
 	avCacheKeys = map[string]map[string]uint64{}
 	avCache.Clear()
 	avDataVersions = map[string]uint64{}
@@ -246,5 +248,9 @@ func invalidateAVSearchDataByKeyLocked(key string) (version uint64) {
 	version = avDataVersion
 	avDataVersions[key] = version
 	delete(avSearchDataCache, key)
+	_, avID, found := strings.Cut(key, "\x00")
+	if found {
+		clearAVOrderedIDs(avID)
+	}
 	return
 }

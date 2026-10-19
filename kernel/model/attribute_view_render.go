@@ -559,6 +559,14 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	renderContext := sql.NewAttributeViewRenderContext()
 	renderContext.ReadOnly = !writable
 	defer renderContext.PushTemplateErrors()
+	var orderReuse *attributeViewOrderReuse
+	if !ignoreRows && strings.TrimSpace(query) == "" && filterContext == nil && target == nil && targetGroupID == "" {
+		orderReuse = planAttributeViewOrderReuse(attrView, view, nodeID, writable)
+		if reused, found := orderReuse.renderPage(attrView, view, page, pageSize, renderContext); found {
+			timing.Count("order_cache_hit", 1)
+			return reused, nil
+		}
+	}
 	templatePlan := planAttributeViewTemplates(attrView, view, query, ignoreRows)
 	deferTemplateValues := templatePlan != nil
 	timing.Stage("fields")
@@ -584,14 +592,15 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 		renderTargetItemID = ""
 	}
 	var targetIndex, targetOffset int
-	targetIndex, targetOffset, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows,
-		renderTargetItemID, renderContext, filterContext)
+	targetIndex, targetOffset, err = renderViewableInstanceWithOrder(viewable, view, attrView, page, pageSize, ignoreRows,
+		renderTargetItemID, renderContext, orderReuse.capture, filterContext)
 	if nil != err {
 		return
 	}
 	if deferTemplateValues {
 		sql.FillAttributeViewTemplateValuesForKeysWithContext(attrView, view, viewable.(av.Collection), templatePlan.deferred, renderContext)
 	}
+	orderReuse.store(renderContext)
 	if nil != target && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
 		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)
 	}
@@ -1081,6 +1090,12 @@ func attrViewFiltersUseRenderedValues(filters []*av.ViewFilter, renderTemplateKe
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
 	ignoreRows bool, targetItemID string,
 	renderContext *sql.AttributeViewRenderContext, filterContexts ...*av.FilterContext) (targetIndex, targetOffset int, err error) {
+	return renderViewableInstanceWithOrder(viewable, view, attrView, page, pageSize, ignoreRows, targetItemID, renderContext, nil, filterContexts...)
+}
+
+func renderViewableInstanceWithOrder(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
+	ignoreRows bool, targetItemID string, renderContext *sql.AttributeViewRenderContext, captureOrder func([]av.Item),
+	filterContexts ...*av.FilterContext) (targetIndex, targetOffset int, err error) {
 	timing := util.BeginPerformance("database.rows")
 	defer timing.Finish()
 	timing.Count("page_size", int64(pageSize))
@@ -1118,6 +1133,9 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	av.Sort(viewable, attrView)
 	timing.Stage("calculate")
 	av.Calc(viewable, attrView)
+	if captureOrder != nil {
+		captureOrder(viewable.(av.Collection).GetItems())
+	}
 	timing.Stage("paginate")
 
 	// 日历按可见范围读取，不使用普通条目分页。

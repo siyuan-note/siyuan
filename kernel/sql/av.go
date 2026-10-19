@@ -70,6 +70,11 @@ func NewAttributeViewRenderContext() *AttributeViewRenderContext {
 	return &AttributeViewRenderContext{templateErrors: map[string]*attributeViewTemplateRenderError{}}
 }
 
+// HasTemplateErrors 判断本次求值是否产生模板错误，错误结果不参与跨请求复用。
+func (context *AttributeViewRenderContext) HasTemplateErrors() bool {
+	return context != nil && len(context.templateErrors) != 0
+}
+
 func (context *AttributeViewRenderContext) addTemplateError(attrView *av.AttributeView, templateKey *av.Key,
 	item av.Item, renderErr error) {
 	if nil == context || nil == attrView || nil == templateKey || nil == item || nil == renderErr {
@@ -514,8 +519,18 @@ func executeTemplateField(tpl *template.Template, ial map[string]string, keyValu
 
 func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[string][]*av.KeyValues) {
 	ret = map[string][]*av.KeyValues{}
+	var included map[string]bool
+	if view.GroupItemIDs != nil {
+		included = make(map[string]bool, len(view.GroupItemIDs))
+		for _, id := range view.GroupItemIDs {
+			included[id] = true
+		}
+	}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
+			if included != nil && !included[val.BlockID] {
+				continue
+			}
 			values := ret[val.BlockID]
 			if nil == values {
 				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}

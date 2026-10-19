@@ -447,15 +447,27 @@ func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error)
 }
 
 func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
+	return upsertTreeWithChanges(tx, tree, context, nil)
+}
+
+func upsertTreeWithChanges(tx *sql.Tx, tree *parse.Tree, context map[string]any, changes *TreeIndexChanges) (err error) {
 	if isIndexIgnored(tree) {
 		return
 	}
 	timing := util.BeginPerformance("index.update")
 	defer timing.Finish()
 	timing.Stage("project")
+	changes, err = usableTreeIndexChanges(tx, tree, changes)
+	if err != nil {
+		return
+	}
 	oldBlockHashes := queryBlockHashes(tx, tree.ID)
-	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
-	timing.Count("blocks_total", int64(len(blocks)))
+	blocks, spans, assets, attributes := fromTreeWithChanges(tree.Root, tree, changes)
+	timing.Count("blocks_total", int64(len(oldBlockHashes)))
+	timing.Count("blocks_projected", int64(len(blocks)))
+	if changes != nil {
+		timing.Count("changeset", 1)
+	}
 	timing.Stage("compare_blocks")
 	newBlockHashes := map[string]string{}
 	for _, block := range blocks {
@@ -464,6 +476,9 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 	unChanges := hashset.New()
 	var toRemoves []string
 	for id, hash := range oldBlockHashes {
+		if changes != nil && !changes.blockIDs[id] {
+			continue
+		}
 		if newHash, ok := newBlockHashes[id]; ok {
 			if newHash == hash {
 				unChanges.Add(id)

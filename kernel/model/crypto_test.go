@@ -38,6 +38,63 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKs[boxID] = dek
 }
 
+// prepareUnlockedEncryptedBoxTest 为数据读写测试设置加密身份、密钥和已完成初始化的生命周期。
+func prepareUnlockedEncryptedBoxTest(t *testing.T, boxID string, dek []byte) {
+	t.Helper()
+	dataDir := filepath.Clean(util.DataDir)
+	key := bytes.Clone(dek)
+	markRuntimeEncryptedBox(boxID)
+	setDEKForTest(boxID, key)
+	setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+	t.Cleanup(func() {
+		cachedDEKsLock.Lock()
+		zeroAndClear(cachedDEKs[boxID])
+		delete(cachedDEKs, boxID)
+		cachedDEKsLock.Unlock()
+		zeroAndClear(key)
+		removeEncryptedBoxLifecycle(boxID)
+		runtimeEncryptedBoxes.CompareAndDelete(boxID, dataDir)
+		runtimeNormalBoxes.CompareAndDelete(boxID, dataDir)
+	})
+}
+
+func TestUnlockedEncryptedBoxFixtureLifecycle(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+	const boxID = "20261019000000-fixture"
+	key := bytes.Repeat([]byte{0x69}, 32)
+	t.Run("unlocked", func(t *testing.T) {
+		prepareUnlockedEncryptedBoxTest(t, boxID, key)
+		if !IsEncryptedBox(boxID) || !isBoxUnlockedForAccess(boxID) {
+			t.Fatal("fixture did not initialize an accessible encrypted notebook")
+		}
+		if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+			t.Fatal(err)
+		}
+		ReleaseEncryptedBoxOperation(boxID)
+		setEncryptedBoxStateWithAdmission(boxID, EncryptedBoxStateUnlocked, false)
+		if err := AcquireEncryptedBoxOperation(boxID); err == nil {
+			ReleaseEncryptedBoxOperation(boxID)
+			t.Fatal("fixture bypassed operation admission")
+		}
+		setEncryptedBoxState(boxID, EncryptedBoxStateError)
+		setDEKForTest(boxID, bytes.Clone(key))
+		if _, err := GetDEKIfUnlocked(boxID); err == nil {
+			t.Fatal("fixture bypassed an unavailable notebook state")
+		}
+	})
+	if IsBoxUnlocked(boxID) || isRuntimeEncryptedBox(boxID) {
+		t.Fatal("fixture retained its key or notebook identity")
+	}
+	if _, exists := encryptedBoxLifecycles.Load(boxID); exists {
+		t.Fatal("fixture retained its lifecycle")
+	}
+	if !bytes.Equal(key, bytes.Repeat([]byte{0x69}, 32)) {
+		t.Fatal("fixture changed its caller's key")
+	}
+}
+
 func TestEncryptedBoxIdentityRejectsInvalidIDs(t *testing.T) {
 	oldDataDir := util.DataDir
 	util.DataDir = t.TempDir()

@@ -37,6 +37,7 @@ func TestAuxiliaryIndexEncryptedUpdateAndReopen(t *testing.T) {
 	if err := database.QueryRow("PRAGMA cipher_version").Scan(&version); err != nil || version == "" {
 		t.Fatalf("SQLCipher required: %q, %v", version, err)
 	}
+	useChanges := false
 	write := func(full bool) {
 		t.Helper()
 		tx, err := beginTxForBox(tree.Box)
@@ -47,6 +48,8 @@ func TestAuxiliaryIndexEncryptedUpdateAndReopen(t *testing.T) {
 		defer tx.Rollback()
 		if full {
 			err = indexTree(tx, tree, nil)
+		} else if useChanges {
+			err = upsertTreeWithChanges(tx, tree, nil, NewTreeIndexChanges([]string{tree.Root.FirstChild.ID}))
 		} else {
 			err = upsertTree(tx, tree, nil)
 		}
@@ -65,6 +68,15 @@ func TestAuxiliaryIndexEncryptedUpdateAndReopen(t *testing.T) {
 	for _, table := range upsertTestTables[:5] {
 		if !reflect.DeepEqual(got[table.name], want[table.name]) {
 			t.Fatalf("unchanged encrypted %s records were rewritten", table.name)
+		}
+	}
+	useChanges = true
+	tree.Root.FirstChild.FirstChild.Tokens = []byte("private change-set update ")
+	write(false)
+	got = upsertTableSnapshots(t, database, true)
+	for _, table := range upsertTestTables[:5] {
+		if !reflect.DeepEqual(got[table.name], want[table.name]) {
+			t.Fatalf("scoped encrypted update rewrote %s", table.name)
 		}
 	}
 	// 重开旧版加密库时补建索引并保留已有数据。

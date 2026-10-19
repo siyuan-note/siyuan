@@ -50,3 +50,32 @@ func TestStaticTemplateKeyDependencies(t *testing.T) {
 		t.Fatal("nil template was treated as known")
 	}
 }
+
+func TestReusableTemplateKeyRequiresClosedPureExpressions(t *testing.T) {
+	text := av.NewKey("text", "Text", "", av.KeyTypeText)
+	key := av.NewKey("template", "Template", "", av.KeyTypeTemplate)
+	database := &av.AttributeView{KeyValues: []*av.KeyValues{{Key: text}, {Key: key}}}
+	for _, test := range []struct {
+		content string
+		reuse   bool
+	}{
+		{`.action{.Text}`, true}, {`.action{index . "Text"}`, true},
+		{`.action{.id_mod.text}`, true}, {`.action{index .id_mod "text"}`, true},
+		{`.action{printf "%s %%" .Text}`, true}, {`.action{.Text | printf "%10s"}`, true},
+		{`.action{print .Text " suffix"}`, true}, {`.action{println .Text}`, true},
+		{`.action{printf "%p" .Text}`, false}, {`.action{printf "%[1]p" .Text}`, false},
+		{`.action{printf .Text "value"}`, false}, {`.action{printf "%T" .Text}`, false},
+		{`.action{now}`, false}, {`.action{queryBlocks "SELECT * FROM blocks"}`, false},
+		{`.action{.Text_raw.Text.Content}`, false}, {`.action{.Text_created}`, false},
+		{`.action{index .id_mod_raw "text"}`, false}, {`.action{.Unknown}`, false},
+		{`.action{index . "Unknown"}`, false}, {`.action{.id_mod.text.Unknown}`, false},
+		{`.action{if .Text}.action{.Text}.action{end}`, false}, {`.action{`, false},
+	} {
+		t.Run(test.content, func(t *testing.T) {
+			key.Template = test.content
+			if reusable := IsReusableTemplateKey(database, key); reusable != test.reuse {
+				t.Fatalf("reusable=%t, want %t", reusable, test.reuse)
+			}
+		})
+	}
+}

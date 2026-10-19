@@ -21,7 +21,7 @@ func TestLivePhotoIndexesBothAssetsInOneImageSpan(t *testing.T) {
 	image.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte("photo")})
 	image.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("assets/photo.heic")})
 	p.AppendChild(image)
-	_, spans, assets, _, _ := buildSpanFromNode(image, tree, tree.ID, tree.Box, tree.Path)
+	_, spans, assets, _, _ := buildSpanFromNode(image, tree, tree.ID, tree.Box, tree.Path, buildBlockFromNode)
 	if len(spans) != 1 || len(assets) != 2 {
 		t.Fatalf("spans=%d, assets=%+v", len(spans), assets)
 	}

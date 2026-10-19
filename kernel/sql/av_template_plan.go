@@ -1,10 +1,97 @@
 package sql
 
 import (
+	"regexp"
+	"strings"
 	"text/template/parse"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
 )
+
+var reusableTemplateFormat = regexp.MustCompile(`%(?:%|[-+# 0]*[0-9]*(?:\.[0-9]+)?[svdf])`)
+
+// IsReusableTemplateKey 仅接纳封闭的字段访问和字符串格式化，不依赖时间、SQL 或外部状态。
+func IsReusableTemplateKey(attrView *av.AttributeView, key *av.Key) bool {
+	if _, known := StaticTemplateKeyDependencies(attrView, key); !known {
+		return false
+	}
+	content := key.Template
+	if key.Type != av.KeyTypeTemplate {
+		content = key.RenderTemplate
+	}
+	tpl, err := compileTemplateField(content)
+	if err != nil || !reusableTemplateNode(tpl.Tree.Root) {
+		return false
+	}
+	variables, err := getTemplateVars(content)
+	if err != nil {
+		return false
+	}
+	for _, variable := range variables {
+		if strings.HasSuffix(variable, "_raw") || strings.HasSuffix(variable, "_created") || strings.HasSuffix(variable, "_end") {
+			return false
+		}
+		known := false
+		for _, values := range attrView.KeyValues {
+			if values != nil && values.Key != nil && (variable == values.Key.ID || variable == values.Key.Name) {
+				known = true
+			}
+		}
+		if !known {
+			return false
+		}
+	}
+	return true
+}
+
+func reusableTemplateNode(node parse.Node) bool {
+	if node == nil {
+		return true
+	}
+	switch current := node.(type) {
+	case *parse.ListNode:
+		for _, child := range current.Nodes {
+			if !reusableTemplateNode(child) {
+				return false
+			}
+		}
+	case *parse.ActionNode:
+		return reusableTemplateNode(current.Pipe)
+	case *parse.PipeNode:
+		for _, command := range current.Cmds {
+			if !reusableTemplateNode(command) {
+				return false
+			}
+		}
+	case *parse.CommandNode:
+		if len(current.Args) > 0 && current.Args[0].Type() == parse.NodeIdentifier {
+			name := current.Args[0].String()
+			if name == "printf" {
+				if len(current.Args) < 2 || current.Args[1].Type() != parse.NodeString || strings.Contains(reusableTemplateFormat.ReplaceAllString(current.Args[1].(*parse.StringNode).Text, ""), "%") {
+					return false
+				}
+			} else if name == "index" {
+				if len(current.Args) != 3 || current.Args[2].Type() != parse.NodeString ||
+					(current.Args[1].Type() != parse.NodeDot && !isTemplateIDModField(current.Args[1])) {
+					return false
+				}
+			} else if name != "print" && name != "println" {
+				return false
+			}
+		}
+		for _, argument := range current.Args {
+			if !reusableTemplateNode(argument) {
+				return false
+			}
+		}
+	case *parse.FieldNode:
+		if isTemplateIDModField(current) {
+			return current.Ident[0] == "id_mod" && len(current.Ident) <= 2
+		}
+		return len(current.Ident) == 1
+	}
+	return true
+}
 
 // StaticTemplateKeyDependencies 复用字段依赖解析，仅为可静态识别的表达式返回完整依赖。
 // 分支、命名模板、变量别名或动态访问保留完整求值路径，避免将遗漏依赖当成显示字段。

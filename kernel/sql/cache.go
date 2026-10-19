@@ -89,6 +89,7 @@ func blockCacheKey(id, boxID string) string {
 }
 
 func ClearCache() {
+	clearFTSCountCache()
 	blockCache.Clear()
 	blockCacheKeysMu.Lock()
 	blockCacheKeys = map[string]map[string]*blockCacheEntry{}

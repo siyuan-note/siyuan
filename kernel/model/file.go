@@ -1223,12 +1223,16 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
+	return writeTreeUpsertQueueWithChanges(tree, nil)
+}
+
+func writeTreeUpsertQueueWithChanges(tree *parse.Tree, changes *sql.TreeIndexChanges) (err error) {
 	isNew := !filelock.IsExist(filepath.Join(util.DataDir, tree.Box, tree.Path))
 	size, err := filesys.WriteTree(tree)
 	if err != nil {
 		return
 	}
-	sql.UpsertTreeQueue(tree)
+	sql.UpsertTreeQueueWithChanges(tree, changes)
 	refreshDocInfoWithSize(tree, size)
 	if isNew {
 		refreshBoxDocInfo(tree)

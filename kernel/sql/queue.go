@@ -50,13 +50,14 @@ type dbQueueOperation struct {
 	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
 	indexTree                     *parse.Tree // index/rename/move
 	upsertTree                    *parse.Tree // upsert/update_refs/delete_refs
-	removeTreeBox, removeTreePath string      // delete
-	removeTreeID                  string      // delete_id
-	removeTreeIDs                 []string    // delete_ids
-	box                           string      // delete_box/delete_box_refs/index/index_node
-	block                         *Block      // update_block_content
-	id                            string      // index_node
-	removeAssetHashes             []string    // delete_assets
+	indexChanges                  *TreeIndexChanges
+	removeTreeBox, removeTreePath string   // delete
+	removeTreeID                  string   // delete_id
+	removeTreeIDs                 []string // delete_ids
+	box                           string   // delete_box/delete_box_refs/index/index_node
+	block                         *Block   // update_block_content
+	id                            string   // index_node
+	removeAssetHashes             []string // delete_assets
 	beginTxRetries                uint8
 	recoveryEntry                 *indexEntry
 	recoveredIndex                bool
@@ -436,7 +437,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 		err = indexTree(tx, op.indexTree, context)
 	case "upsert":
-		err = upsertTree(tx, op.upsertTree, context)
+		err = upsertTreeWithChanges(tx, op.upsertTree, context, op.indexChanges)
 	case "delete":
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 		if nil == err {
@@ -619,14 +620,27 @@ func IndexTreeQueue(tree *parse.Tree) {
 }
 
 func UpsertTreeQueue(tree *parse.Tree) {
+	UpsertTreeQueueWithChanges(tree, nil)
+}
+
+// UpsertTreeQueueWithChanges 合并同一文档的影响集合；未知影响范围或有序操作边界保留完整更新。
+func UpsertTreeQueueWithChanges(tree *parse.Tree, changes *TreeIndexChanges) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "upsert"}
-	for i, op := range operationQueue {
-		if "upsert" == op.action && op.upsertTree != nil && op.upsertTree.ID == tree.ID { // 相同树则覆盖
+	newOp := &dbQueueOperation{upsertTree: tree, indexChanges: mergeTreeIndexChanges(changes, changes), inQueueTime: time.Now(), action: "upsert"}
+	for i := len(operationQueue) - 1; i >= 0; i-- {
+		op := operationQueue[i]
+		if "upsert" == op.action && op.upsertTree != nil && op.upsertTree.Box == tree.Box && op.upsertTree.ID == tree.ID && op.upsertTree.Path == tree.Path {
+			newOp.indexChanges = mergeTreeIndexChanges(op.indexChanges, newOp.indexChanges)
+			newOp.inQueueTime = op.inQueueTime
 			operationQueue[i] = newOp
 			return
+		}
+		// 删除、移动、重命名及其他索引操作不参与快照覆盖，保留原始执行顺序。
+		if op.action != "upsert" && (op.boxID() == tree.Box || op.boxID() == "" || op.action == "delete_ids") ||
+			op.action == "upsert" && op.upsertTree != nil && op.upsertTree.Box == tree.Box && op.upsertTree.ID == tree.ID {
+			break
 		}
 	}
 	appendOperation(newOp)

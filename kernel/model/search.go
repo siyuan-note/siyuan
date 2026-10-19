@@ -2554,7 +2554,14 @@ func fullTextSearchByFTSInBox(ctx context.Context, query, boxFilter, pathFilter 
 	args = append(args, boxArgs...)
 	args = append(args, pathArgs...)
 	timing.Stage("query")
-	blocks, _ := sql.SelectBlocksRawStmtArgsInBoxContext(ctx, stmt, args, pageSize, boxID)
+	var blocks []*sql.Block
+	counted := boxID == "" && ignoreFilter == ""
+	if counted {
+		countStatement := "SELECT COUNT(id), COUNT(DISTINCT root_id) FROM " + table + " WHERE (" + table + " MATCH ?) AND " + typeFilter + boxFilter + pathFilter
+		blocks, matchedBlockCount, matchedRootCount, _ = sql.SelectFTSBlocksWithCountContext(ctx, stmt, countStatement, args)
+	} else {
+		blocks, _ = sql.SelectBlocksRawStmtArgsInBoxContext(ctx, stmt, args, pageSize, boxID)
+	}
 	timing.Stage("format")
 	ret = fromSQLBlocksContext(ctx, &blocks, "", beforeLen)
 	if 1 > len(ret) {
@@ -2562,7 +2569,9 @@ func fullTextSearchByFTSInBox(ctx context.Context, query, boxFilter, pathFilter 
 	}
 
 	timing.Stage("count")
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTSInBox(ctx, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, boxID)
+	if !counted {
+		matchedBlockCount, matchedRootCount = fullTextSearchCountByFTSInBox(ctx, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, boxID)
+	}
 	return
 }
 

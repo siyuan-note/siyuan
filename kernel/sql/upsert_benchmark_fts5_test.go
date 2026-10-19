@@ -69,7 +69,9 @@ func BenchmarkUpsertTreeAuxiliaryIndexes(b *testing.B) {
 			for _, mode := range []struct {
 				name   string
 				update func(*sql.Tx, *parse.Tree, map[string]any) error
-			}{{"complete", upsertTreeWithFullAuxiliaryReplacement}, {"incremental", upsertTree}} {
+			}{{"complete", upsertTreeWithFullAuxiliaryReplacement}, {"incremental", upsertTree}, {"changeset", func(tx *sql.Tx, tree *parse.Tree, context map[string]any) error {
+				return upsertTreeWithChanges(tx, tree, context, NewTreeIndexChanges([]string{tree.ID, tree.Root.FirstChild.ID}))
+			}}} {
 				b.Run(mode.name, func(b *testing.B) {
 					database := newDeletePathTestDB(b, false)
 					db = database

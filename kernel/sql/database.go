@@ -688,6 +688,10 @@ func getEmbedRef(embedNode *ast.Node) (queryBlockID string) {
 }
 
 func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute) {
+	return fromTreeWithChanges(node, tree, nil)
+}
+
+func projectTree(node *ast.Node, tree *parse.Tree, buildBlock indexBlockBuilder) (blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute) {
 	rootID := tree.Root.ID
 	boxID := tree.Box
 	p := tree.Path
@@ -697,7 +701,7 @@ func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span,
 		}
 
 		// 构造行级元素
-		spanBlocks, spanSpans, spanAssets, spanAttrs, walkStatus := buildSpanFromNode(n, tree, rootID, boxID, p)
+		spanBlocks, spanSpans, spanAssets, spanAttrs, walkStatus := buildSpanFromNode(n, tree, rootID, boxID, p, buildBlock)
 		if 0 < len(spanBlocks) {
 			blocks = append(blocks, spanBlocks...)
 		}
@@ -725,8 +729,10 @@ func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span,
 			return ast.WalkContinue
 		}
 
-		b, attrs := buildBlockFromNode(n, tree)
-		blocks = append(blocks, b)
+		b, attrs := buildBlock(n, tree)
+		if b != nil {
+			blocks = append(blocks, b)
+		}
 		if 0 < len(attrs) {
 			attributes = append(attributes, attrs...)
 		}
@@ -787,7 +793,7 @@ func isAttr(name string) bool {
 	return strings.HasPrefix(name, "custom-") || "name" == name || "alias" == name || "memo" == name || "bookmark" == name || "fold" == name || "heading-fold" == name || "style" == name
 }
 
-func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute, walkStatus ast.WalkStatus) {
+func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string, buildBlock indexBlockBuilder) (blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute, walkStatus ast.WalkStatus) {
 	boxLocalPath := filepath.Join(util.DataDir, boxID)
 	docDirLocalPath := filepath.Join(boxLocalPath, p)
 	switch n.Type {
@@ -909,8 +915,10 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		if ast.NodeHTMLBlock == n.Type || ast.NodeIFrame == n.Type || ast.NodeWidget == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
-			b, attrs := buildBlockFromNode(n, tree)
-			blocks = append(blocks, b)
+			b, attrs := buildBlock(n, tree)
+			if b != nil {
+				blocks = append(blocks, b)
+			}
 			attributes = append(attributes, attrs...)
 		}
 
@@ -982,6 +990,10 @@ func BuildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block) {
 }
 
 func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes []*Attribute) {
+	return buildBlockFromNodeWithHeadingParent(n, tree, treenode.HeadingParent(n))
+}
+
+func buildBlockFromNodeWithHeadingParent(n *ast.Node, tree *parse.Tree, headingParent *ast.Node) (block *Block, attributes []*Attribute) {
 	boxID := tree.Box
 	p := tree.Path
 	rootID := tree.Root.ID
@@ -993,7 +1005,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 
 	var content, fcontent, markdown, parentID string
 	ialContent := treenode.IALStr(n)
-	hash := treenode.NodeHash(n, tree, luteEngine)
+	hash := treenode.NodeHashWithHeadingParent(n, tree, luteEngine, headingParent)
 	var length int
 	if ast.NodeDocument == n.Type {
 		content = n.IALAttr("title")
@@ -1013,8 +1025,8 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		fcontent = nodeStaticContent(fc, nil, true, false, true, true)
 
 		parentID = n.Parent.ID
-		if h := treenode.HeadingParent(n); nil != h { // 如果在标题块下方，则将标题块作为父节点
-			parentID = h.ID
+		if headingParent != nil { // 如果在标题块下方，则将标题块作为父节点
+			parentID = headingParent.ID
 		}
 		length = utf8.RuneCountInString(fcontent)
 	} else {
@@ -1025,8 +1037,8 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
 
 		parentID = n.Parent.ID
-		if h := treenode.HeadingParent(n); nil != h {
-			parentID = h.ID
+		if headingParent != nil {
+			parentID = headingParent.ID
 		}
 		length = utf8.RuneCountInString(content)
 	}
@@ -1065,6 +1077,10 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		Updated:  n.IALAttr("updated"),
 	}
 
+	return block, buildNodeAttributes(n, tree)
+}
+
+func buildNodeAttributes(n *ast.Node, tree *parse.Tree) (attributes []*Attribute) {
 	attrs := parse.IAL2Map(n.KramdownIAL)
 	for attrName, attrVal := range attrs {
 		if !isAttr(attrName) {
@@ -1077,9 +1093,9 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 			Value:   attrVal,
 			Type:    "b",
 			BlockID: n.ID,
-			RootID:  rootID,
-			Box:     boxID,
-			Path:    p,
+			RootID:  tree.Root.ID,
+			Box:     tree.Box,
+			Path:    tree.Path,
 		}
 		attributes = append(attributes, attr)
 	}
@@ -1511,6 +1527,7 @@ func cleanupInvalidRefs(database *sql.DB) (err error) {
 }
 
 func CloseDatabase() {
+	clearFTSCountCache()
 	diagnostic := util.WatchOperation("close databases", "close index queue")
 	defer diagnostic.Finish()
 	closeIndexQueue()

@@ -482,10 +482,14 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     }, {capture: true, signal});
     host.addEventListener("keydown", event => {
         captureBeforeChange();
+        const keymap = window.siyuan.config.keymap.editor.general;
+        const alignment = [keymap.alignLeft, keymap.alignCenter, keymap.alignRight]
+            .some(hotkey => matchHotKey(hotkey, event));
         if (!event.isComposing && !composing &&
-            Object.values(window.siyuan.config.keymap.editor.table).some(hotkey => matchHotKey(hotkey, event))) {
+            (alignment || Object.values(window.siyuan.config.keymap.editor.table).some(hotkey => matchHotKey(hotkey, event)))) {
             event.preventDefault();
             event.stopImmediatePropagation();
+            const selection = alignment ? captureRichCellSelection(fragment.wysiwyg, getSelection(), true) : undefined;
             // 先提交内嵌编辑内容，再以所属单元格执行表格快捷键。
             finish();
             restoreTableVirtualizationDOM(table);
@@ -499,11 +503,10 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
             const nextElement = next instanceof Element ? next : next?.parentElement;
             const nextCell = nextElement?.closest<HTMLTableCellElement>("td, th");
             if (nextCell && nextCell.closest(".protyle-wysiwyg") === owner.wysiwyg.element) {
-                openTableCellRichEditor(owner, nextCell);
+                openTableCellRichEditor(owner, nextCell, undefined, undefined, selection);
             }
             return;
         }
-        const keymap = window.siyuan.config.keymap.editor.general;
         const undo = matchHotKey(keymap.undo, event);
         const redo = matchHotKey(keymap.redo, event);
         if (!event.isComposing && !composing && (undo || redo)) {

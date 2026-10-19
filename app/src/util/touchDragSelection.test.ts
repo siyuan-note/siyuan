@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserFixture = (bridgeSource: string, coreSource: string) => {
+const browserFixture = (bridgeSource: string, coreSource: string, gutterVisibilitySource: string) => {
     document.body.innerHTML = `<style>
 body{margin:0}.protyle-wysiwyg{padding-left:50px}.block{height:100px;padding:12px;box-sizing:border-box}
 .protyle-gutters{position:fixed;left:0;top:20px;width:32px;user-select:none}
@@ -27,10 +27,15 @@ body{margin:0}.protyle-wysiwyg{padding-left:50px}.block{height:100px;padding:12p
     window.siyuan = {touchDragActive: false, touchDragGhost: null, zIndex: 1} as typeof window.siyuan;
     const core = {} as typeof import("./touchDragBridgeCore");
     new Function("exports", coreSource)(core);
+    const visibility = {} as typeof import("../protyle/ui/gutterVisibility");
+    new Function("exports", gutterVisibilitySource)(visibility);
     const bridge = {} as typeof import("./touchDragBridge");
     new Function("exports", "require", bridgeSource)(bridge, (id: string) => {
         if (id === "./touchDragBridgeCore") {
             return core;
+        }
+        if (id === "../protyle/ui/gutterVisibility") {
+            return visibility;
         }
         return {Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 460},
             isMobile: () => true, isInAndroid: () => true, isInHarmony: () => false, stopScrollAnimation() {}};
@@ -63,6 +68,11 @@ body{margin:0}.protyle-wysiwyg{padding-left:50px}.block{height:100px;padding:12p
             document.getSelection().selectAllChildren(editable);
         },
         selectStart: () => source.dispatchEvent(new Event("selectstart", {bubbles: true, cancelable: true})),
+        keyboardLayout: () => {
+            (document.activeElement as HTMLElement)?.blur();
+            visibility.hideGutterElements([gutter], true);
+            return handle.isConnected;
+        },
         state: () => ({...state, selection: document.getSelection().toString(),
             selected: source.classList.contains("protyle-wysiwyg--select"),
             active: window.siyuan.touchDragActive, ghost: !!document.getElementById("ghost"), scroll: gutter.scrollTop}),
@@ -88,6 +98,7 @@ test("native mobile gutter gestures preserve taps and scrolling while excluding 
         }).outputText;
     const bridge = compile("src/util/touchDragBridge.ts");
     const core = compile("src/util/touchDragBridgeCore.ts");
+    const visibility = compile("src/protyle/ui/gutterVisibility.ts");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-touch-drag-selection-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const assert = require("node:assert/strict");
@@ -103,13 +114,17 @@ app.whenReady().then(async () => {
         win.webContents.debugger.attach("1.3");
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});
         const evaluate = code => win.webContents.executeJavaScript(code);
-        await evaluate(${JSON.stringify("const __name = value => value; (" + browserFixture.toString() + ")(" + JSON.stringify(bridge) + "," + JSON.stringify(core) + ");")});
+        await evaluate(${JSON.stringify("const __name = value => value; (" + browserFixture.toString() + ")(" + JSON.stringify(bridge) + "," + JSON.stringify(core) + "," + JSON.stringify(visibility) + ");")});
         const touch = (type, x = 15, y = 45) => win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {
             type, touchPoints: ["touchEnd", "touchCancel"].includes(type) ? [] : [{x, y, id: 1}],
         });
         for (let attempt = 1; attempt <= 2; attempt++) {
             await evaluate("nativeDrag.selectText()");
             await touch("touchStart");
+            if (attempt === 1) {
+                assert.equal(await evaluate("nativeDrag.keyboardLayout()"), true,
+                    "keyboard cleanup before activation preserves the touch target");
+            }
             await delay(550);
             let state = await evaluate("nativeDrag.state()");
             assert.equal(state.starts, attempt);
@@ -118,6 +133,8 @@ app.whenReady().then(async () => {
             assert.equal(state.selected, true);
             assert.equal(state.active, true);
             assert.equal(state.ghost, true);
+            assert.equal(await evaluate("nativeDrag.keyboardLayout()"), true,
+                "keyboard cleanup during dragging preserves the touch target and bubbling dragend");
             assert.equal(await evaluate("nativeDrag.selectStart()"), false);
             await evaluate("nativeDrag.selectText()");
             await delay(30);

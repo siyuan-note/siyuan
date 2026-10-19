@@ -56,8 +56,9 @@ func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
 	if err := json.Unmarshal(fields[decisionKey], &legacy); err != nil {
 		return nil, err
 	}
-	// 已提交 profiles 时以现代字段为准；显式 null 表示重置，平铺字段仍需迁移。
-	if len(legacy.Profiles) > 0 && !bytes.Equal(bytes.TrimSpace(legacy.Profiles), []byte("null")) {
+	// 显式提交 profiles 时保留输入；null 先清除旧配置，再由 Decision.Normalize 从平铺字段重建。
+	// 不能把 null 改成对象，否则递归合并会保留旧凭据和端点。
+	if len(legacy.Profiles) > 0 {
 		return patch, nil
 	}
 

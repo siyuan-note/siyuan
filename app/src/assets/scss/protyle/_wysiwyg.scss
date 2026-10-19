@@ -671,6 +671,23 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         position: relative;
       }
 
+      > .protyle-image-container--compact {
+        > .protyle-icons,
+        > .img__net,
+        .protyle-block-resize[data-resize-axis="width"],
+        .protyle-block-resize[data-resize-axis="height"] {
+          display: none;
+        }
+
+        .protyle-block-resize[data-resize-axis="both"]::after {
+          width: 5px;
+          height: 5px;
+          border: 0;
+          border-radius: 50%;
+          background-color: currentColor;
+        }
+      }
+
       .protyle-image-resize {
         position: absolute;
         pointer-events: none;

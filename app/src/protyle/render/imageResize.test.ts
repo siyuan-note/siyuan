@@ -196,6 +196,38 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         check.equal(handle.classList.contains("touch-resize-active"), false);
         check.equal(getComputedStyle(handle).visibility, "visible", "cancelling a drag preserves selected handles");
     }
+    for (const [width, height] of [[24, 12], [200, 20], [40, 100]]) {
+        const compact = await create();
+        compact.style.width = width + "px";
+        compact.style.height = height + "px";
+        compact.parentElement.insertAdjacentHTML("beforeend", '<span class="img__net">network</span>');
+        await settle();
+        tap(compact);
+        const container = compact.parentElement;
+        check.equal(getComputedStyle(container.querySelector(".protyle-icons")).display, "none",
+            "small images hide overlay menus");
+        check.equal(getComputedStyle(container.querySelector(".img__net")).display, "none",
+            "network markers do not obscure small images");
+        for (const axis of ["width", "height"]) {
+            check.equal(getComputedStyle(container.querySelector(`[data-resize-axis="${axis}"]`)).display, "none");
+        }
+        const corner = container.querySelector<HTMLElement>('[data-resize-axis="both"]');
+        check.equal(getComputedStyle(corner, "::after").width, "5px");
+        const rect = corner.getBoundingClientRect();
+        check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), corner,
+            "the compact corner retains its pointer and touch target");
+        begin(compact, "both", new MouseEvent("mousedown", {clientX: 300, clientY: 200}));
+        document.onmousemove(new MouseEvent("mousemove", {clientX: 320, clientY: 210}));
+        document.onmouseup(new MouseEvent("mouseup"));
+        check.ok(compact.clientWidth > width, "small images can still be enlarged");
+        container.style.width = "200px";
+        compact.style.width = "";
+        compact.style.height = "";
+        await settle();
+        check.notEqual(getComputedStyle(container.querySelector(".protyle-icons")).display, "none",
+            "enlarging restores overlay menus");
+        check.equal(getComputedStyle(corner, "::after").width, "16px");
+    }
     const centered = await create();
     root.firstElementChild.setAttribute("style", "text-align: center");
     begin(centered, "width", new MouseEvent("mousedown", {clientX: 300, clientY: 200}));

@@ -14,6 +14,7 @@ export const getImageResizeWidth = (width: number, height: number, deltaX: numbe
 export const bindImageResize = (root: HTMLElement) => {
     const images = new Map<HTMLImageElement, {frame: HTMLElement, container: HTMLElement}>();
     const position = (image: HTMLImageElement, frame: HTMLElement) => {
+        image.parentElement.classList.toggle("protyle-image-container--compact", image.clientWidth < 96 || image.clientHeight < 48);
         frame.style.left = image.offsetLeft + "px";
         frame.style.top = image.offsetTop + "px";
         frame.style.width = image.clientWidth + "px";

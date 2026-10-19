@@ -990,6 +990,13 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   }
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .protyle-wysiwyg .img:not(.img--select):not(.img--drag) .protyle-block-resize {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
 .protyle-format-painter__cursor {
   position: fixed;
   z-index: 9;

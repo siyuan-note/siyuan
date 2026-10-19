@@ -9,8 +9,10 @@ import {compileString} from "sass";
 import {createSourceFile, isIfStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, resizeSource: string, luteSource: string, css: string,
-                            bridgeSource: string, coreSource: string) => {
+                            bridgeSource: string, coreSource: string, selectionSource: string, touchMode: boolean) => {
     const check: typeof assert = require("node:assert/strict");
+    check.equal(matchMedia("(hover: none) and (pointer: coarse)").matches, touchMode,
+        "the test exercises the requested input mode");
     new Function(luteSource)();
     const lute = Lute.New();
     const api = new Function(source + "\nreturn {bindImageResize, getImageResizeWidth};")() as typeof import("./imageResize");
@@ -54,6 +56,22 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         return image;
     };
     const updates: {before: string, after: string}[] = [];
+    const selection = new Function("clearSelect", "hideElements", "hasClosestByAttribute", "hasClosestByClassName",
+        selectionSource)(
+        (types: string[], element: HTMLElement) => {
+            if (types.includes("img")) {
+                element.querySelectorAll(".img--select").forEach(item => item.classList.remove("img--select"));
+            }
+        }, () => {},
+        (element: HTMLElement, name: string, value: string) => element.closest(`[${name}="${value}"]`),
+        (element: HTMLElement, name: string) => element.closest(`.${name}`),
+    );
+    root.addEventListener("mousedown", event => selection.clear(event.target, root));
+    root.addEventListener("click", event => selection.select(event));
+    const tap = (element: HTMLElement) => {
+        element.dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+        element.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    };
     const start = new Function("getImageResizeWidth", "protyle", "target", "nodeElement", "event", "documentSelf",
         "mostRight", "mostBottom", "y", "focusBlock", "updateTransaction", "img3115", resizeSource);
     const begin = (image: HTMLImageElement, axis: string, event: MouseEvent) => {
@@ -70,6 +88,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     for (const legacy of [false, true]) {
         for (const axis of ["width", "height", "both"]) {
             const image = await create(legacy);
+            tap(image);
             const block = root.firstElementChild as HTMLElement;
             const before = block.outerHTML;
             const frame = image.parentElement.querySelector<HTMLElement>(".protyle-image-resize");
@@ -140,6 +159,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     bridge.initTouchDragBridge();
     for (const axis of ["width", "height", "both"]) {
         const image = await create();
+        tap(image);
         const width = image.clientWidth;
         const handle = image.parentElement.querySelector<HTMLElement>(`.protyle-block-resize[data-resize-axis="${axis}"]`);
         handle.addEventListener("mousedown", event => begin(image, axis, event));
@@ -150,18 +170,31 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
             const touch = new Touch({identifier: 1, target: handle, clientX: rect.left + rect.width / 2 + (moved ? dx : 0),
                 clientY: rect.top + rect.height / 2 + (moved ? dy : 0), radiusX: 1, radiusY: 1});
             const event = new TouchEvent(type, {bubbles: true, cancelable: true,
-                touches: type === "touchend" ? [] : [touch], changedTouches: [touch]});
+                touches: type === "touchend" || type === "touchcancel" ? [] : [touch], changedTouches: [touch]});
             handle.dispatchEvent(event);
             return event;
         };
         updates.length = 0;
         dispatch("touchstart", false);
+        check.equal(image.closest(".img").classList.contains("img--select"), true,
+            "pressing a resize handle preserves image selection");
+        check.equal(getComputedStyle(handle).visibility, "visible", "the active handle remains visible");
         check.equal(dispatch("touchmove", true).defaultPrevented, true);
         dispatch("touchend", true);
         check.equal(image.clientWidth, width + 20, `${axis} touch drag resizes the image`);
         check.equal(image.clientHeight * 2, image.clientWidth);
         check.equal(updates.length, 1);
         check.equal(document.onmousemove, null);
+        check.equal(getComputedStyle(handle).visibility, "visible", "handles remain available for another drag");
+        dispatch("touchstart", false);
+        dispatch("touchmove", true);
+        dispatch("touchend", true);
+        check.equal(image.clientWidth, width + 40, `${axis} supports another drag without reselecting the image`);
+        dispatch("touchstart", false);
+        dispatch("touchcancel", false);
+        check.equal(document.onmousemove, null, "cancelled resizing releases the touch bridge");
+        check.equal(handle.classList.contains("touch-resize-active"), false);
+        check.equal(getComputedStyle(handle).visibility, "visible", "cancelling a drag preserves selected handles");
     }
     const centered = await create();
     root.firstElementChild.setAttribute("style", "text-align: center");
@@ -186,7 +219,35 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     const frame = image.parentElement.querySelector<HTMLElement>(".protyle-image-resize");
     const move = (x: number, y: number) => require("electron").ipcRenderer.invoke("image-resize-pointer", x, y);
     await move(1, 1);
-    if (!matchMedia("(pointer: coarse)").matches) {
+    if (matchMedia("(hover: none) and (pointer: coarse)").matches) {
+        const handles = Array.from(frame.querySelectorAll<HTMLElement>(".protyle-block-resize"));
+        const visible = () => handles.map(handle => getComputedStyle(handle).visibility);
+        const hit = (handle: HTMLElement) => {
+            const rect = handle.getBoundingClientRect();
+            return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        };
+        check.deepEqual(visible(), ["hidden", "hidden", "hidden"], "touch images initially hide all handles");
+        handles.forEach(handle => check.notEqual(hit(handle), handle, "hidden handles do not intercept touches"));
+        const rect = image.getBoundingClientRect();
+        await move(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        check.deepEqual(visible(), ["hidden", "hidden", "hidden"], "touch hover does not reveal unselected handles");
+        tap(image);
+        check.deepEqual(visible(), ["visible", "visible", "visible"], "tapping an image reveals its handles");
+        handles.forEach(handle => check.equal(hit(handle), handle, "selected handles accept touches"));
+        root.insertAdjacentHTML("beforeend", lute.Md2BlockDOM("![another](assets/sample.png)"));
+        const another = root.lastElementChild.querySelector<HTMLImageElement>("img");
+        another.src = url;
+        await another.decode();
+        await settle();
+        tap(another);
+        check.deepEqual(visible(), ["hidden", "hidden", "hidden"], "selecting another image hides the previous handles");
+        const anotherHandle = another.parentElement.querySelector<HTMLElement>(".protyle-block-resize");
+        check.equal(getComputedStyle(anotherHandle).visibility, "visible");
+        tap(root);
+        check.equal(getComputedStyle(anotherHandle).visibility, "hidden", "tapping elsewhere clears selection");
+        root.lastElementChild.remove();
+        tap(image);
+    } else {
         const opacity = () => Array.from(frame.querySelectorAll(".protyle-block-resize")).map(handle => getComputedStyle(handle).opacity);
         check.deepEqual(opacity(), ["0", "0", "0"]);
         const rect = image.getBoundingClientRect();
@@ -236,7 +297,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     return "Image resize cases passed";
 };
 
-test("image handles initialize on insertion and retain source, aspect ratio and replay compatibility", {
+test("image handles retain selection, touch visibility, source, aspect ratio and replay compatibility", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {
@@ -244,14 +305,39 @@ test("image handles initialize on insertion and retain source, aspect ratio and 
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const source = createSourceFile("index.ts", readFileSync("src/protyle/wysiwyg/index.ts", "utf8"), ScriptTarget.ES2021, true);
     let resize = "";
+    let clearSelection = "";
+    let selectImage = "";
     const visit = (node: import("typescript").Node) => {
         if (isIfStatement(node) && node.expression.getText(source) === '!protyle.disabled && target.classList.contains("protyle-action__drag")') {
             resize = node.getText(source);
+        }
+        if (isIfStatement(node) && node.expression.getText(source) === "!isToggleBlockDrag" &&
+            node.getText(source).includes('hideElements(["select"], protyle)')) {
+            clearSelection = node.getText(source);
+        }
+        if (isIfStatement(node) && node.expression.getText(source) === "!event.shiftKey && !ctrlIsPressed && imgElement") {
+            selectImage = node.getText(source);
         }
         node.forEachChild(visit);
     };
     visit(source);
     assert.ok(resize);
+    assert.ok(clearSelection);
+    assert.ok(selectImage);
+    const selectionSource = transpileModule(`
+        function clear(target, root) {
+            const protyle = {wysiwyg: {element: root}};
+            const isToggleBlockDrag = false;
+            const avDragFillElement = null;
+            ${clearSelection}
+        }
+        function select(event) {
+            const imgElement = event.target.closest(".img");
+            const ctrlIsPressed = false;
+            const hasNextSibling = () => null;
+            ${selectImage}
+        }
+    `, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText + "\nreturn {clear, select};";
     const resizeSource = transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
         .outputText + "\nreturn resize.call(this);";
     const css = compileString('@use "protyle/protyle"; @use "component/typography"; @use "business/resize";',
@@ -260,9 +346,9 @@ test("image handles initialize on insertion and retain source, aspect ratio and 
         {loadPaths: ["src/assets/scss"], logger: {warn() {}, debug() {}}}).css;
     const bridgeSources = ["src/util/touchDragBridge.ts", "src/util/touchDragBridgeCore.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText);
-    const makeCode = (styles: string) => "const __name = value => value; (" + browserCases.toString() + ")(" +
+    const makeCode = (styles: string, touchMode: boolean) => "const __name = value => value; (" + browserCases.toString() + ")(" +
         [transpile("src/protyle/render/imageResize.ts"), resizeSource,
-            readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources]
+            readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources, selectionSource, touchMode]
             .map(value => JSON.stringify(value)).join(",") + ")";
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-image-resize-test-"));
     const script = path.join(temporary, "run.cjs");
@@ -280,11 +366,11 @@ app.whenReady().then(async () => {
     });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify(makeCode(css))}));
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify(makeCode(css, false))}));
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});
         win.setSize(390, 700);
         await win.loadURL("data:text/html,<html><body></body></html>");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify(makeCode(css + mobileCSS))}));
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify(makeCode(css + mobileCSS, true))}));
         app.exit(0);
     } catch (error) { console.error(error); app.exit(1); }
 });`, "utf8");

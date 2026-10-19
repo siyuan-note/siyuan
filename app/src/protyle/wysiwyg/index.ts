@@ -1461,7 +1461,7 @@ export class WYSIWYG {
                 if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
                     clearSelect(["img", "row", "cell"], protyle.wysiwyg.element);
                 } else if (!hasClosestByClassName(target, "av__firstcol") && !avDragFillElement) {
-                    clearSelect(["img", "av"], protyle.wysiwyg.element);
+                    clearSelect(target.closest(".protyle-image-resize") ? ["av"] : ["img", "av"], protyle.wysiwyg.element);
                 }
             }
 

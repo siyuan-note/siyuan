@@ -652,7 +652,7 @@ test("external resize handles preserve source, independent axes, historical dime
     const hintFile = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
     const hintDeclaration = hintFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
     assert.ok(hintDeclaration && isClassDeclaration(hintDeclaration));
-    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand", "consumeRefBracketClose"].includes(member.name?.getText(hintFile)))
+    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand", "consumeRefBracketClose", "openNewTableCell"].includes(member.name?.getText(hintFile)))
         .map(member => member.getText(hintFile)).join("\n");
     const hintSource = transpileModule(`class Hint { ${hintMethods} }`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const menuFile = createSourceFile("menu.ts", readFileSync("src/menus/protyle.ts", "utf8"), ScriptTarget.ES2021, true);

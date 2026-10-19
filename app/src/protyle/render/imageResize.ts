@@ -15,6 +15,9 @@ export const bindImageResize = (root: HTMLElement) => {
     const images = new Map<HTMLImageElement, {frame: HTMLElement, container: HTMLElement}>();
     const position = (image: HTMLImageElement, frame: HTMLElement) => {
         image.parentElement.classList.toggle("protyle-image-container--compact", image.clientWidth < 96 || image.clientHeight < 48);
+        // 说明文字按图片显示宽度缩放，派生样式只写入说明节点，避免影响图片容器的宽度规则。
+        image.parentElement.querySelectorAll<HTMLElement>(":scope > .img__name, :scope > .protyle-action__title, :scope > .img__alt")
+            .forEach(caption => caption.style.setProperty("--protyle-image-font-size", Math.max(8, image.clientWidth / 10) + "px"));
         frame.style.left = image.offsetLeft + "px";
         frame.style.top = image.offsetTop + "px";
         frame.style.width = image.clientWidth + "px";

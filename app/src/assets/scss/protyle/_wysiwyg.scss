@@ -669,6 +669,15 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
 
       > .protyle-image-container {
         position: relative;
+
+        > .img__name {
+          font-size: min(100%, var(--protyle-image-font-size, 100%));
+        }
+
+        > .protyle-action__title,
+        > .img__alt {
+          font-size: min(85%, var(--protyle-image-font-size, 85%));
+        }
       }
 
       > .protyle-image-container--compact {

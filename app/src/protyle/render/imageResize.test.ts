@@ -275,6 +275,46 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         await settle();
         assertFrame();
     }
+    const captioned = await create();
+    const captionContainer = captioned.parentElement;
+    captionContainer.insertAdjacentHTML("afterbegin", '<span class="img__name"><span>sample.png</span></span>');
+    captionContainer.insertAdjacentHTML("beforeend", '<span class="img__alt"><span>description</span></span>');
+    const captions = Array.from(captionContainer.querySelectorAll<HTMLElement>(".img__name, .protyle-action__title, .img__alt"));
+    const markdown = lute.BlockDOM2StdMd(root.innerHTML);
+    const fontSizes = () => captions.map(caption => parseFloat(getComputedStyle(caption).fontSize));
+    for (const [width, expected] of [[160, 16], [80, 8], [24, 8], [120, 12]]) {
+        captionContainer.style.width = width + "px";
+        await settle();
+        check.equal(captioned.clientWidth, width, "caption styles preserve the image's percentage width rule");
+        fontSizes().forEach(size => check.equal(size, expected, "all three caption types follow the displayed image width"));
+        check.ok(captions.every(caption => getComputedStyle(caption).display !== "none"), "small images retain their captions");
+    }
+    begin(captioned, "width", new MouseEvent("mousedown", {clientX: 300, clientY: 200}));
+    document.onmousemove(new MouseEvent("mousemove", {clientX: 320, clientY: 200}));
+    document.onmouseup(new MouseEvent("mouseup"));
+    await settle();
+    check.equal(captioned.clientWidth, 140);
+    check.deepEqual(fontSizes(), [14, 14, 14], "drag resizing updates the caption fonts");
+    root.style.zoom = "1.5";
+    await settle();
+    check.deepEqual(fontSizes(), [14, 14, 14], "editor zoom scales images and captions together without applying the ratio twice");
+    root.style.zoom = "";
+    captionContainer.style.width = "400px";
+    await settle();
+    fontSizes().forEach((size, i) => check.ok(Math.abs(size - (i === 0 ? 24 : 20.4)) < 0.01,
+        "large images retain the original caption font sizes"));
+    captionContainer.style.width = "";
+    await settle();
+    check.equal(captioned.clientWidth, 200);
+    check.equal(lute.BlockDOM2StdMd(root.innerHTML), markdown, "caption font styles do not enter the saved image source");
+    const restored = lute.BlockDOM2StdMd(root.innerHTML);
+    root.innerHTML = lute.Md2BlockDOM(restored);
+    const restoredImage = root.querySelector<HTMLImageElement>("img");
+    restoredImage.src = url;
+    await restoredImage.decode();
+    await settle();
+    check.equal(parseFloat(getComputedStyle(restoredImage.parentElement.querySelector(".protyle-action__title")).fontSize), 20,
+        "reopening derives the same font size from the current image width");
     const centered = await create();
     root.firstElementChild.setAttribute("style", "text-align: center");
     begin(centered, "width", new MouseEvent("mousedown", {clientX: 300, clientY: 200}));

@@ -43,7 +43,7 @@ import {focusBlock, getBlockElementsByRange, getEditorRange, selectBlocksByRange
 import {focusByRange} from "../util/selectionOffsets";
 import {getHeadingConversionElements} from "../wysiwyg/headingConversion";
 import {hideElements} from "../ui/hideElements";
-import {markGutterForFoldRestore} from "../ui/gutterVisibility";
+import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {toggleListMindmap} from "../render/listMindmap";
@@ -3671,6 +3671,9 @@ export class Gutter {
     }
 
     public render(protyle: IProtyle, element: Element, target?: Element) {
+        if (isGutterTouchDragging(this.element)) {
+            return;
+        }
         const cellFragment = element.closest(".table__cell-rich, .table__cell-editor") ||
             target?.closest(".table__cell-rich, .table__cell-editor");
         if (cellFragment) {

@@ -7,6 +7,15 @@ const runCases = async (sources, css, mobile) => {
     const assert = require("node:assert/strict");
     const path = require("node:path").posix;
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
+    const waitForDialogLayout = async dialog => {
+        const container = dialog.element.querySelector(".b3-dialog__container");
+        for (let attempt = 0; !dialog.element.classList.contains("b3-dialog--open") && attempt < 100; attempt++) {
+            await tick();
+        }
+        assert.equal(dialog.element.classList.contains("b3-dialog--open"), true, "the dialog has opened before measuring its layout");
+        await Promise.all(container.getAnimations().map(animation => animation.finished));
+        assert.equal(getComputedStyle(container).transform, "none", "the dialog opening animation has finished");
+    };
     document.head.innerHTML = "";
     document.body.innerHTML = '<div class="av__panel"><div class="b3-menu"></div></div>';
     document.body.className = "body--windows";
@@ -190,7 +199,8 @@ const runCases = async (sources, css, mobile) => {
     const nameRect = get('[data-action="rules"]').getBoundingClientRect();
     const enabledRect = get("[data-enabled]").getBoundingClientRect();
     assert.ok(Math.abs((nameRect.top + nameRect.bottom) / 2 - (enabledRect.top + enabledRect.bottom) / 2) <= 1,
-        "the enable switch aligns with the rule name");
+        `the enable switch aligns with the rule name: ${JSON.stringify({mobile, width: window.innerWidth,
+            nameRect, enabledRect, font: getComputedStyle(menu).font, rowGap: getComputedStyle(get("[data-enabled]").parentElement).rowGap})}`);
     const ruleRect = nameRect;
     for (const action of ["add-rule"]) {
         const button = get(`[data-action="${action}"]`).getBoundingClientRect();
@@ -703,6 +713,7 @@ const runCases = async (sources, css, mobile) => {
     await click('[data-action="manage-collection"]');
     assert.equal(window.siyuan.dialogs.length, 1, "collection review uses the shared dialog on desktop and mobile");
     const reviewDialog = window.siyuan.dialogs[0];
+    await waitForDialogLayout(reviewDialog);
     assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "source text is escaped");
     assert.equal(transactions.length, writesBeforeReview, "reviewing entries does not mutate the database");
     const reviewTheme = document.createElement("style");
@@ -724,11 +735,16 @@ const runCases = async (sources, css, mobile) => {
                 const previous = reviewDialog.element.querySelector("[data-prev]").getBoundingClientRect();
                 const cleanup = reviewDialog.element.querySelector("[data-cleanup]").getBoundingClientRect();
                 if (cleanup.top > previous.bottom) {
-                    assert.ok(cleanup.top - previous.bottom >= 8, "wrapped review actions preserve their spacing");
+                    assert.ok(cleanup.top - previous.bottom >= 8,
+                        `wrapped review actions preserve their spacing: ${JSON.stringify({mobile, width, fontSize, theme: name,
+                            previous, cleanup, gap: cleanup.top - previous.bottom,
+                            transform: getComputedStyle(reviewDialog.element.querySelector(".b3-dialog__container")).transform,
+                            rowGap: getComputedStyle(reviewDialog.element.querySelector(".b3-dialog__action")).rowGap})}`);
                 }
                 reviewDialog.element.querySelector("[data-cleanup]").click();
                 await tick();
                 const confirmation = window.siyuan.dialogs[1];
+                await waitForDialogLayout(confirmation);
                 for (const element of confirmation.element.querySelectorAll(".b3-dialog__body, button")) {
                     assert.ok(element.scrollWidth <= element.clientWidth + 1, "confirmation wraps at narrow widths and large fonts");
                 }
@@ -855,7 +871,9 @@ if (process.versions.electron && process.type === "browser") {
             for (const mobile of [false, true]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 if (!win.webContents.debugger.isAttached()) win.webContents.debugger.attach("1.3");
-                await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: mobile});
+                if (mobile) {
+                    await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});
+                }
                 const css = sources.daylight + sass.compile(path.join(__dirname, `../src/assets/scss/${mobile ? "mobile" : "base"}.scss`), {logger: sass.Logger.silent}).css;
                 await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)}, ${mobile})`);
             }

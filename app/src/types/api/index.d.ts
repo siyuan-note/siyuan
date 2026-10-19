@@ -680,7 +680,7 @@ export type BatchUpdateBlockRequestInput = { "blocks": Array<UpdateBlockRequestI
 
 export type BatchUpdatePackageRequestInput = { "frontend": string; };
 
-export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "menuMouseScroll": boolean; "mobileBars": BazaarMobileBars | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": BazaarPDFTheme | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type BazaarAppearanceIcon = { "label": string; "name": string; };
 
@@ -708,7 +708,11 @@ export type BazaarLocalInstallError = { "minAppVersion": string; "packageName": 
 
 export type BazaarLocalInstallResult = (BazaarLocalInstallData & { "reason"?: never; }) | (BazaarLocalInstallError & { "updated"?: never; });
 
+export type BazaarMobileBars = { "autoHide": boolean | null; "sidebarButtons": boolean | null; "sidebarSwipe": boolean | null; };
+
 export type BazaarNotifications = { "browserCompatibility": boolean; "docTreeMaxList": boolean; "formatPainterTip"?: boolean; "selectAllIncompleteTip"?: boolean; "selectAllTip"?: boolean; "tagMaxList": boolean; "workspaceNotSSD": boolean; };
+
+export type BazaarPDFTheme = { "annoColor": string; "dark": string; "light": string; };
 
 export type BazaarPackage = { "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "choices"?: Array<BazaarPackageChoice>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "settingsWindow"?: boolean; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
 
@@ -1218,7 +1222,7 @@ export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
 
 export type GetCloudRepoSnapshotsRequestInput = { "endTime"?: number; "page": number; "startTime"?: number; };
 
-export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; "id": string; "query"?: string | null; "viewID"?: string | null; };
+export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; "groupID"?: string | null; "id": string; "query"?: string | null; "viewID"?: string | null; };
 
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
@@ -3788,6 +3792,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","writable"];
     };
+    /**
+     * 获取当前视图可见资源字段中的全部图片，保留载体发布权限、加密笔记本租约、搜索和上下文筛选。
+     * groupID 可选，省略、null 或空字符串时保留整个视图行为；指定时仅返回该分组图片，分组不存在则报错。
+     * 分组先按组内手动顺序排列，再应用视图排序；同一单元格按资源顺序返回，不受分页或虚拟滚动限制。
+     */
     "/api/av/getCurrentAttrViewImages": {
         request: GetCurrentAttrViewImagesRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5485,6 +5494,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知，包装层不再补发。
+     */
     "/api/graph/getGraph": {
         request: GlobalGraphRequestInput;
         response: { "code": 0; "data": GlobalGraphResult | (GraphCorrelation & { "box"?: never; "conf"?: never; "links"?: never; "nodes"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | GlobalGraphResult | (GraphCorrelation & { "box"?: never; "conf"?: never; "links"?: never; "nodes"?: never; }); "msg": string; };
@@ -6065,6 +6077,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 自动锁定分钟数由内核内存值驱动锁定行为，写入后无需广播供其他客户端重读。
+     */
     "/api/notebook/setNotebookCryptoAutoLock": {
         request: NotebookCryptoAutoLockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6867,6 +6882,7 @@ export interface APIPOSTRoutes {
      * web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
      * 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
      * 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
+     * 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
      * ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
      */
     "/api/setting/setAI": {
@@ -6878,6 +6894,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 限定关闭按钮行为：closeButtonBehavior 仅接受 0、1，越界值回退 0。
+     * entryVisibility 省略时保持当前方案，null 还原默认显隐方案。
      */
     "/api/setting/setAppearance": {
         request: SetAppearanceRequestInput;
@@ -6912,6 +6929,7 @@ export interface APIPOSTRoutes {
      * 锚文本长度 1–5120 保持不变，小于 1 回退 64；字体大小超出 9–72 回退 16。
      * backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
      * databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
+     * 只提交 fontFamily、fontWeight 时按新的首选字体重建 fontFamilies；显式提交 fontFamilies 时以该列表为准。
      */
     "/api/setting/setEditor": {
         request: SetEditorRequestInput;
@@ -6946,9 +6964,9 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
+     * 合并提交的导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
      * blockEmbedMode 仅接受 0、1，越界值回退 1；fileAnnotationRefMode 仅接受 0、1，越界值回退 0。
-     * blockRefMode 的其他取值及字段省略、null 的解析行为保持不变。
+     * blockRefMode 的其他取值原样保留；省略的字段保持当前值，null 还原默认值。
      */
     "/api/setting/setExport": {
         request: SetExportRequestInput;
@@ -7195,6 +7213,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 行级样式与数据库调色板变化由 reloadInlineStyles 专用推送通知其他窗口，不走配置段刷新。
+     */
     "/api/storage/setInlineStyles": {
         request: SetInlineStylesRequestInput;
         response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7216,6 +7237,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 写入 data/storage 下独立存储的端点都不是 conf.json 的配置段，因此只持锁不广播。
+     */
     "/api/storage/setOutlineStorage": {
         request: OutlineStorageSetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -22,8 +22,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
         protyle.hint.element.classList.add("fn__none");
     }
     if (protyle.gutter && panels.includes("gutter")) {
-        protyle.gutter.element.classList.add("fn__none");
-        protyle.gutter.element.innerHTML = "";
+        hideGutterElements([protyle.gutter.element], true);
         // https://ld246.com/article/1651935412480
         protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((item) => {
             item.classList.remove("protyle-wysiwyg--hl");
@@ -85,9 +84,6 @@ export const hideAllElements = (types: string[]) => {
         hideRectResizeHandles(document);
     }
     if (types.includes("gutter")) {
-        document.querySelectorAll(".protyle-gutters").forEach(item => {
-            item.classList.add("fn__none");
-            item.innerHTML = "";
-        });
+        hideGutterElements(Array.from(document.querySelectorAll<HTMLElement>(".protyle-gutters")), true);
     }
 };

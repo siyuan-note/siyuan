@@ -233,7 +233,7 @@ func (tx *Transaction) readAttributeViewItems(state *attributeViewItemsSnapshot)
 	return tx.readAttributeViewForMutation(state.AvID, state.BlockID, state.BoxID)
 }
 
-// 只把索引、文件或认证后文档中的源块缺失视为缺失；其它读取失败均保留错误。
+// 只把索引、文件或认证后文档中的源块缺失视为缺失；其他读取失败均保留错误。
 func (tx *Transaction) attributeViewItemSourceMissing(state *attributeViewItemsSnapshot, blockID string) (bool, error) {
 	bt := attributeViewBindingBlockTree(blockID, state.BoxID)
 	if bt == nil {

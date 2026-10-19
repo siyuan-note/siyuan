@@ -5,6 +5,7 @@ import {progressLoading} from "../../dialog/progress";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateAccountPanelVisibility} from "./accountUi";
 import {hideMessage, showMessage} from "../../dialog/message";
+import {refreshSyncCloudDirBlock} from "../../sync/syncGuide";
 import {
     refreshLANSyncConfigItemVisibility,
     refreshSyncModeRelatedItems,
@@ -157,11 +158,7 @@ export const mountLANSyncStatus = (root: HTMLElement) => {
 /** 切换同步提供商等场景：刷新云空间相关区块并重置云目录列表 */
 export const refreshSyncCloudSpaceGroup = (root: Element) => {
     refreshSyncTabPanels(root);
-    const syncConfigElement = root.querySelector("#syncCloudList");
-    if (syncConfigElement) {
-        syncConfigElement.innerHTML = "";
-        syncConfigElement.classList.add("fn__none");
-    }
+    refreshSyncCloudDirBlock(root);
 };
 
 /** 账号同步 Tab：按控件 id 提交配置并更新本地运行时 */

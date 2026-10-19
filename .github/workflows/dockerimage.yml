@@ -414,14 +414,14 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Delete published and expired build candidate tags
+      - name: Delete build candidate tags after publishing
         env:
           DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
           DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
           PUBLISHED: ${{ needs.publish.result == 'success' }}
         run: |
+          # 发布成功时删除仓库内全部候选标签；本次未发布成功时保留候选供重试。
           ARGS=()
           if [ "$PUBLISHED" = "true" ]; then ARGS+=(--published); fi
           python3 scripts/cleanup-docker-tags.py --repository "$IMAGE_REPOSITORY" \
-            --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" \
-            --retention-days 7 --execute "${ARGS[@]}"
+            --execute "${ARGS[@]}"

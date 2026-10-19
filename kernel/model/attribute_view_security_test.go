@@ -110,7 +110,7 @@ func TestGetCurrentAttributeViewImagesPublishAccess(t *testing.T) {
 		if err = SetPublishAccess(PublishAccess{{ID: carrierDocID, Disable: true}}); nil != err {
 			t.Fatal(err)
 		}
-		images, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", "", "")
+		images, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", "", "", "")
 		if !errors.Is(err, av.ErrAttributeViewNotFound) {
 			t.Fatalf("expected [%v], got [%v]", av.ErrAttributeViewNotFound, err)
 		}
@@ -130,7 +130,7 @@ func TestGetCurrentAttributeViewImagesPublishAccess(t *testing.T) {
 		}}); nil != err {
 			t.Fatal(err)
 		}
-		if _, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", "", ""); !errors.Is(err, av.ErrAttributeViewNotFound) {
+		if _, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", "", "", ""); !errors.Is(err, av.ErrAttributeViewNotFound) {
 			t.Fatalf("expected [%v], got [%v]", av.ErrAttributeViewNotFound, err)
 		}
 	})
@@ -141,7 +141,7 @@ func TestGetCurrentAttributeViewImagesPublishAccess(t *testing.T) {
 			Name:  "publish-auth-" + carrierDocID,
 			Value: util.SHA256Hash([]byte(carrierDocID + readerPass)),
 		})
-		images, err := GetCurrentAttributeViewImages(c, avID, "", "", "")
+		images, err := GetCurrentAttributeViewImages(c, avID, "", "", "", "")
 		if nil != err {
 			t.Fatalf("unexpected error: %s", err)
 		}
@@ -154,7 +154,7 @@ func TestGetCurrentAttributeViewImagesPublishAccess(t *testing.T) {
 		if err = SetPublishAccess(PublishAccess{}); nil != err {
 			t.Fatal(err)
 		}
-		images, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", "", "")
+		images, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", "", "", "")
 		if nil != err {
 			t.Fatalf("unexpected error: %s", err)
 		}
@@ -170,12 +170,34 @@ func TestGetCurrentAttributeViewImagesPublishAccess(t *testing.T) {
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Request = httptest.NewRequest(http.MethodPost, "/api/av/getCurrentAttrViewImages", nil)
 		c.Set(RoleContextKey, RoleAdministrator)
-		images, err := GetCurrentAttributeViewImages(c, avID, "", "", "")
+		images, err := GetCurrentAttributeViewImages(c, avID, "", "", "", "")
 		if nil != err {
 			t.Fatalf("unexpected error: %s", err)
 		}
 		if 1 != len(images) || secretImage != images[0] {
 			t.Fatalf("unexpected images: %v", images)
+		}
+	})
+
+	t.Run("分组图片保留发布门禁", func(t *testing.T) {
+		view.Group = &av.ViewGroup{Field: attrView.KeyValues[1].Key.ID}
+		group := av.NewTableView()
+		group.GroupItemIDs = []string{detachedRowID}
+		view.Groups = []*av.View{group}
+		if err := av.SaveAttributeView(attrView); err != nil {
+			t.Fatal(err)
+		}
+		if err := SetPublishAccess(PublishAccess{{ID: carrierDocID, Disable: true}}); err != nil {
+			t.Fatal(err)
+		}
+		if images, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", view.ID, "", group.ID); !errors.Is(err, av.ErrAttributeViewNotFound) || len(images) != 0 {
+			t.Fatalf("group leaked inaccessible images: %v, %v", images, err)
+		}
+		if err := SetPublishAccess(PublishAccess{}); err != nil {
+			t.Fatal(err)
+		}
+		if images, err := GetCurrentAttributeViewImages(newReaderContext(), avID, "", view.ID, "", group.ID); err != nil || len(images) != 1 || images[0] != secretImage {
+			t.Fatalf("unexpected accessible group images: %v, %v", images, err)
 		}
 	})
 }

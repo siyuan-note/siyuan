@@ -205,6 +205,28 @@ fetchPost("/api/bazaar/setBazaarPackageRating", {packageType: "plugin", packageN
 fetchPost("/api/bazaar/getBazaarPackageRatings", {packageType: "plugin", packageNames: [1]});
 fetchPost("/api/bazaar/installLocalBazaarPackage", new ContractFormData({file: new Blob(), overwrite: "true"}));
 
+declare const bazaarAppearanceResponse: APIPOSTRoutes[
+    "/api/bazaar/installBazaarIcon" | "/api/bazaar/uninstallBazaarIcon" |
+    "/api/bazaar/installBazaarTheme" | "/api/bazaar/uninstallBazaarTheme"
+]["response"];
+if (bazaarAppearanceResponse.code === 0 && bazaarAppearanceResponse.data.appearance) {
+    const appearance = bazaarAppearanceResponse.data.appearance;
+    const compactMode: boolean = appearance.compactMode;
+    const menuMouseScroll: boolean = appearance.menuMouseScroll;
+    const outlineKeepCurrentExpand: boolean = appearance.outlineKeepCurrentExpand;
+    const pdfTheme: {light: string; dark: string; annoColor: string} | null = appearance.pdfTheme;
+    const mobileBars: {autoHide: boolean | null; sidebarSwipe: boolean | null; sidebarButtons: boolean | null} | null = appearance.mobileBars;
+    void [compactMode, menuMouseScroll, outlineKeepCurrentExpand, pdfTheme, mobileBars];
+    // @ts-expect-error Appearance preferences retain boolean response types.
+    const numericCompactMode: number = appearance.compactMode;
+    void numericCompactMode;
+    if (appearance.mobileBars) {
+        // @ts-expect-error Unset mobile preferences remain nullable in responses.
+        const autoHide: boolean = appearance.mobileBars.autoHide;
+        void autoHide;
+    }
+}
+
 type RPCWebSocket = APIGETRoutes["/ws/plugin/rpc"]["websocket"];
 const rpcCall: RPCWebSocket["incoming"] = {jsonrpc: "2.0", method: "call", id: 1};
 const rpcNotice: RPCWebSocket["outgoing"] = {jsonrpc: "2.0", method: "event", params: null};

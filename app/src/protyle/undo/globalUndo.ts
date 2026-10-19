@@ -186,7 +186,7 @@ const resolveRootNames = async (rootIDs: string[]): Promise<string[]> => {
 };
 
 const focusRootIDs = (rootIDs: string[], focusBlockId?: string) => {
-    // 只滚动发起窗口的焦点 protyle 到变更块；其它文档不强制重开（撤销物理结果在发起文档）
+    // 只滚动发起窗口的焦点 protyle 到变更块；其他文档不强制重开（撤销物理结果在发起文档）
     const protyle = getActiveProtyle();
     if (protyle && rootIDs.includes(protyle.block?.rootID) && focusBlockId) {
         const targets = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${focusBlockId}"]`));

@@ -152,6 +152,7 @@ export class Hint {
     private emojiPanel?: EmojiPanelController;
     private emojiBrowseMode = false;
     private loadingAnimation?: Animation;
+    private loadingID = 0;
     private bindingDismissController?: AbortController;
 
     constructor(protyle: IProtyle) {
@@ -209,6 +210,7 @@ export class Hint {
     }
 
     public destroy() {
+        this.loadingID++;
         this.bindingDismissController?.abort();
         this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
@@ -664,6 +666,9 @@ export class Hint {
     }
 
     public genLoading(protyle: IProtyle, delay = 0, source = this.source) {
+        const loadingID = ++this.loadingID;
+        const context = getCreateTargetContext(protyle);
+        const rootID = protyle.block.rootID;
         this.source = source;
         this.bindingDismissController?.abort();
         if (source === "av" && getAVBindingCell(protyle.toolbar.range)?.dataset.rowId) {
@@ -716,6 +721,11 @@ export class Hint {
                 {visibility: "hidden"},
             ], {duration: delay});
         }
+        const loadingElement = this.element.querySelector(".fn__loading");
+        // 仅允许当前文档中仍可见的本次加载更新候选，避免旧请求影响后续面板。
+        return () => this.loadingID === loadingID && isSameCreateTargetContext(context, protyle) &&
+            protyle.block.rootID === rootID && this.element.isConnected &&
+            !this.element.classList.contains("fn__none") && this.element.contains(loadingElement);
     }
 
     public bindUploadEvent(protyle: IProtyle, element: HTMLElement) {
@@ -1420,6 +1430,25 @@ ${genHintItemHTML(item)}
                 });
                 return;
             } else {
+                if (!range.collapsed && hasClosestBlock(range.endContainer) !== nodeElement && value.startsWith("|")) {
+                    const template = document.createElement("template");
+                    template.innerHTML = protyle.lute.SpinBlockDOM(value);
+                    const table = template.content.firstElementChild;
+                    if (template.content.childElementCount === 1 && table?.getAttribute("data-type") === "NodeTable") {
+                        table.querySelectorAll<HTMLElement>("colgroup col").forEach(item => {
+                            item.style.minWidth = "60px";
+                        });
+                        // 跨块替换使用完整事务，保留所有受影响块的内容与撤销位置。
+                        insertHTML(template.innerHTML, protyle, true, true, false, undefined, undoContext);
+                        const insertedTable = protyle.wysiwyg.element.querySelector(
+                            `[data-node-id="${table.getAttribute("data-node-id")}"]`);
+                        if (insertedTable) {
+                            focusBlock(insertedTable);
+                            this.openNewTableCell(protyle);
+                        }
+                        return;
+                    }
+                }
                 range.deleteContents();
                 if (value !== "![]()") {
                     this.fixImageCursor(range);
@@ -1643,7 +1672,11 @@ ${genHintItemHTML(item)}
                 }
             }
         }
-        // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+        this.openNewTableCell(protyle);
+    }
+
+    // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+    private openNewTableCell(protyle: IProtyle) {
         const selection = getSelection();
         const focus = selection?.focusNode;
         const focusElement = focus instanceof Element ? focus : focus?.parentElement;

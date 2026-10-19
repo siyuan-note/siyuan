@@ -650,7 +650,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			return
 		}
 		// 兜底校验：禁止跨加密边界块引。包内文档尚未入库，块树查不到，因此把本次导入的全部块 ID
-		// 一并放行，既拦住包外引用（普通笔记本或其它加密笔记本的块），又不误伤包内跨文档引用。
+		// 一并放行，既拦住包外引用（普通笔记本或其他加密笔记本的块），又不误伤包内跨文档引用。
 		importedBlockIDs := make(map[string]bool, len(blockIDs))
 		for _, newID := range blockIDs {
 			importedBlockIDs[newID] = true

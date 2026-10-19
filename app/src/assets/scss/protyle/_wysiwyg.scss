@@ -216,6 +216,11 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         margin-left: 34px;
       }
 
+      > [data-type="NodeIFrame"],
+      > [data-type="NodeWidget"] {
+        max-width: calc(100% - 34px);
+      }
+
       & > [data-node-id]:not(.p):not(.code-block),
       & > [data-table-cell-node]:not(.p):not(.code-block) {
         padding-right: 0;
@@ -666,6 +671,29 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         position: relative;
       }
 
+      > .protyle-image-container--compact {
+        > .protyle-icons,
+        > .img__net,
+        .protyle-block-resize[data-resize-axis="width"],
+        .protyle-block-resize[data-resize-axis="height"] {
+          display: none;
+        }
+
+        .protyle-block-resize[data-resize-axis="both"]::after {
+          width: 5px;
+          height: 5px;
+          // 鼠标与触屏手柄都向图片内部延伸 8px，将圆点中心固定在图片角上。
+          left: 8px;
+          top: 8px;
+          right: auto;
+          bottom: auto;
+          transform: translate(-50%, -50%);
+          border: 0;
+          border-radius: 50%;
+          background-color: currentColor;
+        }
+      }
+
       .protyle-image-resize {
         position: absolute;
         pointer-events: none;
@@ -987,6 +1015,13 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 @media (any-pointer: coarse) {
   .protyle-wysiwyg[data-readonly="false"] .img .protyle-image-caption {
     margin-top: 20px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .protyle-wysiwyg .img:not(.img--select):not(.img--drag) .protyle-block-resize {
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 

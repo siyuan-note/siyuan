@@ -36,6 +36,7 @@ const runCases = async (sources, css, touch) => {
         "../../../util/escape": {escapeAttr: String},
         "./renderData": {isAVRenderData: value => !!value?.view},
         "./virtualScroll": {getAVData: () => undefined},
+        "./readonlyState": {getReadonlyAVSort: () => undefined},
     });
     const commands = load(sources.commands);
     let context;

@@ -191,13 +191,17 @@ export const previewDocImage = (currentSrc: string, id: string, currentVideo?: s
     });
 };
 
-export const previewAttrViewImages = (currentSrc: string, avID: string, blockID: string, viewID: string, query: string) => {
+export const previewAttrViewImages = (currentSrc: string, avID: string, blockID: string, viewID: string, query: string, groupID?: string) => {
     fetchPost("/api/av/getCurrentAttrViewImages", {
         id: avID,
         blockID,
         viewID,
         query,
+        groupID,
     }, (response) => {
-        previewImages(response.data.filter((item: string) => isBrowserRenderableImagePath(item)), currentSrc);
+        const images = (response.data || []).filter((item: string) => isBrowserRenderableImagePath(item));
+        if (images.length > 0) {
+            previewImages(images, currentSrc);
+        }
     });
 };

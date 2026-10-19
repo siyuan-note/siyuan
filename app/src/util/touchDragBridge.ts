@@ -2,6 +2,7 @@ import {stopScrollAnimation} from "../boot/globalEvent/dragover";
 import {Constants} from "../constants";
 import {isInAndroid, isInHarmony} from "../protyle/util/compatibility";
 import {isMobile} from "./functions";
+import {setGutterTouchDragging} from "../protyle/ui/gutterVisibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -127,7 +128,7 @@ interface DragState {
     pendingDropSequence?: number;
     pendingDropTimeout?: number;
     restoreDraggable?: boolean;
-    gutterLongPress?: {touchID: number, timer?: number, moved: boolean};
+    gutterLongPress?: {touchID: number, timer?: number, moved: boolean, gutter: HTMLElement};
 }
 
 interface ForeignDragState {
@@ -247,8 +248,11 @@ const handleTouchStart = (e: TouchEvent) => {
                 const currentState = dragState;
                 currentState.requireLongPress = true;
                 currentState.lastPoint = copyDragPoint(touch);
-                const longPress: DragState["gutterLongPress"] = {touchID: touch.identifier, moved: false};
+                const longPress: DragState["gutterLongPress"] = {
+                    touchID: touch.identifier, moved: false, gutter: draggable.closest<HTMLElement>(".protyle-gutters"),
+                };
                 currentState.gutterLongPress = longPress;
+                setGutterTouchDragging(longPress.gutter, true);
                 // 块标静止长按后直接显示选中块和拖拽影像，无需先移动手指。
                 longPress.timer = window.setTimeout(() => {
                     longPress.timer = undefined;
@@ -356,6 +360,9 @@ const handleTouchMove = (e: TouchEvent) => {
         if (!dragState.isDragging) {
             // 长按门槛：文件树、画廊、列表标记等触摸后短时间滑动视为滚动，放行原生滚动
             if (shouldYieldToScroll(dragState, touch.clientX, touch.clientY)) {
+                if (longPress && dragState.longPressCancelled) {
+                    setGutterTouchDragging(longPress.gutter, false);
+                }
                 return;
             }
             e.preventDefault();
@@ -850,6 +857,9 @@ const cleanupDrag = () => {
     const completedState = dragState;
     dragState = null;
     clearGutterLongPressTimer(completedState);
+    if (completedState?.gutterLongPress) {
+        setGutterTouchDragging(completedState.gutterLongPress.gutter, false);
+    }
     stopScrollAnimation();
     clearDragoverClasses();
     dragRefreshQueue.cancel();

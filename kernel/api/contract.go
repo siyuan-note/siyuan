@@ -48,7 +48,8 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 	// 合并写入在取得配置段锁之后才读取当前配置，避免并发提交互相覆盖。
 	merge := setting.Declared() && setting.Merge
 	if !merge {
-		// 写配置端点按契约声明串行化并通知；读取完整配置与写入共用互斥，保证读到已提交的配置
+		// 按契约声明的模式串行化：Notify 补发变更通知，Silent 只取配置互斥锁。
+		// 读取完整配置与写入共用互斥，保证读到已提交的配置。
 		if setting.Declared() && setting.Mode == apicontract.SettingNotify {
 			handler = serializeSetting(setting.Namespace, handler)
 		} else if setting.Declared() && setting.Mode == apicontract.SettingSilent || endpoint.Definition().Path == "/api/system/getConf" {

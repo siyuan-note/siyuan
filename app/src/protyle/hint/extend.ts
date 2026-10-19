@@ -828,7 +828,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     if (key.endsWith("}}") || key.endsWith("」」")) {
         return [];
     }
-    protyle.hint.genLoading(protyle);
+    const isCurrent = protyle.hint.genLoading(protyle, 0, "hint");
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     const embedParam: import("../../types/api").SearchRefBlockRequestInput = {
         k: key,
@@ -840,9 +840,16 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     if (isEncryptedBox(protyle.notebookId)) {
         embedParam.notebook = protyle.notebookId;
     }
-    fetchPost("/api/search/searchRefBlock", embedParam, (response) => {
+    searchRef(embedParam).then((response) => {
+        if (!isCurrent()) {
+            return;
+        }
+        if (!response) {
+            protyle.hint.genHTML([], protyle, true, "hint");
+            return;
+        }
         const dataList: IHintData[] = [];
-        response.data.blocks.forEach((item: IBlock) => {
+        response.blocks.forEach((item: IBlock) => {
             dataList.push({
                 value: `{{select * from blocks where id='${item.id}'}}`,
                 html: genHintItemHTML(item),
@@ -855,6 +862,10 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
             });
         }
         protyle.hint.genHTML(dataList, protyle, true, "hint");
+    }).catch(() => {
+        if (isCurrent()) {
+            protyle.hint.genHTML([], protyle, true, "hint");
+        }
     });
     return [];
 };

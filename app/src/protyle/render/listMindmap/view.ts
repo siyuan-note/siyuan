@@ -182,10 +182,14 @@ export class ListMindmapView {
     private offsetY = 0;
     private foldAnchor?: {id: string, collapsed: boolean};
     private frame = 0;
+    private drawFrame = 0;
     private initialFit = true;
     private destroyed = false;
     private readonly resizeObserver: ResizeObserver;
     private fullscreenMarker?: Comment;
+    private documentViewport?: {width: number, height: number};
+    private viewportCenter?: {x: number, y: number};
+    private readonly documentFrame = createElement("div", "mindmap-view__document-frame");
     private readonly disposers: (() => void)[] = [];
     private printTransform?: {scale: number, offsetX: number, offsetY: number};
 
@@ -213,6 +217,9 @@ export class ListMindmapView {
         this.inspector.hidden = true;
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.viewport.append(this.canvas, this.world);
+        this.documentFrame.hidden = true;
+        this.documentFrame.setAttribute("aria-hidden", "true");
+        this.viewport.append(this.documentFrame);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -244,6 +251,7 @@ export class ListMindmapView {
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
         this.listen(options.host, "pointerdown", this.activatePointer, {capture: true});
+        this.listen(options.host, "click", this.activatePointer, {capture: true});
         this.listen(options.host, "focusout", (event: FocusEvent) => {
             if (event.relatedTarget instanceof Node && !options.host.contains(event.relatedTarget)) {
                 this.setInteractionActive(false);
@@ -461,11 +469,12 @@ export class ListMindmapView {
 
     private activatePointer = (event: PointerEvent) => {
         const target = event.target as Element;
-        if (target.closest(".mindmap-view") !== this.options.host ||
+        if (this.pinching || target.closest(".mindmap-view") !== this.options.host ||
             this.buttons.get("lock")?.contains(target) || this.isTemporaryPan(event)) {
             return;
         }
-        if (event.pointerType !== "touch" || target.closest("button, input, select")) {
+        // 触屏在点按完成后激活，按下时仍允许浏览器处理文档滑动。
+        if (event.type === "click" || event.pointerType !== "touch" || target.closest("button, input, select")) {
             this.setInteractionActive(true);
         }
     };
@@ -530,12 +539,13 @@ export class ListMindmapView {
     }
 
     private createToolbar() {
+        const controls = createElement("div", "mindmap-view__toolbar-group");
         const add = (id: string, key: string, icon: string, action: () => void) => {
             const button = this.makeButton(key, icon, action);
             this.buttons.set(id, button);
-            this.toolbar.append(button);
+            controls.append(button);
         };
-        this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"));
+        this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
         this.levelSelect = undefined;
         this.options.host.classList.toggle("mindmap-view--locked", this.locked);
         add("lock", this.locked ? "listMindmapUnlock" : "listMindmapLock", this.locked ? "iconLock" : "iconUnlock", () => {
@@ -640,8 +650,16 @@ export class ListMindmapView {
         const reset = this.makeButton("reset", "iconRefresh", () => this.zoomAt(1));
         zoomActions.append(this.zoomSlider, reset);
         zoomControl.append(this.zoomLabel, zoomActions);
-        this.toolbar.append(zoomControl);
+        controls.append(zoomControl);
         add("fit", "listMindmapFit", "iconFocus", () => this.fit());
+        add("documentLayout", "listMindmapDocumentLayout", "iconLayout", () => {
+            this.documentFrame.hidden = !this.documentFrame.hidden;
+            const button = this.buttons.get("documentLayout");
+            button.classList.toggle("block__icon--active", !this.documentFrame.hidden);
+            button.setAttribute("aria-pressed", String(!this.documentFrame.hidden));
+        });
+        this.buttons.get("documentLayout").hidden = !this.fullscreenMarker;
+        this.buttons.get("documentLayout").setAttribute("aria-pressed", String(!this.documentFrame.hidden));
         add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
     }
 
@@ -912,7 +930,7 @@ export class ListMindmapView {
             return bounds;
         }
         // 顶部遮挡范围只包含可见控件及展开的缩放面板，不包含左侧空白区域。
-        this.toolbar.querySelectorAll<HTMLElement>(".block__icon, .mindmap-view__zoom, .mindmap-view__zoom-actions")
+        this.toolbar.querySelectorAll<HTMLElement>(".mindmap-view__toolbar-group, .mindmap-view__zoom-actions")
             .forEach(control => {
                 const rect = control.getBoundingClientRect();
                 const style = getComputedStyle(control);
@@ -1020,6 +1038,8 @@ export class ListMindmapView {
             if (!this.viewport.clientWidth || !this.viewport.clientHeight) {
                 return;
             }
+            const previousPositions = this.positions;
+            const previousSummaries = this.summaryPositions;
             // 同一帧内先恢复测量，布局完成后再隐藏折叠后代，避免展开时读取到零尺寸。
             this.nodeElements.forEach(element => element.hidden = false);
             const makeLayoutNode = (id: string): ListMindmapLayoutNode => {
@@ -1154,15 +1174,38 @@ export class ListMindmapView {
                 this.model.nodes.get(this.foldAnchor.id)?.collapsed) === this.foldAnchor.collapsed) {
                 this.foldAnchor = undefined;
             }
+            const center = this.viewportCenter;
+            this.viewportCenter = undefined;
+            if (center && !this.initialFit) {
+                this.offsetX = this.viewport.clientWidth / 2 - center.x * this.scale;
+                this.offsetY = this.viewport.clientHeight / 2 - center.y * this.scale;
+            }
             if (this.printTransform || this.options.printLayout) {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
                 this.fit();
+            } else if (center) {
+                this.draw();
             } else {
-                const bounded = this.boundedPan(this.offsetX, this.offsetY);
-                this.offsetX = bounded.x;
-                this.offsetY = bounded.y;
+                // 内容布局未变化时保留当前取景，避免全屏裁切后被尺寸通知重新拉回。
+                const changed = previousPositions.size !== this.positions.size ||
+                    [...this.positions].some(([id, position]) => {
+                        const previous = previousPositions.get(id);
+                        return !previous || previous.x !== position.x || previous.y !== position.y ||
+                            previous.width !== position.width || previous.height !== position.height;
+                    }) || previousSummaries.size !== this.summaryPositions.size ||
+                    [...this.summaryPositions].some(([id, position]) => {
+                        const previous = previousSummaries.get(id);
+                        return !previous || previous.x !== position.x || previous.top !== position.top ||
+                            previous.bottom !== position.bottom || previous.labelX !== position.labelX ||
+                            previous.labelY !== position.labelY || previous.width !== position.width || previous.height !== position.height;
+                    });
+                if (changed) {
+                    const bounded = this.boundedPan(this.offsetX, this.offsetY);
+                    this.offsetX = bounded.x;
+                    this.offsetY = bounded.y;
+                }
                 this.draw();
             }
         });
@@ -1728,7 +1771,20 @@ export class ListMindmapView {
         });
     }
 
+    private requestDraw() {
+        if (this.destroyed || this.drawFrame) {
+            return;
+        }
+        // 高频指针事件只记录最新位置，每帧统一绘制节点和连线。
+        this.drawFrame = requestAnimationFrame(() => {
+            this.drawFrame = 0;
+            this.draw();
+        });
+    }
+
     private draw() {
+        cancelAnimationFrame(this.drawFrame);
+        this.drawFrame = 0;
         if (this.destroyed) {
             return;
         }
@@ -2429,7 +2485,7 @@ export class ListMindmapView {
             const bounded = this.boundedPan(pointer.x + dx, pointer.y + dy);
             this.offsetX = bounded.x;
             this.offsetY = bounded.y;
-            this.draw();
+            this.requestDraw();
             pointer.x = this.offsetX;
             pointer.y = this.offsetY;
             pointer.startX = event.clientX;
@@ -3357,6 +3413,8 @@ export class ListMindmapView {
         if (this.destroyed || this.fullscreenMarker) {
             return;
         }
+        this.documentViewport = {width: this.viewport.clientWidth, height: this.viewport.clientHeight};
+        this.captureViewportCenter();
         // 移到独立容器，避免编辑器祖先的变换和裁剪改变全屏覆盖范围。
         this.fullscreenMarker = document.createComment("mindmap-view");
         this.options.host.before(this.fullscreenMarker);
@@ -3372,6 +3430,7 @@ export class ListMindmapView {
         if (!this.fullscreenMarker) {
             return;
         }
+        this.captureViewportCenter();
         this.options.onFullscreen?.(false, this.buttons.get("fullscreen"));
         this.options.host.classList.remove("fullscreen");
         this.fullscreenMarker.replaceWith(this.options.host);
@@ -3389,9 +3448,30 @@ export class ListMindmapView {
         const button = this.buttons.get("fullscreen");
         button.setAttribute("aria-label", this.label(active ? "exitFullscreen" : "fullscreen"));
         button.querySelector("use").setAttribute("xlink:href", active ? "#iconFullscreenExit" : "#iconFullscreen");
-        this.initialFit = true;
+        const layout = this.buttons.get("documentLayout");
+        if (layout) {
+            layout.hidden = !active;
+            layout.classList.toggle("block__icon--active", !this.documentFrame.hidden && active);
+            layout.setAttribute("aria-pressed", String(!this.documentFrame.hidden && active));
+        }
+        if (!active || this.locked) {
+            this.documentFrame.hidden = true;
+        }
+        if (active && this.documentViewport) {
+            this.documentFrame.style.width = `${this.documentViewport.width}px`;
+            this.documentFrame.style.height = `${this.documentViewport.height}px`;
+        }
         this.refreshLayout();
     };
+
+    private captureViewportCenter() {
+        if (!this.initialFit && !this.viewportCenter) {
+            this.viewportCenter = {
+                x: (this.viewport.clientWidth / 2 - this.offsetX) / this.scale,
+                y: (this.viewport.clientHeight / 2 - this.offsetY) / this.scale,
+            };
+        }
+    }
 
     public destroy() {
         this.finishSummaryEdit?.(false);
@@ -3400,6 +3480,8 @@ export class ListMindmapView {
             return;
         }
         this.destroyed = true;
+        cancelAnimationFrame(this.drawFrame);
+        this.drawFrame = 0;
         clearTimeout(this.linkTimer);
         this.cancelPointer();
         if (this.frame) {

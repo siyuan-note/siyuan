@@ -102,8 +102,22 @@
   &.fullscreen &__toolbar .block__icon,
   &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
-  &__toolbar:focus-within .block__icon {
+  &__toolbar:focus-within .block__icon,
+  &.fullscreen &__toolbar-group,
+  &--active &__toolbar-group,
+  &:hover &__toolbar-group,
+  &__toolbar:focus-within &__toolbar-group {
     pointer-events: auto;
+  }
+
+  &__toolbar-group {
+    @include protyle-toolbar-surface($shadow: none);
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+    gap: 8px;
+    padding: 4px;
   }
 
   &__spacer {
@@ -223,6 +237,18 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
+
+  &__document-frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    border: 2px dashed var(--b3-theme-primary);
+    color: var(--b3-theme-primary);
+    pointer-events: none;
+    z-index: 4;
   }
 
   &__viewport--summary {
@@ -906,6 +932,7 @@
     min-height: 0;
 
     &__toolbar,
+    &__document-frame,
     &__resize,
     &__inspector,
     &__tooltip,

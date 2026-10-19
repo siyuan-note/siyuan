@@ -217,7 +217,7 @@ Docker 工作流会先解析或构建独立的 ONNX 运行库镜像，再向应�
 
 ARM32 的 ONNX 编译使用构建机原生 Clang、目标 Alpine 开发文件和从锁定依赖编译的原生 `protoc`，避免在 QEMU 下执行 C++ 编译器；最终安装包仍须完成原有的逐平台真实 OCR 和笔记本读写验收。独立产物保留 ONNX 许可证及第三方声明。构建日志和产物解析报告随平台记录一起上传。首次验证应包含 ARMv7 冷构建、相同输入复用、应用改动后复用，以及 ONNX 输入变更后失效；对应脚本回归通过 `python -m unittest discover -s scripts -p test_docker_release.py` 运行。
 
-Docker 工作流收尾时会清理超过 7 天的 `build-<runId>-<attempt>-<platform>` 和 `build-<runId>-<attempt>-verified` 候选标签；本次发布成功时，还会立即清理本次运行及已使用重试的候选标签。失败或取消的本次运行保留候选，历史候选在后续工作流运行时按保留期清理。`v*`、`latest`、`buildcache-*` 和 `onnx-*` 标签不参与清理，不改变缓存仓库和并行构建方式。清理使用现有 `DOCKER_HUB_USER`、`DOCKER_HUB_PWD` Secrets，凭据须具有标签删除权限；清理失败不改变发布结果，可在 `Clean up build candidate tags` 任务中检查日志。`scripts/cleanup-docker-tags.py` 默认仅预览，传入 `--execute` 才会删除标签；该操作不承诺回收共享镜像层占用的存储。
+Docker 工作流收尾时会清理 `build-<runId>-<attempt>-<platform>` 和 `build-<runId>-<attempt>-verified` 候选标签：本次发布成功时，立即清理仓库内全部候选标签，包括此前失败或取消运行遗留的候选。本次运行未发布成功时保留候选，供重试和排查；下一次成功发布的收尾会一并清除。`v*`、`latest`、`buildcache-*` 和 `onnx-*` 标签不参与清理，不改变缓存仓库和并行构建方式。清理使用现有 `DOCKER_HUB_USER`、`DOCKER_HUB_PWD` Secrets，凭据须具有标签删除权限；清理失败不改变发布结果，可在 `Clean up build candidate tags` 任务中检查日志。`scripts/cleanup-docker-tags.py` 默认仅预览，传入 `--execute` 才会删除标签；该操作不承诺回收共享镜像层占用的存储。
 
 `release.liuyun.io` 通过 Cloudflare Worker `siyuan-release` 从正式版安装包文件名提取版本号，代理 GitHub Release 下载：
 

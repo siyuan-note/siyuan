@@ -1,7 +1,6 @@
 """清理 Docker Hub 构建候选标签，默认只预览，保留发布、构建缓存和 ONNX 标签。"""
 
 import argparse
-from datetime import datetime, timedelta, timezone
 import json
 import os
 import re
@@ -66,43 +65,21 @@ def list_tags(repository, token):
         page += 1
 
 
-def select_tags(tags, run_id, run_attempt, *, published=False, retention_days=7, now=None):
-    if not re.fullmatch(r"[1-9][0-9]*", run_id) or not re.fullmatch(r"[1-9][0-9]*", run_attempt):
-        raise ValueError("Expected a positive workflow run ID and attempt")
-    if retention_days <= 0:
-        raise ValueError("Expected a positive retention period")
-    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=retention_days)
-    selected = set()
-    for tag in tags:
-        name = tag.get("name", "")
-        match = CANDIDATE_TAG.fullmatch(name)
-        if not match:
-            continue
-        if match[1] == run_id:
-            # 发布成功后清理本次运行已使用的所有重试产物，失败运行保留候选以便重试。
-            if published and int(match[2]) <= int(run_attempt):
-                selected.add(name)
-            continue
-        try:
-            updated = datetime.fromisoformat(tag["last_updated"].replace("Z", "+00:00"))
-            if updated.tzinfo is None:
-                raise ValueError("Missing timezone")
-        except (KeyError, AttributeError, TypeError, ValueError):
-            print(f"Warning: preserving tag with invalid last_updated: {name}")
-            continue
-        if updated < cutoff:
-            selected.add(name)
-    return sorted(selected)
+def select_tags(tags, *, published=False):
+    # 未发布成功时保留候选，供重试和排查；发布成功后的收尾一次清理全部候选。
+    if not published:
+        return []
+    return sorted(tag["name"] for tag in tags if CANDIDATE_TAG.fullmatch(tag.get("name", "")))
 
 
-def cleanup(repository, run_id, run_attempt, *, token="", execute=False, **options):
+def cleanup(repository, *, token="", execute=False, **options):
     if not REPOSITORY.fullmatch(repository):
         raise ValueError("Expected a Docker Hub namespace/repository")
     if execute and not token:
         raise ValueError("Deleting Docker Hub tags requires authentication")
     # 先完成分页读取再删除，避免标签数量变化使后续分页跳过候选。
     tags = list_tags(repository, token)
-    selected = select_tags(tags, run_id, run_attempt, **options)
+    selected = select_tags(tags, **options)
     print(f"Selected {len(selected)} of {len(tags)} tags in {repository}")
     failures = []
     for name in selected:
@@ -124,10 +101,8 @@ def cleanup(repository, run_id, run_attempt, *, token="", execute=False, **optio
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repository", required=True)
-    parser.add_argument("--run-id", required=True)
-    parser.add_argument("--run-attempt", required=True)
-    parser.add_argument("--published", action="store_true", help="The current run published successfully")
-    parser.add_argument("--retention-days", type=int, default=7)
+    parser.add_argument("--published", action="store_true",
+                        help="The current run published successfully; delete every candidate tag")
     parser.add_argument("--execute", action="store_true", help="Delete selected tags instead of previewing")
     args = parser.parse_args()
     username = os.environ.get("DOCKER_HUB_USER", "")
@@ -135,8 +110,7 @@ def main():
     if args.execute and (not username or not password):
         parser.error("DOCKER_HUB_USER and DOCKER_HUB_PWD are required for deletion")
     token = hub_token(username, password) if username and password else ""
-    cleanup(args.repository, args.run_id, args.run_attempt, token=token, execute=args.execute,
-            published=args.published, retention_days=args.retention_days)
+    cleanup(args.repository, token=token, execute=args.execute, published=args.published)
 
 
 if __name__ == "__main__":

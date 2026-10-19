@@ -85,75 +85,79 @@ test("mobile frequent group clones supported buttons and preserves the original 
     }
 });
 
-test("full mobile slash panel keeps original hidden items and only prefixes eligible rendered commands", () => {
-    const filename = path.join(__dirname, "keyboardToolbar.ts");
-    const file = createSourceFile(filename, readFileSync(filename, "utf8"), ScriptTarget.Latest, true);
-    const source = file.statements.filter(statement => isVariableStatement(statement) &&
-        statement.declarationList.declarations.some(declaration =>
-            ["getSlashItem", "renderSlashMenu"].includes(declaration.name.getText(file))))
-        .map(statement => statement.getText(file)).join("\n");
-    let mounted = 0;
-    let boundUploads = 0;
-    let eligibilityCalls = 0;
-    let frequentButtons: HTMLButtonElement[] = [];
-    const util = {
-        innerHTML: "",
-        querySelectorAll: () => Array.from(util.innerHTML.matchAll(/<button[^>]+data-slash-entry-key="([^"]+)"[^>]*>/g),
-            match => new Button(match[1])),
-    };
-    const root = {querySelector: () => util};
-    const protyle = {
-        lite: false,
-        app: {plugins: [] as unknown[]},
-        hint: {splitChar: "", lastIndex: 0, bindUploadEvent: () => boundUploads++},
-        options: {upload: {}},
-    };
-    const environment = {
-        Constants: {ZWSP: "\u200b", CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"},
-        Lute: {Caret: "caret"},
-        window: {siyuan: {languages: {}}},
-        SLASH_MENU_ROOT_PATH: "editor.slash.menu",
-        getHostCapabilities: () => ({widgets: false, remoteKernel: true}),
-        isDisabledFeature: () => true,
-        isInAndroid: () => false,
-        isBuiltinInlineStyleVisible: () => false,
-        getSuperBlockCommand: (layout: string) => layout,
-        escapeHtml: (value: string) => value,
-        getFrequentSlashButtons,
-        getFrequentSlashItems: (buttons: HTMLButtonElement[], getKey: (button: HTMLButtonElement) => string) =>
-            rankFrequentSlashItems(buttons, getKey, {heading1: 100, code: 1, insertHTMLFile: 99}),
-        hintSlash: (key: string, editor: unknown, hideConfiguredCreate: boolean, options: {visibilityRoot: string}) => {
-            eligibilityCalls++;
-            assert.equal(key, "");
-            assert.equal(editor, protyle);
-            assert.equal(hideConfiguredCreate, false);
-            assert.equal(options.visibilityRoot, "editor.slash.menu");
-            return [{entryKey: "code", html: "Code"}, {entryKey: "insertHTMLFile", html: "HTML upload"},
-                {entryKey: "separator_1", html: "separator"}];
-        },
-        prependFrequentSlashButtons: (_container: unknown, buttons: HTMLButtonElement[]) => frequentButtons = buttons,
-        mountLiteSlashMenu: () => { mounted++; },
-    };
-    const render = new Function("environment", "const {" + Object.keys(environment).join(",") +
-        "} = environment; let unmountLiteSlashMenu; " + transpileModule(source,
-        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText + "\nreturn renderSlashMenu;")(environment) as
-        (editor: unknown, toolbar: unknown) => void;
-    render(protyle, root);
-    assert.equal(eligibilityCalls, 1);
-    assert.deepEqual(frequentButtons.map(button => button.dataset.slashEntryKey), ["code"]);
-    assert.equal((util.innerHTML.match(/data-slash-entry-key="heading1"/g) || []).length, 1);
-    assert.equal((util.innerHTML.match(/data-slash-entry-key="code"/g) || []).length, 1);
-    assert.equal((util.innerHTML.match(/data-slash-entry-key="insertAsset"/g) || []).length, 1);
-    assert.equal((util.innerHTML.match(/data-slash-entry-key="insertHTMLFile"/g) || []).length, 0);
-    assert.equal(boundUploads, 1);
-    assert.equal(protyle.hint.splitChar, "/");
-    assert.equal(protyle.hint.lastIndex, -1);
-    protyle.lite = true;
-    render(protyle, root);
-    assert.equal(mounted, 1);
-    assert.equal(eligibilityCalls, 1);
-    assert.equal(boundUploads, 1);
-});
+for (const iosPhotos of [false, true]) {
+    test(`full mobile slash panel preserves eligible commands with iOS photos ${iosPhotos}`, () => {
+        const filename = path.join(__dirname, "keyboardToolbar.ts");
+        const file = createSourceFile(filename, readFileSync(filename, "utf8"), ScriptTarget.Latest, true);
+        const source = file.statements.filter(statement => isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(declaration =>
+                ["getSlashItem", "renderSlashMenu"].includes(declaration.name.getText(file))))
+            .map(statement => statement.getText(file)).join("\n");
+        let mounted = 0;
+        let boundUploads = 0;
+        let eligibilityCalls = 0;
+        let frequentButtons: HTMLButtonElement[] = [];
+        const util = {
+            innerHTML: "",
+            querySelectorAll: () => Array.from(util.innerHTML.matchAll(/<button[^>]+data-slash-entry-key="([^"]+)"[^>]*>/g),
+                match => new Button(match[1])),
+        };
+        const root = {querySelector: () => util};
+        const protyle = {
+            lite: false,
+            app: {plugins: [] as unknown[]},
+            hint: {splitChar: "", lastIndex: 0, bindUploadEvent: () => boundUploads++},
+            options: {upload: {}},
+        };
+        const environment = {
+            Constants: {ZWSP: "\u200b", CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"},
+            Lute: {Caret: "caret"},
+            window: {siyuan: {languages: {}}},
+            SLASH_MENU_ROOT_PATH: "editor.slash.menu",
+            getHostCapabilities: () => ({widgets: false, remoteKernel: true}),
+            isDisabledFeature: () => true,
+            isInAndroid: () => false,
+            canPickIOSPhotos: () => iosPhotos,
+            isBuiltinInlineStyleVisible: () => false,
+            getSuperBlockCommand: (layout: string) => layout,
+            escapeHtml: (value: string) => value,
+            getFrequentSlashButtons,
+            getFrequentSlashItems: (buttons: HTMLButtonElement[], getKey: (button: HTMLButtonElement) => string) =>
+                rankFrequentSlashItems(buttons, getKey, {heading1: 100, code: 1, insertHTMLFile: 99}),
+            hintSlash: (key: string, editor: unknown, hideConfiguredCreate: boolean, options: {visibilityRoot: string}) => {
+                eligibilityCalls++;
+                assert.equal(key, "");
+                assert.equal(editor, protyle);
+                assert.equal(hideConfiguredCreate, false);
+                assert.equal(options.visibilityRoot, "editor.slash.menu");
+                return [{entryKey: "code", html: "Code"}, {entryKey: "insertHTMLFile", html: "HTML upload"},
+                    {entryKey: "separator_1", html: "separator"}];
+            },
+            prependFrequentSlashButtons: (_container: unknown, buttons: HTMLButtonElement[]) => frequentButtons = buttons,
+            mountLiteSlashMenu: () => { mounted++; },
+        };
+        const render = new Function("environment", "const {" + Object.keys(environment).join(",") +
+            "} = environment; let unmountLiteSlashMenu; " + transpileModule(source,
+            {compilerOptions: {target: ScriptTarget.ES2021}}).outputText + "\nreturn renderSlashMenu;")(environment) as
+            (editor: unknown, toolbar: unknown) => void;
+        render(protyle, root);
+        assert.equal(eligibilityCalls, 1);
+        assert.deepEqual(frequentButtons.map(button => button.dataset.slashEntryKey), ["code"]);
+        assert.equal((util.innerHTML.match(/data-slash-entry-key="heading1"/g) || []).length, 1);
+        assert.equal((util.innerHTML.match(/data-slash-entry-key="code"/g) || []).length, 1);
+        assert.equal((util.innerHTML.match(/data-slash-entry-key="insertAsset"/g) || []).length, iosPhotos ? 2 : 1);
+        assert.equal(util.innerHTML.includes('data-native-photos="true"'), iosPhotos);
+        assert.equal((util.innerHTML.match(/data-slash-entry-key="insertHTMLFile"/g) || []).length, 0);
+        assert.equal(boundUploads, 1);
+        assert.equal(protyle.hint.splitChar, "/");
+        assert.equal(protyle.hint.lastIndex, -1);
+        protyle.lite = true;
+        render(protyle, root);
+        assert.equal(mounted, 1);
+        assert.equal(eligibilityCalls, 1);
+        assert.equal(boundUploads, 1);
+    });
+}
 
 const chromium = process.env.CHROMIUM_PATH;
 

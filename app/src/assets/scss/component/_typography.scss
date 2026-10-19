@@ -639,6 +639,7 @@
   [data-type="NodeWidget"] {
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
 
     .iframe-content {
       position: relative;

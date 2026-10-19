@@ -550,7 +550,7 @@ var getCurrentAttrViewImages = contractHandler(apicontract.GetCurrentAttrViewIma
 	if err := holdAttributeViewRequest(c, request.BlockID, request.ID); err != nil {
 		return apicontract.Failure[[]string](-1, model.Conf.Language(314))
 	}
-	images, err := model.GetCurrentAttributeViewImages(c, request.ID, request.BlockID, request.ViewID, request.Query)
+	images, err := model.GetCurrentAttributeViewImages(c, request.ID, request.BlockID, request.ViewID, request.Query, request.GroupID)
 	if err != nil {
 		return apicontract.Failure[[]string](-1, err.Error())
 	}

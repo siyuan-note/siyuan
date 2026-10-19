@@ -37,7 +37,7 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 	}
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x58}, 32)
-	setDEKForTest(boxID, key)
+	prepareUnlockedEncryptedBoxTest(t, boxID, key)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted, boxConf.BoxCrypt = true, &conf.BoxEncryption{Spec: boxEncryptionSpec}
 	if err = encryptBoxMetadata(boxID, boxConf, key); err != nil {

@@ -217,10 +217,8 @@ func testAPIContractNativeContainers(t *testing.T, boxID string) {
 						t.Fatal(err)
 					}
 					if invalid {
-						if !bytes.Equal(before, readFile(t)) ||
-							(endpoint != "prependBlock" && (response.Code != -1 || response.Data != nil)) ||
-							(endpoint == "prependBlock" && response.Code != 0) {
-							t.Fatalf("invalid API insert changed document: %s", recorder.Body.String())
+						if response.Code != -1 || response.Data != nil || !bytes.Equal(before, readFile(t)) {
+							t.Fatalf("invalid API insert was not rejected without persistence: %s", recorder.Body.String())
 						}
 					} else {
 						if response.Code != 0 || len(response.Data) != 1 || len(response.Data[0].DoOperations) != 1 {

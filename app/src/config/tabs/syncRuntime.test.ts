@@ -53,6 +53,9 @@ const setup = () => {
             if (name === "./accountUi") {
                 return {updateAccountPanelVisibility: () => {}};
             }
+            if (name === "../../sync/syncGuide") {
+                return {refreshSyncCloudDirBlock: () => {}};
+            }
             return {};
         },
     });

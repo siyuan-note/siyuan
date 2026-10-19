@@ -1451,6 +1451,44 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const hiddenFitBounds = navigationView.contentBounds();
     check.ok(Math.abs(hiddenFitBounds.top * navigationView.scale + navigationView.offsetY - 16) < 1,
         "fitting with a hidden toolbar keeps the normal top margin");
+    for (const background of ["rgb(255, 255, 255)", "rgb(30, 30, 30)"]) {
+        for (const width of [760, 320, 220]) {
+            for (const fullscreen of [false, true]) {
+                navigationHost.classList.toggle("fullscreen", fullscreen);
+                navigationHost.style.width = `${width}px`;
+                navigationHost.style.setProperty("--b3-theme-background", background);
+                navigationHost.style.fontSize = width === 220 ? "32px" : "14px";
+                navigationView.setReadOnly(false);
+                navigationHost.focus();
+                navigationView.setInteractionActive(true);
+                await settle();
+                const group = navigationToolbar.querySelector<HTMLElement>(".mindmap-view__toolbar-group");
+                const groupBounds = group.getBoundingClientRect();
+                check.equal(getComputedStyle(group).backgroundColor, background,
+                    "the toolbar masks underlying text and images with the current theme background");
+                check.equal(getComputedStyle(navigationToolbar).backgroundColor, "rgba(0, 0, 0, 0)",
+                    "the unused toolbar area leaves the map visible");
+                for (const control of Array.from(group.children)) {
+                    if ((control as HTMLElement).hidden) {
+                        continue;
+                    }
+                    const rect = control.getBoundingClientRect();
+                    check.ok(rect.left >= groupBounds.left && rect.right <= groupBounds.right + 1 &&
+                        rect.top >= groupBounds.top && rect.bottom <= groupBounds.bottom + 1,
+                    "the opaque group covers every control after wrapping");
+                }
+                const lock = group.querySelector<HTMLButtonElement>("button");
+                lock.disabled = true;
+                check.equal(getComputedStyle(group).opacity, "1", "disabled buttons retain an opaque backdrop");
+                check.equal(getComputedStyle(group).pointerEvents, "auto", "masked gaps cannot activate underlying nodes");
+                lock.disabled = false;
+                check.ok(navigationView.getToolbarBounds().some((rect: DOMRect) =>
+                    rect.left === groupBounds.left && rect.right === groupBounds.right && rect.bottom === groupBounds.bottom),
+                "fit and node reveal avoid the complete opaque toolbar group");
+            }
+        }
+    }
+    navigationHost.classList.remove("fullscreen");
     navigationView.destroy();
     navigationHost.remove();
 
@@ -1908,14 +1946,15 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const originalHostStyle = host.style.cssText;
     const toolbarZoom = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
     const toolbarPopup = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom-actions");
+    const toolbarGroup = toolbar.querySelector<HTMLElement>(".mindmap-view__toolbar-group");
     for (const width of [96, 180, 260, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
             host.style.fontSize = `${fontSize}px`;
             toolbarZoom.focus();
             const bounds = host.getBoundingClientRect();
-            for (const control of Array.from(toolbar.children) as HTMLElement[]) {
-                if (control.classList.contains("mindmap-view__spacer")) {
+            for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
+                if (control.hidden) {
                     continue;
                 }
                 const rect = control.getBoundingClientRect();
@@ -1923,7 +1962,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                     `toolbar control stays inside the map, width=${width}, fontSize=${fontSize}`);
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
-            const lastButton = toolbar.lastElementChild.getBoundingClientRect();
+            const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
             check.equal(lastButton.top > firstButton.top, width < 360, "narrow toolbars wrap controls");
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
             if (width === 180) {
@@ -3119,6 +3158,32 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const viewport = panHost.querySelector<HTMLElement>(".mindmap-view__viewport");
         const sourceHTML = panModel.list.outerHTML;
         const readingTransform = [panView.scale, panView.offsetX, panView.offsetY];
+        for (const pointerType of ["mouse", "touch"]) {
+            let draws = 0;
+            const draw = panView.draw.bind(panView);
+            panView.draw = () => { draws++; draw(); };
+            const start = [panView.offsetX, panView.offsetY];
+            panView.pointer = {pointerId: 900, pan: true, x: start[0], y: start[1],
+                startX: 100, startY: 100, moved: true};
+            for (let step = 1; step <= 60; step++) {
+                panView.pointerMove({pointerId: 900, pointerType, clientX: 100 + step / 10,
+                    clientY: 100 + step / 10, preventDefault: () => {}});
+            }
+            check.equal(draws, 0, "rapid pan input is coalesced before paint");
+            check.ok(Math.abs(panView.offsetX - start[0] - 6) < 1e-9 &&
+                Math.abs(panView.offsetY - start[1] - 6) < 1e-9);
+            panView.cancelPointer();
+            await settle();
+            check.equal(draws, 1, "release before paint still draws the final position once");
+            const world = panHost.querySelector<HTMLElement>(".mindmap-view__world");
+            const matrix = new DOMMatrix(getComputedStyle(world).transform);
+            check.ok(Math.abs(matrix.e - panView.offsetX) < .001 && Math.abs(matrix.f - panView.offsetY) < .001,
+                "rendered nodes reach the final pointer position");
+            panView.draw = draw;
+        }
+        panView.offsetX = readingTransform[1];
+        panView.offsetY = readingTransform[2];
+        panView.draw();
         check.equal(panView.interactionActive, false);
         check.equal(getComputedStyle(viewport).touchAction, "pan-y");
         const readingWheel = new WheelEvent("wheel", {deltaY: 120, bubbles: true, cancelable: true});
@@ -3305,6 +3370,45 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(panView.editingId, panModel.root.id);
         check.equal(panView.interactionActive, true);
         panView.setEditing(undefined);
+        panView.setInteractionActive(false);
+        await settle();
+        const tapNode = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
+        const tapBounds = tapNode.getBoundingClientRect();
+        for (const point of [fingerAt(1), {id: 1, x: tapBounds.left + tapBounds.width / 2,
+            y: tapBounds.top + tapBounds.height / 2}]) {
+            const beforeTapEdit = edits.length;
+            let readingOnContact = false;
+            viewport.addEventListener("pointerdown", () => readingOnContact = !panView.interactionActive, {once: true});
+            await nativeTouch([
+                {type: "touchStart", touchPoints: [point]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+            check.equal(readingOnContact, true, "touch contact leaves document scrolling available");
+            check.equal(panView.interactionActive, true, "native single tap activates blank canvas and nodes");
+            check.equal(getComputedStyle(viewport).touchAction, "none");
+            check.equal(edits.length, beforeTapEdit, "single tap does not start node editing");
+            check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform);
+            panView.setInteractionActive(false);
+        }
+        panView.setReadOnly(true);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(panView.interactionActive, true, "single tap also activates a read-only canvas");
+        panView.setReadOnly(false);
+        panView.setLocked(true);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(panView.interactionActive, false, "single tap preserves the saved view lock");
+        panView.setLocked(false);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [fingerAt(1)]},
+            {type: "touchCancel", touchPoints: []},
+        ]);
+        check.equal(panView.interactionActive, false, "cancelled touches do not activate the canvas");
         check.equal(panModel.list.outerHTML, sourceHTML, "interaction activation and panning do not change saved data");
         panView.destroy();
         scrollHost.remove();
@@ -4739,7 +4843,15 @@ app.whenReady().then(async () => {
     ipcMain.handle("mindmap-view-native-input", async (_event, events) => {
         win.webContents.focus();
         for (const event of events) {
-            win.webContents.sendInputEvent(event);
+            if (event.type === "mouseWheel") {
+                // 隐藏窗口通过调试协议注入滚轮，直接交给渲染器的输入路由。
+                await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                    type: "mouseWheel", x: event.x, y: event.y, buttons: 0,
+                    deltaX: -event.deltaX, deltaY: -event.deltaY,
+                });
+            } else {
+                win.webContents.sendInputEvent(event);
+            }
             await new Promise(resolve => setTimeout(resolve, 20));
         }
     });

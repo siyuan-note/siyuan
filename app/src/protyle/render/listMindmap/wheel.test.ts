@@ -9,7 +9,7 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const names = ["wheel", "boundedPan", "contentRectangles", "contentBounds", "pointerMove"];
+const names = ["wheel", "boundedPan", "contentRectangles", "contentBounds", "pointerMove", "requestDraw"];
 const methods = view.members.filter(item => item.name && names.includes(item.name.getText(source)));
 assert.equal(methods.length, names.length);
 const compiled = transpileModule(`class View {
@@ -18,7 +18,9 @@ const compiled = transpileModule(`class View {
 globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const setup = () => {
-    const context: any = {clampMindmapPanOffset, clampMindmapPanPosition, WheelEvent: {DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2}};
+    const frames: (() => void)[] = [];
+    const context: any = {clampMindmapPanOffset, clampMindmapPanPosition, WheelEvent: {DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2},
+        requestAnimationFrame: (action: () => void) => frames.push(action)};
     runInNewContext(compiled, context);
     const target = new context.View();
     let draws = 0;
@@ -33,7 +35,7 @@ const setup = () => {
         summaryPositions: new Map(), relationElements: new Map(), relationRoutes: new Map(),
         draw: () => draws++, zoomAt: (...args: number[]) => zooms.push(args),
     });
-    return {target, draws: () => draws, zooms};
+    return {target, draws: () => draws, zooms, frames};
 };
 
 const wheel = (overrides: Record<string, unknown> = {}) => {
@@ -177,6 +179,33 @@ test("active mobile touch panning retains visible content without scrolling the 
     target.pointerMove({...event, clientY: -1920});
     assert.equal(target.offsetY, -116);
     assert.equal(document.scrollTop, 0, "active canvas retains touch ownership at the pan boundary");
+});
+
+test("rapid mouse and touch pans draw the latest position once per frame, including after an idle frame", () => {
+    for (const pointerType of ["mouse", "touch"]) {
+        const {target, draws, frames} = setup();
+        target.viewport.classList = {add: () => {}};
+        target.setHoveredLine = () => {};
+        target.pointer = {pointerId: 1, pan: true, x: 0, y: 0, startX: 100, startY: 100, moved: true};
+        for (let gesture = 0; gesture < 2; gesture++) {
+            const startX = target.pointer.startX;
+            const startY = target.pointer.startY;
+            for (let step = 1; step <= 60; step++) {
+                target.pointerMove({pointerId: 1, pointerType, clientX: startX + step / 10,
+                    clientY: startY + step / 10, preventDefault: () => {}});
+            }
+            assert.equal(draws(), gesture, "input events do not repeatedly redraw the map");
+            assert.equal(frames.length, 1);
+            assert.equal(target.offsetX, (gesture + 1) * 6);
+            assert.equal(target.offsetY, (gesture + 1) * 6);
+            frames.shift()();
+            assert.equal(draws(), gesture + 1);
+            assert.equal(target.drawFrame, 0);
+        }
+        target.destroyed = true;
+        target.requestDraw();
+        assert.equal(frames.length, 0, "destroyed views do not schedule rendering");
+    }
 });
 
 test("fullscreen, horizontal, diagonal and Shift wheel keep canvas panning", () => {

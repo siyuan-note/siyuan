@@ -37,3 +37,14 @@ func TestMergeConfSectionJSONFieldCaseDeterministic(t *testing.T) {
 		}
 	}
 }
+
+func TestMergeConfJSONKeepsExactKeys(t *testing.T) {
+	// 没有结构体类型的通用合并只按精确键名匹配，由调用方决定是否需要大小写兼容。
+	merged, err := MergeConfJSON([]byte(`{"openFile":"F1"}`), []byte(`{"openfile":"F2"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(merged) != `{"openFile":"F1","openfile":"F2"}` {
+		t.Fatalf("untyped merge conflated independently named keys: %s", merged)
+	}
+}

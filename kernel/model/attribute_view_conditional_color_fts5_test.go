@@ -37,6 +37,7 @@ func TestAttributeViewConditionalColorsUndoAndEncryptedReplay(t *testing.T) {
 				boxID = ast.NewNodeID()
 				markRuntimeEncryptedBox(boxID)
 				setDEKForTest(boxID, bytes.Repeat([]byte{0x63}, 32))
+				setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
 				av.SetAVBoxID(original.ID, boxID)
 				t.Cleanup(func() {
 					av.SetAVBoxID(original.ID, "")

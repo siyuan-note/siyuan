@@ -128,6 +128,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureDocumentPathIndexes(db, true); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
 			}
+			if err := ensureAuxiliaryRootIndexes(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create auxiliary root indexes failed: %s", err)
+			}
 			if err := ensureTagSpansIndex(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create tag spans index failed: %s", err)
 			}
@@ -318,6 +321,9 @@ func initDBTables() {
 	}
 	if err = ensureDocumentPathIndexes(db, true); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
+	}
+	if err = ensureAuxiliaryRootIndexes(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create auxiliary root indexes failed: %s", err)
 	}
 }
 
@@ -2161,6 +2167,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureDocumentPathIndexes(boxDB, false); err != nil {
+		return
+	}
+	if err = ensureAuxiliaryRootIndexes(boxDB); err != nil {
 		return
 	}
 	if err = ensureTagSpansIndex(boxDB); err != nil {

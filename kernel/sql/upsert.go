@@ -323,7 +323,7 @@ func insertSpans0(tx *sql.Tx, bulk []*Span) (err error) {
 	return
 }
 
-func insertBlockRefs(tx *sql.Tx, refs []*Ref) (err error) {
+func validBlockRefs(refs []*Ref) []*Ref {
 	validRefs := refs[:0]
 	for _, ref := range refs {
 		if nil == ref || "" == strings.TrimSpace(ref.DefBlockID) || "" == strings.TrimSpace(ref.BlockID) ||
@@ -332,7 +332,11 @@ func insertBlockRefs(tx *sql.Tx, refs []*Ref) (err error) {
 		}
 		validRefs = append(validRefs, ref)
 	}
-	refs = validRefs
+	return validRefs
+}
+
+func insertBlockRefs(tx *sql.Tx, refs []*Ref) (err error) {
+	refs = validBlockRefs(refs)
 	if 1 > len(refs) {
 		return
 	}
@@ -446,8 +450,13 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 	if isIndexIgnored(tree) {
 		return
 	}
+	timing := util.BeginPerformance("index.update")
+	defer timing.Finish()
+	timing.Stage("project")
 	oldBlockHashes := queryBlockHashes(tx, tree.ID)
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
+	timing.Count("blocks_total", int64(len(blocks)))
+	timing.Stage("compare_blocks")
 	newBlockHashes := map[string]string{}
 	for _, block := range blocks {
 		newBlockHashes[block.ID] = block.Hash
@@ -470,6 +479,7 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 		}
 	}
 	blocks = tmp
+	timing.Count("blocks_changed", int64(len(blocks)))
 	for _, b := range blocks {
 		toRemoves = append(toRemoves, b.ID)
 	}
@@ -478,24 +488,39 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 		return
 	}
 
-	if err = deleteSpansByRootID(tx, tree.ID); err != nil {
-		return
-	}
-	if err = deleteAssetsByRootID(tx, tree.ID); err != nil {
-		return
-	}
-	if err = deleteAttributesByRootID(tx, tree.ID); err != nil {
-		return
-	}
-	if err = deleteRefsByPathTx(tx, tree.Box, tree.Path); err != nil {
-		return
-	}
-	if err = deleteFileAnnotationRefsByPathTx(tx, tree.Box, tree.Path); err != nil {
-		return
-	}
-
+	timing.Stage("compare_auxiliary")
 	refs, fileAnnotationRefs := refsFromTree(tree)
-	if err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs); err != nil {
+	refs = validBlockRefs(refs)
+	spanChange, err := diffAuxiliaryIndex(tx, spanIndex, tree.ID, tree.Box, tree.Path, spans, spanIndexKey)
+	if err != nil {
+		return
+	}
+	assetChange, err := diffAuxiliaryIndex(tx, assetIndex, tree.ID, tree.Box, tree.Path, assets, assetIndexKey)
+	if err != nil {
+		return
+	}
+	attributeChange, err := diffAuxiliaryIndex(tx, attributeIndex, tree.ID, tree.Box, tree.Path, attributes, attributeIndexKey)
+	if err != nil {
+		return
+	}
+	refChange, err := diffAuxiliaryIndex(tx, refIndex, tree.ID, tree.Box, tree.Path, refs, refIndexKey)
+	if err != nil {
+		return
+	}
+	fileChange, err := diffAuxiliaryIndex(tx, fileAnnotationIndex, tree.ID, tree.Box, tree.Path, fileAnnotationRefs, fileAnnotationIndexKey)
+	if err != nil {
+		return
+	}
+	timing.Count("auxiliary_deleted", int64(len(spanChange.remove)+len(assetChange.remove)+len(attributeChange.remove)+len(refChange.remove)+len(fileChange.remove)))
+	timing.Count("auxiliary_inserted", int64(len(spanChange.insert)+len(assetChange.insert)+len(attributeChange.insert)+len(refChange.insert)+len(fileChange.insert)))
+	timing.Stage("write")
+	for _, remove := range []func(*sql.Tx) error{spanChange.delete, assetChange.delete, attributeChange.delete, refChange.delete, fileChange.delete} {
+		if err = remove(tx); err != nil {
+			return
+		}
+	}
+	if err = insertTreeRows(tx, context, blocks, spanChange.insert, assetChange.insert, attributeChange.insert,
+		refChange.insert, fileChange.insert); err != nil {
 		return
 	}
 	return err
@@ -515,6 +540,18 @@ func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]any,
 	if isIndexIgnored(tree) {
 		return
 	}
+	if 0 < len(spans) {
+		// 完整插入时移除已有文档标签，避免重复添加。
+		if err = deleteSpansByRootID(tx, tree.Root.ID); err != nil {
+			return
+		}
+	}
+	return insertTreeRows(tx, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
+}
+
+func insertTreeRows(tx *sql.Tx, context map[string]any,
+	blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute,
+	refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) (err error) {
 
 	if err = insertBlocks(tx, blocks, context); err != nil {
 		return
@@ -528,10 +565,6 @@ func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]any,
 	}
 
 	if 0 < len(spans) {
-		// 移除文档标签，否则会重复添加 https://github.com/siyuan-note/siyuan/issues/3723
-		if err = deleteSpansByRootID(tx, tree.Root.ID); err != nil {
-			return
-		}
 		if err = insertSpans(tx, spans); err != nil {
 			return
 		}

@@ -559,10 +559,14 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	renderContext := sql.NewAttributeViewRenderContext()
 	renderContext.ReadOnly = !writable
 	defer renderContext.PushTemplateErrors()
-	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
+	templatePlan := planAttributeViewTemplates(attrView, view, query, ignoreRows)
+	deferTemplateValues := templatePlan != nil
 	timing.Stage("fields")
 	if deferTemplateValues {
 		viewable = sql.RenderViewWithDeferredTemplatesContext(attrView, view, query, ignoreRows, renderContext)
+		timing.Count("required_templates", int64(len(templatePlan.required)))
+		timing.Count("deferred_templates", int64(len(templatePlan.deferred)))
+		sql.FillAttributeViewTemplateValuesForKeysWithContext(attrView, view, viewable.(av.Collection), templatePlan.required, renderContext)
 	} else {
 		viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
 	}
@@ -586,7 +590,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 		return
 	}
 	if deferTemplateValues {
-		sql.FillAttributeViewTemplateValuesWithContext(attrView, view, viewable.(av.Collection), renderContext)
+		sql.FillAttributeViewTemplateValuesForKeysWithContext(attrView, view, viewable.(av.Collection), templatePlan.deferred, renderContext)
 	}
 	if nil != target && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
 		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)

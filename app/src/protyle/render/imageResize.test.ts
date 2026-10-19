@@ -85,6 +85,18 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
                 else container.removeAttribute("style");
             });
     };
+    const assertCompactCorner = (image: HTMLImageElement) => {
+        const corner = image.parentElement.querySelector<HTMLElement>('[data-resize-axis="both"]');
+        const imageRect = image.getBoundingClientRect();
+        const handleRect = corner.getBoundingClientRect();
+        const dot = getComputedStyle(corner, "::after");
+        const transform = new DOMMatrix(dot.transform);
+        const scale = handleRect.width / corner.offsetWidth;
+        const x = handleRect.left + (parseFloat(dot.left) + parseFloat(dot.width) / 2 + transform.e) * scale;
+        const y = handleRect.top + (parseFloat(dot.top) + parseFloat(dot.height) / 2 + transform.f) * scale;
+        check.ok(Math.abs(x - imageRect.right) <= 1, `compact dot x=${x}, image right=${imageRect.right}`);
+        check.ok(Math.abs(y - imageRect.bottom) <= 1, `compact dot y=${y}, image bottom=${imageRect.bottom}`);
+    };
     for (const legacy of [false, true]) {
         for (const axis of ["width", "height", "both"]) {
             const image = await create(legacy);
@@ -213,6 +225,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         }
         const corner = container.querySelector<HTMLElement>('[data-resize-axis="both"]');
         check.equal(getComputedStyle(corner, "::after").width, "5px");
+        assertCompactCorner(compact);
         const rect = corner.getBoundingClientRect();
         check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), corner,
             "the compact corner retains its pointer and touch target");
@@ -227,6 +240,40 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         check.notEqual(getComputedStyle(container.querySelector(".protyle-icons")).display, "none",
             "enlarging restores overlay menus");
         check.equal(getComputedStyle(corner, "::after").width, "16px");
+    }
+    for (const alt of ["", "missing image"]) {
+        root.innerHTML = lute.Md2BlockDOM(`![${alt}](assets/missing.png)`);
+        const broken = root.querySelector<HTMLImageElement>("img");
+        broken.loading = "eager";
+        broken.src = "data:image/png;base64,broken";
+        await broken.decode().catch(() => {});
+        await settle();
+        const brokenFrame = broken.parentElement.querySelector<HTMLElement>(".protyle-image-resize");
+        const assertFrame = () => {
+            const imageRect = broken.getBoundingClientRect();
+            const frameRect = brokenFrame.getBoundingClientRect();
+            check.ok(imageRect.width > 0 && imageRect.height > 0, "the browser displays a broken image placeholder");
+            for (const edge of ["left", "top", "right", "bottom"] as const) {
+                check.ok(Math.abs(frameRect[edge] - imageRect[edge]) <= 1,
+                    `broken image ${JSON.stringify(alt)} ${edge}: frame=${frameRect[edge]}, image=${imageRect[edge]}, client=${broken.clientWidth}x${broken.clientHeight}`);
+            }
+            if (broken.parentElement.classList.contains("protyle-image-container--compact")) {
+                assertCompactCorner(broken);
+            }
+        };
+        assertFrame();
+        root.style.zoom = "1.5";
+        root.style.fontSize = "48px";
+        root.dir = "rtl";
+        await settle();
+        assertFrame();
+        root.style.zoom = "";
+        root.style.fontSize = "";
+        root.dir = "";
+        broken.src = url;
+        await broken.decode();
+        await settle();
+        assertFrame();
     }
     const centered = await create();
     root.firstElementChild.setAttribute("style", "text-align: center");

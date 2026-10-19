@@ -682,6 +682,12 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         .protyle-block-resize[data-resize-axis="both"]::after {
           width: 5px;
           height: 5px;
+          // 鼠标与触屏手柄都向图片内部延伸 8px，将圆点中心固定在图片角上。
+          left: 8px;
+          top: 8px;
+          right: auto;
+          bottom: auto;
+          transform: translate(-50%, -50%);
           border: 0;
           border-radius: 50%;
           background-color: currentColor;

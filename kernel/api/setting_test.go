@@ -81,6 +81,65 @@ func TestSetEditorNullRestoresDefault(t *testing.T) {
 	}
 }
 
+func TestAPIContractSettingEditorLegacyFont(t *testing.T) {
+	for _, route := range []struct {
+		name    string
+		handler gin.HandlerFunc
+	}{{"setEditor", setEditor}, {"patch", patchSetting}} {
+		for _, test := range []struct {
+			name    string
+			body    string
+			family  string
+			weight  int
+			count   int
+			display string
+		}{
+			{"change font", `{"fontFamily":"Verdana","fontWeight":600}`, "Verdana", 600, 1, ""},
+			{"change weight", `{"fontWeight":600}`, "Arial", 600, 1, ""},
+			{"case-insensitive fields", `{"FontFamily":"Verdana","FontWeight":600}`, "Verdana", 600, 1, ""},
+			{"unchanged primary keeps fallbacks", `{"fontFamily":"Arial","fontWeight":400}`, "Arial", 400, 2, "Arial Regular"},
+			{"unrelated field keeps fallbacks", `{"fontSize":18}`, "Arial", 400, 2, "Arial Regular"},
+			{"explicit list wins", `{"fontFamily":"Verdana","fontWeight":600,"fontFamilies":[{"family":"Georgia","weight":500}]}`, "Georgia", 500, 1, ""},
+			{"case-insensitive list wins", `{"fontFamily":"Verdana","FontFamilies":[{"family":"Georgia","weight":500}]}`, "Georgia", 500, 1, ""},
+			{"null legacy font resets", `{"fontFamily":null}`, "", 400, 0, ""},
+			{"explicit legacy display", `{"fontFamily":"Verdana","fontFamilyDisplay":"Verdana Regular"}`, "Verdana", 400, 1, "Verdana Regular"},
+		} {
+			t.Run(route.name+"/"+test.name, func(t *testing.T) {
+				previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
+				util.ReadOnly = true
+				t.Cleanup(func() {
+					model.Conf, util.ReadOnly = previousConf, previousReadOnly
+					util.MarkdownSettings.Store(previousMarkdown)
+				})
+				model.Conf = model.NewAppConf()
+				editor := conf.NewEditor()
+				editor.FontFamilies = []*conf.EditorFont{{Family: "Arial", Weight: 400, DisplayName: "Arial Regular"}, {Family: "serif", Weight: 400}}
+				editor.CodeFontFamilies = []*conf.EditorFont{{Family: "monospace", Weight: 400}}
+				editor.NormalizeFontFamilies()
+				model.Conf.Editor.Store(editor)
+				body := test.body
+				if test.name == "change weight" && route.name == "setEditor" {
+					body = `{"fontWeight":600.0}`
+				}
+				if route.name == "patch" {
+					body = `{"editor":` + body + `}`
+				}
+				code, message, _ := settingContractRequest(t, route.name, route.handler, body)
+				editor = model.Conf.Editor.Load()
+				if code != 0 || editor.FontFamily != test.family || editor.FontWeight != test.weight || len(editor.FontFamilies) != test.count {
+					t.Fatalf("font write failed: %s (%+v)", message, editor)
+				}
+				if editor.FontFamilyDisplay != test.display {
+					t.Fatalf("font display name did not follow the font: %q", editor.FontFamilyDisplay)
+				}
+				if len(editor.CodeFontFamilies) != 1 || editor.CodeFontFamilies[0].Family != "monospace" {
+					t.Fatal("legacy font write changed the code font list")
+				}
+			})
+		}
+	}
+}
+
 func TestSetBazaarPetalDisabledSerializesTransitions(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	previousConf := model.Conf

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -91,25 +92,48 @@ func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
 	if err := json.Unmarshal(patch, &ai); err != nil {
 		return nil, err
 	}
+	var input struct {
+		Decision json.RawMessage `json:"decision"`
+	}
+	if err := json.Unmarshal(patch, &input); err != nil {
+		return nil, err
+	}
 	var decision map[string]json.RawMessage
-	if json.Unmarshal(ai["decision"], &decision) != nil || decision == nil {
+	if json.Unmarshal(input.Decision, &decision) != nil || decision == nil {
 		return patch, nil
 	}
-	if _, modern := decision["profiles"]; modern {
+	var legacy struct {
+		Profiles json.RawMessage `json:"profiles"`
+		Endpoint json.RawMessage `json:"endpoint"`
+		APIKey   json.RawMessage `json:"apiKey"`
+		Name     json.RawMessage `json:"name"`
+		Timeout  json.RawMessage `json:"timeout"`
+	}
+	if err := json.Unmarshal(input.Decision, &legacy); err != nil {
+		return nil, err
+	}
+	if len(legacy.Profiles) > 0 {
 		return patch, nil
 	}
 	profile := map[string]json.RawMessage{}
-	for _, field := range []string{"endpoint", "apiKey", "name", "timeout"} {
-		if value, exists := decision[field]; exists {
+	for _, field := range []struct {
+		name  string
+		value json.RawMessage
+	}{{"endpoint", legacy.Endpoint}, {"apiKey", legacy.APIKey}, {"name", legacy.Name}, {"timeout", legacy.Timeout}} {
+		if value := field.value; len(value) > 0 {
 			// 旧设置字段允许 null，保持清空密钥和恢复默认参数的既有语义。
 			if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
 				value = json.RawMessage(`""`)
-				if field == "timeout" {
+				if field.name == "timeout" {
 					value = json.RawMessage(`0`)
 				}
 			}
-			profile[field] = value
-			delete(decision, field)
+			profile[field.name] = value
+			for key := range decision {
+				if strings.EqualFold(key, field.name) {
+					delete(decision, key)
+				}
+			}
 		}
 	}
 	if len(profile) == 0 {
@@ -120,6 +144,11 @@ func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
 		return nil, err
 	}
 	decision["profiles"] = profiles
+	for key := range ai {
+		if strings.EqualFold(key, "decision") {
+			delete(ai, key)
+		}
+	}
 	ai["decision"], err = json.Marshal(decision)
 	if err != nil {
 		return nil, err
@@ -127,11 +156,71 @@ func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
 	return json.Marshal(ai)
 }
 
+// migrateEditorSettingPatch 在首选字体变化时重新生成字体列表，显式提交的字体列表优先。
+func migrateEditorSettingPatch(patch []byte) ([]byte, error) {
+	var legacy struct {
+		FontFamilies      json.RawMessage `json:"fontFamilies"`
+		FontFamily        json.RawMessage `json:"fontFamily"`
+		FontWeight        json.RawMessage `json:"fontWeight"`
+		FontFamilyDisplay json.RawMessage `json:"fontFamilyDisplay"`
+	}
+	if err := json.Unmarshal(patch, &legacy); err != nil {
+		return nil, err
+	}
+	if len(legacy.FontFamilies) > 0 || len(legacy.FontFamily) == 0 && len(legacy.FontWeight) == 0 || model.Conf == nil {
+		return patch, nil
+	}
+	current := model.Conf.Editor.Load()
+	if current == nil {
+		return patch, nil
+	}
+	family, weight := current.FontFamily, float64(current.FontWeight)
+	if len(legacy.FontFamily) > 0 {
+		family = ""
+		if err := json.Unmarshal(legacy.FontFamily, &family); err != nil {
+			return patch, nil
+		}
+	}
+	if len(legacy.FontWeight) > 0 {
+		weight = 0
+		if err := json.Unmarshal(legacy.FontWeight, &weight); err != nil {
+			return patch, nil
+		}
+	}
+	if family == current.FontFamily && weight == float64(current.FontWeight) {
+		return patch, nil
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(patch, &fields); err != nil {
+		return nil, err
+	}
+	fields["fontFamilies"] = json.RawMessage(`null`)
+	if len(legacy.FontFamilyDisplay) == 0 {
+		fields["fontFamilyDisplay"] = json.RawMessage(`null`)
+	}
+	return json.Marshal(fields)
+}
+
+// mergeSettingPatch 对设置写入统一执行输入迁移，再合并当前配置段。
+func mergeSettingPatch(namespace string, patch []byte) ([]byte, error) {
+	var err error
+	switch namespace {
+	case "ai":
+		patch, err = migrateDecisionSettingPatch(patch)
+	case "editor":
+		patch, err = migrateEditorSettingPatch(patch)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return model.ConfSectionPatchJSON(namespace, patch)
+}
+
 // applySettingPatch 先把补丁合并进当前配置段再交给对应接口的处理函数，命名空间取自契约声明。
 func applySettingPatch[Request, Data any](c *gin.Context, patch []byte,
 	endpoint apicontract.Endpoint[Request, Data], apply func(*gin.Context, Request) apicontract.Response[Data]) apicontract.Response[*apicontract.SettingPatchData] {
 	namespace := endpoint.Definition().Setting.Namespace
-	merged, err := model.ConfSectionPatchJSON(namespace, patch)
+	merged, err := mergeSettingPatch(namespace, patch)
 	if err != nil {
 		return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 	}
@@ -182,11 +271,6 @@ var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context
 	case "ai":
 		if util.IsDisabledFeature("ai") {
 			return apicontract.Failure[*apicontract.SettingPatchData](-1, util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable"))
-		}
-		var err error
-		patch, err = migrateDecisionSettingPatch(patch)
-		if err != nil {
-			return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 		}
 		response = applySettingPatch(c, patch, apicontract.SetAI, applyAISetting)
 	case "ocr":

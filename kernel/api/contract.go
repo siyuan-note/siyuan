@@ -168,7 +168,7 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 
 // mergeSettingBody 把请求体合并进当前配置段；合并失败时保留原始请求体，沿用契约的解码错误。
 func mergeSettingBody(namespace string, body []byte) []byte {
-	if merged, err := model.ConfSectionPatchJSON(namespace, body); err == nil {
+	if merged, err := mergeSettingPatch(namespace, body); err == nil {
 		return merged
 	}
 	return body

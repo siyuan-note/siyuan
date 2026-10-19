@@ -8,8 +8,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// TestAPIContractSettingAICapabilityOverrideClear 验证能力开关的恢复协议：设置补丁不会删除省略的字典键，
-// 前端以空决策提交被删除的覆盖项，由内核规范化移除。
+// TestAPIContractSettingAICapabilityOverrideClear 验证能力开关的提交协议：前端只提交改动的条目，
+// 补丁合并保留其他覆盖项，恢复默认时写入的空决策由规范化清除。
 func TestAPIContractSettingAICapabilityOverrideClear(t *testing.T) {
 	previousConf, previousReadOnly, previousConfDir := model.Conf, util.ReadOnly, util.ConfDir
 	t.Cleanup(func() { model.Conf, util.ReadOnly, util.ConfDir = previousConf, previousReadOnly, previousConfDir })
@@ -17,7 +17,7 @@ func TestAPIContractSettingAICapabilityOverrideClear(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	model.Conf.AI.Store(conf.NewAI())
 
-	const id = "native/backend/asset"
+	const id, otherID = "native/backend/asset", "native/backend/block"
 	patch := func(body string) {
 		t.Helper()
 		code, message, _ := settingContractRequest(t, "patch", patchSetting, body)
@@ -27,20 +27,21 @@ func TestAPIContractSettingAICapabilityOverrideClear(t *testing.T) {
 	}
 	policy := func() *conf.CapabilityPolicy { return model.Conf.AI.Load().Agent.CapabilityPolicy }
 
-	patch(`{"ai":{"agent":{"capabilityPolicy":{"default":"allow","overrides":{"` + id + `":"deny"}}}}}`)
-	if policy().Allows(id) {
-		t.Fatal("capability was not disabled")
+	patch(`{"ai":{"agent":{"capabilityPolicy":{"overrides":{"` + id + `":"deny"}}}}}`)
+	patch(`{"ai":{"agent":{"capabilityPolicy":{"overrides":{"` + otherID + `":"deny"}}}}}`)
+	if policy().Allows(id) || policy().Allows(otherID) {
+		t.Fatal("partial patches must disable both capabilities and preserve each other")
 	}
 
-	// 补丁按对象递归合并，省略该键不会移除已有覆盖项，因此不能靠省略条目恢复能力。
-	patch(`{"ai":{"agent":{"capabilityPolicy":{"default":"allow","overrides":{}}}}}`)
-	if policy().Allows(id) {
-		t.Fatal("omitted overrides must not be removed by the patch merge")
-	}
-
-	patch(`{"ai":{"agent":{"capabilityPolicy":{"default":"allow","overrides":{"` + id + `":""}}}}}`)
+	patch(`{"ai":{"agent":{"capabilityPolicy":{"overrides":{"` + id + `":""}}}}}`)
 	if !policy().Allows(id) {
 		t.Fatal("empty decision did not restore the capability")
+	}
+	if policy().Allows(otherID) {
+		t.Fatal("restoring one capability must not clear another override")
+	}
+	if policy().Default != "allow" {
+		t.Fatalf("partial patch must keep the policy default: %s", policy().Default)
 	}
 	if _, exists := policy().Overrides[id]; exists {
 		t.Fatal("cleared override must be removed from the stored policy")

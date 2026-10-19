@@ -102,8 +102,22 @@
   &.fullscreen &__toolbar .block__icon,
   &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
-  &__toolbar:focus-within .block__icon {
+  &__toolbar:focus-within .block__icon,
+  &.fullscreen &__toolbar-group,
+  &--active &__toolbar-group,
+  &:hover &__toolbar-group,
+  &__toolbar:focus-within &__toolbar-group {
     pointer-events: auto;
+  }
+
+  &__toolbar-group {
+    @include protyle-toolbar-surface($shadow: none);
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+    gap: 8px;
+    padding: 4px;
   }
 
   &__spacer {

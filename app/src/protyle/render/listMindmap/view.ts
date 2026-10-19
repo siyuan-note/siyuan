@@ -530,12 +530,13 @@ export class ListMindmapView {
     }
 
     private createToolbar() {
+        const controls = createElement("div", "mindmap-view__toolbar-group");
         const add = (id: string, key: string, icon: string, action: () => void) => {
             const button = this.makeButton(key, icon, action);
             this.buttons.set(id, button);
-            this.toolbar.append(button);
+            controls.append(button);
         };
-        this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"));
+        this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
         this.levelSelect = undefined;
         this.options.host.classList.toggle("mindmap-view--locked", this.locked);
         add("lock", this.locked ? "listMindmapUnlock" : "listMindmapLock", this.locked ? "iconLock" : "iconUnlock", () => {
@@ -640,7 +641,7 @@ export class ListMindmapView {
         const reset = this.makeButton("reset", "iconRefresh", () => this.zoomAt(1));
         zoomActions.append(this.zoomSlider, reset);
         zoomControl.append(this.zoomLabel, zoomActions);
-        this.toolbar.append(zoomControl);
+        controls.append(zoomControl);
         add("fit", "listMindmapFit", "iconFocus", () => this.fit());
         add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
     }
@@ -912,7 +913,7 @@ export class ListMindmapView {
             return bounds;
         }
         // 顶部遮挡范围只包含可见控件及展开的缩放面板，不包含左侧空白区域。
-        this.toolbar.querySelectorAll<HTMLElement>(".block__icon, .mindmap-view__zoom, .mindmap-view__zoom-actions")
+        this.toolbar.querySelectorAll<HTMLElement>(".mindmap-view__toolbar-group, .mindmap-view__zoom-actions")
             .forEach(control => {
                 const rect = control.getBoundingClientRect();
                 const style = getComputedStyle(control);

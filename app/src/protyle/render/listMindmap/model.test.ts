@@ -1451,6 +1451,41 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const hiddenFitBounds = navigationView.contentBounds();
     check.ok(Math.abs(hiddenFitBounds.top * navigationView.scale + navigationView.offsetY - 16) < 1,
         "fitting with a hidden toolbar keeps the normal top margin");
+    for (const background of ["rgb(255, 255, 255)", "rgb(30, 30, 30)"]) {
+        for (const width of [760, 320, 220]) {
+            for (const fullscreen of [false, true]) {
+                navigationHost.classList.toggle("fullscreen", fullscreen);
+                navigationHost.style.width = `${width}px`;
+                navigationHost.style.setProperty("--b3-theme-background", background);
+                navigationHost.style.fontSize = width === 220 ? "32px" : "14px";
+                navigationView.setReadOnly(false);
+                navigationHost.focus();
+                navigationView.setInteractionActive(true);
+                await settle();
+                const group = navigationToolbar.querySelector<HTMLElement>(".mindmap-view__toolbar-group");
+                const groupBounds = group.getBoundingClientRect();
+                check.equal(getComputedStyle(group).backgroundColor, background,
+                    "the toolbar masks underlying text and images with the current theme background");
+                check.equal(getComputedStyle(navigationToolbar).backgroundColor, "rgba(0, 0, 0, 0)",
+                    "the unused toolbar area leaves the map visible");
+                for (const control of Array.from(group.children)) {
+                    const rect = control.getBoundingClientRect();
+                    check.ok(rect.left >= groupBounds.left && rect.right <= groupBounds.right + 1 &&
+                        rect.top >= groupBounds.top && rect.bottom <= groupBounds.bottom + 1,
+                    "the opaque group covers every control after wrapping");
+                }
+                const lock = group.querySelector<HTMLButtonElement>("button");
+                lock.disabled = true;
+                check.equal(getComputedStyle(group).opacity, "1", "disabled buttons retain an opaque backdrop");
+                check.equal(getComputedStyle(group).pointerEvents, "auto", "masked gaps cannot activate underlying nodes");
+                lock.disabled = false;
+                check.ok(navigationView.getToolbarBounds().some((rect: DOMRect) =>
+                    rect.left === groupBounds.left && rect.right === groupBounds.right && rect.bottom === groupBounds.bottom),
+                "fit and node reveal avoid the complete opaque toolbar group");
+            }
+        }
+    }
+    navigationHost.classList.remove("fullscreen");
     navigationView.destroy();
     navigationHost.remove();
 
@@ -1908,22 +1943,20 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const originalHostStyle = host.style.cssText;
     const toolbarZoom = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
     const toolbarPopup = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom-actions");
+    const toolbarGroup = toolbar.querySelector<HTMLElement>(".mindmap-view__toolbar-group");
     for (const width of [96, 180, 260, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
             host.style.fontSize = `${fontSize}px`;
             toolbarZoom.focus();
             const bounds = host.getBoundingClientRect();
-            for (const control of Array.from(toolbar.children) as HTMLElement[]) {
-                if (control.classList.contains("mindmap-view__spacer")) {
-                    continue;
-                }
+            for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
                 const rect = control.getBoundingClientRect();
                 check.ok(rect.left >= bounds.left && rect.right <= bounds.right,
                     `toolbar control stays inside the map, width=${width}, fontSize=${fontSize}`);
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
-            const lastButton = toolbar.lastElementChild.getBoundingClientRect();
+            const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
             check.equal(lastButton.top > firstButton.top, width < 360, "narrow toolbars wrap controls");
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
             if (width === 180) {

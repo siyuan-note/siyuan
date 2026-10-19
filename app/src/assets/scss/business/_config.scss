@@ -23,11 +23,21 @@
 .workspace-storage {
   &__header {
     flex-wrap: wrap;
+    // 未查看时头部下方没有内容，间距由各内容元素自行提供
+    padding-bottom: 0;
   }
 
   &__time {
     flex: 1 0 100%;
     text-align: right;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__status:empty {
+    margin-top: 0;
   }
 
   &__content {
@@ -35,6 +45,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
+    margin-top: 16px;
     line-height: 1.5;
   }
 
@@ -58,6 +69,7 @@
 
   &__placeholder {
     position: relative;
+    margin-top: 16px;
   }
 
   &__total {

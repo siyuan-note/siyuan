@@ -25,13 +25,18 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/gorilla/websocket"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 )
 
-// LogWebSocketError 记录发送缓冲区满导致的消息丢弃，其他连接错误保留在调试日志中。
+// LogWebSocketError 忽略正常关闭，记录消息丢弃警告，其他连接错误保留在调试日志中。
 func LogWebSocketError(session *melody.Session, channel string, err error) {
+	var closeErr *websocket.CloseError
+	if errors.As(err, &closeErr) && (closeErr.Code == websocket.CloseNormalClosure || closeErr.Code == websocket.CloseGoingAway) {
+		return
+	}
 	app, _ := session.Get("app")
 	id, _ := session.Get("id")
 	typ, _ := session.Get("type")

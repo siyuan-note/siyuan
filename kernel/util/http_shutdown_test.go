@@ -3,13 +3,34 @@ package util
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/siyuan-note/logging"
+	"github.com/soheilhy/cmux"
 )
 
 func TestShutdownHTTPServersWaitsForResponses(t *testing.T) {
+	testShutdownHTTPServersWaitsForResponses(t, false)
+}
+
+func TestShutdownHTTPServersWaitsForMultiplexedResponses(t *testing.T) {
+	testShutdownHTTPServersWaitsForResponses(t, true)
+}
+
+func testShutdownHTTPServersWaitsForResponses(t *testing.T, multiplexed bool) {
+	t.Helper()
+	originalPath := logging.LogPath
+	t.Cleanup(func() { logging.SetLogPath(originalPath) })
+	logPath := filepath.Join(t.TempDir(), "shutdown.log")
+	logging.SetLogPath(logPath)
+
 	release := make(chan struct{})
 	started := make(chan struct{}, 2)
 	shutdownStarted := make(chan struct{}, 2)
@@ -18,10 +39,36 @@ func TestShutdownHTTPServersWaitsForResponses(t *testing.T) {
 		<-release
 		_, _ = io.WriteString(w, "exit completed")
 	})
-	httpServer := httptest.NewServer(handler)
-	httpsServer := httptest.NewTLSServer(handler)
+	httpServer := httptest.NewUnstartedServer(handler)
+	httpsServer := httptest.NewUnstartedServer(handler)
+	if multiplexed {
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := cmux.New(listener)
+		_ = httpServer.Listener.Close()
+		_ = httpsServer.Listener.Close()
+		httpsServer.Listener = m.Match(cmux.TLS())
+		httpServer.Listener = m.Match(cmux.Any())
+		serveDone := make(chan struct{})
+		go func() {
+			_ = m.Serve()
+			close(serveDone)
+		}()
+		t.Cleanup(func() {
+			_ = listener.Close()
+			select {
+			case <-serveDone:
+			case <-time.After(5 * time.Second):
+				t.Error("multiplexer did not stop")
+			}
+		})
+	}
 	t.Cleanup(httpServer.Close)
 	t.Cleanup(httpsServer.Close)
+	httpServer.Start()
+	httpsServer.StartTLS()
 	for _, server := range []*httptest.Server{httpServer, httpsServer} {
 		server.Config.RegisterOnShutdown(func() { shutdownStarted <- struct{}{} })
 	}
@@ -84,6 +131,13 @@ func TestShutdownHTTPServersWaitsForResponses(t *testing.T) {
 	case <-finished:
 	case <-time.After(5 * time.Second):
 		t.Fatal("server shutdown did not finish after exit responses")
+	}
+	data, err := os.ReadFile(logPath)
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "graceful HTTP server shutdown failed") {
+		t.Fatalf("successful shutdown logged as a failure: %s", data)
 	}
 }
 

@@ -1420,6 +1420,25 @@ ${genHintItemHTML(item)}
                 });
                 return;
             } else {
+                if (!range.collapsed && hasClosestBlock(range.endContainer) !== nodeElement && value.startsWith("|")) {
+                    const template = document.createElement("template");
+                    template.innerHTML = protyle.lute.SpinBlockDOM(value);
+                    const table = template.content.firstElementChild;
+                    if (template.content.childElementCount === 1 && table?.getAttribute("data-type") === "NodeTable") {
+                        table.querySelectorAll<HTMLElement>("colgroup col").forEach(item => {
+                            item.style.minWidth = "60px";
+                        });
+                        // 跨块替换使用完整事务，保留所有受影响块的内容与撤销位置。
+                        insertHTML(template.innerHTML, protyle, true, true, false, undefined, undoContext);
+                        const insertedTable = protyle.wysiwyg.element.querySelector(
+                            `[data-node-id="${table.getAttribute("data-node-id")}"]`);
+                        if (insertedTable) {
+                            focusBlock(insertedTable);
+                            this.openNewTableCell(protyle);
+                        }
+                        return;
+                    }
+                }
                 range.deleteContents();
                 if (value !== "![]()") {
                     this.fixImageCursor(range);
@@ -1643,7 +1662,11 @@ ${genHintItemHTML(item)}
                 }
             }
         }
-        // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+        this.openNewTableCell(protyle);
+    }
+
+    // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+    private openNewTableCell(protyle: IProtyle) {
         const selection = getSelection();
         const focus = selection?.focusNode;
         const focusElement = focus instanceof Element ? focus : focus?.parentElement;

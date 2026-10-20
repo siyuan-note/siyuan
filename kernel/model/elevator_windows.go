@@ -73,6 +73,9 @@ func AddMicrosoftDefenderExclusion() (err error) {
 	// 提权工具等待添加命令结束并核验两个路径，只有最终退出码为零才记录完成
 	args := []string{"add-defender-exclusion", syscall.EscapeArg(installPath), syscall.EscapeArg(util.WorkspaceDir)}
 	if err = elevator.Run(elevatorBin, util.WorkingDir, strings.Join(args, " ")); err != nil {
+		if processError, ok := errors.AsType[*elevator.ProcessError](err); ok {
+			logging.LogErrorf("Windows Defender exclusion helper [%s] diagnostics: %s", elevatorBin, processError.Diagnostics)
+		}
 		logging.LogErrorf("add Windows Defender exclusion path [%s, %s] failed: %s", installPath, util.WorkspaceDir, err)
 		return
 	}

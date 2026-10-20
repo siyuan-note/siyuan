@@ -120,7 +120,7 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
             for (const event of [undefined, new MouseEvent("mouseover")]) {
                 for (const interactive of [false, true]) {
                     tooltip.hideTooltip();
-                    const showsBefore = pluginShows;
+                    const showsBefore: number = pluginShows;
                     const message = interactive ? '<a href="#test">Interactive</a>' : "Plain";
                     const context = JSON.stringify({pointerType, tooltipClass, event: !!event, interactive});
                     tooltip.showTooltip(message, more, tooltipClass, event);

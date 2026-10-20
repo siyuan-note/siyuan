@@ -29,7 +29,7 @@ func TestOCRThresholdContract(t *testing.T) {
 	}
 	for _, fields := range []string{`{"detection":null,"box":null,"recognition":null}`, `{"detection":0.3,"box":0.6,"recognition":0}`} {
 		body := `{"provider":"paddleocr","model":"small","auto":false,"thresholds":` + fields + `}`
-		if request, err := SetOCRConfig.Decode(strings.NewReader(body)); err != nil || request.Thresholds == nil {
+		if _, err := SetOCRConfig.Decode(strings.NewReader(body)); err != nil {
 			t.Fatalf("rejected valid thresholds: %s: %v", body, err)
 		}
 	}
@@ -38,11 +38,28 @@ func TestOCRThresholdContract(t *testing.T) {
 func TestOCRAIModelCompatibility(t *testing.T) {
 	for _, field := range []string{"", `,"aiModelId":null`, `,"aiModelId":"vision"`} {
 		request, err := SetOCRConfig.Decode(strings.NewReader(`{"provider":"ai","model":"tiny","auto":false` + field + `}`))
-		if err != nil || field == `,"aiModelId":"vision"` && (request.AIModelID == nil || *request.AIModelID != "vision") {
+		if err != nil || field == `,"aiModelId":"vision"` && request.AIModelID != "vision" {
 			t.Fatalf("valid independent model selection: %+v, %v", request, err)
 		}
 	}
 	if _, err := SetOCRConfig.Decode(strings.NewReader(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":1}`)); err == nil {
 		t.Fatal("accepted numeric model ID")
+	}
+}
+
+func TestOCRTooltipSettingContract(t *testing.T) {
+	for _, key := range []string{"showText", "showEmpty", "showError"} {
+		for _, value := range []string{"true", "false", "null"} {
+			body := `{"provider":"paddleocr","model":"tiny","auto":false,"` + key + `":` + value + `}`
+			if _, err := SetOCRConfig.Decode(strings.NewReader(body)); err != nil {
+				t.Fatalf("rejected tooltip preference %s: %v", body, err)
+			}
+		}
+		for _, value := range []string{`"false"`, "1", "{}"} {
+			body := `{"provider":"paddleocr","model":"tiny","auto":false,"` + key + `":` + value + `}`
+			if _, err := SetOCRConfig.Decode(strings.NewReader(body)); err == nil {
+				t.Fatalf("accepted malformed tooltip preference: %s", body)
+			}
+		}
 	}
 }

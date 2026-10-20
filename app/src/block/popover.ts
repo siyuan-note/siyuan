@@ -15,7 +15,8 @@ import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
 import {getImageTooltip} from "../protyle/render/imageTooltip";
-import {getImageOCRText} from "../asset/imageOCRStatus";
+import {getImageOCRResult} from "../asset/imageOCRStatus";
+import type {ImageOCRTextData} from "../types/api";
 import {
     cancelPendingPopover,
     getPopoverGeneration,
@@ -24,6 +25,7 @@ import {
 } from "./popoverLifecycle";
 import {isBlockPanelTargetAvailable} from "./panelOwnership";
 import {isTouchHoverInput} from "../util/hoverInput";
+import {sanitizeInlineMemoContent} from "../protyle/util/inlineMemo";
 /// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
@@ -194,16 +196,17 @@ export const initBlockPopover = (app: App) => {
                 tooltipAbortController = new AbortController();
                 const capturedController = tooltipAbortController;
                 let size: string;
-                let ocrText: string;
+                let ocrResult: ImageOCRTextData;
                 const updateImageTooltip = () => {
                     if (!capturedController.signal.aborted && image.isConnected &&
                         (image.getAttribute("data-src") || image.getAttribute("src")) === imagePath) {
-                        showTooltip(getImageTooltip(image, size, ocrText), image, undefined, event);
+                        showTooltip(getImageTooltip(image, size, ocrResult?.text, ocrResult?.failed), image, undefined, event);
                     }
                 };
-                if (imagePath.startsWith("assets/")) {
-                    getImageOCRText(imagePath).then(text => {
-                        ocrText = text;
+                const ocr = window.siyuan.config.ocr;
+                if (imagePath.startsWith("assets/") && (ocr?.showText !== false || ocr?.showEmpty || ocr?.showError)) {
+                    getImageOCRResult(imagePath).then(result => {
+                        ocrResult = result;
                         updateImageTooltip();
                     });
                 }
@@ -279,7 +282,7 @@ export const initBlockPopover = (app: App) => {
             }
             let tooltipSpace: number | undefined;
             if (!tip && aElement.getAttribute("data-type")?.includes("inline-memo")) {
-                tip = window.DOMPurify.sanitize(aElement.getAttribute("data-inline-memo-content"));
+                tip = sanitizeInlineMemoContent(aElement.getAttribute("data-inline-memo-content") || "");
                 tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
                 tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
             }

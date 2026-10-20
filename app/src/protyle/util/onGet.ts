@@ -38,12 +38,14 @@ import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
+import {sanitizeInlineMemoContent} from "./inlineMemo";
 import {getSavedTabFocusTarget, hasFocusOffsets} from "./focusRestore";
 import {isAndroid, isIPhone, isPhablet} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {updateBackgroundActions} from "../header/backgroundActions";
 import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
 import {applyPublishFoldStates} from "./viewFold";
 /// #if MOBILE
@@ -283,7 +285,7 @@ const setHTML = (options: {
     doc.querySelectorAll("[data-inline-memo-content]").forEach(item => {
         const content = item.getAttribute("data-inline-memo-content");
         if (content) {
-            item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(content));
+            item.setAttribute("data-inline-memo-content", sanitizeInlineMemoContent(content));
         }
     });
     normalizeHTMLAssetIFrameSources(doc);
@@ -483,14 +485,7 @@ const setHTML = (options: {
         return;
     }
 
-    /// #if MOBILE
-    if (protyle.background) {
-        protyle.background.element.classList.toggle(
-            "protyle-background--mobileshow",
-            !options.action.includes(Constants.CB_GET_ALL)
-        );
-    }
-    /// #endif
+    updateBackgroundActions(protyle);
 
     if (protyle.options.render.breadcrumb) {
         protyle.breadcrumb.toggleExit(!options.action.includes(Constants.CB_GET_ALL));

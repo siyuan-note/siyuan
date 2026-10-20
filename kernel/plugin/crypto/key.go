@@ -16,6 +16,8 @@
 
 package crypto
 
+import "slices"
+
 // KeyType 对应 CryptoKey.type。
 type KeyType string
 
@@ -100,12 +102,7 @@ type KeyData struct {
 }
 
 func containsUsage(usages []KeyUsage, usage KeyUsage) bool {
-	for _, cur := range usages {
-		if cur == usage {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(usages, usage)
 }
 
 // cloneUsages 复制用法列表，避免调用方持有的切片被后续修改影响。
@@ -127,8 +124,4 @@ func filterUsages(usages []KeyUsage, allowed ...KeyUsage) []KeyUsage {
 		}
 	}
 	return ret
-}
-
-func intPtr(value int) *int {
-	return &value
 }

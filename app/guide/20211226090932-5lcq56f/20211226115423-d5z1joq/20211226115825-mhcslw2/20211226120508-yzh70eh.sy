@@ -6,7 +6,7 @@
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容區塊",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -87,7 +87,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120744-67wud4s",
-				"updated": "20211225234425"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120744-33v8vjb",
-				"updated": "20211225234425"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -178,7 +178,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120744-7zvfv94"
+						"id": "20211226120744-7zvfv94",
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -217,7 +218,8 @@
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20211226120744-geyuzi2"
+								"id": "20211226120744-geyuzi2",
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -231,7 +233,7 @@
 								{
 									"ID": "20220307092237-p737tab",
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%內容區塊%' AND content LIKE '%引用%' AND type = 'p') }}\n",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%內容區塊%' AND content LIKE '%引用%' AND type = 'p' }}\n",
 									"Properties": {
 										"id": "20220307092237-p737tab"
 									}
@@ -382,7 +384,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120744-jsi9w11",
-				"updated": "20240731204705"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -428,7 +430,7 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20211226120744-xrkqego",
-				"updated": "20260730184353"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -439,7 +441,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#內容區塊/嵌入#%' OR content LIKE '%#內容區塊/引用#%') AND hpath NOT LIKE '%嵌入內容區塊%'"
+					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#內容區塊/嵌入#%' OR content LIKE '%#內容區塊/引用#%') AND hpath NOT LIKE '%嵌入內容區塊%' AND type = 'p'"
 				},
 				{
 					"Type": "NodeCloseBrace"
@@ -583,7 +585,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202457-cgu87b8",
-				"updated": "20260730184353"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -597,7 +599,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-piyz66c",
-				"updated": "20260730184353"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -611,7 +613,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 前綴執行 JavaScript 程式碼，動態決定要嵌入哪些區塊，適合 SQL 查詢無法滿足的複雜場景"
+					"Data": "​ 前綴執行 JavaScript 程式碼，動態決定要嵌入哪些區塊，適合 SQL 查詢無法滿足的複雜場景。"
 				}
 			]
 		},
@@ -635,7 +637,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-tp9uaus",
-				"updated": "20260612202457"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -649,7 +651,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-9r9tm6j",
-				"updated": "20260730184353"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -663,7 +665,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 開頭的程式碼即可進入 JS 模式"
+					"Data": "​ 開頭的程式碼即可進入 JS 模式。"
 				}
 			]
 		},
@@ -673,7 +675,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-kbzaaf1",
-				"updated": "20260612202457"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -693,7 +695,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20260612202457-ud0zzkc",
-				"updated": "20260730184353"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -772,7 +774,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "(url, data, callback?) =&gt; void"
+									"TextMarkTextContent": "(url, data?, headers?, process?, signal?) =&gt; Promise&lt;IWebSocketData&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -786,7 +788,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "發起同步 POST 請求"
+									"Data": "發起非同步 POST 請求，使用 await 或 .then() 讀取回應；第三個參數是請求標頭物件，不是回呼函式"
 								}
 							]
 						}
@@ -962,7 +964,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-zngmbbn",
-				"updated": "20260612202457"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -976,12 +978,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-1ew3mlh",
-				"updated": "20260730184353"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "需要"
+					"Data": "要自動渲染內容區塊，請"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1044,12 +1046,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-sj5i3ja",
-				"updated": "20260612202457"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "返回陣列中 ID 的順序即為最終顯示順序"
+					"Data": "返回陣列中 ID 的順序即為最終顯示順序。"
 				}
 			]
 		},
@@ -1059,7 +1061,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-2da64g3",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1129,7 +1131,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-68k9wdn",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1142,7 +1144,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待辦\" });\nreturn resp.data.blocks.map(b => b.id);\n"
+					"Data": "//!js\nconst resp = await fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待辦\" });\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1155,12 +1157,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202457-41bqs87",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "取得當前文件下所有子區塊："
+					"Data": "取得目前文件的直接子區塊："
 				}
 			]
 		},
@@ -1170,7 +1172,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-groigh0",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1183,7 +1185,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b => b.id);\n"
+					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = await fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nreturn resp.data.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1211,7 +1213,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-btr2ts2",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1224,7 +1226,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
+					"Data": "//!js\nconst resp = await fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1238,7 +1240,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-90085nz",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1255,7 +1257,7 @@
 			},
 			"Properties": {
 				"id": "20260612202457-5m8wdz1",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1380,7 +1382,7 @@
 					},
 					"Properties": {
 						"id": "20260612202457-sc73hud",
-						"updated": "20260810212846"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1388,16 +1390,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202457-jv0rdwa",
-								"updated": "20260810212846"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "錯誤提示"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：JS 執行異常或返回非陣列時，顯示「引用已過期」"
+									"Data": "渲染與錯誤提示：返回區塊 ID 陣列時自動渲染對應內容區塊，沒有結果時顯示「引用已過期」；返回非陣列時保留指令碼自訂的 DOM 並結束載入；執行異常時顯示實際錯誤訊息"
 								}
 							]
 						}

@@ -41,9 +41,9 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
         messagesContainer: {
             classList,
             scrollTop: 0,
-            addEventListener: () => undefined,
-            removeEventListener: () => undefined,
-            querySelectorAll: () => [],
+            addEventListener: (): undefined => undefined,
+            removeEventListener: (): undefined => undefined,
+            querySelectorAll: (): Element[] => [],
         },
         titleElement: {},
         sendBtn: {

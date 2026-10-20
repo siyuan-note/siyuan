@@ -27,14 +27,12 @@ func TestAPIContractSettingPatchConcurrentFields(t *testing.T) {
 	fontSize := model.Conf.Editor.Load().FontSize
 	var group sync.WaitGroup
 	for _, body := range []string{`{"editor":{"displayImgName":true}}`, `{"editor":{"displayImgAlt":true}}`} {
-		group.Add(1)
-		go func() {
-			defer group.Done()
+		group.Go(func() {
 			code, message, _ := settingContractRequest(t, "patch", patchSetting, body)
 			if code != 0 {
 				t.Errorf("patch failed: %d %s", code, message)
 			}
-		}()
+		})
 	}
 	group.Wait()
 	if !model.Conf.Editor.Load().DisplayImgName || !model.Conf.Editor.Load().DisplayImgAlt || model.Conf.Editor.Load().FontSize != fontSize {
@@ -89,6 +87,24 @@ func TestAPIContractSettingPatchKeymapEnvelopeAndNullableFields(t *testing.T) {
 	code, _, _ = settingContractRequest(t, "patch", patchSetting, `{"editor":{"markdown":{"inlineMath":"bad"}}}`)
 	if code == 0 || model.Conf.Editor.Load() != before {
 		t.Fatal("merged settings bypassed the nested request contract")
+	}
+}
+
+func TestAPIContractSettingPatchKeymapCaseSensitiveCommands(t *testing.T) {
+	previousConf, previousReadOnly := model.Conf, util.ReadOnly
+	util.ReadOnly = true
+	t.Cleanup(func() { model.Conf, util.ReadOnly = previousConf, previousReadOnly })
+	model.Conf = model.NewAppConf()
+	keymap := conf.Keymap{"plugin": map[string]any{"sample": map[string]any{"openFile": map[string]any{"custom": "F1"}}}}
+	model.Conf.Keymap.Store(&keymap)
+	code, message, _ := settingContractRequest(t, "patch", patchSetting,
+		`{"keymap":{"plugin":{"sample":{"openfile":{"custom":"F2"}}}}}`)
+	if code != 0 {
+		t.Fatalf("keymap patch failed: %s", message)
+	}
+	actual, _ := json.Marshal(model.Conf.Keymap.Load())
+	if string(actual) != `{"plugin":{"sample":{"openFile":{"custom":"F1"},"openfile":{"custom":"F2"}}}}` {
+		t.Fatalf("independent command names were conflated: %s", actual)
 	}
 }
 

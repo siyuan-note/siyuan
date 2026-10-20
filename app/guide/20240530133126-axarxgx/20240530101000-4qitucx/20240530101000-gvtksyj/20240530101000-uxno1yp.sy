@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20260927183214"
+		"updated": "20261015221015"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-3mutq27",
 				"id": "20240530101000-ggy8jav",
-				"updated": "20260927183214"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -102,6 +102,66 @@
 				{
 					"Type": "NodeText",
 					"Data": " を選ぶと、ノートブックのルートまたは親ドキュメントを指定できます。確定すると、その場所にドキュメントを作成し、元の位置に参照を挿入します。選択した保存先は今回の作成にのみ適用され、既定の保存先は変更されません。キャンセルするとドキュメントは作成されません。デスクトップ版とモバイル版の両方で利用できます。データベースの項目にドキュメントをバインドまたは再バインドするときも、この操作を利用できます。ドキュメントの作成が成功した後にのみ項目をバインドします。キャンセルした場合や作成に失敗した場合、元のバインドは変更されません。"
+				}
+			]
+		},
+		{
+			"ID": "20261014130425-0xqno1c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014130425-0xqno1c",
+				"updated": "20261015221015"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディター"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双方向リンク"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "[[ または 【【 を自動で閉じる"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で自動補完を有効にできます。初期状態では無効です。有効にすると、[[ または 【【 を入力した際にカーソルの後ろへ対応する ]] または 】】 が挿入されます。閉じ括弧を2回入力すると閉じ括弧を飛び越えて参照を確定します。Enter で候補を選択した場合も閉じ括弧が置き換えられます。空の [[]] または 【【】】 内で Backspace を押すと括弧全体が削除されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261014130425-xs624bu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014130425-xs624bu",
+				"updated": "20261014223520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "]] または 】】 で参照を確定する際は、タイトルが完全一致するドキュメント、大文字と小文字を区別せず一致するドキュメント、該当するデイリーノートの順に参照先を探します。該当するものがなければ、参照時の新規作成先として設定した場所にドキュメントを作成します。インラインコード、コードブロック、インライン数式では動作しません。入力メソッドの文字は確定後に処理され、入力メソッドが補完した閉じ括弧は保持されます。"
 				}
 			]
 		},
@@ -930,7 +990,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "((id \u0026quot;アンカーテキスト\u0026quot;))"
+					"TextMarkTextContent": "((id &quot;アンカーテキスト&quot;))"
 				},
 				{
 					"Type": "NodeText",
@@ -977,7 +1037,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026quot;"
+									"TextMarkTextContent": "&quot;"
 								},
 								{
 									"Type": "NodeText",

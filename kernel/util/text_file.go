@@ -20,30 +20,48 @@ import (
 
 const MaxTextFileBytes = 8 * 1024 * 1024
 
+const (
+	TextFileRevisionConflict    = "revision_conflict"
+	TextFileInvalidPath         = "invalid_path"
+	TextFileUnsupportedEncoding = "unsupported_encoding"
+	TextFileTooLarge            = "too_large"
+	TextFileBackupFailed        = "backup_failed"
+	TextFileResultUnknown       = "result_unknown"
+	TextFileWriteFailed         = "write_failed"
+	TextFileCancelled           = "cancelled"
+)
+
 // TextFileError 说明目标是否可能已变化；result_unknown 必须先读取目标核实，不能直接重试修改。
 type TextFileError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 	Written bool   `json:"written"`
+	cause   error
 }
 
 func (e *TextFileError) Error() string { return e.Code + ": " + e.Message }
+
+func (e *TextFileError) Unwrap() error { return e.cause }
+
+// NewTextFileError 将结果码与错误原因分别保存，保留错误链供调用方判断。
+func NewTextFileError(code string, err error) *TextFileError {
+	return &TextFileError{Code: code, Message: err.Error(), cause: err}
+}
+
+func IsTextFileError(err error, code string) bool {
+	failure, ok := errors.AsType[*TextFileError](err)
+	return ok && failure.Code == code
+}
 
 func textFileError(code, message string) error {
 	return &TextFileError{Code: code, Message: message}
 }
 
 func textFileBeforeCommitError(err error) error {
-	var failure *TextFileError
-	if errors.As(err, &failure) {
+	if failure, ok := errors.AsType[*TextFileError](err); ok {
 		return failure
 	}
-	for _, code := range []string{"revision_conflict", "invalid_path", "unsupported_encoding", "too_large", "backup_failed", "result_unknown"} {
-		if strings.HasPrefix(err.Error(), code+":") {
-			return textFileError(code, strings.TrimSpace(strings.TrimPrefix(err.Error(), code+":")))
-		}
-	}
-	return textFileError("backup_failed", err.Error())
+	return NewTextFileError(TextFileBackupFailed, err)
 }
 
 func TextFileRevision(content []byte) string { return fmt.Sprintf("%x", sha256.Sum256(content)) }
@@ -56,7 +74,7 @@ func CheckSingleLinkRegularFile(file *os.File) error {
 		return err
 	}
 	if !info.Mode().IsRegular() {
-		return textFileError("invalid_path", "target must be a regular file")
+		return textFileError(TextFileInvalidPath, "target must be a regular file")
 	}
 	return textFileSingleLink(file, info)
 }
@@ -70,7 +88,7 @@ func OpenFileNoFollow(root *os.Root, name string) (*os.File, error) {
 // ValidateTextFilePath 拒绝非规范路径，避免将目录穿越、Windows 别名或其他分隔符静默转换为目标路径。
 func ValidateTextFilePath(p string) error {
 	if p == "." || validateManagedSkillPath(p) != nil {
-		return textFileError("invalid_path", "expected a canonical relative file path")
+		return textFileError(TextFileInvalidPath, "expected a canonical relative file path")
 	}
 	return nil
 }
@@ -78,9 +96,9 @@ func ValidateTextFilePath(p string) error {
 func ValidateTextFileContent(content string) error {
 	if err := validateManagedSkillSource(content); err != nil {
 		if errors.Is(err, ErrSkillTooLarge) {
-			return textFileError("too_large", "text files must be at most 8 MiB")
+			return textFileError(TextFileTooLarge, "text files must be at most 8 MiB")
 		}
-		return textFileError("unsupported_encoding", "only UTF-8 text without binary control characters is supported")
+		return textFileError(TextFileUnsupportedEncoding, "only UTF-8 text without binary control characters is supported")
 	}
 	return nil
 }
@@ -99,7 +117,7 @@ func openTextFileParent(root *os.Root, p string) (*os.Root, string, error) {
 		info, statErr := current.Lstat(part)
 		if statErr != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 			current.Close()
-			return nil, "", textFileError("invalid_path", "parent must be an existing regular directory")
+			return nil, "", textFileError(TextFileInvalidPath, "parent must be an existing regular directory")
 		}
 		next, openErr := current.OpenRoot(part)
 		current.Close()
@@ -109,7 +127,7 @@ func openTextFileParent(root *os.Root, p string) (*os.Root, string, error) {
 		opened, statErr := next.Stat(".")
 		if statErr != nil || !os.SameFile(info, opened) {
 			next.Close()
-			return nil, "", textFileError("invalid_path", "parent changed while opening")
+			return nil, "", textFileError(TextFileInvalidPath, "parent changed while opening")
 		}
 		current = next
 	}
@@ -126,7 +144,7 @@ func readRegularFileAt(parent *os.Root, name string, textOnly bool) (string, os.
 		return "", nil, err
 	}
 	if !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
-		return "", nil, textFileError("invalid_path", "target must be a regular unlinked file")
+		return "", nil, textFileError(TextFileInvalidPath, "target must be a regular unlinked file")
 	}
 	file, err := openTextFileRead(parent, name)
 	if err != nil {
@@ -138,7 +156,7 @@ func readRegularFileAt(parent *os.Root, name string, textOnly bool) (string, os.
 		return "", nil, err
 	}
 	if !opened.Mode().IsRegular() || !os.SameFile(info, opened) {
-		return "", nil, textFileError("invalid_path", "target changed while opening")
+		return "", nil, textFileError(TextFileInvalidPath, "target changed while opening")
 	}
 	if err = textFileSingleLink(file, opened); err != nil {
 		return "", nil, err
@@ -148,7 +166,7 @@ func readRegularFileAt(parent *os.Root, name string, textOnly bool) (string, os.
 		limit = PluginProjectMaxFileBytes
 	}
 	if opened.Size() > limit {
-		return "", nil, textFileError("too_large", fmt.Sprintf("file must be at most %d bytes", limit))
+		return "", nil, textFileError(TextFileTooLarge, fmt.Sprintf("file must be at most %d bytes", limit))
 	}
 	data, err := io.ReadAll(io.LimitReader(file, limit+1))
 	if err != nil {
@@ -156,7 +174,7 @@ func readRegularFileAt(parent *os.Root, name string, textOnly bool) (string, os.
 	}
 	content := string(data)
 	if int64(len(content)) > limit {
-		return "", nil, textFileError("too_large", fmt.Sprintf("file must be at most %d bytes", limit))
+		return "", nil, textFileError(TextFileTooLarge, fmt.Sprintf("file must be at most %d bytes", limit))
 	}
 	if textOnly {
 		if err = ValidateTextFileContent(content); err != nil {
@@ -198,7 +216,7 @@ func ApplyTextEdits(original string, edits []TextEdit) (string, []TextEditRange,
 			return "", nil, textFileError("invalid_edit", "oldText must not be empty")
 		}
 		if !utf8.ValidString(edit.OldText) || !utf8.ValidString(edit.NewText) {
-			return "", nil, textFileError("unsupported_encoding", "edits must contain UTF-8 text")
+			return "", nil, textFileError(TextFileUnsupportedEncoding, "edits must contain UTF-8 text")
 		}
 		start := strings.Index(original, edit.OldText)
 		if start < 0 {
@@ -220,7 +238,7 @@ func ApplyTextEdits(original string, edits []TextEdit) (string, []TextEditRange,
 		size += len(edit.NewText) - len(edit.OldText)
 	}
 	if size > MaxTextFileBytes {
-		return "", nil, textFileError("too_large", "edited text must be at most 8 MiB")
+		return "", nil, textFileError(TextFileTooLarge, "edited text must be at most 8 MiB")
 	}
 	var out strings.Builder
 	out.Grow(size)
@@ -300,7 +318,7 @@ func mutateTextFile(ctx context.Context, root *os.Root, p string, request TextFi
 	}
 	defer unlock()
 	if request.IfAbsent == (request.ExpectedRevision != "") || (request.IfAbsent && request.Edits != nil) {
-		return ret, textFileError("revision_conflict", "provide exactly one of ifAbsent=true or expectedRevision; edits require expectedRevision")
+		return ret, textFileError(TextFileRevisionConflict, "provide exactly one of ifAbsent=true or expectedRevision; edits require expectedRevision")
 	}
 	parent, name, err := openTextFileParent(root, p)
 	if err != nil {
@@ -312,7 +330,7 @@ func mutateTextFile(ctx context.Context, root *os.Root, p string, request TextFi
 	var originalInfo os.FileInfo
 	if request.IfAbsent {
 		if _, statErr := parent.Lstat(name); !errors.Is(statErr, os.ErrNotExist) {
-			return ret, textFileError("revision_conflict", "new file must not exist")
+			return ret, textFileError(TextFileRevisionConflict, "new file must not exist")
 		}
 	} else {
 		original, originalInfo, err = readTextFileAt(parent, name)
@@ -321,7 +339,7 @@ func mutateTextFile(ctx context.Context, root *os.Root, p string, request TextFi
 		}
 		ret.OldRevision = TextFileRevision([]byte(original))
 		if ret.OldRevision != request.ExpectedRevision {
-			return ret, textFileError("revision_conflict", "file changed; read it again before writing")
+			return ret, textFileError(TextFileRevisionConflict, "file changed; read it again before writing")
 		}
 		mode = originalInfo.Mode().Perm()
 	}
@@ -362,7 +380,7 @@ func mutateTextFile(ctx context.Context, root *os.Root, p string, request TextFi
 	}
 	file, err := parent.OpenFile(temporary, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
-		return ret, textFileError("write_failed", err.Error())
+		return ret, textFileError(TextFileWriteFailed, err.Error())
 	}
 	defer parent.Remove(temporary)
 	if err = file.Chmod(mode); err == nil {
@@ -380,7 +398,7 @@ func mutateTextFile(ctx context.Context, root *os.Root, p string, request TextFi
 		err = closeErr
 	}
 	if err != nil {
-		return ret, textFileError("write_failed", err.Error())
+		return ret, textFileError(TextFileWriteFailed, err.Error())
 	}
 	// 固定父目录句柄，防止中间目录被替换后改变写入目标；同时拒绝父目录在打开后被移动的情况。
 	if err = sameTextFileParent(root, p, parent); err != nil {
@@ -412,22 +430,22 @@ func mutateTextFile(ctx context.Context, root *os.Root, p string, request TextFi
 		if err == nil {
 			err = operations.remove(parent, temporary)
 			if err != nil {
-				return ret, &TextFileError{Code: "result_unknown", Message: err.Error(), Written: true}
+				return ret, &TextFileError{Code: TextFileResultUnknown, Message: err.Error(), Written: true}
 			}
 		}
 	} else {
 		err = operations.rename(parent, temporary, name)
 	}
 	if err != nil {
-		return ret, textFileError("write_failed", err.Error())
+		return ret, textFileError(TextFileWriteFailed, err.Error())
 	}
 	actual, _, readErr := readTextFileAt(parent, name)
 	if readErr != nil || TextFileRevision([]byte(actual)) != ret.NewRevision {
-		return ret, &TextFileError{Code: "result_unknown", Message: "replacement completed but readback did not match; inspect before retrying", Written: true}
+		return ret, &TextFileError{Code: TextFileResultUnknown, Message: "replacement completed but readback did not match; inspect before retrying", Written: true}
 	}
 	if request.AfterCommit != nil {
 		if err = request.AfterCommit(); err != nil {
-			return ret, &TextFileError{Code: "result_unknown", Message: "replacement completed but project journal update failed: " + err.Error(), Written: true}
+			return ret, &TextFileError{Code: TextFileResultUnknown, Message: "replacement completed but project journal update failed: " + err.Error(), Written: true}
 		}
 	}
 	return ret, nil
@@ -445,7 +463,7 @@ func sameTextFileParent(root *os.Root, p string, parent *os.Root) error {
 	}
 	second, err := current.Stat(".")
 	if err != nil || !os.SameFile(first, second) {
-		return textFileError("invalid_path", "parent changed during write")
+		return textFileError(TextFileInvalidPath, "parent changed during write")
 	}
 	return nil
 }
@@ -453,7 +471,7 @@ func sameTextFileParent(root *os.Root, p string, parent *os.Root) error {
 func checkTextFileRevision(parent *os.Root, name string, absent bool, revision string, originalInfo os.FileInfo) error {
 	if absent {
 		if _, err := parent.Lstat(name); !errors.Is(err, os.ErrNotExist) {
-			return textFileError("revision_conflict", "new file appeared during write")
+			return textFileError(TextFileRevisionConflict, "new file appeared during write")
 		}
 		return nil
 	}
@@ -462,7 +480,7 @@ func checkTextFileRevision(parent *os.Root, name string, absent bool, revision s
 		return err
 	}
 	if !os.SameFile(originalInfo, info) || info.Mode().Perm() != originalInfo.Mode().Perm() || TextFileRevision([]byte(content)) != revision {
-		return textFileError("revision_conflict", "file changed during write")
+		return textFileError(TextFileRevisionConflict, "file changed during write")
 	}
 	return nil
 }
@@ -495,7 +513,7 @@ func MutateTextFileName(ctx context.Context, root *os.Root, p, target string, re
 	}
 	defer unlock()
 	if request.ExpectedRevision == "" {
-		return ret, textFileError("revision_conflict", "expectedRevision is required")
+		return ret, textFileError(TextFileRevisionConflict, "expectedRevision is required")
 	}
 	parent, name, err := openTextFileParent(root, p)
 	if err != nil {
@@ -509,7 +527,7 @@ func MutateTextFileName(ctx context.Context, root *os.Root, p, target string, re
 	ret.OldRevision = TextFileRevision([]byte(original))
 	ret.NewRevision = "missing"
 	if ret.OldRevision != request.ExpectedRevision {
-		return ret, textFileError("revision_conflict", "file changed; read it again before modifying")
+		return ret, textFileError(TextFileRevisionConflict, "file changed; read it again before modifying")
 	}
 	var destination *os.Root
 	var newName string
@@ -520,7 +538,7 @@ func MutateTextFileName(ctx context.Context, root *os.Root, p, target string, re
 		}
 		defer destination.Close()
 		if _, statErr := destination.Lstat(newName); !errors.Is(statErr, os.ErrNotExist) {
-			return ret, textFileError("revision_conflict", "rename destination must not exist")
+			return ret, textFileError(TextFileRevisionConflict, "rename destination must not exist")
 		}
 		ret.NewRevision = ret.OldRevision
 	}
@@ -541,14 +559,14 @@ func MutateTextFileName(ctx context.Context, root *os.Root, p, target string, re
 			return err
 		}
 		if !os.SameFile(originalInfo, info) || TextFileRevision([]byte(current)) != ret.OldRevision {
-			return textFileError("revision_conflict", "file changed during operation")
+			return textFileError(TextFileRevisionConflict, "file changed during operation")
 		}
 		if destination != nil {
 			if err := sameTextFileParent(root, target, destination); err != nil {
 				return err
 			}
 			if _, err := destination.Lstat(newName); !errors.Is(err, os.ErrNotExist) {
-				return textFileError("revision_conflict", "rename destination appeared during operation")
+				return textFileError(TextFileRevisionConflict, "rename destination appeared during operation")
 			}
 		}
 		return nil
@@ -573,19 +591,19 @@ func MutateTextFileName(ctx context.Context, root *os.Root, p, target string, re
 		err = parent.Remove(name)
 	}
 	if err != nil {
-		return ret, textFileError("write_failed", err.Error())
+		return ret, textFileError(TextFileWriteFailed, err.Error())
 	}
 	if destination != nil {
 		actual, _, readErr := readRegularFileAt(destination, newName, false)
 		if readErr != nil || TextFileRevision([]byte(actual)) != ret.NewRevision {
-			return ret, &TextFileError{Code: "result_unknown", Message: "rename completed but readback failed; inspect before retrying", Written: true}
+			return ret, &TextFileError{Code: TextFileResultUnknown, Message: "rename completed but readback failed; inspect before retrying", Written: true}
 		}
 	} else if _, statErr := parent.Lstat(name); !errors.Is(statErr, os.ErrNotExist) {
-		return ret, &TextFileError{Code: "result_unknown", Message: "delete completed but absence could not be verified", Written: true}
+		return ret, &TextFileError{Code: TextFileResultUnknown, Message: "delete completed but absence could not be verified", Written: true}
 	}
 	if request.AfterCommit != nil {
 		if err = request.AfterCommit(); err != nil {
-			return ret, &TextFileError{Code: "result_unknown", Message: "operation completed but project journal update failed: " + err.Error(), Written: true}
+			return ret, &TextFileError{Code: TextFileResultUnknown, Message: "operation completed but project journal update failed: " + err.Error(), Written: true}
 		}
 	}
 	return ret, nil

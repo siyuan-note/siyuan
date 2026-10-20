@@ -107,16 +107,17 @@ func TestMCPHTTPModernProtocol(t *testing.T) {
 				case "server/discover":
 					result = map[string]any{"supportedVersions": []string{version}, "capabilities": test.capabilities}
 				case "tools/list":
-					if request.Params.Cursor == "" {
+					switch request.Params.Cursor {
+					case "":
 						result = map[string]any{"tools": []any{}, "nextCursor": "page-2"}
-					} else if request.Params.Cursor == "page-2" {
+					case "page-2":
 						result = map[string]any{"tools": []any{map[string]any{
 							"name": toolName,
 							"inputSchema": map[string]any{"type": "object", "properties": map[string]any{
 								"query": map[string]any{"type": "string", "x-mcp-header": "Query"},
 							}},
 						}}}
-					} else {
+					default:
 						t.Errorf("unexpected cursor: %q", request.Params.Cursor)
 					}
 				case "tools/call":

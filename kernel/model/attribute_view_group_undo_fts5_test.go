@@ -36,7 +36,7 @@ func TestAttributeViewGroupMoveUndoRedo(t *testing.T) {
 					t.Fatalf("private group move snapshot leaked: %s, %v", encoded, err)
 				}
 				after := readAttributeViewItemsTest(t, before.ID)
-				for cycle := 0; cycle < 3; cycle++ {
+				for range 3 {
 					replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 					assertAttributeViewFieldsTest(t, before, readAttributeViewItemsTest(t, before.ID))
 					rendered := readAttributeViewItemsTest(t, before.ID)
@@ -90,7 +90,7 @@ func TestAttributeViewGroupMoveBoundItem(t *testing.T) {
 	if err := PerformTxSync(tx); err != nil {
 		t.Fatal(err)
 	}
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		current := readAttributeViewItemsTest(t, before.ID)
 		for _, view := range current.Views {
 			sql.RenderView(current, view, "", false)
@@ -108,7 +108,7 @@ func TestAttributeViewGroupMoveEncrypted(t *testing.T) {
 	_, before, tx := setupAttributeViewGroupMoveTest(t, av.LayoutTypeKanban, "C")
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x65}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x65}, 32))
 	av.SetAVBoxID(before.ID, boxID)
 	t.Cleanup(func() {
 		av.SetAVBoxID(before.ID, "")

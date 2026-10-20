@@ -7,7 +7,7 @@
 		"id": "20211226121203-rjjngpz",
 		"title": "通用作業",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -49,15 +49,15 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508003039-ssunw2g",
-				"updated": "20240508003039"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226123302-akitvb1",
+					"TextMarkBlockRefID": "20211226123241-51pujtr",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "導入和導出"
+					"TextMarkTextContent": "剪藏"
 				}
 			]
 		},
@@ -483,6 +483,57 @@
 					"TextMarkBlockRefID": "20260614104322-shrqj15",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "網路代理"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-qjp4p0l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-qjp4p0l",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190001-oidctw1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "OIDC 登入"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-bhcobzb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-bhcobzb",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185001-secvr02",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "金鑰和變數"
+				}
+			]
+		},
+		{
+			"ID": "20261016191102-4rsg5bn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016191102-4rsg5bn",
+				"updated": "20261016191102"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260907120000-crytw01",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "加密筆記本"
 				}
 			]
 		}

@@ -12,7 +12,7 @@ const browserCases = async (source: string) => {
     const requests: ((response: unknown) => void)[] = [];
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
-    const ocrRequests: ((text: string | undefined) => void)[] = [];
+    const ocrRequests: ((text: string | undefined | {text: string, failed: boolean}) => void)[] = [];
     class Panel {
         element = document.createElement("div");
         editors: {protyle: IProtyle}[] = [];
@@ -38,7 +38,8 @@ const browserCases = async (source: string) => {
     const dependencies = {
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
-        getImageOCRText: () => new Promise<string | undefined>(resolve => ocrRequests.push(resolve)),
+        getImageOCRResult: () => new Promise<{text: string, failed: boolean} | undefined>(resolve => ocrRequests.push(result =>
+            resolve(typeof result === "string" ? {text: result, failed: false} : result))),
         hideTooltip: () => {},
         showTooltip: (text: string) => { tooltip = text; },
         fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
@@ -63,7 +64,8 @@ const browserCases = async (source: string) => {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
         menus: {menu: {element: document.createElement("div")}},
         blockPanels: [],
-        languages: {ocrResult: "OCR text", emptyContent: "No related content found", modifiedAt: "Modified", createdAt: "Created"},
+        languages: {ocrResult: "OCR text", ocrNoText: "No OCR text", ocrFailed: "OCR recognition failed",
+            emptyContent: "No related content found", modifiedAt: "Modified", createdAt: "Created"},
     } as unknown as typeof window.siyuan;
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
@@ -242,6 +244,34 @@ const browserCases = async (source: string) => {
     check.ok(tooltip.endsWith("1<br>2<br>3<br>4<br>5<br>6"), "six complete lines remain unchanged");
     check.equal(image.title, "");
     check.equal(image.alt, "");
+    window.siyuan.config.ocr = {provider: "paddleocr", model: "tiny", auto: false,
+        aiModelId: "", reasoningEffort: "", thresholds: {detection: null, box: null, recognition: null},
+        showText: false, showEmpty: false, showError: false};
+    const previousOCRRequests = ocrRequests.length;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(ocrRequests.length, previousOCRRequests, "disabled tooltip options skip OCR reads but retain asset information");
+    check.match(tooltip, /PNG · 1920 × 1080/);
+    window.siyuan.config.ocr.showEmpty = true;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests.at(-1)("");
+    await Promise.resolve();
+    check.match(tooltip, /No OCR text$/);
+    window.siyuan.config.ocr.showError = true;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests.at(-1)({text: "old text", failed: true});
+    await Promise.resolve();
+    check.match(tooltip, /OCR recognition failed$/);
+    check.equal(tooltip.includes("old text"), false);
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests.at(-1)(undefined);
+    await Promise.resolve();
+    check.doesNotMatch(tooltip, /No OCR text|OCR recognition failed/, "read failures are not recognition failures");
+    window.siyuan.config.ocr.showText = true;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    window.siyuan.config.ocr.showText = false;
+    ocrRequests.at(-1)("late preview");
+    await Promise.resolve();
+    check.equal(tooltip.includes("late preview"), false, "late responses use the latest tooltip preferences");
     const link = document.createElement("span");
     link.setAttribute("data-type", "a");
     link.setAttribute("data-href", "https://example.com/file.pdf");

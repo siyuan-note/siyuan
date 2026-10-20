@@ -28,6 +28,8 @@ import {getTableCellEditorLute} from "../util/tableCellRichLute";
 import {setTableCellRichContext, setTableCellRichEventTarget} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
 import {bindLiteCodeActions} from "../lite/codeActions";
+import {setTaskListItemMarker} from "../wysiwyg/list";
+import {nextTaskListMarker} from "../wysiwyg/taskListMarker";
 import {getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
 let activeEditor: {cell: Element, finish: () => void, prepareSwitch: () => boolean} | undefined;
@@ -151,6 +153,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     const clickedImage = point?.target?.closest(".protyle-action")?.closest('.img[data-type="img"]');
     const clickedImageIndex = clickedImage && cell.contains(clickedImage) ?
         Array.from(cell.querySelectorAll('.img[data-type="img"]')).indexOf(clickedImage) : -1;
+    const clickedTask = point?.target?.closest(".protyle-action--task");
+    const clickedTaskIndex = clickedTask && cell.contains(clickedTask) ?
+        Array.from(cell.querySelectorAll(".protyle-action--task")).indexOf(clickedTask) : -1;
     // 外层输入先完成解析和事务，避免把即将挂载的单元格编辑界面当作正文。
     await owner.wysiwyg.flushPendingInput();
     if (openingEditor !== request || owner.disabled || !owner.element.isConnected) {
@@ -477,10 +482,14 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     }, {capture: true, signal});
     host.addEventListener("keydown", event => {
         captureBeforeChange();
+        const keymap = window.siyuan.config.keymap.editor.general;
+        const alignment = [keymap.alignLeft, keymap.alignCenter, keymap.alignRight]
+            .some(hotkey => matchHotKey(hotkey, event));
         if (!event.isComposing && !composing &&
-            Object.values(window.siyuan.config.keymap.editor.table).some(hotkey => matchHotKey(hotkey, event))) {
+            (alignment || Object.values(window.siyuan.config.keymap.editor.table).some(hotkey => matchHotKey(hotkey, event)))) {
             event.preventDefault();
             event.stopImmediatePropagation();
+            const selection = alignment ? captureRichCellSelection(fragment.wysiwyg, getSelection(), true) : undefined;
             // 先提交内嵌编辑内容，再以所属单元格执行表格快捷键。
             finish();
             restoreTableVirtualizationDOM(table);
@@ -494,11 +503,10 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
             const nextElement = next instanceof Element ? next : next?.parentElement;
             const nextCell = nextElement?.closest<HTMLTableCellElement>("td, th");
             if (nextCell && nextCell.closest(".protyle-wysiwyg") === owner.wysiwyg.element) {
-                openTableCellRichEditor(owner, nextCell);
+                openTableCellRichEditor(owner, nextCell, undefined, undefined, selection);
             }
             return;
         }
-        const keymap = window.siyuan.config.keymap.editor.general;
         const undo = matchHotKey(keymap.undo, event);
         const redo = matchHotKey(keymap.redo, event);
         if (!event.isComposing && !composing && (undo || redo)) {
@@ -571,6 +579,17 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     fragment.focus(true);
     // 进入单元格编辑即按所属表格块同步大纲高亮
     updateOutlineCurrentBlock(owner, cell);
+    // 复选框点击交给重建后的任务项，通过内部编辑器保存状态并记录撤销。
+    if (clickedTaskIndex >= 0) {
+        const task = fragment.wysiwyg.querySelectorAll(".protyle-action--task")[clickedTaskIndex]?.parentElement;
+        if (task) {
+            captureBeforeChange();
+            const marker = task.getAttribute("data-task") ?? (task.classList.contains("protyle-task--done") ? "X" : " ");
+            setTaskListItemMarker(fragment.protyle, task, nextTaskListMarker(marker));
+            commit();
+            return;
+        }
+    }
     // 图片操作使用重建后的节点和内部编辑器，菜单修改随单元格事务保存。
     if (clickedImageIndex >= 0) {
         const image = fragment.wysiwyg.querySelectorAll<HTMLElement>('.img[data-type="img"]')[clickedImageIndex];

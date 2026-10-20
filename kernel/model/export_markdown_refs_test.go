@@ -248,3 +248,74 @@ func TestExportMarkdownOtherReferenceModes(t *testing.T) {
 		})
 	}
 }
+
+func TestExportMarkdownCalloutTitleReferences(t *testing.T) {
+	for _, mode := range []int{2, 3, 4} {
+		for _, related := range []bool{false, true} {
+			t.Run(strconv.Itoa(mode)+"/related="+strconv.FormatBool(related), func(t *testing.T) {
+				const boxID = "20261015120000-box0001"
+				setupMarkdownReferencesTest(t, boxID)
+				Conf.Export.Load().BlockRefMode = mode
+				Conf.Export.Load().IncludeRelatedDocs = related
+				source := newFootnoteTestDoc(t, boxID, "Source")
+				target := newFootnoteTestDoc(t, boxID, "Target")
+				defID := target.Root.FirstChild.ID
+				callout := &ast.Node{Type: ast.NodeCallout, ID: ast.NewNodeID(), CalloutType: "NOTE", CalloutTitleExplicit: true,
+					CalloutTitle: `<span data-type="block-ref" data-id="` + defID + `" data-subtype="s">Unique title anchor</span>`}
+				callout.SetIALAttr("id", callout.ID)
+				body := treenode.NewParagraph("")
+				body.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Callout body")})
+				callout.AppendChild(body)
+				source.Root.AppendChild(callout)
+				for _, tree := range []*parse.Tree{source, target} {
+					writeAssetDownloadDocumentTest(t, tree)
+					sql.IndexTreeQueue(tree)
+				}
+				sql.FlushQueue()
+				_, zipPath := ExportPandocConvertZip([]string{source.ID}, "", ".md")
+				archive := openExportArchive(t, zipPath)
+				md := markdownArchiveDocument(t, archive, "Source")
+				if !strings.Contains(md, "> [!NOTE] ") || !strings.Contains(md, "Callout body") || strings.Contains(md, `data-type="block-ref"`) {
+					t.Fatalf("callout structure or title reference conversion failed: %s", md)
+				}
+				switch mode {
+				case 2:
+					if !strings.Contains(md, "siyuan://blocks/"+defID) {
+						t.Fatalf("title lost its block link: %s", md)
+					}
+				case 3:
+					if strings.Contains(md, defID) || strings.Contains(md, "[^") || !strings.Contains(md, "Unique title anchor") {
+						t.Fatalf("text-only title mode retained a reference: %s", md)
+					}
+				case 4:
+					if related {
+						if !strings.Contains(md, "[Unique title anchor](Target.md#"+defID+")") || strings.Contains(md, "[^") {
+							t.Fatalf("related document is not linked from its callout title: %s", md)
+						}
+						if targetMD := markdownArchiveDocument(t, archive, "Target"); !strings.Contains(targetMD, `id="`+defID+`"`) {
+							t.Fatalf("related target is missing its anchor: %s", targetMD)
+						}
+					} else if !strings.Contains(md, "Unique title anchor[^1]") || !strings.Contains(md, "[^1]:") {
+						t.Fatalf("title reference lost its footnote: %s", md)
+					}
+				}
+				if mode != 4 && strings.Count(md, "Unique title anchor") != 1 {
+					t.Fatalf("temporary title was duplicated in the body: %s", md)
+				}
+			})
+		}
+	}
+}
+
+func TestExportMarkdownRelativePath(t *testing.T) {
+	for _, tc := range []struct{ current, href, want string }{
+		{"/", "/Target.md#block", "Target.md#block"},
+		{"/Folder", "/Folder/Target.md#block", "Target.md#block"},
+		{"/Folder", "/Other/Target.md#block", "../Other/Target.md#block"},
+		{"/", "#block", "#block"},
+	} {
+		if got := exportMarkdownRelativePath(tc.current, tc.href); got != tc.want {
+			t.Fatalf("relative path from %q to %q: got %q, want %q", tc.current, tc.href, got, tc.want)
+		}
+	}
+}

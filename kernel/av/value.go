@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -495,12 +496,13 @@ func (subtype BlockRefSubtype) IsValid() bool {
 }
 
 type ValueBlock struct {
-	ID         string          `json:"id,omitempty"` // 绑定的块 ID，非绑定块时为空
-	Icon       string          `json:"icon,omitempty"`
-	Content    string          `json:"content"`
-	RefSubtype BlockRefSubtype `json:"refSubtype,omitempty"`
-	Created    int64           `json:"created,omitempty"`
-	Updated    int64           `json:"updated,omitempty"`
+	CollectionRuleID string          `json:"collectionRuleID,omitempty"` // 创建条目的收集规则；缺省表示手动条目
+	ID               string          `json:"id,omitempty"`               // 绑定的块 ID，非绑定块时为空
+	Icon             string          `json:"icon,omitempty"`
+	Content          string          `json:"content"`
+	RefSubtype       BlockRefSubtype `json:"refSubtype,omitempty"`
+	Created          int64           `json:"created,omitempty"`
+	Updated          int64           `json:"updated,omitempty"`
 }
 
 func (value *Value) NormalizeBlockRefSubtype(avID string, attrs map[string]string) (changed bool) {
@@ -713,7 +715,7 @@ func isAllowedValueTextRichNode(node *ast.Node, localLinks bool) bool {
 		ast.NodeFileAnnotationRefText:
 		return true
 	case ast.NodeLinkDest:
-		return isAllowedValueTextRichLinkTarget(node.TokensStr()) ||
+		return isAllowedValueTextRichLinkTarget(node.TokensStr(), !node.ParentIs(ast.NodeImage)) ||
 			localLinks && !node.ParentIs(ast.NodeImage) && isAllowedTableCellRichLocalLinkTarget(node.TokensStr())
 	case ast.NodeCodeBlock, ast.NodeCodeBlockFenceInfoMarker:
 		return !isValueTextRichExecutableCodeFence(node.CodeBlockInfo)
@@ -754,7 +756,7 @@ func isAllowedValueTextMarkType(node *ast.Node) bool {
 	if "" == node.TextMarkType || "" != node.TextMarkFlashcardOcclusionID {
 		return false
 	}
-	for _, typ := range strings.Fields(node.TextMarkType) {
+	for typ := range strings.FieldsSeq(node.TextMarkType) {
 		switch typ {
 		case "text", "block-ref", "kbd", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark",
 			"sup", "sub", "tag", "code", "inline-math", "inline-memo":
@@ -789,7 +791,7 @@ func isAllowedValueTextMarkReferenceData(node *ast.Node, localLinks bool) bool {
 	}
 
 	if node.IsTextMarkType("a") {
-		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref) &&
+		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref, true) &&
 			!(localLinks && isAllowedTableCellRichLocalLinkTarget(node.TextMarkAHref)) {
 			return false
 		}
@@ -807,7 +809,7 @@ func isAllowedValueTextMarkReferenceData(node *ast.Node, localLinks bool) bool {
 	return true
 }
 
-func isAllowedValueTextRichLinkTarget(target string) bool {
+func isAllowedValueTextRichLinkTarget(target string, customProtocols bool) bool {
 	if "" == target {
 		return true
 	}
@@ -838,14 +840,19 @@ func isAllowedValueTextRichLinkTarget(target string) bool {
 			strings.HasPrefix(strings.ToLower(target), scheme+"://")
 	case "":
 		return isAllowedValueTextRichRelativeLinkTarget(target, decodedTarget, parsed)
-	default:
+	case "javascript", "vbscript", "data", "blob", "file", "filesystem", "about", "chrome", "chrome-extension",
+		"devtools", "view-source", "resource", "moz-extension":
 		return false
+	default:
+		// 自定义协议仅用于主动点击的链接，不能作为图片等自动加载的资源地址。
+		return customProtocols && parsed.Host != "" && parsed.Opaque == "" &&
+			strings.HasPrefix(strings.ToLower(target), scheme+"://")
 	}
 }
 
 func decodeValueTextRichLinkTarget(target string) (ret, decoded string, ok bool) {
 	ret = target
-	for iteration := 0; iteration < 8; iteration++ {
+	for range 8 {
 		next := html.UnescapeString(ret)
 		if next == ret {
 			decoded, err := url.PathUnescape(ret)
@@ -878,14 +885,15 @@ func isAllowedValueTextRichRelativeLinkTarget(target, decodedTarget string, pars
 }
 
 func isAllowedValueTextRichInlineMemoContent(content string) bool {
-	if !utf8.ValidString(content) || containsValueTextRichMemoControl(content) {
+	if !utf8.ValidString(content) || containsValueTextRichMemoControl(content) || containsValueTextRichHTMLTag(content) {
 		return false
 	}
 	decoded := content
-	for iteration := 0; iteration < 8; iteration++ {
+	for range 8 {
 		next := html.UnescapeString(decoded)
 		if next == decoded {
-			return !containsValueTextRichHTMLTag(decoded)
+			// 实体由渲染器保留编码，解码仅用于检查隐藏的控制字符。
+			return true
 		}
 		decoded = next
 		if containsValueTextRichMemoControl(decoded) {
@@ -1544,12 +1552,7 @@ func valueTextRichBlockDOMAttribute(tag, name string) (value string, ok bool) {
 }
 
 func containsValueTextRichDataType(dataType, expected string) bool {
-	for _, typ := range strings.Fields(dataType) {
-		if expected == typ {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings.Fields(dataType), expected)
 }
 
 type valueTextRichStyleEntityProtection struct {
@@ -1726,8 +1729,8 @@ func valueTextRichBlockLiteralMarkdownRanges(markdown string) (ret []valueTextRi
 func stripValueTextRichMarkdownContainer(line string) string {
 	for {
 		line = strings.TrimLeft(line, " \t")
-		if strings.HasPrefix(line, ">") {
-			line = strings.TrimPrefix(line, ">")
+		if after, ok := strings.CutPrefix(line, ">"); ok {
+			line = after
 			continue
 		}
 		if 2 <= len(line) && ('-' == line[0] || '+' == line[0] || '*' == line[0]) &&
@@ -2201,7 +2204,7 @@ func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (
 func normalizeValueTextRichTreeSourceWithLute(tree *parse.Tree, images bool, luteEngine *lute.Lute) (content string, normalizedTree *parse.Tree, err error) {
 	normalizedTree = tree
 	previous := ""
-	for iteration := 0; iteration < 4; iteration++ {
+	for iteration := range 4 {
 		if err = normalizeValueTextRichTreeStyles(normalizedTree, images); nil != err {
 			return "", nil, err
 		}

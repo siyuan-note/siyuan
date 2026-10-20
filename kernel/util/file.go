@@ -111,12 +111,13 @@ func GetMimeTypeByPath(filePath string) (m *mimetype.MIME, ok bool) {
 	return
 }
 
+// IsSymlinkPath 判断现有路径是否为符号链接或目录联接。
 func IsSymlinkPath(absPath string) bool {
 	fi, err := os.Lstat(absPath)
 	if err != nil {
 		return false
 	}
-	return 0 != fi.Mode()&os.ModeSymlink
+	return isLinkFileInfo(fi)
 }
 
 // IsSystemMetadataFile 判断是否为操作系统自动生成的元数据文件（如 macOS 的 .DS_Store），
@@ -179,8 +180,16 @@ func RemoveEmptyDir(p string) (err error) {
 	return
 }
 
+// IsSymlink 判断目录条目是否为符号链接或目录联接。
 func IsSymlink(dir fs.DirEntry) bool {
-	return dir.Type() == fs.ModeSymlink
+	if dir.Type()&fs.ModeSymlink != 0 {
+		return true
+	}
+	if dir.Type()&fs.ModeIrregular == 0 {
+		return false
+	}
+	info, err := dir.Info()
+	return err == nil && isLinkFileInfo(info)
 }
 
 func IsDirRegularOrSymlink(dir fs.DirEntry) bool {
@@ -416,7 +425,7 @@ func FilterUploadFileName(name string) string {
 	return ret
 }
 
-var pdfAnnoPngPattern = regexp.MustCompile("-{0,1}P{0,1}[0-9]{0,4}-{0,1}[0-9]{1,3}-[0-9]{14}-[0-9a-zA-Z]{7}\\.png$")
+var pdfAnnoPngPattern = regexp.MustCompile(`-{0,1}P{0,1}[0-9]{0,4}-{0,1}[0-9]{1,3}-[0-9]{14}-[0-9a-zA-Z]{7}\.png$`)
 
 func TruncateLenFileName(name string) (ret string) {
 	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099

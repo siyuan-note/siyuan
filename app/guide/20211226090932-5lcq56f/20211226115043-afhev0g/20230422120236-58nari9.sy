@@ -6,7 +6,7 @@
 		"id": "20230422120236-58nari9",
 		"title": "資料可用性保障",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20261016111431"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422120301-fq8ivta",
-				"updated": "20230422120301"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422120301-ooxvslf",
-				"updated": "20230422120316"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -154,7 +154,7 @@
 					},
 					"Properties": {
 						"id": "20230422120301-5ioj77c",
-						"updated": "20230422120301"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -162,12 +162,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422120301-d5c3lid",
-								"updated": "20230422120301"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "支持完整導出和導入 Data 壓縮檔"
+									"Data": "支援匯出和匯入包含 data 目錄的 Data 壓縮檔；它不是包含設定、檔案歷史和本地倉庫的完整工作空間備份"
 								}
 							]
 						}
@@ -223,7 +223,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422120301-a1yj8y4",
-				"updated": "20260803165036"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -263,7 +263,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422120301-4tinfy7",
-				"updated": "20260803165036"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -303,7 +303,7 @@
 					},
 					"Properties": {
 						"id": "20230422120301-c2hgawf",
-						"updated": "20260803163402"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -326,7 +326,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230422120301-2sx5b7x",
-								"updated": "20260803163402"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -366,7 +366,7 @@
 									},
 									"Properties": {
 										"id": "20230422120301-z8l8tpp",
-										"updated": "20260803163402"
+										"updated": "20261016111431"
 									},
 									"Children": [
 										{
@@ -374,12 +374,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230422120301-a82nm5r",
-												"updated": "20260803163402"
+												"updated": "20261016111431"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "也可以在 "
+													"Data": "也可以開啟 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -397,12 +397,12 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " ​ 中開啟 "
+													"Data": "​ - "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "同步衝突時生成衝突文檔"
+													"TextMarkTextContent": "同步衝突時生成衝突文件"
 												},
 												{
 													"Type": "NodeText",
@@ -425,7 +425,7 @@
 					},
 					"Properties": {
 						"id": "20230422120301-he36u56",
-						"updated": "20260803165036"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -433,12 +433,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422120301-uqcd85n",
-								"updated": "20260803165036"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "支持在 "
+									"Data": "可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -456,7 +456,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": "​ 中瀏覽和下載雲端快照；寬視窗使用雲端欄，窄視窗切換到 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -465,7 +465,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中瀏覽和下載雲端快照"
+									"Data": "​"
 								}
 							]
 						}

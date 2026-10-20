@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20260810230450"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105232-qhlgs5w",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			},
 			"Properties": {
 				"id": "20230417141558-see765c",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -142,7 +142,7 @@
 					},
 					"Properties": {
 						"id": "20230417141558-d8vl4m7",
-						"updated": "20260809232000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -150,7 +150,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230417141558-f6keda3",
-								"updated": "20260809232000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -191,7 +191,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and select the CSS tab."
+									"Data": " and select the CSS tab"
 								}
 							]
 						}
@@ -633,7 +633,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225174048-t626xpi",
-				"updated": "20260803171606"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -662,7 +662,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225221416-enetgqg",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -683,7 +683,7 @@
 			},
 			"Properties": {
 				"id": "20201225221416-chyd31p",
-				"updated": "20260809232000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -699,7 +699,7 @@
 					},
 					"Properties": {
 						"id": "20201225221416-fwq6l32",
-						"updated": "20260809232000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -707,7 +707,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-dtskbvb",
-								"updated": "20260809232000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -739,7 +739,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "."
+									"Data": ""
 								}
 							]
 						}
@@ -999,7 +999,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225174048-i781zxp",
-				"updated": "20230418094804"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1316,7 +1316,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225174048-5e5cg0p",
-				"updated": "20260810230450"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1335,7 +1335,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225174048-g8oxi84",
-				"updated": "20260810230450"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1383,7 +1383,7 @@
 					},
 					"Properties": {
 						"id": "20201225174048-1ocyqbk",
-						"updated": "20260809232000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -1391,12 +1391,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-nh3eyq7",
-								"updated": "20260809232000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Custom themes inherit variables from the built-in themes. Override only the variables you need, and review renamed or removed variables when SiYuan is updated."
+									"Data": "Custom themes inherit variables from the built-in themes. Override only the variables you need, and review renamed or removed variables when SiYuan is updated"
 								}
 							]
 						}

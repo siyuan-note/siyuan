@@ -48,7 +48,7 @@ func TestAttributeViewFieldsUndoRedo(t *testing.T) {
 					t.Fatal("deleted field left a filter or group behind")
 				}
 			}
-			for cycle := 0; cycle < 3; cycle++ {
+			for range 3 {
 				replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 				assertAttributeViewFieldsTest(t, before, readAttributeViewItemsTest(t, before.ID))
 				replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
@@ -75,7 +75,7 @@ func TestAttributeViewFieldsEmptyLayout(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 		assertAttributeViewFieldsTest(t, before, readAttributeViewItemsTest(t, before.ID))
 		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
@@ -103,7 +103,7 @@ func TestAttributeViewFieldsUndoAfterKanbanRender(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		current := readAttributeViewItemsTest(t, source.ID)
 		if _, err := renderAttributeView(current, fixture.sourceID, layout.ID, "", "", 1, 50, nil, false, true, nil, ""); err != nil {
 			t.Fatal(err)
@@ -192,7 +192,7 @@ func TestAttributeViewFieldsRelations(t *testing.T) {
 				if !self && slices.Contains(av.GetSrcAvIDs(dest.ID), source.ID) {
 					t.Fatal("deleted source relation remained indexed")
 				}
-				for cycle := 0; cycle < 2; cycle++ {
+				for range 2 {
 					for _, view := range []*av.AttributeView{source, dest} {
 						current := readAttributeViewItemsTest(t, view.ID)
 						sql.RenderView(current, current.Views[0], "", false)
@@ -298,7 +298,7 @@ func TestAttributeViewFieldsEncryptedReplay(t *testing.T) {
 	_, before, tx := setupAttributeViewFieldsTest(t, av.KeyTypeText)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x62}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x62}, 32))
 	av.SetAVBoxID(before.ID, boxID)
 	t.Cleanup(func() {
 		av.SetAVBoxID(before.ID, "")

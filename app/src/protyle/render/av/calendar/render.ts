@@ -1,7 +1,7 @@
 import {AV_DATE_TYPES} from "../capabilities";
 import {Constants} from "../../../../constants";
 import {setStorageVal} from "../../../util/compatibility";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {isMobile} from "../../../../util/functions";
 import {transaction} from "../../../wysiwyg/transaction";

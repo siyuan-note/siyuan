@@ -9,6 +9,7 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -71,11 +72,8 @@ func BuiltinPluginSkill(disabled []string) (*BuiltinSkillInfo, error) {
 		Description: frontmatter["description"], Source: "builtin",
 		Version: BuiltinPluginSkillVersion, Digest: fmt.Sprintf("sha256:%x", hash.Sum(nil)), Enabled: true,
 	}
-	for _, id := range disabled {
-		if id == info.ID {
-			info.Enabled = false
-			break
-		}
+	if slices.Contains(disabled, info.ID) {
+		info.Enabled = false
 	}
 	return info, nil
 }

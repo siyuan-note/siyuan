@@ -23,7 +23,7 @@ import {
 import {writeText} from "../../util/compatibility";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
@@ -34,6 +34,7 @@ import {getAssetUploadSuccesses} from "../../upload/uploadResult";
 import {getAVSelectedCells, resolveAVSelectedCell, type IAVSelectedCell, type IAVCellPoint} from "./selectionState";
 import {getAVData, getAVSelectedTableCells} from "./virtualScroll";
 import {getAVAssetUploadTargets} from "./assetUploadTarget";
+import {captureUploadDocument} from "../../upload/insertPosition";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -47,11 +48,11 @@ export const bindAssetEvent = (options: {
         if (event.target.files.length === 0) {
             return;
         }
-        const applyUpload = captureAssetCellUpload(options.protyle, options.blockElement,
+        const upload = captureAssetCellUpload(options.protyle, options.blockElement,
             options.cellElements, options.menuElement);
         uploadFiles(options.protyle, event.target.files, event.target, (_res, result) => {
-            applyUpload(result);
-        }, undefined, {source: "file-picker", target: "av-cell"});
+            upload.apply(result);
+        }, undefined, {source: "file-picker", target: "av-cell", document: upload.document});
     });
 };
 
@@ -133,7 +134,7 @@ export const updateAssetCell = (options: {
         return;
     }
     const viewType = options.blockElement.getAttribute("data-av-type") as TAVView;
-    const colId = getColId(options.cellElements[0], viewType);
+    const colId = options.targets?.[0]?.colID || getColId(options.cellElements[0], viewType);
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     let mAssetValue: IAVCellAssetValue[];
@@ -148,14 +149,9 @@ export const updateAssetCell = (options: {
         if (target && data && selectedCell?.column.type !== "mAsset") {
             return;
         }
-        if (!options.blockElement.contains(item)) {
-            if (isTableLikeView(viewType)) {
-                item = (options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
-                    options.blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
-            } else {
-                item = (options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
-            }
-        }
+        item = resolveAssetCellElement(options.blockElement, item, target || {
+            rowID, colID: getColId(item, viewType), groupID: "",
+        }, viewType);
         if (!item && !selectedCell) {
             return;
         }
@@ -430,7 +426,8 @@ export const editAssetItem = (options: {
                     options.blockElement.getAttribute("data-av-id"),
                     options.blockElement.getAttribute("data-node-id"),
                     options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
+                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
+                    options.cellElements[0]?.closest<HTMLElement>(".av__body")?.dataset.groupId
                 );
             }
         });
@@ -554,24 +551,59 @@ const getAssetCellMenu = (cellElement: HTMLElement) => {
     return ids.includes(cellElement.dataset.id) ? menuElement : null;
 };
 
+const resolveAssetCellElement = (blockElement: Element, cellElement: HTMLElement,
+                                 target: IAVCellPoint, viewType: TAVView) => {
+    let item = cellElement;
+    if (!blockElement.contains(item) || getColId(item, viewType) !== target.colID ||
+        getFieldIdByCellElement(item, viewType) !== target.rowID) {
+        item = (cellElement.classList.contains("custom-attr__avvalue") ?
+            blockElement.querySelector(`.custom-attr__avvalue[data-row-id="${target.rowID}"][data-col-id="${target.colID}"]`) :
+            isTableLikeView(viewType) ?
+                blockElement.querySelector(`.av__row[data-id="${target.rowID}"] .av__cell[data-col-id="${target.colID}"]`) :
+            blockElement.querySelector(`.av__gallery-item[data-id="${target.rowID}"] .av__cell[data-field-id="${target.colID}"]`)) as HTMLElement;
+    }
+    return item && (getTypeByCellElement(item) || item.dataset.type) === "mAsset" ? item : null;
+};
+
 const captureAssetCellUpload = (protyle: IProtyle, blockElement: Element, cells: HTMLElement[],
                                 menuElement: HTMLElement | null) => {
     const cellElements = Array.from(cells);
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
+    const avID = blockElement.getAttribute("data-av-id");
+    const blockID = blockElement.getAttribute("data-node-id");
+    const attributeID = blockElement.getAttribute("data-attribute-id");
+    const ownerElement = blockElement.closest(".protyle-db-row");
     const targets = cellElements.map(item => ({
         rowID: getFieldIdByCellElement(item, viewType),
         colID: getColId(item, viewType),
         groupID: item.closest<HTMLElement>(".av__body")?.dataset.groupId || "",
     }));
-    return (result: Omit<IAssetUploadResult, "requestId" | "input">) => {
-        if (!document.body.contains(blockElement)) {
-            return;
+    // 独立条目的上下文编辑器不挂载 DOM，使用可见面板并按原条目重新解析刷新后的字段。
+    const resolveBlock = () => ownerElement ? ownerElement.querySelector<HTMLElement>(
+        `[data-av-id="${avID}"][data-node-id="${blockID}"][data-attribute-id="${attributeID}"]`) : blockElement;
+    const isAvailable = () => {
+        const currentBlock = resolveBlock();
+        if (protyle.disabled || !currentBlock || !document.body.contains(currentBlock) ||
+            currentBlock.getAttribute("data-av-id") !== avID ||
+            currentBlock.getAttribute("data-node-id") !== blockID) {
+            return false;
         }
-        const addValue = getUploadedAssetValues(result);
-        if (addValue.length === 0) {
-            return;
-        }
-        updateAssetCell({protyle, blockElement, cellElements, targets, addValue, menuElement});
+        const data = getAVData(currentBlock as HTMLElement);
+        return targets.some((target, index) => data ? resolveAVSelectedCell(data, target)?.column.type === "mAsset" :
+            Boolean(resolveAssetCellElement(currentBlock, cellElements[index], target, viewType)));
+    };
+    return {
+        document: captureUploadDocument(protyle, {element: ownerElement || protyle.element, isAvailable}),
+        apply: (result: Omit<IAssetUploadResult, "requestId" | "input">) => {
+            if (!isAvailable()) {
+                return;
+            }
+            const addValue = getUploadedAssetValues(result);
+            if (addValue.length === 0) {
+                return;
+            }
+            updateAssetCell({protyle, blockElement: resolveBlock(), cellElements, targets, addValue, menuElement});
+        },
     };
 };
 
@@ -643,7 +675,7 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
         }
         if (usePanelTarget) {
             if (applyPanelUpload) {
-                applyPanelUpload(result);
+                applyPanelUpload.apply(result);
                 if (panelElement.isConnected) {
                     panelElement.remove();
                 }
@@ -709,9 +741,9 @@ export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement:
         return;
     }
     const menuElement = getAssetCellMenu(cellElement);
-    const applyUpload = captureAssetCellUpload(protyle, blockElement, [cellElement], menuElement);
-    uploadLocalFiles(files, protyle, true, {source: "drop", target: "av-cell", position}, (_response, result) => {
-        applyUpload(result);
+    const upload = captureAssetCellUpload(protyle, blockElement, [cellElement], menuElement);
+    uploadLocalFiles(files, protyle, true, {source: "drop", target: "av-cell", position, document: upload.document}, (_response, result) => {
+        upload.apply(result);
     });
 };
 
@@ -722,10 +754,10 @@ export const uploadFilesToAssetCell = (files: FileList | File[], protyle: IProty
         return;
     }
     const menuElement = getAssetCellMenu(cellElement);
-    const applyUpload = captureAssetCellUpload(protyle, blockElement, [cellElement], menuElement);
+    const upload = captureAssetCellUpload(protyle, blockElement, [cellElement], menuElement);
     uploadFiles(protyle, files, undefined, (_response, result) => {
-        applyUpload(result);
-    }, undefined, {source: options.source, target: "av-cell", position: options.position});
+        upload.apply(result);
+    }, undefined, {source: options.source, target: "av-cell", position: options.position, document: upload.document});
 };
 
 export const dragUploadFiles = (files: FileList | File[], protyle: IProtyle, cellElement: HTMLElement,

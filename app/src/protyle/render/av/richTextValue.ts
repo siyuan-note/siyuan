@@ -20,6 +20,7 @@ export const AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES = [
     "data-marker", "data-node-id", "data-node-index", "data-position", "data-subtype", "data-type", "draggable",
     "spellcheck", "spin", "style", "updated", "xlink:href",
 ];
+const AV_RICH_TEXT_CUSTOM_PROTOCOL = /^(?!(?:javascript|vbscript|data|blob|file|filesystem|about|chrome|chrome-extension|devtools|view-source|resource|moz-extension):)[a-z][a-z0-9+.-]*:\/\//i;
 export const AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS = {
     ALLOWED_TAGS: AV_RICH_TEXT_PREVIEW_ALLOWED_TAGS,
     ALLOWED_ATTR: AV_RICH_TEXT_PREVIEW_ALLOWED_ATTRIBUTES,
@@ -27,7 +28,8 @@ export const AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS = {
     ALLOW_DATA_ATTR: false,
     // 公式源码是纯文本，不按链接地址过滤；链接属性仍使用独立的地址校验。
     ADD_URI_SAFE_ATTR: ["data-content"],
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|siyuan|tel|web\+siyuan):|[#/?]|\.\.?\/|[^a-z]|[a-z0-9._~-]+(?:[/?#]|$))/i,
+    ALLOWED_URI_REGEXP: new RegExp(AV_RICH_TEXT_CUSTOM_PROTOCOL.source +
+        "|" + /^(?:(?:https?|mailto|siyuan|tel|web\+siyuan):|[#/?]|\.\.?\/|[^a-z]|[a-z0-9._~-]+(?:[/?#]|$))/.source, "i"),
 };
 const BUILTIN_INLINE_COLOR_COUNT = 13;
 const MAX_INLINE_FONT_FAMILY_LENGTH = 256;
@@ -152,16 +154,17 @@ export const sanitizeAVRichTextInlineMemoContent = (value: string) => {
         return "";
     }
 
-    for (let start = decoded.indexOf("<"); start >= 0; start = decoded.indexOf("<", start + 1)) {
+    // 实体保持编码后只会显示为文字；仅拒绝可被渲染器解释为标签的原始内容。
+    for (let start = value.indexOf("<"); start >= 0; start = value.indexOf("<", start + 1)) {
         let index = start + 1;
-        if (decoded[index] === "/") {
+        if (value[index] === "/") {
             index++;
-            if (/[A-Za-z]/.test(decoded[index] || "")) {
+            if (/[A-Za-z]/.test(value[index] || "")) {
                 return "";
             }
             continue;
         }
-        if (/[A-Za-z!?]/.test(decoded[index] || "")) {
+        if (/[A-Za-z!?]/.test(value[index] || "")) {
             return "";
         }
     }
@@ -190,7 +193,7 @@ const isCleanAVRichTextAssetPath = (value: string) => {
     return cleanPath === path;
 };
 
-export const getAVRichTextSafeURL = (value?: string | null, localLinks = false) => {
+export const getAVRichTextSafeURL = (value?: string | null, localLinks = false, customProtocols = false) => {
     const original = value || "";
     if (!original) {
         return "";
@@ -237,7 +240,8 @@ export const getAVRichTextSafeURL = (value?: string | null, localLinks = false) 
             const opaque = url.slice(scheme.length + 1);
             return opaque && !opaque.startsWith("/") ? url : "";
         }
-        if (scheme !== "http" && scheme !== "https" && scheme !== "siyuan" && scheme !== "web+siyuan") {
+        if (scheme !== "http" && scheme !== "https" && scheme !== "siyuan" && scheme !== "web+siyuan" &&
+            !(customProtocols && AV_RICH_TEXT_CUSTOM_PROTOCOL.test(url))) {
             return "";
         }
         if (!url.toLowerCase().startsWith(`${scheme}://`)) {

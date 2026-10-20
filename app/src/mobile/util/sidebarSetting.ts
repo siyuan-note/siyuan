@@ -1,6 +1,6 @@
-import {setStorageVal} from "../../protyle/util/compatibility";
+import {patchAppearancePreference} from "../../config/tabs/appearancePreferences";
 import {escapeHtml} from "../../util/escape";
-import {getMobileSidebarConfig, MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
+import {getMobileSidebarConfig} from "./mobileBarsConfig";
 import {updateSidebarButtons} from "./sidebarButtons";
 import {showMobileBars} from "./mobileBars";
 
@@ -14,33 +14,38 @@ export const genSidebarSettingHTML = () => settings.map(key => `<label class="b3
     <input data-sidebar-setting="${key}" type="checkbox" class="b3-switch fn__flex-center">
 </label>`).join("");
 
+export const syncSidebarSetting = (root: ParentNode = document) => {
+    const config = getMobileSidebarConfig();
+    settings.forEach(key => {
+        const input = root.querySelector<HTMLInputElement>(`[data-sidebar-setting="${key}"]`);
+        if (!input) {
+            return;
+        }
+        input.checked = config[key];
+        input.disabled = window.siyuan.config.readonly || window.siyuan.isPublish ||
+            !config[key === "sidebarSwipe" ? "sidebarButtons" : "sidebarSwipe"];
+    });
+};
+
 export const mountSidebarSetting = (root: HTMLElement) => {
-    const render = () => {
-        const config = getMobileSidebarConfig();
-        settings.forEach(key => {
-            const input = root.querySelector<HTMLInputElement>(`[data-sidebar-setting="${key}"]`);
-            if (!input) {
-                return;
-            }
-            input.checked = config[key];
-            input.disabled = window.siyuan.config.readonly || window.siyuan.isPublish ||
-                !config[key === "sidebarSwipe" ? "sidebarButtons" : "sidebarSwipe"];
-        });
-    };
+    const render = () => syncSidebarSetting(root);
     settings.forEach(key => {
         root.querySelector<HTMLInputElement>(`[data-sidebar-setting="${key}"]`)?.addEventListener("change", event => {
+            if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+                render();
+                return;
+            }
             const current = getMobileSidebarConfig();
             const checked = (event.target as HTMLInputElement).checked;
             if (!checked && !current[key === "sidebarSwipe" ? "sidebarButtons" : "sidebarSwipe"]) {
                 render();
                 return;
             }
-            const config = {...window.siyuan.storage[MOBILE_BARS_CONFIG_KEY], ...current, [key]: checked};
-            window.siyuan.storage[MOBILE_BARS_CONFIG_KEY] = config;
-            setStorageVal(MOBILE_BARS_CONFIG_KEY, config);
-            render();
-            updateSidebarButtons();
-            showMobileBars();
+            void patchAppearancePreference(`mobileBars.${key}`, checked).then(() => {
+                render();
+                updateSidebarButtons();
+                showMobileBars();
+            });
         });
     });
     render();

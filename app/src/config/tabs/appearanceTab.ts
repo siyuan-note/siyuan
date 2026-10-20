@@ -52,7 +52,10 @@ import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/uti
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
-import {isPageScrollButtonsEnabled, setPageScrollButtonsEnabled} from "../../protyle/scroll/pageButtons";
+import {isCompactModeAvailable, isCompactModeEnabled, setCompactModeEnabled} from "./compactMode";
+import {isMenuMouseScrollAvailable, isMenuMouseScrollEnabled, setMenuMouseScrollEnabled} from "./menuMouseScroll";
+import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
+import type {TInlineStyleType} from "../../protyle/toolbar/inlineStyle";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -134,6 +137,29 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         step: 1,
         save: (value) => {
             setEditorFontSize(value as number);
+        },
+    });
+    const colorOptions: {type: TInlineStyleType; label: string}[] = [
+        {type: "style1", label: window.siyuan.languages.color},
+        {type: "color", label: window.siyuan.languages.colorFont},
+        {type: "backgroundColor", label: window.siyuan.languages.colorPrimary},
+    ];
+    group.slot({
+        key: "manageColors",
+        keywords: [window.siyuan.languages.manageColors, ...colorOptions.map(option => option.label)],
+        html: () => genStackHtml(colorOptions.map((option, index) => ({
+            left: {
+                kind: index === 0 ? "title" : "desc",
+                text: index === 0 ? window.siyuan.languages.manageColors : "",
+            },
+            right: {kind: "button", id: `manageColors-${option.type}`, label: option.label, icon: "iconSettings"},
+        }))),
+        afterMount: (root) => {
+            colorOptions.forEach(({type}) => {
+                const button = root.querySelector<HTMLButtonElement>(`#manageColors-${type}`);
+                button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
+                button.addEventListener("click", () => { openInlineStyleDialog(type); });
+            });
         },
     });
     group.switch("editor.fullWidth", {
@@ -764,6 +790,7 @@ const mountBootAppearance = async (root: HTMLElement) => {
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("interface", window.siyuan.languages.configGroupInterface);
 
+    // 语言必须保持为界面分组的第一项，便于切换到熟悉的语言。
     group.select("appearance.lang", {
         title: window.siyuan.languages.language,
         desc: window.siyuan.languages.language1,
@@ -896,17 +923,44 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         html: genBodyGradientHtml,
         afterMount: mountBodyGradient,
     });
+    if (isCompactModeAvailable()) {
+        group.switch("compactMode", {
+            title: window.siyuan.languages.compactMode,
+            desc: window.siyuan.languages.compactModeTip,
+            readConfig: isCompactModeEnabled,
+            save: value => setCompactModeEnabled(value as boolean),
+        });
+    }
+    /// #if !MOBILE
+    group.switch("appearance.hideToolbar", {
+        title: window.siyuan.languages.appearance19,
+        desc: window.siyuan.languages.appearance20,
+    });
+    /// #endif
+    group.stack({
+        key: "statusBar",
+        keywords: [
+            window.siyuan.languages.appearance16,
+            window.siyuan.languages.appearance17,
+            window.siyuan.languages.appearance18,
+        ],
+        afterMount: mountAppearanceSetStatusBar,
+    }, (stack) => {
+        stack.title(window.siyuan.languages.appearance16);
+        stack.switch("appearance.hideStatusBar", {
+            desc: window.siyuan.languages.appearance17,
+        });
+        stack.desc(window.siyuan.languages.appearance18);
+        stack.button({
+            id: "statusBarSetting",
+            label: window.siyuan.languages.config,
+            icon: "iconSettings",
+        });
+    });
 };
 
 const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
-
-    group.switch("pageScrollButtons", {
-        title: window.siyuan.languages.showPageScrollButtons,
-        desc: window.siyuan.languages.showPageScrollButtonsTip,
-        readConfig: isPageScrollButtonsEnabled,
-        save: (value) => setPageScrollButtonsEnabled(value === true),
-    });
 
     /// #if MOBILE
     group.slot({
@@ -952,6 +1006,14 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });
+    if (isMenuMouseScrollAvailable()) {
+        group.switch("menuMouseScroll", {
+            title: window.siyuan.languages.menuMouseScroll,
+            desc: window.siyuan.languages.menuMouseScrollTip,
+            readConfig: isMenuMouseScrollEnabled,
+            save: value => setMenuMouseScrollEnabled(value as boolean),
+        });
+    }
     /// #if !MOBILE
     group.select("editor.floatWindowMode", {
         title: window.siyuan.languages.floatWindowMode,
@@ -982,31 +1044,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         ],
     });
     /// #endif
-    group.switch("appearance.hideToolbar", {
-        title: window.siyuan.languages.appearance19,
-        desc: window.siyuan.languages.appearance20,
-    });
     /// #endif
-    group.stack({
-        key: "statusBar",
-        keywords: [
-            window.siyuan.languages.appearance16,
-            window.siyuan.languages.appearance17,
-            window.siyuan.languages.appearance18,
-        ],
-        afterMount: mountAppearanceSetStatusBar,
-    }, (stack) => {
-        stack.title(window.siyuan.languages.appearance16);
-        stack.switch("appearance.hideStatusBar", {
-            desc: window.siyuan.languages.appearance17,
-        });
-        stack.desc(window.siyuan.languages.appearance18);
-        stack.button({
-            id: "statusBarSetting",
-            label: window.siyuan.languages.config,
-            icon: "iconSettings",
-        });
-    });
     group.button({
         id: "notificationsSetting",
         title: window.siyuan.languages.notifications,

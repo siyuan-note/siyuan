@@ -12,7 +12,10 @@ const createPanel = (mobile = false) => {
     const observers: Array<() => void> = [];
     let context: IAVPanelContext;
     let existing = false;
-    const menu = {isConnected: true, clientWidth: 100, dataset: {}, querySelector: (): null => null};
+    let backTarget: HTMLElement;
+    const menuClasses = new Set<string>();
+    const menu = {isConnected: true, clientWidth: 100, dataset: {}, querySelector: (): null => null,
+        classList: {contains: (name: string) => menuClasses.has(name)}};
     const panel = {isConnected: true, lastElementChild: menu, parentElement: {},
         remove: () => { existing = false; panel.isConnected = false; calls.push("remove"); },
         addEventListener: (name: string, callback: (event: unknown) => unknown) => events.set(name, callback)};
@@ -25,6 +28,7 @@ const createPanel = (mobile = false) => {
     const dependencies = new Proxy({
         getPageSize: () => ({}), getFieldsByData: (data: IAV & {fields: IAVColumn[]}) => data.fields,
         escapeAttr: (value: string) => value, isMobile: () => mobile,
+        getMobileAVPanelBackTarget: () => backTarget,
         getAVPanelDescriptor: () => ({render: (value: IAVPanelContext) => { context = value; value.html = "panel"; return true; },
             bind: (value: IAVPanelContext) => { value.closeCB = () => calls.push("closeCB"); }}),
         dispatchAVPanelAction: (value: IAVPanelContext) => { assert.equal(value, context); calls.push("action"); return "handled"; },
@@ -36,14 +40,50 @@ const createPanel = (mobile = false) => {
         exports, require: () => dependencies,
         document: {querySelector: () => existing ? panel : null, body: {insertAdjacentHTML: () => { existing = true; calls.push("insert"); }}},
         window: {siyuan: {zIndex: 0, menus: {menu: {remove: () => calls.push("menu.remove"), element: {classList: classes}}}},
-            addEventListener: () => calls.push("resize.bind"), removeEventListener: () => calls.push("resize.unbind")},
+            addEventListener: (name: string, callback: (event: unknown) => unknown) => {
+                calls.push("resize.bind");
+                events.set(name, callback);
+            }, removeEventListener: () => calls.push("resize.unbind")},
         MutationObserver: class { constructor(callback: () => void) { observers.push(callback); } observe() {} disconnect() {} },
         setTimeout: (callback: () => void) => callback(),
     });
     const open = exports.openMenuPanel as typeof import("../openMenuPanel").openMenuPanel;
     const click = (detail: unknown) => events.get("click")({detail, target: {dataset: {}, closest: (): null => null}, preventDefault: () => {}, stopPropagation: () => {}});
-    return {open, options, calls, click, observers, get context() { return context; }, setExisting: () => { existing = true; }};
+    return {open, options, calls, click, observers, menuClasses, resize: () => events.get("resize")({}),
+        setBackTarget: () => {
+            backTarget = {dataset: {type: "go-properties"}, closest: (): null => null} as unknown as HTMLElement;
+        },
+        get context() { return context; }, setExisting: () => { existing = true; }};
 };
+
+test("window resizing uses the automation height constraint only while its panel is open", () => {
+    const h = createPanel();
+    h.open(h.options);
+    h.calls.length = 0;
+    h.menuClasses.add("av__automation-panel");
+    h.resize();
+    assert.deepEqual(h.calls, ["setAutomationMenuPosition"]);
+    h.calls.length = 0;
+    h.menuClasses.delete("av__automation-panel");
+    h.resize();
+    assert.deepEqual(h.calls, ["setPosition"]);
+});
+
+test("mobile back returns within a database panel and closes the root through its save callback", async () => {
+    const h = createPanel(true);
+    h.options.keepMenuOpen = true;
+    h.open(h.options);
+    h.calls.length = 0;
+    h.setBackTarget();
+    await h.click("back");
+    assert.deepEqual(h.calls, ["action"]);
+    const root = createPanel(true);
+    root.options.keepMenuOpen = true;
+    root.open(root.options);
+    root.calls.length = 0;
+    await root.click("back");
+    assert.deepEqual(root.calls, ["closeCB", "remove", "focusBlock"]);
+});
 
 test("opening an existing panel destroys it without fetching or binding another panel", () => {
     const h = createPanel();

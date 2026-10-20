@@ -1,9 +1,9 @@
 const path = require("path");
+const PreserveWatchAssetsPlugin = require("./scripts/preserve-watch-assets");
 const webpack = require("webpack");
 const pkg = require("./package.json");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 const {EsbuildPlugin} = require("esbuild-loader");
 
 module.exports = (env, argv) => {
@@ -13,6 +13,8 @@ module.exports = (env, argv) => {
         devtool: argv.mode !== "production" ? "source-map" : false,
         target: "electron-renderer",
         output: {
+            // 首次输出时清理，开发期间的后续输出由插件保留旧资源。
+            clean: true,
             globalObject: "globalThis",
             publicPath: "auto",
             filename: "[name].[chunkhash].js",
@@ -140,11 +142,7 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
-            new CleanWebpackPlugin({
-                cleanStaleWebpackAssets: false,
-                cleanOnceBeforeBuildPatterns: [
-                    path.join(__dirname, "stage/build/app")],
-            }),
+            new PreserveWatchAssetsPlugin(),
             new webpack.DefinePlugin({
                 SIYUAN_VERSION: JSON.stringify(pkg.version),
                 NODE_ENV: JSON.stringify(argv.mode),

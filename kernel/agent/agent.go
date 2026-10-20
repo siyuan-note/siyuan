@@ -23,10 +23,12 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"maps"
 	"math/rand/v2"
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -173,14 +175,19 @@ var toolSignatureKeys = map[string][]string{
 // buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。
 func buildDoomSignature(name, action string, args map[string]any) string {
 	var sig strings.Builder
-	sig.WriteString(name + "::action=" + action)
+	sig.WriteString(name)
+	sig.WriteString("::action=")
+	sig.WriteString(action)
 	for _, k := range toolSignatureKeys[name] {
 		if v, ok := args[k]; ok {
 			s := fmt.Sprint(v)
 			if len(s) > 64 {
 				s = s[:64] + "..."
 			}
-			sig.WriteString("::" + k + "=" + s)
+			sig.WriteString("::")
+			sig.WriteString(k)
+			sig.WriteString("=")
+			sig.WriteString(s)
 		}
 	}
 	return sig.String()
@@ -551,7 +558,6 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 			return
 		}
-		tools := capabilities.definitions
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
 		var contextMsgs []AgentMessage
@@ -589,8 +595,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					currentUserExists := false
 					if regenerate {
 						lastUserIdx := -1
-						for i := len(truncated) - 1; i >= 0; i-- {
-							if truncated[i].Role == "user" && (userEntryID == "" || truncated[i].EntryID == userEntryID) {
+						for i, t := range slices.Backward(truncated) {
+							if t.Role == "user" && (userEntryID == "" || t.EntryID == userEntryID) {
 								lastUserIdx = i
 								break
 							}
@@ -602,12 +608,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							return
 						}
 					} else {
-						for i := len(truncated) - 1; i >= 0; i-- {
-							if truncated[i].Role != "user" {
+						for _, t := range slices.Backward(truncated) {
+							if t.Role != "user" {
 								continue
 							}
-							currentUserExists = userEntryID != "" && truncated[i].EntryID == userEntryID
-							if userEntryID == "" && (truncated[i].Content == userMessage || truncated[i].Content == rawUserMessage) {
+							currentUserExists = userEntryID != "" && t.EntryID == userEntryID
+							if userEntryID == "" && (t.Content == userMessage || t.Content == rawUserMessage) {
 								currentUserExists = true
 							}
 							break
@@ -683,8 +689,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		saveTurn := func(state string) bool {
 			turn.State = state
 			deltaStart := turnBaseIndex
-			for i := len(checkpointMsgs) - 1; i >= 0; i-- {
-				message := checkpointMsgs[i]
+			for i, message := range slices.Backward(checkpointMsgs) {
+
 				if message.Role == "user" && ((userEntryID != "" && message.EntryID == userEntryID) ||
 					(userEntryID == "" && message.Content == userMessage)) {
 					deltaStart = i + 1
@@ -942,7 +948,6 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				roundCapabilities = &capabilitySet{registrations: map[string]*capabilityRegistration{}}
 			}
 			capabilities = roundCapabilities
-			tools = requestTools
 			contextMsgs = projectCompactionContext(checkpointMsgs, coveredMessages)
 			messages = checkpointMessagesToOpenAIWithSummary(contextMsgs, language, capabilities, compaction, instructions.Content)
 			if len(messages) > 0 && messages[0].Role == openai.ChatMessageRoleSystem {
@@ -1251,9 +1256,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							toolInputErr = previewErr
 						} else if preview != nil {
 							confirmationArgs = make(map[string]any, len(args)+1)
-							for key, value := range args {
-								confirmationArgs[key] = value
-							}
+							maps.Copy(confirmationArgs, args)
 							confirmationArgs["verifiedPackage"] = preview
 						}
 					}
@@ -1263,9 +1266,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							toolInputErr = previewErr
 						} else if preview != nil {
 							confirmationArgs = make(map[string]any, len(args)+1)
-							for key, value := range args {
-								confirmationArgs[key] = value
-							}
+							maps.Copy(confirmationArgs, args)
 							confirmationArgs["currentSnippet"] = preview
 						}
 					}
@@ -1605,13 +1606,6 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
-
-		turn.TokenBreakdown = computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens)
-		if !saveTurn("finished") {
-			return
-		}
-		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 	}()
 
 	return ch
@@ -2127,7 +2121,13 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 				"Yes requires loading skill with source=builtin and name=siyuan-plugin-development BEFORE asking only materially missing details; No skips that skill and continues the user's custom approach. " +
 				"Do not turn ordinary templates or existing capabilities into plugin work. Confirm a short proposal with workflow.action=plan before implementation; neither choice nor proposal authorizes installation or enabling. " +
 				"Reuse the taskId for adjustments; use newTask only for a separate requested plugin and reconsider only when the user changes the choice.\n")
-			sb.WriteString("Official skill: " + html.EscapeString(builtin.ID) + " · " + html.EscapeString(builtin.Version) + " · " + html.EscapeString(builtin.Digest) + ". This entry requires the workflow question; generic skill matching does not activate it.")
+			sb.WriteString("Official skill: ")
+			sb.WriteString(html.EscapeString(builtin.ID))
+			sb.WriteString(" · ")
+			sb.WriteString(html.EscapeString(builtin.Version))
+			sb.WriteString(" · ")
+			sb.WriteString(html.EscapeString(builtin.Digest))
+			sb.WriteString(". This entry requires the workflow question; generic skill matching does not activate it.")
 		}
 	}
 
@@ -2215,15 +2215,15 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 			totalVisible := len(editorCtx.VisibleBlockIDs)
 			if totalVisible > maxVisibleBlockIDs {
 				sb.WriteString("Visible block ids (showing first ")
-				sb.WriteString(fmt.Sprintf("%d", maxVisibleBlockIDs))
+				fmt.Fprintf(&sb, "%d", maxVisibleBlockIDs)
 				sb.WriteString(" of ")
-				sb.WriteString(fmt.Sprintf("%d", totalVisible))
+				fmt.Fprintf(&sb, "%d", totalVisible)
 				sb.WriteString("):\n")
 			} else {
 				sb.WriteString("Visible block ids:\n")
 			}
 			limit := min(totalVisible, maxVisibleBlockIDs)
-			for i := 0; i < limit; i++ {
+			for i := range limit {
 				sb.WriteString("- ")
 				sb.WriteString(editorCtx.VisibleBlockIDs[i])
 				sb.WriteString("\n")
@@ -2450,7 +2450,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 	return msgs
 }
 
-func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet,
+func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, _ string, capabilities *capabilitySet,
 	compaction *runtimeCompaction, downgradeImages bool) []any {
 	var input []any
 	if compaction != nil {
@@ -2634,7 +2634,8 @@ func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, p
 		if err == nil {
 			for {
 				firstResp, firstErr := recvStreamWithIdleTimeout(stream, streamIdleTimeout, streamCancel)
-				if firstErr != nil || (!util.IsOpenAIResponsesProtocol(protocol) && !util.IsAnthropicMessagesProtocol(protocol)) || len(firstResp.Choices) > 0 ||
+				if firstErr != nil || (!util.IsOpenAIResponsesProtocol(protocol) && !util.IsAnthropicMessagesProtocol(protocol) &&
+					!util.IsGeminiInteractionsProtocol(protocol)) || len(firstResp.Choices) > 0 ||
 					firstResp.Usage != nil {
 					if firstErr == nil || errors.Is(firstErr, io.EOF) {
 						return stream, firstResp, streamCancel, nil
@@ -2698,16 +2699,14 @@ func classifyRetry(err error) string {
 	if errors.Is(err, errModelRequestTimeout) || errors.Is(err, errModelStreamIdleTimeout) || errors.Is(err, context.DeadlineExceeded) {
 		return "timeout"
 	}
-	var subscriptionErr *chatgpt.RequestError
-	if errors.As(err, &subscriptionErr) {
+	if subscriptionErr, ok := errors.AsType[*chatgpt.RequestError](err); ok {
 		if subscriptionErr.Status >= 500 {
 			return "server_error"
 		}
 		return "fatal"
 	}
 
-	var apiErr *openai.APIError
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*openai.APIError](err); ok {
 		code := strings.ToLower(strings.TrimSpace(fmt.Sprint(apiErr.Code)))
 		if code == "subscription_sharing_usage_limit_exceeded" {
 			return "fatal"
@@ -2766,8 +2765,7 @@ func getAgentErrorMessage(err error) string {
 }
 
 func getAgentRequestErrorMessage(err error, _ []openai.ChatCompletionMessage) string {
-	var apiErr *openai.APIError
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*openai.APIError](err); ok {
 		message := strings.TrimSpace(apiErr.Message)
 		if message != "" {
 			runes := []rune(message)

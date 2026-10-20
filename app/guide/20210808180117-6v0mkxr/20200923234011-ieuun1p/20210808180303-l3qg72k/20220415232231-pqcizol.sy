@@ -6,7 +6,7 @@
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -674,7 +674,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232239-rrjlw3p",
-				"updated": "20220415232435"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -780,7 +780,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cquery1\u003e AND \u003cquery2\u003e"
+									"TextMarkTextContent": "<query1> AND <query2>"
 								}
 							]
 						},
@@ -807,7 +807,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cquery1\u003e OR \u003cquery2\u003e"
+									"TextMarkTextContent": "<query1> OR <query2>"
 								}
 							]
 						},
@@ -834,7 +834,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cquery1\u003e NOT \u003cquery2\u003e"
+									"TextMarkTextContent": "<query1> NOT <query2>"
 								}
 							]
 						},
@@ -881,7 +881,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20220415232239-3z0w5v1",
-				"updated": "20220502163630"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -894,7 +894,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "-- Matches documents that contain at least one instance of either \"one\" or \"two\", but do not contain any instances of token \"three\".\n'one OR two NOT three'\n\n-- Match all documents that contain the token \"two\" but not \"three\", or contain the token \"one\".\n'one OR (two NOT three)'\n"
+					"Data": "-- NOT takes precedence over OR; use parentheses to make grouping explicit.\n-- Matches documents that contain at least one instance of either \"one\" or \"two\", but do not contain any instances of token \"three\".\n'(one OR two) NOT three'\n\n-- Match all documents that contain the token \"two\" but not \"three\", or contain the token \"one\".\n'one OR (two NOT three)'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

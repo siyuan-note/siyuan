@@ -72,6 +72,10 @@ export class Model {
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);
         ws.onopen = () => {
             if (this.socketDisposed || this.ws !== ws) return;
+            if (options.type === "main") {
+                const {markKernelConnectionAlive}: typeof import("../util/kernelConnection") = require("../util/kernelConnection");
+                markKernelConnectionAlive();
+            }
             if (options.type === "main" && window.siyuan.isReady) {
                 const {reloadSettingsResetOnReconnect}: typeof import("../config/setting/reset") = require("../config/setting/reset");
                 if (reloadSettingsResetOnReconnect()) return;
@@ -129,7 +133,7 @@ export class Model {
             if (this.socketDisposed || this.ws !== ws) return;
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 const {kernelError}: typeof import("../util/kernelFault") = require("../util/kernelFault");
-                kernelError();
+                void kernelError(() => this.socketDisposed || this.ws !== ws);
             }
         };
         if (this.ws) {

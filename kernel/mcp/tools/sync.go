@@ -57,22 +57,22 @@ func syncHandler(args map[string]any) (CallToolResult, error) {
 	}, nil
 }
 
-func syncPerform(args map[string]any) (CallToolResult, error) {
+func syncPerform(_ map[string]any) (CallToolResult, error) {
 	model.SyncData(true)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync done: " + model.Conf.Sync.Load().Stat}}}, nil
 }
 
-func syncUpload(args map[string]any) (CallToolResult, error) {
+func syncUpload(_ map[string]any) (CallToolResult, error) {
 	model.SyncDataUpload()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync upload done: " + model.Conf.Sync.Load().Stat}}}, nil
 }
 
-func syncDownload(args map[string]any) (CallToolResult, error) {
+func syncDownload(_ map[string]any) (CallToolResult, error) {
 	model.SyncDataDownload()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync download done: " + model.Conf.Sync.Load().Stat}}}, nil
 }
 
-func syncStatus(args map[string]any) (CallToolResult, error) {
+func syncStatus(_ map[string]any) (CallToolResult, error) {
 	s := model.Conf.Sync.Load()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
 		"Sync Status:\n  Enabled: %v\n  Mode: %d (0/1=auto, 2=manual, 3=full-manual)\n  Provider: %d\n  Cloud: %s\n  Perception: %v\n  Interval: %ds\n  Synced: %d\n  Stat: %s",

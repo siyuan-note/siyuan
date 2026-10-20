@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -155,6 +156,7 @@ type agentRuntimeTurn struct {
 	UserEntryID       string         `json:"userEntryID"`
 	TargetUserEntryID string         `json:"targetUserEntryID,omitempty"`
 	UserContent       string         `json:"userContent,omitempty"`
+	UserTimestamp     int64          `json:"userTimestamp,omitempty"`
 	UserBlockHTML     *string        `json:"userBlockHTML,omitempty"`
 	UserReferences    *[]Reference   `json:"userReferences,omitempty"`
 	UserEditorContext *EditorContext `json:"userEditorContext,omitempty"`
@@ -291,6 +293,10 @@ func beginRuntimeTurn(sessionID string, turn *agentRuntimeTurn) error {
 	}
 	if findRuntimeUserAnchor(session, turn.UserEntryID) < 0 {
 		return fmt.Errorf("agent runtime user entry not found")
+	}
+	// 编辑重发的消息时间固定为本轮开始时间，不随后续检查点和恢复操作改变。
+	if turn.Mode == "regenerate" && turn.UserBlockHTML != nil && turn.UserTimestamp == 0 {
+		turn.UserTimestamp = time.Now().UnixMilli()
 	}
 	runtime.ActiveTurn = turn
 	return writeRuntimeLocked(sessionID, runtime)
@@ -441,8 +447,8 @@ func isRuntimeTurnTerminal(turn *agentRuntimeTurn) bool {
 
 func findRuntimeUserAnchor(session map[string]any, userEntryID string) int {
 	entries, _ := session["entries"].([]any)
-	for i := len(entries) - 1; i >= 0; i-- {
-		entry, _ := entries[i].(map[string]any)
+	for i, entrie := range slices.Backward(entries) {
+		entry, _ := entrie.(map[string]any)
 		if entry["type"] != "user" {
 			continue
 		}
@@ -466,6 +472,9 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 	if turn.Mode == "regenerate" && turn.UserContent != "" {
 		entry, _ := entries[anchor].(map[string]any)
 		entry["content"] = turn.UserContent
+		if turn.UserTimestamp > 0 {
+			entry["timestamp"] = turn.UserTimestamp
+		}
 		if turn.UserBlockHTML != nil {
 			if *turn.UserBlockHTML != "" {
 				entry["blockHTML"] = *turn.UserBlockHTML

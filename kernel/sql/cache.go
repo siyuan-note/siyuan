@@ -17,6 +17,7 @@
 package sql
 
 import (
+	"maps"
 	"strings"
 	"sync"
 	"time"
@@ -255,9 +256,7 @@ func getRefsCacheByDefIDInBox(defID, boxID string,
 			cacheable = append(cacheable, ref)
 		}
 	}
-	for blockID, ref := range partial {
-		merged[blockID] = ref
-	}
+	maps.Copy(merged, partial)
 	ret = ret[:0]
 	for _, ref := range merged {
 		ret = append(ret, ref)
@@ -301,9 +300,7 @@ func putRefCacheIfGeneration(defID, boxID string, generation refCacheGeneration,
 	key := refCacheKey(defID, boxID)
 	if cached, ok := defIDRefsCache.Get(key); ok {
 		if entry, valid := cached.(*refCacheEntry); valid {
-			for blockID, ref := range entry.refs {
-				complete[blockID] = ref
-			}
+			maps.Copy(complete, entry.refs)
 		}
 	}
 	defIDRefsCache.SetDefault(key, &refCacheEntry{refs: complete, complete: true})

@@ -45,6 +45,21 @@ fetchPost("/api/petal/loadPluginPublishData", {packageName: "example"}, response
 });
 
 fetchPost("/api/setting/setEditor", {markdown: {inlineMath: null}, fontFamilies: null});
+fetchPost("/api/setting/setEditor", {blockGutterMode: true}, response => {
+    if (response.code === 0 && response.data) {
+        const enabled: boolean = response.data.blockGutterMode;
+        // @ts-expect-error 块标开关响应统一为布尔值。
+        const numericMode: number = response.data.blockGutterMode;
+        void [enabled, numericMode];
+    }
+});
+// @ts-expect-error 块标开关不接受整数。
+fetchPost("/api/setting/setEditor", {blockGutterMode: 1});
+fetchPost("/api/setting/patch", {editor: {blockGutterMode: false}});
+// @ts-expect-error 局部更新也不接受整数块标配置。
+fetchPost("/api/setting/patch", {editor: {blockGutterMode: 0}});
+// @ts-expect-error 块标开关不接受字符串。
+fetchPost("/api/setting/setEditor", {blockGutterMode: "true"});
 fetchPost("/api/setting/setAI", {mcp: {servers: [{name: "server", env: {KEY: "value"}}]}});
 fetchPost("/api/setting/setKeymap", {data: {extension: {items: [null, false, 1, "text", {}]}}});
 fetchPost("/api/setting/setTheme", {theme: "theme", modes: [0, 1]});
@@ -189,6 +204,28 @@ fetchPost("/api/bazaar/setBazaarPackageRating", {packageType: "plugin", packageN
 // @ts-expect-error 集市包名列表只能包含字符串。
 fetchPost("/api/bazaar/getBazaarPackageRatings", {packageType: "plugin", packageNames: [1]});
 fetchPost("/api/bazaar/installLocalBazaarPackage", new ContractFormData({file: new Blob(), overwrite: "true"}));
+
+declare const bazaarAppearanceResponse: APIPOSTRoutes[
+    "/api/bazaar/installBazaarIcon" | "/api/bazaar/uninstallBazaarIcon" |
+    "/api/bazaar/installBazaarTheme" | "/api/bazaar/uninstallBazaarTheme"
+]["response"];
+if (bazaarAppearanceResponse.code === 0 && bazaarAppearanceResponse.data.appearance) {
+    const appearance = bazaarAppearanceResponse.data.appearance;
+    const compactMode: boolean = appearance.compactMode;
+    const menuMouseScroll: boolean = appearance.menuMouseScroll;
+    const outlineKeepCurrentExpand: boolean = appearance.outlineKeepCurrentExpand;
+    const pdfTheme: {light: string; dark: string; annoColor: string} | null = appearance.pdfTheme;
+    const mobileBars: {autoHide: boolean | null; sidebarSwipe: boolean | null; sidebarButtons: boolean | null} | null = appearance.mobileBars;
+    void [compactMode, menuMouseScroll, outlineKeepCurrentExpand, pdfTheme, mobileBars];
+    // @ts-expect-error Appearance preferences retain boolean response types.
+    const numericCompactMode: number = appearance.compactMode;
+    void numericCompactMode;
+    if (appearance.mobileBars) {
+        // @ts-expect-error Unset mobile preferences remain nullable in responses.
+        const autoHide: boolean = appearance.mobileBars.autoHide;
+        void autoHide;
+    }
+}
 
 type RPCWebSocket = APIGETRoutes["/ws/plugin/rpc"]["websocket"];
 const rpcCall: RPCWebSocket["incoming"] = {jsonrpc: "2.0", method: "call", id: 1};

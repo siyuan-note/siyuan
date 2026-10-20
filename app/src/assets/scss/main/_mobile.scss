@@ -15,7 +15,7 @@ body {
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
 }
 
-body.body--android {
+html[data-frontend="mobile"] body.body--android {
   --mobile-top-safe-area: 0px;
 
   .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
@@ -1331,14 +1331,21 @@ body.mobile-topbar--merged {
       align-self: center;
     }
 
-    // 搜索框与返回按钮同处顶栏，占满返回按钮右侧的剩余宽度
+    &__title {
+      min-width: 0;
+    }
+
+    // 标题与搜索框共用顶栏剩余空间，输入框可以在窄屏下收缩。
     &__search {
       display: flex;
       flex: 1;
       min-width: 0;
-      padding-right: 11px;
       -webkit-user-select: text;
       user-select: text;
+
+      input {
+        min-width: 0;
+      }
     }
 
     &__groups {
@@ -1527,6 +1534,12 @@ body.mobile-topbar--merged {
     }
   }
 
+  &__font-family {
+    margin: 4px 8px 4px 0;
+    min-height: 40px;
+    text-align: left;
+  }
+
   &__font-size {
     align-items: center;
     box-sizing: border-box;
@@ -1583,7 +1596,6 @@ body.mobile-topbar--merged {
   &--sheet {
     // 菜单入口可能指定宽度，移动端底部菜单始终铺满视口
     top: auto !important;
-    bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: auto !important;
@@ -1612,14 +1624,12 @@ body.mobile-topbar--merged {
   > .b3-menu {
     // 数据库面板切换内容时会重新写入锚点坐标，底部布局不随锚点变化
     top: auto !important;
-    bottom: 0 !important;
+    bottom: var(--b3-menu-sheet-bottom, 0px);
     left: 0 !important;
     right: 0 !important;
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
-    max-height: 90vh !important;
-    max-height: 90dvh !important;
     box-sizing: border-box;
     border: 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
@@ -1629,6 +1639,10 @@ body.mobile-topbar--merged {
     overflow: visible;
     transform: none;
     will-change: auto;
+
+    &.b3-menu--expanded {
+      border-radius: 0;
+    }
 
     > .b3-menu__items {
       max-height: none;
@@ -1716,6 +1730,12 @@ body.mobile-topbar--merged {
         padding: 0;
       }
 
+      &--actions {
+        height: 56px;
+        min-height: 56px;
+        padding: 8px 16px 0;
+      }
+
       > .b3-menu__label {
         text-align: left;
         color: var(--b3-theme-on-surface-light);
@@ -1724,6 +1744,10 @@ body.mobile-topbar--merged {
 
       > .block__icon {
         color: var(--b3-theme-on-surface-light);
+      }
+
+      > .block__icon--menu-back {
+        display: none;
       }
 
       > [data-type="go-config"] {
@@ -1768,6 +1792,11 @@ body.mobile-topbar--merged {
 }
 
 .protyle {
+  &--page-scroll {
+    // 翻页键悬浮显示，保持移动端正文的原有宽度。
+    --b3-protyle-page-scroll-gutter: 0px;
+  }
+
   &-font {
     font-size: 14px;
   }

@@ -761,6 +761,7 @@
         }
       },
       "required": [
+        "effects",
         "name"
       ],
       "additionalProperties": false
@@ -811,6 +812,7 @@
       "required": [
         "available",
         "description",
+        "effects",
         "id",
         "name",
         "runtime",
@@ -6529,7 +6531,8 @@
           "type": "string",
           "enum": [
             "add",
-            "edit"
+            "edit",
+            "collect"
           ]
         }
       },
@@ -6587,7 +6590,8 @@
           "type": "string",
           "enum": [
             "add",
-            "edit"
+            "edit",
+            "collect"
           ]
         }
       },
@@ -6596,6 +6600,190 @@
         "target",
         "type"
       ],
+      "additionalProperties": false
+    },
+    "AVAutomationBlockAttribute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "equals",
+            "contains",
+            "exists",
+            "notExists"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "operator"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationBlockAttributeInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "equals",
+            "contains",
+            "exists",
+            "notExists"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "operator"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationBlockSource": {
+      "type": "object",
+      "properties": {
+        "attributeMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVAutomationBlockAttribute"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "documentIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebookIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tagMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
+        "tagTarget": {
+          "type": "string",
+          "enum": [
+            "",
+            "block",
+            "container"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AVAutomationBlockSourceInput": {
+      "type": "object",
+      "properties": {
+        "attributeMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVAutomationBlockAttributeInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "documentIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebookIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tagMatch": {
+          "type": "string",
+          "enum": [
+            "",
+            "and",
+            "or"
+          ]
+        },
+        "tagTarget": {
+          "type": "string",
+          "enum": [
+            "",
+            "block",
+            "container"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
       "additionalProperties": false
     },
     "AVAutomationConfig": {
@@ -6622,10 +6810,7 @@
           ]
         },
         "spec": {
-          "type": "integer",
-          "enum": [
-            1
-          ]
+          "type": "integer"
         }
       },
       "required": [
@@ -6651,10 +6836,7 @@
           }
         },
         "spec": {
-          "type": "integer",
-          "enum": [
-            1
-          ]
+          "type": "integer"
         }
       },
       "required": [
@@ -6686,6 +6868,9 @@
             }
           ]
         },
+        "blockSource": {
+          "$ref": "#/$defs/AVAutomationBlockSource"
+        },
         "conditions": {
           "type": "array",
           "items": {
@@ -6711,11 +6896,18 @@
         "name": {
           "type": "string"
         },
+        "notifyOnSuccess": {
+          "type": "boolean"
+        },
+        "timeZone": {
+          "type": "string"
+        },
         "trigger": {
           "type": "string",
           "enum": [
             "added",
-            "changed"
+            "changed",
+            "block"
           ]
         }
       },
@@ -6744,6 +6936,16 @@
             ]
           }
         },
+        "blockSource": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVAutomationBlockSourceInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "conditions": {
           "type": "array",
           "items": {
@@ -6769,11 +6971,25 @@
         "name": {
           "type": "string"
         },
+        "notifyOnSuccess": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeZone": {
+          "type": "string"
+        },
         "trigger": {
           "type": "string",
           "enum": [
             "added",
-            "changed"
+            "changed",
+            "block"
           ]
         }
       },
@@ -6783,6 +6999,46 @@
         "id",
         "name",
         "trigger"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationTemplatePreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "itemID": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "targetAvID": {
+          "type": "string"
+        },
+        "template": {
+          "type": "string"
+        },
+        "timeZone": {
+          "type": "string"
+        },
+        "triggerTime": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "itemID",
+        "keyID",
+        "template",
+        "timeZone"
       ],
       "additionalProperties": false
     },
@@ -6798,8 +7054,12 @@
             "static",
             "source",
             "currentTime",
-            "triggerItem"
+            "triggerItem",
+            "template"
           ]
+        },
+        "template": {
+          "type": "string"
         },
         "value": {
           "$ref": "#/$defs/AVValue"
@@ -6822,8 +7082,12 @@
             "static",
             "source",
             "currentTime",
-            "triggerItem"
+            "triggerItem",
+            "template"
           ]
+        },
+        "template": {
+          "type": "string"
         },
         "value": {
           "anyOf": [
@@ -6991,6 +7255,86 @@
         "customColors",
         "itemPositions",
         "keyValues"
+      ],
+      "additionalProperties": false
+    },
+    "AVBlockCollectionMatch": {
+      "type": "object",
+      "properties": {
+        "collected": {
+          "type": "boolean"
+        },
+        "content": {
+          "type": "string"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "rootID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "collected",
+        "content",
+        "hPath",
+        "id",
+        "rootID"
+      ],
+      "additionalProperties": false
+    },
+    "AVBlockCollectionPreview": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVBlockCollectionMatch"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hasMore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "blocks",
+        "hasMore"
+      ],
+      "additionalProperties": false
+    },
+    "AVBlockCollectionPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "ruleID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "ruleID"
       ],
       "additionalProperties": false
     },
@@ -7316,6 +7660,188 @@
       },
       "required": [
         "keyID"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectBlocksInput": {
+      "type": "object",
+      "properties": {
+        "blockIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ruleID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "blockIDs",
+        "ruleID"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionCleanupInput": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVCollectionCleanupItemInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "ruleVersion": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "items",
+        "ruleVersion"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionCleanupItemInput": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "type": "string"
+        },
+        "itemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "blockID",
+        "itemID"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionReview": {
+      "type": "object",
+      "properties": {
+        "hasMore": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVCollectionReviewItem"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "matched": {
+          "type": "integer"
+        },
+        "ruleVersion": {
+          "type": "string"
+        },
+        "unknown": {
+          "type": "integer"
+        },
+        "unmatched": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hasMore",
+        "items",
+        "matched",
+        "ruleVersion",
+        "unknown",
+        "unmatched"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionReviewItem": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "isDetached": {
+          "type": "boolean"
+        },
+        "itemID": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "invalidItem",
+            "detached",
+            "noRules",
+            "invalidRule",
+            "unavailable",
+            "unreadable"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "matched",
+            "unmatched",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "blockID",
+        "content",
+        "hPath",
+        "isDetached",
+        "itemID",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionReviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "",
+            "matched",
+            "unmatched",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "avID"
       ],
       "additionalProperties": false
     },
@@ -9188,56 +9714,20 @@
                 }
               ]
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
             "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "settings": {
               "$ref": "#/$defs/AVCalendarSettings"
             },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9248,7 +9738,6 @@
           },
           "required": [
             "columns",
-            "rowIds",
             "settings",
             "spec",
             "id",
@@ -9281,17 +9770,10 @@
               ]
             },
             "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "settings": {
               "$ref": "#/$defs/AVCalendarSettings"
@@ -9299,7 +9781,6 @@
           },
           "required": [
             "columns",
-            "rowIds",
             "settings"
           ],
           "additionalProperties": false
@@ -9316,19 +9797,6 @@
             },
             "cardAspectRatioValue": {
               "type": "number"
-            },
-            "cardIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
             },
             "cardLayout": {
               "type": "integer"
@@ -9371,43 +9839,14 @@
                 }
               ]
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "fitImage": {
               "type": "boolean"
             },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9427,7 +9866,6 @@
             "displayFieldName",
             "displayEmptyFields",
             "fields",
-            "cardIds",
             "spec",
             "id",
             "showIcon",
@@ -9443,19 +9881,6 @@
             },
             "cardAspectRatioValue": {
               "type": "number"
-            },
-            "cardIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
             },
             "cardLayout": {
               "type": "integer"
@@ -9512,8 +9937,7 @@
             "fitImage",
             "displayFieldName",
             "displayEmptyFields",
-            "fields",
-            "cardIds"
+            "fields"
           ],
           "additionalProperties": false
         }
@@ -9574,43 +9998,14 @@
             "fillColBackgroundColor": {
               "type": "boolean"
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "fitImage": {
               "type": "boolean"
             },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9737,53 +10132,11 @@
                 }
               ]
             },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewFilter"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
             "id": {
               "type": "string"
             },
-            "pageSize": {
-              "type": "integer"
-            },
-            "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
             "showIcon": {
               "type": "boolean"
-            },
-            "sorts": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/AVViewSort"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
             },
             "spec": {
               "type": "integer"
@@ -9794,7 +10147,6 @@
           },
           "required": [
             "columns",
-            "rowIds",
             "spec",
             "id",
             "showIcon",
@@ -9824,24 +10176,10 @@
                   "type": "null"
                 }
               ]
-            },
-            "rowIds": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
             }
           },
           "required": [
-            "columns",
-            "rowIds"
+            "columns"
           ],
           "additionalProperties": false
         }
@@ -12050,6 +12388,9 @@
     "AVValueBlock": {
       "type": "object",
       "properties": {
+        "collectionRuleID": {
+          "type": "string"
+        },
         "content": {
           "type": "string"
         },
@@ -12081,6 +12422,9 @@
     "AVValueBlockInput": {
       "type": "object",
       "properties": {
+        "collectionRuleID": {
+          "type": "string"
+        },
         "content": {
           "anyOf": [
             {
@@ -16114,6 +16458,9 @@
         "codeBlockThemeLight": {
           "type": "string"
         },
+        "compactMode": {
+          "type": "boolean"
+        },
         "darkThemes": {
           "anyOf": [
             {
@@ -16219,6 +16566,19 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "type": "boolean"
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarMobileBars"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "type": "integer"
         },
@@ -16229,6 +16589,19 @@
           "anyOf": [
             {
               "$ref": "#/$defs/BazaarNotifications"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "type": "boolean"
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarPDFTheme"
             },
             {
               "type": "null"
@@ -16263,6 +16636,7 @@
         "closeButtonBehavior",
         "codeBlockThemeDark",
         "codeBlockThemeLight",
+        "compactMode",
         "darkThemes",
         "entryVisibility",
         "globalFontFamilies",
@@ -16273,9 +16647,13 @@
         "icons",
         "lang",
         "lightThemes",
+        "menuMouseScroll",
+        "mobileBars",
         "mode",
         "modeOS",
         "notifications",
+        "outlineKeepCurrentExpand",
+        "pdfTheme",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -16627,6 +17005,47 @@
         }
       ]
     },
+    "BazaarMobileBars": {
+      "type": "object",
+      "properties": {
+        "autoHide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarSwipe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "autoHide",
+        "sidebarButtons",
+        "sidebarSwipe"
+      ],
+      "additionalProperties": false
+    },
     "BazaarNotifications": {
       "type": "object",
       "properties": {
@@ -16660,15 +17079,29 @@
       ],
       "additionalProperties": false
     },
+    "BazaarPDFTheme": {
+      "type": "object",
+      "properties": {
+        "annoColor": {
+          "type": "string"
+        },
+        "dark": {
+          "type": "string"
+        },
+        "light": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "annoColor",
+        "dark",
+        "light"
+      ],
+      "additionalProperties": false
+    },
     "BazaarPackage": {
       "type": "object",
       "properties": {
-        "alternatives": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "author": {
           "type": "string"
         },
@@ -16692,6 +17125,12 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BazaarPackageChoice"
           }
         },
         "current": {
@@ -16980,6 +17419,22 @@
         "updated",
         "url",
         "version"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackageChoice": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "packageType"
       ],
       "additionalProperties": false
     },
@@ -22916,6 +23371,25 @@
       ],
       "additionalProperties": false
     },
+    "DocumentPreviewImage": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string"
+        },
+        "video": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "src"
+      ],
+      "additionalProperties": false
+    },
     "DownloadCloudSnapshotRequestInput": {
       "type": "object",
       "properties": {
@@ -23087,6 +23561,18 @@
     },
     "EmptyRequestInput": {
       "type": "object",
+      "additionalProperties": false
+    },
+    "EncryptedBoxAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook"
+      ],
       "additionalProperties": false
     },
     "EncryptedNotebookFollowSystemLockRequestInput": {
@@ -24293,6 +24779,16 @@
             }
           ]
         },
+        "excludeTitleImage": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },
@@ -24350,6 +24846,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdf": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -26316,6 +26822,23 @@
       ],
       "additionalProperties": false
     },
+    "FinishLivePhotoPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "id"
+      ],
+      "additionalProperties": false
+    },
     "FullBlockInfo": {
       "type": "object",
       "properties": {
@@ -27379,6 +27902,16 @@
       "type": "object",
       "properties": {
         "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "groupID": {
           "anyOf": [
             {
               "type": "string"
@@ -28908,6 +29441,22 @@
       ],
       "additionalProperties": false
     },
+    "ImageOCRTextData": {
+      "type": "object",
+      "properties": {
+        "failed": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "failed",
+        "text"
+      ],
+      "additionalProperties": false
+    },
     "ImportAutoDocument": {
       "type": "object",
       "properties": {
@@ -30422,6 +30971,116 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "LivePhotoColor": {
+      "type": "object",
+      "properties": {
+        "fullRange": {
+          "type": "boolean"
+        },
+        "matrix": {
+          "type": "integer"
+        },
+        "primaries": {
+          "type": "integer"
+        },
+        "transfer": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fullRange",
+        "matrix",
+        "primaries",
+        "transfer"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoFrameRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "index"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoFrameTime": {
+      "type": "object",
+      "properties": {
+        "duration": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "duration",
+        "timestamp"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "LivePhotoPreviewSession": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "$ref": "#/$defs/LivePhotoColor"
+        },
+        "encode": {
+          "type": "boolean"
+        },
+        "frames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/LivePhotoFrameTime"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "height": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "color",
+        "encode",
+        "frames",
+        "height",
+        "id",
+        "width"
+      ],
       "additionalProperties": false
     },
     "LoadPetalsRequestInput": {
@@ -34977,6 +35636,12 @@
     "PinnedDoc": {
       "type": "object",
       "properties": {
+        "alias": {
+          "type": "string"
+        },
+        "bookmark": {
+          "type": "string"
+        },
         "childrenSortMode": {
           "anyOf": [
             {
@@ -34987,13 +35652,28 @@
             }
           ]
         },
+        "hCtime": {
+          "type": "string"
+        },
+        "hMtime": {
+          "type": "string"
+        },
+        "hSize": {
+          "type": "string"
+        },
         "icon": {
           "type": "string"
         },
         "id": {
           "type": "string"
         },
+        "memo": {
+          "type": "string"
+        },
         "name": {
+          "type": "string"
+        },
+        "name1": {
           "type": "string"
         },
         "notebook": {
@@ -35010,10 +35690,17 @@
         }
       },
       "required": [
+        "alias",
+        "bookmark",
         "childrenSortMode",
+        "hCtime",
+        "hMtime",
+        "hSize",
         "icon",
         "id",
+        "memo",
         "name",
+        "name1",
         "notebook",
         "path",
         "subFileCount",
@@ -35326,6 +36013,16 @@
     "ProcessPDFRequestInput": {
       "type": "object",
       "properties": {
+        "exportAssets": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },
@@ -35795,6 +36492,25 @@
       ],
       "additionalProperties": false
     },
+    "RemoveEncryptedBoxAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "notebook",
+        "paths"
+      ],
+      "additionalProperties": false
+    },
     "RemoveFileRequestInput": {
       "type": "object",
       "properties": {
@@ -36084,6 +36800,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temporarySort": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVViewSortInput"
             },
             {
               "type": "null"
@@ -38803,6 +39529,16 @@
         "beforeLen": {
           "type": "number"
         },
+        "exactDocTitle": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "anyOf": [
             {
@@ -39287,6 +40023,16 @@
               "type": "null"
             }
           ]
+        },
+        "web": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAIWebInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -39328,6 +40074,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compactMode": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -39474,6 +40230,26 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMobileBarsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "anyOf": [
             {
@@ -39498,6 +40274,26 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingNotificationsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPDFThemeInput"
             },
             {
               "type": "null"
@@ -39915,6 +40711,16 @@
             }
           ]
         },
+        "autoCloseRefBrackets": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "autoDirection": {
           "anyOf": [
             {
@@ -40019,6 +40825,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockGutterMode": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -40478,6 +41294,16 @@
             }
           ]
         },
+        "pageScrollButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pasteURLAutoConvert": {
           "anyOf": [
             {
@@ -40664,16 +41490,6 @@
           ]
         },
         "blockRefTextRight": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "docxTemplate": {
           "anyOf": [
             {
               "type": "string"
@@ -41013,6 +41829,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recentDocsSort": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -42135,6 +42961,16 @@
               "type": "null"
             }
           ]
+        },
+        "web": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAIWeb"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -42145,7 +42981,8 @@
         "imageGeneration",
         "mcp",
         "providers",
-        "rerank"
+        "rerank",
+        "web"
       ],
       "additionalProperties": false
     },
@@ -42241,6 +43078,86 @@
               "type": "null"
             }
           ]
+        },
+        "web": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAIWebInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAIWeb": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "fetchProvider": {
+          "type": "string"
+        },
+        "searchProvider": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "fetchProvider",
+        "searchProvider",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAIWebInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fetchProvider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "searchProvider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -42299,6 +43216,9 @@
         "streamIdleTimeout": {
           "type": "integer"
         },
+        "streamingMarkdown": {
+          "type": "boolean"
+        },
         "temperature": {
           "type": "number"
         }
@@ -42314,6 +43234,7 @@
         "sessionTimeout",
         "skills",
         "streamIdleTimeout",
+        "streamingMarkdown",
         "temperature"
       ],
       "additionalProperties": false
@@ -42415,6 +43336,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "streamingMarkdown": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -42524,6 +43455,9 @@
         "codeBlockThemeLight": {
           "type": "string"
         },
+        "compactMode": {
+          "type": "boolean"
+        },
         "darkThemes": {
           "anyOf": [
             {
@@ -42629,6 +43563,19 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "type": "boolean"
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMobileBars"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "type": "integer"
         },
@@ -42639,6 +43586,19 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingNotifications"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "type": "boolean"
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPDFTheme"
             },
             {
               "type": "null"
@@ -42673,6 +43633,7 @@
         "closeButtonBehavior",
         "codeBlockThemeDark",
         "codeBlockThemeLight",
+        "compactMode",
         "darkThemes",
         "entryVisibility",
         "globalFontFamilies",
@@ -42683,9 +43644,13 @@
         "icons",
         "lang",
         "lightThemes",
+        "menuMouseScroll",
+        "mobileBars",
         "mode",
         "modeOS",
         "notifications",
+        "outlineKeepCurrentExpand",
+        "pdfTheme",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -42773,6 +43738,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compactMode": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -42919,6 +43894,26 @@
             }
           ]
         },
+        "menuMouseScroll": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mobileBars": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMobileBarsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mode": {
           "anyOf": [
             {
@@ -42943,6 +43938,26 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingNotificationsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outlineKeepCurrentExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfTheme": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPDFThemeInput"
             },
             {
               "type": "null"
@@ -44070,6 +45085,9 @@
             }
           ]
         },
+        "autoCloseRefBrackets": {
+          "type": "boolean"
+        },
         "autoDirection": {
           "type": "boolean"
         },
@@ -44116,6 +45134,9 @@
               "type": "null"
             }
           ]
+        },
+        "blockGutterMode": {
+          "type": "boolean"
         },
         "blockRefDynamicAnchorTextMaxLen": {
           "type": "integer"
@@ -44332,6 +45353,9 @@
         "onlySearchForDoc": {
           "type": "boolean"
         },
+        "pageScrollButtons": {
+          "type": "boolean"
+        },
         "pasteURLAutoConvert": {
           "type": "boolean"
         },
@@ -44374,6 +45398,7 @@
         "allowHTMLBLockScript",
         "allowSVGScript",
         "assetOpen",
+        "autoCloseRefBrackets",
         "autoDirection",
         "backlinkBlockSort",
         "backlinkContainChildren",
@@ -44385,6 +45410,7 @@
         "backlinkSort",
         "backmentionExpandCount",
         "backmentionSort",
+        "blockGutterMode",
         "blockRefDynamicAnchorTextMaxLen",
         "checkBlockRef",
         "codeFontFamilies",
@@ -44428,6 +45454,7 @@
         "listLogicalOutdent",
         "markdown",
         "onlySearchForDoc",
+        "pageScrollButtons",
         "pasteURLAutoConvert",
         "plantUMLServePath",
         "readOnly",
@@ -44523,6 +45550,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingAssetOpenInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "autoCloseRefBrackets": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -44633,6 +45670,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockGutterMode": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -45092,6 +46139,16 @@
             }
           ]
         },
+        "pageScrollButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pasteURLAutoConvert": {
           "anyOf": [
             {
@@ -45197,6 +46254,12 @@
         "baseURL": {
           "type": "string"
         },
+        "batchSize": {
+          "type": "integer"
+        },
+        "concurrency": {
+          "type": "integer"
+        },
         "dimensions": {
           "type": "integer"
         },
@@ -45216,6 +46279,8 @@
       "required": [
         "apiKey",
         "baseURL",
+        "batchSize",
+        "concurrency",
         "dimensions",
         "enabled",
         "id",
@@ -45241,6 +46306,26 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "batchSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "concurrency": {
+          "anyOf": [
+            {
+              "type": "integer"
             },
             {
               "type": "null"
@@ -45553,9 +46638,6 @@
         "blockRefTextRight": {
           "type": "string"
         },
-        "docxTemplate": {
-          "type": "string"
-        },
         "fileAnnotationRefMode": {
           "type": "integer"
         },
@@ -45611,7 +46693,6 @@
         "blockRefMode",
         "blockRefTextLeft",
         "blockRefTextRight",
-        "docxTemplate",
         "fileAnnotationRefMode",
         "imageWatermarkDesc",
         "imageWatermarkStr",
@@ -45675,16 +46756,6 @@
           ]
         },
         "blockRefTextRight": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "docxTemplate": {
           "anyOf": [
             {
               "type": "string"
@@ -45925,6 +46996,9 @@
         "recentDocsMaxListCount": {
           "type": "integer"
         },
+        "recentDocsSort": {
+          "type": "string"
+        },
         "refCreateSaveBox": {
           "type": "string"
         },
@@ -45985,6 +47059,7 @@
         "openFilesUseCurrentTab",
         "parentDocTitleClickMode",
         "recentDocsMaxListCount",
+        "recentDocsSort",
         "refCreateSaveBox",
         "refCreateSavePath",
         "removeDocWithoutConfirm",
@@ -46164,6 +47239,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recentDocsSort": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -46459,6 +47544,18 @@
       },
       "additionalProperties": false
     },
+    "SettingGetSectionRequestInput": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "namespace"
+      ],
+      "additionalProperties": false
+    },
     "SettingIconRequestInput": {
       "type": "object",
       "properties": {
@@ -46579,19 +47676,15 @@
       "type": "object",
       "properties": {
         "data": {
-          "anyOf": [
-            {
-              "type": "object",
-              "additionalProperties": {
-                "$ref": "#/$defs/JSONValue"
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/JSONValue"
+          }
         }
       },
+      "required": [
+        "data"
+      ],
       "additionalProperties": false
     },
     "SettingLogin2faRequestInput": {
@@ -47102,6 +48195,83 @@
       },
       "additionalProperties": false
     },
+    "SettingMobileBars": {
+      "type": "object",
+      "properties": {
+        "autoHide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarSwipe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "autoHide",
+        "sidebarButtons",
+        "sidebarSwipe"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMobileBarsInput": {
+      "type": "object",
+      "properties": {
+        "autoHide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarButtons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebarSwipe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingModel": {
       "type": "object",
       "properties": {
@@ -47311,14 +48481,28 @@
         "reasoningEffort": {
           "type": "string"
         },
+        "showEmpty": {
+          "type": "boolean"
+        },
+        "showError": {
+          "type": "boolean"
+        },
+        "showText": {
+          "type": "boolean"
+        },
         "thresholds": {
           "$ref": "#/$defs/OCRThresholds"
         }
       },
       "required": [
+        "aiModelId",
         "auto",
         "model",
-        "provider"
+        "provider",
+        "reasoningEffort",
+        "showEmpty",
+        "showError",
+        "thresholds"
       ],
       "additionalProperties": false
     },
@@ -47354,6 +48538,36 @@
             }
           ]
         },
+        "showEmpty": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showError": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showText": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "thresholds": {
           "anyOf": [
             {
@@ -47370,6 +48584,62 @@
         "model",
         "provider"
       ],
+      "additionalProperties": false
+    },
+    "SettingPDFTheme": {
+      "type": "object",
+      "properties": {
+        "annoColor": {
+          "type": "string"
+        },
+        "dark": {
+          "type": "string"
+        },
+        "light": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "annoColor",
+        "dark",
+        "light"
+      ],
+      "additionalProperties": false
+    },
+    "SettingPDFThemeInput": {
+      "type": "object",
+      "properties": {
+        "annoColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dark": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "light": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SettingPatchData": {
@@ -48620,6 +49890,36 @@
       },
       "additionalProperties": false
     },
+    "SettingSectionData": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemAppConf"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "settingTasks": {
+          "$ref": "#/$defs/SettingTaskState"
+        }
+      },
+      "required": [
+        "conf",
+        "namespace",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
     "SettingSnpt": {
       "type": "object",
       "properties": {
@@ -49365,6 +50665,21 @@
         "avID",
         "keyID",
         "previousKeyID"
+      ],
+      "additionalProperties": false
+    },
+    "StartLivePhotoPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "clientEncode": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
       ],
       "additionalProperties": false
     },
@@ -50652,6 +51967,9 @@
         "isPublish": {
           "type": "boolean"
         },
+        "revision": {
+          "type": "integer"
+        },
         "settingTasks": {
           "$ref": "#/$defs/SettingTaskState"
         },
@@ -50662,6 +51980,7 @@
       "required": [
         "conf",
         "isPublish",
+        "revision",
         "start"
       ],
       "additionalProperties": false
@@ -51779,6 +53098,16 @@
     "SystemRecoverExitInput": {
       "type": "object",
       "properties": {
+        "force": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pid": {
           "type": "integer"
         },
@@ -52637,6 +53966,34 @@
         "id",
         "parentID",
         "title"
+      ],
+      "additionalProperties": false
+    },
+    "TestSyncProviderS3Data": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "msg"
+      ],
+      "additionalProperties": false
+    },
+    "TestSyncProviderS3RequestInput": {
+      "type": "object",
+      "properties": {
+        "s3": {
+          "$ref": "#/$defs/SyncS3Input"
+        }
+      },
+      "required": [
+        "s3"
       ],
       "additionalProperties": false
     },
@@ -58159,6 +59516,428 @@
               "anyOf": [
                 {
                   "$ref": "#/$defs/AVAutomationConfigInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "collectAttrViewBlocks"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVCollectBlocksInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "cleanupAttrViewBlocks"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVCollectionCleanupInput"
                 },
                 {
                   "type": "null"
@@ -83387,6 +85166,722 @@
               "anyOf": [
                 {
                   "$ref": "#/$defs/AVAutomationConfigInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "collectAttrViewBlocks"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVCollectBlocksInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "cleanupAttrViewBlocks"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVCollectionCleanupInput"
                 },
                 {
                   "type": "null"
@@ -113132,6 +115627,8 @@
           "setAttrViewName",
           "setAttrViewNewItemTemplates",
           "setAttrViewAutomations",
+          "collectAttrViewBlocks",
+          "cleanupAttrViewBlocks",
           "setAttrViewConditionalColors",
           "setAttrViewFilters",
           "setAttrViewContextFilter",
@@ -123072,6 +125569,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/cancelLivePhotoPreview",
+      "handler": "cancelLivePhotoPreview",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/findAssetReferences",
       "handler": "findAssetReferences",
       "authorization": [
@@ -123136,6 +125711,85 @@
                   },
                   {
                     "$ref": "#/$defs/AssetReferencesData"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/finishLivePhotoPreview",
+      "handler": "finishLivePhotoPreview",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/FinishLivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -123411,6 +126065,94 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/getDocPreviewImages",
+      "handler": "getDocPreviewImages",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AssetDocumentRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/DocumentPreviewImage"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/getFileAnnotation",
       "handler": "getFileAnnotation",
       "authorization": [
@@ -123514,7 +126256,7 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/AssetTextData"
+                "$ref": "#/$defs/ImageOCRTextData"
               },
               "msg": {
                 "type": "string"
@@ -123568,6 +126310,129 @@
           }
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/getLivePhotoFrame",
+      "handler": "getLivePhotoFrame",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LivePhotoFrameRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 422
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/getLivePhotoPreview",
+      "handler": "getLivePhotoPreview",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 422
     },
     {
       "method": "POST",
@@ -123755,6 +126620,102 @@
       "body": "none",
       "request": {
         "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/AssetUnusedItem"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/getUnusedEncryptedBoxAssets",
+      "handler": "getUnusedEncryptedBoxAssets",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/EncryptedBoxAssetsRequestInput"
       },
       "response": {
         "anyOf": [
@@ -124408,6 +127369,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/removeUnusedEncryptedBoxAssets",
+      "handler": "removeUnusedEncryptedBoxAssets",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RemoveEncryptedBoxAssetsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AssetPathsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/renameAsset",
       "handler": "renameAsset",
       "authorization": [
@@ -124751,6 +127792,84 @@
               },
               "data": {
                 "$ref": "#/$defs/SettingOCR"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/startLivePhotoPreview",
+      "handler": "startLivePhotoPreview",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/StartLivePhotoPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/LivePhotoPreviewSession"
               },
               "msg": {
                 "type": "string"
@@ -125411,86 +128530,6 @@
                     "type": "null"
                   }
                 ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/attr/resetBlockAttrs",
-      "handler": "resetBlockAttrs",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
               },
               "msg": {
                 "type": "string"
@@ -128233,6 +131272,178 @@
     },
     {
       "method": "POST",
+      "path": "/api/av/previewAttributeViewCollection",
+      "handler": "previewAttributeViewCollection",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/AVBlockCollectionPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVBlockCollectionPreview"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/previewAttributeViewTemplate",
+      "handler": "previewAttributeViewTemplate",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/AVAutomationTemplatePreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVValue"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/av/removeAttributeViewBlocks",
       "handler": "removeAttributeViewBlocks",
       "authorization": [
@@ -128792,15 +132003,15 @@
     },
     {
       "method": "POST",
-      "path": "/api/av/searchAttributeView",
-      "handler": "searchAttributeView",
+      "path": "/api/av/reviewAttributeViewCollection",
+      "handler": "reviewAttributeViewCollection",
       "authorization": [
         "authenticated",
-        "writable"
+        "admin"
       ],
-      "body": "json",
+      "body": "structJSON",
       "request": {
-        "$ref": "#/$defs/SearchAttributeViewRequestInput"
+        "$ref": "#/$defs/AVCollectionReviewRequestInput"
       },
       "response": {
         "anyOf": [
@@ -128814,7 +132025,14 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/AVSearchData"
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVCollectionReview"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"
@@ -128871,16 +132089,15 @@
     },
     {
       "method": "POST",
-      "path": "/api/av/searchAttributeViewNonRelationKey",
-      "handler": "searchAttributeViewNonRelationKey",
+      "path": "/api/av/searchAttributeView",
+      "handler": "searchAttributeView",
       "authorization": [
         "authenticated",
-        "admin",
         "writable"
       ],
-      "body": "none",
+      "body": "json",
       "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
+        "$ref": "#/$defs/SearchAttributeViewRequestInput"
       },
       "response": {
         "anyOf": [
@@ -128894,7 +132111,7 @@
                 ]
               },
               "data": {
-                "type": "null"
+                "$ref": "#/$defs/AVSearchData"
               },
               "msg": {
                 "type": "string"
@@ -159828,6 +163045,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/setting/getSection",
+      "handler": "getSettingSection",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingGetSectionRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingSectionData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/setting/login2faCloudUser",
       "handler": "login2faCloudUser",
       "authorization": [
@@ -163684,86 +166979,6 @@
     },
     {
       "method": "POST",
-      "path": "/api/storage/setLocalStorage",
-      "handler": "setLocalStorage",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
       "path": "/api/storage/setLocalStorageVal",
       "handler": "setLocalStorageVal",
       "authorization": [
@@ -166350,6 +169565,85 @@
               },
               "data": {
                 "$ref": "#/$defs/SyncWebDAVData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/testSyncProviderS3",
+      "handler": "testSyncProviderS3",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TestSyncProviderS3RequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TestSyncProviderS3Data"
               },
               "msg": {
                 "type": "string"
@@ -169601,86 +172895,6 @@
       "method": "POST",
       "path": "/api/system/rebuildDataIndex",
       "handler": "rebuildDataIndex",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "none",
-      "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/system/reloadUI",
-      "handler": "deprecatedReloadUI",
       "authorization": [
         "authenticated",
         "admin",

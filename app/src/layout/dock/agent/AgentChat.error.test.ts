@@ -55,7 +55,7 @@ const createChat = () => {
             appendChild: (element: typeof elements[number]) => elements.push(element),
             querySelectorAll: () => elements.filter(element => element.className.includes("agent-chat__msg--error")),
         },
-        sessionRuns: {begin: () => ({controller: {}}), markRead: () => undefined, get: () => undefined},
+        sessionRuns: {begin: () => ({controller: {}}), markRead: (): undefined => undefined, get: (): undefined => undefined},
         isScrolledToBottom: () => true,
     });
     for (const method of ["finishActiveThinking", "clearThinking", "scrollToBottom", "flushThinkingStep",

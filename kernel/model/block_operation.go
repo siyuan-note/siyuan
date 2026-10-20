@@ -52,9 +52,20 @@ func PerformBlockOperation(operation *Operation) (transactions []*Transaction, e
 		return nil, fmt.Errorf("unsupported block operation [%s]", operation.Action)
 	}
 
-	tx := &Transaction{DoOperations: []*Operation{operation}}
+	tx := &Transaction{DoOperations: []*Operation{operation}, fromAPI: true}
 	if err = performTxSyncLocked(tx); err != nil {
 		return nil, err
 	}
 	return []*Transaction{tx}, nil
+}
+
+// PerformBlockTransactions 为外部批量块写入启用收集事件，并返回实际提交错误。
+func PerformBlockTransactions(transactions []*Transaction) error {
+	for _, tx := range transactions {
+		tx.fromAPI = true
+		if err := PerformTxSync(tx); err != nil {
+			return err
+		}
+	}
+	return nil
 }

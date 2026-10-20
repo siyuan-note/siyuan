@@ -181,7 +181,7 @@ func validateTreePath(boxID, p string) error {
 	if !strings.HasSuffix(rel, ".sy") {
 		return fmt.Errorf("invalid document path [%s]", p)
 	}
-	for _, id := range strings.Split(strings.TrimSuffix(rel, ".sy"), "/") {
+	for id := range strings.SplitSeq(strings.TrimSuffix(rel, ".sy"), "/") {
 		if !ast.IsNodeIDPattern(id) {
 			return fmt.Errorf("invalid document path [%s]", p)
 		}

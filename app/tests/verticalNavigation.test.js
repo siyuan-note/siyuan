@@ -21,6 +21,7 @@ const rendererModules = () => {
     };
     // 使用实际选区、区域解析与标题按键入口；不挂载无关的工具栏及页签控制器。
     modules["util/selection"] = `const revealTabsForTarget = () => {};
+        import {isHiddenTabContent} from "../render/tabsVisibility";
         import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationState";
         import {getContenteditableElement} from "../wysiwyg/getBlock";
         import {hasClosestBlock} from "./hasClosest";\n` +
@@ -28,6 +29,7 @@ const rendererModules = () => {
         extract("util/selection", ["setFirstNodeRange", "focusBlock", "getEditorRange"]))
             .replace(/\/\/\/ #else[\s\S]*?\/\/\/ #endif/g, "");
     modules["util/hasClosest"] = readFileSync(path.join(root, "util/hasClosest.ts"), "utf8");
+    modules["render/tabsVisibility"] = readFileSync(path.join(root, "render/tabsVisibility.ts"), "utf8");
     modules["util/selectionOffsets"] = "const revealTabsForTarget = () => {};\n" +
         extract("util/selectionOffsets", ["focusByRange", "setLastNodeRange"]);
     modules["util/documentRange"] = readFileSync(path.join(root, "util/documentRange.ts"), "utf8");
@@ -42,6 +44,11 @@ const rendererModules = () => {
         'import {getAdjacentVerticalBlock} from "../wysiwyg/verticalTarget";\n' +
         'import {focusBlock} from "./selection";\n' + extract("util/tableCellRichNavigation", ["leaveRichTableCell"]);
     modules["../util/highlightById"] = "export const scrollCenter = () => {};";
+    modules["util/codeScrollCenter"] = 'import {hasClosestBlock} from "./hasClosest";\n' +
+        'import {getEditorRange} from "./selection";\n' +
+        'import {focusByRange} from "./selectionOffsets";\n' +
+        "const resolveVisibleListMindmapBlock = () => undefined, revealTabsForTarget = () => {};\n" +
+        "const isMobile = () => false;\n" + extract("../util/highlightById", ["scrollCenter"]);
     modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
         'import {isTableLikeView} from "./viewType";\n' +
         'import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";\n' +
@@ -668,6 +675,9 @@ const runElectron = async () => {
         const lifecycleCases = await win.webContents.executeJavaScript(
             `(${require("./navigationLifecycle.cases.js").toString()})()`);
         console.log(`Vertical navigation: ${lifecycleCases} Electron lifecycle cases passed`);
+        const codeScrollCases = await win.webContents.executeJavaScript(
+            `(${require("./codeScrollSelection.cases.js").toString()})()`);
+        console.log(`Vertical navigation: ${codeScrollCases} Electron code scroll selection cases passed`);
     } catch (error) {
         console.error(error);
         exitCode = 1;
@@ -702,6 +712,7 @@ if (process.versions.electron && process.type === "browser") {
             assert.match(stdout, /Electron geometry cases passed/);
             assert.match(stdout, /Electron entry cases passed/);
             assert.match(stdout, /Electron lifecycle cases passed/);
+            assert.match(stdout, /Electron code scroll selection cases passed/);
         } finally {
             rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
         }

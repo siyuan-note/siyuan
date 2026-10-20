@@ -3,7 +3,7 @@ import {Menu} from "../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {upDownHint} from "../../../util/upDownHint";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getAVBlockRefSubtype} from "./cellValue";
 import {getAVColorStyle} from "./color";
 import {createAVPlainTextEditValue} from "./richTextValue";
@@ -341,6 +341,7 @@ export const openFieldRelationMenu = (target: HTMLElement, column: IAVColumn) =>
             return;
         }
         options.forEach(option => menu.addItem({
+            iconHTML: "",
             label: escapeHtml(option.content),
             checked: selectedSet.has(option.id),
             click: element => {
@@ -360,7 +361,7 @@ export const openFieldRelationMenu = (target: HTMLElement, column: IAVColumn) =>
             },
         }));
         if (!options.length) {
-            menu.addItem({type: "readonly", label: window.siyuan.languages.emptyContent});
+            menu.addItem({type: "readonly", iconHTML: "", label: window.siyuan.languages.emptyContent});
         }
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});

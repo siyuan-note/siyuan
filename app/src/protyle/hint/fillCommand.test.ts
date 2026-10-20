@@ -10,7 +10,7 @@ import {shouldCaptureHintUndoFocus} from "./blockHintRange";
 const source = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest);
 const declaration = source.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
 assert.ok(declaration && isClassDeclaration(declaration));
-const methods = declaration.members.filter(member => ["fillCommand", "fill"].includes(member.name?.getText(source)))
+const methods = declaration.members.filter(member => ["fillCommand", "fill", "consumeRefBracketClose", "openNewTableCell"].includes(member.name?.getText(source)))
     .map(member => member.getText(source)).join("\n");
 const code = transpileModule(`class Hint { ${methods} } new Hint();`, {
     compilerOptions: {target: ScriptTarget.ES2020},
@@ -65,48 +65,56 @@ test("daily note completion retains its original insertion target while awaiting
     }
 });
 
-test("mobile reference command inserts at the saved caret and resets stale hint context", () => {
-    for (const [text, offset] of [["", 0], ["text", 0], ["text", 2], ["text", 4]] as const) {
-        for (const source of ["av", "search", "hint"]) {
-            let content: string = text;
-            let focused = false;
-            let queried = false;
-            const block = {outerHTML: "paragraph", getAttribute: () => "paragraph"};
-            const range = {
-                startContainer: block,
-                deleteContents() {},
-                insertNode: (node: {textContent: string}) => {
-                    content = text.substring(0, offset) + node.textContent + text.substring(offset);
-                },
-                setEnd: (_node: unknown, value: number) => assert.equal(value, 2),
-                collapse: (toStart: boolean) => assert.equal(toStart, false),
-            };
-            const hint = runInNewContext(code, {
-                Constants: {BLOCK_HINT_KEYS: ["(("]},
-                hideElements() {}, isProtyleListItemFragment: () => false,
-                hasClosestBlock: () => block, hasClosestByAttribute: (): null => null,
-                getEditorRange: () => { throw new Error("reference insertion replaced the saved caret"); },
-                shouldCaptureHintUndoFocus, getUndoFocusContext: () => ({}),
-                document: {createTextNode: (textContent: string) => ({textContent})},
-                hintRef: (key: string, _protyle: unknown, value: string) => {
-                    assert.equal(key, "");
-                    assert.equal(value, "hint");
-                    queried = true;
-                },
-                focusByRange: (value: unknown) => { assert.equal(value, range); focused = true; },
-            });
-            Object.assign(hint, {source, splitChar: "#", lastIndex: 12, hashTagSearchElement: {}});
-            const protyle = {toolbar: {range}, wysiwyg: {element: {}}};
-            hint.fillCommand("((", protyle, false);
-            assert.equal(content, text.substring(0, offset) + "((" + text.substring(offset));
-            assert.equal(queried && focused, true);
-            assert.equal(hint.source, "hint");
-            assert.equal(hint.splitChar, "((");
-            assert.equal(hint.lastIndex, 0);
-            assert.equal(hint.hashTagSearchElement, undefined);
+for (const command of ["((", "{{"]) {
+    test(`mobile ${command} command inserts at the saved caret and resets stale hint context`, () => {
+        for (const [text, offset] of [["", 0], ["text", 0], ["text", 2], ["text", 4]] as const) {
+            for (const source of ["av", "search", "hint"]) {
+                let content: string = text;
+                let focused = false;
+                let queried = false;
+                const block = {outerHTML: "paragraph", getAttribute: () => "paragraph"};
+                const range = {
+                    startContainer: block,
+                    deleteContents() {},
+                    insertNode: (node: {textContent: string}) => {
+                        content = text.substring(0, offset) + node.textContent + text.substring(offset);
+                    },
+                    setEnd: (_node: unknown, value: number) => assert.equal(value, 2),
+                    collapse: (toStart: boolean) => assert.equal(toStart, false),
+                };
+                const hint = runInNewContext(code, {
+                    Constants: {BLOCK_HINT_KEYS: [command]},
+                    hideElements() {}, isProtyleListItemFragment: () => false,
+                    hasClosestBlock: () => block, hasClosestByAttribute: (): null => null,
+                    getEditorRange: () => { throw new Error("block insertion replaced the saved caret"); },
+                    shouldCaptureHintUndoFocus, getUndoFocusContext: () => ({}),
+                    document: {createTextNode: (textContent: string) => ({textContent})},
+                    hintRef: (key: string, _protyle: unknown, value: string) => {
+                        assert.equal(command, "((");
+                        assert.equal(key, "");
+                        assert.equal(value, "hint");
+                        queried = true;
+                    },
+                    hintEmbed: (key: string) => {
+                        assert.equal(command, "{{");
+                        assert.equal(key, "");
+                        queried = true;
+                    },
+                    focusByRange: (value: unknown) => { assert.equal(value, range); focused = true; },
+                });
+                Object.assign(hint, {source, splitChar: "#", lastIndex: 12, hashTagSearchElement: {}});
+                const protyle = {toolbar: {range}, wysiwyg: {element: {}}};
+                hint.fillCommand(command, protyle, false);
+                assert.equal(content, text.substring(0, offset) + command + text.substring(offset));
+                assert.equal(queried && focused, true);
+                assert.equal(hint.source, "hint");
+                assert.equal(hint.splitChar, command);
+                assert.equal(hint.lastIndex, 0);
+                assert.equal(hint.hashTagSearchElement, undefined);
+            }
         }
-    }
-});
+    });
+}
 
 for (const scenario of ["database shortcut", "database mobile toolbar", "tag search"]) {
     test(`direct table insertion ignores residual ${scenario} context`, () => {
@@ -125,7 +133,8 @@ for (const scenario of ["database shortcut", "database mobile toolbar", "tag sea
             querySelectorAll: (): HTMLElement[] => [], classList: {contains: () => false}, previousElementSibling: original,
         };
         original.nextElementSibling = inserted;
-        const range = {startContainer: original, deleteContents() { mutated = true; }};
+        const range = {startContainer: original, endContainer: original, collapsed: true,
+            deleteContents() { mutated = true; }};
         const staleRange = {startContainer: {}};
         const savedRange = scenario === "database mobile toolbar";
         const hint = runInNewContext(code, {

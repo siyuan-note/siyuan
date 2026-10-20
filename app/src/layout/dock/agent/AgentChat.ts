@@ -18,7 +18,7 @@ import {setPosition} from "../../../util/setPosition";
 import {fetchPost} from "../../../util/fetch";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {sendNotification} from "../../../plugin/platformUtils";
 import {
     applyAgentUserEdit,
@@ -2090,12 +2090,13 @@ export class AgentChat extends Model {
         });
         // 恢复已提交的选中状态（answers 中存的是选项 value）。
         if (entry.answers && entry.answers.length > 0) {
-            el.querySelectorAll("input[type=radio], input[type=checkbox]").forEach((inp) => {
-                (inp as HTMLInputElement).checked = entry.answers!.includes((inp as HTMLInputElement).value);
+            const optionInputs = Array.from(el.querySelectorAll<HTMLInputElement>("input[type=radio], input[type=checkbox]"));
+            optionInputs.forEach((inp) => {
+                inp.checked = entry.answers!.includes(inp.value);
             });
             const customInput = el.querySelector(".agent-chat__question-custom") as HTMLInputElement | null;
             if (customInput) {
-                const customAnswer = entry.answers.find(a => el.querySelector('input[value="' + a + '"]') === null);
+                const customAnswer = entry.answers.find(a => !optionInputs.some(inp => inp.value === a));
                 if (customAnswer) {
                     customInput.value = customAnswer;
                 }

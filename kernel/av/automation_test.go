@@ -112,10 +112,60 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 2
+	source.Automations.Spec = 5
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")
+	}
+}
+
+func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
+	for _, typ := range []string{"l", "i", "h", "mindmap", "callout", "l:u", "l:o", "l:t", "i:t", "h:h1", "h:h6", "callout:WARNING", "callout:CUSTOM"} {
+		if !IsAutomationBlockType(typ) {
+			t.Fatalf("valid type rejected: %s", typ)
+		}
+	}
+	for _, typ := range []string{"ial", "l:task", "h:h7", "p:u", "mindmap:u", "callout:", "callout: NOTE", "callout:NOTE\n"} {
+		if IsAutomationBlockType(typ) {
+			t.Fatalf("invalid type accepted: %s", typ)
+		}
+	}
+	data, err := os.ReadFile("testdata/spec9-layouts.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, spec := range []int{1, 2, 3, 4} {
+		view, err := ParseAttributeViewData("20260921000000-layouts", data)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rule := &AutomationRule{ID: ast.NewNodeID(), Name: "Collect", BlockSource: &AutomationBlockSource{Types: []string{"l"}}}
+		view.Automations = &AutomationConfig{Spec: spec, Rules: []*AutomationRule{rule}}
+		raw, _ := json.Marshal(view)
+		if _, err := ParseAttributeViewData(view.ID, raw); err != nil {
+			t.Fatalf("legacy type spec %d: %v", spec, err)
+		}
+		rule.BlockSource.Types = []string{"l:t"}
+		raw, _ = json.Marshal(view)
+		_, err = ParseAttributeViewData(view.ID, raw)
+		if (err == nil) != (spec >= 3) {
+			t.Fatalf("subtype spec %d: %v", spec, err)
+		}
+		rule.BlockSource.Types = []string{"l"}
+		rule.BlockSource.TagMatch = "or"
+		raw, _ = json.Marshal(view)
+		_, err = ParseAttributeViewData(view.ID, raw)
+		if (err == nil) != (spec >= 3) {
+			t.Fatalf("OR spec %d: %v", spec, err)
+		}
+		for _, target := range []string{"block", "container"} {
+			rule.BlockSource.TagTarget = target
+			raw, _ = json.Marshal(view)
+			_, err = ParseAttributeViewData(view.ID, raw)
+			if (err == nil) != (spec == 4) {
+				t.Fatalf("tag target %s spec %d: %v", target, spec, err)
+			}
+		}
 	}
 }
 

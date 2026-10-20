@@ -8,7 +8,7 @@ import {ipcRenderer} from "electron";
 import {getDefaultSubType, getDefaultType, normalizeSearchTypes} from "../../search/getDefault";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isEncryptedBox, isSiYuanUriProtocol} from "../../util/pathName";
-import {isBrowser} from "../../util/functions";
+import {getFrontend, isBrowser} from "../../util/functions";
 import type {App} from "../../index";
 import {genUUID} from "../../util/genID";
 import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
@@ -17,7 +17,6 @@ import {prepareExternalClipboardHTML} from "./richClipboard";
 import {isIOSPlatform, isIPadOSPlatform} from "./browserCompatibility";
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
 import {createDefaultMobileBottomBarConfig} from "../../mobile/util/mobileBottomBarConfig";
-import {createDefaultMobileBarsConfig, MOBILE_BARS_CONFIG_KEY} from "../../mobile/util/mobileBarsConfig";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -249,7 +248,7 @@ export const getLocalFiles = async () => {
             cmd: "clipboardReadFiles",
         });
         if (Array.isArray(filePaths)) {
-            localFiles = filePaths.map(path => ({path, size: null}));
+            localFiles = filePaths.map((path): ILocalFiles => ({path, size: null}));
         }
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
@@ -651,6 +650,47 @@ export function isChromeBrowser(): boolean {
     return isChromium && !isEdge && !isOpera;
 }
 
+// 鸿蒙 WebView 用 OpenHarmony 标识操作系统，部分浏览器 UA 还会带上兼容的操作系统名
+// 因此该判断必须先于 Android 等平台判断，老版本 Android 内核鸿蒙不含此标识，按 Android 处理
+const isHarmonyOS = () => {
+    return /OpenHarmony/i.test(navigator.userAgent);
+};
+
+const PLATFORM_CLASSES = ["body--mac", "body--windows", "body--linux", "body--ios", "body--android", "body--harmony"];
+
+// 当前前端所在平台，取值互斥；只依据前端自身信息判断，不受内核上报的运行容器影响
+export const resolvePlatformClass = () => {
+    if (isHarmonyOS()) {
+        return "body--harmony";
+    }
+    if (isIOSDevice()) {
+        return "body--ios";
+    }
+    if (isAndroid()) {
+        return "body--android";
+    }
+    if (isMac()) {
+        return "body--mac";
+    }
+    if (isWindows()) {
+        return "body--windows";
+    }
+    return "body--linux";
+};
+
+// 平台类名集中在此写入，主窗口、独立窗口、设置窗口与移动端四个入口均需调用
+export const applyPlatformClasses = () => {
+    const platformClass = resolvePlatformClass();
+    PLATFORM_CLASSES.forEach(item => {
+        document.body.classList.toggle(item, item === platformClass);
+    });
+    // 前端形态标记供内置样式与第三方主题使用，在此提前写入，避免平台相关样式在首帧按浏览器端判断
+    document.documentElement.setAttribute("data-frontend", getFrontend());
+    // 下面两个类名仅供旧第三方主题使用，内置样式已改用上方平台类名，待主题迁移完成后移除
+    document.body.classList.toggle("body--win32", !isBrowser() && !isMac());
+    document.body.classList.toggle("body--win32-browser", isBrowser() && isWindows());
+};
+
 export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
     if (hotkey) {
         return split + updateHotkeyTip(hotkey);
@@ -685,7 +725,7 @@ export const updateHotkeyTip = (hotkey: string) => {
     return keys.join("+");
 };
 
-export const getLocalStorage = (cb: () => void) => {
+export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => void) => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
         window.siyuan.storage = response.data;
         // 历史数据迁移
@@ -718,18 +758,9 @@ export const getLocalStorage = (cb: () => void) => {
             rowTab: "",
             layoutTab: 0
         };
-        defaultStorage[Constants.LOCAL_PDFTHEME] = {
-            light: "light",
-            dark: "dark",
-            annoColor: "var(--b3-pdf-background1)"
-        };
         defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number, filespaths: IFilesPath[]}
         defaultStorage[Constants.LOCAL_PLUGIN_DOCKS] = {};  // { pluginName: {dockId: IPluginDockTab}}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
-        defaultStorage[Constants.LOCAL_OUTLINE] = {
-            keepCurrentExpand: false,
-            expandLevel: 6
-        };
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {
@@ -761,6 +792,7 @@ export const getLocalStorage = (cb: () => void) => {
             mergeContentHeadingMode: "preserve",
         };
         defaultStorage[Constants.LOCAL_EXPORTPDF] = {
+            titleImage: true,
             landscape: false,
             marginType: "0",
             scale: 1,
@@ -771,9 +803,11 @@ export const getLocalStorage = (cb: () => void) => {
             mergeDocHeadingMode: "flat",
             mergeContentHeadingMode: "preserve",
             watermark: false,
-            paged: true
+            paged: true,
+            headingPageBreakLevels: [],
         };
         defaultStorage[Constants.LOCAL_EXPORTIMG] = {
+            titleImage: true,
             keepFold: false,
             watermark: false
         };
@@ -787,9 +821,6 @@ export const getLocalStorage = (cb: () => void) => {
             version: 1,
             tabs: [],
         };
-        // 仅未保存过移动端偏好时启用默认侧栏按钮。
-        defaultStorage[MOBILE_BARS_CONFIG_KEY] = typeof response.data[MOBILE_BARS_CONFIG_KEY] === "undefined" ?
-            createDefaultMobileBarsConfig() : {autoHide: true};
         defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = createDefaultMobileBottomBarConfig();
         defaultStorage[Constants.LOCAL_MOBILE_SIDE_PANEL] = {
             version: 1,
@@ -824,19 +855,18 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
         defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
-        defaultStorage[Constants.LOCAL_RECENT_DOCS] = {type: "viewedAt"};   // TRecentDocsSort
         defaultStorage[Constants.LOCAL_AV_CALENDAR_MODES] = {};
         defaultStorage[Constants.LOCAL_TABS_READING] = {};
 
-        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
+        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
-            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL, MOBILE_BARS_CONFIG_KEY,
+            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL,
             Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
-            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
+            Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH,
             Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES, Constants.LOCAL_TABS_READING].forEach((key) => {
             const value = response.data[key];
             if (typeof value === "string") {
@@ -876,7 +906,7 @@ export const getLocalStorage = (cb: () => void) => {
             setStorageVal(Constants.LOCAL_CLOSED_TABS, sanitizedClosedTabs);
         }
         cb();
-    });
+    }, undefined, onError ? response => onError(new Error(response.msg)) : undefined);
 };
 
 export const isSensitiveSearchConfig = (config?: Config.IUILayoutTabSearchConfig) => {

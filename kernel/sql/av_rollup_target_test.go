@@ -25,7 +25,7 @@ func TestNestedRollupRefreshWithoutRenderingIntermediate(t *testing.T) {
 						}
 					}
 					before := nestedRollupTestSnapshot(t, intermediate)
-					for update := 0; update < 4; update++ {
+					for update := range 4 {
 						for row, value := range nestedRollupTestKeyValues(t, leaf, leafKey.ID).Values {
 							switch typ {
 							case av.KeyTypeText:
@@ -102,13 +102,13 @@ func TestNestedRollupDiamondDoesNotConsumeSiblingDepth(t *testing.T) {
 	cache := map[string]*av.AttributeView{leaf.ID: leaf, shared.ID: shared}
 	outer := newNestedRollupTestDatabase("outer")
 	var keys []*av.Key
-	for branch := 0; branch < 12; branch++ {
+	for branch := range 12 {
 		target, targetKey := newNestedRollupTestLevel(fmt.Sprintf("branch-%d", branch), shared, sharedKey, true)
 		cache[target.ID] = target
 		keys = append(keys, addNestedRollupTestFields(outer, target, targetKey, false))
 	}
 	cache[outer.ID] = outer
-	for repeat := 0; repeat < 2; repeat++ {
+	for repeat := range 2 {
 		if repeat == 1 {
 			for _, key := range keys {
 				key.Rollup.Filters = nestedRollupTestFilters(key.Rollup.KeyID, "fresh-0")
@@ -148,7 +148,7 @@ func TestRenderRollupTargetCyclesAndDepthDoNotUseStoredContents(t *testing.T) {
 			before := nestedRollupTestSnapshot(t, []*av.AttributeView{first, second})
 			context := NewAttributeViewRenderContext()
 			depth := 2
-			for repeat := 0; repeat < 2; repeat++ {
+			for range 2 {
 				collection := renderRollupTarget(first, firstKey, &depth, cache, context)
 				for _, item := range collection.GetItems() {
 					if value := collection.GetValue(item.GetID(), firstKey.ID); value == nil || value.String(true) != "" {
@@ -192,7 +192,7 @@ func TestRenderRollupTargetCyclicFilterDependencyTerminates(t *testing.T) {
 	cache := map[string]*av.AttributeView{leaf.ID: leaf, target.ID: target}
 	context := NewAttributeViewRenderContext()
 	depth := 2
-	for repeat := 0; repeat < 2; repeat++ {
+	for range 2 {
 		collection := renderRollupTarget(target, key, &depth, cache, context)
 		for _, item := range collection.GetItems() {
 			if value := collection.GetValue(item.GetID(), key.ID); value == nil || value.String(true) != "" {
@@ -245,7 +245,7 @@ func TestNestedRollupTargetFiltersAndSortUseFreshValues(t *testing.T) {
 	target, targetKey := newNestedRollupTestLevel("target", leaf, leafKey, true)
 	outer, outerKey := newNestedRollupTestLevel("outer", target, targetKey, true)
 	cache := map[string]*av.AttributeView{leaf.ID: leaf, target.ID: target, outer.ID: outer}
-	for update := 0; update < 2; update++ {
+	for update := range 2 {
 		values := nestedRollupTestKeyValues(t, leaf, leafKey.ID).Values
 		values[update].Text.Content = "alpha"
 		values[1-update].Text.Content = "zulu"
@@ -296,7 +296,7 @@ func TestNestedRollupQuantifiedEmptyFiltersUseFreshValues(t *testing.T) {
 				outer.Views[0].Filters = []*av.ViewFilter{{Column: outerKey.ID, Qualifier: qualifier, Operator: operator,
 					Value: &av.Value{Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{}}}}
 				relations := nestedRollupTestKeyValues(t, target, targetKey.Rollup.RelationKeyID).Values
-				for emptyRow := 0; emptyRow < 2; emptyRow++ {
+				for emptyRow := range 2 {
 					for row, value := range relations {
 						value.Relation.BlockIDs = nil
 						if row != emptyRow {
@@ -327,7 +327,7 @@ func TestNestedRollupQuantifiedEmptyFiltersUseFreshValues(t *testing.T) {
 func newNestedRollupTestDatabase(id string) *av.AttributeView {
 	key := &av.Key{ID: id + "-primary", Name: "Primary", Type: av.KeyTypeBlock}
 	values := &av.KeyValues{Key: key}
-	for row := 0; row < 2; row++ {
+	for row := range 2 {
 		itemID := fmt.Sprintf("2026100800000%d-%s", row, id)
 		values.Values = append(values.Values, &av.Value{
 			ID: itemID + "-primary", KeyID: key.ID, BlockID: itemID, Type: key.Type,
@@ -349,11 +349,12 @@ func newNestedRollupTestLeaf(typ av.KeyType) (*av.AttributeView, *av.Key) {
 	values := &av.KeyValues{Key: key}
 	for row, block := range attrView.GetBlockKeyValues().Values {
 		value := &av.Value{ID: block.BlockID + "-value", KeyID: key.ID, BlockID: block.BlockID, Type: typ}
-		if typ == av.KeyTypeNumber {
+		switch typ {
+		case av.KeyTypeNumber:
 			value.Number = &av.ValueNumber{Content: float64(row + 1), IsNotEmpty: true}
-		} else if typ == av.KeyTypeLocation {
+		case av.KeyTypeLocation:
 			value.Location = &av.ValueLocation{Name: fmt.Sprintf("fresh-%d", row), OriginalInput: "source"}
-		} else {
+		default:
 			value.Text = &av.ValueText{Content: fmt.Sprintf("fresh-%d", row)}
 		}
 		values.Values = append(values.Values, value)

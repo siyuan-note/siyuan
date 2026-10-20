@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20260927183214"
+		"updated": "20261015221015"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20260927183214"
+				"updated": "20261015221015"
 			},
 			"Children": [
 				{
@@ -94,6 +94,70 @@
 				{
 					"Type": "NodeText",
 					"Data": " in the reference suggestions to select a notebook root or a parent document. Confirm to create the document there and insert its reference at the original position. This location applies only to this creation and does not change the default save path. Canceling creates no document. This is available on desktop and mobile. This action is also available when binding or rebinding a database entry. The entry is bound to the new document only after the document has been created successfully; canceling or a creation failure leaves the original binding unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261014130425-k3pzlyv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014130425-k3pzlyv",
+				"updated": "20261015221015"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable automatic closing in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Bidirectional Links"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Auto-close [[ or 【【"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " enables automatic closing, which is off by default. When enabled, typing [[ or 【【 inserts the matching ]] or 】】 after the caret. Typing the two closing brackets skips them and completes the reference. Selecting a candidate with Enter also replaces the closing brackets; Backspace inside an empty [[]] or 【【】】 deletes the entire pair."
+				}
+			]
+		},
+		{
+			"ID": "20261014130425-jqqpiql",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014130425-jqqpiql",
+				"updated": "20261014223520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Completing a reference with ]] or 】】 first looks for a document with an exactly matching title, then a title matching without regard to case, then a matching daily note. If none match, a document is created at the configured location for reference creation. This does not apply in inline code, code blocks or inline math. Input method text is handled after it is committed, and closing brackets already supplied by the input method are preserved."
 				}
 			]
 		},

@@ -1,4 +1,5 @@
-export const loadLanguages = async (lang: string, version: string, onLoaded: (languages: IObject) => void): Promise<void> => {
+export const loadLanguages = async (lang: string, version: string, onLoaded: (languages: IObject) => void,
+                                    onError?: (error: unknown) => void): Promise<void> => {
     const url = `/appearance/langs/${lang}.json?v=${version}`;
     let languages: IObject;
     try {
@@ -14,6 +15,10 @@ export const loadLanguages = async (lang: string, version: string, onLoaded: (la
         languages = data as IObject;
     } catch (error) {
         console.error(url, error);
+        if (onError) {
+            onError(error);
+            return;
+        }
         const element = document.createElement("pre");
         element.className = "language-load-error";
         element.setAttribute("role", "alert");

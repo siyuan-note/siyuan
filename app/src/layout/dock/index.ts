@@ -56,6 +56,7 @@ export class Dock {
     private collapsedPanelSize = "";
     private responsiveFloating = false;
     private responsiveManualOverride = false;
+    private initializing = true;
 
     constructor(options: {
         app: App,
@@ -91,6 +92,10 @@ export class Dock {
         this.app = options.app;
         this.position = options.position;
         this.pin = options.data.pin;
+        // 浮动面板完成定位前保持隐藏，避免恢复内容时覆盖启动遮罩。
+        if (!this.pin) {
+            this.layout.element.style.opacity = "0";
+        }
         bindPanelTransitionGuard(this.layout.element, () => this.isFloating());
         this.data = {};
         if (options.data.data[0]) {
@@ -327,7 +332,10 @@ export class Dock {
                 this.hideDock(true);
                 this.layout.element.classList.add("layout--float");
                 this.resizeElement.classList.add("fn__none");
+                this.initializing = false;
             });   // 需等待所有 Dock 初始化完成后才有稳定布局，才可进行定位
+        } else {
+            this.initializing = false;
         }
     }
 
@@ -579,7 +587,7 @@ export class Dock {
 
     public showDock(reset = false) {
         this.clearDockHoverTimeout();
-        if (!this.panelVisible || (!reset && (!this.isFloating() || this.layout.element.style.opacity === "1")) ||
+        if (this.initializing || !this.panelVisible || (!reset && (!this.isFloating() || this.layout.element.style.opacity === "1")) ||
             (!this.elements[0].querySelector(".dock__item--active") && !this.elements[1].querySelector(".dock__item--active"))
         ) {
             return;

@@ -19,7 +19,7 @@ import {openFile} from "../editor/util";
 import {ipcRenderer} from "electron";
 import {getWindowAppearance} from "../window/appearance";
 /// #endif
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
 import type {App} from "../index";
 import {resize} from "../protyle/util/resize";

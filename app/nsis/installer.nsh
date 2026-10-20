@@ -147,6 +147,8 @@ FunctionEnd
 
 !macro customUnInstall
     ${IfNot} ${isUpdated}
+        # 真正卸载时清理共用安装包，更新安装期间保留缓存。
+        RMDir /r "$PROFILE\.config\siyuan\install"
         IfFileExists "$PROFILE\.config\siyuan\*.*" 0 skipConfigDelete
             MessageBox MB_YESNO "是否需要彻底删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\
                 Do you want to delete the global configuration ($PROFILE\.config\siyuan\)?$\n" \

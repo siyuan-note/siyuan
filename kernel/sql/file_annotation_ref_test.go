@@ -41,7 +41,7 @@ func TestAnnotationRefRangeQueryPreservesExistingMatches(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		rows, err := db.Query("SELECT block_id FROM file_annotation_refs WHERE annotation_id = ? OR substr(annotation_id, 1, ?) IN (?, ?)", id, len(id)+1, id+"?", id+"#")
+		rows, err := db.Query("SELECT DISTINCT block_id FROM file_annotation_refs WHERE annotation_id = ? OR substr(annotation_id, 1, ?) IN (?, ?)", id, len(id)+1, id+"?", id+"#")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -103,6 +103,59 @@ func TestFileAnnotationMarkdownIndex(t *testing.T) {
 	}
 }
 
+func TestQueryFileAnnotationRefsDeduplicatesFormattedBlocks(t *testing.T) {
+	const annotationID = "20261018000000-annot01"
+	const firstBlockID = "20261018000000-block01"
+	const secondBlockID = "20261018000000-block02"
+	const reference = "assets/example.pdf/" + annotationID
+	dom := `<div data-node-id="` + firstBlockID + `" data-type="NodeParagraph"><div contenteditable="true">` +
+		`<span data-type="file-annotation-ref" data-id="` + reference + `">plain </span>` +
+		`<span data-type="file-annotation-ref strong" data-id="` + reference + `">bold</span>` +
+		`<span data-type="file-annotation-ref" data-id="` + reference + `"> plain</span></div></div>` +
+		`<div data-node-id="` + secondBlockID + `" data-type="NodeParagraph"><div contenteditable="true">` +
+		`<span data-type="file-annotation-ref" data-id="` + reference + `">another block</span></div></div>`
+	tree := util.NewLute().BlockDOM2Tree(dom)
+	_, refs := refsFromTree(tree)
+	if len(refs) != 4 {
+		t.Fatalf("expected four annotation segments in two blocks, got %+v", refs)
+	}
+	for _, encrypted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
+			var testDB *stdsql.DB
+			var boxID string
+			if encrypted {
+				testDB, boxID = useEncryptedQueryTestDB(t)
+			} else {
+				var err error
+				testDB, err = stdsql.Open("sqlite3", ":memory:")
+				if err != nil {
+					t.Fatal(err)
+				}
+				previousDB := db
+				db = testDB
+				t.Cleanup(func() { db = previousDB; testDB.Close() })
+			}
+			if _, err := testDB.Exec("CREATE TABLE file_annotation_refs (block_id TEXT, annotation_id TEXT)"); err != nil {
+				t.Fatal(err)
+			}
+			if err := ensureFileAnnotationRefIndex(testDB); err != nil {
+				t.Fatal(err)
+			}
+			for _, ref := range refs {
+				if _, err := testDB.Exec("INSERT INTO file_annotation_refs VALUES (?, ?)", ref.BlockID, ref.AnnotationID); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if got := QueryRefIDsByAnnotationIDInBox(annotationID, boxID); !reflect.DeepEqual(got, []string{firstBlockID, secondBlockID}) {
+				t.Fatalf("formatted annotation backlinks must contain each block once in first-match order: %v", got)
+			}
+			if got := QueryRefIDsByAnnotationIDInBox("missing", boxID); got == nil || len(got) != 0 {
+				t.Fatalf("missing annotation must return an empty list: %v", got)
+			}
+		})
+	}
+}
+
 func TestQueryFileAnnotationRefsIncludesExistingIndexes(t *testing.T) {
 	originalDB := db
 	testDB, err := stdsql.Open("sqlite3", ":memory:")
@@ -119,24 +172,29 @@ func TestQueryFileAnnotationRefsIncludesExistingIndexes(t *testing.T) {
 		"plain": id, "query": id + "?box=20260912000000-hijklmn", "fragment": id + "#view",
 		"other": "20260912000000-abcdefh", "prefix": id + "x", "suffix": "x" + id,
 	} {
-		if _, err = db.Exec("INSERT INTO file_annotation_refs VALUES (?, ?)", blockID, annotationID); err != nil {
-			t.Fatal(err)
+		for range 2 {
+			if _, err = db.Exec("INSERT INTO file_annotation_refs VALUES (?, ?)", blockID, annotationID); err != nil {
+				t.Fatal(err)
+			}
 		}
 	}
 	got := map[string]bool{}
-	for _, id := range QueryRefIDsByAnnotationID(id) {
+	refIDs := QueryRefIDsByAnnotationID(id)
+	for _, id := range refIDs {
 		got[id] = true
 	}
-	if !reflect.DeepEqual(got, map[string]bool{"plain": true, "query": true, "fragment": true}) {
-		t.Fatalf("unexpected annotation backlinks: %v", got)
+	if len(refIDs) != 3 || !reflect.DeepEqual(got, map[string]bool{"plain": true, "query": true, "fragment": true}) {
+		t.Fatalf("unexpected annotation backlinks: %v", refIDs)
 	}
 
 	boxDB, boxID := useEncryptedQueryTestDB(t)
 	if _, err = boxDB.Exec("CREATE TABLE file_annotation_refs (block_id TEXT, annotation_id TEXT)"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = boxDB.Exec("INSERT INTO file_annotation_refs VALUES (?, ?)", "encrypted", id+"?box="+boxID); err != nil {
-		t.Fatal(err)
+	for _, annotationID := range []string{id, id + "?box=" + boxID, id + "#view"} {
+		if _, err = boxDB.Exec("INSERT INTO file_annotation_refs VALUES (?, ?)", "encrypted", annotationID); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if got := QueryRefIDsByAnnotationIDInBox(id, boxID); !reflect.DeepEqual(got, []string{"encrypted"}) {
 		t.Fatalf("encrypted backlinks crossed database scope: %v", got)

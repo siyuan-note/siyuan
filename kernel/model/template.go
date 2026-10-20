@@ -703,7 +703,7 @@ func validateTemplateAttributeViewNode(node *ast.Node, attrView *av.AttributeVie
 		return
 	}
 	visibleViewCount := 0
-	for _, visibleViewID := range strings.Split(visibleViewIDs, ",") {
+	for visibleViewID := range strings.SplitSeq(visibleViewIDs, ",") {
 		visibleViewID = strings.TrimSpace(visibleViewID)
 		if "" == visibleViewID {
 			continue
@@ -866,7 +866,7 @@ func applyTemplateAttributeViewPlan(node *ast.Node, plan *templateAttributeViewP
 		}
 		if visibleViewIDs := strings.TrimSpace(node.IALAttr(av.NodeAttrVisibleViewIDs)); "" != visibleViewIDs {
 			var copiedVisibleViewIDs []string
-			for _, sourceViewID := range strings.Split(visibleViewIDs, ",") {
+			for sourceViewID := range strings.SplitSeq(visibleViewIDs, ",") {
 				sourceViewID = strings.TrimSpace(sourceViewID)
 				if copiedViewID := plan.copiedViewIDs[sourceViewID]; "" != copiedViewID {
 					copiedVisibleViewIDs = append(copiedVisibleViewIDs, copiedViewID)
@@ -1144,7 +1144,7 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 	restoreTabsSelection()
 	// 用映射成套改写模板内部的自引用，并补全指向外部块的引用锚文本
 	// 仅命中 blockIDs 的引用（模板内部块）才会改写 ID；未命中的（外部块）保持不变
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -1367,11 +1367,11 @@ func resolveDocContentTemplatePath(templatePath string) (string, error) {
 	if !filelock.IsExist(absPath) {
 		return "", fmt.Errorf("content template [%s] not found", templatePath)
 	}
-	realRoot, err := filepath.EvalSymlinks(templateRoot)
+	realRoot, err := util.ResolveRealPath(templateRoot)
 	if nil != err {
 		return "", err
 	}
-	realPath, err := filepath.EvalSymlinks(absPath)
+	realPath, err := util.ResolveRealPath(absPath)
 	if nil != err {
 		return "", err
 	}

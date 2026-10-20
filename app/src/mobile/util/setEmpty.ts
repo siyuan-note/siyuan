@@ -12,7 +12,7 @@ import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
 
 export const finishMobileStartup = () => {
     const loadingElement = document.getElementById("loading");
-    if (loadingElement) {
+    if (loadingElement && !loadingElement.classList.contains("startup-error")) {
         loadingElement.remove();
         document.body.style.removeProperty("background-color");
     }

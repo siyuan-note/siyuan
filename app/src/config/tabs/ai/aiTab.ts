@@ -35,6 +35,7 @@ import {openSkillManager} from "../../../ai/skills/manager";
 import {openAgentInstructions} from "./aiInstructions";
 import {genDecisionCardsHtml, mountDecisionCards} from "./aiDecisionUi";
 import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
+import {registerAiWebGroup} from "./aiWeb";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -238,17 +239,17 @@ const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
 
     group.slot({
-        key: "mcpOAuthServer",
-        keywords: [window.siyuan.languages.mcpOAuthServer, "OAuth", "ChatGPT"],
-        html: genMcpOAuthHtml,
-        afterMount: mountMcpOAuth,
-    });
-
-    group.slot({
         key: "mcpServers",
         keywords: getMcpServersBlockKeywords(),
         html: genMcpServersBlockHtml,
         afterMount: mountMcpServersBlock,
+    });
+    tab.group("mcpOAuth", window.siyuan.languages.mcpOAuthServer).slot({
+        key: "mcpOAuthServer",
+        keywords: [window.siyuan.languages.mcpOAuthServer, "OAuth", "ChatGPT",
+            window.siyuan.languages.mcpOAuthPublicURL, window.siyuan.languages.mcpOAuthRegister],
+        html: genMcpOAuthHtml,
+        afterMount: mountMcpOAuth,
     });
 };
 
@@ -288,6 +289,18 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.apiTimeoutTip,
         min: 1,
         unit: "s",
+    });
+    group.number("ai.embedding.concurrency", {
+        title: window.siyuan.languages.apiConcurrency,
+        desc: window.siyuan.languages.apiConcurrencyTip,
+        min: 1,
+        max: 64,
+    });
+    group.number("ai.embedding.batchSize", {
+        title: window.siyuan.languages.apiBatchSize,
+        desc: window.siyuan.languages.apiBatchSizeTip,
+        min: 1,
+        max: 128,
     });
 
     // 独立的嵌入索引重建按钮，不与全局重建索引耦合
@@ -370,6 +383,7 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
+    registerAiWebGroup(tab);
     registerAiDecisionGroup(tab);
     registerAiSkillsGroup(tab);
     registerAiImageGenerationGroup(tab);

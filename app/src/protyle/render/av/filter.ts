@@ -5,7 +5,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {genCellValue, getCellValueText} from "./cell";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
@@ -13,6 +13,7 @@ import {Constants} from "../../../constants";
 import {countFilterLeaves} from "./filterTree";
 import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
+import {closeInlineFilterDropdowns} from "./filterDropdown";
 
 interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
@@ -457,7 +458,7 @@ export const prepareFilterColumns = async (data: IAV) => {
         if (!request) {
             request = fetchSyncPost("/api/av/getAttributeView", {id: targetAVID}).then((response) => {
                 return response.code === 0 ? (response.data?.av?.keyValues || []).map(item => item.key) : [];
-            }).catch(() => []);
+            }).catch((): IAVColumn[] => []);
             avRequests.set(targetAVID, request);
         }
         const targetColumns = await request;
@@ -1178,7 +1179,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             // 下拉面板已移到行外（fixed 定位），用 path 全局查找
             const dropdown = menuElement.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`) as HTMLElement;
             if (dropdown) {
-                // 收起其它已展开的下拉
+                // 收起其他已展开的下拉
                 menuElement.querySelectorAll('[data-type="selectDropdown"]').forEach((el: HTMLElement) => {
                     if (el !== dropdown) el.style.display = "none";
                 });
@@ -1205,7 +1206,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         if (!useEl) return;
         const isCheck = useEl.getAttribute("xlink:href") === "#iconCheck";
         if (isSingle && !isCheck) {
-            // 单选：点击新选项时，先取消该下拉内所有其它已选项
+            // 单选：点击新选项时，先取消该下拉内所有其他已选项
             dropdown.querySelectorAll('[data-type="selectOption"]').forEach((item: HTMLElement) => {
                 if (item !== option) {
                     const itemUseElement = item.querySelector(".av__select-option-check use");
@@ -1303,28 +1304,13 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         event.stopImmediatePropagation();
     });
 
-    // 点击面板空白处收起所有 select 下拉
+    // 点击条件外部时收起下拉，保持当前触发器的切换行为和下拉内部操作。
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
             return;
         }
-        if (!target.closest('[data-type="selectTrigger"]') && !target.closest('[data-type="selectDropdown"]')) {
-            menuElement.querySelectorAll('[data-type="selectDropdown"]').forEach((el: HTMLElement) => {
-                el.style.display = "none";
-            });
-        }
-        if (!target.closest('[data-type="relationFilterTrigger"]') &&
-            !target.closest('[data-type="relationFilterDropdown"]')) {
-            menuElement.querySelectorAll('[data-type="relationFilterDropdown"]').forEach((el: HTMLElement) => {
-                el.style.display = "none";
-            });
-        }
-        if (!target.closest('[data-type-rel="relation"]') && !target.closest('[data-type="relList"]')) {
-            menuElement.querySelectorAll('[data-type="relList"]').forEach((el: HTMLElement) => {
-                el.style.display = "none";
-            });
-        }
+        closeInlineFilterDropdowns(menuElement, target);
     }, true);
 
     // select 搜索过滤
@@ -1360,7 +1346,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 id: colData.relation.avID,
                 keyword,
             }, response => {
-                if ((target as HTMLInputElement).value !== keyword) {
+                if (!target.isConnected || document.activeElement !== target || (target as HTMLInputElement).value !== keyword) {
                     return;
                 }
                 const row = getRow(target);

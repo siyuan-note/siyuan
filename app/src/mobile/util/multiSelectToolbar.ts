@@ -1,4 +1,12 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {escapeAttr} from "../../util/escape";
+
+interface IMultiSelectToolbarAction {
+    type: string;
+    icon: string;
+    label: string;
+    click: () => void;
+}
 
 export const insertMobileMultiSelectMenu = (itemsElement: Element, menuItem: HTMLElement) => {
     const openInNewTab = Array.from(itemsElement.children).find(item => item.getAttribute("data-id") === "openInNewTab");
@@ -15,7 +23,7 @@ export const updateMultiSelectToolbar = (element: HTMLElement, count: number) =>
 };
 
 export const renderMultiSelectToolbar = (element: HTMLElement, count: number, onMenu: () => void, onExit: () => void,
-                                        onSelectAll?: () => void) => {
+                                        onSelectAll?: () => void, actions: IMultiSelectToolbarAction[] = []) => {
     element.style.padding = "0";
     element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
@@ -23,6 +31,7 @@ export const renderMultiSelectToolbar = (element: HTMLElement, count: number, on
         <span class="multiSelectCount"></span>
     </div>
     <span class="fn__flex-1"></span>
+    ${actions.map(action => `<button class="block__icon block__icon--show" data-type="${escapeAttr(action.type)}" aria-label="${escapeAttr(action.label)}"><svg><use xlink:href="#${escapeAttr(action.icon)}"></use></svg></button><span class="fn__space"></span>`).join("")}
     ${onSelectAll ? `<button class="block__icon block__icon--show" data-type="selectAll" aria-label="${window.siyuan.languages.selectAll}"><svg><use xlink:href="#iconSelectAll"></use></svg></button><span class="fn__space"></span>` : ""}
     <button class="block__icon block__icon--show" data-type="menu" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
     <span class="fn__space"></span>
@@ -38,6 +47,8 @@ export const renderMultiSelectToolbar = (element: HTMLElement, count: number, on
                 onExit();
             } else if (button.dataset.type === "selectAll") {
                 onSelectAll?.();
+            } else {
+                actions.find(action => action.type === button.dataset.type)?.click();
             }
         }
         event.preventDefault();

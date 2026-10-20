@@ -7,7 +7,7 @@
 		"id": "20240530101000-96n5y9v",
 		"title": "コンテンツブロックの紹介",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-dtkix1p",
 				"id": "20240530101000-6twvrmm",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -32,7 +32,7 @@
 			"Properties": {
 				"ID": "20240530101000-8hhg459",
 				"id": "20240530101000-jysl0s6",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -51,11 +51,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "202008250000-a1b2c3d"
+					"TextMarkTextContent": "20200825000000-a1b2c3d"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ のように、日時と 7 つのランダムな文字で構成されます。"
+					"Data": "​ のように、14 桁のタイムスタンプ（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、ハイフン、7 文字のランダムな英小文字または数字で構成されます。"
 				}
 			]
 		},
@@ -215,7 +224,7 @@
 			"Properties": {
 				"ID": "20240530101000-8pqai5f",
 				"id": "20240530101000-48s3dyy",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -257,7 +266,7 @@
 			"Properties": {
 				"ID": "20240530101000-vh9kuvt",
 				"id": "20240530101000-m064mpu",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -277,6 +286,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "動作"
 				},
 				{
 					"Type": "NodeText",

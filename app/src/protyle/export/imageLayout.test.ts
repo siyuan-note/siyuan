@@ -43,6 +43,10 @@ size-adjust: 85%;
     document.head.append(nativeFonts);
     let engine = "html";
     let content = "";
+    let titleImageContent = "";
+    let previewRequest: {excludeTitleImage: boolean, addTitle: boolean};
+    let storedImageOptions: {titleImage: boolean};
+    let capturedTitleImage: boolean;
     let dialog: {element: HTMLElement, resize: () => void};
     let captured: {blob: Blob, width: number, height: number, x: number, y: number};
     const messages: string[] = [];
@@ -69,7 +73,8 @@ size-adjust: 85%;
     }
     window.siyuan = {
         config: {editor: {}, export: {addTitle: false}, system: {}},
-        languages: {exportImageTooLarge: "Image too large", exportFileSaveFailed: "Export failed"},
+        languages: {exportImageTooLarge: "Image too large", exportFileSaveFailed: "Export failed",
+            export17: "Add document title", exportTitleImage: "Export title image", title: "Title"},
         storage: {image: {keepFold: false, watermark: false}},
     } as unknown as ISiyuan;
     Object.defineProperty(window, "devicePixelRatio", {value: 2, configurable: true});
@@ -80,6 +85,7 @@ size-adjust: 85%;
     };
     const rememberBlob = (blob: Blob) => {
         const element = dialog.element.querySelector<HTMLElement>(".b3-dialog__content");
+        capturedTitleImage = !!element.querySelector(".title-image");
         const size = layout.getExportImageSize(element);
         const markers = element.querySelectorAll<HTMLElement>(".marker");
         const marker = markers[markers.length - 1].getBoundingClientRect();
@@ -92,9 +98,11 @@ size-adjust: 85%;
         "./imageFonts": fonts,
         "../../dialog": {Dialog: ExportDialog},
         "../../dialog/message": {showMessage: (message: string) => messages.push(message), hideMessage: () => {}},
-        "../../util/fetch": {fetchPost: (url: string, data: {file: File}, callback: (response: unknown) => void) => {
+        "../../util/fetch": {fetchPost: (url: string, data: {file: File, excludeTitleImage: boolean, addTitle: boolean}, callback: (response: unknown) => void) => {
             if (url === "/api/export/exportPreviewHTML") {
-                callback({data: {content, attrs: {}, type: "NodeDocument", name: "image"}});
+                previewRequest = data;
+                callback({data: {content: (data.excludeTitleImage ? "" : titleImageContent) + content,
+                    attrs: {}, type: "NodeDocument", name: "image"}});
             } else {
                 check.equal(url, "/api/export/exportAsFile");
                 rememberBlob(data.file);
@@ -116,7 +124,10 @@ size-adjust: 85%;
         "../util/processCode": {processRender: () => {}},
         "../render/chartRender": {renderChartsForImage: async () => {}},
         "../util/compatibility": {isIPhone: () => mobile && engine === "modern", isIPad: () => false,
-            isSafari: () => engine === "modern", isInAndroid: () => false, setStorageVal: () => {},
+            isSafari: () => engine === "modern", isInAndroid: () => false,
+            setStorageVal: (_key: string, value: {titleImage: boolean}) => {
+                storedImageOptions = JSON.parse(JSON.stringify(value));
+            },
             saveExportFile: async () => {}},
         "../../util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: true}),
             sanitizeKernelHTML: (value: string) => value},
@@ -182,6 +193,43 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
     };
     for (const renderer of ["html", "modern"]) {
         engine = renderer;
+        delete window.siyuan.storage.image.titleImage;
+        titleImageContent = '<div class="title-image">Title image</div>';
+        await open(table(2, false));
+        const titleImageSwitch = dialog.element.querySelector<HTMLInputElement>("#titleImage");
+        const titleSwitch = dialog.element.querySelector<HTMLInputElement>("#addTitle");
+        check.equal(titleImageSwitch.checked, true, "Existing preferences must include title images by default");
+        check.equal(previewRequest.excludeTitleImage, false);
+        await capture();
+        check.equal(capturedTitleImage, true);
+        titleImageSwitch.click();
+        await waitForActions("exclude title image");
+        check.equal(storedImageOptions.titleImage, false, "Changing the switch must persist immediately");
+        check.equal(titleSwitch.checked, false);
+        check.equal(previewRequest.excludeTitleImage, true);
+        check.equal(dialog.element.querySelector(".title-image"), null);
+        titleSwitch.click();
+        await waitForActions("add title independently");
+        check.equal(titleImageSwitch.checked, false);
+        check.equal(previewRequest.addTitle, true);
+        check.equal(previewRequest.excludeTitleImage, true);
+        await capture();
+        check.equal(capturedTitleImage, false);
+        await capture("export");
+        check.equal(capturedTitleImage, false);
+        await open(table(2, false));
+        check.equal(dialog.element.querySelector<HTMLInputElement>("#titleImage").checked, false);
+        const optionsRect = dialog.element.querySelector(".export-img__options").getBoundingClientRect();
+        dialog.element.querySelectorAll(".export-img__options > label, .export-img__options > input").forEach(control => {
+            const rect = control.getBoundingClientRect();
+            check.ok(rect.left >= optionsRect.left && rect.right <= optionsRect.right,
+                "Image export options must remain inside the dialog on narrow viewports");
+        });
+        dialog.element.querySelector<HTMLInputElement>("#titleImage").click();
+        await waitForActions("restore title image");
+        check.equal(storedImageOptions.titleImage, true);
+        check.equal(previewRequest.excludeTitleImage, false);
+        titleImageContent = "";
         const narrow = await open(table(2, false));
         check.equal(narrow.querySelector<HTMLElement>(".export-img").style.minWidth, "");
         check.equal(narrow.scrollWidth, narrow.clientWidth);

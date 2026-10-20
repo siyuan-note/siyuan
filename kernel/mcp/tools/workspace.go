@@ -54,7 +54,7 @@ func workspaceHandler(args map[string]any) (CallToolResult, error) {
 	}, nil
 }
 
-func workspaceList(args map[string]any) (CallToolResult, error) {
+func workspaceList(_ map[string]any) (CallToolResult, error) {
 	paths, err := util.ReadWorkspacePaths()
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "list workspaces failed: " + err.Error()}}, IsError: true}, nil
@@ -62,23 +62,23 @@ func workspaceList(args map[string]any) (CallToolResult, error) {
 
 	var sb strings.Builder
 	seen := map[string]bool{}
-	sb.WriteString(fmt.Sprintf("Registered workspaces (%d):\n\n", len(paths)))
+	fmt.Fprintf(&sb, "Registered workspaces (%d):\n\n", len(paths))
 	for _, p := range paths {
 		key := strings.ToLower(p)
 		if seen[key] {
 			continue
 		}
 		seen[key] = true
-		sb.WriteString(fmt.Sprintf("- %s\n", p))
+		fmt.Fprintf(&sb, "- %s\n", p)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func workspaceInfo(args map[string]any) (CallToolResult, error) {
+func workspaceInfo(_ map[string]any) (CallToolResult, error) {
 	dir := util.WorkspaceDir
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf("Path:    %s\n", dir))
-	sb.WriteString(fmt.Sprintf("Version: %s\n", util.Ver))
-	sb.WriteString(fmt.Sprintf("Valid:   %v\n", util.IsWorkspaceDir(dir)))
+	fmt.Fprintf(&sb, "Path:    %s\n", dir)
+	fmt.Fprintf(&sb, "Version: %s\n", util.Ver)
+	fmt.Fprintf(&sb, "Valid:   %v\n", util.IsWorkspaceDir(dir))
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

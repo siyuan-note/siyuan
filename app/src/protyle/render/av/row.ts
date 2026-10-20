@@ -15,7 +15,7 @@ import {
     renderCellAttr
 } from "./cell";
 import {fetchPost} from "../../../util/fetch";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
 import {clearSelect} from "../../util/clear";
@@ -74,7 +74,7 @@ export const getRowHTML = (options: {
                 html += getCardCoverHTML(coverClass, galleryRow.coverURL, getCompressURL(galleryRow.coverURL),
                     galleryData.fitImage, getCardCoverSource(galleryData), galleryRow.coverPosition);
             } else if (galleryRow.coverContent) {
-                html += `<div class="${coverClass}"><div class="av__gallery-content">${galleryRow.coverContent}</div><div></div></div>`;
+                html += `<div class="${coverClass}"><div class="av__gallery-content" inert>${galleryRow.coverContent}</div><div></div></div>`;
             } else {
                 html += `<div class="${coverClass}"></div>`;
             }
@@ -145,7 +145,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
                 html += getCardCoverHTML(coverClass, kanbanRow.coverURL, getCompressURL(kanbanRow.coverURL),
                     kanbanData.fitImage, getCardCoverSource(kanbanData), kanbanRow.coverPosition);
             } else if (kanbanRow.coverContent.trim()) {
-                html += `<div class="${coverClass}"><div class="av__gallery-content">${kanbanRow.coverContent}</div><div></div></div>`;
+                html += `<div class="${coverClass}"><div class="av__gallery-content" inert>${kanbanRow.coverContent}</div><div></div></div>`;
             }
         }
         html += `<div class="${getCardFieldsClass(kanbanData.cardLayout)}">`;

@@ -7,7 +7,7 @@
 		"id": "20211226115043-afhev0g",
 		"title": "資料安全",
 		"type": "doc",
-		"updated": "20230422123349"
+		"updated": "20261016111431"
 	},
 	"Children": [
 		{
@@ -133,12 +133,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115155-ckjrbi2",
-				"updated": "20211225214451"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "明文存儲"
+					"Data": "普通筆記本的本地儲存"
 				}
 			]
 		},
@@ -147,12 +147,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115155-1b2wvyo",
-				"updated": "20211228141121"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源使用明文方式將資料存儲在本地文件系統上，這意味著："
+					"Data": "普通筆記本的文件和資源檔案以明文儲存在本地檔案系統中，這意味著："
 				}
 			]
 		},
@@ -162,7 +162,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115155-nyex7qa",
-				"updated": "20211228141131"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -174,7 +174,7 @@
 					},
 					"Properties": {
 						"id": "20211226115155-6ukijuv",
-						"updated": "20211228141126"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -182,12 +182,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115155-g95jxwm",
-								"updated": "20211228141126"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "任何能夠使用作業系統的人或軟體都讀取其中的資料"
+									"Data": "擁有這些本地檔案讀取權限的人或軟體可以讀取其內容"
 								}
 							]
 						}
@@ -224,12 +224,33 @@
 			]
 		},
 		{
+			"ID": "20261016111431-vhkhhjf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-vhkhhjf",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "加密筆記本",
+					"TextMarkBlockRefID": "20260907120000-crytw01",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "會加密持久化的文件、資源檔案、資料庫定義和索引。這不等於加密整個工作空間或裝置：解鎖後的記憶體內容、暫存檔案、剪貼簿、明文匯出檔案及部分中繼資料不在這項保證內。仍須使用受信任的作業系統，完整安全邊界請參閱加密筆記本專章。"
+				}
+			]
+		},
+		{
 			"ID": "20211226115155-jq28hup",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115155-jq28hup",
-				"updated": "20211225214451"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -243,12 +264,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115155-04oj3rp",
-				"updated": "20220703223003"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源雲端同步使用"
+					"Data": "思源雲端同步對資料快照使用"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -259,7 +280,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，密碼在本地通過內置密鑰加密保存，除使用者之外的任何第三方均無法在雲端獲得明文資料。"
+					"Data": "。資料倉庫密鑰以 Base64 編碼形式儲存在本地設定檔 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/conf/conf.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中；Base64 編碼不等於加密，請保護好工作空間設定和裝置。資料倉庫密鑰與加密筆記本的主密碼、金鑰備份相互獨立，不能取代後兩者。"
 				}
 			]
 		},
@@ -269,7 +299,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115155-b3gy3p8",
-				"updated": "20211225214451"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -284,7 +314,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115155-z39qt19",
-				"updated": "20220703223919"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -324,7 +354,7 @@
 					},
 					"Properties": {
 						"id": "20211226115155-80w2cr0",
-						"updated": "20211228124700"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -332,12 +362,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115155-6y3o6jb",
-								"updated": "20211228124700"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "重要密碼、密鑰或者Kernel機密等建議使用專用軟體、設備或者離線保存"
+									"Data": "重要密碼、密鑰或者核心機密等建議使用專用軟體、設備或者離線保存"
 								}
 							]
 						}

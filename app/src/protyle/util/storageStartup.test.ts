@@ -6,7 +6,6 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import type {Constants as AppConstants} from "../../constants";
 import {createDefaultMobileBottomBarConfig, normalizeMobileBottomBarConfig} from "../../mobile/util/mobileBottomBarConfig";
-import {createDefaultMobileBarsConfig, MOBILE_BARS_CONFIG_KEY, resolveMobileSidebarConfig} from "../../mobile/util/mobileBarsConfig";
 
 const constantsExports: {Constants?: typeof AppConstants} = {};
 runInNewContext(transpileModule(readFileSync(resolve("src/constants.ts"), "utf8"), {
@@ -35,8 +34,6 @@ const loadStorage = (values: Record<string, unknown>) => {
         getDefaultType: () => ({}),
         getDefaultSubType: () => ({}),
         createDefaultMobileBottomBarConfig,
-        createDefaultMobileBarsConfig,
-        MOBILE_BARS_CONFIG_KEY,
         normalizeSearchTypes: (types: unknown) => types,
         sanitizeClosedTabs: (tabs: unknown[]) => tabs,
         setStorageVal: () => assert.fail("Loading storage must not overwrite persisted data"),
@@ -56,41 +53,10 @@ const loadZoom = (value: unknown) => {
     return zoom;
 };
 
-test("startup preserves the optional page scroll button preference", () => {
-    assert.notEqual(loadStorage({})[Constants.LOCAL_PAGE_SCROLL_BUTTONS], true);
-    for (const enabled of [false, true]) {
-        assert.equal(loadStorage({[Constants.LOCAL_PAGE_SCROLL_BUTTONS]: enabled})[Constants.LOCAL_PAGE_SCROLL_BUTTONS], enabled);
-    }
-});
-
-test("fresh or reset mobile preferences enable sidebar buttons alongside swipe", () => {
-    const first = loadStorage({})[MOBILE_BARS_CONFIG_KEY];
-    const second = loadStorage({})[MOBILE_BARS_CONFIG_KEY];
-    assert.deepEqual(first, createDefaultMobileBarsConfig());
-    assert.deepEqual(resolveMobileSidebarConfig(first as ReturnType<typeof createDefaultMobileBarsConfig>), {sidebarSwipe: true, sidebarButtons: true});
-    assert.notEqual(first, second);
-});
-
-test("startup preserves legacy and explicit sidebar choices in object and serialized storage", () => {
-    for (const persisted of [
-        {autoHide: false},
-        {autoHide: false, sidebarSwipe: true, sidebarButtons: false},
-        {autoHide: false, sidebarSwipe: true, sidebarButtons: true},
-        {autoHide: false, sidebarSwipe: false, sidebarButtons: true},
-    ]) {
-        for (const value of [persisted, JSON.stringify(persisted)]) {
-            const loaded = loadStorage({[MOBILE_BARS_CONFIG_KEY]: value})[MOBILE_BARS_CONFIG_KEY];
-            assert.equal(JSON.stringify(loaded), JSON.stringify(persisted));
-            assert.deepEqual(resolveMobileSidebarConfig(loaded as typeof persisted), resolveMobileSidebarConfig(persisted));
-        }
-    }
-});
-
-test("malformed legacy mobile preferences retain safe sidebar access", () => {
-    for (const value of [null, "null", "invalid", "false", "{}", "[]"]) {
-        const loaded = loadStorage({[MOBILE_BARS_CONFIG_KEY]: value})[MOBILE_BARS_CONFIG_KEY];
-        assert.deepEqual(resolveMobileSidebarConfig(loaded as Parameters<typeof resolveMobileSidebarConfig>[0]),
-            {sidebarSwipe: true, sidebarButtons: value === null}, String(value));
+test("reader and control preferences no longer create defaults in local storage", () => {
+    const storage = loadStorage({});
+    for (const key of ["local-mobile-bars", "local-outline", "local-pdftheme", "local-recent-docs"]) {
+        assert.equal(Object.prototype.hasOwnProperty.call(storage, key), false, key);
     }
 });
 

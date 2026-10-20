@@ -8,7 +8,7 @@
 		"id": "20240530101000-flot1gj",
 		"title": "パフォーマンスの最適化",
 		"type": "doc",
-		"updated": "20260803163243"
+		"updated": "20261016191102"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"Properties": {
 				"ID": "20240530101000-rdwwuy5",
 				"id": "20240530101000-33iniao",
-				"updated": "20260803163243"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -760,7 +760,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250825114907-tkuwv3h",
-				"updated": "20260803163243"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -774,13 +774,9 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20250825114907-av6973u",
-				"updated": "20260803163243"
+				"updated": "20261016191102"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​ "
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
@@ -788,16 +784,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "バージョン情報"
+					"TextMarkTextContent": "アプリ"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メンテナンス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -806,7 +811,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ から、定期的にインデックスを最適化することをお勧めします。"
+					"Data": " から、定期的にインデックスを最適化することをお勧めします。"
 				}
 			]
 		}

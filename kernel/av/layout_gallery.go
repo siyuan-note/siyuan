@@ -37,9 +37,8 @@ type LayoutGallery struct {
 
 	CardFields []*ViewGalleryCardField `json:"fields"` // 卡片字段
 
-	// TODO CardIDs 字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15194
-	//Deprecated
-	CardIDs []string `json:"cardIds"` // 卡片 ID，用于自定义排序
+	// Deprecated: 仅用于读取和升级旧版布局，卡片顺序由 View.ItemIDs 维护。
+	CardIDs []string `json:"cardIds,omitempty"` // 卡片 ID，用于自定义排序
 }
 
 func NewLayoutGallery() *LayoutGallery {

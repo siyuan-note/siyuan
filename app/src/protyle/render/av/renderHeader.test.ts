@@ -66,7 +66,7 @@ describe("database default item templates", () => {
             view: {filters: [], sorts: []}, newItemTemplates: itemTemplate ? [itemTemplate] : [],
             defaultTemplateID,
         } as IAV;
-        const block = {classList: {contains: () => true}} as unknown as Element;
+        const block = {classList: {contains: () => true}, hasAttribute: () => false} as unknown as Element;
         return (module.exports as typeof import("./render")).genTabHeaderHTML(data, false, true, block);
     };
 

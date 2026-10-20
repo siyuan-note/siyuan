@@ -1,8 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"mime/multipart"
 
 	"github.com/88250/gulu"
@@ -42,19 +44,25 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 // contractHandler 将请求绑定和响应类型与注册契约关联，业务入口继续使用现有中间件。
 func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, Data],
 	handler func(*gin.Context, Request) apicontract.Response[Data], beforeDecode ...func(*gin.Context) *apicontract.Response[Data]) gin.HandlerFunc {
-	// 写配置端点按契约声明串行化并通知；读取完整配置与写入共用互斥，保证读到已提交的配置
-	if setting := endpoint.Definition().Setting; setting.Declared() && setting.Mode == apicontract.SettingNotify {
-		handler = serializeSetting(setting.Namespace, handler)
-	} else if setting.Declared() && setting.Mode == apicontract.SettingSilent || endpoint.Definition().Path == "/api/system/getConf" {
-		serialized := handler
-		handler = func(c *gin.Context, request Request) apicontract.Response[Data] {
-			namespace := setting.Namespace
-			if namespace == "" {
-				namespace = "*"
+	setting := endpoint.Definition().Setting
+	// 合并写入在取得配置段锁之后才读取当前配置，避免并发提交互相覆盖。
+	merge := setting.Declared() && setting.Merge
+	if !merge {
+		// 按契约声明的模式串行化：Notify 补发变更通知，Silent 只取配置互斥锁。
+		// 读取完整配置与写入共用互斥，保证读到已提交的配置。
+		if setting.Declared() && setting.Mode == apicontract.SettingNotify {
+			handler = serializeSetting(setting.Namespace, handler)
+		} else if setting.Declared() && setting.Mode == apicontract.SettingSilent || endpoint.Definition().Path == "/api/system/getConf" {
+			serialized := handler
+			handler = func(c *gin.Context, request Request) apicontract.Response[Data] {
+				namespace := setting.Namespace
+				if namespace == "" {
+					namespace = "*"
+				}
+				release := lockSetting(namespace)
+				defer release()
+				return serialized(c, request)
 			}
-			release := lockSetting(namespace)
-			defer release()
-			return serialized(c, request)
 		}
 	}
 	return func(c *gin.Context) {
@@ -108,36 +116,63 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 				return
 			}
 		}
-		var request Request
-		var err error
-		if endpoint.Definition().Body == apicontract.FormBody {
-			// 保留 PostForm 对普通表单、重复字段和解析失败后已有字段的处理。
-			c.PostForm("")
-			form := &multipart.Form{Value: c.Request.PostForm}
-			if c.Request.MultipartForm != nil {
-				form.File = c.Request.MultipartForm.File
+		// 合并写入要基于锁内读取的配置段，请求体本身在取得锁之前读取完毕。
+		var rawBody []byte
+		if merge {
+			body, err := io.ReadAll(c.Request.Body)
+			if err != nil {
+				writeResponse(endpoint.DecodeFailure(err))
+				return
 			}
-			request, err = endpoint.DecodeMultipart(form)
-		} else if endpoint.Definition().Body == apicontract.MultipartBody {
-			form, parseErr := c.MultipartForm()
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				request, err = endpoint.DecodeMultipart(form)
-			}
-		} else {
-			request, err = endpoint.Decode(c.Request.Body)
+			rawBody = body
 		}
-		if err != nil {
-			writeResponse(endpoint.DecodeFailure(err))
+		decodeRequest := func() (request Request, err error) {
+			switch endpoint.Definition().Body {
+			case apicontract.FormBody:
+				// 保留 PostForm 对普通表单、重复字段和解析失败后已有字段的处理。
+				c.PostForm("")
+				form := &multipart.Form{Value: c.Request.PostForm}
+				if c.Request.MultipartForm != nil {
+					form.File = c.Request.MultipartForm.File
+				}
+				return endpoint.DecodeMultipart(form)
+			case apicontract.MultipartBody:
+				form, parseErr := c.MultipartForm()
+				if parseErr != nil {
+					return request, parseErr
+				}
+				return endpoint.DecodeMultipart(form)
+			default:
+				if merge {
+					return endpoint.Decode(bytes.NewReader(mergeSettingBody(setting.Namespace, rawBody)))
+				}
+				return endpoint.Decode(c.Request.Body)
+			}
+		}
+		run := func() apicontract.Response[Data] {
+			request, err := decodeRequest()
+			if err != nil {
+				return endpoint.DecodeFailure(err)
+			}
+			if err = model.LockRequestAfterDecode(c); err != nil {
+				return endpoint.DecodeFailure(err)
+			}
+			return handler(c, request)
+		}
+		if !merge {
+			writeResponse(run())
 			return
 		}
-		if err = model.LockRequestAfterDecode(c); err != nil {
-			writeResponse(endpoint.DecodeFailure(err))
-			return
-		}
-		writeResponse(handler(c, request))
+		writeResponse(withSettingLock(setting.Namespace, run))
 	}
+}
+
+// mergeSettingBody 把请求体合并进当前配置段；合并失败时保留原始请求体，沿用契约的解码错误。
+func mergeSettingBody(namespace string, body []byte) []byte {
+	if merged, err := mergeSettingPatch(namespace, body); err == nil {
+		return merged
+	}
+	return body
 }
 
 // contractFailure 保留既有业务校验的错误码和消息，并限制其错误载荷形态。

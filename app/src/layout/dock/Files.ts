@@ -1,5 +1,6 @@
 import {config as configApi} from "../../config/util/configApi";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../util/escape";
+import {genFileTreeDocAriaLabel} from "../../util/fileTreeTooltip";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {getInstanceById, setPanelFocus} from "../util";
@@ -1322,7 +1323,7 @@ export class Files extends Model {
         );
         if (liElement) {
             if (liElement.getAttribute("data-type") === "navigation-file") {
-                liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeLessThans));
+                liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", genFileTreeDocAriaLabel(data.data, escapeLessThans));
             }
             this.updateSubFileCount(liElement as HTMLElement, subFileCount);
         }
@@ -2149,16 +2150,12 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         setStorageVal(Constants.LOCAL_FILESPATHS, filesPaths);
     }
 
-    private genDocAriaLabel(item: IFile, escapeMethod: (text: string) => string) {
-        return `${escapeMethod(getDocDisplayName(item.name, item.titleEmpty))} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + escapeMethod(item.bookmark) : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + escapeMethod(item.name1) : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + escapeMethod(item.alias) : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + escapeMethod(item.memo) : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
-    }
-
     private genFileHTML(item: IFile) {
         let countHTML = "";
         if (item.count && item.count > 0) {
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
-        const ariaLabel = this.genDocAriaLabel(item, escapeAriaLabel);
+        const ariaLabel = genFileTreeDocAriaLabel(item, escapeAriaLabel);
         const paddingLeft = (item.path.split("/").length - 1) * 18;
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         const iconExpands = window.siyuan.config.fileTree.docIconClickMode === 1;

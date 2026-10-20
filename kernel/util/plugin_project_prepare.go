@@ -22,7 +22,7 @@ func recheckPluginProjectGrantOperation(ctx context.Context, expected *PluginDev
 		return err
 	}
 	if !reflect.DeepEqual(current, expected) {
-		return errors.New("revision_conflict: plugin development grant changed during the operation")
+		return NewTextFileError(TextFileRevisionConflict, errors.New("plugin development grant changed during the operation"))
 	}
 	return nil
 }
@@ -31,18 +31,18 @@ func recheckPluginProjectGrantOperation(ctx context.Context, expected *PluginDev
 func ensurePluginProjectCheckpoint(grant *PluginDevelopmentGrant, directory string, files map[string][]byte) error {
 	private, err := OpenPluginProjectDirectory(PluginProjectPrivateDir(grant.TaskID), true)
 	if err != nil {
-		return fmt.Errorf("backup_failed: %w", err)
+		return NewTextFileError(TextFileBackupFailed, err)
 	}
 	defer private.Close()
 	if _, statErr := private.Lstat(directory); statErr == nil {
 		baseline, err := OpenPluginProjectDirectory(filepath.Join(PluginProjectPrivateDir(grant.TaskID), filepath.FromSlash(directory)), false)
 		if err != nil {
-			return fmt.Errorf("backup_failed: %w", err)
+			return NewTextFileError(TextFileBackupFailed, err)
 		}
 		defer baseline.Close()
 		existing, err := SnapshotPluginProject(baseline, nil)
 		if err != nil || PluginProjectTreeRevision(projectInventory(existing)) != PluginProjectTreeRevision(projectInventory(files)) {
-			return errors.New("backup_failed: existing checkpoint does not match the frozen source")
+			return NewTextFileError(TextFileBackupFailed, errors.New("existing checkpoint does not match the frozen source"))
 		}
 		return nil
 	} else if !errors.Is(statErr, os.ErrNotExist) {
@@ -60,19 +60,19 @@ func ensurePluginProjectCheckpoint(grant *PluginDevelopmentGrant, directory stri
 	for name, data := range files {
 		if err = writePluginProjectBytes(stage, name, data); err != nil {
 			stage.Close()
-			return fmt.Errorf("backup_failed: %w", err)
+			return NewTextFileError(TextFileBackupFailed, err)
 		}
 	}
 	verify, err := SnapshotPluginProject(stage, nil)
 	stage.Close()
 	if err != nil || PluginProjectTreeRevision(projectInventory(verify)) != PluginProjectTreeRevision(projectInventory(files)) {
-		return errors.New("backup_failed: staged checkpoint verification failed")
+		return NewTextFileError(TextFileBackupFailed, errors.New("staged checkpoint verification failed"))
 	}
 	if err = private.MkdirAll(path.Dir(directory), 0700); err != nil {
 		return err
 	}
 	if err = private.Rename(tmp, directory); err != nil {
-		return fmt.Errorf("backup_failed: %w", err)
+		return NewTextFileError(TextFileBackupFailed, err)
 	}
 	return nil
 }
@@ -124,19 +124,19 @@ func resumePluginProjectPreparation(ctx context.Context, grant *PluginDevelopmen
 		for name, data := range files {
 			if err = writePluginProjectBytes(stage, name, data); err != nil {
 				stage.Close()
-				return nil, fmt.Errorf("result_unknown: preparation interrupted; retry prepare_project to rebuild uncommitted staging: %w", err)
+				return nil, NewTextFileError(TextFileResultUnknown, fmt.Errorf("preparation interrupted; retry prepare_project to rebuild uncommitted staging: %w", err))
 			}
 		}
 		verify, verifyErr := SnapshotPluginProject(stage, nil)
 		stage.Close()
 		if verifyErr != nil || PluginProjectTreeRevision(projectInventory(verify)) != PluginProjectTreeRevision(manifest.Baseline) {
-			return nil, errors.New("result_unknown: staged source differs; preparation journal and checkpoint preserved")
+			return nil, NewTextFileError(TextFileResultUnknown, errors.New("staged source differs; preparation journal and checkpoint preserved"))
 		}
 		if err = recheckPluginProjectGrantOperation(ctx, grant, operation); err != nil {
 			return nil, err
 		}
 		if err = project.Rename(".prepare-source", "source"); err != nil {
-			return nil, fmt.Errorf("result_unknown: source publication failed; preparation is resumable: %w", err)
+			return nil, NewTextFileError(TextFileResultUnknown, fmt.Errorf("source publication failed; preparation is resumable: %w", err))
 		}
 	} else if statErr != nil {
 		return nil, statErr
@@ -151,15 +151,15 @@ func resumePluginProjectPreparation(ctx context.Context, grant *PluginDevelopmen
 		return nil, err
 	}
 	if PluginProjectTreeRevision(projectInventory(actual)) != PluginProjectTreeRevision(manifest.Baseline) {
-		return nil, errors.New("revision_conflict: published preparation source has external changes; preserved")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("published preparation source has external changes; preserved"))
 	}
 	manifest.Current, manifest.Preparing = projectInventory(actual), false
 	if err = savePluginProjectManifest(grant, manifest); err != nil {
-		return nil, fmt.Errorf("result_unknown: complete source and checkpoint retained; retry prepare_project to finish journal: %w", err)
+		return nil, NewTextFileError(TextFileResultUnknown, fmt.Errorf("complete source and checkpoint retained; retry prepare_project to finish journal: %w", err))
 	}
 	if recoveryOnly {
 		if _, err = RequirePluginDevelopment(ctx, "recovered"); err != nil {
-			return nil, fmt.Errorf("result_unknown: preparation completed but recovery grant could not be consumed: %w", err)
+			return nil, NewTextFileError(TextFileResultUnknown, fmt.Errorf("preparation completed but recovery grant could not be consumed: %w", err))
 		}
 	}
 	return PluginProjectArtifactStatus(grant, source)

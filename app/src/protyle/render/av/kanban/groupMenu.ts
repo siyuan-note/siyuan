@@ -2,7 +2,7 @@ import {Menu} from "../../../../plugin/Menu";
 import {Constants} from "../../../../constants";
 import {transaction} from "../../../wysiwyg/transaction";
 import {confirmDialog} from "../../../../dialog/confirmDialog";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getAVData} from "../virtualScroll";
 import {
     AV_MANAGE_CUSTOM_COLORS_TYPE,

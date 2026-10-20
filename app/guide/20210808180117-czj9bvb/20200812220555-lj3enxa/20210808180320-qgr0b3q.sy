@@ -7,7 +7,7 @@
 		"id": "20210808180320-qgr0b3q",
 		"title": "自定义外观",
 		"type": "doc",
-		"updated": "20240508000054"
+		"updated": "20261013113128"
 	},
 	"Children": [
 		{
@@ -50,6 +50,85 @@
 			"Properties": {
 				"id": "20240508000054-oeruvuw"
 			}
+		},
+		{
+			"ID": "20261013113128-3apehkq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261013113128-3apehkq",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "紧凑模式"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-8do51zi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-8do51zi",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "开启 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "界面"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "紧凑模式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，桌面端的工具栏、页签、导航列表、菜单和对话框会缩小间距。此选项默认关闭，切换后立即生效；不会改变编辑器文字大小、文档和数据库内容布局、导出结果或移动端界面。"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-urvyupz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-urvyupz",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内置明亮和暗黑主题支持紧凑模式。社区主题下的效果取决于主题自身的布局样式，部分区域可能保持原有间距。"
+				}
+			]
 		}
 	]
 }

@@ -17,7 +17,7 @@ import {viewCards} from "../../card/viewCards";
 import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {popSearch} from "../../mobile/menu/search";
 import {openSearch} from "../../search/spread";
 import {openDocHistory} from "../../history/doc";

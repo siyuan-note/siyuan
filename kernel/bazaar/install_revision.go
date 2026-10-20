@@ -23,7 +23,7 @@ import (
 const MissingInstalledRevision = "missing"
 
 var (
-	ErrInstalledRevisionConflict = errors.New("revision_conflict: installed package changed")
+	ErrInstalledRevisionConflict = util.NewTextFileError(util.TextFileRevisionConflict, errors.New("installed package changed"))
 	ErrPackageHashConflict       = errors.New("package_hash_conflict: package archive changed")
 )
 
@@ -98,7 +98,7 @@ func validateInstallRelativePath(name string) error {
 		strings.ContainsAny(name, "\\:\x00") {
 		return errors.New("invalid marketplace package path")
 	}
-	for _, component := range strings.Split(name, "/") {
+	for component := range strings.SplitSeq(name, "/") {
 		if component == ".." || strings.TrimRight(component, ". ") != component {
 			return errors.New("invalid marketplace package path")
 		}

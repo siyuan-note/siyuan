@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-w9nonqj",
-				"updated": "20261002013053"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -63,6 +63,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 组合的单个字符设置为快捷键。"
+				}
+			]
+		},
+		{
+			"ID": "20261015193140-2q8kvoa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015193140-2q8kvoa",
+				"updated": "20261015193140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷键"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "元素"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中为 Note、Tip、Important、Warning、Caution 五种提示块分别设置快捷键，默认均未绑定，移动端连接外接键盘后也可使用。行为参考引述块快捷键：转换当前块或选中的块，无法转换时插入空提示块。在提示块内，使用不同类型的快捷键会切换类型；使用相同类型的快捷键时，若仅有一个未折叠子块则取消提示块，若有多个子块或子块已折叠则在当前子块后插入空提示块。"
 				}
 			]
 		},
@@ -163,7 +213,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20260928091724"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -183,7 +233,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20260828134448"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1484,7 +1534,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳转到第九个/最后一个页签"
+									"Data": "跳转到最后一个页签"
 								}
 							]
 						},
@@ -1541,7 +1591,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳转到下一个页签"
+									"Data": "跳转到上一个页签"
 								}
 							]
 						},
@@ -1607,7 +1657,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳转到上一个页签"
+									"Data": "跳转到下一个页签"
 								}
 							]
 						},
@@ -4313,7 +4363,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261012014930"
+				"updated": "20261018200107"
 			},
 			"Children": [
 				{
@@ -13047,7 +13097,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261003225941"
+				"updated": "20261018200107"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13058,11 +13108,38 @@
 			]
 		},
 		{
+			"ID": "20261018163000-7w2zbxu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-7w2zbxu"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在画布上按 Esc 可恢复阅读，让滚轮滚动文档。如果正在编辑节点、选择概括范围或拖动关系线，Esc 会先结束或取消当前操作；全屏时按 Esc 退出全屏。"
+				}
+			]
+		},
+		{
+			"ID": "20261018200107-yv270lj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018200107-yv270lj",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 Ctrl（macOS 为 Command）并用鼠标右键拖动画布可临时平移，不会改变键盘焦点或激活阅读中的画布，之后普通滚轮仍滚动文档。视图锁定时此手势不可用。普通模式下空白区域的左键拖动不会平移画布；启用手形工具后可用左键拖动平移。"
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-fr0uxw6",
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-fr0uxw6",
-				"updated": "20261003225941",
+				"updated": "20261017003000",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13429,7 +13506,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中上一个同级节点"
+									"Data": "选中上一个可见的同深度节点，可跨父节点"
 								}
 							]
 						},
@@ -13464,7 +13541,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中下一个同级节点"
+									"Data": "选中下一个可见的同深度节点，可跨父节点"
 								}
 							]
 						},
@@ -14586,7 +14663,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423104310-6605t5b",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14817,7 +14894,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002230606-2186dda",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14831,7 +14908,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 时，执行缩进或反缩进会从至少两行非空代码中识别一致的缩进，并保存为该代码块的设置。支持识别制表符，或以 2、4、6、8 个空格为最小宽度且其他缩进为其整数倍的空格缩进。混合缩进或依据不足时沿用全局设置。显式块级设置优先。识别不会重新格式化已有代码。"
+					"Data": " 时，执行缩进或反缩进会从至少两行非空代码中识别一致的缩进，并保存为该代码块的设置。支持识别制表符，或以 2、4、6、8 个空格为最小宽度且其他缩进为其整数倍的空格缩进。混合缩进或依据不足时沿用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab 空格数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。显式块级设置优先。识别不会重新格式化已有代码。"
 				}
 			]
 		},
@@ -16542,7 +16655,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220618235609-cuv0am5",
-				"updated": "20260919234652"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -17817,7 +17930,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20261007111840"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -17831,7 +17944,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-fahlo11",
-				"updated": "20261007111840"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -17854,7 +17967,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 后，在文档树或置顶文档区可决定单击或点按执行的操作：选择「展开或折叠子文档」立即展开或折叠；选择「单击展开或折叠子文档、双击打开父文档」则双击或连续点按两次打开父文档并保持展开或折叠状态，单击需等待约 300 毫秒以判断是否双击，仍可通过文档菜单打开父文档。没有子文档时单击或点按标题仍直接打开；单击有可打开文档的文档图标则打开文档，否则修改图标；笔记本图标始终用于修改图标"
+					"Data": " 后，在文档树或置顶文档区可决定单击或点按执行的操作：选择「展开或折叠子文档」立即展开或折叠；选择「单击展开或折叠子文档、双击打开父文档」则双击或连续点按两次打开父文档并保持展开或折叠状态，单击需等待约 300 毫秒以判断是否双击，仍可通过文档菜单打开父文档。没有子文档时单击或点按标题仍直接打开；单击有可打开文档的文档图标则打开文档，否则修改图标；笔记本图标始终用于修改图标。"
 				}
 			]
 		},

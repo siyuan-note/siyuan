@@ -1,7 +1,5 @@
-export const MOBILE_BARS_CONFIG_KEY = "local-mobile-bars";
-
 export const isMobileBarsAutoHide = () =>
-    window.siyuan.storage[MOBILE_BARS_CONFIG_KEY]?.autoHide !== false;
+    window.siyuan.config.appearance.mobileBars?.autoHide !== false;
 
 export const createDefaultMobileBarsConfig = () => ({
     autoHide: true,
@@ -19,4 +17,4 @@ export const resolveMobileSidebarConfig = (config?: {autoHide?: boolean, sidebar
 };
 
 export const getMobileSidebarConfig = () =>
-    resolveMobileSidebarConfig(window.siyuan.storage[MOBILE_BARS_CONFIG_KEY]);
+    resolveMobileSidebarConfig(window.siyuan.config.appearance.mobileBars);

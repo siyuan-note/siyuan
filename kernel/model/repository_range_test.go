@@ -21,7 +21,7 @@ func TestRepoSnapshotTimeRange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i := 0; i < 70; i++ {
+	for i := range 70 {
 		clone := *index
 		clone.ID = fmt.Sprintf("%040x", i+19943000)
 		clone.Created = 1000 + int64(i)
@@ -65,7 +65,7 @@ func TestCloudRepoSnapshotTimeRange(t *testing.T) {
 	load := func(page int) ([]*dejavu.Log, int, int, error) {
 		calls = append(calls, page)
 		logs := []*dejavu.Log{}
-		for i := 0; i < 32; i++ {
+		for i := range 32 {
 			logs = append(logs, &dejavu.Log{Created: int64(1000 + (page-1)*32 + i)})
 		}
 		return logs, 3, 96, nil

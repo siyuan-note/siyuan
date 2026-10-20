@@ -18,7 +18,9 @@ const setup = (platform = "MacIntel", maxTouchPoints = 5) => {
     let selected: unknown;
     let focused = false;
     const editable = {focus: () => { focused = true; currentRange = null; }};
-    const element = {matches: () => false, querySelector: () => editable};
+    const element: {matches: (selector: string) => boolean; querySelector: () => typeof editable} = {
+        matches: () => false, querySelector: () => editable,
+    };
     const copyRange = {selectNodeContents: (target: unknown) => { selected = target; }};
     Object.defineProperty(globalThis, "navigator", {configurable: true, value: {
         userAgent: platform === "iPhone" ? "iPhone" : "Mozilla/5.0 (Macintosh)", platform, maxTouchPoints,
@@ -32,7 +34,7 @@ const setup = (platform = "MacIntel", maxTouchPoints = 5) => {
             addRange: (range: unknown) => { currentRange = range; },
         })},
     });
-    return {element: element as unknown as Element, editable, savedRange, copyRange,
+    return {rawElement: element, element: element as unknown as Element, editable, savedRange, copyRange,
         current: () => currentRange, selected: () => selected, focused: () => focused};
 };
 
@@ -76,7 +78,7 @@ describe("block menu clipboard selection", () => {
             const state = setup(platform, platform === "Win32" ? 0 : 5);
             const cursor = {focus: () => {}};
             const hiddenTitle = {focus: () => assert.fail("hidden title must not receive focus")};
-            state.element.matches = selector => selector === '[data-type="NodeAttributeView"]';
+            state.rawElement.matches = (selector: string) => selector === '[data-type="NodeAttributeView"]';
             state.element.querySelector = <T extends Element>(selector: string) =>
                 (selector === ".av__cursor" ? cursor : hiddenTitle) as unknown as T;
             copyBlockSelection(state.element, () => {

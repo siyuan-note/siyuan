@@ -5,6 +5,8 @@ const os = require("node:os");
 
 const runCases = async () => {
     const assert = require("node:assert/strict");
+    const errors = [];
+    window.addEventListener("error", event => errors.push(event.message));
     window.siyuan = {zIndex: 0, languages: {}, menus: {menu: {
         element: document.createElement("div"), remove() { this.data = undefined; }, fullscreen() {},
     }}};
@@ -225,6 +227,14 @@ const runCases = async () => {
     assert.deepEqual(documentEditor.menus, [documentEditor.block]);
     documentEditor.toolbar.subElement.querySelector('[data-type="exitMultiSelectMode"]').click();
     assert.equal(documentEditor.element.querySelector(".protyle-wysiwyg--select"), null);
+
+    // iOS 正文双击保留原生文字菜单，不显示自定义内容工具栏。
+    window.contentToolbarIOS = true;
+    const nativeMenu = createEditor(false);
+    nativeMenu.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    assert.equal(nativeMenu.toolbar.subElement.classList.contains("fn__none"), true);
+    assert.equal(getSelection().toString(), "lph");
+    assert.deepEqual(errors, []);
 };
 
 const runElectron = async () => {
@@ -266,6 +276,8 @@ const runElectron = async () => {
             "const stripSemanticMarkersFromRangeText = range => range.toString();",
             "const getAVTemplateInteractiveElement = () => undefined; const getDiagramBlock = () => undefined;",
             "const isNotEditBlock = () => false;",
+            "const isIOSDevice = () => window.contentToolbarIOS === true;",
+            extract("protyle/wysiwyg/nativeTextMenu", ["usesNativeTextMenu"]),
             "const contentMenu = (protyle, node) => protyle.toolbar.showContent(protyle, getSelection().getRangeAt(0), node);",
             read("protyle/util/hasClosest"),
             read("protyle/wysiwyg/blockSelection"),

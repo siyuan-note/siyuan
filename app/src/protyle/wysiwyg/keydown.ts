@@ -83,6 +83,8 @@ import {isEmptyParagraph} from "./emptyTextBlock";
 import {isListHeadingContainer} from "./headingConversion";
 import {turnParagraphIntoCode} from "./turnIntoCode";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
+import {CALLOUT_PRESETS} from "./calloutType";
+import {handleCalloutShortcut} from "./calloutShortcut";
 import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
 import {formatPainter} from "../toolbar/FormatPainter";
@@ -120,7 +122,7 @@ import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";
@@ -312,6 +314,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 组合输入期间保留浏览器的原生选区，避免读取选区时修复光标而打断输入法。
         if (event.isComposing) {
             event.stopPropagation();
+            return;
+        }
+        const mindmap = event.target.closest(".mindmap-view");
+        if (mindmap && !mindmap.contains(editorElement)) {
+            // 脑图未处理的快捷键复用通用命令，不能进入隐藏源块的正文编辑逻辑。
+            if (!protyle.disabled && event.target.closest(".protyle-wysiwyg") === editorElement) {
+                commonHotkey(protyle, event, hasClosestBlock(mindmap) || undefined);
+            }
             return;
         }
         if (hasClosestByAttribute(event.target, "data-type", "av-search")) {
@@ -2250,6 +2260,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
+        const calloutPreset = CALLOUT_PRESETS.find(item =>
+            matchHotKey(window.siyuan.config.keymap.editor.insert[item.id], event));
+        if (calloutPreset && !isInEmbedBlock(nodeElement)) {
+            event.preventDefault();
+            event.stopPropagation();
+            await handleCalloutShortcut(protyle, nodeElement, range, calloutPreset, blockSelectionModeElement);
+            return;
+        }
         const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list, event);
         const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check, event);
         const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"], event);
@@ -2341,7 +2359,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle,
                             nodeElement: selectsElement[0],
                             id: selectsElement[0].dataset.nodeId,
-                            type: isMatchCheck ? "UL2TL" : (isMatchList ? "OL2UL" : "UL2OL"),
+                            type: getListConversionType("u", targetSubtype) || getListConversionType("o", "u"),
                         });
                     } else if (listContext) {
                         const isListItemFocused = Boolean(protyle.block.showAll &&

@@ -256,7 +256,7 @@ func TestOpenAIResponsesStreamRejectsIncompleteFunctionCall(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer stream.Close()
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		if _, err = stream.Recv(); err != nil {
 			t.Fatalf("receive partial function event %d: %v", i, err)
 		}

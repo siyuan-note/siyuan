@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20261002013053"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -63,6 +63,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20261015193140-bd3r41i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015193140-bd3r41i",
+				"updated": "20261015193140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Element"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " you can assign separate shortcuts to the Note, Tip, Important, Warning, and Caution callout blocks. All five are unassigned by default and also work with an external keyboard on mobile. Like the blockquote shortcut, they convert the current or selected blocks, or insert an empty callout when conversion is unavailable. Inside a callout, a different type changes its type; the same type removes the wrapper when it has one unfolded child, or inserts an empty callout after the current child when it has multiple children or a folded child."
 				}
 			]
 		},
@@ -163,7 +213,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133532-44ubczo",
-				"updated": "20260928091724"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -187,7 +237,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20260828134448"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1486,7 +1536,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Jump to the ninth/last tab"
+									"Data": "Jump to the last tab"
 								}
 							]
 						},
@@ -1543,7 +1593,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select next tab"
+									"Data": "Select previous tab"
 								}
 							]
 						},
@@ -1609,7 +1659,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select previous tab"
+									"Data": "Select next tab"
 								}
 							]
 						},
@@ -4315,7 +4365,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261012014930"
+				"updated": "20261018200107"
 			},
 			"Children": [
 				{
@@ -13065,7 +13115,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261003225941"
+				"updated": "20261018200107"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13076,11 +13126,38 @@
 			]
 		},
 		{
+			"ID": "20261018163000-tgvsr1a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-tgvsr1a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor, summary selection, or relationship-line drag is active, Esc first finishes or cancels that operation. In full screen, Esc exits full screen."
+				}
+			]
+		},
+		{
+			"ID": "20261018200107-p7ncdxc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018200107-p7ncdxc",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hold Ctrl (Command on macOS) and drag the canvas with the right mouse button to pan temporarily without changing keyboard focus or activating a reading canvas. Ordinary wheel input then continues scrolling the document. This gesture is unavailable while the view is locked. Ordinary left dragging on blank canvas does not pan; the Hand Tool allows left-button panning."
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-3srqnh0",
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20261003225941",
+				"updated": "20261017003000",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13399,7 +13476,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the previous sibling node"
+									"Data": "Select the previous visible node at the same depth, across parents"
 								}
 							]
 						},
@@ -13426,7 +13503,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the next sibling node"
+									"Data": "Select the next visible node at the same depth, across parents"
 								}
 							]
 						},
@@ -14516,7 +14593,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105026-c1t0rqo",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14747,7 +14824,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002230606-fd59093",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14761,7 +14838,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " setting, indenting or outdenting detects consistent indentation from at least two nonblank lines and saves it for that block. Tabs or the smallest space indent of 2, 4, 6, or 8 spaces are recognized; other space indents must be multiples of that width. Mixed indentation or insufficient evidence falls back to the global setting. An explicit block setting takes precedence. Detection does not reformat existing code."
+					"Data": " setting, indenting or outdenting detects consistent indentation from at least two nonblank lines and saves it for that block. Tabs or the smallest space indent of 2, 4, 6, or 8 spaces are recognized; other space indents must be multiples of that width. Mixed indentation or insufficient evidence falls back to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Number of Tab Spaces"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". An explicit block setting takes precedence. Detection does not reformat existing code."
 				}
 			]
 		},
@@ -16476,7 +16589,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002116-wyh4u48",
-				"updated": "20260919234652"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -17775,7 +17888,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20261007111840"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -17789,7 +17902,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-l6dnc3c",
-				"updated": "20261007111840"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -17812,7 +17925,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " set, the document tree and pinned documents decide the click action: the expand-only choice expands or collapses immediately, while the double-click choice opens the parent on a double-click or double-tap without changing its expansion state and makes a single click or tap wait about 300 ms; the parent can still be opened from its document menu. A title without child documents still opens directly; clicking a document icon opens an openable document or otherwise changes the icon; a notebook icon always only changes the icon"
+					"Data": " set, the document tree and pinned documents decide the click action: the expand-only choice expands or collapses immediately, while the double-click choice opens the parent on a double-click or double-tap without changing its expansion state and makes a single click or tap wait about 300 ms; the parent can still be opened from its document menu. A title without child documents still opens directly; clicking a document icon opens an openable document or otherwise changes the icon; a notebook icon always only changes the icon."
 				}
 			]
 		},

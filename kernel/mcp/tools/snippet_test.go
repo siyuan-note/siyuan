@@ -48,7 +48,7 @@ func snippetToolResult(t *testing.T, args map[string]any) map[string]any {
 
 func TestSnippetToolPaginationAndPreview(t *testing.T) {
 	snippets := []*conf.Snippet{}
-	for i := 0; i < 25; i++ {
+	for i := range 25 {
 		snippets = append(snippets, &conf.Snippet{ID: fmt.Sprint(i), Name: "Theme", Type: "js", Content: strings.Repeat("字", 8010)})
 	}
 	setupSnippetToolTest(t, snippets)

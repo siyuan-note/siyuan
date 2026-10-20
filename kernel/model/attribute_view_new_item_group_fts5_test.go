@@ -34,13 +34,14 @@ func TestCreateAttributeViewItemPreservesFilteredGroups(t *testing.T) {
 						MSelect: []*av.ValueSelect{{Content: "Feedback", Color: "1"}},
 					}},
 				})
-				if layout == av.LayoutTypeTable || layout == av.LayoutTypeList {
+				switch layout {
+				case av.LayoutTypeTable, av.LayoutTypeList:
 					view.GetTableLayout().Columns = append(view.GetTableLayout().Columns,
 						&av.ViewTableColumn{BaseField: &av.BaseField{ID: filterKey.ID}})
-				} else if layout == av.LayoutTypeGallery {
+				case av.LayoutTypeGallery:
 					view.Gallery.CardFields = append(view.Gallery.CardFields,
 						&av.ViewGalleryCardField{BaseField: &av.BaseField{ID: filterKey.ID}})
-				} else {
+				default:
 					view.Kanban.Fields = append(view.Kanban.Fields,
 						&av.ViewKanbanField{BaseField: &av.BaseField{ID: filterKey.ID}})
 				}

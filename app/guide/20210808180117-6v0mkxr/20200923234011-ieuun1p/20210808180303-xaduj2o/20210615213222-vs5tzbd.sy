@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20261011203418"
+		"updated": "20261016112108"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501135308-u5qn6iz",
-				"updated": "20220501135308"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615120310-64352xf",
-				"updated": "20220615120310"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -56,7 +56,7 @@
 					},
 					"Properties": {
 						"id": "20220615120310-zyipokx",
-						"updated": "20220615120310"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -64,12 +64,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615120310-hxba93x",
-								"updated": "20220615120310"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "File history: saved in the "
+									"Data": "File history: original file bytes are saved in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -78,7 +78,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " folder as the original file, human-readable, and can be manually copied to the corresponding location of data for recovery"
+									"Data": ". Ordinary-notebook history is plaintext; encrypted-notebook history retains ciphertext. Prefer recovery through SiYuan and check the notebook and key requirements below"
 								}
 							]
 						}
@@ -93,7 +93,7 @@
 					},
 					"Properties": {
 						"id": "20220615120310-ku0y1n6",
-						"updated": "20220615120310"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -101,12 +101,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615120310-qkv8ygq",
-								"updated": "20220615120310"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Data snapshot: partitioned by file, encrypted and compressed and saved in the "
+									"Data": "Data snapshot: files are split into chunks, encrypted, compressed, and stored in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -115,7 +115,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " folder, unreadable by humans and cannot be manually restored"
+									"Data": "; restore snapshots through SiYuan rather than copying individual repository files into data"
 								}
 							]
 						}
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120326-oxyzckb",
-				"updated": "20260803163440"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120326-dopr4db",
-				"updated": "20260809232000"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-30uwxvd",
-				"updated": "20260809232000"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-kwaramc",
-						"updated": "20260809232000"
+						"updated": "20261016112108"
 					},
 					"Children": [
 						{
@@ -204,7 +204,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yr7v67z",
-								"updated": "20260809232000"
+								"updated": "20261016112108"
 							},
 							"Children": [
 								{
@@ -223,7 +223,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Document"
+									"TextMarkTextContent": "Documents"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "File Management"
 								},
 								{
 									"Type": "NodeText",
@@ -236,7 +245,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", and the history folder uses the suffix -update."
+									"Data": ", and the history folder uses the suffix -update"
 								}
 							]
 						}
@@ -527,7 +536,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501135308-2rn9rgb",
-				"updated": "20250115153512"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -542,7 +551,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-3azjqzh",
-				"updated": "20250115153512"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -554,7 +563,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-itmzgsj",
-						"updated": "20250115153512"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -562,7 +571,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yvsiton",
-								"updated": "20260720201253"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -599,7 +608,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "File History"
+									"TextMarkTextContent": "File history"
 								},
 								{
 									"Type": "NodeText",
@@ -663,7 +672,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091559-kgrtuyh",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -677,12 +686,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501133808-qv8l0rm",
-				"updated": "20220615120526"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the time list column on the left side of the data history interface, there is a rollback button on the right side of each history record. After clicking, a confirmation dialog box will pop up. If the rollback is confirmed, the existing file will be overwritten with the file history."
+					"Data": "Use the rollback button beside a history record and confirm to overwrite the existing file. Preview the record first where available. Viewing or rolling back an encrypted document requires its original notebook to be present and unlocked. Restoring a deleted encrypted notebook is a separate recovery path and also needs matching notebook/global key backups and the master password; see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Master password and key backup",
+					"TextMarkBlockRefID": "20260907120000-en00031",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -691,12 +711,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501133808-uopvhd4",
-				"updated": "20220501133808"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If there are very many files that need to be rolled back, it is recommended to manually copy on the file system. The internal structure of the history folder is the same as the internal structure of data, for example:"
+					"Data": "Prefer recovery through SiYuan. For bulk recovery by manual copying, first verify the source and destination, and retain the original notebook ID, directory structure, and matching key material for encrypted notebooks. Do not copy their ciphertext into an ordinary notebook. The history directory mirrors the corresponding data paths, for example:"
 				}
 			]
 		},
@@ -859,7 +879,7 @@
 			},
 			"Properties": {
 				"id": "20220501133808-vpkkff8",
-				"updated": "20220615111249"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -873,7 +893,7 @@
 					},
 					"Properties": {
 						"id": "20220501133808-u2jd9bs",
-						"updated": "20220501134035"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -881,12 +901,32 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501133808-nuxcwdm",
-								"updated": "20220501134035"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Exit SiYuan, and then make a full copy and backup of the entire workspace to avoid data loss caused by subsequent misoperations"
+									"Data": "If using on-demand downloads, first complete "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkTextContent": "Asset downloads",
+									"TextMarkBlockRefID": "20260905184908-022q2es",
+									"TextMarkBlockRefSubtype": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " with "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Download all"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Then exit SiYuan normally and back up the entire workspace, including configuration, history, the repository, and encrypted-notebook key backups, before overwriting anything"
 								}
 							]
 						}
@@ -903,7 +943,7 @@
 					},
 					"Properties": {
 						"id": "20220501133808-5op6pre",
-						"updated": "20220501134101"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -911,12 +951,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501133808-wgm1itd",
-								"updated": "20220501134101"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Go to the "
+									"Data": "In "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -925,7 +965,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " folder and copy the data in the "
+									"Data": ", copy only the required files from "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -934,7 +974,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " folder directly to the data folder for overwriting"
+									"Data": " to their matching paths under data. Preserve notebook IDs, filenames, and directory structure; encrypted history must retain its matching notebook and key material"
 								}
 							]
 						}
@@ -951,7 +991,7 @@
 					},
 					"Properties": {
 						"id": "20220501133808-te5g9yq",
-						"updated": "20220615111249"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -959,12 +999,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501133808-8md1hk0",
-								"updated": "20220615111249"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Reindex manually after starting SiYuan"
+									"Data": "Start SiYuan, unlock any restored encrypted notebook, rebuild the index, and check the recovered documents and assets"
 								}
 							]
 						}
@@ -978,7 +1018,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-rhii2c7",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -992,12 +1032,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-mjy7por",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "By default, the history of files generated in the last 30 days is automatically saved, which can be adjusted through "
+					"Data": "File history is retained for 30 days by default. Adjust this in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1012,6 +1052,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "File Management"
 				},
 				{
 					"Type": "NodeText",
@@ -1024,7 +1073,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". History will be automatically deleted."
+					"Data": ". Older file history is deleted automatically."
 				}
 			]
 		},
@@ -1033,12 +1082,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-3fqyf3h",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you want to clear all file history data, you can click "
+					"Data": "To delete all file history, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1061,11 +1110,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Clear all history"
+					"TextMarkTextContent": "File Management"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", or manually delete the "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete all history"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and its "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Purge"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " button. Alternatively, exit SiYuan before manually deleting "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1074,25 +1141,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " folder, then "
+					"Data": ", then rebuild the history index in "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Rebuild history index"
+					"TextMarkTextContent": "File history"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "File History"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": ". Do not delete history you still need for encrypted-notebook recovery."
 				}
 			]
 		},
@@ -1102,7 +1160,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120602-drz9hwc",
-				"updated": "20260927191121"
+				"updated": "20261016111710"
 			},
 			"Children": [
 				{
@@ -1117,7 +1175,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-iya2886",
-				"updated": "20260803171606"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1131,12 +1189,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-wipwu6g",
-				"updated": "20260803171606"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before using the data snapshot for the first time, you need to initialize the "
+					"Data": "Before using snapshots for the first time, initialize "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1163,7 +1221,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": ". Keep this repository key safe; it is separate from the encrypted-notebook master password and key backups."
 				}
 			]
 		},
@@ -1316,7 +1374,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-wp2lnbq",
-				"updated": "20250115153528"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1483,12 +1541,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-dwulzmi",
-				"updated": "20220615120852"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When browsing data snapshots, you can only distinguish between the snapshot creation time and memo, so the memo should be as detailed as possible, so that different data snapshots can be accurately identified in the future."
+					"Data": "Use a detailed memo to identify a snapshot later. A memo does not protect it from cleanup; add a tag to snapshots you need to retain and keep an independent backup."
 				}
 			]
 		},
@@ -1863,7 +1921,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nhnnujh",
-				"updated": "20261011203418"
+				"updated": "20261016111710"
 			},
 			"Children": [
 				{
@@ -1873,12 +1931,53 @@
 			]
 		},
 		{
+			"ID": "20261016111431-bfqnv4v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-bfqnv4v",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local snapshots are cleaned up automatically according to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Account & Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Local data repo purge"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The defaults are 180 retention days and 2 snapshots per day. Within that retention window, earlier days are thinned to the daily limit, while today’s snapshots and referenced snapshots, including tags, are retained by automatic cleanup. These are local retention rules, not a promise to keep every snapshot for 180 days or a cloud-backup policy. Manual purge below removes all unreferenced snapshots regardless of this retention window."
+				}
+			]
+		},
+		{
 			"ID": "20230422101614-mdijztr",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
 				"id": "20230422101614-mdijztr",
-				"updated": "20261011203418"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -2094,7 +2193,7 @@
 					},
 					"Properties": {
 						"id": "20230422101614-ht2yhm0",
-						"updated": "20230422101614"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -2102,12 +2201,59 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422101614-lxjcg2j",
-								"updated": "20230422101614"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Manually delete the "
+									"Data": "To reset the repository, prefer "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Account & Sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Reset data repo"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", which checks asset-download completeness. First finish "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkTextContent": "Asset downloads",
+									"TextMarkBlockRefID": "20260905184908-022q2es",
+									"TextMarkBlockRefSubtype": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " with "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Download all"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", save the repository key, and back up the entire workspace. Manually deleting "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2116,7 +2262,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ folder to clear all data snapshots"
+									"Data": "​ bypasses these checks and removes all local snapshots, including tagged ones; only consider it after these prerequisites and after exiting SiYuan normally"
 								}
 							]
 						}

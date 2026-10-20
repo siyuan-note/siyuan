@@ -171,27 +171,33 @@ func TestAPIContractSystemExitRecovery(t *testing.T) {
 	})
 	model.Conf = model.NewAppConf()
 	closeSystem = func(bool, bool, int) (int, string) { t.Fatal("recovery bypassed guards"); return 0, "" }
-	for _, code := range []int{-1, 0, 1, 3} {
-		called := false
-		finished := false
-		finishSystemExit = func() { finished = true }
-		recoverSystemExit = func(pid int, startedAt int64) (int, string) {
-			called = true
-			if pid != 123 || startedAt != 456 {
-				t.Fatalf("wrong recovery identity: %d %d", pid, startedAt)
+	for _, forced := range []bool{false, true} {
+		for _, code := range []int{-1, 0, 1, 3} {
+			called := false
+			finished := false
+			finishSystemExit = func() { finished = true }
+			recoverSystemExit = func(pid int, startedAt int64, force bool) (int, string) {
+				called = true
+				if pid != 123 || startedAt != 456 || force != forced {
+					t.Fatalf("wrong recovery identity: %d %d", pid, startedAt)
+				}
+				return code, ""
 			}
-			return code, ""
-		}
-		recorder := systemContractRequest(t, "POST", "exit", exit, strings.NewReader(`{"force":true,"execInstallPkg":2,"recoverExit":{"pid":123,"startedAt":456}}`))
-		var result struct {
-			Code int `json:"code"`
-		}
-		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || !called || result.Code != code {
-			t.Fatalf("unexpected recovery response: %s", recorder.Body.String())
-		}
-		requireAPIContract(t, "POST", "/api/system/exit", recorder)
-		if finished != (code == 0) {
-			t.Fatalf("server shutdown changed for recovery code %d: %v", code, finished)
+			body := `{"force":true,"execInstallPkg":2,"recoverExit":{"pid":123,"startedAt":456}}`
+			if forced {
+				body = `{"force":false,"execInstallPkg":2,"recoverExit":{"pid":123,"startedAt":456,"force":true}}`
+			}
+			recorder := systemContractRequest(t, "POST", "exit", exit, strings.NewReader(body))
+			var result struct {
+				Code int `json:"code"`
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || !called || result.Code != code {
+				t.Fatalf("unexpected recovery response: %s", recorder.Body.String())
+			}
+			requireAPIContract(t, "POST", "/api/system/exit", recorder)
+			if finished != (code == 0) {
+				t.Fatalf("server shutdown changed for recovery code %d: %v", code, finished)
+			}
 		}
 	}
 }

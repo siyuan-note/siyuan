@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/88250/lute/parse"
@@ -26,16 +27,20 @@ import (
 )
 
 type ocrFixtureProvider struct {
-	rows   []map[string]string
-	err    error
-	called bool
-	path   string
+	rows           []map[string]string
+	err            error
+	called         bool
+	path           string
+	beforeResponse func()
 }
 
 func (*ocrFixtureProvider) Available() bool { return true }
 func (p *ocrFixtureProvider) Recognize(_ context.Context, path string) ([]map[string]string, error) {
 	p.called = true
 	p.path = path
+	if p.beforeResponse != nil {
+		p.beforeResponse()
+	}
 	return p.rows, p.err
 }
 
@@ -117,6 +122,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	if err != nil || len(matches) != 0 {
 		t.Fatalf("obsolete OCR remained in full-text search: %v, %v", matches, err)
 	}
+	testOCRClearResults(t, path, provider)
 	provider.err = errors.New("inference failed")
 	testAIOCRAssetIndex(t, path, paragraph.ID)
 	if _, _, err := OCRAsset(context.Background(), path); err == nil {
@@ -124,6 +130,13 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	}
 	if util.GetAssetText(path) != "editedocrkeyword" {
 		t.Fatal("failed recognition changed saved text")
+	}
+	if !HasOCRFailure(path + "#preview") {
+		t.Fatal("local provider failure was not recorded")
+	}
+	SetOCRAssetText(path, "editedocrkeyword")
+	if HasOCRFailure(path) {
+		t.Fatal("saving OCR text did not clear the failure")
 	}
 	provider.called = false
 	const notebookPath = "assets/notebook-image.png"
@@ -210,6 +223,115 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		t.Fatal("encrypted OCR changed source ciphertext")
 	}
 	testOCRNotebookIsolation(t, provider, fixture.box.ID)
+}
+
+func testOCRClearResults(t *testing.T, path string, provider *ocrFixtureProvider) {
+	t.Helper()
+	recordOCRFailure(path, errors.New("previous failure"))
+	SetOCRAssetText(path+"?width=100#preview", "")
+	sql.FlushQueue()
+	assertCleared := func(t *testing.T) {
+		t.Helper()
+		if !util.ExistsAssetText(path) || util.GetAssetText(path) != "" || HasOCRFailure(path) {
+			t.Fatalf("cleared OCR was not retained: exists=%v text=%q failed=%v", util.ExistsAssetText(path), util.GetAssetText(path), HasOCRFailure(path))
+		}
+	}
+	assertCleared(t)
+	matches, err := sql.QueryNoLimit("SELECT id FROM blocks_fts WHERE blocks_fts MATCH 'editedocrkeyword'")
+	if err != nil || len(matches) != 0 {
+		t.Fatalf("cleared OCR remained in full-text search: %v, %v", matches, err)
+	}
+	util.SaveAssetsTexts()
+	util.RemoveAssetText(path)
+	util.LoadAssetsTexts()
+	assertCleared(t)
+	provider.called = false
+	cache.LoadAssets()
+	autoOCRAssets()
+	if provider.called {
+		t.Fatal("automatic OCR reran a cleared result after reload")
+	}
+	for _, automatic := range []bool{false, true} {
+		for _, failed := range []bool{false, true} {
+			t.Run(fmt.Sprintf("local clear automatic=%v failed=%v", automatic, failed), func(t *testing.T) {
+				util.RemoveAssetText(path)
+				provider.err = nil
+				if failed {
+					provider.err = errors.New("in-flight failure")
+				}
+				provider.beforeResponse = func() { SetOCRAssetText(path+"?width=200#cleared", "") }
+				_, _, err := ocrAsset(context.Background(), path+"?width=100#recognizing", Conf.GetOCR(), automatic)
+				provider.beforeResponse = nil
+				if failed && !errors.Is(err, provider.err) || !failed && !errors.Is(err, context.Canceled) {
+					t.Fatalf("unexpected invalidated request result: %v", err)
+				}
+				assertCleared(t)
+				ocrRequests.Lock()
+				active := len(ocrRequests.active)
+				ocrRequests.Unlock()
+				if active != 0 {
+					t.Fatal("completed OCR retained request state")
+				}
+				provider.err = nil
+				if _, _, err = OCRAsset(context.Background(), path); err != nil || !strings.Contains(util.GetAssetText(path), "nativeocrkeyword") {
+					t.Fatalf("manual recognition after clearing did not restore text: %v, %q", err, util.GetAssetText(path))
+				}
+			})
+		}
+	}
+	t.Run("overlapping manual requests", func(t *testing.T) {
+		value := Conf.GetOCR()
+		first := beginOCRRequest(path)
+		second := beginOCRRequest(path + "?width=200#preview")
+		if !first.save("first result", value, false) {
+			t.Fatal("first manual result was rejected")
+		}
+		first.finish(value, false, nil)
+		if !second.save("second result", value, false) || util.GetAssetText(path) != "second result" {
+			t.Fatal("later manual result did not supersede the first")
+		}
+		second.finish(value, false, nil)
+		stale := beginOCRRequest(path)
+		SetOCRAssetText(path, "")
+		current := beginOCRRequest(path)
+		if stale.save("stale result", value, false) {
+			t.Fatal("invalidated request overwrote the cleared result")
+		}
+		stale.finish(value, false, errors.New("stale failure"))
+		assertCleared(t)
+		if !current.save("new result", value, false) || util.GetAssetText(path) != "new result" {
+			t.Fatal("finishing an invalidated request canceled a newer request")
+		}
+		current.finish(value, false, nil)
+	})
+	t.Run("concurrent clear and commit", func(t *testing.T) {
+		for _, automatic := range []bool{false, true} {
+			for range 20 {
+				util.RemoveAssetText(path)
+				value := Conf.GetOCR()
+				request := beginOCRRequest(path)
+				start := make(chan struct{})
+				var wait sync.WaitGroup
+				wait.Add(2)
+				go func() {
+					defer wait.Done()
+					<-start
+					request.save("in-flight result", value, automatic)
+					request.finish(value, automatic, nil)
+				}()
+				go func() {
+					defer wait.Done()
+					<-start
+					SetOCRAssetText(path, "")
+				}()
+				close(start)
+				wait.Wait()
+				assertCleared(t)
+			}
+		}
+	})
+	SetOCRAssetText(path, "editedocrkeyword")
+	sql.FlushQueue()
 }
 
 func testAutomaticOCRUnsupportedLogging(t *testing.T, path string, provider *ocrFixtureProvider) {
@@ -330,6 +452,16 @@ func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstB
 			t.Fatalf("unexpected scoped OCR full-text results for %s: %v, %v", keyword, matches, err)
 		}
 	}
+	SetOCRAssetText(first+"&width=300#cleared", "")
+	documents[1].want, documents[3].want = "", ""
+	sql.FlushQueue()
+	check()
+	for keyword, count := range map[string]int{"changedocrkeyword": 0, "globalocrkeyword": 1, "secondocrkeyword": 1} {
+		matches, err := sql.QueryNoLimitArgs("SELECT id FROM blocks_fts WHERE blocks_fts MATCH ?", keyword)
+		if err != nil || len(matches) != count {
+			t.Fatalf("clearing shared references changed unrelated OCR for %s: %v, %v", keyword, matches, err)
+		}
+	}
 	provider.err = errors.New("scoped recognition failed")
 	if _, _, err := OCRAsset(context.Background(), first); err == nil {
 		t.Fatal("failed notebook recognition returned success")
@@ -341,8 +473,8 @@ func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstB
 	}
 	util.LoadAssetsTexts()
 	secondText := util.GetOcrJsonText([]map[string]string{{"text": "secondocrkeyword", "conf": "99"}})
-	for reference, want := range map[string]string{path: "globalocrkeyword", first: "changedocrkeyword", second: secondText} {
-		if got := util.GetAssetText(reference); got != want {
+	for reference, want := range map[string]string{path: "globalocrkeyword", first: "", second: secondText} {
+		if got := util.GetAssetText(reference); !util.ExistsAssetText(reference) || got != want {
 			t.Fatalf("scoped OCR result did not survive reload for %s: %q", reference, got)
 		}
 	}

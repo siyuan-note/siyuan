@@ -37,7 +37,7 @@ const runRendererCase = async (sources, expected) => {
         invoke: async (_channel, data) => data.cmd === "isFullScreen" ? windowState.promise : false},
         webFrame: {setZoomFactor() {}}};
     const functions = {isWindow: () => true, setToolbarLeftMac() {}};
-    const compatibility = {isMac: () => false};
+    const compatibility = {isMac: () => false, applyPlatformClasses() {}};
     const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions});
     const {initWindow} = load(sources.host, {
         electron, "../constants": {Constants: constants}, "../util/functions": functions,
@@ -76,7 +76,7 @@ const runRendererCase = async (sources, expected) => {
             wnd = {element, headersElement: element.querySelector(".layout-tab-bar"), children: [{}]};
         }, adjustLayout() {}},
         "../util/functions": {getSearch: () => "[]"},
-        "../protyle/util/compatibility": {initWindowOpenOverride() {}, initNativeDialogOverride() {}},
+        "../protyle/util/compatibility": {initWindowOpenOverride() {}, initNativeDialogOverride() {}, applyPlatformClasses() {}},
         "../util/assets": {initAssets: keepLoading => assert.equal(keepLoading, true),
             enqueueAppearanceUpdate: apply => apply(), setInlineStyle: async () => {}},
         "../config/tabs/appearanceRuntime": {appearanceConfigApi: {apply: () => {

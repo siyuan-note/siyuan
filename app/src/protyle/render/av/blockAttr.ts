@@ -33,6 +33,8 @@ import {getHostCapabilities} from "../../../util/hostCapabilities";
 import {getAVRichTextSafeURL, renderAVRichTextElements} from "./richText";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../../search/util";
+import {openFileById} from "../../../editor/util";
+import {checkFold} from "../../../util/noRelyPCFunction";
 /// #else
 import {popSearch} from "../../../mobile/menu/search";
 /// #endif
@@ -113,7 +115,7 @@ const handleRichTextInteraction = (protyle: IProtyle, event: MouseEvent) => {
         });
         /// #endif
     } else if (linkElement && richTextElement.contains(linkElement)) {
-        const link = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"));
+        const link = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"), false, true);
         if (link) {
             openLink(protyle.app, link, event, event.ctrlKey || event.metaKey);
         }
@@ -380,10 +382,28 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 const relationRefElement = (event.target as HTMLElement).closest<HTMLElement>(
                     '.av__cell--relation [data-type~="block-ref"][data-id]');
                 if (relationRefElement?.dataset.id) {
-                    openLink(protyle.app, `siyuan://blocks/${relationRefElement.dataset.id}`, event,
-                        event.ctrlKey || event.metaKey);
                     event.preventDefault();
                     event.stopPropagation();
+                    /// #if !MOBILE
+                    if (event.altKey || event.shiftKey) {
+                        checkFold(relationRefElement.dataset.id, (zoomIn, action, isRoot) => {
+                            if (!isRoot) {
+                                action.push(Constants.CB_GET_HL);
+                            }
+                            openFileById({
+                                app: protyle.app,
+                                id: relationRefElement.dataset.id,
+                                position: event.shiftKey ? "bottom" : "right",
+                                action,
+                                zoomIn,
+                                scrollPosition: "start"
+                            });
+                        });
+                        return;
+                    }
+                    /// #endif
+                    openLink(protyle.app, `siyuan://blocks/${relationRefElement.dataset.id}`, event,
+                        event.ctrlKey || event.metaKey);
                     return;
                 }
                 const urlElement = (event.target as HTMLElement).closest<HTMLAnchorElement>(

@@ -21,6 +21,7 @@ import {focusDatabasePrimary} from "./primaryFocus";
 import {preserveAVBindingRange} from "./binding";
 import {inheritDatabaseRowReadonly} from "./rowReadonly";
 import {getDatabaseRowNavigation, IDatabaseRowNavigation, mountDatabaseRowNavigation} from "./databaseRowNavigation";
+import {updateBackgroundActions} from "../../header/backgroundActions";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -191,6 +192,7 @@ export const showDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData
     };
     inheritDatabaseRowReadonly(editorProtyle, source);
     editorProtyle.element.dataset.databaseRowId = data.boundBlockID || "";
+    updateBackgroundActions(editorProtyle);
     mountDesktopDatabaseRowNavigation(model, data, source);
     editorProtyle.databaseAttributePanel?.expand(data.avID);
     editorProtyle.contentElement.scrollTop = 0;
@@ -374,6 +376,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         undefined, undefined, (editorProtyle) => {
             inheritDatabaseRowReadonly(editorProtyle, protyle);
             editorProtyle.element.dataset.databaseRowId = data.boundBlockID;
+            updateBackgroundActions(editorProtyle);
             mountDatabaseRowNavigation(editorProtyle.element, data, next => openDatabaseRowByData(protyle, next),
                 editorProtyle.breadcrumb?.element.parentElement);
             editorProtyle.databaseAttributePanel?.expand(data.avID);
@@ -393,7 +396,6 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
             app: protyle.app,
             position: options?.position || "right",
             removeCurrentTab: options && !options.keepAVPanel ? undefined : false,
-            openNewTab: options ? options.keepAVPanel ? false : undefined : true,
             keepAVPanel: options?.keepAVPanel,
             custom: {
                 id: "siyuan-database-row",

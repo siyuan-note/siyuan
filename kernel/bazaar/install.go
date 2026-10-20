@@ -37,37 +37,50 @@ import (
 
 var downloadPackageFlight singleflight.Group
 var bazaarDownloadCloudServer = util.GetCloudServer
+var bazaarDownloadFileServer = util.BazaarOSSServer
 var packageInstallLock = semaphore.NewWeighted(1)
 
 // downloadBazaarFile 下载集市文件
 func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err error) {
-	repoURLHashTrimmed := strings.TrimPrefix(repoURLHash, "https://github.com/")
 	v, err, _ := downloadPackageFlight.Do(repoURLHash, func() (any, error) {
-		// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc 或带路径 /README.md
-		repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
-		u := util.BazaarOSSServer + "/package/" + repoURLHashTrimmed
-		buf := &bytes.Buffer{}
-		resp, err := httpclient.NewCloudFileRequest2m().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
-			if pushProgress {
-				progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
-				util.PushDownloadProgress(repoURL, progress)
-			}
-		}).Get(u)
-		if err != nil {
-			logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
-			return nil, errors.New("get bazaar package failed, please check your network")
-		}
-		if 200 != resp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
-			return nil, errors.New("get bazaar package failed: " + resp.Status)
-		}
-		data := buf.Bytes()
-		return data, nil
+		return downloadBazaarFileContext(context.Background(), repoURLHash, pushProgress)
 	})
 	if err != nil {
 		return nil, err
 	}
 	return v.([]byte), nil
+}
+
+// downloadBazaarFileContext 为每次安装独立下载，避免取消一个请求影响其他安装或 README 请求。
+func downloadBazaarFileContext(ctx context.Context, repoURLHash string, pushProgress bool) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
+	u := bazaarDownloadFileServer + "/package/" + strings.TrimPrefix(repoURLHash, "https://github.com/")
+	buf := &bytes.Buffer{}
+	resp, err := httpclient.NewCloudFileRequest2m().SetContext(ctx).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+		if pushProgress && ctx.Err() == nil && info.Response.ContentLength > 0 {
+			// 完整响应校验成功后才推送完成，避免提前禁用取消操作。
+			progress := min(float32(info.DownloadedSize)/float32(info.Response.ContentLength), 0.99)
+			util.PushDownloadProgress(repoURL, progress)
+		}
+	}).Get(u)
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	if err != nil {
+		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
+		return nil, errors.New("get bazaar package failed, please check your network")
+	}
+	if 200 != resp.StatusCode {
+		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
+		return nil, errors.New("get bazaar package failed: " + resp.Status)
+	}
+	if pushProgress {
+		util.PushDownloadProgress(repoURL, 1)
+	}
+	return buf.Bytes(), nil
 }
 
 // incPackageDownloads 增加集市包下载次数
@@ -97,6 +110,9 @@ var packageManifestNames = func() map[string]string {
 
 // InstallPackageWithOptions 将在线包替换也纳入目标版本校验。
 func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool, options PackageInstallOptions) (*PackageInstallResult, error) {
+	if err := options.check(); err != nil {
+		return nil, err
+	}
 	if options.ExpectedInstalledRevision == "" {
 		revision, err := InstalledPackageRevision(installPath)
 		if err != nil {
@@ -112,7 +128,7 @@ func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID
 	}
 
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadBazaarFile(repoURLHash, true)
+	data, err := downloadBazaarFileContext(options.context(), repoURLHash, true)
 	if err != nil {
 		return nil, err
 	}
@@ -141,6 +157,9 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 }
 
 func installPackageWithOptions(data []byte, installPath, pkgType, packageName string, update bool, options PackageInstallOptions) (result *PackageInstallResult, err error) {
+	if err = options.check(); err != nil {
+		return
+	}
 	// 非更新安装时目标目录已存在且非空则拒绝覆盖，防止把其他包的内容写入已有包目录
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 	if !update {
@@ -171,7 +190,7 @@ func installPackageWithOptions(data []byte, installPath, pkgType, packageName st
 	if err != nil {
 		return
 	}
-	if err = extractLocalPackageReader(reader, unzipPath); err != nil {
+	if err = extractLocalPackageReaderContext(options.context(), reader, unzipPath); err != nil {
 		return
 	}
 
@@ -320,7 +339,7 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 		if targetExists {
 			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true
-				return result, fmt.Errorf("result_unknown: install marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
+				return result, util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("install marketplace package failed: %w; rollback failed: %s", err, rollbackErr))
 			}
 		}
 		return
@@ -328,7 +347,7 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	result.InstalledRevision, err = installedPackageRevision(installPath)
 	if err != nil || result.InstalledRevision != stagingRevision {
 		preserveOperationPath = true
-		return result, errors.New("result_unknown: installed package changed after replacement; recovery copy preserved")
+		return result, util.NewTextFileError(util.TextFileResultUnknown, errors.New("installed package changed after replacement; recovery copy preserved"))
 	}
 	return
 }

@@ -63,7 +63,7 @@ func legacyJSONObjectError(err error) error {
 func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage) error {
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Type().Field(i)
-		name := strings.Split(field.Tag.Get("json"), ",")[0]
+		name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
 		if (!field.IsExported() && !field.Anonymous) || name == "-" {
 			continue
 		}
@@ -133,13 +133,13 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 			}
 			value.Field(i).SetString(trimmed)
 		}
-		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
+		for option := range strings.SplitSeq(field.Tag.Get("api"), ",") {
 			if strings.HasPrefix(option, "enum=") {
 				if field.Type.Kind() != reflect.String {
 					return fmt.Errorf("unsupported enum field: %s", name)
 				}
 				found := false
-				for _, choice := range strings.Split(strings.TrimPrefix(option, "enum="), "|") {
+				for choice := range strings.SplitSeq(strings.TrimPrefix(option, "enum="), "|") {
 					if value.Field(i).String() == choice {
 						found = true
 						break

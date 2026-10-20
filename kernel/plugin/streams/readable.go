@@ -89,9 +89,9 @@ type readRequest struct {
 }
 
 var (
-	readableStateType      = reflect.TypeOf((*readableState)(nil))
-	readableControllerType = reflect.TypeOf((*readableController)(nil))
-	readableReaderType     = reflect.TypeOf((*readableReaderState)(nil))
+	readableStateType      = reflect.TypeFor[*readableState]()
+	readableControllerType = reflect.TypeFor[*readableController]()
+	readableReaderType     = reflect.TypeFor[*readableReaderState]()
 )
 
 // readableStateOf 取出 ReadableStream 的内部状态，只接受本包创建的对象。
@@ -415,7 +415,7 @@ func readableStreamClose(h *Host, stream *readableState) {
 
 // readableStreamError 对应 ReadableStreamError：置为 errored，拒绝 reader 的 closed Promise，并以同一 reason
 // 拒绝所有挂起的 read() 请求。
-func readableStreamError(h *Host, stream *readableState, reason goja.Value) {
+func readableStreamError(_ *Host, stream *readableState, reason goja.Value) {
 	stream.status = statusErrored
 	stream.storedError = reason
 	reader := stream.reader

@@ -17,8 +17,8 @@ import (
 // 仅清理内置偏好；保存的布局、插件数据、最近记录和未知键保持不变。
 var resetSettingsStorageKeys = []string{
 	"local-zoom", "local-searchdata", "local-searchasset", "local-searchunref",
-	"local-exportpdf", "local-exportword", "local-exportimg", "local-pdftheme", "local-flashcard",
-	"local-mobile-bars", "local-mobile-bottom-bar", "local-mobile-side-panel", "local-outline",
+	"local-exportpdf", "local-exportword", "local-exportimg", "local-flashcard",
+	"local-mobile-bottom-bar", "local-mobile-side-panel",
 	"local-fileposition", "local-dialogposition",
 }
 

@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
+	"time"
 
 	mmap "github.com/edsrzf/mmap-go"
 	"github.com/siyuan-note/filelock"
@@ -70,6 +72,13 @@ func WriteFileByMmap(filePath string, data []byte) (err error) {
 		logging.LogError(msg)
 		err = errors.New(msg)
 		return
+	}
+	// Windows 的映射写入不会自动更新时间，显式标记内容变更以供同步快照识别。
+	if runtime.GOOS == "windows" {
+		now := time.Now()
+		if err = os.Chtimes(filePath, now, now); err != nil {
+			return fmt.Errorf("update file modification time [%s]: %w", filePath, err)
+		}
 	}
 	return
 }

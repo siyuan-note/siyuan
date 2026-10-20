@@ -89,7 +89,7 @@ func TestAPIContractDocHistorySnapshots(t *testing.T) {
 	engine.POST("/api/repo/getRepoSnapshots", getRepoSnapshots)
 	engine.POST("/api/repo/getRepoDocHistory", getRepoDocHistory)
 	for _, include := range []bool{false, true} {
-		body, _ := json.Marshal(map[string]interface{}{"id": index.ID, "page": 1, "includeFiles": include})
+		body, _ := json.Marshal(map[string]any{"id": index.ID, "page": 1, "includeFiles": include})
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/repo/getRepoSnapshots", bytes.NewReader(body)))
 		requireAPIContract(t, "POST", "/api/repo/getRepoSnapshots", recorder)

@@ -5,9 +5,14 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML} from "./filter";
+import {closeInlineFilterDropdowns} from "./filterDropdown";
 import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue, openFieldLocationEditor} from "./fieldValueEditor";
 import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
+import {collectionSourceIncomplete, mountBlockCollectionSource} from "./blockCollection";
+import {automationTimeZone, mountAutomationTemplate} from "./automationTemplate";
+import {openAutomationRules} from "./automationRules";
+import {openCollectionManager} from "./collectionReview";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
     value?: IAVCellValue;
@@ -39,8 +44,8 @@ const compatibleFields = (database: AVAttributeViewData, field: IAVColumn): IAVC
 const optionHTML = (value: string, label: string, selected: string) =>
     `<option value="${escapeAttr(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>`;
 
-const iconButton = (action: string, icon: string, label: string, warning = false) =>
-    `<svg class="b3-menu__action b3-menu__action--show${warning ? " b3-menu__action--warning" : ""} fn__pointer ariaLabel" data-action="${action}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(label)}"><use xlink:href="#${icon}"></use></svg>`;
+const iconButton = (action: string, icon: string, label: string, warning = false, contextual = false) =>
+    `<svg class="b3-menu__action ${contextual ? "av__automation-remove" : "b3-menu__action--show"}${warning ? " b3-menu__action--warning" : ""} fn__pointer ariaLabel" data-action="${action}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(label)}"><use xlink:href="#${icon}"></use></svg>`;
 
 export const openAutomationMenu = async (options: {
     protyle: IProtyle,
@@ -60,21 +65,24 @@ export const openAutomationMenu = async (options: {
     menuElement.innerHTML = `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
     <span class="block__icon block__icon--menu-back" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>
-    <span class="b3-menu__label ft__center">${lang.databaseAutomations}</span>
+    <span class="b3-menu__label ft__center av__automation-title">${lang.databaseAutomations}</span>
 </button>
 <button class="b3-menu__separator"></button>
 <div class="av__automation">
+    <button type="button" class="b3-button b3-button--outline b3-button--wrap" data-action="manage-collection">${lang.automationCollectionManage}</button>
     <div class="av__automation-body" data-body></div>
 </div></div>`;
     const panel = menuElement.querySelector<HTMLElement>(".av__automation");
     const body = panel.querySelector<HTMLElement>("[data-body]");
+    const scrollElement = menuElement.querySelector<HTMLElement>(".b3-menu__items");
     // 先收起已打开的选项菜单，再由本次点击打开新菜单，避免冒泡被面板拦截后菜单滞留。
-    const closeMenu = () => {
+    const closeMenu = (event: MouseEvent) => {
         if (!panel.isConnected) {
             menuElement.removeEventListener("click", closeMenu, true);
             return;
         }
         window.siyuan.menus.menu.remove();
+        closeInlineFilterDropdowns(body, event.target as HTMLElement);
     };
     menuElement.addEventListener("click", closeMenu, true);
     const goBack = () => {
@@ -82,7 +90,12 @@ export const openAutomationMenu = async (options: {
             menuElement.querySelector<HTMLElement>('[data-type="go-config"]').click();
         }
     };
-    panel.addEventListener("click", event => event.stopPropagation());
+    panel.addEventListener("click", event => {
+        if ((event.target as Element).closest('[data-action="manage-collection"]')) {
+            void openCollectionManager(protyle, avID, blockElement.dataset.nodeId);
+        }
+        event.stopPropagation();
+    });
     panel.addEventListener("change", event => event.stopPropagation());
     onResize();
     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
@@ -99,9 +112,10 @@ export const openAutomationMenu = async (options: {
         goBack();
         return;
     }
-    let previous: {spec: 1, rules: AutomationRule[]} = clone(database.automations || {spec: 1, rules: []});
+    let previous: {spec: number, rules: AutomationRule[]} = clone(database.automations || {spec: 1, rules: []});
     const createRule = (): AutomationRule => ({
         id: Lute.NewNodeID(), name: lang.databaseAutomations, enabled: false, trigger: "changed",
+        timeZone: automationTimeZone(),
         actions: [{type: "edit", target: "current", fields: {}}],
     });
     const rules: AutomationRule[] = clone(previous.rules || []);
@@ -125,14 +139,17 @@ export const openAutomationMenu = async (options: {
     const filtersAvailable = (source: AVAttributeViewData, filters: IAVFilter[] = []): boolean => filters.every(filter =>
         filter.filters ? filtersAvailable(source, filter.filters) : fieldsOf(source).some(field => field.id === filter.column));
     const incomplete = (rule: AutomationRule): string => {
-        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.checkValidity())) {
+        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.closest("[data-template-preview], [data-attribute-editor]") && !input.checkValidity())) {
             return lang.invalid;
         }
         if (!rule.name.trim()) {
             return lang.name;
         }
+        if (rule.trigger === "block" && collectionSourceIncomplete(rule.blockSource)) {
+            return lang.automationCollectionScope;
+        }
         if (rule.keyID && !fieldsOf(database).some(field => field.id === rule.keyID)) {
-            return lang.automationTrigger;
+            return lang.automationWatchField;
         }
         if (!filtersAvailable(database, rule.conditions)) {
             return lang.filter;
@@ -148,7 +165,7 @@ export const openAutomationMenu = async (options: {
             if (!filtersAvailable(target, action.filters)) {
                 return lang.filter;
             }
-            if (!Object.keys(action.fields).length) {
+            if (action.type !== "collect" && !Object.keys(action.fields).length) {
                 return lang.fields;
             }
             for (const [keyID, value] of Object.entries(action.fields)) {
@@ -168,8 +185,9 @@ export const openAutomationMenu = async (options: {
         const issue = rule && incomplete(rule);
         const status = body.querySelector<HTMLElement>("[data-status]");
         if (status) {
-            status.textContent = issue ? lang.automationIncomplete.replace("${1}", issue) : "";
-            status.classList.toggle("fn__none", !issue);
+            status.textContent = issue ? lang.automationIncomplete.replace("${1}", issue) : rule && !rule.enabled ? lang.automationReady : "";
+            status.classList.toggle("ft__error", !!issue);
+            status.classList.toggle("fn__none", !issue && (!rule || rule.enabled));
         }
         const enabled = body.querySelector<HTMLInputElement>("[data-enabled]");
         if (enabled && rule) {
@@ -188,7 +206,11 @@ export const openAutomationMenu = async (options: {
         }
         updateStatus();
         onResize();
-        const next = {spec: 1 as const, rules: clone(rules)};
+        const usesTemplates = rules.some(rule => rule.actions.some(action => Object.values(action.fields).some(value => value.mode === "template")));
+        const usesSourceOptions = rules.some(rule => rule.blockSource?.types?.some(type => type.includes(":")) ||
+            rule.blockSource?.tagMatch === "or" || rule.blockSource?.attributeMatch === "or");
+        const usesTagTarget = rules.some(rule => !!rule.blockSource?.tagTarget);
+        const next = {spec: Math.max(previous.spec, usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }
@@ -198,9 +220,9 @@ export const openAutomationMenu = async (options: {
     };
     const chooseField = (target: HTMLElement, fields: IAVColumn[], callback: (field: IAVColumn) => void) => {
         const menu = new Menu();
-        fields.forEach(field => menu.addItem({label: escapeHtml(field.name), click: () => callback(field)}));
+        fields.forEach(field => menu.addItem({iconHTML: "", label: escapeHtml(field.name), click: () => callback(field)}));
         if (!fields.length) {
-            menu.addItem({type: "readonly", label: lang.emptyContent});
+            menu.addItem({type: "readonly", iconHTML: "", label: lang.emptyContent});
         }
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height});
@@ -209,7 +231,7 @@ export const openAutomationMenu = async (options: {
         host.innerHTML = `<div data-conditions></div><button class="b3-button b3-button--cancel" type="button" data-add-condition>${lang.addFilterCondition}</button>`;
         const render = () => {
             const list = host.querySelector<HTMLElement>("[data-conditions]");
-            list.innerHTML = filters.map((_, i) => `<div class="av__automation-row" data-condition="${i}"><div class="av__automation-filter" data-filter></div>${iconButton("remove-condition", "iconTrashcan", lang.delete, true)}</div>`).join("");
+            list.innerHTML = filters.map((_, i) => `<div class="av__automation-row" data-condition="${i}"><div class="av__automation-filter" data-filter></div>${iconButton("remove-condition", "iconTrashcan", lang.delete, true, true)}</div>`).join("");
             list.querySelectorAll<HTMLElement>("[data-condition]").forEach(element => {
                 const i = Number(element.dataset.condition);
                 const filterRoot = element.querySelector<HTMLElement>("[data-filter]");
@@ -292,29 +314,42 @@ export const openAutomationMenu = async (options: {
         if (!body.isConnected || rules[index] !== rule || version !== renderVersion) {
             return;
         }
-        body.innerHTML = `<div class="ft__on-surface ft__smaller">${lang.automationTip}</div>
-<div class="av__automation-row">${rule ? `<select class="b3-select fn__flex-1" data-rule aria-label="${lang.databaseAutomations}">${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div>
-${rule ? `<div class="av__automation-row"><input class="b3-text-field fn__flex-1" data-name aria-label="${lang.name}" value="${escapeAttr(rule.name)}"><input type="checkbox" class="b3-switch fn__flex-center ariaLabel" data-position="north" aria-label="${escapeAttr(lang.enable)}" data-enabled${rule.enabled ? " checked" : ""}></div>
-<div class="ft__error ft__smaller fn__none" role="status" data-status></div>
-<div class="ft__b">${lang.automationTrigger}</div><div class="av__automation-row"><select class="b3-select" data-trigger>${optionHTML("added", lang.automationAdded, rule.trigger)}${optionHTML("changed", lang.automationChanged, rule.trigger)}</select>${rule.trigger === "changed" ? `<select class="b3-select fn__flex-1" data-trigger-field aria-label="${lang.fields}">${optionHTML("", lang.all, rule.keyID || "")}${fieldsOf(database).map(field => optionHTML(field.id, field.name, rule.keyID)).join("")}</select>` : ""}</div>
-<div data-source-conditions></div><div class="ft__b">${lang.automationAction}</div><div data-actions></div><button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAction}</button>` : ""}`;
+        const scrollTop = scrollElement.scrollTop;
+        body.innerHTML = `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTip}</div>
+<div class="av__automation-row">${rule ? `<button type="button" class="b3-button b3-button--cancel fn__flex-1 av__automation-source-action" data-action="rules" aria-label="${escapeAttr(lang.automationRule)}"><span class="fn__ellipsis" data-rule-name>${escapeHtml(rule.name)}</span><svg><use xlink:href="#iconDown"></use></svg></button><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}</div>
+${rule ? `
+<label class="av__automation-row"><span class="fn__flex-1">${lang.automationNotifySuccess}</span><input type="checkbox" class="b3-switch" data-notify-success${rule.notifyOnSuccess !== false ? " checked" : ""}></label>
+<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationAutoSaveTip}</div>
+${rule.trigger === "block" ? `<div class="ft__on-surface ft__smaller av__automation-tip" data-rule-change-tip>${lang.automationCollectionRuleChangeTip}</div>` : ""}
+<div class="ft__on-surface ft__smaller fn__none av__automation-status" role="status" data-status></div>
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">1</span><span class="av__automation-section-title">${lang.automationWhen}</span></div>
+<div class="av__automation-columns"><label class="av__automation-control"><span class="ft__on-surface av__automation-control-label">${lang.automationTrigger}</span><select class="b3-select av__automation-trigger" data-trigger>${optionHTML("added", lang.automationAdded, rule.trigger)}${optionHTML("changed", lang.automationChanged, rule.trigger)}${optionHTML("block", lang.automationCollectBlocks, rule.trigger)}</select></label>${rule.trigger === "changed" ? `<label class="av__automation-control"><span class="ft__on-surface av__automation-control-label">${lang.automationWatchField}</span><select class="b3-select av__automation-watch-field" data-trigger-field>${optionHTML("", lang.automationAnyField, rule.keyID || "")}${fieldsOf(database).map(field => optionHTML(field.id, field.name, rule.keyID)).join("")}</select></label>` : ""}</div>
+${rule.trigger === "changed" ? `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationChangedTip}</div>` : ""}</section>
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">2</span><span class="av__automation-section-title">${rule.trigger === "block" ? lang.automationBlockConditions : lang.automationConditions}</span></div>
+${rule.trigger === "block" ? "" : `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationConditionsTip}</div>`}<div data-source-conditions></div></section>
+<section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">3</span><span class="av__automation-section-title">${lang.automationThen}</span></div><div data-actions></div>${rule.trigger === "block" ? "" : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddAction}</button>`}</section>` : ""}`;
         if (!rule) {
             onResize();
+            scrollElement.scrollTop = scrollTop;
             return;
         }
-        mountFilters(body.querySelector("[data-source-conditions]"), database, rule.conditions || [], filters => {
-            rule.conditions = filters;
-            save();
-        });
+        if (rule.trigger === "block") {
+            rule.blockSource = rule.blockSource || {};
+            mountBlockCollectionSource(body.querySelector("[data-source-conditions]"), rule.blockSource, protyle, () => save(), onResize);
+        } else {
+            mountFilters(body.querySelector("[data-source-conditions]"), database, rule.conditions || [], filters => {
+                rule.conditions = filters;
+                save();
+            });
+        }
         const actionsHost = body.querySelector<HTMLElement>("[data-actions]");
         actionsHost.innerHTML = rule.actions.map((action, i) => {
             const target = databases.get(targetID(action));
-            return `<div class="av__automation-action" data-index="${i}"><div class="av__automation-row">
-<select class="b3-select" data-action-type aria-label="${lang.automationAction}">${optionHTML("edit", lang.editFields, action.type)}${optionHTML("add", lang.new, action.type)}</select>
-<select class="b3-select fn__flex-1" data-target aria-label="${lang.conditionalColorTarget}">${optionHTML("current", action.type === "add" ? lang.thisDatabase : lang.automationCurrentItem, action.target)}${optionHTML("related", action.type === "add" ? lang.relation : lang.relatedItems, action.target)}${optionHTML("filtered", action.type === "add" ? lang.database : lang.automationMatchingItems, action.target)}</select>
-${iconButton("remove-action", "iconTrashcan", lang.delete, true)}</div>
-${action.target === "related" ? `<select class="b3-select fn__block" data-relation aria-label="${lang.relation}">${optionHTML("", lang.selectRelation, action.relationKeyID || "")}${fieldsOf(database).filter(field => field.type === "relation" && field.relation?.avID).map(field => optionHTML(field.id, field.name, action.relationKeyID)).join("")}</select>` : action.target === "filtered" ? `<button type="button" class="b3-button b3-button--outline fn__block" data-action="database">${escapeHtml(target?.name || lang.select)} (${lang.database})</button>` : ""}
-${target ? `<div data-target-filters></div><div data-fields></div><button type="button" class="b3-button b3-button--cancel" data-action="add-field"><svg><use xlink:href="#iconAdd"></use></svg>${lang.fields}</button>` : ""}</div>`;
+            return `<div class="av__automation-action" data-index="${i}"><div class="av__automation-row"><span class="ft__b fn__flex-1 av__automation-action-title">${lang.automationAction} ${i + 1}</span>${action.type === "collect" ? "" : iconButton("remove-action", "iconTrashcan", lang.delete, true, true)}</div>
+${action.type === "collect" ? `<div class="av__automation-action-description">${lang.automationCollectionAction}</div>` : `<div class="av__automation-columns"><label class="av__automation-control"><span class="ft__on-surface av__automation-control-label">${lang.automationOperation}</span><select class="b3-select av__automation-action-type" data-action-type>${optionHTML("edit", lang.editFields, action.type)}${optionHTML("add", lang.new, action.type)}</select></label>
+<label class="av__automation-control"><span class="ft__on-surface av__automation-control-label">${action.type === "add" ? lang.database : lang.automationTarget}</span><select class="b3-select av__automation-action-target" data-target>${optionHTML("current", action.type === "add" ? lang.thisDatabase : lang.automationCurrentItem, action.target)}${optionHTML("related", action.type === "add" ? lang.relation : lang.relatedItems, action.target)}${optionHTML("filtered", action.type === "add" ? lang.database : lang.automationMatchingItems, action.target)}</select></label></div>`}
+${action.target === "related" ? `<select class="b3-select fn__block av__automation-target-relation" data-relation aria-label="${lang.relation}">${optionHTML("", lang.selectRelation, action.relationKeyID || "")}${fieldsOf(database).filter(field => field.type === "relation" && field.relation?.avID).map(field => optionHTML(field.id, field.name, action.relationKeyID)).join("")}</select>` : action.target === "filtered" ? `<button type="button" class="b3-button b3-button--outline fn__block av__automation-target-database" data-action="database">${escapeHtml(target?.name || lang.select)} (${lang.database})</button>` : ""}
+${target ? `${action.type === "edit" && action.target !== "current" ? `<div class="ft__on-surface av__automation-control-label">${lang.automationTargetConditions}</div><div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTargetTip}</div>` : ""}<div data-target-filters></div><div class="ft__on-surface av__automation-control-label">${lang.automationSetFields}</div><div data-fields></div><button type="button" class="b3-button b3-button--cancel" data-action="add-field"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddField}</button>` : ""}</div>`;
         }).join("");
         actionsHost.querySelectorAll<HTMLElement>("[data-index]").forEach(element => {
             const action = rule.actions[Number(element.dataset.index)];
@@ -334,9 +369,11 @@ ${target ? `<div data-target-filters></div><div data-fields></div><button type="
                 const row = document.createElement("div");
                 row.className = "av__automation-field";
                 row.dataset.fieldId = keyID;
-                const compatible = compatibleFields(database, field);
-                row.innerHTML = `<div class="av__automation-row"><span class="fn__flex-1">${escapeHtml(field?.name || `${lang.invalid}: ${keyID}`)}</span>${iconButton("remove-field", "iconClose", lang.delete, true)}</div>
-${field ? `<div class="av__automation-row"><select class="b3-select" data-mode aria-label="${lang.automationStaticValue}">${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}</select><div class="av__automation-value" data-value></div></div>` : ""}`;
+                const compatible = action.type === "collect" ? [] : compatibleFields(database, field);
+                const fieldName = field?.name || `${lang.invalid}: ${keyID}`;
+                row.innerHTML = `<span class="av__automation-field-name fn__ellipsis ariaLabel" aria-label="${escapeAttr(fieldName)}" data-position="north">${escapeHtml(fieldName)}</span>
+<div class="av__automation-assignment">${field ? `<select class="b3-select av__automation-value-mode" data-mode aria-label="${escapeAttr(lang.automationValueMode)}">${optionHTML("static", lang.automationStaticValue, value.mode)}${compatible.length ? optionHTML("source", lang.automationSourceField, value.mode) : ""}${field.type === "date" ? optionHTML("currentTime", lang.automationTriggerTime, value.mode) : ""}${action.type !== "collect" && field.type === "relation" && field.relation?.avID === avID ? optionHTML("triggerItem", lang.automationTriggerItem, value.mode) : ""}${optionHTML("template", lang.template, value.mode)}</select><div class="av__automation-value" data-value></div>` : ""}</div>
+${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
                 fieldsHost.append(row);
                 if (!field) {
                     return;
@@ -345,48 +382,47 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
                 if (value.mode === "static") {
                     mountValue(host, field, value);
                 } else if (value.mode === "source") {
-                    host.innerHTML = `<select class="b3-select fn__block" data-source-field aria-label="${lang.automationSourceField}">${compatible.map(source => optionHTML(source.id, source.name, value.keyID)).join("")}</select>`;
+                    host.innerHTML = `<select class="b3-select fn__block av__automation-source-field" data-source-field aria-label="${lang.automationSourceField}">${compatible.map(source => optionHTML(source.id, source.name, value.keyID)).join("")}</select>`;
+                } else if (value.mode === "template") {
+                    row.dataset.templateAssignment = "true";
+                    row.append(host);
+                    mountAutomationTemplate({host, field, source: database, targetID: targetID(action), rule, value, save: () => {
+                        rule.enabled = false;
+                        save();
+                    }, onResize});
                 }
             });
         });
         updateStatus();
         onResize();
+        // 重建期间内容高度可能暂时变小，所有字段挂载并完成定位后再恢复滚动位置。
+        scrollElement.scrollTop = scrollTop;
     };
-    body.addEventListener("input", event => {
-        if ((event.target as HTMLElement).matches("[data-name]")) {
-            rules[index].name = (event.target as HTMLInputElement).value;
-            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = rules[index].name;
-        }
-    });
-    body.addEventListener("blur", event => {
-        const target = event.target as HTMLInputElement;
-        if (target.matches("[data-name]")) {
-            rules[index].name = target.value.trim() || lang.databaseAutomations;
-            target.value = rules[index].name;
-            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = target.value;
-            save();
-        }
-    }, true);
     body.addEventListener("change", event => {
         const target = event.target as HTMLInputElement;
         const rule = rules[index];
         const action = rule?.actions[Number(target.closest<HTMLElement>("[data-index]")?.dataset.index)];
-        if (target.matches("[data-rule]")) {
-            index = Number(target.value);
-            void render();
-            return;
-        } else if (target.matches("[data-name]")) {
-            rule.name = target.value.trim() || lang.databaseAutomations;
-            target.value = rule.name;
-            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = rule.name;
-            save();
+        if (target.matches("[data-notify-success]")) {
+            rule.notifyOnSuccess = target.checked;
+            save(null);
             return;
         } else if (target.matches("[data-enabled]")) {
             rule.enabled = target.checked;
             save();
             return;
         } else if (target.matches("[data-trigger]")) {
-            rule.trigger = target.value === "added" ? "added" : "changed";
+            const wasBlock = rule.trigger === "block";
+            rule.trigger = target.value === "block" ? "block" : target.value === "added" ? "added" : "changed";
+            if (rule.trigger === "block") {
+                rule.keyID = "";
+                rule.conditions = [];
+                rule.blockSource = rule.blockSource || {documentIDs: [protyle.block.rootID]};
+                rule.actions = [{type: "collect", target: "current", fields: {}}];
+                rule.enabled = false;
+            } else if (wasBlock) {
+                rule.actions = [{type: "edit", target: "current", fields: {}}];
+                rule.enabled = false;
+            }
         } else if (target.matches("[data-trigger-field]")) {
             rule.keyID = target.value;
             save();
@@ -405,7 +441,11 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
             const keyID = target.closest<HTMLElement>("[data-field-id]").dataset.fieldId;
             const field = fieldsOf(databases.get(targetID(action))).find(item => item.id === keyID);
             const value = action.fields[keyID];
-            value.mode = target.value === "source" ? "source" : target.value === "currentTime" ? "currentTime" : target.value === "triggerItem" ? "triggerItem" : "static";
+            value.mode = target.value === "template" ? "template" : target.value === "source" ? "source" : target.value === "currentTime" ? "currentTime" : target.value === "triggerItem" ? "triggerItem" : "static";
+            if (value.mode === "template") {
+                rule.timeZone = rule.timeZone || automationTimeZone();
+                rule.enabled = false;
+            }
             if (value.mode === "source") {
                 value.keyID = compatibleFields(database, field)[0]?.id;
             } else if (value.mode === "static" && !value.value) {
@@ -443,20 +483,28 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
         const actionIndex = Number(target.closest<HTMLElement>("[data-index]")?.dataset.index);
         const action = rule?.actions[actionIndex];
         switch (target.dataset.action) {
+            case "rules":
+                openAutomationRules(target, rules, rule.id, id => {
+                    index = rules.findIndex(item => item.id === id);
+                    void render();
+                }, (id, name) => {
+                    const renamed = rules.find(item => item.id === id);
+                    renamed.name = name;
+                    save(null);
+                    body.querySelector("[data-rule-name]").textContent = rules[index].name;
+                }, id => {
+                    const currentID = rules[index].id;
+                    rules.splice(rules.findIndex(item => item.id === id), 1);
+                    index = Math.max(0, rules.findIndex(item => item.id === currentID));
+                    save(null);
+                    if (!rules.length) { rules.push(createRule()); }
+                    void render();
+                });
+                return;
             case "add-rule":
                 rules.push(createRule());
                 index = rules.length - 1;
                 break;
-            case "remove-rule":
-                rules.splice(index, 1);
-                index = Math.min(index, rules.length - 1);
-                save(null);
-                if (!rules.length) {
-                    rules.push(createRule());
-                    index = 0;
-                }
-                void render();
-                return;
             case "add-action":
                 rule.actions.push({type: "edit", target: "current", fields: {}});
                 break;
@@ -467,7 +515,7 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
                 delete action.fields[target.closest<HTMLElement>("[data-field-id]").dataset.fieldId];
                 break;
             case "add-field":
-                chooseField(target, fieldsOf(databases.get(targetID(action))).filter(field => !action.fields[field.id]), field => {
+                chooseField(target, fieldsOf(databases.get(targetID(action))).filter(field => !action.fields[field.id] && (action.type !== "collect" || field.type !== "block")), field => {
                     action.fields[field.id] = {mode: "static", value: newFieldValue(field)};
                     save();
                     void render();

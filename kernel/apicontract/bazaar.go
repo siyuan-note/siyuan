@@ -226,27 +226,31 @@ type BazaarPackageRating struct {
 	Count        int64    `json:"count"`
 	Distribution [5]int64 `json:"distribution"`
 }
+type BazaarPackageChoice struct {
+	PackageType string `json:"packageType"`
+	Name        string `json:"name"`
+}
 type BazaarPackage struct {
-	Author            string              `json:"author"`
-	URL               string              `json:"url"`
-	Version           string              `json:"version"`
-	MinAppVersion     string              `json:"minAppVersion"`
-	DisabledInPublish bool                `json:"disabledInPublish"`
-	Kernels           []string            `json:"kernels"`
-	Backends          []string            `json:"backends"`
-	Frontends         []string            `json:"frontends"`
-	SettingsWindow    bool                `json:"settingsWindow,omitempty"` // 声明支持在独立设置窗口运行
-	BootAppearances   []string            `json:"bootAppearances,omitempty"`
-	DisplayName       BazaarLocaleStrings `json:"displayName"`
-	Description       BazaarLocaleStrings `json:"description"`
-	Readme            BazaarLocaleStrings `json:"readme"`
-	Icon              *string             `json:"icon,omitempty"`
-	Preview           *string             `json:"preview,omitempty"`
-	Funding           *BazaarFunding      `json:"funding"`
-	Keywords          []string            `json:"keywords"`
-	Deprecated        bool                `json:"deprecated,omitempty"`
-	DeprecatedReason  BazaarLocaleStrings `json:"deprecatedReason,omitempty"`
-	Alternatives      []string            `json:"alternatives,omitempty"`
+	Author            string                `json:"author"`
+	URL               string                `json:"url"`
+	Version           string                `json:"version"`
+	MinAppVersion     string                `json:"minAppVersion"`
+	DisabledInPublish bool                  `json:"disabledInPublish"`
+	Kernels           []string              `json:"kernels"`
+	Backends          []string              `json:"backends"`
+	Frontends         []string              `json:"frontends"`
+	SettingsWindow    bool                  `json:"settingsWindow,omitempty"` // 声明支持在独立设置窗口运行
+	BootAppearances   []string              `json:"bootAppearances,omitempty"`
+	DisplayName       BazaarLocaleStrings   `json:"displayName"`
+	Description       BazaarLocaleStrings   `json:"description"`
+	Readme            BazaarLocaleStrings   `json:"readme"`
+	Icon              *string               `json:"icon,omitempty"`
+	Preview           *string               `json:"preview,omitempty"`
+	Funding           *BazaarFunding        `json:"funding"`
+	Keywords          []string              `json:"keywords"`
+	Deprecated        bool                  `json:"deprecated,omitempty"`
+	DeprecatedReason  BazaarLocaleStrings   `json:"deprecatedReason,omitempty"`
+	Choices           []BazaarPackageChoice `json:"choices,omitempty"` // 替代包及其类型，可跨类型
 
 	PreferredFunding          string `json:"preferredFunding"`
 	PreferredName             string `json:"preferredName"`
@@ -293,28 +297,47 @@ type BazaarPackage struct {
 	Modes                 *[]string `json:"modes,omitempty"`                 // 主题：支持的模式列表
 }
 type BazaarAppearance struct {
-	BodyGradient        *BazaarBodyGradient      `json:"bodyGradient"`        // 背景渐变，空值表示自动配色
-	GlobalFontFamilies  []*BazaarEditorFont      `json:"globalFontFamilies"`  // 按优先级排列的全局默认字体
-	Mode                int                      `json:"mode"`                // 模式：0：明亮，1：暗黑
-	ModeOS              bool                     `json:"modeOS"`              // 模式是否跟随系统
-	DarkThemes          []*BazaarAppearanceTheme `json:"darkThemes"`          // 暗黑模式外观主题列表
-	LightThemes         []*BazaarAppearanceTheme `json:"lightThemes"`         // 明亮模式外观主题列表
-	ThemeDark           string                   `json:"themeDark"`           // 选择的暗黑模式外观主题
-	ThemeLight          string                   `json:"themeLight"`          // 选择的明亮模式外观主题
-	ThemeVer            string                   `json:"themeVer"`            // 选择的主题版本
-	Icons               []*BazaarAppearanceIcon  `json:"icons"`               // 图标列表
-	Icon                string                   `json:"icon"`                // 选择的图标
-	IconVer             string                   `json:"iconVer"`             // 选择的图标版本
-	CodeBlockThemeLight string                   `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
-	CodeBlockThemeDark  string                   `json:"codeBlockThemeDark"`  // 暗黑模式下代码块主题
-	Lang                string                   `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
-	ThemeJS             bool                     `json:"themeJS"`             // 是否启用了主题 JavaScript
-	CloseButtonBehavior int                      `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
-	HideToolbar         bool                     `json:"hideToolbar"`         // 是否隐藏顶栏工具栏
-	HideStatusBar       bool                     `json:"hideStatusBar"`       // 是否隐藏底部状态栏
-	StatusBar           *BazaarStatusBar         `json:"statusBar"`           // 底部状态栏配置
-	Notifications       *BazaarNotifications     `json:"notifications"`       // 外观通知开关配置
-	EntryVisibility     *BazaarEntryVisibility   `json:"entryVisibility"`     // 桌面端入口可见性配置
+	CompactMode              bool                     `json:"compactMode"`              // 桌面端紧凑模式，默认关闭
+	MenuMouseScroll          bool                     `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
+	PDFTheme                 *BazaarPDFTheme          `json:"pdfTheme"`                 // PDF 阅读主题与标注颜色，响应保留空值
+	OutlineKeepCurrentExpand bool                     `json:"outlineKeepCurrentExpand"` // 大纲保持当前标题展开，默认关闭
+	MobileBars               *BazaarMobileBars        `json:"mobileBars"`               // 移动端工具栏与侧栏访问偏好，响应保留空值
+	BodyGradient             *BazaarBodyGradient      `json:"bodyGradient"`             // 背景渐变，空值表示自动配色
+	GlobalFontFamilies       []*BazaarEditorFont      `json:"globalFontFamilies"`       // 按优先级排列的全局默认字体
+	Mode                     int                      `json:"mode"`                     // 模式：0：明亮，1：暗黑
+	ModeOS                   bool                     `json:"modeOS"`                   // 模式是否跟随系统
+	DarkThemes               []*BazaarAppearanceTheme `json:"darkThemes"`               // 暗黑模式外观主题列表
+	LightThemes              []*BazaarAppearanceTheme `json:"lightThemes"`              // 明亮模式外观主题列表
+	ThemeDark                string                   `json:"themeDark"`                // 选择的暗黑模式外观主题
+	ThemeLight               string                   `json:"themeLight"`               // 选择的明亮模式外观主题
+	ThemeVer                 string                   `json:"themeVer"`                 // 选择的主题版本
+	Icons                    []*BazaarAppearanceIcon  `json:"icons"`                    // 图标列表
+	Icon                     string                   `json:"icon"`                     // 选择的图标
+	IconVer                  string                   `json:"iconVer"`                  // 选择的图标版本
+	CodeBlockThemeLight      string                   `json:"codeBlockThemeLight"`      // 明亮模式下代码块主题
+	CodeBlockThemeDark       string                   `json:"codeBlockThemeDark"`       // 暗黑模式下代码块主题
+	Lang                     string                   `json:"lang"`                     // 选择的界面语言，同 AppConf.Lang
+	ThemeJS                  bool                     `json:"themeJS"`                  // 是否启用了主题 JavaScript
+	CloseButtonBehavior      int                      `json:"closeButtonBehavior"`      // 关闭按钮行为，0：退出，1：最小化到托盘
+	HideToolbar              bool                     `json:"hideToolbar"`              // 是否隐藏顶栏工具栏
+	HideStatusBar            bool                     `json:"hideStatusBar"`            // 是否隐藏底部状态栏
+	StatusBar                *BazaarStatusBar         `json:"statusBar"`                // 底部状态栏配置
+	Notifications            *BazaarNotifications     `json:"notifications"`            // 外观通知开关配置
+	EntryVisibility          *BazaarEntryVisibility   `json:"entryVisibility"`          // 桌面端入口可见性配置
+}
+
+// BazaarPDFTheme 明亮界面默认 light，暗黑界面默认 dark；标注颜色默认为 var(--b3-pdf-background1)。
+type BazaarPDFTheme struct {
+	Light     string `json:"light"`
+	Dark      string `json:"dark"`
+	AnnoColor string `json:"annoColor"`
+}
+
+// BazaarMobileBars 三项默认开启；响应保留未设置的 null，不将其转换为 false。
+type BazaarMobileBars struct {
+	AutoHide       *bool `json:"autoHide"`
+	SidebarSwipe   *bool `json:"sidebarSwipe"`
+	SidebarButtons *bool `json:"sidebarButtons"`
 }
 type BazaarBodyGradient struct {
 	Mode  string                  `json:"mode"` // auto：自动，custom：自定义，off：关闭

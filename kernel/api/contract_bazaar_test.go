@@ -10,6 +10,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"maps"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -42,9 +43,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -96,9 +95,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -155,9 +152,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -212,9 +207,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -270,9 +263,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -328,9 +319,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -386,9 +375,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -443,9 +430,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -502,9 +487,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -560,9 +543,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -617,9 +598,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -674,9 +653,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -735,9 +712,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -793,9 +768,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -847,9 +820,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -901,9 +872,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -961,9 +930,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1018,9 +985,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1072,9 +1037,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1126,9 +1089,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1186,9 +1147,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1243,9 +1202,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1297,9 +1254,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1351,9 +1306,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1411,9 +1364,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1468,9 +1419,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1525,9 +1474,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1582,9 +1529,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1643,9 +1588,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1701,9 +1644,7 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 		for key := range base {
 			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
 				changed := map[string]json.RawMessage{}
-				for k, v := range base {
-					changed[k] = v
-				}
+				maps.Copy(changed, base)
 				changed[key] = json.RawMessage(value)
 				data, _ := json.Marshal(changed)
 				bodies = append(bodies, data)
@@ -1744,7 +1685,7 @@ func TestBazaarContractTransportCompatibility(t *testing.T) {
 	appearance.BodyGradient = &conf.BodyGradient{Mode: "custom", Light: conf.BodyGradientColor{Color: "#000000", Opacity: 50}}
 	appearance.EntryVisibility.Profiles = []*conf.EntryVisibilityProfile{nil, {ID: "custom", Orders: map[string][]string{"menu": {"item"}}}}
 	appearance.GlobalFontFamilies = []*conf.EditorFont{nil, {Family: "serif", Weight: 500}}
-	cases := [][2]interface{}{{pkg, bazaarPackage(pkg)}, {&bazaar.Package{}, bazaarPackage(&bazaar.Package{})}, {appearance, bazaarAppearance(appearance)}, {(*conf.Appearance)(nil), bazaarAppearance(nil)}, {[]*bazaar.Package{nil, pkg}, bazaarPackages([]*bazaar.Package{nil, pkg})}, {([]*bazaar.Package)(nil), bazaarPackages(nil)}, {[]*bazaar.Package{}, bazaarPackages([]*bazaar.Package{})}}
+	cases := [][2]any{{pkg, bazaarPackage(pkg)}, {&bazaar.Package{}, bazaarPackage(&bazaar.Package{})}, {appearance, bazaarAppearance(appearance)}, {(*conf.Appearance)(nil), bazaarAppearance(nil)}, {[]*bazaar.Package{nil, pkg}, bazaarPackages([]*bazaar.Package{nil, pkg})}, {([]*bazaar.Package)(nil), bazaarPackages(nil)}, {[]*bazaar.Package{}, bazaarPackages([]*bazaar.Package{})}}
 	for _, pair := range cases {
 		left, _ := json.Marshal(pair[0])
 		right, _ := json.Marshal(pair[1])
@@ -1753,6 +1694,57 @@ func TestBazaarContractTransportCompatibility(t *testing.T) {
 		}
 	}
 }
+
+func TestBazaarContractAppearanceTransportCompatibility(t *testing.T) {
+	bundle, err := apicontract.BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name       string
+		appearance *conf.Appearance
+	}{
+		{"nil", nil},
+		{"zero", &conf.Appearance{}},
+		{"defaults", conf.NewAppearance()},
+		{"configured", &conf.Appearance{
+			CompactMode:              true,
+			MenuMouseScroll:          true,
+			PDFTheme:                 &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "#abcdef"},
+			OutlineKeepCurrentExpand: true,
+			MobileBars:               &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(true)},
+		}},
+		{"disabled", &conf.Appearance{
+			PDFTheme:   &conf.PDFTheme{},
+			MobileBars: &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(false), SidebarButtons: new(false)},
+		}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			payload := bazaarAppearance(test.appearance)
+			expected, err := json.Marshal(test.appearance)
+			if err != nil {
+				t.Fatal(err)
+			}
+			actual, err := json.Marshal(payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(actual, expected) {
+				t.Fatalf("appearance transport mismatch:\ngot  %s\nwant %s", actual, expected)
+			}
+			response, err := json.Marshal(apicontract.Success(apicontract.BazaarAppearancePackagesData{Appearance: payload}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, endpoint := range []string{"installBazaarIcon", "uninstallBazaarIcon", "installBazaarTheme", "uninstallBazaarTheme"} {
+				if err := bundle.ValidateResponse(http.MethodPost, "/api/bazaar/"+endpoint, response); err != nil {
+					t.Errorf("%s: %v", endpoint, err)
+				}
+			}
+		})
+	}
+}
+
 func TestBazaarContractHTTPFailures(t *testing.T) {
 	document, err := apicontract.BuildBundle()
 	if err != nil {

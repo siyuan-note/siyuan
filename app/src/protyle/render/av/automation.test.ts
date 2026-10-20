@@ -1,4 +1,5 @@
 import * as capabilities from "./capabilities";
+import * as filterDropdown from "./filterDropdown";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -43,10 +44,10 @@ test("automation settings autosave changes with independent undo snapshots and k
     let returned = 0;
     let resized = 0;
     let menuVisible = false;
-    let captureClick: () => void;
+    let captureClick: (event: {target: {closest: () => HTMLElement}}) => void;
     const classes = new Set(["b3-menu--fullscreen", "b3-menu--sheet"]);
     const menu = {innerHTML: "", classList: {add: (name: string) => classes.add(name), remove: (name: string) => classes.delete(name)},
-        addEventListener: (_type: string, listener: () => void, capture: boolean) => {
+        addEventListener: (_type: string, listener: typeof captureClick, capture: boolean) => {
             assert.equal(capture, true);
             captureClick = listener;
         },
@@ -71,6 +72,7 @@ test("automation settings autosave changes with independent undo snapshots and k
                 addItem() {}
                 open() { menuVisible = true; }
             }},
+            "./filterDropdown": filterDropdown,
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async (_path: string, request: {id: string}) => ({code: 0, data: {av: request.id === "source" ? database : destination}})},
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
@@ -89,10 +91,10 @@ test("automation settings autosave changes with independent undo snapshots and k
     assert.ok(resized >= 2);
     const addField = {dataset: {action: "add-field"}, closest: () => ({dataset: {index: "0"}}),
         getBoundingClientRect: () => ({left: 0, bottom: 0, height: 20})};
-    captureClick();
+    captureClick({target: {closest: () => null}});
     listeners.get("click")({target: {closest: () => addField}});
     assert.equal(menuVisible, true);
-    captureClick();
+    captureClick({target: {closest: () => null}});
     listeners.get("click")({target: {closest: (): HTMLElement => null}});
     assert.equal(menuVisible, false);
     assert.equal(transactions.length, 0);
@@ -123,7 +125,7 @@ test("automation settings autosave changes with independent undo snapshots and k
     assert.deepEqual(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[1], otherRule);
     panel.isConnected = false;
     menuVisible = true;
-    captureClick();
+    captureClick({target: {closest: () => null}});
     assert.equal(menuVisible, true);
     assert.equal(returned, 0);
 });
@@ -132,7 +134,9 @@ test("empty automation settings persist an incomplete rule disabled on editing a
     const listeners = new Map<string, (event: unknown) => void>();
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     const status = {textContent: "", classList: {toggle() {}}};
-    const select = {selectedOptions: [{textContent: ""}]};
+    const select = {textContent: ""};
+    let renameRule: (id: string, name: string) => void;
+    let removeRule: (id: string) => void;
     const enabled = {checked: false};
     const list = {innerHTML: "", querySelectorAll: (): HTMLElement[] => []};
     const conditions = {innerHTML: "", querySelector: (selector: string) => selector === "[data-conditions]" ? list : {addEventListener() {}}};
@@ -140,7 +144,7 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener),
         querySelectorAll: (): HTMLElement[] => [],
         querySelector: (selector: string) => ({"[data-source-conditions]": conditions, "[data-status]": status,
-            "[data-rule]": select, "[data-enabled]": enabled})[selector] || list};
+            "[data-rule-name]": select, "[data-enabled]": enabled})[selector] || list};
     const panel = {isConnected: true, addEventListener() {}, querySelector: (selector: string) => selector === "[data-body]" ? body : {
         addEventListener: (_type: string, listener: (event: unknown) => void) => listeners.set(selector, listener),
     }};
@@ -154,6 +158,9 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         Lute: {NewNodeID: () => "draft-rule"},
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"}}},
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
+            "./automationRules": {openAutomationRules: (_target: HTMLElement, _rules: unknown, _current: string,
+                _select: unknown, rename: typeof renameRule, remove: typeof removeRule) => { renameRule = rename; removeRule = remove; }},
+            "./automationTemplate": {automationTimeZone: () => "UTC"},
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {av: database}})},
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
@@ -164,15 +171,14 @@ test("empty automation settings persist an incomplete rule disabled on editing a
     await methods.openAutomationMenu({protyle: {options: {}} as IProtyle,
         blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement, avID: "source",
         menuElement: menu as unknown as HTMLElement, onResize() {}});
-    assert.match(body.innerHTML, /data-name/);
+    assert.match(body.innerHTML, /data-action="rules"/);
+    assert.doesNotMatch(body.innerHTML, /data-name/);
     assert.match(body.innerHTML, /data-trigger/);
     assert.match(list.innerHTML, /data-action="add-field"/);
     assert.equal(transactions.length, 0);
     assert.equal(database.automations.rules.length, 0);
-    const nameInput = {value: "Draft", matches: (selector: string) => selector === "[data-name]", closest: (): HTMLElement => null};
-    listeners.get("input")({target: nameInput});
-    assert.equal(transactions.length, 0);
-    listeners.get("blur")({target: nameInput});
+    listeners.get("click")({target: {closest: () => ({dataset: {action: "rules"}, closest: (): HTMLElement => null})}});
+    renameRule("draft-rule", "Draft");
     assert.equal(transactions.length, 1);
     const saved = JSON.parse(JSON.stringify(transactions[0].perform[0]));
     const undo = JSON.parse(JSON.stringify(transactions[0].undo[0]));
@@ -185,16 +191,16 @@ test("empty automation settings persist an incomplete rule disabled on editing a
     listeners.get("change")({target: {checked: true, matches: (selector: string) => selector === "[data-enabled]", closest: (): HTMLElement => null}});
     assert.equal(transactions.length, 1);
     assert.equal(enabled.checked, false);
-    listeners.get("click")({target: {closest: () => ({dataset: {action: "remove-rule"}, closest: (): HTMLElement => null})}});
+    removeRule("draft-rule");
     assert.equal(transactions.length, 2);
     assert.equal(JSON.parse(JSON.stringify(transactions[1].perform[0].data)).rules.length, 0);
     assert.deepEqual(transactions[1].undo[0].data, transactions[0].perform[0].data);
     await new Promise(resolve => setImmediate(resolve));
-    assert.match(body.innerHTML, /data-name/);
+    assert.match(body.innerHTML, /data-action="rules"/);
     assert.match(body.innerHTML, /data-trigger/);
     assert.match(list.innerHTML, /data-action="add-field"/);
     assert.equal(transactions.length, 2);
-    listeners.get("click")({target: {closest: () => ({dataset: {action: "remove-rule"}, closest: (): HTMLElement => null})}});
+    removeRule("draft-rule");
     assert.equal(transactions.length, 2);
 });
 

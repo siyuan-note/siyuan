@@ -25,6 +25,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -335,13 +336,7 @@ func getBootAppearanceByID(provider, appearanceID string) (ret *BootAppearance, 
 	if parseErr != nil || !bazaar.IsValidInstalledPackage(pkg, provider) {
 		return nil, ErrBootAppearanceNotFound
 	}
-	found := false
-	for _, declaredID := range pkg.BootAppearances {
-		if declaredID == appearanceID {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(pkg.BootAppearances, appearanceID)
 	if !found {
 		return nil, ErrBootAppearanceNotFound
 	}
@@ -658,7 +653,7 @@ func ensureBootAppearancePathHasNoSymlink(root, target string) error {
 		return ErrBootAppearanceAssetForbidden
 	}
 	current := rootAbs
-	for _, part := range strings.Split(relative, string(os.PathSeparator)) {
+	for part := range strings.SplitSeq(relative, string(os.PathSeparator)) {
 		if part == "." || part == "" {
 			continue
 		}

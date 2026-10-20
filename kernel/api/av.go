@@ -486,7 +486,9 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 	if request.CreateIfNotExist != nil {
 		create = *request.CreateIfNotExist
 	}
-	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, fromContractAVCalendarRange(request.CalendarRange))
+	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, model.AttributeViewRenderOptions{
+		CalendarRange: fromContractAVCalendarRange(request.CalendarRange), TemporarySort: fromContractAVViewSort(request.TemporarySort),
+	})
 })
 
 var getAttributeViewCalendarUndated = contractHandler(apicontract.GetAttributeViewCalendarUndated, func(c *gin.Context, request apicontract.AVCalendarUndatedRequest) apicontract.Response[apicontract.AVCalendarUndatedData] {
@@ -548,7 +550,7 @@ var getCurrentAttrViewImages = contractHandler(apicontract.GetCurrentAttrViewIma
 	if err := holdAttributeViewRequest(c, request.BlockID, request.ID); err != nil {
 		return apicontract.Failure[[]string](-1, model.Conf.Language(314))
 	}
-	images, err := model.GetCurrentAttributeViewImages(c, request.ID, request.BlockID, request.ViewID, request.Query)
+	images, err := model.GetCurrentAttributeViewImages(c, request.ID, request.BlockID, request.ViewID, request.Query, request.GroupID)
 	if err != nil {
 		return apicontract.Failure[[]string](-1, err.Error())
 	}

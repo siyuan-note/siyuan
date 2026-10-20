@@ -32,6 +32,7 @@ const rendererModules = (sources) => {
         electron: {ipcRenderer}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"}},
         "../util/functions": {setToolbarLeftMac() {}},
     });
+    document.body.classList.toggle("body--windows", process.platform !== "darwin");
     document.body.classList.toggle("body--win32", process.platform !== "darwin");
     const fit = loadRendererModule(sources.fit, {
         "../../boot/windowControls": controls, "../../protyle/util/compatibility": {isMac: () => process.platform === "darwin"},
@@ -236,6 +237,7 @@ const runCases = async (sources) => {
         "../../constants": {Constants: {DIALOG_SETTING: "settings"}},
         "./tabs": {getSettingTab: () => ({mount: async root => { remounted++; root.innerHTML = markup(); }})},
         "./windowContext": {getSettingsOwnerApp: () => window.siyuan.ws.app},
+        "./collapse": loadRendererModule(sources.collapse, {}),
     });
     const saving = loadRendererModule(sources.save, {
         "./mount": mounting,
@@ -458,7 +460,8 @@ if (process.versions.electron && process.type === "browser") {
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
             settingInterface: "config/setting/interface.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
-            mount: "config/setting/mount.ts", save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
+            mount: "config/setting/mount.ts", collapse: "config/setting/collapse.ts",
+            save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
             bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts", hoverInput: "util/hoverInput.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
             if (key === "frontend") {

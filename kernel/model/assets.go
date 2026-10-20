@@ -669,8 +669,8 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 }
 
 func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, assetsDirPath string, needWriteTree bool) (err error) {
-	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
-	defer finishTabTitles()
+	finishInlineTitles := treenode.MaterializeInlineTitles(tree.Root)
+	defer finishInlineTitles()
 	var files int
 	var size int64
 	msgId := gulu.Rand.String(7)
@@ -758,9 +758,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 				u := dest
 				if strings.Contains(u, "qpic.cn") {
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
-					if strings.Contains(u, "http://") {
-						u = strings.Replace(u, "http://", "https://", 1)
-					}
+					u = strings.Replace(u, "http://", "https://", 1)
 
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/6431
 					// 下面这部分需要注释掉，否则会导致响应 400
@@ -880,7 +878,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 
 	util.PushClearMsg(msgId)
 
-	finishTabTitles()
+	finishInlineTitles()
 	if needWriteTree {
 		if 0 < files {
 			msgId = util.PushMsg(Conf.Language(113), 7000)
@@ -1087,10 +1085,7 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	if start >= len(ret) {
 		return []*cache.Asset{}, nil
 	}
-	end := start + pageSize
-	if end > len(ret) {
-		end = len(ret)
-	}
+	end := min(start+pageSize, len(ret))
 	ret = ret[start:end]
 	// 仅处理当前页的高亮内容，避免对其他页重复渲染。
 	highlightKeyword := strings.Join(keywords, search.TermSep)
@@ -1172,8 +1167,8 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 	}
 	if assetDirIndex > 0 {
 		notebookRoot := filepath.Join(util.DataDir, parts[0])
-		resolvedDataDir, dataEvalErr := ResolveRealPath(util.DataDir)
-		resolvedNotebookRoot, notebookEvalErr := ResolveRealPath(notebookRoot)
+		resolvedDataDir, dataEvalErr := util.ResolveRealPath(util.DataDir)
+		resolvedNotebookRoot, notebookEvalErr := util.ResolveRealPath(notebookRoot)
 		if dataEvalErr != nil || notebookEvalErr != nil ||
 			!gulu.File.IsSubPath(resolvedDataDir, resolvedNotebookRoot) ||
 			!gulu.File.IsSubPath(resolvedNotebookRoot, resolvedRoot) {
@@ -2531,7 +2526,7 @@ func assetLinkDestBlockID(node *ast.Node) string {
 }
 
 func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool, normalize ...func(string) string) []string {
-	if !node.IsBlock() && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
+	if !node.IsBlock() && ast.NodeImage != node.Type && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
 		ast.NodeIFrame != node.Type && ast.NodeWidget != node.Type && ast.NodeAudio != node.Type && ast.NodeVideo != node.Type &&
 		ast.NodeAttributeView != node.Type && ast.NodeFileAnnotationRefID != node.Type && !node.IsTextMarkType("a") &&
 		!node.IsTextMarkType("file-annotation-ref") {
@@ -2555,7 +2550,7 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 		}
 	}
 
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2619,19 +2614,33 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	itemFilter attributeViewItemFilter,
 	normalize ...func(string) string,
 ) (ret []string) {
+	return getAssetsLinkDestsWithOptions(node, includeServePath, itemFilter, assetLinkScanOptions{resolveAttributeViews: true}, normalize...)
+}
+
+type assetLinkScanOptions struct {
+	resolveAttributeViews bool
+	expandAssetLists      bool
+}
+
+// getAssetsLinkDestsWithOptions 控制数据库加载与资源列表展开；保守展开仅用于已有完整资源清单的扫描。
+func getAssetsLinkDestsWithOptions(
+	node *ast.Node, includeServePath bool, itemFilter attributeViewItemFilter, options assetLinkScanOptions,
+	normalize ...func(string) string,
+) (ret []string) {
 	ret = []string{}
-	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			if dest := normalizeScannedAsset(treenode.ImageLivePhotoVideo(n), normalize); dest != "" && util.IsAssetLinkDest([]byte(dest), includeServePath) {
+				ret = append(ret, dest)
+			}
+		}
 		if n.IsBlock() {
 			// 以 custom-data-assets 开头的块属性值可能是多个资源文件链接，需要计入
 			// Ignore assets associated with the `custom-data-assets` block attribute when cleaning unreferenced assets https://github.com/siyuan-note/siyuan/issues/12574
 			for _, kv := range n.KramdownIAL {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
-					dest := normalizeScannedAsset(kv[1], normalize)
-					if "" == dest || !util.IsAssetLinkDest([]byte(dest), includeServePath) {
-						continue
-					}
-					ret = append(ret, dest)
+					ret = append(ret, assetListLinkDests(kv[1], includeServePath, options.expandAssetLists, normalize...)...)
 				}
 			}
 		}
@@ -2669,6 +2678,9 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 				ret = append(ret, dest)
 			}
 		} else if ast.NodeAttributeView == n.Type {
+			if !options.resolveAttributeViews {
+				return ast.WalkContinue
+			}
 			attrView, _ := av.ParseAttributeView(n.AttributeViewID)
 			if nil == attrView {
 				return ast.WalkContinue
@@ -2682,13 +2694,9 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				dataAssets = normalizeScannedAsset(dataAssets, normalize)
-				if !util.IsAssetLinkDest([]byte(dataAssets), includeServePath) {
-					return ast.WalkContinue
-				}
-				ret = append(ret, dataAssets)
+				ret = append(ret, assetListLinkDests(dataAssets, includeServePath, options.expandAssetLists, normalize...)...)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				ret = append(ret, htmlAssetLinkDests(n.Tokens, includeServePath, normalize...)...)
+				ret = append(ret, htmlAssetLinkDestsWithOptions(n.Tokens, includeServePath, options.expandAssetLists, normalize...)...)
 			}
 		}
 		return ast.WalkContinue
@@ -2703,7 +2711,28 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	return
 }
 
+var assetListPattern = regexp.MustCompile(`[^\s,]+`)
+
+// assetListLinkDests 同时保留完整路径与列表项，兼容文件名中的空格、逗号和多值资源属性。
+func assetListLinkDests(raw string, includeServePath, expand bool, normalize ...func(string) string) (ret []string) {
+	values := []string{raw}
+	if expand {
+		values = append(values, assetListPattern.FindAllString(raw, -1)...)
+	}
+	for _, value := range values {
+		dest := normalizeScannedAsset(value, normalize)
+		if dest != "" && util.IsAssetLinkDest([]byte(dest), includeServePath) {
+			ret = append(ret, dest)
+		}
+	}
+	return
+}
+
 func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(string) string) (ret []string) {
+	return htmlAssetLinkDestsWithOptions(tokens, includeServePath, false, normalize...)
+}
+
+func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetLists bool, normalize ...func(string) string) (ret []string) {
 	// 逐个读取标签属性，兼容内联标签片段并只解码一层 HTML 实体。
 	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
 	for {
@@ -2712,6 +2741,10 @@ func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
 			for _, attr := range tokenizer.Token().Attr {
+				if expandAssetLists && (attr.Key == "data-assets" || strings.HasPrefix(attr.Key, "custom-data-assets")) {
+					ret = append(ret, assetListLinkDests(attr.Val, includeServePath, true, normalize...)...)
+					continue
+				}
 				dest := normalizeScannedAsset(strings.TrimSpace(attr.Val), normalize)
 				if util.IsAssetLinkDest([]byte(dest), includeServePath) {
 					ret = append(ret, dest)
@@ -2824,7 +2857,11 @@ func getAssetsLinkDestsInTree(tree *parse.Tree, includeServePath bool) (nodes []
 }
 
 func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
-	if ast.NodeLinkDest == node.Type {
+	if ast.NodeImage == node.Type {
+		if video := treenode.ImageLivePhotoVideo(node); video != "" {
+			treenode.SetImageLivePhotoVideo(node, strings.ReplaceAll(video, oldDest, dest))
+		}
+	} else if ast.NodeLinkDest == node.Type {
 		if bytes.HasPrefix(node.Tokens, []byte("//")) {
 			node.Tokens = append([]byte("https:"), node.Tokens...)
 		}

@@ -47,7 +47,7 @@ import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {zoomOut} from "../../menus/protyle";
 import {isFoldedHeading, shouldUnfoldMovedHeading} from "./foldHeadingMove";
 /// #if !BROWSER
@@ -471,7 +471,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             let topSourceElement = getTopAloneElement(item);
             const oldSourceParentElement = getParentBlock(item);
             const sourceContainerSnapshots = new Map<Element, TDragSourceContainerSnapshot>();
-            if (topSourceElement !== item && item.getAttribute("data-type") === "NodeListItem") {
+            if (topSourceElement !== item) {
                 let sourceContainer = oldSourceParentElement;
                 while (sourceContainer) {
                     const sourceContainerID = sourceContainer.getAttribute("data-node-id");
@@ -479,10 +479,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                         const sourceContainerClone = sourceContainer.cloneNode(true) as Element;
                         const movedItemClone = sourceContainerClone.querySelector(`[data-node-id="${id}"]`);
                         if (movedItemClone) {
-                            const placeholderElement = genDragListItemPlaceholder(
-                                protyle.lute,
-                                movedItemClone.getAttribute("data-subtype")
-                            );
+                            const placeholderElement = item.getAttribute("data-type") === "NodeListItem" ?
+                                genDragListItemPlaceholder(protyle.lute, movedItemClone.getAttribute("data-subtype")) :
+                                genEmptyElement(false, false, Lute.NewNodeID());
                             const placeholderID = placeholderElement?.getAttribute("data-node-id");
                             if (!placeholderElement || !placeholderID) {
                                 break;
@@ -553,7 +552,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 });
                 const sourceContainerSnapshot = sourceContainerSnapshots.get(topSourceElement);
                 if (sourceContainerSnapshot && undoMoveOperation) {
-                    // 使用占位列表项保持容器快照有效，撤销时恢复容器、移回原列表项，再删除占位项。
+                    // 占位块保持容器快照有效，撤销时恢复容器、移回原块，再删除占位块。
                     replaceDragUndoOperation(undoOperations, undoMoveOperation, [
                         {
                             action: "delete",

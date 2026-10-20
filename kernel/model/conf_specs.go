@@ -206,7 +206,7 @@ func fileTreeReactions() []Reaction[*conf.FileTree] {
 	return []Reaction[*conf.FileTree]{
 		{Name: "sort", Changed: func(old, next *conf.FileTree) bool { return old.Sort != next.Sort }, Apply: func(old, next *conf.FileTree) { PushDocSortModeChanged("global", "", "", "/", &next.Sort) }},
 		{Name: "box-document", Changed: func(old, next *conf.FileTree) bool {
-			return (old.BoxDocEnabled != nil && *old.BoxDocEnabled) != (next.BoxDocEnabled != nil && *next.BoxDocEnabled)
+			return old.BoxDocEnabled != next.BoxDocEnabled
 		}, Apply: func(old, next *conf.FileTree) { RefreshBoxDocFeature() }},
 	}
 }

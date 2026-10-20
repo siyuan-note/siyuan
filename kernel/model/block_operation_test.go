@@ -178,7 +178,7 @@ func TestLargeInsertSiblingAnchors(t *testing.T) {
 			setupFoldTransactionDatabase(t, fixture)
 			tx := &Transaction{}
 			var ids []string
-			for index := 0; index < 32; index++ {
+			for range 32 {
 				id := ast.NewNodeID()
 				ids = append(ids, id)
 				dom := util.NewLute().Md2BlockDOM("inserted\n{: id=\""+id+"\"}", false)

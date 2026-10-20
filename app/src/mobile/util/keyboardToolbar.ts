@@ -8,6 +8,7 @@ import {
 } from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
+import {canPickIOSPhotos} from "../../protyle/upload/iosPhotos";
 import {getSuperBlockCommand} from "../../block/superBlock";
 import {getSelectionPosition} from "../../protyle/util/selection";
 import {focusByRange} from "../../protyle/util/selectionOffsets";
@@ -73,7 +74,7 @@ import {
     getInlineFontFamilyLabel,
     getFontFamilyState,
     getInlineFontFamilyValue,
-    renderMobileFontFamilyMenu,
+    openFontFamilyMenu,
 } from "../../protyle/toolbar/fontFamilyMenu";
 import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../protyle/util/editorFocus";
@@ -86,11 +87,12 @@ import {MOBILE_TOOLBAR_NAMES} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
+import {isGutterTouchDragging} from "../../protyle/ui/gutterVisibility";
 import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
 import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
 import {hintSlash} from "../../protyle/hint/extend";
 import {getFrequentSlashItems} from "../../protyle/hint/frequentSlashStorage";
-import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
+import {finishTableCellEditing, getTableCellRichContext, prepareTableCellMenuItems} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
 import {getIconByType} from "../../editor/getIcon";
 import {MOBILE_TOOLBAR_ACTION_NAMES, MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "./toolbarActions";
@@ -103,6 +105,7 @@ import {getCaretOverflowDirection, getCaretScrollDelta} from "../../protyle/wysi
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
+let fontFamilyMenu: {element: HTMLElement, protyle: IProtyle} | undefined;
 let unmountLiteSlashMenu: (() => void) | undefined;
 
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
@@ -666,9 +669,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div data-id="fontFamily" class="keyboard__slash-title${disableFontFamily ? " fn__none" : ""}">${window.siyuan.languages.fontFamily}</div>
 <div data-id="fontFamilyWrap" class="keyboard__slash-block${disableFontFamily ? " fn__none" : ""}">
-    <button class="keyboard__slash-item" data-action="fontFamilyMenu">
-        <span class="keyboard__slash-icon" data-type="fontFamilyPreview">A</span>
-        <span class="keyboard__slash-text">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
+    <button class="b3-select keyboard__font-family fn__flex-1" data-action="fontFamilyMenu" data-menu="true" aria-haspopup="listbox" aria-expanded="false">
+        <span data-type="fontFamilyPreview">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
     </button>
 </div>
 <div data-id="fontSize" class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
@@ -776,7 +778,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${isInAndroid() ? getSlashItem("insertAsset", Constants.ZWSP + 3, "iconImage", window.siyuan.languages.insertImage + '<input class="b3-form__upload" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker"/>', "true") : ""}
+    ${isInAndroid() || canPickIOSPhotos() ? getSlashItem("insertAsset", Constants.ZWSP + 3, "iconImage", window.siyuan.languages.insertImage + '<input class="b3-form__upload" data-native-photos="true" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker"/>', "true") : ""}
     ${isInAndroid() ? getSlashItem("insertAsset", Constants.ZWSP + 3, "iconCamera", window.siyuan.languages.insertPhoto + '<input class="b3-form__upload" capture="user" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true") : ""}
     ${getSlashItem("insertAsset", Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file" multiple="multiple"' + (protyle.options.upload.accept ? (' accept="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
     ${getHostCapabilities().remoteKernel ? "" : getSlashItem("insertIframeURL", '<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
@@ -888,6 +890,48 @@ const hideAndroidKeyboardForPanel = (protyle: IProtyle) => {
     }, 100);
 };
 
+const openMobileFontFamilyMenu = (protyle: IProtyle, target: HTMLElement, appearance = false) => {
+    if (!protyle || protyle.disabled || window.siyuan.config.readonly) {
+        return;
+    }
+    const range = protyle.toolbar.range.cloneRange();
+    const nodes = getFontNodeElements(protyle);
+    const state = getFontFamilyState(protyle, nodes);
+    const valid = () => getCurrentEditor()?.protyle === protyle && !protyle.disabled &&
+        !window.siyuan.config.readonly && target.isConnected &&
+        range.startContainer.isConnected && range.endContainer.isConnected;
+    preventKeyboardToolbarRender();
+    void openFontFamilyMenu(target, {
+        ...state,
+        isOpenValid: valid,
+        onInteraction: preventKeyboardToolbarRender,
+        onOpen: element => { fontFamilyMenu = {element, protyle}; },
+        onClose() {
+            const searchFocused = fontFamilyMenu?.element.contains(document.activeElement);
+            fontFamilyMenu = undefined;
+            if (searchFocused) {
+                activeBlur(true);
+            }
+        },
+        onSelect(family) {
+            if (!valid()) {
+                return;
+            }
+            protyle.toolbar.range = range;
+            fontEvent(protyle, nodes, "fontFamily", getInlineFontFamilyValue(family), false);
+            if (appearance) {
+                const toolbarElement = document.getElementById("keyboardToolbar");
+                const utilElement = toolbarElement.querySelector(".keyboard__util");
+                const scrollTop = utilElement.scrollTop;
+                renderTextMenu(protyle, toolbarElement);
+                utilElement.scrollTop = scrollTop;
+            } else {
+                restoreKeyboardToolbarRange(protyle, protyle.toolbar.range);
+            }
+        },
+    });
+};
+
 const resetKeyboardToolbarUtilButtons = () => {
     unmountLiteSlashMenu?.();
     unmountLiteSlashMenu = undefined;
@@ -933,6 +977,10 @@ const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
 };
 
 export const hideKeyboardToolbarUtilOnEditorClick = () => {
+    if (fontFamilyMenu && fontFamilyMenu.protyle === getCurrentEditor()?.protyle &&
+        fontFamilyMenu.element.contains(document.activeElement)) {
+        return;
+    }
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (!showUtil && (!toolbarElement || toolbarElement.clientHeight <= 100)) {
         return;
@@ -1102,6 +1150,12 @@ const showKeyboardToolbarElement = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
         !toolbarElement.contains(document.activeElement)) {
+        if (keyboardPanelTop !== undefined && fontFamilyMenu && fontFamilyMenu.protyle === getCurrentEditor()?.protyle &&
+            fontFamilyMenu.element.contains(document.activeElement)) {
+            // 字体搜索使用独立菜单，保留底层外观面板及选区。
+            notifyMobileKeyboardChange(true);
+            return;
+        }
         // 普通输入框可能保留文档选区，不能据此恢复编辑焦点或显示文档工具栏。
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
@@ -1312,6 +1366,13 @@ export const hideKeyboardToolbar = (keyboardClosed = true) => {
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     inlineMathSelection.reset();
+    const gutterElement = getCurrentEditor()?.protyle.gutter?.element;
+    if (gutterElement && isGutterTouchDragging(gutterElement)) {
+        // 键盘收起时保留块标手势所需的 WebView 焦点，避免原生端取消后续触摸。
+        preventKeyboardToolbarRender();
+        hideKeyboardToolbar();
+        return KeyboardHideResult.PreserveSelection;
+    }
     if (preserveSelection && ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
         // 输入法切换安全键盘时会临时隐藏，保留普通输入框焦点，避免中断密码输入。
         preventKeyboardToolbarRender();
@@ -1376,6 +1437,7 @@ const updateVideoMaxHeight = () => {
 };
 
 export const initKeyboardToolbar = () => {
+    window.addEventListener("siyuan-mobile-table-action", () => activeBlur(true));
     window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
@@ -1626,38 +1688,9 @@ export const initKeyboardToolbar = () => {
         const target = event.target as HTMLElement;
         const liteSlashBtnElement = target.closest<HTMLElement>(".keyboard__util .protyle-hint .keyboard__slash-item[data-value]");
         const slashBtnElement = liteSlashBtnElement || hasClosestByClassName(target, "keyboard__slash-item");
-        if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
-            const range = protyle.toolbar.range.cloneRange();
-            const nodeElements = getFontNodeElements(protyle);
-            const fontFamilyState = getFontFamilyState(protyle, nodeElements);
-            const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
-            const isFontFamilyMenuValid = () => getCurrentEditor()?.protyle === protyle &&
-                toolbarElement.clientHeight > 100 && range.startContainer.isConnected &&
-                range.endContainer.isConnected && toolbarElement.querySelector('.keyboard__action[data-type="text"]')
-                    ?.classList.contains("protyle-toolbar__item--current") === true;
-            preventKeyboardToolbarRender();
-            void renderMobileFontFamilyMenu(utilElement, {
-                ...fontFamilyState,
-                isOpenValid: isFontFamilyMenuValid,
-                onBack() {
-                    if (!isFontFamilyMenuValid()) {
-                        return;
-                    }
-                    protyle.toolbar.range = range;
-                    renderTextMenu(protyle, toolbarElement);
-                    focusByRange(range);
-                },
-                onInteraction: preventKeyboardToolbarRender,
-                onSelect(family) {
-                    if (!isFontFamilyMenuValid()) {
-                        return;
-                    }
-                    protyle.toolbar.range = range;
-                    fontEvent(protyle, nodeElements, "fontFamily", getInlineFontFamilyValue(family), false);
-                    renderTextMenu(protyle, toolbarElement);
-                    focusByRange(protyle.toolbar.range);
-                }
-            });
+        const fontFamilyButton = target.closest<HTMLElement>('[data-action="fontFamilyMenu"]');
+        if (fontFamilyButton) {
+            openMobileFontFamilyMenu(protyle, fontFamilyButton, true);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -1823,7 +1856,11 @@ export const initKeyboardToolbar = () => {
                 protyle.toolbar.setInlineMark(protyle, type, "toolbar");
             }
             return;
-        } else if (type === "font-family" || type === "font-size") {
+        } else if (type === "font-family") {
+            hideKeyboardToolbarUtil();
+            openMobileFontFamilyMenu(protyle, buttonElement);
+            return;
+        } else if (type === "font-size") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil(true);
                 restoreKeyboardToolbarRange(protyle, range);
@@ -1852,32 +1889,12 @@ export const initKeyboardToolbar = () => {
                 finish();
             };
             preventKeyboardToolbarRender();
-            if (type === "font-family") {
-                const state = getFontFamilyState(protyle, nodes);
-                if (state.disabled) {
+            util.replaceChildren(createFontSizePicker(protyle, value => apply("fontSize", value), preventKeyboardToolbarRender, () => {
+                if (valid()) {
+                    protyle.toolbar.range = savedRange;
                     finish();
-                    return;
                 }
-                void renderMobileFontFamilyMenu(util, {
-                    ...state,
-                    isOpenValid: valid,
-                    onInteraction: preventKeyboardToolbarRender,
-                    onBack() {
-                        if (valid()) {
-                            protyle.toolbar.range = savedRange;
-                            finish();
-                        }
-                    },
-                    onSelect: family => apply("fontFamily", getInlineFontFamilyValue(family)),
-                });
-            } else {
-                util.replaceChildren(createFontSizePicker(protyle, value => apply("fontSize", value), preventKeyboardToolbarRender, () => {
-                    if (valid()) {
-                        protyle.toolbar.range = savedRange;
-                        finish();
-                    }
-                }));
-            }
+            }));
             showKeyboardToolbarUtil(protyle.contentElement.scrollTop);
             hideAndroidKeyboardForPanel(protyle);
             return;
@@ -1940,14 +1957,38 @@ export const initKeyboardToolbar = () => {
                     keyboardPanelClosing = false;
                     hideKeyboardToolbarUtil();
                     if (!protyle.gutter && getTableCellRichContext(protyle)) {
-                        const {MenuItem} = await import("../../menus/Menu");
+                        const [{MenuItem}, {tableMenu}] = await Promise.all([
+                            import("../../menus/Menu"), import("../../menus/protyle"),
+                        ]);
                         if (!session.isCurrent()) {
                             return;
                         }
                         if (!nodeElement.isConnected || protyle.disabled || !getTableCellRichContext(protyle)) {
                             return;
                         }
+                        const context = getTableCellRichContext(protyle);
+                        const table = context.cell.closest('[data-type="NodeTable"]');
+                        const tableRange = document.createRange();
+                        tableRange.selectNodeContents(context.cell);
+                        tableRange.collapse(true);
+                        const tableMenus = tableMenu(context.owner, table, context.cell, tableRange, true).menus;
+                        prepareTableCellMenuItems(tableMenus, () => finishTableCellEditing(context.cell));
                         window.siyuan.menus.menu.remove();
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "tableSelectRange",
+                            icon: "iconSelect",
+                            label: window.siyuan.languages.tableSelectRange,
+                            click: () => {
+                                context.owner.wysiwyg.tableControl?.startTouchSelection(context.cell);
+                            },
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "table",
+                            icon: "iconTable",
+                            label: window.siyuan.languages.table,
+                            submenu: tableMenus,
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "insertBefore",
                             icon: "iconBefore",

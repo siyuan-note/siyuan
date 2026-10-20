@@ -21,7 +21,7 @@ func textFileSingleLink(file *os.File, _ os.FileInfo) error {
 		return err
 	}
 	if info.NumberOfLinks != 1 {
-		return textFileError("invalid_path", "hard-linked files are not supported")
+		return textFileError(TextFileInvalidPath, "hard-linked files are not supported")
 	}
 	return nil
 }

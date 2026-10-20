@@ -89,8 +89,11 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
         const s3 = window.siyuan.config.sync.s3;
         const ready = !!s3 && [s3.endpoint, s3.accessKey, s3.secretKey, s3.bucket, s3.region]
             .every(value => !!value?.trim());
-        cloudListElement.innerHTML = ready ? `<div class="fn__hr"></div><ul class="b3-list">
-    <li class="b3-list-item" style="cursor: default;"><span class="b3-list-item__text">${escapeHtml(s3.bucket)}</span></li>
+        // S3 不使用云端同步目录，仅为与其他提供商保持一致的列表样式而显示唯一的固定项
+        cloudListElement.innerHTML = ready ? `<div class="fn__hr"></div><ul class="b3-list b3-list--background" style="overflow: auto;">
+    <li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+        <input type="radio" name="cloudName" checked/><span class="fn__space"></span><span>${escapeHtml(s3.bucket)}</span>
+    </li>
 </ul>` : `<ul><li class="b3-list--empty">${window.siyuan.languages.cloudConfigTip}</li></ul>`;
         cb?.(ready);
         return;
@@ -171,6 +174,22 @@ ${canManage ? `<span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b
         cloudListElement.innerHTML = syncListHTML;
         cb?.(ready);
     });
+};
+
+/** S3 直接展示配置的存储桶，其他提供者通过“配置”按钮展开目录列表 */
+export const refreshSyncCloudDirBlock = (root: Element) => {
+    const blockElement = root.querySelector("#syncCloudDirBlock");
+    const listElement = root.querySelector("#syncCloudList");
+    if (!blockElement || !listElement) {
+        return;
+    }
+    const isS3 = window.siyuan.config.sync.provider === 2;
+    blockElement.querySelector('[data-action="config"]')?.classList.toggle("fn__none", isS3);
+    listElement.innerHTML = "";
+    listElement.classList.toggle("fn__none", !isS3);
+    if (isS3) {
+        renderSyncCloudList(listElement, true);
+    }
 };
 
 export const syncGuide = (app?: App) => {

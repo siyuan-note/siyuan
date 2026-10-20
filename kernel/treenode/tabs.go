@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -138,84 +137,5 @@ func TabTitleParagraph(item *ast.Node) *ast.Node {
 	if nil == item || ast.NodeTabItem != item.Type || nil != item.TabTitleBlock() || "" == item.TabItemTitle {
 		return nil
 	}
-	luteEngine := util.NewLute()
-	tree := parse.Inline("", []byte(item.TabItemTitle), luteEngine.ParseOptions)
-	if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
-		return nil
-	}
-	parse.NestedInlines2FlattedSpans(tree, false)
-	paragraph := tree.Root.FirstChild
-	paragraph.ID = ""
-	paragraph.KramdownIAL = nil
-	paragraph.Parent = item
-	return paragraph
-}
-
-// WalkWithTabTitles 遍历正文及页签标题中的行级内容，标题修改后写回字符串字段。
-func WalkWithTabTitles(root *ast.Node, walker ast.Walker) {
-	if nil == root {
-		return
-	}
-	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
-		status := walker(node, entering)
-		if !entering || ast.WalkContinue != status || ast.NodeTabItem != node.Type {
-			return status
-		}
-		paragraph := TabTitleParagraph(node)
-		if nil == paragraph {
-			return status
-		}
-		luteEngine := util.NewLute()
-		before := FormatNode(paragraph, luteEngine)
-		stop := false
-		ast.Walk(paragraph, func(inline *ast.Node, titleEntering bool) ast.WalkStatus {
-			if inline == paragraph {
-				return ast.WalkContinue
-			}
-			result := walker(inline, titleEntering)
-			stop = ast.WalkStop == result
-			return result
-		})
-		if after := FormatNode(paragraph, luteEngine); after != before {
-			node.TabItemTitle = strings.TrimSpace(after)
-		}
-		if stop {
-			return ast.WalkStop
-		}
-		return status
-	})
-}
-
-// MaterializeTabTitles 在批量改写期间提供临时标题子树，返回的收尾函数必须在渲染或写盘前执行。
-func MaterializeTabTitles(root *ast.Node) func() {
-	type titleFragment struct {
-		item      *ast.Node
-		paragraph *ast.Node
-		before    string
-	}
-	luteEngine := util.NewLute()
-	var fragments []titleFragment
-	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeTabItem == node.Type {
-			if paragraph := TabTitleParagraph(node); nil != paragraph {
-				paragraph.Parent = nil
-				fragments = append(fragments, titleFragment{node, paragraph, FormatNode(paragraph, luteEngine)})
-				node.PrependChild(paragraph)
-			}
-		}
-		return ast.WalkContinue
-	})
-	finished := false
-	return func() {
-		if finished {
-			return
-		}
-		finished = true
-		for _, fragment := range fragments {
-			fragment.paragraph.Unlink()
-			if after := FormatNode(fragment.paragraph, luteEngine); after != fragment.before {
-				fragment.item.TabItemTitle = strings.TrimSpace(after)
-			}
-		}
-	}
+	return inlineTitleParagraph(item, item.TabItemTitle)
 }

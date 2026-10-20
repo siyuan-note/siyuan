@@ -2,6 +2,7 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr} from "../../../util/escape";
 import {isAVRenderData} from "./renderData";
 import {getAVData} from "./virtualScroll";
+import {getReadonlyAVSort} from "./readonlyState";
 import type {IDatabaseRowOpenData} from "./openDatabaseRow";
 
 export interface IDatabaseRowNavigation {
@@ -9,6 +10,7 @@ export interface IDatabaseRowNavigation {
     query: string;
     groupID?: string;
     calendarRange?: IAVCalendarRange;
+    temporarySort?: IAVSort;
 }
 
 export const getDatabaseRowNavigation = (source: Partial<IProtyle>, data: IDatabaseRowOpenData) => {
@@ -25,6 +27,7 @@ export const getDatabaseRowNavigation = (source: Partial<IProtyle>, data: IDatab
         query: block.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
         groupID: block.querySelector(`[data-id="${data.itemID}"]`)?.closest<HTMLElement>(".av__body")?.dataset.groupId,
         calendarRange: (av.view as IAVTable).calendarRange,
+        temporarySort: source.disabled ? getReadonlyAVSort(block, av.viewID) : undefined,
     };
 };
 
@@ -41,6 +44,7 @@ export const getDatabaseRowNeighbors = async (data: IDatabaseRowOpenData) => {
     const request = {
         id: data.avID, blockID: data.databaseBlockID, viewID: navigation.viewID,
         query: navigation.query, calendarRange: navigation.calendarRange, createIfNotExist: false,
+        temporarySort: navigation.temporarySort,
         page: 1, pageSize: 1,
     };
     // 定位窗口包含当前条目的前后行，避免只在已渲染的分页或虚拟滚动范围内切换。

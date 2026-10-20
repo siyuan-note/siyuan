@@ -404,23 +404,39 @@ func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, cou
 }
 
 func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
-	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, true, calendarRanges...)
+	options := AttributeViewRenderOptions{}
+	if len(calendarRanges) > 0 {
+		options.CalendarRange = calendarRanges[0]
+	}
+	return RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, options)
 }
 
 // RenderAttributeViewWithTargetReadOnly 仅在内存中渲染发布视图，不创建或保存数据库。
 func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
-	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, false, ignoreRows, targetItemID, targetGroupID, false, calendarRanges...)
+	options := AttributeViewRenderOptions{ReadOnly: true}
+	if len(calendarRanges) > 0 {
+		options.CalendarRange = calendarRanges[0]
+	}
+	return RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, false, ignoreRows, targetItemID, targetGroupID, options)
 }
 
-func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, writable bool, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+// AttributeViewRenderOptions 仅影响本次渲染，不参与数据库持久化。
+type AttributeViewRenderOptions struct {
+	ReadOnly      bool
+	CalendarRange *av.CalendarRange
+	TemporarySort *av.ViewSort
+}
+
+// RenderAttributeViewWithTargetOptions 在分页前应用临时排序；临时排序和只读请求均不创建或保存数据库。
+func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	writable := !options.ReadOnly && options.TemporarySort == nil
+	createIfNotExist = createIfNotExist && writable
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
 	}
-	if len(calendarRanges) > 0 {
-		if _, err = calendarRanges[0].Location(); nil != err {
-			return
-		}
+	if _, err = options.CalendarRange.Location(); nil != err {
+		return
 	}
 
 	waitForSyncingStorages()
@@ -454,6 +470,22 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	if temporarySort := options.TemporarySort; temporarySort != nil {
+		if temporarySort.Order != av.SortOrderAsc && temporarySort.Order != av.SortOrderDesc {
+			err = fmt.Errorf("invalid temporary sort order [%s]", temporarySort.Order)
+			return
+		}
+		view, viewErr := getRenderAttributeViewView(attrView, viewID, "", blockID, false)
+		if viewErr != nil {
+			err = viewErr
+			return
+		}
+		// 字段删除或不再支持排序时恢复已保存规则，避免阅读状态阻断数据库显示。
+		if key, keyErr := attrView.GetKey(temporarySort.Column); keyErr == nil && av.GetKeyCapability(key.Type).Sortable {
+			sort := *temporarySort
+			view.Sorts = []*av.ViewSort{&sort}
+		}
+	}
 	if targetItemID != "" {
 		target = &AttributeViewRenderTarget{Status: "itemNotFound", ItemID: targetItemID}
 		if nil != attrView.GetBlockValue(targetItemID) {
@@ -461,7 +493,7 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, calendarRanges...)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, options.CalendarRange)
 	return
 }
 
@@ -1121,7 +1153,7 @@ func findAttributeViewTargetIndex(targetItemID string, length int, getID func(in
 	if targetItemID == "" {
 		return -1
 	}
-	for i := 0; i < length; i++ {
+	for i := range length {
 		if getID(i) == targetItemID {
 			return i
 		}

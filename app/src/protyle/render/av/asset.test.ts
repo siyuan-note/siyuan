@@ -9,6 +9,7 @@ import * as assetUploadTarget from "./assetUploadTarget";
 import {updateAVCachedCellValue} from "./cellValue";
 import * as uploadResult from "../../upload/uploadResult";
 import * as viewType from "./viewType";
+import * as insertPosition from "../../upload/insertPosition";
 
 // 使用完整资源消费者，控制上传完成与虚拟行移除的顺序，记录实际生成的事务。
 const createHarness = (layout = "table") => {
@@ -27,6 +28,7 @@ const createHarness = (layout = "table") => {
         closest: () => ({dataset: {}}),
     };
     const block = {
+        closest: (): HTMLElement | null => null,
         getAttribute: (key: string) => ({"data-av-type": layout, "data-av-id": "av", "data-node-id": "block"})[key],
         contains: () => rendered,
         querySelector: () => rendered ? element : null,
@@ -39,6 +41,7 @@ const createHarness = (layout = "table") => {
         "./selectionState": selectionState,
         "./assetUploadTarget": assetUploadTarget,
         "../../upload/uploadResult": uploadResult,
+        "../../upload/insertPosition": insertPosition,
         "./virtualScroll": {getAVData: () => data},
         "./col": {getColId: () => "assets"},
         "./row": {getFieldIdByCellElement: () => "row"},

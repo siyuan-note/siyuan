@@ -17,6 +17,7 @@ for (const scenario of [
         let focused = 0;
         let closes = 0;
         let positions = 0;
+        let mouseScrollBindings = 0;
         const listeners = new Map<string, () => void>();
         const input = {addEventListener() {}, focus() { focused++; }};
         const list = {addEventListener() {}};
@@ -39,6 +40,11 @@ for (const scenario of [
                 }
                 if (id.endsWith("/compatibility")) return {isPhablet: () => scenario.phablet};
                 if (id.endsWith("/setPosition")) return {setPosition: () => { positions++; }};
+                if (id.endsWith("/menuMouseScroll")) return {bindMenuMouseScroll: (element: unknown, _enabled: unknown, items: unknown) => {
+                    assert.equal(element, popup);
+                    assert.equal(items, list);
+                    mouseScrollBindings++;
+                }};
                 return {};
             },
             window: {
@@ -60,5 +66,6 @@ for (const scenario of [
         assert.equal(focused, scenario.focus);
         assert.equal(closes, scenario.closes);
         assert.equal(positions, scenario.positions);
+        assert.equal(mouseScrollBindings, scenario.mobile ? 0 : 1);
     });
 }

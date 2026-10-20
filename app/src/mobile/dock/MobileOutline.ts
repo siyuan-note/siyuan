@@ -1,3 +1,4 @@
+import {patchAppearancePreference} from "../../config/tabs/appearancePreferences";
 import {saveOutlineState} from "../../config/util/resourceConfig";
 import {toggleMenu} from "../../menus/menuToggle";
 import {bindPanelSearch} from "../../layout/dock/panelSearch";
@@ -6,7 +7,7 @@ import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {hasClosestBlock, hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {setStorageVal, writeBlockDOMClipboard} from "../../protyle/util/compatibility";
+import {writeBlockDOMClipboard} from "../../protyle/util/compatibility";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
@@ -74,7 +75,7 @@ export class MobileOutline extends Model {
     <div class="fn__space"></div>
     <input spellcheck="false" class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
     <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconSearch'></use></svg>
-    <svg data-type="keepCurrentExpand" class="toolbar__icon${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " toolbar__icon--active" : ""}"><use xlink:href="#iconFocus"></use></svg>
+    <svg data-type="keepCurrentExpand" class="toolbar__icon${window.siyuan.config.appearance.outlineKeepCurrentExpand ? " toolbar__icon--active" : ""}"><use xlink:href="#iconFocus"></use></svg>
     <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconExpandLevel"></use></svg>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
@@ -135,19 +136,19 @@ export class MobileOutline extends Model {
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 保持当前标题展开功能
-        this.element.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
+        this.element.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", async (event: MouseEvent & {
             target: Element
         }) => {
             const iconElement = hasClosestByClassName(event.target, "toolbar__icon");
             if (!iconElement) {
                 return;
             }
-            if (iconElement.classList.contains("toolbar__icon--active")) {
+            if (window.siyuan.config.readonly || window.siyuan.isPublish) return;
+            await patchAppearancePreference("outlineKeepCurrentExpand", !window.siyuan.config.appearance.outlineKeepCurrentExpand);
+            if (!window.siyuan.config.appearance.outlineKeepCurrentExpand) {
                 iconElement.classList.remove("toolbar__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = false;
             } else {
                 iconElement.classList.add("toolbar__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = true;
                 let focusElement;
                 const blockElement = hasClosestBlock(window.siyuan.mobile.editor.protyle.toolbar.range?.startContainer);
                 if (blockElement) {
@@ -157,8 +158,6 @@ export class MobileOutline extends Model {
                     this.setCurrent(focusElement);
                 }
             }
-            // 保存keepCurrentExpand状态到localStorage
-            setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
         });
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -510,7 +509,7 @@ export class MobileOutline extends Model {
         if (!currentElement) {
             return;
         }
-        if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
+        if (window.siyuan.config.appearance.outlineKeepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {
                 ulElement.classList.remove("fn__none");
@@ -526,7 +525,8 @@ export class MobileOutline extends Model {
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
             const elementRect = this.tree.element.getBoundingClientRect();
-            this.tree.element.scrollTop += currentElement.getBoundingClientRect().top -
+            const currentRect = currentElement.getBoundingClientRect();
+            this.tree.element.scrollTop += currentRect.bottom -
                 (elementRect.top + elementRect.height / 2);
         }
     }
@@ -760,8 +760,6 @@ export class MobileOutline extends Model {
             });
         }
         this.saveExpendIds();
-        window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel = targetLevel;
-        setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
     private setAllExpanded(expanded: boolean) {

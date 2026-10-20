@@ -2,66 +2,54 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ModuleKind, transpileModule} from "typescript";
+import {createSectionRuntime} from "../../util/sectionRuntime";
 
-const compiled = transpileModule(readFileSync("src/config/tabs/ai/agentStreamingMarkdown.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
-
-const createPreference = (values: Record<string, unknown> = {}, readonly = false) => {
-    const events: {type: string}[] = [];
-    const storage = {...values};
+test("streaming Markdown uses confirmed AI preferences and preserves readonly protection", async () => {
+    const siyuan = {config: {ai: {agent: {streamingMarkdown: false}}, readonly: false}, isPublish: false,
+        storage: {"siyuan-agent-streaming-markdown": true}};
+    const saved: unknown[][] = [];
     const exports = {} as typeof import("./agentStreamingMarkdown");
-    runInNewContext(compiled, {
-        exports,
-        require: (id: string) => {
-            assert.equal(id, "../../../protyle/util/compatibility");
-            return {setStorageVal: (key: string, value: unknown) => {
-                if (!readonly) {
-                    values[key] = value;
-                }
-            }};
-        },
-        CustomEvent: class {
-            constructor(public type: string) {}
-        },
-        window: {
-            siyuan: {storage},
-            dispatchEvent: (event: {type: string}) => events.push(event),
-        },
+    runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/agentStreamingMarkdown.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText, {exports, window: {siyuan}, require: () => ({aiConfigApi: {
+        patch: async (...args: unknown[]) => {saved.push(args);},
+    }})});
+    assert.equal(exports.isAgentStreamingMarkdownEnabled(), false);
+    await exports.setAgentStreamingMarkdownEnabled(true);
+    assert.deepEqual(saved, [["agent.streamingMarkdown", true]]);
+    assert.equal(exports.isAgentStreamingMarkdownEnabled(), false);
+    siyuan.config.ai.agent.streamingMarkdown = true;
+    assert.equal(exports.isAgentStreamingMarkdownEnabled(), true);
+    siyuan.config.readonly = true;
+    await exports.setAgentStreamingMarkdownEnabled(false);
+    siyuan.config.readonly = false;
+    siyuan.isPublish = true;
+    await exports.setAgentStreamingMarkdownEnabled(false);
+    assert.equal(saved.length, 1);
+});
+
+test("confirmed AI updates notify streaming renderers once per changed preference", async () => {
+    const config = {ai: {agent: {streamingMarkdown: false}}};
+    const events: string[] = [];
+    const exports = {} as typeof import("./aiRuntime");
+    runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/aiRuntime.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText, {
+        exports, window: {siyuan: {config}, dispatchEvent: (event: Event) => events.push(event.type)},
+        CustomEvent: class { constructor(public type: string) {} },
+        require: () => ({
+            AGENT_STREAMING_MARKDOWN_CHANGED_EVENT: "siyuan-agent-streaming-markdown-changed",
+            createConfigNamespaceApi: (options: {namespace: string; getConfig: () => typeof config.ai;
+                setConfig: (data: typeof config.ai) => void;
+                reactions: Parameters<typeof createSectionRuntime<typeof config.ai>>[0]["reactions"]}) =>
+                createSectionRuntime({namespace: options.namespace, get: options.getConfig, set: options.setConfig,
+                    reactions: options.reactions}),
+        }),
     });
-    return {...exports, events, values, storage};
-};
-
-test("streaming Markdown persists an explicit opt-in through SiYuan storage", () => {
-    const preference = createPreference();
-    assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
-    for (const value of ["", "false", "true", "1", "invalid", "TRUE", false, 1]) {
-        preference.storage[preference.AGENT_STREAMING_MARKDOWN_KEY] = value;
-        assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
-    }
-    preference.setAgentStreamingMarkdownEnabled(true);
-    assert.equal(preference.isAgentStreamingMarkdownEnabled(), true);
-    assert.equal(Object.keys(preference.values).length, 1);
-    assert.equal(createPreference(preference.values).isAgentStreamingMarkdownEnabled(), true);
-    assert.equal(preference.events[0].type, preference.AGENT_STREAMING_MARKDOWN_CHANGED_EVENT);
-    preference.setAgentStreamingMarkdownEnabled(false);
-    assert.equal(createPreference(preference.values).isAgentStreamingMarkdownEnabled(), false);
-});
-
-test("readonly mode allows a session-only preference", () => {
-    const preference = createPreference({}, true);
-    assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
-    preference.setAgentStreamingMarkdownEnabled(true);
-    assert.equal(preference.isAgentStreamingMarkdownEnabled(), true);
-    assert.equal(createPreference(preference.values).isAgentStreamingMarkdownEnabled(), false);
-    preference.setAgentStreamingMarkdownEnabled(false);
-    assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
-});
-
-test("reads updates made by other windows instead of caching persisted values", () => {
-    const preference = createPreference();
-    preference.setAgentStreamingMarkdownEnabled(true);
-    delete preference.storage[preference.AGENT_STREAMING_MARKDOWN_KEY];
-    assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
+    await exports.aiConfigApi.apply({agent: {streamingMarkdown: true}} as Config.IAI);
+    await exports.aiConfigApi.apply({agent: {streamingMarkdown: true}} as Config.IAI);
+    await exports.aiConfigApi.apply({agent: {streamingMarkdown: false}} as Config.IAI);
+    assert.equal(events.filter(name => name === "siyuan-agent-streaming-markdown-changed").length, 2);
+    assert.equal(config.ai.agent.streamingMarkdown, false);
 });

@@ -30,7 +30,8 @@ test("manual route save and reset use one transaction and reject stale relation 
     const original = JSON.stringify(data);
     const transactions: {before: string, after: string}[] = [];
     const messages: string[] = [];
-    const list = {isConnected: true, dataset: {nodeId: "map-relations"}, get outerHTML() { return JSON.stringify(data); }};
+    const list = {isConnected: true, dataset: {nodeId: "map-relations"}, closest: (): null => null,
+        get outerHTML() { return JSON.stringify(data); }};
     const context: any = {
         canEdit: () => true,
         getListMindmapSiblingIDs: () => new Map(),
@@ -93,7 +94,7 @@ test("manual route save and reset use one transaction and reject stale relation 
         data = JSON.parse(saved);
         const before = JSON.stringify(data);
         target.onRelationChange("r", {arrowDirection});
-        const transaction = transactions[transactions.length - 1];
+        const transaction: {before: string; after: string} = transactions[transactions.length - 1];
         assert.equal(transaction.before, before, "undo retains the original relation and missing default field");
         assert.deepEqual(JSON.parse(transaction.after).relations[0], {
             ...JSON.parse(before).relations[0], arrowDirection,
@@ -102,7 +103,7 @@ test("manual route save and reset use one transaction and reject stale relation 
         assert.equal(JSON.stringify(data), before);
         data = JSON.parse(transaction.after);
         assert.equal(JSON.stringify(data), transaction.after, "redo restores the selected arrow mode");
-        const count = transactions.length;
+        const count: number = transactions.length;
         target.onRelationChange("r", {arrowDirection});
         assert.equal(transactions.length, count, "choosing the current direction is a no-op");
     }
@@ -120,7 +121,7 @@ test("manual route save and reset use one transaction and reject stale relation 
     assert.equal(transactions[transactions.length - 1].after, beforeAnchor, "anchor reset preserves the manual path");
     data = JSON.parse(anchored.after);
     const anchorSnapshot = JSON.stringify(data.relations[0]);
-    const count = transactions.length;
+    const count: number = transactions.length;
     data.relations[0].label = "New remote label";
     target.onRelationChange("r", {fromAnchor: {side: "left", ratio: .4}}, anchorSnapshot);
     assert.equal(transactions.length, count, "stale anchor drags cannot replace remote updates");

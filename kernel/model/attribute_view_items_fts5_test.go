@@ -23,6 +23,72 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestAttributeViewItemsMissingSourceUndoRedo(t *testing.T) {
+	for _, mode := range []string{"index", "file", "node"} {
+		t.Run(mode, func(t *testing.T) { testAttributeViewItemsMissingSourceUndoRedo(t, mode) })
+	}
+}
+
+func testAttributeViewItemsMissingSourceUndoRedo(t *testing.T, mode string) {
+	_, before, op, undo := setupAttributeViewItemsTest(t, true)
+	missingID := ast.NewNodeID()
+	missingPath := ""
+	itemID := op.SrcIDs[0]
+	if mode != "index" {
+		tree, err := LoadTreeByBlockID(before.GetBlockValue(itemID).Block.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if mode == "file" {
+			missingID = before.GetBlockValue(itemID).Block.ID
+			missingPath = filepath.Join(util.DataDir, tree.Box, tree.Path)
+			if err = os.Remove(missingPath); err != nil {
+				t.Fatal(err)
+			}
+		} else {
+			node := treenode.NewParagraph("")
+			missingID = node.ID
+			tree.Root.AppendChild(node)
+			treenode.UpsertBlockTree(tree)
+			node.Unlink()
+			if _, err = filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	before.GetBlockValue(itemID).Block.ID = missingID
+	if err := av.SaveAttributeView(before); err != nil {
+		t.Fatal(err)
+	}
+	op.SrcIDs = []string{itemID}
+	undo = undo[:1]
+	undo[0].Srcs[0]["id"] = missingID
+	tx := &Transaction{fromAPI: true, DoOperations: []*Operation{op}, UndoOperations: undo}
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	if readAttributeViewItemsTest(t, before.ID).GetBlockValue(itemID) != nil {
+		t.Fatal("missing-source entry was not removed")
+	}
+	for range 2 {
+		if err := PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(tx.UndoOperations)}); err != nil {
+			t.Fatal(err)
+		}
+		assertAttributeViewItemsEqual(t, before, readAttributeViewItemsTest(t, before.ID))
+		if mode == "file" {
+			if _, err := os.Stat(missingPath); !errors.Is(err, os.ErrNotExist) {
+				t.Fatal("undo recreated a missing source file", err)
+			}
+		}
+		if tree, err := LoadTreeByBlockID(missingID); err == nil && treenode.GetNodeInTree(tree, missingID) != nil && mode != "file" {
+			t.Fatal("undo fabricated a source block")
+		}
+		if err := PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(tx.DoOperations)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestAttributeViewItemsUndoRedo(t *testing.T) {
 	for _, bound := range []bool{false, true} {
 		name := "detached"
@@ -44,7 +110,7 @@ func TestAttributeViewItemsUndoRedo(t *testing.T) {
 			if err != nil || strings.Contains(string(data), "private field contents") {
 				t.Fatalf("private field snapshots leaked into response: %s, %v", data, err)
 			}
-			for cycle := 0; cycle < 3; cycle++ {
+			for cycle := range 3 {
 				deleted := readAttributeViewItemsTest(t, before.ID)
 				for _, kv := range deleted.KeyValues {
 					for _, value := range kv.Values {
@@ -98,7 +164,7 @@ func TestAttributeViewItemsUndoRelationConfiguration(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		for _, before := range []*av.AttributeView{source, peer} {
 			current := readAttributeViewItemsTest(t, before.ID)
 			if len(current.Views[0].Filters[0].Filters) != 0 || len(current.NewItemTemplates[0].FieldValues) != 0 {
@@ -246,7 +312,7 @@ func TestAttributeViewItemsUndoRelations(t *testing.T) {
 				t.Fatal(err)
 			}
 			entry := GlobalUndoLog.Peek(fixture.sourceID)
-			for cycle := 0; cycle < 2; cycle++ {
+			for range 2 {
 				deletedDest := readAttributeViewItemsTest(t, dest.ID)
 				if got := av.GetValue(deletedDest.KeyValues, backID, targetID).Relation.BlockIDs; !slices.Equal(got, []string{keptID}) {
 					t.Fatalf("delete did not clear back relations: %v", got)
@@ -337,6 +403,7 @@ func TestAttributeViewItemsEncryptedReplay(t *testing.T) {
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
 	setDEKForTest(boxID, bytes.Repeat([]byte{0x62}, 32))
+	repairEncryptedBoxStateFromDEK(boxID)
 	av.SetAVBoxID(original.ID, boxID)
 	t.Cleanup(func() {
 		av.SetAVBoxID(original.ID, "")

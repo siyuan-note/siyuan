@@ -19,10 +19,10 @@ export const genWorkspaceStorageHtml = () => `<div class="b3-label config-item w
     <div class="b3-label b3-label--inner fn__flex workspace-storage__header">
         ${genConfigItemMainHtml(window.siyuan.languages.workspaceStorage, window.siyuan.languages.workspaceStorageTip)}
         <span class="fn__space"></span>
-        ${genButtonHtml("refreshWorkspaceStorage", window.siyuan.languages.refresh, "iconRefresh")}
+        ${genButtonHtml("refreshWorkspaceStorage", `<span data-storage-action-label>${window.siyuan.languages.workspaceStorageView}</span>`, "iconEye")}
         <div class="b3-label__text workspace-storage__time" data-storage-time></div>
     </div>
-    <div class="b3-label__text" data-storage-status role="status"></div>
+    <div class="b3-label__text workspace-storage__status" data-storage-status role="status"></div>
     <div class="workspace-storage__placeholder fn__none" data-storage-loading role="status" aria-label="${window.siyuan.languages.loading}">
         <div class="fn__loading"><img width="64" src="/stage/loading-pure.svg" alt=""></div>
     </div>
@@ -52,6 +52,8 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
     }
     const refresh = element.querySelector<HTMLButtonElement>("#refreshWorkspaceStorage");
     const refreshIcon = refresh.querySelector("svg");
+    const actionLabel = refresh.querySelector<HTMLElement>("[data-storage-action-label]");
+    const actionIcon = refresh.querySelector("use");
     const status = element.querySelector<HTMLElement>("[data-storage-status]");
     const loading = element.querySelector<HTMLElement>("[data-storage-loading]");
     const content = element.querySelector<HTMLElement>("[data-storage-content]");
@@ -63,6 +65,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
     let disposed = false;
     let pending = false;
     let chartLoading = false;
+    let viewed = false;
     let data: WorkspaceStorageData | undefined;
     let chart: ReturnType<typeof window.echarts.init> | undefined;
     const controller = new AbortController();
@@ -119,6 +122,15 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
     const load = async () => {
         if (pending || disposed) {
             return;
+        }
+        if (!viewed) {
+            viewed = true;
+            // 首次查看后才开始统计，避免每次打开设置都扫描工作空间目录
+            if (actionLabel) {
+                actionLabel.textContent = window.siyuan.languages.refresh;
+            }
+            actionIcon?.setAttribute("href", "#iconRefresh");
+            actionIcon?.setAttribute("xlink:href", "#iconRefresh");
         }
         pending = true;
         refresh.disabled = true;
@@ -210,5 +222,4 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
             window.echarts.dispose(chartElement);
         }
     });
-    void load();
 };

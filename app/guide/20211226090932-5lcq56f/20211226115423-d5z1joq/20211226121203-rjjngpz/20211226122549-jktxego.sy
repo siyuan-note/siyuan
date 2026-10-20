@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-a3qlogr",
-				"updated": "20261002013053"
+				"updated": "20261015193140"
 			},
 			"Children": [
 				{
@@ -63,6 +63,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20261015193140-98at8pv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015193140-98at8pv",
+				"updated": "20261015193140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "元素"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中為 Note、Tip、Important、Warning、Caution 五種提示區塊分別設定快捷鍵，預設均未綁定，行動端連接外接鍵盤後也可使用。行為參考引述區塊快捷鍵：轉換目前區塊或選取的區塊，無法轉換時插入空提示區塊。在提示區塊內，使用不同類型的快捷鍵會切換類型；使用相同類型的快捷鍵時，若僅有一個未摺疊子區塊則取消提示區塊，若有多個子區塊或子區塊已摺疊則在目前子區塊後插入空提示區塊。"
 				}
 			]
 		},
@@ -163,7 +213,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20260928091724"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -183,7 +233,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-4e9hm9i",
-				"updated": "20260828134448"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1478,7 +1528,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳到第九個/最後一個分頁"
+									"Data": "跳到最後一個分頁"
 								}
 							]
 						},
@@ -1601,7 +1651,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選中上一個分頁"
+									"Data": "選取下一個分頁"
 								}
 							]
 						},
@@ -4307,7 +4357,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261012014930"
+				"updated": "20261018200107"
 			},
 			"Children": [
 				{
@@ -13053,7 +13103,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261003225941"
+				"updated": "20261018200107"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13064,11 +13114,38 @@
 			]
 		},
 		{
+			"ID": "20261018163000-e1khci4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-e1khci4"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在畫布上按 Esc 可恢復閱讀，讓滾輪捲動文件。如果正在編輯節點、選取摘要範圍或拖曳關係線，Esc 會先結束或取消目前操作；全螢幕時按 Esc 離開全螢幕。"
+				}
+			]
+		},
+		{
+			"ID": "20261018200107-s3tp7x9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018200107-s3tp7x9",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 Ctrl（macOS 為 Command）並用滑鼠右鍵拖曳畫布可暫時平移，不會改變鍵盤焦點或啟用閱讀中的畫布，之後一般滾輪仍捲動文件。檢視鎖定時此手勢無法使用。一般模式下空白區域的左鍵拖曳不會平移畫布；啟用手形工具後可用左鍵拖曳平移。"
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-f8y6pxv",
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-f8y6pxv",
-				"updated": "20261003225941",
+				"updated": "20261017003000",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13387,7 +13464,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取上一個同級節點"
+									"Data": "選取上一個可見的同深度節點，可跨父節點"
 								}
 							]
 						},
@@ -13414,7 +13491,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取下一個同級節點"
+									"Data": "選取下一個可見的同深度節點，可跨父節點"
 								}
 							]
 						},
@@ -14504,7 +14581,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105322-jc65ji5",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14735,7 +14812,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002230606-18ff032",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14749,7 +14826,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 時，執行縮排或反縮排會從至少兩行非空程式碼中辨識一致的縮排，並儲存為該區塊的設定。支援辨識定位字元，或以 2、4、6、8 個空格為最小寬度且其他縮排為其整數倍的空格縮排。混合縮排或依據不足時沿用全域設定。明確指定的區塊設定優先。辨識不會重新格式化既有程式碼。"
+					"Data": " 時，執行縮排或反縮排會從至少兩行非空程式碼中辨識一致的縮排，並儲存為該區塊的設定。支援辨識定位字元，或以 2、4、6、8 個空格為最小寬度且其他縮排為其整數倍的空格縮排。混合縮排或依據不足時沿用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab 空格數"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。明確指定的區塊設定優先。辨識不會重新格式化既有程式碼。"
 				}
 			]
 		},
@@ -16460,7 +16573,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002039-klsrtup",
-				"updated": "20260919234652"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -17759,7 +17872,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20261007111840"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -17773,7 +17886,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-nft4e80",
-				"updated": "20261007111840"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -17796,7 +17909,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後，在文件樹或置頂文件區可決定點擊或點按執行的操作：選擇「展開或折疊子文件」立即展開或折疊；選擇「點擊展開或折疊子文件、按兩下開啟父文件」則按兩下或連續點按兩次開啟父文件並保持展開或折疊狀態，點擊需等待約 300 毫秒以判斷是否按兩下，仍可透過文件選單開啟父文件。沒有子文件時點擊或點按標題仍直接開啟；點擊有可開啟文件的文件圖示則開啟文件，否則修改圖示；筆記本圖示一律用於修改圖示"
+					"Data": " 後，在文件樹或置頂文件區可決定點擊或點按執行的操作：選擇「展開或折疊子文件」立即展開或折疊；選擇「點擊展開或折疊子文件、按兩下開啟父文件」則按兩下或連續點按兩次開啟父文件並保持展開或折疊狀態，點擊需等待約 300 毫秒以判斷是否按兩下，仍可透過文件選單開啟父文件。沒有子文件時點擊或點按標題仍直接開啟；點擊有可開啟文件的文件圖示則開啟文件，否則修改圖示；筆記本圖示一律用於修改圖示。"
 				}
 			]
 		},

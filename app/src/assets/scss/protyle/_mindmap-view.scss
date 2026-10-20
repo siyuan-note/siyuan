@@ -14,10 +14,13 @@
   [data-type="NodeList"][data-mindmap-view-rendered="true"]:not([fold="1"]),
   [data-type="NodeMindmap"][data-mindmap-view-rendered="true"]:not([fold="1"]) {
     height: auto !important;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   [data-type="NodeList"][data-mindmap-view-rendered="true"] > [data-type="NodeListItem"],
-  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .mindmap-item[data-type="NodeMindmapItem"][data-node-id] {
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .mindmap-item[data-type="NodeMindmapItem"][data-node-id],
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .li[data-type="NodeMindmapItem"][data-node-id] {
     display: none;
   }
 }
@@ -40,6 +43,10 @@
   font-size: 14px;
   line-height: 1.5;
   outline: none;
+
+  &--active {
+    outline: 1px solid var(--b3-theme-primary);
+  }
 
   &--nested {
     width: 260px;
@@ -79,20 +86,38 @@
     z-index: 5;
     opacity: 0;
     pointer-events: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 8px;
     overflow: visible;
   }
 
   &.fullscreen &__toolbar,
+  &--active &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
     opacity: 1;
   }
 
   &.fullscreen &__toolbar .block__icon,
+  &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
-  &__toolbar:focus-within .block__icon {
+  &__toolbar:focus-within .block__icon,
+  &.fullscreen &__toolbar-group,
+  &--active &__toolbar-group,
+  &:hover &__toolbar-group,
+  &__toolbar:focus-within &__toolbar-group {
     pointer-events: auto;
+  }
+
+  &__toolbar-group {
+    @include protyle-toolbar-surface($shadow: none);
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+    gap: 8px;
+    padding: 4px;
   }
 
   &__spacer {
@@ -189,7 +214,7 @@
     overflow: hidden;
     border-radius: inherit;
     cursor: default;
-    touch-action: none;
+    touch-action: pan-y;
     user-select: none;
 
     &--dragging {
@@ -201,12 +226,29 @@
     }
   }
 
+  &--active &__viewport,
+  &.fullscreen:not(.mindmap-view--locked) &__viewport {
+    touch-action: none;
+  }
+
   &__canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
+
+  &__document-frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    border: 2px dashed var(--b3-theme-primary);
+    color: var(--b3-theme-primary);
+    pointer-events: none;
+    z-index: 4;
   }
 
   &__viewport--summary {
@@ -261,6 +303,8 @@
     width: 0;
     height: 0;
     transform-origin: 0 0;
+    // 平移在视口捕获指针，光标状态不必向全部节点继承。
+    cursor: default;
   }
 
   &__node {
@@ -343,6 +387,7 @@
 
     &--dragging {
       opacity: .35;
+      cursor: grabbing;
     }
 
     &--editing {
@@ -516,6 +561,11 @@
     }
   }
 
+  // 内层画布为按内容撑开的节点提供固有宽度，避免百分比宽度循环计算后塌缩。
+  &__editor .mindmap-view {
+    min-width: 260px;
+  }
+
   &__editor .protyle-content[data-padding-mode] {
     container-type: normal;
   }
@@ -681,14 +731,10 @@
     opacity: 1;
   }
 
-  &__viewport--dragging &__add-child,
-  &__viewport--dragging &__add-bridge {
+  &__node.mindmap-view__node--hide-controls > &__add-child,
+  &__node.mindmap-view__node--hide-controls > &__add-bridge {
     visibility: hidden;
     opacity: 0;
-  }
-
-  &__viewport--dragging &__node {
-    cursor: grabbing;
   }
 
   &__ghost {
@@ -880,10 +926,12 @@
 @media print {
   .mindmap-view {
     break-inside: avoid;
+    outline: none;
     height: var(--mindmap-view-print-height, 420px);
     min-height: 0;
 
     &__toolbar,
+    &__document-frame,
     &__resize,
     &__inspector,
     &__tooltip,

@@ -62,7 +62,7 @@ func archiveRelativePath(name string) bool {
 	if name == "" || path.Clean(name) != name || strings.HasPrefix(name, "/") || strings.ContainsAny(name, "\\:\x00<>\"|?*") {
 		return false
 	}
-	for _, part := range strings.Split(name, "/") {
+	for part := range strings.SplitSeq(name, "/") {
 		base := strings.ToUpper(strings.SplitN(part, ".", 2)[0])
 		reserved := base == "CON" || base == "PRN" || base == "AUX" || base == "NUL" ||
 			(len(base) == 4 && (strings.HasPrefix(base, "COM") || strings.HasPrefix(base, "LPT")) && base[3] >= '1' && base[3] <= '9')

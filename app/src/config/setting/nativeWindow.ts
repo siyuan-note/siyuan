@@ -3,7 +3,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {genUUID} from "../../util/genID";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import {exportLayout, reloadUI, resetLayout} from "../../layout/util";
+import {exportLayout, reloadUI, resetLayout, suspendLayoutSaving} from "../../layout/util";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {subscribeGlobalPluginState, applyPluginReload} from "../../plugin/globalState";
 import {loadPlugin, unloadPlugin} from "../../plugin/loader";
@@ -107,6 +107,7 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
     const host: ISettingsWindowHost = {
         app, title, isActive, dispose: close,
         exportLayout: options => { assertActive(); return exportLayout(options); },
+        suspendLayoutSaving: () => { assertActive(); return suspendLayoutSaving(); },
         reload: () => { assertActive(); return reloadUI(); },
         resetLayout: () => { assertActive(); return resetLayout(); },
         getDockOrderSnapshot: () => { assertActive(); return getDockEntryOrderSnapshot(); },

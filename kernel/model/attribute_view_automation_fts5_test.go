@@ -214,7 +214,7 @@ func TestAutomationEncryptedUnavailableReferencePause(t *testing.T) {
 	_, source, target, statusID, _ := setupAutomationTest(t)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x72}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x72}, 32))
 	t.Cleanup(func() {
 		for _, view := range []*av.AttributeView{source, target} {
 			av.SetAVBoxID(view.ID, "")
@@ -342,7 +342,7 @@ func TestAutomationLargeDatabaseNoOp(t *testing.T) {
 	status, _ := source.GetKeyValues(statusID)
 	primaryTemplate, statusTemplate := primary.Values[0].Clone(), status.Values[0].Clone()
 	primary.Values, status.Values = nil, nil
-	for i := 0; i < 20000; i++ {
+	for range 20000 {
 		id := ast.NewNodeID()
 		p, s := primaryTemplate.Clone(), statusTemplate.Clone()
 		p.ID, p.BlockID, s.ID, s.BlockID = ast.NewNodeID(), id, ast.NewNodeID(), id
@@ -407,7 +407,7 @@ func TestAutomationRelationKeywordsKeepCryptoBoundary(t *testing.T) {
 	_, source, target, _, logsID := setupAutomationTest(t)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x62}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x62}, 32))
 	t.Cleanup(func() {
 		av.SetAVBoxID(target.ID, "")
 		forgetRuntimeEncryptedBox(boxID)
@@ -479,7 +479,7 @@ func BenchmarkAutomationChangedItems(b *testing.B) {
 				{Key: &av.Key{ID: "primary", Type: av.KeyTypeBlock}},
 				{Key: &av.Key{ID: "status", Type: av.KeyTypeText}},
 			}, Automations: &av.AutomationConfig{Rules: []*av.AutomationRule{{Enabled: true, Trigger: "changed", KeyID: "status"}}}}
-			for i := 0; i < size; i++ {
+			for i := range size {
 				id := fmt.Sprint(i)
 				view.KeyValues[0].Values = append(view.KeyValues[0].Values, &av.Value{BlockID: id, Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: "Task"}})
 				view.KeyValues[1].Values = append(view.KeyValues[1].Values, &av.Value{BlockID: id, Type: av.KeyTypeText, Text: &av.ValueText{Content: "Pending"}})
@@ -723,10 +723,15 @@ func TestAutomationRelationReplacementUndo(t *testing.T) {
 
 func TestAutomationEncryptedExecutionAndFailures(t *testing.T) {
 	_, source, target, statusID, _ := setupAutomationTest(t)
+	source.Automations.Spec = 2
+	source.Automations.Rules[0].TimeZone = "Asia/Shanghai"
+	source.Automations.Rules[0].Actions[0].Fields[target.KeyValues[2].Key.ID] = &av.AutomationValue{
+		Mode: "template", Template: `.action{now | date "2006-01-02T15:04:05Z07:00"}`,
+	}
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x71}, 32)
-	setDEKForTest(boxID, key)
+	prepareUnlockedEncryptedBoxTest(t, boxID, key)
 	t.Cleanup(func() {
 		for _, view := range []*av.AttributeView{source, target} {
 			av.SetAVBoxID(view.ID, "")

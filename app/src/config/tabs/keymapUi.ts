@@ -21,6 +21,12 @@ import {Menu} from "../../plugin/Menu";
 import {trackSettingSave} from "../setting/pending";
 import {getSettingsOwnerApp} from "../setting/windowContext";
 import type {App} from "../../index";
+import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
+
+const getKeymapLabel = (key: string) => {
+    const callout = CALLOUT_PRESETS.find(item => item.id === key);
+    return callout ? `${window.siyuan.languages.callout} - ${callout.title}` : window.siyuan.languages[key];
+};
 
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
@@ -88,6 +94,9 @@ export const mountKeymapTab = async (root: HTMLElement, keywords?: string, _app?
             }
         });
         refreshKeymapBindings(root);
+        searchKeymapList(root.querySelector<HTMLElement>("#keymapList"),
+            root.querySelector<HTMLInputElement>("#keymapInput").value,
+            root.querySelector<HTMLElement>("#searchByKey").dataset.keymap || "");
         return;
     }
     if (root.innerHTML === "") {
@@ -155,7 +164,7 @@ const buildKeymapKeywords = (): string[] => [
 const buildKeymapCommandTexts = (): string[] => {
     const out: string[] = [];
     const pushKey = (key: string) => {
-        const text = window.siyuan.languages[key];
+        const text = getKeymapLabel(key);
         if (text) {
             out.push(text);
         }
@@ -271,11 +280,12 @@ const genKeymapItem = (keys: string) => {
     // 使用固定的 Constants.SIYUAN_KEYMAP 来保证每次生成的选项顺序一致
     // 避免在设置快捷键之后关闭设置重新打开设置之后选项顺序改变
     for (const key of Object.keys(template)) {
-        if (!window.siyuan.languages[key]) {
+        const label = getKeymapLabel(key);
+        if (!label) {
             continue;
         }
         const item = config[key] ?? template[key];
-        html.push(genKeymapRowHtml(window.siyuan.languages[key], keys + Constants.ZWSP + key, item));
+        html.push(genKeymapRowHtml(label, keys + Constants.ZWSP + key, item));
     }
     return html.join("");
 };
@@ -351,7 +361,7 @@ const bindKeymapList = (root: HTMLElement) => {
     searchKeymapElement.addEventListener("blur", () => {
         sendGlobalShortcut(window.siyuan.ws.app);
     });
-    // 捕获阶段优先于其它监听，确保 keydown 在 IME/全局逻辑之前处理
+    // 捕获阶段优先于其他监听，确保 keydown 在 IME/全局逻辑之前处理
     // 按键搜索框只录物理键位，不接收文本输入；readonly 可避免 IME 抢占 keydown
     searchKeymapElement.addEventListener("keydown", (event: KeyboardEvent) => {
         event.stopPropagation();
@@ -399,6 +409,7 @@ const bindKeymapList = (root: HTMLElement) => {
         cancelRecording();
         keymapListElement.dataset.keymapFilter = button.dataset.keymapFilterValue;
         refreshBindings();
+        searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap || "");
     });
     const saveRow = (row: HTMLElement, keys: string[], reset = false) => {
         renderRowBindings(row, keys);
@@ -406,6 +417,7 @@ const bindKeymapList = (root: HTMLElement) => {
             delete getKeymapItem(data, row.dataset.key.split(Constants.ZWSP)).bindings.priority;
         } : undefined);
         refreshBindings();
+        searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap || "");
     };
     keymapListElement.addEventListener("pointerdown", (event) => {
         if (recording && (event.target as HTMLElement).closest(".config-keymap__controls") &&
@@ -714,8 +726,6 @@ const refreshKeymapBindings = (root: HTMLElement) => {
             button.classList.toggle("fn__none", !hasConflict);
         }
     });
-    searchKeymapList(list, list.querySelector<HTMLInputElement>("#keymapInput").value,
-        list.querySelector<HTMLInputElement>("#searchByKey").dataset.keymap || "");
 };
 
 let keymapSaveQueue = Promise.resolve();
@@ -751,6 +761,9 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
                 renderRowBindings(element, getKeymapBindings(getKeymapItem(savedKeymap, element.dataset.key.split(Constants.ZWSP))));
             });
             refreshKeymapBindings(root);
+            searchKeymapList(root.querySelector<HTMLElement>("#keymapList"),
+                root.querySelector<HTMLInputElement>("#keymapInput").value,
+                root.querySelector<HTMLElement>("#searchByKey").dataset.keymap || "");
             showMessage(window.siyuan.languages.keymapSaveFailed);
         }
     }));

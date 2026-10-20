@@ -1381,8 +1381,6 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 			titleEmpty = titleEmptyArg.(bool)
 		}
 	}
-	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id, titleEmpty)
-
 	tags = strings.TrimSpace(tags)
 	tags = strings.ReplaceAll(tags, "，", ",")
 	tagArray := strings.Split(tags, ",")
@@ -1391,8 +1389,19 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		tmp = append(tmp, strings.TrimSpace(tag))
 	}
 	tags = strings.Join(tmp, ",")
-	if tags != "" {
-		SetBlockAttrs(retID, map[string]string{"tags": tags})
+	if id == "" {
+		id = ast.NewNodeID()
+	}
+	retID, err = createDocsByHPath0(box.ID, hPath, dom, parentID, id, titleEmpty,
+		func(boxID, p, title, content string, empty bool) (*parse.Tree, error) {
+			var attrs map[string]string
+			if tags != "" && strings.TrimSuffix(path.Base(p), ".sy") == id {
+				attrs = map[string]string{"tags": tags}
+			}
+			return createDoc0(boxID, p, title, content, empty, true, attrs)
+		})
+	if err != nil {
+		return
 	}
 
 	FlushTxQueue()
@@ -2355,7 +2364,6 @@ func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
 	if titleChanged || emptyAttrUpdated {
 		IncSync()
 	}
-	return
 }
 
 type createDocValidation struct {
@@ -2451,7 +2459,7 @@ func createDocSync(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tr
 	return createDoc0(boxID, p, title, dom, titleEmpty, true)
 }
 
-func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *parse.Tree, err error) {
+func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool, attributes ...map[string]string) (tree *parse.Tree, err error) {
 	validation, err := validateCreateDoc(boxID, p, title, titleEmpty)
 	if nil != err {
 		return
@@ -2513,13 +2521,26 @@ func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *
 		unlink.Unlink()
 	}
 
+	for _, attrs := range attributes {
+		if _, err = setNodeAttrs0(tree.Root, attrs, boxID); err != nil {
+			return nil, err
+		}
+	}
 	err = performCreateDocTransaction(tree, syncWrite)
 	return
 }
 
 func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}}
-	if syncWrite {
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}, fromAPI: true}
+	boundary := ""
+	if IsEncryptedBox(tree.Box) {
+		boundary = tree.Box
+	}
+	collections, err := av.BlockCollectionViewIDsInBox(boundary)
+	if err != nil {
+		return err
+	}
+	if syncWrite || len(collections) > 0 {
 		if err = PerformTxSync(transaction); nil != err {
 			// 事务在写文件前会更新块树，失败时清理未落盘文档的索引。
 			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)

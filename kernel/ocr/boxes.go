@@ -203,8 +203,8 @@ func cropBox(img image.Image, box textBox) image.Image {
 			ix, iy := int(math.Floor(sx)), int(math.Floor(sy))
 			fx, fy := sx-float64(ix), sy-float64(iy)
 			var channels [4]float64
-			for dy := 0; dy < 2; dy++ {
-				for dx := 0; dx < 2; dx++ {
+			for dy := range 2 {
+				for dx := range 2 {
 					weight := ((1-fx)*float64(1-dx) + fx*float64(dx)) * ((1-fy)*float64(1-dy) + fy*float64(dy))
 					pixel := source.NRGBAAt(max(0, min(source.Bounds().Dx()-1, ix+dx)), max(0, min(source.Bounds().Dy()-1, iy+dy)))
 					for c, value := range [4]uint8{pixel.R, pixel.G, pixel.B, pixel.A} {

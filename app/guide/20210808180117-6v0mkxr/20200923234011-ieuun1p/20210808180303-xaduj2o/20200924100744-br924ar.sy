@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018221152"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210503095708-2g6bgl4",
-				"updated": "20260820133158"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -102,12 +102,37 @@
 			]
 		},
 		{
+			"ID": "20261016111305-wsz5ty2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-wsz5ty2",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For full-text searches within files and OCR text, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230805232134-3d6mx2k",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Search asset content"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
 			"ID": "20201210194734-v2rmiaq",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20261012014930"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -362,7 +387,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092043-7z9onxu",
-				"updated": "20260930092043"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -382,6 +407,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Images"
 				},
 				{
 					"Type": "NodeText",
@@ -403,7 +437,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092955-wsw0tvh",
-				"updated": "20260930092955"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -423,6 +457,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Images"
 				},
 				{
 					"Type": "NodeText",
@@ -450,6 +493,72 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hover over an image to see its file name, format, loaded original dimensions, title, and tooltip text, even if it has no title. Local workspace images also show file size when available. File size is omitted for remote and encrypted notebook images."
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-70wtkp3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018221152-70wtkp3",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Live Photos"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261018221152-5v49fj9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-5v49fj9",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On iOS, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Insert image"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the editor to select Live Photos from Photos. SiYuan retains the original photo and its paired video, including their original metadata."
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-wun4xf3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-wun4xf3",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the image preview on any client, then select Live Photo to play it. If the original video cannot play, SiYuan generates a compatible preview on demand. The first playback may take longer; the local cache is reused afterward and is not synchronized. The compatible preview is lossy, while the original files stay unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-qkagk4i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-qkagk4i",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HDR and some uncommon encodings currently cannot be converted for compatible playback. The still image and original files remain available. Android Motion Photo import and restoring a system Live Photo from exported files are not supported yet."
 				}
 			]
 		},
@@ -1041,7 +1150,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261012014930"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1549,7 +1658,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261012014930"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1662,12 +1771,53 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203027-chylp3d",
-				"updated": "20261001013550"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Changes saved in the image result editor automatically update search indexes. After editing the JSON file outside SiYuan, rebuild the asset content index"
+					"Data": "Changes saved in the image result editor automatically update search indexes. After editing the JSON file outside SiYuan, rebuild the asset content index."
+				}
+			]
+		},
+		{
+			"ID": "20261014150710-z1vm4en",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014150710-z1vm4en",
+				"updated": "20261014150710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear OCR text"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to clear the asset’s OCR text in one click. This affects all images referencing the same asset and updates the search index. The empty result is retained, so automatic OCR skips the asset; rerun OCR manually from the image menu to restore text."
 				}
 			]
 		},
@@ -1676,7 +1826,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-3zn8sf9",
-				"updated": "20261010140118"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1716,7 +1866,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Hover over a local image to view its OCR text; an empty result is shown explicitly. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
+					"Data": " Hover over a local image to view OCR text and recognition hints according to your settings. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1748,6 +1898,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " Long OCR text is shortened to at most 200 characters and six lines, followed by three dots. Double-click the OCR icon to view the full text."
+				}
+			]
+		},
+		{
+			"ID": "20261014140201-g0z2wp6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014140201-g0z2wp6",
+				"updated": "20261014140201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image tooltips"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " independently choose whether image tooltips show saved OCR text, a hint when no OCR text is available, and a recognition failure hint. Text previews are enabled by default; the other two hints are disabled. These choices are saved per device and work independently of automatic OCR. Hiding hints does not delete text or change search results. No OCR text does not necessarily mean recognition has failed. Failure hints reflect recognition failures during the current session; successful recognition or saving text clears them, and they are not retained after restarting the kernel. Mobile devices do not show these hover tooltips."
 				}
 			]
 		}

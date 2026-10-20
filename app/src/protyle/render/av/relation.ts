@@ -10,7 +10,7 @@ import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} f
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {getFieldsByData, getViewName} from "./view";
 import {getColIconByType, getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";

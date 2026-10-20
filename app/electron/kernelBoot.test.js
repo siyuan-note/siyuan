@@ -4,6 +4,7 @@ const path = require("node:path");
 const {pathToFileURL} = require("node:url");
 const {test} = require("node:test");
 const vm = require("node:vm");
+const {EventEmitter} = require("node:events");
 
 const source = readFileSync(path.join(__dirname, "main.js"), "utf8");
 const startup = source.slice(source.indexOf("const initKernel ="), source.indexOf("const fetchWithTimeout ="));
@@ -18,6 +19,7 @@ const setup = (progress, options = {}) => {
     let requests = 0;
     let versionRequests = 0;
     let closeKernel;
+    let spawns = 0;
     const window = {
         destroyed: false,
         isDestroyed() { return this.destroyed; },
@@ -26,6 +28,7 @@ const setup = (progress, options = {}) => {
         webContents: {executeJavaScript: async script => { events.push(["boot-script", script]); }},
     };
     const fixture = {events, waits, window, closeKernel: code => closeKernel(code, null),
+        spawns: () => spawns,
         requests: () => requests, versionRequests: () => versionRequests,
         timerCount: () => timers.size, timerDelays: () => Array.from(timers.values()).map(timer => timer.ms),
         settleMicrotasks: () => new Promise(resolve => setImmediate(resolve)),
@@ -46,7 +49,7 @@ const setup = (progress, options = {}) => {
         path,
         pathToFileURL,
         process: {platform: options.platform || "win32", env: {}},
-        app: {getPreferredSystemLanguages: () => ["en"]},
+        app: Object.assign(new EventEmitter(), {getPreferredSystemLanguages: () => ["en"]}),
         resolveAppLanguage: languages => languages[0],
         loadAppMenuLanguages: language => JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs", language + ".json"), "utf8")),
         escapeHTML: value => String(value).replace(/[&<>"']/g, character => ({
@@ -67,10 +70,11 @@ const setup = (progress, options = {}) => {
         bootIndexPath: "app/electron/boot.html",
         loadBootWindow: () => events.push("resume-boot"),
         kernelProcesses: new Map(), expectedKernelExitPorts: new Set(),
-        createBootWindow: () => {}, showLocalBootWindow: () => {}, showAppleSiliconWarning: async () => true,
+        createBootWindow: () => events.push("create-boot"), showLocalBootWindow: () => events.push("show-boot"),
+        showAppleSiliconWarning: async () => true,
         waitForPreviousWorkspaceExit: options.previousExit || (async () => true),
-        requestWorkspaceExitRecovery: async (workspace, marker, signal) => {
-            events.push(["recover-exit", workspace, marker.pid, signal]);
+        requestWorkspaceExitRecovery: async (workspace, marker, signal, _fetch, _readFile, force) => {
+            events.push(["recover-exit", workspace, marker.pid, signal, force]);
             return 1;
         },
         dialog: {showMessageBox: async (_window, message) => {
@@ -82,10 +86,13 @@ const setup = (progress, options = {}) => {
         requestKernelExit: port => events.push(["exit-kernel", port]),
         showErrorWindow: (...args) => { events.push(["error-window", args[1]]); return 1; },
         exitApp: () => events.push("exit-app"),
-        childProcess: {spawn: () => ({pid: 123, on: (event, callback) => {
-            assert.equal(event, "close");
-            closeKernel = callback;
-        }}), execFile: (file, args, options, callback) => {
+        childProcess: {spawn: (_file, args) => {
+            events.push(["spawn-args", Array.from(args)]);
+            return {pid: 123 + spawns++, on: (event, callback) => {
+                assert.equal(event, "close");
+                closeKernel = callback;
+            }};
+        }, execFile: (file, args, options, callback) => {
             events.push(["exec-file", file, args.join(" "), options.timeout]);
             callback(null, "");
         }},
@@ -119,6 +126,180 @@ const setup = (progress, options = {}) => {
 };
 
 const exits = fixture => fixture.events.filter(event => Array.isArray(event) && event[0] === "exit-kernel");
+
+test("workspace lock retries retain one window and port until startup succeeds", async () => {
+    let previousExitChecks = 0;
+    const state = setup(() => 100, {
+        platform: "linux",
+        previousExit: async () => { previousExitChecks++; return true; },
+        version: (request, fixture) => {
+            if (request <= 3) {
+                fixture.closeKernel(24);
+                return new Error("net::ERR_CONNECTION_REFUSED");
+            }
+        },
+    });
+    assert.equal(await state.run(), 6806);
+    assert.equal(state.spawns(), 4);
+    assert.equal(previousExitChecks, 4);
+    assert.equal(state.events.filter(event => event === "create-boot").length, 1);
+    assert.equal(state.events.filter(event => event === "show-boot").length, 1);
+    assert.equal(state.events.some(event => Array.isArray(event) && event[0] === "error-window"), false);
+    assert.equal(state.context.kernelProcesses.size, 1);
+    assert.equal(state.window.previousExitWaiting, "");
+    assert.equal(exits(state).length, 0);
+    assert.equal(state.context.app.listenerCount("before-quit"), 0);
+});
+
+test("lock retries have a fixed deadline and report one terminal error", async () => {
+    const state = setup(() => 100, {version: (_request, fixture) => {
+        fixture.closeKernel(24);
+        return new Error("net::ERR_CONNECTION_REFUSED");
+    }});
+    assert.equal(await state.run(), false);
+    assert.equal(state.spawns(), 90);
+    assert.equal(state.events.filter(event => Array.isArray(event) && event[0] === "error-window").length, 1);
+    assert.equal(state.events.filter(event => event === "exit-app").length, 1);
+    assert.equal(state.context.kernelProcesses.size, 0);
+    assert.equal(exits(state).length, 0);
+});
+
+test("closing, replacing or quitting during lock retry prevents another spawn", async () => {
+    for (const action of ["close", "replace", "quit"]) {
+        const state = setup(() => 100, {
+            version: (_request, fixture) => {
+                fixture.closeKernel(24);
+                return new Error("net::ERR_CONNECTION_REFUSED");
+            },
+            onSleep: (_ms, fixture) => {
+                if (action === "close") fixture.window.destroyed = true;
+                if (action === "replace") fixture.context.bootWindow = {isDestroyed: () => false};
+                if (action === "quit") {
+                    fixture.context.app.on("before-quit", event => event.preventDefault());
+                    const event = {preventDefault() { this.prevented = true; }};
+                    fixture.context.app.emit("before-quit", event);
+                    assert.equal(event.prevented, true);
+                }
+            },
+        });
+        assert.equal(await state.run(), false);
+        assert.equal(state.spawns(), 1);
+        assert.equal(exits(state).length, 0);
+        assert.equal(state.events.some(event => Array.isArray(event) && event[0] === "error-window"), false);
+        if (action === "quit") assert.equal(state.window.destroyed, true);
+    }
+});
+
+test("a marker appearing on retry retains long graceful exit recovery", async () => {
+    let checks = 0;
+    let state;
+    state = setup(() => 100, {
+        previousExit: async (_workspace, options) => {
+            if (++checks === 2) {
+                assert.equal(state.spawns(), 1);
+                await options.onWaiting();
+                state.advance(120000);
+            }
+            return true;
+        },
+        version: (request, fixture) => {
+            if (request === 1) {
+                fixture.closeKernel(24);
+                return new Error("net::ERR_CONNECTION_REFUSED");
+            }
+        },
+    });
+    assert.equal(await state.run(), 6806);
+    assert.equal(state.spawns(), 2);
+    assert.equal(exits(state).length, 0);
+});
+
+test("late responses from a locked attempt cannot settle its replacement", async () => {
+    for (const reject of [false, true]) {
+        let finishOld;
+        let finishNew;
+        const state = setup(() => 100, {version: request => new Promise((resolve, rejectRequest) => {
+            if (request === 1) finishOld = () => reject ? rejectRequest(new Error("late failure")) : resolve();
+            else finishNew = resolve;
+        })});
+        let settled = false;
+        const run = state.run().then(result => { settled = true; return result; });
+        await state.settleMicrotasks();
+        state.closeKernel(24);
+        await state.settleMicrotasks();
+        assert.equal(state.spawns(), 2);
+        finishOld();
+        await state.settleMicrotasks();
+        assert.equal(settled, false);
+        assert.equal(state.window.destroyed, false);
+        finishNew();
+        assert.equal(await run, 6806);
+        assert.equal(exits(state).length, 0);
+    }
+});
+
+test("retry remains bound to its original workspace when the last workspace changes", async () => {
+    const checked = [];
+    const state = setup(() => 100, {
+        previousExit: async workspace => { checked.push(workspace); return true; },
+        version: (request, fixture) => {
+            if (request === 1) {
+                fixture.closeKernel(24);
+                return new Error("net::ERR_CONNECTION_REFUSED");
+            }
+        },
+        onSleep: (_ms, fixture) => { fixture.context.lastWorkspacePath = "other-workspace"; },
+    });
+    assert.equal(await state.run(), 6806);
+    assert.deepEqual(checked, ["workspace", "workspace"]);
+    const args = state.events.filter(event => Array.isArray(event) && event[0] === "spawn-args")[1][1];
+    assert.equal(args[args.indexOf("--workspace") + 1], "workspace");
+});
+
+test("canceling retry marker recovery or declining its sync failure does not respawn", async () => {
+    for (const action of ["replace", "sync-failure"]) {
+        let checks = 0;
+        let state;
+        state = setup(() => 100, {
+            previousExit: async (_workspace, options) => {
+                if (++checks === 1) return true;
+                await options.onWaiting();
+                if (action === "sync-failure") return options.onRecoveryFailed(true);
+                state.context.bootWindow = {isDestroyed: () => false};
+                return true;
+            },
+            version: (_request, fixture) => {
+                fixture.closeKernel(24);
+                return new Error("net::ERR_CONNECTION_REFUSED");
+            },
+        });
+        assert.equal(await state.run(), false);
+        assert.equal(state.spawns(), 1);
+        assert.equal(exits(state).length, 0);
+        assert.equal(state.window.destroyed, action === "sync-failure");
+    }
+});
+
+test("expected exits and other error codes do not retry kernel spawning", async () => {
+    for (const code of [0, 20, 21, 25, 26, 24]) {
+        const state = setup(() => 100, {version: (_request, fixture) => {
+            if (code === 24) fixture.context.expectedKernelExitPorts.add("6806");
+            fixture.closeKernel(code);
+            return new Error("net::ERR_CONNECTION_REFUSED");
+        }});
+        assert.equal(await state.run(), false);
+        assert.equal(state.spawns(), 1);
+    }
+});
+
+test("code 24 after startup success retains runtime failure handling", async () => {
+    const state = setup(() => 100);
+    assert.equal(await state.run(), 6806);
+    state.closeKernel(24);
+    await state.settleMicrotasks();
+    assert.equal(state.spawns(), 1);
+    assert.equal(state.events.filter(event => Array.isArray(event) && event[0] === "error-window").length, 1);
+});
 
 test("startup shows previous-exit waiting and spawns only after it completes", async () => {
     let finish;
@@ -167,10 +348,31 @@ test("boot recovery reports sync failure and cancel closes only the waiting wind
     assert.ok(state.events.some(event => Array.isArray(event) && event[0] === "recover-exit" && event[3] === signal));
     const prompt = state.events.find(event => Array.isArray(event) && event[0] === "recovery-dialog")[1];
     assert.match(prompt.message, /Synchronization failed/);
-    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel"]);
+    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel", "Force exit"]);
     assert.equal(state.window.destroyed, true);
     assert.equal(state.versionRequests(), 0);
     assert.equal(exits(state).length, 0);
+});
+
+test("boot recovery forwards an explicit forced exit before starting a replacement kernel", async () => {
+    const signal = new AbortController().signal;
+    const state = setup(() => 100, {recoveryResponse: 2, previousExit: async (_workspace, options) => {
+        assert.equal(await options.onRecoveryFailed(true), "force");
+        await options.recover({pid: 123}, signal, true);
+        return true;
+    }});
+    assert.equal(await state.run(), 6806);
+    const recovered = state.events.findIndex(event => Array.isArray(event) && event[0] === "recover-exit" && event[4] === true);
+    const spawned = state.events.findIndex(event => Array.isArray(event) && event[0] === "spawn-args");
+    assert.ok(recovered >= 0 && spawned > recovered);
+    assert.equal(state.window.destroyed, false);
+});
+
+test("boot recovery offers only retry and cancel after a transport failure", async () => {
+    const state = setup(() => 100, {previousExit: async (_workspace, options) => options.onRecoveryFailed(false)});
+    assert.equal(await state.run(), false);
+    const prompt = state.events.find(event => Array.isArray(event) && event[0] === "recovery-dialog")[1];
+    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel"]);
 });
 
 test("boot progress recovers from certificate and network changes without exiting the kernel", async () => {

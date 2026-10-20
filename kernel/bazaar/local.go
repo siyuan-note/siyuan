@@ -48,6 +48,16 @@ var localPackageManifests = map[string]string{
 	"widget.json":   "widgets",
 }
 
+// IsValidPackageType 判断 pkgType 是否为集市支持的包类型（复数形式），以本地包清单映射为准。
+func IsValidPackageType(pkgType string) bool {
+	for _, t := range localPackageManifests {
+		if t == pkgType {
+			return true
+		}
+	}
+	return false
+}
+
 // ExtractLocalPackage 将本地集市包解压到临时目录并识别包类型。
 func ExtractLocalPackage(archivePath string) (pkgType string, pkg *Package, packagePath string, cleanup func(), err error) {
 	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(context.Background(), archivePath, "", false)

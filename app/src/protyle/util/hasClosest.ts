@@ -104,9 +104,16 @@ export const hasClosestByClassName = (element: Node, className: string, top = fa
     return isClosest && e;
 };
 
-export const hasClosestBlock = (element: Node) => {
+export const hasClosestBlock = (element: Node, resolveTable = false) => {
     const nodeElement = hasClosestByAttribute(element, "data-node-id", null);
-    if (isBlockElement(nodeElement as Element)) {
+    if (nodeElement && isBlockElement(nodeElement)) {
+        // 文档级命令使用表格块身份，单元格片段内部的编辑操作保留自身节点。
+        if (resolveTable) {
+            const table = nodeElement.closest(".table__cell-editor")?.closest<HTMLElement>('[data-type="NodeTable"]');
+            if (table) {
+                return table;
+            }
+        }
         return nodeElement;
     }
     return false;

@@ -162,13 +162,13 @@ export class ViewStateService {
 
     public flush() {
         this.clearFlushTimer();
-        const result = this.flushChain.catch(() => undefined).then(async () => {
+        const result = this.flushChain.catch((): undefined => undefined).then(async () => {
             await this.ready;
             while (this.pendingValues.size > 0 || this.pendingRemovals.size > 0) {
                 await this.flushPending();
             }
         });
-        this.flushChain = result.catch(() => undefined);
+        this.flushChain = result.catch((): undefined => undefined);
         return result;
     }
 

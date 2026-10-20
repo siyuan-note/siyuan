@@ -32,6 +32,7 @@ declare namespace Config {
          * provider 为 ai 时，手动和自动识别均使用独立的 aiModelId；失效时不回退到其他模型或提供商。
          * 首次从本地提供商切换到 AI 时关闭自动识别，之后可以显式开启。
          * reasoningEffort 独立控制手动和自动 AI OCR，空字符串沿用模型默认。
+         * showText、showEmpty、showError 独立控制图片悬浮提示，不受自动识别开关影响，也不改变搜索结果。
          */
         ocr: import("./api").SettingOCR;
         api: IAPI;
@@ -143,6 +144,7 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
+        web: IAIWeb;
         providers: IProvider[];
         editing: IEditing;
         agent: IAgent;
@@ -153,10 +155,22 @@ declare namespace Config {
         decision: IDecision;
     }
 
+    /** 网页服务独立于对话模型；省略配置时搜索使用 Exa、抓取使用直接请求。 */
+    export interface IAIWeb {
+        searchProvider: string;
+        fetchProvider: string;
+        /** DeepSeek Search 与 Fetch 共用的凭证，由内核加密保存。 */
+        apiKey: string;
+        /** DeepSeek 请求超时秒数，默认 30，范围 1–600。 */
+        timeout: number;
+    }
+
     /**
      * AI agent global settings
      */
     export interface IAgent {
+        /** 流式输出渲染 Markdown，默认关闭，重置普通设置时随 AI 配置保留 */
+        streamingMarkdown: boolean;
         modelId: string;
         sessionTimeout: number;
         streamIdleTimeout: number;
@@ -232,6 +246,10 @@ declare namespace Config {
         name: string;
         timeout: number;
         dimensions: number;
+        /** 嵌入索引并发请求数，默认 8，范围 1–64。 */
+        concurrency: number;
+        /** 每次嵌入索引请求的文本块数，默认 10，范围 1–128。 */
+        batchSize: number;
     }
 
     /**
@@ -254,13 +272,17 @@ declare namespace Config {
     export interface IProvider {
         /** 账户认证只保存本机账户引用；省略时使用 API Key */
         authType?: string;
+        /** 本机按工作空间路径和服务商 ID 保存的账号绑定，不随 conf.json 或设置导出保存 */
         accountID?: string;
         headers?: Record<string, string>;
         id: string;
         enabled: boolean;
         displayName?: string;
         baseURL: string;
-        /** 生成协议：openai、openai-responses 或 anthropic-messages；省略时使用 openai */
+        /**
+         * 生成协议：openai、openai-responses、anthropic-messages 或 gemini-interactions；省略时使用 openai
+         * Gemini Interactions 使用原生 /v1beta 或 /v1 基础地址，始终关闭服务端会话存储并由本地管理历史
+         */
         protocol?: string;
         apiKey: string;
         requestTimeout: number;
@@ -317,6 +339,14 @@ declare namespace Config {
      * SiYuan appearance related configuration
      */
     export interface IAppearance {
+        /** 用户偏好保存在 conf.json；升级不读取旧 local.json 键，外观重置时恢复默认值 */
+        compactMode: boolean;
+        /** 默认关闭；新建空工作空间默认开启 */
+        menuMouseScroll: boolean;
+        pdfTheme: {light: string; dark: string; annoColor: string};
+        outlineKeepCurrentExpand: boolean;
+        /** 三项默认开启，侧栏滑动与按钮至少保留一种 */
+        mobileBars: {autoHide: boolean; sidebarSwipe: boolean; sidebarButtons: boolean};
         /** 背景渐变，未配置时根据工作空间名称自动配色 */
         bodyGradient?: {
             mode: string;
@@ -637,6 +667,8 @@ declare namespace Config {
          * Whether to display the bookmark icon
          */
         displayBookmarkIcon: boolean;
+        /** 是否显示完整块标，默认 false */
+        blockGutterMode: boolean;
         /**
          * Whether to display the network image mark
          */
@@ -675,6 +707,8 @@ declare namespace Config {
          * Whether to retain dynamically loaded content blocks
          */
         keepLoadedContent: boolean;
+        /** 是否显示翻屏按钮，默认关闭，不迁移旧的本地偏好 */
+        pageScrollButtons: boolean;
         /**
          * The number of blocks loaded each time they are dynamically loaded
          */
@@ -773,6 +807,10 @@ declare namespace Config {
          * Whether to enable the `[[` symbol to search only for document blocks
          */
         onlySearchForDoc: boolean;
+        /**
+         * Whether typing `[[` auto-inserts `]]` and typing `]]` completes the block reference
+         */
+        autoCloseRefBrackets: boolean;
         /**
          * PlantUML rendering service address
          */
@@ -929,6 +967,8 @@ declare namespace Config {
      * Document tree related configuration
      */
     export interface IFileTree {
+        /** 默认 viewedAt，未知值回落默认值；文档树设置重置时恢复默认 */
+        recentDocsSort: string;
         /**
          * Whether to allow the creation of sub-documents deeper than 7 levels
          */

@@ -74,8 +74,7 @@ func init() {
 	SystemSetOIDC.decodeRequest = decodeOIDC
 	SystemOIDCValidateStart.decodeRequest = decodeOIDC
 	SystemImportCustomFont.decodeFailure = func(err error) Response[*SystemCustomFont] {
-		var sizeError *http.MaxBytesError
-		if errors.As(err, &sizeError) {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 			return Failure[*SystemCustomFont](413, "font file is too large")
 		}
 		return Failure[*SystemCustomFont](400, "Field [file] must not be empty")

@@ -2,8 +2,10 @@ package av
 
 import (
 	"fmt"
+	stdhtml "html"
 	"net/url"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,12 +51,7 @@ func isTableCellRichCustomTextMark(node *ast.Node) bool {
 	if nil == node || ast.NodeTextMark != node.Type {
 		return false
 	}
-	for _, typ := range strings.Fields(node.TextMarkType) {
-		if tableCellRichCustomTypePattern.MatchString(typ) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(strings.Fields(node.TextMarkType), tableCellRichCustomTypePattern.MatchString)
 }
 
 func isAllowedTableCellRichCustomNode(node *ast.Node) bool {
@@ -68,7 +65,7 @@ func isAllowedTableCellRichCustomNode(node *ast.Node) bool {
 		"" != node.TextMarkFlashcardOcclusionID || !isAllowedValueTextMarkReferenceData(node, true) {
 		return false
 	}
-	for _, typ := range strings.Fields(node.TextMarkType) {
+	for typ := range strings.FieldsSeq(node.TextMarkType) {
 		if tableCellRichCustomTypePattern.MatchString(typ) {
 			continue
 		}
@@ -185,6 +182,17 @@ func isAllowedTableCellRichImageNode(node *ast.Node) bool {
 		}
 		switch attribute[0] {
 		case "title":
+		case "custom-sy-live-photo":
+			if _, err := strconv.ParseUint(attribute[1], 10, 32); err != nil {
+				return false
+			}
+		case "custom-sy-live-photo-video":
+			target, err := url.Parse(image.IALAttr(attribute[0]))
+			if err != nil || target.IsAbs() || target.Host != "" ||
+				!strings.HasPrefix(strings.TrimPrefix(target.Path, "/"), "assets/") ||
+				strings.Contains(target.Path, "\\") || slices.Contains(strings.Split(target.Path, "/"), "..") {
+				return false
+			}
 		case "style", "parent-style":
 			style := strings.ToLower(attribute[1])
 			if strings.ContainsAny(style, "\\<>@") || strings.Contains(style, "url") || strings.Contains(style, "expression") {
@@ -196,7 +204,7 @@ func isAllowedTableCellRichImageNode(node *ast.Node) bool {
 	}
 	if ast.NodeKramdownSpanIAL == node.Type {
 		for _, attribute := range parse.Tokens2IAL(node.Tokens) {
-			if len(attribute) != 2 || image.IALAttr(attribute[0]) != attribute[1] {
+			if len(attribute) != 2 || image.IALAttr(attribute[0]) != stdhtml.UnescapeString(attribute[1]) {
 				return false
 			}
 		}

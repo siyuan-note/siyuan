@@ -6,12 +6,13 @@ import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {setPosition} from "../../../util/setPosition";
+import {setAutomationMenuPosition} from "./automationPosition";
 import {setColOption} from "./select";
 import {prepareFilterColumns} from "./filter";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {isMobile} from "../../../util/functions";
-import {bindMobileAVPanel} from "./mobilePanel";
+import {bindMobileAVPanel, getMobileAVPanelBackTarget} from "./mobilePanel";
 import {bindSwitcherEvent, getFieldsByData, getSwitcherHTML} from "./view";
 import {focusBlock} from "../../util/selection";
 import {getFieldIdByCellElement} from "./row";
@@ -156,7 +157,11 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             delete menuElement.dataset.positionTop;
             delete menuElement.dataset.positionBottom;
             delete menuElement.dataset.positionX;
-            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+            if (menuElement.classList.contains("av__automation-panel")) {
+                setAutomationMenuPosition(menuElement, tabRect);
+            } else {
+                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+            }
         } : undefined;
         if (resizeMenu) {
             window.addEventListener("resize", resizeMenu);
@@ -221,6 +226,16 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             } else if (typeof event.detail === "object") {
                 type = (event.detail as { type: string }).type;
                 target = (event.detail as { target: HTMLElement }).target;
+            }
+            if (isMobile() && (type === "back" || type === "close")) {
+                // 系统返回与标题栏共用导航及提交入口，先结束当前输入框的编辑。
+                if (document.activeElement && menuElement.contains(document.activeElement)) {
+                    (document.activeElement as HTMLElement).blur();
+                }
+                if (type === "back") {
+                    target = getMobileAVPanelBackTarget(menuElement);
+                    type = target?.dataset.type || "close";
+                }
             }
             const selectedElement = target?.closest(".b3-chip--middle") as HTMLElement;
             if (options.type === "select" && selectedElement?.parentElement.classList.contains("b3-chips") &&

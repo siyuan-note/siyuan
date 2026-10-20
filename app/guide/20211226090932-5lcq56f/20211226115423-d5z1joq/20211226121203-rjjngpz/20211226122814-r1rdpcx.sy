@@ -6,7 +6,7 @@
 		"id": "20211226122814-r1rdpcx",
 		"title": "虛擬引用",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122825-sua3d6c",
-				"updated": "20211226013145"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122825-xjba5oj",
-				"updated": "20211226013145"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -78,6 +78,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雙向連結"
 				},
 				{
 					"Type": "NodeText",
@@ -170,7 +179,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20221003215030-sldbsma",
-				"updated": "20260809232000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -186,7 +195,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221003215030-n76ec39",
-				"updated": "20260809232000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -198,7 +207,7 @@
 					},
 					"Properties": {
 						"id": "20221003215030-w2qi431",
-						"updated": "20260809232000"
+						"updated": "20261016202635"
 					},
 					"Children": [
 						{
@@ -206,12 +215,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221003215030-v8qcvra",
-								"updated": "20260809232000"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "虛擬引用不會即時更新。請等待搜索索引完成後重新整理或重新打開文檔；如果關鍵字仍未更新，再嘗試重建索引。"
+									"Data": "虛擬引用不會即時更新。請等待搜索索引完成後重新整理或重新打開文檔；如果關鍵字仍未更新，再嘗試重建索引"
 								}
 							]
 						}

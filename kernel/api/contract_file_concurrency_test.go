@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"maps"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -209,9 +210,7 @@ func startPutFileUpload(client *http.Client, request *http.Request) <-chan putFi
 			defer response.Body.Close()
 			result.protocol = response.ProtoMajor
 			result.recorder = httptest.NewRecorder()
-			for key, values := range response.Header {
-				result.recorder.Header()[key] = values
-			}
+			maps.Copy(result.recorder.Header(), response.Header)
 			result.recorder.Code = response.StatusCode
 			_, result.err = io.Copy(result.recorder.Body, response.Body)
 		}

@@ -2,6 +2,7 @@ import {resolveTabID, tabKeyboardTarget} from "./tabsState";
 import {bindTabsDrag, cancelTabsDrag, isDraggingTabs} from "./tabsDrag";
 import {escapeHtml} from "../../util/escape";
 import {clearTabsAttributes, renderTabsAttributes} from "./tabsAttributes";
+import {isHiddenTabContent} from "./tabsVisibility";
 
 export interface ITabsRenderOptions {
     prepare?: () => void;
@@ -620,7 +621,7 @@ export const revealTabAncestors = (root: Element, target: Element, persist = tru
     }
     path.forEach(panel => {
         const tabs = panel.parentElement;
-        if (tabs.classList.contains("tabs") && panel.getAttribute("data-tabs-hidden") !== "false") {
+        if (tabs.classList.contains("tabs") && isHiddenTabContent(panel)) {
             roots.get(root)?.select(tabs, itemID(panel), persist);
         }
     });

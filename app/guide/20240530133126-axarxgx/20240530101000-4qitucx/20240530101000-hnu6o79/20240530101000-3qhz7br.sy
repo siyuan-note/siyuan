@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261019201307"
 	},
 	"Children": [
 		{
@@ -19,7 +19,7 @@
 			"Properties": {
 				"ID": "20240530101000-tfcp9du",
 				"id": "20240530101000-e1tndfu",
-				"updated": "20240530101000"
+				"updated": "20261019194453"
 			},
 			"Children": [
 				{
@@ -35,7 +35,7 @@
 			"Properties": {
 				"ID": "20240530101000-8o1a9my",
 				"id": "20240530101000-wlqefeq",
-				"updated": "20240530101000"
+				"updated": "20261019194453"
 			},
 			"Children": [
 				{
@@ -113,7 +113,7 @@
 					"Properties": {
 						"ID": "20240530101000-gjgldj9",
 						"id": "20240530101000-gm1p50s",
-						"updated": "20240530101000"
+						"updated": "20261019194453"
 					},
 					"Children": [
 						{
@@ -137,12 +137,12 @@
 							"Properties": {
 								"ID": "20240530101000-h8nud0n",
 								"id": "20240530101000-r0imp45",
-								"updated": "20240530101000"
+								"updated": "20261019194453"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コピー＆ペースト、またはドラッグ＆ドロップによるアップロードに対応しています。サイドバーをドラッグすることでサイズを調整できます。"
+									"Data": "コピー＆ペースト、またはドラッグ＆ドロップで画像をアップロードできます。画像にマウスを合わせると枠の外側に小さなハンドルが表示され、右側、下側、右下のハンドルをドラッグして縦横比を保ちながらサイズを変更できます。タッチスクリーンでは画像をタップしてハンドルを表示してから、ハンドルをドラッグします"
 								}
 							]
 						},
@@ -910,6 +910,52 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261015131447-v0xgm0w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015131447-v0xgm0w",
+				"updated": "20261016011750"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コンテンツ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "色を管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の各ボタンから、文字色と背景色の組み合わせ、文字色、背景色の管理画面を直接開けます。"
 				}
 			]
 		},
@@ -2044,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261012014930"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
@@ -2079,6 +2125,66 @@
 			]
 		},
 		{
+			"ID": "20261018163000-bic9sbi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-bic9sbi",
+				"updated": "20261019201307"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップ上のマウスホイールと 1 本指のスワイプは、初期状態では文書をスクロールします。デスクトップではマップをクリック、モバイルではマップを 1 回タップするとキャンバスを操作できます。モバイルではツールバーの「手のひらツール」でも 1 本指の移動を行い、ツールをオフにするとノードを選択・ドラッグ・編集できます。閲覧中でもノードをダブルタップすると編集できます。操作中は枠が強調表示され、ホイールまたはマウスの右ボタンを押したドラッグでキャンバスを移動します。手のひらツールでは左ボタンでのドラッグも使えます。通常モードでは空白部分を左ボタンでドラッグしてもキャンバスは移動しません。タッチ画面では操作中に 1 本指でキャンバスを移動できます。移動範囲の端でも文書はスクロールしません。マップの外をクリックする、キーボードフォーカスを外に移す、またはキャンバス上で Esc を押すと閲覧に戻ります。全画面表示ではキャンバス操作を維持し、全画面表示を終了すると閲覧に戻ります。"
+				}
+			]
+		},
+		{
+			"ID": "20261019142953-j4zhvo2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261019142953-j4zhvo2",
+				"updated": "20261019142953"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文書と全画面表示を切り替えても、マインドマップの中心と拡大率は維持されます。ツールバーの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "禅モードの切り替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文書内のレイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、文書内のマインドマップ表示領域と同じ大きさの枠が中央に表示されます。枠を目安にキャンバスを移動・拡大縮小すると、全画面表示を終了した後の表示範囲を確認できます。もう一度押すと枠を非表示にします。この枠でブロックの幅や高さは変わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20261018163000-qe8wgtd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-qe8wgtd",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンバス操作を開始しなくても、Ctrl（macOS では Command）を押しながらホイールを回すとポインターを中心に拡大・縮小でき、同じキーを押しながらマウスの右ボタンでキャンバスをドラッグすると一時的に移動できます。一時的な移動ではキーボードフォーカスとノードの選択を保持します。タッチ画面では 2 本指で拡大・縮小と移動ができます。これらのジェスチャーは現在の閲覧状態またはキャンバス操作状態を保持します。保存された表示ロックは、引き続き編集、拡大・縮小、移動を無効にします。ロック解除後、必要に応じてキャンバス操作を開始してください。"
+				}
+			]
+		},
+		{
 			"ID": "20260928143000-unwwtu3",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2088,7 +2194,67 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "マインドマップのツールバーで「表示をロック」を押すと、編集、拡大・縮小、移動が無効になります。マップ上でのスワイプやマウスホイール操作は文書をスクロールします。「表示のロックを解除」で操作を再開できます。ロック状態はブロックとともに保存されます。"
+					"Data": "マインドマップのツールバーで「表示をロック」を押すと、編集、拡大・縮小、移動が無効になります。マップ上でのスワイプやマウスホイール操作は文書をスクロールします。「表示のロックを解除」で操作を再開できます。ロック状態はブロックとともに保存されます。マインドマップブロック全体、またはそれを含む文書を直接埋め込んだ場合、ロックを解除するとノードやスタイルを編集できます。変更は元のブロックと他の埋め込み先にも反映されます。読み取り専用や履歴のプレビューでは編集できません。"
+				}
+			]
+		},
+		{
+			"ID": "20261017110432-562ro9u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017110432-562ro9u",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップのツールバーで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線のスタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、分岐曲線、直角線、扇形曲線、角丸直角線から選択できます。選択はマップ全体に適用され、文書とともに保存され、取り消しとやり直しに対応します。親子ノード間の接続線のみを変更し、ノードの位置や関連線は変更しません。直角のスタイルでは共通の縦線に既定の線色を使用し、縦線を個別に選択することはできません。横方向の分岐は個別に選択して色を変更できます。SiYuan 形式の HTML と PDF プレビューには保存したスタイルが反映されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-geqkoea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-geqkoea",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新規マップの既定の接続線スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、新規マップやリスト・タブから初めて変換するマップの接続線スタイルを選択できます。この設定は現在のワークスペースのローカル設定に保存され、クラウド同期には含まれません。変更しても既存のマップには影響しません。コピー、インポート、リストやタブとの往復変換では元のスタイルが保持されます。"
 				}
 			]
 		},
@@ -3286,7 +3452,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-3zow3ge",
-				"updated": "20261012014859"
+				"updated": "20261017003253"
 			},
 			"Children": [
 				{
@@ -3300,7 +3466,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を入力して「画像やファイルを挿入」を選択すると、ローカル画像をアップロードできます。クリップボードの画像を貼り付けることもできます。画像は文書の添付ファイルとして保存されます。複数の最上位ノードに対して表示される仮想中心のタイトルはプレーンテキストのままです。"
+					"Data": " を入力して「画像やファイルを挿入」を選択すると、ローカル画像をアップロードできます。クリップボードの画像を貼り付けることもできます。画像は文書の添付ファイルとして保存されます。複数の最上位ノードに対して表示される仮想中心のタイトルはプレーンテキストのままです。ノード内の画像をダブルクリックすると、ノードの編集に入らずに拡大プレビューを表示できます。"
 				}
 			]
 		},
@@ -4636,12 +4802,44 @@
 			"Properties": {
 				"ID": "20240530101000-lbctees",
 				"id": "20240530101000-9x9ue7u",
-				"updated": "20240530101000"
+				"updated": "20261018213321"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "フローチャート"
+				}
+			]
+		},
+		{
+			"ID": "20261018213321-ho943st",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018213321-ho943st",
+				"updated": "20261018213321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mermaid ブロックの右端にあるハンドルをドラッグすると、幅を調整できます。幅を狭めた後、ブロックメニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "レイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "中央揃え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、ブロックを中央に配置できます。"
 				}
 			]
 		},
@@ -5314,7 +5512,7 @@
 			"Properties": {
 				"ID": "20240530101000-agmhi90",
 				"id": "20240530101000-mguk4vq",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -5357,12 +5555,23 @@
 			"Properties": {
 				"ID": "20240530101000-mfktcb8",
 				"id": "20240530101000-8sj8uxy",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以下の 3 つの形式で定義できます:"
+					"Data": "ローカルカーネルでは以下の 3 つの形式を使用できます。リモートカーネルへの接続時は厳密な JSON のみをサポートし、JavaScript オブジェクト式や関数は実行されません。詳しくは"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "リモートカーネルへの接続"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},

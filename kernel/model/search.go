@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	stdhtml "html"
+	"maps"
 	"math"
 	"os"
 	"path"
@@ -457,22 +458,26 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 		if 32 < len(refs) {
 			refs = refs[:32]
 		}
-		var btsID []string
+		var defBlockIDs []string
 		for _, ref := range refs {
-			btsID = append(btsID, ref.DefBlockRootID)
+			defBlockIDs = append(defBlockIDs, ref.DefBlockID)
 		}
-		btsID = gulu.Str.RemoveDuplicatedElem(btsID)
-		bts := treenode.GetBlockTreesInBox(btsID, boxID)
+		bts := treenode.GetBlockTreesInBox(defBlockIDs, boxID)
 
 		for _, ref := range refs {
-			tree := cachedTrees[ref.DefBlockRootID]
+			// 按目标块的当前索引定位文档，兼容引用记录中尚未更新的所属文档信息。
+			bt := bts[ref.DefBlockID]
+			if nil == bt {
+				continue
+			}
+			tree := cachedTrees[bt.RootID]
 			if nil == tree {
-				tree, _ = loadTreeByBlockTree(bts[ref.DefBlockRootID])
+				tree, _ = loadTreeByBlockTree(bt)
 			}
 			if nil == tree {
 				continue
 			}
-			cachedTrees[ref.RootID] = tree
+			cachedTrees[bt.RootID] = tree
 
 			node := treenode.GetNodeInTree(tree, ref.DefBlockID)
 			if nil == node {
@@ -1080,9 +1085,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			return
 		}
 		reloadTreeIDs = append(reloadTreeIDs, rootID)
-		for id, node := range pendingNodes[rootID] {
-			updateNodes[id] = node
-		}
+		maps.Copy(updateNodes, pendingNodes[rootID])
 	}
 	return
 }
@@ -1486,9 +1489,7 @@ func cloneReplaceTextNode(node *ast.Node) *ast.Node {
 	ret.Tokens = bytes.Clone(node.Tokens)
 	if nil != node.Properties {
 		ret.Properties = map[string]string{}
-		for key, value := range node.Properties {
-			ret.Properties[key] = value
-		}
+		maps.Copy(ret.Properties, node.Properties)
 	}
 	if nil != node.KramdownIAL {
 		ret.KramdownIAL = make([][]string, len(node.KramdownIAL))
@@ -1930,7 +1931,7 @@ func buildBoxesFilter(boxes []string, alias ...string) (clause string, args []an
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, box := range boxes {
-		builder.WriteString(fmt.Sprintf("%sbox = ?", prefix))
+		fmt.Fprintf(&builder, "%sbox = ?", prefix)
 		args = append(args, box)
 		if i < len(boxes)-1 {
 			builder.WriteString(" OR ")
@@ -1954,7 +1955,7 @@ func buildPathsFilter(paths []string, alias ...string) (clause string, args []an
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, path := range paths {
-		builder.WriteString(fmt.Sprintf("%spath LIKE ?", prefix))
+		fmt.Fprintf(&builder, "%spath LIKE ?", prefix)
 		args = append(args, path+"%")
 		if i < len(paths)-1 {
 			builder.WriteString(" OR ")
@@ -1975,7 +1976,7 @@ func buildRootIDExclusionFilter(rootIDs []string, alias ...string) (clause strin
 		prefix = alias[0]
 	}
 	builder := bytes.Buffer{}
-	builder.WriteString(fmt.Sprintf(" AND %sroot_id NOT IN (", prefix))
+	fmt.Fprintf(&builder, " AND %sroot_id NOT IN (", prefix)
 	for i, rootID := range rootIDs {
 		if 0 < i {
 			builder.WriteString(", ")
@@ -2315,13 +2316,12 @@ func removeLimitClause(stmt string) string {
 		return stmt
 	}
 
-	switch parsedStmt.(type) {
+	switch stmtNode := parsedStmt.(type) {
 	case *sqlparser.Select:
-		slct := parsedStmt.(*sqlparser.Select)
-		if nil != slct.Limit {
-			slct.Limit = nil
+		if nil != stmtNode.Limit {
+			stmtNode.Limit = nil
 		}
-		stmt = sqlparser.String(slct)
+		stmt = sqlparser.String(stmtNode)
 	}
 	return stmt
 }

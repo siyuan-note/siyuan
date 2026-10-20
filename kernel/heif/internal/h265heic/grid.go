@@ -134,10 +134,8 @@ func (f *file) decodeTiles(g gridInfo, tiles []uint32) (*hevc.Picture, error) {
 	perTile := max(f.workers(0)/tileWorkers, 1)
 
 	for range tileWorkers - 1 {
-		wg.Add(1)
 
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 
 			var dec itemDecoder
 
@@ -176,7 +174,7 @@ func (f *file) decodeTiles(g gridInfo, tiles []uint32) (*hevc.Picture, error) {
 				blit(out, p, g, i, tw, th)
 				p.Release()
 			}
-		}()
+		})
 	}
 
 	var dec itemDecoder
@@ -371,27 +369,6 @@ func planes16(src, dst *hevc.Picture, pl int) ([]uint16, []uint16) {
 	default:
 		return src.Cr16, dst.Cr16
 	}
-}
-
-// gridAlpha assembles a grid's alpha from the auxiliary items on its tiles.
-func (f *file) gridAlpha(it *item) (*hevc.Picture, error) {
-	g, tiles, err := f.gridOf(it)
-	if err != nil {
-		return nil, err
-	}
-
-	alpha := make([]uint32, len(tiles))
-
-	for i, id := range tiles {
-		a := f.alphaOf(id)
-		if a == nil {
-			return nil, nil
-		}
-
-		alpha[i] = a.id
-	}
-
-	return f.decodeTiles(g, alpha)
 }
 
 func (f *file) hasAlpha(it *item) (bool, error) {

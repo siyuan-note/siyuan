@@ -6,7 +6,7 @@
 		"id": "20240119205543-hknwwrl",
 		"title": "忽略搜索",
 		"type": "doc",
-		"updated": "20240202105344"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119211553-6upakii",
-				"updated": "20240202105344"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -156,12 +156,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240119211847-akaulr6",
-				"updated": "20240119211907"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "这些 ignore 配置文件中的每一行会被作为 SQL path NOT LIKE 的一个条件，例如："
+					"Data": "这些 ignore 配置文件中的每一行必须是一条完整的 SQL 过滤条件，多行使用 AND 组合，例如："
 				}
 			]
 		},

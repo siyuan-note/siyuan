@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -122,6 +123,7 @@ func TestAPIContractSettingDecisionPartialSave(t *testing.T) {
 	decision.Provider = "openai"
 	decision.Profiles["openai"].APIKey = "openai-key"
 	decision.Profiles["typesafe"].APIKey = "typesafe-key"
+	// 省略 decision 时保持已有供应商和凭据，仅更新提交的字段
 	for _, body := range []string{
 		`{}`,
 		`{"decision":{"enabled":true,"endpoint":"https://legacy.example","apiKey":"legacy-key","name":"legacy","timeout":30}}`,
@@ -166,5 +168,108 @@ func TestAPIContractSettingDecisionLegacyPatch(t *testing.T) {
 	code, message, _ := settingContractRequest(t, "patch", patchSetting, `{"ai":{"decision":{"apiKey":"stale-projection","profiles":{"typesafe":{"apiKey":"modern-key"}}}}}`)
 	if code != 0 || model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey != "modern-key" {
 		t.Fatalf("legacy projection overwrote modern patch: %s", message)
+	}
+}
+
+func TestAPIContractSettingDecisionLegacySave(t *testing.T) {
+	for _, route := range []struct {
+		name    string
+		handler gin.HandlerFunc
+	}{{"setAI", setAI}, {"patch", patchSetting}} {
+		t.Run(route.name, func(t *testing.T) {
+			aiContractConfiguration(t)
+			previousReadOnly := util.ReadOnly
+			util.ReadOnly = true
+			t.Cleanup(func() { util.ReadOnly = previousReadOnly })
+			decision := model.Conf.AI.Load().Decision
+			decision.Provider = "openai"
+			decision.Profiles["openai"].APIKey = "openai-key"
+			for _, body := range []string{
+				`{"decision":{"enabled":true,"endpoint":"https://legacy.example","apiKey":"legacy-key","name":"legacy-model","timeout":45}}`,
+				`{"Decision":{"APIKey":"updated-key"}}`,
+			} {
+				if route.name == "patch" {
+					body = `{"ai":` + body + `}`
+				}
+				code, message, _ := settingContractRequest(t, route.name, route.handler, body)
+				if code != 0 {
+					t.Fatalf("legacy save failed: %s", message)
+				}
+			}
+			decision = model.Conf.AI.Load().Decision
+			profile := decision.Profiles["typesafe"]
+			if !decision.Enabled || decision.Provider != "openai" || decision.Profiles["openai"].APIKey != "openai-key" ||
+				profile.APIKey != "updated-key" || profile.Endpoint != "https://legacy.example" || profile.Name != "legacy-model" || profile.Timeout != 45 {
+				t.Fatalf("legacy fields or unrelated profile lost: %+v %+v", decision, profile)
+			}
+			for _, test := range []struct {
+				body string
+				key  string
+			}{
+				{`{"decision":{"apiKey":null}}`, ""},
+				{`{"decision":{"apiKey":"stale-key","profiles":{"typesafe":{"apiKey":"modern-key"}}}}`, "modern-key"},
+				// profiles 显式 null 表示重置，平铺字段仍需迁移到 typesafe。
+				{`{"decision":{"profiles":null,"apiKey":"reset-key"}}`, "reset-key"},
+			} {
+				body := test.body
+				if route.name == "patch" {
+					body = `{"ai":` + body + `}`
+				}
+				code, message, _ := settingContractRequest(t, route.name, route.handler, body)
+				if code != 0 || model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey != test.key {
+					t.Fatalf("legacy clearing, reset or modern precedence failed: %s", message)
+				}
+			}
+		})
+	}
+}
+
+func TestAPIContractSettingDecisionProfilesReset(t *testing.T) {
+	for _, route := range []struct {
+		name    string
+		handler gin.HandlerFunc
+	}{{"setAI", setAI}, {"patch", patchSetting}} {
+		for _, test := range []struct {
+			name    string
+			body    string
+			key     string
+			profile *conf.DecisionProfile
+		}{
+			{"reset profiles", `{"profiles":null}`, "", nil},
+			{"reset with legacy key", `{"profiles":null,"apiKey":"reset-key"}`, "reset-key", nil},
+			{"case-insensitive reset", `{"Profiles":null,"APIKey":"reset-key"}`, "reset-key", nil},
+			{"reset with null legacy fields", `{"profiles":null,"endpoint":null,"apiKey":null,"name":null,"timeout":null}`, "", nil},
+			{"reset with complete legacy profile", `{"profiles":null,"endpoint":"https://new.example","apiKey":"reset-key","name":"new-model","timeout":45}`, "reset-key",
+				&conf.DecisionProfile{Endpoint: "https://new.example", APIKey: "reset-key", Name: "new-model", Timeout: 45}},
+		} {
+			t.Run(route.name+"/"+test.name, func(t *testing.T) {
+				aiContractConfiguration(t)
+				previousReadOnly := util.ReadOnly
+				util.ReadOnly = true
+				t.Cleanup(func() { util.ReadOnly = previousReadOnly })
+				decision := model.Conf.AI.Load().Decision
+				decision.Enabled, decision.Provider = true, "openai"
+				for _, profile := range decision.Profiles {
+					profile.Endpoint, profile.APIKey, profile.Name, profile.Timeout = "https://old.example", "old-key", "old-model", 90
+				}
+				body := `{"decision":` + test.body + `}`
+				if route.name == "patch" {
+					body = `{"ai":` + body + `}`
+				}
+				code, message, _ := settingContractRequest(t, route.name, route.handler, body)
+				if code != 0 {
+					t.Fatalf("profile reset failed: %s", message)
+				}
+				expected := conf.NewAI().Decision
+				expected.Enabled, expected.Provider = true, "openai"
+				if test.profile != nil {
+					expected.Profiles["typesafe"] = test.profile
+				}
+				expected.Profiles["typesafe"].APIKey = test.key
+				if !reflect.DeepEqual(model.Conf.AI.Load().Decision, expected) {
+					t.Fatal("profile reset retained old settings or lost legacy fields and unrelated decision settings")
+				}
+			})
+		}
 	}
 }

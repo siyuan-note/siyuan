@@ -29,9 +29,9 @@ func TestSignVerifyRoundTrip(t *testing.T) {
 		alg   Algorithm
 	}{
 		{"RSASSA-PKCS1-v1_5", Algorithm{Name: AlgRSASSAPKCS1, Hash: AlgSHA256,
-			ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}},
+			ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}}},
 		{"RSA-PSS", Algorithm{Name: AlgRSAPSS, Hash: AlgSHA256,
-			ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}, SaltLength: intPtr(32)}},
+			ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}, SaltLength: new(32)}},
 		{"ECDSA P-256", Algorithm{Name: AlgECDSA, Hash: AlgSHA256, NamedCurve: CurveP256}},
 		{"ECDSA P-384", Algorithm{Name: AlgECDSA, Hash: AlgSHA384, NamedCurve: CurveP384}},
 		{"ECDSA P-521", Algorithm{Name: AlgECDSA, Hash: AlgSHA512, NamedCurve: CurveP521}},
@@ -99,7 +99,7 @@ func TestECDSASignatureIsFixedLength(t *testing.T) {
 		}
 
 		// 多次签名长度必须恒定，不能随 r、s 的前导零变化。
-		for i := 0; i < 8; i++ {
+		for i := range 8 {
 			signature, signErr := Sign(alg, pair.PrivateKey, []byte{byte(i)})
 			if signErr != nil {
 				t.Fatalf("%s: %v", curve, signErr)
@@ -117,7 +117,7 @@ func TestECDSASignatureIsFixedLength(t *testing.T) {
 
 func TestRSAOAEPRoundTrip(t *testing.T) {
 	alg := Algorithm{Name: AlgRSAOAEP, Hash: AlgSHA256,
-		ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}
+		ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}}
 
 	pair, err := GenerateKey(alg, true, []KeyUsage{UsageEncrypt, UsageDecrypt})
 	if err != nil {
@@ -165,7 +165,7 @@ func TestRSAOAEPRoundTrip(t *testing.T) {
 
 func TestRSALimits(t *testing.T) {
 	base := Algorithm{Name: AlgRSASSAPKCS1, Hash: AlgSHA256,
-		ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}
+		ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}}
 	usages := []KeyUsage{UsageSign, UsageVerify}
 
 	// 公开指数只支持 65537。
@@ -177,7 +177,7 @@ func TestRSALimits(t *testing.T) {
 
 	// 模数长度下限。
 	short := base
-	short.ModulusLength = intPtr(512)
+	short.ModulusLength = new(512)
 	if _, err := GenerateKey(short, true, usages); errorName(t, err) != ErrNameNotSupported {
 		t.Fatalf("error = %v, want NotSupportedError", err)
 	}
@@ -190,13 +190,13 @@ func TestRSALimits(t *testing.T) {
 
 	// RSA-PSS 的零长度盐无法用 Go 表达。
 	pssAlg := Algorithm{Name: AlgRSAPSS, Hash: AlgSHA256,
-		ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}
+		ModulusLength: new(2048), PublicExponent: []byte{1, 0, 1}}
 	pair, err := GenerateKey(pssAlg, true, usages)
 	if err != nil {
 		t.Fatal(err)
 	}
 	zeroSalt := pssAlg
-	zeroSalt.SaltLength = intPtr(0)
+	zeroSalt.SaltLength = new(0)
 	if _, err = Sign(zeroSalt, pair.PrivateKey, []byte("data")); errorName(t, err) != ErrNameNotSupported {
 		t.Fatalf("error = %v, want NotSupportedError", err)
 	}
@@ -228,11 +228,11 @@ func TestECDHDeriveBits(t *testing.T) {
 		bobAlg := alg
 		bobAlg.Public = alice.PublicKey
 
-		fromAlice, err := DeriveBits(aliceAlg, alice.PrivateKey, intPtr(256))
+		fromAlice, err := DeriveBits(aliceAlg, alice.PrivateKey, new(256))
 		if err != nil {
 			t.Fatalf("%s: %v", curve, err)
 		}
-		fromBob, err := DeriveBits(bobAlg, bob.PrivateKey, intPtr(256))
+		fromBob, err := DeriveBits(bobAlg, bob.PrivateKey, new(256))
 		if err != nil {
 			t.Fatalf("%s: %v", curve, err)
 		}
@@ -250,7 +250,7 @@ func TestECDHDeriveBits(t *testing.T) {
 		}
 
 		// 请求超过共享密钥长度必须报错。
-		if _, err = DeriveBits(aliceAlg, alice.PrivateKey, intPtr(len(full)*8+8)); errorName(t, err) != ErrNameOperation {
+		if _, err = DeriveBits(aliceAlg, alice.PrivateKey, new(len(full)*8+8)); errorName(t, err) != ErrNameOperation {
 			t.Fatalf("%s: error = %v, want OperationError", curve, err)
 		}
 	}
@@ -272,11 +272,11 @@ func TestX25519DeriveBits(t *testing.T) {
 	bobAlg := alg
 	bobAlg.Public = alice.PublicKey
 
-	fromAlice, err := DeriveBits(aliceAlg, alice.PrivateKey, intPtr(256))
+	fromAlice, err := DeriveBits(aliceAlg, alice.PrivateKey, new(256))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fromBob, err := DeriveBits(bobAlg, bob.PrivateKey, intPtr(256))
+	fromBob, err := DeriveBits(bobAlg, bob.PrivateKey, new(256))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -308,19 +308,19 @@ func TestECDHRejectsMismatchedPublicKey(t *testing.T) {
 	// 曲线不一致。
 	mismatched := p256
 	mismatched.Public = other.PublicKey
-	if _, err = DeriveBits(mismatched, alice.PrivateKey, intPtr(128)); errorName(t, err) != ErrNameInvalidAccess {
+	if _, err = DeriveBits(mismatched, alice.PrivateKey, new(128)); errorName(t, err) != ErrNameInvalidAccess {
 		t.Fatalf("error = %v, want InvalidAccessError", err)
 	}
 
 	// 算法不一致。
 	wrongAlg := p256
 	wrongAlg.Public = x25519.PublicKey
-	if _, err = DeriveBits(wrongAlg, alice.PrivateKey, intPtr(128)); errorName(t, err) != ErrNameInvalidAccess {
+	if _, err = DeriveBits(wrongAlg, alice.PrivateKey, new(128)); errorName(t, err) != ErrNameInvalidAccess {
 		t.Fatalf("error = %v, want InvalidAccessError", err)
 	}
 
 	// 缺少 public 成员。
-	if _, err = DeriveBits(p256, alice.PrivateKey, intPtr(128)); errorName(t, err) != ErrNameType {
+	if _, err = DeriveBits(p256, alice.PrivateKey, new(128)); errorName(t, err) != ErrNameType {
 		t.Fatalf("error = %v, want TypeError", err)
 	}
 }
@@ -339,7 +339,7 @@ func TestECDHDeriveKey(t *testing.T) {
 	derive := alg
 	derive.Public = bob.PublicKey
 	key, err := DeriveKey(derive, alice.PrivateKey,
-		Algorithm{Name: AlgAESGCM, Length: intPtr(256)}, true, []KeyUsage{UsageEncrypt, UsageDecrypt})
+		Algorithm{Name: AlgAESGCM, Length: new(256)}, true, []KeyUsage{UsageEncrypt, UsageDecrypt})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -393,12 +393,12 @@ func TestAESKWRFC3394(t *testing.T) {
 }
 
 func TestAESKWWrapUnwrapKey(t *testing.T) {
-	wrappingKey, err := GenerateKey(Algorithm{Name: AlgAESKW, Length: intPtr(256)},
+	wrappingKey, err := GenerateKey(Algorithm{Name: AlgAESKW, Length: new(256)},
 		true, []KeyUsage{UsageWrapKey, UsageUnwrapKey})
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := GenerateKey(Algorithm{Name: AlgAESGCM, Length: intPtr(128)},
+	target, err := GenerateKey(Algorithm{Name: AlgAESGCM, Length: new(128)},
 		true, []KeyUsage{UsageEncrypt, UsageDecrypt})
 	if err != nil {
 		t.Fatal(err)

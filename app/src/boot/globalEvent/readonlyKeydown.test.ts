@@ -73,6 +73,44 @@ test("readonly body and tab header preserve keyboard defaults and bubbling", asy
     }
 });
 
+test("mindmap shortcuts bypass hidden source editing in editable and readonly documents", async () => {
+    let commonCalls = 0;
+    const bind = loadFunction("src/protyle/wysiwyg/keydown.ts", "keydown", {
+        bindVerticalNavigationReset: (): void => undefined,
+        getAVTemplateInteractiveElement: () => false,
+        commonHotkey: (_protyle: unknown, event: any) => {
+            commonCalls++;
+            if (event.key === "copyID") {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        },
+        hasClosestBlock: () => ({}),
+    });
+    for (const disabled of [false, true]) {
+        let listener: (event: any) => Promise<void>;
+        const editor = {addEventListener: (_type: string, callback: typeof listener) => listener = callback};
+        const mindmap = {contains: () => false};
+        bind({disabled}, editor);
+        const before = commonCalls;
+        for (const key of ["commandPanel", "search", "editReadonly", "customShortcut"]) {
+            const event = keyboardEvent(key);
+            event.target.closest = selector => selector === ".mindmap-view" ? mindmap :
+                selector === ".protyle-wysiwyg" ? editor : null;
+            await listener(event);
+            assert.equal(event.defaultPrevented, false, key);
+            assert.equal(event.propagationStopped, false, key);
+        }
+        assert.equal(commonCalls - before, disabled ? 0 : 4);
+        const copy = keyboardEvent("copyID");
+        copy.target.closest = selector => selector === ".mindmap-view" ? mindmap :
+            selector === ".protyle-wysiwyg" ? editor : null;
+        await listener(copy);
+        assert.equal(copy.defaultPrevented, !disabled);
+        assert.equal(copy.propagationStopped, !disabled);
+    }
+});
+
 const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false) => {
     const calls: string[] = [];
     const contexts: Array<{protyle: unknown, previousRange?: unknown}> = [];

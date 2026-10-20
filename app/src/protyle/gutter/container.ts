@@ -1,11 +1,11 @@
 import {Constants} from "../../constants";
 
-// 列表项的首个容器保留独立块标，段落仍沿用列表项的合并操作。
-export const getListItemGutterContainer = (element: Element) => {
+// 精简模式保留首个容器的独立块标，完整模式也允许从列表标记定位首个内容块。
+export const getListItemGutterContainer = (element: Element, full = false) => {
     const item = element.closest('[data-type="NodeListItem"]');
     const first = item?.querySelector(":scope > [data-node-id]");
     const type = first?.getAttribute("data-type");
-    if (first && (["NodeTable", "NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeTabs",
+    if (first && (full || ["NodeTable", "NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeTabs",
         "NodeMindmap", "NodeAttributeView", "NodeCodeBlock", "NodeIFrame"].includes(type) ||
         type === "NodeList" && first.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") &&
         (element === item || first.contains(element) ||

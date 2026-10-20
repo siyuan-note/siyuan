@@ -6,7 +6,7 @@
 		"id": "20230506210010-houyyvy",
 		"title": "插件",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -77,7 +77,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210021-04aesus",
-				"updated": "20260803163440"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210021-tk7w2m5",
-				"updated": "20260803163440"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -101,7 +101,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "工作空间/plugins/"
+					"TextMarkTextContent": "工作空间/data/plugins/"
 				},
 				{
 					"Type": "NodeText",
@@ -114,7 +114,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -123,7 +127,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -132,7 +140,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -141,7 +153,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中启用或禁用插件。"
+					"Data": "​ 中启用或禁用插件。"
 				}
 			]
 		},

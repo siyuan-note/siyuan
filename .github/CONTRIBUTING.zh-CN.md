@@ -21,10 +21,10 @@ Electron 44 要求 macOS 13 或更高版本，Windows 和 Linux 仅支持 64 位
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.7.0 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.9.0 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@44.7.0 -D`
+  * `pnpm install electron@44.9.0 -D`
 
 NPM 镜像：
 
@@ -34,7 +34,7 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@44.7.0 -D`
+* `pnpm install electron@44.9.0 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`
@@ -70,7 +70,7 @@ NPM 镜像：
 桌面端打包会运行 `scripts/prepare-ocr.py`，准备固定版本的模型和原生运行库。可以先执行 `python scripts/prepare-ocr.py --runtime windows-amd64 --check-only` 或 `python3 scripts/prepare-ocr.py --runtime linux-arm64 --build-worker --check-only` 检查原生依赖，不会下载资源或执行编译。
 
 * Windows：发布构建者须具有 Visual Studio 许可证授予的再分发权，并从 `VC/Redist/MSVC` 提供对应 x64/ARM64 架构的**发布版** CRT 文件。脚本通过 `vswhere` 或 `VCToolsRedistDir` 查找已安装的 Visual Studio。自定义位置或跨主机打包时，将 `SIYUAN_OCR_VC_REDIST_DIR` 指向含 `x64`、`arm64` 子目录的 `VC/Redist/MSVC/<version>`，也可以直接指向目标架构的 `Microsoft.VC*.CRT` 目录。仅使用官方 Visual Studio 再分发文件，不要从 `System32`、调试运行库或第三方 DLL 下载站收集文件。准备步骤会检查架构和必需的导出符号，将 CRT 的传递依赖放在 ONNX Runtime 旁，并记录 SHA-256 摘要及许可说明。发布时应及时更新这些应用本地运行库，详见 Microsoft 的[再分发条款](https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution#visual-c-runtime-files)。该方案不会安装系统级运行库，也不需要最终用户提权
-* Linux：即使内核采用 musl 工具链，OCR 辅助进程仍需要 **glibc** 编译器。运行 `scripts/linux-build.sh` 前须准备本机 `gcc` 和对应的交叉编译器。在 Debian/Ubuntu 上，AMD64 主机构建 ARM64 需要 `gcc-aarch64-linux-gnu`，ARM64 主机构建 AMD64 需要 `gcc-x86-64-linux-gnu`；可执行 `sudo apt-get install gcc gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu` 安装。可选环境变量 `SIYUAN_OCR_CC_AMD64`、`SIYUAN_OCR_CC_ARM64` 分别指定目标架构的编译器命令，脚本会校验目标三元组，不会复用内核的 musl `CC`
+* Linux：桌面 OCR 辅助进程的 AMD64、ARM64 构建统一以 **glibc 2.28** 为兼容目标，独立于内核的 musl 工具链。准备脚本下载 `scripts/ocr-assets.json` 中固定版本的 Zig 编译器，校验摘要并缓存在 `.cache/ocr/`，不随应用分发。请安装 `binutils`，以便使用 `readelf` 检查兼容性。可选环境变量 `SIYUAN_OCR_CC_AMD64`、`SIYUAN_OCR_CC_ARM64` 分别指定带 glibc 2.28 或更旧 sysroot 的编译器命令；脚本会拒绝较新头文件及依赖较新 glibc 符号的产物。`--check-only` 仅校验默认工具链选择，不下载工具链。Docker 继续使用独立的 Alpine/musl OCR 构建流程
 
 ### iOS
 

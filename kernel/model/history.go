@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"math"
 	"os"
@@ -571,7 +572,9 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	relPath := strings.TrimPrefix(filepath.ToSlash(historyPath), filepath.ToSlash(util.HistoryDir))
 	relPath = strings.TrimPrefix(relPath, "/")
 	pathParts := strings.SplitN(relPath, "/", 3)
-	data, readErr := filelock.ReadFile(from)
+	filelock.Lock(from)
+	data, readErr := os.ReadFile(from)
+	filelock.Unlock(from)
 	if readErr != nil {
 		return readErr
 	}
@@ -585,13 +588,36 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 			return fmt.Errorf("encrypted notebook asset history is plaintext [%s]", pathParts[1])
 		}
 		// 加密笔记本的资源回滚到笔记本级 assets 目录
-		to = filepath.Join(util.DataDir, pathParts[1], "assets", filepath.Base(historyPath))
+		assetPath := pathParts[2]
+		if !strings.HasPrefix(assetPath, "assets/") || path.Clean(assetPath) != assetPath || strings.Contains(assetPath, "\\") {
+			return errors.New("invalid encrypted asset history path")
+		}
+		boxID := pathParts[1]
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			return errors.New(Conf.Language(314))
+		}
+		defer zeroAndClear(dek)
+		if _, err = DecryptAssetToWriter(boxID, filepath.Base(historyPath), dek, bytes.NewReader(data), io.Discard); err != nil {
+			return err
+		}
+		to = filepath.Join(util.DataDir, boxID, filepath.FromSlash(assetPath))
+		if err = validateEncryptedCleanupPath(util.DataDir, to); err != nil {
+			return err
+		}
 		if err = os.MkdirAll(filepath.Dir(to), 0755); err != nil {
 			return
 		}
 	}
 
-	if err = filelock.CopyNewtimes(from, to); err != nil {
+	if encrypted {
+		err = writeEncryptedCleanupData(to, data)
+	} else {
+		err = filelock.CopyNewtimes(from, to)
+	}
+	if err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
@@ -997,7 +1023,6 @@ func (box *Box) generateDocHistory0() {
 	}
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	return
 }
 
 func generateDocHistoryFile(boxID, file, historyDir string, luteEngine *lute.Lute) error {
@@ -1201,7 +1226,6 @@ func generateTreeHistory(tree *parse.Tree, historyDir string) {
 		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
-	return
 }
 
 func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
@@ -1235,7 +1259,6 @@ func getHistoryDir(suffix string) (ret string, err error) {
 
 func ReindexHistory() {
 	task.AppendTask(task.HistoryDatabaseIndexFull, fullReindexHistory)
-	return
 }
 
 func fullReindexHistory() {
@@ -1258,7 +1281,6 @@ func fullReindexHistory() {
 		name := historyDir.Name()
 		indexHistoryDir(name, lutEngine)
 	}
-	return
 }
 
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace, HistoryOpOutline}
@@ -1421,7 +1443,6 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	}
 
 	sql.IndexHistoriesQueue(histories)
-	return
 }
 
 func fromSQLHistories(sqlHistories []*sql.History) (ret []*HistoryItem) {

@@ -2,6 +2,8 @@ package util
 
 import (
 	"context"
+	"errors"
+	"net"
 	"net/http"
 	"sync"
 
@@ -18,7 +20,9 @@ func ShutdownHTTPServers(ctx context.Context, servers ...*http.Server) {
 		pending.Add(1)
 		go func(server *http.Server) {
 			defer pending.Done()
-			if err := server.Shutdown(ctx); err != nil {
+			// cmux 的 HTTP/HTTPS listener 共用底层监听器，重复关闭会返回 net.ErrClosed。
+			// Shutdown 返回该错误前已等待活跃响应完成，无需再强制关闭。
+			if err := server.Shutdown(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 				logging.LogWarnf("graceful HTTP server shutdown failed: %s", err)
 				_ = server.Close()
 			}

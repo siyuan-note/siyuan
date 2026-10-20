@@ -27,7 +27,7 @@ func TestAttributeViewDeletedBlockUndoRedo(t *testing.T) {
 			if entry == nil || len(entry.undoOperations) <= len(tx.DoOperations) {
 				t.Fatal("database restoration was not recorded after the block operations")
 			}
-			for cycle := 0; cycle < 3; cycle++ {
+			for range 3 {
 				deleted := readAttributeViewItemsTest(t, before.ID)
 				for _, primary := range before.GetBlockKeyValues().Values {
 					if !primary.IsDetached && deleted.GetBlockValue(primary.BlockID) != nil {
@@ -203,7 +203,7 @@ func TestAttributeViewDeletedBlockUndoRelations(t *testing.T) {
 				t.Fatal(err)
 			}
 			entry := GlobalUndoLog.Peek(fixture.sourceID)
-			for cycle := 0; cycle < 2; cycle++ {
+			for range 2 {
 				back := readAttributeViewItemsTest(t, dest.ID).GetValue(backID, targetID)
 				if !slices.Equal(back.Relation.BlockIDs, []string{keptID}) {
 					t.Fatalf("deletion retained stale back relations: %v", back.Relation.BlockIDs)
@@ -315,9 +315,10 @@ func setupAttributeViewDeletedBlockTest(t *testing.T, mode string) (*fileOperati
 	}
 	var nodes []*ast.Node
 	count := 1
-	if mode == "container" {
+	switch mode {
+	case "container":
 		count = 2
-	} else if mode == "batch" {
+	case "batch":
 		count = 32
 	}
 	for i := 0; i < count; i++ {

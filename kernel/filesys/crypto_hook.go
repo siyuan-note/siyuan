@@ -128,20 +128,6 @@ func SyAAD(boxID, relativePath string) (string, error) {
 	return "siyuan:file:" + boxID + ":" + base, nil
 }
 
-// encryptedBox 判断 boxID 是否为已解锁的加密 box，供 filesys 内部分流（如静默修正禁用）。
-// 通过 DEKProvider 探测：返回非 nil dek 即加密且已解锁。
-func encryptedBox(boxID string) bool {
-	if DEKProvider == nil {
-		return false
-	}
-	if DEKLockAcquire != nil {
-		DEKLockAcquire(boxID)
-		defer DEKLockRelease(boxID)
-	}
-	dek, err := DEKProvider(boxID)
-	return err == nil && dek != nil
-}
-
 // docIALBoxID 从 .sy 绝对路径反推 boxID，供 DocIAL 判断是否需整体解密。
 // 路径形如 <DataDir>/<boxID>/...；若不在 DataDir 下或 boxID 非合法 ID 模式，返回空串。
 func docIALBoxID(absPath string) string {

@@ -206,7 +206,7 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
             try {
                 origin = normalizeRemoteKernelOrigin(data.origin);
             } catch (error) {
-                throw new Error(languages().remoteKernelAddressTip);
+                throw new Error(languages().remoteKernelAddressTip, {cause: error});
             }
             if (data.cmd === "trust") {
                 if (typeof data.trustRemoteExtensions !== "boolean") {

@@ -6,7 +6,7 @@
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
 		"type": "doc",
-		"updated": "20261011203418"
+		"updated": "20261016112108"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501134357-003dftr",
-				"updated": "20230403113939"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615111559-oiv8079",
-				"updated": "20220615112117"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -56,7 +56,7 @@
 					},
 					"Properties": {
 						"id": "20220615111600-89ecgx0",
-						"updated": "20220615111600"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -64,12 +64,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615111600-ag04crg",
-								"updated": "20220615112026"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文件历史：按原始文件方式保存在 "
+									"Data": "文件历史：按原始文件字节保存在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -78,7 +78,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夹下，人类可读，可手动拷贝到 data 对应位置恢复"
+									"Data": " 文件夹下。普通笔记本历史是明文，加密笔记本历史保留密文；优先通过思源恢复，并核对下文的笔记本和密钥要求"
 								}
 							]
 						}
@@ -93,7 +93,7 @@
 					},
 					"Properties": {
 						"id": "20220615111601-l9ydpwh",
-						"updated": "20220615112117"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -101,7 +101,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615111601-8oaj5t3",
-								"updated": "20220615112117"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -115,7 +115,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夹下，人类不可读，无法手动恢复"
+									"Data": " 文件夹下，应通过思源恢复，不能把单个仓库文件直接复制到 data 中恢复"
 								}
 							]
 						}
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615111435-ownalnb",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615111435-mm5qpqp",
-				"updated": "20260809232000"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210403160319-ufy7jta",
-				"updated": "20260809232000"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20210403160319-8uzmero",
-						"updated": "20260809232000"
+						"updated": "20261016112108"
 					},
 					"Children": [
 						{
@@ -204,7 +204,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210524213102-cwl7v2f",
-								"updated": "20260809232000"
+								"updated": "20261016112108"
 							},
 							"Children": [
 								{
@@ -232,11 +232,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
+									"TextMarkTextContent": "文件管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "历史生成间隔"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中调整间隔，历史文件夹后缀为 -update。"
+									"Data": " 中调整间隔，历史文件夹后缀为 -update"
 								}
 							]
 						}
@@ -647,7 +656,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090742-hjfornp",
-				"updated": "20220615112957"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -661,12 +670,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210121105921-zdk68jf",
-				"updated": "20220615120058"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在数据历史界面左侧时间列表栏中，每一条历史记录右侧都有一个回滚按钮，点击以后将弹出确认对话框，如果确认回滚的话将使用文件历史覆盖现有文件。"
+					"Data": "点击历史记录右侧的回滚按钮并确认后，会使用文件历史覆盖现有文件。请先预览可预览的记录。查看或回滚加密文档时，原加密笔记本必须存在并已解锁。恢复已删除的加密笔记本是另一条恢复路径，还需要匹配的笔记本及全局密钥备份和主密码，详见"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "主密码和密钥备份",
+					"TextMarkBlockRefID": "20260907120000-cn00031",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -675,12 +695,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501133017-3hecoih",
-				"updated": "20220501133133"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果有非常多的文件需要回滚，建议手动在文件系统上复制。历史文件夹的内部结构和 data 内部结构一致，比如："
+					"Data": "优先通过思源恢复。如需手动复制进行批量恢复，请先核对来源和目标；加密笔记本必须保留原笔记本 ID、目录结构和匹配的密钥材料，不要将其密文复制到普通笔记本中。历史目录与对应的 data 路径结构一致，例如："
 				}
 			]
 		},
@@ -843,7 +863,7 @@
 			},
 			"Properties": {
 				"id": "20220501133237-il09opg",
-				"updated": "20220615111149"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -857,7 +877,7 @@
 					},
 					"Properties": {
 						"id": "20220501133254-az0u30r",
-						"updated": "20220501133340"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -865,12 +885,32 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501133254-4ztj9yt",
-								"updated": "20220501133340"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "退出思源，然后全量复制备份一下整个工作空间，避免后续误操作导致数据丢失"
+									"Data": "使用按需下载时，先在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkTextContent": "资源文件下载",
+									"TextMarkBlockRefID": "20260905184908-5o1vhpi",
+									"TextMarkBlockRefSubtype": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "全部下载"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 并完成下载，再正常退出思源，全量备份整个工作空间，包括配置、历史、仓库和加密笔记本密钥备份，然后再进行覆盖操作"
 								}
 							]
 						}
@@ -887,7 +927,7 @@
 					},
 					"Properties": {
 						"id": "20220501133342-7fu44br",
-						"updated": "20220501133421"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -895,7 +935,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501133342-j92vqhx",
-								"updated": "20220501133421"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -909,7 +949,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夹，将 "
+									"Data": " 文件夹，仅将 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -918,7 +958,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件夹下的数据直接复制到 data 文件夹进行覆盖"
+									"Data": " 中需要恢复的文件复制到 data 下对应路径，保持笔记本 ID、文件名和目录结构不变；加密历史须保留匹配的笔记本与密钥材料"
 								}
 							]
 						}
@@ -935,7 +975,7 @@
 					},
 					"Properties": {
 						"id": "20220501133422-0nxnwc2",
-						"updated": "20220615111149"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -943,12 +983,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501133422-gc6qund",
-								"updated": "20220615111149"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "启动思源后手动执行重建索引"
+									"Data": "启动思源，解锁恢复的加密笔记本，手动重建索引并检查恢复后的文档和资源文件"
 								}
 							]
 						}
@@ -962,7 +1002,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615115547-2fr6uej",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
@@ -976,12 +1016,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615115551-u75o5mk",
-				"updated": "20220615115618"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "默认自动保存最近 30 天生成的文件历史，可通过 "
+					"Data": "文件历史默认保留 30 天，可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -996,6 +1036,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件管理"
 				},
 				{
 					"Type": "NodeText",
@@ -1008,7 +1057,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 进行调整，超过该期限的文件历史会被自动删除。"
+					"Data": " 中调整，超过期限的文件历史会被自动删除。"
 				}
 			]
 		},
@@ -1017,12 +1066,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615115625-3dx0t1j",
-				"updated": "20260803171606"
+				"updated": "20261016112108"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你想清空所有文件历史数据，可以点击 "
+					"Data": "如需删除全部文件历史，可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1045,11 +1094,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "清空所有历史"
+					"TextMarkTextContent": "文件管理"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，或者手动删除 "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "删除所有历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 处点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。也可先退出思源，再手动删除 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1058,7 +1125,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夹，然后在 "
+					"Data": " 文件夹，随后在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1067,16 +1134,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "重建历史索引"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": " 中重建历史索引。不要删除仍用于加密笔记本恢复的历史。"
 				}
 			]
 		},
@@ -1086,7 +1144,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615112531-5yos96d",
-				"updated": "20260927191121"
+				"updated": "20261016111710"
 			},
 			"Children": [
 				{
@@ -1101,7 +1159,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615113758-i2279ot",
-				"updated": "20220615113939"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1115,20 +1173,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615113752-lbtlf6j",
-				"updated": "20220615113952"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "第一次使用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "数据快照"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "前需要在 "
+					"Data": "第一次使用数据快照前，需要在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1155,7 +1205,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "。请妥善保存该仓库密钥；它与加密笔记本的主密码、密钥备份相互独立。"
 				}
 			]
 		},
@@ -1307,7 +1357,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615112535-k8n73hd",
-				"updated": "20250115153534"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1473,12 +1523,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615114908-0y5tfv9",
-				"updated": "20220615115114"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "浏览数据快照时只能通过快照创建时间和备注进行区别，所以备注信息应该尽量详细一些，以备后续能够准确识别不同的数据快照。"
+					"Data": "填写详细备注便于以后识别快照，但备注不会阻止清理。需要长期保留的快照应添加标记，并另行独立备份。"
 				}
 			]
 		},
@@ -1853,7 +1903,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615115126-z62p36j",
-				"updated": "20261011203418"
+				"updated": "20261016111710"
 			},
 			"Children": [
 				{
@@ -1863,12 +1913,53 @@
 			]
 		},
 		{
+			"ID": "20261016111431-wem57hb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-wem57hb",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地快照会根据 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "账号与同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "本地数据仓库清理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的配置自动清理，默认保留天数为 180 天、每天保留 2 个。保留期限内的过去日期快照会按每日数量稀疏保留，当天快照和标记等引用指向的快照不受自动淘汰影响。这是本地保留规则，并不保证每个快照都保留满 180 天，也不同于云端备份策略。下述手动清理会删除所有未引用的快照，不受此保留期限保护。"
+				}
+			]
+		},
+		{
 			"ID": "20220615115758-ajl5l83",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
 				"id": "20220615115758-ajl5l83",
-				"updated": "20261011203418"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -2084,7 +2175,7 @@
 					},
 					"Properties": {
 						"id": "20230422101105-vdd9m4g",
-						"updated": "20230422101105"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -2092,12 +2183,59 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422101105-0csmuf6",
-								"updated": "20230422101106"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "手动删除 "
+									"Data": "重置仓库时优先使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "账号与同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "重置数据仓库"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，该入口会检查资源下载完整性。操作前先在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkTextContent": "资源文件下载",
+									"TextMarkBlockRefID": "20260905184908-5o1vhpi",
+									"TextMarkBlockRefSubtype": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "全部下载"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 并完成下载，保存仓库密钥并备份完整工作空间。手动删除 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2106,11 +2244,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 文件夹可以清空全部"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据快照"
+									"Data": "​​ 会绕过检查并删除包括标记快照在内的全部本地快照；只有完成这些前提并正常退出思源后才考虑此操作"
 								}
 							]
 						}

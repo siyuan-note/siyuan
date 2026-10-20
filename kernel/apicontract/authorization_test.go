@@ -65,7 +65,7 @@ func TestRouteAuthorizationCoverage(t *testing.T) {
 					mutation(&changed[index])
 				}
 			}
-			if err := CheckRoutes(changed, bindings, nil); err == nil {
+			if err := CheckRoutes(changed, bindings); err == nil {
 				t.Fatal("missing or mismatched authorization was accepted")
 			}
 		}

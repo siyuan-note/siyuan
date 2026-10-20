@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261007020517"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-qss2syl",
-				"updated": "20260804180000"
+				"updated": "20261015225720"
 			},
 			"Children": [
 				{
@@ -39,12 +39,44 @@
 			]
 		},
 		{
+			"ID": "20261015225720-okoj5kh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015225720-okoj5kh",
+				"updated": "20261015225720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To use a ChatGPT account, open its provider configuration in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select and save an account for this workspace on the current device. Credentials and account bindings stay on this device and are excluded from conf.json and settings exports. Sign in and select an account separately on each device. Copying configuration then preserves the destination device’s bindings for existing providers. Select an account again after adding a provider or moving the workspace directory. After upgrading, select an account once more; existing sign-in credentials are retained."
+				}
+			]
+		},
+		{
 			"ID": "20260804170002-24z0hpx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170002-24z0hpx",
-				"updated": "20260813120000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -75,7 +107,7 @@
 			},
 			"Properties": {
 				"id": "20260804170004-9yg5i8j",
-				"updated": "20260813120000"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -204,7 +236,7 @@
 					},
 					"Properties": {
 						"id": "20260804170009-l87zz79",
-						"updated": "20260813120000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -212,7 +244,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170010-wxcjvxu",
-								"updated": "20260813120000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -235,7 +267,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion."
+									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion"
 								}
 							]
 						}

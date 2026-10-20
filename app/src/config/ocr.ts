@@ -45,6 +45,12 @@ const getThresholdFields = () => [
     {key: "recognition", title: window.siyuan.languages.ocrRecognitionThreshold, placeholder: "0.5"},
 ] as const;
 
+const getTooltipFields = () => [
+    {key: "showText", title: window.siyuan.languages.ocrShowText, tip: window.siyuan.languages.ocrShowTextTip, default: true},
+    {key: "showEmpty", title: window.siyuan.languages.ocrShowEmpty, tip: window.siyuan.languages.ocrShowEmptyTip, default: false},
+    {key: "showError", title: window.siyuan.languages.ocrShowError, tip: window.siyuan.languages.ocrShowErrorTip, default: false},
+] as const;
+
 export const registerOCRTab = (tab: SettingTabBuilder) => {
     const languages = window.siyuan.languages;
     tab.group("general", languages.configGroupOCREngine).slot({
@@ -84,6 +90,14 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
 <span class="fn__space"></span>${genNumberInputHtml(`ocrThreshold_${field.key}`, "", 0, 1, "any")}</div>`,
         });
     });
+    const tooltip = tab.group("tooltip", languages.ocrTooltipSettings);
+    getTooltipFields().forEach(field => {
+        tooltip.slot({
+            key: `ocr_${field.key}`,
+            keywords: [field.title, field.tip],
+            html: () => genSwitchRow(`ocr_${field.key}`, field.title, field.tip, field.default),
+        });
+    });
 };
 
 export const mountOCRSettings = (root: HTMLElement): (() => void) => {
@@ -99,6 +113,12 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     let importDialog: ReturnType<typeof openOCRImportModelsDialog> | undefined;
     const languages = window.siyuan.languages;
     const thresholdFields = getThresholdFields();
+    const tooltipFields = getTooltipFields();
+    const updateTooltipInputs = () => {
+        tooltipFields.forEach(field => {
+            root.querySelector<HTMLInputElement>(`#ocr_${field.key}`).checked = data.config[field.key] ?? field.default;
+        });
+    };
     const dirtyThresholds = new Set<keyof OCRThresholds>();
     let thresholdValues: OCRThresholds;
     const updateThresholdInputs = () => {
@@ -126,7 +146,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         root.querySelector("#ocrAIModel").closest(".config-item").classList.toggle("fn__none", !isAI);
         root.querySelector("#ocrReasoningEffort").closest(".config-item").classList.toggle("fn__none", !isAI);
         root.querySelector('[data-config-group-id="advanced"]')?.classList.toggle("fn__none", !isPaddleOCR);
-        root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
+        root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, .config-item button").forEach(element => {
             element.disabled = busy || (element.tagName === "BUTTON" && pendingSaves > 0);
         });
         root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || !isPaddleOCR;
@@ -181,6 +201,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
         root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value = data.config.reasoningEffort || "";
         root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
+        updateTooltipInputs();
         updateThresholdInputs();
         updateControls();
     };
@@ -249,6 +270,9 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             provider: root.querySelector<HTMLSelectElement>("#ocrProvider").value,
             model: root.querySelector<HTMLSelectElement>("#ocrModel").value,
             auto: root.querySelector<HTMLInputElement>("#ocrAuto").checked,
+            showText: root.querySelector<HTMLInputElement>("#ocr_showText").checked,
+            showEmpty: root.querySelector<HTMLInputElement>("#ocr_showEmpty").checked,
+            showError: root.querySelector<HTMLInputElement>("#ocr_showError").checked,
             aiModelId: root.querySelector<HTMLSelectElement>("#ocrAIModel").value,
             reasoningEffort: root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value,
             thresholds,
@@ -277,6 +301,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
                     root.querySelector<HTMLSelectElement>("#ocrProvider").value = data.config.provider;
                     root.querySelector<HTMLSelectElement>("#ocrModel").value = data.config.model;
                     root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
+                    updateTooltipInputs();
                     root.querySelector<HTMLSelectElement>("#ocrAIModel").innerHTML = aiModelOptions();
                     root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
                     root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value = data.config.reasoningEffort || "";

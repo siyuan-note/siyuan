@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20261007101500"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-3a8f750",
-				"updated": "20261007101500"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-fm69hhx",
-				"updated": "20260903130000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-avdhx8g",
-				"updated": "20260903130000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -261,7 +261,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-cs620vb",
-						"updated": "20260810212846"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -269,7 +269,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-t85dnxq",
-								"updated": "20260810212846"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -396,7 +396,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "1-9"
+									"TextMarkTextContent": "1-8"
 								},
 								{
 									"Type": "NodeText",
@@ -414,11 +414,47 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "1-9"
+									"TextMarkTextContent": "1-8"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 跳轉到第 1 至第 9 個分頁"
+									"Data": " 跳轉到第 1 至第 8 個分頁；使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 跳轉到最後一個分頁"
 								}
 							]
 						}

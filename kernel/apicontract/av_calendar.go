@@ -35,9 +35,10 @@ type AVCalendarRange struct {
 
 type AVLayoutCalendar struct {
 	*AVBaseLayout
-	Columns  []*AVViewTableColumn `json:"columns" api:"optional,nullable"`
-	RowIDs   []string             `json:"rowIds" api:"optional,nullable"`
-	Settings AVCalendarSettings   `json:"settings"`
+	Columns []*AVViewTableColumn `json:"columns" api:"optional,nullable"`
+	// 兼容旧版行顺序；空列表与底层布局一致省略，非空列表保持原有顺序。
+	RowIDs   []string           `json:"rowIds,omitempty" api:"optional,nullable"`
+	Settings AVCalendarSettings `json:"settings"`
 }
 
 // AVCalendarUndatedData 返回当前日历视图中待安排条目的单页数据。

@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
@@ -330,8 +329,8 @@ func anthropicMessageBlocks(message openai.ChatCompletionMessage) ([]json.RawMes
 				return nil, errors.New("missing Anthropic image source")
 			}
 			source := map[string]string{"type": "url", "url": part.ImageURL.URL}
-			if strings.HasPrefix(part.ImageURL.URL, "data:") {
-				meta, data, ok := strings.Cut(strings.TrimPrefix(part.ImageURL.URL, "data:"), ";base64,")
+			if after, ok := strings.CutPrefix(part.ImageURL.URL, "data:"); ok {
+				meta, data, ok := strings.Cut(after, ";base64,")
 				if !ok || data == "" || (meta != "image/png" && meta != "image/jpeg" && meta != "image/gif" && meta != "image/webp") {
 					return nil, errors.New("unsupported Anthropic image data URL")
 				}
@@ -344,7 +343,7 @@ func anthropicMessageBlocks(message openai.ChatCompletionMessage) ([]json.RawMes
 	}
 	for _, call := range message.ToolCalls {
 		input := json.RawMessage(call.Function.Arguments)
-		if !validAnthropicToolInput(input) || call.ID == "" || call.Function.Name == "" {
+		if !validAIToolArguments(input) || call.ID == "" || call.Function.Name == "" {
 			return nil, errors.New("invalid Anthropic tool call in conversation")
 		}
 		blocks = append(blocks, anthropicJSON(map[string]any{
@@ -352,11 +351,6 @@ func anthropicMessageBlocks(message openai.ChatCompletionMessage) ([]json.RawMes
 		}))
 	}
 	return blocks, nil
-}
-
-func validAnthropicToolInput(input json.RawMessage) bool {
-	input = bytes.TrimSpace(input)
-	return len(input) > 0 && input[0] == '{' && json.Valid(input)
 }
 
 type anthropicContentBlock struct {
@@ -393,12 +387,12 @@ func validateAnthropicHistory(blocks []json.RawMessage, calls []openai.ToolCall)
 				return errors.New("Anthropic redacted thinking is missing")
 			}
 		case "tool_use":
-			if block.ID == "" || block.Name == "" || callIDs[block.ID] || !validAnthropicToolInput(block.Input) || callIndex >= len(calls) ||
+			if block.ID == "" || block.Name == "" || callIDs[block.ID] || !validAIToolArguments(block.Input) || callIndex >= len(calls) ||
 				block.ID != calls[callIndex].ID || block.Name != calls[callIndex].Function.Name {
 				return errors.New("Anthropic conversation tool calls do not match native content")
 			}
 			callIDs[block.ID] = true
-			if !equalAnthropicToolInput(block.Input, []byte(calls[callIndex].Function.Arguments)) {
+			if !equalAIToolArguments(block.Input, []byte(calls[callIndex].Function.Arguments)) {
 				return errors.New("Anthropic conversation tool arguments do not match native content")
 			}
 			callIndex++
@@ -410,22 +404,6 @@ func validateAnthropicHistory(blocks []json.RawMessage, calls []openai.ToolCall)
 		return errors.New("Anthropic conversation is missing native tool calls")
 	}
 	return nil
-}
-
-func equalAnthropicToolInput(native, projected []byte) bool {
-	// 会话序列化可能调整对象键顺序，比较结构时保留数字精度和原生内容本身。
-	decode := func(data []byte) (value any, err error) {
-		if !validAnthropicToolInput(data) {
-			return nil, errors.New("invalid Anthropic tool input")
-		}
-		decoder := json.NewDecoder(bytes.NewReader(data))
-		decoder.UseNumber()
-		err = decoder.Decode(&value)
-		return
-	}
-	nativeValue, nativeErr := decode(native)
-	projectedValue, projectedErr := decode(projected)
-	return nativeErr == nil && projectedErr == nil && reflect.DeepEqual(nativeValue, projectedValue)
 }
 
 func validateAnthropicToolResults(messages []anthropicMessage) error {

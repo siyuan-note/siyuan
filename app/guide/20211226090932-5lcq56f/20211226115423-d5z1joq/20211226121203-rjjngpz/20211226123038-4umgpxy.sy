@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018221152"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-arn57f1",
-				"updated": "20260820133158"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -98,12 +98,37 @@
 			]
 		},
 		{
+			"ID": "20261016111305-dy1rcih",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-dy1rcih",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在檔案內容和 OCR 文字中搜尋，請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230805232920-5fdco36",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "搜索資源文件內容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
 			"ID": "20211226123051-ddr3yub",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20261012014930"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -358,7 +383,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092043-i4ib04g",
-				"updated": "20260930092043"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -378,6 +403,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
 				},
 				{
 					"Type": "NodeText",
@@ -399,7 +433,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092955-yhn9ixh",
-				"updated": "20260930092955"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -419,6 +453,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
 				},
 				{
 					"Type": "NodeText",
@@ -446,6 +489,72 @@
 				{
 					"Type": "NodeText",
 					"Data": "滑鼠懸停圖片可查看檔名、格式、已載入圖片的原始尺寸、標題和提示文字，無標題的圖片也會顯示這些資訊。本機工作空間圖片還會顯示可取得的檔案大小。網路圖片和加密筆記本圖片不顯示檔案大小。"
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-vfohlz8",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018221152-vfohlz8",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "原況照片"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261018221152-ypol2kc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-ypol2kc",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 iOS 用戶端中，使用編輯器的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插入圖片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 從相簿選擇原況照片。思源保留原圖及配對影片，包括原始中繼資料。"
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-uyqfjk6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-uyqfjk6",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在任意用戶端開啟圖片預覽後，點擊原況照片按鈕播放。如果無法直接播放原影片，思源會依需要產生相容預覽。首次播放可能需要等待，之後重用本機快取，快取不參與同步。相容預覽為有損轉換，原始檔案保持不變。"
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-bbm9eyb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-bbm9eyb",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HDR 和部分特殊編碼目前無法轉換為相容預覽，靜態圖片和原始檔案仍會保留。暫不支援 Android 動態照片匯入，以及從匯出檔案還原系統原況照片。"
 				}
 			]
 		},
@@ -1039,7 +1148,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20261012014930"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1539,7 +1648,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261012014930"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1652,12 +1761,53 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203058-pvk5pnz",
-				"updated": "20261001013550"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "透過圖片結果編輯視窗儲存後會自動更新搜尋索引；在思源外部修改 JSON 檔案後，需手動重建資源檔案索引"
+					"Data": "透過圖片結果編輯視窗儲存後會自動更新搜尋索引；在思源外部修改 JSON 檔案後，需手動重建資源檔案索引。"
+				}
+			]
+		},
+		{
+			"ID": "20261014150710-p7nr3gx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014150710-p7nr3gx",
+				"updated": "20261014150710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空 OCR 文字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 一鍵清空該資源的 OCR 文字，同時影響引用同一資源的所有圖片並更新搜尋索引。清空後保留空結果，自動 OCR 會跳過該資源；如需恢復，可從圖片選單手動重新辨識。"
 				}
 			]
 		},
@@ -1666,7 +1816,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-ffpq13r",
-				"updated": "20261010140118"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1706,7 +1856,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "懸浮在本機圖片上可查看 OCR 文字，無辨識結果時會顯示空內容提示。文字辨識圖示表示 OCR 操作，圖片圖示則將圖片複製為 PNG，無 OCR 文字時也可複製圖片。在自訂外觀方案中，可透過 "
+					"Data": "懸浮在本機圖片上可依設定查看 OCR 文字和辨識提示。文字辨識圖示表示 OCR 操作，圖片圖示則將圖片複製為 PNG，無 OCR 文字時也可複製圖片。在自訂外觀方案中，可透過 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1738,6 +1888,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "OCR 懸浮預覽最多顯示 200 個字元、6 行，超出部分以三個點標記。按兩下 OCR 圖示可查看完整文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261014140201-ppb3syl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014140201-ppb3syl",
+				"updated": "20261014140201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片提示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分別控制圖片懸浮提示中的 OCR 文字、無 OCR 文字提示和辨識失敗提示。預設顯示文字預覽，另外兩項預設關閉。這些選擇按裝置儲存，獨立於自動 OCR 開關；隱藏提示不會刪除文字或改變搜尋結果。無 OCR 文字不一定表示辨識失敗。失敗提示反映本次執行期間的辨識失敗，成功辨識或儲存文字後清除，重新啟動核心後不保留。行動端不顯示這類懸浮提示。"
 				}
 			]
 		}

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"maps"
 	"sort"
 	"strings"
 
@@ -30,9 +31,7 @@ func expandBacklinkDocumentEntries(blocks []*Block, refs []*sql.Ref, defRootID s
 			}
 		}
 		entries, _, _, mappings := buildLinkRefsInBoxWithDocumentGrouping(defRootID, removeDuplicatedRefs(documentRefs), keywords, boxID, false)
-		for parentID, refID := range mappings {
-			originalRefBlockIDs[parentID] = refID
-		}
+		maps.Copy(originalRefBlockIDs, mappings)
 		result = append(result, entries...)
 	}
 	return result
@@ -59,7 +58,7 @@ func backlinkAnchorSortKeys(blocks []*Block, tree *parse.Tree, refs []*sql.Ref, 
 		nodes, _ := getBacklinkRenderNodes(node, originalRefBlockIDs)
 		found := false
 		for _, root := range nodes {
-			ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			treenode.WalkWithInlineTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering || !treenode.IsBlockRef(n) {
 					return ast.WalkContinue
 				}

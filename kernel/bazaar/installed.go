@@ -143,10 +143,7 @@ func RefreshInstalledPackageREADME(pkg *Package, installPath, baseURLPath, repoU
 }
 
 func installedPackageCacheVersion(pkg *Package) int64 {
-	ret := pkg.InstallTime
-	if pkg.UpdateTime > ret {
-		ret = pkg.UpdateTime
-	}
+	ret := max(pkg.UpdateTime, pkg.InstallTime)
 	return ret
 }
 

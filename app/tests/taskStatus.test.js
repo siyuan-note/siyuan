@@ -301,11 +301,11 @@ const cases = async source => {
         isMultiSelectMode: () => false}, gutter: {renderMenu: (_protyle, block) => { blockMenuTarget = block; }}};
     window.siyuan.menus = {menu: {popup() {}, fullscreen() {}, remove() {}}};
     const contextMenu = new Function("protyle", "getBlockSelectionModeElement", "isInEmbedBlock", "hasClosestBlock",
-        "hasClosestByClassName", "getEditorRange", "isNotEditBlock", "hasClosestByAttribute", "hideElements",
+        "hasClosestByClassName", "getEditorRange", "isNotEditBlock", "hasClosestByAttribute", "hideElements", "isIOSDevice",
         source.contextMenu + "; return handleContextMenu;")(
         contextProtyle, () => null, () => null, target => target.closest("[data-node-id]"),
         (target, name) => target.closest(`.${name}`), () => selectionRange, () => false,
-        (target, name, value) => target.closest(`[${name}~="${value}"]`), () => {});
+        (target, name, value) => target.closest(`[${name}~="${value}"]`), () => {}, () => false);
     for (const readonly of [false, true]) {
         contextProtyle.disabled = readonly;
         for (const target of taskItem.querySelectorAll(".protyle-action, svg, use")) {

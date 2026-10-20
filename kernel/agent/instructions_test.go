@@ -63,7 +63,7 @@ func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 		writeAssistantContextStream(t, w, "", "done")
 	}))
 	defer server.Close()
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		sessionID := ast.NewNodeID()
 		session := map[string]any{"id": sessionID, "title": "instructions", "createdAt": 1, "updatedAt": 1,
 			"entries": []any{map[string]any{"id": "user-1", "type": "user", "content": "test preferences"}}}

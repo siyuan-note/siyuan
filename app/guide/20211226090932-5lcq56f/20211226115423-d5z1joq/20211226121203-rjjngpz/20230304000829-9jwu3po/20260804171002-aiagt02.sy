@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018104335"
 	},
 	"Children": [
 		{
@@ -275,7 +275,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-qlngedh",
-				"updated": "20260816114944"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -556,7 +556,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-t9reg9k",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -570,7 +570,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-mk2k1ns",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -584,7 +584,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 在目前會話中不再詢問任何操作。"
+					"Data": " 免除本會話中一般操作的逐項確認。設為必須確認的能力及程式碼片段修改仍需確認。"
 				}
 			]
 		},
@@ -593,7 +593,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170043-geqztqz",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -607,7 +607,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 前應確認目前任務範圍和所用工具可信，因為後續寫入操作將不再逐項確認。"
+					"Data": " 前應確認目前任務範圍和所用工具可信，因為一般寫入操作將不再逐項確認；上述強制確認仍然有效。"
 				}
 			]
 		},
@@ -951,6 +951,118 @@
 				{
 					"Type": "NodeText",
 					"Data": "。呼叫外部 MCP 工具可能傳送本機資料、修改外部系統或產生費用，應根據確認卡片核對具體影響。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-6a7ncw2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018102417-6a7ncw2",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "網頁搜尋與擷取"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261018102417-wpqqnpa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-wpqqnpa",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以讓智能體搜尋公開網頁、讀取正文並歸納內容或儲存到筆記。web_search 傳回連結和摘要，web_fetch 讀取指定 URL。直接擷取透過 HTTP 取得內容，不執行 JavaScript。桌面應用程式另有獨立的渲染擷取工具，用於讀取由 JavaScript 產生的正文。"
+				}
+			]
+		},
+		{
+			"ID": "20261018104335-t9urpxi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018104335-t9urpxi",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "網頁搜尋與擷取"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以分別選擇搜尋和擷取服務，預設使用 Exa 搜尋和直接擷取。使用 DeepSeek 時，填寫 Search 和 Fetch 共用的 DeepSeek API 金鑰，此設定與對話模型無關。DeepSeek Search 請求 5 筆結果且不包含網頁正文，單筆摘要最多 800 個字元，總輸出最多 8,000 個字元。需要正文時再擷取特定網頁。"
+				}
+			]
+		},
+		{
+			"ID": "20261018104335-16jvt70",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018104335-16jvt70",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "DeepSeek Search 會將搜尋詞傳送給 DeepSeek，DeepSeek Fetch 會將目標 URL 傳送給 DeepSeek，不攜帶瀏覽器 Cookie 或登入狀態，這些請求可能產生費用。DeepSeek Fetch 僅取得網頁正文，下載檔案時應選擇直接擷取。金鑰無效、餘額不足、限流或網頁無法使用時會傳回錯誤，不自動切換服務。請依工具權限設定核對並確認外部請求。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-i6tpsxl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-i6tpsxl",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "渲染擷取會執行網頁指令碼，並從本機桌面端發出網路請求，連線至遠端核心時也是如此。它沿用目前視窗的代理設定，使用獨立的暫存工作階段，不攜帶既有的 Cookie 或登入狀態。請核對請求的網址，並依工具權限設定確認操作。內網位址和下載會被拒絕。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-4dfvyxt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-4dfvyxt",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "渲染擷取需要桌面實例保持連線。瀏覽器端、行動端和外部 MCP 用戶端使用設定的擷取服務。正文為空或逾時時會傳回錯誤，較長結果會截斷至 50,000 個字元。需要登入、嵌入頁面、工作執行緒或持續瀏覽器連線的網頁仍可能無法讀取。"
 				}
 			]
 		},

@@ -370,6 +370,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewNewItemTemplates(op)
 			case "setAttrViewAutomations":
 				ret = tx.doSetAttrViewAutomations(op)
+			case "collectAttrViewBlocks":
+				ret = tx.doCollectAttrViewBlocks(op)
+			case "cleanupAttrViewBlocks":
+				ret = tx.doCleanupAttrViewBlocks(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
 			case "setAttrViewContextFilter":
@@ -2015,7 +2019,13 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if ast.NodeTable == oldNode.Type && ast.NodeTable == updatedNode.Type &&
 		(treenode.HasTableCellRich(oldNode) || "1" == oldNode.IALAttr(treenode.TableCellRichTableAttribute)) &&
 		"1" != updatedNode.IALAttr(treenode.TableCellRichTableAttribute) {
-		return &TxErr{code: TxErrCodeReloadUI, msg: "table update omitted rich text format metadata", id: id}
+		if !tx.isReplay || "" != updatedNode.IALAttr(treenode.TableCellRichTableAttribute) {
+			return &TxErr{code: TxErrCodeReloadUI, msg: "table update omitted rich text format metadata", id: id}
+		}
+		// 撤销日志中的普通表格快照保留富文本格式标记，确保连续撤销和重做可恢复。
+		updatedNode.SetIALAttr(treenode.TableCellRichTableAttribute, "1")
+		data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = data
 	}
 	if err = treenode.ValidateTableCellRich(updatedNode); nil != err {
 		return &TxErr{code: TxErrCodeReloadUI, msg: err.Error(), id: id}
@@ -2055,23 +2065,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 					// 剔除空白的行级公式
 					unlinks = append(unlinks, n)
 				}
-			} else if n.IsTextMarkType("block-ref") {
-				if "" == n.TextMarkBlockRefID {
-					// 已被 degradeCrossBoundaryBlockRefs 降级为纯文本，跳过引用处理
-					return ast.WalkContinue
-				}
-
-				sql.CacheRef(subTree, n)
-
-				if "d" == n.TextMarkBlockRefSubtype {
-					// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
-					// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
-					if dRefText := treenode.GetDynamicRefText(n.TextMarkBlockRefID, tree.Box); "" != dRefText {
-						n.TextMarkTextContent = dRefText
-					}
-				}
-
-				newDefIDs = append(newDefIDs, n.TextMarkBlockRefID)
 			}
 		}
 		return ast.WalkContinue
@@ -2079,6 +2072,30 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	for _, n := range unlinks {
 		n.Unlink()
 	}
+	treenode.WalkWithInlineTitles(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
+			if "" == n.TextMarkBlockRefID {
+				// 已被 degradeCrossBoundaryBlockRefs 降级为纯文本，跳过引用处理
+				return ast.WalkContinue
+			}
+
+			sql.CacheRef(subTree, n)
+
+			if "d" == n.TextMarkBlockRefSubtype {
+				// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
+				// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
+				if dRefText := treenode.GetDynamicRefText(n.TextMarkBlockRefID, tree.Box); "" != dRefText {
+					n.TextMarkTextContent = dRefText
+				}
+			}
+
+			newDefIDs = append(newDefIDs, n.TextMarkBlockRefID)
+		}
+		return ast.WalkContinue
+	})
 
 	oldDefIDs = gulu.Str.RemoveDuplicatedElem(oldDefIDs)
 	newDefIDs = gulu.Str.RemoveDuplicatedElem(newDefIDs)
@@ -2193,7 +2210,7 @@ func unfoldHeading(heading, currentNode *ast.Node) {
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
-	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2237,7 +2254,7 @@ func degradeCrossBoundaryBlockRefsWithAllowed(root *ast.Node, srcBox string, res
 		}
 		return ast.WalkContinue
 	})
-	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2256,6 +2273,7 @@ func degradeCrossBoundaryBlockRefsWithAllowed(root *ast.Node, srcBox string, res
 				logging.LogWarnf("block ref crosses encrypted boundary, src box [%s] -> def block [%s], degrade to text", srcBox, n.TextMarkBlockRefID)
 				n.TextMarkBlockRefID = ""
 				n.TextMarkBlockRefSubtype = ""
+				n.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", ""))
 				n.TextMarkTextContent = strings.TrimSpace(n.TextMarkTextContent)
 				degraded++
 			}
@@ -2278,9 +2296,7 @@ func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
 		}
-		if _, ok := oldNodes[n.ID]; ok {
-			delete(oldNodes, n.ID)
-		}
+		delete(oldNodes, n.ID)
 		return ast.WalkContinue
 	})
 	for _, n := range oldNodes {
@@ -2564,19 +2580,20 @@ type Operation struct {
 	BlockIDs   []string `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
 	BlockID    string   `json:"blockID"`
 
-	DeckID                   string      `json:"deckID"` // 用于添加/删除闪卡
-	Tree                     *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
-	templateDocTreeRootID    string
-	blockSwapState           *blockSwapState
-	blockSwapUndo            bool
-	listConversion           *listConversionState
-	listConversionUndo       bool
-	attributeViewItems       *attributeViewItemsSnapshot
-	attributeViewFields      *attributeViewFieldsSnapshot
-	attributeViewFieldUndo   bool
-	attributeViewAutomation  bool
-	attributeViewBinding     *attributeViewBindingSnapshot
-	attributeViewBindingUndo bool
+	DeckID                        string      `json:"deckID"` // 用于添加/删除闪卡
+	Tree                          *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+	templateDocTreeRootID         string
+	blockSwapState                *blockSwapState
+	blockSwapUndo                 bool
+	listConversion                *listConversionState
+	listConversionUndo            bool
+	attributeViewItems            *attributeViewItemsSnapshot
+	attributeViewFields           *attributeViewFieldsSnapshot
+	attributeViewFieldUndo        bool
+	attributeViewAutomation       bool
+	attributeViewCollectionRuleID string
+	attributeViewBinding          *attributeViewBindingSnapshot
+	attributeViewBindingUndo      bool
 
 	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
@@ -2748,6 +2765,8 @@ type Transaction struct {
 	blockSwapOriginalTrees       []*parse.Tree
 	attributeViewRollback        *attributeViewRollback
 	attributeViewAutomations     *attributeViewAutomationState
+	pushAutomationMessage        func(string, int) string
+	attributeViewCollections     *attributeViewCollectionState
 	attributeViewItemCreation    bool
 	invalidatedAvHistory         map[string]bool
 
@@ -3047,6 +3066,7 @@ func (tx *Transaction) commit() (err error) {
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
 	IncSync()
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
+	tx.appendAutomationBlockAttrs()
 	tx.state.Store(2)
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
@@ -3079,11 +3099,14 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.removeCreatedDoc, tx.writeTransactionTree = nil, nil
 	tx.luteEngine = nil
 	tx.attributeViewAutomations = nil
+	tx.pushAutomationMessage = nil
+	tx.attributeViewCollections = nil
 	tx.attributeViewItemCreation = false
 }
 
 func (tx *Transaction) rollback() {
 	tx.mindmapSummarySiblings = nil
+	tx.rollbackCollectionCreatedTrees()
 	tx.finishAttributeViewMutation(true)
 	for _, tree := range tx.blockSwapOriginalTrees {
 		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
@@ -3111,7 +3134,6 @@ func (tx *Transaction) rollback() {
 	tx.writeTransactionTree = nil
 	tx.state.Store(3)
 	tx.m.Unlock()
-	return
 }
 
 // cleanupRestoredCreatedDocs 清理提交失败前已经写入的计划文档，避免父文档失败后遗留孤儿文档。
@@ -3198,6 +3220,9 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 		return nil, err
 	}
 	tx.trees[bt.RootID] = ret
+	if err = tx.captureCollectionTree(ret); err != nil {
+		return nil, err
+	}
 	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
@@ -3234,14 +3259,19 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return nil, err
 	}
 	tx.trees[rootID] = ret
+	if err = tx.captureCollectionTree(ret); err != nil {
+		return nil, err
+	}
 	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
 
 func (tx *Transaction) writeTree(tree *parse.Tree) {
 	tx.trees[tree.ID] = tree
+	if err := tx.captureCollectionTree(tree); err != nil {
+		tx.collectionState().err = err
+	}
 	treenode.UpsertBlockTree(tree)
-	return
 }
 
 func getRefsCacheByDefNode(updateNode *ast.Node, boxID string) (ret []*sql.Ref, changedNodes []*ast.Node) {
@@ -3328,7 +3358,7 @@ type changedDefNode struct {
 }
 
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
-	treenode.WalkWithTabTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

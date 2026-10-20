@@ -8,6 +8,7 @@ import {getSettingTabFromMenuTarget} from "./mainMenu";
 import {unmountSettingTab} from "./settingPanel";
 import {activeBlur} from "../util/keyboardToolbar";
 import {syncMainMenuGroupCollapse} from "./mainMenuCollapse";
+import {showMobileFilterInput} from "../dock/mobileFilterInput";
 
 export interface IMainMenuSearch {
     /** 搜索框当前关键字，已归一化；空串表示未处于搜索态 */
@@ -49,7 +50,7 @@ const createSettingSearchMountQueue = (app: App) => {
         mount(root: HTMLElement, tabId: TSettingTab, keywords: string, result: SettingTabSearchResult) {
             const taskVersion = ++version;
             const previousQueue = queue;
-            queue = previousQueue.catch(() => undefined).then(async () => {
+            queue = previousQueue.catch((): undefined => undefined).then(async () => {
                 if (taskVersion !== version || !root.isConnected) {
                     if (!root.isConnected) {
                         unmountSettingTab(root, tabId);
@@ -116,9 +117,21 @@ const filterMainMenu = (element: HTMLElement, keywords: string) => {
 
 export const createMainMenuSearch = (app: App, menuElement: HTMLElement): IMainMenuSearch => {
     const searchElement = menuElement.querySelector(".mobile-main-menu__search input") as HTMLInputElement;
+    const searchContainer = searchElement.parentElement;
+    const titleElement = menuElement.querySelector(".mobile-main-menu__title");
+    const openSearchElement = menuElement.querySelector<HTMLElement>('[data-type="menu-search-open"]');
+    const closeSearchElement = menuElement.querySelector<HTMLElement>('[data-type="menu-search-close"]');
     const groupsElement = menuElement.querySelector(".mobile-main-menu__groups") as HTMLElement;
     const searchMountQueue = createSettingSearchMountQueue(app);
     let selectedTabId: TSettingTab | undefined;
+
+    const setSearchVisible = (visible: boolean) => {
+        searchContainer.classList.toggle("fn__none", !visible);
+        titleElement.classList.toggle("fn__none", visible);
+        openSearchElement.classList.toggle("fn__none", visible);
+        openSearchElement.setAttribute("aria-expanded", String(visible));
+        closeSearchElement.classList.toggle("fn__none", !visible);
+    };
 
     const showSearchResult = (keywords: string, tabId: TSettingTab, result: SettingTabSearchResult) => {
         groupsElement.classList.toggle("mobile-main-menu__groups--bazaar", tabId === "bazaar");
@@ -168,12 +181,27 @@ export const createMainMenuSearch = (app: App, menuElement: HTMLElement): IMainM
         selectedTabId = undefined;
         searchMountQueue.invalidate();
         searchElement.value = "";
+        setSearchVisible(false);
         groupsElement.classList.remove("mobile-main-menu__groups--bazaar");
         clearSettingTabResults(menuElement);
         filterMainMenu(menuElement, "");
         groupsElement.scrollTop = 0;
     };
 
+    openSearchElement.addEventListener("click", () => {
+        setSearchVisible(true);
+        showMobileFilterInput(searchElement, openSearchElement);
+    });
+    closeSearchElement.addEventListener("click", () => {
+        reset();
+        openSearchElement.focus();
+    });
+    searchElement.addEventListener("blur", () => {
+        // 有关键字时保留输入框，操作设置项后仍能看到当前筛选条件。
+        if (!normalizeSearchText(searchElement.value)) {
+            setSearchVisible(false);
+        }
+    });
     searchElement.addEventListener("compositionend", sync);
     searchElement.addEventListener("input", (event: InputEvent) => {
         if (!event.isComposing) {

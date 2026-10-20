@@ -28,6 +28,8 @@ type pinnedDocsStorage struct {
 
 type PinnedDoc struct {
 	ID, Notebook, Name, Path, Icon string
+	HSize, HMtime, HCtime          string
+	Name1, Alias, Memo, Bookmark   string
 	SubFileCount                   int
 	Unavailable                    bool
 	ChildrenSortMode               *int
@@ -137,6 +139,8 @@ func GetPinnedDocs() (ret []PinnedDoc, err error) {
 			return nil, fmt.Errorf("cannot read pinned document [%s]", ref.ID)
 		}
 		doc.Name, doc.Path, doc.Icon = file.Name, file.Path, file.Icon
+		doc.HSize, doc.HMtime, doc.HCtime = file.HSize, file.HMtime, file.HCtime
+		doc.Name1, doc.Alias, doc.Memo, doc.Bookmark = file.Name1, file.Alias, file.Memo, file.Bookmark
 		doc.ChildrenSortMode = file.ChildrenSortMode
 		if file.TitleEmpty {
 			doc.Name = Conf.Language(16)

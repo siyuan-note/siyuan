@@ -278,8 +278,8 @@ func parseBazaarIndex(data []byte) (ret *bazaarIndexSnapshot, err error) {
 
 func normalizeLegacyBazaarRepo(repo string) (string, bool) {
 	const githubPrefix = "https://github.com/"
-	if strings.HasPrefix(repo, githubPrefix) {
-		repo = strings.TrimPrefix(repo, githubPrefix)
+	if after, ok := strings.CutPrefix(repo, githubPrefix); ok {
+		repo = after
 	}
 	if !isValidBazaarRepo(repo) {
 		return "", false
@@ -291,7 +291,7 @@ func isValidBazaarRepo(repo string) bool {
 	if 1 != strings.Count(repo, "/") || strings.HasPrefix(repo, "/") || strings.HasSuffix(repo, "/") {
 		return false
 	}
-	for _, part := range strings.Split(repo, "/") {
+	for part := range strings.SplitSeq(repo, "/") {
 		if "" == part || "." == part || ".." == part {
 			return false
 		}

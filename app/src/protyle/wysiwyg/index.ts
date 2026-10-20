@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {bindEditorFocusMemory} from "../util/editorFocusMemory";
 import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
@@ -13,6 +14,8 @@ import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
+import {usesNativeTextMenu} from "./nativeTextMenu";
+import {bindListMarkerCaret} from "./listMarkerCaret";
 import {clearTouchBlockSelection} from "./touchBlockSelection";
 import {isDirectMathClick} from "../util/mathClick";
 import {
@@ -63,7 +66,7 @@ import {
     tagMenu,
     zoomOut
 } from "../../menus/protyle";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
 import {getMultilineInputText, isTextInputType} from "./multilineInput";
@@ -245,6 +248,7 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
 import {bindImageTitleEditor} from "../render/imageTitleEditor";
+import {bindImageResize, getImageResizeWidth} from "../render/imageResize";
 import {isDirectCalloutStructureClick} from "./calloutClick";
 import {
     BLOCK_SELECTION_CLASS,
@@ -413,11 +417,14 @@ export class WYSIWYG {
     private largeListVirtualizer?: LargeListVirtualizer;
     private largeTableVirtualizer?: LargeTableVirtualizer;
     private disposeSpellcheckFocus?: () => void;
+    private disposeFocusMemory?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private disposeListMarkerCaret?: () => void;
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
+    private disposeImageResize?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -536,18 +543,23 @@ export class WYSIWYG {
         this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
+        this.disposeFocusMemory = bindEditorFocusMemory(this.element);
         this.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
         // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
         this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
-        if (!isMobile()) {
+        if (!isMobile() || !protyle.lite) {
             this.tableControl = new TableControl(protyle, this.element);
         }
         this.bindCommonEvent(protyle);
         this.imageTitleEditor = bindImageTitleEditor(protyle, this.element);
+        this.disposeImageResize = bindImageResize(this.element);
         this.bindEvent(protyle);
+        this.disposeListMarkerCaret = bindListMarkerCaret(this.element, () => !protyle.disabled &&
+            !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
+            !getBlockSelectionModeElement(this.element));
         this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
         if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
@@ -593,7 +605,9 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeFocusMemory?.();
         this.imageTitleEditor?.destroy();
+        this.disposeImageResize?.();
         this.persistComposition?.();
         this.persistComposition = undefined;
         this.disposeHeadingFoldIndicators?.();
@@ -601,6 +615,7 @@ export class WYSIWYG {
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
         this.disposeTouchCaret?.();
+        this.disposeListMarkerCaret?.();
         this.largeListVirtualizer?.destroy();
         this.largeTableVirtualizer?.destroy();
     }
@@ -1236,6 +1251,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            if (this.tableControl?.hasTouchSelection() && (event.target as Element).closest("td, th")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             this.mouseDownTarget = event.target;
             // 常规划选时排除属性占位，三击时恢复以保留浏览器的整段选择行为
             this.element.classList.toggle("protyle-wysiwyg--select-attr", event.button === 0 && event.detail > 2);
@@ -1441,7 +1461,7 @@ export class WYSIWYG {
                 if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
                     clearSelect(["img", "row", "cell"], protyle.wysiwyg.element);
                 } else if (!hasClosestByClassName(target, "av__firstcol") && !avDragFillElement) {
-                    clearSelect(["img", "av"], protyle.wysiwyg.element);
+                    clearSelect(target.closest(".protyle-image-resize") ? ["av"] : ["img", "av"], protyle.wysiwyg.element);
                 }
             }
 
@@ -1970,16 +1990,21 @@ export class WYSIWYG {
                 };
                 return false;
             }
-            // 图片、iframe、video、挂件缩放
+            // 图片、iframe、video、挂件和 Mermaid 缩放。
             if (!protyle.disabled && target.classList.contains("protyle-action__drag")) {
                 if (!nodeElement) {
                     return;
                 }
                 const html = nodeElement.outerHTML;
                 const isIFrame = ["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type);
-                const resizeAxis = isIFrame ? target.dataset.resizeAxis || "both" : "both";
+                const isMermaid = nodeElement.dataset.subtype === "mermaid";
                 let isCenter = true;
-                if ("NodeVideo" === nodeElement.dataset.type) {
+                if (isMermaid) {
+                    if (nodeElement.parentElement.classList.contains("sb")) {
+                        return;
+                    }
+                    isCenter = nodeElement.style.textAlign === "center";
+                } else if ("NodeVideo" === nodeElement.dataset.type) {
                     nodeElement.classList.add("iframe--drag");
                     if (["left", "right", ""].includes(nodeElement.style.textAlign)) {
                         isCenter = false;
@@ -1989,36 +2014,76 @@ export class WYSIWYG {
                     if (!nodeElement.style.margin) {
                         isCenter = false;
                     }
-                } else if (target.parentElement.parentElement.getAttribute("data-type") === "img") {
-                    target.parentElement.parentElement.classList.add("img--drag");
                 }
 
                 const x = event.clientX;
-                const dragElement = isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
-                    target.previousElementSibling as HTMLElement;
+                const imageFrame = target.closest(".protyle-image-resize");
+                const dragElement = isMermaid ? nodeElement :
+                    isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
+                    imageFrame ? imageFrame.parentElement.querySelector<HTMLImageElement>(":scope > img") :
+                        target.previousElementSibling as HTMLElement;
                 if (!dragElement) {
                     nodeElement.classList.remove("iframe--drag");
                     return;
                 }
-                const dragWidth = dragElement.clientWidth;
+                const mermaidStyle = isMermaid ? getComputedStyle(nodeElement) : null;
+                const dragWidth = isMermaid ? parseFloat(mermaidStyle.width) : dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
+                const resizeAxis = isMermaid ? "width" : isIFrame || dragElement.tagName === "IMG" ?
+                    target.dataset.resizeAxis || (isIFrame ? "both" : "width") : "both";
                 if (target.classList.contains("protyle-block-resize")) {
                     target.classList.add("touch-resize-active");
                 }
 
                 const imgElement = dragElement.parentElement.parentElement;
+                const imageRect = dragElement.getBoundingClientRect();
+                const imageScale = imageRect.width / dragWidth || 1;
+                const imageMultiple = !imgElement.style.minWidth && nodeElement.style.textAlign !== "center" ? 1 : 2;
+                const mindmapNode = dragElement.tagName === "IMG" ?
+                    nodeElement.closest<HTMLElement>(".mindmap-view__node--editing") : null;
+                const mindmapStyle = mindmapNode ? getComputedStyle(mindmapNode) : null;
+                // 节点按内容撑开，当前编辑器宽度不能作为放大图片的上限。
+                const imageMaxWidth = Math.max(17, mindmapNode && Number.isFinite(parseFloat(mindmapStyle.maxWidth)) ?
+                    parseFloat(mindmapStyle.maxWidth) - parseFloat(mindmapStyle.paddingRight) - parseFloat(mindmapStyle.borderRightWidth) -
+                    (imageRect.left - mindmapNode.getBoundingClientRect().left) / imageScale :
+                    (mostRight - imageRect.left - (imageMultiple === 2 ? imageRect.width / 2 : 0)) * imageMultiple / imageScale);
+                const mermaidInsets = mermaidStyle?.boxSizing === "content-box" ?
+                    parseFloat(mermaidStyle.paddingLeft) + parseFloat(mermaidStyle.paddingRight) +
+                    parseFloat(mermaidStyle.borderLeftWidth) + parseFloat(mermaidStyle.borderRightWidth) : 0;
+                const mermaidScale = isMermaid ? imageRect.width / (dragWidth + mermaidInsets) || 1 : 1;
+                const mermaidParentStyle = isMermaid ? getComputedStyle(nodeElement.parentElement) : null;
+                const mermaidMaxWidth = isMermaid ? Math.max(17, nodeElement.parentElement.clientWidth -
+                    parseFloat(mermaidParentStyle.paddingLeft) - parseFloat(mermaidParentStyle.paddingRight) -
+                    mermaidInsets) : 0;
                 if (dragElement.tagName === "IMG") {
+                    imgElement.classList.add("img--drag");
                     img3115(imgElement);
                 }
-                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                const resizeEvents = new AbortController();
+                const resizeMove = (moveEvent: MouseEvent) => {
+                    if (isMermaid) {
+                        nodeElement.style.width = getImageResizeWidth(dragWidth, dragHeight,
+                            (moveEvent.clientX - x) / mermaidScale, 0, "width", isCenter ? 2 : 1, mermaidMaxWidth) + "px";
+                        nodeElement.style.flex = "none";
+                        return;
+                    }
                     if (dragElement.tagName === "IMG") {
+                        const image = dragElement as HTMLImageElement;
+                        const height = image.naturalWidth && image.naturalHeight ?
+                            dragWidth * image.naturalHeight / image.naturalWidth : dragHeight;
+                        const width = getImageResizeWidth(dragWidth, height,
+                            (moveEvent.clientX - x) / imageScale, (moveEvent.clientY - y) / imageScale,
+                            resizeAxis, imageMultiple, imageMaxWidth);
+                        dragElement.style.width = "";
                         dragElement.style.height = "";
+                        dragElement.removeAttribute("width");
+                        dragElement.removeAttribute("height");
+                        dragElement.parentElement.style.width = width + "px";
+                        return;
                     }
                     if (resizeAxis !== "height" && moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
-                        const multiple = ((dragElement.tagName === "IMG" && !imgElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
-                        if (dragElement.tagName === "IMG") {
-                            dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
-                        } else if (dragElement.tagName === "IFRAME") {
+                        const multiple = isCenter ? 2 : 1;
+                        if (dragElement.tagName === "IFRAME") {
                             // 只清理当前轴的历史尺寸，另一轴继续沿用原数据。
                             dragElement.style.width = "";
                             dragElement.removeAttribute("width");
@@ -2027,7 +2092,7 @@ export class WYSIWYG {
                             dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         }
                     }
-                    if (resizeAxis !== "width" && dragElement.tagName !== "IMG") {
+                    if (resizeAxis !== "width") {
                         if (moveEvent.clientY > y - dragHeight + 8 && moveEvent.clientY < mostBottom) {
                             if (dragElement.tagName === "IFRAME") {
                                 dragElement.style.height = "";
@@ -2040,7 +2105,15 @@ export class WYSIWYG {
                     }
                 };
 
+                // 脑图编辑器会隔离冒泡事件；捕获阶段继续缩放，保留触摸桥接直接调用的接口。
+                documentSelf.addEventListener("mousemove", resizeMove, {capture: true, signal: resizeEvents.signal});
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    if (moveEvent.eventPhase === Event.NONE) {
+                        resizeMove(moveEvent);
+                    }
+                };
                 documentSelf.onmouseup = () => {
+                    resizeEvents.abort();
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
@@ -2048,12 +2121,13 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     nodeElement.classList.remove("iframe--drag");
                     target.classList.remove("touch-resize-active");
-                    target.parentElement.parentElement.classList.remove("img--drag");
+                    imgElement.classList.remove("img--drag");
                     if (target.classList.contains("protyle-action__drag") && nodeElement) {
                         focusBlock(nodeElement);
                         updateTransaction(protyle, nodeElement, html);
                     }
                 };
+                documentSelf.addEventListener("mouseup", documentSelf.onmouseup, {capture: true, signal: resizeEvents.signal});
                 return;
             }
             // table cell select
@@ -3698,6 +3772,12 @@ export class WYSIWYG {
             const target = event.detail.target || event.target as HTMLElement;
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             /// #if MOBILE
+            if (isIOSDevice() && selectElements.length === 0 && !isInEmbedBlock(target) &&
+                usesNativeTextMenu(target, this.element)) {
+                // 不在系统选词菜单上叠加正文浮层，保留原生选区和选择手柄。
+                protyle.toolbar.subElement.classList.add("fn__none");
+                return;
+            }
             if (event.isTrusted && !protyle.disabled && window.JSAndroid?.prepareWordSelection &&
                 selectElements.length === 0 && target.closest('[contenteditable="true"]') && !isInEmbedBlock(target)) {
                 const blockElement = hasClosestBlock(target);
@@ -4177,6 +4257,7 @@ export class WYSIWYG {
         let compositionRange: ({ range: Range } | { cell: HTMLElement; offset: number }) & {
             hasRetainedText?: (range: Range) => boolean;
         };
+        let compositionInputText = "";
         let crossBlockComposition: ICrossBlockComposition;
         this.persistComposition = () => {
             if (!isComposition || crossBlockComposition || !compositionSnapshot?.html ||
@@ -4218,6 +4299,7 @@ export class WYSIWYG {
             }
             this.persistComposition?.();
             isComposition = true;
+            compositionInputText = "";
             recoveredComposition = false;
             compositionSnapshot = undefined;
             crossBlockComposition = undefined;
@@ -4310,9 +4392,15 @@ export class WYSIWYG {
             if (!blockElement) {
                 return;
             }
-            if ("" !== event.data) {
+            // iOS 的空结束事件仍可能保留已提交的括号，只在确认文本保留后处理最近的组合输入。
+            const refBracketText = event.data || (compositionRange?.hasRetainedText?.(range) &&
+                /^[【】]{1,2}$/.test(compositionInputText) ? compositionInputText : "");
+            if ("" !== event.data || refBracketText) {
                 compositionRange = undefined;
                 this.escapeInline(protyle, range, event);
+                if (protyle.hint.handleRefBracketInput(protyle, range, refBracketText)) {
+                    return;
+                }
                 // 小鹤音形 ;k 不能使用 setTimeout;
                 // wysiwyg.element contenteditable 为 false 时，连拼 needRender 必须为 false
                 // hr 渲染；任务列表、粗体、数学公示结尾 needRender 必须为 true
@@ -4359,6 +4447,11 @@ export class WYSIWYG {
             if (!event.isComposing && ["deleteContentBackward", "deleteContentForward"].includes(event.inputType) &&
                 !getBlockSelectionModeElement(this.element) && !this.element.querySelector(".protyle-wysiwyg--select") &&
                 isTabTextBoundary(getEditorRange(this.element), event.inputType === "deleteContentBackward")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (!isComposition && protyle.hint.handleRefBracketBeforeInput(protyle, event)) {
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -4510,6 +4603,9 @@ export class WYSIWYG {
             }
             // 输入法可能暂时清空选区或把光标放到编辑器根节点，候选更新不能触发选区修复。
             if (event.isComposing || (isComposition && !isCommittedTextInput(event))) {
+                if (event.data !== null) {
+                    compositionInputText = event.data;
+                }
                 return;
             }
             const range = getEditorRange(this.element);
@@ -4542,6 +4638,10 @@ export class WYSIWYG {
                 return;
             }
             this.escapeInline(protyle, range, event);
+            if (protyle.hint.handleRefBracketInput(protyle, range, event.data)) {
+                event.stopPropagation();
+                return;
+            }
 
             // 原生输入结束后立即恢复各段折行，避免延迟解析前绘制出临时的整段换行。
             normalizeInlineElementBoundaries(this.element);
@@ -4682,6 +4782,13 @@ export class WYSIWYG {
                 return;
             }
             const target = event.target as HTMLElement;
+            /// #if MOBILE
+            if (isIOSDevice() && usesNativeTextMenu(target, this.element)) {
+                // 双击选词与长按共用系统文字菜单，避免正文浮层覆盖后续触摸位置。
+                protyle.toolbar.subElement.classList.add("fn__none");
+                return;
+            }
+            /// #endif
             if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
                 const blockElement = hasClosestBlock(target) as HTMLElement;
                 const columnID = target.parentElement?.getAttribute("data-col-id");
@@ -4721,7 +4828,9 @@ export class WYSIWYG {
             }
             if (target.tagName === "IMG" && !target.classList.contains("emoji") &&
                 !target.closest('[data-subtype="plantuml"]')) {
-                previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
+                previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID,
+                    target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
+                        target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "");
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/12691

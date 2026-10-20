@@ -53,8 +53,6 @@ func prepareMarkdownExportReferences(docPaths []string, defBlockIDs []string, co
 }
 
 func collectMarkdownExportReferences(tree *parse.Tree, refs *markdownExportReferences) {
-	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
-	defer finishTabTitles()
 	var order []string
 	footnotes := map[string]*refAsFootnotes{}
 	depth := 0

@@ -7,6 +7,9 @@ type OCR struct {
 	AIModelID       string        `json:"aiModelId"`
 	ReasoningEffort string        `json:"reasoningEffort"`
 	Auto            bool          `json:"auto"`
+	ShowText        *bool         `json:"showText"`
+	ShowEmpty       bool          `json:"showEmpty"`
+	ShowError       bool          `json:"showError"`
 	Thresholds      OCRThresholds `json:"thresholds"`
 }
 
@@ -18,5 +21,5 @@ type OCRThresholds struct {
 }
 
 func NewOCR() *OCR {
-	return &OCR{Provider: "paddleocr", Model: "tiny", Auto: false}
+	return &OCR{Provider: "paddleocr", Model: "tiny", Auto: false, ShowText: new(true)}
 }

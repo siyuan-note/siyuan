@@ -49,6 +49,29 @@ func QueryDailyNoteRootIDsInBox(boxID, name, date string) (ids []string, err err
 	return ids, rows.Err()
 }
 
+// QueryExactDocTitleIDInBox 按完整文档标题查询，先精确匹配，再匹配 Unicode 大小写，保留数据库错误。
+func QueryExactDocTitleIDInBox(title, id, rootID, boxID string) (ret string, err error) {
+	rows, err := queryForBox(boxID, "SELECT id, content FROM blocks WHERE type = 'd' AND id != ? AND id != ? ORDER BY id", id, rootID)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	var folded string
+	for rows.Next() {
+		var candidateID, candidateTitle string
+		if err = rows.Scan(&candidateID, &candidateTitle); err != nil {
+			return "", err
+		}
+		if candidateTitle == title {
+			return candidateID, nil
+		}
+		if folded == "" && strings.EqualFold(candidateTitle, title) {
+			folded = candidateID
+		}
+	}
+	return folded, rows.Err()
+}
+
 // GetBlockInBox 按 id 在指定 box 的 db 里查 block。boxID 为空则查全局 db。
 func GetBlockInBox(id, boxID string) (ret *Block) {
 	ret = getBlockCacheInBox(id, boxID)

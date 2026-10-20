@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -16,8 +17,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// MergeConfJSON 对象递归合并，数组和 null 整体替换，未知字段由入站契约决定是否接受。
+// MergeConfJSON 按精确键名递归合并对象，数组和 null 整体替换，未知字段由入站契约决定是否接受。
 func MergeConfJSON(base, patch []byte) ([]byte, error) {
+	return mergeConfJSON(base, patch, nil)
+}
+
+func mergeConfJSON(base, patch []byte, valueType reflect.Type) ([]byte, error) {
 	var current, changes map[string]json.RawMessage
 	if err := json.Unmarshal(base, &current); err != nil {
 		return nil, err
@@ -28,18 +33,63 @@ func MergeConfJSON(base, patch []byte) ([]byte, error) {
 	if current == nil {
 		current = map[string]json.RawMessage{}
 	}
-	for key, value := range changes {
-		if bytes.HasPrefix(bytes.TrimSpace(value), []byte("{")) && bytes.HasPrefix(bytes.TrimSpace(current[key]), []byte("{")) {
-			merged, err := MergeConfJSON(current[key], value)
+	keys := make([]string, 0, len(changes))
+	for key := range changes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		value := changes[key]
+		target, fieldType := mergeConfJSONField(valueType, key)
+		if bytes.HasPrefix(bytes.TrimSpace(value), []byte("{")) && bytes.HasPrefix(bytes.TrimSpace(current[target]), []byte("{")) {
+			merged, err := mergeConfJSON(current[target], value, fieldType)
 			if err != nil {
 				return nil, err
 			}
-			current[key] = merged
+			current[target] = merged
 		} else {
-			current[key] = value
+			current[target] = value
 		}
 	}
 	return json.Marshal(current)
+}
+
+// mergeConfJSONField 按结构体声明匹配字段名，字典键保持精确匹配，并继续解析字典值的类型。
+func mergeConfJSONField(valueType reflect.Type, key string) (string, reflect.Type) {
+	for valueType != nil && valueType.Kind() == reflect.Pointer {
+		valueType = valueType.Elem()
+	}
+	if valueType == nil {
+		return key, nil
+	}
+	if valueType.Kind() == reflect.Map {
+		return key, valueType.Elem()
+	}
+	if valueType.Kind() != reflect.Struct {
+		return key, nil
+	}
+	name := key
+	var fieldType reflect.Type
+	for i := 0; i < valueType.NumField(); i++ {
+		field := valueType.Field(i)
+		if field.PkgPath != "" {
+			continue
+		}
+		fieldName := strings.Split(field.Tag.Get("json"), ",")[0]
+		if fieldName == "-" {
+			continue
+		}
+		if fieldName == "" {
+			fieldName = field.Name
+		}
+		if fieldName == key {
+			return fieldName, field.Type
+		}
+		if fieldType == nil && strings.EqualFold(fieldName, key) {
+			name, fieldType = fieldName, field.Type
+		}
+	}
+	return name, fieldType
 }
 
 func (spec *SectionSpec[C]) patch(patch []byte) ([]Issue, error) {
@@ -74,11 +124,14 @@ func MergeConfSectionJSON(current any, patch []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MergeConfJSON(data, patch)
+	return mergeConfJSON(data, patch, reflect.TypeOf(current))
 }
 
 // ConfSectionPatchJSON 返回合并后的配置段，调用方在发布前保留契约校验与专用领域动作。
 func ConfSectionPatchJSON(namespace string, patch []byte) ([]byte, error) {
+	if nil == Conf {
+		return patch, nil
+	}
 	spec, ok := SectionSpecByNamespace(namespace)
 	if !ok {
 		return nil, fmt.Errorf("unsupported configuration section: %s", namespace)

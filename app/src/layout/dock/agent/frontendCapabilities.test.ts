@@ -7,8 +7,10 @@ import type {App} from "../../../index";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-for (const mobile of [false, true]) {
-    test(`frontend capabilities keep platform actions and shared validation (${mobile ? "mobile" : "desktop"})`, async () => {
+for (const platform of ["desktop", "browser", "mobile"]) {
+    const mobile = platform === "mobile";
+    const browser = platform !== "desktop";
+    test(`frontend capabilities keep platform actions and shared validation (${platform})`, async () => {
         const actions: string[] = [];
         const delayed: (() => void)[] = [];
         const block = {scrollIntoView: () => actions.push("scroll"),
@@ -18,7 +20,10 @@ for (const mobile of [false, true]) {
         const dialog = {element: {querySelector: () => input}};
         const constants = {CB_GET_FOCUS: "focus", DIALOG_GLOBALSEARCH: "search"};
         const searchOptions: Array<{key?: string, method?: number}> = [];
-        const siyuan = {dialogs: [dialog], config: {ai: {embedding: {enabled: true}}}};
+        const fetchedPages: unknown[] = [];
+        let page = {html: "<main>Rendered</main>", text: "Rendered", plain: false};
+        let fetchError: Error | undefined;
+        const siyuan = {dialogs: [dialog], config: {ai: {embedding: {enabled: true}, web: {timeout: 60}}}};
         const dependencies: Record<string, unknown> = {
             "../../../config": {openSetting: () => { actions.push("settings"); return dialog; }},
             "../../getAll": {getAllEditor: () => [{protyle: {wysiwyg: {element: {querySelector: (): null => null}}}}, editor]},
@@ -37,20 +42,59 @@ for (const mobile of [false, true]) {
                 searchOptions.push(options); actions.push("search");
             }},
             "../../../protyle/util/compatibility": {isDisabledFeature: () => false},
+            "../../../util/functions": {isBrowser: () => browser},
+            "electron": {ipcRenderer: {invoke: async (channel: string, args: unknown) => {
+                assert.equal(channel, "siyuan-web-page-fetch");
+                fetchedPages.push(args);
+                if (fetchError) {
+                    throw fetchError;
+                }
+                return page;
+            }}},
         };
         const source = parse(readFileSync("src/layout/dock/agent/frontendCapabilities.ts", "utf8"),
-            {MOBILE: mobile, BROWSER: true}, false, true, "frontendCapabilities.ts");
+            {MOBILE: mobile, BROWSER: browser}, false, true, "frontendCapabilities.ts");
         const code = transpileModule(source, {compilerOptions: {
             module: ModuleKind.CommonJS, target: ScriptTarget.ES2021,
         }}).outputText;
+        if (platform === "desktop") {
+            assert.match(code, /require\("electron"\)/);
+        } else {
+            assert.doesNotMatch(code, /require\("electron"\)/);
+            assert.doesNotMatch(code, /siyuan-web-page-fetch/);
+        }
         const exports = {} as typeof import("./frontendCapabilities");
         runInNewContext(code, {exports, require: (name: string) => {
             assert.ok(name in dependencies, name);
             return dependencies[name];
         }, window: {siyuan}, document: {getElementById: () => input},
-        Event: class {}, InputEvent: class {}, setTimeout: (callback: () => void) => delayed.push(callback)});
+        Lute: {New: () => ({HTML2Md: (html: string) => {
+            assert.equal(html, "<main>Rendered</main>");
+            return "# Rendered";
+        }})}, Event: class {}, InputEvent: class {}, setTimeout: (callback: () => void) => delayed.push(callback)});
         const capability = (name: string) => exports.lookupCapability("native/frontend/" + name);
-        assert.equal(exports.listCapabilityManifests().length, 4);
+        assert.equal(exports.listCapabilityManifests().length, platform === "desktop" ? 5 : 4);
+        const fetchPage = capability("web_page_fetch");
+        if (platform !== "desktop") {
+            assert.equal(fetchPage, undefined);
+        } else {
+            assert.equal(fetchPage.effects.dataEgress, true);
+            assert.ok((await fetchPage.handler({}, {} as App)).error);
+            assert.ok((await fetchPage.handler({url: "https://example.com", format: "html"}, {} as App)).error);
+            assert.equal(fetchedPages.length, 0);
+            assert.equal((await fetchPage.handler({url: "https://example.com"}, {} as App)).result, "# Rendered");
+            assert.equal((await fetchPage.handler({url: "https://example.com", format: "text"}, {} as App)).result, "Rendered");
+            assert.deepEqual(fetchedPages.map(args => JSON.parse(JSON.stringify(args))),
+                [{url: "https://example.com", timeout: 60}, {url: "https://example.com", timeout: 60}]);
+            page = {html: "", text: "# Original Markdown", plain: true};
+            assert.equal((await fetchPage.handler({url: "https://example.com"}, {} as App)).result, "# Original Markdown");
+            page.text = "\u{1F600}".repeat(50001);
+            assert.ok((await fetchPage.handler({url: "https://example.com"}, {} as App)).result.startsWith("\u{1F600}".repeat(50000) + "\n\n...content truncated"));
+            page.text = " ";
+            assert.ok((await fetchPage.handler({url: "https://example.com"}, {} as App)).error);
+            fetchError = new Error("Page fetch timed out");
+            assert.match((await fetchPage.handler({url: "https://example.com"}, {} as App)).error, /timed out/);
+        }
         for (const name of ["focus_block", "open_document"]) {
             assert.equal((await capability(name).handler({}, {} as App)).error, "missing required argument: id");
         }

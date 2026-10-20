@@ -94,7 +94,7 @@ export class AVAttributePanel {
                     return;
                 }
                 this.activeAvID = (target.closest('[data-type="av-tab"]') as HTMLElement).dataset.id || "";
-                this.updateTabs();
+                this.updateTabSelection();
                 event.preventDefault();
                 event.stopPropagation();
             } else if (target.closest('[data-type="toggle"]')) {
@@ -348,17 +348,20 @@ export class AVAttributePanel {
         } else {
             tabsElement?.remove();
         }
+        this.updateTabSelection(databaseElements);
+    }
+
+    private updateTabSelection(databaseElements = Array.from(this.bodyElement.querySelectorAll<HTMLElement>(":scope > [data-av-id]"))) {
+        const useTabs = window.siyuan.config.editor.databaseAttrUseTabs;
         if (databaseElements.length > 0 && !databaseElements.some(item => item.dataset.avId === this.activeAvID)) {
             this.activeAvID = databaseElements[0]?.dataset.avId || "";
         }
         databaseElements.forEach(item => {
             item.classList.toggle("fn__none", useTabs && databaseElements.length > 1 && item.dataset.avId !== this.activeAvID);
         });
-        if (tabsElement) {
-            tabsElement.querySelectorAll("[data-type=\"av-tab\"]").forEach(item => {
-                item.classList.toggle("item--focus", item.getAttribute("data-id") === this.activeAvID);
-            });
-        }
+        this.bodyElement.querySelectorAll(':scope > .protyle-db-attr__tabs [data-type="av-tab"]').forEach(item => {
+            item.classList.toggle("item--focus", item.getAttribute("data-id") === this.activeAvID);
+        });
     }
 
     private bindTabDrag(tabsElement: HTMLElement) {

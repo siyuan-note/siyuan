@@ -139,7 +139,7 @@ func TestAVCacheRejectsStaleAsyncAdmission(t *testing.T) {
 	entered, release := make(chan struct{}), make(chan struct{})
 	controlled, err := ristretto.NewCache(&ristretto.Config{
 		NumCounters: 100, MaxCost: 1 << 20, BufferItems: 64,
-		Cost: func(value interface{}) int64 {
+		Cost: func(value any) int64 {
 			close(entered)
 			<-release
 			return 1

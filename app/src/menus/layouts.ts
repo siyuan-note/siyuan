@@ -10,7 +10,7 @@ import {upDownHint} from "../util/upDownHint";
 import {isBrowser} from "../util/functions";
 import {editWindowWorkspace, getWindowWorkspaces, openWindowWorkspace, removeWindowWorkspace} from "../window/workspace";
 import {MenuItem} from "./Menu";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {captureWindowGeometry, restoreWindowGeometry} from "../window/geometry";
 import type {IWindowGeometry} from "../window/geometry";
 /// #if !BROWSER

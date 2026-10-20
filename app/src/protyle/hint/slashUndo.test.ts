@@ -9,7 +9,8 @@ import {shouldCaptureHintUndoFocus} from "./blockHintRange";
 const source = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest);
 const declaration = source.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
 assert.ok(declaration && isClassDeclaration(declaration));
-const fill = declaration.members.find(member => member.name?.getText(source) === "fill").getText(source);
+const fill = declaration.members.filter(member => ["fill", "consumeRefBracketClose", "openNewTableCell"].includes(member.name?.getText(source)))
+    .map(member => member.getText(source)).join("\n");
 
 for (const scenario of ["replace", "insert", "empty-list-item", "list-item"]) {
     test(`slash undo retains the original caret for ${scenario}`, () => {

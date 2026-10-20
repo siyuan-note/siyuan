@@ -29,16 +29,10 @@ func TestNewFileTreeDefaults(t *testing.T) {
 	if 0 != fileTree.ParentDocTitleClickMode {
 		t.Fatal("clicking a parent document title should open the document by default")
 	}
-	if nil == fileTree.BoxDocEnabled {
-		t.Fatal("box document setting should be initialized")
-	}
-	if *fileTree.BoxDocEnabled {
+	if fileTree.BoxDocEnabled {
 		t.Fatal("box documents should be disabled for new users")
 	}
-	if nil == fileTree.UseSVGDefaultIcon {
-		t.Fatal("default icon setting should be initialized")
-	}
-	if !*fileTree.UseSVGDefaultIcon {
+	if !fileTree.UseSVGDefaultIcon {
 		t.Fatal("SVG default icons should be enabled for new users")
 	}
 }

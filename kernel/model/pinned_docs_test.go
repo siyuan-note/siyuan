@@ -103,6 +103,61 @@ func TestPinnedDocsValidateAndMaintainReferences(t *testing.T) {
 	}
 }
 
+func TestPinnedDocsTooltipMetadata(t *testing.T) {
+	f := setupFileOperationTest(t)
+	for _, id := range []string{f.sourceID, f.box.ID} {
+		tree := treenode.NewTree(f.box.ID, "/"+id+".sy", "/Tooltip", "Tooltip")
+		t.Cleanup(func() { cache.RemoveTreeData(id); cache.RemoveDocIAL(tree.Path) })
+		writeTree := func() {
+			t.Helper()
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpsertBlockTree(tree)
+			cache.RemoveDocIAL(tree.Path)
+		}
+		writeTree()
+		if err := UpdatePinnedDocs([]string{id}, "pin", "", false); err != nil {
+			t.Fatal(err)
+		}
+		for _, suffix := range []string{"before", "after", ""} {
+			attrs := map[string]string{"name": suffix, "alias": suffix, "memo": suffix, "bookmark": suffix}
+			for key, value := range attrs {
+				tree.Root.SetIALAttr(key, value)
+			}
+			tree.Root.SetIALAttr("updated", "20261017010203")
+			writeTree()
+			docs, err := GetPinnedDocs()
+			if err != nil {
+				t.Fatal(err)
+			}
+			var doc *PinnedDoc
+			for i := range docs {
+				if docs[i].ID == id {
+					doc = &docs[i]
+				}
+			}
+			if doc == nil || doc.HSize == "" || doc.HMtime == "" || doc.HCtime == "" ||
+				doc.Name1 != suffix || doc.Alias != suffix || doc.Memo != suffix || doc.Bookmark != suffix {
+				t.Fatalf("incomplete pinned metadata for %s: %+v", id, doc)
+			}
+			if id == f.sourceID {
+				files, _, err := ListDocTree(f.box.ID, "/", util.SortModeNameASC, false, false, 100)
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, file := range files {
+					if file.ID == id && !reflect.DeepEqual(
+						[]string{doc.HSize, doc.HMtime, doc.HCtime, doc.Name1, doc.Alias, doc.Memo, doc.Bookmark},
+						[]string{file.HSize, file.HMtime, file.HCtime, file.Name1, file.Alias, file.Memo, file.Bookmark}) {
+						t.Fatalf("pinned metadata differs from source tree: %+v, %+v", doc, file)
+					}
+				}
+			}
+		}
+	}
+}
+
 func TestPinnedDocsClosedAndEncryptedNotebook(t *testing.T) {
 	f := setupFileOperationTest(t)
 	originalLangs := util.Langs
@@ -120,6 +175,10 @@ func TestPinnedDocsClosedAndEncryptedNotebook(t *testing.T) {
 	docs, err := GetPinnedDocs()
 	if err != nil || len(docs) != 1 || !docs[0].Unavailable {
 		t.Fatalf("closed notebook lost pin: %+v, %v", docs, err)
+	}
+	if docs[0].HSize != "" || docs[0].HMtime != "" || docs[0].HCtime != "" ||
+		docs[0].Name1 != "" || docs[0].Alias != "" || docs[0].Memo != "" || docs[0].Bookmark != "" {
+		t.Fatalf("closed notebook exposed detailed metadata: %+v", docs[0])
 	}
 	boxConf.Encrypted = true
 	forgetRuntimeNormalBox(f.box.ID)

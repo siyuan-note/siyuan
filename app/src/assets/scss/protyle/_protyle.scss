@@ -66,7 +66,6 @@
   &__up {
     transition: var(--b3-transition);
     position: absolute;
-    opacity: 0;
     cursor: pointer;
     color: var(--b3-border-color);
 
@@ -81,13 +80,6 @@
 
   &__down {
     bottom: calc(50% - var(--b3-dynamicscroll-width) / 2 - 20px);
-  }
-
-  &:hover {
-    .protyle-scroll__down,
-    .protyle-scroll__up {
-      opacity: 1;
-    }
   }
 
   &__bar {
@@ -116,11 +108,6 @@
   }
 
   @media (hover: none) {
-    &__down,
-    &__up {
-      opacity: 1;
-    }
-
     &__bar {
       top: calc(50% - 22px);
 
@@ -158,6 +145,22 @@
   &--dragging {
     opacity: 0;
     pointer-events: none;
+  }
+
+  &--full {
+    display: flex;
+    flex-wrap: wrap;
+    width: max-content;
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+
+    > button {
+      flex-shrink: 0;
+    }
+  }
+
+  &[data-scrollable="true"] span {
+    touch-action: pan-y;
   }
 
   button {
@@ -300,7 +303,7 @@
   background-color: var(--b3-theme-background);
   flex-shrink: 0;
   box-sizing: border-box;
-  min-height: 42px;
+  min-height: var(--b3-ui-panel-height, 42px);
   // 需高于选区容器，并低于 .protyle-toolbar
   z-index: 5;
   font-size: 14px;
@@ -843,6 +846,10 @@
     opacity: 0;
   }
 
+  &--hide-actions &__action {
+    display: none;
+  }
+
   &__icon {
     height: 80px;
     width: 80px;
@@ -1259,6 +1266,12 @@ table + .protyle-action__table {
   }
 }
 
+.table__cell--touch-selecting {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .protyle-table-control {
   position: fixed;
   inset: 0;
@@ -1307,7 +1320,8 @@ table + .protyle-action__table {
       transition: opacity 150ms linear;
     }
 
-    &:hover {
+    &:hover,
+    &--active {
       &::before {
         opacity: 0;
       }
@@ -1440,11 +1454,103 @@ table + .protyle-action__table {
     pointer-events: none;
   }
 
-  &__drop {
+  &__drop,
+  &__width-guide {
     position: fixed;
     z-index: 3;
     background-color: var(--b3-theme-primary);
     pointer-events: none;
+  }
+
+  &__width-guide {
+    width: 2px;
+    transform: translateX(-50%);
+  }
+
+  &__width {
+    width: 28px;
+    cursor: col-resize;
+    touch-action: pan-y;
+
+    &::before {
+      width: 2px;
+      height: 100%;
+      background-color: var(--b3-theme-primary);
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+
+  &--touch {
+    > .protyle-table-control__handle,
+    > .protyle-table-control__add {
+      display: none;
+    }
+  }
+
+  &__touch-button,
+  &__endpoint {
+    position: fixed;
+    z-index: 3;
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  &__endpoint {
+    z-index: 4;
+
+    &::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      background-color: var(--b3-theme-primary);
+      border: 2px solid var(--b3-theme-background);
+      border-radius: 50%;
+    }
+  }
+
+  &__toolbar {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    width: auto;
+    pointer-events: auto;
+  }
+
+  &__touch-add {
+    touch-action: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+    }
+  }
+
+  &__touch-handle {
+    width: 16px;
+    height: 16px;
+    touch-action: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    &.protyle-table-control__handle--row::after {
+      left: -12px;
+    }
+
+    &.protyle-table-control__handle--column::after {
+      top: -12px;
+    }
   }
 }
 .image-ocr {

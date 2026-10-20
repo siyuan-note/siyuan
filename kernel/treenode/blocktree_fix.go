@@ -117,5 +117,8 @@ func GetRootUpdated() (ret map[string]string) {
 		}
 		ret[rootID] = updated
 	}
+	if err = rows.Err(); err != nil {
+		logging.LogErrorf("iterate block tree failed: %s", err)
+	}
 	return
 }

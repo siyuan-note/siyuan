@@ -1,16 +1,71 @@
 package model
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/olahol/melody"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestWorkspaceExitRetryPreservesBatch(t *testing.T) {
+	previous, temp := pendingWorkspaceExit, util.TempDir
+	t.Cleanup(func() { pendingWorkspaceExit, util.TempDir = previous, temp })
+	util.TempDir = t.TempDir()
+	pendingWorkspaceExit = nil
+	markPendingWorkspaceExit()
+	batch := pendingWorkspaceExit
+	batch.SetPhase("waiting")
+	time.Sleep(2 * time.Millisecond)
+	markPendingWorkspaceExit()
+	if pendingWorkspaceExit != batch {
+		t.Fatal("background retry replaced the recoverable exit batch")
+	}
+	data, err := os.ReadFile(filepath.Join(util.TempDir, "kernel-exit.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var marker util.WorkspaceExitState
+	if err = json.Unmarshal(data, &marker); err != nil || marker.StartedAt != batch.StartedAt || marker.Phase != "exiting" {
+		t.Fatalf("retry marker changed identity: %s (%v)", data, err)
+	}
+}
+
+func TestExitSyncSkippedAndFailed(t *testing.T) {
+	prepareSyncDirectoryTest(t)
+	previousErrors := autoSyncErrCount.Load()
+	t.Cleanup(func() { autoSyncErrCount.Store(previousErrors) })
+	for _, mode := range []int{0, 3} {
+		Conf.Sync.Load().Enabled = mode != 0
+		Conf.Sync.Load().Mode = mode
+		if err := syncData(true, false); err != nil {
+			t.Fatalf("skipped exit sync reported a failure: %v", err)
+		}
+	}
+	Conf.Sync.Load().Mode = 1
+	Conf.Sync.Load().Enabled = true
+	Conf.SetUser(&conf.User{UserId: "sync-test", UserSiYuanOneTimePayStatus: 1})
+	Conf.Repo.Load().Key = nil
+	Conf.Sync.Load().Perception = false
+	autoSyncErrCount.Store(8)
+	if !checkSync(false, true, false) {
+		t.Fatal("exit retry was blocked by automatic sync backoff")
+	}
+	if err := syncData(true, false); err == nil {
+		t.Fatal("repository initialization failure was reported as successful exit sync")
+	}
+	Conf.Sync.Load().Enabled = false
+	if err := syncData(true, false); err != nil {
+		t.Fatalf("previous sync failure leaked into a skipped sync: %v", err)
+	}
+}
 
 func TestWorkspaceExitRecoveryGuards(t *testing.T) {
 	previous, previousFinished := pendingWorkspaceExit, exitFinished
@@ -23,14 +78,14 @@ func TestWorkspaceExitRecoveryGuards(t *testing.T) {
 	exitFinished = false
 	pendingWorkspaceExit = &util.WorkspaceExitState{PID: os.Getpid(), StartedAt: 123, Phase: "waiting"}
 	for _, expected := range []*util.WorkspaceExitState{{PID: os.Getpid() + 1, StartedAt: 123}, {PID: os.Getpid(), StartedAt: 124}} {
-		if code, _ := RecoverWorkspaceExit(expected.PID, expected.StartedAt); code != -1 {
+		if code, _ := RecoverWorkspaceExit(expected.PID, expected.StartedAt, true); code != -1 {
 			t.Fatalf("mismatched exit accepted: %d", code)
 		}
 	}
 	session := &melody.Session{Request: httptest.NewRequest("GET", "/ws?app=exit-recovery-test&id=main&type=main", nil)}
 	util.AddPushChan(session)
 	t.Cleanup(func() { util.RemovePushChan(session) })
-	if code, _ := RecoverWorkspaceExit(os.Getpid(), 123); code != 3 {
+	if code, _ := RecoverWorkspaceExit(os.Getpid(), 123, true); code != 3 {
 		t.Fatalf("active window lost its exit: %d", code)
 	}
 	util.RemovePushChan(session)
@@ -43,7 +98,7 @@ func TestWorkspaceExitRecoveryGuards(t *testing.T) {
 	}
 	util.AttachUI = true
 	exitFinished = true
-	if code, _ := RecoverWorkspaceExit(os.Getpid(), 123); code != 0 {
+	if code, _ := RecoverWorkspaceExit(os.Getpid(), 123, true); code != 0 {
 		t.Fatalf("completed recovery was not idempotent: %d", code)
 	}
 }

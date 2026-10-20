@@ -58,6 +58,7 @@ const fixture = () => {
         registerBuiltinSlashHint: value => value,
         path: path,
     };
+    Object.assign(deps, load("protyle/hint/searchRef", deps, window, Lute));
     const paths = load("util/pathName", {...deps, path}, window, Lute);
     Object.assign(deps, load("util/newFileSelection", deps, window, Lute), {
         ...paths,
@@ -188,13 +189,13 @@ test("typed and searched reference suggestions offer location selection includin
             f.hint.prepareCreateTarget = () => ({promise: Promise.resolve(hideConfigured), isCurrent: () => true});
             const extend = load("protyle/hint/extend", f.deps, f.window, f.Lute);
             extend.hintRef("New title", f.protyle, source);
-            f.requests[0].cb({data: {newDoc: true, k: "New title", blocks: []}});
+            f.requests[0].cb({code: 0, data: {newDoc: true, k: "New title", blocks: []}});
             await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFileAtPath ")), true);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFile ")), !hideConfigured);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newSubDoc ")), true);
             f.hint.genSearchHTML(f.protyle, {value: "New title"}, false, "Original anchor", source);
-            f.requests[1].cb({data: {newDoc: true, k: "New title", blocks: []}});
+            f.requests[1].cb({code: 0, data: {newDoc: true, k: "New title", blocks: []}});
             await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.hint.element.lastElementChild.innerHTML.includes("newFileAtPath"), true);
         }

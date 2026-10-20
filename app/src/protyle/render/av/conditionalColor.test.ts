@@ -14,7 +14,7 @@ test("conditional backgrounds preserve explicit defaults and independent propert
 });
 
 test("conditional rule drops preserve values and handle both directions and unchanged positions", () => {
-    const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map(id => ({id, target: "item", color: null,
+    const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map((id): IAVConditionalColorRule => ({id, target: "item", color: null,
         matchOption: false, filter: {column: "text", operator: "Is not empty"}}));
     const ids = (items: IAVConditionalColorRule[]) => items.map(item => item.id);
     assert.deepEqual(ids(moveConditionalColorRule(rules, "a", "c", false)), ["b", "c", "a"]);

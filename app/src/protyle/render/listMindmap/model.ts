@@ -1,8 +1,10 @@
 import {Constants} from "../../../constants";
-import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
+import {getOrderedListMarkerUpdates, isListConversionType} from "../../wysiwyg/listContext";
 import type {MindmapManualRoute, MindmapRelationAnchor} from "./routing";
 import {getListMindmapSiblingIDs, isListMindmapSummaryCrossing, normalizeListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary} from "./summary";
+import {LIST_MINDMAP_CONNECTOR_STYLES} from "./connectors";
+import type {ListMindmapConnectorStyle} from "./connectors";
 
 export interface ListMindmapNodeStyle {
     textColor?: string;
@@ -36,6 +38,7 @@ export interface ListMindmapMetadata {
     version: 1 | 2;
     rootTitle?: string;
     viewLocked?: boolean;
+    connectorStyle?: ListMindmapConnectorStyle;
     nodes: Record<string, ListMindmapNodeStyle>;
     relations: ListMindmapRelation[];
     summaries?: ListMindmapSummary[];
@@ -103,6 +106,9 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
         throw invalidMetadata();
     }
     if (data.viewLocked !== undefined && typeof data.viewLocked !== "boolean") {
+        throw invalidMetadata();
+    }
+    if ("connectorStyle" in data && !LIST_MINDMAP_CONNECTOR_STYLES.some(style => style === data.connectorStyle)) {
         throw invalidMetadata();
     }
     const numberKeys = ["fontSize", "borderWidth", "borderRadius", "lineWidth"];
@@ -191,6 +197,13 @@ export const writeListMindmapMetadata = (list: HTMLElement, metadata: ListMindma
     list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, value);
 };
 
+// 仅首次创建配置时写入样式，已有脑图配置继续按自身的样式或固定缺省值显示。
+export const initializeListMindmapConnectorStyle = (list: Element, style: ListMindmapConnectorStyle) => {
+    if (!list.hasAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA)) {
+        writeListMindmapMetadata(list as HTMLElement, {...parseListMindmapMetadata(null), connectorStyle: style});
+    }
+};
+
 // 退出脑图时移除画布高度，让列表按正文撑开，同时保留其他块样式。
 export const clearListMindmapHeight = (element: Element) => {
     const style = (element as HTMLElement).style;
@@ -205,6 +218,9 @@ export const clearListMindmapHeight = (element: Element) => {
 
 export const retagMindmapBranch = (root: Element, toMindmap: boolean) => {
     if (!toMindmap) {
+        if (root.getAttribute("data-type") === "NodeMindmap") {
+            initializeListMindmapConnectorStyle(root, "bezier");
+        }
         clearListMindmapHeight(root);
     }
     const sourceBranch = toMindmap ? "NodeList" : "NodeMindmap";
@@ -328,7 +344,10 @@ export const readListMindmap = (list: HTMLElement): ListMindmapModel => {
 };
 
 const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
-    root.querySelectorAll(".mindmap-view, .list-mindmap").forEach(element => element.remove());
+    root.querySelectorAll(".mindmap-view, .list-mindmap, .protyle-image-resize").forEach(element => element.remove());
+    root.querySelectorAll(".img--select, .img--drag, .protyle-image-container--compact").forEach(element => {
+        element.classList.remove("img--select", "img--drag", "protyle-image-container--compact");
+    });
     // 页签导航和面板标识由渲染器生成，不参与正文比较或脑图节点事务。
     root.querySelectorAll(".tabs-header, .tabs-divider, .tabs-attributes").forEach(element => element.remove());
     root.querySelectorAll('[data-type="NodeTabs"], [data-type="NodeTabItem"]').forEach(element => {
@@ -361,7 +380,8 @@ const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
 };
 
 export const cleanListMindmapHTML = (html: string): string => {
-    if (!html.includes("mindmap-view") && !html.includes("list-mindmap") && !html.includes("NodeTabs")) {
+    if (!html.includes("mindmap-view") && !html.includes("list-mindmap") && !html.includes("NodeTabs") &&
+        !html.includes("protyle-image") && !html.includes("img--select") && !html.includes("img--drag")) {
         return html;
     }
     const template = document.createElement("template");
@@ -375,6 +395,9 @@ export const listMindmapConversionSource = (element: Element): Element => {
     const template = document.createElement("template");
     template.innerHTML = cleanListMindmapHTML(element.outerHTML);
     const source = template.content.firstElementChild;
+    if (source.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") {
+        initializeListMindmapConnectorStyle(source, "bezier");
+    }
     if (source.getAttribute("data-type") === "NodeMindmap") {
         retagMindmapBranch(source, false);
     }
@@ -438,7 +461,7 @@ export const materializeListMindmapRoot = (list: HTMLElement, lute: Lute): boole
 export const isListMindmapListConversion = (element: Element, type: string) =>
     (element.getAttribute("data-type") === "NodeMindmap" ||
         element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") &&
-    ["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type);
+    isListConversionType(type);
 
 // 转换列表类型时退出脑图显示，保留节点、连接元数据及原 DOM 供撤销使用。
 export const convertListMindmapToList = (element: Element, type: string, lute: Lute): string | undefined => {
@@ -460,7 +483,7 @@ export const convertListMindmapToList = (element: Element, type: string, lute: L
     return materializeListMindmapRoot(list, lute) ? lute.SpinBlockDOM(list.outerHTML) : converted;
 };
 
-// 按每层最大宽度对齐节点，并为每个分支保留完整的垂直空间，避免富文本节点相互遮挡。
+// 按父节点宽度排列分支，保留节点下方控件的操作空间，避免富文本节点相互遮挡。
 export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     horizontalGap?: number;
     verticalGap?: number;
@@ -469,8 +492,9 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     verticalGaps?: Map<string, number>;
     summaries?: {nodeIds: string[], height: number}[];
 } = {}) => {
+    // 横向间距容纳右侧两枚按钮，纵向间距避开节点下方 14px 的悬停区域。
     const horizontalGap = options.horizontalGap ?? 40;
-    const verticalGap = options.verticalGap ?? 24;
+    const verticalGap = options.verticalGap ?? 16;
     const padding = options.padding ?? 32;
     const gapBefore = (id: string) => Math.max(verticalGap, options.verticalGaps?.get(id) || 0);
     if ([horizontalGap, verticalGap, padding].some(value => !Number.isFinite(value) || value < 0)) {

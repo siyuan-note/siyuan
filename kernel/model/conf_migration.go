@@ -72,7 +72,17 @@ var confMigrations = []confMigration{
 		if nil == c.Export.Load() {
 			return false, nil
 		}
-		docxTemplate := util.RemoveInvalid(c.Export.Load().DocxTemplate)
+		var legacy struct {
+			Export struct {
+				DocxTemplate string `json:"docxTemplate"`
+			} `json:"export"`
+		}
+		if len(raw) > 0 {
+			if err := gulu.JSON.UnmarshalJSON(raw, &legacy); err != nil {
+				return false, err
+			}
+		}
+		docxTemplate := util.RemoveInvalid(legacy.Export.DocxTemplate)
 		if "" == docxTemplate {
 			return false, nil
 		}
@@ -84,7 +94,6 @@ var confMigrations = []confMigration{
 			params += " --reference-doc " + docxTemplate
 			c.Export.Load().PandocParams = strings.TrimSpace(params)
 		}
-		c.Export.Load().DocxTemplate = ""
 		return true, nil
 	}},
 	{5, "pandoc", func(c *AppConf, raw []byte) (bool, error) {

@@ -15,14 +15,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func modelLocationCoordinate(value float64) *float64 { return &value }
-
 func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 	const keyID, itemID = "20261009000001-locakey", "20261009000002-locarow"
 	value := &av.Value{ID: "20261009000003-locaval", KeyID: keyID, BlockID: itemID,
 		Type: av.KeyTypeLocation, CreatedAt: 100, UpdatedAt: 200,
-		Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0),
-			Longitude: modelLocationCoordinate(120), OriginalInput: "original"}}
+		Location: &av.ValueLocation{Name: "Home", Latitude: new(float64(0)),
+			Longitude: new(float64(120)), OriginalInput: "original"}}
 	view := &av.AttributeView{ID: "20261009000000-locatav", KeyValues: []*av.KeyValues{
 		{Key: &av.Key{ID: "20261009000004-locabky", Type: av.KeyTypeBlock}, Values: []*av.Value{{
 			BlockID: itemID, Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: "Entry"}}}},
@@ -90,7 +88,7 @@ func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 }
 
 func TestAttributeViewLocationNoOpProvenance(t *testing.T) {
-	previous := &av.ValueLocation{Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "source"}
+	previous := &av.ValueLocation{Latitude: new(float64(0)), Longitude: new(float64(0)), OriginalInput: "source"}
 	updated := *previous
 	normalizeAttributeViewLocationProvenance(previous, &updated, []byte(`{"location":{"latitude":0,"longitude":0}}`))
 	if updated.OriginalInput != "source" {
@@ -99,20 +97,20 @@ func TestAttributeViewLocationNoOpProvenance(t *testing.T) {
 }
 
 func TestAttributeViewLocationAutomationReplacement(t *testing.T) {
-	previous := &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "original"}}
+	previous := &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Home", Latitude: new(float64(0)), Longitude: new(float64(0)), OriginalInput: "original"}}
 	next := previous.Clone()
 	next.Location.OriginalInput = "different provenance"
 	if !equalAutomationValues(previous, next) {
 		t.Fatal("provenance triggered an automation value change")
 	}
-	next.Location.Longitude = modelLocationCoordinate(1)
+	next.Location.Longitude = new(float64(1))
 	if equalAutomationValues(previous, next) {
 		t.Fatal("coordinate change was ignored")
 	}
 	for _, desired := range []*av.Value{
 		{Type: av.KeyTypeLocation},
 		{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Office"}},
-		{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0)}},
+		{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Latitude: new(float64(0)), Longitude: new(float64(0))}},
 	} {
 		merged := previous.Clone()
 		data, _ := json.Marshal(automationValuePatch(desired))
@@ -162,7 +160,7 @@ func TestAttributeViewLocationEncryptedRecovery(t *testing.T) {
 				t.Fatalf("legacy authenticated read: %v", err)
 			}
 			value := &av.Value{ID: "20261009000002-locaval", KeyID: locationKeyID, BlockID: "20260921000003-example", Type: av.KeyTypeLocation,
-				Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "original"}}
+				Location: &av.ValueLocation{Name: "Home", Latitude: new(float64(0)), Longitude: new(float64(0)), OriginalInput: "original"}}
 			view.KeyValues = append(view.KeyValues, &av.KeyValues{Key: &av.Key{ID: locationKeyID, Name: "Location", Type: av.KeyTypeLocation}, Values: []*av.Value{value}})
 			if err = av.SaveAttributeView(view); err != nil {
 				t.Fatal(err)
@@ -268,7 +266,7 @@ func TestAttributeViewLocationSaveRejectsInvalidAndFuture(t *testing.T) {
 	for _, spec := range []int{av.LocationSpec, av.CurrentSpec + 1} {
 		view := &av.AttributeView{ID: avID, Spec: spec, KeyValues: []*av.KeyValues{{
 			Key: &av.Key{Type: av.KeyTypeLocation}, Values: []*av.Value{{Type: av.KeyTypeLocation,
-				Location: &av.ValueLocation{Latitude: modelLocationCoordinate(91), Longitude: modelLocationCoordinate(0)}}},
+				Location: &av.ValueLocation{Latitude: new(float64(91)), Longitude: new(float64(0))}}},
 		}}}
 		if err := av.SaveAttributeView(view); err == nil || spec > av.CurrentSpec && err != av.ErrSpecTooNew {
 			t.Fatalf("invalid/future save result: %v", err)

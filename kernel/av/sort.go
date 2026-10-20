@@ -191,12 +191,13 @@ func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoin
 		}
 	case KeyTypeText:
 		if nil != value.Text && nil != other.Text {
-			if "" == value.Text.Content {
+			switch "" {
+			case value.Text.Content:
 				if "" == other.Text.Content {
 					return 0
 				}
 				return 1
-			} else if "" == other.Text.Content {
+			case other.Text.Content:
 				return -1
 			}
 
@@ -324,24 +325,26 @@ func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoin
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {
-			if "" == value.URL.Content {
+			switch "" {
+			case value.URL.Content:
 				if "" == other.URL.Content {
 					return 0
 				}
 				return 1
-			} else if "" == other.URL.Content {
+			case other.URL.Content:
 				return -1
 			}
 			return strings.Compare(value.URL.Content, other.URL.Content)
 		}
 	case KeyTypeEmail:
 		if nil != value.Email && nil != other.Email {
-			if "" == value.Email.Content {
+			switch "" {
+			case value.Email.Content:
 				if "" == other.Email.Content {
 					return 0
 				}
 				return 1
-			} else if "" == other.Email.Content {
+			case other.Email.Content:
 				return -1
 			}
 			return strings.Compare(value.Email.Content, other.Email.Content)
@@ -360,12 +363,13 @@ func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoin
 		return strings.Compare(left, right)
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other.Phone {
-			if "" == value.Phone.Content {
+			switch "" {
+			case value.Phone.Content:
 				if "" == other.Phone.Content {
 					return 0
 				}
 				return 1
-			} else if "" == other.Phone.Content {
+			case other.Phone.Content:
 				return -1
 			}
 			return strings.Compare(value.Phone.Content, other.Phone.Content)
@@ -376,16 +380,16 @@ func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoin
 			for _, v := range value.MAsset {
 				v1.WriteString(v.Content)
 			}
-			var v2 string
+			var v2 strings.Builder
 			for _, v := range other.MAsset {
-				v2 += v.Content
+				v2.WriteString(v.Content)
 			}
 
-			if 0 == strings.Compare(v1.String(), v2) {
+			if 0 == strings.Compare(v1.String(), v2.String()) {
 				return 0
 			}
 
-			if util.EmojiPinYinCompare(v1.String(), v2) {
+			if util.EmojiPinYinCompare(v1.String(), v2.String()) {
 				return -1
 			}
 			return 1

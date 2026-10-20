@@ -6,7 +6,7 @@
 		"id": "20201227173504-847cs1q",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20260921003419"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -294,7 +294,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227174908-s19h988",
-				"updated": "20260918190000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -312,30 +312,107 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201227180709-rglrztt",
-				"updated": "20210301202239"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "构建 Docker 镜像时设置了入口："
+					"Data": "镜像入口为 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "ENTRYPOINT [ \"/opt/siyuan/kernel\" ]"
+					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/entrypoint.sh\"]"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，使用 "
+					"Data": "，默认命令为 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run b3log/siyuan"
+					"TextMarkTextContent": "CMD [\"serve\"]"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 并带参即可启动："
+					"Data": "。镜像名称后的参数会替换默认命令，因此传入内核参数时必须显式包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261016112115-xcrje9n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016112115-xcrje9n",
+				"updated": "20261016112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启动前先创建宿主机工作空间目录并配置鉴权。以下示例从宿主机已导出的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 环境变量读取强锁屏密码；新 Docker 工作空间没有密码或有效的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190000-oidccn1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC 登录"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 时会拒绝启动。例如，可在 Bash 中按下例私密输入自己选择的密码。不要将真实密码写入共享文件或命令历史；有权限检查容器环境的人仍可读到该值。"
+				}
+			]
+		},
+		{
+			"ID": "20261016112115-dw35lxo",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261016112115-dw35lxo",
+				"updated": "20261016112115"
+			},
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "YmFzaA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "read -r -s -p \"锁屏密码：\" SIYUAN_ACCESS_AUTH_CODE\nprintf '\\n'\nexport SIYUAN_ACCESS_AUTH_CODE\n: \"${SIYUAN_ACCESS_AUTH_CODE:?请设置非空锁屏密码}\"\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},
@@ -397,7 +474,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210301201353-sffb1m7",
-				"updated": "20260918190000"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -418,7 +495,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE b3log/siyuan serve --workspace=workspace_dir_container"
 				},
 				{
 					"Type": "NodeText",
@@ -435,7 +512,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。Docker 端口映射格式为宿主机端口:容器端口；若修改发布服务端口，应同步调整容器端口，访问时使用宿主机端口。请使用固定的发布服务端口，不要设置为 0"
+					"Data": "。Docker 端口映射格式为宿主机端口:容器端口；若修改发布服务端口，应同步调整容器端口，访问时使用宿主机端口。请使用固定的发布服务端口，不要设置为 0。"
 				}
 			]
 		},
@@ -541,30 +618,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201227194509-hdnzkry",
-				"updated": "20231108220452"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "为了简化，建议将 workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace_dir_host"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 和 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace_dir_container"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 都配置为 "
+					"Data": "例如，在宿主机创建 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -573,16 +632,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，对应的启动命令示例："
+					"Data": " 后运行 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE -e PUID=1000 -e PGID=1000 b3log/siyuan serve --workspace=/siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": "。宿主机与容器内路径可以不同。启动后打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "http://server-ip:6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，使用刚才设置的密码登录；启动失败时检查容器日志。"
 				}
 			]
 		},
@@ -592,7 +660,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211112102027-wpzhq6h",
-				"updated": "20211112102725"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -606,30 +674,66 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211112102355-akc01dd",
-				"updated": "20211112103316"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "镜像中是使用默认创建的普通用户 "
+					"Data": "入口脚本需要权限来创建或复用用户和组，并递归设置 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan"
+					"TextMarkTextContent": "/opt/siyuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（uid 1000/gid 1000）来启动内核进程的，所以在宿主机创建工作空间文件夹时请注意设置该文件夹所属用户组："
+					"Data": "、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
+					"TextMarkTextContent": "/home/siyuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，在启动容器时需要带参数 "
+					"Data": " 和工作空间的所有权，随后通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "su-exec"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 以 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "PUID:PGID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 运行内核，两者默认均为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。如需匹配宿主机所有者，可传入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-e PUID=1000 -e PGID=1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 并替换为相应数字 ID。不要添加 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -638,7 +742,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "，否则入口脚本无法准备权限。所有权调整也会作用于挂载的宿主机目录。"
 				}
 			]
 		},
@@ -894,7 +998,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230406104141-6o5jpu6",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -909,7 +1013,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230406104201-nbfn2p9",
-				"updated": "20260903150000"
+				"updated": "20261016112115"
 			},
 			"Children": [
 				{
@@ -921,7 +1025,7 @@
 					},
 					"Properties": {
 						"id": "20230406104217-8m58gpo",
-						"updated": "20260903150000"
+						"updated": "20261016112115"
 					},
 					"Children": [
 						{
@@ -929,7 +1033,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406104217-42a91na",
-								"updated": "20260903150000"
+								"updated": "20261016112115"
 							},
 							"Children": [
 								{
@@ -945,7 +1049,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "。"
+									"Data": ""
 								}
 							]
 						}

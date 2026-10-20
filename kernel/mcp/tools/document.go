@@ -172,9 +172,9 @@ func documentList(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Documents in %s (hPath: %s):\n\n", notebook, hPath))
+	fmt.Fprintf(&sb, "Documents in %s (hPath: %s):\n\n", notebook, hPath)
 	for _, f := range files {
-		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", f.Name, f.ID, strings.TrimRight(hPath, "/")+"/"+f.Name))
+		fmt.Fprintf(&sb, "- %s (id: %s, hPath: %s)\n", f.Name, f.ID, strings.TrimRight(hPath, "/")+"/"+f.Name)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -272,13 +272,13 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Search results matching '%s' (%d):\n\n", keyword, len(docs)))
+	fmt.Fprintf(&sb, "Search results matching '%s' (%d):\n\n", keyword, len(docs))
 	for _, d := range docs {
 		typ, id, name := documentSearchDisplayFields(d)
 		if typ == "NOTEBOOK" {
-			sb.WriteString(fmt.Sprintf("- [%s] %s (id: %s, hPath: %s)\n", typ, name, id, d["hPath"]))
+			fmt.Fprintf(&sb, "- [%s] %s (id: %s, hPath: %s)\n", typ, name, id, d["hPath"])
 		} else {
-			sb.WriteString(fmt.Sprintf("- [%s] %s (id: %s, notebook: %s, hPath: %s)\n", typ, name, id, d["box"], d["hPath"]))
+			fmt.Fprintf(&sb, "- [%s] %s (id: %s, notebook: %s, hPath: %s)\n", typ, name, id, d["box"], d["hPath"])
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -304,24 +304,22 @@ func documentInfo(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf(
-		"ID: %s\nRootID: %s\nName: %s\nRefCount: %d\nSubFileCount: %d\nIcon: %s",
-		info.ID, info.RootID, info.Name, info.RefCount, info.SubFileCount, info.Icon,
-	))
+	fmt.Fprintf(&sb, "ID: %s\nRootID: %s\nName: %s\nRefCount: %d\nSubFileCount: %d\nIcon: %s",
+		info.ID, info.RootID, info.Name, info.RefCount, info.SubFileCount, info.Icon)
 	if len(info.RefIDs) > 0 {
-		sb.WriteString(fmt.Sprintf("\nRefIDs: %s", strings.Join(info.RefIDs, ", ")))
+		fmt.Fprintf(&sb, "\nRefIDs: %s", strings.Join(info.RefIDs, ", "))
 	}
 	if len(info.AttrViews) > 0 {
 		sb.WriteString("\nAttrViews:")
 		for _, av := range info.AttrViews {
-			sb.WriteString(fmt.Sprintf("\n  - %s: %s", av.ID, av.Name))
+			fmt.Fprintf(&sb, "\n  - %s: %s", av.ID, av.Name)
 		}
 	}
 	if len(info.IAL) > 0 {
 		sb.WriteString("\nIAL:")
 		for k, v := range info.IAL {
 			v = truncateText(v, 100)
-			sb.WriteString(fmt.Sprintf("\n  %s: %s", k, v))
+			fmt.Fprintf(&sb, "\n  %s: %s", k, v)
 		}
 	}
 

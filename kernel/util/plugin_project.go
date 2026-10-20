@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -101,15 +102,15 @@ func validPluginProjectRevision(s string) bool {
 // 即使出现在允许清单中，也拒绝平台别名及私密、构建依赖和运行时材料。
 func ValidatePluginProjectFile(name string) error {
 	if err := validateManagedSkillPath(name); err != nil {
-		return fmt.Errorf("invalid_path: %w", err)
+		return NewTextFileError(TextFileInvalidPath, err)
 	}
-	for _, part := range strings.Split(strings.ToLower(name), "/") {
+	for part := range strings.SplitSeq(strings.ToLower(name), "/") {
 		switch part {
 		case "configs", "settings", "cache", "logs", "secrets", "credentials", "data.json", "settings.json", "token.json", "token.txt", "tokens.txt", "auth.json", "auth.txt", "credential.json", "credentials.txt", "secret.json", "secrets.json", "secrets.txt":
-			return fmt.Errorf("invalid_path: credential or runtime material is not permitted: %s", name)
+			return NewTextFileError(TextFileInvalidPath, fmt.Errorf("credential or runtime material is not permitted: %s", name))
 		}
 		if strings.HasPrefix(part, ".") || strings.HasSuffix(part, ".log") || strings.HasSuffix(part, ".bak") || strings.HasSuffix(part, ".key") || strings.HasSuffix(part, ".pem") || strings.HasSuffix(part, ".p12") || strings.HasSuffix(part, ".pfx") || strings.HasSuffix(part, ".zip") || part == "node_modules" || part == "backup" || part == "backups" || part == "checkpoints" || part == "artifacts" || part == "storage" || part == "conf" || part == "config" || part == "conf.json" || part == "config.json" || part == "credentials.json" || part == "token" || part == "tokens.json" || strings.HasPrefix(part, "id_rsa") || strings.HasPrefix(part, "id_ed25519") {
-			return fmt.Errorf("invalid_path: private, runtime or generated archive material is not permitted: %s", name)
+			return NewTextFileError(TextFileInvalidPath, fmt.Errorf("private, runtime or generated archive material is not permitted: %s", name))
 		}
 	}
 	return nil
@@ -117,7 +118,7 @@ func ValidatePluginProjectFile(name string) error {
 
 func pluginProjectAllowFiles(grant *PluginDevelopmentGrant) ([]string, error) {
 	if len(grant.AllowFiles) == 0 || len(grant.AllowFiles) > PluginProjectMaxFiles {
-		return nil, errors.New("invalid_path: approved file inventory is empty or too large")
+		return nil, NewTextFileError(TextFileInvalidPath, errors.New("approved file inventory is empty or too large"))
 	}
 	files := append([]string(nil), grant.AllowFiles...)
 	sort.Strings(files)
@@ -128,14 +129,14 @@ func pluginProjectAllowFiles(grant *PluginDevelopmentGrant) ([]string, error) {
 		}
 		key := strings.ToLower(name)
 		if seen[key] {
-			return nil, errors.New("invalid_path: duplicate or case-colliding approved file")
+			return nil, NewTextFileError(TextFileInvalidPath, errors.New("duplicate or case-colliding approved file"))
 		}
 		seen[key] = true
 	}
 	for key := range seen {
 		for parent := path.Dir(key); parent != "."; parent = path.Dir(parent) {
 			if seen[parent] {
-				return nil, errors.New("invalid_path: file/directory collision")
+				return nil, NewTextFileError(TextFileInvalidPath, errors.New("file/directory collision"))
 			}
 		}
 	}
@@ -164,7 +165,7 @@ func PluginProjectRegularFile(info os.FileInfo) bool {
 func OpenPluginProjectDirectory(abs string, create bool) (*os.Root, error) {
 	rel, err := filepath.Rel(WorkspaceDir, abs)
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || filepath.IsAbs(rel) {
-		return nil, errors.New("invalid_path: project path escapes workspace")
+		return nil, NewTextFileError(TextFileInvalidPath, errors.New("project path escapes workspace"))
 	}
 	root, err := os.OpenRoot(WorkspaceDir)
 	if err != nil {
@@ -173,7 +174,7 @@ func OpenPluginProjectDirectory(abs string, create bool) (*os.Root, error) {
 	if rel == "." {
 		return root, nil
 	}
-	for _, part := range strings.Split(filepath.ToSlash(rel), "/") {
+	for part := range strings.SplitSeq(filepath.ToSlash(rel), "/") {
 		if part == "" || part == "." || part == ".." {
 			root.Close()
 			return nil, errors.New("invalid_path")
@@ -191,7 +192,7 @@ func OpenPluginProjectDirectory(abs string, create bool) (*os.Root, error) {
 		}
 		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 			root.Close()
-			return nil, errors.New("invalid_path: linked project directory")
+			return nil, NewTextFileError(TextFileInvalidPath, errors.New("linked project directory"))
 		}
 		next, openErr := root.OpenRoot(part)
 		if openErr != nil {
@@ -202,7 +203,7 @@ func OpenPluginProjectDirectory(abs string, create bool) (*os.Root, error) {
 		root.Close()
 		if statErr != nil || !os.SameFile(info, actual) {
 			next.Close()
-			return nil, errors.New("invalid_path: project directory changed")
+			return nil, NewTextFileError(TextFileInvalidPath, errors.New("project directory changed"))
 		}
 		root = next
 	}
@@ -218,10 +219,10 @@ func readPluginProjectFile(root *os.Root, name string) ([]byte, error) {
 		return nil, err
 	}
 	if !PluginProjectRegularFile(info) {
-		return nil, errors.New("invalid_path: linked or special file")
+		return nil, NewTextFileError(TextFileInvalidPath, errors.New("linked or special file"))
 	}
 	if info.Size() > PluginProjectMaxFileBytes {
-		return nil, errors.New("too_large: project file exceeds 16 MiB")
+		return nil, NewTextFileError(TextFileTooLarge, errors.New("project file exceeds 16 MiB"))
 	}
 	f, err := OpenFileNoFollow(root, name)
 	if err != nil {
@@ -230,7 +231,7 @@ func readPluginProjectFile(root *os.Root, name string) ([]byte, error) {
 	defer f.Close()
 	actual, err := f.Stat()
 	if err != nil || !PluginProjectRegularFile(actual) || !os.SameFile(info, actual) {
-		return nil, errors.New("revision_conflict: file identity changed")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("file identity changed"))
 	}
 	if err = CheckSingleLinkRegularFile(f); err != nil {
 		return nil, err
@@ -240,7 +241,7 @@ func readPluginProjectFile(root *os.Root, name string) ([]byte, error) {
 		return nil, err
 	}
 	if int64(len(data)) > PluginProjectMaxFileBytes {
-		return nil, errors.New("too_large: project file exceeds 16 MiB")
+		return nil, NewTextFileError(TextFileTooLarge, errors.New("project file exceeds 16 MiB"))
 	}
 	return data, nil
 }
@@ -265,7 +266,7 @@ func snapshotPluginProject(root *os.Root, authorize func(string) error, temporar
 
 			data, err := readPluginProjectFile(root, name)
 			if err != nil || PluginProjectDigest(data) != revision {
-				return errors.New("result_unknown: recorded temporary file has incomplete or unknown bytes; preserved for inspection")
+				return NewTextFileError(TextFileResultUnknown, errors.New("recorded temporary file has incomplete or unknown bytes; preserved for inspection"))
 			}
 			return nil
 		}
@@ -279,24 +280,24 @@ func snapshotPluginProject(root *os.Root, authorize func(string) error, temporar
 		}
 		key := strings.ToLower(name)
 		if seen[key] {
-			return errors.New("invalid_path: case-colliding project paths")
+			return NewTextFileError(TextFileInvalidPath, errors.New("case-colliding project paths"))
 		}
 		seen[key] = true
 		if len(seen) > PluginProjectMaxFiles*2 {
-			return errors.New("too_large: project contains too many paths")
+			return NewTextFileError(TextFileTooLarge, errors.New("project contains too many paths"))
 		}
 		info, err := root.Lstat(name)
 		if err != nil {
 			return err
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			return errors.New("invalid_path: linked project member")
+			return NewTextFileError(TextFileInvalidPath, errors.New("linked project member"))
 		}
 		if info.IsDir() {
 			return nil
 		}
 		if len(files) >= PluginProjectMaxFiles {
-			return errors.New("too_large: project contains too many files")
+			return NewTextFileError(TextFileTooLarge, errors.New("project contains too many files"))
 		}
 		data, err := readPluginProjectFile(root, name)
 		if err != nil {
@@ -304,7 +305,7 @@ func snapshotPluginProject(root *os.Root, authorize func(string) error, temporar
 		}
 		total += int64(len(data))
 		if total > PluginProjectMaxBytes {
-			return errors.New("too_large: project exceeds 64 MiB")
+			return NewTextFileError(TextFileTooLarge, errors.New("project exceeds 64 MiB"))
 		}
 		files[name] = data
 		return nil
@@ -357,7 +358,7 @@ func InspectPluginProjectSource(abs string, authorize func(string) error, select
 		return inspectPluginProjectCandidate(root, authorize)
 	}
 	if len(selected) != 1 {
-		return nil, errors.New("invalid_path: invalid selected source inventory")
+		return nil, NewTextFileError(TextFileInvalidPath, errors.New("invalid selected source inventory"))
 	}
 	files, err := snapshotSelectedPluginSource(root, selected[0], authorize)
 	if err != nil {
@@ -368,11 +369,11 @@ func InspectPluginProjectSource(abs string, authorize func(string) error, select
 
 func checkPluginProjectGrant(grant *PluginDevelopmentGrant, taskID string) error {
 	if taskID == "" || grant.TaskID != taskID || !fs.ValidPath(taskID) || strings.ContainsAny(taskID, "/\\:.") {
-		return errors.New("invalid_path: invalid project task")
+		return NewTextFileError(TextFileInvalidPath, errors.New("invalid project task"))
 	}
 	want := filepath.Join(PluginProjectRoot(taskID), "source")
 	if grant.SourceRoot != want {
-		return errors.New("invalid_path: source root does not match host project")
+		return NewTextFileError(TextFileInvalidPath, errors.New("source root does not match host project"))
 	}
 	return nil
 }
@@ -405,7 +406,7 @@ func readPluginProjectManifest(grant *PluginDevelopmentGrant) (*pluginProjectMan
 		return nil, err
 	}
 	if manifest.PlanHash != grant.PlanHash {
-		return nil, errors.New("revision_conflict: prepare_project with expectedSourceRevision is required for the newly approved plan")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("prepare_project with expectedSourceRevision is required for the newly approved plan"))
 	}
 	return manifest, nil
 }
@@ -425,7 +426,7 @@ func readPluginProjectManifestForStatus(grant *PluginDevelopmentGrant) (*pluginP
 		return nil, err
 	}
 	if manifest.Version != 1 || manifest.Baseline == nil || manifest.Current == nil {
-		return nil, errors.New("revision_conflict: project belongs to another approved plan")
+		return nil, NewTextFileError(TextFileRevisionConflict, errors.New("project belongs to another approved plan"))
 	}
 	return &manifest, nil
 }
@@ -451,12 +452,12 @@ func savePluginProjectManifest(grant *PluginDevelopmentGrant, manifest *pluginPr
 func validateProjectBaseline(grant *PluginDevelopmentGrant, manifest *pluginProjectManifest) error {
 	root, err := OpenPluginProjectDirectory(pluginProjectBaselinePath(grant, manifest), false)
 	if err != nil {
-		return fmt.Errorf("backup_failed: %w", err)
+		return NewTextFileError(TextFileBackupFailed, err)
 	}
 	defer root.Close()
 	files, err := SnapshotPluginProject(root, nil)
 	if err != nil || PluginProjectTreeRevision(projectInventory(files)) != PluginProjectTreeRevision(manifest.Baseline) {
-		return errors.New("backup_failed: baseline checkpoint is missing or changed")
+		return NewTextFileError(TextFileBackupFailed, errors.New("baseline checkpoint is missing or changed"))
 	}
 	return nil
 }
@@ -485,7 +486,7 @@ func PreparePluginProject(ctx context.Context, taskID string, authorize func(str
 		if manifest, readErr := readPluginProjectManifestForStatus(grant); readErr == nil {
 			if manifest.Preparing {
 				if manifest.PlanHash != grant.PlanHash || manifest.SourcePath != grant.SourcePath || manifest.SourceRevision != grant.SourceRevision {
-					return errors.New("revision_conflict: finish interrupted preparation before changing plans")
+					return NewTextFileError(TextFileRevisionConflict, errors.New("finish interrupted preparation before changing plans"))
 				}
 				ret, err = resumePluginProjectPreparation(ctx, grant, manifest, allowed, recoveryOnly)
 				return err
@@ -506,14 +507,14 @@ func PreparePluginProject(ctx context.Context, taskID string, authorize func(str
 			return errors.New("recovery-only approval cannot initialize a project")
 		}
 		if _, err = os.Lstat(PluginProjectRoot(taskID)); err == nil {
-			return errors.New("result_unknown: unregistered project source exists; preserved for inspection")
+			return NewTextFileError(TextFileResultUnknown, errors.New("unregistered project source exists; preserved for inspection"))
 		} else if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
 		selected := map[string][]byte{}
 		if grant.SourcePath != "" {
 			if filepath.IsAbs(grant.SourcePath) || !IsPublishRelativePath(grant.SourcePath) {
-				return errors.New("invalid_path: sourcePath must be workspace relative")
+				return NewTextFileError(TextFileInvalidPath, errors.New("sourcePath must be workspace relative"))
 			}
 			abs := filepath.Join(WorkspaceDir, filepath.FromSlash(grant.SourcePath))
 			if authorize != nil {
@@ -535,12 +536,12 @@ func PreparePluginProject(ctx context.Context, taskID string, authorize func(str
 				return err
 			}
 			if PluginProjectTreeRevision(projectInventory(selected)) != grant.SourceRevision {
-				return errors.New("revision_conflict: approved selected import source changed; inspect with sourceFiles matching the approved allowFiles")
+				return NewTextFileError(TextFileRevisionConflict, errors.New("approved selected import source changed; inspect with sourceFiles matching the approved allowFiles"))
 			}
 			again, inspectErr := InspectPluginProjectSource(abs, authorize, allowed)
 			actual, statErr := os.Stat(abs)
 			if inspectErr != nil || statErr != nil || !os.SameFile(identity, actual) || again.SourceRevision != grant.SourceRevision {
-				return errors.New("revision_conflict: selected import source changed while freezing")
+				return NewTextFileError(TextFileRevisionConflict, errors.New("selected import source changed while freezing"))
 			}
 		}
 		if err = ensurePluginProjectCheckpoint(grant, "baseline", selected); err != nil {
@@ -548,7 +549,7 @@ func PreparePluginProject(ctx context.Context, taskID string, authorize func(str
 		}
 		manifest := &pluginProjectManifest{Version: 1, PlanHash: grant.PlanHash, SourcePath: grant.SourcePath, SourceRevision: grant.SourceRevision, Preparing: true, Baseline: projectInventory(selected), Current: map[string]string{}}
 		if err = savePluginProjectManifest(grant, manifest); err != nil {
-			return fmt.Errorf("backup_failed: preparation journal not saved; source was not created: %w", err)
+			return NewTextFileError(TextFileBackupFailed, fmt.Errorf("preparation journal not saved; source was not created: %w", err))
 		}
 		ret, err = resumePluginProjectPreparation(ctx, grant, manifest, allowed, false)
 		return err
@@ -577,7 +578,7 @@ func WithPluginProjectSource(ctx context.Context, write bool, fn func(*PluginDev
 			return err
 		}
 		if grant.TaskID != lockedTaskID {
-			return errors.New("revision_conflict: active task changed while waiting for the project lock")
+			return NewTextFileError(TextFileRevisionConflict, errors.New("active task changed while waiting for the project lock"))
 		}
 		if err = checkPluginProjectGrant(grant, grant.TaskID); err != nil {
 			return err
@@ -588,13 +589,13 @@ func WithPluginProjectSource(ctx context.Context, write bool, fn func(*PluginDev
 		}
 		if write {
 			if manifest.Preparing {
-				return errors.New("result_unknown: retry prepare_project to finish interrupted preparation")
+				return NewTextFileError(TextFileResultUnknown, errors.New("retry prepare_project to finish interrupted preparation"))
 			}
 			if manifest.PlanHash != grant.PlanHash {
-				return errors.New("revision_conflict: prepare_project is required for the newly approved plan")
+				return NewTextFileError(TextFileRevisionConflict, errors.New("prepare_project is required for the newly approved plan"))
 			}
 			if manifest.mutationPending() {
-				return errors.New("result_unknown: interrupted mutation requires project_status and restore_project")
+				return NewTextFileError(TextFileResultUnknown, errors.New("interrupted mutation requires project_status and restore_project"))
 			}
 			if err = validateProjectBaseline(grant, manifest); err != nil {
 				return err
@@ -646,7 +647,7 @@ func PluginProjectArtifactStatus(grant *PluginDevelopmentGrant, root *os.Root) (
 	files, err := snapshotPluginProject(root, nil, manifest.TemporaryFiles)
 	if err != nil {
 		if manifest.mutationPending() {
-			return nil, fmt.Errorf("result_unknown: pending project cannot be safely inspected; manual inspection required; source and journal preserved: %w", err)
+			return nil, NewTextFileError(TextFileResultUnknown, fmt.Errorf("pending project cannot be safely inspected; manual inspection required; source and journal preserved: %w", err))
 		}
 		return nil, err
 	}
@@ -670,7 +671,7 @@ func BeginPluginProjectMutations(grant *PluginDevelopmentGrant, changes map[stri
 		return err
 	}
 	if len(changes) == 0 || manifest.mutationPending() {
-		return errors.New("result_unknown: pending or empty project mutation")
+		return NewTextFileError(TextFileResultUnknown, errors.New("pending or empty project mutation"))
 	}
 	if err = validateProjectBaseline(grant, manifest); err != nil {
 		return err
@@ -693,36 +694,36 @@ func BeginPluginProjectMutations(grant *PluginDevelopmentGrant, changes map[stri
 		return err
 	}
 	if PluginProjectTreeRevision(projectInventory(files)) != PluginProjectTreeRevision(manifest.Current) {
-		return errors.New("revision_conflict: source contains external edits")
+		return NewTextFileError(TextFileRevisionConflict, errors.New("source contains external edits"))
 	}
 	for name, change := range changes {
 		if !set[name] || !validPluginProjectRevision(change.OldRevision) || !validPluginProjectRevision(change.NewRevision) {
-			return errors.New("invalid_path: mutation is outside the approved inventory")
+			return NewTextFileError(TextFileInvalidPath, errors.New("mutation is outside the approved inventory"))
 		}
 		old := manifest.Current[name]
 		if old == "" {
 			old = PluginProjectMissingRevision
 		}
 		if old != change.OldRevision {
-			return errors.New("revision_conflict: mutation old revision differs")
+			return NewTextFileError(TextFileRevisionConflict, errors.New("mutation old revision differs"))
 		}
 	}
 	manifest.Pending, manifest.Artifact = changes, nil
 	manifest.TemporaryFiles = map[string]string{}
 	if len(temporaryPaths) > 0 {
 		if len(changes) != 1 || len(temporaryPaths) != 1 {
-			return errors.New("invalid_path: temporary file requires one mutation")
+			return NewTextFileError(TextFileInvalidPath, errors.New("temporary file requires one mutation"))
 		}
 		for name, change := range changes {
 			tmp := temporaryPaths[0]
 			if path.Dir(tmp) != path.Dir(name) || !strings.HasPrefix(path.Base(tmp), ".text-file-") || validateManagedSkillPath(tmp) != nil || change.NewRevision == PluginProjectMissingRevision {
-				return errors.New("invalid_path: invalid host temporary file")
+				return NewTextFileError(TextFileInvalidPath, errors.New("invalid host temporary file"))
 			}
 			manifest.TemporaryFiles[tmp] = change.NewRevision
 		}
 	}
 	if err = savePluginProjectManifest(grant, manifest); err != nil {
-		return fmt.Errorf("backup_failed: mutation journal could not be saved: %w", err)
+		return NewTextFileError(TextFileBackupFailed, fmt.Errorf("mutation journal could not be saved: %w", err))
 	}
 	return nil
 }
@@ -737,7 +738,7 @@ func FinishPluginProjectMutations(grant *PluginDevelopmentGrant, paths []string)
 		return err
 	}
 	if len(paths) != len(manifest.Pending) {
-		return errors.New("result_unknown: incomplete mutation completion")
+		return NewTextFileError(TextFileResultUnknown, errors.New("incomplete mutation completion"))
 	}
 	root, err := OpenPluginProjectDirectory(grant.SourceRoot, false)
 	if err != nil {
@@ -751,14 +752,14 @@ func FinishPluginProjectMutations(grant *PluginDevelopmentGrant, paths []string)
 	for _, name := range paths {
 		change, ok := manifest.Pending[name]
 		if !ok {
-			return errors.New("result_unknown: mutation journal mismatch")
+			return NewTextFileError(TextFileResultUnknown, errors.New("mutation journal mismatch"))
 		}
 		actual := PluginProjectMissingRevision
 		if data, ok := files[name]; ok {
 			actual = PluginProjectDigest(data)
 		}
 		if actual != change.NewRevision {
-			return errors.New("result_unknown: mutation result differs; journal preserved")
+			return NewTextFileError(TextFileResultUnknown, errors.New("mutation result differs; journal preserved"))
 		}
 		if actual == PluginProjectMissingRevision {
 			delete(manifest.Current, name)
@@ -767,7 +768,7 @@ func FinishPluginProjectMutations(grant *PluginDevelopmentGrant, paths []string)
 		}
 	}
 	if PluginProjectTreeRevision(projectInventory(files)) != PluginProjectTreeRevision(manifest.Current) {
-		return errors.New("result_unknown: source changed while completing mutation")
+		return NewTextFileError(TextFileResultUnknown, errors.New("source changed while completing mutation"))
 	}
 	manifest.Pending = nil
 	manifest.TemporaryFiles = nil
@@ -785,7 +786,7 @@ func RecordPluginProjectArtifact(grant *PluginDevelopmentGrant, artifact *Plugin
 		return err
 	}
 	if manifest.mutationPending() || artifact.SourceRevision != PluginProjectTreeRevision(manifest.Current) {
-		return errors.New("revision_conflict: artifact source is not the recorded project revision")
+		return NewTextFileError(TextFileRevisionConflict, errors.New("artifact source is not the recorded project revision"))
 	}
 	manifest.Artifact = artifact
 	return savePluginProjectManifest(grant, manifest)
@@ -797,8 +798,8 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 	err = WithPluginProjectLockContext(ctx, taskID, func() (operationErr error) {
 		restorationStarted := false
 		defer func() {
-			if restorationStarted && operationErr != nil && !strings.Contains(operationErr.Error(), "result_unknown") {
-				operationErr = fmt.Errorf("result_unknown: restoration may be partial; journal and checkpoints preserved: %w", operationErr)
+			if restorationStarted && operationErr != nil && !IsTextFileError(operationErr, TextFileResultUnknown) {
+				operationErr = NewTextFileError(TextFileResultUnknown, fmt.Errorf("restoration may be partial; journal and checkpoints preserved: %w", operationErr))
 			}
 		}()
 		grant, err := RequirePluginDevelopment(ctx, "recover")
@@ -823,25 +824,23 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 		files, err := snapshotPluginProject(root, nil, manifest.TemporaryFiles)
 		if err != nil {
 			if manifest.mutationPending() {
-				return fmt.Errorf("result_unknown: pending project cannot be safely restored; manual inspection required; source and journal preserved: %w", err)
+				return NewTextFileError(TextFileResultUnknown, fmt.Errorf("pending project cannot be safely restored; manual inspection required; source and journal preserved: %w", err))
 			}
 			return err
 		}
 		inventory := projectInventory(files)
 		if expectedRevision == "" || PluginProjectTreeRevision(inventory) != expectedRevision {
-			return errors.New("revision_conflict: current project revision changed")
+			return NewTextFileError(TextFileRevisionConflict, errors.New("current project revision changed"))
 		}
 		known := map[string]string{}
-		for name, rev := range manifest.Current {
-			known[name] = rev
-		}
+		maps.Copy(known, manifest.Current)
 		for name, change := range manifest.Pending {
 			actual := inventory[name]
 			if actual == "" {
 				actual = PluginProjectMissingRevision
 			}
 			if actual != change.OldRevision && actual != change.NewRevision {
-				return errors.New("revision_conflict: recovery would overwrite an external edit")
+				return NewTextFileError(TextFileRevisionConflict, errors.New("recovery would overwrite an external edit"))
 			}
 			if actual == PluginProjectMissingRevision {
 				delete(known, name)
@@ -850,7 +849,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			}
 		}
 		if PluginProjectTreeRevision(known) != expectedRevision {
-			return errors.New("revision_conflict: recovery would overwrite an external edit")
+			return NewTextFileError(TextFileRevisionConflict, errors.New("recovery would overwrite an external edit"))
 		}
 		baseline, err := OpenPluginProjectDirectory(pluginProjectBaselinePath(grant, manifest), false)
 		if err != nil {
@@ -890,7 +889,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			}
 		}
 		if err = savePluginProjectManifest(grant, manifest); err != nil {
-			return fmt.Errorf("backup_failed: %w", err)
+			return NewTextFileError(TextFileBackupFailed, err)
 		}
 		restorationStarted = true
 		for name, revision := range manifest.TemporaryFiles {
@@ -899,7 +898,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 				continue
 			}
 			if readErr != nil || PluginProjectDigest(data) != revision {
-				return errors.New("result_unknown: temporary file changed during restoration; preserved")
+				return NewTextFileError(TextFileResultUnknown, errors.New("temporary file changed during restoration; preserved"))
 			}
 			if err = root.Remove(name); err != nil {
 				return err
@@ -917,7 +916,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 				return readErr
 			}
 			if actual != change.OldRevision {
-				return errors.New("revision_conflict: source changed during restoration; journal preserved")
+				return NewTextFileError(TextFileRevisionConflict, errors.New("source changed during restoration; journal preserved"))
 			}
 			if change.NewRevision == PluginProjectMissingRevision {
 				err = root.Remove(name)
@@ -931,7 +930,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 				}
 			}
 			if err != nil {
-				return fmt.Errorf("result_unknown: restoration interrupted; journal preserved: %w", err)
+				return NewTextFileError(TextFileResultUnknown, fmt.Errorf("restoration interrupted; journal preserved: %w", err))
 			}
 		}
 		restored, err := SnapshotPluginProject(root, nil)
@@ -939,7 +938,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			return err
 		}
 		if PluginProjectTreeRevision(projectInventory(restored)) != PluginProjectTreeRevision(manifest.Baseline) {
-			return errors.New("result_unknown: restored source differs; journal preserved")
+			return NewTextFileError(TextFileResultUnknown, errors.New("restored source differs; journal preserved"))
 		}
 		manifest.Current, manifest.Pending = projectInventory(restored), nil
 		manifest.TemporaryFiles = nil

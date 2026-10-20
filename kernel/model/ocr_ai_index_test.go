@@ -5,6 +5,7 @@ package model
 import (
 	"context"
 	"errors"
+	"fmt"
 	"image"
 	"image/png"
 	"io"
@@ -90,6 +91,7 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 		{"reasoning changed", func() { Conf.m.Lock(); Conf.OCR.Load().ReasoningEffort = "none"; Conf.m.Unlock() }, ""},
 		{"AI model disabled", func() { Conf.AI.Load().Providers[0].Models[0].Enabled = false }, ""},
 		{"manually edited", func() { SetOCRAssetText(path, "manual text") }, "manual text"},
+		{"manually cleared", func() { SetOCRAssetText(path, "") }, ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			util.RemoveAssetText(path)
@@ -101,7 +103,39 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 			if !errors.Is(err, context.Canceled) || util.GetAssetText(path) != test.want {
 				t.Fatalf("in-flight automatic response replaced text: %v, %q", err, util.GetAssetText(path))
 			}
+			if HasOCRFailure(path) {
+				t.Fatal("canceled automatic recognition was reported as failure")
+			}
 		})
+	}
+	for _, automatic := range []bool{false, true} {
+		for _, failed := range []bool{false, true} {
+			t.Run(fmt.Sprintf("AI clear automatic=%v failed=%v", automatic, failed), func(t *testing.T) {
+				util.RemoveAssetText(path)
+				value := conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", Auto: true}
+				Conf.OCR.Store(&value)
+				providerFailure = failed
+				beforeResponse = func() { SetOCRAssetText(path+"?width=200#cleared", "") }
+				_, err := aiOCRAsset(context.Background(), path+"?width=100#recognizing", value, automatic)
+				beforeResponse = nil
+				if err == nil || !failed && !errors.Is(err, context.Canceled) {
+					t.Fatalf("unexpected invalidated AI request result: %v", err)
+				}
+				if !util.ExistsAssetText(path) || util.GetAssetText(path) != "" || HasOCRFailure(path) {
+					t.Fatalf("in-flight AI response changed cleared text or status: %q, %v", util.GetAssetText(path), HasOCRFailure(path))
+				}
+				ocrRequests.Lock()
+				active := len(ocrRequests.active)
+				ocrRequests.Unlock()
+				if active != 0 {
+					t.Fatal("completed AI OCR retained request state")
+				}
+				providerFailure = false
+				if _, err = AIOCRAsset(context.Background(), path); err != nil || !strings.Contains(util.GetAssetText(path), "aiocrkeyword") {
+					t.Fatalf("manual AI recognition after clearing did not restore text: %v, %q", err, util.GetAssetText(path))
+				}
+			})
+		}
 	}
 	beforeResponse = nil
 	Conf.AI.Load().Providers[0].Models[0].Enabled = true
@@ -147,6 +181,9 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	Conf.OCR.Load().AIModelID = "vision"
 	providerFailure = true
 	autoOCRAssets()
+	if !HasOCRFailure(extra) {
+		t.Fatal("automatic AI provider failure was not recorded")
+	}
 	providerFailure = false
 	autoOCRAssets()
 	if calls != previousCalls+3 || util.ExistsAssetText(extra) {
@@ -156,6 +193,9 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	autoOCRAssets()
 	if calls != previousCalls+4 || !util.ExistsAssetText(extra) {
 		t.Fatal("changed reasoning effort inherited the previous retry delay")
+	}
+	if HasOCRFailure(extra) {
+		t.Fatal("successful automatic AI recognition did not clear the failure")
 	}
 	if err = os.Remove(filepath.Join(util.DataDir, filepath.FromSlash(extra))); err != nil {
 		t.Fatal(err)

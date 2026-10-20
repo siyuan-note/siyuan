@@ -19,7 +19,7 @@ func TestRecentUpdatedBlocksIndexesPreserveResults(t *testing.T) {
 		}
 	}
 	for _, blockType := range []string{"p", "d"} {
-		for i := 0; i < 40; i++ {
+		for i := range 40 {
 			insert(fmt.Sprintf("%s-%02d", blockType, i), blockType, fmt.Sprintf("20261008%06d", i), 8)
 		}
 	}
@@ -38,7 +38,7 @@ func TestRecentUpdatedBlocksIndexesPreserveResults(t *testing.T) {
 		before = append(before, ids(SelectBlocksRawStmt("SELECT * FROM blocks WHERE "+condition+" ORDER BY updated DESC", 1, 16)))
 		before = append(before, ids(SelectBlocksRawStmt("SELECT * FROM blocks WHERE "+condition+" AND id NOT LIKE '%-39' ORDER BY updated DESC", 1, 16)))
 	}
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		if err := ensureRecentUpdatedBlocksIndexes(database); err != nil {
 			t.Fatal(err)
 		}

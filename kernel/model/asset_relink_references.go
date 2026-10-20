@@ -43,7 +43,7 @@ func relinkPath(value string) (string, error) {
 	if !strings.HasPrefix(p, "assets/") || path.Clean(p) != p || strings.ContainsAny(p, "\\\x00\r\n") || strings.HasSuffix(p, "/") {
 		return "", fmt.Errorf("invalid asset path: %q", value)
 	}
-	for _, segment := range strings.Split(p, "/") {
+	for segment := range strings.SplitSeq(p, "/") {
 		if strings.Contains(segment, ":") {
 			return "", fmt.Errorf("invalid asset path: %q", value)
 		}
@@ -113,7 +113,6 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 	return ret
 }
 
-var relinkAssetListPattern = regexp.MustCompile(`[^\s,]+`)
 var relinkCSSURLPattern = regexp.MustCompile(`(?i)url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]*))\s*\)`)
 var relinkHTMLAttrPattern = regexp.MustCompile("([^\\s=<>/]+)(\\s*=\\s*)(\"[^\"]*\"|'[^']*'|[^\\s>]+)")
 
@@ -122,7 +121,7 @@ func (r *assetRelinker) list(raw, kind string, location apicontract.AssetReferen
 	if p, err := relinkPath(raw); err == nil && (p == r.oldPath || r.routes[p] != nil) {
 		return r.reference(raw, kind, location)
 	}
-	return relinkAssetListPattern.ReplaceAllStringFunc(raw, func(value string) string {
+	return assetListPattern.ReplaceAllStringFunc(raw, func(value string) string {
 		return r.reference(value, kind, location)
 	})
 }
@@ -185,7 +184,7 @@ func (r *assetRelinker) html(raw []byte, location apicontract.AssetReference) []
 }
 
 func (r *assetRelinker) tree(tree *parse.Tree, location apicontract.AssetReference) {
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -203,11 +202,17 @@ func (r *assetRelinker) tree(tree *parse.Tree, location apicontract.AssetReferen
 				rewritten = r.css(decoded, "title-image", loc)
 			} else if key == "data-assets" || strings.HasPrefix(key, "custom-data-assets") {
 				rewritten = r.list(decoded, "attribute", loc)
+			} else if n.Type == ast.NodeImage && key == treenode.LivePhotoVideoAttr {
+				rewritten = r.reference(decoded, "attribute", loc)
 			} else {
 				continue
 			}
 			if rewritten != decoded {
-				n.SetIALAttr(key, rewritten)
+				if n.Type == ast.NodeImage && key == treenode.LivePhotoVideoAttr {
+					treenode.SetImageLivePhotoVideo(n, rewritten)
+				} else {
+					n.SetIALAttr(key, rewritten)
+				}
 			}
 		}
 		switch n.Type {

@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111950"
 	},
 	"Children": [
 		{
@@ -208,7 +208,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-77frbcy",
-				"updated": "20250115162705"
+				"updated": "20261016111950"
 			},
 			"Children": [
 				{
@@ -364,7 +364,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230220103708-l6sdi3r",
-				"updated": "20250115162705"
+				"updated": "20261016111950"
 			},
 			"Children": [
 				{
@@ -404,7 +404,7 @@
 					},
 					"Properties": {
 						"id": "20230220103708-fmphm6k",
-						"updated": "20250115162705"
+						"updated": "20261016111950"
 					},
 					"Children": [
 						{
@@ -412,12 +412,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230220103708-ml52xbc",
-								"updated": "20250115162705"
+								"updated": "20261016111950"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If the amount of data is large, it is recommended to export the data package through "
+									"Data": "For a large dataset, export a Data archive using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "App"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -426,7 +453,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the settings, and then send the data package to the new device by manual copying or other methods, and export the data package on the new device. Go to "
+									"Data": "​, transfer it to the new device, and use "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -435,7 +462,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, and finally configure synchronization"
+									"Data": "​ on the same settings page there before configuring synchronization"
 								}
 							]
 						}
@@ -449,7 +476,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261011151543-4pvea6y",
-				"updated": "20261011151543"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -463,7 +490,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261011151543-l4oq2bn",
-				"updated": "20261011151543"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -486,7 +513,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", select S3, WebDAV, or the local file system (desktop only), then click the configuration button in the sync service configuration row. Complete the form and click "
+					"Data": ", select S3, WebDAV, or the local file system, then click the configuration button in the sync service configuration row. The local file system is available with standard desktop and Docker kernels, not mobile kernels; its path is on the kernel’s machine or inside its container, not on the device running the browser. Complete the form and click "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -542,7 +569,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230219121305-3yj6w9y",
-				"updated": "20260803171606"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -556,7 +583,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230219121305-p0gorey",
-				"updated": "20260803171606"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -584,7 +611,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Cloud Sync Mode"
+					"TextMarkTextContent": "Cloud sync mode"
 				},
 				{
 					"Type": "NodeText",
@@ -598,7 +625,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219121305-c1bb9y3",
-				"updated": "20230219121414"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -610,7 +637,7 @@
 					},
 					"Properties": {
 						"id": "20230219121305-e5kvdxk",
-						"updated": "20230219121414"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -633,7 +660,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230219121305-8v43t1f",
-								"updated": "20230219121305"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -645,7 +672,7 @@
 									},
 									"Properties": {
 										"id": "20230219121305-oeasqmw",
-										"updated": "20230219121305"
+										"updated": "20261016111431"
 									},
 									"Children": [
 										{
@@ -653,12 +680,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230219121305-0tp4568",
-												"updated": "20230219121305"
+												"updated": "20261016111431"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "A synchronization will be performed when starting and exiting, and a synchronization will be performed 30 seconds after the data in use is no longer changed"
+													"Data": "Sync runs at startup and normal exit, and after local data stops changing for the configured interval; the default is 30 seconds"
 												}
 											]
 										}
@@ -827,7 +854,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230219121305-n0v0nlb",
-				"updated": "20260918195936"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1004,7 +1031,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220510105000-03p25i0",
-				"updated": "20220510105000"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1016,7 +1043,7 @@
 					},
 					"Properties": {
 						"id": "20220510105000-soqifkx",
-						"updated": "20220510105000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1024,12 +1051,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220510105000-p9xg0yf",
-								"updated": "20220510105000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After 30 seconds of data change, if there is no further change, a comparison will be made, and if it continues to change, it will be delayed by 30 seconds"
+									"Data": "After the last data change, sync is scheduled using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Account & Sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Sync interval"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (30 seconds by default, adjustable from 30 to 43,200 seconds); further changes restart this wait"
 								}
 							]
 						}
@@ -1044,7 +1098,7 @@
 					},
 					"Properties": {
 						"id": "20220510105000-ouj6xo5",
-						"updated": "20220510105000"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1052,16 +1106,105 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220510105000-eps1jp2",
-								"updated": "20220510105000"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If there is no data change, it will be incremented by 5 minutes, 8 minutes, 16 minutes, 32 minutes..."
+									"Data": "When no data changes are found, the interval between automatic checks increases; new data changes schedule sync using the configured interval again"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-tjkwrig",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261016111431-tjkwrig",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sync perception and LAN acceleration"
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-8v5b36n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-8v5b36n",
+				"updated": "20261016111710"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Account & Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sync perception"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " uses SiYuan official-cloud signals to trigger synchronization sooner in automatic mode. It is unavailable in Docker kernels, does not bypass manual or full-manual mode, and does not eliminate editing conflicts."
+				}
+			]
+		},
+		{
+			"ID": "20261016111431-hvkyscs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111431-hvkyscs",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Account & Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "LAN sync acceleration"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " prefers encrypted data objects from reachable LAN devices using the same repository key and cloud sync target. Cloud storage remains authoritative, with fallback to the cloud if LAN transfers are unavailable; this is not a fully offline peer-to-peer replacement. Docker kernels do not provide LAN acceleration. LAN notifications trigger synchronization only in automatic mode."
 				}
 			]
 		},
@@ -1071,7 +1214,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220307095105-is2jz8h",
-				"updated": "20220307095105"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1085,12 +1228,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220307095105-pdveh7f",
-				"updated": "20220307095118"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "From the above working principle, we can know that SiYuan only supports alternate synchronization of data on multiple devices: after synchronization is completed on device A, synchronization is performed on device B. Simultaneous synchronization of multiple devices cannot be supported, so unexpected data overwriting will occur."
+					"Data": "To reduce conflicts, finish syncing on device A, then sync device B before editing there. Simultaneous edits to the same file can conflict and cause one version to overwrite another; sync perception and LAN acceleration do not remove this risk."
 				}
 			]
 		},
@@ -1100,7 +1243,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220307095105-xr4ht8a",
-				"updated": "20220703232432"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1117,7 +1260,7 @@
 			},
 			"Properties": {
 				"id": "20220307095105-z02ucyo",
-				"updated": "20220307095105"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1130,19 +1273,21 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20220307095105-hbj4ovp"
+						"id": "20220307095105-hbj4ovp",
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
 							"ID": "20220307095105-i864hxu",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220307095105-i864hxu"
+								"id": "20220307095105-i864hxu",
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Execute synchronization after editing on device A (by triggering synchronization automatically or manually), at this time, the cloud data will be overwritten by the data of device A, that is, the cloud and device A keep the same data"
+									"Data": "After editing on device A, sync and wait for completion so its changes reach the cloud"
 								}
 							]
 						}
@@ -1158,19 +1303,21 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20220307095105-q12j7j7"
+						"id": "20220307095105-q12j7j7",
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
 							"ID": "20220307095105-l0xxcoe",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220307095105-l0xxcoe"
+								"id": "20220307095105-l0xxcoe",
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Execute synchronization on device B. At this time, the data of device B will be overwritten by the cloud data, that is, the cloud and devices A and B keep the same data"
+									"Data": "Before editing on device B, sync and wait for completion to receive device A’s changes"
 								}
 							]
 						}
@@ -1186,19 +1333,21 @@
 						"Num": 3
 					},
 					"Properties": {
-						"id": "20220307095105-3mv34vh"
+						"id": "20220307095105-3mv34vh",
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
 							"ID": "20220307095105-2adzw18",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220307095105-2adzw18"
+								"id": "20220307095105-2adzw18",
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After editing on device B, perform synchronization again. At this time, the cloud data will be overwritten by device B data, that is, the cloud and device B keep the same data."
+									"Data": "After editing on device B, sync again and wait for its changes to reach the cloud"
 								}
 							]
 						}
@@ -1214,19 +1363,21 @@
 						"Num": 4
 					},
 					"Properties": {
-						"id": "20220307095105-pwlmtr3"
+						"id": "20220307095105-pwlmtr3",
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
 							"ID": "20220307095105-bivgvtw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220307095105-bivgvtw"
+								"id": "20220307095105-bivgvtw",
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Execute synchronization on device A. At this time, the data of device A will be overwritten by the cloud data, that is, the cloud and devices A and B keep the same data"
+									"Data": "Sync device A again to receive device B’s changes before continuing to edit there"
 								}
 							]
 						}
@@ -1239,12 +1390,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220307095105-imseszh",
-				"updated": "20220307095105"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In this scenario, the process of using synchronization is performed alternately on devices A and B, which can ensure that data synchronization is completed normally as expected."
+					"Data": "Alternating editing and checking that each sync succeeds reduces conflicts and helps keep both devices consistent."
 				}
 			]
 		},
@@ -1254,7 +1405,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220703232421-8zpzkw4",
-				"updated": "20220703232435"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1271,7 +1422,7 @@
 			},
 			"Properties": {
 				"id": "20220703232421-gmxxahn",
-				"updated": "20221009104451"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1285,7 +1436,7 @@
 					},
 					"Properties": {
 						"id": "20220703232421-tfvngal",
-						"updated": "20220703232625"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1293,12 +1444,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703232421-vhp8oio",
-								"updated": "20220703232625"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Sync after editing the file a on device A"
+									"Data": "Device A edits file a and completes synchronization"
 								}
 							]
 						}
@@ -1315,7 +1466,7 @@
 					},
 					"Properties": {
 						"id": "20220703232421-wfhhavr",
-						"updated": "20220703232627"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1323,12 +1474,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703232421-2wl7eyb",
-								"updated": "20220703232627"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Sync after editing the file a on device B"
+									"Data": "Before receiving A’s changes, device B edits its older copy of file a and then synchronizes"
 								}
 							]
 						}
@@ -1372,7 +1523,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-b62c3ph",
-				"updated": "20260614203414"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1388,7 +1539,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721112403-th2r6zf",
-				"updated": "20260614203414"
+				"updated": "20261016111431"
 			},
 			"Children": [
 				{
@@ -1540,7 +1691,7 @@
 					},
 					"Properties": {
 						"id": "20231120213153-tpjbi5o",
-						"updated": "20231120213154"
+						"updated": "20261016111431"
 					},
 					"Children": [
 						{
@@ -1548,12 +1699,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231120213154-sjzx64a",
-								"updated": "20231120213154"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If the data snapshot takes more than 12 seconds before data synchronization, you will be prompted to clean up the data warehouse. If you need to change the default time, you can use the following two methods."
+									"Data": "If the data snapshot takes more than 12 seconds before data synchronization, you will be prompted to clean up the data warehouse. If you need to change the default time, you can use the following two methods"
 								}
 							]
 						},
@@ -1656,7 +1807,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231120213154-aoykqw3",
-								"updated": "20231120213154"
+								"updated": "20261016111431"
 							},
 							"Children": [
 								{
@@ -1670,7 +1821,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ (12 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file."
+									"Data": "​ (12 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file"
 								}
 							]
 						}

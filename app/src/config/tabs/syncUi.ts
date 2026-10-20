@@ -12,6 +12,7 @@ import {Dialog} from "../../dialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {isMobile} from "../../util/functions";
 import {canPurgeRepo} from "../../history/repoPurge";
+import {refreshSyncCloudDirBlock} from "../../sync/syncGuide";
 
 /** 按当前配置刷新同步 Tab 可见性与动态面板（供 syncRuntime 调用） */
 export const refreshSyncTabPanels = (root: Element) => {
@@ -372,8 +373,8 @@ const genProviderFlexInput = (label: string, id: string, attrs = "", warning = "
     <label for="${id}" class="fn__flex-center fn__size200">${label}</label>
     <div class="fn__space"></div>
     <div class="fn__flex-1"><input spellcheck="false" id="${id}" class="b3-text-field fn__block" aria-describedby="sync-${id}-error${warning ? ` sync-${id}-warning` : ""}"${attrs ? ` ${attrs}` : ""}>
-    <div id="sync-${id}-error" class="ft__error fn__none" role="status"></div>${warning ? `
-    <div id="sync-${id}-warning" class="ft__error fn__none" role="status">${warning}</div>` : ""}</div>
+    <div id="sync-${id}-error" class="ft__error fn__none" role="status"><div class="fn__hr"></div><span></span></div>${warning ? `
+    <div id="sync-${id}-warning" class="ft__error fn__none" role="status"><div class="fn__hr"></div><span>${warning}</span></div>` : ""}</div>
 </div>`;
 
 const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
@@ -382,7 +383,7 @@ const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-l
     <div class="fn__flex-1"><div class="b3-form__icona fn__block">
         <input spellcheck="false" id="${id}" type="password" class="b3-text-field b3-form__icona-input" aria-describedby="sync-${id}-error">
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
-    </div><div id="sync-${id}-error" class="ft__error fn__none" role="status"></div></div>
+    </div><div id="sync-${id}-error" class="ft__error fn__none" role="status"><div class="fn__hr"></div><span></span></div></div>
 </div>`;
 
 const genProviderFlexSelect = (label: string, id: string, optionsHtml: string) => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
@@ -442,7 +443,8 @@ const validateSyncProviderFields = (configElement: Element, def: SyncThirdPartyP
             input.type === "number" && !input.checkValidity() ? input.validationMessage : "";
         input.setAttribute("aria-invalid", String(!!message));
         const error = configElement.querySelector<HTMLElement>(`#sync-${key}-error`);
-        error.textContent = message;
+        // 提示文本节点前有间隔元素，只替换文案节点
+        (error.lastElementChild as HTMLElement).textContent = message;
         error.classList.toggle("fn__none", !message);
         valid &&= !message;
     });
@@ -464,6 +466,9 @@ const openSyncProviderConfigDialog = (root: Element) => {
     }
     const L = window.siyuan.languages;
     const warning = def.configKey === "s3" ? L.s3EndpointBucketWarning : "";
+    // 测试连接仅用于 S3：探测会写入并删除探针对象，WebDAV 与本地目录没有等价的列举语义
+    const testButton = def.configKey === "s3" ? `<div class="fn__space"></div>
+    <button class="b3-button b3-button--outline" data-action="test"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${L.testConnection}</span></button>` : "";
     let closed = false;
     let rulesVersion = 0;
     let rulesTimer: ReturnType<typeof setTimeout>;
@@ -474,7 +479,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
         content: `<div class="b3-dialog__content config-sync-form">${def.fields.map(field => genProviderField(field, field.id === "endpoint" ? warning : "")).join("")}
 <div data-type="sync-config-error" class="ft__error fn__none" role="status"></div></div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button><div class="fn__flex-1"></div><div class="fn__space"></div>
+    <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button>${testButton}<div class="fn__flex-1"></div><div class="fn__space"></div>
     <button class="b3-button b3-button--cancel" data-action="cancel">${L.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text" data-action="save">${L.save}</button>
 </div>`,
@@ -491,6 +496,8 @@ const openSyncProviderConfigDialog = (root: Element) => {
     const configElement = dialog.element;
     const template = {...def.getConfig()};
     fillSyncProviderConfigValues(configElement, template);
+    const testElement = configElement.querySelector<HTMLButtonElement>('[data-action="test"]');
+    const testLabel = testElement?.querySelector("span");
     const fields = def.fields.map(field => configElement.querySelector<HTMLInputElement | HTMLSelectElement>(`#${field.id}`));
     const initialValues = fields.map(field => field.value);
     const destroy = dialog.destroy.bind(dialog);
@@ -511,11 +518,14 @@ const openSyncProviderConfigDialog = (root: Element) => {
         });
         configElement.setAttribute("aria-busy", String(value));
     };
-    const setError = (message: string) => {
+    const setStatus = (message: string, success = false) => {
         const error = configElement.querySelector<HTMLElement>('[data-type="sync-config-error"]');
         error.textContent = message;
         error.classList.toggle("fn__none", !message);
+        error.classList.toggle("ft__success", !!message && success);
+        error.classList.toggle("ft__error", !!message && !success);
     };
+    const setError = (message: string) => setStatus(message);
     const loadRules = async () => {
         const version = ++rulesVersion;
         const response = await fetchSyncPost("/api/sync/getSyncProviderConfigRules", {
@@ -558,9 +568,12 @@ const openSyncProviderConfigDialog = (root: Element) => {
         }
     };
     const refresh = () => {
-        const currentRoot = root.isConnected ? root : document.querySelector("#syncProviderConfig")?.closest(".config__tab-container");
+        const currentRoot = root.isConnected ? root : document.querySelector("#syncProviderConfig")?.closest(".config__tab-container, .config");
         if (currentRoot) {
             refreshSyncTabPanels(currentRoot);
+            if (window.siyuan.config.sync.provider === 2) {
+                refreshSyncCloudDirBlock(currentRoot);
+            }
             const enabled = currentRoot.querySelector<HTMLInputElement>('[id="sync.enabled"]');
             if (enabled) {
                 enabled.checked = window.siyuan.config.sync.enabled;
@@ -605,6 +618,66 @@ const openSyncProviderConfigDialog = (root: Element) => {
     };
     configElement.querySelector('[data-action="save"]').addEventListener("click", () => { void save(); });
     configElement.querySelector('[data-action="cancel"]').addEventListener("click", () => dialog.destroy());
+    // 测试连接只探测当前草稿，不保存配置；失败分为确定错误与网络未知，避免把无法判定的情况报成配置问题
+    const testConnection = async () => {
+        if (pending || confirming || window.siyuan.config.readonly || !testElement || !testLabel) {
+            return;
+        }
+        validationShown = true;
+        if (!validateSyncProviderFields(configElement, def, requiredFields)) {
+            setError(L.syncConfigNotSaved);
+            configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+            return;
+        }
+        setError("");
+        setPending(true);
+        testLabel.textContent = L.testConnectionTesting;
+        try {
+            // 必填清单来自内核，规则尚未返回时它是空的，空值会漏过本地校验并被内核报成配置错误，因此先取规则
+            let rules: Awaited<ReturnType<typeof loadRules>>;
+            try {
+                rules = await loadRules();
+            } catch {
+                if (!closed) {
+                    setError(L.loadingError);
+                }
+                return;
+            }
+            if (closed) {
+                return;
+            }
+            if (!rules) {
+                setError(L.loadingError);
+                return;
+            }
+            if (!validateSyncProviderFields(configElement, def, rules.requiredFields)) {
+                setError(L.syncConfigNotSaved);
+                configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+                return;
+            }
+            const response = await fetchSyncPost("/api/sync/testSyncProviderS3", {
+                s3: readProviderConfigFields(configElement, template),
+            });
+            if (closed) {
+                return;
+            }
+            if (response.code !== 0) {
+                setError(response.msg || L.testConnectionFail);
+            } else if ("ok" === response.data.kind) {
+                setStatus(L.testConnectionSuccess, true);
+            } else {
+                setStatus(response.data.msg ? L.testConnectionFailMsg.replace("${msg}", response.data.msg) : L.testConnectionFail);
+            }
+        } catch {
+            if (!closed) {
+                setError(L.testConnectionFail);
+            }
+        } finally {
+            testLabel.textContent = L.testConnection;
+            setPending(false);
+        }
+    };
+    testElement?.addEventListener("click", () => { void testConnection(); });
     configElement.querySelector('[data-action="clear"]').addEventListener("click", () => {
         if (pending || confirming || window.siyuan.config.readonly) {
             return;
@@ -641,6 +714,8 @@ const openSyncProviderConfigDialog = (root: Element) => {
         rulesVersion++;
         clearTimeout(rulesTimer);
         configElement.querySelector("#sync-endpoint-warning")?.classList.toggle("fn__none", true);
+        // 配置已改变，旧的测试结果不再对应当前草稿
+        setStatus("");
         rulesTimer = setTimeout(refreshRules, 300);
         if (validationShown) {
             validateSyncProviderFields(configElement, def, requiredFields);

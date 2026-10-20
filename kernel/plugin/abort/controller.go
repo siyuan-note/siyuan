@@ -37,12 +37,12 @@ func (c *controllerState) Keys() []string              { return nil }
 
 // controllerStateType 用于在 Object.Export() 前用 Object.ExportType() 做判定，原因见 signalStateType
 // 的注释：AbortController.prototype 本身作为 receiver 时，直接 Export() 会因 signal 访问器无限递归。
-var controllerStateType = reflect.TypeOf((*controllerState)(nil))
+var controllerStateType = reflect.TypeFor[*controllerState]()
 
 // Enable 把 AbortController 与 AbortSignal 挂到 runtime 的 globalThis，调用方式与
 // url、buffer、console、encoding 一致，失败时 panic。
 //
-// 与规范的已知差异（与本沙箱其它构造函数一致）：实例不是 AbortController/AbortSignal 的真正
+// 与规范的已知差异（与本沙箱其他构造函数一致）：实例不是 AbortController/AbortSignal 的真正
 // ECMAScript 类，不用 new 直接调用 AbortController 也不会抛错（goja 的原生构造函数无法区分两种调用）；
 // AbortSignal 与规范一致，无论是否使用 new 都抛出 TypeError: Illegal constructor。
 // addEventListener 的 options 只支持 {once}，capture/passive/signal 会被静默忽略。
@@ -107,10 +107,7 @@ func newSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.Objec
 
 	// AbortSignal.timeout(milliseconds) -> 到时后以 TimeoutError 中止的新信号。
 	if err := ctor.Set("timeout", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-		milliseconds := call.Argument(0).ToInteger()
-		if milliseconds < 0 {
-			milliseconds = 0
-		}
+		milliseconds := max(call.Argument(0).ToInteger(), 0)
 
 		state := &SignalState{}
 		object := newSignalObject(rt, prototype, state)
@@ -165,7 +162,7 @@ func signalArrayOf(rt *goja.Runtime, value goja.Value) []*SignalState {
 	length := int64(object.Get("length").ToInteger())
 
 	states := make([]*SignalState, 0, length)
-	for i := int64(0); i < length; i++ {
+	for i := range length {
 		state, err := SignalOf(rt, object.Get(fmt.Sprint(i)), fmt.Sprintf("signals[%d]", i))
 		if err != nil {
 			panic(rt.NewTypeError(err.Error()))
@@ -332,7 +329,7 @@ func newControllerConstructor(rt *goja.Runtime, prototype *goja.Object, signalCt
 }
 
 // newControllerPrototype 构造 AbortController.prototype：signal 访问器与 abort 方法。
-func newControllerPrototype(rt *goja.Runtime, signalCtor *goja.Object) (*goja.Object, error) {
+func newControllerPrototype(rt *goja.Runtime, _ *goja.Object) (*goja.Object, error) {
 	prototype := rt.NewObject()
 
 	self := func(call goja.FunctionCall, method string) *controllerState {

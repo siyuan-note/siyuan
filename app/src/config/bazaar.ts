@@ -22,6 +22,7 @@ import {
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
+    getBazaarDeprecationChoices,
     getBazaarDeprecationData,
     getBazaarFrontendLabels,
     getBazaarFundingItems,
@@ -41,6 +42,7 @@ import {
 } from "./bazaar/packageConfig";
 import {genBazaarPackagePanelHTML} from "./bazaar/html";
 import {bindBazaarEvents} from "./bazaar/events";
+import {renderBazaarInstall} from "./bazaar/installTask";
 import {
     bindRatingUserChange,
     genCardRatingHTML,
@@ -429,15 +431,19 @@ export const bazaar = {
             return "";
         }
         const reason = item.preferredDeprecatedReason || window.siyuan.languages.bazaarDeprecatedTip;
-        const alternatives = Array.isArray(item.alternatives) ? item.alternatives.filter((name) =>
-            typeof name === "string" && name.length > 0) : [];
-        const alternativesHTML = alternatives.map((name) => `<button type="button" data-type="bazaar-alternative" data-package-type="${bazaarType}" data-package-name="${escapeAttr(name)}" class="b3-chip b3-chip--small b3-chip--pointer config-bazaar__deprecated-button">${escapeHtml(name)}</button>`).join("");
+        const choices = getBazaarDeprecationChoices(item);
+        // 跨类型替代包需标明目标类型，同类型在同类标签页中不必重复
+        const choicesHTML = choices.map((choice) => {
+            const typeLabel = choice.packageType === bazaarType ? "" :
+                `<span class="config-bazaar__deprecated-type">${escapeHtml(window.siyuan.languages[BAZAAR_PACKAGE_CONFIG[choice.packageType].languageKey])}</span>`;
+            return `<button type="button" data-type="bazaar-alternative" data-package-type="${choice.packageType}" data-package-name="${escapeAttr(choice.name)}" class="b3-chip b3-chip--small b3-chip--pointer config-bazaar__deprecated-button">${escapeHtml(choice.name)}${typeLabel}</button>`;
+        }).join("");
         return `<section class="config-bazaar__deprecated">
     <div class="config-bazaar__deprecated-title">${escapeHtml(window.siyuan.languages.bazaarDeprecated)}</div>
     <div class="config-bazaar__deprecated-reason">${escapeHtml(reason)}</div>
-    ${alternativesHTML ? `<div class="config-bazaar__deprecated-alternatives">
+    ${choicesHTML ? `<div class="config-bazaar__deprecated-alternatives">
         <span class="config-bazaar__deprecated-label">${window.siyuan.languages.bazaarAlternatives}</span>
-        <div class="config-bazaar__deprecated-list">${alternativesHTML}</div>
+        <div class="config-bazaar__deprecated-list">${choicesHTML}</div>
     </div>` : ""}
 </section>`;
     },
@@ -1174,6 +1180,7 @@ type="checkbox">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
+        renderBazaarInstall(bazaar.element);
         const previewElement = readmeElement.querySelector<HTMLElement>(".item__preview");
         if (previewElement) {
             // 加载期间保留预览区域，仅在加载失败后移除容器

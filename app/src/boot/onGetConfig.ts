@@ -1,6 +1,6 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initWindowOpenOverride, isMac, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {applyPlatformClasses, initWindowOpenOverride, isMac, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -71,7 +71,7 @@ export const initDesktopHost = async () => {
 
 export const onGetConfig = async (isStart: boolean, app: App) => {
     correctHotkey(app);
-    document.body.classList.toggle("body--windows", isWindows());
+    applyPlatformClasses();
     /// #if !BROWSER
     await initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
@@ -243,6 +243,7 @@ export const initWindow = async (app: App) => {
         setLastExportPath(savePath);
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
+            titleImage: ipcData.titleImage !== false,
             removeAssets: ipcData.removeAssets,
             keepFold: ipcData.keepFold,
             mergeSubdocs: ipcData.mergeSubdocs,
@@ -258,6 +259,7 @@ export const initWindow = async (app: App) => {
             marginBottom: ipcData.pdfOptions.margins.bottom,
             marginLeft: ipcData.pdfOptions.margins.left,
             paged: ipcData.paged,
+            headingPageBreakLevels: ipcData.headingPageBreakLevels,
         };
         setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
         try {
@@ -283,58 +285,23 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 return;
             }
             pdfFilePath = responseUnique.data.path;
-            fetchPost("/api/export/exportHTML", {
+            fs.writeFileSync(pdfFilePath, pdfData);
+            const processed = await fetchSyncPost("/api/export/processPDF", {
                 id: ipcData.rootId,
-                pdf: true,
-                addTitle: ipcData.addTitle,
-                customTitle: ipcData.customTitle,
+                exportAssets: true,
                 merge: ipcData.mergeSubdocs,
                 mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
                 mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
-                savePath,
-            }, () => {
-                fs.writeFileSync(pdfFilePath, pdfData);
-                ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
-                fetchPost("/api/export/processPDF", {
-                    id: ipcData.rootId,
-                    merge: ipcData.mergeSubdocs,
-                    mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
-                    mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
-                    path: pdfFilePath,
-                    removeAssets: ipcData.removeAssets,
-                    watermark: ipcData.watermark
-                }, async () => {
-                    afterExport(pdfFilePath, msgId);
-                    if (ipcData.removeAssets) {
-                        const removePromise = (dir: string) => {
-                            return new Promise(function (resolve) {
-                                fs.stat(dir, function (err, stat) {
-                                    if (!stat) {
-                                        return;
-                                    }
-
-                                    if (stat.isDirectory()) {
-                                        fs.readdir(dir, function (err, files) {
-                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                            Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                fs.rm(dir, resolve);
-                                            });
-                                        });
-                                    } else {
-                                        fs.unlink(dir, resolve);
-                                    }
-                                });
-                            });
-                        };
-
-                        const assetsDir = path.join(savePath, "assets");
-                        await removePromise(assetsDir);
-                        if (1 > fs.readdirSync(assetsDir).length) {
-                            fs.rmdirSync(assetsDir);
-                        }
-                    }
-                });
+                path: pdfFilePath,
+                removeAssets: ipcData.removeAssets,
+                watermark: ipcData.watermark
             });
+            if (processed.code !== 0) {
+                showMessage(processed.msg, 0, "error", msgId);
+                return;
+            }
+            ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
+            afterExport(pdfFilePath, msgId);
         } catch (e) {
             console.error(e);
             showMessage(window.siyuan.languages.exportPDFLowMemory, 0, "error", msgId);
@@ -385,8 +352,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     }
 
     if (!isMac()) {
-        document.body.classList.add("body--win32");
-
         const controls = isWindow() ? document.querySelector<HTMLElement>(".toolbar__window") : document.getElementById("windowControls");
         if (!isWindow()) controls.replaceChildren();
         initWindowControls(controls, () => {
@@ -400,9 +365,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
-    }
-    if (isWindows()) {
-        document.body.classList.add("body--win32-browser");
     }
     /// #endif
 };

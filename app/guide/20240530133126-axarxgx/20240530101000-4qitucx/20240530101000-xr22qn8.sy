@@ -8,7 +8,7 @@
 		"id": "20240530101000-xr22qn8",
 		"title": "外観のカスタマイズ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20261013113128"
 	},
 	"Children": [
 		{
@@ -44,6 +44,81 @@
 					"TextMarkBlockRefID": "20240530101000-bpj42r0",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "テーマ"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-e2px19z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261013113128-e2px19z",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンパクトモード"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-3hus3mv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-3hus3mv",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "インターフェース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コンパクトモード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、デスクトップのツールバー、タブ、ナビゲーションリスト、メニュー、ダイアログの間隔が狭くなります。初期設定では無効で、切り替えるとすぐに反映されます。エディターの文字サイズ、文書やデータベースの内容のレイアウト、エクスポート結果、モバイル画面は変わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-7j202vs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-7j202vs",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "標準のライトテーマとダークテーマはコンパクトモードに対応しています。コミュニティテーマでの表示はテーマ独自のレイアウトによって異なり、一部の間隔が元のままになる場合があります。"
 				}
 			]
 		}

@@ -4,6 +4,7 @@ import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 import type {ListMindmapRelation} from "./model";
+import {buildListMindmapConnectors} from "./connectors";
 
 // 执行实际绘制和命中方法，画布替身仅记录路径与箭头，避免依赖图形显示环境。
 const source = createSourceFile("view.ts", readFileSync("src/protyle/render/listMindmap/view.ts", "utf8"),
@@ -30,7 +31,9 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
     let polygon: Point[] = [];
     const polygons: Point[][] = [];
     const strokes: TestPath[] = [];
+    const strokeStyles: string[] = [];
     const context = {
+        strokeStyle: "",
         strokeHit: false,
         setTransform: () => {}, clearRect: () => {}, translate: () => {}, scale: () => {},
         setLineDash: () => {}, closePath: () => {}, save: () => {}, restore: () => {}, resetTransform: () => {},
@@ -38,11 +41,17 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         moveTo: (x: number, y: number) => polygon.push({x, y}),
         lineTo: (x: number, y: number) => polygon.push({x, y}),
         fill: () => polygons.push(polygon),
-        stroke: (path: TestPath) => strokes.push(path),
+        stroke: (path: TestPath) => {
+            strokes.push(path);
+            strokeStyles.push(context.strokeStyle);
+        },
         isPointInStroke: () => context.strokeHit,
     };
     const sandbox: any = {
+        buildListMindmapConnectors,
         Path2D: TestPath, window: {devicePixelRatio: 1},
+        // 绘制入口会取消上一帧的合并绘制请求，替身环境没有帧调度
+        cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1,
         getComputedStyle: (element: {style?: {color?: string}}) => ({
             getPropertyValue: () => "", color: element.style?.color || "black",
         }),
@@ -64,10 +73,36 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
             ["b", {id: "b", x: -20, y: 0, width: 20, height: 20}]]),
         relationElements: new Map([["r", element()]]),
         relationRoutes: new Map([["r", [{x: 100, y: 10}, {x: 0, y: 10}]]]),
-        routingObstacles: () => [], drawRelationPreview: () => {}, drawSummaries: () => {}, renderRouteControls: () => {},
+        routingObstacles: (): unknown[] => [], drawRelationPreview: () => {}, drawSummaries: () => {}, renderRouteControls: () => {},
     });
-    return {target, context, polygons, strokes, element};
+    return {target, context, polygons, strokes, strokeStyles, element};
 };
+
+test("shared orthogonal trunks keep the default color and stay outside branch selection in every renderer", () => {
+    for (const connectorStyle of ["orthogonal", "rounded"]) {
+        for (const printLayout of [false, true]) {
+            const {target, strokes, strokeStyles} = setup();
+            Object.assign(target.model.metadata, {connectorStyle, relations: [], nodes: {
+                root: {lineColor: "#112233"}, a: {lineColor: "#ff0000"}, b: {lineColor: "#0000ff"},
+            }});
+            target.model.root.id = "root";
+            target.readOnly = printLayout;
+            target.options.printLayout = printLayout;
+            target.positions = new Map([
+                ["root", {id: "root", x: 20, y: 100, width: 100, height: 40}],
+                ["a", {id: "a", x: 160, y: 0, width: 100, height: 40}],
+                ["b", {id: "b", x: 160, y: 200, width: 100, height: 40}],
+            ]);
+            target.edges = [{from: "root", to: "a"}, {from: "root", to: "b"}];
+            target.selectedEdge = "b";
+            target.draw();
+            assert.deepEqual(strokeStyles, ["#112233", "#ff0000", "#0000ff"]);
+            assert.equal(target.linePaths.length, 2);
+            assert.equal(target.linePaths.some((line: {path: TestPath}) => line.path === strokes[0]), false,
+                "the shared trunk is drawn once without becoming a selectable child line");
+        }
+    }
+});
 
 test("all arrow modes use endpoint identity rather than canonical path drawing order", () => {
     for (const mode of [undefined, "forward", "reverse", "both", "none"] as const) {

@@ -5,6 +5,7 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../../asset/html";
 import {updateTransaction, transaction} from "../../wysiwyg/transaction";
 import {genListItemElement, setTaskListItemMarker} from "../../wysiwyg/list";
+import {getListConversionType, type TListSubtype} from "../../wysiwyg/listContext";
 import {nextTaskListMarker, nextTaskListStatus} from "../../wysiwyg/taskListMarker";
 import {getTaskStatusItems} from "../../wysiwyg/taskStatusDialog";
 import {getTabTask} from "../tabsRender";
@@ -16,6 +17,7 @@ import {hideAllElements, hideElements} from "../../ui/hideElements";
 import {globalClickHideMenu} from "../../../menus/menuClick";
 import {countBlockWord} from "../../../layout/status";
 import {openLink} from "../../../editor/openLink";
+import {previewDocImage} from "../../preview/image";
 import {suspendBlockPopover} from "../../../block/popover";
 import {matchHotKey} from "../../util/hotKey";
 import {setFullscreen} from "../../breadcrumb/action";
@@ -30,7 +32,7 @@ import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
-    convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight,
+    convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight, initializeListMindmapConnectorStyle,
 } from "./model";
 import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
@@ -45,13 +47,17 @@ import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold"
 import {isMobile} from "../../../util/functions";
 import {addListMindmapSummaryRanges, getListMindmapSiblingIDs, getListMindmapSummaryParentID, getListMindmapSummaryRange,
     getListMindmapSummarySnapshot} from "./summary";
-import {isProtyleListItemFragment} from "../../runtimeCapabilities";
+import {getProtyleTransactionOwner, isProtyleListItemFragment} from "../../runtimeCapabilities";
 import {isFoldedRenderContent} from "../foldedContent";
 import {disposeCustomBlocksInElement} from "../../../plugin/customBlockRender";
 import {processRender} from "../../util/processCode";
 import {highlightRender} from "../highlightRender";
 import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
+import {getListMindmapConnectorMenuItem} from "./connectorMenu";
+import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
+import {getEmbedChildOperationContext} from "../../wysiwyg/getBlock";
+import {requestRedo, requestUndo} from "../../undo/globalUndo";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void, focusRevision: number,
@@ -75,7 +81,8 @@ const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled &&
     list.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
 
 const canEdit = (owner: IProtyle, list: HTMLElement) => canToggleView(owner, list) &&
-    !list.closest(".protyle-wysiwyg__embed");
+    (!list.closest(".protyle-wysiwyg__embed") ||
+        !!getEmbedChildOperationContext(list)?.resultElement.dataset.rootId);
 
 export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     if (!["NodeList", "NodeMindmap"].includes(list.dataset.type) || !canToggleView(owner, list)) {
@@ -87,7 +94,8 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
         if (!source || !canEdit(owner, list)) {
             return;
         }
-        const type = {o: "UL2OL", t: "UL2TL", u: "OL2UL"}[source.getAttribute("data-subtype")] || "OL2UL";
+        const type = getListConversionType("u", source.getAttribute("data-subtype") as TListSubtype) ||
+            getListConversionType("o", "u");
         const html = convertListMindmapToList(source, type, owner.lute);
         const template = list.ownerDocument.createElement("template");
         template.innerHTML = html;
@@ -104,6 +112,9 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     if (list.dataset.type === "NodeMindmap" || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) == null) {
         const before = cleanListMindmapHTML(list.outerHTML);
         const toMindmap = list.dataset.type === "NodeList";
+        if (toMindmap) {
+            initializeListMindmapConnectorStyle(list, getDefaultListMindmapConnectorStyle());
+        }
         retagMindmapBranch(list, toMindmap);
         if (!toMindmap) {
             list.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
@@ -126,12 +137,19 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     }
     hideElements(["gutter", "toolbar", "hint"], owner);
     const previousStyle = list.getAttribute("style") || "";
+    const previousMetadata = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA) || "";
     if (!next) {
+        initializeListMindmapConnectorStyle(list, "bezier");
         clearListMindmapHeight(list);
     }
     const nextStyle = list.getAttribute("style") || "";
     const doAttrs: Record<string, string> = {[Constants.CUSTOM_SY_LIST_MINDMAP]: next};
     const undoAttrs: Record<string, string> = {[Constants.CUSTOM_SY_LIST_MINDMAP]: previous};
+    const nextMetadata = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA) || "";
+    if (nextMetadata !== previousMetadata) {
+        doAttrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA] = nextMetadata;
+        undoAttrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA] = previousMetadata;
+    }
     if (nextStyle !== previousStyle) {
         doAttrs.style = nextStyle;
         undoAttrs.style = previousStyle;
@@ -161,7 +179,7 @@ class ListMindmapController {
         this.owner = owner;
         this.list = list;
         this.model = readListMindmap(list);
-        list.querySelector(":scope > .mindmap-view")?.remove();
+        list.querySelectorAll(":scope > .mindmap-view").forEach(host => host.remove());
         this.host = document.createElement("div");
         this.host.className = "mindmap-view";
         syncListMindmapHeight(list, this.host);
@@ -218,11 +236,47 @@ class ListMindmapController {
         this.view = new ListMindmapView({
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
+            onPreviewImage: (src, video) => previewDocImage(src, owner.block.rootID, video),
             onInteractionStart: event => suspendBlockPopover(this.host, event),
             readOnly: !canEdit(owner, list),
             onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
                 metadata.viewLocked = locked;
             }) : Promise.resolve(true),
+            onSettingsMenu: anchor => {
+                toggleMenu({
+                    target: anchor,
+                    build: (_menu, session) => {
+                        if (!canEdit(owner, list)) {
+                            return;
+                        }
+                        const menu = new Menu();
+                        menu.addItem(getListMindmapConnectorMenuItem(readListMindmap(list).metadata.connectorStyle || "bezier",
+                            style => {
+                                void this.metadata(metadata => {
+                                    if ((metadata.connectorStyle || "bezier") === style) {
+                                        return false;
+                                    }
+                                    if (style === "bezier") {
+                                        delete metadata.connectorStyle;
+                                    } else {
+                                        metadata.connectorStyle = style;
+                                    }
+                                });
+                            }, window.siyuan.languages));
+                        menu.addItem(getListMindmapConnectorMenuItem(getDefaultListMindmapConnectorStyle(), style => {
+                            if (canEdit(owner, list)) {
+                                setDefaultListMindmapConnectorStyle(style);
+                            }
+                        }, window.siyuan.languages, "default"));
+                        if (isMobile()) {
+                            session.show(() => menu.fullscreen("bottom"));
+                        } else {
+                            const rect = anchor.getBoundingClientRect();
+                            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                        }
+                    },
+                });
+            },
             onExpandLevelMenu: (anchor, select) => {
                 toggleMenu({
                     target: anchor,
@@ -592,6 +646,19 @@ class ListMindmapController {
             const siblings = selected?.parentId ? model.nodes.get(selected.parentId)?.children || [] : [];
             const index = siblings.findIndex(node => node.id === selectedID);
             const previous = getListMindmapSiblingIDs(model);
+            const focusContext = (id: string, source: ListMindmapModel): Record<string, string> => {
+                const embed = this.list.closest(".protyle-wysiwyg__embed");
+                if (!embed) {
+                    return {};
+                }
+                const element = source.nodes.get(id)?.element || this.list;
+                const index = Array.from(this.owner.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`))
+                    .indexOf(element);
+                const query = embed.closest<HTMLElement>('[data-type="NodeBlockQueryEmbed"]');
+                return {...(index >= 0 ? {undoFocusIndex: String(index)} : {}),
+                    ...(query?.dataset.nodeId ? {undoFocusEmbedId: query.dataset.nodeId} : {})};
+            };
+            const undoFocus = focusContext(selectedID, model);
             if (change() === false) {
                 return false;
             }
@@ -604,10 +671,12 @@ class ListMindmapController {
                 updateTransaction(this.owner, this.list, before, {
                     undoFocusId: selectedID, undoFocusStart: "0", undoFocusEnd: "0",
                     mindmapSnapshotId: this.list.dataset.nodeId,
+                    ...undoFocus,
                     ...(selection?.undo ? {undoFocusMindmapSelection: JSON.stringify(selection.undo)} : {}),
                 }, {doOperations: [], undoOperations: [], context: {
                     undoFocusId: nextID, undoFocusStart: "0", undoFocusEnd: "0",
                     mindmapSnapshotId: this.list.dataset.nodeId,
+                    ...focusContext(nextID, next),
                     ...(selection?.redo ? {undoFocusMindmapSelection: JSON.stringify(selection.redo)} : {}),
                 }});
             }
@@ -667,10 +736,12 @@ class ListMindmapController {
         this.view.setEditing(id);
         const editor = openListMindmapEditor({
             owner: this.owner, node, host, replaceFirstParagraph, selection,
+            rootID: this.list.closest<HTMLElement>(".protyle-wysiwyg__embed")?.dataset.rootId,
             canEdit: () => !this.disposed && this.list.isConnected && canEdit(this.owner, this.list),
             onSave: (html, undo, redo) => this.change(() => replaceListMindmapContent(this.list, id, html), true, id, {undo, redo}),
             onResize: () => this.view.refreshLayout(),
             onAdd: kind => this.add(id, kind),
+            isPanTarget: event => this.view.isPanTarget(event),
             onFinish: () => {
                 if (this.activeEditor !== editor) {
                     return;
@@ -723,7 +794,25 @@ class ListMindmapController {
                 this.view.focusNode(editingID);
             }
             const focusRevision = root?.focusRevision;
-            if (redo) {
+            const sourceRootID = this.list.closest<HTMLElement>(".protyle-wysiwyg__embed")?.dataset.rootId;
+            if (sourceRootID) {
+                // 全屏视图和节点片段的选区不在嵌入源块内，撤销始终使用源文档和实际提交事务的编辑器。
+                const owner = this.owner.lite && getProtyleTransactionOwner(this.owner,
+                    [{action: "update", id: this.list.dataset.nodeId, data: before}]) || this.owner;
+                if (!owner.lite) {
+                    await (redo ? requestRedo(owner, sourceRootID) : requestUndo(owner, sourceRootID));
+                    if (this.owner.lite && this.list.isConnected && !this.disposed) {
+                        // 全屏中的片段不在外层编辑器内，按源块补齐撤销结果，并保留等待期间的新修改。
+                        const snapshot = cleanListMindmapHTML(this.list.outerHTML);
+                        const response = await fetchSyncPost("/api/block/getBlockDOM",
+                            {id: this.list.dataset.nodeId, notebook: this.owner.notebookId});
+                        if (response.code === 0 && canEdit(this.owner, this.list) && !this.disposed &&
+                            cleanListMindmapHTML(this.list.outerHTML) === snapshot) {
+                            this.replay(response.data.dom);
+                        }
+                    }
+                }
+            } else if (redo) {
                 await this.owner.undo.redo(this.owner);
             } else {
                 await this.owner.undo.undo(this.owner);
@@ -843,14 +932,20 @@ class ListMindmapController {
 
 // 补齐折叠隐藏的正文后才允许改动列表，避免以局部视图覆盖完整块树。
 const completeList = async (owner: IProtyle, list: HTMLElement) => {
+    const rootID = owner.block.rootID;
+    const notebookId = owner.notebookId;
+    const id = list.dataset.nodeId;
+    const type = list.dataset.type;
+    const isCurrent = () => canEdit(owner, list) && owner.block.rootID === rootID &&
+        owner.notebookId === notebookId && list.dataset.nodeId === id && list.dataset.type === type;
     await owner.wysiwyg.flushPendingInput();
     await waitForPendingTransactions(owner);
-    if (!list.isConnected) {
+    if (!isCurrent()) {
         return "failed";
     }
     const before = cleanListMindmapHTML(list.outerHTML);
-    const response = await fetchSyncPost("/api/block/getBlockDOM", {id: list.dataset.nodeId, notebook: owner.notebookId});
-    if (response.code !== 0 || !list.isConnected) {
+    const response = await fetchSyncPost("/api/block/getBlockDOM", {id, notebook: notebookId});
+    if (response.code !== 0 || !isCurrent()) {
         return "failed";
     }
     if (cleanListMindmapHTML(list.outerHTML) !== before) {
@@ -877,6 +972,10 @@ export const initListMindmaps = (owner: IProtyle) => {
     const placeholders = new Map<HTMLElement, HTMLElement>();
     const failed = new WeakSet<HTMLElement>();
     const newlyCreated = new WeakSet<HTMLElement>();
+    const completeSources = new WeakSet<HTMLElement>();
+    const needsCompleteSource = (list: HTMLElement) =>
+        (!owner.lite || !!list.closest(".protyle-wysiwyg__embed")) && canEdit(owner, list) &&
+        !newlyCreated.has(list) && !completeSources.has(list);
     let pendingFocus: {list: HTMLElement, candidateIDs: string[], selection?: Record<string, string>, guard?: () => boolean};
     let frame = 0;
     let disposed = false;
@@ -899,6 +998,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                 return;
             }
             // 在浏览器绘制正文前占位，补齐源块期间沿用脑图的尺寸和公共加载动画。
+            list.querySelectorAll(":scope > .mindmap-view").forEach(host => host.remove());
             const host = document.createElement("div");
             host.className = "mindmap-view";
             host.contentEditable = "false";
@@ -916,7 +1016,7 @@ export const initListMindmaps = (owner: IProtyle) => {
         }
         const lists = new Set(getListMindmapElements(root));
         instances.forEach((instance, list) => {
-            if (!lists.has(list)) {
+            if (!lists.has(list) || needsCompleteSource(list)) {
                 instance.destroy();
                 instances.delete(list);
             } else if (!isFoldedRenderContent(list, true)) {
@@ -930,6 +1030,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                 }
             }
         });
+        prepare();
         lists.forEach(list => {
             if (instances.has(list) || loading.has(list) || failed.has(list) || isFoldedRenderContent(list, true)) {
                 return;
@@ -955,11 +1056,12 @@ export const initListMindmaps = (owner: IProtyle) => {
                     list.removeAttribute("data-mindmap-view-rendered");
                 }
             };
-            if (!owner.lite && canEdit(owner, list) && !newlyCreated.has(list)) {
+            if (needsCompleteSource(list)) {
                 loading.add(list);
                 let retry = false;
                 void completeList(owner, list).then(complete => {
                     if (complete === "complete") {
+                        completeSources.add(list);
                         mount();
                     } else if (complete === "changed") {
                         retry = true;
@@ -978,6 +1080,9 @@ export const initListMindmaps = (owner: IProtyle) => {
                     }
                 });
             } else {
+                if (newlyCreated.has(list)) {
+                    completeSources.add(list);
+                }
                 newlyCreated.delete(list);
                 mount();
             }

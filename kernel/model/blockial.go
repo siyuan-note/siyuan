@@ -140,6 +140,9 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 	}
 
 	FlushTxQueue()
+	if handled, collectionErr := performCollectionAttributeOperations(blockAttrs, true); handled || collectionErr != nil {
+		return collectionErr
+	}
 
 	var blockIDs []string
 	for _, blockAttr := range blockAttrs {
@@ -226,6 +229,9 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 
 	FlushTxQueue()
+	if handled, collectionErr := performCollectionAttributeOperations([]map[string]any{{"id": id, "attrs": nameValues}}, false); handled || collectionErr != nil {
+		return collectionErr
+	}
 
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
@@ -353,7 +359,19 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 		cache.RemoveDocIALInBox(tree.Path, tree.Box)
 		cache.PutDocIALInBox(tree.Path, tree.Box, newAttrs)
 	}
-	pushBlockAttrs(oldAttrs, node)
+	if state := tx.attributeViewAutomations; state != nil {
+		if state.blockAttrs == nil {
+			state.blockAttrs = map[string]*Operation{}
+		}
+		operation := blockAttrsOperation(oldAttrs, node)
+		if previous := state.blockAttrs[node.ID]; previous != nil {
+			operation.Data.(map[string]any)["old"] = previous.Data.(map[string]any)["old"]
+		}
+		operation.attributeViewAutomation = true
+		state.blockAttrs[node.ID] = operation
+	} else {
+		pushBlockAttrs(oldAttrs, node)
+	}
 	pushDocSortModeChanged(oldAttrs, node, tree)
 	return
 }
@@ -535,16 +553,19 @@ func normalizeIconValue(value string) string {
 	return ret
 }
 
-func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {
+func blockAttrsOperation(oldAttrs map[string]string, node *ast.Node) *Operation {
 	newAttrs := parse.IAL2Map(node.KramdownIAL)
 	data := map[string]any{"old": oldAttrs, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType
 	}
-	doOp := &Operation{Action: "updateAttrs", Data: data, ID: node.ID, RootID: treenode.TreeRoot(node).ID}
+	return &Operation{Action: "updateAttrs", Data: data, ID: node.ID, RootID: treenode.TreeRoot(node).ID}
+}
+
+func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
 	evt.Data = []*Transaction{{
-		DoOperations:   []*Operation{doOp},
+		DoOperations:   []*Operation{blockAttrsOperation(oldAttrs, node)},
 		UndoOperations: []*Operation{},
 	}}
 	util.PushEvent(evt)

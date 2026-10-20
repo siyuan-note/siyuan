@@ -59,6 +59,7 @@ type Editor struct {
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
 	CodeLigatures                   bool           `json:"codeLigatures"`                   // 代码块是否连字
 	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示内容块角标
+	BlockGutterMode                 bool           `json:"blockGutterMode"`                 // 是否显示完整块标
 	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
 	DisplayImgName                  bool           `json:"displayImgName"`                  // 是否显示图片文件名
 	DisplayImgAlt                   bool           `json:"displayImgAlt"`                   // 是否显示图片提示文本
@@ -86,6 +87,7 @@ type Editor struct {
 	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
 	FloatWindowDelay                *int           `json:"floatWindowDelay"`                // 浮窗悬停触发延迟，单位：毫秒，默认 620，nil 表示未设置
 	KeepLoadedContent               bool           `json:"keepLoadedContent"`               // 是否保持动态加载的内容
+	PageScrollButtons               bool           `json:"pageScrollButtons"`               // 是否显示翻屏按钮，默认关闭
 	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，下限 48
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
@@ -94,6 +96,7 @@ type Editor struct {
 	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
 	HashTagSearch                   *bool          `json:"hashTagSearch"`                   // 输入 # 时是否进行标签搜索
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
+	AutoCloseRefBrackets            bool           `json:"autoCloseRefBrackets"`            // 输入 [[ 时自动补全 ]]，输入 ]] 时完成引用
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 	BacklinkMentionExclude          string         `json:"backlinkMentionExclude"`          // 反链提及关键字排除列表
@@ -236,6 +239,7 @@ func NewEditor() *Editor {
 		Spellcheck:                      false,
 		SpellcheckLanguages:             []string{"en-US"},
 		HashTagSearch:                   new(true),
+		AutoCloseRefBrackets:            false,
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          -1,
 		BacklinkContainChildren:         true,

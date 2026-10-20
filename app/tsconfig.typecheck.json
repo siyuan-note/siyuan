@@ -4,6 +4,6 @@
     "noEmit": true,
     "emitDeclarationOnly": false,
     "skipLibCheck": true,
-    "lib": ["ES2021", "DOM", "DOM.Iterable"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   }
 }

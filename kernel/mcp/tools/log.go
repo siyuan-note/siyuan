@@ -148,10 +148,7 @@ func agentLogTail(args map[string]any) (CallToolResult, error) {
 }
 
 func agentLogRead(args map[string]any) (CallToolResult, error) {
-	offset := int(getFloat64Arg(args, "offset"))
-	if offset < 1 {
-		offset = 1
-	}
+	offset := max(int(getFloat64Arg(args, "offset")), 1)
 	limit := resolveAgentLogLimit(args, agentLogDefaultReadLimit, agentLogMaxReadLimit)
 	lines := make([]numberedAgentLogLine, 0, limit)
 	total, err := scanAgentLog(func(number int, line string) bool {
@@ -323,7 +320,7 @@ func collectAgentLogSecrets(value reflect.Value, ownerType string, secrets map[s
 		return
 	}
 	if value.CanInterface() {
-		if section, ok := value.Interface().(interface{ SnapshotValue() any }); ok {
+		if section, ok := reflect.TypeAssert[interface{ SnapshotValue() any }](value); ok {
 			collectAgentLogSecrets(reflect.ValueOf(section.SnapshotValue()), ownerType, secrets)
 			return
 		}
@@ -343,7 +340,7 @@ func collectAgentLogSecrets(value reflect.Value, ownerType string, secrets map[s
 			if fieldType.PkgPath != "" {
 				continue
 			}
-			name := strings.Split(fieldType.Tag.Get("json"), ",")[0]
+			name, _, _ := strings.Cut(fieldType.Tag.Get("json"), ",")
 			if name == "" || name == "-" {
 				name = fieldType.Name
 			}

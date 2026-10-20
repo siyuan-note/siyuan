@@ -1,6 +1,10 @@
 package apicontract
 
-import "reflect"
+import (
+	"maps"
+	"reflect"
+	"slices"
+)
 
 type transactionActionPayload struct {
 	action       string
@@ -31,6 +35,8 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewName", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"setAttrViewNewItemTemplates", reflect.TypeFor[TransactionNewItemTemplates](), reflect.TypeFor[Null]()},
 	{"setAttrViewAutomations", reflect.TypeFor[AVAutomationConfig](), reflect.TypeFor[Null]()},
+	{"collectAttrViewBlocks", reflect.TypeFor[AVCollectBlocks](), reflect.TypeFor[Null]()},
+	{"cleanupAttrViewBlocks", reflect.TypeFor[AVCollectionCleanup](), reflect.TypeFor[Null]()},
 	{"setAttrViewConditionalColors", reflect.TypeFor[[]*AVConditionalColorRule](), reflect.TypeFor[Null]()},
 	{"setAttrViewFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewContextFilter", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
@@ -236,9 +242,7 @@ func transactionPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Sc
 
 func transactionOperationBranch(base *Schema, action, data, result *Schema, input bool) *Schema {
 	properties := map[string]*Schema{}
-	for key, value := range base.Properties {
-		properties[key] = value
-	}
+	maps.Copy(properties, base.Properties)
 	properties["action"], properties["data"], properties["retData"] = action, data, result
 	required := append([]string{}, base.Required...)
 	addRequired := []string{"data", "retData"}
@@ -246,13 +250,7 @@ func transactionOperationBranch(base *Schema, action, data, result *Schema, inpu
 		addRequired = []string{"action"}
 	}
 	for _, name := range addRequired {
-		found := false
-		for _, existing := range required {
-			if existing == name {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(required, name)
 		if !found {
 			required = append(required, name)
 		}

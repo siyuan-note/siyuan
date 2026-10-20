@@ -19,6 +19,7 @@ export interface ISettingsWindowHost {
     getEditorToolbarCatalogSnapshot: () => IToolbarCatalogEntry[];
     openBazaarPath: (type: TBazaarType, name: string, storage?: boolean) => void;
     exportLayout: (options: {cb: () => void; errorExit: boolean}) => Promise<void>;
+    suspendLayoutSaving: () => Promise<() => void>;
     exit: (setCurrentWorkspace?: boolean) => Promise<void>;
     subscribePlugins: (listener: (state: IGlobalPluginStateSnapshot) => void) => () => void;
     applyPluginReload: (data: IPluginReloadData) => Promise<void>;

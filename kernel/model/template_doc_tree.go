@@ -417,11 +417,11 @@ func resolveTemplatePackageFile(rootTemplatePath, relativePath string) (string, 
 	if !gulu.File.IsSubPath(packageRoot, absPath) || !filelock.IsExist(absPath) {
 		return "", fmt.Errorf("child template [%s] not found in the current template package", relativePath)
 	}
-	realRoot, err := filepath.EvalSymlinks(packageRoot)
+	realRoot, err := util.ResolveRealPath(packageRoot)
 	if nil != err {
 		return "", err
 	}
-	realPath, err := filepath.EvalSymlinks(absPath)
+	realPath, err := util.ResolveRealPath(absPath)
 	if nil != err {
 		return "", err
 	}

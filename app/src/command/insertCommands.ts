@@ -28,7 +28,8 @@ const BUILTIN_STYLES: Record<string, TBuiltinInlineStyleID> = {
 const SPECIAL_LABELS: Record<string, string> = {
     html: "HTML", flowChart: "Flow Chart", graph: "Graph", mermaid: "Mermaid", UML: "UML",
 };
-const INSERT_KEYMAP_IDS = new Set(["ref", "list", "orderedList", "check", "mindmap", "quote", "code", "table"]);
+const INSERT_KEYMAP_IDS = new Set(["ref", "list", "orderedList", "check", "mindmap", "quote", "code", "table",
+    "calloutNote", "calloutTip", "calloutImportant", "calloutWarning", "calloutCaution"]);
 
 const keymapPath = (id: string): TCommandKeymapPath | undefined => {
     if (/^heading[1-6]$/.test(id)) {

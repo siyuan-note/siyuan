@@ -32,7 +32,7 @@ func TestLuteTextMarkEscapedContentRoundTrip(t *testing.T) {
 				engine := NewLute()
 				const content = "&lt;vitae&gt; &amp; &amp;lt;literal&amp;gt;"
 				dom := `<div data-node-id="20260918120000-abcdefg" data-type="` + blockType + `" data-subtype="h1"><div contenteditable="true">before <span data-type="` + mark + `">` + content + `</span> after</div></div>`
-				for i := 0; i < 3; i++ {
+				for i := range 3 {
 					tree := engine.BlockDOM2Tree(dom)
 					found := false
 					ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

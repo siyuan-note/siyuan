@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20261002224424"
+		"updated": "20261018005815"
 	},
 	"Children": [
 		{
@@ -121,7 +121,7 @@
 			"Properties": {
 				"ID": "20240530101000-cxeqe3k",
 				"id": "20240530101000-8up071z",
-				"updated": "20240530101000"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"Properties": {
 				"ID": "20240530101000-c3dgugw",
 				"id": "20240530101000-1jtqnm2",
-				"updated": "20240530101000"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -569,7 +569,7 @@
 					"Properties": {
 						"ID": "20240530101000-tmb2uts",
 						"id": "20240530101000-qjpknj6",
-						"updated": "20240530101000"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -578,12 +578,19 @@
 							"Properties": {
 								"ID": "20240530101000-f8pe9hl",
 								"id": "20240530101000-b8k62b9",
-								"updated": "20240530101000"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "残りのフォルダはユーザーが作成したノートブックフォルダで、その中に .sy という拡張子の JSON 形式のファイルによってドキュメントデータが保存されます。"
+									"Data": "残りのフォルダはユーザーが作成したノートブックフォルダで、拡張子 .sy のファイルにドキュメントデータが保存されます。通常のノートブックではドキュメントデータを JSON 形式で保存します。暗号化ノートブックのドキュメントファイルは暗号文で保存されるため、JSON として直接読み書きしないでください。詳しくは"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-cryja01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "暗号化ノートブック"
 								}
 							]
 						}
@@ -598,7 +605,7 @@
 			"Properties": {
 				"ID": "20240530101000-kzr1stl",
 				"id": "20240530101000-kibjam5",
-				"updated": "20260810212846"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -654,7 +661,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-dc55vlo",
-				"updated": "20260810212846"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -666,7 +673,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-zgsohz6",
-						"updated": "20260810212846"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -674,17 +681,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-qf51d1d",
-								"updated": "20260810212846"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "デスクトップ"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": "
+									"Data": "デスクトップ："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -693,16 +695,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "エクスポート"
+									"TextMarkTextContent": "アプリ"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -716,11 +727,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "インポート Data"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "インポート Data"
 								}
 							]
 						}
@@ -735,7 +769,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-fgvjudu",
-						"updated": "20260810212846"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -743,35 +777,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-jjauibs",
-								"updated": "20260810212846"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "モバイル"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": "
+									"Data": "モバイル："
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "右パネル"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "情報"
+									"TextMarkTextContent": "アプリ"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -785,11 +823,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "インポート Data"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "インポート Data"
 								}
 							]
 						}
@@ -869,7 +930,7 @@
 			"Properties": {
 				"ID": "20240530101000-zzi4hcc",
 				"id": "20240530101000-koxcm1m",
-				"updated": "20260803170332"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -895,7 +956,7 @@
 			"Properties": {
 				"ID": "20240530101000-e74hr3y",
 				"id": "20240530101000-m9hbtpx",
-				"updated": "20260803170332"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -908,7 +969,7 @@
 					"Properties": {
 						"ID": "20240530101000-ke1xxg1",
 						"id": "20240530101000-d7sx7ym",
-						"updated": "20240530101000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -917,12 +978,12 @@
 							"Properties": {
 								"ID": "20240530101000-n61x4xz",
 								"id": "20240530101000-epa3km2",
-								"updated": "20240530101000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "アプリストアからインストールした場合はアプリストアからアップデートしてください。"
+									"Data": "アプリストアからインストールした場合はアプリストアからアップデートしてください"
 								}
 							]
 						}
@@ -938,7 +999,7 @@
 					"Properties": {
 						"ID": "20240530101000-ytqityo",
 						"id": "20240530101000-8s9aebg",
-						"updated": "20260803170332"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -947,7 +1008,7 @@
 							"Properties": {
 								"ID": "20240530101000-fzsf35i",
 								"id": "20240530101000-h7rotnf",
-								"updated": "20260803170332"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -979,7 +1040,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ を有効にすると、最新バージョンが公開されるとインストールパッケージを自動的にダウンロードしてインストールを促します。"
+									"Data": " ​ を有効にすると、最新バージョンが公開されるとインストールパッケージを自動的にダウンロードしてインストールを促します"
 								}
 							]
 						}
@@ -995,7 +1056,7 @@
 					"Properties": {
 						"ID": "20240530101000-udaggvt",
 						"id": "20240530101000-madn5i3",
-						"updated": "20240530101000"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -1004,12 +1065,12 @@
 							"Properties": {
 								"ID": "20240530101000-nb2qzv0",
 								"id": "20240530101000-ind6vgj",
-								"updated": "20240530101000"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "モバイル版をインストールパッケージからインストールした場合は、新しいパッケージをダウンロードしてインストールしてください。"
+									"Data": "モバイル版をインストールパッケージからインストールした場合は、新しいパッケージをダウンロードしてインストールしてください"
 								}
 							]
 						}
@@ -1049,7 +1110,7 @@
 			"Properties": {
 				"ID": "20240530101000-owjuw7q",
 				"id": "20240530101000-1u51q5t",
-				"updated": "20260809232000"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
@@ -1065,6 +1126,56 @@
 					"Properties": {
 						"id": ""
 					}
+				}
+			]
+		},
+		{
+			"ID": "20261017212429-yem61n3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017212429-yem61n3",
+				"updated": "20261018005815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "既定では簡略表示です。項目が1つだけのリストでも、リストとリスト項目のアイコンは表示されます。現在のブロックと、それを含むすべてのコンテナのアイコンを表示するには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "動作"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックアイコンをすべて表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にします。各アイコンから対応するブロックのメニューを開いたり、そのブロックをドラッグしたりできます。"
 				}
 			]
 		},
@@ -1239,7 +1350,7 @@
 			"Properties": {
 				"ID": "20240530101000-xkwaw8d",
 				"id": "20240530101000-r8dsete",
-				"updated": "20260803170332"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1260,7 +1371,7 @@
 			"Properties": {
 				"ID": "20240530101000-86x5uzc",
 				"id": "20240530101000-uqxlw8g",
-				"updated": "20260803170332"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1276,7 +1387,7 @@
 					"Properties": {
 						"ID": "20240530101000-19bohb0",
 						"id": "20240530101000-qwvljpb",
-						"updated": "20260803170332"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -1285,7 +1396,7 @@
 							"Properties": {
 								"ID": "20240530101000-l1h5udu",
 								"id": "20240530101000-sa4zw1a",
-								"updated": "20260803170332"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -1326,7 +1437,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ から取得できます。"
+									"Data": " ​ から取得できます"
 								}
 							]
 						}
@@ -1346,7 +1457,7 @@
 					"Properties": {
 						"ID": "20240530101000-508zmqc",
 						"id": "20240530101000-idjxzo9",
-						"updated": "20260803163243"
+						"updated": "20261016202856"
 					},
 					"Children": [
 						{
@@ -1379,7 +1490,7 @@
 							"Properties": {
 								"ID": "20240530101000-kiyyp29",
 								"id": "20240530101000-bkcq3ah",
-								"updated": "20260803163243"
+								"updated": "20261016202856"
 							},
 							"Children": [
 								{
@@ -1398,7 +1509,7 @@
 									"Properties": {
 										"ID": "20240530101000-m67unc5",
 										"id": "20240530101000-j626kwo",
-										"updated": "20260803163243"
+										"updated": "20261016191102"
 									},
 									"Children": [
 										{
@@ -1407,13 +1518,9 @@
 											"Properties": {
 												"ID": "20240530101000-l0xrhri",
 												"id": "20240530101000-f7nk7ay",
-												"updated": "20260803163243"
+												"updated": "20261016191102"
 											},
 											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​ "
-												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
@@ -1421,16 +1528,25 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "エクスポート"
+													"TextMarkTextContent": "アプリ"
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "データ"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1439,7 +1555,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " ​ からデータをバックアップするか、ファイルシステムの "
+													"Data": " からデータをバックアップするか、ファイルシステムの "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1448,7 +1564,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ フォルダをコピーします。"
+													"Data": " フォルダをコピーします"
 												}
 											]
 										}
@@ -1470,7 +1586,7 @@
 									"Properties": {
 										"ID": "20240530101000-y8ykhvp",
 										"id": "20240530101000-nbh4zn7",
-										"updated": "20260803163243"
+										"updated": "20261016202856"
 									},
 									"Children": [
 										{
@@ -1479,7 +1595,7 @@
 											"Properties": {
 												"ID": "20240530101000-zl7ne0h",
 												"id": "20240530101000-2bzatij",
-												"updated": "20260803163243"
+												"updated": "20261016202856"
 											},
 											"Children": [
 												{
@@ -1511,7 +1627,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " ​ からデータリポジトリのリセットを実行します。"
+													"Data": " ​ からデータリポジトリのリセットを実行します"
 												}
 											]
 										}
@@ -1533,7 +1649,7 @@
 									"Properties": {
 										"ID": "20240530101000-ziowgm5",
 										"id": "20240530101000-shu4th0",
-										"updated": "20240530101000"
+										"updated": "20261016202856"
 									},
 									"Children": [
 										{
@@ -1542,12 +1658,12 @@
 											"Properties": {
 												"ID": "20240530101000-glsf17c",
 												"id": "20240530101000-au0mf5v",
-												"updated": "20240530101000"
+												"updated": "20261016202856"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "データリポジトリキーを再初期化します。一台のデバイスでキーを初期化した後、他のデバイスでキーをインポートします。"
+													"Data": "データリポジトリキーを再初期化します。一台のデバイスでキーを初期化した後、他のデバイスでキーをインポートします"
 												}
 											]
 										}
@@ -1569,7 +1685,7 @@
 									"Properties": {
 										"ID": "20240530101000-725q7r8",
 										"id": "20240530101000-fl0ix0m",
-										"updated": "20240530101000"
+										"updated": "20261016202856"
 									},
 									"Children": [
 										{
@@ -1578,12 +1694,12 @@
 											"Properties": {
 												"ID": "20240530101000-cv34uf4",
 												"id": "20240530101000-91zw5g6",
-												"updated": "20240530101000"
+												"updated": "20261016202856"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "クラウドでは新しい同期ディレクトリが使用され、古い同期ディレクトリは削除できます。"
+													"Data": "クラウドでは新しい同期ディレクトリが使用され、古い同期ディレクトリは削除できます"
 												}
 											]
 										}
@@ -1605,7 +1721,7 @@
 									"Properties": {
 										"ID": "20240530101000-42rthkp",
 										"id": "20240530101000-lcrcoyt",
-										"updated": "20240530101000"
+										"updated": "20261016202856"
 									},
 									"Children": [
 										{
@@ -1614,12 +1730,12 @@
 											"Properties": {
 												"ID": "20240530101000-qmq7x4y",
 												"id": "20240530101000-rhl7rel",
-												"updated": "20240530101000"
+												"updated": "20261016202856"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "クラウドでは新しいクラウドスナップショットが使用され、古いクラウドスナップショットは削除できます。"
+													"Data": "クラウドでは新しいクラウドスナップショットが使用され、古いクラウドスナップショットは削除できます"
 												}
 											]
 										}

@@ -13,10 +13,10 @@ import {scrollCenter} from "../../util/highlightById";
 import {transaction, updateTransaction} from "./transaction";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {net2LocalAssets} from "../breadcrumb/action";
 import {copyTextByType} from "../toolbar/util";
-import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
 import {removeEmbed} from "./removeEmbed";
 import {clearBlockElement} from "../util/clear";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
@@ -29,6 +29,8 @@ import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
+    const getCopyIDs = (elements: Element[]) => Array.from(new Set(elements.map(element =>
+        (hasClosestBlock(element, true) || element).getAttribute("data-node-id"))));
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset, event)) {
         net2LocalAssets(protyle, "Img");
         event.preventDefault();
@@ -68,7 +70,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocolMd");
+            copyTextByType(getCopyIDs(selectElements), "protocolMd");
         } else {
             copyTextByType([protyle.block.rootID], "protocolMd");
         }
@@ -83,7 +85,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "id");
+            copyTextByType(getCopyIDs(selectElements), "id");
         } else {
             copyTextByType([protyle.block.rootID], "id");
         }
@@ -97,7 +99,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocol");
+            copyTextByType(getCopyIDs(selectElements), "protocol");
         } else {
             copyTextByType([protyle.block.rootID], "protocol");
         }
@@ -118,7 +120,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "blockEmbed");
+            copyTextByType(getCopyIDs(selectElements), "blockEmbed");
         } else {
             copyTextByType([protyle.block.rootID], "blockEmbed");
         }

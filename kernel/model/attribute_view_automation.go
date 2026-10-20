@@ -21,6 +21,11 @@ import (
 
 const maxAutomationOperations = 1000
 
+// IsAutomaticAttributeViewOperation 供块 API 保持仅返回原始块操作的响应格式。
+func (operation *Operation) IsAutomaticAttributeViewOperation() bool {
+	return operation != nil && operation.attributeViewAutomation
+}
+
 type attributeViewAutomationSource struct {
 	before  *av.AttributeView
 	blockID string
@@ -34,6 +39,24 @@ type attributeViewAutomationState struct {
 	count      int
 	recordUndo bool
 	paused     []automationPausedRule
+	results    map[string]*automationRuleResult
+	blockAttrs map[string]*Operation
+}
+
+// 将自动化产生的最终属性补在正文操作之后，避免旧正文覆盖新绑定。
+func (tx *Transaction) appendAutomationBlockAttrs() {
+	state := tx.attributeViewAutomations
+	if state == nil {
+		return
+	}
+	ids := make([]string, 0, len(state.blockAttrs))
+	for id := range state.blockAttrs {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		tx.DoOperations = append(tx.DoOperations, state.blockAttrs[id])
+	}
 }
 
 type automationUnavailableReference struct {
@@ -185,6 +208,12 @@ func (tx *Transaction) rememberAutomationTree(tree *parse.Tree) error {
 }
 
 func (tx *Transaction) runAttributeViewAutomations() error {
+	if tx.attributeViewCollections != nil && tx.attributeViewCollections.err != nil {
+		return tx.attributeViewCollections.err
+	}
+	if tx.attributeViewCollections != nil {
+		tx.attributeViewCollections.running = true
+	}
 	state := tx.attributeViewAutomations
 	if state == nil || tx.isReplay {
 		return nil
@@ -215,12 +244,11 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 		relationValues := tx.automationRelationValues(source.boxID, state.current)
 		paused := false
 		for _, rule := range current.Automations.Rules {
-			if rule == nil || !rule.Enabled {
+			if rule == nil || !rule.Enabled || rule.Trigger == "block" {
 				continue
 			}
 			validationErr := tx.validateAutomationRule(current, rule, source.boxID)
-			var unavailable *automationUnavailableReference
-			if errors.As(validationErr, &unavailable) {
+			if unavailable, ok := errors.AsType[*automationUnavailableReference](validationErr); ok {
 				rule.Enabled = false
 				paused = true
 				state.paused = append(state.paused, automationPausedRule{rule.Name, unavailable})
@@ -255,10 +283,14 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 			ReloadAttrView(current.ID)
 		}
 	}
+	if err := tx.runAttributeViewCollections(); err != nil {
+		return err
+	}
 	// 先确定全部触发条件，关联关键词也不会读到前一自动动作修改后的标题。
 	for _, entry := range triggered {
+		result := tx.automationResult(entry.source.boxID, entry.current.ID, entry.rule)
 		for _, action := range entry.rule.Actions {
-			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action); err != nil {
+			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action, entry.rule.TimeZone, result); err != nil {
 				return fmt.Errorf("automation [%s]: %w", entry.rule.ID, err)
 			}
 		}
@@ -389,9 +421,10 @@ func equalAutomationValues(left, right *av.Value) bool {
 
 func (tx *Transaction) automationTarget(source *av.AttributeView, action *av.AutomationAction, boxID string) (*av.AttributeView, error) {
 	id := action.AvID
-	if action.Target == "current" {
+	switch action.Target {
+	case "current":
 		id = source.ID
-	} else if action.Target == "related" {
+	case "related":
 		key, err := source.GetKey(action.RelationKeyID)
 		if err != nil || key.Relation == nil || key.Relation.AvID == "" {
 			return nil, unavailableAutomationReference("fields", action.RelationKeyID,
@@ -449,6 +482,9 @@ func (tx *Transaction) validateAutomationFilters(view *av.AttributeView, filters
 }
 
 func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av.AutomationRule, boxID string) error {
+	if rule.Trigger == "block" {
+		return tx.validateBlockCollectionRule(source, rule, boxID)
+	}
 	if rule.Trigger != "added" && rule.Trigger != "changed" || len(rule.Actions) == 0 || len(rule.Actions) > 20 {
 		return fmt.Errorf("invalid automation trigger or actions")
 	}
@@ -484,6 +520,10 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 					fmt.Sprintf("automation action field [%s] is unavailable", keyID))
 			}
 			switch field.Mode {
+			case "template":
+				if err := av.ValidateAutomationTemplate(field.Template, rule.TimeZone); err != nil {
+					return err
+				}
 			case "currentTime":
 				if key.Type != av.KeyTypeDate {
 					return unavailableAutomationReference("fields", keyID, "automation trigger time requires a date field")
@@ -516,7 +556,7 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 }
 
 func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource, current *av.AttributeView,
-	itemID string, action *av.AutomationAction) error {
+	itemID string, action *av.AutomationAction, timeZone string, result *automationRuleResult) error {
 	target, err := tx.automationTarget(current, action, source.boxID)
 	if err != nil {
 		return err
@@ -546,6 +586,7 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 			return err
 		}
 		ids = []string{id}
+		result.record("added", target.ID, id)
 	} else {
 		switch action.Target {
 		case "current":
@@ -572,6 +613,7 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 	sort.Strings(keys)
 	ids = slices.Compact(ids)
 	relationValues := tx.automationRelationValues(source.boxID, nil)
+	computed := map[string]*av.Value{}
 	for _, id := range ids {
 		target, err = tx.readAttributeViewForMutation(target.ID, blockID, source.boxID)
 		if err != nil {
@@ -591,7 +633,20 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 		}
 		for _, keyID := range keys {
 			key, _ := target.GetKey(keyID)
-			value, valueErr := tx.resolveAutomationValue(current, itemID, key, action.Fields[keyID])
+			value := computed[keyID]
+			var valueErr error
+			if value == nil {
+				value, valueErr = tx.resolveAutomationValue(current, itemID, key, action.Fields[keyID], timeZone)
+				if valueErr == nil && action.Fields[keyID].Mode == "template" {
+					valueErr = tx.validateAutomationTemplateReferences(current, target, key, value, source.boxID)
+					if value.Relation != nil {
+						value.Relation.Contents = nil
+					}
+				}
+				if valueErr == nil {
+					computed[keyID] = value
+				}
+			}
 			if valueErr != nil {
 				return valueErr
 			}
@@ -619,6 +674,9 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 				Data: automationValuePatch(previous)}
 			if err = tx.applyAutomationOperation(op, inverse); err != nil {
 				return err
+			}
+			if action.Type != "add" {
+				result.record("updated", target.ID, id)
 			}
 		}
 	}
@@ -653,9 +711,12 @@ func automationValuePatch(value *av.Value) map[string]any {
 }
 
 func (tx *Transaction) resolveAutomationValue(source *av.AttributeView, itemID string, key *av.Key,
-	field *av.AutomationValue) (*av.Value, error) {
+	field *av.AutomationValue, timeZone string) (*av.Value, error) {
 	var value *av.Value
 	switch field.Mode {
+	case "template":
+		return av.EvaluateAutomationTemplate(av.AutomationTemplateContext{Source: source, ItemID: itemID,
+			Time: time.UnixMilli(tx.attributeViewAutomations.time), TimeZone: timeZone}, key, field.Template)
 	case "currentTime":
 		value = &av.Value{Type: av.KeyTypeDate, Date: &av.ValueDate{Content: tx.attributeViewAutomations.time, IsNotEmpty: true}}
 	case "triggerItem":
@@ -697,6 +758,8 @@ func (tx *Transaction) applyAutomationOperation(op, inverse *Operation) error {
 		err = tx.doInsertAttrViewBlock(op)
 	case "updateAttrViewCell":
 		err = tx.doUpdateAttrViewCell(op)
+	case "removeAttrViewBlock":
+		err = tx.doRemoveAttrViewBlock(op)
 	}
 	if err != nil {
 		return err
@@ -724,7 +787,10 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 	if err = json.Unmarshal(data, &config); err != nil {
 		return fail(err)
 	}
-	if config.Spec != 1 || len(config.Rules) > 100 {
+	if err = config.ValidateSpec(); err != nil {
+		return fail(err)
+	}
+	if len(config.Rules) > 100 {
 		return fail(fmt.Errorf("unsupported automation configuration"))
 	}
 	if err = (&av.AttributeView{Automations: &config}).NormalizeLocations(); nil != err {
@@ -737,6 +803,16 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 			return fail(fmt.Errorf("invalid automation rule"))
 		}
 		seen[rule.ID] = true
+		for _, action := range rule.Actions {
+			if action == nil {
+				continue
+			}
+			for _, field := range action.Fields {
+				if field != nil && field.Mode == "template" && config.Spec < 2 {
+					return fail(fmt.Errorf("template assignments require automation spec 2"))
+				}
+			}
+		}
 		if rule.Enabled {
 			if err = tx.validateAutomationRule(view, rule, boxID); err != nil {
 				return fail(err)

@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018104335"
 	},
 	"Children": [
 		{
@@ -267,7 +267,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-2jaadkf",
-				"updated": "20260816114944"
+				"updated": "20261016191953"
 			},
 			"Children": [
 				{
@@ -548,7 +548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-sri5ln6",
-				"updated": "20260804180000"
+				"updated": "20261016191953"
 			},
 			"Children": [
 				{
@@ -562,7 +562,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-fuwjiju",
-				"updated": "20260804180000"
+				"updated": "20261016191953"
 			},
 			"Children": [
 				{
@@ -577,6 +577,15 @@
 				{
 					"Type": "NodeText",
 					"Data": " を選択できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "セッション許可"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、このセッションでの通常の操作について個別の確認を省略できます。確認必須に設定された機能とコードスニペットの変更には、引き続き確認が必要です。"
 				}
 			]
 		},
@@ -585,7 +594,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170043-c3mrdfs",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -595,7 +604,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を使用すると、現在のセッションでは以降の書き込み操作が個別に確認されません。使用する前に、タスクの範囲とツールが信頼できることを確認してください。"
+					"Data": " を使う前に、タスクの範囲とツールが信頼できることを確認してください。通常の書き込み操作では個別の確認が省略されますが、上記の必須確認は引き続き行われます。"
 				}
 			]
 		},
@@ -939,6 +948,114 @@
 				{
 					"Type": "NodeText",
 					"Data": " を参照してください。外部 MCP ツールはローカルデータの送信、外部システムの変更、料金の発生を伴う場合があるため、確認カードの影響を確認してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-5r3z242",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018102417-5r3z242",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Web 検索と取得"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261018102417-kbspy6l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-kbspy6l",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "公開 Web ページを検索し、本文を読み取って要約したりノートに保存したりするようエージェントに依頼できます。web_search はリンクと要約を返し、web_fetch は指定した URL を読み取ります。直接取得では HTTP を使用し、JavaScript は実行しません。デスクトップアプリでは、JavaScript で生成される本文を取得するための独立したレンダリング取得ツールも利用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261018104335-h974oif",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018104335-h974oif",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Web 検索と取得"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で検索サービスと取得サービスを個別に選択できます。既定では Exa 検索と直接取得を使用します。DeepSeek を使用する場合は、Search と Fetch で共有する DeepSeek API キーを入力します。この設定は対話モデルとは独立しています。DeepSeek Search は本文なしで 5 件の結果を要求し、各要約を 800 文字、出力全体を 8,000 文字に制限します。全文が必要な場合にページを取得してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261018104335-6bib27g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018104335-6bib27g",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "DeepSeek Search は検索語を、DeepSeek Fetch は対象 URL を DeepSeek に送信します。ブラウザーの Cookie やログイン状態は送信しません。これらのリクエストには料金が発生する場合があります。DeepSeek Fetch はページ本文のみを取得するため、ファイルのダウンロードには直接取得を選択してください。キーが無効、残高不足、レート制限、ページの取得不可などの場合はエラーを返し、サービスを自動で切り替えません。ツールの権限設定に従って外部リクエストを確認してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-zew7i8y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-zew7i8y",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "レンダリングによる取得では、ページのスクリプトを実行し、ローカルのデスクトップからネットワークリクエストを送信します。リモートカーネルへの接続時も同様です。現在のウィンドウのプロキシ設定を使い、既存の Cookie やログイン状態を引き継がない独立した一時セッションを使用します。対象の URL を確認し、ツールの権限設定に従って操作を承認してください。内部アドレスへのアクセスとダウンロードは拒否されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-o7p27lp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-o7p27lp",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "レンダリング取得には、デスクトップインスタンスの接続を維持する必要があります。ブラウザー版、モバイル版、外部 MCP クライアントは、設定された取得サービスを使用します。本文が空の場合やタイムアウト時はエラーを返し、長い結果は 50,000 文字で切り詰めます。ログイン、埋め込みページ、ワーカー、継続的なブラウザー接続が必要なページは、取得できない場合があります。"
 				}
 			]
 		},

@@ -12,6 +12,18 @@ type AssetPathRequest struct {
 	Path string `json:"path"`
 }
 
+// EncryptedBoxAssetsRequest 只接受当前已解锁的加密笔记本，不回退到全局资源。
+type EncryptedBoxAssetsRequest struct {
+	Notebook string `json:"notebook"`
+}
+
+// RemoveEncryptedBoxAssetsRequest 仅删除用户确认的 assets 相对路径，空列表不删除任何资源。
+// 删除前完整重新扫描；新增引用或任意读取、认证、解析错误均中止整批操作。
+type RemoveEncryptedBoxAssetsRequest struct {
+	Notebook string   `json:"notebook"`
+	Paths    []string `json:"paths"`
+}
+
 type AssetOCRTextRequest struct {
 	Path *string `json:"path" api:"optional"`
 }
@@ -86,6 +98,11 @@ type AssetStatData struct {
 
 type AssetTextData struct {
 	Text string `json:"text"`
+}
+
+type ImageOCRTextData struct {
+	Text   string `json:"text"`
+	Failed bool   `json:"failed"`
 }
 
 // AssetOCRData 的列名沿用 Tesseract TSV 表头，所有提供商的单元格均为文本。

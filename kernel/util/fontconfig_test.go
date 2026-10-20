@@ -16,7 +16,10 @@
 
 package util
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestParseFontconfigFonts(t *testing.T) {
 	data := fontconfigValueSeparator + "LXGW WenKai" + fontconfigPairSeparator + "en" +
@@ -98,10 +101,5 @@ func TestParseFontconfigSpacing(t *testing.T) {
 }
 
 func containsFontconfigAlias(aliases []string, expected string) bool {
-	for _, alias := range aliases {
-		if alias == expected {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(aliases, expected)
 }

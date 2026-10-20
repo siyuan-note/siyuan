@@ -223,65 +223,6 @@ func srcFor(r io.Reader) (*source, error) {
 	return memSource(data), nil
 }
 
-// parseHeader reads only the boxes a configuration needs and stops as soon as
-// one can be derived, so a stream that cannot be addressed by range still
-// costs no more than its header.
-func parseHeader(r io.Reader) (*file, error) {
-	f := &file{}
-
-	seen := false
-
-	err := eachBoxReader(r, func(typ string, n int64, body io.Reader) error {
-		switch typ {
-		case "ftyp":
-			seen = true
-
-		case "meta":
-			if f.meta != nil {
-				return nil
-			}
-
-			b, err := boxBytes(body, n)
-			if err != nil {
-				return err
-			}
-
-			m, err := parseMeta(b)
-			if err != nil {
-				return err
-			}
-
-			f.meta = m
-
-		case "moov":
-			return ErrUnsupported
-
-		default:
-			return nil
-		}
-
-		// Only a configuration from the primary item ends the walk. A picture
-		// track is the fallback for a file that has no usable image item, and
-		// a meta box after moov would still outrank it.
-		if seen {
-			if _, err := f.config(); err == nil {
-				return errStop
-			}
-		}
-
-		return nil
-	})
-	if err != nil && !errors.Is(err, errStop) {
-		return nil, err
-	}
-
-	if !seen || f.meta == nil {
-		return nil, ErrInvalid
-	}
-
-	return f, nil
-}
-
 // config is the image configuration of the primary item, or of the picture
 // track when a file carries no image item.
 func (f *file) config() (image.Config, error) {

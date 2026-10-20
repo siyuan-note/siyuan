@@ -4,17 +4,19 @@
 
 ## 适用范围
 
-本文规定内核 HTTP 接口的类型定义、兼容要求、生成产物和验证流程。传输类型与端点定义位于 `kernel/apicontract/` 下的各模块文件，`contracts.go` 汇总端点注册表；迁移已完成，`kernel/apicontract/legacy_routes.json` 清单为空。新增接口必须定义类型契约，不得加入该清单。
+本文规定内核 HTTP 接口的类型定义、兼容要求、生成产物和验证流程。传输类型与端点定义位于 `kernel/apicontract/` 下的各模块文件，`contracts.go` 汇总端点注册表；迁移已完成，所有接口必须定义类型契约并绑定类型化处理函数。
 
 ## 接口维护流程
 
 1. 在契约包中定义或更新传输类型与端点，显式声明公开或已鉴权访问、管理员和写入要求，以及请求体、错误码、空值、默认值和历史输入兼容规则
 2. 用 `contractHandler` 绑定业务入口，并用 `contractRouteHandlers` 注册处理函数，保持路由中间件顺序和租约范围
-3. 保持 `legacy_routes.json` 为空；删除接口时同步移除路由注册和契约定义
+3. 删除接口时同步移除路由注册和契约定义
 4. 更新实际响应、兼容输入和严格类型测试，运行生成器，再修正编译器指出的调用问题
-5. 同步 `petal` 的生成声明和相关公共声明；公开接口同步更新接口文档
+5. 同步 `petal` 的生成声明和相关公共声明。接口行为、默认值、约束和兼容性在契约源码注释及对应的 Petal 维护声明中说明。修改已有接口时，检查并同步更新 `docs/API.md`、`docs/API.zh-CN.md` 和 `docs/API.ja.md` 中受影响的条目，不假定各语言覆盖相同接口；仅在用户明确要求时，将新实现的接口加入这些参考文档
 
-生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数、契约适配器和鉴权中间件的对应关系。`define` 要求显式传入访问策略：公开端点使用 `PublicAccess`，已鉴权端点可叠加 `AdminAccess` 和 `WritableAccess`。分域注册函数保留字面量方法与路径，`contractRouteHandlers` 从绑定端点派生中间件。生成检查拒绝缺少策略、端点绑定不匹配，以及显式中间件遗漏或顺序改变。鉴权元数据不替代资源权限或全局笔记本租约中间件。CI 对照变更前的清单阻止增加存量记录。不得通过 `any`、类型断言或修改存量清单规避契约检查。
+本文及其翻译是维护指南，仅在契约机制、兼容性政策、生成流程、测试发现或验证规则变化时，或用户明确要求时更新。常规接口或功能变更不向此处追加端点专用行为、功能摘要、验证结果或定向测试命令。面向用户的操作说明放入内置用户指南，可执行的插件示例放入 `plugin-sample`，任务专用检查及结果写入任务回复或 PR 描述。Petal 的 README 仅保留项目标题和 `plugin-sample` 链接。文档范围遵循 [AGENTS.md](../AGENTS.md)。
+
+生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数、契约适配器和鉴权中间件的对应关系。`define` 要求显式传入访问策略：公开端点使用 `PublicAccess`，已鉴权端点可叠加 `AdminAccess` 和 `WritableAccess`。分域注册函数保留字面量方法与路径，`contractRouteHandlers` 从绑定端点派生中间件。生成检查拒绝缺少策略、端点绑定不匹配，以及显式中间件遗漏或顺序改变。鉴权元数据不替代资源权限或全局笔记本租约中间件。生成器和 CI 拒绝没有契约的路由并检查完整路由覆盖。不得通过 `any` 或类型断言规避契约检查。
 
 ## 契约与实现
 
@@ -38,11 +40,17 @@
 
 `POST /api/ai/testDecisionModel` 使用固定的 TypeSafe System One 样例测试已保存的可选 `ai.decision` 配置。接口要求管理员权限，遵循全局人工智能禁用标记和请求取消，返回具有类型声明的 `{matched, msg?}` 数据；配置错误和供应商错误不会被转换为判断结果。省略决策配置时补齐默认关闭的配置，关闭后保留密钥，并沿用现有配置加密存储机制。`TestAPIContractAI*`、`TestAPIContractSetting*`、`TestAIDecisionConfiguration` 和 `TestDecision*` 覆盖契约、配置、顺序批量调用的部分结果、区块读取、锁定笔记本拒绝访问、能力可用性、确认、取消及供应商响应校验，均纳入完整内核持续集成测试。可运行 `go test -tags "fts5 sqlcipher" ./api ./conf ./util ./mcp/tools ./agent -run 'Test(APIContractAI|APIContractSetting|AIDecision|Decision)' -count=1` 和 `go test ./apicontract/...` 进行针对性验证。
 
+`POST /api/system/getRuntimeInfo` 不接受请求体，在标准成功信封中返回 `{text: string}`。接口要求认证和管理员权限，支持只读模式，报告内核版本、运行时、操作系统、逻辑 CPU 数量、当前系统与进程内存，以及检测到的工作空间存储类型。不支持的内存和存储探测返回 `unknown`；不推断移动端存储为 SSD。诊断文本不包含工作空间路径、主机名和账户标识。`TestAPIContractSystemRuntimeInfo` 纳入内核全量持续集成测试；可运行 `go test -tags "fts5 sqlcipher" ./api -run TestAPIContractSystemRuntimeInfo -count=1` 和 `go test ./apicontract/...` 单独验证。
+
+移动端发行版可在内核启动前调用 `DisableFeature("ai")`。全部 `/api/ai/` 接口及 `/api/setting/setAI` 在解码请求体前拒绝请求，同时保留路由认证和授权。JSON 接口返回错误码 `-1` 和空数据；MCP OAuth 回调返回 HTTP 403 纯文本。已存储的 AI 配置保持不变。嵌入索引、重排及传出的 MCP 连接也遵循此标记。`TestAPIContractAIDisabled`、`TestAIDisabledBackgroundFeatures` 和 `TestAIDisabledMCPConnections` 纳入内核全量持续集成测试。可运行 `go test -tags "fts5 sqlcipher" ./api ./model ./mcp/client -run 'Test(APIContractAI|AIDisabled)' -count=1` 和 `go test ./apicontract/...` 验证受影响的行为。
+
 加密笔记本系统锁屏接口保留管理员鉴权和只读检查。布尔开关保存在系统配置中，不进入密钥备份的认证数据。`TestAPIContractNotebookSystemLock` 覆盖配置持久化、关闭开关、独立于闲置时间、多笔记本（包括仅解锁未挂载的笔记本）、重复锁定、锁定后拒绝读取，以及重新解锁后认证读取未改变的密文。该测试已包含在下文的内核全量命令中，也可单独运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAPIContractNotebook(SystemLock|CryptoAuthorization)$' -count=1`。`TestNotebookSystemLockContract` 覆盖严格布尔输入，`TestRouteCoverage` 检查路由注册和处理器绑定。
 
 2026 年 9 月 14 日迁移完成时，`kernel/api/router.go` 中的 629 条方法和路径注册均已纳入契约，旧路由清单为空。该基线中的 4 条 `ANY` 注册在生成声明中展开为 661 条具体方法和路径。后续新增接口时，以生成器和路由覆盖检查的统计为准。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。
 
 系统契约保留完整配置、工作空间管理、上传、认证、OIDC 响应分支、启动事件流以及空响应和二进制响应。前端在读取持久化布局和快捷键的位置缩小类型，保留原有默认值修复、废弃键清理和绑定过滤逻辑。配置导入、导出和退出保持原有生命周期及加密行为。
+
+OIDC Web 回调在认证后返回 HTTP 200 HTML，重复成功的回调也使用相同响应。它复用共享结果页，通过 meta refresh 和备用链接发起同源导航，结束供应商的跨站 HTTP 重定向链，同时保留会话来源检查。桌面端和验证回调继续使用结果页。`TestOIDCWebCallbackContract`、`TestOIDCRepeatedWebCallbackContractSession` 和 `TestRenderOAuthRedirectPage` 覆盖响应契约、目标转义、会话 Cookie 及持续拒绝跨站请求，均包含在内核全量持续集成测试中。可运行 `go test -tags "fts5 sqlcipher" ./model ./util ./api -run 'Test(OIDC|WriteOIDC|RenderOAuth|IsSessionOriginAllowed|IsCrossSiteFetchSite|CheckAuthRemoteSessionOrigin|APIContractSystem|APIContractRouterCoverage)' -count=1` 和 `go test ./apicontract/...` 单独验证。
 
 事务契约按动作区分全部 98 个已知操作，并在显式未知操作兼容分支中排除这些名称。前端使用同一组有限操作联合。私有原始输入保留历史字段、被忽略的值、模型异步错误和回传载荷，类型声明不把模型校验提前到 HTTP 准入阶段。撤销、重做、标题操作、响应租约及事务持久化格式保持原有行为。
 
@@ -58,7 +66,11 @@
 
 数据库契约分别声明表格、画廊和看板的结果结构，保留基础字段缺失、单元格局部修改及 null 值。独立的 `list` 布局复用表格的 `columns`/`rows`/`rowCount` 载荷，布局配置保存在 `list` 下，`viewType` 标识为 `list`。已知修改字段保留传入状态，不以零值填充未提供的字段。当前、历史和快照渲染使用对应请求类型，调用端先处理错误载荷再更新视图。行排序、发布准入、加密笔记本租约和快速 JSON 渲染保留既有行为。前端和插件的共享声明按视图及单元格实际提供的字段同步。`TestAVContractListLayout` 覆盖布局切换、默认字段显隐、后续渲染和持久化布局映射；运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAVContract' -count=1` 和 `go test ./apicontract/...`。这些测试已包含在内核完整 CI 测试中。
 
+数据库渲染接口对发布阅读者使用不落盘的渲染路径。请求保留现有模式、载体授权、内容过滤及笔记本租约；即使传入 `createIfNotExist: true`，也不能为阅读者创建缺失的数据库。兼容性归一化、分组生成和缺失字段修正均仅在内存中完成。`TestAVContractPublishRenderDoesNotWrite` 覆盖显式视图切换、数据库及载体文件保持不变、访问拒绝和数据库缺失，纳入内核全量持续集成测试；可运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAVContract(PublishRenderDoesNotWrite|RenderWire)$' -count=1` 和 `go test ./apicontract/...` 单独验证。前端会话状态和 DOM 回归通过 `node --import tsx --test src/protyle/render/av/publishState.test.ts tests/publishReadonlyFold.test.js` 及前端全量持续集成测试执行。
+
 AI 契约保留供应商配置、模型发现与匹配、确认结果、会话扩展字段，以及数值和省略语义。编辑器和智能体流声明实际 SSE 事件，断开连接时关闭上游请求，流生命周期仍位于请求内部。OAuth 页面保留媒体类型、HTTP 状态和安全响应头。会话权限通知使用 `WithAfterWrite`，保留先响应再广播的顺序。任意 JSON 仅用于协议扩展字段和工具结果。
+
+AI 供应商在 `openai` 和 `openai-responses` 之外支持 `anthropic-messages`；省略协议时保留 Chat Completions 默认值。原生 Messages 调用覆盖模型发现、模型测试、编辑器生成、智能体工具、标题和摘要压缩。由于 Messages 要求 `max_tokens`，自动输出上限使用 4096 个词元。助手条目可携带包含协议、版本和不透明内容块的 `nativeContent`；版本 1 在运行时恢复和会话提交期间保留 Anthropic 思考签名及块顺序。其他协议只投影可见对话，不发送这些原生内容块。未知原生版本在发送 Messages 请求前失败，并保留原始会话。流用量在 `message_stop` 后仅发送一次，不完整的工具响应不能进入工具执行。`TestAnthropic*` 和 `TestAPIContractAnthropic*` 纳入内核全量持续集成测试；可运行 `go test -tags "fts5 sqlcipher" ./conf ./util ./agent ./api ./apicontract/... -run 'Test(Anthropic|APIContractAnthropic|APIContractAI|AIInput|AISession|RouteCoverage)' -count=1` 和 `go test ./apicontract/...` 验证受影响的范围。现有前端测试发现规则已包含 `aiProviderPresets.test.ts`。
 
 `/api/ai/agent/manageSkills` 使用严格字符串字段，并通过管理员和只读检查管理工作空间技能文件。相对路径标识实际目录，与文件头中的技能名称无关，允许普通的点开头名称。读写支持不超过 8 MiB 的 UTF-8 文本，不依赖扩展名并保留原文字节。目录和资源读取保留基于内容的版本；不支持编辑的内容省略 `content`，并增加可选的 `readOnlyReason`（`binary`、`encoding` 或 `tooLarge`）。编辑器以读取结果判断可编辑性，不依赖可能过期的列表项。修改已有文件时重新校验内容并要求当前版本，与旧技能修改接口和安装共享临界区，成功后通知同步。路径穿越、平台别名、链接、过期版本，以及单独修改不支持的内容或重命名、删除根 `SKILL.md` 的请求均被拒绝。`TestAISkillManagementContract`、`TestAPIContractAISkillManagement` 和 `TestSkillManagement` 覆盖请求类型、实际 HTTP 响应、权限、原文、文本判定、隐藏路径、并发保存和文件系统边界。运行 `go test -tags "fts5 sqlcipher" ./apicontract/... ./api ./util -run 'Test(AISkillManagementContract|APIContractAISkillManagement|SkillManagement|RouteCoverage)' -count=1`；下方完整内核 CI 测试包含这些回归用例。
 
@@ -71,6 +83,10 @@ AI 契约保留供应商配置、模型发现与匹配、确认结果、会话�
 `TestAPIContractFileTreeMissingDocuments` 通过实际 HTTP 响应覆盖查询路径、删除、重命名、复制和移动不存在的文档，按响应契约检查业务错误及保留的 `closeTimeout`，已包含在下方的内核全量测试命令中。可在 `kernel/` 中执行 `go test -tags "fts5 sqlcipher" ./api -run TestAPIContractFileTreeMissingDocuments -count=1` 单独验证。
 
 附件契约保留结果列表的空值、逐文件上传顺序与重名文件、部分上传成功时的提示及本地插入失败载荷。OCR 列保持字符串值。标注校验、发布文件准入、加密读写、延迟下载和上传目标选择保持既有行为。非 API 上传入口复用同一个有类型的模型操作。
+
+未使用资源的列出和清理在文档加载或引用目录遍历失败时返回标准的 `code: -1`、`data: null` 错误，包括不支持的文档规范。单资源清理使用相同的完整扫描；批量清理在扫描成功前不会创建历史或开始删除。成功响应结构和加密笔记本排除规则保持不变。`TestAssetUnusedScanFailureContract`、`TestUnusedAssets*`、`TestHTMLAssetLinkDests`、`TestPagedPathsErrorModes`、`TestExportAssetEntityRename` 和 `TestExportHTMLMultipleAssetReferences` 覆盖 HTTP 错误、源数据保留、HTML 引用、URL 后缀、历史遍历行为，以及导出的资源和链接。它们纳入内核全量持续集成测试；可运行 `go test -tags "fts5 sqlcipher" ./model ./api -run 'Test(AssetUnusedScanFailureContract|UnusedAssets|HTMLAssetLinkDests|PagedPathsErrorModes|ExportAssetEntityRename|ExportHTMLMultipleAssetReferences)' -count=1` 和 `go test ./apicontract/...` 单独验证。
+
+`/api/asset/resolveAssetPath` 保留路径字符串响应及管理员授权。已解锁的加密资源返回保留原文件名的已认证临时明文副本；普通资源保留现有路径。请求持有加密笔记本租约直至响应序列化完成。外部编辑不会写回加密源数据。`TestAPIContractNotebookSystemLock` 包含外部资源响应校验、原文件名保留、源数据保留、认证失败清理、锁定后拒绝访问及锁定清理，纳入内核全量持续集成测试。可运行 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(APIContractNotebookSystemLock|AssetAdminEndpointsRejectReader|MobileExportLease)' -count=1` 和 `go test ./apicontract/...` 验证受影响的行为及路由覆盖。
 
 资源引用扫描将定义文件缺失或定义 ID 无效的数据库记录到可选的 `unavailableAttributeViews` 列表，不阻断查询、预演或替换。每项包含笔记本 ID 与名称、文档 ID 与路径及人类可读路径、块 ID、数据库 ID 和原因。已存在但无法读取或内容损坏的定义仍返回错误。保存前重新校验缺失文件快照，避免遗漏扫描期间恢复的定义。当前按需下载规则不包含数据库定义，回归测试会检查这一前提。缺失定义回归覆盖模型和实际 HTTP 契约，包括关闭的笔记本和共享定义。
 
@@ -138,6 +154,8 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 HTML 剪贴板转换保留字面反斜杠和标记字符，并在关闭 Markdown 语法时保留 HTML 格式。`TestHTML2BlockDOMContractEscapedText` 覆盖两种源格式模式、实际响应模式校验、编辑往返、HTML 实体以及样式和链接边界。可使用 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(.*HTML.*|.*Clipboard.*|.*IFrame.*|SpinBlockDOM.*|WPSPresentation.*|NormalizeMSWord.*|NormalizeWPS.*)' -count=1` 运行相关转换回归。下方内核全量命令已包含这些测试，`app/tests/luteHtmlEscapes.test.js` 通过前端全量测试检查生成的 Lute JavaScript。修改 Lute 源码后，还需在 Lute 仓库运行 `go test ./...` 并重新生成内置 JavaScript。
 
+`swapBlockRef` 接受可选布尔值 `originalToEmbed`。省略或传入 `false` 时，在原定义位置保留引用；传入 `true` 时，将其替换为查询已移动定义 ID 的嵌入块。`includeChildren` 保留标题和列表行为。`TestSwapBlockRefContractCompatibility` 和 `TestSwapBlockRefNodes` 覆盖请求默认值、无效选项，以及文档、标题和列表场景下的两种替换模式，包含在下方的内核全量命令中。
+
 存储契约仅在存储值中允许任意 JSON，键、最近文档、搜索条件、行内样式和属性视图调色板均使用结构化类型。最近文档写入接口保留只读角色在解析请求体前直接返回成功的行为。`contractHandler` 可选的类型化 `beforeDecode` 回调用于保留这一执行顺序，允许在解码前返回响应；路由检查仍要求显式绑定端点。行内样式版本 1 的更新保留已有内置配置，版本 2 和调色板请求保留结构体解码的兼容行为。
 
 `DirectJSONOutput` 保留直接返回 JSON 对象或数组的独立协议，不添加内核信封，此类载荷使用 `SuccessDirectJSON` 返回。支持通知空响应的端点显式声明 `NoContent` 并返回 `SuccessNoContent`；HTTP 校验要求状态码为 204 且响应体为空。鉴权和只读错误仍保留内核错误信封。生成声明记录直接输出模式及可选的空响应支持。
@@ -182,7 +200,7 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 `/api/block/migrateLegacyMindmaps` 是要求管理员身份的写入端点，保留只读保护及加密笔记本请求租约。请求必须提供文档 `id` 和 `notebook`；保存历史后，在一次可撤销事务中转换能够完整解析的旧 `mindmap` 列表，返回 `converted` 数量和文档脑图的权威 `blocks`（`id`、`dom`）。重复请求返回当前块内容，不重复转换；不完整的原文保持不变。回归命令为 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(LegacyMindmap|MigrateLegacyMindmaps|APIContractHeadingTransactions|APIContractRouterCoverage|RouteCoverage)' -count=1`，前端覆盖位于 `listMindmap/migrate.test.ts` 和 `listMindmap/model.test.ts`，均由现有持续集成规则发现。
 
-在 `app/` 下运行：
+契约变更后，在 `app/` 下运行生成和检查。以下命令也列出了前端全量测试；根据受影响的行为和风险选择回归范围，不要求每个任务都运行全量测试：
 
 ```text
 pnpm run api:generate --petal ../../petal
@@ -191,11 +209,13 @@ pnpm run lint
 pnpm test
 ```
 
-上述生成命令同时更新本仓库与 `petal`，无须再单独执行不带 `--petal` 的生成命令。`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，而本地跨仓库同步须使用该参数核对插件声明。
+上述生成命令同时更新本仓库与 `petal`，无须再单独执行不带 `--petal` 的生成命令。`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。运行前核对目标仓库的路径、身份、分支、基线及已有改动；实际位置不同时使用已验证的路径。目标仓库不可用时，尽可能完成独立工作并报告跨仓库同步受阻，不自动创建或下载其他仓库，也不宣称同步完成。CI 只检查本仓库产物，而本地跨仓库同步须使用该参数核对插件声明。
+
+`pnpm run lint` 包含类型和静态检查，也会由 ESLint 自动修复文件；运行后检查差异，将改动限制在任务范围内，不覆盖已有工作。它不运行行为测试。只读审阅应使用适用的非修改性检查，不运行此命令。分别报告通过、失败和未运行的检查。
 
 同一生成器还读取 `kernel/av/capabilities.go` 中的字段能力声明，输出 `app/src/protyle/render/av/capabilities.generated.ts`、`app/src/types/av/index.d.ts` 和对应的 `petal/types/av/index.d.ts`。字段能力和筛选算子清单在内核维护，修改后重新生成产物，不手工编辑生成的字段类型或算子联合类型。测试枚举 Go 类型常量，拒绝遗漏声明，并通过现有生成检查命令和内核全量测试核对生成产物。
 
-在 `kernel/` 下运行：
+在 `kernel/` 下运行 `go test ./apicontract/...` 及适用的 API 兼容性和路由覆盖测试。影响范围需要更广验证时，可运行内核全量测试：
 
 ```text
 go test -tags "fts5 sqlcipher" ./... -count=1
@@ -205,4 +225,6 @@ go test -tags "fts5 sqlcipher" ./... -count=1
 
 导入和静态文件测试数据使用 `internal/testutil.PublicDataDir` 创建并清理经过显式验证的非敏感目录，不依赖 `TMPDIR` 和 `GOTMPDIR`。该辅助函数依次尝试用户主目录、当前目录和文件系统根目录；若没有安全且可写的位置，则报告测试数据准备失败。CI 还会将 `TMPDIR` 设为 `/tmp`，并使用独立的 `GOTMPDIR` 重新运行受影响的路径测试，以覆盖环境变量覆盖的情况。
 
-CI 在 Linux 上运行所有内核包的测试，在 Windows 上运行所有前端、Electron 和打包脚本测试。前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件在独立进程中运行，根据可用 CPU 核心数选择并发度，上限为 4，以限制 Electron 进程启动争用。通过 `pnpm test --test-concurrency=1` 可串行执行。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。
+预发布工作流 `.github/workflows/cd.yml` 执行语言校验、契约和类型检查，在 Linux 上运行所有内核包的测试，在 Windows 上运行前端、Electron 和打包脚本测试。它仅由预发布标签推送（`*-alpha*`、`*-beta*`、`*-rc*`）或手动调度触发，普通分支推送和 PR 不触发该工作流。部分测试步骤，包括 Linux 内核全量测试和前端测试，设置了 `continue-on-error: true`。因此，任务成功或版本发布不代表所有测试通过；报告验证结果前，应检查实际步骤结果、日志和测试报告。此处说明不改变工作流的发布门禁。
+
+前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件在独立进程中运行，根据可用 CPU 核心数选择并发度，上限为 4，以限制 Electron 进程启动争用。通过 `pnpm test --test-concurrency=1` 可串行执行。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。

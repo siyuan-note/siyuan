@@ -65,6 +65,8 @@ type Tool struct {
 	EffectScope string `json:"effectScope,omitempty"`
 	// ActionEffects 按 action 描述本地读写、数据外发与外部计费，供智能体精确执行确认和快照策略。
 	ActionEffects map[string]ToolEffects `json:"-"`
+	// ResolveEffects 在列出和确认能力时读取当前配置，未声明时沿用静态效果与既有确认规则。
+	ResolveEffects func(string) (ToolEffects, bool) `json:"-"`
 
 	Handler          func(args map[string]any) (CallToolResult, error)                      `json:"-"`
 	ContextHandler   func(ctx context.Context, args map[string]any) (CallToolResult, error) `json:"-"`
@@ -83,7 +85,15 @@ func (t *Tool) IsAvailable() bool {
 }
 
 func (t *Tool) EffectsFor(action string) (ToolEffects, bool) {
-	if t == nil || t.ActionEffects == nil {
+	if t == nil {
+		return ToolEffects{}, false
+	}
+	if t.ResolveEffects != nil {
+		if effects, declared := t.ResolveEffects(action); declared {
+			return effects, true
+		}
+	}
+	if t.ActionEffects == nil {
 		return ToolEffects{}, false
 	}
 	effects, ok := t.ActionEffects[action]

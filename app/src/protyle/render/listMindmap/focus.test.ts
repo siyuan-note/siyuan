@@ -49,6 +49,38 @@ test("new mind map nodes become selected before editing", async () => {
     assert.deepEqual(steps, ["focus:new", "edit:new"]);
 });
 
+test("embedded history uses the source document and transaction owner without depending on the selection", async () => {
+    for (const lite of [false, true]) {
+        const submitted: unknown[] = [];
+        const mainOwner = {lite: false};
+        const owner = {lite, block: {rootID: "host-document"}, wysiwyg: {element: {isConnected: true}},
+            undo: {undo: assert.fail, redo: assert.fail}};
+        const embed = {dataset: {rootId: "source-document"}};
+        const list = {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "snapshot", closest: () => embed};
+        const context: any = {canEdit: () => true, roots: new WeakMap(), cleanListMindmapHTML: (html: string) => html,
+            hasMindmapFocusOverlay: () => false,
+            getProtyleTransactionOwner: (_owner: unknown, operations: {id: string}[]) => {
+                assert.equal(operations[0].id, "map");
+                return mainOwner;
+            },
+            requestUndo: (target: unknown, rootID: string) => submitted.push([target, rootID, "undo"]),
+            requestRedo: (target: unknown, rootID: string) => submitted.push([target, rootID, "redo"]),
+            fetchSyncPost: async (_url: string, data: {id: string}) => {
+                assert.equal(data.id, "map");
+                return {code: 0, data: {dom: "canonical history snapshot"}};
+            },
+        };
+        runInNewContext(compiled, context);
+        const target = Object.assign(new context.Controller(), {owner, list,
+            model: {nodes: new Map(), root: {id: "map"}}, view: {getSelectedId: () => "map"},
+            replay: (html: string) => { assert.equal(html, "canonical history snapshot"); return true; }});
+        await target.undo(false);
+        await target.undo(true);
+        assert.deepEqual(submitted, [[lite ? mainOwner : owner, "source-document", "undo"],
+            [lite ? mainOwner : owner, "source-document", "redo"]]);
+    }
+});
+
 test("undo from a node editor restores that node or its previous sibling", async () => {
     const root = {id: "root", children: [{id: "existing"}, {id: "new"}]};
     const nodes = new Map<string, {id: string, parentId?: string, children?: {id: string}[]}>([
@@ -68,7 +100,7 @@ test("undo from a node editor restores that node or its previous sibling", async
     runInNewContext(compiled, context);
     const target = new context.Controller();
     Object.assign(target, {
-        owner, list: {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "map"}, model: {nodes, root},
+        owner, list: {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "map", closest: (): null => null}, model: {nodes, root},
         view: {getSelectedId: () => "root", focusNode: (id: string) => selected.push(id)},
     });
     roots.set(owner, {restoreFocus: (_listID: string, ids: string[]) => target.focusNode(ids)});
@@ -83,7 +115,7 @@ test("undo from a node editor restores that node or its previous sibling", async
 test("text history records the edited node even when selection changes before its save", async () => {
     const nodes = new Map([["root", {id: "root", children: [{id: "child"}]}],
         ["child", {id: "child", parentId: "root", children: []}]]);
-    const list = {isConnected: true, dataset: {nodeId: "map"}, outerHTML: "before"};
+    const list = {isConnected: true, dataset: {nodeId: "map"}, outerHTML: "before", closest: (): null => null};
     const operations: {undo: Record<string, string>, redo: Record<string, string>}[] = [];
     const context: any = {
         canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root")}),
@@ -114,8 +146,9 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     let state: State = [{id: "root", children: ["existing"]}, {id: "existing", children: []}];
     let selectedID = "existing";
     let target: any;
+    type ModelNode = {id: string; children: ModelNode[]; parentId: string};
     const getModel = () => {
-        const nodes = new Map(state.map(node => [node.id, {id: node.id, children: [], parentId: ""}]));
+        const nodes = new Map<string, ModelNode>(state.map((node): [string, ModelNode] => [node.id, {id: node.id, children: [], parentId: ""}]));
         state.forEach(node => {
             nodes.get(node.id).children = node.children.map(id => {
                 const child = nodes.get(id);
@@ -125,7 +158,8 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
         });
         return {nodes, root: nodes.get("root")};
     };
-    const list = {isConnected: true, dataset: {nodeId: "map"}, get outerHTML() { return JSON.stringify(state); }};
+    const list = {isConnected: true, dataset: {nodeId: "map"}, closest: (): null => null,
+        get outerHTML() { return JSON.stringify(state); }};
     const roots = new WeakMap();
     const root = {focusRevision: 0, restoreFocus: (_listID: string, ids: string[]) => {
         root.focusRevision++;
@@ -214,7 +248,7 @@ test("empty or canceled history restores the current text selection unless a new
         hasMindmapFocusOverlay: () => false};
     runInNewContext(compiled, context);
     const target = Object.assign(new context.Controller(), {
-        owner, list: {dataset: {nodeId: "map"}, outerHTML: "same", isConnected: true}, model: {root: node, nodes},
+        owner, list: {dataset: {nodeId: "map"}, outerHTML: "same", isConnected: true, closest: (): null => null}, model: {root: node, nodes},
         view: {getSelectedId: () => "item", focusNode: () => {}, getContentHost: () => ({isConnected: true})},
         edit: async (...args: unknown[]) => opened.push(args[4]),
     });
@@ -245,7 +279,7 @@ test("history reopening does not invalidate its own guard and stale editor clean
     }};
     runInNewContext(compiled, context);
     const target = Object.assign(new context.Controller(), {
-        owner, editRequest: 0, list: {}, model: {nodes: new Map([["item", {id: "item"}]])},
+        owner, editRequest: 0, list: {closest: (): null => null}, model: {nodes: new Map([["item", {id: "item"}]])},
         view: {setEditing: () => {}, update: () => {}},
     });
     const saved = {undoFocusId: "body", undoFocusStart: "1", undoFocusEnd: "1"};

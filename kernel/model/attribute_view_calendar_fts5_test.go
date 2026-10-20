@@ -36,7 +36,7 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 			if encrypted {
 				boxID = ast.NewNodeID()
 				markRuntimeEncryptedBox(boxID)
-				setDEKForTest(boxID, bytes.Repeat([]byte{0x63}, 32))
+				prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x63}, 32))
 				av.SetAVBoxID(original.ID, boxID)
 				t.Cleanup(func() {
 					av.SetAVBoxID(original.ID, "")

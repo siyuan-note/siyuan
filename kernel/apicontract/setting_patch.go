@@ -20,8 +20,8 @@ type SettingPatchData struct {
 	Issues []SettingIssue `json:"issues"`
 }
 
-// PatchSettingRequest 每次仅更新一个配置域。对象递归合并，数组和 null 整体替换，省略字段保留当前值。
-// 旧设置接口的整份配置提交和默认值语义不变；失败不发出配置变更通知。
+// PatchSettingRequest 每次仅更新一个配置域。对象递归合并，数组整体替换，省略字段保持当前值，null 还原默认值。
+// 失败不发出配置变更通知。
 type PatchSettingRequest struct {
 	Editor     *SettingEditor       `json:"editor" api:"optional"`
 	Export     *SettingExport       `json:"export" api:"optional"`
@@ -89,8 +89,8 @@ func init() {
 			if restricted != nil {
 				allowed := map[string]bool{}
 				typ := reflect.TypeOf(restricted)
-				for i := 0; i < typ.NumField(); i++ {
-					allowed[strings.Split(typ.Field(i).Tag.Get("json"), ",")[0]] = true
+				for field := range typ.Fields() {
+					allowed[strings.Split(field.Tag.Get("json"), ",")[0]] = true
 				}
 				for field := range object {
 					if !allowed[field] {

@@ -175,8 +175,7 @@ func newTextEncoderObject(rt *goja.Runtime, te *TextEncoder) *goja.Object {
 }
 
 func throwAsJSError(rt *goja.Runtime, err error) {
-	var encErr *Error
-	if errors.As(err, &encErr) {
+	if encErr, ok := errors.AsType[*Error](err); ok {
 		panic(encErr.JSError(rt))
 	}
 

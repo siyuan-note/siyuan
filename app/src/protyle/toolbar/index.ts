@@ -55,7 +55,7 @@ import {blockRender} from "../render/blockRender";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
 import {hideElements} from "../ui/hideElements";
@@ -66,6 +66,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {getPlantumlImageBlob} from "../render/plantumlImage";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
+import {decodeInlineMemoContent, encodeInlineMemoContent} from "../util/inlineMemo";
 import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
@@ -1729,7 +1730,7 @@ export class Toolbar {
         if (types.includes("NodeHTMLBlock")) {
             textElement.value = renderElement.querySelector("protyle-html").getAttribute("data-content") || "";
         } else if (isInlineMemo) {
-            textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
+            textElement.value = decodeInlineMemoContent(renderElement.getAttribute("data-inline-memo-content") || "");
         } else {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
@@ -1754,7 +1755,7 @@ export class Toolbar {
                 }
                 inlineMemoElements.forEach((item) => {
                     if (item.nodeType !== 3) {
-                        item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(textElement.value));
+                        item.setAttribute("data-inline-memo-content", encodeInlineMemoContent(textElement.value));
                     }
                 });
             } else {
@@ -1842,8 +1843,7 @@ export class Toolbar {
                             inlineLastNode = item;
                         }
                     } else if (item.nodeType !== 3) {
-                        // 行级备注自动移除换行  https://ld246.com/article/1664205917326
-                        item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(textElement.value));
+                        item.setAttribute("data-inline-memo-content", encodeInlineMemoContent(textElement.value));
                     }
                 });
             } else if (types.includes("inline-math") && !noChange) {

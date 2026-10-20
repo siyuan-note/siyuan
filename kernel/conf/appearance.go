@@ -19,28 +19,53 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
-	BodyGradient        *BodyGradient       `json:"bodyGradient"`        // 背景渐变，空值表示自动配色
-	GlobalFontFamilies  []*EditorFont       `json:"globalFontFamilies"`  // 按优先级排列的全局默认字体
-	Mode                int                 `json:"mode"`                // 模式：0：明亮，1：暗黑
-	ModeOS              bool                `json:"modeOS"`              // 模式是否跟随系统
-	DarkThemes          []*AppearanceTheme  `json:"darkThemes"`          // 暗黑模式外观主题列表
-	LightThemes         []*AppearanceTheme  `json:"lightThemes"`         // 明亮模式外观主题列表
-	ThemeDark           string              `json:"themeDark"`           // 选择的暗黑模式外观主题
-	ThemeLight          string              `json:"themeLight"`          // 选择的明亮模式外观主题
-	ThemeVer            string              `json:"themeVer"`            // 选择的主题版本
-	Icons               []*AppearanceIcon   `json:"icons"`               // 图标列表
-	Icon                string              `json:"icon"`                // 选择的图标
-	IconVer             string              `json:"iconVer"`             // 选择的图标版本
-	CodeBlockThemeLight string              `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
-	CodeBlockThemeDark  string              `json:"codeBlockThemeDark"`  // 暗黑模式下代码块主题
-	Lang                string              `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
-	ThemeJS             bool                `json:"themeJS"`             // 是否启用了主题 JavaScript
-	CloseButtonBehavior int                 `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
-	HideToolbar         bool                `json:"hideToolbar"`         // 是否隐藏顶栏工具栏
-	HideStatusBar       bool                `json:"hideStatusBar"`       // 是否隐藏底部状态栏
-	StatusBar           *util.StatusBar     `json:"statusBar"`           // 底部状态栏配置
-	Notifications       *util.Notifications `json:"notifications"`       // 外观通知开关配置
-	EntryVisibility     *EntryVisibility    `json:"entryVisibility"`     // 桌面端入口可见性配置
+	CompactMode              bool                `json:"compactMode"`              // 桌面端紧凑模式
+	MenuMouseScroll          bool                `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
+	PDFTheme                 *PDFTheme           `json:"pdfTheme"`                 // PDF 阅读主题与标注颜色
+	OutlineKeepCurrentExpand bool                `json:"outlineKeepCurrentExpand"` // 大纲保持当前标题展开
+	MobileBars               *MobileBars         `json:"mobileBars"`               // 移动端工具栏与侧栏访问偏好
+	BodyGradient             *BodyGradient       `json:"bodyGradient"`             // 背景渐变，空值表示自动配色
+	GlobalFontFamilies       []*EditorFont       `json:"globalFontFamilies"`       // 按优先级排列的全局默认字体
+	Mode                     int                 `json:"mode"`                     // 模式：0：明亮，1：暗黑
+	ModeOS                   bool                `json:"modeOS"`                   // 模式是否跟随系统
+	DarkThemes               []*AppearanceTheme  `json:"darkThemes"`               // 暗黑模式外观主题列表
+	LightThemes              []*AppearanceTheme  `json:"lightThemes"`              // 明亮模式外观主题列表
+	ThemeDark                string              `json:"themeDark"`                // 选择的暗黑模式外观主题
+	ThemeLight               string              `json:"themeLight"`               // 选择的明亮模式外观主题
+	ThemeVer                 string              `json:"themeVer"`                 // 选择的主题版本
+	Icons                    []*AppearanceIcon   `json:"icons"`                    // 图标列表
+	Icon                     string              `json:"icon"`                     // 选择的图标
+	IconVer                  string              `json:"iconVer"`                  // 选择的图标版本
+	CodeBlockThemeLight      string              `json:"codeBlockThemeLight"`      // 明亮模式下代码块主题
+	CodeBlockThemeDark       string              `json:"codeBlockThemeDark"`       // 暗黑模式下代码块主题
+	Lang                     string              `json:"lang"`                     // 选择的界面语言，同 AppConf.Lang
+	ThemeJS                  bool                `json:"themeJS"`                  // 是否启用了主题 JavaScript
+	CloseButtonBehavior      int                 `json:"closeButtonBehavior"`      // 关闭按钮行为，0：退出，1：最小化到托盘
+	HideToolbar              bool                `json:"hideToolbar"`              // 是否隐藏顶栏工具栏
+	HideStatusBar            bool                `json:"hideStatusBar"`            // 是否隐藏底部状态栏
+	StatusBar                *util.StatusBar     `json:"statusBar"`                // 底部状态栏配置
+	Notifications            *util.Notifications `json:"notifications"`            // 外观通知开关配置
+	EntryVisibility          *EntryVisibility    `json:"entryVisibility"`          // 桌面端入口可见性配置
+}
+
+type PDFTheme struct {
+	Light     string `json:"light"`
+	Dark      string `json:"dark"`
+	AnnoColor string `json:"annoColor"`
+}
+
+type MobileBars struct {
+	AutoHide       *bool `json:"autoHide"`
+	SidebarSwipe   *bool `json:"sidebarSwipe"`
+	SidebarButtons *bool `json:"sidebarButtons"`
+}
+
+func NewPDFTheme() *PDFTheme {
+	return &PDFTheme{Light: "light", Dark: "dark", AnnoColor: "var(--b3-pdf-background1)"}
+}
+
+func NewMobileBars() *MobileBars {
+	return &MobileBars{AutoHide: new(true), SidebarSwipe: new(true), SidebarButtons: new(true)}
 }
 
 type BodyGradient struct {
@@ -61,6 +86,9 @@ func NewAppearance() *Appearance {
 // NewAppearanceForContainer 使用显式容器参数选择状态栏默认项。
 func NewAppearanceForContainer(mobile bool) *Appearance {
 	return &Appearance{
+		MenuMouseScroll:     true,
+		PDFTheme:            NewPDFTheme(),
+		MobileBars:          NewMobileBars(),
 		GlobalFontFamilies:  []*EditorFont{},
 		Mode:                0,
 		ModeOS:              true,

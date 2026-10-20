@@ -230,13 +230,15 @@ func NewAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[strin
 	if geminiThoughtSignatures {
 		transport = WrapGeminiThoughtSignatureTransport(transport)
 	}
+	transport = &aiErrorResponseTransport{base: transport}
 	transport = &reasoningResponseTransport{base: transport}
 	config.HTTPClient = transport
 	return &AIClient{Client: openai.NewClientWithConfig(config), baseURL: apiBaseURL,
-		anthropicHTTP: newAnthropicHTTPClient(apiKey, apiBaseURL, headers...)}
+		anthropicHTTP: newAnthropicHTTPClient(apiKey, apiBaseURL, headers...),
+		geminiHTTP:    newGeminiInteractionsHTTPClient(apiKey, apiBaseURL, headers...)}
 }
 
-// TestModel 测试模型可用性。先调用 ListModels（GET /v1/models）拉取可用模型清单，
+// TestModel 测试模型可用性。先按协议拉取可用模型清单，
 // 再按 Provider 协议发送极简文本生成请求，确认所选协议实际可用。
 // 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
 // err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
@@ -252,9 +254,13 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 	// 优先校验模型是否在可用清单中
 	var availableIDs []string
 	var listErr error
-	if IsAnthropicMessagesProtocol(protocol) {
+	if IsAnthropicMessagesProtocol(protocol) || IsGeminiInteractionsProtocol(protocol) {
 		var models []AvailableModel
-		models, listErr = listAnthropicModels(ctx, client)
+		if IsGeminiInteractionsProtocol(protocol) {
+			models, listErr = listGeminiInteractionModels(ctx, client)
+		} else {
+			models, listErr = listAnthropicModels(ctx, client)
+		}
 		for _, m := range models {
 			availableIDs = append(availableIDs, m.ID)
 		}
@@ -293,7 +299,12 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 		// Responses 的输出预算至少为 16，包含可能使用的推理 token。
 		request.MaxCompletionTokens = 16
 	}
-	if IsOpenAIResponsesProtocol(protocol) || IsAnthropicMessagesProtocol(protocol) {
+	if IsGeminiInteractionsProtocol(protocol) {
+		// Gemini 的思考也消耗输出预算，为极简连通性测试保留有限预算。
+		request.MaxCompletionTokens = 256
+		request.ReasoningEffort = "low"
+	}
+	if IsOpenAIResponsesProtocol(protocol) || IsAnthropicMessagesProtocol(protocol) || IsGeminiInteractionsProtocol(protocol) {
 		request.Stream = true
 		var stream *OpenAICompletionStream
 		stream, err = CreateOpenAICompletionStream(ctx, client, protocol, request, nil)
@@ -312,6 +323,10 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 		}
 	} else {
 		_, err = CreateOpenAICompletion(ctx, client, protocol, request, nil)
+	}
+	if IsGeminiInteractionsProtocol(protocol) && errors.Is(err, errGeminiInteractionIncomplete) {
+		// 受限预算可能被思考耗尽，已校验的终止响应仍能证明协议连通；正常生成继续将不完整响应视为错误。
+		err = nil
 	}
 	if nil != err {
 		matched = false

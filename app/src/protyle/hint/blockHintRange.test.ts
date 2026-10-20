@@ -5,8 +5,10 @@ import {
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
     isBlockHintQueryAtCaret,
+    shouldAutoCloseRefBrackets,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
+    stripBlockHintCloseKey,
 } from "./blockHintRange";
 
 describe("getBlockHintTriggerOffset", () => {
@@ -86,6 +88,23 @@ describe("getBlockRefStaticText", () => {
         assert.equal(getBlockRefStaticText("[[旧的开始", "[[", true), "旧的开始");
         assert.equal(getBlockRefStaticText("((query", "((", true), "query");
     });
+
+    it("removes a manually typed closing marker from an inline block hint", () => {
+        assert.equal(getBlockRefStaticText("[[Title]]", "[[", true, "]]"), "Title");
+        assert.equal(getBlockRefStaticText("【【标题】】", "【【", true, "】】"), "标题");
+        assert.equal(getBlockRefStaticText("[[Title]]", "[[", false, "]]"), "[[Title]]");
+    });
+});
+
+describe("stripBlockHintCloseKey", () => {
+    it("removes only a complete trailing closing marker", () => {
+        assert.equal(stripBlockHintCloseKey("Title]]", "]]"), "Title");
+        assert.equal(stripBlockHintCloseKey("query))", "))"), "query");
+        assert.equal(stripBlockHintCloseKey("Title]", "]]"), "Title]");
+        assert.equal(stripBlockHintCloseKey("[draft] notes", "]]"), "[draft] notes");
+        assert.equal(stripBlockHintCloseKey("]]", "]]"), "");
+        assert.equal(stripBlockHintCloseKey("Title]]", undefined), "Title]]");
+    });
 });
 
 describe("shouldIgnoreHintTrigger", () => {
@@ -139,4 +158,20 @@ describe("endsWithMultiCharHintPrefix", () => {
         assert.equal(endsWithMultiCharHintPrefix("2级", hintKeys), false);
         assert.equal(endsWithMultiCharHintPrefix("2", hintKeys), false);
     });
+});
+
+describe("auto-closing reference brackets", () => {
+    it("inserts closing brackets only right after a new [[", () => {
+        assert.equal(shouldAutoCloseRefBrackets("note [[", ""), true);
+        assert.equal(shouldAutoCloseRefBrackets("[[", " tail"), true);
+        assert.equal(shouldAutoCloseRefBrackets("[[", "]]"), false);
+        assert.equal(shouldAutoCloseRefBrackets("[", ""), false);
+        assert.equal(shouldAutoCloseRefBrackets("[[Title", ""), false);
+        assert.equal(shouldAutoCloseRefBrackets("note 【【", "", "【【"), true);
+        assert.equal(shouldAutoCloseRefBrackets("【【", "】】", "【【"), false);
+        assert.equal(shouldAutoCloseRefBrackets("【【", "】", "【【"), false);
+        assert.equal(shouldAutoCloseRefBrackets("【", "", "【【"), false);
+        assert.equal(shouldAutoCloseRefBrackets("【【标题", "", "【【"), false);
+    });
+
 });

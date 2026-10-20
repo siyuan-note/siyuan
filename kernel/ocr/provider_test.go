@@ -22,7 +22,6 @@ func (p *testProvider) Recognize(ctx context.Context, path string) ([]map[string
 func TestProviderSelection(t *testing.T) {
 	r := NewRegistry()
 	for _, id := range []ProviderID{Tesseract, PaddleOCR} {
-		id := id
 		if err := r.Register(id, &testProvider{
 			available: true,
 			recognize: func(_ context.Context, path string) ([]map[string]string, error) {

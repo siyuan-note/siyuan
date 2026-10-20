@@ -27,6 +27,7 @@ const maxPending = 256
 
 var ErrInvalid = errors.New("invalid_request")
 var ErrGrant = errors.New("invalid_grant")
+var ErrGrantType = errors.New("unsupported_grant_type")
 var ErrClient = errors.New("invalid_client")
 var ErrDisabled = errors.New("MCP OAuth is disabled")
 
@@ -280,7 +281,7 @@ func normalizeScope(value string) (string, error) {
 		return scope, nil
 	}
 	hasMCP, offline := false, false
-	for _, item := range strings.Fields(value) {
+	for item := range strings.FieldsSeq(value) {
 		switch item {
 		case scope:
 			hasMCP = true
@@ -464,7 +465,7 @@ func (s *Service) Token(req apicontract.MCPOAuthTokenRequest) (ret apicontract.M
 		}
 		g.Spent = append(g.Spent, g.RefreshHash)
 	default:
-		return ret, errors.New("unsupported_grant_type")
+		return ret, ErrGrantType
 	}
 	ret = apicontract.MCPOAuthTokenResponse{AccessToken: AccessPrefix + random(), TokenType: "Bearer", ExpiresIn: 3600, Scope: g.Scope}
 	if remaining := g.Expires - now; remaining < int64(ret.ExpiresIn) {

@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
-import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {canPurgeRepo} from "../../history/repoPurge";
 import {registerSettingGroup} from "../setting/group";
 import {registerSettingItem} from "../setting/item";
@@ -11,6 +11,9 @@ import {scanSettingTabSearch} from "../search/scan";
 
 const source = readFileSync("src/config/tabs/syncUi.ts", "utf8");
 const code = transpileModule(source + "\nexports.open = openSyncProviderConfigDialog;", {
+    compilerOptions: {module: ModuleKind.CommonJS},
+}).outputText;
+const syncGuideCode = transpileModule(readFileSync("src/sync/syncGuide.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS},
 }).outputText;
 
@@ -32,14 +35,15 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         checkValidity() { return this.value.trim() !== "" && Number.isInteger(Number(this.value)) && Number(this.value) > 0; },
     }]));
     const errors = Object.fromEntries(Object.keys(template).map(key => [`sync-${key}-error`, {
-        textContent: "", classList: {toggle() {}},
+        lastElementChild: {textContent: ""}, classList: {toggle() {}},
     }]));
     const status = {textContent: "", classList: {toggle() {} }};
     let warningHidden = true;
     const warning = {classList: {toggle: (_name: string, hidden: boolean) => { warningHidden = hidden; }}};
-    const buttons = Object.fromEntries(["save", "cancel", "clear"].map(action => [action, {
+    const buttons = Object.fromEntries(["save", "cancel", "clear", "test"].map(action => [action, {
         disabled: false, callback: () => {}, addEventListener(_event: string, callback: () => void) {this.callback = callback;},
         getAttribute(name: string) { return name === "data-action" ? action : null; },
+        querySelector: (selector: string) => selector === "span" ? {textContent: ""} : null,
     }]));
     const element = {
         querySelector(selector: string) {
@@ -54,9 +58,13 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         addEventListener(name: string, callback: (event: unknown) => void) {events[name] = callback;},
         setAttribute() {},
     };
-    const root = {isConnected: true, querySelector: (): null => null};
+    const cloudList = {innerHTML: "", classList: {toggle() {}}};
+    const cloudBlock = {querySelector: () => ({classList: {toggle() {}}}), closest: (): null => null};
+    const cloudElement = (selector: string) => selector === "#syncCloudList" ? cloudList :
+        selector === "#syncCloudDirBlock" ? cloudBlock : null;
+    const root = {isConnected: true, querySelector: cloudElement};
     const enabled = {checked: true};
-    const replacement = {querySelector: (selector: string) => selector === '[id="sync.enabled"]' ? enabled : null};
+    const replacement = {querySelector: (selector: string) => selector === '[id="sync.enabled"]' ? enabled : cloudElement(selector)};
     const requests: {url: string, data: any, resolve: (response: any) => void, reject: () => void}[] = [];
     const ruleRequests: typeof requests = [];
     const rules = {requiredFields: provider === 2 ? ["endpoint", "accessKey", "secretKey", "bucket", "region"] : ["endpoint"], endpointBucketWarning: false};
@@ -65,14 +73,24 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
     let closed = 0;
     let dialog: {destroy: () => void};
     let dialogOptions: {width: string, content: string, destroyCallback: () => void};
+    const window = {siyuan: {config, languages: {syncConfigNotSaved: "Required fields missing", syncConfigSaveFailed: "Not confirmed",
+        loadingError: "Loading failed", testConnection: "Test connection", testConnectionTesting: "Testing...",
+        testConnectionSuccess: "Connection successful", testConnectionFail: "Connection failed",
+        testConnectionFailMsg: "Connection failed: ${msg}", cloudConfigTip: "Configure storage", _kernel: {142: "Input cannot be empty"}}}};
+    const syncGuide = {} as Pick<typeof import("../../sync/syncGuide"), "refreshSyncCloudDirBlock">;
+    runInNewContext(syncGuideCode, {
+        exports: syncGuide, window,
+        require: () => ({escapeHtml}),
+    });
+    syncGuide.refreshSyncCloudDirBlock(root as unknown as Element);
     const exports = {} as {open: (root: unknown) => void};
     runInNewContext(code, {
         URL, CSS: {escape: (value: string) => value}, exports,
         setTimeout: (callback: () => void) => {rulesTimer = callback; return 1;},
         clearTimeout: () => {rulesTimer = undefined;},
-        document: {querySelector: () => ({closest: () => replacement})},
-        window: {siyuan: {config, languages: {syncConfigNotSaved: "Required fields missing", syncConfigSaveFailed: "Not confirmed",
-            loadingError: "Loading failed", _kernel: {142: "Input cannot be empty"}}}},
+        window,
+        document: {querySelector: () => ({closest: (selector: string) =>
+            selector.split(", ").includes(mobile ? ".config" : ".config__tab-container") ? replacement : null})},
         require(name: string) {
             if (name === "../../dialog") {
                 return {Dialog: class {
@@ -110,17 +128,46 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
             }
             if (name === "../../util/functions") { return {isMobile: () => mobile}; }
             if (name === "../../util/needSubscribe") { return {isPaidUser: () => true, needSubscribe: () => false}; }
+            if (name === "../../sync/syncGuide") { return syncGuide; }
             return {};
         },
     });
     exports.open(root);
-    return {inputs, sync, config, requests, ruleRequests, rules, refreshRules: () => rulesTimer?.(), confirmations, buttons, status, root, events, enabled,
+    return {inputs, sync, config, requests, ruleRequests, rules, refreshRules: () => rulesTimer?.(), confirmations, buttons, status, root, events, enabled, cloudList,
         options: () => dialogOptions, close: () => dialog.destroy(), closed: () => closed,
         click: (action: string) => buttons[action].callback(), input: () => events.input({}),
         warningHidden: () => warningHidden};
 };
 
 const settle = () => new Promise<void>(resolve => setImmediate(resolve));
+
+for (const mobile of [false, true]) {
+    for (const replaced of [false, true]) {
+        test(`S3 bucket display follows saved and cleared configuration (mobile=${mobile}, replaced=${replaced})`, async () => {
+            const ui = setup(2, mobile);
+            ui.root.isConnected = !replaced;
+            assert.match(ui.cloudList.innerHTML, />notes</);
+            ui.inputs.bucket.value = "new-bucket";
+            ui.click("save");
+            await settle();
+            ui.requests[0].resolve({code: 0, data: {s3: ui.requests[0].data.sync.s3}});
+            await settle();
+            assert.equal(ui.closed(), 1);
+            assert.match(ui.cloudList.innerHTML, />new-bucket</);
+            assert.doesNotMatch(ui.cloudList.innerHTML, />notes</);
+            const clearing = setup(2, mobile);
+            clearing.root.isConnected = !replaced;
+            assert.match(clearing.cloudList.innerHTML, />notes</);
+            clearing.click("clear");
+            clearing.confirmations[0].confirm();
+            clearing.requests[0].resolve({code: 0, data: {enabled: false, s3: {...clearing.sync.s3, bucket: ""}}});
+            await settle();
+            assert.equal(clearing.closed(), 1);
+            assert.match(clearing.cloudList.innerHTML, /Configure storage/);
+            assert.doesNotMatch(clearing.cloudList.innerHTML, />notes</);
+        });
+    }
+}
 
 for (const provider of [2, 3, 4]) {
     test(`provider ${provider} submits the complete draft only after Save`, async () => {
@@ -250,6 +297,62 @@ test("read-only transitions do not re-enable writes after a pending save", async
     ui.click("clear");
     assert.equal(ui.requests.length, 1);
     assert.equal(ui.confirmations.length, 0);
+});
+
+test("test connection probes the draft without saving the configuration", async () => {
+    const ui = setup();
+    ui.inputs.endpoint.value = "https://s3.example.com/notes/";
+    ui.click("test");
+    await settle();
+    assert.equal(ui.requests.length, 1);
+    assert.equal(ui.requests[0].url, "/api/sync/testSyncProviderS3");
+    assert.equal(ui.requests[0].data.s3.endpoint, "https://s3.example.com/notes/");
+    assert.equal(ui.requests[0].data.s3.bucket, "notes");
+    ui.requests[0].resolve({code: 0, data: {kind: "config", msg: "probe object was not listed"}});
+    await settle();
+    assert.equal(ui.status.textContent, "Connection failed: probe object was not listed");
+    assert.equal(ui.inputs.endpoint.disabled, false);
+    assert.equal(ui.buttons.test.disabled, false);
+    assert.equal(ui.closed(), 0);
+});
+
+test("test connection reports success and clears the result when the draft changes", async () => {
+    const ui = setup();
+    ui.click("test");
+    await settle();
+    ui.requests[0].resolve({code: 0, data: {kind: "ok", msg: ""}});
+    await settle();
+    assert.equal(ui.status.textContent, "Connection successful");
+    ui.input();
+    assert.equal(ui.status.textContent, "");
+});
+
+test("test connection waits for kernel rules before validating the draft", async () => {
+    const ui = setup(2, false, true);
+    ui.inputs.endpoint.value = "";
+    ui.click("test");
+    await settle();
+    // 打开对话框时的规则请求被暂停，点击测试会另起一次并等它返回
+    assert.equal(ui.ruleRequests.length, 2);
+    assert.equal(ui.requests.length, 0);
+    ui.ruleRequests[1].resolve({code: 0, data: ui.rules});
+    await settle();
+    // 规则返回后空字段才由内核必填清单拦住，不会把空值交给探测接口
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.inputs.endpoint.attributes["aria-invalid"], "true");
+    assert.equal(ui.status.textContent, "Required fields missing");
+    assert.equal(ui.buttons.test.disabled, false);
+});
+
+test("test connection reports a rule loading failure without probing", async () => {
+    const ui = setup(2, false, true);
+    ui.click("test");
+    await settle();
+    ui.ruleRequests[1].reject();
+    await settle();
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.status.textContent, "Loading failed");
+    assert.equal(ui.buttons.test.disabled, false);
 });
 
 test("draft stays bound to the opened provider even if another window changes the provider", async () => {

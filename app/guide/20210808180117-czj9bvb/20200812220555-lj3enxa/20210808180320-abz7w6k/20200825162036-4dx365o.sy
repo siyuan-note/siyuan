@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261019201307"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604182832-nm3hapx",
-				"updated": "20240702222051"
+				"updated": "20261019194453"
 			},
 			"Children": [
 				{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091228-ttcj9nm",
-				"updated": "20240702222051"
+				"updated": "20261019194453"
 			},
 			"Children": [
 				{
@@ -105,7 +105,7 @@
 					},
 					"Properties": {
 						"id": "20220916195046-bdzv6fy",
-						"updated": "20240702222051"
+						"updated": "20261019194453"
 					},
 					"Children": [
 						{
@@ -127,12 +127,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210604222221-9zkgkky",
-								"updated": "20220916195051"
+								"updated": "20261019194453"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可通过复制粘贴或拖拽来上传图片；上传后的图片可通过拖拽进行大小调整。"
+									"Data": "可通过复制粘贴或拖拽来上传图片。将鼠标移到图片上可显示边框外的小手柄，拖动右侧、底部或右下角的手柄可等比调整大小；触屏上先点击图片显示手柄，再拖动手柄"
 								}
 							]
 						},
@@ -842,6 +842,56 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261015131447-dbilful",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015131447-dbilful",
+				"updated": "20261016011750"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "内容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "管理颜色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中点击对应按钮，分别管理颜色、文字颜色和背景颜色。"
 				}
 			]
 		},
@@ -1914,7 +1964,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261012014930"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
@@ -1949,6 +1999,66 @@
 			]
 		},
 		{
+			"ID": "20261018163000-vnuug6c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-vnuug6c",
+				"updated": "20261019201307"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思维导图默认将鼠标滚轮和单指滑动交给文档滚动。桌面端点击导图、移动端轻点一次导图即可操作画布；移动端也可使用工具栏中的“手形工具”进行单指平移，关闭手形工具后可选择、拖动或双击编辑节点，也可在阅读时直接双击节点进入编辑。操作中的画布显示高亮边框，可用滚轮或鼠标右键拖动平移画布，启用手形工具后也可用左键拖动平移。普通模式下，空白区域的左键拖动不会平移画布。移动端操作时可用单指拖动平移画布，到达平移边界后也不会滚动文档。点击导图外部、将键盘焦点移到外部，或在画布上按 Esc 即可恢复阅读。全屏时保持画布操作，退出全屏后恢复阅读。"
+				}
+			]
+		},
+		{
+			"ID": "20261019142953-m439ybs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261019142953-m439ybs",
+				"updated": "20261019142953"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档与全屏之间切换时会保留脑图中心点和缩放比例。点击工具栏中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "全屏切换"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可显示居中的指示框，其大小与文档内脑图的可视区域相同。参照指示框平移、缩放画布，即可预览退出全屏后显示的范围；再次点击按钮可隐藏指示框。指示框不会改变脑图块的宽度或高度。"
+				}
+			]
+		},
+		{
+			"ID": "20261018163000-rtw5v99",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-rtw5v99",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "无需进入画布操作，也可以按住 Ctrl（macOS 为 Command）滚动鼠标滚轮，以指针为中心缩放，或按住同一按键并用鼠标右键拖动画布进行临时平移。临时平移保留键盘焦点和节点选中状态。触屏上可用双指缩放、平移。这些手势保持当前的阅读或画布操作状态。已保存的视图锁定仍禁止编辑、缩放和平移，解锁后可按需进入画布操作。"
+				}
+			]
+		},
+		{
 			"ID": "20260928143000-4bg2v0y",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -1958,7 +2068,71 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "点击思维导图工具栏中的“锁定视图”后，禁止编辑、缩放和平移，在导图上滑动或滚动鼠标滚轮将滚动文档。点击“解锁视图”可恢复操作。锁定状态随块保存。"
+					"Data": "点击思维导图工具栏中的“锁定视图”后，禁止编辑、缩放和平移，在导图上滑动或滚动鼠标滚轮将滚动文档。点击“解锁视图”可恢复操作。锁定状态随块保存。直接嵌入完整思维导图块或包含它的文档时，解锁后可编辑节点和样式，修改会同步到源块及其他嵌入位置；只读和历史预览中仍不能编辑。"
+				}
+			]
+		},
+		{
+			"ID": "20261017110432-6mghas7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017110432-6mghas7",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在脑图工具栏的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连线"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连线样式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择曲线分叉、正交折线、曲线汇聚或圆角折线。选择应用于整张脑图，随文档保存，并支持撤销和重做。切换只改变父子节点间的连线，不改变节点位置或关系线。正交样式共用的竖线沿用默认线色，不单独选中；横向分支仍可单独选中和配色。思源格式的 HTML 和 PDF 预览使用保存的样式。"
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-kojg0bw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-kojg0bw",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连线"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建默认连线样式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择新建导图的连线样式，也适用于首次将列表或页签转换为导图。此偏好保存在当前工作空间的本地配置中，不参与云同步。修改它不会改变已有导图；复制、导入及列表或页签往返转换保留原样式。"
 				}
 			]
 		},
@@ -3159,7 +3333,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-5g40dth",
-				"updated": "20261012014859"
+				"updated": "20261017003253"
 			},
 			"Children": [
 				{
@@ -3173,7 +3347,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 并选择“插入图片或文件”，即可上传本地图片，也可以直接粘贴剪贴板图片。图片作为文档附件保存。多个顶层节点形成的虚拟中心标题仍为纯文本。"
+					"Data": " 并选择“插入图片或文件”，即可上传本地图片，也可以直接粘贴剪贴板图片。图片作为文档附件保存。多个顶层节点形成的虚拟中心标题仍为纯文本。双击节点中的图片即可直接放大预览，无需先进入节点编辑。"
 				}
 			]
 		},
@@ -4461,12 +4635,44 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-2nz4ows",
-				"updated": "20210604223148"
+				"updated": "20261018213321"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "流程图"
+				}
+			]
+		},
+		{
+			"ID": "20261018213321-q522rrs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018213321-q522rrs",
+				"updated": "20261018213321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可拖动 Mermaid 块右侧的手柄调整宽度。缩小后，在块菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "居中"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将块居中显示。"
 				}
 			]
 		},
@@ -5116,7 +5322,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-jctx529",
-				"updated": "20210415200602"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -5157,12 +5363,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221225011731-fkkxxrw",
-				"updated": "20221225012400"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "可使用如下三种格式定义："
+					"Data": "本地内核支持以下三种格式。连接远程内核时仅支持严格 JSON，不执行 JavaScript 对象表达式或函数，详见"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-u4065fm",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "连接远程内核"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

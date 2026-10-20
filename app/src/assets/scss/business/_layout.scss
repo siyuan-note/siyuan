@@ -28,7 +28,7 @@
     overflow: hidden;
   }
 
-  // 左右停靠栏只过渡本侧的占位间距：其高度由容器决定，而顶栏隐藏时 margin-top 会在 0 与 42px 间切换，
+  // 左右停靠栏只过渡本侧的占位间距：其高度由容器决定，而顶栏隐藏时 margin-top 会随顶栏高度切换，
   // 过渡整个 margin 会把面板顶部下移、高度压小
   &__dockl {
     transition: width $dock-transition, margin-right $dock-transition;
@@ -236,7 +236,7 @@
       &--readonly {
         flex-shrink: 0;
         min-width: 71px;
-        margin-left: -8px;
+        margin-left: var(--b3-ui-tab-actions-margin-left, -8px);
       }
 
       .item {
@@ -246,13 +246,13 @@
         display: flex;
         align-items: center;
         transition: var(--b3-transition);
-        min-height: 29px;
+        min-height: var(--b3-ui-tab-min-height, 29px);
         position: relative;
         max-width: 186px;
         flex-shrink: 0;
         overflow: hidden;
         color: var(--b3-theme-on-surface);
-        margin: 6px 4px;
+        margin: var(--b3-ui-tab-margin, 6px 4px);
         border-radius: var(--b3-border-radius);
 
         &[data-clone="true"] {
@@ -353,7 +353,7 @@
         }
 
         &__icon {
-          padding: 4px 0 4px 8px;
+          padding: var(--b3-ui-tab-icon-padding, 4px 0 4px 8px);
           line-height: 22px;
           flex-shrink: 0;
           font-family: var(--b3-font-family-emoji);
@@ -381,14 +381,14 @@
         &__text {
           text-align: center;
           transition: var(--b3-transition);
-          padding: 0 8px;
+          padding: var(--b3-ui-tab-text-padding, 0 8px);
           white-space: nowrap;
           overflow: hidden;
           -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
         }
 
         &__close {
-          padding: 7px 6px 6px 0;
+          padding: var(--b3-ui-tab-close-padding, 7px 6px 6px 0);
           display: flex;
           align-items: center;
 
@@ -426,7 +426,7 @@
   user-select: none;
   box-sizing: border-box;
   -webkit-user-select: none;
-  width: 42px;
+  width: var(--b3-ui-dock-width, 42px);
   flex-direction: column;
   height: 100%;
   min-height: 0;
@@ -440,7 +440,7 @@
   }
 
   &__split {
-    height: 17px;
+    height: var(--b3-ui-dock-split-height, 17px);
     position: relative;
 
     &::after {
@@ -462,11 +462,11 @@
   }
 
   &__item {
-    padding: 5px;
+    padding: var(--b3-ui-dock-padding, 5px);
     color: var(--b3-theme-on-surface-light);
     display: flex;
     border-radius: var(--b3-border-radius);
-    margin: 7px;
+    margin: var(--b3-ui-dock-margin, 7px);
     cursor: pointer;
     touch-action: none;
 

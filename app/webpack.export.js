@@ -1,8 +1,8 @@
 const path = require("path");
+const PreserveWatchAssetsPlugin = require("./scripts/preserve-watch-assets");
 const webpack = require("webpack");
 const pkg = require("./package.json");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const {EsbuildPlugin} = require("esbuild-loader");
 
@@ -12,6 +12,8 @@ module.exports = (env, argv) => {
         watch: argv.mode !== "production",
         devtool: argv.mode !== "production" ? "eval-source-map" : false,
         output: {
+            // 首次输出时清理，开发期间的后续输出由插件保留旧资源。
+            clean: true,
             publicPath: "auto",
             filename: "[name].js",
             path: path.resolve(__dirname, "stage/build/export"),
@@ -90,11 +92,8 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
+            new PreserveWatchAssetsPlugin(),
             // new BundleAnalyzerPlugin(),
-            new CleanWebpackPlugin({
-                cleanOnceBeforeBuildPatterns: [
-                    path.join(__dirname, "stage/build/export")],
-            }),
             new webpack.DefinePlugin({
                 NODE_ENV: JSON.stringify(argv.mode),
                 SIYUAN_VERSION: JSON.stringify(pkg.version),

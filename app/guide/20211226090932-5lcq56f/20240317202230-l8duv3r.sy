@@ -7,7 +7,7 @@
 		"id": "20240317202230-l8duv3r",
 		"title": "擴充開發",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20261016202635"
 	},
 	"Children": [
 		{
@@ -253,7 +253,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317202310-3n68u3l",
-				"updated": "20260804235500"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -265,7 +265,7 @@
 					},
 					"Properties": {
 						"id": "20240317202310-qr9ah0g",
-						"updated": "20240317202310"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -273,7 +273,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240317202310-8deqwkz",
-								"updated": "20240317202310"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -324,6 +324,17 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 等）"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。加密筆記本的持久化檔案不能透過這些原始檔案 API 讀取或改寫。請在解鎖後使用對應的文件、區塊或資源 API，詳見"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-crytw01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "加密筆記本"
 								}
 							]
 						}
@@ -338,7 +349,7 @@
 					},
 					"Properties": {
 						"id": "20240317202310-poaxn3m",
-						"updated": "20260804235500"
+						"updated": "20261016202635"
 					},
 					"Children": [
 						{
@@ -346,12 +357,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240317202310-e5wron5",
-								"updated": "20240317202310"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "思源在建立日記的時候會自動為文件新增 custom-dailynote-yyyymmdd 屬性，以方便將日記文件同普通文件區分。"
+									"Data": "思源在建立日記的時候會自動為文件新增 custom-dailynote-yyyymmdd 屬性，以方便將日記文件同普通文件區分"
 								}
 							]
 						},
@@ -360,24 +371,24 @@
 							"Type": "NodeBlockquote",
 							"Properties": {
 								"id": "20240317202310-ozkltzq",
-								"updated": "20260804235500"
+								"updated": "20261016202635"
 							},
 							"Children": [
 								{
 									"Type": "NodeBlockquoteMarker",
-									"Data": "\u003e"
+									"Data": ">"
 								},
 								{
 									"ID": "20240317202310-tfo5fiq",
 									"Type": "NodeParagraph",
 									"Properties": {
 										"id": "20240317202310-tfo5fiq",
-										"updated": "20260804235500"
+										"updated": "20261016202635"
 									},
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "詳情請見 GitHub Issue #9807。"
+											"Data": "詳情請見 GitHub Issue #9807"
 										}
 									]
 								}

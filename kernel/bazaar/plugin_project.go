@@ -29,7 +29,7 @@ const pluginProjectPackagerVersion = "siyuan-plugin-zip-v1"
 // 也不将打包结果当作 JavaScript 语法或运行时验证。
 func buildPluginProjectArchive(grant *util.PluginDevelopmentGrant, snapshot map[string][]byte) ([]byte, *util.PluginProjectArtifact, error) {
 	if len(grant.AllowFiles) == 0 || len(grant.AllowFiles) > util.PluginProjectMaxFiles {
-		return nil, nil, errors.New("invalid_path: invalid approved inventory")
+		return nil, nil, util.NewTextFileError(util.TextFileInvalidPath, errors.New("invalid approved inventory"))
 	}
 	approved := append([]string(nil), grant.AllowFiles...)
 	sort.Strings(approved)
@@ -44,13 +44,13 @@ func buildPluginProjectArchive(grant *util.PluginDevelopmentGrant, snapshot map[
 		}
 		key := strings.ToLower(name)
 		if seen[key] {
-			return nil, nil, errors.New("invalid_path: duplicate or case-colliding archive member")
+			return nil, nil, util.NewTextFileError(util.TextFileInvalidPath, errors.New("duplicate or case-colliding archive member"))
 		}
 		seen[key] = true
 		for prefix := name; prefix != "."; prefix = path.Dir(prefix) {
 			key := strings.ToLower(prefix)
 			if old, ok := prefixes[key]; ok && old != prefix {
-				return nil, nil, errors.New("invalid_path: case-colliding archive path prefix")
+				return nil, nil, util.NewTextFileError(util.TextFileInvalidPath, errors.New("case-colliding archive path prefix"))
 			}
 			prefixes[key] = prefix
 		}
@@ -60,11 +60,11 @@ func buildPluginProjectArchive(grant *util.PluginDevelopmentGrant, snapshot map[
 		}
 		names = append(names, name)
 		if int64(len(data)) > util.PluginProjectMaxFileBytes {
-			return nil, nil, errors.New("too_large: archive member exceeds 16 MiB")
+			return nil, nil, util.NewTextFileError(util.TextFileTooLarge, errors.New("archive member exceeds 16 MiB"))
 		}
 		total += int64(len(data))
 		if total > util.PluginProjectMaxBytes {
-			return nil, nil, errors.New("too_large: project exceeds 64 MiB")
+			return nil, nil, util.NewTextFileError(util.TextFileTooLarge, errors.New("project exceeds 64 MiB"))
 		}
 		// 仅提供有限补充扫描；安全边界主要来自已确认并冻结的显式清单。
 		if bytes.Contains(data, []byte("-----BEGIN PRIVATE KEY-----")) || bytes.Contains(data, []byte("-----BEGIN RSA PRIVATE KEY-----")) || bytes.Contains(data, []byte("-----BEGIN OPENSSH PRIVATE KEY-----")) || bytes.Contains(data, []byte("-----BEGIN EC PRIVATE KEY-----")) {
@@ -78,7 +78,7 @@ func buildPluginProjectArchive(grant *util.PluginDevelopmentGrant, snapshot map[
 	for name := range seen {
 		for parent := path.Dir(name); parent != "."; parent = path.Dir(parent) {
 			if seen[parent] {
-				return nil, nil, errors.New("invalid_path: file/directory archive member collision")
+				return nil, nil, util.NewTextFileError(util.TextFileInvalidPath, errors.New("file/directory archive member collision"))
 			}
 		}
 	}
@@ -141,7 +141,7 @@ func buildPluginProjectArchive(grant *util.PluginDevelopmentGrant, snapshot map[
 		return nil, nil, err
 	}
 	if int64(output.Len()) > MaxLocalPackageArchiveSize {
-		return nil, nil, errors.New("too_large: archive exceeds local installation limit")
+		return nil, nil, util.NewTextFileError(util.TextFileTooLarge, errors.New("archive exceeds local installation limit"))
 	}
 	sourceRevision := util.PluginProjectTreeRevision(inventory)
 	artifact := &util.PluginProjectArtifact{PackageHash: util.PluginProjectDigest(output.Bytes()), SourceRevision: sourceRevision, PackageName: pkg.Name, Version: pkg.Version, Frontend: grant.Frontend, FileListDigest: util.PluginProjectDigest([]byte(strings.Join(names, "\x00"))), PackagerVersion: pluginProjectPackagerVersion, Checks: map[string]string{
@@ -155,14 +155,14 @@ func buildPluginProjectArchive(grant *util.PluginDevelopmentGrant, snapshot map[
 func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) (ret *util.PluginProjectArtifact, err error) {
 	err = util.WithPluginProjectSource(ctx, true, func(grant *util.PluginDevelopmentGrant, root *os.Root) error {
 		if grant.TaskID != taskID {
-			return errors.New("invalid_path: task mismatch")
+			return util.NewTextFileError(util.TextFileInvalidPath, errors.New("task mismatch"))
 		}
 		status, err := util.PluginProjectArtifactStatus(grant, root)
 		if err != nil {
 			return err
 		}
 		if status.Pending || status.ExternalChanges {
-			return errors.New("revision_conflict: project has interrupted or external changes")
+			return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("project has interrupted or external changes"))
 		}
 		snapshot, err := util.SnapshotPluginProject(root, nil)
 		if err != nil {
@@ -173,7 +173,7 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			return err
 		}
 		if expectedRevision == "" || artifact.SourceRevision != expectedRevision {
-			return errors.New("revision_conflict: source differs from the expected revision")
+			return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("source differs from the expected revision"))
 		}
 		// 归档始终消费上面的不可变字节快照，发布前再核对当前源码。
 		again, err := util.SnapshotPluginProject(root, nil)
@@ -185,7 +185,7 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			inventory[name] = util.PluginProjectDigest(data)
 		}
 		if util.PluginProjectTreeRevision(inventory) != expectedRevision {
-			return errors.New("revision_conflict: source changed while packaging")
+			return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("source changed while packaging"))
 		}
 		if err = util.RecheckPluginProjectGrant(ctx, grant); err != nil {
 			return err
@@ -199,7 +199,7 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 		name := artifact.PackageHash + ".zip"
 		if info, statErr := artifacts.Lstat(name); statErr == nil {
 			if !util.PluginProjectRegularFile(info) {
-				return errors.New("invalid_path: existing artifact is not a regular file")
+				return util.NewTextFileError(util.TextFileInvalidPath, errors.New("existing artifact is not a regular file"))
 			}
 			file, readErr := util.OpenFileNoFollow(artifacts, name)
 			if readErr != nil {
@@ -212,7 +212,7 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			existing, readErr := io.ReadAll(io.LimitReader(file, MaxLocalPackageArchiveSize+1))
 			file.Close()
 			if readErr != nil || int64(len(existing)) > MaxLocalPackageArchiveSize || util.PluginProjectDigest(existing) != artifact.PackageHash {
-				return errors.New("revision_conflict: published archive changed")
+				return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("published archive changed"))
 			}
 		} else {
 			if !errors.Is(statErr, os.ErrNotExist) {
@@ -231,7 +231,7 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 				stored += info.Size()
 			}
 			if len(entries) >= 8 || stored+int64(len(archive)) > 256*1024*1024 {
-				return errors.New("too_large: retained artifact limit reached; existing recovery artifacts were preserved")
+				return util.NewTextFileError(util.TextFileTooLarge, errors.New("retained artifact limit reached; existing recovery artifacts were preserved"))
 			}
 			tmp := ".package-" + artifact.PackageHash + ".tmp"
 			file, writeErr := artifacts.OpenFile(tmp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
@@ -259,10 +259,10 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 		artifact.PackagePath = filepath.ToSlash(rel)
 		ret = artifact
 		if err = publishPluginProjectDelivery(grant, artifact, archive); err != nil {
-			return fmt.Errorf("result_unknown: authoritative archive retained; delivery publication failed: %w", err)
+			return util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("authoritative archive retained; delivery publication failed: %w", err))
 		}
 		if err = util.RecordPluginProjectArtifact(grant, artifact); err != nil {
-			return fmt.Errorf("result_unknown: archive retained; ready metadata was not saved: %w", err)
+			return util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("archive retained; ready metadata was not saved: %w", err))
 		}
 		ret = artifact
 		return nil
@@ -275,7 +275,7 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 func ResolvePluginProjectArtifact(ctx context.Context, taskID, archivePath, expectedHash string) (ret string, err error) {
 	err = util.WithPluginProjectSource(ctx, false, func(grant *util.PluginDevelopmentGrant, root *os.Root) error {
 		if grant.TaskID != taskID {
-			return errors.New("invalid_path: task mismatch")
+			return util.NewTextFileError(util.TextFileInvalidPath, errors.New("task mismatch"))
 		}
 		if err := util.RecheckPluginProjectGrant(ctx, grant); err != nil {
 			return err
@@ -285,7 +285,7 @@ func ResolvePluginProjectArtifact(ctx context.Context, taskID, archivePath, expe
 			return err
 		}
 		if status.Artifact == nil || (status.Artifact.PackagePath != archivePath && status.Artifact.DeliveryPath != archivePath) || status.Artifact.PackageHash != expectedHash {
-			return errors.New("revision_conflict: archive is not the current approved project artifact")
+			return util.NewTextFileError(util.TextFileRevisionConflict, errors.New("archive is not the current approved project artifact"))
 		}
 		ret = filepath.Join(util.WorkspaceDir, filepath.FromSlash(status.Artifact.PackagePath))
 		return nil

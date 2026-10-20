@@ -166,7 +166,7 @@ func rewriteTreeAssetReferences(tree *parse.Tree, options assetReferenceRewriteO
 		tree.Root.SetIALAttr("title-img", strings.Replace(titleImg, titleImgPath, rewritten, 1))
 	}
 
-	treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -187,6 +187,11 @@ func rewriteTreeAssetReferences(tree *parse.Tree, options assetReferenceRewriteO
 		}
 
 		switch node.Type {
+		case ast.NodeImage:
+			reference := treenode.ImageLivePhotoVideo(node)
+			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {
+				treenode.SetImageLivePhotoVideo(node, rewritten)
+			}
 		case ast.NodeLinkDest:
 			reference := node.TokensStr()
 			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {
@@ -246,6 +251,12 @@ func rewriteAttributeViewRichAssetReferences(value *av.Value, options assetRefer
 			return ast.WalkContinue
 		}
 		switch node.Type {
+		case ast.NodeImage:
+			reference := treenode.ImageLivePhotoVideo(node)
+			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {
+				treenode.SetImageLivePhotoVideo(node, rewritten)
+				updated = true
+			}
 		case ast.NodeLinkDest:
 			reference := node.TokensStr()
 			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {

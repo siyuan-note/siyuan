@@ -142,6 +142,208 @@
         "src/asset/picker.ts"
       ]
     },
+    "av__automation-action-description": {
+      "reason": "数据库自动化动作说明的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-action-target": {
+      "reason": "数据库自动化动作目标的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-action-title": {
+      "reason": "数据库自动化动作标题的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-action-type": {
+      "reason": "数据库自动化动作类型的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-attribute-name": {
+      "reason": "数据库自动化监听属性名称的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-attribute-operator": {
+      "reason": "数据库自动化监听属性运算符的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-attribute-value": {
+      "reason": "数据库自动化监听属性值的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-control-label": {
+      "reason": "数据库自动化配置项标签的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts",
+        "src/protyle/render/av/automationTemplate.ts",
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-document-name": {
+      "reason": "数据库自动化监听文档名称的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-notebook-name": {
+      "reason": "数据库自动化监听笔记本名称的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-preview-content": {
+      "reason": "数据库自动化收集预览内容的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-preview-description": {
+      "reason": "数据库自动化收集预览路径和状态说明的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-preview-empty": {
+      "reason": "数据库自动化收集预览空状态的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-preview-results": {
+      "reason": "数据库自动化收集预览结果及错误提示的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-rule-name": {
+      "reason": "数据库自动化规则名称的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-rule-select": {
+      "reason": "数据库自动化规则选择的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-section-index": {
+      "reason": "数据库自动化步骤编号的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-section-title": {
+      "reason": "数据库自动化步骤标题的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-source-field": {
+      "reason": "数据库自动化来源字段的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-source-tags": {
+      "reason": "数据库自动化监听标签的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-source-types": {
+      "reason": "数据库自动化监听块类型的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-status": {
+      "reason": "数据库自动化规则状态提示的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-target-database": {
+      "reason": "数据库自动化目标数据库名称的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-target-relation": {
+      "reason": "数据库自动化目标关联字段的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-template-editor": {
+      "reason": "数据库自动化模板编辑器的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automationTemplate.ts"
+      ]
+    },
+    "av__automation-template-input": {
+      "reason": "数据库自动化模板预览字段值的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automationTemplate.ts"
+      ]
+    },
+    "av__automation-template-item": {
+      "reason": "数据库自动化模板预览条目的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automationTemplate.ts"
+      ]
+    },
+    "av__automation-template-time": {
+      "reason": "数据库自动化模板预览时间的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automationTemplate.ts"
+      ]
+    },
+    "av__automation-tip": {
+      "reason": "数据库自动化辅助说明的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts",
+        "src/protyle/render/av/automationTemplate.ts",
+        "src/protyle/render/av/blockCollection.ts"
+      ]
+    },
+    "av__automation-title": {
+      "reason": "数据库自动化面板标题的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-trigger": {
+      "reason": "数据库自动化触发条件的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-value-mode": {
+      "reason": "数据库自动化字段赋值模式的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "av__automation-watch-field": {
+      "reason": "数据库自动化监听字段的语义化主题钩子，默认外观复用现有类，不需要独立样式",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
     "av__batch-edit-proxy": {
       "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
       "references": [

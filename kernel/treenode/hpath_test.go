@@ -46,20 +46,21 @@ func TestHPathRefreshIndexMigration(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer rows.Close()
-			var plan string
+			var plan strings.Builder
 			for rows.Next() {
 				var id, parent, unused int
 				var detail string
 				if err = rows.Scan(&id, &parent, &unused, &detail); err != nil {
 					t.Fatal(err)
 				}
-				plan += detail + "\n"
+				plan.WriteString(detail)
+				plan.WriteString("\n")
 			}
 			if err = rows.Err(); err != nil {
 				t.Fatal(err)
 			}
-			if !strings.Contains(plan, "root_id=? AND box_id=? AND rowid>?") || strings.Contains(plan, "TEMP B-TREE") {
-				t.Fatalf("batch scans beyond the document or sorts all rows: %s", plan)
+			if !strings.Contains(plan.String(), "root_id=? AND box_id=? AND rowid>?") || strings.Contains(plan.String(), "TEMP B-TREE") {
+				t.Fatalf("batch scans beyond the document or sorts all rows: %s", plan.String())
 			}
 		})
 	}

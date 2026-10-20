@@ -23,11 +23,21 @@
 .workspace-storage {
   &__header {
     flex-wrap: wrap;
+    // 未查看时头部下方没有内容，间距由各内容元素自行提供
+    padding-bottom: 0;
   }
 
   &__time {
     flex: 1 0 100%;
     text-align: right;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__status:empty {
+    margin-top: 0;
   }
 
   &__content {
@@ -35,6 +45,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
+    margin-top: 16px;
     line-height: 1.5;
   }
 
@@ -58,6 +69,7 @@
 
   &__placeholder {
     position: relative;
+    margin-top: 16px;
   }
 
   &__total {
@@ -171,6 +183,12 @@
   > .fn__flex-1 {
     min-width: 0;
   }
+
+  > label {
+    // 与输入框顶部对齐，避免提示文本出现后整行变高导致文案随之居中下移
+    align-self: flex-start;
+    padding-top: 4px;
+  }
 }
 
 .config-sync-form {
@@ -183,10 +201,18 @@
 }
 
 @media screen and (max-width: 750px) {
-  .config-sync-field > .fn__flex-1 {
-    flex: none;
-    width: 100%;
-    margin-top: 8px;
+  .config-sync-field {
+    > label {
+      // 窄屏下输入框整行落到文案下方，恢复默认的垂直居中
+      align-self: auto;
+      padding-top: 0;
+    }
+
+    > .fn__flex-1 {
+      flex: none;
+      width: 100%;
+      margin-top: 8px;
+    }
   }
 }
 
@@ -214,7 +240,7 @@
     left: 0;
     right: 0;
     z-index: 1;
-    height: 24px;
+    height: var(--b3-ui-config-padding, 24px);
     touch-action: none;
 
     &::before {
@@ -234,8 +260,8 @@
   }
 
   &__tab-wrap > .config__tab-container:not([data-name="bazaar"]):not([data-name="assets"]) {
-    padding: 24px;
-    scroll-padding-block: 24px;
+    padding: var(--b3-ui-config-padding, 24px);
+    scroll-padding-block: var(--b3-ui-config-padding, 24px);
     height: 100%;
     flex-shrink: 0;
 
@@ -268,7 +294,7 @@
 
     .b3-label:not(.b3-label--inner) {
       margin: 0 16px;
-      padding: 16px 0;
+      padding: var(--b3-ui-config-row-padding, 16px 0);
     }
 
     label.b3-label:not(.b3-label--inner) {
@@ -302,12 +328,12 @@
   }
 
   &-group {
-    margin: 24px;
+    margin: var(--b3-ui-config-padding, 24px);
   }
 
   &-title {
     display: block;
-    margin: 24px 16px 16px 16px;
+    margin: var(--b3-ui-config-title-margin, 24px 16px 16px 16px);
     font-size: 15px;
     font-weight: bold;
 
@@ -420,7 +446,7 @@
       flex-direction: column;
       min-height: 0;
       overflow: hidden;
-      padding: 24px 12px;
+      padding: var(--b3-ui-config-padding, 24px) 12px;
       box-sizing: border-box;
       border-right: 1px solid var(--b3-border-color);
 
@@ -444,10 +470,10 @@
       .config__tab-title {
         display: flex;
         align-items: center;
-        height: 61px;
+        height: calc(37px + var(--b3-ui-config-padding, 24px));
         box-sizing: border-box;
-        margin: -24px -20px 0;
-        padding: 24px 24px 16px;
+        margin: calc(0px - var(--b3-ui-config-padding, 24px)) -20px 0;
+        padding: var(--b3-ui-config-padding, 24px) 24px 16px;
         touch-action: none;
 
         .b3-list-item__graphic {
@@ -460,8 +486,8 @@
       }
 
       .b3-list-item {
-        line-height: 32px;
-        margin: 8px;
+        line-height: var(--b3-ui-config-nav-height, 32px);
+        margin: var(--b3-ui-config-nav-margin, 8px);
 
         &__graphic {
           padding: 0 6px 0 4px;
@@ -1134,6 +1160,11 @@
           flex-shrink: 0;
           font-size: 12px;
           line-height: 20px;
+        }
+
+        &-type {
+          color: var(--b3-theme-on-surface);
+          margin-left: 4px;
         }
 
         &-list {

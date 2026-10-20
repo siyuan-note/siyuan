@@ -86,6 +86,22 @@ func TestAPIContractSettingConfigCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetPublish, func() *conf.Publish { return &conf.Publish{} }, append(common, `{"auth":null,"port":65535.0}`, `{"port":65536}`, `{"auth":{"accounts":[null]}}`))
 }
 
+func TestAPIContractSettingPreferencesCompatibility(t *testing.T) {
+	compareSettingConfig(t, apicontract.SetAI, func() *conf.AI { return &conf.AI{} }, []string{
+		`{}`, `{"agent":{"streamingMarkdown":true}}`, `{"agent":{"streamingMarkdown":false}}`,
+		`{"agent":{"streamingMarkdown":null}}`, `{"agent":{"streamingMarkdown":"true"}}`,
+	})
+	compareSettingConfig(t, apicontract.SetAppearance, conf.NewAppearance, []string{
+		`{}`, `{"compactMode":true,"menuMouseScroll":false,"outlineKeepCurrentExpand":true}`,
+		`{"pdfTheme":{"light":"dark","dark":"light","annoColor":"red"},"mobileBars":{"autoHide":false}}`,
+		`{"pdfTheme":null,"mobileBars":null}`, `{"mobileBars":{"sidebarSwipe":null,"sidebarButtons":false}}`,
+		`{"compactMode":"true"}`, `{"pdfTheme":{"light":false}}`, `{"mobileBars":{"autoHide":1}}`,
+	})
+	compareSettingConfig(t, apicontract.SetFiletree, conf.NewFileTree, []string{
+		`{}`, `{"recentDocsSort":"updated"}`, `{"recentDocsSort":null}`, `{"recentDocsSort":true}`,
+	})
+}
+
 func TestAPIContractSettingMindmapCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetSearch, func() *conf.Search { return &conf.Search{} }, []string{
 		`{}`, `{"mindmap":true,"mindmapItem":false}`, `{"mindmap":false,"mindmapItem":true}`,
@@ -245,9 +261,9 @@ func fillSettingPayload(value reflect.Value) {
 		value.Set(reflect.New(value.Type().Elem()))
 		fillSettingPayload(value.Elem())
 	case reflect.Struct:
-		for i := 0; i < value.NumField(); i++ {
-			if value.Field(i).CanSet() {
-				fillSettingPayload(value.Field(i))
+		for _, field := range value.Fields() {
+			if field.CanSet() {
+				fillSettingPayload(field)
 			}
 		}
 		if value.Type() == reflect.TypeFor[conf.EntryVisibilityProfile]() {

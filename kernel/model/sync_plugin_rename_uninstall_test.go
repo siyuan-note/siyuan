@@ -65,7 +65,7 @@ func lastReloadPluginsLog(t *testing.T) string {
 		t.Fatal(err)
 	}
 	var line string
-	for _, l := range strings.Split(string(data), "\n") {
+	for l := range strings.SplitSeq(string(data), "\n") {
 		if strings.Contains(l, "reload plugins, uninstalls=") {
 			line = strings.TrimSpace(l)
 		}

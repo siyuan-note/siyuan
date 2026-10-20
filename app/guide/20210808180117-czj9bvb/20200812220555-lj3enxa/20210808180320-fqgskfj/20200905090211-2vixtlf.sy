@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261017174053"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-fkv1xsc",
-				"updated": "20260921215916"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -53,7 +53,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104090624-c5bu25o",
-				"updated": "20260923221935"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1014,6 +1014,75 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "思维导图项块"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "listitem-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/listitem-block-20260425175517-4uac18s.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "列表项"
 								},
 								{
@@ -1438,7 +1507,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20261012014930"
+				"updated": "20261017174053"
 			},
 			"Children": [
 				{
@@ -1713,7 +1782,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-erf17it",
-				"updated": "20260425180351"
+				"updated": "20261017174053"
 			},
 			"Children": [
 				{
@@ -1906,6 +1975,48 @@
 				{
 					"Type": "NodeText",
 					"Data": "如果表格包含合并的单元格或标题，则会以 HTML 形式复制或导出为 Markdown。"
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-4dbby6c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-4dbby6c",
+				"updated": "20261017170001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端点击单元格可编辑文字。长按尚未进入编辑的单元格可进入区域选择，也可使用键盘工具栏的块菜单。拖动选区的两个角点手柄可扩大或缩小范围，拖到视口边缘可自动滚动表格。滑动单元格内容仍用于滚动；编辑文字时，长按仍用于选字。"
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-bcg68ni",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-bcg68ni",
+				"updated": "20261017174053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击单元格后，其所在行和列的边框上会显示蓝色点阵手柄。点击列上方或行左侧的手柄可选中整列或整行。在顶部工具栏开启「多选」后，可点选增减不连续的单元格、行或列。通过「更多」可合并单元格、设置样式和对齐，或批量操作所选行列；点击「关闭」退出选择。"
+				}
+			]
+		},
+		{
+			"ID": "20261017142635-oe1mo6v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017142635-oe1mo6v",
+				"updated": "20261017171205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击任意一行的列分隔线使其高亮，再横向拖动高亮线调整列宽；纵向滑动仍用于滚动表格，点击线外退出调整。选中列后可通过「更多」按内容自适应或均分列宽。点击表格边缘的加号可添加行列，拖动边缘控件可批量增加行列或移除末尾的空白行列。收缩表格时会保留非空内容和合并单元格。"
 				}
 			]
 		},
@@ -2612,7 +2723,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-j34ty5i",
-				"updated": "20261012014930"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -2632,6 +2743,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "思维导图块是独立的块类型。可以将无序列表、有序列表或任务列表转换为思维导图块，也可以转换回列表。转换会保留列表项内容、编号和任务状态。以列表形式保存的旧思维导图会在打开文档进行编辑时升级。"
+				}
+			]
+		},
+		{
+			"ID": "20261016111305-t5hg0oj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016111305-t5hg0oj",
+				"updated": "20261016111305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思维导图块只能包含思维导图项块。每个思维导图项都有独立的块 ID，可包含普通内容块及嵌套思维导图，但不能直接包含列表块、列表项块或其他思维导图项块。"
 				}
 			]
 		},
@@ -3294,7 +3419,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200925095848-aon4lem",
-				"updated": "20260906003122"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -3326,7 +3451,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104090624-vsksysm",
-				"updated": "20260906003122"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -3576,6 +3701,62 @@
 								{
 									"Type": "NodeText",
 									"Data": "页签项块：包含普通内容块及嵌套页签块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016111305-tdchsxm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016111305-tdchsxm",
+						"updated": "20261016111305"
+					},
+					"Children": [
+						{
+							"ID": "20261016111305-a9a64vw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016111305-a9a64vw",
+								"updated": "20261016111305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思维导图块：只能包含思维导图项块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016111305-410l2sw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016111305-410l2sw",
+						"updated": "20261016111305"
+					},
+					"Children": [
+						{
+							"ID": "20261016111305-9vyve5m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016111305-9vyve5m",
+								"updated": "20261016111305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思维导图项块：包含普通内容块及嵌套思维导图，不能直接包含列表块、列表项块或思维导图项块"
 								}
 							]
 						}

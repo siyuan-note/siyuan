@@ -1968,6 +1968,7 @@ The field types (`keyType`) are:
     * `groupPaging`: Optional paging configuration for grouped (kanban) views
     * `targetItemID`: Optional database item ID to locate. When specified, the response includes target-location metadata
     * `targetGroupID`: Optional group hint used with `targetItemID`
+    * `temporarySort`: Optional single-field sort, e.g. `{"column":"field-id","order":"DESC"}`. Omitted or `null` uses the saved rules. Overrides sorting before pagination for this request only; does not create or save the database or change the carrier view. `order` must be `ASC` or `DESC`; missing or unsupported fields fall back to saved rules. Existing `valueSource` and `dateEndpoint` options are supported
     * `createIfNotExist`: When `true` (default), create a database with a default view if the database does not exist
     * `persistView`: Deprecated compatibility parameter. It is accepted but ignored because the database definition no longer stores a top-level current view
 * Return value (real response, table layout, one row shown):
@@ -2118,6 +2119,7 @@ The field types (`keyType`) are:
     * `blockID`: The database block that embeds the database. It resolves the active view, publish access, and the block-level context filter. Omit only for a detached database that does not require block context
     * `viewID`: Optional explicit view ID. When omitted, the view is resolved from `blockID`, then falls back to the first available view
     * `query`: Optional full-text filter for the primary-key values
+    * `groupID`: Optional group ID. Omitted, null, or empty keeps the whole-view behavior. Otherwise only images from that group are returned in group item order followed by the view's sorting rules, without pagination. An unknown group returns an error
 * Return value: an array of image asset paths from visible asset fields after applying the database block's context filter, the view's filters, and sorting
 
   ```json
@@ -2204,8 +2206,7 @@ The field types (`keyType`) are:
                   "pin": false,
                   "width": ""
                 }
-              ],
-              "rowIds": null
+              ]
             },
             "itemIds": ["20240118203818-ct041hj", "20240118203855-sqzbja0", "20240118203831-fkfvvtx", "20240118203842-kc31ovy", "20240531235026-uiap07y"],
             "groupCreated": 0,
@@ -2221,6 +2222,8 @@ The field types (`keyType`) are:
   ```
 
     * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`list`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
+
+    * `data.av.automations` optionally contains database-wide rules (`spec: 1` through `4`). A `block` trigger uses `blockSource` to select notebooks/documents, block types, tags, and custom attributes; its `collect` action binds matching source blocks to this database. Main types include every subtype; format 3 supports `h:h1` through `h:h6`, `l:u/o/t`, `i:u/o/t`, and `callout:TYPE` (case-sensitive, including custom types). Empty types impose no restriction, and multiple types use OR. Automatically created primary values may include `block.collectionRuleID`, which is maintained by the kernel. Automatic collection only adds entries. Source changes and changes to rule conditions, scope, target, or activation preserve existing rows and fields; matching again keeps the same row. Explicit cleanup checks all enabled collection rules for manual and automatic bound entries alike, preserves matches and indeterminate entries, and rechecks before removing unmatched entries; undo restores the original row and all fields. `blockSource.tagMatch` and `attributeMatch` default to `and`; format 3 also supports `or` independently within each group. Groups remain ANDed, and empty groups add no restriction. Each rule's optional `notifyOnSuccess` defaults to `true` (including `null`); successful changes are summarized once after the transaction commits. Disabled notifications do not suppress errors. No-op actions, explicit collection, undo, redo, and rolled-back transactions do not generate success messages. Format 4 adds optional `blockSource.tagTarget`: omitted/empty uses default selection, preferring an eligible list item over its first content block, `block` collects the tagged block itself, and `container` collects the nearest container meeting type and attribute conditions, deduplicated by block ID. Documents require an explicit `d` type. AND tags must occur in one source block; without tag conditions this option has no effect. Preview and actual collection share the same targets; changing this option preserves existing rows and fields.
 
 ### Get primary key values
 

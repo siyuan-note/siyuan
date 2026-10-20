@@ -6,7 +6,7 @@
 		"id": "20210613191509-cbkxcbz",
 		"title": "Content Block Attribute",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -274,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-65gd8yo",
-				"updated": "20260803171606"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -288,7 +288,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251201102224-5uvilvm",
-				"updated": "20260803171606"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -311,7 +311,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, attribute names can only use lowercase English letters and Arabic numerals and must begin with a letter (e.g., "
+					"Data": "​, attribute names must begin with a lowercase English letter and may contain lowercase English letters, digits, and hyphens (-). Uppercase input is converted to lowercase (e.g., "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -326,6 +326,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "day1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "project-id"
 				},
 				{
 					"Type": "NodeText",

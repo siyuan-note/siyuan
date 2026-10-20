@@ -6,6 +6,7 @@ import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, 
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
+import {openHeadingPageBreakDialog} from "../protyle/export/headingPageBreaksUI";
 import {
     isInAndroid,
     isInHarmony,
@@ -28,7 +29,7 @@ import {focusByRange} from "../protyle/util/selectionOffsets";
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif
 import {rename, replaceFileName} from "../editor/rename";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
 import type {App} from "../index";
@@ -914,11 +915,13 @@ ${databaseOptions}`,
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
                 ignore: !isInMobileApp() || !getHostCapabilities().importExport,
-                click: () => {
+                click: () => openHeadingPageBreakDialog(() => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
                         id,
+                        pdf: true,
+                        excludeTitleImage: localData.titleImage === false,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
                         mergeDocHeadingMode: localData.mergeDocHeadingMode,
@@ -938,7 +941,7 @@ ${databaseOptions}`,
                             hideMessage(msgId);
                         }, 3000);
                     });
-                }
+                })
             }, {
                 id: "exportHTML_SiYuan",
                 label: "HTML (SiYuan)",

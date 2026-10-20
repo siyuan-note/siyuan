@@ -15,7 +15,7 @@ const browserCases = (sources: string[], css: string) => {
     const bridge = {} as {initTouchDragBridge: () => void};
     new Function("exports", "require", sources[0])(bridge, (id: string) => id === "./touchDragBridgeCore" ? core : {
         Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 500, TIMEOUT_MOUSE_DRAG_DELAY: 150},
-        isInAndroid: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
+        isInAndroid: () => false, isInHarmony: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
     });
     const resize = {} as {moveResize: (element: HTMLElement) => void};
     new Function("exports", "require", sources[2])(resize, () => ({

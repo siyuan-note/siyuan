@@ -182,8 +182,8 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 	return routes, bindings, err
 }
 
-// CheckRoutes 要求每个实际路由都有契约或存量记录，已迁移路由必须绑定对应的类型适配器。
-func CheckRoutes(routes []Route, bindings map[string]string, legacy []Route) error {
+// CheckRoutes 要求每个实际路由都有契约并绑定对应的类型适配器。
+func CheckRoutes(routes []Route, bindings map[string]string) error {
 	typed := map[string]Definition{}
 	for _, definition := range Definitions() {
 		if !definition.Authorization.Valid() {
@@ -192,13 +192,6 @@ func CheckRoutes(routes []Route, bindings map[string]string, legacy []Route) err
 		for _, method := range definition.Methods {
 			typed[method+" "+definition.Path] = definition
 		}
-	}
-	legacySet := map[string]Route{}
-	for _, route := range legacy {
-		if _, exists := legacySet[route.Key()]; exists {
-			return fmt.Errorf("duplicate legacy route: %s", route.Key())
-		}
-		legacySet[route.Key()] = route
 	}
 	seen := map[string]bool{}
 	for _, route := range routes {
@@ -214,25 +207,13 @@ func CheckRoutes(routes []Route, bindings map[string]string, legacy []Route) err
 			if route.Handler != definition.Name || bindings[route.Handler] != definition.Name {
 				return fmt.Errorf("typed handler missing or mismatched: %s", route.Key())
 			}
-			if _, exists := legacySet[route.Key()]; exists {
-				return fmt.Errorf("migrated route remains in legacy list: %s", route.Key())
-			}
 		} else {
-			previous, exists := legacySet[route.Key()]
-			if !exists || previous.Handler != route.Handler {
-				return fmt.Errorf("route needs a typed contract: %s (%s)", route.Key(), route.Handler)
-			}
-			seen[route.Key()] = true
+			return fmt.Errorf("route needs a typed contract: %s (%s)", route.Key(), route.Handler)
 		}
 	}
 	for key := range typed {
 		if !seen[key] {
 			return fmt.Errorf("contract has no route: %s", key)
-		}
-	}
-	for key := range legacySet {
-		if !seen[key] {
-			return fmt.Errorf("removed route remains in legacy list: %s", key)
 		}
 	}
 	return nil

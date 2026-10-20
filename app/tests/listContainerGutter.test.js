@@ -9,10 +9,33 @@ const sources = (full = false) => {
         "../src/protyle/gutter/index.ts"), "utf8"), ts.ScriptTarget.Latest, true);
     const gutter = source.statements.find(node => ts.isClassDeclaration(node) && node.name.text === "Gutter");
     const render = gutter.members.find(node => node.name?.getText(source) === "render");
+    const getNodeElement = gutter.members.find(node => node.name?.getText(source) === "getNodeElement");
+    const renderMenu = gutter.members.find(node => node.name?.getText(source) === "renderMenu");
+    let multiSelectAction;
+    const collectMultiSelect = node => {
+        if (ts.isObjectLiteralExpression(node) && node.properties.some(property =>
+            property.name?.getText(source) === "id" && property.initializer?.getText(source) === '"multiSelect"')) {
+            multiSelectAction = node.properties.find(property => property.name?.getText(source) === "click").initializer;
+        }
+        ts.forEachChild(node, collectMultiSelect);
+    };
+    collectMultiSelect(renderMenu);
+    assert.ok(multiSelectAction);
+    const menuType = renderMenu.body.statements.find(node => ts.isVariableStatement(node) &&
+        node.declarationList.declarations.some(declaration => declaration.name.getText(source) === "type"));
+    const interactions = [];
+    const collectInteractions = node => {
+        if (ts.isCallExpression(node) && node.expression.getText(source) === "this.element.addEventListener" &&
+            ['"dragstart"', '"click"'].includes(node.arguments[0].getText(source))) {
+            interactions.push(node.getText(source));
+        }
+        ts.forEachChild(node, collectInteractions);
+    };
+    collectInteractions(gutter.members.find(ts.isConstructorDeclaration));
     const body = full ? render.body.getText(source) :
         render.body.getText(source).split("const shouldRenderInsert")[0] + "return html; }";
     const helpers = ["protyle/gutter/container.ts", "protyle/wysiwyg/getBlock.ts", "protyle/gutter/layout.ts",
-        "protyle/util/hasClosest.ts", "protyle/render/autoDirection.ts"].map(file => {
+        "protyle/util/hasClosest.ts", "protyle/render/autoDirection.ts", "mobile/util/blockSelection.ts"].map(file => {
         const source = ts.createSourceFile(file, readFileSync(path.join(__dirname, "../src", file), "utf8"),
             ts.ScriptTarget.Latest, true);
         return source.statements.filter(node => ts.isVariableStatement(node) &&
@@ -20,7 +43,8 @@ const sources = (full = false) => {
                 "getSbChildBlockCount", "getParentBlock", "getGutterMarginHeight", "getFixedGutterPosition",
                 "getBacklinkGutterContentTop", "getListGutterAnchorLeft", "getContainerGutterSpace", "isContainerGutterBridge",
                 "hasClosestBlock", "isBlockElement", "hasClosestByClassName", "hasTopClosestByClassName", "hasClosestByTag",
-                "hasClosestByAttribute", "getAutoListDirection", "listSelector", "directionAttribute"].includes(declaration.name.getText(source))))
+                "hasClosestByAttribute", "getAutoListDirection", "listSelector", "directionAttribute",
+                "getMobileBlockSelectionElement"].includes(declaration.name.getText(source))))
             .map(node => node.getText(source)).join("\n");
     }).join("\n").replace(/export const /g, "const ");
     const hoverSource = ts.createSourceFile("initUI.ts", readFileSync(path.join(__dirname,
@@ -38,7 +62,19 @@ const sources = (full = false) => {
     const events = readFileSync(path.join(__dirname, "../src/boot/globalEvent/mousemove.ts"), "utf8")
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, "") +
         `\nfunction bindHover(protyle) { let overAttr = false; ${hoverBinding}; }`;
-    return ts.transpileModule(helpers + `\nfunction render(protyle, element, target) ${body}\n` + (full ? events : ""), {
+    const interactionSource = `function getNodeElement(protyle, element) ${getNodeElement.body.getText(source)}
+function mobileMultiSelect(protyle, nodeElement) {
+    ${menuType.getText(source)}
+    return (${multiSelectAction.getText(source)})();
+}
+function bindInteractions(protyle) {
+    let isGutterDragging = false;
+    let dragCleanupController;
+    const restoreGutter = () => {};
+    ${interactions.join("\n")};
+}`;
+    return ts.transpileModule(helpers + `\nfunction render(protyle, element, target) ${body}\n` +
+        (full ? events + interactionSource : ""), {
         compilerOptions: {target: ts.ScriptTarget.ES2021},
     }).outputText;
 };
@@ -46,23 +82,36 @@ const sources = (full = false) => {
 const cases = (source, fullSource, css) => {
     const check = require("node:assert/strict");
     const noop = () => false;
+    let multiSelect = false;
+    const clicked = [];
+    const folded = [];
     const dependencies = {
-        Constants: {CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"}, hideElements: noop, getCrossBlockTextRange: noop,
-        getGutterSelection: () => ({isMultiSelect: false, selectElements: []}),
+        Constants: {CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", ZWSP: "|", SIYUAN_DROP_BLOCK: "block",
+            SIYUAN_DROP_GUTTER: "gutter:"}, hideElements: noop, getCrossBlockTextRange: noop,
+        getGutterSelection: selected => ({isMultiSelect: multiSelect, selectElements: selected}),
+        getGutterSelectionTarget: (selected, element) => selected.find(item => item === element || item.contains(element)),
         getHorizontalSuperBlockChild: noop, getEmbedGutterOperationContext: noop, isInEmbedBlock: noop,
         isInAVBlock: noop, hasViewFoldContext: noop, getGutterFixedContainerRect: noop,
         isMobile: () => mobile, isWindow: noop, isTabGutterBridge: noop, isMac: noop,
         getAllModels: () => ({editor: [{editor: {protyle}}], backlink: []}), getAllEditor: () => [{protyle}],
         isGutterInsertStateMatched: (count, insert) => count === (insert ? 4 : 0),
         getBlockTypeName: type => type, getIconByType: () => "iconTest",
-        genGutterBlockButtonHTML: data => `<button data-type="${data.type}" data-node-id="${data.nodeID}"><svg><use href="#iconTest"></use></svg></button>`,
+        genGutterBlockButtonHTML: data => `<button data-type="${data.type}" data-node-id="${data.nodeID}"><svg><use href="#iconTest"></use></svg><span ${data.draggable ? 'draggable="true"' : ""}></span></button>`,
+        hideTooltip: noop, clearSelect: noop, isOnlyMeta: noop, isEncryptedBox: noop,
+        prepareCrossBlockTextSelection: noop, getContenteditableElement: element => element.querySelector('[contenteditable="true"]'),
+        genEmptyElement: () => {const element = document.createElement("div"); element.innerHTML = '<div contenteditable="true"></div>'; return element;},
+        getLangByType: type => type,
+        setDragTipGhost: noop, stringifyBlockDragData: JSON.stringify, restoreGutterRange: noop,
+        setFold: (_owner, element) => {folded.push(element.dataset.nodeId); return {fold: 1};},
+        markGutterForFoldRestore: () => true, isGutterTouchDragging: noop,
+        toggleMenu: options => options.build(null, {show: callback => callback()}),
     };
     const render = new Function(...Object.keys(dependencies), source + "\nreturn render;")(...Object.values(dependencies));
-    const {render: renderFull, windowMouseMove, bindHover} = new Function(...Object.keys(dependencies),
-        fullSource + "\nreturn {render, windowMouseMove, bindHover};")(...Object.values(dependencies));
+    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, bindInteractions, mobileMultiSelect} = new Function(...Object.keys(dependencies),
+        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, bindInteractions, mobileMultiSelect};")(...Object.values(dependencies));
     let mobile = false;
     window.siyuan = {languages: {fold: "Fold", rowTip: "Row", addBelowAbove: "Add"}, layout: {}, blockPanels: [],
-        config: {editor: {fontSize: 16, rtl: false}}};
+        config: {editor: {fontSize: 16, rtl: false}, system: {workspaceDir: "test"}}};
     const style = document.createElement("style");
     style.textContent = `body {margin:0; width:1000px; height:800px} .protyle-wysiwyg {margin:80px 180px;width:500px}
         .li {position:relative;padding-left:34px} .protyle-action {position:absolute;left:0;top:0;width:24px;height:34px}
@@ -233,6 +282,155 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
         }
     }
     check.deepEqual(movements, [], "moving to the marker must preserve gutters");
+
+    window.siyuan.config.editor.blockGutterMode = false;
+    window.siyuan.menus = {menu: {element: document.createElement("div"), remove() {}, fullscreen() {}, popup() {}}};
+    Object.assign(protyle, {toolbar: {range: {}}, block: {rootID: "document"}, notebookId: "notebook"});
+    gutter.getNodeElement = (...args) => getNodeElement.apply(gutter, args);
+    gutter.isMatchNode = () => true;
+    gutter.renderMenu = (_owner, button) => clicked.push(gutter.getNodeElement(protyle, button).dataset.nodeId);
+    bindInteractions.call(gutter, protyle);
+    const assertTargets = ids => {
+        check.deepEqual(state().ids, ids);
+        for (const id of ids) {
+            const button = gutter.element.querySelector(`button[data-node-id="${id}"]`);
+            check.equal(gutter.getNodeElement(protyle, button), root.querySelector(`[data-node-id="${id}"]`));
+            button.click();
+            check.equal(clicked.at(-1), id, "each block icon opens its own menu");
+            const transfer = new DataTransfer();
+            button.querySelector("span").dispatchEvent(new DragEvent("dragstart", {bubbles: true, dataTransfer: transfer}));
+            check.deepEqual(errors, []);
+            check.ok(transfer.types.some(type => type.startsWith("gutter:") && type.includes(`|${id}|`)),
+                `${id}: dragging uses the icon's exact block ID`);
+        }
+        gutter.element.querySelectorAll('[data-type="fold"]').forEach(button => {
+            const id = button.previousElementSibling.dataset.nodeId;
+            check.ok(id, "fold controls stay adjacent to their block");
+            button.click();
+            check.equal(folded.at(-1), id);
+        });
+    };
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const subtype of ["u", "o", "t"]) {
+            root.innerHTML = `<div data-node-id="list" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="item" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p("paragraph")}${attr}</div>${attr}</div>`;
+            const paragraph = root.querySelector('[data-node-id="paragraph"]');
+            gutter.render(protyle, paragraph);
+            assertTargets(["list", "item"]);
+            check.equal(gutter.element.classList.contains("protyle-gutters--full"), false);
+            const before = state();
+            check.deepEqual(hover(root.querySelector(".protyle-action")), before,
+                "compact single-item indicators stay stable when moving to the list marker");
+            if (mobile) {
+                let selected;
+                protyle.toolbar.showMultiSelectMode = (_owner, element) => { selected = element; };
+                const item = root.querySelector('[data-node-id="item"]');
+                mobileMultiSelect(protyle, item);
+                check.equal(selected, item, "the compact list item menu selects the item instead of the whole list");
+            }
+            const list = root.querySelector('[data-node-id="list"]');
+            list.lastElementChild.insertAdjacentHTML("beforebegin", `<div data-node-id="second-item" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p("second-paragraph")}${attr}</div>`);
+            gutter.render(protyle, paragraph);
+            assertTargets(["list", "item"]);
+            gutter.render(protyle, root.querySelector('[data-node-id="second-paragraph"]'));
+            assertTargets(["second-item"]);
+            root.querySelector('[data-node-id="second-item"]').remove();
+            gutter.render(protyle, paragraph);
+            assertTargets(["list", "item"]);
+            paragraph.insertAdjacentHTML("afterend", p("extra-paragraph"));
+            gutter.render(protyle, paragraph);
+            assertTargets(["list", "item"]);
+            check.equal(gutter.element.querySelector('[data-type="fold"]').previousElementSibling.dataset.nodeId, "item");
+        }
+        const list = `<div data-node-id="list" data-type="NodeList" class="list"><div data-node-id="item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p("paragraph")}${attr}</div>${attr}</div>`;
+        for (const [html, ids] of [
+            [`<div data-node-id="quote" data-type="NodeBlockquote" class="bq">${list}${attr}</div>`, ["quote", "list", "item"]],
+            [`<div data-node-id="callout" data-type="NodeCallout" class="callout"><div class="callout-info">Title</div><div class="callout-content">${list}</div>${attr}</div>`, ["list", "item"]],
+            [`<div data-node-id="super" data-type="NodeSuperBlock" class="sb" data-sb-layout="row">${list}${attr}</div>`, ["super", "list", "item"]],
+            [`<div data-node-id="tabs" data-type="NodeTabs" class="tabs"><div class="tabs-header">Tab</div><div data-node-id="tab" data-type="NodeTabItem" class="tab-item"><div class="tab-item-content">${list}</div>${attr}</div>${attr}</div>`, ["tab", "list", "item"]],
+        ]) {
+            root.innerHTML = html;
+            gutter.render(protyle, root.querySelector('[data-node-id="paragraph"]'));
+            assertTargets(ids);
+        }
+    }
+
+    window.siyuan.config.editor.blockGutterMode = true;
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const [type, cls, content, layout = "row"] of fixtures) {
+            root.innerHTML = `<div data-node-id="list" data-type="NodeList" class="list"><div data-node-id="item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div><div data-node-id="container" data-type="${type}" class="${cls}" data-sb-layout="${layout}">${content}${attr}</div>${p("after")}${attr}</div>${attr}</div>`;
+            const container = root.querySelector('[data-node-id="container"]');
+            if (type === "NodeList" && content.includes("mindmap-view")) {
+                container.setAttribute("custom-sy-list-mindmap", "1");
+            }
+            gutter.render(protyle, container, container);
+            assertTargets(["list", "item", "container"]);
+            gutter.render(protyle, root.querySelector('[data-node-id="after"]'));
+            assertTargets(["list", "item", "after"]);
+        }
+        for (const subtype of ["u", "o", "t"]) {
+            root.innerHTML = `<div data-node-id="list" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="item" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p("paragraph")}${attr}</div>${attr}</div>`;
+            gutter.render(protyle, root.querySelector('[data-node-id="paragraph"]'));
+            assertTargets(["list", "item", "paragraph"]);
+            const before = state();
+            check.deepEqual(hover(root.querySelector(".protyle-action")), before,
+                "moving from a paragraph to the list marker retains the complete chain");
+        }
+    }
+
+    root.innerHTML = `<div data-node-id="outer-list" data-type="NodeList" class="list"><div data-node-id="outer-item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p("first")}<div data-node-id="quote" data-type="NodeBlockquote" class="bq">${p("qfirst")}<div data-node-id="tabs" data-type="NodeTabs" class="tabs"><div class="tabs-header">Tabs</div><div data-node-id="tab" data-type="NodeTabItem" class="tab-item"><div class="tab-item-content">${p("leaf")}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>`;
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+    assertTargets(["outer-list", "outer-item", "quote", "tabs", "tab", "leaf"]);
+    const nestedState = state();
+    const leafRect = root.querySelector('[data-node-id="leaf"]').getBoundingClientRect();
+    check.deepEqual(hover(root.querySelector('[data-node-id="quote"]'),
+        (gutter.element.getBoundingClientRect().right + leafRect.left) / 2, leafRect.top + 5), nestedState,
+        "crossing ancestor padding preserves the current complete chain");
+    protyle.disabled = true;
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+    check.equal(gutter.element.querySelectorAll('[draggable="true"]').length, 0, "read-only icons remain non-draggable");
+    protyle.disabled = false;
+
+    pane.style.cssText = "width:320px;height:200px";
+    root.style.cssText = "padding:20px 24px;width:250px";
+    document.documentElement.style.setProperty("--b3-font-size-editor", "48px");
+    const deepIDs = Array.from({length: 16}, (_, index) => `deep-${index}`);
+    root.innerHTML = deepIDs.reduceRight((html, id) =>
+        `<div data-node-id="${id}" data-type="NodeBlockquote" class="bq">${html}${attr}</div>`, p("deep-leaf"));
+    gutter.render(protyle, root.querySelector('[data-node-id="deep-leaf"]'));
+    check.deepEqual(state().ids, [...deepIDs, "deep-leaf"]);
+    const bounds = gutter.element.getBoundingClientRect();
+    const viewport = pane.getBoundingClientRect();
+    check.ok(bounds.left >= viewport.left && bounds.right <= viewport.right && bounds.top >= viewport.top && bounds.bottom <= viewport.bottom,
+        "full indicators stay within a narrow pane with large editor fonts");
+    check.equal(gutter.element.dataset.scrollable, "true", "deep chains are scrollable");
+    gutter.element.scrollTop = gutter.element.scrollHeight;
+    const previousButton = gutter.element.querySelector("button[data-node-id]");
+    const previousScrollTop = gutter.element.scrollTop;
+    gutter.render(protyle, root.querySelector('[data-node-id="deep-leaf"]'));
+    check.equal(gutter.element.querySelector("button[data-node-id]"), previousButton, "repeated rendering keeps full-mode buttons stable");
+    check.equal(gutter.element.scrollTop, previousScrollTop, "repeated rendering preserves the visible level");
+    const lastButton = gutter.element.querySelector('button[data-node-id="deep-leaf"]');
+    const lastRect = lastButton.getBoundingClientRect();
+    check.equal(document.elementFromPoint(lastRect.left + lastRect.width / 2, lastRect.top + lastRect.height / 2)?.closest("button"), lastButton,
+        "the innermost block remains clickable after scrolling");
+
+    multiSelect = true;
+    root.innerHTML = p("selected1") + p("selected2");
+    root.querySelectorAll("[data-node-id]").forEach(element => element.classList.add("protyle-wysiwyg--select"));
+    gutter.render(protyle, root.firstElementChild);
+    check.deepEqual(state().ids, ["selected1"], "full mode retains the existing multi-selection target");
+    check.equal(gutter.element.querySelectorAll(".protyle-gutters__line, .protyle-gutters__plus").length, 0);
+    check.equal(gutter.element.classList.contains("protyle-gutters--full"), false);
+    multiSelect = false;
+    window.siyuan.config.editor.blockGutterMode = false;
+    root.innerHTML = `<div data-node-id="list" data-type="NodeList" class="list"><div data-node-id="item" data-type="NodeListItem" class="li"><div class="protyle-action"></div>${p("paragraph")}${attr}</div>${attr}</div>`;
+    gutter.render(protyle, root.querySelector('[data-node-id="paragraph"]'));
+    check.deepEqual(state().ids.sort(), ["item", "list"], "narrow compact mode retains both list and item indicators");
+    check.equal(gutter.element.style.maxHeight, "");
+    check.equal(gutter.element.style.overflowY, "");
+    check.equal(gutter.element.dataset.scrollable, undefined);
     return "List container gutters passed";
 };
 
@@ -255,7 +453,7 @@ if (process.versions.electron && process.type === "browser") {
         app.exit(0);
     })().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").test("first list containers retain both container and list item gutters", {
+    require("node:test").test("compact and full block indicators keep exact targets and remain reachable", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 30000,
     }, async () => {

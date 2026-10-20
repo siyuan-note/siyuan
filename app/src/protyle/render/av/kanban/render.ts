@@ -3,7 +3,7 @@ import {isAVDateType, isAVSelectType} from "../capabilities";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {getPublishAVView} from "../publishState";
-import {getReadonlyAVView} from "../readonlyState";
+import {getReadonlyAVView, getReadonlyAVSortRequest, reconcileReadonlyAVSort} from "../readonlyState";
 import {hasClosestByAttribute} from "../../../util/hasClosest";
 import {getPageSize} from "../groups";
 import {fetchSyncPost} from "../../../../util/fetch";
@@ -99,6 +99,7 @@ export const renderKanban = async (options: {
             createIfNotExist: !window.siyuan.isPublish && !standalone,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
+            temporarySort: getReadonlyAVSortRequest(options.blockElement, options.protyle, common.viewID),
         }, undefined, false));
         if (!isCurrentAVRender(options.blockElement, renderToken)) {
             return;
@@ -117,6 +118,7 @@ export const renderKanban = async (options: {
     if (persistAVLocateView(options.blockElement, options.protyle, data)) {
         return;
     }
+    reconcileReadonlyAVSort(options.blockElement, data);
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
     if (isTableLikeView(data.viewType) || data.viewType === "calendar") {

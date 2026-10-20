@@ -18,7 +18,8 @@ import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, isInHarmony, readClipboard, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {focusByOffset, getEditorRange, getUndoFocusContext} from "./selection";
-import {getSelectionOffset} from "./selectionOffsets";
+import {focusByRange, getSelectionOffset} from "./selectionOffsets";
+import {restoreTableVirtualizationDOM} from "./tableVirtualizationDOM";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -35,7 +36,7 @@ import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
-import {remapListMindmapIDs} from "../render/listMindmap/model";
+import {cleanListMindmapHTML, remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
@@ -50,7 +51,7 @@ import {
 import {getAssetUploadPathsByInput, getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
 import {
@@ -119,7 +120,7 @@ const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
         return true;
     }
     const linkDest = resolveLinkDest(text, protyle.lute);
-    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle)))) {
+    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle), true))) {
         protyle.toolbar.range = range;
         protyle.toolbar.setInlineMark(protyle, "a", "range", {type: "a", color: linkDest});
         return true;
@@ -214,6 +215,11 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
 };
 
 export const getPlainText = (blockElement: HTMLElement, isNested = false): string => {
+    if (!isNested && blockElement.querySelector(".mindmap-view, .list-mindmap")) {
+        const template = document.createElement("template");
+        template.innerHTML = cleanListMindmapHTML(blockElement.outerHTML);
+        return getPlainText(template.content.firstElementChild as HTMLElement);
+    }
     const dataType = blockElement.dataset.type;
     if (dataType === "NodeBlockQueryEmbed" || blockElement.classList.contains("protyle-wysiwyg__embed") ||
         (!isNested && blockElement.querySelector('[data-type="NodeBlockQueryEmbed"], .protyle-wysiwyg__embed'))) {
@@ -260,7 +266,8 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false): strin
         text = text.slice(0, -1);
     } else if (dataType === "NodeTabItem" && isNested) {
         text += getTabTitle(blockElement)?.textContent || "";
-    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem"].includes(dataType)) {
+    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem",
+        "NodeMindmap", "NodeMindmapItem"].includes(dataType)) {
         if (dataType === "NodeCallout") {
             text += `${getCalloutInfo(blockElement)}\n`;
         } else if (dataType === "NodeTabItem") {
@@ -817,6 +824,36 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (getUnsupportedBlocks) {
             const source = siyuanHTML || (textHTML ? protyle.lute.HTML2BlockDOM(textHTML) :
                 protyle.lute.Md2BlockDOM(textPlain));
+            const tableCellContext = getTableCellRichContext(protyle);
+            if (tableCellContext && /<table[\s>]/i.test(source)) {
+                const template = document.createElement("template");
+                template.innerHTML = source;
+                const nodes = Array.from(template.content.childNodes).filter(node =>
+                    node.nodeType === Node.ELEMENT_NODE ||
+                    node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== "");
+                const element = nodes.length === 1 && nodes[0].nodeType === Node.ELEMENT_NODE ?
+                    nodes[0] as HTMLElement : undefined;
+                if (element && (element.tagName === "TABLE" || element.dataset.type === "NodeTable") &&
+                    element.querySelector("th, td")) {
+                    // 单元格区域由外层表格按网格粘贴，先提交内部编辑器，避免载荷被当作嵌套表格。
+                    const {owner, cell, finish} = tableCellContext;
+                    if (!isPasteInsertPositionAvailable() || owner.disabled) {
+                        return;
+                    }
+                    finish();
+                    if (!cell.isConnected || !owner.element.isConnected || cell.contains(protyle.element)) {
+                        return;
+                    }
+                    restoreTableVirtualizationDOM(cell.closest('[data-type="NodeTable"]'));
+                    const range = document.createRange();
+                    range.selectNodeContents(cell);
+                    range.collapse(true);
+                    owner.wysiwyg.element.focus({preventScroll: true});
+                    focusByRange(range);
+                    await paste(owner, {target: cell, textPlain, textHTML: "", siyuanHTML: source});
+                    return;
+                }
+            }
             const unsupported = getUnsupportedBlocks(source);
             if (unsupported.length > 0) {
                 showMessage(window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
@@ -1453,7 +1490,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (localAssets.length > 0) {
                 let localAssetResult: Omit<IAssetUploadResult, "requestId" | "input"> | undefined;
                 await new Promise<void>(resolve => {
-                    uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
+                    uploadLocalFiles(localAssets.map((item): ILocalFiles => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,

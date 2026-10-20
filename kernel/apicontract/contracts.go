@@ -152,6 +152,8 @@ var (
 )
 
 var (
+	// GetPinnedDocs 按置顶顺序返回普通文档及与文档树一致的大小、属性和时间信息。
+	// 关闭笔记本的条目标记 unavailable，详细信息为空；加密笔记本不返回置顶条目。
 	GetPinnedDocs    = define[EmptyRequest, []PinnedDoc]("getPinnedDocs", "/api/filetree/getPinnedDocs", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{NonNullable: true}, "POST")
 	UpdatePinnedDocs = define[UpdatePinnedDocsRequest, Null]("updatePinnedDocs", "/api/filetree/updatePinnedDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )
@@ -324,7 +326,7 @@ var (
 	ReindexHistory            = define[EmptyRequest, Null]("reindexHistory", "/api/history/reindexHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	ClearWorkspaceHistory     = define[EmptyRequest, Null]("clearWorkspaceHistory", "/api/history/clearWorkspaceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	BatchSetBlockAttrs        = define[BatchSetBlockAttrsRequest, Null]("batchSetBlockAttrs", "/api/attr/batchSetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	GetTag                    = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag"}}, "POST")
+	GetTag                    = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag", Mode: SettingSilent}}, "POST")
 )
 
 var (
@@ -351,11 +353,12 @@ var (
 	// 保存本机加密笔记本锁屏策略，成功后广播 system 设置变更通知，供其他客户端重新读取配置。
 	SetEncryptedNotebookFollowSystemLock = define[EncryptedNotebookFollowSystemLockRequest, Null]("setEncryptedNotebookFollowSystemLock", "/api/notebook/setEncryptedNotebookFollowSystemLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	LockEncryptedNotebooksOnSystemLock   = define[EmptyRequest, Null]("lockEncryptedNotebooksOnSystemLock", "/api/notebook/lockEncryptedNotebooksOnSystemLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	SetNotebookCryptoAutoLock            = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "notebookCrypto"}}, "POST")
-	ChangeMasterPassword                 = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	ExportNotebookCryptoBackup           = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-	TouchEncryptedNotebooks              = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-	GetNotebookArchiveCandidates         = define[EmptyRequest, NotebookArchiveCandidatesData]("getNotebookArchiveCandidates", "/api/notebook/getNotebookArchiveCandidates", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+	// 自动锁定分钟数由内核内存值驱动锁定行为，写入后无需广播供其他客户端重读。
+	SetNotebookCryptoAutoLock    = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "notebookCrypto", Mode: SettingSilent}}, "POST")
+	ChangeMasterPassword         = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	ExportNotebookCryptoBackup   = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+	TouchEncryptedNotebooks      = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+	GetNotebookArchiveCandidates = define[EmptyRequest, NotebookArchiveCandidatesData]("getNotebookArchiveCandidates", "/api/notebook/getNotebookArchiveCandidates", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	// 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
 	// 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
 	PrepareNotebookArchive = define[PrepareNotebookArchiveRequest, NotebookArchiveData]("prepareNotebookArchive", "/api/notebook/prepareNotebookArchive", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -518,21 +521,18 @@ var SetLocalStorageVals = define[StorageSetKeysRequest, Null]("setLocalStorageVa
 var RemoveLocalStorageVal = define[StorageRemoveRequest, Null]("removeLocalStorageVal", "/api/storage/removeLocalStorageVal", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "localStorage", Mode: SettingSilent}}, "POST")
 var RemoveLocalStorageVals = define[StorageRemoveKeysRequest, Null]("removeLocalStorageVals", "/api/storage/removeLocalStorageVals", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "localStorage", Mode: SettingSilent}}, "POST")
 var GetOutlineStorage = define[OutlineStorageRequest, map[string]JSONValue]("getOutlineStorage", "/api/storage/getOutlineStorage", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-var SetOutlineStorage = define[OutlineStorageSetRequest, Null]("setOutlineStorage", "/api/storage/setOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var RemoveOutlineStorage = define[OutlineStorageRequest, Null]("removeOutlineStorage", "/api/storage/removeOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+
+// 写入 data/storage 下独立存储的端点都不是 conf.json 的配置段，因此只持锁不广播。
+var SetOutlineStorage = define[OutlineStorageSetRequest, Null]("setOutlineStorage", "/api/storage/setOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var RemoveOutlineStorage = define[OutlineStorageRequest, Null]("removeOutlineStorage", "/api/storage/removeOutlineStorage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var GetViewState = define[StorageKeyRequest, map[string]JSONValue]("getViewState", "/api/storage/getViewState", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var GetRecentDocs = define[RecentDocsRequest, []*RecentDoc]("getRecentDocs", "/api/storage/getRecentDocs", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
 
-var ResetBlockAttrs = define[EmptyRequest, Null]("resetBlockAttrs", "/api/attr/resetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var SearchAttributeViewNonRelationKey = define[EmptyRequest, Null]("searchAttributeViewNonRelationKey", "/api/av/searchAttributeViewNonRelationKey", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var SetLocalStorage = define[EmptyRequest, Null]("setLocalStorage", "/api/storage/setLocalStorage", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{Setting: SettingWrite{Namespace: "localStorage", Mode: SettingSilent}}, "POST")
-var DeprecatedReloadUI = define[EmptyRequest, Null]("deprecatedReloadUI", "/api/system/reloadUI", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-
 var GetCriteria = define[EmptyRequest, []*Criterion]("getCriteria", "/api/storage/getCriteria", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
-var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 
 var UpdateRecentDocOpenTime = define[RecentDocUpdateRequest, Null]("updateRecentDocOpenTime", "/api/storage/updateRecentDocOpenTime", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var UpdateRecentDocViewTime = define[RecentDocUpdateRequest, Null]("updateRecentDocViewTime", "/api/storage/updateRecentDocViewTime", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -543,8 +543,10 @@ var GetDocOutline = define[OutlineRequest, []*SearchPath]("getDocOutline", "/api
 var GetDocHeadingNumbers = define[HeadingNumbersRequest, map[string]string]("getDocHeadingNumbers", "/api/outline/getDocHeadingNumbers", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/api/storage/getInlineStyles", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
-var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
-var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage"}}, "POST")
+
+// 行级样式与数据库调色板变化由 reloadInlineStyles 专用推送通知其他窗口，不走配置段刷新。
+var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
+var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 
 var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -640,9 +642,10 @@ var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph
 
 var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "graph"}}, "POST")
 
-var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph"}}, "POST")
+// 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知，包装层不再补发。
+var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
 
-var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph"}}, "POST")
+var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
 
 var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/api/ref/refreshBacklink", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -754,6 +757,10 @@ var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semantic
 // SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
 var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// SearchRefBlock 的 exactDocTitle 默认关闭，保留候选搜索行为；启用后仅匹配完整文档标题，
+// 先区分大小写，再忽略大小写，同级匹配按 ID 升序取一个，排除 id 和 rootID。
+// 精确匹配不受全文搜索字段、类型、忽略规则或结果上限影响；未匹配时 newDoc 为 true。
+// 保留发布权限、加密笔记本租约和原有响应变体，查询或文档读取失败时返回错误。
 var SearchRefBlock = define[SearchRefBlockRequest, SearchRefData]("searchRefBlock", "/api/search/searchRefBlock", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 var ListLoadedPlugins = define[EmptyRequest, []*LoadedPlugin]("listLoadedPlugins", "/api/plugin/listLoadedPlugins", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
@@ -791,30 +798,35 @@ var GetBazaarPlugin = define[GetBazaarPluginRequest, BazaarPackagesData]("getBaz
 var GetInstalledPlugin = define[GetInstalledPluginRequest, BazaarPackagesData]("getInstalledPlugin", "/api/bazaar/getInstalledPlugin", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+// 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarPlugin = define[InstallBazaarPluginRequest, BazaarPackagesData]("installBazaarPlugin", "/api/bazaar/installBazaarPlugin", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarPlugin = define[UninstallBazaarPluginRequest, BazaarPackagesData]("uninstallBazaarPlugin", "/api/bazaar/uninstallBazaarPlugin", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarWidget = define[GetBazaarWidgetRequest, BazaarPackagesData]("getBazaarWidget", "/api/bazaar/getBazaarWidget", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledWidget = define[GetInstalledWidgetRequest, BazaarPackagesData]("getInstalledWidget", "/api/bazaar/getInstalledWidget", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+// 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarWidget = define[InstallBazaarWidgetRequest, BazaarPackagesData]("installBazaarWidget", "/api/bazaar/installBazaarWidget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarWidget = define[UninstallBazaarWidgetRequest, BazaarPackagesData]("uninstallBazaarWidget", "/api/bazaar/uninstallBazaarWidget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarIcon = define[GetBazaarIconRequest, BazaarPackagesData]("getBazaarIcon", "/api/bazaar/getBazaarIcon", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledIcon = define[GetInstalledIconRequest, BazaarPackagesData]("getInstalledIcon", "/api/bazaar/getInstalledIcon", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+// 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarIcon = define[InstallBazaarIconRequest, BazaarAppearancePackagesData]("installBazaarIcon", "/api/bazaar/installBazaarIcon", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarIcon = define[UninstallBazaarIconRequest, BazaarAppearancePackagesData]("uninstallBazaarIcon", "/api/bazaar/uninstallBazaarIcon", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarTemplate = define[GetBazaarTemplateRequest, BazaarPackagesData]("getBazaarTemplate", "/api/bazaar/getBazaarTemplate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledTemplate = define[GetInstalledTemplateRequest, BazaarPackagesData]("getInstalledTemplate", "/api/bazaar/getInstalledTemplate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+// 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarTemplate = define[InstallBazaarTemplateRequest, BazaarPackagesData]("installBazaarTemplate", "/api/bazaar/installBazaarTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarTemplate = define[UninstallBazaarTemplateRequest, BazaarPackagesData]("uninstallBazaarTemplate", "/api/bazaar/uninstallBazaarTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarTheme = define[GetBazaarThemeRequest, BazaarPackagesData]("getBazaarTheme", "/api/bazaar/getBazaarTheme", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledTheme = define[GetInstalledThemeRequest, BazaarPackagesData]("getInstalledTheme", "/api/bazaar/getInstalledTheme", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+// 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarTheme = define[InstallBazaarThemeRequest, BazaarAppearancePackagesData]("installBazaarTheme", "/api/bazaar/installBazaarTheme", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarTheme = define[UninstallBazaarThemeRequest, BazaarAppearancePackagesData]("uninstallBazaarTheme", "/api/bazaar/uninstallBazaarTheme", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
@@ -842,10 +854,17 @@ var SetSyncProviderLocal = define[SetSyncLocalRequest, SyncLocalData]("setSyncPr
 var ClearSyncProviderConfig = define[ClearSyncProviderConfigRequest, ClearSyncProviderConfigData]("clearSyncProviderConfig", "/api/sync/clearSyncProviderConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 
 // GetSyncProviderConfigRules 返回服务类型 2（S3）、3（WebDAV）或 4（本地文件系统）的共用必填清单。
-// endpoint、bucket 可省略；仅 S3 返回地址主机名重复包含桶名的提示，提示不阻断保存或同步。
+// endpoint、bucket 可省略；仅 S3 返回 Endpoint 可能让对象键多出前缀的提示，提示不阻断保存或同步。
 // 此接口只做内存中的静态判定，不读取或保存用户配置，不接收凭据，不访问云端或文件系统。
 // 未知服务返回 code -1；规则提示不替代保存时的完整校验和资源来源保护。只读模式下也可调用。
 var GetSyncProviderConfigRules = define[SyncProviderConfigRulesRequest, SyncProviderConfigRulesData]("getSyncProviderConfigRules", "/api/sync/getSyncProviderConfigRules", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// TestSyncProviderS3 使用请求中的候选配置探测云端：写入探针对象、按前缀列举并比对、尽力删除探针，不读取或保存用户配置。
+// 请求字段与保存接口一致；缺少必填项或地址无效时同样返回 code 0，由 kind 为 config 表示，避免与网络故障混淆。
+// kind 为 ok 表示写入与列举指向同一个对象键；config 表示可确定的配置错误；network 表示网络或服务端不可达，无法判定配置。
+// 探测会在桶内创建再删除 repo/objects/.s/siyuan-probe-<随机值>-probe，需要该前缀的写入与列举权限；未删除的探针会作为未引用对象被云端清理回收。
+// 只读模式下也可调用，不修改已有快照或同步开关。
+var TestSyncProviderS3 = define[TestSyncProviderS3Request, TestSyncProviderS3Data]("testSyncProviderS3", "/api/sync/testSyncProviderS3", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetCloudSyncDir = define[SyncNameRequest, Null]("setCloudSyncDir", "/api/sync/setCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData]("setSyncAssetDownloadMode", "/api/sync/setSyncAssetDownloadMode", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
@@ -1004,8 +1023,15 @@ var ExportBrowserHTML = define[ExportBrowserHTMLRequest, ExportZipData]("exportB
 
 // 导出图片或 PDF 预览时，可选的 keepJSEmbed: true 保留脚本嵌入占位，默认不保留。
 // 内核不执行脚本；调用方须遵守安全模式限制，并等待异步渲染完成后再导出。
+// image=true 或 pdf=true 时可用 excludeTitleImage=true 排除题头图；省略、null 或 false 保留，独立于 addTitle。
+// 未指定图片或 PDF 模式时忽略 excludeTitleImage；原始文档、正文图片及加密笔记本读取授权不受影响。
 var ExportPreviewHTML = define[ExportPreviewHTMLRequest, ExportPreviewHTMLData]("exportPreviewHTML", "/api/export/exportPreviewHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportHTML = define[ExportHTMLRequest, ExportHTMLData]("exportHTML", "/api/export/exportHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// exportAssets=true 时仅复制 PDF 实际资源链接需要的外部文件，同名文件另存并更新链接，不覆盖已有文件。
+// removeAssets=true 时把链接目标嵌入为附件，不在输出目录复制或清理资源；页面图片不额外复制。
+// exportAssets 省略、null 或 false 保持已有处理方式；启用时保留加密笔记本读取租约，禁止写入加密目录。
+// 启用时 path 必须为绝对路径，资源读取或 PDF 写入失败会报错，并撤销本次新建的外部资源文件。
 var ProcessPDF = define[ProcessPDFRequest, Null]("processPDF", "/api/export/processPDF", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportPreview = define[ExportIDRequest, ExportPreviewData]("exportPreview", "/api/export/preview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportAsFile = define[ExportAsFileRequest, ExportFileData]("exportAsFile", "/api/export/exportAsFile", AuthenticatedAccess|AdminAccess, MultipartBody, ResponseOptions{}, "POST")
@@ -1022,7 +1048,12 @@ var ExportReStructuredText = define[ExportIDRequest, ExportNamedZipData]("export
 
 var StatAsset = define[AssetPathRequest, AssetStatData]("statAsset", "/api/asset/statAsset", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var FullReindexAssetContent = define[EmptyRequest, Null]("fullReindexAssetContent", "/api/asset/fullReindexAssetContent", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
-var GetImageOCRText = define[AssetOCRTextRequest, AssetTextData]("getImageOCRText", "/api/asset/getImageOCRText", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetImageOCRText 保留已有 text 字段；无文本、缺失 path 和加密资源返回空字符串。
+// failed 来自实际识别失败，不由空文本推断；取消和不支持的图片不记为失败。
+// 失败状态仅在当前内核运行期间保留最近 1024 个资源，成功识别或保存文本后清除，不写入 OCR 数据文件。
+// 加密资源始终返回 failed=false；笔记本资源身份保留 box 参数，显示参数和片段不改变状态身份。
+var GetImageOCRText = define[AssetOCRTextRequest, ImageOCRTextData]("getImageOCRText", "/api/asset/getImageOCRText", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/api/asset/setImageOCRText", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // AssetOCR 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
@@ -1042,7 +1073,7 @@ var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", A
 var AIOCR = define[AssetPathRequest, AssetTextData]("aiOCR", "/api/ai/ocr", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetOCRConfig = define[EmptyRequest, OCRConfigData]("getOCRConfig", "/api/asset/getOCRConfig", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-var SetOCRConfig = define[SettingOCR, SettingOCR]("setOCRConfig", "/api/asset/setOCRConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ocr"}}, "POST")
+var SetOCRConfig = define[SettingOCR, SettingOCR]("setOCRConfig", "/api/asset/setOCRConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ocr", Merge: true}}, "POST")
 var ImportOCRModels = define[ImportOCRModelsRequest, OCRModel]("importOCRModels", "/api/asset/importOCRModels", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 // 重命名普通笔记本资源，并同步字面量及百分号编码的文档、数据库引用。
@@ -1054,6 +1085,31 @@ var FindAssetReferences = define[FindAssetReferencesRequest, AssetReferencesData
 // 实际重链接成功写盘后清理文档及关联跨文档撤销记录；预览和写入失败不清理历史。
 var RelinkAsset = define[RelinkAssetRequest, AssetReferencesData]("relinkAsset", "/api/asset/relinkAsset", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAssets", "/api/asset/getDocImageAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 返回文档图片及各自关联的实况照片原始视频；保留图片顺序，不合并相同封面。
+var GetDocPreviewImages = define[AssetDocumentRequest, []DocumentPreviewImage]("getDocPreviewImages", "/api/asset/getDocPreviewImages", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按需生成 H.264/AAC 兼容预览，不修改原件，不同步缓存；输入限制为 64 MiB、十秒、600 帧和 4096×2160 像素。
+// path 为相对资源 URL，路径中的百分号编码只解码一次，box 等查询参数保持原有资源解析语义。
+// 普通资源的真实路径必须位于对应 assets 目录内；加密资源沿用 box 边界校验与解锁租约。
+// 支持 SDR HEVC 4:2:0（8/10 位）或 AVC，以及 AAC 或 44.1/48 kHz 单声道、双声道整数 PCM。
+// clientEncode 为 true 且 encode 为 true 时，调用方顺序读取帧并提交 Annex B 编码；否则直接读取预览。
+// 客户端编码只对管理员开放，其他角色由内核生成预览，不能提交共享缓存内容。
+// 会话五分钟内有效，编码任务两分钟超时；加密笔记本只使用内存，锁定时取消任务、清除会话与缓存。
+var StartLivePhotoPreview = define[StartLivePhotoPreviewRequest, LivePhotoPreviewSession]("startLivePhotoPreview", "/api/asset/startLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 顺序读取零起始的 I420 帧，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+var GetLivePhotoFrame = define[LivePhotoFrameRequest, BinaryContent]("getLivePhotoFrame", "/api/asset/getLivePhotoFrame", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 422}, "POST")
+
+// 提交大端 uint32 帧数，随后逐帧提交大端 uint32 长度及 Annex B 数据；最多 64 MiB，帧数和尺寸必须匹配源片。
+// 验证并等待 MP4 封装完成后返回；失败结果不能进入共享缓存。
+var FinishLivePhotoPreview = define[FinishLivePhotoPreviewRequest, Null]("finishLivePhotoPreview", "/api/asset/finishLivePhotoPreview", AuthenticatedAccess|AdminAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 等待并读取 MP4 兼容预览，响应为 no-store 的二进制；错误返回 HTTP 422 的标准 JSON 信封。
+var GetLivePhotoPreview = define[LivePhotoPreviewRequest, BinaryContent]("getLivePhotoPreview", "/api/asset/getLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 422}, "POST")
+
+// 取消会话并释放在途转换资源，已完成的缓存仍可在下一次播放时复用。
+var CancelLivePhotoPreview = define[LivePhotoPreviewRequest, Null]("cancelLivePhotoPreview", "/api/asset/cancelLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")
@@ -1070,6 +1126,16 @@ var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAsset
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
 // 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
 var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// GetUnusedEncryptedBoxAssets 扫描单个已解锁加密笔记本的文档、全部数据库定义及智能体会话引用。
+// 任意扫描失败返回 -1，不返回不完整候选。锁定目标使用既有 314 语言消息；结果不截断。
+// name 为响应期间可见的原始文件名，item 为 assets 相对路径，path 带目标 box 查询参数。
+var GetUnusedEncryptedBoxAssets = define[EncryptedBoxAssetsRequest, []*AssetUnusedItem]("getUnusedEncryptedBoxAssets", "/api/asset/getUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RemoveUnusedEncryptedBoxAssets 重新验证用户确认的候选，备份认证后的原始密文后整批删除。
+// 失败补偿恢复源文件，未提交的中断批次在启动同步前恢复；清理历史只索引脱敏元数据。
+// 不改变现有全局清理行为，不修改加密格式，不生成全局资源索引或明文缓存。
+var RemoveUnusedEncryptedBoxAssets = define[RemoveEncryptedBoxAssetsRequest, AssetPathsData]("removeUnusedEncryptedBoxAssets", "/api/asset/removeUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
@@ -1084,24 +1150,29 @@ var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("inser
 var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
-var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet"}}, "POST")
-var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar"}}, "POST")
+var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet", Merge: true}}, "POST")
+var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
+// web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
 // 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
-var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai"}}, "POST")
-var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets"}}, "POST")
-var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "variables"}}, "POST")
+// 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
+// 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
+// ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
+var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai", Merge: true}}, "POST")
+var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets", Merge: true}}, "POST")
+var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "variables", Merge: true}}, "POST")
 
 // SetFlashcard 使用与启动、导入相同的规范化规则；保留零张上限，非法记忆参数和权重恢复默认值。
 // reviewMode 仅接受 0、1、2，越界值回退 0。
-var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard", "/api/setting/setFlashcard", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "flashcard"}}, "POST")
+var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard", "/api/setting/setFlashcard", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "flashcard", Merge: true}}, "POST")
 
-// SetEditor 使用与启动、导入相同的规范化规则并同步保存。锚文本长度 1–5120 保持不变，小于 1 回退 64。
-// 字体大小超出 9–72 回退 16；省略字体列表和图片标题字段时继续保留原有兼容行为。
+// SetEditor 使用与启动、导入相同的规范化规则并同步保存。
+// 锚文本长度 1–5120 保持不变，小于 1 回退 64；字体大小超出 9–72 回退 16。
 // backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
 // databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
-var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor"}}, "POST")
+// 只提交 fontFamily、fontWeight 时按新的首选字体重建 fontFamilies；显式提交 fontFamilies 时以该列表为准。
+var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor", Merge: true}}, "POST")
 
 // PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
 // export.blockRefMode 的旧值 0、1、5 按旧设置接口的兼容语义转换为 4；启动迁移由配置版本控制。
@@ -1112,30 +1183,40 @@ var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/sett
 // sync.assetDownloadMode 的非法值仍拒绝写入；repo.indexRetentionDays 的正值不设上限。
 var PatchSetting = define[PatchSettingRequest, *SettingPatchData]("patchSetting", "/api/setting/patch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "*", Mode: SettingSelfManaged}}, "POST")
 
-// SetExport 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
+// SetExport 合并提交的导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
 // blockEmbedMode 仅接受 0、1，越界值回退 1；fileAnnotationRefMode 仅接受 0、1，越界值回退 0。
-// blockRefMode 的其他取值及字段省略、null 的解析行为保持不变。
-var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "export"}}, "POST")
+// blockRefMode 的其他取值原样保留；省略的字段保持当前值，null 还原默认值。
+var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "export", Merge: true}}, "POST")
 
-// SetFiletree 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
+// SetFiletree 使用与启动、导入相同的路径和数值规范化规则。
 // maxListCount 小于 1 回退 512，largeFileWarningSize 小于 2 回退 8，两者大于 10240 时截断至 10240。
-var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/api/setting/setFiletree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "fileTree"}}, "POST")
+var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/api/setting/setFiletree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "fileTree", Merge: true}}, "POST")
 
-// SetSearch 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32。
-// limit 大于 10240 时截断至 10240。
-// 省略汉字敏感、自定义块和脑图选项时保留当前值；反链提及关键词上限小于 1 回退 512。
-var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "search"}}, "POST")
+// SetSearch 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32，大于 10240 时截断至 10240。
+// 反链提及关键词上限小于 1 回退 512。
+var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "search", Merge: true}}, "POST")
 
 // SetAppearance 限定关闭按钮行为：closeButtonBehavior 仅接受 0、1，越界值回退 0。
-var SetAppearance = define[SetAppearanceRequest, *SettingAppearance]("setAppearance", "/api/setting/setAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance"}}, "POST")
+// entryVisibility 省略时保持当前方案，null 还原默认显隐方案。
+var SetAppearance = define[SetAppearanceRequest, *SettingAppearance]("setAppearance", "/api/setting/setAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance", Merge: true}}, "POST")
 
 // SetEntryVisibility 的版本 7 方案可用 defaults 指定 simple 或 full，未覆盖的显隐跟随该内置方案。
 // 省略 defaults 的方案及旧版本方案保留独立显隐语义；entries 中的布尔值始终优先，未知入口和插件排序保留。
 var SetEntryVisibility = define[SetEntryVisibilityRequest, *SettingEntryVisibility]("setEntryVisibility", "/api/setting/setEntryVisibility", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance"}}, "POST")
-var SetPublish = define[SetPublishRequest, SettingPublishData]("setPublish", "/api/setting/setPublish", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "publish"}}, "POST")
+
+// SetPublish 认证账户须提交完整数组，传 null 或空数组表示清空账户。
+var SetPublish = define[SetPublishRequest, SettingPublishData]("setPublish", "/api/setting/setPublish", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "publish", Merge: true}}, "POST")
+
+// GetSettingSection 读取单个配置段，字段与脱敏规则与 /api/system/getConf 一致，仅返回请求的配置段以减少传输量。
+// namespace 必须是已注册的配置段；需要完整配置的启动和重连场景仍使用 /api/system/getConf。
+var GetSettingSection = define[SettingGetSectionRequest, SettingSectionData]("getSettingSection", "/api/setting/getSection", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
 var GetBootAppearances = define[EmptyRequest, SettingBootAppearancesData]("getBootAppearances", "/api/setting/getBootAppearances", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SetBootAppearance = define[SettingBootAppearanceRequest, *SettingBootAppearanceSelection]("setBootAppearance", "/api/setting/setBootAppearance", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "appearance", Mode: SettingSilent}}, "POST")
 var SetBazaarPetalDisabled = define[SettingPetalDisabledRequest, SettingPetalDisabledData]("setBazaarPetalDisabled", "/api/setting/setBazaarPetalDisabled", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar"}}, "POST")
+
+// SetKeymap 整体替换快捷键配置：data 必须提交完整的快捷键对象，只提交部分分组会清空未提交的快捷键。
+// 单条快捷键请使用 /api/setting/patch 的 keymap 命名空间，该接口按对象递归合并。
 var SetKeymap = define[SettingKeymapRequest, Null]("setKeymap", "/api/setting/setKeymap", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "keymap"}}, "POST")
 
 // 接收可选的 exit（默认 false），要求管理员权限并禁止只读写入。
@@ -1213,6 +1294,23 @@ var SearchAttributeViewRelationKey = define[SearchAttributeViewRelationKeyReques
 // 返回数据库级 automations，所有视图共享；缺省表示没有自动化规则。
 // 规则通过 `/api/transactions` 的 setAttrViewAutomations 操作整体保存。
 var GetAttributeView = define[GetAttributeViewRequest, AVData]("getAttributeView", "/api/av/getAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// PreviewAttributeViewCollection 预览已保存且启用的普通块收集规则，不修改文档或数据库。
+// 仅在目标数据库的加密边界内查询；page 从 1 开始，每页最多 100 个，hasMore 表示还有下一页。
+var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AVBlockCollectionPreview]("previewAttributeViewCollection", "/api/av/previewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 按全部启用收集规则的并集检查已有条目，返回 matched、unmatched、unknown 和规则版本。
+// 手动及自动绑定条目统一判断；游离、无可用规则或无法判断时保留，不隐式清理或补收。
+// status 可选，按分类筛选后每页最多 100 项；省略时保留混合分页，全库计数不受筛选影响。
+// unknown 条目通过 reason 说明原因；isDetached 表示游离条目，主动移出使用普通条目移出事务。
+// reason 的 invalidItem、detached、noRules、invalidRule 分别表示绑定信息不完整、游离、无启用规则和规则无效，
+// unavailable 表示源块不可用，unreadable 表示源内容读取失败；原因不包含原始错误或私密路径。
+// 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
+var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
+// 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
+var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
@@ -1222,9 +1320,17 @@ var CreateAttributeViewItemDocs = define[CreateAttributeViewItemDocsRequest, AVC
 var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("searchAttributeView", "/api/av/searchAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVArchiveRenderData]("renderSnapshotAttributeView", "/api/av/renderSnapshotAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArchiveRenderData]("renderHistoryAttributeView", "/api/av/renderHistoryAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 渲染指定数据库视图，保留载体权限、加密笔记本租约、筛选和分页行为。
+// temporarySort 可选，省略或 null 时使用已保存的排序；指定时以单字段规则覆盖本次渲染排序，先排序再分页。
+// 临时排序的 order 必须为 ASC 或 DESC；字段缺失或不支持排序时恢复已保存规则。
+// 临时排序不创建或保存数据库，不改变载体默认视图；支持现有 valueSource 和 dateEndpoint 语义。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 获取当前视图可见资源字段中的全部图片，保留载体发布权限、加密笔记本租约、搜索和上下文筛选。
+// groupID 可选，省略、null 或空字符串时保留整个视图行为；指定时仅返回该分组图片，分组不存在则报错。
+// 分组先按组内手动顺序排列，再应用视图排序；同一单元格按资源顺序返回，不受分页或虚拟滚动限制。
 var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]("getCurrentAttrViewImages", "/api/av/getCurrentAttrViewImages", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1238,10 +1344,16 @@ var AIChatGPTWithAction = define[AIActionRequest, string]("chatGPTWithAction", "
 var AIListEditorActions = define[EmptyRequest, []*AIEditorAction]("lsAIEditorActions", "/api/ai/editor/lsActions", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AISaveEditorAction = define[AIEditorActionSaveRequest, *AIEditorAction]("saveAIEditorAction", "/api/ai/editor/saveAction", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditorAction", "/api/ai/editor/removeAction", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按提供商协议验证实际生成能力，模型清单命中本身不代表测试通过。
+// gemini-interactions 使用原生端点、store=false 和有限输出预算，必须收到已校验的流式终止事件。
+// 测试允许无上游错误且不含工具调用的 incomplete 响应，避免思考耗尽测试预算导致误判；正常生成仍报错。
 var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AITestDecisionModel = define[AIDecisionTestRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按提供商协议读取模型及上下文上限；gemini-interactions 使用原生模型清单并去除 models/ 前缀。
 var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 套餐授权接口仅供已鉴权管理员使用，遵守 AI 禁用开关及只读限制。
@@ -1301,6 +1413,9 @@ var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/a
 var AIManageSkills = define[AISkillFileRequest, AISkillFileData]("manageSkills", "/api/ai/agent/manageSkills", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", AuthenticatedAccess|AdminAccess, StructJSONBody, aiEditorSSEOptions(), "POST")
+
+// gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
+// 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
@@ -1342,7 +1457,8 @@ var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnbo
 
 // SystemExit 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
 // 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。
-// 接管固定使用正常同步、跳过安装提示且不修改工作空间顺序，忽略 force、execInstallPkg、setCurrentWorkspace。
+// 接管默认正常同步，recoverExit.force 为 true 时跳过同步但仍执行数据清理；跳过安装提示且不修改工作空间顺序。
+// 顶层 force、execInstallPkg、setCurrentWorkspace 在接管时忽略；省略 recoverExit.force 保持正常同步。
 // 省略或传入 null 时保持原行为及数字截断规则，认证、管理员权限及加密笔记本关闭流程不变。
 var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3}, DataOnError: true}, "POST")
 var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1358,6 +1474,10 @@ var SystemGetSysFonts = define[EmptyRequest, []*SystemFont]("getSysFonts", "/api
 var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspaces", "/api/system/getWorkspaces", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 
 // SystemImportConf 导入前按启动和设置接口的相同规则规范化编辑器、导出、文档树、搜索和闪卡偏好，并同步保存。
+// 同时导入外观及界面语言、OCR、代码片段总开关和普通变量；这些配置段缺失或为 null 时保留当前值。
+// 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
+// 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
+// ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
 var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{Setting: SettingWrite{Namespace: "*"}}, "POST")
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
@@ -1385,7 +1505,17 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 
 // move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
 // 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1，所有视图共享数据库级规则。
+// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 4，所有视图共享数据库级规则。
+// blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
+// blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
+// spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
+// 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。
+// 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
+// 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。
+// 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
+// cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
+// 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
+// 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。
 // addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
 // 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
 // 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。

@@ -6,7 +6,7 @@ import {Menus} from "../../menus";
 import {genUUID} from "../../util/genID";
 import {fetchSyncPost} from "../../util/fetch";
 import {addBaseURL, redirectToCheckAuth} from "../../util/pathName";
-import {getLocalStorage, initNativeDialogOverride, initWindowOpenOverride, isMac, isWindows} from "../../protyle/util/compatibility";
+import {getLocalStorage, initNativeDialogOverride, initWindowOpenOverride, applyPlatformClasses} from "../../protyle/util/compatibility";
 import {addScriptSync} from "../../protyle/util/addScript";
 import {ensureLute} from "../../protyle/util/lute";
 import {loadDesktopHostConnection, initDesktopHost} from "../../boot/onGetConfig";
@@ -142,7 +142,7 @@ const initialize = async () => {
         if (runtime.handleMessage(data)) return;
         switch (data.cmd) {
             case "logoutAuth": redirectToCheckAuth(); break;
-            case "settingChanged": void refreshSettingConfig(data.data.namespace); break;
+            case "settingChanged": void refreshSettingConfig(data.data.namespace, data.data.revision); break;
             case "setConf":
                 void refreshSettingConfig();
                 void runtime.refreshSnippets(true);
@@ -198,8 +198,7 @@ const initialize = async () => {
     if (!isActive()) return;
     listen(Constants.SIYUAN_SEND_WINDOWS, (_event, data: IWebSocketData) => onWindowsMsg(data));
     runtime.applyZoom();
-    document.body.classList.toggle("body--windows", isWindows());
-    document.body.classList.toggle("body--win32", !isMac());
+    applyPlatformClasses();
     listen(Constants.SIYUAN_EVENT, (_event, command: string) => applyWindowState(command));
     ipcRenderer.send(Constants.SIYUAN_EVENT);
     const [fullscreen, maximized] = await Promise.all([

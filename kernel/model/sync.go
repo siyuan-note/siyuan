@@ -152,14 +152,13 @@ func SyncDataUpload() (err error) {
 var (
 	pendingSync      syncPendingState
 	syncSameCount    = atomic.Int32{}
-	autoSyncErrCount = 0
+	autoSyncErrCount = atomic.Int32{}
 	fixSyncInterval  = 5 * time.Minute
 
 	syncPlanTimeLock = sync.Mutex{}
 	syncPlanTime     = time.Now().Add(fixSyncInterval)
 
 	BootSyncSucc atomic.Int32 // -1：未执行，0：执行成功，1：执行失败
-	ExitSyncSucc = -1
 )
 
 func init() {
@@ -240,7 +239,6 @@ func BootSyncData() {
 	if iosAfterBoot {
 		completeSyncPerception(cloudPublished, err)
 	}
-	return
 }
 
 func SyncData(byHand bool) {
@@ -305,11 +303,12 @@ func lockSyncRequest(state *syncRequestState) (unlock func(), ok bool) {
 	return unlock, true
 }
 
-func syncData(exit, byHand bool) {
+func syncData(exit, byHand bool) (err error) {
+	err = errors.New("sync did not complete")
 	defer logging.Recover()
 
 	if !checkSync(false, exit, byHand) {
-		return
+		return nil
 	}
 
 	requests := &syncAutoRequests
@@ -320,17 +319,16 @@ func syncData(exit, byHand bool) {
 	}
 	unlock, ok := lockSyncRequest(requests)
 	if !ok {
-		return
+		return nil
 	}
 	defer unlock()
-	_ = syncDataLocked(exit, byHand)
+	return syncDataLocked(exit, byHand)
 }
 
 func syncDataLocked(exit, byHand bool) error {
 	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if exit {
-		ExitSyncSucc = 0
 		logging.LogInfof("sync before exit")
 		msgId := util.PushMsg(Conf.Language(81), 1000*60*15)
 		defer func() {
@@ -421,9 +419,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if 7 < autoSyncErrCount && !byHand {
-		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")
-		util.PushErrMsg(Conf.Language(125), 1000*60*60)
+	if !byHand && !exit && notifyAutoSyncPaused() {
 		planSyncAfter(64 * time.Minute)
 		return false
 	}

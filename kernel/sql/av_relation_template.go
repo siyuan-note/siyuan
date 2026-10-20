@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"maps"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -49,9 +50,7 @@ func fillRelationPrimaryTemplates(target *av.AttributeView, relations []*av.Valu
 		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: key.ID}})
 	}
 	cache := make(map[string]*av.AttributeView, len(cachedAttrViews))
-	for id, attrView := range cachedAttrViews {
-		cache[id] = attrView
-	}
+	maps.Copy(cache, cachedAttrViews)
 	cache[target.ID] = &cloned
 
 	// 显示模板只能读取原始值，计算目标模板时无需再次展开关联主键显示模板。

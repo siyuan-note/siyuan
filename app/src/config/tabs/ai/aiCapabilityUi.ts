@@ -4,14 +4,16 @@ import {listCapabilityManifests} from "../../../layout/dock/agent/frontendCapabi
 import {
     AgentActionApprovalDecision,
     AgentApprovalDecision,
+    CapabilityDecision,
+    IAgentApprovalOverridePatch,
+    actionApprovalPatch,
+    approvalOverridePatch,
+    capabilityOverridesPatch,
     getCapabilityActionApproval,
     resolveCapabilityApproval,
-    updateCapabilityActionApproval,
-    updateCapabilityApproval,
 } from "./aiCapabilityPolicy";
 import {aiConfigApi} from "./aiRuntime";
 
-type CapabilityDecision = "allow" | "deny";
 type CapabilityScope = "agent" | "mcp";
 
 const escapeAttribute = (value: string) => escapeAttr(escapeHtml(value));
@@ -126,38 +128,28 @@ const addUnavailableCapabilities = (capabilities: ICapabilityInfo[], scope: Capa
     });
 };
 
-const saveCapabilityPolicy = (scope: CapabilityScope, policy: Config.ICapabilityPolicy, onApplied: () => void) => {
+const saveCapabilityPolicy = (scope: CapabilityScope, overrides: Record<string, string>, onApplied: () => void) => {
     const path = scope === "agent" ? "agent.capabilityPolicy" : "mcp.exposurePolicy";
-    aiConfigApi.patch(path, policy, onApplied);
+    aiConfigApi.patch(path, {overrides}, onApplied);
 };
 
-const saveApprovalPolicy = (policy: Config.IAgent["approvalPolicy"], onApplied: () => void) => {
-    aiConfigApi.patch("agent.approvalPolicy", policy, onApplied);
+// 仅提交本次改动的审批覆盖项，避免用旧快照覆盖其他能力的设置。
+const saveApprovalPolicy = (overrides: Record<string, IAgentApprovalOverridePatch>, onApplied: () => void) => {
+    aiConfigApi.patch("agent.approvalPolicy", {overrides}, onApplied);
 };
 
 const setCapabilitiesDecision = (scope: CapabilityScope, ids: string[], decision: CapabilityDecision,
                                   onApplied: () => void) => {
-    const policy = getCapabilityPolicy(scope);
-    const overrides = {...policy.overrides};
-    ids.forEach((id) => {
-        if (decision === policy.default) {
-            delete overrides[id];
-        } else {
-            overrides[id] = decision;
-        }
-    });
-    saveCapabilityPolicy(scope, {...policy, overrides}, onApplied);
+    saveCapabilityPolicy(scope, capabilityOverridesPatch(getCapabilityPolicy(scope).default, ids, decision), onApplied);
 };
 
 const setCapabilityApproval = (id: string, decision: AgentApprovalDecision, onApplied: () => void) => {
-    const policy = getApprovalPolicy();
-    saveApprovalPolicy(updateCapabilityApproval(policy, id, decision), onApplied);
+    saveApprovalPolicy({[id]: approvalOverridePatch(getApprovalPolicy().default, decision)}, onApplied);
 };
 
 const setCapabilityActionApproval = (id: string, action: string, decision: AgentActionApprovalDecision,
                                      onApplied: () => void) => {
-    const policy = getApprovalPolicy();
-    saveApprovalPolicy(updateCapabilityActionApproval(policy, id, action, decision), onApplied);
+    saveApprovalPolicy({[id]: actionApprovalPatch(action, decision)}, onApplied);
 };
 
 const capabilityMatches = (capability: ICapabilityInfo, query: string) => {

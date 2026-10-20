@@ -447,7 +447,7 @@ func GetBackmentionDocInBox(defID, refTreeID, keyword string, containChildren, h
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
-		if nil != tree && nil == refTree {
+		if nil == refTree {
 			refTree = tree
 		}
 	}
@@ -466,7 +466,6 @@ func filterBlockPaths(blockLinks []*Backlink) {
 			b.BlockPaths = []*BlockPath{}
 		}
 	}
-	return
 }
 
 func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {
@@ -1114,7 +1113,8 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 	}
 
 	buf := bytes.Buffer{}
-	buf.WriteString(columnFilter() + ":(")
+	buf.WriteString(columnFilter())
+	buf.WriteString(":(")
 	for i, mentionKeyword := range mentionKeywords {
 		if confSearchSnapshot.BacklinkMentionKeywordsLimit < i {
 			if notify := backmentionNotifier(notifiers); notify != nil {
@@ -1131,7 +1131,9 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 	}
 	buf.WriteString(")")
 	if "" != keyword {
-		buf.WriteString(" AND (" + quoteFTSPhrase(keyword) + ")")
+		buf.WriteString(" AND (")
+		buf.WriteString(quoteFTSPhrase(keyword))
+		buf.WriteString(")")
 	}
 	terms := mentionKeywords
 	if "" != keyword {

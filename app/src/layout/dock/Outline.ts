@@ -1,3 +1,4 @@
+import {patchAppearancePreference} from "../../config/tabs/appearancePreferences";
 import {saveOutlineState} from "../../config/util/resourceConfig";
 import {toggleMenu} from "../../menus/menuToggle";
 import {bindPanelSearch} from "./panelSearch";
@@ -13,11 +14,10 @@ import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {
     isPhablet,
-    setStorageVal,
     updateHotkeyAfterTip,
     writeBlockDOMClipboard
 } from "../../protyle/util/compatibility";
-import {openFileById} from "../../editor/util";
+import {invalidateOutlineRequest, openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {escapeHtml} from "../../util/escape";
@@ -83,7 +83,7 @@ export class Outline extends Model {
         <svg><use xlink:href='#iconSearch'></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="keepCurrentExpand" class="block__icon ariaLabel${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " block__icon--active" : ""}" data-position="north" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand}">
+    <span data-type="keepCurrentExpand" class="block__icon ariaLabel${window.siyuan.config.appearance.outlineKeepCurrentExpand ? " block__icon--active" : ""}" data-position="north" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand}">
         <svg><use xlink:href="#iconFocus"></use></svg>
     </span>
     <span class="fn__space"></span>
@@ -134,6 +134,7 @@ export class Outline extends Model {
                         });
                     }
                 } else {
+                    this.selectHeading(id);
                     checkFold(id, (zoomIn) => {
                         const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                         openFileById({
@@ -193,19 +194,19 @@ export class Outline extends Model {
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 保持当前标题展开功能
-        options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
+        options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", async (event: MouseEvent & {
             target: Element
         }) => {
             const iconElement = hasClosestByClassName(event.target, "block__icon");
             if (!iconElement) {
                 return;
             }
-            if (iconElement.classList.contains("block__icon--active")) {
+            if (window.siyuan.config.readonly || window.siyuan.isPublish) return;
+            await patchAppearancePreference("outlineKeepCurrentExpand", !window.siyuan.config.appearance.outlineKeepCurrentExpand);
+            if (!window.siyuan.config.appearance.outlineKeepCurrentExpand) {
                 iconElement.classList.remove("block__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = false;
             } else {
                 iconElement.classList.add("block__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = true;
                 let focusElement;
                 getAllModels().editor.find(editItem => {
                     if (editItem.editor.protyle.block.rootID === this.blockId) {
@@ -223,8 +224,6 @@ export class Outline extends Model {
                     this.setCurrent(focusElement);
                 }
             }
-            // 保存keepCurrentExpand状态到localStorage
-            setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
         });
         options.tab.panelElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -574,6 +573,12 @@ export class Outline extends Model {
         }
     }
 
+    private selectHeading(id: string) {
+        // 导航准备期间禁止旧的大纲重载和光标定位覆盖手动选择。
+        invalidateOutlineRequest(this);
+        this.setCurrentById(id, false);
+    }
+
     public invalidateCurrent() {
         this.currentRequestID++;
     }
@@ -652,7 +657,8 @@ export class Outline extends Model {
         }
     }
 
-    private setCurrentById(id: string, scroll = true) {
+    public setCurrentById(id: string, scroll = true) {
+        this.invalidateCurrent();
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
         });
@@ -660,7 +666,7 @@ export class Outline extends Model {
         if (!currentElement) {
             return;
         }
-        if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
+        if (window.siyuan.config.appearance.outlineKeepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {
                 ulElement.classList.remove("fn__none");
@@ -677,7 +683,9 @@ export class Outline extends Model {
             currentElement.classList.add("b3-list-item--focus");
             if (scroll) {
                 const elementRect = this.element.getBoundingClientRect();
-                this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
+                const currentRect = currentElement.getBoundingClientRect();
+                this.element.scrollTop += currentRect.bottom -
+                    (elementRect.top + elementRect.height / 2);
             }
         }
     }
@@ -886,8 +894,6 @@ export class Outline extends Model {
             });
         }
         this.saveExpendIds();
-        window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel = targetLevel;
-        setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
     public setAllExpanded(expanded: boolean) {
@@ -1052,6 +1058,7 @@ export class Outline extends Model {
                     }
 
                     // 带子标题转换
+                    this.selectHeading(id);
                     checkFold(id, (zoomIn) => {
                         const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                         openFileById({
@@ -1061,7 +1068,6 @@ export class Outline extends Model {
                             action: zoomIn ? [action, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [action, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
-                    this.setCurrentById(id, false);
                     const headingSubMenu = [];
                     if (currentLevel !== 1) {
                         headingSubMenu.push(this.genHeadingTransform(id, 1));

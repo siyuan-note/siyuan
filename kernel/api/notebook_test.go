@@ -43,7 +43,7 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	*model.Conf.FileTree.Load().BoxDocEnabled = true
+	model.Conf.FileTree.Load().BoxDocEnabled = true
 	t.Cleanup(func() {
 		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
 			t.Errorf("restore publish access failed: %v", err)
@@ -131,7 +131,7 @@ func writeNotebookSortFixture(t *testing.T, boxID string, childCount, boxIndex i
 
 	writeNotebookSortDoc(t, boxID, boxID)
 	childIDs := make([]string, 0, childCount)
-	for i := 0; i < childCount; i++ {
+	for i := range childCount {
 		childID := fmt.Sprintf("2026081201%02d%02d-doc%04d", boxIndex, i, boxIndex*100+i)
 		writeNotebookSortDoc(t, boxID, childID)
 		childIDs = append(childIDs, childID)

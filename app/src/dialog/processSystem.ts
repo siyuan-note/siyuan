@@ -1,4 +1,5 @@
 import {Constants} from "../constants";
+import {renderBazaarInstall, updateBazaarInstallProgress} from "../config/bazaar/installTask";
 import {getSettingsWindowHost} from "../config/setting/windowContext";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
@@ -238,17 +239,18 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
     }
     await requestSystemExit({force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
-            const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
-            const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
-            if (buttonElement) {
-                buttonElement.addEventListener("click", () => {
+            confirmDialog(window.siyuan.languages.sync, escapeHtml(window.siyuan.languages._kernel[96]), () => {
+                void exitSiYuan(setCurrentWorkspace);
+            }, undefined, false, {
+                label: window.siyuan.languages._kernel[97],
+                callback: () => {
                     if (response.data.installPkgPath) {
                         installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
                         return;
                     }
                     void requestSystemExit({force: true, setCurrentWorkspace}, forceQuit);
-                });
-            }
+                }
+            }, window.siyuan.languages.retry);
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
 
@@ -387,6 +389,13 @@ export const bootSync = () => {
 };
 
 export const downloadProgress = (data: { id: string, percent: number }) => {
+    if (updateBazaarInstallProgress(data)) {
+        renderBazaarInstall(document);
+        return;
+    }
+    if (!Number.isFinite(data.percent)) {
+        return;
+    }
     const bazaarReadmeElement = document.querySelector("#configBazaarReadme");
     const bazaarSideElement = bazaarReadmeElement?.querySelector(".item__side");
     if (!bazaarSideElement) {
@@ -395,20 +404,14 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     if (data.id !== (bazaarSideElement.getAttribute("data-progress-id") || bazaarSideElement.getAttribute("data-repourl"))) {
         return;
     }
-    const installBtnElement = bazaarReadmeElement.querySelector('[data-type="install"]') as HTMLElement;
     const updateBtnElement = bazaarReadmeElement.querySelector('[data-type="install-t"]') as HTMLElement;
-    if (!installBtnElement && !updateBtnElement) {
+    if (!updateBtnElement) {
         return;
     }
     const progressHTML = `<span style="width: ${data.percent * 100}%"></span>`;
     if (data.percent >= 1) {
-        installBtnElement?.parentElement.classList.add("fn__none");
         updateBtnElement?.parentElement.classList.add("fn__none");
     } else {
-        if (installBtnElement) {
-            installBtnElement.classList.add("b3-button--progress");
-            installBtnElement.innerHTML = progressHTML;
-        }
         if (updateBtnElement) {
             updateBtnElement.classList.add("b3-button--progress");
             updateBtnElement.innerHTML = progressHTML;

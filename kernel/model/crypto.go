@@ -197,6 +197,11 @@ func acquireBoxWriteLock(boxID string) {
 	muI.(*sync.RWMutex).Lock()
 }
 
+func tryAcquireBoxWriteLock(boxID string) bool {
+	muI, _ := boxLifecycleLocks.LoadOrStore(boxID, &sync.RWMutex{})
+	return muI.(*sync.RWMutex).TryLock()
+}
+
 func releaseBoxWriteLock(boxID string) {
 	if muI, ok := boxLifecycleLocks.Load(boxID); ok {
 		muI.(*sync.RWMutex).Unlock()
@@ -1562,6 +1567,7 @@ func lockBoxWithPreparationHeld(boxID string, prepare func()) {
 func lockBoxHeld(boxID string) {
 	// 此时已排空在途操作并持有 box 写锁，可以安全清除该笔记本的明文 HEIF 预览缓存。
 	heif.ClearMemoryCache(boxID)
+	LivePhotoPreviews.Clear(boxID)
 	RevokeManagedEncryptedExportsForBox(boxID)
 	ClearRichClipboardBox(boxID)
 	ClearGlobalBacklinkSnapshots(boxID)
@@ -2319,10 +2325,7 @@ func EncryptAsset(boxID, diskName, originalName string, dek, plaintext []byte) (
 	ret.Write(encryptedMetadata)
 	for chunkIndex := uint64(0); chunkIndex < chunkCount; chunkIndex++ {
 		start := int(chunkIndex) * encryptedAssetChunkSize
-		end := start + encryptedAssetChunkSize
-		if end > len(plaintext) {
-			end = len(plaintext)
-		}
+		end := min(start+encryptedAssetChunkSize, len(plaintext))
 		encryptedChunk, encryptErr := util.EncryptWithAAD(
 			assetKey,
 			plaintext[start:end],
@@ -2366,7 +2369,7 @@ func decryptAssetMetadata(boxID, diskName string, dek, ciphertext []byte) (metad
 
 // encryptedAssetChunkAAD 将分块绑定到本次写入的容器，阻止同名资源的不同版本互换分块。
 func encryptedAssetChunkAAD(prefix string, containerID []byte, index uint64) []byte {
-	return []byte(fmt.Sprintf("%s:content:v%d:%x:%d", prefix, encryptedAssetSpec, containerID, index))
+	return fmt.Appendf(nil, "%s:content:v%d:%x:%d", prefix, encryptedAssetSpec, containerID, index)
 }
 
 func parseEncryptedAssetMetadata(data []byte) (*encryptedAssetMetadata, error) {
@@ -2501,7 +2504,7 @@ func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, 
 		}
 		aad := encryptedAssetChunkAAD(aadPrefix, metadata.ContainerID, chunkIndex)
 		if metadata.Spec == encryptedAssetLegacySpec {
-			aad = []byte(fmt.Sprintf("%s:content:%d", aadPrefix, chunkIndex))
+			aad = fmt.Appendf(nil, "%s:content:%d", aadPrefix, chunkIndex)
 		}
 		plainChunk, chunkErr := util.DecryptWithAAD(
 			assetKey,

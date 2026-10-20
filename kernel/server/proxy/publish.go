@@ -170,6 +170,12 @@ func newPublishReverseProxy(target *url.URL, roundTripper http.RoundTripper) *ht
 			request.SetURL(target)
 			request.Out.Host = request.In.Host
 			request.SetXForwarded()
+
+			// 覆盖客户端传入的标记，将客户端协议与内核回源协议分开判断。
+			request.Out.Header.Set(util.ClientTLSHeader, util.ClientTLSHeaderPlaintextValue)
+			if request.In.TLS != nil {
+				request.Out.Header.Set(util.ClientTLSHeader, util.ClientTLSHeaderValue)
+			}
 		},
 		Transport: roundTripper,
 	}

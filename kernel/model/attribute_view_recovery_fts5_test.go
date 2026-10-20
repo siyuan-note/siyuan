@@ -94,7 +94,7 @@ func TestAttributeViewMissingDatabaseHistoryRecovery(t *testing.T) {
 			if encrypted {
 				boxID = ast.NewNodeID()
 				markRuntimeEncryptedBox(boxID)
-				setDEKForTest(boxID, bytes.Repeat([]byte{0x73}, 32))
+				prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x73}, 32))
 				av.SetAVBoxID(before.ID, boxID)
 				t.Cleanup(func() {
 					av.SetAVBoxID(before.ID, "")
@@ -260,7 +260,7 @@ func TestDeletedFlashcardBlockReplayRetainsDeckAttribute(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 		restored, err := LoadTreeByBlockID(fixture.sourceID)
 		if err != nil {
@@ -308,7 +308,7 @@ func TestFlashcardCopyRedoPreservesNormalizedAttributes(t *testing.T) {
 	}
 	check()
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
-	for cycle := 0; cycle < 2; cycle++ {
+	for range 2 {
 		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
 		check()
@@ -433,7 +433,7 @@ func TestAttributeViewBoundHistoryOneWayEncrypted(t *testing.T) {
 	dest, keyID, itemID := addDeletedBlockOneWayTestRelation(t, source)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x79}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x79}, 32))
 	t.Cleanup(func() {
 		for _, view := range []*av.AttributeView{source, dest} {
 			av.SetAVBoxID(view.ID, "")

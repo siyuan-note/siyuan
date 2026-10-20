@@ -24,6 +24,7 @@ import {createSectionRuntime} from "../util/sectionRuntime";
 import {syncBodyGradient} from "./bodyGradient";
 import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
 import {closeSettingsWindow, isSettingsWindow} from "../setting/windowContext";
+import {syncAppearancePreferences} from "./appearancePreferences";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -73,17 +74,14 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
     const changedPackages = refresh && invalidateAppearancePackages(refresh.themes || [], refresh.icons || [], refresh.revision);
     const themeChanged = changedPackages?.themes.some(name => name === getCurrentThemeName(prevAppearance) ||
         name === getCurrentThemeName(data));
-    // 仅更新背景渐变时原位同步控件，避免整页重建期间的布局变化引起滚动抖动。
+    // 阅读和控件偏好原位应用，避免整页重建期间的布局变化引起滚动抖动。
     // 启动初始化传入当前配置本身，需要完整加载外观资源；重复推送仍使用原位同步。
     const appearanceKeys = Object.keys({...prevAppearance, ...data}) as Array<keyof Config.IAppearance>;
-    if (!refresh && prevAppearance !== data &&
-        appearanceKeys.every(key => key === "bodyGradient" ||
-            JSON.stringify(prevAppearance[key]) === JSON.stringify(data[key]))) {
-        window.siyuan.config.appearance = data;
-        setBodyHighlight(data.bodyGradient);
-        syncBodyGradient();
-        return;
-    }
+    const inPlaceKeys = new Set(["bodyGradient", "compactMode", "menuMouseScroll", "pdfTheme",
+        "outlineKeepCurrentExpand", "mobileBars"]);
+    const inPlace = !refresh && prevAppearance !== data &&
+        appearanceKeys.every(key => inPlaceKeys.has(key) ||
+            JSON.stringify(prevAppearance[key]) === JSON.stringify(data[key]));
     const unloadChangedTheme = themeChanged && prevAppearance.themeJS && isCurrentThemeSupported(prevAppearance, getFrontend());
     if ((unloadChangedTheme || shouldUnloadThemeScript(prevAppearance, data, getFrontend())) && !await unloadThemeScript()) {
         if (closeSettingsWindow()) return;
@@ -101,6 +99,17 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
         get: () => prevAppearance,
         set: next => { window.siyuan.config.appearance = next; },
         reactions: [{
+            name: "preferences",
+            changed: () => true,
+            apply: () => { syncAppearancePreferences(); },
+        }, {
+            name: "gradient",
+            changed: () => inPlace,
+            apply: () => {
+                setBodyHighlight(data.bodyGradient);
+                syncBodyGradient();
+            },
+        }, {
             name: "bars",
             changed: () => true,
             apply: (old, next) => {
@@ -113,7 +122,7 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
             },
         }, {
             name: "appearance-resources",
-            changed: () => true,
+            changed: () => !inPlace,
             apply: async (old, next) => {
                 await loadAssets(next);
                 if (JSON.stringify(next.globalFontFamilies) !== JSON.stringify(old.globalFontFamilies)) {

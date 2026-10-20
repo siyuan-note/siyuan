@@ -416,8 +416,7 @@ func (s *Service) refresh(ctx context.Context, a *Account) error {
 	var tokens tokenResponse
 	form := url.Values{"grant_type": {"refresh_token"}, "client_id": {a.ClientID}, "refresh_token": {a.RefreshToken}, "resource": {s.resource}}
 	if err := s.readJSON(ctx, "POST", s.issuer+"/api/accounts/oauth/token", form.Encode(), &tokens); err != nil {
-		var requestErr *RequestError
-		if errors.As(err, &requestErr) {
+		if requestErr, ok := errors.AsType[*RequestError](err); ok {
 			switch requestErr.Code {
 			case "invalid_grant", "invalid_refresh_token", "token_expired", "refresh_token_expired", "refresh_token_invalidated", "refresh_token_reused":
 				clearTokens(a)
@@ -497,7 +496,7 @@ func (s *Service) endSession(ctx context.Context, id string, remove bool) (revok
 			d, metadataErr := s.metadata(ctx)
 			if metadataErr == nil && s.identityEndpoint(d.Revocation) {
 				form := url.Values{"token": {a.RefreshToken}, "token_type_hint": {"refresh_token"}, "client_id": {a.ClientID}}
-				for i := 0; i < 2; i++ {
+				for i := range 2 {
 					if s.readJSON(ctx, "POST", d.Revocation, form.Encode(), nil) == nil {
 						revoked = true
 						break

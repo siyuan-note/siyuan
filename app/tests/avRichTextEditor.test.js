@@ -25,7 +25,7 @@ const runCases = async (sources) => {
         fetchPost: (url, params, callback) => {
             assert.equal(url, "/api/search/searchRefBlock");
             request = params;
-            callback({data: {newDoc: true, k: "New document", blocks: []}});
+            callback({code: 0, data: {newDoc: true, k: "New document", blocks: []}});
         },
         Lute: {UnEscapeHTMLStr: value => value, Caret: "caret"},
         replaceFileName: value => value,
@@ -255,7 +255,9 @@ const runElectron = async () => {
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const hintSource = ts.createSourceFile("extend.ts", readFileSync(path.join(__dirname,
             "../src/protyle/hint/extend.ts"), "utf8"), ts.ScriptTarget.Latest, true);
-        sources.hintRef = ts.transpileModule(hintSource.statements.filter(ts.isVariableStatement).find(statement =>
+        const searchRefSource = readFileSync(path.join(__dirname, "../src/protyle/hint/searchRef.ts"), "utf8")
+            .replace(/^import .*;\r?\n/gm, "");
+        sources.hintRef = ts.transpileModule(searchRefSource + "\n" + hintSource.statements.filter(ts.isVariableStatement).find(statement =>
             statement.declarationList.declarations.some(declaration => declaration.name.getText(hintSource) === "hintRef"))
             .getText(hintSource), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         await win.loadURL("data:text/html,<html><body></body></html>");

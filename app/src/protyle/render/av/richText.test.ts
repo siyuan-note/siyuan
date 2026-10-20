@@ -333,9 +333,8 @@ describe("attribute view text source compatibility", () => {
             }
         }
         assert.deepEqual(AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS, ["sup"]);
-        assert.equal(sanitizeAVRichTextInlineMemoContent(
-            "&amp;lt;img src=x onerror=alert(1)&amp;gt;memo&lt;/img&gt;"
-        ), "");
+        const escapedMemo = "&amp;lt;img src=x onerror=alert(1)&amp;gt;memo&lt;/img&gt;";
+        assert.equal(sanitizeAVRichTextInlineMemoContent(escapedMemo), escapedMemo);
         assert.equal(sanitizeAVRichTextInlineMemoContent("2 < 3\tline\nnext\r\u200D\u200F"),
             "2 < 3\tline\nnext\r\u200D\u200F");
         assert.equal(sanitizeAVRichTextInlineMemoContent("heart <3"), "heart <3");
@@ -345,7 +344,7 @@ describe("attribute view text source compatibility", () => {
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo </span"), "");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo <!--"), "");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo <?xml"), "");
-        assert.equal(sanitizeAVRichTextInlineMemoContent("&lt;script&gt;"), "");
+        assert.equal(sanitizeAVRichTextInlineMemoContent("&lt;script&gt;"), "&lt;script&gt;");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo\u0000content"), "");
         assert.equal(sanitizeAVRichTextInlineMemoContent("memo\u007Fcontent"), "");
 
@@ -412,6 +411,27 @@ describe("attribute view text source compatibility", () => {
             "D:\\file\u200B.txt", "https:\\\\example.com\\document.txt", "\\\\server",
         ]) {
             assert.equal(getAVRichTextSafeURL(target, true), "", target);
+        }
+    });
+
+    it("allows custom protocols only for explicit links and keeps dangerous schemes blocked", () => {
+        for (const target of [
+            "hook://file/EqhAm6xHS?p=YXJjaGl2ZXMvcHJvdmVuYW5jZQ==&n=2026%2D10%2D05",
+            "obsidian://open?vault=notes&file=book", "custom+app://action/path", "CUSTOM://action",
+            "ftp://example.com/file",
+        ]) {
+            assert.equal(getAVRichTextSafeURL(target, false, true), target);
+            assert.equal(getAVRichTextSafeURL(target), "", "automatic resource policy must remain restricted");
+        }
+        for (const target of [
+            "javascript://host/payload", "JaVaScRiPt://host/payload", "vbscript://host/payload",
+            "data://host/payload", "blob://host/payload", "file://host/payload", "filesystem://host/payload",
+            "about://host/payload", "chrome://settings", "chrome-extension://id/page", "devtools://host/page",
+            "view-source://host/page", "resource://host/page", "moz-extension://id/page",
+            "java%73cript://host/payload", "java\u200Bscript://host/payload", "custom&colon;payload",
+            "hook:/file/path", "hook://", "hook:payload", "hook://host/path%0a", "folder:name",
+        ]) {
+            assert.equal(getAVRichTextSafeURL(target, false, true), "", target);
         }
     });
 

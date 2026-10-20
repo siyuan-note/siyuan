@@ -4,6 +4,8 @@ import {
     consumeGutterFoldRestore,
     hideGutterElements,
     markGutterForFoldRestore,
+    isGutterTouchDragging,
+    setGutterTouchDragging,
     shouldHideGutterAfterFold
 } from "./gutterVisibility";
 
@@ -21,6 +23,23 @@ const createElement = (content: string) => {
 };
 
 describe("hideGutterElements", () => {
+    it("preserves only the touched gutter across keyboard layout cleanup", () => {
+        const source = createElement("source");
+        const other = createElement("other");
+        setGutterTouchDragging(source.element, true);
+        for (const hidden of [true, false]) {
+            hideGutterElements([source.element, other.element], hidden);
+            assert.equal(source.element.innerHTML, "source");
+            assert.equal(source.hasClass("fn__none"), false);
+            assert.equal(other.element.innerHTML, "");
+        }
+        setGutterTouchDragging(source.element, false);
+        assert.equal(isGutterTouchDragging(source.element), false);
+        hideGutterElements([source.element], true);
+        assert.equal(source.element.innerHTML, "");
+        assert.equal(source.hasClass("fn__none"), true);
+    });
+
     it("hides and clears every gutter in the editor hierarchy", () => {
         const parent = createElement("parent");
         const nested = createElement("nested");

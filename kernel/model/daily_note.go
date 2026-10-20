@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -46,13 +47,7 @@ func resolveDailyNote(box *Box, now time.Time, findByDate bool) (hPath string, t
 			return
 		}
 		if len(ids) > 0 {
-			matched := false
-			for _, id := range ids {
-				if rootID == id {
-					matched = true
-					break
-				}
-			}
+			matched := slices.Contains(ids, rootID)
 			if !matched {
 				rootID = ids[0]
 			}

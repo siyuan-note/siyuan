@@ -90,7 +90,7 @@ const fetchStreamChunkSize = 32 * 1024
 
 // fetchResponseBody 管理一次 fetch 响应体的消费：response.body 的 ReadableStream 与 text()/json()/buffer()/
 // arrayBuffer()/bytes()/blob() 共享同一个只能读一次的底层字节源（resp.Body），哪个先开始读就"认领"它，
-// 其余路径都会得到"响应体已经被读取"的错误——与真实 fetch 的 bodyUsed 语义一致，而不是像本沙箱其它数据对象
+// 其余路径都会得到"响应体已经被读取"的错误——与真实 fetch 的 bodyUsed 语义一致，而不是像本沙箱其他数据对象
 // 那样允许反复调用：响应体现在是真正流式到达、边读边释放的，不会先整体缓存一份供多次读取。claimed 只在
 // 事件循环线程上读写，不需要加锁。
 type fetchResponseBody struct {
@@ -151,7 +151,7 @@ func setFetchResponseBodyMethods(p *KernelPlugin, rt *goja.Runtime, response *go
 					}
 
 					// 复用既有数据对象的六个方法实现，避免在这里重复一遍 text/json/buffer/arrayBuffer/bytes/blob
-					// 各自的转换逻辑；data 已经是这次响应体专属的切片，不会被其它调用方共享或改写。
+					// 各自的转换逻辑；data 已经是这次响应体专属的切片，不会被其他调用方共享或改写。
 					inner, innerErr := NewDataObject(p, rt, data, contentType)
 					if innerErr != nil {
 						if rejectErr := reject(rt.NewGoError(innerErr)); rejectErr != nil {
@@ -246,7 +246,7 @@ func newFetchResponseBodyStream(p *KernelPlugin, rt *goja.Runtime, body *fetchRe
 	}, 0, nil)
 }
 
-// uint8ArrayOf 把 data 包装为 Uint8Array：data 已经是不会再被其它调用方共享或改写的独立切片，直接作为
+// uint8ArrayOf 把 data 包装为 Uint8Array：data 已经是不会再被其他调用方共享或改写的独立切片，直接作为
 // ArrayBuffer 的底层存储，不需要再复制一次。
 func uint8ArrayOf(p *KernelPlugin, rt *goja.Runtime, data []byte) goja.Value {
 	value, err := p.formDataHost.NewUint8Array(rt, data)
@@ -567,12 +567,12 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 			var openOnce sync.Once
 			var openPromises []Promise
 
-			addOpenPromise := func(resolve, reject func(reason interface{}) error) {
+			addOpenPromise := func(resolve, reject func(reason any) error) {
 				// nil slice 也可以直接 append
 				openPromises = append(openPromises, Promise{Resolve: resolve, Reject: reject})
 			}
 
-			resolveOpenPromises := func(rt *goja.Runtime) {
+			resolveOpenPromises := func(_ *goja.Runtime) {
 				if openPromises != nil {
 					for _, promise := range openPromises {
 						if resolveErr := promise.Resolve(nil); resolveErr != nil {

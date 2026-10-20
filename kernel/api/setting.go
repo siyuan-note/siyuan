@@ -37,38 +37,50 @@ var (
 	bazaarPetalStateMu sync.Mutex
 )
 
+// settingRequest 提供设置接口的配置段原始内容与解析诊断。
+type settingRequest interface {
+	ConfigError() error
+	ConfigJSON() []byte
+}
+
+// applySettingSection 解码整段设置并提交，返回提交后的配置段。
+// 从构造函数默认值开始解码，JSON null 对非指针字段不生效、对指针和集合字段置空，两者都回落默认值。
+func applySettingSection[Request settingRequest, Section, Data any](c *gin.Context, request Request, namespace string,
+	defaults func() *Section, load func() *Section, convert func(*Section) Data) apicontract.Response[Data] {
+	return applySettingSectionWith(c, request, func(section *Section) ([]model.Issue, error) {
+		return model.ApplyConfSection(namespace, section)
+	}, defaults, load, convert)
+}
+
+// applySettingSectionWith 使用调用方指定的提交规则应用配置段。
+func applySettingSectionWith[Request settingRequest, Section, Data any](c *gin.Context, request Request,
+	apply func(*Section) ([]model.Issue, error), defaults func() *Section, load func() *Section,
+	convert func(*Section) Data) apicontract.Response[Data] {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[Data](-1, err.Error())
+	}
+	section := defaults()
+	if err := gulu.JSON.UnmarshalJSON(request.ConfigJSON(), section); err != nil {
+		return apicontract.Failure[Data](-1, err.Error())
+	}
+	issues, err := apply(section)
+	recordSettingIssues(c, issues)
+	if err != nil {
+		return apicontract.Failure[Data](-1, err.Error())
+	}
+	return apicontract.Success(convert(load()))
+}
+
 var setEditorReadOnly = contractHandler(apicontract.SetEditorReadOnly, func(c *gin.Context, request apicontract.EditorReadOnlyRequest) apicontract.Response[apicontract.Null] {
 	model.UpdateEditorConf(func(s *conf.Editor) { s.ReadOnly = request.ReadOnly })
 	return apicontract.Success(apicontract.Null{})
 })
 
-var setConfSnippet = contractHandler(apicontract.SetConfSnippet, applySnippetSetting)
-
-func applySnippetSetting(c *gin.Context, request apicontract.SetConfSnippetRequest) (ret apicontract.Response[*apicontract.SettingSnpt]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingSnpt](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingSnpt)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	snippet := &conf.Snpt{}
-	if err = gulu.JSON.UnmarshalJSON(param, snippet); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingSnpt](-1, err.Error())
-		return
-	}
-
-	issues, applyErr := model.ApplyConfSection("snippet", snippet)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingSnpt](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingSnptPayload(model.Conf.Snippet.Load()))
-	return
+var applySnippetSetting = func(c *gin.Context, request apicontract.SetConfSnippetRequest) apicontract.Response[*apicontract.SettingSnpt] {
+	return applySettingSection(c, request, "snippet", conf.NewSnpt, model.Conf.Snippet.Load, settingSnptPayload)
 }
+
+var setConfSnippet = contractHandler(apicontract.SetConfSnippet, applySnippetSetting)
 
 var addVirtualBlockRefExclude = contractHandler(apicontract.AddVirtualBlockRefExclude, func(c *gin.Context, request apicontract.VirtualBlockRefRequest) apicontract.Response[apicontract.Null] {
 	model.AddVirtualBlockRefExclude(request.Keywords)
@@ -85,36 +97,13 @@ var refreshVirtualBlockRef = contractHandler(apicontract.RefreshVirtualBlockRef,
 	return apicontract.Success(apicontract.Null{})
 })
 
-var setBazaar = contractHandler(apicontract.SetBazaar, applyBazaarSetting)
-
-func applyBazaarSetting(c *gin.Context, request apicontract.SetBazaarRequest) (ret apicontract.Response[*apicontract.SettingBazaar]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingBazaar](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingBazaar)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	bazaar := &conf.Bazaar{}
-	if err = gulu.JSON.UnmarshalJSON(param, bazaar); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingBazaar](-1, err.Error())
-		return
-	}
-
+var applyBazaarSetting = func(c *gin.Context, request apicontract.SetBazaarRequest) apicontract.Response[*apicontract.SettingBazaar] {
 	bazaarPetalStateMu.Lock()
 	defer bazaarPetalStateMu.Unlock()
-
-	issues, applyErr := model.ApplyConfSection("bazaar", bazaar)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingBazaar](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingBazaarPayload(model.Conf.Bazaar.Load()))
-	return
+	return applySettingSection(c, request, "bazaar", conf.NewBazaar, model.Conf.Bazaar.Load, settingBazaarPayload)
 }
+
+var setBazaar = contractHandler(apicontract.SetBazaar, applyBazaarSetting)
 
 var setBazaarPetalDisabled = contractHandler(apicontract.SetBazaarPetalDisabled, func(c *gin.Context, request apicontract.SettingPetalDisabledRequest) apicontract.Response[apicontract.SettingPetalDisabledData] {
 	petalDisabled := request.PetalDisabled
@@ -146,17 +135,10 @@ func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apico
 	param := request.ConfigJSON()
 	var err error
 
-	ai := &conf.AI{}
+	ai := conf.NewAI()
 	if err = gulu.JSON.UnmarshalJSON(param, ai); err != nil {
 		ret = apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 		return
-	}
-	if model.Conf.AI.Load() != nil {
-		if ai.Decision == nil {
-			ai.Decision = model.Conf.AI.Load().Decision.Clone()
-		} else {
-			ai.Decision.MergePrevious(model.Conf.AI.Load().Decision)
-		}
 	}
 	if ai.MCP != nil {
 		for _, server := range ai.MCP.Servers {
@@ -179,7 +161,9 @@ func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apico
 		preserveMCPServerIDs(oldServers, ai.MCP.Servers)
 	}
 	ai = conf.NormalizeAI(ai)
-	model.Conf.SetAI(ai)
+	if err = model.Conf.SetAI(c.Request.Context(), ai); err != nil {
+		return apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
+	}
 	mcpserver.RefreshToolExposure()
 
 	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。
@@ -230,63 +214,25 @@ func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
 	}
 }
 
+var applySecretsSetting = func(c *gin.Context, request apicontract.SetSecretsRequest) apicontract.Response[*apicontract.SettingSecrets] {
+	response := applySettingSection(c, request, "secrets", conf.NewSecrets, model.Conf.Secrets.Load, settingSecretsPayload)
+	if response.Code() == 0 {
+		reconnectStdioMCPWithEnvironment()
+	}
+	return response
+}
+
 var setSecrets = contractHandler(apicontract.SetSecrets, applySecretsSetting)
 
-func applySecretsSetting(c *gin.Context, request apicontract.SetSecretsRequest) (ret apicontract.Response[*apicontract.SettingSecrets]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingSecrets](-1, err.Error())
+var applyVariablesSetting = func(c *gin.Context, request apicontract.SetVariablesRequest) apicontract.Response[*apicontract.SettingVariables] {
+	response := applySettingSection(c, request, "variables", conf.NewVariables, model.Conf.Variables.Load, settingVariablesPayload)
+	if response.Code() == 0 {
+		reconnectStdioMCPWithEnvironment()
 	}
-	ret = apicontract.Success((*apicontract.SettingSecrets)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	secrets := &conf.Secrets{}
-	if err = gulu.JSON.UnmarshalJSON(param, secrets); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingSecrets](-1, err.Error())
-		return
-	}
-
-	issues, applyErr := model.ApplyConfSection("secrets", secrets)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingSecrets](-1, err.Error())
-	}
-	reconnectStdioMCPWithEnvironment()
-
-	ret = apicontract.Success(settingSecretsPayload(model.Conf.Secrets.Load()))
-	return
+	return response
 }
 
 var setVariables = contractHandler(apicontract.SetVariables, applyVariablesSetting)
-
-func applyVariablesSetting(c *gin.Context, request apicontract.SetVariablesRequest) (ret apicontract.Response[*apicontract.SettingVariables]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingVariables](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingVariables)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	variables := &conf.Variables{}
-	if err = gulu.JSON.UnmarshalJSON(param, variables); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingVariables](-1, err.Error())
-		return
-	}
-
-	issues, applyErr := model.ApplyConfSection("variables", variables)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingVariables](-1, err.Error())
-	}
-	reconnectStdioMCPWithEnvironment()
-
-	ret = apicontract.Success(settingVariablesPayload(model.Conf.Variables.Load()))
-	return
-}
 
 func reconnectStdioMCPWithEnvironment() {
 	confAISnapshot := model.Conf.LoadAI()
@@ -310,74 +256,17 @@ func stdioMCPServerIDsWithEnvironment(servers []conf.MCPServer) []string {
 	return serverIDs
 }
 
+var applyFlashcardSetting = func(c *gin.Context, request apicontract.SetFlashcardRequest) apicontract.Response[*apicontract.SettingFlashcard] {
+	return applySettingSection(c, request, "flashcard", conf.NewFlashcard, model.Conf.Flashcard.Load, settingFlashcardPayload)
+}
+
 var setFlashcard = contractHandler(apicontract.SetFlashcard, applyFlashcardSetting)
 
-func applyFlashcardSetting(c *gin.Context, request apicontract.SetFlashcardRequest) (ret apicontract.Response[*apicontract.SettingFlashcard]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingFlashcard](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingFlashcard)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	flashcard := &conf.Flashcard{}
-	if err = gulu.JSON.UnmarshalJSON(param, flashcard); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingFlashcard](-1, err.Error())
-		return
-	}
-
-	issues, applyErr := model.ApplyConfSection("flashcard", flashcard)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingFlashcard](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingFlashcardPayload(model.Conf.Flashcard.Load()))
-	return
+var applyEditorSetting = func(c *gin.Context, request apicontract.SetEditorRequest) apicontract.Response[*apicontract.SettingEditor] {
+	return applySettingSection(c, request, "editor", conf.NewEditor, model.Conf.Editor.Load, settingEditorPayload)
 }
 
 var setEditor = contractHandler(apicontract.SetEditor, applyEditorSetting)
-
-func applyEditorSetting(c *gin.Context, request apicontract.SetEditorRequest) (ret apicontract.Response[*apicontract.SettingEditor]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingEditor](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingEditor)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	editor := conf.NewEditor()
-	if err = gulu.JSON.UnmarshalJSON(param, editor); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingEditor](-1, err.Error())
-		return
-	}
-	if !request.HasField("fontFamilies") && editor.FontFamily == model.Conf.Editor.Load().FontFamily &&
-		editor.FontWeight == model.Conf.Editor.Load().FontWeight {
-		editor.FontFamilies = model.Conf.Editor.Load().FontFamilies
-	}
-	if !request.HasField("codeFontFamilies") {
-		editor.CodeFontFamilies = model.Conf.Editor.Load().CodeFontFamilies
-	}
-	if !request.HasFieldFold("displayImgName") {
-		editor.DisplayImgName = model.Conf.Editor.Load().DisplayImgName
-	}
-	if !request.HasFieldFold("displayImgAlt") {
-		editor.DisplayImgAlt = model.Conf.Editor.Load().DisplayImgAlt
-	}
-
-	issues, applyErr := model.ApplyConfSection("editor", editor)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingEditor](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingEditorPayload(model.Conf.Editor.Load()))
-	return
-}
 
 var setExport = contractHandler(apicontract.SetExport, applyExportSetting)
 
@@ -390,20 +279,18 @@ func applyExportSetting(c *gin.Context, request apicontract.SetExportRequest) (r
 	param := request.ConfigJSON()
 	var err error
 
-	export := &conf.Export{}
+	export := conf.NewExport()
 	if err = gulu.JSON.UnmarshalJSON(param, export); err != nil {
 		ret = apicontract.FailureWithTimeout[*apicontract.SettingExport](-1, err.Error(), 5000)
 		return
 	}
 
-	// 整段旧接口保留废弃导出模式的转换行为
 	conf.MigrateExportBlockRefMode(export)
+	// 只校验本次实际改动的 Pandoc 路径，避免沿用已有路径时重复提示
 	previousPandocBin := model.Conf.Export.Load().PandocBin
-	if "" != export.PandocBin {
-		if !util.IsValidPandocBin(export.PandocBin) {
-			util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)
-			export.PandocBin = previousPandocBin
-		}
+	if "" != export.PandocBin && export.PandocBin != previousPandocBin && !util.IsValidPandocBin(export.PandocBin) {
+		util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)
+		export.PandocBin = previousPandocBin
 	}
 
 	issues, applyErr := model.ApplyConfSection("export", export)
@@ -429,94 +316,17 @@ var getPandocBin = contractHandler(apicontract.GetPandocBin, func(c *gin.Context
 	return apicontract.Success(pandocRuntime.BinPath)
 })
 
+var applyFiletreeSetting = func(c *gin.Context, request apicontract.SetFiletreeRequest) apicontract.Response[*apicontract.SettingFileTree] {
+	return applySettingSection(c, request, "fileTree", conf.NewFileTree, model.Conf.FileTree.Load, settingFileTreePayload)
+}
+
 var setFiletree = contractHandler(apicontract.SetFiletree, applyFiletreeSetting)
 
-func applyFiletreeSetting(c *gin.Context, request apicontract.SetFiletreeRequest) (ret apicontract.Response[*apicontract.SettingFileTree]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingFileTree)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	fileTree := conf.NewFileTree()
-	// 请求未携带的保存格式和大文件阈值沿用当前配置
-	fileTree.UseSingleLineSave = model.Conf.FileTree.Load().UseSingleLineSave
-	fileTree.LargeFileWarningSize = model.Conf.FileTree.Load().LargeFileWarningSize
-	fileTree.BoxDocEnabled = nil
-	fileTree.UseSVGDefaultIcon = nil
-	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
-		return
-	}
-	if nil == fileTree.BoxDocEnabled {
-		if nil != model.Conf.FileTree.Load() && nil != model.Conf.FileTree.Load().BoxDocEnabled {
-			fileTree.BoxDocEnabled = model.Conf.FileTree.Load().BoxDocEnabled
-		} else {
-			fileTree.BoxDocEnabled = new(bool)
-		}
-	}
-	if nil == fileTree.UseSVGDefaultIcon {
-		if nil != model.Conf.FileTree.Load() && nil != model.Conf.FileTree.Load().UseSVGDefaultIcon {
-			fileTree.UseSVGDefaultIcon = model.Conf.FileTree.Load().UseSVGDefaultIcon
-		} else {
-			fileTree.UseSVGDefaultIcon = new(bool)
-		}
-	}
-
-	issues, applyErr := model.ApplyConfSection("fileTree", fileTree)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingFileTreePayload(model.Conf.FileTree.Load()))
-	return
+var applySearchSetting = func(c *gin.Context, request apicontract.SetSearchRequest) apicontract.Response[*apicontract.SettingSearch] {
+	return applySettingSection(c, request, "search", conf.NewSearch, model.Conf.Search.Load, settingSearchPayload)
 }
 
 var setSearch = contractHandler(apicontract.SetSearch, applySearchSetting)
-
-func applySearchSetting(c *gin.Context, request apicontract.SetSearchRequest) (ret apicontract.Response[*apicontract.SettingSearch]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingSearch](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingSearch)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	s := &conf.Search{}
-	if err = gulu.JSON.UnmarshalJSON(param, s); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingSearch](-1, err.Error())
-		return
-	}
-
-	if s.HanSensitive == nil {
-		// 兼容未携带该字段的旧版前端/第三方调用：保持当前值，避免被零值意外关闭并触发重建索引
-		s.HanSensitive = model.Conf.Search.Load().HanSensitive
-	}
-	if s.CustomBlock == nil {
-		s.CustomBlock = new(model.Conf.Search.Load().CustomBlockEnabled())
-	}
-	if s.Mindmap == nil {
-		s.Mindmap = new(model.Conf.Search.Load().MindmapEnabled())
-	}
-	if s.MindmapItem == nil {
-		s.MindmapItem = new(model.Conf.Search.Load().MindmapItemEnabled())
-	}
-
-	issues, applyErr := model.ApplyConfSection("search", s)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingSearch](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingSearchPayload(model.Conf.Search.Load()))
-	return
-}
 
 var setKeymap = contractHandler(apicontract.SetKeymap, applyKeymapSetting)
 
@@ -538,42 +348,13 @@ func applyKeymapSetting(c *gin.Context, request apicontract.SettingKeymapRequest
 	return apicontract.Success(apicontract.Null{})
 }
 
-var setAppearance = contractHandler(apicontract.SetAppearance, applyAppearanceSetting)
-
-func applyAppearanceSetting(c *gin.Context, request apicontract.SetAppearanceRequest) (ret apicontract.Response[*apicontract.SettingAppearance]) {
-	if err := request.ConfigError(); err != nil {
-		return apicontract.Failure[*apicontract.SettingAppearance](-1, err.Error())
-	}
-	ret = apicontract.Success((*apicontract.SettingAppearance)(nil))
-
-	param := request.ConfigJSON()
-	var err error
-
-	appearance := &conf.Appearance{}
-	if err = gulu.JSON.UnmarshalJSON(param, appearance); err != nil {
-		ret = apicontract.Failure[*apicontract.SettingAppearance](-1, err.Error())
-		return
-	}
-
-	if nil == appearance.EntryVisibility {
-		appearance.EntryVisibility = model.Conf.Appearance.Load().EntryVisibility
-	}
-	if !request.HasField("bodyGradient") {
-		appearance.BodyGradient = model.Conf.Appearance.Load().BodyGradient
-	}
-	if !request.HasField("globalFontFamilies") {
-		appearance.GlobalFontFamilies = model.Conf.Appearance.Load().GlobalFontFamilies
-	}
-	issues, applyErr := model.ApplyAppearanceSetting(appearance)
-	recordSettingIssues(c, issues)
-	err = applyErr
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingAppearance](-1, err.Error())
-	}
-
-	ret = apicontract.Success(settingAppearancePayload(model.Conf.Appearance.Load()))
-	return
+var applyAppearanceSetting = func(c *gin.Context, request apicontract.SetAppearanceRequest) apicontract.Response[*apicontract.SettingAppearance] {
+	return applySettingSectionWith(c, request, model.ApplyAppearanceSetting,
+		func() *conf.Appearance { return conf.NewAppearanceForContainer(util.IsMobileContainer()) },
+		model.Conf.Appearance.Load, settingAppearancePayload)
 }
+
+var setAppearance = contractHandler(apicontract.SetAppearance, applyAppearanceSetting)
 
 var getBootAppearances = contractHandler(apicontract.GetBootAppearances, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.SettingBootAppearancesData] {
 	appearances := model.GetBootAppearances()
@@ -660,17 +441,12 @@ func applyPublishSetting(c *gin.Context, request apicontract.SetPublishRequest) 
 	param := request.ConfigJSON()
 	var err error
 
-	publish := &conf.Publish{}
+	publish := conf.NewPublish()
 	if err = gulu.JSON.UnmarshalJSON(param, publish); err != nil {
 		ret = apicontract.Failure[apicontract.SettingPublishData](-1, err.Error())
 		return
 	}
 
-	if nil == publish.Auth {
-		// 请求体缺省 auth（如 null）时保留现有认证配置，避免把 null 写入 conf.json 导致下次启动崩溃
-		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
-		publish.Auth = model.Conf.Publish.Load().Auth
-	}
 	issues, applyErr := model.ApplyConfSection("publish", publish)
 	recordSettingIssues(c, issues)
 	err = applyErr

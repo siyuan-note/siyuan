@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -34,6 +35,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 )
 
 var FileTool = &Tool{
@@ -266,18 +268,18 @@ func fileList(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Directory: %s (%d entries)\n\n", p, total))
+	fmt.Fprintf(&sb, "Directory: %s (%d entries)\n\n", p, total)
 	for _, e := range entries {
 		info, _ := e.Info()
 		size := ""
 		if info != nil {
 			size = fmt.Sprintf("%d", info.Size())
 		}
-		sb.WriteString(fmt.Sprintf("- %s [%s] %s\n", e.Name(), typeLabel(e.IsDir()), size))
+		fmt.Fprintf(&sb, "- %s [%s] %s\n", e.Name(), typeLabel(e.IsDir()), size)
 	}
 
 	if max > 0 && max < total {
-		sb.WriteString(fmt.Sprintf("\n...output limited to %d of %d entries. Use limit parameter to adjust.", max, total))
+		fmt.Fprintf(&sb, "\n...output limited to %d of %d entries. Use limit parameter to adjust.", max, total)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -366,7 +368,7 @@ func fileWrite(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
 	if util.IsPluginDevelopmentRawWriteForbidden(abs) {
-		return fileSafeError(fileInvalid("invalid_path", "raw write to a managed plugin or delivery path is forbidden"))
+		return fileSafeError(fileInvalid(util.TextFileInvalidPath, "raw write to a managed plugin or delivery path is forbidden"))
 	}
 	if err := os.MkdirAll(filepath.Dir(abs), 0755); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "mkdir failed: " + err.Error()}}, IsError: true}, nil
@@ -396,18 +398,11 @@ type fileReadPage struct {
 func fileSafeError(err error) (CallToolResult, error) {
 	var failure *util.TextFileError
 	if !errors.As(err, &failure) {
-		failure = &util.TextFileError{Code: "write_failed", Message: err.Error()}
-		for _, code := range []string{"revision_conflict", "invalid_path", "unsupported_encoding", "too_large", "backup_failed", "result_unknown"} {
-			if strings.HasPrefix(err.Error(), code+":") {
-				failure.Code = code
-				failure.Message = strings.TrimSpace(strings.TrimPrefix(err.Error(), code+":"))
-				break
-			}
-		}
+		failure = &util.TextFileError{Code: util.TextFileWriteFailed, Message: err.Error()}
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			failure.Code = "cancelled"
+			failure.Code = util.TextFileCancelled
 		} else if errors.Is(err, os.ErrNotExist) {
-			failure.Code = "invalid_path"
+			failure.Code = util.TextFileInvalidPath
 		}
 	}
 	// 系统错误可能包含输入路径；复制后限制错误文本，避免共享输出截断器破坏错误 JSON 或修改调用方对象。
@@ -421,7 +416,7 @@ func fileSafeError(err error) (CallToolResult, error) {
 		failure.Message = failure.Message[:end] + "..."
 	}
 	encoded, _ := json.Marshal(failure)
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(encoded)}}, StructuredContent: failure, StructuredContentSet: true, IsError: true, ExecutionUnknown: failure.Code == "result_unknown"}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(encoded)}}, StructuredContent: failure, StructuredContentSet: true, IsError: true, ExecutionUnknown: failure.Code == util.TextFileResultUnknown}, nil
 }
 
 func fileInvalid(code, message string) error {
@@ -434,7 +429,7 @@ func fileJSONResult(value any) (CallToolResult, error) {
 		return fileSafeError(err)
 	}
 	if len(encoded) >= fileJSONBudget {
-		return fileSafeError(fileInvalid("too_large", "serialized result exceeds safe response budget"))
+		return fileSafeError(fileInvalid(util.TextFileTooLarge, "serialized result exceeds safe response budget"))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(encoded)}}, StructuredContent: value, StructuredContentSet: true}, nil
 }
@@ -473,7 +468,7 @@ func fileReadMetadata(args map[string]any) (CallToolResult, error) {
 		return fileSafeError(err)
 	}
 	if _, err := resolvePath(p); err != nil {
-		return fileSafeError(fileInvalid("invalid_path", err.Error()))
+		return fileSafeError(fileInvalid(util.TextFileInvalidPath, err.Error()))
 	}
 	root, err := os.OpenRoot(util.WorkspaceDir)
 	if err != nil {
@@ -493,7 +488,7 @@ func fileMetadataContent(args map[string]any, content string) (CallToolResult, e
 	}
 	revision := util.TextFileRevision([]byte(content))
 	if expected, exists := args["expectedRevision"]; exists && expected != revision {
-		return fileSafeError(fileInvalid("revision_conflict", "file changed; restart the read with its current revision"))
+		return fileSafeError(fileInvalid(util.TextFileRevisionConflict, "file changed; restart the read with its current revision"))
 	}
 	offset, err := fileIntegerArg(args, "byteOffset", 0)
 	if err != nil {
@@ -556,7 +551,7 @@ func fileMetadataContent(args map[string]any, content string) (CallToolResult, e
 	}
 	setEnd(best)
 	if best == offset && offset < len(content) {
-		return fileSafeError(fileInvalid("too_large", "metadata leaves no room for content"))
+		return fileSafeError(fileInvalid(util.TextFileTooLarge, "metadata leaves no room for content"))
 	}
 	return fileJSONResult(page)
 }
@@ -590,7 +585,8 @@ func fileMutationRequest(args map[string]any) (util.TextFileMutation, error) {
 	request.IfAbsent, _ = args["ifAbsent"].(bool)
 	request.DryRun, _ = args["dryRun"].(bool)
 	action, _ := args["action"].(string)
-	if action == "edit" {
+	switch action {
+	case "edit":
 		raw, ok := args["edits"].([]any)
 		if !ok || len(raw) == 0 || len(raw) > 128 {
 			return request, fileInvalid("invalid_edit", "edits must contain 1 to 128 replacements")
@@ -608,7 +604,7 @@ func fileMutationRequest(args map[string]any) (util.TextFileMutation, error) {
 			}
 			request.Edits[i] = util.TextEdit{OldText: oldText, NewText: newText}
 		}
-	} else if action == "write" || action == "" {
+	case "write", "":
 		var ok bool
 		request.Content, ok = args["data"].(string)
 		if !ok {
@@ -625,7 +621,7 @@ func fileMutationResult(result util.TextFileMutationResult) (CallToolResult, err
 			return fileJSONResult(result)
 		}
 		if len(result.Diff) == 0 {
-			return fileSafeError(fileInvalid("too_large", "edit result exceeds response budget"))
+			return fileSafeError(fileInvalid(util.TextFileTooLarge, "edit result exceeds response budget"))
 		}
 		end := len(result.Diff) / 2
 		for end > 0 && !utf8.RuneStart(result.Diff[end]) {
@@ -643,10 +639,10 @@ func fileMutate(ctx context.Context, args map[string]any) (CallToolResult, error
 	}
 	abs, err := resolvePath(p)
 	if err != nil {
-		return fileSafeError(fileInvalid("invalid_path", err.Error()))
+		return fileSafeError(fileInvalid(util.TextFileInvalidPath, err.Error()))
 	}
 	if util.IsPluginDevelopmentRawWriteForbidden(abs) {
-		return fileSafeError(fileInvalid("invalid_path", "raw write to a managed plugin or delivery path is forbidden"))
+		return fileSafeError(fileInvalid(util.TextFileInvalidPath, "raw write to a managed plugin or delivery path is forbidden"))
 	}
 	request, err := fileMutationRequest(args)
 	if err != nil {
@@ -663,7 +659,7 @@ func fileMutate(ctx context.Context, args map[string]any) (CallToolResult, error
 			return err
 		}
 		if util.IsPluginDevelopmentRawWriteForbidden(abs) {
-			return fileInvalid("invalid_path", "raw write to a managed plugin or delivery path is forbidden")
+			return fileInvalid(util.TextFileInvalidPath, "raw write to a managed plugin or delivery path is forbidden")
 		}
 		return nil
 	}
@@ -677,7 +673,7 @@ func fileMutate(ctx context.Context, args map[string]any) (CallToolResult, error
 func fileManaged(ctx context.Context, args map[string]any) (result CallToolResult, resultErr error) {
 	action, _ := args["action"].(string)
 	if action != "read" && action != "write" && action != "edit" && action != "delete" && action != "rename" {
-		return fileSafeError(fileInvalid("invalid_path", "managed sources support only read, conditional write/edit and file-only delete/rename"))
+		return fileSafeError(fileInvalid(util.TextFileInvalidPath, "managed sources support only read, conditional write/edit and file-only delete/rename"))
 	}
 	write := action != "read"
 	err := util.WithPluginProjectSource(ctx, write, func(grant *util.PluginDevelopmentGrant, root *os.Root) error {
@@ -712,7 +708,7 @@ func fileManaged(ctx context.Context, args map[string]any) (result CallToolResul
 				return err
 			}
 			if current.TaskID != grant.TaskID || current.SessionID != grant.SessionID || current.PlanHash != grant.PlanHash || current.PlanVersion != grant.PlanVersion || current.SkillDigest != grant.SkillDigest || current.SourceRoot != grant.SourceRoot {
-				return fileInvalid("revision_conflict", "approved plugin plan changed during operation")
+				return fileInvalid(util.TextFileRevisionConflict, "approved plugin plan changed during operation")
 			}
 			_, err = fileManagedRelative(current, p)
 			if err == nil && action == "rename" {
@@ -771,22 +767,20 @@ func fileManagedRelative(grant *util.PluginDevelopmentGrant, p string) (string, 
 	}
 	abs := filepath.Join(util.WorkspaceDir, filepath.FromSlash(p))
 	if grant.SourceRoot == "" || filepath.Clean(grant.SourceRoot) != filepath.Join(util.PluginProjectRoot(grant.TaskID), "source") {
-		return "", fileInvalid("invalid_path", "invalid host-owned source root")
+		return "", fileInvalid(util.TextFileInvalidPath, "invalid host-owned source root")
 	}
 	rel, err := filepath.Rel(grant.SourceRoot, abs)
 	if err != nil {
-		return "", fileInvalid("invalid_path", "path is outside approved source")
+		return "", fileInvalid(util.TextFileInvalidPath, "path is outside approved source")
 	}
 	rel = filepath.ToSlash(rel)
 	if err = util.ValidateTextFilePath(rel); err != nil {
 		return "", err
 	}
-	for _, allowed := range grant.AllowFiles {
-		if rel == allowed {
-			return rel, nil
-		}
+	if slices.Contains(grant.AllowFiles, rel) {
+		return rel, nil
 	}
-	return "", fileInvalid("invalid_path", "file is outside the approved project allowlist")
+	return "", fileInvalid(util.TextFileInvalidPath, "file is outside the approved project allowlist")
 }
 
 func fileDelete(args map[string]any) (CallToolResult, error) {
@@ -949,7 +943,7 @@ func fileGrep(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d lines:\n\n", len(results)))
+	fmt.Fprintf(&sb, "Found %d lines:\n\n", len(results))
 	for _, r := range results {
 		rel, relErr := filepath.Rel(util.WorkspaceDir, r.File)
 		if relErr != nil {
@@ -959,7 +953,7 @@ func fileGrep(args map[string]any) (CallToolResult, error) {
 		if r.Context {
 			sep = "-:"
 		}
-		sb.WriteString(fmt.Sprintf("%s:%d%s %s\n", rel, r.Line, sep, r.Text))
+		fmt.Fprintf(&sb, "%s:%d%s %s\n", rel, r.Line, sep, r.Text)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
@@ -1080,6 +1074,9 @@ func grepGuardedFile(path string, re *regexp.Regexp, context int, results *[]*gu
 			}
 		}
 	}
+	if scanErr := scanner.Err(); scanErr != nil {
+		logging.LogErrorf("scan file [%s] failed: %s", path, scanErr)
+	}
 }
 
 // skipTraversalDir 判断遍历时是否跳过该目录，与 Gulu 的隐藏目录跳过规则保持一致。
@@ -1144,15 +1141,16 @@ func fileFind(args map[string]any) (CallToolResult, error) {
 
 	var sb strings.Builder
 	if max > 0 && max < total {
-		sb.WriteString(fmt.Sprintf("Found %d files (showing first %d):\n\n", total, max))
+		fmt.Fprintf(&sb, "Found %d files (showing first %d):\n\n", total, max)
 	} else {
-		sb.WriteString(fmt.Sprintf("Found %d files:\n\n", len(results)))
+		fmt.Fprintf(&sb, "Found %d files:\n\n", len(results))
 	}
 	for _, r := range results {
-		sb.WriteString(r + "\n")
+		sb.WriteString(r)
+		sb.WriteString("\n")
 	}
 	if max > 0 && max < total {
-		sb.WriteString(fmt.Sprintf("\n...output limited to %d of %d files. Use limit parameter to adjust.", max, total))
+		fmt.Fprintf(&sb, "\n...output limited to %d of %d files. Use limit parameter to adjust.", max, total)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

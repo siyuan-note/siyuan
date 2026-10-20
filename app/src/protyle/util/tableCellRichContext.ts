@@ -1,6 +1,7 @@
 type TableCellContext = {owner: IProtyle, cell: HTMLTableCellElement, finish: () => void};
 
 const contexts = new WeakMap<IProtyle, TableCellContext>();
+const cellContexts = new WeakMap<HTMLTableCellElement, TableCellContext>();
 const forwardedEventTargets = new WeakMap<Event, HTMLElement>();
 
 export const setTableCellRichEventTarget = (event: Event, host: HTMLElement) => {
@@ -22,6 +23,13 @@ export const getTableCellRichSelectionHost = (selection: Selection) => {
 
 export const setTableCellRichContext = (protyle: IProtyle, context: TableCellContext) => {
     contexts.set(protyle, context);
+    cellContexts.set(context.cell, context);
+};
+
+// 结构和选区操作必须先提交单元格；组合输入尚未结束时保留编辑器和原始内容。
+export const finishTableCellEditing = (cell: HTMLTableCellElement) => {
+    cellContexts.get(cell)?.finish();
+    return cell.isConnected && !cell.querySelector(".table__cell-editor");
 };
 
 export const getTableCellRichContext = (protyle: IProtyle) => {
@@ -30,12 +38,14 @@ export const getTableCellRichContext = (protyle: IProtyle) => {
 };
 
 // 菜单展示期间保留文字选区，执行表格操作前再提交单元格内容。
-export const prepareTableCellMenuItems = (items: IMenu[], prepare: () => void) => {
+export const prepareTableCellMenuItems = (items: IMenu[], prepare: () => boolean | void) => {
     items.forEach(item => {
         if (item.click) {
             const click = item.click;
             item.click = (...args) => {
-                prepare();
+                if (prepare() === false) {
+                    return;
+                }
                 return click(...args);
             };
         }
@@ -44,12 +54,18 @@ export const prepareTableCellMenuItems = (items: IMenu[], prepare: () => void) =
             item.bind = element => {
                 element.addEventListener("click", event => {
                     if (!(event.target instanceof HTMLInputElement)) {
-                        prepare();
+                        if (prepare() === false) {
+                            event.preventDefault();
+                            event.stopImmediatePropagation();
+                        }
                     }
                 }, {capture: true});
                 element.addEventListener("keydown", event => {
                     if (event.key === "Enter" && !event.isComposing) {
-                        prepare();
+                        if (prepare() === false) {
+                            event.preventDefault();
+                            event.stopImmediatePropagation();
+                        }
                     }
                 }, {capture: true});
                 bind(element);

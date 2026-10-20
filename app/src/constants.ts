@@ -95,12 +95,16 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_TABLE_HEADER_ROW: string = "custom-sy-table-header-row";
     public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
     public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
+    public static readonly CUSTOM_SY_LIVE_PHOTO: string = "custom-sy-live-photo";
+    public static readonly CUSTOM_SY_LIVE_PHOTO_VIDEO: string = "custom-sy-live-photo-video";
 
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
     public static readonly ATTRIBUTE_DOCK_WIDTH = "data-dock-width";
     public static readonly ATTRIBUTE_MENU_KEYMAP = "data-menu-keymap";
+    // 界面密度标记仅用于根元素，不写入笔记内容。
+    public static readonly ATTRIBUTE_UI_DENSITY = "data-ui-density";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
@@ -200,6 +204,7 @@ export abstract class Constants {
     public static readonly LOCAL_EXPORTIMG = "local-exportimg";
     public static readonly LOCAL_EXPORTPATH = "local-exportpath";
     public static readonly LOCAL_BAZAAR = "local-bazaar";
+    /** @deprecated 内置偏好改用 config.appearance.pdfTheme，不再读取此旧键 */
     public static readonly LOCAL_PDFTHEME = "local-pdftheme";
     public static readonly LOCAL_LAYOUTS = "local-layouts";
     public static readonly LOCAL_WINDOW_WORKSPACE = "local-window-workspace-";
@@ -209,16 +214,21 @@ export abstract class Constants {
     public static readonly LOCAL_FILESPATHS = "local-filespaths";
     public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
+    /** @deprecated 内置偏好改用 config.appearance.outlineKeepCurrentExpand，不再读取此旧键 */
     public static readonly LOCAL_OUTLINE = "local-outline";
     public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";
     public static readonly LOCAL_IMAGES = "local-images";
     public static readonly LOCAL_EMOJIS = "local-emojis";
     public static readonly LOCAL_MOVE_PATH = "local-move-path";
+    /** @deprecated 内置偏好改用 config.fileTree.recentDocsSort，不再读取此旧键 */
     public static readonly LOCAL_RECENT_DOCS = "local-recent-docs";
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
     public static readonly LOCAL_TABS_READING = "local-tabs-reading";
-    public static readonly LOCAL_PAGE_SCROLL_BUTTONS = "local-page-scroll-buttons";
+    /** @deprecated 内置偏好改用 config.appearance.compactMode，不再读取此旧键 */
+    public static readonly LOCAL_COMPACT_MODE = "local-compact-mode";
+    /** @deprecated 内置偏好改用 config.appearance.menuMouseScroll，不再读取此旧键 */
+    public static readonly LOCAL_MENU_MOUSE_SCROLL = "local-menu-mouse-scroll";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";
@@ -672,6 +682,11 @@ export abstract class Constants {
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
                 quote: {default: "", custom: ""},
+                calloutNote: {default: "", custom: ""},
+                calloutTip: {default: "", custom: ""},
+                calloutImportant: {default: "", custom: ""},
+                calloutWarning: {default: "", custom: ""},
+                calloutCaution: {default: "", custom: ""},
                 clearInline: {default: "⌘\\", custom: "⌘\\"},
             },
             heading: {

@@ -318,9 +318,12 @@ const renderMobileMainMenuGroupHTML = (group: IMobileMainMenuGroup) =>
 /** 生成主菜单容器 `#menu` 的内容，分组与条目均由 `MOBILE_MAIN_MENU_GROUPS` 推导 */
 export const renderMobileMainMenuHTML = () => `<div class="toolbar toolbar--border">
     <svg class="toolbar__icon" data-type="close-menu" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
-    <div class="mobile-main-menu__search" data-prevent-swipe>
+    <div class="toolbar__text mobile-main-menu__title">${window.siyuan.languages.more}</div>
+    <div class="mobile-main-menu__search fn__none" data-prevent-swipe>
         <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
+    <button type="button" class="toolbar__button" data-type="menu-search-open" aria-label="${escapeAttr(window.siyuan.languages.search)}" aria-expanded="false"><svg><use xlink:href="#iconSearch"></use></svg></button>
+    <button type="button" class="toolbar__button fn__none" data-type="menu-search-close" aria-label="${escapeAttr(window.siyuan.languages.cancel)}"><svg><use xlink:href="#iconClose"></use></svg></button>
 </div>
 <div class="b3-menu__items b3-menu__groups mobile-main-menu__groups">
     ${MOBILE_MAIN_MENU_GROUPS.map(renderMobileMainMenuGroupHTML).join("")}

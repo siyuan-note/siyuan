@@ -34,12 +34,13 @@ func avArchiveRenderData(attrView *av.AttributeView, view av.Viewable) apicontra
 	return apicontract.AVArchiveRenderData{Name: attrView.Name, ID: attrView.ID, CustomColors: avContractSlice(attrView.Palette(), toContractAVAttributeViewCustomColor), ColorOrder: attrView.PaletteOrder(), UsedCustomColorIndexes: attrView.UsedCustomColorIndexes(), ViewType: string(view.GetType()), ViewID: view.GetID(), Views: views, View: avContractView(view), IsMirror: av.IsMirror(attrView.ID), NewItemTemplates: avContractSlice(attrView.NewItemTemplates, toContractAVNewItemTemplate), DefaultTemplateID: attrView.DefaultTemplateID}
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool, calendarRanges ...*av.CalendarRange) apicontract.Response[apicontract.AVRenderResult] {
-	render := model.RenderAttributeViewWithTarget
-	if filter != nil {
-		render = model.RenderAttributeViewWithTargetReadOnly
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool, renderOptions ...model.AttributeViewRenderOptions) apicontract.Response[apicontract.AVRenderResult] {
+	options := model.AttributeViewRenderOptions{}
+	if len(renderOptions) > 0 {
+		options = renderOptions[0]
 	}
-	view, attrView, target, err := render(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, calendarRanges...)
+	options.ReadOnly = options.ReadOnly || filter != nil
+	view, attrView, target, err := model.RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, options)
 	if err != nil {
 		message := err.Error()
 		if errors.Is(err, av.ErrSpecTooNew) {

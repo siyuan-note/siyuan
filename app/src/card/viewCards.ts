@@ -1,4 +1,4 @@
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {Protyle} from "../protyle";
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";

@@ -152,7 +152,7 @@ func IsPluginDevelopmentRawPathForbidden(abs string, ancestors bool) bool {
 				return true
 			}
 		}
-		for _, component := range strings.Split(pluginDevelopmentLexicalPath(candidate), "/") {
+		for component := range strings.SplitSeq(pluginDevelopmentLexicalPath(candidate), "/") {
 			if strings.HasPrefix(component, ".siyuan-package-install-") {
 				return true
 			}

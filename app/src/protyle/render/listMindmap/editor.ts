@@ -25,6 +25,7 @@ import {getUndoFocusContext, restoreFocusContext} from "../../util/selection";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
+    rootID?: string;
     node: ListMindmapNode;
     host: HTMLElement;
     canEdit: () => boolean;
@@ -33,6 +34,7 @@ interface ListMindmapEditorOptions {
     onAdd: (kind: "child" | "sibling") => Promise<void>;
     onFinish: () => void;
     onUndo: (redo: boolean, selection?: Record<string, string>) => void;
+    isPanTarget?: (event: PointerEvent) => boolean;
     replaceFirstParagraph?: string;
     selection?: Record<string, string>;
 }
@@ -73,7 +75,8 @@ const retainIndependentBlocks = (html: string, node: ListMindmapNode) => {
         child.getAttribute("data-type") !== nestedBranchType(node)).forEach(child => {
         const blocks = [child, ...Array.from(child.querySelectorAll(independentBlockSelector))];
         blocks.forEach(block => {
-            if (block.matches(independentBlockSelector) && !block.closest(".protyle-wysiwyg__embed")) {
+            if (block.matches(independentBlockSelector) &&
+                block.closest(".protyle-wysiwyg__embed") === node.element.closest(".protyle-wysiwyg__embed")) {
                 current.set(block.getAttribute("data-node-id"), block);
             }
         });
@@ -103,6 +106,7 @@ const matchesCustomizedEditorShortcut = (event: KeyboardEvent) => {
 // 编辑器挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
 export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const {owner, node, host} = options;
+    const rootID = options.rootID || owner.block.rootID;
     const initialBlockHTML = nodeContent(node);
     if (!options.canEdit() || !node.element?.isConnected) {
         return;
@@ -171,7 +175,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             lute: owner.lute, lockedOptions: {toolbar, hint},
         },
         afterSetContent: (protyle, element) => {
-            protyle.block.rootID = owner.block.rootID;
+            protyle.block.rootID = rootID;
             protyle.block.parentID = node.id;
             protyle.path = owner.path;
             setCustomBlockRootReady(element, true);
@@ -197,7 +201,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             saveTimer = window.setTimeout((): void => { void commit(); }, 350);
         },
     });
-    fragment.protyle.block.rootID = owner.block.rootID;
+    fragment.protyle.block.rootID = rootID;
     const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement];
     const overlayRoot = host.closest(".mindmap-view") || document.body;
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。
@@ -261,9 +265,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished || composing) {
             return false;
         }
-        // 编辑器中创建的列表会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
+        // 编辑器中创建的列表和脑图会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
         if (!finishSession &&
-            Array.from(fragment.wysiwyg.children).some(element => element.getAttribute("data-type") === "NodeList")) {
+            Array.from(fragment.wysiwyg.children).some(element =>
+                ["NodeList", nestedBranchType(node)].includes(element.getAttribute("data-type")))) {
             return false;
         }
         const html = cleanListMindmapHTML(fragment.getBlockHTML());
@@ -404,7 +409,11 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove", "click", "dblclick",
         "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout", "keyup"]
         .forEach(type => host.addEventListener(type, event => event.stopPropagation(), {signal}));
-    host.addEventListener("keydown", event => event.stopPropagation(), {signal});
+    host.addEventListener("keydown", event => {
+        if (event.defaultPrevented || event.isComposing || composing || !(event.ctrlKey || event.metaKey || event.altKey)) {
+            event.stopPropagation();
+        }
+    }, {signal});
     host.addEventListener("keydown", event => {
         if (event.target instanceof Element &&
             fragment.wysiwyg.contains(event.target.closest(".mindmap-view"))) {
@@ -482,7 +491,9 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog");
     };
     document.addEventListener("pointerdown", event => {
-        if (!belongs(event.target as Node)) {
+        if (options.isPanTarget?.(event)) {
+            captureBeforeChange();
+        } else if (!belongs(event.target as Node)) {
             finish();
         } else {
             // 工具栏浮层位于节点 host 外，格式命令执行前仍需保存原文字选区。

@@ -18,6 +18,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/dejavu/entity"
@@ -26,7 +27,7 @@ import (
 // files 构造 counts 指定的文件列表：扩展名 -> 文件数。
 func files(counts map[string]int) (ret []*entity.File) {
 	for ext, count := range counts {
-		for i := 0; i < count; i++ {
+		for i := range count {
 			ret = append(ret, &entity.File{Path: fmt.Sprintf("/assets/%s-%d.%s", ext, i, ext)})
 		}
 	}
@@ -133,9 +134,9 @@ func TestStatTypesByPathNoExt(t *testing.T) {
 }
 
 func format(ret []*TypeCount) string {
-	s := ""
+	var s strings.Builder
 	for _, tc := range ret {
-		s += fmt.Sprintf("%s=%d ", tc.Type, tc.Count)
+		fmt.Fprintf(&s, "%s=%d ", tc.Type, tc.Count)
 	}
-	return s
+	return s.String()
 }

@@ -21,6 +21,13 @@ import {
 } from "./packageConfig";
 import {openRatingDialog, refreshVisibleRatingUI, syncRatingUser} from "./rating";
 import {getSettingsWindowHost} from "../setting/windowContext";
+import {
+    beginBazaarInstall,
+    cancelBazaarInstall,
+    finishBazaarInstall,
+    getBazaarInstallTask,
+    renderBazaarInstall,
+} from "./installTask";
 
 type TBazaarController = typeof import("../bazaar").bazaar;
 type TBazaarPackageSource = "downloaded" | "updated" | "bazaar";
@@ -144,11 +151,21 @@ const ACTION_HANDLERS = {
     install: ((context, target) => {
         const {controller, app, mount, availableItem, pkgItem, pkgType} = context;
         const installItem = availableItem || pkgItem;
+        if (installItem && pkgType && getBazaarInstallTask(pkgType, installItem.name)) {
+            cancelBazaarInstall(pkgType, installItem.name);
+            renderBazaarInstall(mount.element);
+            return HANDLED;
+        }
         if (target.classList.contains("b3-button--progress") || target.hasAttribute("disabled") ||
             !installItem || !pkgType) {
             return HANDLED;
         }
         const themeAppearanceMode = pkgType === "themes" ? controller._resolveThemeAppearanceMode(installItem) : {};
+        const task = beginBazaarInstall(pkgType, installItem.name, installItem.repoURL);
+        if (!task) {
+            return HANDLED;
+        }
+        renderBazaarInstall(mount.element);
         const request = controller._beginBazaarRequest(pkgType, mount);
         const config = BAZAAR_PACKAGE_CONFIG[pkgType];
         fetchPost(config.api.install, {
@@ -160,16 +177,15 @@ const ACTION_HANDLERS = {
             ...themeAppearanceMode,
             frontend: getFrontend()
         }, response => {
+            if (task.controller.signal.aborted) {
+                return;
+            }
             controller._onBazaar(response, pkgType, request);
             if (response.code !== 0) {
-                if (controller._isBazaarRequestCurrent(pkgType, request)) {
-                    controller._refreshReadmeDetail(pkgType, installItem.name);
-                }
                 return;
             }
             if (controller._isMountCurrent(mount)) {
                 controller._genMyHTML(pkgType, app, false);
-                controller._refreshReadmeDetail(pkgType, installItem.name);
             }
             if (pkgType === "plugins") {
                 if (window.siyuan.config.bazaar.petalDisabled) {
@@ -184,6 +200,14 @@ const ACTION_HANDLERS = {
                         });
                     });
                 }
+            }
+        }, undefined, error => {
+            showMessage(error.msg);
+        }, task.controller.signal).finally(() => {
+            finishBazaarInstall(pkgType, installItem.name, task);
+            renderBazaarInstall(document);
+            if (controller._isMountCurrent(mount)) {
+                controller._refreshReadmeDetail(pkgType, installItem.name);
             }
         });
         return HANDLED;

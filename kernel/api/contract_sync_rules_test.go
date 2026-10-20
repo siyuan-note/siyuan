@@ -11,6 +11,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAPIContractSyncProviderConfigRules(t *testing.T) {
@@ -25,6 +26,10 @@ func TestAPIContractSyncProviderConfigRules(t *testing.T) {
 		warning        bool
 	}{
 		{`{"provider":2,"endpoint":"https://notes.example.com","bucket":"notes"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/notes/","bucket":"notes"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/proxy/","bucket":"notes"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/","bucket":"notes/sub"}`, conf.ProviderS3, 0, true},
+		{`{"provider":2,"endpoint":"https://s3.example.com/","bucket":"notes"}`, conf.ProviderS3, 0, false},
 		{`{"provider":2}`, conf.ProviderS3, 0, false},
 		{`{"provider":3,"endpoint":"https://notes.example.com","bucket":"notes"}`, conf.ProviderWebDAV, 0, false},
 		{`{"provider":4}`, conf.ProviderLocal, 0, false},
@@ -48,5 +53,35 @@ func TestAPIContractSyncProviderConfigRules(t *testing.T) {
 	}
 	if string(before) != string(syncMarshal(t, model.Conf.Sync.Load())) {
 		t.Fatal("rule requests changed the saved configuration")
+	}
+}
+
+func TestAPIContractSyncProviderS3Probe(t *testing.T) {
+	syncTestConfiguration(t)
+	previousLangs := util.Langs
+	util.Langs = map[string]map[int]string{"en": {142: "Input cannot be empty", 249: "Invalid URL"}}
+	t.Cleanup(func() { util.Langs = previousLangs })
+	before := syncMarshal(t, model.Conf.Sync.Load())
+	engine := gin.New()
+	const path = "/api/sync/testSyncProviderS3"
+	engine.POST(path, testSyncProviderS3)
+	for _, body := range []string{
+		`{"s3":{}}`,
+		`{"s3":{"endpoint":"ftp://invalid","accessKey":"key","secretKey":"secret","bucket":"notes","region":"auto"}}`,
+	} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader(body)))
+		requireAPIContract(t, "POST", path, recorder)
+		var response struct {
+			Code int                                `json:"code"`
+			Data apicontract.TestSyncProviderS3Data `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 ||
+			response.Data.Kind != model.SyncProbeConfig || response.Data.Msg == "" {
+			t.Fatalf("invalid draft must return a diagnostic config result: %s (%v)", recorder.Body.String(), err)
+		}
+	}
+	if string(before) != string(syncMarshal(t, model.Conf.Sync.Load())) {
+		t.Fatal("probe requests changed the saved configuration")
 	}
 }

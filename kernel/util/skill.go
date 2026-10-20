@@ -26,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -95,7 +96,7 @@ func readSkillRecords(root string) []skillRecord {
 	var records []skillRecord
 	for _, e := range entries {
 		isDir := e.IsDir()
-		if !isDir && e.Type()&os.ModeSymlink != 0 {
+		if !isDir && IsSymlink(e) {
 			if info, statErr := os.Stat(filepath.Join(root, e.Name())); statErr == nil {
 				isDir = info.IsDir()
 			}
@@ -232,10 +233,8 @@ func DiscoverUserSkills(enabledUserSkills []string) []UserSkillInfo {
 func findSkillRecord(records []skillRecord, name string) (skillRecord, bool) {
 	key := skillKey(name)
 	for _, record := range records {
-		for _, alias := range skillAliases(record) {
-			if alias == key {
-				return record, true
-			}
+		if slices.Contains(skillAliases(record), key) {
+			return record, true
 		}
 	}
 	return skillRecord{}, false
@@ -304,7 +303,7 @@ func hasWindowsDrivePrefix(resource string) bool {
 }
 
 func listSkillResources(skillDir string) (resources []string, truncated bool) {
-	realRoot, err := filepath.EvalSymlinks(skillDir)
+	realRoot, err := ResolveRealPath(skillDir)
 	if err != nil {
 		return nil, false
 	}
@@ -357,13 +356,13 @@ func listSkillResources(skillDir string) (resources []string, truncated bool) {
 }
 
 func readSkillResource(skillDir, skillName, resource string) (string, error) {
-	realRoot, err := filepath.EvalSymlinks(skillDir)
+	realRoot, err := ResolveRealPath(skillDir)
 	if err != nil {
 		return "", fmt.Errorf("skill not found: %s", skillName)
 	}
 
 	target := filepath.Join(realRoot, filepath.FromSlash(resource))
-	realTarget, err := filepath.EvalSymlinks(target)
+	realTarget, err := ResolveRealPath(target)
 	if err != nil {
 		return "", fmt.Errorf("skill resource not found: %s/%s", skillName, resource)
 	}
@@ -611,10 +610,10 @@ func normalizeSkillURL(raw string) (normalizedSkillSource, error) {
 	case "github.com":
 		return normalizeGitHubURL(u)
 	case "raw.githubusercontent.com":
-		// 直接 GET 单个 SKILL.md（或其它文本文件）
+		// 直接 GET 单个 SKILL.md（或其他文本文件）
 		return normalizedSkillSource{downloadURL: u.String()}, nil
 	default:
-		// 其它直链（release zip、自建站点等）：直接 GET，是否 zip 交由 Content-Type 判定
+		// 其他直链（release zip、自建站点等）：直接 GET，是否 zip 交由 Content-Type 判定
 		return normalizedSkillSource{downloadURL: u.String()}, nil
 	}
 }

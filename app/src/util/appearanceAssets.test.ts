@@ -5,18 +5,31 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import * as themeCompatibility from "./themeCompatibility";
+import * as browserCompatibility from "../protyle/util/browserCompatibility";
+import type {TBrowserNavigator} from "../protyle/util/browserCompatibility";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const createAssets = (ensureLute: () => Promise<void> = async () => {}) => {
+const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: {
+    navigator?: TBrowserNavigator;
+    backend?: string;
+    mobile?: boolean;
+} = {}) => {
     const source = readFileSync(resolve(process.cwd(), "src/util/assets.ts"), "utf8");
-    const processed = parse(source, {MOBILE: false, BROWSER: true}, false, true);
+    const processed = parse(source, {MOBILE: client.mobile || false, BROWSER: true}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
     const removedElements: string[] = [];
     const element = (attributes: Record<string, string>) => ({
         attributes,
         getAttribute: (key: string) => attributes[key],
         setAttribute: (key: string, value: string) => attributes[key] = value,
+        toggleAttribute: (key: string, enabled: boolean) => {
+            if (enabled) {
+                attributes[key] = "";
+            } else {
+                delete attributes[key];
+            }
+        },
         addEventListener: () => {},
         remove: () => removedElements.push(attributes.href || attributes.src),
     });
@@ -28,6 +41,7 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}) => {
     };
     const html = element({"data-theme-mode": "light"});
     const appearance = {
+        pdfTheme: {light: "light", dark: "dark", annoColor: "var(--b3-pdf-background1)"},
         lang: "en", mode: 0, modeOS: false, themeLight: "custom", themeDark: "midnight", themeVer: "1.0.0",
         icon: "custom", iconVer: "1.0.0", themeJS: false,
         lightThemes: [{name: "custom", label: "Custom", frontends: ["all"]}],
@@ -48,7 +62,7 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}) => {
         window: {
             siyuan: {config: {appearance}, storage: {pdf: {light: "light", dark: "dark"}}},
             location: {href: "http://localhost/stage/build/desktop/"},
-            navigator: {},
+            navigator: client.navigator || {userAgent: "", platform: "", maxTouchPoints: 0},
             matchMedia: () => ({matches: false}),
             setTimeout: () => 0,
             clearTimeout: () => {},
@@ -70,6 +84,15 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}) => {
             if (name === "./themeCompatibility") {
                 return themeCompatibility;
             }
+            if (name === "../protyle/util/browserCompatibility") {
+                return browserCompatibility;
+            }
+            if (name === "./functions") {
+                return {
+                    getBackend: () => client.backend || "linux",
+                    getFrontend: () => client.mobile ? "browser-mobile" : "browser-desktop",
+                };
+            }
             if (name === "../layout/getAll") {
                 return {getAllModels: (): {graph: unknown[]} => ({graph: []})};
             }
@@ -85,8 +108,29 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}) => {
             return new Proxy({}, {get: () => (): undefined => undefined});
         },
     });
-    return {assets: moduleExports, appearance, elements, errors, scriptURLs, removedElements};
+    return {assets: moduleExports, appearance, elements, html, errors, scriptURLs, removedElements};
 };
+
+test("appearance exposes the kernel backend and the browser frontend independently", async () => {
+    const cases = [
+        {name: "Windows client with iOS backend", backend: "ios", mobile: false,
+            navigator: {userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", platform: "Win32", maxTouchPoints: 0}},
+        {name: "macOS client with iOS backend", backend: "ios", mobile: false,
+            navigator: {userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", platform: "MacIntel", maxTouchPoints: 0}},
+        {name: "Android client with iOS backend", backend: "ios", mobile: true,
+            navigator: {userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9)", platform: "Linux armv8l", maxTouchPoints: 5}},
+        {name: "iPhone client with Linux backend", backend: "linux", mobile: true,
+            navigator: {userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5}},
+        {name: "iPad desktop client with Linux backend", backend: "linux", mobile: false,
+            navigator: {userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15)", platform: "MacIntel", maxTouchPoints: 5}},
+    ];
+    for (const scenario of cases) {
+        const {assets, appearance, html} = createAssets(undefined, scenario);
+        await assets.loadAssets(appearance);
+        assert.equal(html.getAttribute("data-backend"), scenario.backend, scenario.name);
+        assert.equal(html.getAttribute("data-frontend"), scenario.mobile ? "browser-mobile" : "browser-desktop", scenario.name);
+    }
+});
 
 test("third-party appearance scripts wait for Lute before execution", async () => {
     let complete: () => void;

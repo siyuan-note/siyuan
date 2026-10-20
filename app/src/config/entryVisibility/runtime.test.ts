@@ -296,7 +296,7 @@ test("visibility edits on a built-in profile leave untouched orders following ca
 test("dock visibility menus follow profile scope order instead of the catalog order", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
     const compiled = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-    const current = Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, []]));
+    const current = Object.fromEntries(DOCK_ORDER_SCOPES.map((scope): [string, string[]] => [scope, []]));
     current["dock.order.LeftTop"] = ["file", "outline"];
     const config: Config.IEntryVisibility = {version: 6, active: "custom", profiles: [{
         id: "custom", name: "Custom", entries: {}, orders: {"dock.order.LeftTop": ["outline", "file"]},
@@ -340,7 +340,7 @@ test("entry profile saves in settings windows send requests and flush pending ch
         syncDockBarVisibility: bar.syncDockBarVisibility,
         refreshDockCatalog: () => {},
         getSettingsOwnerApp: (): undefined => undefined,
-        getDockEntryOrderSnapshot: () => Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, []])),
+        getDockEntryOrderSnapshot: () => Object.fromEntries(DOCK_ORDER_SCOPES.map((scope): [string, string[]] => [scope, []])),
         mergeDockEntryOrderSnapshot,
         applyDockEntryOrderSnapshot: () => {},
         config: {set: (path: string, config: Config.IEntryVisibility, applied: (data: unknown) => void) => {

@@ -18,6 +18,7 @@ package av
 
 import (
 	"encoding/json"
+	"html"
 	"strings"
 	"testing"
 
@@ -35,11 +36,15 @@ func TestValueTextRichEmptyParagraphs(t *testing.T) {
 	for _, paragraphs := range [][]string{{"", ""}, {"", "first", "", "", "last", ""}} {
 		var dom strings.Builder
 		for _, content := range paragraphs {
-			dom.WriteString(`<div data-node-id="` + ast.NewNodeID() + `" data-type="NodeParagraph"><div contenteditable="true">` + content + `</div></div>`)
+			dom.WriteString(`<div data-node-id="`)
+			dom.WriteString(ast.NewNodeID())
+			dom.WriteString(`" data-type="NodeParagraph"><div contenteditable="true">`)
+			dom.WriteString(content)
+			dom.WriteString(`</div></div>`)
 		}
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown,
 			Content: valueTextRichBlockDOM2Kramdown(newValueTextRichLute(), dom.String())}
-		for round := 0; round < 3; round++ {
+		for range 3 {
 			before := rich.Content
 			tree, err := NormalizeValueTextRich(rich)
 			if nil != err {
@@ -674,17 +679,17 @@ func TestValueTextRichStyleEntityScannerManyMarkers(t *testing.T) {
 			`var(--b3-font-family-editor), var(--b3-font-family);"}`
 	)
 	var markdown strings.Builder
-	for i := 0; i < repetitions; i++ {
+	for range repetitions {
 		markdown.WriteString(styled)
 		markdown.WriteByte('\n')
 	}
 	markdown.WriteString("```\n")
-	for i := 0; i < repetitions; i++ {
+	for range repetitions {
 		markdown.WriteString(styled)
 		markdown.WriteByte('\n')
 	}
 	markdown.WriteString("```\n")
-	for i := 0; i < repetitions; i++ {
+	for range repetitions {
 		markdown.WriteByte('`')
 		markdown.WriteString(styled)
 		markdown.WriteString("`\n")
@@ -790,7 +795,7 @@ func TestValueTextRichInlineRoundTrip(t *testing.T) {
 	}
 	for _, test := range tests {
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: test.content}
-		for pass := 0; pass < 2; pass++ {
+		for pass := range 2 {
 			tree, err := ParseValueTextRich(rich)
 			if nil != err {
 				t.Fatalf("parse inline type %q failed: %s", test.typ, err)
@@ -826,7 +831,7 @@ func TestValueTextRichInlineRoundTrip(t *testing.T) {
 	}
 
 	combined := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: "***combined***"}
-	for pass := 0; pass < 2; pass++ {
+	for pass := range 2 {
 		tree, err := ParseValueTextRich(combined)
 		if nil != err {
 			t.Fatal(err)
@@ -948,6 +953,11 @@ func TestValueTextRichLinkTargetPolicy(t *testing.T) {
 		"tel:+8613800138000",
 		"siyuan://blocks/20240101000000-abcdefg?focus=1",
 		"web+siyuan://bazaar/plugins/example/readme",
+		"hook://file/EqhAm6xHS?p=YXJjaGl2ZXMvcHJvdmVuYW5jZQ==&n=2026%2D10%2D05",
+		"obsidian://open?vault=notes&file=book",
+		"custom+app://action/path",
+		"CUSTOM://action",
+		"ftp://example.com/file",
 		"../relative/note.md",
 		"/absolute/path",
 		"#heading",
@@ -970,8 +980,26 @@ func TestValueTextRichLinkTargetPolicy(t *testing.T) {
 		"data:text/html,<script>alert(1)</script>",
 		"file:///tmp/document.txt",
 		"blob:https://example.com/id",
-		"ftp://example.com/file",
-		"custom://action",
+		"javascript://host/payload",
+		"JaVaScRiPt://host/payload",
+		"vbscript://host/payload",
+		"data://host/payload",
+		"blob://host/payload",
+		"file://host/payload",
+		"filesystem://host/payload",
+		"about://host/payload",
+		"chrome://settings",
+		"chrome-extension://id/page",
+		"devtools://host/page",
+		"view-source://host/page",
+		"resource://host/page",
+		"moz-extension://id/page",
+		"java%73cript://host/payload",
+		"hook:/file/path",
+		"hook://",
+		"hook:payload",
+		"hook://host/path%0a",
+		"folder:name",
 		"https:example.com",
 		"http:///missing-host",
 		"tel:",
@@ -1006,6 +1034,37 @@ func TestValueTextRichLinkTargetPolicy(t *testing.T) {
 	}
 }
 
+func TestValueTextRichCustomProtocolRoundTrip(t *testing.T) {
+	const target = "hook://file/EqhAm6xHS?p=YXJjaGl2ZXMvcHJvdmVuYW5jZQ==&n=2026%2D10%2D05"
+	rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown,
+		Content: "[Book](" + target + ")"}
+	for range 3 {
+		tree, err := NormalizeValueTextRich(rich)
+		if err != nil {
+			t.Fatal(err)
+		}
+		found := false
+		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering && node.Type == ast.NodeTextMark && node.IsTextMarkType("a") {
+				found = true
+				if html.UnescapeString(node.TextMarkAHref) != target || node.TextMarkTextContent != "Book" {
+					t.Fatalf("custom link changed: %+v", node)
+				}
+			}
+			return ast.WalkContinue
+		})
+		if !found {
+			t.Fatal("custom protocol link was removed")
+		}
+	}
+	image := &ast.Node{Type: ast.NodeImage}
+	destination := &ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(target)}
+	image.AppendChild(destination)
+	if isAllowedValueTextRichNode(destination, true) {
+		t.Fatal("custom protocols must not be loaded as images")
+	}
+}
+
 func TestValueTextRichRejectsObfuscatedLinkTargets(t *testing.T) {
 	contents := []string{
 		"[classic](<vbscript:msgbox(1)>)",
@@ -1031,6 +1090,10 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 		"copyright ©",
 		"2 < 3 and 4 > 1",
 		"heart <3",
+		"&lt;a",
+		"vector&lt;T&gt;",
+		"&lt;script&gt;alert(1)&lt;/script&gt;",
+		"&amp;lt;img src=x onerror=alert(1)&amp;gt;",
 		"tab\tline",
 		"line one\nline two\rline three",
 		"\U0001f469\u200d\U0001f4bb developer",
@@ -1039,8 +1102,7 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 	blocked := []string{
 		"<img src=x onerror=alert(1)>",
 		"<span data-type=\"file-annotation-ref\" data-id=\"assets/document.pdf/id\">fake</span>",
-		"&lt;script&gt;alert(1)&lt;/script&gt;",
-		"&amp;lt;img src=x onerror=alert(1)&amp;gt;",
+		"<script>alert(1)</script>",
 		"memo\x00control",
 	}
 	for _, content := range allowed {
@@ -1066,13 +1128,46 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 	malicious := []string{
 		`<span data-type="inline-memo" data-inline-memo-content="&lt;img src=x onerror=alert(1)&gt;">image</span>`,
 		`<span data-type="inline-memo" data-inline-memo-content="&lt;span data-type='file-annotation-ref'&gt;fake&lt;/span&gt;">fake</span>`,
-		`<span data-type="inline-memo" data-inline-memo-content="&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;">entity</span>`,
+		`<span data-type="inline-memo" data-inline-memo-content="<script">incomplete</span>`,
 		"<span data-type=\"inline-memo\" data-inline-memo-content=\"memo&#127;control\">control</span>",
 	}
 	for _, content := range malicious {
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: content}
 		if _, err := NormalizeValueTextRich(rich); nil == err {
 			t.Fatalf("active inline memo was accepted: %q", content)
+		}
+	}
+}
+
+func TestValueTextRichEscapedInlineMemoRoundTrip(t *testing.T) {
+	luteEngine := newValueTextRichLute()
+	for _, content := range []string{"&lt;a", "vector&lt;T&gt;", "&amp;lt;a", "&lt;img src=x onerror=alert(1)&gt;"} {
+		blockDOM := `<div data-node-id="20261018120000-abcdefg" data-type="NodeParagraph"><div contenteditable="true"><span data-type="inline-memo" data-inline-memo-content="` + html.EscapeString(content) + `">note</span></div></div>`
+		for round := 0; round < 3; round++ {
+			markdown := luteEngine.BlockDOM2Md(blockDOM)
+			rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: markdown}
+			tree, err := NormalizeValueTextRich(rich)
+			if nil != err {
+				t.Fatalf("normalize escaped memo %q on round %d: %v", content, round, err)
+			}
+			found := false
+			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && node.IsTextMarkType("inline-memo") {
+					found = true
+					if node.TextMarkInlineMemoContent != content {
+						t.Fatalf("memo = %q, want %q", node.TextMarkInlineMemoContent, content)
+					}
+				}
+				return ast.WalkContinue
+			})
+			if !found {
+				t.Fatal("inline memo was lost")
+			}
+			output := luteEngine.Tree2HTML(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+			if !strings.Contains(output, content) || strings.Contains(output, "<img") || strings.Contains(output, "<script") {
+				t.Fatalf("escaped memo changed or became markup: %q", output)
+			}
+			blockDOM = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		}
 	}
 }

@@ -7,7 +7,7 @@
 		"id": "20240530101000-1vvnhju",
 		"title": "埋め込みコンテンツブロック",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016202856"
 	},
 	"Children": [
 		{
@@ -95,7 +95,7 @@
 			"Properties": {
 				"ID": "20240530101000-32r7es9",
 				"id": "20240530101000-f3y73rq",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -116,7 +116,7 @@
 			"Properties": {
 				"ID": "20240530101000-04eiu3r",
 				"id": "20240530101000-mo42kxt",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -203,7 +203,7 @@
 					"Properties": {
 						"ID": "20240530101000-82jbqm7",
 						"id": "20240530101000-bwttj5l",
-						"updated": "20240530101000"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -246,7 +246,7 @@
 							"Properties": {
 								"ID": "20240530101000-sc7oqkj",
 								"id": "20240530101000-xkfup1r",
-								"updated": "20240530101000"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -259,7 +259,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%コンテンツブロック%' AND content LIKE '%参照%' AND type = 'p') }}\n"
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%コンテンツブロック%' AND content LIKE '%参照%' AND type = 'p' }}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -416,7 +416,7 @@
 			"Properties": {
 				"ID": "20240530101000-eiazno1",
 				"id": "20240530101000-wi5nstx",
-				"updated": "20240731205025"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -463,7 +463,7 @@
 			"Properties": {
 				"id": "20240530101000-0qh2kff",
 				"style": "height: 116px;",
-				"updated": "20240530101000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -474,7 +474,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#コンテンツブロック/埋め込み#%' OR content LIKE '%#コンテンツブロック/参照#%') AND hpath NOT LIKE '%埋め込みコンテンツブロック%'"
+					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#コンテンツブロック/埋め込み#%' OR content LIKE '%#コンテンツブロック/参照#%') AND hpath NOT LIKE '%埋め込みコンテンツブロック%' AND type = 'p'"
 				},
 				{
 					"Type": "NodeCloseBrace"
@@ -625,7 +625,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202513-yhlrbpu",
-				"updated": "20260612202513"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -639,7 +639,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202513-yxwvpxl",
-				"updated": "20260612202513"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -653,7 +653,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ プレフィックスを使用してJavaScriptコードを実行し、埋め込むブロックを動的に決定できます。SQLクエリでは対応できない複雑なケースに適しています"
+					"Data": "​ プレフィックスを使用してJavaScriptコードを実行し、埋め込むブロックを動的に決定できます。SQLクエリでは対応できない複雑なケースに適しています。"
 				}
 			]
 		},
@@ -677,7 +677,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202513-ewrm2vu",
-				"updated": "20260612202513"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -691,7 +691,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202513-ja76rsv",
-				"updated": "20260612202513"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -705,7 +705,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で始まるコードを入力するとJSモードに入ります"
+					"Data": "​ で始まるコードを入力するとJSモードに入ります。"
 				}
 			]
 		},
@@ -715,7 +715,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202513-19hv4qk",
-				"updated": "20260612202513"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -735,7 +735,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20260612202513-vhqtc2u",
-				"updated": "20260612202513"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -814,7 +814,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "(url, data, callback?) =&gt; void"
+									"TextMarkTextContent": "(url, data?, headers?, process?, signal?) =&gt; Promise&lt;IWebSocketData&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -828,7 +828,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "同期POSTリクエストを送信"
+									"Data": "非同期 POST リクエストを送信し、await または .then() で応答を読み取ります。第 3 引数はコールバックではなくヘッダーオブジェクトです"
 								}
 							]
 						}
@@ -1004,7 +1004,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202513-x2r5w1f",
-				"updated": "20260612202513"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -1018,9 +1018,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202513-vi0swg2",
-				"updated": "20260612202513"
+				"updated": "20261016111305"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツブロックを自動描画するには、"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "strong",
@@ -1082,12 +1086,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202513-nnq73ws",
-				"updated": "20260612202513"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "返された配列内のIDの順序が最終的な表示順序になります"
+					"Data": "返された配列内のIDの順序が最終的な表示順序になります。"
 				}
 			]
 		},
@@ -1097,7 +1101,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202513-l6jncw7",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1167,7 +1171,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202513-v3xc4yv",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1180,7 +1184,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"TODO\" });\nreturn resp.data.blocks.map(b => b.id);\n"
+					"Data": "//!js\nconst resp = await fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"TODO\" });\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1193,12 +1197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202513-tsy5jda",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "現在のドキュメントのすべての子ブロックを取得："
+					"Data": "現在のドキュメントの直接の子ブロックを取得："
 				}
 			]
 		},
@@ -1208,7 +1212,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202513-xmi5ilb",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1221,7 +1225,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b => b.id);\n"
+					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = await fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nreturn resp.data.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1249,7 +1253,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202513-zj8ks59",
-				"updated": "20260809232000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1262,7 +1266,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
+					"Data": "//!js\nconst resp = await fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nif (resp.code !== 0) {\n    throw new Error(resp.msg);\n}\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1276,7 +1280,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202513-sow3tzu",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1293,7 +1297,7 @@
 			},
 			"Properties": {
 				"id": "20260612202513-3lgymqo",
-				"updated": "20260810212846"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1418,7 +1422,7 @@
 					},
 					"Properties": {
 						"id": "20260612202513-vevjm1h",
-						"updated": "20260810212846"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1426,16 +1430,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202513-1eher1f",
-								"updated": "20260810212846"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "エラー表示"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：JSの実行に失敗するか配列以外が返された場合、「参照が期限切れです」と表示されます"
+									"Data": "描画とエラー表示：ブロック ID の配列を返すと対象ブロックを自動描画し、結果が空の場合は「参照が期限切れです」と表示します。配列以外を返す場合は、スクリプトが作成した DOM を保持して読み込みを終了します。実行時に例外が発生した場合は、実際のエラーメッセージを表示します"
 								}
 							]
 						}

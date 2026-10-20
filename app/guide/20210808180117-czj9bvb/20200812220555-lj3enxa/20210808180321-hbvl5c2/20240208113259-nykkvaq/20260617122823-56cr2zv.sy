@@ -6,7 +6,7 @@
 		"id": "20260617122823-56cr2zv",
 		"title": "表格计算",
 		"type": "doc",
-		"updated": "20260617123133"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617123133-yfcvt0u",
-				"updated": "20260617123133"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123133-jv887ic",
-				"updated": "20260617123133"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -696,7 +696,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617123133-cr7ylh4",
-				"updated": "20260617123133"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -708,7 +708,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260617123133-qqnng8v",
-						"updated": "20260617123133"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -722,7 +722,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ 的元素个数取决于列类型：数字、文本等单值列每行算一个值；多选、资源等多值列每个选项单独算一个值（与原生「计算值数量」口径一致）。"
+							"Data": "​ 的元素个数取决于列类型：空单元格会被跳过，数字、文本等单值列每个非空单元格算一个值；多选、资源等多值列每个选项单独算一个值（与原生「计算值数量」口径一致）。"
 						}
 					]
 				}
@@ -802,7 +802,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123133-14b9ta3",
-				"updated": "20260617123133"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -835,7 +835,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260617123133-jgyu512",
-				"updated": "20260617123133"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1042,14 +1042,14 @@
 									"Data": "​"
 								}
 							]
-							}
-						]
-					},
-					{
-						"Type": "NodeTableRow",
-						"Data": "tr",
-						"Children": [
-							{
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
 							"Type": "NodeTableCell",
 							"Data": "td",
 							"Children": [
@@ -1070,7 +1070,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{len (uniq .strings)}}"
+									"TextMarkTextContent": ".action{len (uniq .strings)}"
 								},
 								{
 									"Type": "NodeText",

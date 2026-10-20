@@ -4,6 +4,26 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {writeText} from "../protyle/util/compatibility";
 import {invalidateImageOCRStatus} from "./imageOCRStatus";
 
+const clearing = new Set<string>();
+
+export const clearImageOCRText = async (path: string) => {
+    if (clearing.has(path)) {
+        return;
+    }
+    clearing.add(path);
+    try {
+        const response = await fetchSyncPost("/api/asset/setImageOCRText", {path, text: ""});
+        if (response.code === 0) {
+            invalidateImageOCRStatus(path);
+            showMessage(window.siyuan.languages.clearOCRTextDone);
+        }
+    } catch (error) {
+        showMessage(error.message, 7000, "error");
+    } finally {
+        clearing.delete(path);
+    }
+};
+
 export const copyImageOCRText = (path: string) => {
     fetchPost("/api/asset/getImageOCRText", {path}, (response) => {
         writeText(response.data.text);

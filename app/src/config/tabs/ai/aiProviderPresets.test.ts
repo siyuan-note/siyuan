@@ -9,6 +9,19 @@ import {
 } from "./aiProviderPresets";
 
 describe("AI provider presets", () => {
+    it("switches Gemini native and compatible endpoints while preserving the existing default", () => {
+        const compatible = "https://generativelanguage.googleapis.com/v1beta/openai";
+        const native = "https://generativelanguage.googleapis.com/v1beta";
+        assert.equal(getDefaultProviderProtocol("gemini"), "openai");
+        assert.equal(getProviderProtocolBaseURL(compatible, "gemini-interactions"), native);
+        assert.equal(findProviderPreset(native + "/")?.id, "gemini");
+        assert.equal(getProviderProtocolBaseURL(native, "openai"), compatible);
+        for (const custom of [native + "?route=custom", "https://gateway.example.com/v1beta"]) {
+            assert.equal(getProviderProtocolBaseURL(custom, "gemini-interactions"), custom);
+            assert.equal(getProviderProtocolBaseURL(custom, "openai"), custom);
+        }
+    });
+
     it("uses the current MiniMax China endpoint for newly created providers", () => {
         const preset = PROVIDER_PRESETS.find((item) => item.id === "minimax-cn");
         assert.equal(preset?.baseURL, "https://api.minimax.cn/v1");

@@ -474,7 +474,9 @@ func TestExportTemplateDocumentAttributeScope(t *testing.T) {
 			tree.Root.SetIALAttr("icon", "default")
 			var markdown strings.Builder
 			for _, chunk := range test.chunks {
-				markdown.WriteString("```template\n" + chunk + "\n```\n\n")
+				markdown.WriteString("```template\n")
+				markdown.WriteString(chunk)
+				markdown.WriteString("\n```\n\n")
 			}
 			engine := NewLute()
 			codeTree := parse.Parse("", []byte(markdown.String()), engine.ParseOptions)

@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"maps"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -153,9 +154,7 @@ func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			invalidIAL := make(map[string]string, len(ial))
-			for key, value := range ial {
-				invalidIAL[key] = value
-			}
+			maps.Copy(invalidIAL, ial)
 			if "" == test.id {
 				delete(invalidIAL, "id")
 			} else {

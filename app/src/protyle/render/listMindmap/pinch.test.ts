@@ -22,7 +22,7 @@ const setup = () => {
     const target = new context.View();
     let cancelled = 0;
     Object.assign(target, {
-        scale: 1, offsetX: 0, offsetY: 0, pinching: false,
+        scale: 1, offsetX: 0, offsetY: 0, pinching: false, interactionActive: false,
         viewport: {contains: (element: {outside?: boolean} | null) => !!element && !element.outside,
             getBoundingClientRect: () => ({left: 10, top: 20})},
         cancelPointer: () => { cancelled++; target.pendingPointerId = undefined; },
@@ -51,6 +51,33 @@ test("pinch cancels dragging and zooms around the finger midpoint within existin
     assert.equal(target.scale, 2.5);
     target.pinchMove(event(touch(100), touch(101)));
     assert.equal(target.scale, .15);
+});
+
+test("two fingers pan and zoom a reading canvas without activating single-finger dragging", () => {
+    const {target} = setup();
+    target.pinchStart(event(touch(60), touch(160)));
+    target.pinchMove(event(touch(90, 140), touch(190, 140)));
+    assert.equal(target.scale, 1);
+    assert.equal(target.offsetX, 30);
+    assert.equal(target.offsetY, 20);
+    target.pinchMove(event(touch(50, 160), touch(250, 160)));
+    assert.equal(target.scale, 2);
+    assert.equal(target.offsetX, -60);
+    assert.equal(target.offsetY, -60);
+    target.pinchEnd(event());
+    target.pointerDown({pointerType: "touch", isPrimary: true});
+    assert.equal(target.pointer, undefined);
+    assert.equal(target.interactionActive, false);
+});
+
+test("saved view locks prohibit two-finger gestures", () => {
+    const {target, cancelled} = setup();
+    target.locked = true;
+    target.pinchStart(event(touch(60), touch(160)));
+    target.pinchMove(event(touch(10), touch(210)));
+    assert.equal(target.scale, 1);
+    assert.equal(target.pinching, false);
+    assert.equal(cancelled(), 0);
 });
 
 test("remaining fingers cannot start a drag and a new gesture starts at the current scale", () => {

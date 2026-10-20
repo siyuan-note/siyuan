@@ -71,7 +71,6 @@ func CleanNotExistAssetsTexts(exists func(string) bool) {
 		delete(assetsTexts, asset)
 		assetsTextsChanged.Store(true)
 	}
-	return
 }
 
 func LoadAssetsTexts() {
@@ -111,7 +110,6 @@ func LoadAssetsTexts() {
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("read assets texts [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
 	}
-	return
 }
 
 func SaveAssetsTexts() {

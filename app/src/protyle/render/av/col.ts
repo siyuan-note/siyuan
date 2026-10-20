@@ -18,7 +18,7 @@ import {focusBlock} from "../../util/selection";
 import {toggleUpdateRelationBtn} from "./relation";
 import {bindRollupData, getRollupHTML} from "./rollup";
 import {Constants} from "../../../constants";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne, isMobile} from "../../../util/functions";
 import {Dialog} from "../../../dialog";
@@ -1180,7 +1180,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     ignoreRows: true,
                 }, (response) => {
                     const avData = response.data as IAV;
-                    // 该字段还没有筛选条件时，创建它的默认筛选条件（其它字段的筛选不影响）；
+                    // 该字段还没有筛选条件时，创建它的默认筛选条件（其他字段的筛选不影响）；
                     // 已有该字段筛选时直接打开总筛选配置面板，避免每次重复新建
                     if (!hasFilterForColumn(avData.view.filters, colId)) {
                         const filter: IAVFilter = {

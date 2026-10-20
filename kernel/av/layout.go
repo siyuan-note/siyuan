@@ -33,13 +33,11 @@ type BaseLayout struct {
 	ShowIcon  bool `json:"showIcon"`  // 是否显示字段图标
 	WrapField bool `json:"wrapField"` // 是否换行字段内容
 
-	// TODO 以下三个字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15162
-
-	//Deprecated
+	// Deprecated: 仅用于读取和升级旧版布局，过滤规则由 View.Filters 维护。
 	Filters []*ViewFilter `json:"filters,omitempty"` // 过滤规则
-	//Deprecated
+	// Deprecated: 仅用于读取和升级旧版布局，排序规则由 View.Sorts 维护。
 	Sorts []*ViewSort `json:"sorts,omitempty"` // 排序规则
-	//Deprecated
+	// Deprecated: 仅用于读取和升级旧版布局，分页大小由 View.PageSize 维护。
 	PageSize int `json:"pageSize,omitempty"` // 每页条目数
 }
 

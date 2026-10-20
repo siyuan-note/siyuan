@@ -323,7 +323,7 @@ func normalizeIFramePosition(node *ast.Node) {
 
 func isOutOfFlowPosition(style string) bool {
 	position := ""
-	for _, declaration := range strings.Split(style, ";") {
+	for declaration := range strings.SplitSeq(style, ";") {
 		property, value, ok := strings.Cut(declaration, ":")
 		if !ok || !strings.EqualFold(strings.TrimSpace(property), "position") {
 			continue

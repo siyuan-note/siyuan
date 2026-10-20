@@ -1,49 +1,25 @@
-import {transaction} from "./transaction";
+import {transaction, turnsOneInto} from "./transaction";
 import {Constants} from "../../constants";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {focusByRange} from "../util/selectionOffsets";
+import {CALLOUT_PRESETS, ICalloutPreset} from "./calloutType";
 
-export interface ICalloutPreset {
-    id: string;
-    icon: string;
-    type: string;
-    title: string;
-    color: string;
-}
-
-export const CALLOUT_PRESETS: ICalloutPreset[] = [{
-    id: "calloutNote",
-    icon: "✏️",
-    type: "NOTE",
-    title: "Note",
-    color: "var(--b3-callout-note)",
-}, {
-    id: "calloutTip",
-    icon: "💡",
-    type: "TIP",
-    title: "Tip",
-    color: "var(--b3-callout-tip)",
-}, {
-    id: "calloutImportant",
-    icon: "❗",
-    type: "IMPORTANT",
-    title: "Important",
-    color: "var(--b3-callout-important)",
-}, {
-    id: "calloutWarning",
-    icon: "⚠️",
-    type: "WARNING",
-    title: "Warning",
-    color: "var(--b3-callout-warning)",
-}, {
-    id: "calloutCaution",
-    icon: "🚨",
-    type: "CAUTION",
-    title: "Caution",
-    color: "var(--b3-callout-caution)",
-}];
+const turnBlockquoteIntoCallout = (blockElements: HTMLElement[], protyle: IProtyle,
+                                 callout: Pick<ICalloutPreset, "type" | "title" | "icon">) => {
+    if (blockElements.length !== 1 || blockElements[0].dataset.type !== "NodeBlockquote") {
+        return false;
+    }
+    const nodeElement = blockElements[0];
+    if (!protyle.disabled && protyle.wysiwyg.element.contains(nodeElement)) {
+        void turnsOneInto({protyle, nodeElement, id: nodeElement.dataset.nodeId, type: "Blockquote2Callout", callout});
+    }
+    return true;
+};
 
 export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyle, preset: ICalloutPreset) => {
+    if (turnBlockquoteIntoCallout(blockElements, protyle, preset)) {
+        return;
+    }
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const ids = new Set<string>();
@@ -95,6 +71,10 @@ export const updateCustomCalloutType = (blockElements: HTMLElement[], protyle: I
         onConfirm: (value, dialog) => {
             const type = value.trim();
             if (!type) {
+                return;
+            }
+            if (turnBlockquoteIntoCallout(blockElements, protyle, {...CALLOUT_PRESETS[0], type})) {
+                dialog.destroy();
                 return;
             }
             const doOperations: IOperation[] = [];

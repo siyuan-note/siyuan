@@ -48,7 +48,10 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
     },
     {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", responsesSupport: "experimental", icon: "/stage/images/ai-providers/volcengine.svg"},
     {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/zhipu.svg"},
-    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/gemini.svg"},
+    {
+        id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/gemini.svg",
+        protocolBaseURLs: {"gemini-interactions": "https://generativelanguage.googleapis.com/v1beta"},
+    },
     {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/mistral.svg"},
     {
         id: "xiaomi-mimo", name: "Xiaomi MiMo", baseURL: "https://api.xiaomimimo.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/xiaomi-mimo.png",

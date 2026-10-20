@@ -1,61 +1,172 @@
 name: Release Docker Image
+run-name: Release Docker Image ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
 
 on:
   push:
     tags:
+      # 预发行版（-alpha/-beta/-rc）同样构建镜像，但只发布版本标签，不更新 latest。
       - 'v*'
-      - '!*alpha*'
-      - '!*beta*'
-      - '!*rc*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, without the v prefix; an -alpha/-beta/-rc suffix is allowed'
+        required: true
+        type: string
+      verify_cache:
+        description: 'Run separate per-platform ONNX cache acceptance (slow)'
+        default: false
+        type: boolean
+
+concurrency:
+  # 预发行版与正式版共用同一队列串行执行，且不取消进行中的运行，避免同时向镜像仓库推送。
+  group: siyuan-docker-release
+  cancel-in-progress: false
+  queue: max
 
 env:
-  package_json: "app/package.json"
-  docker_hub_owner: "b3log"
-  docker_hub_repo: "siyuan"
+  IMAGE_REPOSITORY: b3log/siyuan
+  # ARMv7 的 ONNX 冷编译使用四核运行器的全部核心。
+  ARMV7_ONNX_BUILD_PARALLEL: 4
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  prepare:
     if: ${{ github.repository_owner == 'siyuan-note' }}
-    name: build
     runs-on: ubuntu-24.04
-    permissions:
-      packages: write
-      contents: read
-
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      source_commit: ${{ steps.release.outputs.source_commit }}
     steps:
-      - name: Checkout repository and submodules
+      - name: Checkout release source
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.ref }}
-          submodules: recursive
+          # 手动重建使用正式版标签的源码，避免混入工作流分支上的后续开发内容。
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || github.sha }}
+          path: source
+          persist-credentials: false
 
-      - name: Extract version from package.json
-        id: version
-        run: |
-          echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
+      - name: Checkout Docker build configuration and tests
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: docker-config
+          sparse-checkout: |
+            Dockerfile
+            .dockerignore
+            scripts/verify-docker-release.py
+            scripts/check-docker-cache.py
+            scripts/cleanup-docker-tags.py
+            scripts/build-docker-onnx.py
+            scripts/docker-onnx-build.sh
+            scripts/docker-onnx-toolchain.cmake
+            scripts/test_docker_release.py
+            scripts/testdata/docker-ocr
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
 
-      - name: Verify tag matches package.json version
-        # 去掉 tag 前导 v 后与 package.json 中的版本号比对，
-        # 不一致说明开发者推 tag 前忘记同步版本号，直接终止整个流程。
+      - name: Verify and pin release version and source
+        id: release
+        working-directory: source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_VERSION: ${{ inputs.version }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          VERSION="${{ steps.version.outputs.value }}"
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "Tag (v$TAG) does not match version in package.json ($VERSION), stopping"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="$REQUESTED_VERSION"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)(\.[0-9A-Za-z]+)*)?$ ]]; then
+            echo "Expected a version without a v prefix, optionally with an -alpha/-beta/-rc suffix, stopping"
             exit 1
           fi
-          echo "Tag matches version: $TAG"
+          PACKAGE_VERSION=$(jq -er .version app/package.json)
+          if [ "$VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "Requested version ($VERSION) does not match package.json ($PACKAGE_VERSION), stopping"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION; source: $(git rev-parse HEAD)"
+
+      - name: Test Docker release verification
+        run: python3 -m unittest discover -s docker-config/scripts -p test_docker_release.py
+
+  build:
+    needs: prepare
+    name: Build and verify ${{ matrix.id }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 360
+    strategy:
+      # 一个平台失败时保留其他平台的构建结果，支持只重试失败任务。
+      # 预发行版与正式版构建相同的平台集合。
+      fail-fast: false
+      matrix:
+        include:
+          - id: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+            emulate: false
+          - id: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            emulate: false
+          - id: armv7
+            platform: linux/arm/v7
+            runner: ubuntu-24.04
+            emulate: true
+          - id: armv8
+            platform: linux/arm/v8
+            runner: ubuntu-24.04
+            emulate: true
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - name: Checkout pinned release source and submodules
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.source_commit }}
+          path: source
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Checkout pinned Docker build configuration
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: docker-config
+          sparse-checkout: |
+            Dockerfile
+            .dockerignore
+            scripts/build-docker-onnx.py
+            scripts/docker-onnx-build.sh
+            scripts/docker-onnx-toolchain.cmake
+            scripts/verify-docker-release.py
+            scripts/testdata/docker-ocr
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Apply and record build configuration
+        env:
+          SOURCE_COMMIT: ${{ needs.prepare.outputs.source_commit }}
+          CONFIGURATION_COMMIT: ${{ github.sha }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test "$(jq -er .version app/package.json)" = "$RELEASE_VERSION"
+          cp ../docker-config/Dockerfile Dockerfile
+          cp ../docker-config/.dockerignore .dockerignore
+          cp ../docker-config/scripts/docker-onnx-build.sh ../docker-config/scripts/docker-onnx-toolchain.cmake scripts/
+          echo "Source commit: $SOURCE_COMMIT; configuration commit: $CONFIGURATION_COMMIT"
+          sha256sum Dockerfile .dockerignore
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
           tool-cache: false
-
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
           android: true
           dotnet: true
           haskell: true
@@ -63,8 +174,11 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - name: Set up QEMU
+      - name: Set up QEMU for ARM32
+        if: ${{ matrix.emulate }}
         uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v4
@@ -75,7 +189,239 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
-      - name: Build and push Docker image
-        # 走到这里的一定是 stable 版本，直接同时打 :latest 和具体版本号标签
+      - name: Resolve or build immutable ONNX runtime artifact
+        id: onnx
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          PLATFORM_ID: ${{ matrix.id }}
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .
+          ONNX_PARALLEL=2
+          if [ "$PLATFORM_ID" = "armv7" ]; then ONNX_PARALLEL="$ARMV7_ONNX_BUILD_PARALLEL"; fi
+          python3 ../docker-config/scripts/build-docker-onnx.py --context . \
+            --repository "$IMAGE_REPOSITORY" --platform "$PLATFORM" --parallel "$ONNX_PARALLEL" \
+            --records "$RUNNER_TEMP/docker-onnx" --github-output "$GITHUB_OUTPUT"
+
+      - name: Build platform candidate and export its cache
+        id: build
+        shell: bash
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          PLATFORM_ID: ${{ matrix.id }}
+          ONNX_IMAGE: ${{ steps.onnx.outputs.onnx_image }}
+          CACHE_IMAGE: ${{ env.IMAGE_REPOSITORY }}:buildcache-release-v2-${{ matrix.id }}
+        run: |
+          docker buildx build --push --platform "$PLATFORM" --provenance=mode=min \
+            --build-arg "ONNX_IMAGE=$ONNX_IMAGE" \
+            --cache-from "type=registry,ref=$CACHE_IMAGE" \
+            --cache-to "type=registry,ref=$CACHE_IMAGE,mode=max" \
+            --metadata-file "$RUNNER_TEMP/docker-metadata.json" --progress plain \
+            -t "$IMAGE_REPOSITORY:build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$PLATFORM_ID" . \
+            2>&1 | tee "$RUNNER_TEMP/docker-build.log"
+          DIGEST=$(jq -r '."containerimage.digest"' "$RUNNER_TEMP/docker-metadata.json")
+          if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "Missing platform candidate image digest"
+            exit 1
+          fi
+          echo "image=$IMAGE_REPOSITORY@$DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Verify platform kernel and real OCR
+        env:
+          RELEASE_IMAGE: ${{ steps.build.outputs.image }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_COMMIT: ${{ needs.prepare.outputs.source_commit }}
+          CONFIGURATION_COMMIT: ${{ github.sha }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          python3 ../docker-config/scripts/verify-docker-release.py verify \
+            --image "$RELEASE_IMAGE" --version "$RELEASE_VERSION" --platform "$PLATFORM" \
+            --source-commit "$SOURCE_COMMIT" --configuration-commit "$CONFIGURATION_COMMIT" \
+            --run-id "$GITHUB_RUN_ID" --report "$RUNNER_TEMP/docker-verification/report.json"
+
+      - name: Save successful platform verification
+        uses: actions/upload-artifact@v7
+        with:
+          # 同次运行重试时只替换对应平台的报告，其他成功平台的报告继续保留。
+          name: docker-verification-${{ matrix.id }}
+          path: ${{ runner.temp }}/docker-verification/report.json
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Preserve platform build and verification records
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-build-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.id }}
+          path: |
+            ${{ runner.temp }}/docker-build.log
+            ${{ runner.temp }}/docker-onnx
+            ${{ runner.temp }}/docker-metadata.json
+            ${{ runner.temp }}/docker-verification/report.json
+            ${{ runner.temp }}/docker-verification/diagnostics
+          if-no-files-found: ignore
+
+  cache:
+    name: Optional cache acceptance ${{ matrix.id }}
+    needs: prepare
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.verify_cache }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+            emulate: false
+          - id: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            emulate: false
+          - id: armv7
+            platform: linux/arm/v7
+            runner: ubuntu-24.04
+            emulate: true
+          - id: armv8
+            platform: linux/arm/v8
+            runner: ubuntu-24.04
+            emulate: true
+    steps:
+      - name: Checkout pinned cache verification configuration
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: |
+            Dockerfile
+            scripts/check-docker-cache.py
+            scripts/docker-onnx-build.sh
+            scripts/docker-onnx-toolchain.cmake
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+
+      - name: Set up QEMU for ARM32
+        if: ${{ matrix.emulate }}
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Verify platform ONNX cache reuse and invalidation
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          PLATFORM_ID: ${{ matrix.id }}
+        run: |
+          ONNX_PARALLEL=2
+          if [ "$PLATFORM_ID" = "armv7" ]; then ONNX_PARALLEL="$ARMV7_ONNX_BUILD_PARALLEL"; fi
+          python3 scripts/check-docker-cache.py --platform "$PLATFORM" \
+            --onnx-parallel "$ONNX_PARALLEL" \
+            --dockerfile Dockerfile --cache-repository "$IMAGE_REPOSITORY" \
+            --records "$RUNNER_TEMP/docker-cache-acceptance"
+
+      - name: Preserve cache acceptance records
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-cache-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.id }}
+          path: ${{ runner.temp }}/docker-cache-acceptance
+          if-no-files-found: ignore
+
+  publish:
+    name: Assemble and publish verified release
+    needs: [prepare, build, cache]
+    # 未启用额外缓存验收时允许其跳过，所有平台的成品验收始终必须成功。
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result == 'success' && (needs.cache.result == 'success' || needs.cache.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout pinned release verification
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/verify-docker-release.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Download successful platform reports from this run
+        uses: actions/download-artifact@v8
+        with:
+          pattern: docker-verification-*
+          path: ${{ runner.temp }}/platform-reports
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Assemble verified platform digests
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_COMMIT: ${{ needs.prepare.outputs.source_commit }}
+          CONFIGURATION_COMMIT: ${{ github.sha }}
+        run: |
+          python3 scripts/verify-docker-release.py assemble \
+            --repository "$IMAGE_REPOSITORY" --candidate-tag "build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-verified" \
+            --version "$RELEASE_VERSION" --source-commit "$SOURCE_COMMIT" \
+            --configuration-commit "$CONFIGURATION_COMMIT" --run-id "$GITHUB_RUN_ID" \
+            --reports "$RUNNER_TEMP/platform-reports" --report "$RUNNER_TEMP/docker-verification.json"
+
+      - name: Publish verified release image
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          RELEASE_IMAGE=$(jq -er .image "$RUNNER_TEMP/docker-verification.json")
+          python3 scripts/verify-docker-release.py promote \
+            --image "$RELEASE_IMAGE" --version "$RELEASE_VERSION" \
+            --report "$RUNNER_TEMP/docker-verification.json"
+
+      - name: Preserve assembled release verification
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/docker-verification.json
+          if-no-files-found: ignore
+
+  cleanup:
+    name: Clean up build candidate tags
+    needs: publish
+    if: ${{ always() && github.repository_owner == 'siyuan-note' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # 清理失败只保留诊断，不改变已经发布的镜像或发布结果。
+    continue-on-error: true
+    steps:
+      - name: Checkout pinned tag cleanup
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/cleanup-docker-tags.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Delete build candidate tags after publishing
+        env:
+          DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+          DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
+          PUBLISHED: ${{ needs.publish.result == 'success' }}
+        run: |
+          # 发布成功时删除仓库内全部候选标签；本次未发布成功时保留候选供重试。
+          ARGS=()
+          if [ "$PUBLISHED" = "true" ]; then ARGS+=(--published); fi
+          python3 scripts/cleanup-docker-tags.py --repository "$IMAGE_REPOSITORY" \
+            --execute "${ARGS[@]}"

@@ -553,7 +553,7 @@ func SetIndexAssetPath(b bool) {
 }
 
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
-	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
 			if ast.NodeCustomBlock == n.Type {
 				return ast.WalkSkipChildren
@@ -685,7 +685,7 @@ func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span,
 	rootID := tree.Root.ID
 	boxID := tree.Box
 	p := tree.Path
-	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -803,41 +803,39 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		spans = append(spans, span)
 		walkStatus = ast.WalkSkipChildren
 
-		destNode := n.ChildByType(ast.NodeLinkDest)
-		if nil == destNode {
-			return
-		}
-
-		// assetsLinkDestsInTree
-
-		if !util.IsAssetLinkDest(destNode.Tokens, false) {
-			return
-		}
-
-		dest := gulu.Str.FromBytes(destNode.Tokens)
-		if idx := strings.Index(dest, "?"); idx > 0 {
-			dest = dest[:idx]
-		}
-
 		var title string
 		if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 			title = gulu.Str.FromBytes(titleNode.Tokens)
 		}
-
-		hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
-		name, _ := util.LastID(dest)
-		asset := &Asset{
-			ID:      ast.NewNodeID(),
-			BlockID: parentBlock.ID,
-			RootID:  rootID,
-			Box:     boxID,
-			DocPath: p,
-			Path:    dest,
-			Name:    name,
-			Title:   title,
-			Hash:    hash,
+		dests := []string{"", treenode.ImageLivePhotoVideo(n)}
+		if destNode := n.ChildByType(ast.NodeLinkDest); destNode != nil {
+			dests[0] = destNode.TokensStr()
 		}
-		assets = append(assets, asset)
+		for i, dest := range dests {
+			if !util.IsAssetLinkDest([]byte(dest), false) {
+				continue
+			}
+			if idx := strings.Index(dest, "?"); idx > 0 {
+				dest = dest[:idx]
+			}
+			assetTitle := title
+			if i > 0 {
+				assetTitle = ""
+			}
+			hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
+			name, _ := util.LastID(dest)
+			assets = append(assets, &Asset{
+				ID:      ast.NewNodeID(),
+				BlockID: parentBlock.ID,
+				RootID:  rootID,
+				Box:     boxID,
+				DocPath: p,
+				Path:    dest,
+				Name:    name,
+				Title:   assetTitle,
+				Hash:    hash,
+			})
+		}
 		return
 	case ast.NodeTextMark:
 		typ := treenode.TypeAbbr(n.Type.String()) + " " + n.TextMarkType
@@ -1165,7 +1163,12 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		}
 		rowIDs = append(rowIDs, strconv.FormatInt(rowID, 10))
 	}
+	iterErr := rows.Err()
 	rows.Close()
+	if err = iterErr; err != nil {
+		logging.LogErrorf("iterate block rowIDs failed: %s", err)
+		return
+	}
 
 	if 1 > len(rowIDs) {
 		return
@@ -1502,7 +1505,7 @@ func cleanupInvalidRefs(database *sql.DB) (err error) {
 }
 
 func CloseDatabase() {
-	diagnostic := util.WatchOperationWithTiming("close databases", "close index queue")
+	diagnostic := util.WatchOperation("close databases", "close index queue")
 	defer diagnostic.Finish()
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
@@ -1661,6 +1664,10 @@ func migrateBlockEmbeddingsSchema() {
 			return
 		}
 		existing[name] = true
+	}
+	if err = rows.Err(); err != nil {
+		logging.LogErrorf("iterate block_embeddings columns failed: %s", err)
+		return
 	}
 
 	// 表不存在（首次启动还没建）时 existing 为空，跳过；待 initDBTables 建表
@@ -1921,7 +1928,6 @@ func closeDatabase() {
 	debug.FreeOSMemory()
 	db = nil
 	runtime.GC()
-	return
 }
 
 func SQLTemplateFuncs(templateFuncMap *template.FuncMap, boxIDs ...string) {

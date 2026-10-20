@@ -5,9 +5,9 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {promisify} from "node:util";
 import test from "node:test";
-import {ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isClassDeclaration, isConstructorDeclaration, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, css: string) => {
+const browserCases = async (source: string, css: string, constructorSource: string) => {
     const check = require("node:assert/strict");
     const style = document.createElement("style");
     style.textContent = css;
@@ -18,16 +18,20 @@ const browserCases = async (source: string, css: string) => {
     let resolveLoad: (result: string) => void;
     let requests = 0;
     const errors: Error[] = [];
+    const syncHeight = (list: HTMLElement, host: HTMLElement) => {
+        host.style.setProperty("--mindmap-view-height", list.style.height);
+    };
+    // 执行实际构造器的视图准备部分，重布局、事件绑定和节点编辑不参与加载状态测试。
+    const Controller = new Function("readListMindmap", "syncListMindmapHeight", constructorSource +
+        "; return LoadingController;")(() => ({}), syncHeight);
     const dependencies = {
         console: {error: (error: Error) => errors.push(error)},
         roots,
         Constants: {CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", ATTRIBUTE_EDITING: "data-editing"},
         getListMindmapElements: (root: Element) => Array.from(root.querySelectorAll('[data-type="NodeMindmap"]')),
         isFoldedRenderContent: (element: Element) => !!element.closest('[fold="1"]'),
-        syncListMindmapHeight: (list: HTMLElement, host: HTMLElement) => {
-            host.style.setProperty("--mindmap-view-height", list.style.height);
-        },
-        canEdit: () => true,
+        syncListMindmapHeight: syncHeight,
+        canEdit: (owner: {disabled?: boolean}) => !owner.disabled,
         isProtyleListItemFragment: (owner: {fragment?: boolean}) => owner.fragment === true,
         completeList: () => {
             requests++;
@@ -39,11 +43,7 @@ const browserCases = async (source: string, css: string) => {
             return sequence;
         },
         cancelAnimationFrame: (id: number) => frames.delete(id),
-        ListMindmapController: class {
-            constructor(owner: IProtyle, list: HTMLElement) {
-                list.querySelector(".mindmap-view")?.remove();
-                list.insertAdjacentHTML("beforeend", '<div class="mindmap-view">Rendered</div>');
-            }
+        ListMindmapController: class extends Controller {
             refresh() {}
             async finish() { return true; }
             destroy() {}
@@ -87,17 +87,21 @@ const browserCases = async (source: string, css: string) => {
         roots.get(owner).destroy();
         root.remove();
     }
-    for (const result of ["complete", "failed", "changed", "destroy"]) {
+    for (const [wrapper, result] of ["NodeBlockquote", "NodeCallout"].flatMap(wrapper =>
+        ["complete", "failed", "changed", "destroy"].map(result => [wrapper, result]))) {
         const root = document.createElement("div");
         root.className = "protyle-wysiwyg";
         document.body.appendChild(root);
         const owner = {wysiwyg: {element: root}};
         init(owner);
-        root.innerHTML = '<div data-type="NodeTabs"><div data-type="NodeMindmap" data-node-id="map" style="height:320px">' +
-            '<div class="mindmap-item" data-type="NodeMindmapItem" data-node-id="item">Source text</div></div></div>';
+        root.innerHTML = `<div data-type="${wrapper}"><div data-type="NodeMindmap" data-node-id="map" style="height:320px">` +
+            '<div class="mindmap-item" data-type="NodeMindmapItem" data-node-id="item">Source text</div>' +
+            '<div class="mindmap-view" aria-busy="true">Cloned loading view</div>' +
+            '<div class="mindmap-view">Cloned rendered view</div></div></div>';
         await flush();
         const list = root.querySelector<HTMLElement>('[data-type="NodeMindmap"]');
         const item = list.firstElementChild;
+        check.equal(list.querySelectorAll(":scope > .mindmap-view").length, 1, "undo clones must not retain stale views");
         check.equal(getComputedStyle(item).display, "none", "Source must be hidden before the first frame");
         check.equal(list.querySelector(".mindmap-view").getBoundingClientRect().height, 320);
         check.equal(list.querySelectorAll('[aria-busy="true"]').length, 1);
@@ -121,6 +125,7 @@ const browserCases = async (source: string, css: string) => {
             check.equal(requests, previousRequests, "Failure must not cause a request loop");
         } else {
             check.ok(list.querySelector(".mindmap-view"), `${result}: ${list.outerHTML}`);
+            check.equal(list.querySelectorAll(":scope > .mindmap-view").length, 1);
             check.equal(list.querySelector(".mindmap-view").textContent, "Rendered");
             check.equal(list.querySelector('[aria-busy="true"]'), null);
             check.equal(getComputedStyle(item).display, "none");
@@ -129,6 +134,35 @@ const browserCases = async (source: string, css: string) => {
         root.remove();
     }
     check.deepEqual(errors, []);
+    for (const lite of [false, true]) {
+        const root = document.createElement("div");
+        root.className = "protyle-wysiwyg";
+        root.innerHTML = '<div class="protyle-wysiwyg__embed"><div data-type="NodeMindmap" data-node-id="embedded">' +
+            "<div>Partial source</div></div></div>";
+        document.body.append(root);
+        const owner = {lite, fragment: lite, disabled: true, wysiwyg: {element: root}};
+        const previousRequests = requests;
+        init(owner);
+        await frame();
+        check.equal(requests, previousRequests, "read-only embeds do not load editable source");
+        owner.disabled = false;
+        roots.get(owner).refresh();
+        await frame();
+        check.equal(requests, previousRequests + 1, "permission changes must hydrate before enabling editing");
+        resolveLoad("complete");
+        await flush();
+        await frame();
+        check.equal(requests, previousRequests + 1, "completed source is reused by later refreshes");
+        roots.get(owner).destroy();
+        root.remove();
+    }
+    const remounted = document.createElement("div");
+    remounted.innerHTML = '<div data-node-id="source">Preserved source</div>' +
+        '<div class="mindmap-view" aria-busy="true">Stale loading</div><div class="mindmap-view">Stale rendered</div>';
+    new Controller({}, remounted);
+    check.equal(remounted.querySelectorAll(":scope > .mindmap-view").length, 1);
+    check.equal(remounted.querySelector(".mindmap-view").textContent, "Rendered");
+    check.equal(remounted.firstElementChild.textContent, "Preserved source");
     for (const fragment of [false, true]) {
         const root = document.createElement("div");
         root.className = "protyle-wysiwyg";
@@ -158,6 +192,16 @@ test("mindmap loading hides source before paint and recovers after failure or di
         text.indexOf("export const destroyListMindmaps =")).replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
+    const ast = createSourceFile("index.ts", text, ScriptTarget.Latest, true);
+    const controller = ast.statements.find(statement => isClassDeclaration(statement) &&
+        statement.name?.text === "ListMindmapController");
+    assert.ok(controller && isClassDeclaration(controller));
+    const constructor = controller.members.find(isConstructorDeclaration).body.getText(ast);
+    const constructorSource = transpileModule("class LoadingController {constructor(owner, list) " +
+        constructor.slice(0, constructor.indexOf("const renderGutter =")) +
+        'list.appendChild(this.host); this.host.textContent = "Rendered";}}', {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,
     }).css;
@@ -171,7 +215,8 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)},
+${JSON.stringify(constructorSource)})`)}));
         win.destroy();
         app.exit(0);
     } catch (error) {

@@ -41,12 +41,13 @@ func TestSwapBlockRefNodes(t *testing.T) {
 							wrap(ref)
 						}
 						var child *ast.Node
-						if kind == "heading" {
+						switch kind {
+						case "heading":
 							def.Type = ast.NodeHeading
 							def.HeadingLevel = 1
 							child = treenode.NewParagraph("")
 							def.InsertAfter(child)
-						} else if kind == "list" || kind == "bothLists" {
+						case "list", "bothLists":
 							li := wrap(def)
 							child = &ast.Node{Type: ast.NodeList, ListData: &ast.ListData{Typ: 0}}
 							li.AppendChild(child)
@@ -122,7 +123,7 @@ func TestSwapBlockRefNodes(t *testing.T) {
 						for _, tree := range trees {
 							treeMap[tree.ID] = tree
 						}
-						for cycle := 0; cycle < 2; cycle++ {
+						for range 2 {
 							if err := restoreBlockSwapFragments(state.after, state.before, treeMap); err != nil {
 								t.Fatalf("undo: %v", err)
 							}

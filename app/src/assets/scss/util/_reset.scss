@@ -12,16 +12,16 @@ html {
 // 声明当前配色方案，用于修正 iOS 深色模式下输入法候选词高亮项背景丢失等问题 https://github.com/siyuan-note/siyuan/issues/17894
 :root[data-theme-mode="dark"] {
   color-scheme: dark;
-
-  &[data-backend="ios"]:is([data-frontend="desktop"], [data-frontend="mobile"]) {
-    // iOS 深色模式下显式设置光标颜色，改善外接键盘输入法候选字的可见性。
-    // https://github.com/siyuan-note/siyuan/issues/20005
-    caret-color: var(--b3-theme-on-background);
-  }
 }
 
 :root[data-theme-mode="light"] {
   color-scheme: light;
+}
+
+// iOS 使用固定蓝色光标，改善系统与应用明暗模式不同组合下的输入法候选字对比度。
+// https://github.com/siyuan-note/siyuan/issues/20005
+body.body--ios {
+  caret-color: #3575f0;
 }
 
 // 语言包或主题不可用时，仍使用系统配色显示启动错误。
@@ -83,20 +83,27 @@ body {
     }
   }
 
-  &.body--win32 {
+  // 非 macOS 平台不预留 macOS 窗口按钮空间，浏览器端工具栏的标题栏避让由 .toolbar--browser 处理
+  &.body--windows,
+  &.body--linux {
     --b3-toolbar-left-mac: 8px;
-    .toolbar {
+
+    .toolbar:not(.toolbar--browser) {
       padding: 0 0 0 5px;
     }
 
-    .fullscreen {
-      & > .protyle-breadcrumb,
-      & > .block__icons {
-        padding-right: 126px;
-      }
+    // 前端形态条件不增加优先级，独立窗口继续使用自身的窗口控件占位。
+    :where(html[data-frontend="desktop"]) &,
+    :where(html[data-frontend="desktop-window"]) & {
+      .fullscreen {
+        & > .protyle-breadcrumb,
+        & > .block__icons {
+          padding-right: 126px;
+        }
 
-      & > .block__icons > .search__label {
-        right: 108px;
+        & > .block__icons > .search__label {
+          right: 108px;
+        }
       }
     }
   }
@@ -109,7 +116,7 @@ body {
       }
     }
 
-    &.body--win32 .fullscreen {
+    &:not(.body--mac) .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
         padding-right: 168px;
@@ -146,12 +153,12 @@ body {
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      height: calc(100% - 42px);
-      margin-top: 42px;
+      height: calc(100% - var(--b3-ui-panel-height, 42px));
+      margin-top: var(--b3-ui-panel-height, 42px);
     }
 
     .toolbar {
-      height: 42px;
+      height: var(--b3-ui-panel-height, 42px);
       position: absolute;
       width: 100%;
 
@@ -163,7 +170,7 @@ body {
 
     .layout__dockl:not(.layout--float),
     .layout__dockr:not(.layout--float) {
-      margin-top: 42px;
+      margin-top: var(--b3-ui-panel-height, 42px);
     }
 
     .layout__wnd--left .layout-tab-container {
@@ -175,13 +182,13 @@ body {
     }
 
     .layout__wnd--center .layout-tab-bar .item {
-      margin: 6px 4px;
+      margin: var(--b3-ui-tab-margin, 6px 4px);
     }
 
     .toolbar #drag {
       -webkit-app-region: none;
       color: transparent;
-      height: 42px;
+      height: var(--b3-ui-panel-height, 42px);
       position: relative;
 
       .toolbar__title-icon {
@@ -192,7 +199,7 @@ body {
       &::after {
         content: "";
         width: var(--b3-toolbar-drag-left);
-        height: 42px;
+        height: var(--b3-ui-panel-height, 42px);
         position: absolute;
         left: 0;
         top: 0;
@@ -218,8 +225,8 @@ body {
 
     .toolbar__item--win,
     .toolbar__item--close {
-      padding: 13.25px;
-      height: 42px;
+      padding: var(--b3-ui-window-control-padding, 13.25px);
+      height: var(--b3-ui-panel-height, 42px);
     }
   }
 

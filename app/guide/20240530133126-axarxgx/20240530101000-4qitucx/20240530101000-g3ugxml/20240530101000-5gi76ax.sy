@@ -7,7 +7,7 @@
 		"id": "20240530101000-5gi76ax",
 		"title": "ウィジェット",
 		"type": "doc",
-		"updated": "20261002002136"
+		"updated": "20261016191345"
 	},
 	"Children": [
 		{
@@ -79,7 +79,7 @@
 			"Properties": {
 				"ID": "20240530101000-hw8mkkp",
 				"id": "20240530101000-51f06sm",
-				"updated": "20261002002136"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -94,7 +94,7 @@
 			"Properties": {
 				"ID": "20240530101000-fu57jks",
 				"id": "20240530101000-r9kvt7c",
-				"updated": "20240530101000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -104,7 +104,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace/widgets/"
+					"TextMarkTextContent": "workspace/data/widgets/"
 				},
 				{
 					"Type": "NodeText",

@@ -12,7 +12,7 @@ export const mountMcpOAuth = (root: HTMLElement) => {
     const lang = window.siyuan.languages;
     const escape = escapeHtmlTextAndAttr;
     const input = (field: string, label: string, value = "", readonly = false) =>
-        `<label class="fn__block">${escape(label)}<input class="b3-text-field fn__block" data-field="${field}" value="${escape(value)}" ${readonly ? "readonly" : ""} spellcheck="false"></label><div class="fn__hr"></div>`;
+        `<label class="fn__block">${escape(label)}<div class="fn__hr--small"></div><input class="b3-text-field fn__block" data-field="${field}" value="${escape(value)}" ${readonly ? "readonly" : ""} spellcheck="false"></label><div class="fn__hr"></div>`;
 
     const render = async () => {
         const response = await fetchSyncPost("/api/mcp/getOAuth", {});
@@ -20,13 +20,16 @@ export const mountMcpOAuth = (root: HTMLElement) => {
             return;
         }
         const status = response.data;
-        block.innerHTML = `<div class="b3-label__text">${escape(lang.mcpOAuthServer)}</div>
-<div class="b3-label__text ft__on-surface">${escape(lang.mcpOAuthTip)}</div><div class="fn__hr"></div>
-<label class="fn__flex"><span class="fn__flex-1">${escape(lang.mcpOAuthServer)}</span><input class="b3-switch" type="checkbox" data-field="enabled" ${status.enabled ? "checked" : ""}></label><div class="fn__hr"></div>
+        block.innerHTML = `<label class="fn__flex"><div class="fn__flex-1 config-item__main">
+<div class="config-name">${escape(lang.enable)}</div><div class="b3-label__text">${escape(lang.mcpOAuthTip)}</div>
+</div><span class="fn__space"></span><input class="b3-switch fn__flex-center" type="checkbox" data-field="enabled" ${status.enabled ? "checked" : ""}></label><div class="fn__hr"></div>
 ${input("publicURL", lang.mcpOAuthPublicURL, status.publicURL)}
-<button class="b3-button b3-button--outline" data-action="save">${escape(lang.save)}</button>
-<button class="b3-button b3-button--outline" data-action="revoke">${escape(lang.mcpOAuthRevokeAll)}</button><div class="fn__hr"></div>
 ${status.publicURL ? input("endpoint", lang.mcpOAuthEndpoint, status.publicURL + "/mcp", true) : ""}
+<div class="fn__flex">
+<button class="b3-button b3-button--outline" data-action="save">${escape(lang.save)}</button>
+<span class="fn__space"></span><button class="b3-button b3-button--outline" data-action="revoke">${escape(lang.mcpOAuthRevokeAll)}</button>
+</div><div class="fn__hr"></div>
+<div class="config-name">${escape(lang.mcpOAuthRegister)}</div><div class="fn__hr--small"></div>
 ${input("name", lang.name)}${input("redirectURI", lang.mcpOAuthRedirectURI)}
 <button class="b3-button b3-button--outline" data-action="register">${escape(lang.mcpOAuthRegister)}</button>
 <div data-secret></div><div class="fn__hr"></div>

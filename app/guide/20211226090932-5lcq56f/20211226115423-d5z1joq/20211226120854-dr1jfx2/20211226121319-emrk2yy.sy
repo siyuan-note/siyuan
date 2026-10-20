@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261019201307"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-i45akvs",
-				"updated": "20240702222119"
+				"updated": "20261019194453"
 			},
 			"Children": [
 				{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122008-1e014nh",
-				"updated": "20240702222119"
+				"updated": "20261019194453"
 			},
 			"Children": [
 				{
@@ -105,7 +105,7 @@
 					},
 					"Properties": {
 						"id": "20220916195409-g57vfyf",
-						"updated": "20240702222119"
+						"updated": "20261019194453"
 					},
 					"Children": [
 						{
@@ -127,12 +127,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122008-pei037e",
-								"updated": "20220916195424"
+								"updated": "20261019194453"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可通過複制貼上或拖拽來上傳圖片；上傳後的圖片可通過拖拽進行大小調整。"
+									"Data": "可透過複製貼上或拖曳來上傳圖片。將滑鼠移到圖片上可顯示邊框外的小把手，拖曳右側、底部或右下角的把手可等比例調整大小；在觸控螢幕上先點選圖片顯示把手，再拖曳把手"
 								}
 							]
 						},
@@ -838,6 +838,56 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261015131447-7b390sx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015131447-7b390sx",
+				"updated": "20261016011750"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "內容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "管理顏色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中點選對應按鈕，分別管理顏色、文字顏色和背景顏色。"
 				}
 			]
 		},
@@ -1912,7 +1962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261012014930"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
@@ -1947,6 +1997,66 @@
 			]
 		},
 		{
+			"ID": "20261018163000-b7er7oa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-b7er7oa",
+				"updated": "20261019201307"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "心智圖預設將滑鼠滾輪和單指滑動交給文件捲動。桌面版點擊心智圖、行動版輕點一次心智圖即可操作畫布；行動版也可使用工具列中的「手形工具」進行單指平移，關閉手形工具後可選取、拖曳或按兩下編輯節點，也可在閱讀時直接按兩下節點進入編輯。操作中的畫布顯示醒目邊框，可用滾輪或滑鼠右鍵拖曳平移畫布，啟用手形工具後也可用左鍵拖曳平移。一般模式下，空白區域的左鍵拖曳不會平移畫布。行動版操作時可用單指拖曳平移畫布，到達平移邊界後也不會捲動文件。點擊心智圖外部、將鍵盤焦點移到外部，或在畫布上按 Esc 即可恢復閱讀。全螢幕時保持畫布操作，離開全螢幕後恢復閱讀。"
+				}
+			]
+		},
+		{
+			"ID": "20261019142953-9ypjmtz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261019142953-9ypjmtz",
+				"updated": "20261019142953"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文件與全螢幕之間切換時，會保留心智圖的中心點和縮放比例。點擊工具列中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "全螢幕切換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件版面"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可顯示置中的指示框，大小與文件內心智圖的可視區域相同。參照指示框平移、縮放畫布，即可預覽離開全螢幕後顯示的範圍；再次點擊按鈕可隱藏指示框。指示框不會變更心智圖區塊的寬度或高度。"
+				}
+			]
+		},
+		{
+			"ID": "20261018163000-byam24i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-byam24i",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無須進入畫布操作，也可以按住 Ctrl（macOS 為 Command）捲動滑鼠滾輪，以指標為中心縮放，或按住同一按鍵並用滑鼠右鍵拖曳畫布進行暫時平移。暫時平移保留鍵盤焦點和節點選取狀態。觸控螢幕上可用雙指縮放、平移。這些手勢保持目前的閱讀或畫布操作狀態。已儲存的檢視鎖定仍禁止編輯、縮放和平移，解鎖後可視需要進入畫布操作。"
+				}
+			]
+		},
+		{
 			"ID": "20260928143000-t2iv0ys",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -1956,7 +2066,71 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點擊思維導圖工具列中的「鎖定視圖」後，禁止編輯、縮放和平移，在導圖上滑動或滾動滑鼠滾輪將捲動文件。點擊「解鎖視圖」可恢復操作。鎖定狀態隨區塊儲存。"
+					"Data": "點擊思維導圖工具列中的「鎖定視圖」後，禁止編輯、縮放和平移，在導圖上滑動或滾動滑鼠滾輪將捲動文件。點擊「解鎖視圖」可恢復操作。鎖定狀態隨區塊儲存。直接嵌入完整心智圖區塊或包含它的文件時，解鎖後可編輯節點和樣式，修改會同步至來源區塊及其他嵌入位置；唯讀和歷史預覽中仍不能編輯。"
+				}
+			]
+		},
+		{
+			"ID": "20261017110432-qnsdugf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017110432-qnsdugf",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在心智圖工具列的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連線樣式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇曲線分岔、直角折線、曲線匯聚或圓角折線。選擇套用至整張心智圖，隨文件儲存，並支援復原和重做。切換只改變父子節點間的連線，不改變節點位置或關係線。直角樣式共用的垂直線沿用預設線色，不能單獨選取；水平分支仍可單獨選取和配色。思源格式的 HTML 與 PDF 預覽使用儲存的樣式。"
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-z8j1a4z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-z8j1a4z",
+				"updated": "20261017113835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建預設連線樣式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇新建心智圖的連線樣式，也適用於首次將清單或頁籤轉換為心智圖。此偏好儲存在目前工作空間的本機設定中，不參與雲端同步。修改它不會改變既有心智圖；複製、匯入及清單或頁籤往返轉換保留原樣式。"
 				}
 			]
 		},
@@ -3157,7 +3331,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-vfgciw1",
-				"updated": "20261012014859"
+				"updated": "20261017003253"
 			},
 			"Children": [
 				{
@@ -3171,7 +3345,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 並選擇「插入圖片或檔案」，即可上傳本機圖片，也可以直接貼上剪貼簿圖片。圖片會儲存為文件附件。多個頂層節點形成的虛擬中心標題仍為純文字。"
+					"Data": " 並選擇「插入圖片或檔案」，即可上傳本機圖片，也可以直接貼上剪貼簿圖片。圖片會儲存為文件附件。多個頂層節點形成的虛擬中心標題仍為純文字。按兩下節點中的圖片即可直接放大預覽，無需先進入節點編輯。"
 				}
 			]
 		},
@@ -4460,12 +4634,44 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-l775ci5",
-				"updated": "20211226122008"
+				"updated": "20261018213321"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "流程圖"
+				}
+			]
+		},
+		{
+			"ID": "20261018213321-x7k2w2a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018213321-x7k2w2a",
+				"updated": "20261018213321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可拖曳 Mermaid 區塊右側的控制柄調整寬度。縮小後，在區塊選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "佈局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "置中"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 將區塊置中顯示。"
 				}
 			]
 		},
@@ -5097,7 +5303,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-6gbflza",
-				"updated": "20211226122008"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -5138,12 +5344,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221225012231-gx68k6u",
-				"updated": "20221225012248"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "可使用如下三種格式定義："
+					"Data": "本地內核支援以下三種格式。連線至遠端內核時僅支援嚴格 JSON，不執行 JavaScript 物件運算式或函式，詳見"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-3qa6edk",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "連線至遠端內核"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

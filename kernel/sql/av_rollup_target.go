@@ -1,6 +1,8 @@
 package sql
 
 import (
+	"maps"
+
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 )
@@ -56,9 +58,7 @@ func renderRollupTarget(target *av.AttributeView, key *av.Key, depth *int,
 		}
 	}
 	cache := make(map[string]*av.AttributeView, len(cachedAttrViews)+1)
-	for avID, attrView := range cachedAttrViews {
-		cache[avID] = attrView
-	}
+	maps.Copy(cache, cachedAttrViews)
 	cache[target.ID] = &cloned
 
 	// 每条依赖分支使用独立深度，兄弟字段不会消耗彼此的递归预算。

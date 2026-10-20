@@ -155,7 +155,7 @@ func TestParseToolArgsRejectsInvalidJSON(t *testing.T) {
 
 func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
 	var tracker doomLoopTracker
-	for i := 0; i < doomLoopStopThreshold; i++ {
+	for range doomLoopStopThreshold {
 		tracker.record("question", "", map[string]any{}, true)
 	}
 	if tracker.count != doomLoopStopThreshold || tracker.prevName != "question" {
@@ -395,6 +395,14 @@ func TestQueryToolActionEffects(t *testing.T) {
 }
 
 func TestBrowserCapabilityEffects(t *testing.T) {
+	renderedFetch := &capabilityRegistration{ID: "native/frontend/web_page_fetch", ModelName: "frontend__web_page_fetch",
+		Source: "native", Runtime: "browser", Effects: tools.ToolEffects{DataEgress: true}, EffectsDeclared: true}
+	if required, _ := capabilityConfirmRequirement(renderedFetch, "", nil, false, nil); !required || needsCapabilitySnapshot(renderedFetch, "") {
+		t.Fatal("rendered page fetch must require confirmation without creating a local snapshot")
+	}
+	if required, _ := capabilityConfirmRequirement(renderedFetch, "", nil, true, nil); required {
+		t.Fatal("rendered page fetch must honor session approval")
+	}
 	native := &capabilityRegistration{ID: "native/frontend/open_search", ModelName: "frontend__open_search", Source: "native", Runtime: "browser"}
 	if required, _ := capabilityConfirmRequirement(native, "", nil, false, nil); required || needsCapabilitySnapshot(native, "") {
 		t.Fatal("built-in browser capability must not require confirmation or create a snapshot")

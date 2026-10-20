@@ -185,9 +185,9 @@ func TestDecimalSumNonFinite(t *testing.T) {
 }
 
 func BenchmarkDecimalSum(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var sum decimalSum
-		for j := 0; j < 10000; j++ {
+		for range 10000 {
 			sum.add(0.1)
 		}
 		if 1000 != sum.float64() {

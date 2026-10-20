@@ -58,6 +58,8 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
             // Viewer.js 将生命周期事件派发给源元素，回调的 this 指向该元素。
             sourceElement.dispatchEvent(new Event("ready"));
         }
+
+        public destroy() {}
     }
     const source = readFileSync("src/protyle/preview/image.ts", "utf8");
     const compiled = transpileModule(source, {

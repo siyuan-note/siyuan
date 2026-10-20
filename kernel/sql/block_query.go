@@ -410,30 +410,28 @@ func queryWithLimitInfo(stmt string, limit int, info *QueryLimitInfo) (ret []map
 				return queryRawStmtWithLimitInfo(stmt, limit, info)
 			}
 
-			switch parsedStmt.(type) {
+			switch parsedStmt := parsedStmt.(type) {
 			case *sqlparser.Select:
-				slct := parsedStmt.(*sqlparser.Select)
-				if info != nil && slct.Limit != nil && slct.Limit.Rowcount != nil {
+				if info != nil && parsedStmt.Limit != nil && parsedStmt.Limit.Rowcount != nil {
 					info.Limit = 0
 				}
-				if nil == slct.Limit || nil == slct.Limit.Rowcount {
+				if nil == parsedStmt.Limit || nil == parsedStmt.Limit.Rowcount {
 					fallbackStmt += " LIMIT " + strconv.Itoa(limit)
 				}
 				limitClause := getLimitClause(parsedStmt, limit)
-				slct.Limit = limitClause
-				stmt = sqlparser.String(slct)
+				parsedStmt.Limit = limitClause
+				stmt = sqlparser.String(parsedStmt)
 			case *sqlparser.Union:
 				// Kernel API `/api/query/sql` support `UNION` statement https://github.com/siyuan-note/siyuan/issues/8226
-				union := parsedStmt.(*sqlparser.Union)
-				if info != nil && union.Limit != nil && union.Limit.Rowcount != nil {
+				if info != nil && parsedStmt.Limit != nil && parsedStmt.Limit.Rowcount != nil {
 					info.Limit = 0
 				}
-				if nil == union.Limit || nil == union.Limit.Rowcount {
+				if nil == parsedStmt.Limit || nil == parsedStmt.Limit.Rowcount {
 					fallbackStmt += " LIMIT " + strconv.Itoa(limit)
 				}
 				limitClause := getLimitClause(parsedStmt, limit)
-				union.Limit = limitClause
-				stmt = sqlparser.String(union)
+				parsedStmt.Limit = limitClause
+				stmt = sqlparser.String(parsedStmt)
 			default:
 				return queryRawStmtWithLimitInfo(stmt, limit, info)
 			}
@@ -441,16 +439,15 @@ func queryWithLimitInfo(stmt string, limit int, info *QueryLimitInfo) (ret []map
 			return queryRawStmtWithLimitInfo(stmt, limit, info)
 		}
 	} else {
-		switch parsedStmt2.(type) {
+		switch parsedStmt2 := parsedStmt2.(type) {
 		case *sqlparser2.SelectStatement:
-			slct := parsedStmt2.(*sqlparser2.SelectStatement)
-			if info != nil && slct.LimitExpr != nil {
+			if info != nil && parsedStmt2.LimitExpr != nil {
 				info.Limit = 0
 			}
-			if nil == slct.LimitExpr {
+			if nil == parsedStmt2.LimitExpr {
 				fallbackStmt += " LIMIT " + strconv.Itoa(limit)
-				slct.LimitExpr = &sqlparser2.NumberLit{Value: strconv.Itoa(limit)}
-				serialized, ok := stringifySelectStatement(slct)
+				parsedStmt2.LimitExpr = &sqlparser2.NumberLit{Value: strconv.Itoa(limit)}
+				serialized, ok := stringifySelectStatement(parsedStmt2)
 				if !ok {
 					return queryRawStmtWithLimitInfo(originalStmt, limit, info)
 				}
@@ -546,16 +543,14 @@ func ToBlocks(result []map[string]any) (ret []*Block) {
 }
 
 func getLimitClause(parsedStmt sqlparser.Statement, limit int) (ret *sqlparser.Limit) {
-	switch parsedStmt.(type) {
+	switch stmtNode := parsedStmt.(type) {
 	case *sqlparser.Select:
-		slct := parsedStmt.(*sqlparser.Select)
-		if nil != slct.Limit {
-			ret = slct.Limit
+		if nil != stmtNode.Limit {
+			ret = stmtNode.Limit
 		}
 	case *sqlparser.Union:
-		union := parsedStmt.(*sqlparser.Union)
-		if nil != union.Limit {
-			ret = union.Limit
+		if nil != stmtNode.Limit {
+			ret = stmtNode.Limit
 		}
 	}
 

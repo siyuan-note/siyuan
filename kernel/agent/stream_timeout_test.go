@@ -15,6 +15,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -28,7 +29,7 @@ import (
 func TestStreamIdleTimeoutResetsAfterEachChunk(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		flusher := prepareTestStream(t, w)
-		for i := 0; i < 6; i++ {
+		for i := range 6 {
 			writeTestStreamChunk(t, w, flusher, fmt.Sprintf("%d", i))
 			if i < 5 {
 				time.Sleep(60 * time.Millisecond)
@@ -97,11 +98,11 @@ func TestResponsesProgressEventsResetIdleTimeout(t *testing.T) {
 	defer cancel()
 	defer stream.Close()
 
-	content := ""
+	var content strings.Builder
 	response := firstResponse
 	for {
 		for _, choice := range response.Choices {
-			content += choice.Delta.Content
+			content.WriteString(choice.Delta.Content)
 		}
 		response, err = recvStreamWithIdleTimeout(stream, 100*time.Millisecond, cancel)
 		if errors.Is(err, io.EOF) {
@@ -111,8 +112,8 @@ func TestResponsesProgressEventsResetIdleTimeout(t *testing.T) {
 			t.Fatalf("receive Responses progress stream failed: %v", err)
 		}
 	}
-	if content != "done" {
-		t.Fatalf("unexpected Responses content: %q", content)
+	if content.String() != "done" {
+		t.Fatalf("unexpected Responses content: %q", content.String())
 	}
 }
 

@@ -18,7 +18,7 @@ func TestNoBodyContractRequests(t *testing.T) {
 
 func TestAPIContractSystemRequestCompatibility(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"force":null}`, `{"force":true}`, `{"force":true} {}`, `{"unknown":1e1000}`, ``} {
-		var legacy map[string]interface{}
+		var legacy map[string]any
 		legacyErr := json.NewDecoder(strings.NewReader(body)).Decode(&legacy)
 		request, err := SystemGetChangelog.Decode(strings.NewReader(body))
 		if err != nil {

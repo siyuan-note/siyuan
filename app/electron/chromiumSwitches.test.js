@@ -41,6 +41,7 @@ const startup = (args = [], {packaged = true, remote = false} = {}) => {
     const context = vm.createContext({
         app: {commandLine, isPackaged: packaged},
         process: {argv: packaged ? ["SiYuan.exe", ...args] : ["electron.exe", "main.js", ...args]},
+        linuxInputMethodLaunchArguments: packaged ? ["SiYuan.exe", ...args] : ["electron.exe", "main.js", ...args],
         appendChromiumSwitch,
         remoteKernelTarget: remote ? {mode: "remote"} : undefined,
         remoteKernelArgError: undefined,

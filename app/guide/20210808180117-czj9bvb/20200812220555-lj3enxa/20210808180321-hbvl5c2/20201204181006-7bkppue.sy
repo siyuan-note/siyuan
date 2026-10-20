@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20260922175505"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -140,7 +140,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20260619110354"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -298,7 +298,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20260619110354"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -1265,7 +1265,7 @@
 					},
 					"Properties": {
 						"id": "20240308162139-yt96e2z",
-						"updated": "20250828154937"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1273,7 +1273,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162139-x4evb04",
-								"updated": "20250828154937"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1287,7 +1287,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于返回当前周"
+									"Data": "​：返回输入日期所属的 ISO 8601 周数（1–53），例如 2021-01-01 属于第 53 周"
 								}
 							]
 						}
@@ -1302,7 +1302,7 @@
 					},
 					"Properties": {
 						"id": "20250828154237-r8vhx3a",
-						"updated": "20250828154248"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1310,7 +1310,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828154237-2kgeyrr",
-								"updated": "20250828154248"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1324,7 +1324,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于返回当前月份"
+									"Data": "​：返回输入日期所属 ISO 周的星期四所在的自然月份，例如 2021-01-01 返回 12。需要自然月份时使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"01\""
 								}
 							]
 						}
@@ -1339,7 +1344,7 @@
 					},
 					"Properties": {
 						"id": "20250828154157-thdko4b",
-						"updated": "20250828154157"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -1347,7 +1352,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250828154157-s8wsy4j",
-								"updated": "20250828154231"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -1361,7 +1366,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于返回当前年份"
+									"Data": "​：返回输入日期所属的 ISO 周年，例如 2021-01-01 返回 2020。需要自然年份时使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"2006\""
 								}
 							]
 						}

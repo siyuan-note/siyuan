@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20261002224424"
+		"updated": "20261018005815"
 	},
 	"Children": [
 		{
@@ -123,7 +123,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428213311-2hv9zwx",
-				"updated": "20210428213320"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -167,7 +167,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428213927-rbcfx2y",
-				"updated": "20230622164014"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -514,7 +514,7 @@
 					},
 					"Properties": {
 						"id": "20210428214049-1kebc1m",
-						"updated": "20210512152317"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -522,7 +522,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428214054-0vorr4s",
-								"updated": "20210512152317"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -536,7 +536,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​​ 后缀的文件用于保存文档数据，数据格式为 JSON"
+									"Data": "​​​​ 后缀的文件用于保存文档数据。普通笔记本的文档数据以 JSON 保存；加密笔记本的文档文件以密文保存，不能直接作为 JSON 读取或编辑，详见"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-crycn01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "加密笔记本"
 								}
 							]
 						}
@@ -550,7 +557,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210918114843-6xo7hmr",
-				"updated": "20260810212846"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -612,7 +619,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619171630-l6d80j9",
-				"updated": "20260810212846"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -624,7 +631,7 @@
 					},
 					"Properties": {
 						"id": "20220619171640-j9yl9en",
-						"updated": "20260810212846"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -632,7 +639,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619171640-gqfe61q",
-								"updated": "20260810212846"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -646,7 +653,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -655,7 +662,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -669,11 +685,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "导入 Data"
+									"TextMarkTextContent": "设置"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "应用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导入 Data"
 								}
 							]
 						}
@@ -688,7 +727,7 @@
 					},
 					"Properties": {
 						"id": "20220619171850-ldv3f31",
-						"updated": "20260810212846"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -696,7 +735,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619171850-jx3xl19",
-								"updated": "20260810212846"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -706,11 +745,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "右侧栏"
+									"TextMarkTextContent": "设置"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -719,7 +758,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -733,11 +781,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "导入 Data"
+									"TextMarkTextContent": "设置"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "应用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导入 Data"
 								}
 							]
 						}
@@ -989,12 +1060,62 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501230739-whydmx1",
-				"updated": "20260809232000"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "有的块（比如在列表项中的段落块）找不到块标怎么办？"
+				}
+			]
+		},
+		{
+			"ID": "20261017212429-ssbwd82",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017212429-ssbwd82",
+				"updated": "20261018005815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "默认使用精简块标。只有一个列表项时，也会保留列表块和列表项块标。若要显示当前块及其所属容器的全部块标，可启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示完整块标"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，通过各层块标直接打开对应块的菜单或拖拽该块。"
 				}
 			]
 		},
@@ -1491,7 +1612,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201224120447-kp1qdga"
+				"id": "20201224120447-kp1qdga",
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1554,7 +1676,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230406111610-s0vr122",
-				"updated": "20230806002852"
+				"updated": "20261016202635"
 			},
 			"Children": [
 				{
@@ -1566,6 +1688,10 @@
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://ld246.com/sponsor",
 					"TextMarkTextContent": "靠爱发电 - 链滴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

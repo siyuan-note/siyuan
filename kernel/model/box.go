@@ -589,7 +589,6 @@ func (box *Box) listFiles(files, ret *[]*FileInfo) {
 			*ret = append(*ret, file)
 		}
 	}
-	return
 }
 
 type BoxInfo struct {
@@ -901,6 +900,7 @@ func ClearTempFiles() {
 
 func clearTempFiles(count *int, size *int64) {
 	heif.ClearMemoryCache("")
+	LivePhotoPreviews.Clear("")
 	for _, name := range []string{
 		"assets-cache", "bazaar", "export", "import", "convert", "pandoc", "os", "base64", "install", "thumbnails", "repo", "clipboard",
 	} {
@@ -939,7 +939,6 @@ func clearTempDir(dir string, count *int, size *int64) {
 	if util.IsEmptyDir(dir) {
 		util.RemoveEmptyDir(dir)
 	}
-	return
 }
 
 func VacuumDataIndex() {

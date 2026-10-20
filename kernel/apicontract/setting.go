@@ -11,6 +11,7 @@ type SettingBazaar struct {
 }
 
 type SettingAI struct {
+	Web             *SettingAIWeb           `json:"web" api:"optional,nullable"`
 	MCP             *SettingMCP             `json:"mcp" api:"optional,nullable"`
 	Embedding       *SettingEmbedding       `json:"embedding" api:"optional,nullable"`
 	Rerank          *SettingRerank          `json:"rerank" api:"optional,nullable"`
@@ -19,6 +20,17 @@ type SettingAI struct {
 	Editing         *SettingEditing         `json:"editing" api:"optional,nullable"`
 	ImageGeneration *SettingImageGeneration `json:"imageGeneration" api:"optional,nullable"`
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
+}
+
+// SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
+// 超时默认 30 秒，上限 600 秒。
+// DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
+// Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
+type SettingAIWeb struct {
+	SearchProvider string `json:"searchProvider" api:"optional,nullable"`
+	FetchProvider  string `json:"fetchProvider" api:"optional,nullable"`
+	APIKey         string `json:"apiKey" api:"optional,nullable"`
+	Timeout        int    `json:"timeout" api:"optional,nullable"`
 }
 
 type SettingMCP struct {
@@ -48,13 +60,15 @@ type SettingCapabilityPolicy struct {
 }
 
 type SettingEmbedding struct {
-	ID         string `json:"id" api:"optional,nullable"`
-	Enabled    bool   `json:"enabled" api:"optional,nullable"`
-	APIKey     string `json:"apiKey" api:"optional,nullable"`
-	BaseURL    string `json:"baseURL" api:"optional,nullable"`
-	Name       string `json:"name" api:"optional,nullable"`
-	Timeout    int    `json:"timeout" api:"optional,nullable"`
-	Dimensions int    `json:"dimensions" api:"optional,nullable"`
+	ID          string `json:"id" api:"optional,nullable"`
+	Enabled     bool   `json:"enabled" api:"optional,nullable"`
+	APIKey      string `json:"apiKey" api:"optional,nullable"`
+	BaseURL     string `json:"baseURL" api:"optional,nullable"`
+	Name        string `json:"name" api:"optional,nullable"`
+	Timeout     int    `json:"timeout" api:"optional,nullable"`
+	Dimensions  int    `json:"dimensions" api:"optional,nullable"`
+	Concurrency int    `json:"concurrency" api:"optional,nullable"`
+	BatchSize   int    `json:"batchSize" api:"optional,nullable"`
 }
 
 type SettingRerank struct {
@@ -86,6 +100,8 @@ type SettingDecisionProfile struct {
 }
 
 type SettingAgent struct {
+	// 默认关闭，保存在 conf.json；升级不读取前端旧键，重置普通设置时随 AI 配置保留。
+	StreamingMarkdown   bool                     `json:"streamingMarkdown" api:"optional,nullable"`
 	ModelID             string                   `json:"modelId" api:"optional,nullable"`
 	SessionTimeout      int                      `json:"sessionTimeout" api:"optional,nullable"`
 	StreamIdleTimeout   int                      `json:"streamIdleTimeout" api:"optional,nullable"`
@@ -132,17 +148,21 @@ type SettingImageGeneration struct {
 
 type SettingProvider struct {
 	// 套餐认证固定使用公开 Responses API；账户引用不包含令牌，省略时保留 API Key 认证。
-	AuthType       string            `json:"authType,omitempty" api:"optional,nullable"`
-	AccountID      string            `json:"accountID,omitempty" api:"optional,nullable"`
-	Headers        map[string]string `json:"headers,omitempty" api:"optional,nullable"`
-	ID             string            `json:"id" api:"optional,nullable"`
-	DisplayName    string            `json:"displayName,omitempty" api:"optional,nullable"`
-	Enabled        bool              `json:"enabled" api:"optional,nullable"`
-	APIKey         string            `json:"apiKey" api:"optional,nullable"`
-	BaseURL        string            `json:"baseURL" api:"optional,nullable"`
-	Protocol       string            `json:"protocol,omitempty" api:"optional,nullable"`
-	RequestTimeout int               `json:"requestTimeout" api:"optional,nullable"`
-	Models         []*SettingModel   `json:"models" api:"optional,nullable"`
+	AuthType string `json:"authType,omitempty" api:"optional,nullable"`
+	// AccountID 读写本机按工作空间路径和服务商 ID 保存的绑定，不随 conf.json 或设置导出保存。
+	// 清空或省略时解除该服务商的本机绑定；旧配置中的账户引用不迁移，各设备需重新选择。
+	AccountID   string            `json:"accountID,omitempty" api:"optional,nullable"`
+	Headers     map[string]string `json:"headers,omitempty" api:"optional,nullable"`
+	ID          string            `json:"id" api:"optional,nullable"`
+	DisplayName string            `json:"displayName,omitempty" api:"optional,nullable"`
+	Enabled     bool              `json:"enabled" api:"optional,nullable"`
+	APIKey      string            `json:"apiKey" api:"optional,nullable"`
+	BaseURL     string            `json:"baseURL" api:"optional,nullable"`
+	// Protocol 支持 openai、openai-responses、anthropic-messages 和 gemini-interactions，省略时保持 openai。
+	// Gemini Interactions 使用原生 /v1beta 或 /v1 基础地址，空地址默认为 Google 官方 /v1beta。
+	Protocol       string          `json:"protocol,omitempty" api:"optional,nullable"`
+	RequestTimeout int             `json:"requestTimeout" api:"optional,nullable"`
+	Models         []*SettingModel `json:"models" api:"optional,nullable"`
 }
 
 type SettingModel struct {
@@ -188,7 +208,8 @@ type SettingFlashcard struct {
 	Weights          string  `json:"weights" api:"optional,nullable"`
 }
 
-// SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
+// SettingEditor 描述编辑器配置。displayImgName、displayImgAlt、blockGutterMode 和 pageScrollButtons 默认关闭，
+// null 表示回到默认值，其他非布尔类型拒绝更新。
 type SettingEditor struct {
 	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
 	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
@@ -205,6 +226,7 @@ type SettingEditor struct {
 	CodeLineWrap                    bool                 `json:"codeLineWrap" api:"optional,nullable"`
 	CodeLigatures                   bool                 `json:"codeLigatures" api:"optional,nullable"`
 	DisplayBookmarkIcon             bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
+	BlockGutterMode                 bool                 `json:"blockGutterMode" api:"optional,nullable"`
 	DisplayNetImgMark               bool                 `json:"displayNetImgMark" api:"optional,nullable"`
 	DisplayImgName                  bool                 `json:"displayImgName" api:"optional,nullable"`
 	DisplayImgAlt                   bool                 `json:"displayImgAlt" api:"optional,nullable"`
@@ -232,16 +254,20 @@ type SettingEditor struct {
 	FloatWindowMode                 int                  `json:"floatWindowMode" api:"optional,nullable"`
 	FloatWindowDelay                *int                 `json:"floatWindowDelay" api:"optional,nullable"`
 	KeepLoadedContent               bool                 `json:"keepLoadedContent" api:"optional,nullable"`
-	DynamicLoadBlocks               int                  `json:"dynamicLoadBlocks" api:"optional,nullable"`
-	Justify                         bool                 `json:"justify" api:"optional,nullable"`
-	RTL                             bool                 `json:"rtl" api:"optional,nullable"`
+	// PageScrollButtons 控制翻屏按钮，默认关闭，不迁移旧的本地偏好。
+	PageScrollButtons bool `json:"pageScrollButtons" api:"optional,nullable"`
+	DynamicLoadBlocks int  `json:"dynamicLoadBlocks" api:"optional,nullable"`
+	Justify           bool `json:"justify" api:"optional,nullable"`
+	RTL               bool `json:"rtl" api:"optional,nullable"`
 	// AutoDirection 默认关闭；段落和标题按首个强方向字符排版，列表项独立调整标记和缩进。
 	// 手动方向优先，表格列顺序不变。
-	AutoDirection           bool             `json:"autoDirection" api:"optional,nullable"`
-	Spellcheck              bool             `json:"spellcheck" api:"optional,nullable"`
-	SpellcheckLanguages     []string         `json:"spellcheckLanguages" api:"optional,nullable"`
-	HashTagSearch           *bool            `json:"hashTagSearch" api:"optional,nullable"`
-	OnlySearchForDoc        bool             `json:"onlySearchForDoc" api:"optional,nullable"`
+	AutoDirection       bool     `json:"autoDirection" api:"optional,nullable"`
+	Spellcheck          bool     `json:"spellcheck" api:"optional,nullable"`
+	SpellcheckLanguages []string `json:"spellcheckLanguages" api:"optional,nullable"`
+	HashTagSearch       *bool    `json:"hashTagSearch" api:"optional,nullable"`
+	OnlySearchForDoc    bool     `json:"onlySearchForDoc" api:"optional,nullable"`
+	// AutoCloseRefBrackets 默认关闭；启用后输入 [[ 自动补全 ]]，输入 ]] 时引用同名文档、日记或新建文档。
+	AutoCloseRefBrackets    bool             `json:"autoCloseRefBrackets" api:"optional,nullable"`
 	BacklinkExpandCount     int              `json:"backlinkExpandCount" api:"optional,nullable"`
 	BackmentionExpandCount  int              `json:"backmentionExpandCount" api:"optional,nullable"`
 	BacklinkMentionExclude  string           `json:"backlinkMentionExclude" api:"optional,nullable"`
@@ -299,7 +325,6 @@ type SettingExport struct {
 	FileAnnotationRefMode   int    `json:"fileAnnotationRefMode" api:"optional,nullable"`
 	PandocBin               string `json:"pandocBin" api:"optional,nullable"`
 	PandocParams            string `json:"pandocParams" api:"optional,nullable"`
-	DocxTemplate            string `json:"docxTemplate" api:"optional,nullable"`
 	RemoveAssetsID          bool   `json:"removeAssetsID" api:"optional,nullable"`
 	MarkdownYFM             bool   `json:"markdownYFM" api:"optional,nullable"`
 	InlineMemo              bool   `json:"inlineMemo" api:"optional,nullable"`
@@ -313,9 +338,11 @@ type SettingExport struct {
 }
 
 type SettingFileTree struct {
-	AlwaysSelectOpenedFile bool `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
-	OpenFilesUseCurrentTab bool `json:"openFilesUseCurrentTab" api:"optional,nullable"`
-	CloseTabOnDoubleClick  bool `json:"closeTabOnDoubleClick" api:"optional,nullable"`
+	// 默认 viewedAt；支持 created、updated、openAt、closedAt，未知值回落 viewedAt。重置文档树设置时恢复默认。
+	RecentDocsSort         string `json:"recentDocsSort" api:"optional,nullable"`
+	AlwaysSelectOpenedFile bool   `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
+	OpenFilesUseCurrentTab bool   `json:"openFilesUseCurrentTab" api:"optional,nullable"`
+	CloseTabOnDoubleClick  bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
 	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
 	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
 	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`
@@ -347,7 +374,7 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
-	// 思维导图默认开启，思维导图项默认关闭；更新时省略或传 null 保留当前值。
+	// 思维导图默认开启，思维导图项默认关闭；null 表示回到默认值。
 	Mindmap                      *bool `json:"mindmap" api:"optional,nullable"`
 	MindmapItem                  *bool `json:"mindmapItem" api:"optional,nullable"`
 	CustomBlock                  *bool `json:"customBlock" api:"optional,nullable"`
@@ -391,28 +418,50 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
-	BodyGradient        *SettingBodyGradient      `json:"bodyGradient" api:"optional,nullable"`
-	GlobalFontFamilies  []*SettingEditorFont      `json:"globalFontFamilies" api:"optional,nullable"`
-	Mode                int                       `json:"mode" api:"optional,nullable"`
-	ModeOS              bool                      `json:"modeOS" api:"optional,nullable"`
-	DarkThemes          []*SettingAppearanceTheme `json:"darkThemes" api:"optional,nullable"`
-	LightThemes         []*SettingAppearanceTheme `json:"lightThemes" api:"optional,nullable"`
-	ThemeDark           string                    `json:"themeDark" api:"optional,nullable"`
-	ThemeLight          string                    `json:"themeLight" api:"optional,nullable"`
-	ThemeVer            string                    `json:"themeVer" api:"optional,nullable"`
-	Icons               []*SettingAppearanceIcon  `json:"icons" api:"optional,nullable"`
-	Icon                string                    `json:"icon" api:"optional,nullable"`
-	IconVer             string                    `json:"iconVer" api:"optional,nullable"`
-	CodeBlockThemeLight string                    `json:"codeBlockThemeLight" api:"optional,nullable"`
-	CodeBlockThemeDark  string                    `json:"codeBlockThemeDark" api:"optional,nullable"`
-	Lang                string                    `json:"lang" api:"optional,nullable"`
-	ThemeJS             bool                      `json:"themeJS" api:"optional,nullable"`
-	CloseButtonBehavior int                       `json:"closeButtonBehavior" api:"optional,nullable"`
-	HideToolbar         bool                      `json:"hideToolbar" api:"optional,nullable"`
-	HideStatusBar       bool                      `json:"hideStatusBar" api:"optional,nullable"`
-	StatusBar           *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
-	Notifications       *SettingNotifications     `json:"notifications" api:"optional,nullable"`
-	EntryVisibility     *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`
+	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。
+	// 重置外观设置时恢复默认；紧凑模式与菜单鼠标滚动默认关闭，新建空工作空间的菜单鼠标滚动默认开启。
+	CompactMode              bool                      `json:"compactMode" api:"optional,nullable"`
+	MenuMouseScroll          bool                      `json:"menuMouseScroll" api:"optional,nullable"`
+	PDFTheme                 *SettingPDFTheme          `json:"pdfTheme" api:"optional,nullable"`
+	OutlineKeepCurrentExpand bool                      `json:"outlineKeepCurrentExpand" api:"optional,nullable"`
+	MobileBars               *SettingMobileBars        `json:"mobileBars" api:"optional,nullable"`
+	BodyGradient             *SettingBodyGradient      `json:"bodyGradient" api:"optional,nullable"`
+	GlobalFontFamilies       []*SettingEditorFont      `json:"globalFontFamilies" api:"optional,nullable"`
+	Mode                     int                       `json:"mode" api:"optional,nullable"`
+	ModeOS                   bool                      `json:"modeOS" api:"optional,nullable"`
+	DarkThemes               []*SettingAppearanceTheme `json:"darkThemes" api:"optional,nullable"`
+	LightThemes              []*SettingAppearanceTheme `json:"lightThemes" api:"optional,nullable"`
+	ThemeDark                string                    `json:"themeDark" api:"optional,nullable"`
+	ThemeLight               string                    `json:"themeLight" api:"optional,nullable"`
+	ThemeVer                 string                    `json:"themeVer" api:"optional,nullable"`
+	Icons                    []*SettingAppearanceIcon  `json:"icons" api:"optional,nullable"`
+	Icon                     string                    `json:"icon" api:"optional,nullable"`
+	IconVer                  string                    `json:"iconVer" api:"optional,nullable"`
+	CodeBlockThemeLight      string                    `json:"codeBlockThemeLight" api:"optional,nullable"`
+	CodeBlockThemeDark       string                    `json:"codeBlockThemeDark" api:"optional,nullable"`
+	Lang                     string                    `json:"lang" api:"optional,nullable"`
+	ThemeJS                  bool                      `json:"themeJS" api:"optional,nullable"`
+	CloseButtonBehavior      int                       `json:"closeButtonBehavior" api:"optional,nullable"`
+	HideToolbar              bool                      `json:"hideToolbar" api:"optional,nullable"`
+	HideStatusBar            bool                      `json:"hideStatusBar" api:"optional,nullable"`
+	StatusBar                *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
+	Notifications            *SettingNotifications     `json:"notifications" api:"optional,nullable"`
+	EntryVisibility          *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`
+}
+
+// SettingPDFTheme 明亮界面默认 light，暗黑界面默认 dark；主题值只接受 light、dark。
+// 标注颜色为空时使用 var(--b3-pdf-background1)，允许保存用户选择的 CSS 颜色。
+type SettingPDFTheme struct {
+	Light     string `json:"light" api:"optional,nullable"`
+	Dark      string `json:"dark" api:"optional,nullable"`
+	AnnoColor string `json:"annoColor" api:"optional,nullable"`
+}
+
+// SettingMobileBars 三项默认开启，侧栏滑动与按钮不能同时关闭。
+type SettingMobileBars struct {
+	AutoHide       *bool `json:"autoHide" api:"optional,nullable"`
+	SidebarSwipe   *bool `json:"sidebarSwipe" api:"optional,nullable"`
+	SidebarButtons *bool `json:"sidebarButtons" api:"optional,nullable"`
 }
 
 type SettingBodyGradient struct {

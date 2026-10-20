@@ -23,13 +23,13 @@ func validatePluginProjectPrefixes(names []string) error {
 		}
 		key := strings.ToLower(name)
 		if files[key] {
-			return errors.New("invalid_path: duplicate or case-colliding approved file")
+			return NewTextFileError(TextFileInvalidPath, errors.New("duplicate or case-colliding approved file"))
 		}
 		files[key] = true
 		for prefix := name; prefix != "."; prefix = path.Dir(prefix) {
 			key := strings.ToLower(prefix)
 			if old, ok := seen[key]; ok && old != prefix {
-				return errors.New("invalid_path: case-colliding source path prefix")
+				return NewTextFileError(TextFileInvalidPath, errors.New("case-colliding source path prefix"))
 			}
 			seen[key] = prefix
 		}
@@ -37,7 +37,7 @@ func validatePluginProjectPrefixes(names []string) error {
 	for name := range files {
 		for parent := path.Dir(name); parent != "."; parent = path.Dir(parent) {
 			if files[parent] {
-				return errors.New("invalid_path: source file/directory collision")
+				return NewTextFileError(TextFileInvalidPath, errors.New("source file/directory collision"))
 			}
 		}
 	}
@@ -47,7 +47,7 @@ func validatePluginProjectPrefixes(names []string) error {
 // 只读取冻结允许清单的现有文件；允许将未来新建文件列入方案，但绝不追随链接。
 func snapshotSelectedPluginSource(root *os.Root, selected []string, authorize func(string) error) (map[string][]byte, error) {
 	if len(selected) == 0 || len(selected) > PluginProjectMaxFiles {
-		return nil, errors.New("invalid_path: sourceFiles must be a bounded nonempty file list")
+		return nil, NewTextFileError(TextFileInvalidPath, errors.New("sourceFiles must be a bounded nonempty file list"))
 	}
 	if err := validatePluginProjectPrefixes(selected); err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func snapshotSelectedPluginSource(root *os.Root, selected []string, authorize fu
 		}
 		total += int64(len(data))
 		if total > PluginProjectMaxBytes {
-			return nil, errors.New("too_large: selected source exceeds 64 MiB")
+			return nil, NewTextFileError(TextFileTooLarge, errors.New("selected source exceeds 64 MiB"))
 		}
 		files[name] = data
 	}
@@ -91,7 +91,7 @@ func inspectPluginProjectCandidate(root *os.Root, authorize func(string) error) 
 		}
 		paths++
 		if paths > PluginProjectMaxFiles*2 {
-			return errors.New("too_large: source inventory exceeds bounded inspection")
+			return NewTextFileError(TextFileTooLarge, errors.New("source inventory exceeds bounded inspection"))
 		}
 		exclude := func(reason string) error {
 			excluded = append(excluded, PluginProjectExcludedFile{name, reason})
@@ -115,7 +115,7 @@ func inspectPluginProjectCandidate(root *os.Root, authorize func(string) error) 
 			return nil
 		}
 		if len(files) >= PluginProjectMaxFiles {
-			return errors.New("too_large: source inventory contains too many files")
+			return NewTextFileError(TextFileTooLarge, errors.New("source inventory contains too many files"))
 		}
 		data, err := readPluginProjectFile(root, name)
 		if err != nil {
@@ -123,7 +123,7 @@ func inspectPluginProjectCandidate(root *os.Root, authorize func(string) error) 
 		}
 		total += int64(len(data))
 		if total > PluginProjectMaxBytes {
-			return errors.New("too_large: source inventory exceeds 64 MiB")
+			return NewTextFileError(TextFileTooLarge, errors.New("source inventory exceeds 64 MiB"))
 		}
 		files[name] = data
 		return nil

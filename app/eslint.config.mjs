@@ -38,6 +38,8 @@ export default [{
     },
 
     rules: {
+        // 条件编译保留的互斥分支会使重复赋值检查误报初始值。
+        "no-useless-assignment": "off",
         semi: [2, "always"],
         quotes: [2, "double", {
             avoidEscape: true,

@@ -6,7 +6,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "./hasClosest";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {copyTableCellContent} from "./tableCellRich";
 import {
@@ -925,6 +925,26 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     return true;
 };
 
+const focusInsertedBlock = (element: Element) => {
+    const listItemElement = element.parentElement;
+    const listElement = listItemElement?.parentElement;
+    const parentParagraphElement = listElement?.previousElementSibling;
+    if (element.getAttribute("data-type") === "NodeWidget" &&
+        listItemElement?.getAttribute("data-type") === "NodeListItem" &&
+        element.previousElementSibling?.classList.contains("protyle-action") &&
+        listElement?.getAttribute("data-type") === "NodeList" && listElement.firstElementChild === listItemElement &&
+        listElement.parentElement?.getAttribute("data-type") === "NodeListItem" &&
+        parentParagraphElement?.getAttribute("data-type") === "NodeParagraph") {
+        // 首个子项的挂件无法显示文本光标，使实际选区与父项末尾显示的光标保持一致。
+        const range = document.createRange();
+        range.selectNodeContents(getContenteditableElement(parentParagraphElement));
+        range.collapse(false);
+        focusByRange(range);
+        return;
+    }
+    focusBlock(element, undefined, false);
+};
+
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
                            useProtyleRange = false,
@@ -1010,12 +1030,46 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
 
     const blockRanges = !range.collapsed ? getBlockRanges(protyle.wysiwyg.element, range) : [];
+    if (!range.collapsed && rangeStartBlockElement && rangeEndBlockElement &&
+        rangeStartBlockElement !== rangeEndBlockElement) {
+        // 元素边界和空正文可能不产生文本选区，仍需把边界块纳入跨块事务。
+        [{element: rangeStartBlockElement, toStart: true}, {element: rangeEndBlockElement, toStart: false}]
+            .forEach(({element, toStart}) => {
+                if (blockRanges.some(item => item.blockElement === element)) {
+                    return;
+                }
+                const editableElement = getContenteditableElement(element);
+                const container = toStart ? range.startContainer : range.endContainer;
+                if (!editableElement?.contains(container)) {
+                    return;
+                }
+                const boundaryRange = range.cloneRange();
+                boundaryRange.collapse(toStart);
+                const position = getSelectionOffset(editableElement, undefined, boundaryRange);
+                const item = {blockElement: element, editableElement, range: boundaryRange, ...position};
+                if (toStart) {
+                    blockRanges.unshift(item);
+                } else {
+                    blockRanges.push(item);
+                }
+            });
+    }
     if (templateDocTreePlanID && blockRanges.some(item => item.blockElement.classList.contains("av") ||
         item.blockElement.classList.contains("table") || isInEmbedBlock(item.blockElement) ||
         !item.editableElement)) {
         return;
     }
     const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
+    // 序号重排会更新整个列表项，撤销快照必须在跨块删除前保存。
+    const orderedListItemOldHTML = new Map<string, string>();
+    if (isCrossBlockRange) {
+        blockRanges.forEach(item => {
+            const listItem = hasClosestByClassName(item.blockElement, "li");
+            if (listItem && listItem.getAttribute("data-subtype") === "o") {
+                orderedListItemOldHTML.set(listItem.getAttribute("data-node-id"), listItem.outerHTML);
+            }
+        });
+    }
     let crossBlockUndoFocusContext: Record<string, string> | undefined;
     if (isCrossBlockRange) {
         const undoRange = document.createRange();
@@ -1211,18 +1265,31 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 (range.startContainer as HTMLElement).remove();
             }
         } else {
-            // 跨块删除时浏览器会连块内最后一个 protyle-attr 一起移除，这里提前保存并在删除后恢复
-            const preserveAttrElements = [
-                blockElement,
-                rangeEndBlockElement,
-            ].filter((item): item is HTMLElement => Boolean(item)).map(item => ({
-                element: item,
-                attrHTML: item.querySelector(":scope > .protyle-attr")?.outerHTML || "",
+            // 跨块删除会移除边界块及其容器的标记和属性节点，提前保存并在删除后恢复。
+            const boundaryElements = new Set<HTMLElement>();
+            [blockElement, rangeEndBlockElement].filter((item): item is HTMLElement => Boolean(item)).forEach(element => {
+                while (element && element !== protyle.wysiwyg.element) {
+                    if (element.hasAttribute("data-node-id")) {
+                        boundaryElements.add(element);
+                    }
+                    element = element.parentElement;
+                }
+            });
+            const preserveElements = Array.from(boundaryElements).map(element => ({
+                element,
+                attrHTML: element.querySelector(":scope > .protyle-attr")?.outerHTML || "",
+                actionHTML: element.querySelector(":scope > .protyle-action")?.outerHTML || "",
             }));
             range.deleteContents();
-            preserveAttrElements.forEach(({element, attrHTML}) => {
-                if (attrHTML && !element.querySelector(":scope > .protyle-attr") && element.isConnected) {
+            preserveElements.forEach(({element, attrHTML, actionHTML}) => {
+                if (!element.isConnected) {
+                    return;
+                }
+                if (attrHTML && !element.querySelector(":scope > .protyle-attr")) {
                     element.insertAdjacentHTML("beforeend", attrHTML);
+                }
+                if (actionHTML && !element.querySelector(":scope > .protyle-action")) {
+                    element.insertAdjacentHTML("afterbegin", actionHTML);
                 }
             });
         }
@@ -1536,7 +1603,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     } else if (lastElement) {
         // https://github.com/siyuan-note/siyuan/issues/5591
-        focusBlock(lastElement, undefined, false);
+        focusInsertedBlock(lastElement);
     }
     protyle.wysiwyg.element.querySelectorAll("wbr").forEach(item => {
         item.remove();
@@ -1650,7 +1717,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         orderList.querySelectorAll(":scope > .li").forEach(li => {
             const liId = li.getAttribute("data-node-id");
             if (!doOperation.find(o => o.id === liId && o.action === "insert")) {
-                originalItems.push({id: liId, html: li.outerHTML});
+                originalItems.push({id: liId, html: orderedListItemOldHTML.get(liId) || li.outerHTML});
             }
         });
         updateListOrder(orderList);

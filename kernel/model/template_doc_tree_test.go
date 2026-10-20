@@ -522,7 +522,7 @@ func TestAttachTemplateDocTreePlansValidatesTransactionBoundary(t *testing.T) {
 		t.Fatalf("render document tree plan failed: %v", err)
 	}
 	transaction, _ := newTemplateDocTreeInsertTransaction(summary.ID, fixture.sourceID)
-	if attached, attachErr := AttachTemplateDocTreePlans([]*Transaction{transaction, &Transaction{}}); nil == attachErr || attached {
+	if attached, attachErr := AttachTemplateDocTreePlans([]*Transaction{transaction, {}}); nil == attachErr || attached {
 		t.Fatalf("plan spanning multiple transactions was accepted: attached=%t, err=%v", attached, attachErr)
 	}
 	if _, ok := templateDocTreePlans.Load(summary.ID); !ok {
@@ -697,7 +697,7 @@ func nestedTemplateDocTreeDefinition(depth int) []any {
 func templateCallChainForTest(t *testing.T, depth int) *template.Template {
 	t.Helper()
 	var source strings.Builder
-	for index := 0; index < depth; index++ {
+	for index := range depth {
 		fmt.Fprintf(&source, `.action{define "call-%d"}`, index)
 		if index+1 < depth {
 			fmt.Fprintf(&source, `.action{template "call-%d" .}`, index+1)

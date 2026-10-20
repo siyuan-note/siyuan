@@ -3,6 +3,8 @@ import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {isMobile} from "../../../../util/functions";
+import {isInMobileApp} from "../../../util/compatibility";
+import {bindMenuMouseScroll} from "../../../../menus/menuMouseScroll";
 import {calendarDayDistance} from "./date";
 import {getCalendarDropDay} from "./hitTest";
 import type {ICalendarState} from "./state";
@@ -49,6 +51,8 @@ export const bindCalendarUndated = (options: {
     const more = panel.querySelector<HTMLButtonElement>("[data-calendar-undated-more]");
     const dateKeyID = (data.view as IAVTable).calendar.dateKeyID;
     const mobile = isMobile();
+    const resetMouseScroll = mobile ? undefined : bindMenuMouseScroll(panel, () =>
+        !isInMobileApp() && window.siyuan.config.appearance?.menuMouseScroll === true);
     const normalizedQuery = query.trim();
     const cache = state.undatedCache?.dateKeyID === dateKeyID && state.undatedCache.query === normalizedQuery &&
         state.undatedCache.search === state.undatedSearch.trim() ? state.undatedCache : undefined;
@@ -176,6 +180,7 @@ export const bindCalendarUndated = (options: {
     };
     let keepMobileSelection = false;
     const setOpen = (open: boolean, focusSearch = false) => {
+        resetMouseScroll?.();
         const menu = mobile ? window.siyuan.menus.menu : undefined;
         if (!open && mobile && menu.element.lastElementChild.contains(panel)) {
             menu.closeSheet();

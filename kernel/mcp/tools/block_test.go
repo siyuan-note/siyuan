@@ -169,7 +169,7 @@ func TestBlockToolPreservesNativeDOMIdentity(t *testing.T) {
 	if _, err = prepareBlockWriteData(strings.Replace(dom, id, "invalid", 1), "dom"); err == nil {
 		t.Fatal("invalid explicit block ID was accepted")
 	}
-	duplicate := strings.Replace(nativeMindmapTestDOM, `data-type="NodeParagraph"`, `data-node-id="`+id+`" data-type="NodeParagraph"`, -1)
+	duplicate := strings.ReplaceAll(nativeMindmapTestDOM, `data-type="NodeParagraph"`, `data-node-id="`+id+`" data-type="NodeParagraph"`)
 	if _, err = prepareBlockWriteData(duplicate, "dom"); err == nil {
 		t.Fatal("duplicate explicit block IDs were accepted")
 	}

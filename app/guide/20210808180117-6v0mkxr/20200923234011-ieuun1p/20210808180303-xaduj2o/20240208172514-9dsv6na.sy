@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261018144949"
 	},
 	"Children": [
 		{
@@ -142,7 +142,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20261012014930"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -157,7 +157,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20251224101749-2wip2q0",
-				"updated": "20260613160453"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -227,6 +227,41 @@
 									"TextMarkBlockRefID": "20260613155453-sgecaav",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "fields"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261016191345-7g1gwxq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261016191345-7g1gwxq",
+						"updated": "20261016191345"
+					},
+					"Children": [
+						{
+							"ID": "20261016191345-wyplf76",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261016191345-wyplf76",
+								"updated": "20261016191345"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "See "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260617123409-cmygnqa",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Table Calculation"
 								}
 							]
 						}
@@ -1650,7 +1685,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20261012014930"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1679,7 +1714,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-5zjv62o",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -1708,7 +1743,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-438l9c3",
-				"updated": "20261012014859"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2021,7 +2056,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-4a6yi6q",
-						"updated": "20260613171129"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2029,7 +2064,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171129-5e9n0cc",
-								"updated": "20260613171129"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2039,7 +2074,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Filter conditions can be set on multiple fields simultaneously. Multiple conditions use AND logic (all must be satisfied)"
+									"Data": ": Conditions can target multiple fields. They use AND by default (all must match), can switch to OR (any can match), and can be organized into nested groups"
 								}
 							]
 						}
@@ -2185,7 +2220,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-vqc74gs",
-				"updated": "20260613171129"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2214,7 +2249,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-kv1oshm",
-				"updated": "20260613171129"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2570,7 +2605,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-jxnni38",
-						"updated": "20260613171129"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2598,7 +2633,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613171129-42i5mjn",
-								"updated": "20260613171129"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2638,7 +2673,7 @@
 									},
 									"Properties": {
 										"id": "20260613171129-bkk8gir",
-										"updated": "20260613171129"
+										"updated": "20261016191345"
 									},
 									"Children": [
 										{
@@ -2646,12 +2681,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613171129-wfww2an",
-												"updated": "20260613171129"
+												"updated": "20261016191345"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Unmodified rows are placed last, sorted by creation time in ascending order"
+													"Data": "Unmodified rows are placed last and retain their manual order; entries with equal sort values also retain their manual order"
 												}
 											]
 										}
@@ -2664,12 +2699,26 @@
 			]
 		},
 		{
+			"ID": "20261016130603-ca75uwv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016130603-ca75uwv",
+				"updated": "20261016130603"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing is locked, click the sort icon in the database toolbar and choose a field and ascending or descending order. This temporary sort applies only to the current database block and view in this window, without changing the saved sort rules. Choose Restore default sorting, unlock editing, or close the document to restore the saved rules."
+				}
+			]
+		},
+		{
 			"ID": "20260613171129-y8inb0t",
 			"Type": "NodeHeading",
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-y8inb0t",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2698,7 +2747,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-y221wzt",
-				"updated": "20260920084445"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -2743,7 +2792,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-ifu1208",
-						"updated": "20260613171129"
+						"updated": "20261016191345"
 					},
 					"Children": [
 						{
@@ -2751,7 +2800,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171129-hjdzw4d",
-								"updated": "20260613171129"
+								"updated": "20261016191345"
 							},
 							"Children": [
 								{
@@ -2761,7 +2810,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Except for rollup, asset, and line number, almost all field types support grouping. Different field types correspond to different grouping methods:"
+									"Data": ": Rollup, line number, and location fields do not support grouping. Other types do; asset fields require a display template and are grouped by its result. Grouping methods vary by field type:"
 								}
 							]
 						},
@@ -3060,7 +3109,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172555-hv2afdr",
-				"updated": "20250615172312"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -3074,12 +3123,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261007101857-8yrn5q5",
-				"updated": "20261007101857"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The desktop and mobile relation selection panels always offer a new-item action using the related database’s default template. When the input differs from the name generated by the primary key template, two actions show the actual names: create with the default template, or create with the input name. The input-name action overrides only the primary key; field defaults, icon, content template and save location still apply. Empty input, no primary key template, or identical names produce only one action. Without a default template, creation produces a detached item. Creating the item and updating the relation can be undone together"
+					"Data": "The desktop and mobile relation selection panels always offer a new-item action using the related database’s default template. When the input differs from the name generated by the primary key template, two actions show the actual names: create with the default template, or create with the input name. The input-name action overrides only the primary key; field defaults, icon, content template and save location still apply. Empty input, no primary key template, or identical names produce only one action. Without a default template, creation produces a detached item. Creating the item and updating the relation can be undone together."
 				}
 			]
 		},
@@ -3806,7 +3855,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261010222552"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -3820,7 +3869,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-5by05dc",
-				"updated": "20261010222552"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
@@ -3847,7 +3896,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". If a referenced field is deleted or its type changes, or a target database is deleted, the next item write automatically pauses the affected rule and identifies the rule and missing reference. The source edit is saved and the rule configuration is retained; repair it and enable the rule manually. Locked databases, authentication failures, corrupt data, and write failures still roll back the edit and automatic actions"
+					"Data": ". If a referenced field is deleted or its type changes, or a target database is deleted, the next item write automatically pauses the affected rule and identifies the rule and missing reference. The source edit is saved and the rule configuration is retained; repair it and enable the rule manually. Locked databases, authentication failures, corrupt data, and write failures still roll back the edit and automatic actions."
+				}
+			]
+		},
+		{
+			"ID": "20261017202044-s3bkzez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017202044-s3bkzez",
+				"updated": "20261018000619"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notify on success is enabled by default and can be set independently for each rule. It reports actual additions, updates, or collections after the entire transaction commits; several rules share one summary, counting only rules with notifications enabled. Updating several fields of one entry counts as one updated entry. Turning notifications off does not stop execution or hide errors. Unmatched conditions, missing targets, unchanged values, repeated matches, manual collection or cleanup, undo, redo, and failed transactions do not produce success messages."
 				}
 			]
 		},
@@ -3856,12 +3919,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-ayryj7q",
-				"updated": "20261002224707"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Triggers support added items and changed fields. A field-change trigger can watch one field or any editable field; writing the same value again does not trigger it. Add filter conditions to run actions only for matching items"
+					"Data": "Configure a rule in three sections: “When this event occurs”, “And the triggering item matches (optional)”, and “Run these actions”. Choose added items or changed fields as the event. A field-change trigger can watch one field or any editable field; writing the same value again does not trigger it. The second section checks the triggering item's values after the change; leaving it empty adds no restriction."
 				}
 			]
 		},
@@ -3870,12 +3933,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-hrqksxn",
-				"updated": "20261002224707"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Each rule can run several actions in order: edit the triggering item, edit related items, edit items matching filters in a database, or add an unbound item to this or another database. Empty target filters match all items"
+					"Data": "Each rule can run several actions in order. Choose the operation and its target, then add the fields to set and their value sources. Editing supports the triggering item, related items, or items matching filters in a selected database. Conditions inside an action filter the items to modify, not the triggering item; empty target conditions match all items in that target. Adding creates an unbound item in this or another database."
 				}
 			]
 		},
@@ -3884,12 +3947,191 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-x0qa1o9",
-				"updated": "20261002224707"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, or a relation to the triggering item. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon"
+					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, a relation to the triggering item, or a calculated template. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon."
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-kcsjytv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-kcsjytv",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose Template as the value source to edit a "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{...}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " template inline. Editing a template pauses the rule; enable it again after editing. Every editable field supports templates; computed fields such as creation time, update time, row number, rollup, and template fields cannot be assigned. Primary fields retain their existing binding."
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-v82xurl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-v82xurl",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, when a watering task is completed, add the next task and set its date to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is fixed to the trigger time, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate 0 0 7"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " advances seven calendar days. The rule saves the frontend time zone when templates are first used and keeps that zone across devices."
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-r1dfdx7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-r1dfdx7",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "field \"fieldID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " reads a source item's stored value; dates support "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Renaming a field does not change its ID reference. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "value \"fieldID\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " reads a structured payload, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "toJson"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " outputs JSON. For example, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"fieldID\"))}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " advances both ends of a date range while preserving its date-only or specific-time setting."
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-l1uq6e6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-l1uq6e6",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Text, URL, email, and phone fields use text. Numbers must be finite, and checkboxes use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Dates accept ISO dates, date-times, or date payload JSON. Select uses an existing option name; multi-select uses a JSON array of names or option objects. Relations use existing item ID arrays; assets and locations use their existing payload JSON. Templates do not create options, related items, or assets."
+				}
+			]
+		},
+		{
+			"ID": "20261016165601-tphvdoa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016165601-tphvdoa",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Expand Data used for preview, select an actual example entry, and adjust the preview date or referenced fields before viewing the result. These inputs do not modify entries. Empty output clears the field; missing variables, empty source dates, invalid types, or invalid references roll back the triggering edit and all actions. Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+				}
+			]
+		},
+		{
+			"ID": "20261016113125-e9334a5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016113125-e9334a5",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, to record the first completion time, watch changes to Status, require the triggering item's Status to be Done and Completion time to be empty, then edit the triggering item and set Completion time to Trigger time. After completing the configuration, enable the rule. Without the empty-time condition, completing the item again can overwrite its completion time."
 				}
 			]
 		},
@@ -3898,12 +4140,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-s9ne4gk",
-				"updated": "20261002224707"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For example, create a two-way relation between a task database and a time-log database. When a task status changes to In progress, add a log with its start date set to the trigger time and its relation set to the triggering task. When the status changes to Done, edit related logs whose end date is empty and set that date to the trigger time"
+					"Data": "For example, create a two-way relation between a task database and a time-log database. When a task status changes to In progress, add a log with its start date set to the trigger time and its relation set to the triggering task. When the status changes to Done, edit related logs whose end date is empty and set that date to the trigger time."
 				}
 			]
 		},
@@ -3912,12 +4154,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-ri3sf0d",
-				"updated": "20261002224707"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic actions and the original edit are undone and redone together, and both roll back if execution fails. Redo retains the original item IDs and timestamps. Automatic actions do not trigger other rules. Imports, sync, history restoration, and undo replay do not trigger rules again; ordinary API writes trigger rules but do not create editor undo entries"
+					"Data": "Automatic actions and the original edit are undone and redone together, and both roll back if execution fails. Redo retains the original item IDs and timestamps. Automatic actions do not trigger other rules. Imports, sync, history restoration, and undo replay do not trigger rules again; ordinary API writes trigger rules but do not create editor undo entries."
 				}
 			]
 		},
@@ -3926,12 +4168,518 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-cvkf5jx",
-				"updated": "20261002224707"
+				"updated": "20261016202856"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them"
+					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them."
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-qsam7m8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261016174753-qsam7m8",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template examples"
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-9j350k4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016174753-9j350k4",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Copy a complete example into the template editor. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "FIELD_ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is a placeholder: replace it with the source field ID in the triggering item's database, not the field name. When copying a field, use matching source and target types. When copying relations, both relation fields must also point to the same database."
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-knf2f34",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20261016174753-knf2f34",
+				"updated": "20261016174753"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Use"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Template content"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Date: trigger day"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{now | date \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Date: seven days after the trigger"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Date: move a source date or range forward seven days, preserving time settings"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"FIELD_ID\"))}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text, primary, URL, email, or phone: copy a source field"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text or primary: append a suffix to source text"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"} (next)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Number: add one to the source number, including decimals"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{addf (field \"FIELD_ID\") 1}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Checkbox: invert the source value"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{not (field \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select: use an existing option"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Done"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Multi-select: use two existing options"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[\"Work\",\"Important\"]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Date, multi-select, relation, asset, or location: copy a source field of the same type"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (value \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261016174753-dmprrcl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016174753-dmprrcl",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ""
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is a fixed date format layout; do not replace it with the current date. The option names in the select and multi-select examples must already exist in the target field; replace them as needed. Check the preview before enabling the rule."
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-fm4qoja",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261015141042-fm4qoja",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collect ordinary blocks"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-nrq3k5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-nrq3k5z",
+				"updated": "20261018120429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope (includes subdocuments) to select notebooks or documents. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined. Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them. Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction. Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
+				}
+			]
+		},
+		{
+			"ID": "20261017204817-jfdo45b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017204817-jfdo45b",
+				"updated": "20261018144949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The Collect menu above Block types offers Default, Block containing the tag, and Container block. Default prefers the enclosing list item when its first content block contains the tags and it meets the type and attribute conditions; otherwise it uses the eligible tagged block. Selecting both paragraph and list-item types still produces only one target for the same tag source. Block containing the tag filters and collects the actual tagged block by its type and attributes. Container block collects the nearest container meeting the selected type and attribute conditions, deduplicating by block ID; documents are eligible only when explicitly selected. All required tags must occur in the same source block, rather than being combined across children. With no tag conditions, this option has no effect. Preview shows the final collection targets. Changing this option preserves existing entries and fields without converting their bound blocks. The two explicit modes require automation format 4; older formats remain readable, and older clients reject format 4 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261017195341-czg1ilm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017195341-czg1ilm",
+				"updated": "20261018000619"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A main block type includes all its subtypes. You can instead select heading levels H1-H6, unordered/ordered/task lists or list items, and built-in or custom callout types. Lists and list items match independently; multiple choices use OR, and an empty selection allows every type. Selecting a main type replaces its selected subtypes. Changing a block subtype uses the same matching logic for automatic collection, cleanup review, and preview. Subtype filters require automation format 3; existing format 1 and 2 rules remain readable, and older clients reject format 3 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-dmlyxmz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-dmlyxmz",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tags match the block itself, without collecting all ancestor containers. A list item uses the tags in its first paragraph; that paragraph is collected separately only when paragraph blocks are explicitly selected. Collection binds the original block to this database without copying or moving it. Initial fields support fixed values and the trigger time for date fields; the primary field retains its original block binding."
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-4gexoxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-4gexoxe",
+				"updated": "20261018000619"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a block first matches, a new entry is added. Automatic collection only adds entries. Source changes, moving out of scope, changing conditions or collection targets, and disabling or deleting rules preserve existing entries and their field values. Matching again preserves the same entry and manually edited fields."
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-u9c28d4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-u9c28d4",
+				"updated": "20261018122129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Automations"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collection management"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select Database entries to check all existing entries against the union of enabled block collection rules. Manual and automatically collected entries are checked alike. Matches rules, Does not match rules, and Cannot determine have separate counts and pages; the first opening prioritizes entries that do not match. Unknown entries explain why they cannot be classified. Remove unmatched entries on this page confirms the count and rechecks rules, sources, and bindings before removing only entries still confirmed unmatched. Nonmatching and unknown entries also offer individual removal. Removal keeps source blocks and supports undo and redo of the original entry IDs, fields, and ordering. Missing source blocks are not recreated; read or authentication failures preserve the data and return an error. A later new match creates an initialized entry rather than recovering removed field values."
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-1ymbtr0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-1ymbtr0",
+				"updated": "20261018122129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enabling or editing a rule does not collect existing blocks. In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Automations"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collection management"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " select Rule matches and choose an enabled collection rule to inspect matching source blocks and their collected or uncollected status. Collect matches on this page adds only the displayed uncollected matches. The page controls show the current page number. Each preview page contains at most 100 blocks and may be smaller when many fields are initialized."
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-cael6rr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-cael6rr",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collection is evaluated after block creation, content or attribute edits, and block moves. Moving an entire document in the document tree, imports, sync, and history restoration do not backfill matches; use the preview to collect existing content. Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules."
 				}
 			]
 		},

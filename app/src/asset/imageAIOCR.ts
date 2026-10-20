@@ -16,12 +16,12 @@ export const reImageAIOCR = async (path: string) => {
     try {
         const response = await fetchSyncPost("/api/ai/ocr", {path});
         if (response.code === 0) {
-            invalidateImageOCRStatus(path);
             openImageOCR(path);
         }
     } catch (error) {
         showMessage(error.message, 7000, "error");
     } finally {
+        invalidateImageOCRStatus(path);
         pending.delete(path);
         hideMessage(messageId);
     }

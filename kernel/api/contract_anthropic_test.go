@@ -52,8 +52,13 @@ func TestAPIContractAnthropicGenerationAndModels(t *testing.T) {
 		}
 	}))
 	defer upstream.Close()
-	provider := &conf.Provider{ID: "provider", Enabled: true, BaseURL: upstream.URL + "/v1",
-		Protocol: util.AnthropicProtocolMessages, APIKey: "key", RequestTimeout: 5,
+	testNativeProviderContract(t, upstream.URL+"/v1", util.AnthropicProtocolMessages)
+}
+
+func testNativeProviderContract(t *testing.T, baseURL, protocol string) {
+	t.Helper()
+	provider := &conf.Provider{ID: "provider", Enabled: true, BaseURL: baseURL,
+		Protocol: protocol, APIKey: "key", RequestTimeout: 5,
 		Headers: map[string]string{"X-Custom": "configured"}, Models: []*conf.Model{{ID: "model", Name: "test", Enabled: true}}}
 	model.Conf.AI.Load().Providers = []*conf.Provider{provider}
 	model.Conf.AI.Load().Editing.ModelID = "model"
@@ -89,7 +94,7 @@ func TestAPIContractAnthropicGenerationAndModels(t *testing.T) {
 				t.Fatal(err)
 			}
 			if tc.path == "/api/ai/editor/chat" {
-				for _, frame := range strings.Split(strings.TrimSpace(recorder.Body.String()), "\n\n") {
+				for frame := range strings.SplitSeq(strings.TrimSpace(recorder.Body.String()), "\n\n") {
 					lines := strings.SplitN(frame, "\n", 2)
 					if len(lines) != 2 {
 						t.Fatalf("invalid SSE frame: %s", frame)
@@ -107,6 +112,11 @@ func TestAPIContractAnthropicGenerationAndModels(t *testing.T) {
 }
 
 func TestAPIContractAnthropicSessionContent(t *testing.T) {
+	testNativeSessionContract(t, `{"protocol":"anthropic-messages","version":1,"blocks":[{"type":"thinking","thinking":"reason","signature":"opaque"},{"type":"text","text":"answer"}]}`)
+}
+
+func testNativeSessionContract(t *testing.T, nativeContent string) {
+	t.Helper()
 	aiContractConfiguration(t)
 	engine := gin.New()
 	engine.POST("/api/ai/agent/saveSession", saveSession)
@@ -116,7 +126,7 @@ func TestAPIContractAnthropicSessionContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tc := range []struct{ path, body string }{
-		{"/api/ai/agent/saveSession", `{"id":"20260918000000-abcdefg","entries":[{"type":"assistant","content":"answer","nativeContent":{"protocol":"anthropic-messages","version":1,"blocks":[{"type":"thinking","thinking":"reason","signature":"opaque"},{"type":"text","text":"answer"}]}}]}`},
+		{"/api/ai/agent/saveSession", fmt.Sprintf(`{"id":"20260918000000-abcdefg","entries":[{"type":"assistant","content":"answer","nativeContent":%s}]}`, nativeContent)},
 		{"/api/ai/agent/getSession", `{"id":"20260918000000-abcdefg"}`},
 	} {
 		request := httptest.NewRequest("POST", tc.path, strings.NewReader(tc.body))

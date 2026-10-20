@@ -73,7 +73,10 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
         const exports = {};
         modules[id] = exports;
         if (!source) {
-            return new Proxy(exports, {get: (_target, key) => check.fail(`Unexpected insertion dependency: ${id}.${String(key)}`)});
+            return new Proxy(exports, {get: (_target, key) => {
+                if (key === "__esModule") return false;
+                return check.fail(`Unexpected insertion dependency: ${id}.${String(key)}`);
+            }});
         }
         new Function("exports", "require", source)(exports, (specifier: string) => load(
             require("node:path").posix.normalize(require("node:path").posix.join(id, "..", specifier))
@@ -355,7 +358,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     const bridge = {} as {initTouchDragBridge: () => void};
     new Function("exports", "require", bridgeSource)(bridge, (id: string) => id === "./touchDragBridgeCore" ? bridgeCore : {
         Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 460, TIMEOUT_MOUSE_DRAG_DELAY: 150},
-        isInAndroid: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
+        isInAndroid: () => false, isInHarmony: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
     });
     Object.assign(window, {siyuan: {touchDragActive: false}});
     bridge.initTouchDragBridge();
@@ -533,6 +536,93 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     host.classList.add("fullscreen");
     check.equal(getComputedStyle(host.querySelector(".mindmap-view__resize")).display, "none");
     host.classList.remove("fullscreen");
+    for (const type of ["NodeMindmap", "NodeList"]) {
+        mindmap.dataset.type = type;
+        mindmap.className = type === "NodeList" ? "list" : "mindmap";
+        mindmap.setAttribute("custom-sy-list-mindmap", "1");
+        for (const width of ["", "1000px"]) {
+            mindmap.style.width = width;
+            const sourceStyle = mindmap.getAttribute("style");
+            for (const padding of ["24px", "20%", "24px"]) {
+                root.style.paddingLeft = padding;
+                root.style.paddingRight = padding;
+                const available = root.clientWidth - parseFloat(getComputedStyle(root).paddingLeft) -
+                    parseFloat(getComputedStyle(root).paddingRight);
+                check.ok(mindmap.getBoundingClientRect().width <= available + 1,
+                    `${type} fits the document after changing adaptive width (${width}, ${padding})`);
+                check.ok(host.getBoundingClientRect().width <= mindmap.getBoundingClientRect().width);
+                check.equal(mindmap.getAttribute("style"), sourceStyle, "layout preserves the saved source dimensions");
+            }
+        }
+    }
+    mindmap.style.width = "";
+    root.style.paddingLeft = "";
+    root.style.paddingRight = "";
+    const layoutRoot = document.createElement("div");
+    layoutRoot.className = "protyle-wysiwyg";
+    document.body.appendChild(layoutRoot);
+    for (const mobile of [false, true]) {
+        const mobileStyle = document.createElement("style");
+        if (mobile) {
+            mobileStyle.textContent = mobileCSS;
+            document.head.appendChild(mobileStyle);
+        }
+        for (const type of ["NodeIFrame", "NodeWidget", "NodeMindmap", "NodeList"]) {
+            const isMindmap = type === "NodeMindmap" || type === "NodeList";
+            // 原生脑图和旧列表脑图都验证嵌入结果，避免导图宽度回归。
+            const modes = isMindmap ? ["embedded", "embedded-list"] : ["normal", "list", "embedded", "embedded-list"];
+            for (const mode of modes) {
+                for (const rtl of [false, true]) {
+                    layoutRoot.classList.toggle("protyle-block--rtl", rtl);
+                    for (const savedWidth of ["", "200px", "1000px"]) {
+                        layoutRoot.innerHTML = mode.includes("list") ? lute.Md2BlockDOM("- Parent\n  - Child") : "";
+                        const parent = mode.includes("list") ? layoutRoot.querySelector(".li .li") : layoutRoot;
+                        const block = document.createElement("div");
+                        block.dataset.nodeId = Lute.NewNodeID();
+                        block.dataset.type = type;
+                        block.className = isMindmap ? (type === "NodeList" ? "list" : "mindmap") : "iframe";
+                        block.style.width = savedWidth;
+                        block.style.height = "180px";
+                        if (isMindmap) {
+                            block.dataset.mindmapViewRendered = "true";
+                            block.setAttribute("custom-sy-list-mindmap", "1");
+                            block.innerHTML = '<div class="mindmap-view"><div class="mindmap-view__toolbar"></div><div class="mindmap-view__viewport"></div></div>';
+                        } else {
+                            // 兼容保存在 iframe 上的历史尺寸，不改写源数据。
+                            block.innerHTML = '<div class="iframe-content"><iframe src="about:blank" style="width:900px;height:180px"></iframe></div>';
+                        }
+                        if (mode.includes("embedded")) {
+                            const query = document.createElement("div");
+                            query.className = "render-node";
+                            query.dataset.type = "NodeBlockQueryEmbed";
+                            query.dataset.nodeId = Lute.NewNodeID();
+                            query.innerHTML = '<div class="protyle-icons"></div><div class="protyle-wysiwyg__embed"></div>';
+                            parent.insertBefore(query, parent.querySelector(":scope > .protyle-attr"));
+                            query.lastElementChild.appendChild(block);
+                        } else {
+                            parent.insertBefore(block, parent.querySelector(":scope > .protyle-attr"));
+                        }
+                        const savedHTML = block.outerHTML;
+                        // 连续缩小、恢复编辑器宽度，模拟侧栏开关和分屏。
+                        for (const width of [720, 320, 240, 720]) {
+                            layoutRoot.style.width = `${width}px`;
+                            const context = `${type}/${mode}/mobile=${mobile}/rtl=${rtl}/saved=${savedWidth}/width=${width}`;
+                            const bounds = block.parentElement.getBoundingClientRect();
+                            const rect = block.getBoundingClientRect();
+                            check.ok(rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1,
+                                `${context}: block fits its containing result or list item`);
+                            const content = block.querySelector("iframe, .mindmap-view").getBoundingClientRect();
+                            check.ok(content.left >= rect.left - 1 && content.right <= rect.right + 1,
+                                `${context}: rendered content fits the block`);
+                            check.equal(block.outerHTML, savedHTML, `${context}: layout preserves saved dimensions`);
+                        }
+                    }
+                }
+            }
+        }
+        mobileStyle.remove();
+    }
+    layoutRoot.remove();
     block.querySelectorAll(".protyle-block-resize").forEach(handle => handle.classList.add("touch-resize-active"));
     return "IFrame, widget and mind map resize cases passed";
 };
@@ -582,7 +672,7 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
     }
 };
 
-test("external resize handles preserve source, independent axes, historical dimensions and clipping", {
+test("external resize handles preserve source, axes, historical dimensions and narrow container bounds", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 90000,
 }, async () => {
@@ -596,8 +686,10 @@ test("external resize handles preserve source, independent axes, historical dime
     };
     visit(source);
     assert.ok(resize);
-    const resizeSource = transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
-        .outputText.replace(/^function resize\(\) \{/, "").replace(/\}\s*$/, "");
+    const imageResizeSource = transpileModule(readFileSync("src/protyle/render/imageResize.ts", "utf8").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const resizeSource = imageResizeSource + transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
+        .outputText + "\nreturn resize.call(this);";
     const renderSource = transpileModule(readFileSync("src/protyle/render/iframeResize.ts", "utf8").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const css = compileString('@use "protyle/protyle"; @use "component/typography"; @use "business/resize";',
@@ -625,7 +717,7 @@ test("external resize handles preserve source, independent axes, historical dime
     const hintFile = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
     const hintDeclaration = hintFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
     assert.ok(hintDeclaration && isClassDeclaration(hintDeclaration));
-    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand"].includes(member.name?.getText(hintFile)))
+    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand", "consumeRefBracketClose", "openNewTableCell"].includes(member.name?.getText(hintFile)))
         .map(member => member.getText(hintFile)).join("\n");
     const hintSource = transpileModule(`class Hint { ${hintMethods} }`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const menuFile = createSourceFile("menu.ts", readFileSync("src/menus/protyle.ts", "utf8"), ScriptTarget.ES2021, true);

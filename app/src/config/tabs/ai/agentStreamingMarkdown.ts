@@ -1,20 +1,12 @@
-import {setStorageVal} from "../../../protyle/util/compatibility";
+import {aiConfigApi} from "./aiRuntime";
 
-export const AGENT_STREAMING_MARKDOWN_KEY = "siyuan-agent-streaming-markdown";
 export const AGENT_STREAMING_MARKDOWN_CHANGED_EVENT = "siyuan-agent-streaming-markdown-changed";
 
 export const isAgentStreamingMarkdownEnabled = (): boolean => {
-    return window.siyuan.storage[AGENT_STREAMING_MARKDOWN_KEY] === true;
+    return window.siyuan.config.ai?.agent?.streamingMarkdown === true;
 };
 
-export const onAgentStreamingMarkdownStorageChanged = (key: string): void => {
-    if (key === AGENT_STREAMING_MARKDOWN_KEY) {
-        window.dispatchEvent(new CustomEvent(AGENT_STREAMING_MARKDOWN_CHANGED_EVENT));
-    }
-};
-
-export const setAgentStreamingMarkdownEnabled = (enabled: boolean): void => {
-    window.siyuan.storage[AGENT_STREAMING_MARKDOWN_KEY] = enabled;
-    setStorageVal(AGENT_STREAMING_MARKDOWN_KEY, enabled);
-    onAgentStreamingMarkdownStorageChanged(AGENT_STREAMING_MARKDOWN_KEY);
+export const setAgentStreamingMarkdownEnabled = (enabled: boolean) => {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish) return;
+    return aiConfigApi.patch("agent.streamingMarkdown", enabled);
 };

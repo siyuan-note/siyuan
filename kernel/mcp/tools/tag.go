@@ -70,7 +70,7 @@ func tagList(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Tags (%d):\n\n", len(tags)))
+	fmt.Fprintf(&sb, "Tags (%d):\n\n", len(tags))
 	for _, t := range tags {
 		sb.WriteString("- ")
 		sb.WriteString(formatTagTextMark(t))

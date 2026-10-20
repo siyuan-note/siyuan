@@ -41,7 +41,7 @@ type shellExecuteInfo struct {
 }
 
 func Run(executable, workingDir, arguments string) error {
-	return run(executable, workingDir, arguments, launch)
+	return runWithDiagnostics(executable, workingDir, arguments, launch)
 }
 
 func run(executable, workingDir, arguments string, start func(*shellExecuteInfo) error) error {

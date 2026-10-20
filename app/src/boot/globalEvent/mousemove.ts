@@ -283,7 +283,6 @@ export const windowMouseMove = (event: MouseEvent) => {
 
     const blockElement = hasClosestByClassName(target, "table");
     if (blockElement && blockElement.style.cursor !== "col-resize" &&
-        !hasClosestByClassName(blockElement, "protyle-wysiwyg__embed") &&
         !hasClosestByClassName(blockElement, "protyle-custom")) {
         const cellElement = (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD")) as HTMLTableCellElement;
         const tableElement = blockElement.querySelector("table");

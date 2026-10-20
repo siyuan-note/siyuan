@@ -32,7 +32,7 @@ export const requestSystemExit = (options: {
         }
         progressLoading({code: 2, msg: ""}, progressID);
         return response;
-    }).catch(error => {
+    }).catch((error): undefined => {
         console.warn("exit request failed", error);
         // 请求失败不代表内核已经停止；保留界面供用户重试，并继续接收内核退出事件。
         progressLoading({code: 2, msg: ""}, progressID);

@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -52,12 +53,7 @@ func DisableFeature(feature string) {
 
 // IsDisabledFeature 查询原生端启动时禁用的功能，不修改用户配置。
 func IsDisabledFeature(feature string) bool {
-	for _, disabled := range DisabledFeatures {
-		if disabled == feature {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(DisabledFeatures, feature)
 }
 
 const DefaultUseSingleLineSave = true

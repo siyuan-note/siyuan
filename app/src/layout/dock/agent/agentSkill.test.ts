@@ -54,6 +54,9 @@ const browserCases = async (source: string) => {
     document.body.appendChild(panel);
     const hint = {
         element, source: "hint", enableExtend: true, enableSlash: true, splitChar: "/",
+        consumeRefBracketClose: api.Hint.prototype.consumeRefBracketClose,
+        // 用例只覆盖命令填充，表格单元格接管由 fillCommand 用例覆盖
+        openNewTableCell: () => {},
         genHTML: (items: IHintData[], _protyle?: IProtyle, reset = false) => {
             if (reset && items.length === 0) {
                 element.classList.add("fn__none");
@@ -248,7 +251,7 @@ test("agent mobile commands coexist with skills and skill names remain atomic", 
     }).map(statement => statement.getText(composer)).join("\n");
     const hint = createSourceFile("hint.ts", read("../../../protyle/hint/index.ts"), ScriptTarget.Latest, true);
     const hintSource = hint.statements.find(isClassDeclaration).members.filter(member => isMethodDeclaration(member) &&
-        ["fill", "getHTMLByData"].includes(member.name.getText(hint))).map(member => member.getText(hint)).join("\n");
+        ["fill", "getHTMLByData", "consumeRefBracketClose"].includes(member.name.getText(hint))).map(member => member.getText(hint)).join("\n");
     const source = transpileModule([read("../../../protyle/hint/builtinSlash.ts"),
         read("../../../protyle/hint/blockHintRange.ts"), read("agentHintState.ts"),
         read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,

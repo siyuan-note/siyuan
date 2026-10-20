@@ -168,7 +168,10 @@ const cases = async (source: string, css: string) => {
             (type === "o" ? "1." : `<svg><use href="#${type === "u" ? "iconDot" : "iconCheck"}"></use></svg>`) +
             `</div><div class="p" data-type="NodeParagraph" data-table-cell-node><div data-table-cell-content>Item ${index}</div>` +
             '<div class="protyle-attr"></div></div><div class="protyle-attr"></div></div>').join("") +
-        '</div><span class="img"><span class="protyle-action">Image controls</span></span>' +
+        '</div><span data-type="img" class="img img--select img--drag"><span class="protyle-image-container protyle-image-container--compact" style="width: 180px;">' +
+        '<img src="assets/image.png" alt="description"><span class="protyle-image-resize" style="width: 0px; height: 0px;">' +
+        '<span class="protyle-block-resize touch-resize-active" data-resize-axis="both"></span></span></span>' +
+        '<span class="protyle-action">Image controls</span></span>' +
         '</div></td></tr></tbody></table><div class="protyle-action__table"></div>');
     const originalTable = richTable.outerHTML;
     const map = document.createElement("div");
@@ -191,6 +194,10 @@ const cases = async (source: string, css: string) => {
     check.equal(richPreview.querySelector(".protyle-action--order").textContent, "1.");
     check.equal(richPreview.querySelector(".protyle-action--task use").getAttribute("href"), "#iconCheck");
     check.equal(map.querySelector(".img .protyle-action, .protyle-attr, .protyle-action__table"), null);
+    check.equal(map.querySelector(".protyle-image-resize, .protyle-block-resize, .img--select, .img--drag, .protyle-image-container--compact"), null,
+        "image previews never retain hidden-source handles or selection states");
+    check.equal(map.querySelector(".img img").getAttribute("src"), "assets/image.png");
+    check.equal((map.querySelector(".img img").parentElement as HTMLElement).style.width, "180px");
     check.equal(map.querySelector("[data-node-id], [draggable], [contenteditable]"), null);
     check.equal(richTable.outerHTML, originalTable, "preview rendering leaves the source table intact");
     for (const size of [16, 32]) {
@@ -283,6 +290,8 @@ app.whenReady().then(async () => {
         const result = await promisify(execFile)(executable, [script], {env, timeout: 15000, windowsHide: true});
         assert.match(result.stdout, /Special block previews passed/);
     } finally {
-        rmSync(temporary, {recursive: true, force: true});
+        if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) && path.basename(temporary).startsWith("siyuan-mindmap-preview-")) {
+            rmSync(temporary, {recursive: true, force: true, maxRetries: 20, retryDelay: 100});
+        }
     }
 });

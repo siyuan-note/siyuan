@@ -1964,6 +1964,7 @@ if (response.code === 0 && response.data) {
     * `groupPaging`: 分组（看板）视图的可选分页配置
     * `targetItemID`: 可选的待定位数据库条目 ID。指定后，返回值中包含目标定位信息
     * `targetGroupID`: 与 `targetItemID` 配合使用的可选分组提示
+    * `temporarySort`: 可选的单字段排序，例如 `{"column":"field-id","order":"DESC"}`。省略或为 `null` 时使用已保存规则；指定时仅覆盖本次请求的排序，在分页前生效，不创建或保存数据库，也不改变载体默认视图。`order` 必须为 `ASC` 或 `DESC`；字段缺失或不支持排序时恢复已保存规则。支持现有的 `valueSource` 和 `dateEndpoint` 选项
     * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在则创建包含默认视图的数据库
     * `persistView`: 已废弃的兼容参数。接口仍接受该参数但会忽略，因为数据库定义不再存储顶层当前视图
 * 返回值（真实响应，表格布局，展示一行）：
@@ -2114,6 +2115,7 @@ if (response.code === 0 && response.data) {
     * `blockID`: 嵌入该数据库的数据库块，用于解析当前视图、发布权限和块级上下文筛选。仅在独立数据库且不需要块上下文时省略
     * `viewID`: 可选的明确视图 ID。省略时先通过 `blockID` 解析，无法解析则使用第一个可用视图
     * `query`: 可选的主键值全文过滤关键字
+    * `groupID`: 可选的分组 ID。省略、null 或空字符串时保持整个视图行为；指定时仅返回该分组图片，先按组内条目顺序排列，再应用视图排序，不受分页限制。分组不存在时返回错误
 * 返回值：应用数据库块上下文筛选、视图筛选与排序后，可见资源字段中的图片资源路径数组
 
   ```json
@@ -2200,8 +2202,7 @@ if (response.code === 0 && response.data) {
                   "pin": false,
                   "width": ""
                 }
-              ],
-              "rowIds": null
+              ]
             },
             "itemIds": ["20240118203818-ct041hj", "20240118203855-sqzbja0", "20240118203831-fkfvvtx", "20240118203842-kc31ovy", "20240531235026-uiap07y"],
             "groupCreated": 0,
@@ -2217,6 +2218,8 @@ if (response.code === 0 && response.data) {
   ```
 
     * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
+
+    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1` 至 `4`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。自动收集只添加条目，原文变化及规则条件、范围、对象或启用状态变化均保留已有条目和字段，再次匹配仍使用原条目。主动清理按全部启用的收集规则统一检查手动和自动绑定条目，保留匹配或无法判断的条目，执行前复查后仅移出确认不匹配的条目；撤销恢复原条目及全部字段。 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。 每条规则的可选 `notifyOnSuccess` 缺省或 `null` 为 `true`，实际变更在事务提交成功后合并通知；关闭不影响错误提示。无变化、手动收集、撤销重做及回滚事务不发送成功通知。 格式 4 增加可选的 `blockSource.tagTarget`：缺省或空字符串使用默认选择，优先收集合格列表项而非其首个内容块，`block` 收集标签所在块，`container` 选择最近的符合类型和属性条件的容器并按块 ID 去重；文档需显式选择 `d`。全部标签须在同一个来源块中，无标签条件时此选项不影响筛选。预览与实际收集对象一致，切换保留已有条目及字段。
 
 ### 获取主键值
 
@@ -2350,7 +2353,10 @@ if (response.code === 0 && response.data) {
 | `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
 | `location` | `{"location":{"name":"Home","latitude":0,"longitude":0,"originalInput":"0, 0"}}` |
+| `mAsset`   | `{"mAsset": [{"type": "image", "name": "图片", "content": "https://example.com/image"}]}` |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
+
+对于 `mAsset`，每项使用 `type: "image"` 渲染图片，或使用 `type: "file"` 渲染文件链接。更新值会替换整个 `mAsset` 数组，因此追加资源时必须包含已有条目。
 
 > ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格和列表为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
 

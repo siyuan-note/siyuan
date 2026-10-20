@@ -105,9 +105,10 @@ func containsOuterLimitClause(stmt string) bool {
 			}
 			continue
 		}
-		if ch == '(' {
+		switch ch {
+		case '(':
 			depth++
-		} else if ch == ')' {
+		case ')':
 			depth--
 		}
 		if isSQLLimitWordByte(ch) {

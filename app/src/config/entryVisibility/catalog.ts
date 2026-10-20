@@ -2,6 +2,7 @@ import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
 import {declaredMenuCatalog} from "../../menus/declarations/menuDeclaration";
 import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../../protyle/wysiwyg/codeBlockUtil";
 import {orderGutterTurnIntoItems} from "../../protyle/gutter/turnIntoMenu";
+import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
 import {
     DESKTOP_TOOLBAR_ENTRIES,
     getToolbarEntryId,
@@ -234,11 +235,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("paragraph", lang("paragraph")),
         node("quote", lang("quote")),
         node("callout", lang("callout")),
-        node("calloutNote", location(lang("callout"), literal("Note"))),
-        node("calloutTip", location(lang("callout"), literal("Tip"))),
-        node("calloutImportant", location(lang("callout"), literal("Important"))),
-        node("calloutWarning", location(lang("callout"), literal("Warning"))),
-        node("calloutCaution", location(lang("callout"), literal("Caution"))),
+        ...CALLOUT_PRESETS.map(item => node(item.id, location(lang("callout"), literal(item.title)))),
         node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
         ...(!multi ? [node("tabs", lang("tabs"))] : []),
         node("heading1", lang("heading1")),
@@ -596,6 +593,7 @@ const slashMenuBuiltinChildren = [
     node("tag", lang("tag")),
     node("inlineMath", lang("inline-math")),
     separator("separator_3"),
+    node("insertIOSPhotos", lang("insertImage")),
     node("insertAsset", lang("insertAsset")),
     node("insertHTMLFile", lang("insertHTMLFile")),
     node("insertIframeURL", lang("insertIframeURL")),
@@ -760,6 +758,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("riffCard", lang("riffCard"), false),
             node("search", lang("search")),
             node("replace", lang("replace")),
+            node("cleanUnusedAssets", lang("cleanUnusedAssets")),
             separator("separator_1"),
             node("close", lang("close")),
             node("delete", lang("delete")),
@@ -980,6 +979,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("delete", lang("delete")),
             separator("separator_2"),
             node("rename", lang("rename")),
+            // OCR 子菜单的入口、默认顺序与清空操作共用声明。
             declaredMenuCatalog(IMAGE_OCR_MENU),
             node("alignCenter", lang("alignCenter")),
             node("alignLeft", lang("alignLeft")),
@@ -1337,7 +1337,7 @@ export const refreshToolbarCatalogEntries = (items: IToolbarCatalogEntry[]) => {
     const order = mergeEntryOrderPreservingUnknown(DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key), actualOrder);
     const children = normalizeToolbarCatalogSeparators([
         ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && item.simple),
-        ...order.flatMap((key) => nodes.get(key) || []),
+        ...order.flatMap((key): IEntryCatalogNode | [] => nodes.get(key) || []),
         ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && !item.simple),
     ]);
     const signature = JSON.stringify(children.map((item) => toolbarCatalogNodeSignature(item, pluginLabels)));

@@ -69,3 +69,35 @@ func TestEmbeddingResultWrites(t *testing.T) {
 	exec(stmtFailedEmbedding, []byte{}, "model", 5, "id", "1", "edited")
 	check(0, 0, 0)
 }
+
+func TestEmbeddingPendingQueryPageSize(t *testing.T) {
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, stmt := range []string{
+		"CREATE TABLE blocks (id INTEGER PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, content TEXT, updated TEXT)",
+		"CREATE TABLE block_embeddings (id INTEGER PRIMARY KEY, fail_count INTEGER, last_tried INTEGER)",
+		"WITH RECURSIVE ids(id) AS (SELECT 1 UNION ALL SELECT id + 1 FROM ids WHERE id < 200) INSERT INTO blocks (id) SELECT id FROM ids",
+	} {
+		if _, err = db.Exec(stmt); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, limit := range []int{64, 128, 200, 8192} {
+		rows, queryErr := db.Query(stmtPendingBlocks, embeddingMaxFailCount, 0, limit)
+		if queryErr != nil {
+			t.Fatal(queryErr)
+		}
+		count := 0
+		for rows.Next() {
+			count++
+		}
+		err = rows.Err()
+		rows.Close()
+		if err != nil || count != min(limit, 200) {
+			t.Fatalf("limit=%d, rows=%d, error=%v", limit, count, err)
+		}
+	}
+}

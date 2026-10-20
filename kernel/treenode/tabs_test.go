@@ -47,7 +47,7 @@ func TestTabTitleWalkerOwnershipAndRewrite(t *testing.T) {
 	body := NewParagraph("")
 	item.AppendChild(body)
 	references := 0
-	WalkWithTabTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
+	WalkWithInlineTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && IsBlockRef(n) {
 			references++
 			if ParentBlock(n) != item {
@@ -59,7 +59,7 @@ func TestTabTitleWalkerOwnershipAndRewrite(t *testing.T) {
 	if references != 1 || item.TabItemTitle != title || item.FirstChild != body {
 		t.Fatal("read traversal changed the document")
 	}
-	WalkWithTabTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
+	WalkWithInlineTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && IsBlockRef(n) {
 			n.TextMarkBlockRefID = "20260905120000-ref0002"
 		}
@@ -72,7 +72,7 @@ func TestTabTitleWalkerOwnershipAndRewrite(t *testing.T) {
 		t.Fatal(item.TabItemTitle)
 	}
 	l := util.NewLute()
-	finish := MaterializeTabTitles(item)
+	finish := MaterializeInlineTitles(item)
 	item.FirstChild.FirstChild.Unlink()
 	finish()
 	if item.FirstChild != body || strings.Contains(FormatNode(TabTitleParagraph(item), l), "Title") {
@@ -98,7 +98,7 @@ func TestTabsOriginalTitleOwnershipAndNormalization(t *testing.T) {
 		t.Fatal("normalization must be stable")
 	}
 	references := 0
-	WalkWithTabTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
+	WalkWithInlineTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && IsBlockRef(n) {
 			references++
 			if ParentBlock(n) != title {
@@ -111,7 +111,7 @@ func TestTabsOriginalTitleOwnershipAndNormalization(t *testing.T) {
 	if references != 1 || !strings.Contains(FormatNode(title, l), "ref0002") {
 		t.Fatal("title reference traversal or rewrite failed")
 	}
-	finish := MaterializeTabTitles(item)
+	finish := MaterializeInlineTitles(item)
 	finish()
 	if item.TabTitleBlock() != title || title.IALAttr("custom-test") != "retained" || TabTitleParagraph(item) != nil {
 		t.Fatal("title identity was replaced or synthesized twice")

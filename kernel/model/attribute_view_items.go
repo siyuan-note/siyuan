@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -27,6 +29,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // 删除快照只保存在内核撤销日志中，保留字段值、条目身份和各视图顺序，不参与接口序列化。
@@ -36,6 +39,7 @@ type attributeViewItemsSnapshot struct {
 	Keys                 []*av.KeyValues
 	Orders               map[string][]string
 	Covers               map[string]map[string]*av.CardCoverPosition
+	MissingBlocks        map[string]bool
 	relatedChanges       *attributeViewFieldsSnapshot
 }
 
@@ -229,6 +233,30 @@ func (tx *Transaction) readAttributeViewItems(state *attributeViewItemsSnapshot)
 	return tx.readAttributeViewForMutation(state.AvID, state.BlockID, state.BoxID)
 }
 
+// 只把索引、文件或认证后文档中的源块缺失视为缺失；其他读取失败均保留错误。
+func (tx *Transaction) attributeViewItemSourceMissing(state *attributeViewItemsSnapshot, blockID string) (bool, error) {
+	bt := attributeViewBindingBlockTree(blockID, state.BoxID)
+	if bt == nil {
+		return true, nil
+	}
+	if tx.trees[bt.RootID] == nil {
+		if _, err := os.Stat(filepath.Join(util.DataDir, bt.BoxID, bt.Path)); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return true, nil
+			}
+			return false, err
+		}
+	}
+	tree, err := tx.loadTreeByBlockTree(bt)
+	if errors.Is(err, os.ErrNotExist) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return treenode.GetNodeInTree(tree, blockID) == nil, nil
+}
+
 func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeView, state *attributeViewItemsSnapshot) error {
 	if _, err := tx.readAttributeViewItems(state); err != nil {
 		return err
@@ -272,6 +300,25 @@ func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeVie
 		}
 	}
 	for _, id := range blockIDs {
+		if id != state.BlockID {
+			missing, err := tx.attributeViewItemSourceMissing(state, id)
+			if err != nil {
+				return err
+			}
+			// 缺失源块只恢复原条目快照，不创建替代源块；读取或认证失败仍返回错误。
+			if missing && !tx.isReplay {
+				if state.MissingBlocks == nil {
+					state.MissingBlocks = map[string]bool{}
+				}
+				state.MissingBlocks[id] = true
+			}
+			if missing && state.MissingBlocks[id] {
+				continue
+			}
+			if missing {
+				return ErrBlockNotFound
+			}
+		}
 		if err := tx.rememberAttributeViewMutationTree(id); err != nil {
 			return err
 		}
@@ -302,6 +349,18 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 		for _, value := range kv.Values {
 			if value.Type != av.KeyTypeBlock || value.IsDetached || value.Block == nil {
 				continue
+			}
+			if current.GetBlockValueByBoundID(value.Block.ID) != nil {
+				return fmt.Errorf("database entry binding [%s] changed", value.Block.ID)
+			}
+			if state.MissingBlocks[value.Block.ID] {
+				missing, missingErr := tx.attributeViewItemSourceMissing(state, value.Block.ID)
+				if missingErr != nil {
+					return missingErr
+				}
+				if missing {
+					continue
+				}
 			}
 			tree, loadErr := tx.loadTree(value.Block.ID)
 			if loadErr != nil {
@@ -389,6 +448,15 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 		primary := current.GetBlockValue(id)
 		if primary == nil || primary.IsDetached || primary.Block == nil {
 			continue
+		}
+		if state.MissingBlocks[primary.Block.ID] {
+			missing, missingErr := tx.attributeViewItemSourceMissing(state, primary.Block.ID)
+			if missingErr != nil {
+				return missingErr
+			}
+			if missing {
+				continue
+			}
 		}
 		node, tree, loadErr := getNodeByBlockID(tx, primary.Block.ID)
 		if loadErr != nil {

@@ -39,44 +39,6 @@ func (r *raw) at(x, y int) []byte {
 	return r.pix[o : o+r.psize]
 }
 
-func (r *raw) crop(x, y, w, h int) *raw {
-	out := r.alloc(w, h)
-	for j := range h {
-		copy(out.pix[j*out.stride:][:w*r.psize], r.at(x, y+j)[:w*r.psize])
-	}
-
-	return out
-}
-
-// rotate turns the image anti-clockwise by angle quarter turns.
-func (r *raw) rotate(angle int) *raw {
-	if angle == 0 {
-		return r
-	}
-	w, h := r.w, r.h
-	if angle&1 != 0 {
-		w, h = h, w
-	}
-	out := r.alloc(w, h)
-
-	for j := range r.h {
-		for i := range r.w {
-			var dx, dy int
-			switch angle {
-			case 1:
-				dx, dy = j, r.w-1-i
-			case 2:
-				dx, dy = r.w-1-i, r.h-1-j
-			default:
-				dx, dy = r.h-1-j, i
-			}
-			copy(out.at(dx, dy), r.at(i, j))
-		}
-	}
-
-	return out
-}
-
 func (r *raw) mirror(axis int) *raw {
 	if axis == 0 {
 		for y := range r.h / 2 {

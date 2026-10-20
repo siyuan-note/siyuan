@@ -71,8 +71,11 @@ func TestAttributeViewCarrierUsesExactCryptoBoundary(t *testing.T) {
 		t.Fatalf("a supplied but missing carrier should fail closed: %v", err)
 	}
 
-	if _, err = GetCurrentAttributeViewImages(nil, foreignAvID, carrierBlockID, "", ""); !errors.Is(err, av.ErrViewNotFound) {
+	if _, err = GetCurrentAttributeViewImages(nil, foreignAvID, carrierBlockID, "", "", ""); !errors.Is(err, av.ErrViewNotFound) {
 		t.Fatalf("image lookup should preserve the carrier crypto boundary: %v", err)
+	}
+	if _, err = GetCurrentAttributeViewImages(nil, foreignAvID, carrierBlockID, "", "", "group"); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("group image lookup should preserve the carrier crypto boundary: %v", err)
 	}
 	if _, _, _, err = RenderAttributeViewWithTarget(carrierBlockID, foreignAvID, "", "", 1, -1, nil,
 		av.LayoutTypeTable, false, false, "", ""); !errors.Is(err, av.ErrAttributeViewNotFound) {

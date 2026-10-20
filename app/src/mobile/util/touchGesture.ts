@@ -12,6 +12,7 @@ export const shouldStartLongPressMultiSelect = (
     dataType: string | undefined,
     insideInlineMath: boolean,
     imageMenuTarget: boolean,
+    insideTableCell = false,
 ) => !(tagName === "SPAN" && (dataType || "").split(" ").some(type =>
     ["block-ref", "file-annotation-ref", "tag", "inline-memo", "a"].includes(type))) &&
-    !insideInlineMath && !imageMenuTarget;
+    !insideInlineMath && !imageMenuTarget && !insideTableCell;

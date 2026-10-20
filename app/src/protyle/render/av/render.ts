@@ -40,7 +40,7 @@ import {
 } from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {getPublishAVView} from "./publishState";
-import {getReadonlyAVView} from "./readonlyState";
+import {getReadonlyAVView, getReadonlyAVSortRequest, reconcileReadonlyAVSort} from "./readonlyState";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
 import {
@@ -166,6 +166,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__flex-1"></div>
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : " av__views-switcher--all"}${data.views.length > 0 ? "" : " fn__none"}">
+                <svg><use xlink:href="#iconEye"></use></svg>
+                <span class="fn__space"></span>
+                <small>${visibleViewIDs.length}/${data.views.length}</small>
+            </span>
+            <div class="fn__space"></div>
             <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
@@ -174,7 +180,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconFocus"></use></svg>
             </span>
             <div class="fn__space"></div>` : ""}
-            <span data-type="av-sort" aria-label="${window.siyuan.languages.sort}" data-position="8south" class="ariaLabel block__icon${data.view.sorts.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-sort" aria-label="${blockElement.hasAttribute("data-readonly-sort") ? window.siyuan.languages.avTemporarySort : window.siyuan.languages.sort}" data-position="8south" class="ariaLabel block__icon${blockElement.hasAttribute("data-readonly-sort") ? " av__readonly-sort" : ""}${data.view.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
@@ -192,12 +198,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             ${data.isMirror ? `<span data-av-id="${data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">
                 <svg><use xlink:href="#iconSplitLR"></use></svg>
             </span><div class="fn__space"></div>` : ""}
-            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : " av__views-switcher--all"}${data.views.length > 0 ? "" : " fn__none"}">
-                <svg><use xlink:href="#iconEye"></use></svg>
-                <span class="fn__space"></span>
-                <small>${visibleViewIDs.length}/${data.views.length}</small>
-            </span>
-            <div class="fn__space"></div>
             ${editingState.newItemHTML}
         </div>
         <div contenteditable="${editingState.contenteditable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${escapeHtmlTextAndAttr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${escapeHtmlTextAndAttr(data.name || "")}</div>
@@ -709,6 +709,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 createIfNotExist: !window.siyuan.isPublish && !standalone,
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
+                temporarySort: getReadonlyAVSortRequest(e, protyle, common.viewID),
             }, undefined, false));
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
@@ -729,6 +730,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (persistAVLocateView(e, protyle, data)) {
             continue;
         }
+        reconcileReadonlyAVSort(e, data);
         applyAVRenderContext(e, data);
         if (e.hasAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)) {
             setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));

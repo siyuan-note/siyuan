@@ -199,6 +199,33 @@ describe("database item icons", () => {
         assert.equal(bound.operations.length, 0);
     });
 
+    it("preserves detached state and undo values when editing legacy row icons", async () => {
+        for (const layout of ["table", "list", "gallery", "kanban", "calendar"] as TAVView[]) {
+            const h = createHarness(layout);
+            h.cell.value.block.id = "20230101000000-legacy1";
+            h.open();
+            assert.equal(h.panel.type, "av");
+            let previousIcon = "";
+            for (const icon of ["1f600", "1f680", ""]) {
+                const previousValue = JSON.parse(JSON.stringify(h.cell.value)) as IAVCellValue;
+                previousValue.block.icon = previousIcon;
+                h.panel.callback(icon);
+                await Promise.resolve();
+                const op = h.operations[h.operations.length - 1];
+                const nextValue = op.doOperations[0].data as IAVCellValue;
+                assert.equal(nextValue.isDetached, true);
+                assert.equal(nextValue.block.id, "20230101000000-legacy1");
+                assert.equal(nextValue.block.content, "Title");
+                assert.equal(nextValue.block.icon, icon);
+                assert.equal(op.doOperations[0].rowID, "row");
+                assert.equal(op.doOperations[0].keyID, "primary");
+                assert.deepEqual(JSON.parse(JSON.stringify(op.undoOperations[0].data)), previousValue);
+                assert.equal(h.cell.value.isDetached, true);
+                previousIcon = icon;
+            }
+        }
+    });
+
     it("keeps the original row through virtual scrolling and preserves later title edits", async () => {
         const h = createHarness();
         h.open();

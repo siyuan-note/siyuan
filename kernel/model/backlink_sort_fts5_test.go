@@ -76,6 +76,14 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 			}
 			const childID = "20260917000000-child01"
 			ids := []string{"20260917000001-ref0010", "20260917000002-ref0002", "20260917000003-ref0001", "20260917000004-ref002b"}
+			assertIndexedReference := func(parentID string) {
+				t.Helper()
+				// 直接读取索引，避免缓存掩盖重复插入留下的旧父级和内容。
+				rows, err := sql.QueryNoLimitArgsInBox("SELECT parent_id, content FROM blocks WHERE id = ?", boxID, ids[2])
+				if err != nil || len(rows) != 1 || rows[0]["parent_id"] != parentID || rows[0]["content"] != "A1" {
+					t.Fatalf("indexed reference in %s notebook: got %+v, want one row under %s with content A1: %v", name, rows, parentID, err)
+				}
+			}
 			for i, tree := range trees {
 				for tree.Root.FirstChild != nil {
 					tree.Root.FirstChild.Unlink()
@@ -149,14 +157,16 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 				t.Fatal(err)
 			}
 			treenode.UpsertBlockTree(tree)
-			sql.IndexTreeQueue(tree)
+			sql.UpsertTreeQueue(tree)
 			sql.UpdateRefsTreeQueue(tree)
 			sql.FlushQueue()
+			assertIndexedReference(fixture.targetID)
 			for _, mode := range []int{0, 1, 2, 0} {
 				want := []string{fixture.targetID}
-				if mode == 1 {
+				switch mode {
+				case 1:
 					want = []string{ids[2], ids[1], ids[3], ids[0]}
-				} else if mode == 2 {
+				case 2:
 					want = []string{ids[0], ids[1], ids[3], ids[2]}
 				}
 				for _, explicitBox := range []bool{false, true} {
@@ -203,9 +213,10 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 				t.Fatal(err)
 			}
 			treenode.UpsertBlockTree(tree)
-			sql.IndexTreeQueue(tree)
+			sql.UpsertTreeQueue(tree)
 			sql.UpdateRefsTreeQueue(tree)
 			sql.FlushQueue()
+			assertIndexedReference(item.ID)
 			newToken, _, _, _, expired, err := GetGlobalBacklinks(globalQuery, "", 0, "", allow)
 			if err != nil || expired {
 				t.Fatalf("refreshed global sorting in %s notebook: %v %v", name, expired, err)

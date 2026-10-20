@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20261002224424"
+		"updated": "20261018005815"
 	},
 	"Children": [
 		{
@@ -123,7 +123,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115356-hp36u1f",
-				"updated": "20211228141247"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -163,7 +163,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115356-i1v42hf",
-				"updated": "20230630143055"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -510,7 +510,7 @@
 					},
 					"Properties": {
 						"id": "20211226115356-vfc2ba3",
-						"updated": "20211228141258"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -518,7 +518,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115356-jv0ssqa",
-								"updated": "20211228141258"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -532,7 +532,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​​ 後綴的文件用於保存文檔資料，資料格式為 JSON"
+									"Data": "​​​​ 後綴的檔案用於儲存文件資料。一般筆記本的文件資料以 JSON 儲存；加密筆記本的文件以密文儲存，不能直接當作 JSON 讀取或編輯，詳見"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-crytw01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "加密筆記本"
 								}
 							]
 						}
@@ -546,7 +553,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181824-pwnc2gx",
-				"updated": "20260810212846"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -614,7 +621,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619172140-cq7i3di",
-				"updated": "20260810212846"
+				"updated": "20261016191102"
 			},
 			"Children": [
 				{
@@ -626,7 +633,7 @@
 					},
 					"Properties": {
 						"id": "20220619172140-8tsb58k",
-						"updated": "20260810212846"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -634,7 +641,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172140-fk0wiay",
-								"updated": "20260810212846"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
@@ -648,7 +655,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -657,12 +664,21 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導出 Data"
+									"TextMarkTextContent": "資料"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "匯出 Data"
 								},
 								{
 									"Type": "NodeText",
@@ -671,11 +687,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導入 Data"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "應用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導入 Data"
 								}
 							]
 						}
@@ -690,7 +729,7 @@
 					},
 					"Properties": {
 						"id": "20220619172140-s4joicq",
-						"updated": "20260810212846"
+						"updated": "20261016191102"
 					},
 					"Children": [
 						{
@@ -698,21 +737,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172140-9qv0epp",
-								"updated": "20260810212846"
+								"updated": "20261016191102"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "移動端："
+									"Data": "行動端："
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "右側欄"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -721,12 +760,21 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導出 Data"
+									"TextMarkTextContent": "資料"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "匯出 Data"
 								},
 								{
 									"Type": "NodeText",
@@ -735,11 +783,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導入 Data"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "應用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導入 Data"
 								}
 							]
 						}
@@ -993,12 +1064,62 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231338-vlg2lgm",
-				"updated": "20260809232000"
+				"updated": "20261018005815"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "有的區塊（比如在列表項中的段落區塊）找不到區塊標怎麼辦？"
+				}
+			]
+		},
+		{
+			"ID": "20261017212429-ke3nbw0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017212429-ke3nbw0",
+				"updated": "20261018005815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "預設使用精簡區塊標。只有一個列表項時，也會保留列表區塊和列表項區塊標。若要顯示目前區塊及其所屬容器的所有區塊標，可啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示完整區塊標"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，透過各層區塊標直接開啟對應區塊的選單或拖曳該區塊。"
 				}
 			]
 		},

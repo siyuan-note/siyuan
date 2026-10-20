@@ -9,9 +9,9 @@ package util
 import "os"
 
 func openTextFileRead(*os.Root, string) (*os.File, error) {
-	return nil, textFileError("invalid_path", "safe file handles are unavailable on this platform")
+	return nil, textFileError(TextFileInvalidPath, "safe file handles are unavailable on this platform")
 }
 
 func textFileSingleLink(*os.File, os.FileInfo) error {
-	return textFileError("invalid_path", "file link counts are unavailable on this platform")
+	return textFileError(TextFileInvalidPath, "file link counts are unavailable on this platform")
 }

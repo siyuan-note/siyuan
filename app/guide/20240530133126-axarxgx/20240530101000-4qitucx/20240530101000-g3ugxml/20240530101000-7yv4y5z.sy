@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20261007101500"
+		"updated": "20261016111305"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-5b80d49",
-				"updated": "20261007101500"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204552-v3apeie",
-				"updated": "20260903130000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204552-bxaw5cp",
-				"updated": "20260903130000"
+				"updated": "20261016111305"
 			},
 			"Children": [
 				{
@@ -266,7 +266,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-wvncepl",
-						"updated": "20260810212846"
+						"updated": "20261016111305"
 					},
 					"Children": [
 						{
@@ -274,7 +274,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-pcf6xlh",
-								"updated": "20260810212846"
+								"updated": "20261016111305"
 							},
 							"Children": [
 								{
@@ -401,7 +401,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "1-9"
+									"TextMarkTextContent": "1-8"
 								},
 								{
 									"Type": "NodeText",
@@ -419,11 +419,47 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "1-9"
+									"TextMarkTextContent": "1-8"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " で 1 番目から 9 番目のタブに移動できます"
+									"Data": " で 1 番目から 8 番目のタブに移動し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で最後のタブに移動できます"
 								}
 							]
 						}

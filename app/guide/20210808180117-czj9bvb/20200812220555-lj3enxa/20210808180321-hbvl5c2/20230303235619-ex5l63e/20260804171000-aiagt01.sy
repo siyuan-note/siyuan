@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261019222954"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-0kg9iaq",
-				"updated": "20260926163337"
+				"updated": "20261019222954"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260926163337-jwclkdq",
-				"updated": "20260926163337"
+				"updated": "20261019222954"
 			},
 			"Children": [
 				{
@@ -260,12 +260,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-g2pa359",
-				"updated": "20260926163337"
+				"updated": "20261019222954"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文件读取失败、编码错误或内容超限时，会显示错误并停止本轮请求，原文件不会被覆盖或截断。如果保存时发现文件已被其它窗口或同步修改，请先复制未保存的内容，重新打开编辑器并合并修改后再保存。"
+					"Data": "文件读取失败、编码错误或内容超限时，会显示错误并停止本轮请求，原文件不会被覆盖或截断。如果保存时发现文件已被其他窗口或同步修改，请先复制未保存的内容，重新打开编辑器并合并修改后再保存。"
 				}
 			]
 		},
@@ -275,7 +275,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-76js6ua",
-				"updated": "20260820190627"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -556,7 +556,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-tqg42zs",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -570,7 +570,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-39b79if",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -584,7 +584,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 在当前会话中不再询问任何操作。"
+					"Data": " 免除本会话中一般操作的逐项确认。设为必须确认的能力及代码片段修改仍需确认。"
 				}
 			]
 		},
@@ -593,7 +593,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170043-17l9f9p",
-				"updated": "20260804180000"
+				"updated": "20261016191345"
 			},
 			"Children": [
 				{
@@ -607,7 +607,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 前应确认当前任务范围和所用工具可信，因为后续写入操作将不再逐项确认。"
+					"Data": " 前应确认当前任务范围和所用工具可信，因为一般写入操作将不再逐项确认；上述强制确认仍然有效。"
 				}
 			]
 		},
@@ -951,6 +951,118 @@
 				{
 					"Type": "NodeText",
 					"Data": "。调用外部 MCP 工具可能发送本地数据、修改外部系统或产生费用，应根据确认卡片核对具体影响。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-ch6z3dh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018102417-ch6z3dh",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "网页搜索与抓取"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261018102417-czenpo4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-czenpo4",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以让智能体搜索公开网页、读取正文并归纳内容或保存到笔记。web_search 返回链接和摘要，web_fetch 读取指定 URL。直接抓取通过 HTTP 获取内容，不执行 JavaScript。桌面应用还提供独立的渲染抓取工具，用于读取由 JavaScript 生成的正文。"
+				}
+			]
+		},
+		{
+			"ID": "20261018104335-uga4jno",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018104335-uga4jno",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "网页搜索与抓取"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以分别选择搜索和抓取服务，默认使用 Exa 搜索和直接抓取。使用 DeepSeek 时，填写 Search 和 Fetch 共用的 DeepSeek API 密钥，此设置与对话模型无关。DeepSeek Search 请求 5 条结果且不包含网页正文，单条摘要最多 800 个字符，总输出最多 8,000 个字符。需要正文时再抓取具体网页。"
+				}
+			]
+		},
+		{
+			"ID": "20261018104335-gteywdk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018104335-gteywdk",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "DeepSeek Search 会将搜索词发送给 DeepSeek，DeepSeek Fetch 会将目标 URL 发送给 DeepSeek，不携带浏览器 Cookie 或登录状态，这些请求可能产生费用。DeepSeek Fetch 仅获取网页正文，下载文件时应选择直接抓取。密钥无效、余额不足、限流或网页不可用时会返回错误，不自动切换服务。请根据工具权限设置核对并确认外部请求。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-fykajop",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-fykajop",
+				"updated": "20261018102417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "渲染抓取会执行网页脚本，并从本机桌面端发起网络请求，连接远程内核时也是如此。它沿用当前窗口的代理配置，使用独立的临时会话，不携带已有的 Cookie 或登录状态。请核对请求的网址，并根据工具权限设置确认操作。内网地址和下载会被拒绝。"
+				}
+			]
+		},
+		{
+			"ID": "20261018102417-770stzg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018102417-770stzg",
+				"updated": "20261018104335"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "渲染抓取需要桌面实例保持连接。浏览器端、移动端和外部 MCP 客户端使用配置的抓取服务。正文为空或超时时会返回错误，较长结果会截断至 50,000 个字符。需要登录、嵌入页面、工作线程或持续浏览器连接的网页仍可能无法读取。"
 				}
 			]
 		},

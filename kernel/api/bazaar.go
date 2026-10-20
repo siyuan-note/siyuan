@@ -246,7 +246,7 @@ var getInstalledPlugin = contractHandler(apicontract.GetInstalledPlugin, func(c 
 })
 
 var installBazaarPlugin = contractHandler(apicontract.InstallBazaarPlugin, func(c *gin.Context, request apicontract.InstallBazaarPluginRequest) apicontract.Response[apicontract.BazaarPackagesData] {
-	err := model.InstallBazaarPackage("plugins", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
+	err := model.InstallBazaarPackageContext(c.Request.Context(), "plugins", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
 	if err != nil {
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
@@ -286,7 +286,7 @@ var getInstalledWidget = contractHandler(apicontract.GetInstalledWidget, func(c 
 })
 
 var installBazaarWidget = contractHandler(apicontract.InstallBazaarWidget, func(c *gin.Context, request apicontract.InstallBazaarWidgetRequest) apicontract.Response[apicontract.BazaarPackagesData] {
-	err := model.InstallBazaarPackage("widgets", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
+	err := model.InstallBazaarPackageContext(c.Request.Context(), "widgets", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
 	if err != nil {
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
@@ -321,7 +321,7 @@ var getInstalledIcon = contractHandler(apicontract.GetInstalledIcon, func(c *gin
 })
 
 var installBazaarIcon = contractHandler(apicontract.InstallBazaarIcon, func(c *gin.Context, request apicontract.InstallBazaarIconRequest) apicontract.Response[apicontract.BazaarAppearancePackagesData] {
-	err := model.InstallBazaarPackage("icons", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
+	err := model.InstallBazaarPackageContext(c.Request.Context(), "icons", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
 	if err != nil {
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](1, err.Error())
 	}
@@ -356,7 +356,7 @@ var getInstalledTemplate = contractHandler(apicontract.GetInstalledTemplate, fun
 })
 
 var installBazaarTemplate = contractHandler(apicontract.InstallBazaarTemplate, func(c *gin.Context, request apicontract.InstallBazaarTemplateRequest) apicontract.Response[apicontract.BazaarPackagesData] {
-	err := model.InstallBazaarPackage("templates", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
+	err := model.InstallBazaarPackageContext(c.Request.Context(), "templates", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, nil)
 	if err != nil {
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
@@ -397,7 +397,7 @@ var installBazaarTheme = contractHandler(apicontract.InstallBazaarTheme, func(c 
 		themeOptions = &model.ThemeInstallOptions{Mode: int(*request.Mode), ModeOS: *request.ModeOS}
 	}
 
-	err := model.InstallBazaarPackage("themes", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, themeOptions)
+	err := model.InstallBazaarPackageContext(c.Request.Context(), "themes", request.RepoURL, request.RepoHash, request.RepoRef, request.PackageName, themeOptions)
 	if err != nil {
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](1, err.Error())
 	}
@@ -519,7 +519,12 @@ func bazaarPackage(value *bazaar.Package) *apicontract.BazaarPackage {
 	ret.Keywords = value.Keywords
 	ret.Deprecated = value.Deprecated
 	ret.DeprecatedReason = apicontract.BazaarLocaleStrings(value.DeprecatedReason)
-	ret.Alternatives = value.Alternatives
+	if value.Choices != nil {
+		ret.Choices = make([]apicontract.BazaarPackageChoice, len(value.Choices))
+		for i, choice := range value.Choices {
+			ret.Choices[i] = apicontract.BazaarPackageChoice{PackageType: choice.PackageType, Name: choice.Name}
+		}
+	}
 	ret.PreferredFunding = value.PreferredFunding
 	ret.PreferredName = value.PreferredName
 	ret.PreferredDesc = value.PreferredDesc
@@ -565,6 +570,15 @@ func bazaarAppearance(value *conf.Appearance) *apicontract.BazaarAppearance {
 		return nil
 	}
 	ret := &apicontract.BazaarAppearance{}
+	ret.CompactMode = value.CompactMode
+	ret.MenuMouseScroll = value.MenuMouseScroll
+	ret.OutlineKeepCurrentExpand = value.OutlineKeepCurrentExpand
+	if value.PDFTheme != nil {
+		ret.PDFTheme = &apicontract.BazaarPDFTheme{Light: value.PDFTheme.Light, Dark: value.PDFTheme.Dark, AnnoColor: value.PDFTheme.AnnoColor}
+	}
+	if value.MobileBars != nil {
+		ret.MobileBars = &apicontract.BazaarMobileBars{AutoHide: value.MobileBars.AutoHide, SidebarSwipe: value.MobileBars.SidebarSwipe, SidebarButtons: value.MobileBars.SidebarButtons}
+	}
 	ret.BodyGradient = bazaarBodyGradient(value.BodyGradient)
 	if value.GlobalFontFamilies != nil {
 		ret.GlobalFontFamilies = make([]*apicontract.BazaarEditorFont, len(value.GlobalFontFamilies))

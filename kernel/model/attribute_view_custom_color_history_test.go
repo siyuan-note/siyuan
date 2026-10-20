@@ -84,10 +84,8 @@ func TestAttributeViewCustomColorRenderContextReturnsIndependentPalettes(t *test
 	const goroutines = 32
 	var waitGroup sync.WaitGroup
 	errs := make(chan string, goroutines)
-	for i := 0; i < goroutines; i++ {
-		waitGroup.Add(1)
-		go func() {
-			defer waitGroup.Done()
+	for range goroutines {
+		waitGroup.Go(func() {
 			colors, order, found := resolver("20260824000000-target1")
 			if !found || 1 != len(colors) || "#0a0b0c" != colors[0].Dark.BackgroundColor {
 				errs <- "resolver returned an invalid palette"
@@ -96,7 +94,7 @@ func TestAttributeViewCustomColorRenderContextReturnsIndependentPalettes(t *test
 				errs <- "resolver returned an invalid palette order"
 			}
 			colors[0].Light.Color = "#ffffff"
-		}()
+		})
 	}
 	waitGroup.Wait()
 	close(errs)

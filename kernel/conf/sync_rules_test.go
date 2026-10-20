@@ -25,7 +25,7 @@ func TestSyncProviderRequiredFields(t *testing.T) {
 	}
 }
 
-func TestS3EndpointIncludesBucket(t *testing.T) {
+func TestS3EndpointIncludesBucketOrPath(t *testing.T) {
 	for _, tc := range []struct {
 		endpoint, bucket string
 		want             bool
@@ -36,15 +36,21 @@ func TestS3EndpointIncludesBucket(t *testing.T) {
 		{"http://notes.storage.example:9000", "notes", true},
 		{"https://my.notes.storage.example", "my.notes", true},
 		{"https://notebook.storage.example", "notes", false},
-		{"https://storage.example/notes", "notes", false},
+		{"https://storage.example/notes", "notes", true},
+		{"https://s3.example.com/proxy/", "notes", true},
+		{"https://s3.example.com/%6eotes/", "notes", true},
+		{"https://s3.example.com", "notes/sub", true},
+		{"https://s3.example.com/", "notes", false},
+		{"https://s3.example.com", "notes/", false},
 		{"https://notes", "notes", false},
 		{"https://storage.example?notes.storage.example", "notes", false},
 		{"ftp://notes.storage.example", "notes", false},
 		{"https://bad host", "bad", false},
+		{"https://", "notes", false},
 		{"", "notes", false},
 		{"https://notes.storage.example", "", false},
 	} {
-		if got := S3EndpointIncludesBucket(tc.endpoint, tc.bucket); got != tc.want {
+		if got := S3EndpointIncludesBucketOrPath(tc.endpoint, tc.bucket); got != tc.want {
 			t.Errorf("%q, %q: got %v, want %v", tc.endpoint, tc.bucket, got, tc.want)
 		}
 	}

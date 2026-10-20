@@ -16,6 +16,8 @@ github.com/88250/gulu v1.2.3-0.20260609090754-168309361d92 h1:/DtFVbsSdZLqbADVnF
 github.com/88250/gulu v1.2.3-0.20260609090754-168309361d92/go.mod h1:D+Db16m0N7r9MLZCMcj1a0ZsEGQAxDZkadOn79Gh0vI=
 github.com/88250/gulu v1.2.3-0.20260831011033-1a37069fad34 h1:otJni0ngVaCRTzTZEbO7NtrUKREdqqTPMRighyl3q80=
 github.com/88250/gulu v1.2.3-0.20260831011033-1a37069fad34/go.mod h1:+ynqZu9Ep0aCc/wxiKIN2q0EXthGVNN94HlUNIZEVTY=
+github.com/88250/gulu v1.2.3-0.20261016025619-193697a1830b h1:4W35lPprw5jnQDfuiE5zW5VFtqHQ3nfbqko0ePL1jQ4=
+github.com/88250/gulu v1.2.3-0.20261016025619-193697a1830b/go.mod h1:+ynqZu9Ep0aCc/wxiKIN2q0EXthGVNN94HlUNIZEVTY=
 github.com/88250/lute v1.7.8-0.20260816044801-e16e8e268504 h1:ZybE/84qeCWXOY/B9u7SHqnxOi2E6v19T9ZmPLYXo/Q=
 github.com/88250/lute v1.7.8-0.20260816044801-e16e8e268504/go.mod h1:mLbeedMhJIKH5UU+Kes/AevfvTXnPGbkJuIK3m5lZf4=
 github.com/88250/lute v1.7.8-0.20260821043618-a0c40f22628e h1:7I9b7xIS+22VAW0ciwt3BXXBEPUTuEYWdRU5bBq6zxs=
@@ -86,6 +88,16 @@ github.com/88250/lute v1.7.9-0.20261011114542-0cf6cf586e3d h1:Gad4z1iQ7JX2zX3Anv
 github.com/88250/lute v1.7.9-0.20261011114542-0cf6cf586e3d/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
 github.com/88250/lute v1.7.9-0.20261011125927-8bf47cd864f7 h1:wBl1Zt34QKHJYgfzjnRvvBbPCa7RkGYYbateVGbz8Vs=
 github.com/88250/lute v1.7.9-0.20261011125927-8bf47cd864f7/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.9-0.20261015164716-cda23fe190fe h1:rOl6mfTD6J9S9rwd028UEUr35ju9EBclqQSj1Fneb/w=
+github.com/88250/lute v1.7.9-0.20261015164716-cda23fe190fe/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.9-0.20261016025608-6d44a08f8718 h1:lT+OjpzrZsyfM2uwfWUWFy6U0Quw9JabLpxJn3N3NT8=
+github.com/88250/lute v1.7.9-0.20261016025608-6d44a08f8718/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.9-0.20261018021415-ba0ae7728a69 h1:xN0+0tbHYeJdx6atD+T0CNqe/9P7X+xdfB33yBjbhMk=
+github.com/88250/lute v1.7.9-0.20261018021415-ba0ae7728a69/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.9-0.20261018095303-29e2594b04e3 h1:5CQBznNURMAx4jSeBVD9iYNT3usn3TifZVA08s0FhUs=
+github.com/88250/lute v1.7.9-0.20261018095303-29e2594b04e3/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.9-0.20261018152725-ab704845b936 h1:2531WMaOH6rF5QhuKotrpyQjquoYcZ/lxxYQ9J6Bm2w=
+github.com/88250/lute v1.7.9-0.20261018152725-ab704845b936/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
 github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46 h1:Bq1JsDfVbHKUxNL/B2JXd8cC/1h6aFjrlXpGycnh0Hk=
 github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46/go.mod h1:fVfOloBzs2+W2VJCCbq60XIxc3yJHAZ0Gahv1oO0gyI=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -96,6 +108,8 @@ github.com/ClarkThan/ahocorasick v0.1.2 h1:Pk8jK2DRoYIKuwsopkB4DGlFu2jFYlzOPkKI/
 github.com/ClarkThan/ahocorasick v0.1.2/go.mod h1:a3CzWIqeRxiODAscAIfZ4wbFRXxywBrdCwTENVAWB2g=
 github.com/ConradIrwin/font v0.2.2-0.20260202161408-44ae4cf5fb22 h1:xEDrMXxOJsMByKW9Uw2WvwuVhfRd0SN5sOWVR8rYSjc=
 github.com/ConradIrwin/font v0.2.2-0.20260202161408-44ae4cf5fb22/go.mod h1:5iRYC36M+hBFrRcE25N9/kioASZaqIkAXbgOyfVDCXg=
+github.com/Eyevinn/mp4ff v0.60.0 h1:gtxm4/NTTZ0805f0+nHKIdyps6txbjywsgTjwXbnJ6M=
+github.com/Eyevinn/mp4ff v0.60.0/go.mod h1:97zsDIJUiDTYqKpqq/b1K9foamxXmvsgE4GdPrPK3ks=
 github.com/JalfResi/justext v0.0.0-20221106200834-be571e3e3052 h1:8T2zMbhLBbH9514PIQVHdsGhypMrsB4CxwbldKA9sBA=
 github.com/JalfResi/justext v0.0.0-20221106200834-be571e3e3052/go.mod h1:0SURuH1rsE8aVWvutuMZghRNrNrYEUzibzJfhEYR8L0=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=
@@ -283,6 +297,7 @@ github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1v
 github.com/go-task/slim-sprig/v3 v3.0.0/go.mod h1:W848ghGpv3Qj3dhTPRyJypKRiqCdHZiAzKg9hl15HA8=
 github.com/go-test/deep v1.0.8 h1:TDsG77qcSprGbC6vTN8OuXp5g+J+b5Pcguhf7Zt61VM=
 github.com/go-test/deep v1.0.8/go.mod h1:5C2ZWiW0ErCdrYzpqxLbTX7MG14M9iiw8DgHncVwcsE=
+github.com/go-test/deep v1.1.0 h1:WOcxcdHcvdgThNXjw0t76K42FXTU7HpNQWHpA2HHNlg=
 github.com/goccy/go-json v0.10.6 h1:p8HrPJzOakx/mn/bQtjgNjdTcN+/S6FcG2CTtQOrHVU=
 github.com/goccy/go-json v0.10.6/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=
 github.com/goccy/go-yaml v1.19.2 h1:PmFC1S6h8ljIz6gMRBopkjP1TVT7xuwrButHID66PoM=
@@ -425,6 +440,8 @@ github.com/onsi/ginkgo/v2 v2.32.0 h1:Hw7s2pVrQo/8Yz5N77qdnpHaoc+c6cC9WIV1Jce+J6E
 github.com/onsi/ginkgo/v2 v2.32.0/go.mod h1:+aXOY+vzZ5mu2iI2HpTZUPmM//oQfsNFX6gU9kNcA44=
 github.com/onsi/gomega v1.42.1 h1:iN1rCUX+44NZ1Dc97MPoeFYbFR0vh8zxoxMFwKdyZ6I=
 github.com/onsi/gomega v1.42.1/go.mod h1:REff/hsDsodHoKlWsP2mAPhu1+5/6hVYNf9rIEBpeSg=
+github.com/oops1/go.264 v1.12.0 h1:72uGb5MAyX83lSrK3aMvxYtxdQHOct7E4bD8YoJxbBU=
+github.com/oops1/go.264 v1.12.0/go.mod h1:9QWDhblzn+OCeWpxJLpIfr/G/N5MSf849wVixp4Hzas=
 github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1 h1:zKBIfL5ZmbJfSe4nXABkazrSw7BQufi5ghXTZWXsvq8=
 github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1/go.mod h1:zTtQIk3kOO9kweg5zJAgbdwBXR2HBPsDN0k6AxmTpzY=
 github.com/otiai10/gosseract/v2 v2.4.1 h1:G8AyBpXEeSlcq8TI85LH/pM5SXk8Djy2GEXisgyblRw=
@@ -534,6 +551,8 @@ github.com/siyuan-note/dejavu v0.0.0-20260929110133-2612bd536470 h1:67W6Rm2i+oAX
 github.com/siyuan-note/dejavu v0.0.0-20260929110133-2612bd536470/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
 github.com/siyuan-note/dejavu v0.0.0-20261011111741-4465ef631977 h1:GQW/X2467LNPzESWrmAnfM1YA7XtovkZRJOVi7x45eA=
 github.com/siyuan-note/dejavu v0.0.0-20261011111741-4465ef631977/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
+github.com/siyuan-note/dejavu v0.0.0-20261019140134-d0b1127c4adf h1:UN7K475+Tq5a4WudQ97y5WYhVJJTUYocxWLpbcjlD1c=
+github.com/siyuan-note/dejavu v0.0.0-20261019140134-d0b1127c4adf/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044 h1:b1/Q4DSREDvGh1/NbzR9873EKrjakdoUtsNlghWxUOI=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044/go.mod h1:t6jXpJdrXzRsdQF+XGaw35f16JVZcDyIkk5/6//ywnY=
 github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce h1:356bfC3pucxXuYpZIwaQ3viVCbq5RbRuvBhb4xtoBR0=
@@ -589,6 +608,10 @@ github.com/tklauser/go-sysconf v0.4.0 h1:7H0uAN+7RkwWRaxhYXDLqa5V3LPrJeV8wmD9dRU
 github.com/tklauser/go-sysconf v0.4.0/go.mod h1:8mTNWyog7H+MpKijp4VmKJAd2bbYQ2zuUwkYRbUArPI=
 github.com/tklauser/numcpus v0.12.0 h1:NR85qdvHA9pFse3x3weVZ0r0ST8R6l5RHbZrlRaqob4=
 github.com/tklauser/numcpus v0.12.0/go.mod h1:ABHeXzJnr/qqwguhClkZKT1/8VABcYrsyUiUGobwWJg=
+github.com/tphakala/go-aac v0.7.1 h1:/aspCjUIl+7i+Xs6K43Xm7P+yucn3V6WSvEbdzOyebU=
+github.com/tphakala/go-aac v0.7.1/go.mod h1:5BL5jIIhw7Q1R6Tl7mUOHSoEQeKG7EUVNAGYRIQ7xbg=
+github.com/tphakala/simd v1.11.0 h1:3rtUU/6mO76R4rq3hQiEX+DC4yKc/twIGU62bkmIAYA=
+github.com/tphakala/simd v1.11.0/go.mod h1:eO53GkWg40mRbr2tzs0Xb1IMZQ5U8cMR+Aa1RlXUinE=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.3.2 h1:zkEASHHyEClGeURfgNT9PJZVfAbs9oEX9QXggwWNJbc=

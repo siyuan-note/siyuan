@@ -216,6 +216,11 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         margin-left: 34px;
       }
 
+      > [data-type="NodeIFrame"],
+      > [data-type="NodeWidget"] {
+        max-width: calc(100% - 34px);
+      }
+
       & > [data-node-id]:not(.p):not(.code-block),
       & > [data-table-cell-node]:not(.p):not(.code-block) {
         padding-right: 0;
@@ -662,40 +667,54 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         height: 100%;
       }
 
-      .protyle-action__drag {
-        height: 30%;
-        width: 4px;
-        background: var(--b3-theme-surface);
-        display: none;
-        border-radius: var(--b3-border-radius);
-        cursor: col-resize;
-        transition: var(--b3-transition);
-        touch-action: none;
+      > .protyle-image-container {
+        position: relative;
+
+        > .img__name {
+          font-size: min(100%, var(--protyle-image-font-size, 100%));
+        }
+
+        > .protyle-action__title,
+        > .img__alt {
+          font-size: min(85%, var(--protyle-image-font-size, 85%));
+        }
+      }
+
+      > .protyle-image-container--compact {
+        > .protyle-icons,
+        > .img__net,
+        .protyle-block-resize[data-resize-axis="width"],
+        .protyle-block-resize[data-resize-axis="height"] {
+          display: none;
+        }
+
+        .protyle-block-resize[data-resize-axis="both"]::after {
+          width: 5px;
+          height: 5px;
+          // 鼠标与触屏手柄都向图片内部延伸 8px，将圆点中心固定在图片角上。
+          left: 8px;
+          top: 8px;
+          right: auto;
+          bottom: auto;
+          transform: translate(-50%, -50%);
+          border: 0;
+          border-radius: 50%;
+          background-color: currentColor;
+        }
+      }
+
+      .protyle-image-resize {
         position: absolute;
-        top: 35%;
-        margin-left: -8px;
-        box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
-        box-sizing: border-box;
-        z-index: 1;
+        pointer-events: none;
+        z-index: 6;
 
-        &:hover {
-          background-color: var(--b3-theme-background);
-          box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
+        > .protyle-block-resize {
+          pointer-events: auto;
         }
+      }
 
-        &::before,
-        &::after {
-          position: absolute;
-          width: 4px;
-          content: "";
-          height: 100%;
-          left: -4px;
-        }
-
-        &::after {
-          left: 4px;
-          width: 8px
-        }
+      &:hover .protyle-block-resize {
+        opacity: 1;
       }
 
       &__net {
@@ -982,8 +1001,37 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   cursor: text;
 }
 
-.protyle-wysiwyg[data-readonly="true"] .iframe .protyle-block-resize {
+.protyle-wysiwyg[data-readonly="true"] .iframe .protyle-block-resize,
+.protyle-wysiwyg[data-readonly="true"] [data-subtype="mermaid"] > .protyle-block-resize,
+.protyle-wysiwyg .sb > [data-subtype="mermaid"] > .protyle-block-resize {
   display: none;
+}
+
+.protyle-wysiwyg [data-subtype="mermaid"]:hover > .protyle-block-resize {
+  opacity: 1;
+}
+
+.protyle-wysiwyg[data-readonly="true"] .protyle-image-resize,
+.protyle-wysiwyg__embed .protyle-image-resize,
+.mindmap-view__preview-block .protyle-image-resize {
+  display: none;
+}
+
+.protyle-wysiwyg[data-readonly="false"] .img .protyle-image-caption {
+  margin-top: 12px;
+}
+
+@media (any-pointer: coarse) {
+  .protyle-wysiwyg[data-readonly="false"] .img .protyle-image-caption {
+    margin-top: 20px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .protyle-wysiwyg .img:not(.img--select):not(.img--drag) .protyle-block-resize {
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 .protyle-format-painter__cursor {
@@ -1097,7 +1145,7 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
     .av__row--util svg[data-type="set-page-size"],
     .av__row--header > .block__icons,
     .av__views .fn__space,
-    .av__views .block__icon:not([data-type="av-search-icon"]),
+    .av__views .block__icon:not([data-type="av-search-icon"]):not(.av__readonly-sort),
     .av__widthdrag,
     .av__gallery-actions,
     .av__gallery-add,

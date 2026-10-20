@@ -15,6 +15,30 @@ const createLute = () => {
 };
 
 describe("Markdown table structure", () => {
+    it("normalizes omitted merged-cell slots without adding visible cells", () => {
+        const lute = createLute();
+        const head = "<thead><tr><th>A</th><th>B</th><th>C</th></tr></thead>";
+        for (const [body, expected] of [
+            [
+                "<tr><td>a</td><td rowspan=\"2\">merged</td><td>b</td></tr><tr><td>c</td><td>d</td></tr>",
+                "<tr><td>a</td><td rowspan=\"2\">merged</td><td>b</td></tr><tr><td>c</td><td class=\"fn__none\"></td><td>d</td></tr>",
+            ],
+            [
+                "<tr><td colspan=\"2\" rowspan=\"2\">merged</td><td>b</td></tr><tr><td>c</td></tr>",
+                "<tr><td colspan=\"2\" rowspan=\"2\">merged</td><td class=\"fn__none\"></td><td>b</td></tr><tr><td class=\"fn__none\"></td><td class=\"fn__none\"></td><td>c</td></tr>",
+            ],
+        ]) {
+            for (const source of [body, expected]) {
+                let dom = `<div data-type="NodeTable"><div><table>${head}<tbody>${source}</tbody></table></div></div>`;
+                for (let round = 0; round < 3; round++) {
+                    dom = lute.SpinBlockDOM(dom);
+                    assert.ok(dom.includes(`<tbody>${expected}</tbody>`), dom);
+                    assert.equal((dom.match(/<col \/>/g) || []).length, 3);
+                }
+            }
+        }
+    });
+
     it("preserves tasks, nested lists, styles and multiline code through copy and paste", () => {
         const lute = createLute();
         const source = '- [/] progress\n  - [ ] nested\n\n<span style="color:red">colored</span>\n\n```go\na | b\nc\n```';

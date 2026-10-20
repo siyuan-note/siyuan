@@ -1979,14 +1979,19 @@ body.mobile-topbar--merged {
 
   > .backlinkList,
   > .backlinkMList {
-    min-height: 0;
-    overflow: auto;
-    overscroll-behavior: contain;
-
     > .b3-list > .backlinkList__item > .b3-list-item {
       margin-left: 0;
       margin-right: 0;
       border-radius: 0;
+    }
+  }
+
+  &:not(.sy__backlink--bottom) {
+    > .backlinkList,
+    > .backlinkMList {
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
     }
   }
 

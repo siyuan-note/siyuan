@@ -28,6 +28,7 @@ import {invalidateMobileReferenceOpen} from "./util/openReference";
 import {closeAVCellEditor} from "../protyle/render/av/cellEditor";
 import {clearDatabaseRowNavigation} from "../protyle/render/av/databaseRowNavigation";
 import {prepareDatabaseAttributePanel} from "../protyle/render/av/attributePanel";
+import {closeMobileBottomBacklinkPanel, updateMobileBottomBacklinkPanel} from "./util/bottomBacklink";
 
 export const getCurrentEditor = () => {
     return getActiveMobileSecondaryEditor() || window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -75,7 +76,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    onFailure?: (invalid?: boolean, editorUnchanged?: boolean) => void, keepPanels = false,
                                    waitForDatabaseAttributes = false) => {
     invalidateMobileReferenceOpen();
-    const closing = closeMobileEditorSheets();
+    const closing = closeMobileEditorSheets() || closeMobileBottomBacklinkPanel();
     if (closing) {
         void closing.then(() => {
             if (isValid() && !signal?.aborted) {
@@ -99,6 +100,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         completed = true;
         clearDatabaseRowNavigation(protyle.element);
         setEditor();
+        void updateMobileBottomBacklinkPanel(protyle).catch(error => console.error(error));
         bindMobileBarsScroll(protyle.contentElement, () => {
             // 面包屑位移后同步数据库吸顶位置，避免数据库使用上一帧的面包屑位置
             protyle.wysiwyg.element.querySelectorAll(".av[data-render='true']").forEach((item: HTMLElement) => {
@@ -125,6 +127,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         completed = true;
         if (titleHidden && isValid() && window.siyuan.mobile.editor?.protyle.wysiwyg.element.childElementCount > 0) {
             setEditor();
+        }
+        if (isValid()) {
+            void updateMobileBottomBacklinkPanel().catch(error => console.error(error));
         }
         onFailure?.(invalid, !titleHidden);
     };

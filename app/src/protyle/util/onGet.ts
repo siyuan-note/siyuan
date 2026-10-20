@@ -50,6 +50,7 @@ import {beginPerformance} from "./performance";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 import {pauseMobileBarsScroll} from "../../mobile/util/mobileBars";
+import {updateMobileBottomBacklinkPanel} from "../../mobile/util/bottomBacklink";
 /// #endif
 
 export const onGet = (options: {
@@ -495,6 +496,11 @@ const setHTML = (options: {
             protyle.breadcrumb.toggleExit(!options.action.includes(Constants.CB_GET_ALL));
             protyle.breadcrumb.render(protyle);
         }
+        /// #if MOBILE
+        if (window.siyuan.mobile?.editor?.protyle === protyle) {
+            void updateMobileBottomBacklinkPanel(protyle).catch(error => console.error(error));
+        }
+        /// #endif
         if (options.afterCB) {
             options.afterCB();
         }

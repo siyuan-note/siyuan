@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261020212341"
 	},
 	"Children": [
 		{
@@ -431,6 +431,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice. Existing profiles retain their original visibility behavior; copying a profile or creating one based on Current preserves its inheritance and explicit choices. New profiles based on Simple or Full follow the default order as versions change until you customize a level. Based on Current and duplicate preserve existing custom orders. Clear the search and use the reset icon in a column or dock group title to reset that level. To reset every level, use the refresh icon labeled Reset all orders on the right of the Position column title on desktop, or the Reset all orders button at the bottom on mobile. Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
+				}
+			]
+		},
+		{
+			"ID": "20261020212341-1sz2i9r",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261020212341-1sz2i9r",
+				"updated": "20261020212341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Backlinks at the bottom of documents"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261020212341-idextig",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020212341-idextig",
+				"updated": "20261020212341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop and mobile, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Bidirectional Links"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show the backlinks panel at the bottom of the document"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to view backlinks and mentions at the end of the document. The panel loads as you approach it. It appears after the end of the document is loaded and is hidden when there are no results."
 				}
 			]
 		}

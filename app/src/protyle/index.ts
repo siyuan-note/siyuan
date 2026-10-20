@@ -41,6 +41,7 @@ import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
 /// #if MOBILE
 import {removeMobileSecondaryEditor, unregisterMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
+import {destroyMobileBottomBacklinkPanel} from "../mobile/util/bottomBacklink";
 /// #endif
 import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
@@ -675,6 +676,7 @@ export class Protyle {
     public destroy() {
         this.destroyed = true;
         /// #if MOBILE
+        destroyMobileBottomBacklinkPanel(this.protyle);
         unregisterMobileSecondaryEditor(this);
         /// #endif
         destroy(this.protyle);

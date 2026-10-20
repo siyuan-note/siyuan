@@ -84,6 +84,7 @@ const browserCases = (code: typeof sources) => {
             isValid: () => true, action: [], afterOpen: () => {opened++;}, onFailure: () => {failed++;},
             sanitizeKernelHTML: (html: string) => html,
             beginPerformance: noop,
+            updateMobileBottomBacklinkPanel: () => Promise.resolve(),
         };
         for (const name of ["invalidateTrackedRanges", "hideElements", "invalidateHeadingNumberRefresh",
             "normalizeHTMLAssetIFrameSources", "updateWidgetCacheVersion", "disposeCustomBlocksInElement",
@@ -145,6 +146,7 @@ test("mobile loading completion clears row navigation before settling once", () 
         document: {getElementById: (): HTMLElement | null => null},
         setEditor: () => calls.push("show editor"),
         bindMobileBarsScroll: () => calls.push("bind scroll"),
+        updateMobileBottomBacklinkPanel: () => { calls.push("update backlinks"); return Promise.resolve(); },
         isValid: () => true,
         action: [] as string[], Constants: {CB_GET_OPENNEW: "open-new"},
         afterOpen: () => calls.push("opened"),
@@ -155,7 +157,7 @@ test("mobile loading completion clears row navigation before settling once", () 
     const protyle = {element: container, contentElement: {}};
     complete(protyle);
     complete(protyle);
-    assert.deepEqual(calls, ["remove navigation", "protyle--database-row-navigation", "show editor", "bind scroll", "opened"]);
+    assert.deepEqual(calls, ["remove navigation", "protyle--database-row-navigation", "show editor", "update backlinks", "bind scroll", "opened"]);
 });
 
 test("document rendering preserves landscape title controls and finishes loading", {

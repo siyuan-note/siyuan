@@ -11,7 +11,7 @@ import {bindLiteCodeActions} from "../../lite/codeActions";
 import {setMobileToolbarUndo} from "../../lite/mobileToolbar";
 import {getDefaultToolbar} from "../../toolbar/defaults";
 import {hideElements} from "../../ui/hideElements";
-import {uploadFiles} from "../../upload";
+import {paste} from "../../util/paste";
 import {matchHotKey} from "../../util/hotKey";
 import {processRender} from "../../util/processCode";
 import {initEditorTabs} from "../../wysiwyg/tabs";
@@ -534,12 +534,12 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         getSelection().setBaseAndExtent(range.endContainer, range.endOffset, range.startContainer, range.startOffset);
     }
     undoSelection ||= captureSelection();
-    return {finish, destroy, pasteImages: (files: File[]) => {
+    return {finish, destroy, pasteClipboard: (data: IClipboardData) => {
         if (finished || closing || !options.canEdit()) {
             return;
         }
         fragment.focus(true);
         fragment.protyle.toolbar.range = undefined;
-        uploadFiles(fragment.protyle, files, undefined, undefined, undefined, {source: "paste"});
+        return paste(fragment.protyle, {...data, target: fragment.wysiwyg});
     }};
 };

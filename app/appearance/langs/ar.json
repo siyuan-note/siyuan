@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "لصق كعقدة فرعية",
+	"mindmapPasteSibling": "لصق كعقدة شقيقة",
 	"embedBlockBreadcrumbParentPath": "إظهار المسار الأصل في مسار التنقل",
 	"closeWindowOnLastTabClosed": "إغلاق النافذة الجديدة مع آخر علامة تبويب",
 	"closeWindowOnLastTabClosedTip": "إغلاق النافذة الجديدة عند إغلاق آخر علامة تبويب فيها أو سحبها إلى نافذة أخرى",

@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "Alt düğüm olarak yapıştır",
+	"mindmapPasteSibling": "Aynı düzeyde düğüm olarak yapıştır",
 	"embedBlockBreadcrumbParentPath": "Gezinti yolunda üst yolu göster",
 	"closeWindowOnLastTabClosed": "Son sekmeyle birlikte yeni pencereyi kapat",
 	"closeWindowOnLastTabClosedTip": "Son sekmesi kapatıldığında veya başka bir pencereye sürüklendiğinde yeni pencereyi kapat",

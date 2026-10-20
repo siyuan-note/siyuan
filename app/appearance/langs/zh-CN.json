@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "粘贴为子节点",
+	"mindmapPasteSibling": "粘贴为同级节点",
 	"embedBlockBreadcrumbParentPath": "面包屑显示文档上层路径",
 	"closeWindowOnLastTabClosed": "新窗口随最后一个页签关闭",
 	"closeWindowOnLastTabClosedTip": "把新窗口的最后一个页签关闭或拖拽到其他窗口之后，关闭该窗口",

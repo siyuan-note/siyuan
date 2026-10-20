@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "चाइल्ड नोड के रूप में पेस्ट करें",
+	"mindmapPasteSibling": "समान स्तर के नोड के रूप में पेस्ट करें",
 	"embedBlockBreadcrumbParentPath": "ब्रेडक्रंब में मूल पथ दिखाएँ",
 	"closeWindowOnLastTabClosed": "अंतिम टैब के साथ नई विंडो बंद करें",
 	"closeWindowOnLastTabClosedTip": "अंतिम टैब बंद होने या दूसरी विंडो में खींचे जाने पर नई विंडो बंद करें",

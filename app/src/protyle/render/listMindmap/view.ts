@@ -43,7 +43,10 @@ export interface ListMindmapViewOptions {
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onInteractionStart?: (event: PointerEvent) => () => void;
     onEdit?: (id: string, contentHost: HTMLElement, replaceFirstParagraph?: string) => void;
-    onPasteImages?: (id: string, files: File[]) => void;
+    onCopy?: (ids: string[], cut: boolean, event?: ClipboardEvent) => void;
+    onPaste?: (id: string, kind: "child" | "sibling", data?: IClipboardData) => void;
+    onClipboardMenu?: (anchor: HTMLElement, ids: string[]) => void;
+    onDeleteNodes?: (ids: string[]) => void;
     isAddSiblingShortcut?: (event: KeyboardEvent) => boolean;
     isAddChildShortcut?: (event: KeyboardEvent) => boolean;
     onRootTitleChange?: (title: string) => void;
@@ -80,6 +83,7 @@ interface PointerState {
     rightButton?: boolean;
     pan?: boolean;
     id?: string;
+    nodeId?: string;
     startX: number;
     startY: number;
     x: number;
@@ -87,6 +91,7 @@ interface PointerState {
     moved: boolean;
     hiddenControls?: HTMLElement[];
     summary?: boolean;
+    selection?: string[];
     targetId?: string;
     placement?: "before" | "child" | "after";
     relation?: {
@@ -151,6 +156,9 @@ export class ListMindmapView {
     private edges: {from: string, to: string}[] = [];
     private bounds = {width: 1, height: 1};
     private selectedId?: string;
+    private readonly selectedIds = new Set<string>();
+    private multiSelect = false;
+    private pasteSibling = false;
     private selectedRelation?: string;
     private selectedEdge?: string;
     private hoveredLine?: string;
@@ -303,7 +311,10 @@ export class ListMindmapView {
         this.listen(this.viewport, "wheel", this.wheel, {passive: false});
         this.listen(this.viewport, "dragstart", (event: Event) => event.preventDefault());
         this.listen(options.host, "keydown", this.keyDown);
-        this.listen(options.host, "paste", this.pasteImages);
+        this.listen(options.host, "copy", this.copySelection);
+        this.listen(options.host, "cut", this.copySelection);
+        this.listen(options.host, "paste", this.pasteSelection);
+        this.listen(options.host, "keyup", () => this.pasteSibling = false);
         // 脑图内部先处理交互，再阻止外层文档将节点操作识别为列表块编辑。
         ["pointerdown", "pointerup", "pointermove", "pointercancel", "mousedown", "mouseup", "mousemove", "click",
             "dblclick", "contextmenu", "dragstart", "dragover", "drop", "beforeinput", "input", "compositionstart",
@@ -426,6 +437,9 @@ export class ListMindmapView {
             return;
         }
         if (this.summarySelecting && (this.viewport.contains(target) || this.summaryControls.contains(target))) {
+            return;
+        }
+        if ((event.ctrlKey || event.metaKey) && event.button === 0 && this.viewport.contains(target)) {
             return;
         }
         if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle, .mindmap-view__summary-editor")) {
@@ -703,13 +717,18 @@ export class ListMindmapView {
     }
 
     public update(model: ListMindmapModel) {
-        if (this.pointer?.relation || this.pointer?.summary) {
+        if (this.pointer?.relation || this.pointer?.summary || this.pointer?.selection) {
             this.cancelPointer();
         }
         if (this.destroyed) {
             return;
         }
         this.model = model;
+        this.selectedIds.forEach(id => {
+            if (!model.nodes.has(id)) {
+                this.selectedIds.delete(id);
+            }
+        });
         if (!!model.metadata.viewLocked !== this.persistedLocked) {
             this.persistedLocked = !!model.metadata.viewLocked;
             this.setLocked(this.persistedLocked);
@@ -1029,6 +1048,11 @@ export class ListMindmapView {
 
     public getSelectedId() {
         return this.selectedId;
+    }
+
+    public getSelectedIds() {
+        return this.selectedId ? [...new Set([this.selectedId, ...this.selectedIds])]
+            .filter(id => this.model.nodes.has(id)) : [];
     }
 
     public focusNode(id: string) {
@@ -2040,9 +2064,18 @@ export class ListMindmapView {
         }
     }
 
-    private selectNode(id: string) {
+    private selectNode(id: string, additive = false) {
         const changed = this.selectedId !== id || !!this.selectedRelation;
-        this.selectedId = id;
+        const ids = additive ? new Set(this.getSelectedIds()) : new Set<string>();
+        if (additive && ids.has(id)) {
+            ids.delete(id);
+            this.selectedId = [...ids].pop();
+        } else {
+            ids.add(id);
+            this.selectedId = id;
+        }
+        this.selectedIds.clear();
+        ids.forEach(selected => this.selectedIds.add(selected));
         this.selectedSummary = undefined;
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
@@ -2056,11 +2089,14 @@ export class ListMindmapView {
     }
 
     private updateSelection() {
+        if (!this.selectedId) {
+            this.selectedIds.clear();
+        }
         if (!this.relationFrom) {
             this.relationPreview = undefined;
         }
         this.nodeElements.forEach((element, id) => {
-            const selected = this.selectedId === id || this.summarySelected.has(id);
+            const selected = this.selectedId === id || this.selectedIds.has(id) || this.summarySelected.has(id);
             element.classList.toggle("mindmap-view__node--selected", selected);
             element.classList.toggle("mindmap-view__node--relation", this.relationFrom === id ||
                 this.relationPreview?.targetId === id || !!this.summaryFrom &&
@@ -2070,7 +2106,7 @@ export class ListMindmapView {
         this.relationElements.forEach((element, id) => element.classList.toggle("mindmap-view__relation--selected", this.selectedRelation === id));
         const node = this.model.nodes.get(this.selectedId);
         const disabled: Record<string, boolean> = {
-            relation: !node || node.virtual,
+            relation: !node || node.virtual || this.getSelectedIds().length > 1,
             summary: false,
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };
@@ -2175,6 +2211,8 @@ export class ListMindmapView {
             this.options.onSummaryDelete?.(this.selectedSummary);
         } else if (this.selectedRelation) {
             this.options.onRelationDelete?.(this.selectedRelation);
+        } else if (this.getSelectedIds().length > 1 && this.options.onDeleteNodes) {
+            this.options.onDeleteNodes(this.getSelectedIds());
         } else {
             const node = this.model.nodes.get(this.selectedId);
             if (node && !node.virtual && node !== this.model.root) {
@@ -2376,7 +2414,13 @@ export class ListMindmapView {
             return;
         }
         if (id) {
-            this.selectNode(id);
+            this.selectNode(id, event.button === 0 && (event.ctrlKey || event.metaKey || this.multiSelect));
+            if (event.ctrlKey || event.metaKey || this.multiSelect) {
+                this.suppressLinkClick = true;
+                this.options.host.focus({preventScroll: true});
+                this.cancelPointer();
+                return;
+            }
         }
         if ((!this.editingId || id) && !this.isTemporaryPan(event)) {
             this.options.host.focus({preventScroll: true});
@@ -2391,12 +2435,15 @@ export class ListMindmapView {
             rightButton: event.button === 2,
             pan: this.panning || event.button === 2 || event.pointerType === "touch",
             id: !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
+            nodeId: id,
             startX: event.clientX,
             startY: event.clientY,
             x: this.offsetX,
             y: this.offsetY,
             moved: false,
             hiddenControls,
+            selection: !id && event.button === 0 && !this.panning && !this.relationFrom &&
+                event.pointerType !== "touch" ? (event.ctrlKey || event.metaKey ? this.getSelectedIds() : []) : undefined,
         };
         try {
             // 在原点击元素捕获指针，保留链接目标，同时让连续点击可以识别为双击。
@@ -2450,6 +2497,33 @@ export class ListMindmapView {
             pointer.hiddenControls?.forEach(element => element.classList.add("mindmap-view__node--hide-controls"));
         }
         pointer.moved = true;
+        if (pointer.selection) {
+            const viewport = this.viewport.getBoundingClientRect();
+            const left = Math.min(pointer.startX, event.clientX);
+            const right = Math.max(pointer.startX, event.clientX);
+            const top = Math.min(pointer.startY, event.clientY);
+            const bottom = Math.max(pointer.startY, event.clientY);
+            this.summaryBox.hidden = false;
+            this.summaryBox.style.cssText = `left:${left - viewport.left}px;top:${top - viewport.top}px;` +
+                `width:${right - left}px;height:${bottom - top}px`;
+            this.selectedIds.clear();
+            pointer.selection.forEach(id => this.selectedIds.add(id));
+            this.nodeElements.forEach((element, id) => {
+                if (!this.positions.has(id) || this.model.nodes.get(id)?.virtual) {
+                    return;
+                }
+                const rect = element.getBoundingClientRect();
+                if (rect.left + rect.width / 2 >= left && rect.left + rect.width / 2 <= right &&
+                    rect.top + rect.height / 2 >= top && rect.top + rect.height / 2 <= bottom) {
+                    this.selectedIds.add(id);
+                }
+            });
+            this.selectedId = [...this.selectedIds][0];
+            this.selectedRelation = this.selectedEdge = this.selectedSummary = undefined;
+            this.inspector.hidden = true;
+            this.updateSelection();
+            return;
+        }
         if (pointer.summary) {
             const viewport = this.viewport.getBoundingClientRect();
             const left = Math.min(pointer.startX, event.clientX);
@@ -2591,6 +2665,13 @@ export class ListMindmapView {
             return;
         }
         const {id, targetId, placement, moved} = pointer;
+        if (pointer.selection && moved) {
+            this.suppressLinkClick = true;
+            this.cancelPointer();
+            this.inspector.hidden = !this.selectedId || this.readOnly;
+            this.renderInspector();
+            return;
+        }
         if (pointer.summary) {
             this.suppressLinkClick = true;
             pointer.summary = false;
@@ -2628,12 +2709,13 @@ export class ListMindmapView {
         this.cancelPointer();
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
-        } else if (!moved && !id && !pointer.rightButton && !this.readOnly && !this.panning) {
+        } else if (!moved && !pointer.nodeId && !pointer.rightButton && !this.readOnly && !this.panning) {
             if (this.editingId) {
                 this.clearSelection();
             }
             this.finishThen(() => {
                 this.options.host.focus({preventScroll: true});
+                this.clearSelection();
                 this.selectLine(event);
             });
         }
@@ -3089,23 +3171,43 @@ export class ListMindmapView {
         this.draw();
     }
 
-    private pasteImages = (event: ClipboardEvent) => {
+    private copySelection = (event: ClipboardEvent) => {
+        const cut = event.type === "cut";
+        if (event.defaultPrevented || this.editingId || this.relationFrom || this.summarySelecting ||
+            cut && this.readOnly || !this.options.onCopy || !this.getSelectedIds().length ||
+            (event.target as HTMLElement).isContentEditable ||
+            (event.target as HTMLElement).closest("input, textarea, select")) {
+            return;
+        }
+        event.preventDefault();
+        this.options.onCopy(this.getSelectedIds(), cut, cut ? undefined : event);
+    };
+
+    private pasteSelection = (event: ClipboardEvent) => {
         if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.summarySelecting ||
-            !this.options.onPasteImages || !this.selectedId ||
+            !this.options.onPaste || this.getSelectedIds().length !== 1 ||
             (event.target as HTMLElement).isContentEditable ||
             (event.target as HTMLElement).closest("input, textarea, select")) {
             return;
         }
         const id = this.selectedId;
         const node = this.model.nodes.get(id);
-        const files = Array.from(event.clipboardData?.files || []).filter(file => file.type.startsWith("image/"));
-        if (!node || node.virtual || files.length === 0) {
+        const data: IClipboardData = {
+            files: Array.from(event.clipboardData?.files || []),
+            textPlain: event.clipboardData?.getData("text/plain"),
+            textHTML: event.clipboardData?.getData("text/html"),
+            siyuanHTML: event.clipboardData?.getData("text/siyuan"),
+        };
+        const kind = this.pasteSibling ? "sibling" : "child";
+        this.pasteSibling = false;
+        if (!node || node.virtual && kind === "sibling" ||
+            !data.files.length && !data.textPlain && !data.textHTML && !data.siyuanHTML) {
             return;
         }
         event.preventDefault();
         this.finishThen(() => {
             if (!this.readOnly && this.selectedId === id && this.model.nodes.has(id)) {
-                this.options.onPasteImages(id, files);
+                this.options.onPaste(id, kind, data);
             }
         });
     };
@@ -3129,6 +3231,30 @@ export class ListMindmapView {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {
+            return;
+        }
+        if (!startingComposition && !this.editingId && !this.summarySelecting && !this.relationFrom &&
+            (event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey &&
+            ["c", "x"].includes(event.key.toLowerCase()) && this.options.onCopy && this.getSelectedIds().length) {
+            const cut = event.key.toLowerCase() === "x";
+            if (!cut || !this.readOnly) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.options.onCopy(this.getSelectedIds(), cut);
+            }
+            return;
+        }
+        if (!startingComposition && (event.ctrlKey || event.metaKey) && !event.altKey &&
+            event.key.toLowerCase() === "v" && !this.editingId && !this.summarySelecting && !this.relationFrom &&
+            !this.readOnly && this.options.onPaste && this.getSelectedIds().length === 1) {
+            this.pasteSibling = event.shiftKey;
+            // Shift+V 在部分宿主中会被解释为纯文本粘贴，直接读取完整载荷以保留节点结构。
+            if (event.shiftKey) {
+                event.preventDefault();
+                this.pasteSibling = false;
+                this.options.onPaste(this.selectedId, "sibling");
+            }
+            event.stopPropagation();
             return;
         }
         if (this.summarySelecting && event.key !== "Escape") {
@@ -3292,6 +3418,7 @@ export class ListMindmapView {
                 return;
             }
             this.relationFrom = undefined;
+            this.multiSelect = false;
             this.cancelSummarySelection();
             this.inspector.hidden = true;
             if (this.fullscreenMarker && !selectingSummary) {
@@ -3395,6 +3522,27 @@ export class ListMindmapView {
             return;
         }
         const id = this.selectedId;
+        const ids = this.getSelectedIds();
+        const multiple = ids.length > 1;
+        const select = squareButton("multiSelect", "iconSelect", () => {
+            this.multiSelect = !this.multiSelect;
+            this.renderInspector();
+        });
+        select.setAttribute("aria-pressed", String(this.multiSelect));
+        select.classList.toggle("color__square--current", this.multiSelect);
+        this.inspector.append(select);
+        if (this.options.onClipboardMenu) {
+            const more = squareButton("more", "iconMore", () => this.options.onClipboardMenu(more, ids));
+            more.setAttribute("aria-haspopup", "menu");
+            this.inspector.append(more);
+        }
+        if (multiple) {
+            const remove = squareButton("delete", "iconTrashcan", () => this.deleteSelection());
+            remove.disabled = ids.includes(this.model.root.id) ||
+                this.model.root.virtual && this.model.root.children.every(node => ids.includes(node.id));
+            this.inspector.append(remove);
+            return;
+        }
         const style = this.model.metadata.nodes[id] || {};
         const change = (patch: Partial<ListMindmapNodeStyle>) => this.options.onNodeStyle?.(id, patch);
         this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"));

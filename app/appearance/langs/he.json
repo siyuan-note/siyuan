@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "הדבקה כצומת ילד",
+	"mindmapPasteSibling": "הדבקה כצומת אח",
 	"embedBlockBreadcrumbParentPath": "הצגת נתיב האב בנתיב הניווט",
 	"closeWindowOnLastTabClosed": "סגירת החלון החדש עם הלשונית האחרונה",
 	"closeWindowOnLastTabClosedTip": "סגירת החלון החדש כאשר הלשונית האחרונה בו נסגרת או נגררת לחלון אחר",

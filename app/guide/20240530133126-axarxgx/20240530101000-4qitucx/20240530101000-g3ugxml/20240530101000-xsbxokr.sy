@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261018200107"
+		"updated": "20261020162345"
 	},
 	"Children": [
 		{
@@ -13053,7 +13053,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20261018200107"
+				"updated": "20261020162345"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13095,7 +13095,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-01k7syf",
-				"updated": "20261017003000",
+				"updated": "20261020162345",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13618,6 +13618,200 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードの分岐をコピー"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+C"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘C"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードの分岐を切り取り"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+X"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘X"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "子ノードとして貼り付け"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘V"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同階層のノードとして貼り付け"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘V"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261020162345-6y84piz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020162345-6y84piz",
+				"updated": "20261020162345"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンバスの空白部分をマウスの左ボタンでドラッグすると、複数のノードを範囲選択できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）を押しながらノードをクリックすると、選択状態を切り替えられます。タッチ画面ではノードを選択し、下部の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複数選択"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にしてからノードを個別にタップします。もう一度ボタンを押すか "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、このモードを終了します。コピーと切り取りには子ツリー全体が含まれ、親と子を同時に選択しても重複しません。ノードのスタイル、分岐内の関連線、範囲全体が含まれる要約も保持します。ルートノードは切り取れません。クリップボードへの書き込みが失敗した場合やプレーンテキストしか扱えない環境では、元のノードを残します。"
 				}
 			]
 		},
@@ -13626,21 +13820,57 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-cyh3qk6",
-				"updated": "20260930234403"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ノードの編集中に "
+					"Data": "ノードを 1 つ選択して "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+V / ⌘V"
+					"TextMarkTextContent": "Ctrl+V"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で画像を貼り付けられます。ノードを選択した状態で貼り付けると、現在表示されている本文の末尾に画像が追加されます。アップロード中は完了を待ってからノードの編集を終了してください。"
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと子ノードとして、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⇧⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと同階層のノードとして貼り付けます。下部の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " メニューからもコピー、切り取り、これらの貼り付けを実行できます。マインドマップのノードは元の階層を保持し、通常のテキスト、画像、コンテンツブロックは新しいノードのエディタを通して挿入します。ノードのテキスト編集中は、通常の本文編集と同じ貼り付け動作になります。画像のアップロード中は完了を待ってからノードの編集を終了してください。"
 				}
 			]
 		},

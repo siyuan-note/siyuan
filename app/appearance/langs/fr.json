@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "Coller comme nœud enfant",
+	"mindmapPasteSibling": "Coller comme nœud de même niveau",
 	"embedBlockBreadcrumbParentPath": "Afficher le chemin parent dans le fil d'Ariane",
 	"closeWindowOnLastTabClosed": "Fermer la nouvelle fenêtre avec le dernier onglet",
 	"closeWindowOnLastTabClosedTip": "Fermer la nouvelle fenêtre lorsque son dernier onglet est fermé ou déplacé vers une autre fenêtre",

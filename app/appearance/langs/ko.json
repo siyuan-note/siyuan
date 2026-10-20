@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "하위 노드로 붙여넣기",
+	"mindmapPasteSibling": "같은 수준의 노드로 붙여넣기",
 	"embedBlockBreadcrumbParentPath": "탐색 경로에 문서의 상위 경로 표시",
 	"closeWindowOnLastTabClosed": "마지막 탭과 함께 새 창 닫기",
 	"closeWindowOnLastTabClosedTip": "새 창의 마지막 탭을 닫거나 다른 창으로 드래그하면 해당 창 닫기",

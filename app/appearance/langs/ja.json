@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "子ノードとして貼り付け",
+	"mindmapPasteSibling": "同階層のノードとして貼り付け",
 	"embedBlockBreadcrumbParentPath": "パンくずリストに文書の上位パスを表示",
 	"closeWindowOnLastTabClosed": "最後のタブとともに新しいウィンドウを閉じる",
 	"closeWindowOnLastTabClosedTip": "新しいウィンドウの最後のタブを閉じるか別のウィンドウへドラッグしたときに、そのウィンドウを閉じます",

@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "貼上為子節點",
+	"mindmapPasteSibling": "貼上為同層級節點",
 	"embedBlockBreadcrumbParentPath": "麵包屑顯示文件上層路徑",
 	"closeWindowOnLastTabClosed": "新視窗隨最後一個頁籤關閉",
 	"closeWindowOnLastTabClosedTip": "將新視窗的最後一個頁籤關閉或拖曳到其他視窗後，關閉該視窗",

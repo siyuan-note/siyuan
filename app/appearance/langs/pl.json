@@ -1,4 +1,6 @@
 {
+	"mindmapPasteChild": "Wklej jako węzeł podrzędny",
+	"mindmapPasteSibling": "Wklej jako węzeł równorzędny",
 	"embedBlockBreadcrumbParentPath": "Pokaż ścieżkę nadrzędną w nawigacji okruszkowej",
 	"closeWindowOnLastTabClosed": "Zamknij nowe okno wraz z ostatnią kartą",
 	"closeWindowOnLastTabClosedTip": "Zamknij nowe okno po zamknięciu jego ostatniej karty lub przeciągnięciu jej do innego okna",

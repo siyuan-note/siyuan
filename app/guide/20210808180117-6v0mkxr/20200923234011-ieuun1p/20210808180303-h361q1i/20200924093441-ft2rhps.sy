@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261019201307"
+		"updated": "20261020162345"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261019201307"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
@@ -2074,12 +2074,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-mq248cg",
-				"updated": "20261017113835"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "In the mind map toolbar, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3500,7 +3509,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-kkcg79g",
-				"updated": "20261012014859"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
@@ -3514,7 +3523,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous. Single-node summaries and nested ranges are supported; ranges may contain each other but must not cross. The bracket encloses the visible subtree and any inner summaries. To create several summaries, activate Summary and drag a selection on blank canvas. You can also tap blank canvas, then tap nodes individually. The preview groups consecutive selected siblings by parent; selected ancestors take precedence over their descendants. Existing identical summaries are skipped, and crossing ranges prevent creation. Use the confirm button or Enter to create all previewed groups in one undoable operation; Esc cancels. Document updates cancel a pending selection. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
+					"Data": " in the bottom node menu, then select the last sibling node to add a bracket and summary text. The range must be contiguous. Single-node summaries and nested ranges are supported; ranges may contain each other but must not cross. The bracket encloses the visible subtree and any inner summaries. To create several summaries, activate Summary and drag a selection on blank canvas. You can also tap blank canvas, then tap nodes individually. The preview groups consecutive selected siblings by parent; selected ancestors take precedence over their descendants. Existing identical summaries are skipped, and crossing ranges prevent creation. Use the confirm button or Enter to create all previewed groups in one undoable operation; Esc cancels. Document updates cancel a pending selection. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
 				}
 			]
 		},

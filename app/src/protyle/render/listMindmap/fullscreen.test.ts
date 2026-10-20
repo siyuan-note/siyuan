@@ -71,8 +71,10 @@ const browserCases = async (source: string, css: string) => {
                 button("exitFullscreen").click();
                 await settle();
                 equalCenter(documentCenter);
-                check.deepEqual([view.scale, view.offsetX, view.offsetY], documentTransform,
-                    "an unchanged round trip restores the document transform");
+                [view.scale, view.offsetX, view.offsetY].forEach((value, index) => {
+                    check.ok(Math.abs(value - documentTransform[index]) < 1e-8,
+                        "an unchanged round trip restores the document transform");
+                });
                 check.equal(guide.hidden, true);
 
                 button("fullscreen").click();

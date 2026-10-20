@@ -612,7 +612,8 @@ if (process.versions.electron && process.type === "browser") {
                 const buffer = child.getNativeWindowHandle();
                 const handle = buffer.length === 8 ? buffer.readBigUInt64LE().toString() : String(buffer.readUInt32LE());
                 const {stdout} = await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive",
-                    "-File", path.join(__dirname, "fixtures/windowHitTest.ps1"), handle, JSON.stringify(points)],
+                    "-File", path.join(__dirname, "fixtures/windowHitTest.ps1"), handle, JSON.stringify(points),
+                    "-AssemblyPath", path.join(process.argv[2], "WindowHitTest.dll")],
                 {windowsHide: true, timeout: 15000});
                 return JSON.parse(stdout);
             });
@@ -661,11 +662,17 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 120000}, async () => {
+    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 180000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-window-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
+            if (process.platform === "win32") {
+                // 原生类型只编译一次，冷启动耗时不占用窗口消息探测的超时预算。
+                await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive", "-File",
+                    path.join(__dirname, "fixtures/windowHitTest.ps1"), "-Prepare",
+                    "-AssemblyPath", path.join(profile, "WindowHitTest.dll")], {windowsHide: true, timeout: 60000});
+            }
             // 两轮窗口生命周期包含多个原生命中测试子进程，为 CI 启动开销预留时间。
             await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 110000});
         } finally {

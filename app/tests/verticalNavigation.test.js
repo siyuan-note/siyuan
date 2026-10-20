@@ -197,11 +197,14 @@ const rendererModules = () => {
     };
     visitTrim(onGet);
     assert.ok(trimBranch?.elseStatement && ts.isIfStatement(trimBranch.elseStatement));
+    modules["util/renderContent"] = extract("util/renderContent", ["getInsertedRenderRoots"]);
     modules["util/navigationTrim"] = `import {containsCurrentSelection} from "./documentRange";
+        import {getInsertedRenderRoots} from "./renderContent";
         import {Constants} from "../../constants";
         const invalidateTrackedRangesInElement = () => {}, disposeCustomBlocksInElement = () => {}, hideElements = () => {};
         export const run = (protyle, content, before) => {
             const options = {content, action: [before ? Constants.CB_GET_BEFORE : Constants.CB_GET_APPEND]};
+            let renderRoots;
             const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
             if (${trimBranch.expression.getText(onGet)}) ${trimBranch.thenStatement.getText(onGet)}
             else ${trimBranch.elseStatement.thenStatement.getText(onGet)}

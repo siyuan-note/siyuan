@@ -24,6 +24,7 @@ const sources = {
     layout: compile(sliceSource("../../mobile/util/mobileTopBar.ts", "const MOBILE_TOP_BAR_ELEMENT_IDS = ")),
     editor: compile(sliceSource("../../mobile/util/setEmpty.ts", "export const setEditor = ")),
     render: compile(sliceSource("onGet.ts", "export const onGet = ", "export const disabledForeverProtyle = ")),
+    content: compile(sliceSource("renderContent.ts", "export const getInsertedRenderRoots = ")),
     backgroundActions: compile(sliceSource("../header/backgroundActions.ts", "export const updateBackgroundActions = ")),
     loading: compile(sliceSource("../ui/initUI.ts", "export const addLoading = ", "export const setPadding = ")),
     navigation: compile(sliceSource("../render/av/databaseRowNavigation.ts", "export const clearDatabaseRowNavigation = ", "export const mountDatabaseRowNavigation = ")),
@@ -82,6 +83,7 @@ const browserCases = (code: typeof sources) => {
             setTitle: noop, finishMobileStartup: noop, bindMobileBarsScroll: noop,
             isValid: () => true, action: [], afterOpen: () => {opened++;}, onFailure: () => {failed++;},
             sanitizeKernelHTML: (html: string) => html,
+            beginPerformance: noop,
         };
         for (const name of ["invalidateTrackedRanges", "hideElements", "invalidateHeadingNumberRefresh",
             "normalizeHTMLAssetIFrameSources", "updateWidgetCacheVersion", "disposeCustomBlocksInElement",
@@ -90,7 +92,7 @@ const browserCases = (code: typeof sources) => {
             dependencies[name] = noop;
         }
         const runtime = new Function(...Object.keys(dependencies), code.orientation + code.layout + code.editor + code.loading +
-            code.backgroundActions + code.render + code.navigation + code.completion + "\nreturn {onGet, addLoading, complete, fail, updateMobileTopBarLayout};")(
+            code.backgroundActions + code.content + code.render + code.navigation + code.completion + "\nreturn {onGet, addLoading, complete, fail, updateMobileTopBarLayout};")(
             ...Object.values(dependencies));
         if (mode !== "desktop") {
             runtime.updateMobileTopBarLayout();

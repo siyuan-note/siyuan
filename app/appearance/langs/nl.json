@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Nieuw venster sluiten met het laatste tabblad",
+	"closeWindowOnLastTabClosedTip": "Sluit het nieuwe venster wanneer het laatste tabblad wordt gesloten of naar een ander venster wordt gesleept",
 	"tabToMainWindow": "Naar hoofdvenster verplaatsen",
 	"workspaceStorageView": "Bekijken",
 	"listMindmapDocumentLayout": "Documentindeling",

@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "ปิดหน้าต่างใหม่พร้อมแท็บสุดท้าย",
+	"closeWindowOnLastTabClosedTip": "ปิดหน้าต่างใหม่เมื่อปิดแท็บสุดท้ายหรือลากแท็บนั้นไปยังหน้าต่างอื่น",
 	"tabToMainWindow": "ย้ายไปยังหน้าต่างหลัก",
 	"workspaceStorageView": "ดู",
 	"listMindmapDocumentLayout": "เค้าโครงเอกสาร",

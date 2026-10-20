@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Neues Fenster mit dem letzten Tab schließen",
+	"closeWindowOnLastTabClosedTip": "Das neue Fenster schließen, wenn sein letzter Tab geschlossen oder in ein anderes Fenster gezogen wird",
 	"tabToMainWindow": "In das Hauptfenster verschieben",
 	"workspaceStorageView": "Anzeigen",
 	"listMindmapDocumentLayout": "Dokumentlayout",

@@ -51,6 +51,26 @@ func TestNormalizeSettingsFileTreeAndSearch(t *testing.T) {
 	}
 }
 
+func TestNormalizeSettingsCloseWindowOnLastTab(t *testing.T) {
+	for _, input := range []string{`{}`, `{"closeWindowOnLastTabClosed":null}`, `{"closeWindowOnLastTabClosed":true}`, `{"closeWindowOnLastTabClosed":false}`} {
+		var fileTree FileTree
+		if err := json.Unmarshal([]byte(input), &fileTree); err != nil {
+			t.Fatal(err)
+		}
+		got := NormalizeFileTree(&fileTree)
+		want := !strings.Contains(input, "false")
+		if got.CloseWindowOnLastTabClosed == nil || *got.CloseWindowOnLastTabClosed != want {
+			t.Fatalf("%s: unexpected last-tab close preference: %+v", input, got)
+		}
+		if *NormalizeFileTree(got).CloseWindowOnLastTabClosed != want {
+			t.Fatal("normalization changed the saved preference")
+		}
+	}
+	if !*NewFileTree().CloseWindowOnLastTabClosed || !*NormalizeFileTree(nil).CloseWindowOnLastTabClosed {
+		t.Fatal("new and missing settings must enable last-tab closing")
+	}
+}
+
 func TestNormalizeSettingsFlashcard(t *testing.T) {
 	for _, weight := range []string{"bad", "NaN", "+Inf"} {
 		weights := strings.Split(DefaultFSRSWeights(), ",")

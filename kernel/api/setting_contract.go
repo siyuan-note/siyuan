@@ -507,6 +507,7 @@ func settingFileTreePayload(value *conf.FileTree) *apicontract.SettingFileTree {
 	result.AlwaysSelectOpenedFile = value.AlwaysSelectOpenedFile
 	result.OpenFilesUseCurrentTab = value.OpenFilesUseCurrentTab
 	result.CloseTabOnDoubleClick = value.CloseTabOnDoubleClick
+	result.CloseWindowOnLastTabClosed = value.CloseWindowOnLastTabClosed
 	result.DocIconClickMode = value.DocIconClickMode
 	result.ParentDocTitleClickMode = value.ParentDocTitleClickMode
 	boxDocEnabled := value.BoxDocEnabled

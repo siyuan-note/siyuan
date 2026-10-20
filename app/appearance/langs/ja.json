@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "最後のタブとともに新しいウィンドウを閉じる",
+	"closeWindowOnLastTabClosedTip": "新しいウィンドウの最後のタブを閉じるか別のウィンドウへドラッグしたときに、そのウィンドウを閉じます",
 	"tabToMainWindow": "メインウィンドウに移動",
 	"workspaceStorageView": "表示",
 	"listMindmapDocumentLayout": "文書内のレイアウト",

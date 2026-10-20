@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Fermer la nouvelle fenêtre avec le dernier onglet",
+	"closeWindowOnLastTabClosedTip": "Fermer la nouvelle fenêtre lorsque son dernier onglet est fermé ou déplacé vers une autre fenêtre",
 	"tabToMainWindow": "Déplacer vers la fenêtre principale",
 	"workspaceStorageView": "Afficher",
 	"listMindmapDocumentLayout": "Disposition du document",

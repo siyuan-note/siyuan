@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Tutup jendela baru bersama tab terakhir",
+	"closeWindowOnLastTabClosedTip": "Tutup jendela baru saat tab terakhirnya ditutup atau diseret ke jendela lain",
 	"tabToMainWindow": "Pindahkan ke jendela utama",
 	"workspaceStorageView": "Lihat",
 	"listMindmapDocumentLayout": "Tata letak dokumen",

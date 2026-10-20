@@ -13,6 +13,9 @@ func NormalizeFileTree(fileTree *FileTree) *FileTree {
 	if fileTree == nil {
 		fileTree = NewFileTree()
 	}
+	if fileTree.CloseWindowOnLastTabClosed == nil {
+		fileTree.CloseWindowOnLastTabClosed = NewFileTree().CloseWindowOnLastTabClosed
+	}
 	if fileTree.MaxListCount < 1 {
 		fileTree.MaxListCount = 512
 	}

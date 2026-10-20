@@ -41715,6 +41715,16 @@
             }
           ]
         },
+        "closeWindowOnLastTabClosed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "createDocAtTop": {
           "anyOf": [
             {
@@ -46953,6 +46963,16 @@
         "closeTabsOnStart": {
           "type": "boolean"
         },
+        "closeWindowOnLastTabClosed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "createDocAtTop": {
           "anyOf": [
             {
@@ -47047,6 +47067,7 @@
         "boxDocEnabled",
         "closeTabOnDoubleClick",
         "closeTabsOnStart",
+        "closeWindowOnLastTabClosed",
         "createDocAtTop",
         "docCreateSaveBox",
         "docCreateSavePath",
@@ -47116,6 +47137,16 @@
           ]
         },
         "closeTabsOnStart": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeWindowOnLastTabClosed": {
           "anyOf": [
             {
               "type": "boolean"

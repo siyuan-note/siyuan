@@ -343,6 +343,8 @@ type SettingFileTree struct {
 	AlwaysSelectOpenedFile bool   `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
 	OpenFilesUseCurrentTab bool   `json:"openFilesUseCurrentTab" api:"optional,nullable"`
 	CloseTabOnDoubleClick  bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
+	// 默认 true；关闭或移走独立桌面窗口的最后一个页签后关闭该窗口，不影响主窗口。省略时保留现值，null 恢复默认。
+	CloseWindowOnLastTabClosed *bool `json:"closeWindowOnLastTabClosed" api:"optional,nullable"`
 	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
 	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
 	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`

@@ -16,6 +16,28 @@ const compile = (file: string, extra = "") => ts.transpileModule(
     {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}},
 ).outputText;
 
+test("desktop tab settings end with startup behavior and last-tab window closing", () => {
+    const {parse} = require("ifdef-loader/preprocessor");
+    for (const mode of [{MOBILE: false, BROWSER: false}, {MOBILE: false, BROWSER: true},
+        {MOBILE: true, BROWSER: false}]) {
+        const source = parse(readFileSync(join(__dirname, "fileTab.ts"), "utf8"), mode, false, true) +
+            "\nexport {registerTabStartupGroup};";
+        const code = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS}}).outputText;
+        const exports: {registerTabStartupGroup?: (tab: unknown) => void} = {};
+        const items: string[] = [];
+        const record = (key: string) => items.push(key);
+        runInNewContext(code, {exports, require: () => ({}),
+            window: {siyuan: {languages: {}}}});
+        exports.registerTabStartupGroup({group: () => ({switch: record, number: record, select: record})});
+        if (mode.MOBILE || mode.BROWSER) {
+            assert.equal(items.at(-1), "fileTree.tabStartupMode");
+            assert.ok(!items.includes("fileTree.closeWindowOnLastTabClosed"));
+        } else {
+            assert.deepEqual(items.slice(-2), ["fileTree.tabStartupMode", "fileTree.closeWindowOnLastTabClosed"]);
+        }
+    }
+});
+
 const loadBehaviorSettings = (config: {docIconClickMode?: number, parentDocTitleClickMode?: number} = {}) => {
     const fileTree = {docIconClickMode: 0, parentDocTitleClickMode: 0, ...config};
     const languages = {

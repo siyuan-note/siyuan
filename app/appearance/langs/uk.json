@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Закривати нове вікно разом з останньою вкладкою",
+	"closeWindowOnLastTabClosedTip": "Закривати нове вікно після закриття його останньої вкладки або перетягування її до іншого вікна",
 	"tabToMainWindow": "Перемістити до головного вікна",
 	"workspaceStorageView": "Переглянути",
 	"listMindmapDocumentLayout": "Макет документа",

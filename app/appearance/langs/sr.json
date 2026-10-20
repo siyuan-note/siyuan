@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Затвори нови прозор са последњом картицом",
+	"closeWindowOnLastTabClosedTip": "Затвори нови прозор када се његова последња картица затвори или превуче у други прозор",
 	"tabToMainWindow": "Премести у главни прозор",
 	"workspaceStorageView": "Прикажи",
 	"listMindmapDocumentLayout": "Распоред документа",

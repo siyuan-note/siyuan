@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "新視窗隨最後一個頁籤關閉",
+	"closeWindowOnLastTabClosedTip": "將新視窗的最後一個頁籤關閉或拖曳到其他視窗後，關閉該視窗",
 	"tabToMainWindow": "移動到主視窗",
 	"workspaceStorageView": "查看",
 	"listMindmapDocumentLayout": "文件版面",

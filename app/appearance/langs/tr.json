@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Son sekmeyle birlikte yeni pencereyi kapat",
+	"closeWindowOnLastTabClosedTip": "Son sekmesi kapatıldığında veya başka bir pencereye sürüklendiğinde yeni pencereyi kapat",
 	"tabToMainWindow": "Ana pencereye taşı",
 	"workspaceStorageView": "Görüntüle",
 	"listMindmapDocumentLayout": "Belge düzeni",

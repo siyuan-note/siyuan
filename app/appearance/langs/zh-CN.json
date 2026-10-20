@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "新窗口随最后一个页签关闭",
+	"closeWindowOnLastTabClosedTip": "把新窗口的最后一个页签关闭或拖拽到其他窗口之后，关闭该窗口",
 	"tabToMainWindow": "移动到主窗口",
 	"workspaceStorageView": "查看",
 	"listMindmapDocumentLayout": "文档布局",

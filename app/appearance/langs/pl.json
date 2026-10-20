@@ -1,4 +1,6 @@
 {
+	"closeWindowOnLastTabClosed": "Zamknij nowe okno wraz z ostatnią kartą",
+	"closeWindowOnLastTabClosedTip": "Zamknij nowe okno po zamknięciu jego ostatniej karty lub przeciągnięciu jej do innego okna",
 	"tabToMainWindow": "Przenieś do głównego okna",
 	"workspaceStorageView": "Pokaż",
 	"listMindmapDocumentLayout": "Układ dokumentu",

@@ -25,6 +25,8 @@ type syncCheckoutTask struct {
 	fileStarted, lastLog time.Time
 	lastLogPath          string
 	lastLogBytes         int64
+	lastPush             time.Time
+	sentProgress         dejavu.CheckoutProgress
 	upserts, removes     map[string]*entity.File
 	beforePetals         []*Petal
 }
@@ -51,17 +53,30 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 		Context: ctx, Before: checkCheckoutSpace, Cleaned: notifyCheckoutCleanup,
 		Progress: func(progress dejavu.CheckoutProgress) {
 			task.Lock()
-			if task.progress.Path != progress.Path {
+			newFile := task.progress.Path != progress.Path
+			if newFile {
 				task.fileStarted = time.Now()
 			}
 			task.progress = progress
 			task.Unlock()
+			if newFile && progress.Size >= 50*1024*1024 {
+				logging.LogInfof("sync checkout file started [file=%q, bytes=%d]", progress.Path, progress.Size)
+			}
 			if progress.Written == 0 || progress.Written == progress.Size {
 				task.push()
 			}
 		},
-		Committed: func(file *entity.File) { task.upserts[file.Path] = file; delete(task.removes, file.Path) },
-		Removed:   func(file *entity.File) { task.removes[file.Path] = file; delete(task.upserts, file.Path) },
+		Committed: func(file *entity.File) {
+			task.upserts[file.Path] = file
+			delete(task.removes, file.Path)
+			if file.Size >= 50*1024*1024 {
+				task.Lock()
+				elapsed := time.Since(task.fileStarted)
+				task.Unlock()
+				logging.LogInfof("sync checkout file committed [file=%q, bytes=%d, elapsed=%.2fs]", file.Path, file.Size, elapsed.Seconds())
+			}
+		},
+		Removed: func(file *entity.File) { task.removes[file.Path] = file; delete(task.upserts, file.Path) },
 	})
 	task.push()
 	task.worker.Add(1)
@@ -100,6 +115,13 @@ func (task *syncCheckoutTask) push() {
 		util.BroadcastByType("main", "syncProgress", 0, Conf.Language(81), map[string]any{"taskID": task.id, "current": 0, "total": 0})
 		return
 	}
+	// 首个文件和最终完成数量立即推送，其余变化合并到时间窗口，避免小文件造成消息洪泛。
+	final := p.Count >= p.Total && p.Written >= p.Size && p != task.sentProgress
+	if task.sentProgress.Path != "" && !final && time.Since(task.lastPush) < 200*time.Millisecond {
+		return
+	}
+	task.lastPush = time.Now()
+	task.sentProgress = p
 	elapsed := time.Since(task.fileStarted)
 	rate := float64(p.Written) / max(elapsed.Seconds(), 0.001)
 	remaining := "--:--:--"

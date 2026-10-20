@@ -17,6 +17,7 @@
 package filesys
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -371,6 +372,7 @@ func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	if strict {
 		if err = treenode.CheckSpecJSON(data); err != nil {
 			return nil, err
@@ -458,7 +460,11 @@ func (r *docIALReader) Read(p []byte) (int, error) {
 
 func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
 	r := &docIALReader{Reader: reader}
-	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, r, 512)
+	buffered := bufio.NewReaderSize(r, 512)
+	if prefix, _ := buffered.Peek(3); bytes.Equal(prefix, []byte("\xef\xbb\xbf")) {
+		_, _ = buffered.Discard(3)
+	}
+	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, buffered, 512)
 	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
 		if field == "Properties" {
 			iter.ReadVal(&ret)
@@ -666,10 +672,15 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	if err = validateTreePath(boxID, p); err != nil {
 		return
 	}
+	// 这里只处理解密后的 JSON，密文必须先通过认证，订正成功后才允许写回。
+	withoutBOM := bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
+	needFix = len(withoutBOM) != len(jsonData)
+	jsonData = withoutBOM
 	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}
-	jsonData, needFix = removeUnescapedUnicodeNull(jsonData)
+	jsonData, removedNull := removeUnescapedUnicodeNull(jsonData)
+	needFix = needFix || removedNull
 	ret, parseNeedFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if parseNeedFix {
 		needFix = true
@@ -758,6 +769,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 }
 
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	jsonData = bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
 	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}

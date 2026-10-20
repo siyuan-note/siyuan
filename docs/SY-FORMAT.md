@@ -24,6 +24,8 @@ This guide distinguishes the format that new writers should emit from historical
 
 Unless a section explicitly says otherwise, "required" refers to canonical new writes. `dataparser.ParseJSON` is a compatibility reader rather than a strict schema validator: for example, it can add a missing empty paragraph, assign a missing block ID, and upgrade an old `Spec`.
 
+Canonical plaintext `.sy` writes use UTF-8 JSON without a byte order mark (BOM). The file-system tree and document-property readers accept one UTF-8 BOM (`EF BB BF`) at the very beginning of the plaintext, before JSON validation and parsing. For encrypted notebooks, this normalization takes place only after authenticated decryption; a BOM must not be prepended to the ciphertext. Successful tree repair or saving writes JSON without a BOM. Read-only snapshots and property queries leave the source unchanged. Malformed JSON, unsupported document specifications, and authentication failures remain errors and must preserve the original file; BOM tolerance does not bypass these checks.
+
 ---
 
 ## 0.5 When to read/write `.sy` directly (priority order)

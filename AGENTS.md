@@ -70,6 +70,7 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - Each language must be properly translated — do NOT copy the same text across all language files
    - Use three ASCII periods (`...`) for ellipses in all localized strings; do not use Unicode ellipsis characters (`…` or `……`)
    - Setting description tip strings must not end with a period or equivalent sentence-ending mark (for example `.`, `。`, or `।`)
+   - User-facing error messages must not end with a period or its language-specific equivalent (for example `.`, `。`, or `।`); preserve punctuation between sentences and apply this rule consistently across all languages, including `_kernel` messages
    - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
    - In `zh-TW` localization and the Traditional Chinese user guide, consistently translate the content-model term Block as `區塊`, including compounds (e.g. `子區塊`, `程式碼區塊`, `區塊 ID`); never abbreviate it as `塊`, and count blocks with `個區塊`
    - Translate Block Reference as `區塊引用` and Blockquote as `引述區塊`; preserve non-content-block terms such as `分塊` (data chunks) and `覈取方塊` (Checkbox)

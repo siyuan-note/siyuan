@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261020162345"
+		"updated": "20261020165811"
 	},
 	"Children": [
 		{
@@ -2090,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261020162345"
+				"updated": "20261020165811"
 			},
 			"Children": [
 				{
@@ -2167,6 +2167,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " を押すと、文書内のマインドマップ表示領域と同じ大きさの枠が中央に表示されます。枠を目安にキャンバスを移動・拡大縮小すると、全画面表示を終了した後の表示範囲を確認できます。もう一度押すと枠を非表示にします。この枠でブロックの幅や高さは変わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20261020165811-336bt9a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020165811-336bt9a",
+				"updated": "20261020165811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ツールバーの倍率表示にポインターを重ねるかタップすると、ズームパネルが開きます。スライダーで倍率を調整できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "リセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと 100% に戻り、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "キャンバスに合わせる"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとマップ全体が収まるように倍率を調整して中央に表示します。"
 				}
 			]
 		},

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261020162345"
+		"updated": "20261020165811"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261020162345"
+				"updated": "20261020165811"
 			},
 			"Children": [
 				{
@@ -2038,6 +2038,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " in the toolbar to show a centered frame matching the map viewport in the document. Pan and zoom while viewing this frame to preview the area that will appear after leaving full screen. Click the button again to hide the frame. The frame does not change the block's width or height."
+				}
+			]
+		},
+		{
+			"ID": "20261020165811-dthghbx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020165811-dthghbx",
+				"updated": "20261020165811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over or tap the zoom percentage in the toolbar to open the zoom panel. Use the slider to adjust zoom. Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reset"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to restore 100%, or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Fit to canvas"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to adjust the zoom and center the whole map."
 				}
 			]
 		},

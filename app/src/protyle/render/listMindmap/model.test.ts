@@ -1313,6 +1313,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     // 顶部控件按悬停、焦点和全屏的实际可见状态避让，缩放画布保持相同的局部间距。
     const navigationToolbar = navigationHost.querySelector<HTMLElement>(".mindmap-view__toolbar");
     const navigationFit = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
+    const navigationControl = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
     const moveNavigationPointer = async (inside: boolean) => {
         navigationHost.scrollIntoView({block: "start"});
         const bounds = navigationHost.getBoundingClientRect();
@@ -1323,7 +1324,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         await settle();
     };
     const placeAtToolbar = (left?: number) => {
-        const controlBounds = navigationFit().getBoundingClientRect();
+        const controlBounds = navigationControl().getBoundingClientRect();
         const viewportBounds = navigationViewport.getBoundingClientRect();
         const rect = addedNode.getBoundingClientRect();
         const scaleX = viewportBounds.width / navigationViewport.offsetWidth;
@@ -1344,12 +1345,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             navigationHost.focus();
             await moveNavigationPointer(mode === "hover");
             if (mode === "focus") {
-                navigationFit().focus();
+                navigationControl().focus();
             }
             check.equal(getComputedStyle(navigationToolbar).opacity, "1", `${mode} shows the toolbar`);
             placeAtToolbar();
             const before = addedNode.getBoundingClientRect();
-            check.ok(before.top < navigationFit().getBoundingClientRect().bottom, "target starts behind a toolbar control");
+            check.ok(before.top < navigationControl().getBoundingClientRect().bottom, "target starts behind a toolbar control");
             navigationView.refreshLayout();
             if (mode === "focus") {
                 navigationView.revealNode(addedItem.dataset.nodeId);
@@ -1360,7 +1361,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 }));
             }
             await settle();
-            check.ok(addedNode.getBoundingClientRect().top >= navigationFit().getBoundingClientRect().bottom + 15 * scale,
+            check.ok(addedNode.getBoundingClientRect().top >= navigationControl().getBoundingClientRect().bottom + 15 * scale,
                 `node stays below visible toolbar controls, mode=${mode}, width=${width}`);
         }
     }
@@ -1409,10 +1410,39 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         Array.from({length: 20}, (_value, index) => `  * Branch ${index}\n`).join(""));
     navigationView.update(api.readListMindmap(fittingSource.firstElementChild as HTMLElement));
     navigationHost.style.height = "420px";
-    const activateNavigationFit = async (keyboard: boolean) => {
+    const activateNavigationFit = async (keyboard: boolean, touch = false) => {
         navigationHost.scrollIntoView({block: "start"});
+        const zoom = navigationToolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
+        const zoomBounds = zoom.getBoundingClientRect();
+        const zoomPoint = {x: Math.round(zoomBounds.left + zoomBounds.width / 2),
+            y: Math.round(zoomBounds.top + zoomBounds.height / 2)};
+        if (touch) {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                {type: "touchStart", touchPoints: [{...zoomPoint, id: 0}]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+        } else if (keyboard) {
+            zoom.focus();
+        } else {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-input", [
+                {type: "mouseMove", ...zoomPoint},
+            ]);
+        }
+        await settle();
+        check.equal(getComputedStyle(navigationToolbar.querySelector(".mindmap-view__zoom-actions")).display, "flex",
+            "hovering, focusing or tapping the percentage opens the zoom panel");
         const bounds = navigationFit().getBoundingClientRect();
         const point = {x: Math.round(bounds.left + bounds.width / 2), y: Math.round(bounds.top + bounds.height / 2)};
+        check.equal(document.elementFromPoint(point.x, point.y)?.closest("button"), navigationFit(),
+            "fit in the zoom panel is visible and reachable");
+        if (touch) {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                {type: "touchStart", touchPoints: [{...point, id: 0}]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+            await settle();
+            return;
+        }
         if (keyboard) {
             navigationFit().focus();
         }
@@ -1425,7 +1455,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         ]);
         await settle();
     };
-    for (const mode of ["hover", "focus", "fullscreen"]) {
+    for (const mode of ["hover", "focus", "fullscreen", "touch"]) {
         for (const width of [760, 400, 300]) {
             const outerScale = width === 300 ? .5 : 1;
             navigationView.setReadOnly(width !== 400);
@@ -1440,7 +1470,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             navigationView.offsetX = 100;
             navigationView.offsetY = -100;
             navigationView.draw();
-            await activateNavigationFit(mode === "focus");
+            await activateNavigationFit(mode === "focus", mode === "touch");
             check.equal(getComputedStyle(navigationToolbar).opacity, "1");
             check.ok(navigationView.scale < 1 && navigationView.scale > .15,
                 `the tall map needs an unconstrained fit, mode=${mode}, width=${width}, scale=${navigationView.scale}`);
@@ -1454,9 +1484,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 `fit leaves the whole map below the toolbar, mode=${mode}, width=${width}`);
             check.ok(contentBottom <= viewportBounds.bottom - 65 * outerScale, "fit preserves the bottom panel clearance");
             const fittedTransform = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
-            await activateNavigationFit(mode === "focus");
+            await activateNavigationFit(mode === "focus", mode === "touch");
             check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
                 "repeated fit activation preserves scale and centering");
+            navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="reset"]').click();
+            check.equal(navigationView.scale, 1, "reset restores 100% independently of fit to canvas");
         }
     }
     navigationHost.classList.remove("fullscreen");
@@ -1988,7 +2020,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const toolbarZoom = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
     const toolbarPopup = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom-actions");
     const toolbarGroup = toolbar.querySelector<HTMLElement>(".mindmap-view__toolbar-group");
-    for (const width of [96, 180, 260, 360, 700]) {
+    check.equal(fitButton.parentElement, toolbarPopup, "fit shares the zoom panel with the slider and reset");
+    check.equal(toolbarGroup.querySelector(':scope > [aria-label="listMindmapFit"]'), null,
+        "fit no longer occupies a separate top-level toolbar slot");
+    for (const width of [96, 180, 240, 260, 320, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
             host.style.fontSize = `${fontSize}px`;
@@ -2005,8 +2040,20 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
             const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
-            check.equal(lastButton.top > firstButton.top, width < 260, "compact global toolbars wrap only when necessary");
+            check.equal(lastButton.top > firstButton.top, width < 240,
+                `compact global toolbars wrap only when necessary, width=${width}, fontSize=${fontSize}`);
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
+            if (width >= 240) {
+                const popupBounds = toolbarPopup.getBoundingClientRect();
+                check.ok(popupBounds.left >= bounds.left && popupBounds.right <= bounds.right,
+                    `zoom panel stays inside the map, width=${width}, fontSize=${fontSize}`);
+                for (const control of toolbarPopup.querySelectorAll<HTMLElement>("button")) {
+                    const rect = control.getBoundingClientRect();
+                    check.equal(document.elementFromPoint(rect.left + rect.width / 2,
+                        rect.top + rect.height / 2)?.closest("button"), control,
+                    "reset and fit remain reachable in the zoom panel");
+                }
+            }
             if (width === 180) {
                 const popupBounds = toolbarPopup.getBoundingClientRect();
                 check.ok(popupBounds.bottom > toolbar.getBoundingClientRect().bottom,
@@ -2024,9 +2071,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     host.style.cssText = originalHostStyle;
     host.focus();
     view.zoomAt(1);
+    toolbarZoom.focus();
     fitButton.dispatchEvent(new PointerEvent("pointerover", {bubbles: true}));
     check.equal(host.querySelector<HTMLElement>('[role="tooltip"]').hidden, false);
     check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapFit");
+    host.focus();
     select(beta);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("mindmap-view__inspector--node"), true);
@@ -4959,6 +5008,10 @@ app.whenReady().then(async () => {
                     deltaX: -event.deltaX, deltaY: -event.deltaY,
                 });
             } else {
+                // 拖拽移动明确携带按下的按钮状态，避免切换触摸模拟后丢失原生指针捕获。
+                if (event.type === "mouseMove" && event.button) {
+                    event.modifiers = [...(event.modifiers || []), event.button + "buttondown"];
+                }
                 win.webContents.sendInputEvent(event);
             }
             await new Promise(resolve => setTimeout(resolve, 20));

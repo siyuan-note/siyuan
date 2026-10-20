@@ -678,10 +678,11 @@ export class ListMindmapView {
         this.zoomSlider.setAttribute("aria-label", this.label("zoom"));
         this.zoomSlider.oninput = () => this.zoomAt(Number(this.zoomSlider.value) / 100);
         const reset = this.makeButton("reset", "iconRefresh", () => this.zoomAt(1));
-        zoomActions.append(this.zoomSlider, reset);
+        const fit = this.makeButton("listMindmapFit", "iconFocus", () => this.fit());
+        this.buttons.set("fit", fit);
+        zoomActions.append(this.zoomSlider, reset, fit);
         zoomControl.append(this.zoomLabel, zoomActions);
         controls.append(zoomControl);
-        add("fit", "listMindmapFit", "iconFocus", () => this.fit());
         add("documentLayout", "listMindmapDocumentLayout", "iconLayout", () => {
             this.documentFrame.hidden = !this.documentFrame.hidden;
             const button = this.buttons.get("documentLayout");

@@ -3273,6 +3273,48 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
         viewport.style.removeProperty("user-select");
         scrollHost.contentEditable = "false";
+        // 覆盖真实右键按下及空闲后重新启动，不能跳过激活、焦点和指针捕获阶段。
+        for (const idle of [0, 3000]) {
+            await new Promise(resolve => setTimeout(resolve, idle));
+            panView.selectNode(panModel.root.id);
+            panView.inspector.hidden = true;
+            const rootNode = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
+            const add = rootNode.querySelector<HTMLElement>(".mindmap-view__add-child");
+            check.equal(visiblyRendered(add), true, "the selected node exposes its controls before dragging");
+            const point = centerPoint(rootNode);
+            const end = {x: point.x + 24, y: point.y + 16};
+            const before = [panView.offsetX, panView.offsetY];
+            await nativeInput([
+                {type: "mouseMove", ...point},
+                {type: "mouseDown", ...point, button: "right", clickCount: 1},
+                {type: "mouseMove", ...end, button: "right"},
+            ]);
+            await settle();
+            check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 24, before[1] + 16],
+                "native right dragging starts on the first move, including after idle");
+            check.equal(getComputedStyle(viewport).cursor, "grabbing", "the capturing viewport provides the pan cursor");
+            check.ok(Array.from(panHost.querySelectorAll<HTMLElement>(".mindmap-view__node"))
+                .every(element => getComputedStyle(element).cursor === "default"),
+            "panning leaves every node cursor unchanged");
+            check.equal(getComputedStyle(add).visibility, "hidden", "selected node controls stay hidden while panning");
+            const world = panHost.querySelector<HTMLElement>(".mindmap-view__world");
+            const matrix = new DOMMatrix(getComputedStyle(world).transform);
+            check.ok(Math.abs(matrix.e - panView.offsetX) < .001 && Math.abs(matrix.f - panView.offsetY) < .001);
+            if (idle) {
+                viewport.dispatchEvent(new PointerEvent("pointercancel", {bubbles: true,
+                    pointerId: panView.pointer.pointerId, pointerType: "mouse"}));
+                check.equal(panView.pointer, undefined);
+                check.equal(getComputedStyle(add).visibility, "visible", "canceling restores selected node controls");
+            }
+            await nativeInput([{type: "mouseUp", ...end, button: "right", clickCount: 1}]);
+            await settle();
+            check.equal(panView.pointer, undefined);
+            check.equal(getComputedStyle(add).visibility, "visible", "releasing the pointer restores selected node controls");
+        }
+        panView.offsetX = readingTransform[1];
+        panView.offsetY = readingTransform[2];
+        panView.draw();
+        panView.setInteractionActive(false);
         const reader = document.createElement("input");
         reader.value = "Document reading selection";
         reader.style.cssText = "position:fixed;top:0;left:0";

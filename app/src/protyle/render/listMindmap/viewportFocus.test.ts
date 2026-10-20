@@ -27,6 +27,7 @@ const setup = () => {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
         selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
+        world: {querySelectorAll: (): HTMLElement[] => []},
         nodeElements: new Map(), offsetX: 0, offsetY: 0,
         interactionActive: true, setInteractionActive: (value: boolean) => target.interactionActive = value,
         buttons: new Map(),

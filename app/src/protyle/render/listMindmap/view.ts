@@ -85,6 +85,7 @@ interface PointerState {
     x: number;
     y: number;
     moved: boolean;
+    hiddenControls?: HTMLElement[];
     summary?: boolean;
     targetId?: string;
     placement?: "before" | "child" | "after";
@@ -2362,6 +2363,11 @@ export class ListMindmapView {
         if ((!this.editingId || id) && !this.isTemporaryPan(event)) {
             this.options.host.focus({preventScroll: true});
         }
+        // 在捕获指针改变悬停状态前记录控件所属节点，避免拖动时重算整张脑图。
+        const hiddenControls = Array.from(this.world.querySelectorAll<HTMLElement>(
+            ".mindmap-view__node--selected, .mindmap-view__node--line-hover, " +
+            ".mindmap-view__node:hover, .mindmap-view__node:focus-within"))
+            .filter(element => element.closest(".mindmap-view") === this.options.host);
         this.pointer = {
             pointerId: event.pointerId,
             rightButton: event.button === 2,
@@ -2372,6 +2378,7 @@ export class ListMindmapView {
             x: this.offsetX,
             y: this.offsetY,
             moved: false,
+            hiddenControls,
         };
         try {
             // 在原点击元素捕获指针，保留链接目标，同时让连续点击可以识别为双击。
@@ -2421,6 +2428,9 @@ export class ListMindmapView {
             return;
         }
         event.preventDefault();
+        if (!pointer.moved && (pointer.id || pointer.pan)) {
+            pointer.hiddenControls?.forEach(element => element.classList.add("mindmap-view__node--hide-controls"));
+        }
         pointer.moved = true;
         if (pointer.summary) {
             const viewport = this.viewport.getBoundingClientRect();
@@ -2693,6 +2703,7 @@ export class ListMindmapView {
         this.clearDrop();
         const pointer = this.pointer;
         this.pointer = undefined;
+        pointer?.hiddenControls?.forEach(element => element.classList.remove("mindmap-view__node--hide-controls"));
         this.summaryBox.hidden = true;
         if (pointer?.summary) {
             this.summarySelected.clear();

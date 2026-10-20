@@ -303,6 +303,8 @@
     width: 0;
     height: 0;
     transform-origin: 0 0;
+    // 平移在视口捕获指针，光标状态不必向全部节点继承。
+    cursor: default;
   }
 
   &__node {
@@ -385,6 +387,7 @@
 
     &--dragging {
       opacity: .35;
+      cursor: grabbing;
     }
 
     &--editing {
@@ -728,14 +731,10 @@
     opacity: 1;
   }
 
-  &__viewport--dragging &__add-child,
-  &__viewport--dragging &__add-bridge {
+  &__node.mindmap-view__node--hide-controls > &__add-child,
+  &__node.mindmap-view__node--hide-controls > &__add-bridge {
     visibility: hidden;
     opacity: 0;
-  }
-
-  &__viewport--dragging &__node {
-    cursor: grabbing;
   }
 
   &__ghost {

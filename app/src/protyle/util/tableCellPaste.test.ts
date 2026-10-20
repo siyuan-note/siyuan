@@ -234,6 +234,9 @@ app.whenReady().then(async () => {
             {env, timeout: 25000, windowsHide: true});
         assert.match(result.stdout, /table-cell-paste-ok/);
     } finally {
-        rmSync(directory, {recursive: true, force: true});
+        if (path.dirname(path.resolve(directory)) === path.resolve(tmpdir()) &&
+            path.basename(directory).startsWith("siyuan-table-cell-paste-")) {
+            rmSync(directory, {recursive: true, force: true});
+        }
     }
 });

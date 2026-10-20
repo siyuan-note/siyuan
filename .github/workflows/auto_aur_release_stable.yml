@@ -122,7 +122,7 @@ jobs:
           EOF
 
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
+        uses: KSXGitHub/github-actions-deploy-aur@v4.2.0
         with:
           pkgname: siyuan-bin
           pkgbuild: ./PKGBUILD

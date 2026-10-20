@@ -79,7 +79,7 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
                     liveButton.setAttribute("role", "button");
                     liveButton.setAttribute("aria-label", window.siyuan.languages.livePhoto);
                     liveButton.setAttribute("data-position", "north");
-                    liveButton.innerHTML = '<svg><use xlink:href="#iconVideo"></use></svg>';
+                    liveButton.innerHTML = '<svg><use xlink:href="#iconImagePlay"></use></svg>';
                     const play = () => {
                         if (stopLivePhoto) {
                             stopLive();

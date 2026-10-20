@@ -17,7 +17,7 @@ test("image gallery releases playing and converting Live Photos on navigation an
             response.end(readFileSync("stage/protyle/js/viewerjs/viewer.js"));
         } else {
             response.writeHead(200, {"Content-Type": "text/html"});
-            response.end("<!doctype html><title>Gallery verification</title>");
+            response.end(`<!doctype html><title>Gallery verification</title><body><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
         }
     });
     try {
@@ -61,6 +61,10 @@ test("image gallery releases playing and converting Live Photos on navigation an
             const viewer=window.siyuan.viewer;
             const button=viewer.toolbar.querySelector(".viewer-live-photo");
             if (!button || button.classList.contains("fn__none")) {throw new Error("Live Photo action missing");}
+            const icon=button.querySelector("use");
+            if(icon?.getAttribute("xlink:href")!=="#iconImagePlay"){throw new Error("Live Photo icon mismatch");}
+            const bounds=icon.getBBox();
+            if(bounds.width<=0 || bounds.height<=0){throw new Error("Live Photo icon is empty");}
             button.click();
             viewer.view(0);
             await wait(()=>viewer.index===0 && viewer.viewed);

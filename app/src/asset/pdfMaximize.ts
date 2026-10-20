@@ -27,7 +27,7 @@ export const bindPdfMaximize = (element: HTMLElement, pdf: PDFPaneApplication, p
     if (!outer || !button || previewOnly || element.classList.contains("pdf-viewer--mobile")) {
         return () => {};
     }
-    button.classList.remove("fn__none");
+    button.disabled = false;
     const controller = new AbortController();
     let maximized = false;
     let frame = 0;

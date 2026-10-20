@@ -32,6 +32,22 @@ async function runElectron() {
             const element = document.createElement("div");
             element.style.cssText = "position:absolute;top:32px;left:400px;width:400px;height:600px";
             element.innerHTML = getPdfViewerHTML(); document.body.append(element);
+            const button = element.querySelector("#pdfMaximize");
+            const more = element.querySelector("#secondaryToolbarToggleButton");
+            check(button.nextElementSibling === more, "maximize must immediately precede more tools");
+            check(button.disabled && getComputedStyle(button).display !== "none",
+                "maximize must occupy its slot before PDF initialization");
+            const toolbarPositions = () => ["pdfMaximize", "secondaryToolbarToggleButton", "sidebarToggleButton",
+                "viewFindButton", "pageNumber"].map(id => {
+                    const rect = element.querySelector("#" + id).getBoundingClientRect();
+                    return [id, rect.x, rect.y, rect.width, rect.height];
+                });
+            const initialPositions = JSON.stringify(toolbarPositions());
+            await wait();
+            check(JSON.stringify(toolbarPositions()) === initialPositions, "delayed initialization must preserve toolbar layout");
+            button.click();
+            check(!element.querySelector(".pdf__outer").classList.contains("pdf__outer--maximized"),
+                "uninitialized maximize remains disabled");
             const stream = "BT /F1 12 Tf 25 300 Td (PDF pane text) Tj ET";
             const page = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 500] /Resources << /Font << /F1 7 0 R >> >> /Contents 6 0 R >>";
             const objects = ["<< /Type /Catalog /Pages 2 0 R >>",
@@ -47,12 +63,13 @@ async function runElectron() {
                 "trailer\\n<< /Size 8 /Root 1 0 R >>\\nstartxref\\n" + xref + "\\n%%EOF";
             const url = URL.createObjectURL(new Blob([source], {type: "application/pdf"}));
             const pdf = webViewerLoad(url, element, 1);
+            check(!button.disabled && getComputedStyle(button).display !== "none", "binding enables the existing maximize button");
+            check(JSON.stringify(toolbarPositions()) === initialPositions, "binding maximize must not shift toolbar controls");
             await pdf.initializedPromise;
             for (let i = 0; i < 160 && !pdf.pdfViewer.getPageView(0)?.textLayer?.div.textContent; i++) await wait();
             check(pdf.pdfViewer.getPageView(0)?.textLayer?.div.textContent.includes("PDF pane text"), "PDF did not render");
             const documentInstance = pdf.pdfDocument;
             const outer = element.querySelector(".pdf__outer");
-            const button = element.querySelector("#pdfMaximize");
             const originalLayout = element.style.cssText;
             const originalNotes = notes.outerHTML;
             const position = () => ({...pdf.pdfViewer._location});
@@ -65,7 +82,9 @@ async function runElectron() {
                 pdf.pdfViewer.currentScaleValue = scale;
                 pdf.pdfViewer.scrollPageIntoView({pageNumber: 2, destArray: [null, {name: "XYZ"}, 0, 450, null],
                     ignoreDestinationZoom: true});
-                await wait();
+                // 等待滚动事件更新阅读位置，避免用上一页的位置作为最大化前的基准。
+                for (let i = 0; i < 40 && (position()?.pageNumber !== 2 || Math.abs(position().top - 450) >= 2); i++) await wait();
+                check(position()?.pageNumber === 2 && Math.abs(position().top - 450) < 2, "initial reading position did not settle");
                 const before = position();
                 for (let i = 0; i < 3; i++) {
                     button.click(); await wait();
@@ -107,7 +126,9 @@ async function runElectron() {
             for (const mobile of [false, true]) {
                 const element = document.createElement("div");
                 if (mobile) element.className = "pdf-viewer--mobile";
-                element.innerHTML = f.getPdfViewerHTML(); document.body.append(element);
+                element.innerHTML = f.getPdfViewerHTML({maximize: false}); document.body.append(element);
+                f.check(getComputedStyle(element.querySelector("#pdfMaximize")).display === "none",
+                    "preview and standalone mobile must hide maximize before initialization");
                 const pdf = f.webViewerLoad(f.url, element, 1, undefined, !mobile);
                 f.check(element.querySelector("#pdfMaximize").classList.contains("fn__none"),
                     "preview or standalone mobile viewer exposed redundant maximize");

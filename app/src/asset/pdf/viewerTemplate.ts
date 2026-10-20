@@ -1,6 +1,6 @@
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 
-export const getPdfViewerHTML = () => `<div class="pdf__outer" id="outerContainer">
+export const getPdfViewerHTML = ({maximize = true}: {maximize?: boolean} = {}) => `<div class="pdf__outer" id="outerContainer">
       <div id="sidebarContainer">
         <div id="toolbarSidebar">
           <div id="toolbarSidebarLeft">
@@ -180,9 +180,6 @@ export const getPdfViewerHTML = () => `<div class="pdf__outer" id="outerContaine
         <div class="pdf__toolbar">
           <div id="toolbarContainer">
             <div id="toolbarViewer">
-                <button id="pdfMaximize" class="toolbarButton b3-tooltips b3-tooltips__se fn__none" aria-label="${window.siyuan.languages.max}" aria-pressed="false">
-                  <svg><use xlink:href="#iconFullscreen"></use></svg>
-                </button>
                 <button id="sidebarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
                     <svg><use xlink:href="#iconLayoutLeft"></use></svg>
                 </button>
@@ -223,6 +220,9 @@ export const getPdfViewerHTML = () => `<div class="pdf__outer" id="outerContaine
                 <span id="secondaryPrint" class="fn__none"></span>
                 <span id="viewBookmark" class="fn__none"></span>
                 <span id="secondaryViewBookmark" class="fn__none"></span>
+                <button id="pdfMaximize" class="toolbarButton b3-tooltips b3-tooltips__sw${maximize ? "" : " fn__none"}" aria-label="${window.siyuan.languages.max}" aria-pressed="false" disabled>
+                  <svg><use xlink:href="#iconFullscreen"></use></svg>
+                </button>
                 <button id="secondaryToolbarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.more}" aria-expanded="false" aria-controls="secondaryToolbar">
                   <svg><use xlink:href="#iconMore"></use></svg>
                 </button>

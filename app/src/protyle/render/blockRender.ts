@@ -12,6 +12,7 @@ import {finishCustomEmbedRender, finishEmptyEmbedRender, IEmbedRenderLoadingStat
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isDirectHeadingEmbed} from "./embedHeading";
 import {isFoldedRenderContent} from "./foldedContent";
+import {EMBED_BREADCRUMB_PARENT_PATH, getEmbedBreadcrumbPaths} from "./embedBreadcrumb";
 
 /**
  * 渲染嵌入块
@@ -121,7 +122,8 @@ const renderEmbed = (blocks: {
     blocks.forEach((blocksItem, index) => {
         let breadcrumbHTML = "";
         if (blocksItem.blockPaths.length !== 0) {
-            breadcrumbHTML = genBreadcrumb(blocksItem.blockPaths, true);
+            breadcrumbHTML = genBreadcrumb(getEmbedBreadcrumbPaths(blocksItem.blockPaths, blocksItem.block.rootID,
+                item.getAttribute(EMBED_BREADCRUMB_PARENT_PATH)), true);
         }
         let popover = "";
         if (index !== 0) {

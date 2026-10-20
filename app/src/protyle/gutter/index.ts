@@ -46,6 +46,7 @@ import {hideElements} from "../ui/hideElements";
 import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
+import {EMBED_BREADCRUMB_PARENT_PATH} from "../render/embedBreadcrumb";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
@@ -2543,6 +2544,20 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                             window.siyuan.menus.menu.remove();
                         });
+                    }
+                }, {
+                    id: "embedBlockBreadcrumbParentPath",
+                    label: window.siyuan.languages.embedBlockBreadcrumbParentPath,
+                    iconHTML: "",
+                    checked: nodeElement.getAttribute(EMBED_BREADCRUMB_PARENT_PATH) !== "false",
+                    click() {
+                        const value = (nodeElement.getAttribute(EMBED_BREADCRUMB_PARENT_PATH) === "false").toString();
+                        nodeElement.setAttribute(EMBED_BREADCRUMB_PARENT_PATH, value);
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id, attrs: {[EMBED_BREADCRUMB_PARENT_PATH]: value}
+                        });
+                        nodeElement.removeAttribute("data-render");
+                        blockRender(protyle, nodeElement);
                     }
                 }, {
                     id: "headingEmbedMode",

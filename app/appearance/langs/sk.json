@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPath": "Zobraziť nadradenú cestu v navigačnej ceste",
 	"closeWindowOnLastTabClosed": "Zavrieť nové okno s poslednou kartou",
 	"closeWindowOnLastTabClosedTip": "Zavrieť nové okno po zatvorení jeho poslednej karty alebo jej presunutí do iného okna",
 	"tabToMainWindow": "Presunúť do hlavného okna",

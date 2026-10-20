@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPath": "Показывать родительский путь в навигационной цепочке",
 	"closeWindowOnLastTabClosed": "Закрывать новое окно вместе с последней вкладкой",
 	"closeWindowOnLastTabClosedTip": "Закрывать новое окно при закрытии его последней вкладки или её перетаскивании в другое окно",
 	"tabToMainWindow": "Переместить в главное окно",

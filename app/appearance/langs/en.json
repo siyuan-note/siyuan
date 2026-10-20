@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPath": "Show parent path in breadcrumbs",
 	"closeWindowOnLastTabClosed": "Close new window with last tab",
 	"closeWindowOnLastTabClosedTip": "Close the new window when its last tab is closed or dragged to another window",
 	"tabToMainWindow": "Move to main window",

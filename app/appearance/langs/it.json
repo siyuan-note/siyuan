@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPath": "Mostra il percorso superiore nelle briciole di pane",
 	"closeWindowOnLastTabClosed": "Chiudi la nuova finestra con l'ultima scheda",
 	"closeWindowOnLastTabClosedTip": "Chiudi la nuova finestra quando l'ultima scheda viene chiusa o trascinata in un'altra finestra",
 	"tabToMainWindow": "Sposta nella finestra principale",

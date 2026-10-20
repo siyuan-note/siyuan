@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPath": "Mostrar o caminho superior na trilha de navegação",
 	"closeWindowOnLastTabClosed": "Fechar a nova janela com a última aba",
 	"closeWindowOnLastTabClosedTip": "Fechar a nova janela quando sua última aba for fechada ou arrastada para outra janela",
 	"tabToMainWindow": "Mover para a janela principal",

@@ -452,6 +452,7 @@ const gutterSingle = () => [
         node("update", lang("update")),
         separator("separator_breadcrumb"),
         node("embedBlockBreadcrumb", lang("embedBlockBreadcrumb")),
+        node("embedBlockBreadcrumbParentPath", lang("embedBlockBreadcrumbParentPath")),
         node("headingEmbedMode", lang("headingEmbedMode"), true, [
             node("showHeadingWithBlocks", lang("showHeadingWithBlocks")),
             node("showHeadingOnlyTitle", lang("showHeadingOnlyTitle")),

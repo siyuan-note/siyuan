@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPath": "ब्रेडक्रंब में मूल पथ दिखाएँ",
 	"closeWindowOnLastTabClosed": "अंतिम टैब के साथ नई विंडो बंद करें",
 	"closeWindowOnLastTabClosedTip": "अंतिम टैब बंद होने या दूसरी विंडो में खींचे जाने पर नई विंडो बंद करें",
 	"tabToMainWindow": "मुख्य विंडो में ले जाएँ",

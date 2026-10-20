@@ -57,6 +57,18 @@ export const getEmojiFontStyle = (platform: "apple" | "windows11" | "other", ser
   src: local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
   size-adjust: 85%;
+}
+/* 图标位使用：图标旁边是文字，因此要对齐的是文字的视觉中心而不是图标框中心。
+   Segoe UI Emoji 的字体框为 1.08/0.25，图标墨迹约为 0.875/0.141，按原度量居中会让字形比中文偏低约 0.75px；
+   把 ascent/descent 改写为 80%/19%（和仍为 99%，行盒高度不变）后，字形与相邻文字对齐，且随字号等比生效。 */
+@font-face {
+  font-family: "Emojis Icon";
+  src: local("Segoe UI Emoji"),
+  local("Segoe UI Symbol");
+  size-adjust: 85%;
+  ascent-override: 80%;
+  descent-override: 19%;
+  line-gap-override: 0%;
 }`;
     } else {
         style = `@font-face {

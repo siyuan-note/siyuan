@@ -1703,7 +1703,8 @@
         align-items: center;
         justify-content: center;
         object-fit: contain;
-        line-height: 1;
+        // 与相邻的单元格文字使用同一行高模型，字形才不会相对文字偏高
+        line-height: inherit;
         color: var(--b3-theme-on-surface);
         margin: 0 5px 0 0;
         flex-shrink: 0;

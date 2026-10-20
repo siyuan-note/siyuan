@@ -311,18 +311,10 @@
       align-items: center;
       justify-content: center;
 
-      body.body--windows & > .b3-list-item__emoji {
-        transform: translateY(-1px);
-      }
-
       &:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
       }
-    }
-
-    &__emoji {
-      pointer-events: none;
     }
 
     &__hinttext {

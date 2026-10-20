@@ -28,6 +28,11 @@ const isDefaultIcon = (value: string | undefined): value is TFileTreeDefaultIcon
 const getDirectIconElement = (liElement: HTMLElement) => Array.from(liElement.children).find((item) =>
     item.classList.contains("b3-list-item__icon") || item.classList.contains("b3-list-item__graphic")) as HTMLElement | undefined;
 
+const renderFileTreeEmoji = (icon: string, className: string, needSpan: boolean) => {
+    const html = unicode2Emoji(icon, className, needSpan);
+    return html && !html.startsWith("<") ? `<span class="b3-list-item__emoji">${html}</span>` : html;
+};
+
 export const getFileTreeDefaultIconAttr = (icon: string, defaultIcon: TFileTreeDefaultIcon, disabled = false) =>
     !icon && !disabled ? ` data-default-icon="${defaultIcon}"` : "";
 
@@ -35,11 +40,11 @@ export const getFileTreeIconHTML = (icon: string, defaultIcon: TFileTreeDefaultI
                                     needSpan = false, useSVGDefaultIcon =
                                         window.siyuan.config.fileTree.useSVGDefaultIcon === true) => {
     if (icon) {
-        return unicode2Emoji(icon, className, needSpan);
+        return renderFileTreeEmoji(icon, className, needSpan);
     }
 
     if (!useSVGDefaultIcon) {
-        return unicode2Emoji(getDefaultEmoji(defaultIcon), className, needSpan);
+        return renderFileTreeEmoji(getDefaultEmoji(defaultIcon), className, needSpan);
     }
 
     const classAttr = needSpan ? ` class="${escapeAttr(className)}"` : "";
@@ -75,7 +80,7 @@ export const updateFileTreeItemIcon = (liElement: HTMLElement, icon: string,
     }
     if (icon) {
         delete liElement.dataset.defaultIcon;
-        iconElement.innerHTML = unicode2Emoji(icon);
+        iconElement.innerHTML = getFileTreeIconHTML(icon, defaultIcon);
         return;
     }
     liElement.dataset.defaultIcon = defaultIcon;

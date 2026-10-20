@@ -743,15 +743,23 @@ export class TableControl {
             }
         }, {capture: true, signal});
         this.wysiwygElement.addEventListener("contextmenu", event => {
-            if (!this.selection) {
+            if (event.shiftKey || this.protyle.toolbar.isMultiSelectMode()) {
                 return;
             }
             const cell = getCell(event.target);
-            if (!cell || getTableNode(cell) !== this.selection.node) {
+            if (!cell || !getTableNode(cell) || cell.closest(".protyle-wysiwyg") !== this.wysiwygElement) {
                 this.clear();
                 return;
             }
-            if (!this.isCellInSelection(cell)) {
+            if (!this.selection || getTableNode(cell) !== this.selection.node) {
+                // 保留触屏长按和内嵌编辑器的文字菜单；未进入编辑的单元格可直接右键操作。
+                if (this.touch || (event.target as Element).closest(".table__cell-editor") ||
+                    !finishTableCellEditing(cell)) {
+                    return;
+                }
+                restoreTableVirtualizationDOM(cell.closest("table"));
+                this.selectFromCell("cell", cell, false, false);
+            } else if (!this.isCellInSelection(cell)) {
                 this.selectFromCell(this.selection.mode, cell, false, false);
             }
             event.preventDefault();

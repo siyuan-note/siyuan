@@ -793,6 +793,39 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(ran, false, "unfinished composition blocks structural menu actions");
     }
     mobile = false;
+    {
+        const f = fixture();
+        const rightClick = (target: Element, shiftKey = false) => {
+            const event = new MouseEvent("contextmenu", {bubbles: true, cancelable: true, shiftKey});
+            target.dispatchEvent(event);
+            return event;
+        };
+        getSelection().removeAllRanges();
+        check.equal(rightClick(f.cell(1, 1)).defaultPrevented, true);
+        check.equal(menuElement.dataset.name, "table-cell");
+        check.deepEqual(f.core.getSelectedCells(), [f.cell(1, 1)], "right click selects a previously inactive cell");
+        f.core.selectCellRange(f.cell(1, 0), f.cell(2, 1));
+        rightClick(f.cell(2, 1));
+        check.equal(f.core.getSelectedCells().length, 4, "right click inside a selected range keeps the range");
+        rightClick(f.cell(1, 2));
+        check.deepEqual(f.core.getSelectedCells(), [f.cell(1, 2)], "right click outside the range selects the target");
+        check.equal(rightClick(f.table.parentElement).defaultPrevented, false, "table block padding retains the block menu");
+        check.equal(f.core.getSelectedCells().length, 0);
+        check.equal(rightClick(f.cell(1, 1), true).defaultPrevented, false, "Shift preserves the native menu");
+        f.setBlockMultiSelect(true);
+        check.equal(rightClick(f.cell(1, 1)).defaultPrevented, false, "block multiselection retains its menu");
+        f.setBlockMultiSelect(false);
+        const cell = f.cell(1, 1);
+        cell.innerHTML = '<div class="table__cell-editor"><div class="protyle-wysiwyg"><div contenteditable="true">Text</div></div></div>';
+        const editable = cell.querySelector('[contenteditable="true"]');
+        check.equal(rightClick(editable).defaultPrevented, false, "rich text editing retains its own context menu");
+        cell.textContent = "A2";
+        f.owner.disabled = true;
+        rightClick(cell);
+        check.ok(items.some(item => item.label === "copy" && !item.disabled));
+        check.ok(!items.some(item => item.label === "paste" && !item.disabled), "readonly cell menus cannot paste");
+        f.dispose();
+    }
     for (const mode of ["row", "column", "both"]) {
         const f = fixture();
         f.table.style.marginBottom = "0";

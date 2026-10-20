@@ -113,8 +113,13 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         return {owner, queue, element, wysiwyg, table, range};
     };
     let tableExitTarget: HTMLElement;
+    let serializations = 0;
     const editorDependencies = {
         ...dependencies, ...api, TABLE_CELL_INLINE_ATTRIBUTE: "data-sy-table-cell-inline",
+        serializeTableCellRich: (html: string) => {
+            serializations++;
+            return api.serializeTableCellRich(html);
+        },
         TABLE_CELL_RICH_ATTRIBUTE: "data-sy-table-cell-rich", TABLE_CELL_SLASH_IDS: new Set(),
         hintRef: noop, hintTag: noop, registerBuiltinSlashHint: (callback: unknown) => callback,
         getDefaultToolbar: (): string[] => [], updateOutlineCurrentBlock: noop,
@@ -209,6 +214,34 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const rich of [false, true]) {
+            const {owner, element, table} = fixture();
+            const cells = Array.from(table.querySelectorAll<HTMLTableCellElement>("th, td"));
+            if (rich) {
+                cells.forEach(cell => api.setTableCellRich(cell, "**First**\n\nSecond"));
+            }
+            const before = api.cleanTableCellRichHTML(table.outerHTML);
+            serializations = 0;
+            for (const cell of cells) {
+                await open(owner, cell);
+            }
+            check.equal(serializations, 0, "entering and switching unchanged cells skips Markdown serialization");
+            check.equal(changes.length, 0, "navigation must not create document transactions");
+            check.equal(api.cleanTableCellRichHTML(table.outerHTML), before, "navigation preserves stored cell content");
+            const editable = cells[cells.length - 1].querySelector<HTMLElement>('[contenteditable="true"]');
+            editable.textContent = "Edited";
+            // A synchronous switch must save changes even before the MutationObserver callback runs.
+            await open(owner, cells[0]);
+            check.equal(changes.length, 1, "switching captures edits without depending on a dirty flag");
+            check.equal(serializations, 2, "only the original and changed content need serialization");
+            check.match(operationHTML(changes[0].doOperations[0]), /Edited/);
+            await finish(element);
+        }
+    }
+    mobile = true;
 
     const generalKeymap = window.siyuan.config.keymap.editor.general;
     window.siyuan.config.keymap.editor.general = {...generalKeymap,

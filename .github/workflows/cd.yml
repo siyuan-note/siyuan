@@ -169,7 +169,7 @@ jobs:
         with:
           go-version-file: kernel/go.mod
           cache-dependency-path: kernel/go.sum
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Install repository pnpm version
@@ -197,7 +197,7 @@ jobs:
         with:
           go-version-file: kernel/go.mod
           cache-dependency-path: kernel/go.sum
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Install filesystem fault injection dependency
@@ -251,7 +251,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - uses: actions/setup-go@v6
@@ -300,7 +300,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Install repository pnpm version
@@ -427,7 +427,7 @@ jobs:
           path: siyuan-testing
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
@@ -595,7 +595,7 @@ jobs:
       - run: go version
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 

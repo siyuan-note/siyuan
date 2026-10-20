@@ -1,4 +1,8 @@
 {
+	"dataImportConflicts": "Notizbücher mit Konflikten",
+	"dataImportSkip": "Konflikte überspringen",
+	"dataImportOverwrite": "Konflikte überschreiben",
+	"dataImportSkipped": "Übersprungene Notizbücher",
 	"automationCollectionDepth": "Tiefe der Unterdokumente",
 	"automationCollectionDepthUnlimited": "Unbegrenzt",
 	"automationCollectionDepthCurrent": "Nur aktuelles Dokument",
@@ -3365,6 +3369,9 @@
 		"418": "Dieses Modell benötigt den vollständigen Werkzeugverlauf des aktuellen Gesprächsschritts. Verwenden Sie ein Modell mit größerem Kontextfenster oder teilen Sie die Aufgabe auf",
 		"419": "Die Kontextkomprimierung des Agenten hat die Anfrage- oder Zeitgrenze erreicht. Ihr Gespräch wurde beibehalten",
 		"420": "Die Cloud-Synchronisierungsindizes (%s) können nicht aufgelistet werden. Dies bedeutet nicht, dass die Cloud leer ist. Prüfen Sie das Netzwerk, die Synchronisierungseinstellungen und die Berechtigungen zum Auflisten",
-		"421": "Ein anderer Arbeitsbereich verarbeitet Updatepakete. Bitte später erneut nach Updates suchen"
+		"421": "Ein anderer Arbeitsbereich verarbeitet Updatepakete. Bitte später erneut nach Updates suchen",
+		"422": "Der Data.zip-Import ist abgelaufen oder wurde geändert; wählen Sie das Archiv erneut aus",
+		"423": "Notizbücher mit unterschiedlichem Verschlüsselungsstatus oder Datenschlüssel können nicht zusammengeführt werden [%s]",
+		"424": "Wiederherstellung des Data.zip-Imports fehlgeschlagen; bewahren Sie den Arbeitsbereich auf und versuchen Sie die Wiederherstellung erneut"
 	}
 }

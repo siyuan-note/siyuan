@@ -876,6 +876,8 @@ export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": st
 
 export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
 
+export type CommitDataImportRequestInput = { "id": string; "mode": "skip" | "overwrite"; "password"?: string; };
+
 export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean; };
 
 export type ConfirmSettingsResetRequestInput = { "saved": boolean; "token": string; };
@@ -937,6 +939,12 @@ export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "
 export type DailyNoteInfo = { "existed": boolean; "hPath": string; "id": string; "title": string; };
 
 export type DailyNoteInfoRequestInput = { "date"?: string | null; "notebook": string; };
+
+export type DataImportPlan = { "conflicts": Array<string> | null; "encrypted": Array<string> | null; "id": string; };
+
+export type DataImportRequestInput = { "id": string; };
+
+export type DataImportResult = { "skipped": Array<string> | null; };
 
 export type DeleteBlockRequestInput = { "id": string; };
 
@@ -5664,6 +5672,16 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 取消尚未提交且仍有效的 Data.zip 预检；不能删除已提交批次的恢复材料。
+     */
+    "/api/import/cancelDataImport": {
+        request: DataImportRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/import/cancelImportSY": {
         request: ImportTokenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5677,6 +5695,19 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 按路径覆盖并保留目标独有文件，skip 保留冲突目录及其密钥材料，返回明确的跳过清单。
+     * 导入加密内容必须提供可认证兼容密钥的主密码；不同数据密钥或加密状态不能直接合并。
+     * 旧备份不回退当前密码或丢弃历史密钥；完整预检后提交，失败和中断可回滚，加密笔记本保持锁定。
+     * 成功批次的原件、旧密文和密钥材料保留在工作空间 conf/data-imports 下。
+     */
+    "/api/import/commitDataImport": {
+        request: CommitDataImportRequestInput;
+        response: { "code": 0; "data": DataImportResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/continueImportSY": {
         request: ContinueImportSYRequestInput;
@@ -5692,6 +5723,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 旧 Data.zip 入口仍拒绝覆盖已有加密笔记本，也拒绝加密来源覆盖同 ID 的普通笔记本。
+     * 不会隐式选择冲突策略；交互式冲突处理使用 prepareDataImport、commitDataImport 和 cancelDataImport。
+     */
     "/api/import/importData": {
         request: ImportDataRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5750,6 +5785,17 @@ export interface APIPOSTRoutes {
     "/api/import/importZipMd": {
         request: ImportZipMarkdownRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 预检 Data.zip 并保存原件，返回加密冲突及需要认证的笔记本 ID，不修改活动数据。
+     * 预检有效期为 30 分钟；提交前必须显式选择 skip 或 overwrite，取消会移除尚未提交的暂存文件。
+     */
+    "/api/import/prepareDataImport": {
+        request: ImportDataRequestInput;
+        response: { "code": 0; "data": DataImportPlan; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

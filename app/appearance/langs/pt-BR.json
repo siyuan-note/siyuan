@@ -1,4 +1,8 @@
 {
+	"dataImportConflicts": "Cadernos em conflito",
+	"dataImportSkip": "Ignorar conflitos",
+	"dataImportOverwrite": "Sobrescrever conflitos",
+	"dataImportSkipped": "Cadernos ignorados",
 	"automationCollectionDepth": "Profundidade dos subdocumentos",
 	"automationCollectionDepthUnlimited": "Sem limite",
 	"automationCollectionDepthCurrent": "Somente o documento atual",
@@ -3365,6 +3369,9 @@
 		"418": "Este modelo exige manter intacto o histórico de chamadas de ferramentas do turno atual. Use um modelo com uma janela de contexto maior ou divida a tarefa",
 		"419": "A compactação do contexto do agente atingiu o limite de solicitações ou de tempo. Sua conversa foi preservada",
 		"420": "Não foi possível listar os índices de sincronização na nuvem (%s). Isso não significa que a nuvem esteja vazia. Verifique a rede, a configuração de sincronização e as permissões de listagem",
-		"421": "Outro espaço de trabalho está processando pacotes de atualização. Verifique novamente se há atualizações mais tarde"
+		"421": "Outro espaço de trabalho está processando pacotes de atualização. Verifique novamente se há atualizações mais tarde",
+		"422": "A importação de Data.zip expirou ou foi alterada; selecione o arquivo novamente",
+		"423": "Não é possível mesclar cadernos com estados de criptografia ou chaves de dados diferentes [%s]",
+		"424": "Falha na recuperação da importação de Data.zip; preserve o espaço de trabalho e tente a recuperação novamente"
 	}
 }

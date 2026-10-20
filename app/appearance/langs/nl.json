@@ -1,4 +1,8 @@
 {
+	"dataImportConflicts": "Notitieboeken met conflicten",
+	"dataImportSkip": "Conflicten overslaan",
+	"dataImportOverwrite": "Conflicten overschrijven",
+	"dataImportSkipped": "Overgeslagen notitieboeken",
 	"automationCollectionDepth": "Diepte van subdocumenten",
 	"automationCollectionDepthUnlimited": "Onbeperkt",
 	"automationCollectionDepthCurrent": "Alleen huidig document",
@@ -3365,6 +3369,9 @@
 		"418": "Dit model vereist dat de volledige geschiedenis van hulpmiddelaanroepen in de huidige beurt behouden blijft. Gebruik een model met een groter contextvenster of splits de taak op",
 		"419": "Het comprimeren van de agentcontext heeft de aanvraag- of tijdslimiet bereikt. Je gesprek is bewaard",
 		"420": "De cloudsynchronisatie-indexen (%s) kunnen niet worden weergegeven. Dit betekent niet dat de cloud leeg is. Controleer het netwerk, de synchronisatie-instellingen en de machtigingen voor het opvragen van de lijst",
-		"421": "Een andere werkruimte verwerkt updatepakketten. Controleer later opnieuw op updates"
+		"421": "Een andere werkruimte verwerkt updatepakketten. Controleer later opnieuw op updates",
+		"422": "De Data.zip-import is verlopen of gewijzigd; selecteer het archief opnieuw",
+		"423": "Notitieboeken met een verschillende versleutelingsstatus of gegevenssleutel kunnen niet worden samengevoegd [%s]",
+		"424": "Herstel van de Data.zip-import is mislukt; bewaar de werkruimte en probeer het herstel opnieuw"
 	}
 }

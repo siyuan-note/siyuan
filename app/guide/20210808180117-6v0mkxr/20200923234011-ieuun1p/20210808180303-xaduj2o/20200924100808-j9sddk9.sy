@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20261016200946"
+		"updated": "20261020220502"
 	},
 	"Children": [
 		{
@@ -408,6 +408,48 @@
 				{
 					"Type": "NodeText",
 					"Data": "​: Please pay attention before use, to avoid existing data being overwritten and unrecoverable."
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-tsupjxf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-tsupjxf",
+				"updated": "20261020220502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data.zip can update the current workspace without creating another workspace. The archive is analyzed before importing. If encrypted notebooks conflict, choose Skip conflicts (the default), Overwrite conflicts or Cancel. The result lists skipped notebook IDs before the interface reloads."
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-v98hoer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-v98hoer",
+				"updated": "20261020220502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Importing encrypted content requires a compatible master password. A backup from before a password change can be read with compatible historical keys without reverting the current password. Notebooks with different encryption states or data keys cannot be merged directly. Overwrite replaces matching paths and retains destination-only files; it does not propagate deletions. Imported encrypted notebooks remain locked until you unlock them again."
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-9jmeu5c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-9jmeu5c",
+				"updated": "20261020220502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The import verifies selected content before writing and can roll back a failed or interrupted commit. The original archive, replaced files and key material remain in the workspace’s conf/data-imports/ directory. Keep these recovery files until you have verified the imported content and required history."
 				}
 			]
 		},

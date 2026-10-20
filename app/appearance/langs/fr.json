@@ -1,4 +1,8 @@
 {
+	"dataImportConflicts": "Carnets en conflit",
+	"dataImportSkip": "Ignorer les conflits",
+	"dataImportOverwrite": "Écraser les conflits",
+	"dataImportSkipped": "Carnets ignorés",
 	"automationCollectionDepth": "Profondeur des sous-documents",
 	"automationCollectionDepthUnlimited": "Illimitée",
 	"automationCollectionDepthCurrent": "Document actuel uniquement",
@@ -3365,6 +3369,9 @@
 		"418": "Ce modèle exige de conserver intégralement l’historique des appels d’outils du tour actuel. Utilisez un modèle avec une fenêtre de contexte plus grande ou divisez la tâche",
 		"419": "La compression du contexte de l’agent a atteint la limite de requêtes ou de durée. Votre conversation a été conservée",
 		"420": "Impossible de lister les index de synchronisation dans le cloud (%s). Cela ne signifie pas que le cloud est vide. Vérifiez le réseau, la configuration de synchronisation et les autorisations de listage",
-		"421": "Un autre espace de travail traite les paquets de mise à jour. Veuillez rechercher à nouveau les mises à jour plus tard"
+		"421": "Un autre espace de travail traite les paquets de mise à jour. Veuillez rechercher à nouveau les mises à jour plus tard",
+		"422": "L’importation de Data.zip a expiré ou a changé ; sélectionnez à nouveau l’archive",
+		"423": "Impossible de fusionner des carnets dont l’état de chiffrement ou la clé de données diffère [%s]",
+		"424": "Échec de la récupération de l’importation de Data.zip ; conservez l’espace de travail et réessayez la récupération"
 	}
 }

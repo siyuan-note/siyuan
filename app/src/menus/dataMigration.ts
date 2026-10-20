@@ -6,7 +6,6 @@ import {escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import type {APICallbackResponse, APIPOSTRoutes} from "../types/api";
-import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {importObsidianVault} from "./importObsidian";
 import {saveExportFile, writeText} from "../protyle/util/compatibility";
@@ -16,6 +15,7 @@ import * as path from "path";
 import {afterExport} from "../protyle/export/util";
 /// #endif
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {importDataFile} from "./importData";
 
 interface IDataMigrationOptions {
     mode?: "manage" | "onboarding";
@@ -248,9 +248,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         });
     });
     bindFileInput("data", (file, input) => {
-        confirmDialog(`${window.siyuan.languages.import} Data`, window.siyuan.languages.importDataTip, () => {
-            postFile("/api/import/importData", file);
-        });
+        void importDataFile(file, completeContentImport);
         input.value = "";
     });
     bindFileInput("conf", (file, input) => {

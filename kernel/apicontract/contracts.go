@@ -676,7 +676,22 @@ var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("c
 // 未定义的脚注不生成块引用，代码和转义的脚注文本保持原样；反链复用块引用索引。
 var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 旧 Data.zip 入口仍拒绝覆盖已有加密笔记本，也拒绝加密来源覆盖同 ID 的普通笔记本。
+// 不会隐式选择冲突策略；交互式冲突处理使用 prepareDataImport、commitDataImport 和 cancelDataImport。
 var ImportData = define[ImportDataRequest, Null]("importData", "/api/import/importData", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 预检 Data.zip 并保存原件，返回加密冲突及需要认证的笔记本 ID，不修改活动数据。
+// 预检有效期为 30 分钟；提交前必须显式选择 skip 或 overwrite，取消会移除尚未提交的暂存文件。
+var PrepareDataImport = define[ImportDataRequest, DataImportPlan]("prepareDataImport", "/api/import/prepareDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 按路径覆盖并保留目标独有文件，skip 保留冲突目录及其密钥材料，返回明确的跳过清单。
+// 导入加密内容必须提供可认证兼容密钥的主密码；不同数据密钥或加密状态不能直接合并。
+// 旧备份不回退当前密码或丢弃历史密钥；完整预检后提交，失败和中断可回滚，加密笔记本保持锁定。
+// 成功批次的原件、旧密文和密钥材料保留在工作空间 conf/data-imports 下。
+var CommitDataImport = define[CommitDataImportRequest, DataImportResult]("commitDataImport", "/api/import/commitDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 取消尚未提交且仍有效的 Data.zip 预检；不能删除已提交批次的恢复材料。
+var CancelDataImport = define[DataImportRequest, Null]("cancelDataImport", "/api/import/cancelDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 压缩包中的 Markdown 使用与 `/api/import/importStdMd` 相同的标准脚注转换规则。
 var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")

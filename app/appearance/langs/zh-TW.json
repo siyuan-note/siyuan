@@ -1,4 +1,8 @@
 {
+	"dataImportConflicts": "衝突的筆記本",
+	"dataImportSkip": "略過衝突",
+	"dataImportOverwrite": "覆寫衝突",
+	"dataImportSkipped": "已略過的筆記本",
 	"automationCollectionDepth": "子文件深度",
 	"automationCollectionDepthUnlimited": "不限",
 	"automationCollectionDepthCurrent": "僅目前文件",
@@ -3365,6 +3369,9 @@
 		"418": "目前模型要求完整保留本輪工具呼叫記錄，請切換到上下文視窗更大的模型或拆分任務",
 		"419": "智慧體上下文壓縮達到請求次數或耗時上限，對話記錄已保留",
 		"420": "無法列舉雲端同步索引（%s），這不代表雲端為空。請檢查網路、同步設定和列舉權限",
-		"421": "另一個工作空間正在處理更新安裝套件，請稍後重新檢查更新"
+		"421": "另一個工作空間正在處理更新安裝套件，請稍後重新檢查更新",
+		"422": "Data.zip 匯入已過期或發生變更，請重新選擇壓縮檔",
+		"423": "無法合併加密狀態或資料金鑰不同的筆記本 [%s]",
+		"424": "Data.zip 匯入復原失敗，請保留工作空間並重試復原"
 	}
 }

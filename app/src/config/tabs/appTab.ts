@@ -8,7 +8,6 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
-import {ContractFormData} from "../../util/contractFormData";
 /// #if !MOBILE
 import {reloadUI} from "../../layout/util";
 /// #endif
@@ -30,6 +29,7 @@ import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {genWorkspaceStorageHtml, mountWorkspaceStorage} from "./workspaceStorage";
+import {importDataFile} from "../../menus/importData";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
@@ -423,8 +423,11 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#importData")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
-                const formData = new ContractFormData({file: target.files[0]});
-                fetchPost("/api/import/importData", formData);
+                const file = target.files?.[0];
+                target.value = "";
+                if (file) {
+                    void importDataFile(file);
+                }
             });
         },
     });

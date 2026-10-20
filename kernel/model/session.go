@@ -194,6 +194,12 @@ func CheckReadonly(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	// 导入提交期间暂停其他写接口，避免已确认的磁盘快照被并发请求修改。
+	if c.Request.URL.Path != "/api/import/commitDataImport" {
+		dataImportAccess.RLock()
+		defer dataImportAccess.RUnlock()
+		c.Next()
+	}
 }
 
 func CheckAuth(c *gin.Context) {

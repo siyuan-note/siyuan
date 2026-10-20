@@ -3379,6 +3379,11 @@
 		"428": "The server does not allow directory creation here; check the WebDAV path and write permissions",
 		"429": "Cannot create the cloud directory; check that its parent is a directory and no file has the same name",
 		"430": "The WebDAV endpoint did not return a directory or sync data; check the address and WebDAV service",
-		"431": "Automatic sync will retry at %s; you can also sync manually"
+		"431": "Automatic sync will retry at %s; you can also sync manually",
+		"432": "Restoring %s (%d/%d): %s / %s, %s/s, %s remaining",
+		"433": "Sync canceled; completed files were kept. Sync again to finish",
+		"434": "Not enough disk space to restore this file: required %s, available %s",
+		"435": "Removed interrupted sync temporary files, freeing %s",
+		"436": "Sync is in progress; editing stays blocked until it finishes or cancellation completes"
 	}
 }

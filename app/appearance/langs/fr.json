@@ -3379,6 +3379,11 @@
 		"428": "Le serveur interdit la création de dossiers ici ; vérifiez le chemin WebDAV et les droits d’écriture",
 		"429": "Impossible de créer le dossier distant ; vérifiez que son parent est un dossier et qu’aucun fichier ne porte le même nom",
 		"430": "Le point de terminaison WebDAV n’a renvoyé ni dossier ni données de synchronisation ; vérifiez l’adresse et le service WebDAV",
-		"431": "La synchronisation automatique réessaiera à %s ; vous pouvez aussi synchroniser manuellement"
+		"431": "La synchronisation automatique réessaiera à %s ; vous pouvez aussi synchroniser manuellement",
+		"432": "Restauration de %s (%d/%d) : %s / %s, %s/s, temps restant %s",
+		"433": "Synchronisation annulée ; les fichiers terminés ont été conservés. Relancez la synchronisation pour finir",
+		"434": "Espace disque insuffisant pour restaurer ce fichier : nécessaire %s, disponible %s",
+		"435": "Fichiers temporaires de synchronisation interrompue supprimés, %s libérés",
+		"436": "Synchronisation en cours ; la modification reste bloquée jusqu’à la fin ou l’achèvement de l’annulation"
 	}
 }

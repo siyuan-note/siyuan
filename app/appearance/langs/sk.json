@@ -3379,6 +3379,11 @@
 		"428": "Server tu neumožňuje vytvárať adresáre; skontrolujte cestu WebDAV a oprávnenia na zápis",
 		"429": "Cloudový adresár sa nedá vytvoriť; overte, že nadradená položka je adresár a neexistuje súbor s rovnakým názvom",
 		"430": "Koncový bod WebDAV nevrátil adresár ani údaje synchronizácie; skontrolujte adresu a službu WebDAV",
-		"431": "Automatická synchronizácia sa zopakuje o %s; môžete synchronizovať aj ručne"
+		"431": "Automatická synchronizácia sa zopakuje o %s; môžete synchronizovať aj ručne",
+		"432": "Obnovuje sa %s (%d/%d): %s / %s, %s/s, zostáva %s",
+		"433": "Synchronizácia zrušená; dokončené súbory zostali zachované. Na dokončenie spustite synchronizáciu znova",
+		"434": "Nedostatok miesta na obnovenie súboru: potrebné %s, dostupné %s",
+		"435": "Dočasné súbory prerušenej synchronizácie odstránené, uvoľnené %s",
+		"436": "Prebieha synchronizácia; úpravy zostávajú zablokované do jej dokončenia alebo ukončenia rušenia"
 	}
 }

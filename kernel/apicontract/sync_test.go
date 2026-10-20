@@ -30,6 +30,21 @@ func TestSyncProviderProbeContracts(t *testing.T) {
 	}
 }
 
+func TestSyncCheckoutCancellationContract(t *testing.T) {
+	request, err := CancelSyncCheckout.Decode(strings.NewReader(`{"taskID":" current "}`))
+	if err != nil || request.TaskID != "current" {
+		t.Fatalf("task ID not bound: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"taskID":null}`, `{"taskID":123}`, `{"taskID":" "}`} {
+		if _, err := CancelSyncCheckout.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid ID accepted: %s", body)
+		}
+	}
+	if CancelSyncCheckout.definition.Authorization != AuthenticatedAccess|AdminAccess {
+		t.Fatal("cancel requires authentication and administrator access")
+	}
+}
+
 func TestSyncConditionalDirection(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"upload":null}`, `{"upload":"wrong"}`, `{"upload":[]}`} {
 		request, err := PerformSync.Decode(strings.NewReader(body))

@@ -3379,6 +3379,11 @@
 		"428": "Serwer nie pozwala tutaj tworzyć katalogów; sprawdź ścieżkę WebDAV i uprawnienia do zapisu",
 		"429": "Nie można utworzyć katalogu w chmurze; sprawdź, czy element nadrzędny jest katalogiem i nie istnieje plik o tej samej nazwie",
 		"430": "Punkt końcowy WebDAV nie zwrócił katalogu ani danych synchronizacji; sprawdź adres i usługę WebDAV",
-		"431": "Automatyczna synchronizacja ponowi próbę o %s; można też synchronizować ręcznie"
+		"431": "Automatyczna synchronizacja ponowi próbę o %s; można też synchronizować ręcznie",
+		"432": "Przywracanie %s (%d/%d): %s / %s, %s/s, pozostało %s",
+		"433": "Synchronizacja anulowana; ukończone pliki zostały zachowane. Uruchom synchronizację ponownie, aby dokończyć",
+		"434": "Za mało miejsca na przywrócenie tego pliku: wymagane %s, dostępne %s",
+		"435": "Usunięto pliki tymczasowe przerwanej synchronizacji, zwolniono %s",
+		"436": "Synchronizacja trwa; edycja pozostaje zablokowana do jej zakończenia lub zakończenia anulowania"
 	}
 }

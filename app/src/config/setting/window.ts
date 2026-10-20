@@ -16,6 +16,7 @@ import {loadAssets, setInlineStyle, initAssets, reloadInlineStyles, refreshTheme
 import {initMessage} from "../../dialog/message";
 import {processSync, downloadProgress} from "../../dialog/processSystem";
 import {progressLoading} from "../../dialog/progress";
+import {syncCheckoutProgress} from "../../sync/checkoutProgress";
 import {setSettingsWindowHost} from "./windowContext";
 import {refreshSettingConfig} from "./sync";
 import {openSettingDialog} from "../index";
@@ -156,6 +157,7 @@ const initialize = async () => {
                 void applyPluginReload(app, data.data).catch(error => console.error("Could not update settings plugins", error));
                 break;
             case "readonly": window.siyuan.config.editor.readOnly = data.data; break;
+            case "syncProgress": syncCheckoutProgress(data); break;
             case "progress": progressLoading(data); break;
             case "downloadProgress": downloadProgress(data.data); break;
             case "syncing": processSync(data); break;

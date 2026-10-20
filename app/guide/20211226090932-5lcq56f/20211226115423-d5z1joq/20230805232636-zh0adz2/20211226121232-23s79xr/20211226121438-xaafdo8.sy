@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20261020224352"
+		"updated": "20261020231029"
 	},
 	"Children": [
 		{
@@ -579,6 +579,61 @@
 				{
 					"Type": "NodeText",
 					"Data": "若目前來源的資源或歷史快照尚未補齊，變更來源或清除設定會被阻止。請恢復原同步來源的存取並完成全部下載後重試。儲存或清除失敗時，生效設定和草稿都會保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-8zr82uz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-8zr82uz",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同步時會顯示目前檔案、已寫入位元組數、速度和預計剩餘時間。點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "摺疊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可收起詳細資訊，再點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 按鈕可重新展開。同步完成或取消處理結束前，編輯操作仍會被阻止。點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可請求在檔案或分塊邊界取消。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-6xu32w1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-6xu32w1",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "取消後會保留已完成的檔案並清理目前暫存檔，可以再次同步以完成剩餘內容。空間不足時，請釋放空間後重試。啟動或還原檔案前會清理可確認歸屬的中斷同步暫存檔，並提示釋放的容量。"
 				}
 			]
 		},

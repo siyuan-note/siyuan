@@ -3379,6 +3379,11 @@
 		"428": "De server staat hier geen nieuwe mappen toe; controleer het WebDAV-pad en de schrijfrechten",
 		"429": "De cloudmap kan niet worden gemaakt; controleer of de bovenliggende locatie een map is en er geen bestand met dezelfde naam bestaat",
 		"430": "Het WebDAV-eindpunt gaf geen map of synchronisatiegegevens terug; controleer het adres en de WebDAV-service",
-		"431": "Automatische synchronisatie probeert het om %s opnieuw; u kunt ook handmatig synchroniseren"
+		"431": "Automatische synchronisatie probeert het om %s opnieuw; u kunt ook handmatig synchroniseren",
+		"432": "Herstellen van %s (%d/%d): %s / %s, %s/s, resterend %s",
+		"433": "Synchronisatie geannuleerd; voltooide bestanden zijn behouden. Synchroniseer opnieuw om af te ronden",
+		"434": "Onvoldoende schijfruimte om dit bestand te herstellen: nodig %s, beschikbaar %s",
+		"435": "Tijdelijke bestanden van de onderbroken synchronisatie verwijderd, %s vrijgemaakt",
+		"436": "Synchronisatie is bezig; bewerken blijft geblokkeerd tot deze klaar is of de annulering is voltooid"
 	}
 }

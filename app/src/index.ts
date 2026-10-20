@@ -40,6 +40,7 @@ import {
     transactionError
 } from "./dialog/processSystem";
 import {progressLoading} from "./dialog/progress";
+import {syncCheckoutProgress} from "./sync/checkoutProgress";
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllModels, getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp, isIOSDevice} from "./protyle/util/compatibility";
@@ -174,6 +175,9 @@ export class App {
                                     });
                                 });
                             }
+                            break;
+                        case "syncProgress":
+                            syncCheckoutProgress(data);
                             break;
                         case "progress":
                             progressLoading(data);

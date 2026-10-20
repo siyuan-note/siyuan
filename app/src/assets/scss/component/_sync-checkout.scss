@@ -1,0 +1,44 @@
+.sync-checkout {
+  position: fixed;
+  inset: 0;
+
+  &__panel {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: min(680px, 92vw);
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    box-sizing: border-box;
+  }
+
+  &__scrim {
+    opacity: 1;
+  }
+
+  &__progress {
+    width: 100%;
+    margin: 16px 0;
+    accent-color: var(--b3-theme-primary);
+  }
+
+  &__details {
+    margin-bottom: 16px;
+  }
+
+  &__notice {
+    margin-bottom: 16px;
+  }
+
+  &--compact {
+    .sync-checkout__scrim {
+      opacity: 0;
+    }
+
+    .sync-checkout__panel {
+      top: auto;
+      bottom: 16px;
+      transform: translateX(-50%);
+    }
+  }
+}

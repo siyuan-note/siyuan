@@ -3379,6 +3379,11 @@
 		"428": "Server tidak mengizinkan pembuatan direktori di sini; periksa jalur WebDAV dan izin tulis",
 		"429": "Tidak dapat membuat direktori awan; pastikan induknya adalah direktori dan tidak ada berkas dengan nama yang sama",
 		"430": "Titik akhir WebDAV tidak mengembalikan direktori atau data sinkronisasi; periksa alamat dan layanan WebDAV",
-		"431": "Sinkronisasi otomatis akan dicoba lagi pada %s; Anda juga dapat menyinkronkan secara manual"
+		"431": "Sinkronisasi otomatis akan dicoba lagi pada %s; Anda juga dapat menyinkronkan secara manual",
+		"432": "Memulihkan %s (%d/%d): %s / %s, %s/dtk, tersisa %s",
+		"433": "Sinkronisasi dibatalkan; berkas yang selesai dipertahankan. Sinkronkan lagi untuk menyelesaikan",
+		"434": "Ruang disk tidak cukup untuk memulihkan berkas ini: diperlukan %s, tersedia %s",
+		"435": "Berkas sementara dari sinkronisasi terputus dihapus, mengosongkan %s",
+		"436": "Sinkronisasi berlangsung; penyuntingan tetap diblokir hingga selesai atau pembatalan tuntas"
 	}
 }

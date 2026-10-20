@@ -820,6 +820,10 @@ export type BroadcastPublishMessage = { "filename": string; "size": number; "typ
 
 export type BroadcastPublishResult = { "channel": BroadcastChannel; "code": number; "message": BroadcastPublishMessage; "msg": string; };
 
+export type CancelSyncCheckoutData = { "requested": boolean; };
+
+export type CancelSyncCheckoutRequestInput = { "taskID": string; };
+
 export type ChangeAttrViewLayoutRequestInput = { "avID": string; "blockID": string; "layoutType": string; };
 
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
@@ -7352,6 +7356,20 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
+     * requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。
+     * 在分块和文件替换边界检查取消，保留已完成文件，清理当前临时文件，不写成功同步点。
+     * 解除界面编辑阻挡前同步已落盘变更的索引；不回滚已完成文件，不改变全部下载或按需下载设置。
+     * 只读模式可请求取消，不会更改同步配置；调用要求登录和管理员权限。
+     */
+    "/api/sync/cancelSyncCheckout": {
+        request: CancelSyncCheckoutRequestInput;
+        response: { "code": 0; "data": CancelSyncCheckoutData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     /**
      * 清除 provider 为 2（S3）、3（WebDAV）或 4（本地文件系统）的配置并同步落盘。

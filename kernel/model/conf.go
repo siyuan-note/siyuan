@@ -1153,6 +1153,7 @@ func (conf *AppConf) language(num int) (ret string) {
 }
 
 func InitBoxes() {
+	cleanupInterruptedCheckout()
 	blockCount := treenode.CountBlocks()
 	initialized := 0 < blockCount
 	for _, box := range Conf.GetOpenedBoxes() {

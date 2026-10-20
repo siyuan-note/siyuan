@@ -12,6 +12,7 @@ import {
     transactionError
 } from "../../dialog/processSystem";
 import {progressLoading} from "../../dialog/progress";
+import {syncCheckoutProgress} from "../../sync/checkoutProgress";
 import type {App} from "../../index";
 import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
 import {reloadEmoji} from "../../emoji";
@@ -190,6 +191,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "downloadProgress":
                 downloadProgress(data.data);
+                break;
+            case "syncProgress":
+                syncCheckoutProgress(data);
                 break;
             case"progress":
                 progressLoading(data);

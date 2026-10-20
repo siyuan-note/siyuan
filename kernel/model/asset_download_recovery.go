@@ -22,7 +22,11 @@ func processAssetDownloadRecovery(repo *dejavu.Repo, recoverFiles bool) error {
 		id, changes, err = repo.AssetDownloadChanges()
 	}
 	if changes != nil && changes.DataChanged() {
-		processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, "a", 0, true)
+		mode := "a"
+		if !recoverFiles {
+			mode = "c"
+		}
+		processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, mode, 0, true)
 	}
 	if id != "" && err == nil {
 		err = repo.AcknowledgeAssetDownloadChanges(id)

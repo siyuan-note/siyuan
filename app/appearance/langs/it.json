@@ -3379,6 +3379,11 @@
 		"428": "Il server non consente di creare cartelle qui; controllare il percorso WebDAV e i permessi di scrittura",
 		"429": "Impossibile creare la cartella nel cloud; verificare che l’elemento superiore sia una cartella e che non esista un file con lo stesso nome",
 		"430": "L’endpoint WebDAV non ha restituito una cartella o dati di sincronizzazione; controllare l’indirizzo e il servizio WebDAV",
-		"431": "La sincronizzazione automatica riproverà alle %s; è possibile anche sincronizzare manualmente"
+		"431": "La sincronizzazione automatica riproverà alle %s; è possibile anche sincronizzare manualmente",
+		"432": "Ripristino di %s (%d/%d): %s / %s, %s/s, tempo rimanente %s",
+		"433": "Sincronizzazione annullata; i file completati sono stati conservati. Sincronizzare di nuovo per terminare",
+		"434": "Spazio su disco insufficiente per ripristinare questo file: necessario %s, disponibile %s",
+		"435": "File temporanei della sincronizzazione interrotta rimossi, liberati %s",
+		"436": "Sincronizzazione in corso; la modifica resta bloccata fino al termine o al completamento dell’annullamento"
 	}
 }

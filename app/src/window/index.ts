@@ -23,6 +23,7 @@ import {
     transactionError
 } from "../dialog/processSystem";
 import {progressLoading} from "../dialog/progress";
+import {syncCheckoutProgress} from "../sync/checkoutProgress";
 import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
@@ -126,6 +127,9 @@ class App {
                                 break;
                             case "setServerAddrs":
                                 updateServerAddresses(data.data);
+                                break;
+                            case "syncProgress":
+                                syncCheckoutProgress(data);
                                 break;
                             case "progress":
                                 progressLoading(data);

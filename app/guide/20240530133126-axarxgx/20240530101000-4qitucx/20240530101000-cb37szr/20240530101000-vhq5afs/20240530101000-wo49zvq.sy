@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20261020224352"
+		"updated": "20261020231029"
 	},
 	"Children": [
 		{
@@ -594,6 +594,61 @@
 				{
 					"Type": "NodeText",
 					"Data": "現在の同期元のリソースや履歴スナップショットが完全にダウンロードされていない場合、同期元の変更や設定の消去はできません。元の同期先へのアクセスを復旧し、すべてのリソースをダウンロードしてから再試行してください。保存や消去に失敗しても、有効な設定と下書きは保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-1j1jsub",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-1j1jsub",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同期中は現在のファイル、書き込み済みバイト数、速度、推定残り時間が表示されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "折りたたみ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと詳細を折りたたみ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ボタンで再び開けます。同期またはキャンセル処理が終わるまで編集はできません。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "キャンセル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとファイルまたは分割データの境界でキャンセルを要求します。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-f8dbg1y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-f8dbg1y",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンセル後も完了したファイルは保持され、現在の一時ファイルは削除されます。残りを完了するには再度同期してください。空き容量が不足している場合は、容量を確保して再試行してください。起動時またはファイル復元前に、所有を確認できる中断した同期の一時ファイルを削除し、解放した容量を表示します。"
 				}
 			]
 		},

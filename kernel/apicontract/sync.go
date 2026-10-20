@@ -12,6 +12,14 @@ import (
 type SyncEnabledRequest struct {
 	Enabled bool `json:"enabled"`
 }
+
+type CancelSyncCheckoutRequest struct {
+	TaskID string `json:"taskID" api:"trim"`
+}
+
+type CancelSyncCheckoutData struct {
+	Requested bool `json:"requested"`
+}
 type SyncIntervalRequest struct {
 	Interval float64 `json:"interval"`
 }

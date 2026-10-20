@@ -308,7 +308,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 formula.innerHTML = '<span class="katex">rendered formula</span>';
                 formula.setAttribute("data-render", "true");
             });
-        }, {TIMEOUT_DBLCLICK: 190, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
+        }, {TIMEOUT_DBLCLICK: 190, TIMEOUT_LONGPRESS: 460, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
             CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code",
             CUSTOM_SY_CODE_TAB_SPACES: "custom-sy-code-tab-spaces"}, () => {});
     const lute = Lute.New();
@@ -1162,6 +1162,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let redo = 0;
     let settingsOpened = 0;
     let overflowExpand: ((level: number | "expandAll" | "foldAll") => void) | undefined;
+    let panMenu: {active: boolean, toggle: () => void};
     let finishAllowed: boolean | Promise<boolean> = true;
     const options = {
         host, model,
@@ -1189,9 +1190,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onFold: (id: string) => folds.push(id),
         onUndo: () => undo++,
         onRedo: () => redo++,
-        onSettingsMenu: (_anchor: HTMLElement, expand?: typeof overflowExpand) => {
+        onSettingsMenu: (_anchor: HTMLElement, expand?: typeof overflowExpand, pan?: typeof panMenu) => {
             settingsOpened++;
             overflowExpand = expand;
+            panMenu = pan;
         },
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
@@ -1201,6 +1203,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); };
+    const enableHand = (targetHost: HTMLElement) => {
+        targetHost.querySelector<HTMLButtonElement>('[aria-label="more"]').click();
+        check.ok(panMenu);
+        check.equal(panMenu.active, false);
+        panMenu.toggle();
+    };
 
     // 方向键选中视口外的节点时自动平移，待完成的布局和只读视图使用同一定位逻辑。
     const navigationHost = document.createElement("div");
@@ -1313,7 +1321,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     // 顶部控件按悬停、焦点和全屏的实际可见状态避让，缩放画布保持相同的局部间距。
     const navigationToolbar = navigationHost.querySelector<HTMLElement>(".mindmap-view__toolbar");
     const navigationFit = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
-    const navigationControl = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+    const navigationControl = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="more"]');
     const moveNavigationPointer = async (inside: boolean) => {
         navigationHost.scrollIntoView({block: "start"});
         const bounds = navigationHost.getBoundingClientRect();
@@ -1599,7 +1607,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(view.findLine(branch).id, child.id, "the real canvas hit test selects each horizontal branch");
         }
         view.setReadOnly(true);
-        check.equal(host.querySelector('[aria-label="more"]'), null, "read-only views render saved styles without an edit menu");
+        check.ok(host.querySelector('[aria-label="more"]'), "read-only views retain the fallback pan menu");
+        check.equal(host.querySelector('[aria-label="connect"]'), null, "read-only views do not expose object editing actions");
         check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
         view.setReadOnly(false);
     }
@@ -2040,7 +2049,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
             const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
-            check.equal(lastButton.top > firstButton.top, width < 240,
+            check.equal(lastButton.top > firstButton.top, width < 180,
                 `compact global toolbars wrap only when necessary, width=${width}, fontSize=${fontSize}`);
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
             if (width >= 240) {
@@ -2057,14 +2066,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             if (width === 180) {
                 const popupBounds = toolbarPopup.getBoundingClientRect();
                 check.ok(popupBounds.bottom > toolbar.getBoundingClientRect().bottom,
-                    "zoom popup extends below the wrapping toolbar");
+                    "zoom popup extends below the compact toolbar");
                 const slider = toolbarPopup.querySelector<HTMLInputElement>("input");
                 const sliderBounds = slider.getBoundingClientRect();
                 check.equal(document.elementFromPoint(sliderBounds.left + sliderBounds.width / 2,
                     sliderBounds.top + sliderBounds.height / 2), slider, "zoom slider is not clipped or covered");
                 slider.value = "125";
                 slider.dispatchEvent(new Event("input", {bubbles: true}));
-                check.equal(view.scale, 1.25, "zoom controls remain usable after wrapping");
+                check.equal(view.scale, 1.25, "zoom controls remain usable at narrow widths");
             }
         }
     }
@@ -3208,7 +3217,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(getComputedStyle(panViewport).cursor, "default");
     check.equal(getComputedStyle(host.querySelector(".mindmap-view__node")).cursor, "default");
     check.equal(panButton.querySelector("use").getAttribute("xlink:href"), "#iconPan");
-    panButton.click();
+    check.equal(panButton.hidden, true, "the inactive hand tool is available through More without taking toolbar space");
+    enableHand(host);
+    check.equal(panButton.hidden, false, "the active mode provides a direct exit button");
     check.equal(panButton.getAttribute("aria-pressed"), "true");
     check.equal(getComputedStyle(panViewport).cursor, "grab");
     const panNode = host.querySelector<HTMLElement>(".mindmap-view__node");
@@ -3224,6 +3235,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.querySelector(".mindmap-view__ghost"), null);
     panButton.click();
     check.equal(panButton.getAttribute("aria-pressed"), "false");
+    check.equal(panButton.hidden, true);
     check.equal(getComputedStyle(panViewport).cursor, "default");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
     single.zoomAt(2.5);
@@ -3467,7 +3479,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.ok(Array.from(panHost.querySelectorAll(".mindmap-view__toolbar use"))
             .every(icon => icon.getAttribute("xlink:href") !== "#iconEdit"), "canvas activation has no separate pencil button");
         const hand = panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
-        hand.click();
+        enableHand(panHost);
         check.equal(panView.interactionActive, true);
         check.equal(getComputedStyle(viewport).touchAction, "none");
         check.equal(hand.getAttribute("aria-pressed"), "true", "hand tool activates one-finger canvas panning");
@@ -3506,7 +3518,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(panView.interactionActive, true, "desktop pointer input activates the canvas");
         document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
         check.equal(panView.interactionActive, false, "outside pointer input returns to reading");
-        hand.click();
+        enableHand(panHost);
         panHost.dispatchEvent(new FocusEvent("focusout", {relatedTarget: followingContent}));
         check.equal(panView.interactionActive, false, "moving focus outside returns to reading");
         panView.offsetX = 16 - rootPosition.x * panView.scale;
@@ -3569,6 +3581,85 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(panModel.list.outerHTML, sourceHTML, "interaction activation and panning do not change saved data");
         panView.destroy();
         scrollHost.remove();
+    }
+
+    // 密集节点上的快速触屏拖动平移画布，长按确认后才移动节点。
+    {
+        const touchSource = document.createElement("div");
+        touchSource.innerHTML = lute.Md2BlockDOM("* Root\n  * First\n  * Second\n  * Third\n");
+        const touchModel = api.readListMindmap(touchSource.firstElementChild as HTMLElement);
+        const touchHost = document.createElement("div");
+        touchHost.style.cssText = "position:fixed;left:0;top:0;width:600px;height:400px;z-index:100";
+        document.body.append(touchHost);
+        const touchMoves: unknown[][] = [];
+        const touchView = new api.ListMindmapView({...options, host: touchHost, model: touchModel,
+            onMove: (...args: unknown[]) => touchMoves.push(args)});
+        await settle();
+        const originalHTML = touchModel.list.outerHTML;
+        const firstId = touchModel.root.children[0].id;
+        const lastId = touchModel.root.children[2].id;
+        const touchNode = () => touchHost.querySelector<HTMLElement>(`[data-mindmap-id="${firstId}"]`);
+        const point = (id: string) => {
+            const rect = touchHost.querySelector<HTMLElement>(`[data-mindmap-id="${id}"]`).getBoundingClientRect();
+            return {id: 1, x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2)};
+        };
+        const nativeTouch = (events: Record<string, unknown>[]) =>
+            require("electron").ipcRenderer.invoke("mindmap-view-native-touch", events);
+        touchView.setInteractionActive(true);
+        const initialSelection = touchView.getSelectedId();
+        const from = point(firstId);
+        const beforePan = [touchView.offsetX, touchView.offsetY];
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [from]},
+            {type: "touchMove", touchPoints: [{...from, x: from.x + 40, y: from.y + 20}]},
+            {type: "wait", delay: 520},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.notDeepEqual([touchView.offsetX, touchView.offsetY], beforePan, "native swipes pan even when starting on a node");
+        check.equal(touchMoves.length, 0);
+        check.equal(touchView.getSelectedId(), initialSelection, "swiping a dense map does not select incidental nodes");
+        check.equal(touchModel.list.outerHTML, originalHTML);
+        touchView.fit();
+        await settle();
+        const heldFrom = point(firstId);
+        const destination = point(lastId);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [heldFrom]},
+            {type: "wait", delay: 520},
+            {type: "touchMove", touchPoints: [destination]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(touchMoves.length, 1, "a completed native long press allows one node move on release");
+        check.equal(touchMoves[0][0], firstId);
+        check.equal(touchMoves[0][1], lastId);
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), false);
+        const sendTouch = (type: string) => touchNode().dispatchEvent(new PointerEvent(type, {
+            bubbles: true, cancelable: true, pointerId: 71, pointerType: "touch", isPrimary: true,
+            button: 0, clientX: heldFrom.x, clientY: heldFrom.y,
+        }));
+        sendTouch("pointerdown");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), true, "holding provides visible drag feedback");
+        sendTouch("pointercancel");
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), false);
+        check.equal(touchMoves.length, 1, "cancellation does not submit the armed drag");
+        sendTouch("pointerdown");
+        sendTouch("pointerup");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), false, "a short tap leaves no delayed drag");
+        check.equal(touchView.getSelectedId(), firstId, "short taps still select a node");
+        touchView.setReadOnly(true);
+        sendTouch("pointerdown");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        check.equal(touchView.pointer?.touchNode, undefined, "read-only maps never arm a node move");
+        sendTouch("pointerup");
+        touchView.destroy();
+        touchHost.remove();
+        const fallbackHost = document.createElement("div");
+        const fallback = new api.ListMindmapView({...options, host: fallbackHost, onSettingsMenu: undefined, readOnly: true});
+        check.equal(fallbackHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]').hidden, false,
+            "standalone export retains a usable fallback when no application menu is available");
+        fallback.destroy();
     }
 
     lute.SetTabs(true);
@@ -5022,6 +5113,10 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true, maxTouchPoints: 2});
         try {
             for (const event of events) {
+                if (event.type === "wait") {
+                    await new Promise(resolve => setTimeout(resolve, event.delay));
+                    continue;
+                }
                 await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", event);
                 await new Promise(resolve => setTimeout(resolve, 30));
             }

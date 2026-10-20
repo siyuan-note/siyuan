@@ -183,7 +183,7 @@ const cases = async (source: string, css: string) => {
     const node = {id: "table-node", children: [] as unknown[], contentBlocks: [richTable], virtual: false};
     const model = {root: node, nodes: new Map([[node.id, node]]), metadata: {nodes: {}, relations: [] as {id: string}[]}};
     const view = Object.assign(new api.MindmapPreviewView(), {
-        options: {}, persistedLocked: false, nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(),
+        options: {}, persistedLocked: false, nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
         cancelSummarySelection: () => {}, renderTask: () => {}, destroyContentViews: () => {},
         label: (key: string) => key, updateRelations: () => {}, updateSummaries: () => {},
         updateSelection: () => {}, renderInspector: () => {}, refreshLayout: () => {},

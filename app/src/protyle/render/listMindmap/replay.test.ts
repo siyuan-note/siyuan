@@ -9,8 +9,9 @@ const indexSource = createSourceFile("index.ts", readFileSync("src/protyle/rende
     ScriptTarget.ES2021, true);
 const controller = indexSource.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
 assert.ok(controller && isClassDeclaration(controller));
-const replay = controller.members.find(item => item.name?.getText(indexSource) === "replay");
-const replaySource = compile(`class Controller { ${replay.getText(indexSource)} } globalThis.Controller = Controller;`);
+const replay = controller.members.filter(item => ["replay", "replaceSourceChildren"].includes(item.name?.getText(indexSource)));
+assert.equal(replay.length, 2);
+const replaySource = compile(`class Controller { ${replay.map(item => item.getText(indexSource)).join("\n")} } globalThis.Controller = Controller;`);
 
 // 小型 DOM 替身验证对象身份和替换顺序；真实布局/选区另由 Electron 回归覆盖。
 class ElementFixture {

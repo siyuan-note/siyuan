@@ -37,6 +37,8 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         let item: IMenu;
         let defaultItem: IMenu;
         let expandItem: IMenu;
+        let panItem: IMenu;
+        let entries: IMenu[];
         let defaultStyle = "bezier";
         const defaults: string[] = [];
         const placements: unknown[] = [];
@@ -63,9 +65,12 @@ test("desktop and mobile connector menus persist one undoable change and preserv
                 build(undefined, {show: (open: () => void) => open()});
             },
             Menu: class {
+                constructor() { entries = []; }
                 addItem(value: IMenu) {
+                    entries.push(value);
                     if (value.id === "defaultConnectorStyle") { defaultItem = value; }
                     else if (value.id === "expandLevel") { expandItem = value; }
+                    else if (value.id === "pan") { panItem = value; }
                     else { item = value; }
                 }
                 open(position: unknown) { placements.push(position); }
@@ -123,5 +128,12 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         (defaultItem.submenu as IMenu[]).find(entry => entry.id === "spline").click(undefined, undefined);
         assert.deepEqual(defaults, ["rounded"], "a stale menu cannot change preferences after editing is disabled");
         assert.equal(transactions.length, count, "an already open menu cannot edit a newly read-only map");
+        let panToggles = 0;
+        target.onSettingsMenu(anchor, undefined, {active: true, toggle: () => panToggles++});
+        assert.deepEqual(entries.map(entry => entry.id), ["pan"], "read-only menus contain no editable global settings");
+        assert.equal(panItem.checked, true, "the fallback pan mode remains visible in a read-only map's More menu");
+        panItem.click(undefined, undefined);
+        assert.equal(panToggles, 1);
+        assert.equal(transactions.length, count, "switching pan mode never changes source data");
     }
 });

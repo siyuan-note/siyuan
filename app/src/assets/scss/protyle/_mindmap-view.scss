@@ -391,6 +391,11 @@
       box-shadow: inset 0 0 0 2px var(--b3-theme-primary);
     }
 
+    &--drag-ready {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: 2px;
+    }
+
     &--dragging {
       opacity: .35;
       cursor: grabbing;

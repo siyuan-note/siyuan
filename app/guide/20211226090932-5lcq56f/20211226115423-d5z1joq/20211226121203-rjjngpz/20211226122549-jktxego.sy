@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261020162345"
+		"updated": "20261020181700"
 	},
 	"Children": [
 		{
@@ -4357,7 +4357,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261018200107"
+				"updated": "20261020181700"
 			},
 			"Children": [
 				{
@@ -13103,7 +13103,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261020162345"
+				"updated": "20261020181700"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13131,12 +13131,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018200107-s3tp7x9",
-				"updated": "20261018200107"
+				"updated": "20261020181700"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "按住 Ctrl（macOS 為 Command）並用滑鼠右鍵拖曳畫布可暫時平移，不會改變鍵盤焦點或啟用閱讀中的畫布，之後一般滾輪仍捲動文件。檢視鎖定時此手勢無法使用。一般模式下空白區域的左鍵拖曳不會平移畫布；啟用手形工具後可用左鍵拖曳平移。"
+					"Data": "按住 Ctrl（macOS 為 Command）並用滑鼠右鍵拖曳畫布可暫時平移，不會改變鍵盤焦點或啟用閱讀中的畫布，之後一般滾輪仍捲動文件。檢視鎖定時此手勢無法使用。一般模式下，空白區域的滑鼠左鍵拖曳用於框選節點。需要左鍵平移時，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手形工具"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中啟用手形，啟用後會顯示可直接退出該模式的按鈕。觸控螢幕上先輕點導圖啟用畫布，之後從節點或空白處快速單指拖曳會平移畫布；要移動節點，請長按節點，待邊框提示出現後再拖曳。未啟用時單指滑動仍捲動文件，雙指縮放和平移、雙擊節點編輯，以及多選、概括和連接模式維持原有操作。"
 				}
 			]
 		},

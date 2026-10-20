@@ -114,3 +114,13 @@ test("editing controls and touches outside the map do not activate pinch", () =>
     target.pinchEnd(event());
     assert.equal(target.pinching, false);
 });
+
+test("additional contacts cancel a pending node hold even when a control or third finger prevents pinch", () => {
+    for (const contacts of [[touch(60), touch(160, 120, true)], [touch(60), touch(160), touch(260)]]) {
+        const {target, cancelled} = setup();
+        target.pointer = {touchNode: "child"};
+        target.pinchStart(event(...contacts));
+        assert.equal(cancelled(), 1);
+        assert.equal(target.pinching, false);
+    }
+});

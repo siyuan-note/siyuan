@@ -58,7 +58,8 @@ export interface ListMindmapViewOptions {
     onFoldSiblings?: (id: string) => Promise<boolean>;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
-    onSettingsMenu?: (anchor: HTMLElement, expand?: (level: ListMindmapFoldTarget) => void) => void;
+    onSettingsMenu?: (anchor: HTMLElement, expand?: (level: ListMindmapFoldTarget) => void,
+                      pan?: {active: boolean, toggle: () => void}) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
     onTaskMenu?: (id: string, anchor: HTMLElement) => void;
     onTabTaskToggle?: (id: string, itemId: string) => void;
@@ -84,6 +85,8 @@ interface PointerState {
     pan?: boolean;
     id?: string;
     nodeId?: string;
+    touchNode?: string;
+    touchDragTimer?: number;
     startX: number;
     startY: number;
     x: number;
@@ -283,13 +286,14 @@ export class ListMindmapView {
         this.listen(this.viewport, "touchmove", this.pinchMove, {passive: false});
         this.listen(this.viewport, "touchend", this.pinchEnd, {passive: false});
         this.listen(this.viewport, "touchcancel", this.pinchEnd, {passive: false});
+        this.listen(this.viewport, "touchcancel", this.cancelPointer);
         this.listen(window, "blur", () => {
             this.pinching = false;
             this.pinch = undefined;
             this.setInteractionActive(false);
         });
         this.listen(this.viewport, "contextmenu", (event: MouseEvent) => {
-            if (this.suppressPanContextMenu) {
+            if (this.suppressPanContextMenu || this.pointer?.touchNode) {
                 event.preventDefault();
             }
         });
@@ -590,17 +594,17 @@ export class ListMindmapView {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
             return;
         }
+        if (this.options.onSettingsMenu) {
+            add("settings", "more", "iconMore", () => {
+                const selectedId = this.selectedId;
+                this.options.onSettingsMenu(this.buttons.get("settings"),
+                    this.buttons.get("expandLevel").hidden ? level => this.finishThen(() => {
+                        void this.expandToLevel(level, selectedId).catch(error => console.error(error));
+                    }) : undefined, {active: this.panning, toggle: () => this.togglePanning()});
+            });
+            this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
+        }
         if (!this.readOnly) {
-            if (this.options.onSettingsMenu) {
-                add("settings", "more", "iconMore", () => {
-                    const selectedId = this.selectedId;
-                    this.options.onSettingsMenu(this.buttons.get("settings"),
-                        this.buttons.get("expandLevel").hidden ? level => this.finishThen(() => {
-                            void this.expandToLevel(level, selectedId).catch(error => console.error(error));
-                        }) : undefined);
-                });
-                this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
-            }
             add("summary", "listMindmapSummary", "iconGroups", () => {
                 this.finishThen(() => {
                     this.setInteractionActive(true);
@@ -654,18 +658,7 @@ export class ListMindmapView {
             button.before(control);
             control.append(button, this.levelSelect);
         }
-        add("pan", "cursorHand", "iconPan", () => {
-            this.finishThen(() => {
-                this.setInteractionActive(true);
-                this.finishRelationEdit?.(true);
-                this.cancelPointer();
-                this.setPanning(!this.panning);
-                this.relationFrom = undefined;
-                this.relationPreview = undefined;
-                this.inspector.hidden = true;
-                this.updateSelection();
-            });
-        });
+        add("pan", "cursorHand", "iconPan", () => this.togglePanning());
         this.setPanning(this.panning);
         const zoomControl = createElement("div", "mindmap-view__zoom-control");
         const zoomActions = createElement("div", "mindmap-view__zoom-actions");
@@ -705,6 +698,22 @@ export class ListMindmapView {
         }
     }
 
+    private togglePanning() {
+        this.finishThen(() => {
+            if (this.locked || this.destroyed) {
+                return;
+            }
+            this.setInteractionActive(true);
+            this.finishRelationEdit?.(true);
+            this.cancelPointer();
+            this.setPanning(!this.panning);
+            this.relationFrom = undefined;
+            this.relationPreview = undefined;
+            this.inspector.hidden = true;
+            this.updateSelection();
+        });
+    }
+
     private setPanning(value: boolean) {
         if (value) {
             this.cancelSummarySelection();
@@ -713,12 +722,15 @@ export class ListMindmapView {
         this.options.host.classList.toggle("mindmap-view--pan", value);
         this.viewport.classList.toggle("mindmap-view__viewport--pan", value);
         const button = this.buttons.get("pan");
+        if (button) {
+            button.hidden = !!this.options.onSettingsMenu && !value;
+        }
         button?.classList.toggle("block__icon--active", value);
         button?.setAttribute("aria-pressed", String(value));
     }
 
     public update(model: ListMindmapModel) {
-        if (this.pointer?.relation || this.pointer?.summary || this.pointer?.selection) {
+        if (this.pointer?.relation || this.pointer?.summary || this.pointer?.selection || this.pointer?.touchNode) {
             this.cancelPointer();
         }
         if (this.destroyed) {
@@ -2233,6 +2245,9 @@ export class ListMindmapView {
     }
 
     private pinchStart = (event: TouchEvent) => {
+        if (event.touches.length > 1 && this.pointer?.touchNode) {
+            this.cancelPointer();
+        }
         if (this.locked || event.touches.length !== 2 || Array.from(event.touches).some(touch =>
             !this.viewport.contains(touch.target as Node) ||
             ((touch.target as Element).closest("button, input, select, textarea, audio, video, iframe") ||
@@ -2415,7 +2430,9 @@ export class ListMindmapView {
             return;
         }
         if (id) {
-            this.selectNode(id, event.button === 0 && (event.ctrlKey || event.metaKey || this.multiSelect));
+            if (event.pointerType !== "touch" || event.ctrlKey || event.metaKey || this.multiSelect) {
+                this.selectNode(id, event.button === 0 && (event.ctrlKey || event.metaKey || this.multiSelect));
+            }
             if (event.ctrlKey || event.metaKey || this.multiSelect) {
                 this.suppressLinkClick = true;
                 this.options.host.focus({preventScroll: true});
@@ -2435,8 +2452,10 @@ export class ListMindmapView {
             pointerId: event.pointerId,
             rightButton: event.button === 2,
             pan: this.panning || event.button === 2 || event.pointerType === "touch",
-            id: !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
+            id: event.pointerType !== "touch" && !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
             nodeId: id,
+            touchNode: event.pointerType === "touch" && !this.readOnly && this.options.onMove &&
+                id !== this.model.root.id && this.model.nodes.has(id) && !this.model.nodes.get(id).virtual ? id : undefined,
             startX: event.clientX,
             startY: event.clientY,
             x: this.offsetX,
@@ -2450,9 +2469,33 @@ export class ListMindmapView {
             // 在原点击元素捕获指针，保留链接目标，同时让连续点击可以识别为双击。
             this.pointerCapture = id ? event.target as HTMLElement : this.viewport;
             this.pointerCapture.setPointerCapture(event.pointerId);
+            if (this.pointer.touchNode) {
+                this.startTouchNodeDrag(this.pointer);
+            }
         } catch {
             this.cancelPointer();
         }
+    }
+
+    private startTouchNodeDrag(pointer: PointerState) {
+        if (!pointer.touchNode) {
+            return;
+        }
+        // 快速滑动始终平移；只有在原节点上长按完成后才允许改变导图结构。
+        pointer.touchDragTimer = window.setTimeout(() => {
+            pointer.touchDragTimer = undefined;
+            if (this.pointer !== pointer || pointer.moved || this.readOnly || this.pinching || this.panning ||
+                this.multiSelect || this.summarySelecting || this.relationFrom ||
+                this.destroyed || !this.model.nodes.has(pointer.touchNode)) {
+                return;
+            }
+            pointer.id = pointer.touchNode;
+            pointer.pan = false;
+            this.selectNode(pointer.id);
+            this.inspector.hidden = true;
+            this.suppressLinkClick = true;
+            this.nodeElements.get(pointer.id)?.classList.add("mindmap-view__node--drag-ready");
+        }, Constants.TIMEOUT_LONGPRESS);
     }
 
     private pointerMove = (event: PointerEvent) => {
@@ -2493,6 +2536,8 @@ export class ListMindmapView {
         if (!pointer.moved && Math.hypot(dx, dy) < 5) {
             return;
         }
+        clearTimeout(pointer.touchDragTimer);
+        pointer.touchDragTimer = undefined;
         event.preventDefault();
         if (!pointer.moved && (pointer.id || pointer.pan)) {
             pointer.hiddenControls?.forEach(element => element.classList.add("mindmap-view__node--hide-controls"));
@@ -2706,8 +2751,11 @@ export class ListMindmapView {
             }
             return;
         }
-        this.suppressLinkClick = moved;
+        this.suppressLinkClick = moved || !!pointer.touchNode && !!id;
         this.cancelPointer();
+        if (!moved && !id && event.pointerType === "touch" && pointer.nodeId && !this.panning) {
+            this.selectNode(pointer.nodeId);
+        }
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
         } else if (!moved && !pointer.nodeId && !pointer.rightButton && !this.readOnly && !this.panning) {
@@ -2804,6 +2852,7 @@ export class ListMindmapView {
         this.clearDrop();
         const pointer = this.pointer;
         this.pointer = undefined;
+        clearTimeout(pointer?.touchDragTimer);
         pointer?.hiddenControls?.forEach(element => element.classList.remove("mindmap-view__node--hide-controls"));
         this.summaryBox.hidden = true;
         if (pointer?.summary) {
@@ -2821,7 +2870,7 @@ export class ListMindmapView {
         this.ghost?.remove();
         this.ghost = undefined;
         this.viewport.classList.remove("mindmap-view__viewport--dragging");
-        this.nodeElements.forEach(element => element.classList.remove("mindmap-view__node--dragging"));
+        this.nodeElements.forEach(element => element.classList.remove("mindmap-view__node--dragging", "mindmap-view__node--drag-ready"));
         if (pointer?.relation) {
             if (pointer.relation.endpoint) {
                 this.nodeElements.forEach(element => element.classList.remove("mindmap-view__node--relation"));

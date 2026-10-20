@@ -19,7 +19,7 @@ globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outp
 
 const setup = () => {
     const frames: (() => void)[] = [];
-    const context: any = {clampMindmapPanOffset, clampMindmapPanPosition, WheelEvent: {DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2},
+    const context: any = {clearTimeout, clampMindmapPanOffset, clampMindmapPanPosition, WheelEvent: {DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2},
         requestAnimationFrame: (action: () => void) => frames.push(action)};
     runInNewContext(compiled, context);
     const target = new context.View();

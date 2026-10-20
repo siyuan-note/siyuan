@@ -249,32 +249,37 @@ class ListMindmapController {
             onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
                 metadata.viewLocked = locked;
             }) : Promise.resolve(true),
-            onSettingsMenu: (anchor, expand) => {
+            onSettingsMenu: (anchor, expand, pan) => {
                 toggleMenu({
                     target: anchor,
                     build: (_menu, session) => {
-                        if (!canEdit(owner, list)) {
-                            return;
-                        }
                         const menu = new Menu();
-                        menu.addItem(getListMindmapConnectorMenuItem(readListMindmap(list).metadata.connectorStyle || "bezier",
-                            style => {
-                                void this.metadata(metadata => {
-                                    if ((metadata.connectorStyle || "bezier") === style) {
-                                        return false;
-                                    }
-                                    if (style === "bezier") {
-                                        delete metadata.connectorStyle;
-                                    } else {
-                                        metadata.connectorStyle = style;
-                                    }
-                                });
-                            }, window.siyuan.languages));
-                        menu.addItem(getListMindmapConnectorMenuItem(getDefaultListMindmapConnectorStyle(), style => {
-                            if (canEdit(owner, list)) {
-                                setDefaultListMindmapConnectorStyle(style);
-                            }
-                        }, window.siyuan.languages, "default"));
+                        if (pan) {
+                            menu.addItem({
+                                id: "pan", icon: "iconPan", label: window.siyuan.languages.cursorHand,
+                                checked: pan.active, click: pan.toggle,
+                            });
+                        }
+                        if (canEdit(owner, list)) {
+                            menu.addItem(getListMindmapConnectorMenuItem(readListMindmap(list).metadata.connectorStyle || "bezier",
+                                style => {
+                                    void this.metadata(metadata => {
+                                        if ((metadata.connectorStyle || "bezier") === style) {
+                                            return false;
+                                        }
+                                        if (style === "bezier") {
+                                            delete metadata.connectorStyle;
+                                        } else {
+                                            metadata.connectorStyle = style;
+                                        }
+                                    });
+                                }, window.siyuan.languages));
+                            menu.addItem(getListMindmapConnectorMenuItem(getDefaultListMindmapConnectorStyle(), style => {
+                                if (canEdit(owner, list)) {
+                                    setDefaultListMindmapConnectorStyle(style);
+                                }
+                            }, window.siyuan.languages, "default"));
+                        }
                         if (expand) {
                             menu.addItem({
                                 id: "expandLevel", icon: "iconExpandLevel", label: window.siyuan.languages.expandLevel,

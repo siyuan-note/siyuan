@@ -206,9 +206,9 @@ git diff --exit-code $releaseCommit origin/master
 - 将公开分发的安装包和最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，核对版本、目标提交和文件名后公开正式版
 - 确认正式版标签已创建，并检查 [Release Docker Image](../.github/workflows/dockerimage.yml) 的运行状态；该工作流监听 `v*` 标签推送，正式版同时更新 `latest`，预发行版只发布版本标签，仅合并分支不会触发
 - 通过下载域名下载安装包并核对摘要
-- 同步 Gitee
 - 上传百度网盘
 - 链滴登录 `siyuan` 账号发布公告
+- 同步 Gitee
 - 修改并部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
 - 部署 Index（版本更新、构建和推送已由发布准备的 `--publish --execute` 完成）
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架

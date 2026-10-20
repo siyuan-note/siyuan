@@ -206,8 +206,8 @@ class EditorWorkflowTests(unittest.TestCase):
             check = job(name)
             self.assertRegex(check, r"(?m)^    needs: prepare$")
             self.assertIn("contents: read", check)
-            self.assertIn("uses: actions/checkout@v6", check)
-            self.assertIn("uses: actions/setup-node@v6", check)
+            self.assertIn("uses: actions/checkout@v7", check)
+            self.assertIn("uses: actions/setup-node@v7", check)
             self.assertNotRegex(check, r"(?m)^    continue-on-error:")
         for name in ["kernel-tests-linux", "kernel-tests-windows"]:
             check = job(name)

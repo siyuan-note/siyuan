@@ -594,16 +594,6 @@ export class ListMindmapView {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
             return;
         }
-        if (this.options.onSettingsMenu) {
-            add("settings", "more", "iconMore", () => {
-                const selectedId = this.selectedId;
-                this.options.onSettingsMenu(this.buttons.get("settings"),
-                    this.buttons.get("expandLevel").hidden ? level => this.finishThen(() => {
-                        void this.expandToLevel(level, selectedId).catch(error => console.error(error));
-                    }) : undefined, {active: this.panning, toggle: () => this.togglePanning()});
-            });
-            this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
-        }
         if (!this.readOnly) {
             add("summary", "listMindmapSummary", "iconGroups", () => {
                 this.finishThen(() => {
@@ -685,6 +675,16 @@ export class ListMindmapView {
         this.buttons.get("documentLayout").hidden = !this.fullscreenMarker;
         this.buttons.get("documentLayout").setAttribute("aria-pressed", String(!this.documentFrame.hidden));
         add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+        if (this.options.onSettingsMenu) {
+            add("settings", "more", "iconMore", () => {
+                const selectedId = this.selectedId;
+                this.options.onSettingsMenu(this.buttons.get("settings"),
+                    this.buttons.get("expandLevel").hidden ? level => this.finishThen(() => {
+                        void this.expandToLevel(level, selectedId).catch(error => console.error(error));
+                    }) : undefined, {active: this.panning, toggle: () => this.togglePanning()});
+            });
+            this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
+        }
         this.updateToolbarLayout();
     }
 
@@ -3581,16 +3581,20 @@ export class ListMindmapView {
         select.setAttribute("aria-pressed", String(this.multiSelect));
         select.classList.toggle("color__square--current", this.multiSelect);
         this.inspector.append(select);
-        if (this.options.onClipboardMenu) {
-            const more = squareButton("more", "iconMore", () => this.options.onClipboardMenu(more, ids));
-            more.setAttribute("aria-haspopup", "menu");
-            this.inspector.append(more);
-        }
+        const appendMore = () => {
+            if (this.options.onClipboardMenu) {
+                const more = squareButton("more", "iconMore", () => this.options.onClipboardMenu(more, ids));
+                more.classList.add("mindmap-view__node-more");
+                more.setAttribute("aria-haspopup", "menu");
+                this.inspector.append(more);
+            }
+        };
         if (multiple) {
             const remove = squareButton("delete", "iconTrashcan", () => this.deleteSelection());
             remove.disabled = ids.includes(this.model.root.id) ||
                 this.model.root.virtual && this.model.root.children.every(node => ids.includes(node.id));
             this.inspector.append(remove);
+            appendMore();
             return;
         }
         const style = this.model.metadata.nodes[id] || {};
@@ -3628,6 +3632,7 @@ export class ListMindmapView {
         if (node && !node.virtual && node !== this.model.root) {
             this.inspector.append(squareButton("delete", "iconTrashcan", () => this.deleteSelection()));
         }
+        appendMore();
     }
 
     private toggleFullscreen() {

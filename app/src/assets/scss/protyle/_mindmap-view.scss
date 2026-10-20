@@ -118,6 +118,7 @@
 
   &__toolbar-group {
     @include protyle-toolbar-surface($shadow: none);
+    position: relative;
     align-items: center;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -180,9 +181,9 @@
   }
 
   &__zoom-control {
-    position: relative;
     display: flex;
     align-items: center;
+    align-self: stretch;
     flex-shrink: 0;
     pointer-events: auto;
 
@@ -195,8 +196,8 @@
   &__zoom-actions {
     @include protyle-toolbar-surface;
     position: absolute;
-    top: 100%;
-    right: 0;
+    top: calc(100% - 4px);
+    right: 4px;
     display: none;
     align-items: center;
     gap: 8px;
@@ -901,6 +902,10 @@
     .mindmap-view__palette {
       margin: 0;
     }
+  }
+
+  &__node-more {
+    order: 2;
   }
 
   &__tooltip {

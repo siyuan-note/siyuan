@@ -1558,6 +1558,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
     const settings = host.querySelector<HTMLButtonElement>('[aria-label="more"]');
     check.equal(settings.getAttribute("aria-haspopup"), "menu");
+    check.equal(settings.nextElementSibling, null, "More is the last toolbar control");
+    check.equal(settings.previousElementSibling.getAttribute("aria-label"), "fullscreen");
     settings.click();
     check.equal(settingsOpened, 1, "the editable toolbar opens the shared settings menu");
     const toolbarWidth = host.style.width;
@@ -2049,6 +2051,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
             const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
+            check.equal(toolbarGroup.lastElementChild.getAttribute("aria-label"), "more",
+                "More stays last at every toolbar width");
+            for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
+                if (!control.hidden) {
+                    check.ok(control.getBoundingClientRect().right <= lastButton.right + 1,
+                        `More stays rightmost after wrapping, width=${width}, fontSize=${fontSize}`);
+                }
+            }
             check.equal(lastButton.top > firstButton.top, width < 180,
                 `compact global toolbars wrap only when necessary, width=${width}, fontSize=${fontSize}`);
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
@@ -3020,7 +3030,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     });
     await settle();
     const levelButton = host.querySelector<HTMLButtonElement>('.mindmap-view__toolbar button[aria-label="expandLevel"]');
-    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "more");
+    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "listMindmapLock");
     check.equal(levelButton.nextElementSibling.getAttribute("aria-label"), "cursorHand");
     check.equal(host.querySelector(".mindmap-view__level-select"), null);
     levelView.selectNode(levelChild);

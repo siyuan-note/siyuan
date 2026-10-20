@@ -126,6 +126,7 @@ const browserCases = async (source: string, css: string) => {
     document.body.append(host);
     const copied: {ids: string[], cut: boolean}[] = [];
     const pasted: {id: string, kind: string}[] = [];
+    const menus: {anchor: HTMLElement, ids: string[]}[] = [];
     // Synthetic events have no native pointer capture; geometry and handlers still run in Chromium.
     const capture = HTMLElement.prototype.setPointerCapture;
     const hasCapture = HTMLElement.prototype.hasPointerCapture;
@@ -134,7 +135,7 @@ const browserCases = async (source: string, css: string) => {
     const view = new api.ListMindmapView({host, model, onExit() {},
         onCopy: (ids: string[], cut: boolean) => copied.push({ids, cut}),
         onPaste: (id: string, kind: string) => pasted.push({id, kind}),
-        onClipboardMenu() {}, onDeleteNodes() {}});
+        onClipboardMenu: (anchor: HTMLElement, ids: string[]) => menus.push({anchor, ids}), onDeleteNodes() {}});
     const wait = () => new Promise(resolve => setTimeout(resolve, 40));
     await wait();
     const pointer = (id: string, modifiers: PointerEventInit = {}) => {
@@ -145,8 +146,28 @@ const browserCases = async (source: string, css: string) => {
             clientY: rect.top + rect.height / 2, ...modifiers}));
         view.viewport.dispatchEvent(new PointerEvent("pointerup", {pointerId: 1, bubbles: true}));
     };
+    const checkNodeMenu = async () => {
+        for (const width of [240, 320, 850]) {
+            host.style.width = `${width}px`;
+            view.renderInspector();
+            await wait();
+            const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
+            const more = inspector.querySelector<HTMLButtonElement>('[aria-label="more"]');
+            check.equal(inspector.lastElementChild, more, "More follows the node actions in keyboard order");
+            const right = more.getBoundingClientRect().right;
+            for (const control of Array.from(inspector.children) as HTMLElement[]) {
+                check.ok(control.getBoundingClientRect().right <= right + 1,
+                    `More stays rightmost in single and multiple node menus, width=${width}`);
+            }
+            more.click();
+            check.equal(menus.at(-1).anchor, more);
+            check.deepEqual(menus.at(-1).ids, view.getSelectedIds(), "More retains the current node selection");
+        }
+    };
     pointer(a.id);
+    await checkNodeMenu();
     pointer(b.id, {ctrlKey: true});
+    await checkNodeMenu();
     check.deepEqual(new Set(view.getSelectedIds()), new Set([a.id, b.id]));
     check.equal(host.querySelectorAll('[aria-selected="true"]').length, 2);
     host.dispatchEvent(new ClipboardEvent("copy", {bubbles: true, cancelable: true, clipboardData: new DataTransfer()}));

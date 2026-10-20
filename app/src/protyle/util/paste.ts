@@ -18,7 +18,8 @@ import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, isInHarmony, readClipboard, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {focusByOffset, getEditorRange, getUndoFocusContext} from "./selection";
-import {getSelectionOffset} from "./selectionOffsets";
+import {focusByRange, getSelectionOffset} from "./selectionOffsets";
+import {restoreTableVirtualizationDOM} from "./tableVirtualizationDOM";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -823,6 +824,36 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (getUnsupportedBlocks) {
             const source = siyuanHTML || (textHTML ? protyle.lute.HTML2BlockDOM(textHTML) :
                 protyle.lute.Md2BlockDOM(textPlain));
+            const tableCellContext = getTableCellRichContext(protyle);
+            if (tableCellContext && /<table[\s>]/i.test(source)) {
+                const template = document.createElement("template");
+                template.innerHTML = source;
+                const nodes = Array.from(template.content.childNodes).filter(node =>
+                    node.nodeType === Node.ELEMENT_NODE ||
+                    node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== "");
+                const element = nodes.length === 1 && nodes[0].nodeType === Node.ELEMENT_NODE ?
+                    nodes[0] as HTMLElement : undefined;
+                if (element && (element.tagName === "TABLE" || element.dataset.type === "NodeTable") &&
+                    element.querySelector("th, td")) {
+                    // 单元格区域由外层表格按网格粘贴，先提交内部编辑器，避免载荷被当作嵌套表格。
+                    const {owner, cell, finish} = tableCellContext;
+                    if (!isPasteInsertPositionAvailable() || owner.disabled) {
+                        return;
+                    }
+                    finish();
+                    if (!cell.isConnected || !owner.element.isConnected || cell.contains(protyle.element)) {
+                        return;
+                    }
+                    restoreTableVirtualizationDOM(cell.closest('[data-type="NodeTable"]'));
+                    const range = document.createRange();
+                    range.selectNodeContents(cell);
+                    range.collapse(true);
+                    owner.wysiwyg.element.focus({preventScroll: true});
+                    focusByRange(range);
+                    await paste(owner, {target: cell, textPlain, textHTML: "", siyuanHTML: source});
+                    return;
+                }
+            }
             const unsupported = getUnsupportedBlocks(source);
             if (unsupported.length > 0) {
                 showMessage(window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));

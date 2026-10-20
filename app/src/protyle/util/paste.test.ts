@@ -23,6 +23,7 @@ const createHarness = (disabled = false, richPaste = false) => {
     const restrictedFallback = new Error("restricted fallback");
     const mocks: Record<string, unknown> = {
         "./pictureImages": {normalizePictureImages},
+        "./tableCellRichContext": {getTableCellRichContext: (): undefined => undefined},
         "../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png", ".jpg"]}},
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: () => (html: string) => html,

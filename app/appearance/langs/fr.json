@@ -1,4 +1,5 @@
 {
+	"agentInstructionsLocationConflict": "data/ai/AGENTS.md et data/storage/ai/AGENTS.md diffèrent ; fusionnez leur contenu dans le nouveau fichier, puis supprimez l’ancien fichier",
 	"dataImportConflicts": "Carnets en conflit",
 	"dataImportSkip": "Ignorer les conflits",
 	"dataImportOverwrite": "Écraser les conflits",
@@ -367,7 +368,7 @@
 	"oidcClaimRulesRequired": "Au moins une règle de revendication est requise si les droits administrateur ne sont pas accordés à tous les utilisateurs authentifiés",
 	"oidcGitHubClaimRulesTip": "Exemple GitHub (remplacez YOUR_GITHUB_USERNAME par votre nom d’utilisateur GitHub) : [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Instructions personnalisées",
-	"agentInstructionsTip": "Préférences de l’espace de travail enregistrées dans data/ai/AGENTS.md et synchronisées sauf exclusion ; texte UTF-8 de 32 KiB maximum, appliqué au prochain tour de conversation",
+	"agentInstructionsTip": "Préférences de l’espace de travail enregistrées dans data/storage/ai/AGENTS.md et synchronisées sauf exclusion ; texte UTF-8 de 32 KiB maximum, appliqué au prochain tour de conversation",
 	"agentInstructionsTooLarge": "Les instructions ne doivent pas dépasser 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md a changé. Copiez vos modifications, rouvrez l’éditeur et fusionnez-les avant d’enregistrer",
 	"listMindmapSummary": "Résumé",

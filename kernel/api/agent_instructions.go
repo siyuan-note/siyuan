@@ -22,8 +22,10 @@ func getAgentInstructionsContract(c *gin.Context, request apicontract.EmptyReque
 }
 
 func setAgentInstructionsContract(c *gin.Context, request apicontract.AIAgentInstructionsSaveRequest) apicontract.Response[apicontract.AIAgentInstructionsData] {
-	data, err := util.SaveAgentInstructions(request.Content, request.Revision)
-	if err == nil {
+	data, migrated, err := util.SaveAgentInstructions(request.Content, request.Revision)
+	if migrated {
+		model.IncSyncIfNeeded(util.AgentInstructionsPath(), util.LegacyAgentInstructionsPath())
+	} else if err == nil {
 		model.IncSyncIfNeeded(util.AgentInstructionsPath())
 	}
 	return agentInstructionsResponse(data, err)

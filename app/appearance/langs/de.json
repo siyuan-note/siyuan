@@ -1,4 +1,5 @@
 {
+	"agentInstructionsLocationConflict": "data/ai/AGENTS.md und data/storage/ai/AGENTS.md unterscheiden sich; führen Sie die Inhalte in der neuen Datei zusammen und entfernen Sie dann die alte Datei",
 	"dataImportConflicts": "Notizbücher mit Konflikten",
 	"dataImportSkip": "Konflikte überspringen",
 	"dataImportOverwrite": "Konflikte überschreiben",
@@ -367,7 +368,7 @@
 	"oidcClaimRulesRequired": "Mindestens eine Claim-Regel ist erforderlich, sofern nicht alle authentifizierten Benutzer Administratorrechte erhalten",
 	"oidcGitHubClaimRulesTip": "GitHub-Beispiel (YOUR_GITHUB_USERNAME durch Ihren GitHub-Benutzernamen ersetzen): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Benutzerdefinierte Anweisungen",
-	"agentInstructionsTip": "Arbeitsbereichsweite Vorgaben werden in data/ai/AGENTS.md gespeichert und synchronisiert, sofern nicht ausgeschlossen; UTF-8-Text bis 32 KiB, gültig ab dem nächsten Gesprächsschritt",
+	"agentInstructionsTip": "Arbeitsbereichsweite Vorgaben werden in data/storage/ai/AGENTS.md gespeichert und synchronisiert, sofern nicht ausgeschlossen; UTF-8-Text bis 32 KiB, gültig ab dem nächsten Gesprächsschritt",
 	"agentInstructionsTooLarge": "Anweisungen dürfen höchstens 32 KiB groß sein",
 	"agentInstructionsConflict": "AGENTS.md wurde geändert. Kopieren Sie Ihre Änderungen, öffnen Sie den Editor erneut und führen Sie die Änderungen vor dem Speichern zusammen",
 	"listMindmapSummary": "Zusammenfassung",

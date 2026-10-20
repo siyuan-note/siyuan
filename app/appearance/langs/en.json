@@ -1,4 +1,5 @@
 {
+	"agentInstructionsLocationConflict": "data/ai/AGENTS.md and data/storage/ai/AGENTS.md differ; merge their contents into the new file, then remove the old file",
 	"dataImportConflicts": "Conflicting notebooks",
 	"dataImportSkip": "Skip conflicts",
 	"dataImportOverwrite": "Overwrite conflicts",
@@ -367,7 +368,7 @@
 	"oidcClaimRulesRequired": "At least one claim rule is required unless administrator access is granted to all authenticated users",
 	"oidcGitHubClaimRulesTip": "GitHub example (replace YOUR_GITHUB_USERNAME with your GitHub username): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Custom instructions",
-	"agentInstructionsTip": "Workspace-wide preferences stored in data/ai/AGENTS.md and synced unless excluded; UTF-8 text up to 32 KiB, effective from the next conversation turn",
+	"agentInstructionsTip": "Workspace-wide preferences stored in data/storage/ai/AGENTS.md and synced unless excluded; UTF-8 text up to 32 KiB, effective from the next conversation turn",
 	"agentInstructionsTooLarge": "Instructions must be at most 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md has changed. Copy your edits, reopen the editor, and merge them before saving",
 	"listMindmapSummary": "Summary",

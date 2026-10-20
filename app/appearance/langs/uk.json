@@ -1,4 +1,5 @@
 {
+	"agentInstructionsLocationConflict": "Вміст data/ai/AGENTS.md і data/storage/ai/AGENTS.md відрізняється; об’єднайте його в новому файлі, а потім видаліть старий файл",
 	"dataImportConflicts": "Конфліктні блокноти",
 	"dataImportSkip": "Пропустити конфлікти",
 	"dataImportOverwrite": "Перезаписати конфлікти",
@@ -367,7 +368,7 @@
 	"oidcClaimRulesRequired": "Потрібне принаймні одне правило тверджень, якщо права адміністратора не надано всім автентифікованим користувачам",
 	"oidcGitHubClaimRulesTip": "Приклад GitHub (замініть YOUR_GITHUB_USERNAME своїм іменем користувача GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Власні інструкції",
-	"agentInstructionsTip": "Налаштування робочого простору зберігаються в data/ai/AGENTS.md і синхронізуються, якщо не виключені; текст UTF-8 до 32 KiB, застосовується з наступного ходу розмови",
+	"agentInstructionsTip": "Налаштування робочого простору зберігаються в data/storage/ai/AGENTS.md і синхронізуються, якщо не виключені; текст UTF-8 до 32 KiB, застосовується з наступного ходу розмови",
 	"agentInstructionsTooLarge": "Розмір інструкцій не має перевищувати 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md змінено. Скопіюйте свої правки, знову відкрийте редактор і об’єднайте зміни перед збереженням",
 	"listMindmapSummary": "Узагальнення",

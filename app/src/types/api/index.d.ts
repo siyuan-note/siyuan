@@ -2877,7 +2877,8 @@ export interface APIPOSTRoutes {
         additionalErrorStatuses: [409];
     };
     /**
-     * 返回工作空间 data/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+     * 返回工作空间 data/storage/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+     * 兼容读取旧路径 data/ai/AGENTS.md，读取不迁移；两处内容不同时返回 code=-1，保留两份文件并提示合并。
      * 缺失文件返回空 content 和 missing 修订，不创建文件；非 UTF-8 文本、超出 32 KiB 或读取失败返回 code=-1。
      */
     "/api/ai/agent/getInstructions": {
@@ -2997,6 +2998,7 @@ export interface APIPOSTRoutes {
     /**
      * 接收 content 和读取时的 revision，要求管理员权限且禁止只读写入。
      * 内容允许为空；修订冲突返回 code=-1 并保留原文。保存采用原子替换，并按工作空间同步忽略规则通知同步。
+     * 首次保存迁移旧路径 data/ai/AGENTS.md，先持久化原文到新路径再移除旧文件；旧路径的忽略规则需在保存前更新。
      * 指令在下一轮用户对话生效，同轮工具调用和压缩使用固定快照，且不能覆盖工具权限、审批或访问控制。
      */
     "/api/ai/agent/setInstructions": {

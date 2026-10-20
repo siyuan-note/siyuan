@@ -1,4 +1,5 @@
 {
+	"agentInstructionsLocationConflict": "data/ai/AGENTS.md と data/storage/ai/AGENTS.md の内容が異なります。内容を新しいファイルに統合してから古いファイルを削除してください",
 	"dataImportConflicts": "競合するノートブック",
 	"dataImportSkip": "競合をスキップ",
 	"dataImportOverwrite": "競合を上書き",
@@ -367,7 +368,7 @@
 	"oidcClaimRulesRequired": "認証済みの全ユーザーに管理者権限を付与しない場合、少なくとも1つのクレームルールが必要です",
 	"oidcGitHubClaimRulesTip": "GitHub の例（YOUR_GITHUB_USERNAME を自分の GitHub ユーザー名に置き換えてください）：[{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "カスタム指示",
-	"agentInstructionsTip": "ワークスペース全体の設定を data/ai/AGENTS.md に保存し、除外されていなければ同期します。最大 32 KiB の UTF-8 テキストに対応し、次の会話ターンから適用されます",
+	"agentInstructionsTip": "ワークスペース全体の設定を data/storage/ai/AGENTS.md に保存し、除外されていなければ同期します。最大 32 KiB の UTF-8 テキストに対応し、次の会話ターンから適用されます",
 	"agentInstructionsTooLarge": "指示は 32 KiB 以下にしてください",
 	"agentInstructionsConflict": "AGENTS.md が変更されました。編集内容をコピーし、エディターを開き直して変更を統合してから保存してください",
 	"listMindmapSummary": "要約",

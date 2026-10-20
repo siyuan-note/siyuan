@@ -1,4 +1,5 @@
 {
+	"agentInstructionsLocationConflict": "Súbory data/ai/AGENTS.md a data/storage/ai/AGENTS.md sa líšia; zlúčte ich obsah do nového súboru a potom odstráňte starý súbor",
 	"dataImportConflicts": "Konfliktné poznámkové bloky",
 	"dataImportSkip": "Preskočiť konflikty",
 	"dataImportOverwrite": "Prepísať konflikty",
@@ -367,7 +368,7 @@
 	"oidcClaimRulesRequired": "Ak nemajú všetci overení používatelia práva správcu, vyžaduje sa aspoň jedno pravidlo tvrdení",
 	"oidcGitHubClaimRulesTip": "Príklad pre GitHub (nahraďte YOUR_GITHUB_USERNAME svojím používateľským menom GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Vlastné pokyny",
-	"agentInstructionsTip": "Predvoľby pracovného priestoru uložené v data/ai/AGENTS.md a synchronizované, ak nie sú vylúčené; text UTF-8 do 32 KiB, platný od ďalšieho kola konverzácie",
+	"agentInstructionsTip": "Predvoľby pracovného priestoru uložené v data/storage/ai/AGENTS.md a synchronizované, ak nie sú vylúčené; text UTF-8 do 32 KiB, platný od ďalšieho kola konverzácie",
 	"agentInstructionsTooLarge": "Pokyny nesmú presiahnuť 32 KiB",
 	"agentInstructionsConflict": "Súbor AGENTS.md sa zmenil. Skopírujte svoje zmeny, znova otvorte editor a pred uložením ich zlúčte",
 	"listMindmapSummary": "Súhrn",

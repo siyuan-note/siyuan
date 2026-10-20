@@ -87,6 +87,7 @@ import {MOBILE_TOOLBAR_NAMES} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
+import {isGutterTouchDragging} from "../../protyle/ui/gutterVisibility";
 import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
 import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
 import {hintSlash} from "../../protyle/hint/extend";
@@ -1365,6 +1366,13 @@ export const hideKeyboardToolbar = (keyboardClosed = true) => {
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     inlineMathSelection.reset();
+    const gutterElement = getCurrentEditor()?.protyle.gutter?.element;
+    if (gutterElement && isGutterTouchDragging(gutterElement)) {
+        // 键盘收起时保留块标手势所需的 WebView 焦点，避免原生端取消后续触摸。
+        preventKeyboardToolbarRender();
+        hideKeyboardToolbar();
+        return KeyboardHideResult.PreserveSelection;
+    }
     if (preserveSelection && ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
         // 输入法切换安全键盘时会临时隐藏，保留普通输入框焦点，避免中断密码输入。
         preventKeyboardToolbarRender();

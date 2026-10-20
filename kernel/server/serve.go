@@ -51,6 +51,7 @@ import (
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
+	"github.com/siyuan-note/siyuan/kernel/tiffpreview"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/soheilhy/cmux"
 
@@ -1190,17 +1191,25 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
+		if shouldTranscodeTIFF(context, p) {
+			if !acquireImagePreviewSlot(context) {
+				return
+			}
+			defer releaseImagePreviewSlot()
+			serveTIFFPreview(context, p)
+			return
+		}
 		if heif.IsPath(p) {
 			addHEIFVaryAccept(context)
 			if shouldTranscodeHEIF(context) {
-				if !acquireHEIFPreviewSlot(context) {
+				if !acquireImagePreviewSlot(context) {
 					return
 				}
-				defer releaseHEIFPreviewSlot()
+				defer releaseImagePreviewSlot()
 				serveHEIFPreview(context, p)
 				return
 			}
-		} else {
+		} else if !tiffpreview.IsPath(p) {
 			if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
 				return
 			}
@@ -1236,17 +1245,22 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 		transcodeHEIF := heif.IsPath(p) && shouldTranscodeHEIF(context)
+		transcodeTIFF := shouldTranscodeTIFF(context, p)
 		if heif.IsPath(p) {
 			addHEIFVaryAccept(context)
 		}
-		if transcodeHEIF {
-			if !acquireHEIFPreviewSlot(context) {
+		if transcodeHEIF || transcodeTIFF {
+			if !acquireImagePreviewSlot(context) {
 				return
 			}
-			defer releaseHEIFPreviewSlot()
+			defer releaseImagePreviewSlot()
 		}
 		// 加密笔记本的历史是密文（.sy/assets/AV），需先解密再输出
 		if serveEncryptedHistory(context, p) {
+			return
+		}
+		if transcodeTIFF {
+			servePlainTIFFPreview(context, p, false)
 			return
 		}
 		if transcodeHEIF {
@@ -1258,13 +1272,13 @@ func serveAssets(ginServer *gin.Engine) {
 	})
 }
 
-var heifPreviewSlots = make(chan struct{}, 1)
+var imagePreviewSlots = make(chan struct{}, 1)
 
-func acquireHEIFPreviewSlot(c *gin.Context) bool {
+func acquireImagePreviewSlot(c *gin.Context) bool {
 	timer := time.NewTimer(30 * time.Second)
 	defer timer.Stop()
 	select {
-	case heifPreviewSlots <- struct{}{}:
+	case imagePreviewSlots <- struct{}{}:
 		return true
 	case <-c.Request.Context().Done():
 		return false
@@ -1274,8 +1288,8 @@ func acquireHEIFPreviewSlot(c *gin.Context) bool {
 	}
 }
 
-func releaseHEIFPreviewSlot() {
-	<-heifPreviewSlots
+func releaseImagePreviewSlot() {
+	<-imagePreviewSlots
 }
 
 func setEncryptedAssetCacheHeaders(c *gin.Context) {
@@ -1611,18 +1625,21 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	defer model.ReleaseBoxReadLock(boxID)
 	heifRequest := heif.IsPath(absPath) && !strings.EqualFold(context.Query("download"), "true")
 	transcodeHEIF := heif.IsPath(absPath) && shouldTranscodeHEIF(context)
+	transcodeTIFF := shouldTranscodeTIFF(context, absPath)
 	if heifRequest && rejectOversizedHEIF(context, absPath, true) {
 		return true
 	}
 	var ciphertext []byte
 	var readErr error
-	if heifRequest {
+	if transcodeTIFF {
+		ciphertext, readErr = tiffpreview.ReadFileLimited(absPath, int64(tiffpreview.MaxInputBytes)+2*1024*1024)
+	} else if heifRequest {
 		ciphertext, readErr = heif.ReadFileLimited(absPath, int64(heif.MaxInputBytes)+2*1024*1024)
 	} else {
 		ciphertext, readErr = os.ReadFile(absPath)
 	}
 	if readErr != nil {
-		if errors.Is(readErr, heif.ErrInputTooLarge) {
+		if errors.Is(readErr, heif.ErrInputTooLarge) || errors.Is(readErr, tiffpreview.ErrInputTooLarge) {
 			context.Status(http.StatusRequestEntityTooLarge)
 		} else {
 			context.Status(http.StatusNotFound)
@@ -1655,6 +1672,10 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 		return true
 	}
 	defer clear(plain)
+	if transcodeTIFF {
+		writeTIFFPreview(context, plain, true)
+		return true
+	}
 	if heifRequest && len(plain) > heif.MaxInputBytes {
 		context.Status(http.StatusRequestEntityTooLarge)
 		return true
@@ -1727,14 +1748,15 @@ func serveRepoDiff(ginServer *gin.Engine) {
 			return
 		}
 		transcodeHEIF := heif.IsPath(requestPath) && shouldTranscodeHEIF(context)
+		transcodeTIFF := shouldTranscodeTIFF(context, requestPath)
 		if heif.IsPath(requestPath) {
 			addHEIFVaryAccept(context)
 		}
-		if transcodeHEIF {
-			if !acquireHEIFPreviewSlot(context) {
+		if transcodeHEIF || transcodeTIFF {
+			if !acquireImagePreviewSlot(context) {
 				return
 			}
-			defer releaseHEIFPreviewSlot()
+			defer releaseImagePreviewSlot()
 		}
 		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）
 		parts := strings.SplitN(strings.TrimPrefix(requestPath, "/"), "/", 2)
@@ -1759,6 +1781,10 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		p := filepath.Join(repoDiffBaseDir, filepath.FromSlash(strings.TrimPrefix(requestPath, "/")))
 		if !gulu.File.IsSubPath(repoDiffBaseDir, p) {
 			context.Status(http.StatusUnauthorized)
+			return
+		}
+		if transcodeTIFF {
+			servePlainTIFFPreview(context, p, encryptedBoxID != "")
 			return
 		}
 		if transcodeHEIF {

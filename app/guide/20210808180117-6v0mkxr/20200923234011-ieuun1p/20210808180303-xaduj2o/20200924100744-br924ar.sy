@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261018221152"
+		"updated": "20261021003402"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20261016013311"
+				"updated": "20261021003402"
 			},
 			"Children": [
 				{
@@ -493,6 +493,49 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hover over an image to see its file name, format, loaded original dimensions, title, and tooltip text, even if it has no title. Local workspace images also show file size when available. File size is omitted for remote and encrypted notebook images."
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-19jkwn2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261021003402-19jkwn2",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF images"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261021003402-g6tlloh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-g6tlloh",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF images (.tif/.tiff) inserted as assets display the first frame. The original file is preserved for download; switching frames is not currently supported. Preview brightness for 16-bit grayscale images follows a valid ImageJ display range, or the actual grayscale range of the first frame when no display range is available."
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-up66rhq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-up66rhq",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Previews accept files up to 64 MiB and frames up to 50 million pixels on desktop or 12.5 million pixels on mobile. BigTIFF, floating-point, CMYK, and JPEG-compressed TIFF images are not supported. Unsupported files remain available for download and can be opened in an external application."
 				}
 			]
 		},

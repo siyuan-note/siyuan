@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261018221152"
+		"updated": "20261021003402"
 	},
 	"Children": [
 		{
@@ -128,7 +128,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20261016013311"
+				"updated": "20261021003402"
 			},
 			"Children": [
 				{
@@ -489,6 +489,49 @@
 				{
 					"Type": "NodeText",
 					"Data": "滑鼠懸停圖片可查看檔名、格式、已載入圖片的原始尺寸、標題和提示文字，無標題的圖片也會顯示這些資訊。本機工作空間圖片還會顯示可取得的檔案大小。網路圖片和加密筆記本圖片不顯示檔案大小。"
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-8jtd6hy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261021003402-8jtd6hy",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF 圖片"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261021003402-pq0fz6d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-pq0fz6d",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "作為資源檔案插入的 TIFF 圖片（.tif/.tiff）顯示第一幀，下載時仍保留原始檔案，暫不支援切換幀。16 位元灰階圖片的預覽亮度優先採用有效的 ImageJ 顯示範圍，未提供顯示範圍時依第一幀的實際灰階範圍調整。"
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-aalgaoz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-aalgaoz",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "預覽支援不超過 64 MiB 的檔案，單幀上限為桌面端 5000 萬像素、行動端 1250 萬像素。暫不支援 BigTIFF、浮點、CMYK 和 JPEG 壓縮的 TIFF 圖片。不支援預覽的檔案仍可下載並使用外部應用程式開啟。"
 				}
 			]
 		},

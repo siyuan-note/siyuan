@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -269,5 +270,119 @@ func TestDownloadInstallPkgSourcesSkipsRetryWhenNoSourceUsable(t *testing.T) {
 	}
 	if got := requests.Load(); 2 != got {
 		t.Fatalf("unusable sources were retried: %d requests", got)
+	}
+}
+
+// 首字节等待超过探测窗口不代表所有源不可达，仍需保留顺序下载回退。
+func TestDownloadInstallPkgSourcesRetriesAfterProbeWindowExpires(t *testing.T) {
+	dir := prepareInstallPackageTest(t)
+	content := installPkgProbeTestContent()
+	metadata := installPkgDownloadMetadata(content)
+	var requests atomic.Int32
+	source := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if requests.Add(1) <= 2 {
+			<-r.Context().Done()
+			return
+		}
+		_, _ = w.Write(content)
+	}))
+	t.Cleanup(source.Close)
+
+	if err := downloadInstallPkgSources([]string{source.URL, source.URL}, metadata); err != nil {
+		t.Fatal(err)
+	}
+	if got := requests.Load(); 3 != got {
+		t.Fatalf("unexpected request count after probe timeout: %d", got)
+	}
+	assertInstallPkgDownloaded(t, dir, content)
+}
+
+type installPkgInterruptedReader struct {
+	content []byte
+}
+
+func (r *installPkgInterruptedReader) Read(buffer []byte) (int, error) {
+	if 0 == len(r.content) {
+		return 0, io.EOF
+	}
+	read := copy(buffer, r.content)
+	r.content = r.content[read:]
+	return read, io.ErrUnexpectedEOF
+}
+
+// 同一次读取返回数据和错误时，不得让成功写盘覆盖读取错误并发布安装包。
+func TestInstallPkgProbeDownloadPreservesReadError(t *testing.T) {
+	dir := prepareInstallPackageTest(t)
+	content := []byte("interrupted package")
+	metadata := installPkgDownloadMetadata(content)
+	probe := newInstallPkgProbe(context.Background(), "https://example.invalid/pkg", 1, make(chan *installPkgProbe, 1))
+	t.Cleanup(probe.cancel)
+	err := probe.download(io.NopCloser(&installPkgInterruptedReader{content: content}), dir, metadata)
+	if !errors.Is(err, io.ErrUnexpectedEOF) {
+		t.Fatalf("read error was lost: %v", err)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if 0 != len(entries) {
+		t.Fatalf("interrupted download left files: %v", entries)
+	}
+}
+
+// 胜出源校验失败后按原顺序重试，并由后续源发布经过校验的安装包。
+func TestDownloadInstallPkgSourcesRetriesAfterWinnerFailure(t *testing.T) {
+	dir := prepareInstallPackageTest(t)
+	content := installPkgProbeTestContent()
+	metadata := installPkgDownloadMetadata(content)
+	started := make(chan struct{})
+	var badRequests, goodRequests atomic.Int32
+	good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if 1 == goodRequests.Add(1) {
+			close(started)
+			<-r.Context().Done()
+			return
+		}
+		_, _ = w.Write(content)
+	}))
+	t.Cleanup(good.Close)
+	bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		badRequests.Add(1)
+		select {
+		case <-started:
+			_, _ = w.Write([]byte("invalid package"))
+		case <-r.Context().Done():
+		}
+	}))
+	t.Cleanup(bad.Close)
+
+	if err := downloadInstallPkgSources([]string{bad.URL, good.URL}, metadata); err != nil {
+		t.Fatal(err)
+	}
+	if 2 != badRequests.Load() || 2 != goodRequests.Load() {
+		t.Fatalf("unexpected fallback requests: bad=%d good=%d", badRequests.Load(), goodRequests.Load())
+	}
+	assertInstallPkgDownloaded(t, dir, content)
+}
+
+// 禁用客户端默认超时后，下载上下文仍必须能够终止已建立连接上的阻塞读取。
+func TestInstallPkgProbeOpenHonorsDownloadContext(t *testing.T) {
+	source := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.(http.Flusher).Flush()
+		<-r.Context().Done()
+	}))
+	t.Cleanup(source.Close)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	t.Cleanup(cancel)
+	probe := newInstallPkgProbe(ctx, source.URL, 1, make(chan *installPkgProbe, 1))
+	t.Cleanup(probe.cancel)
+	body, err := probe.open()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(probe.closeBody)
+	if _, err = io.ReadAll(body); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("download context did not interrupt the response body: %v", err)
 	}
 }

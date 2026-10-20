@@ -99,7 +99,7 @@ func probeAndDownloadInstallPkgWithin(installDir string, urls []string, metadata
 
 	timer := time.NewTimer(window)
 	defer timer.Stop()
-	awaitInstallPkgProbe(events, timer, len(probes))
+	allFailed := awaitInstallPkgProbe(events, timer, len(probes))
 
 	winner := pickInstallPkgProbe(probes)
 	for _, probe := range probes {
@@ -119,7 +119,10 @@ func probeAndDownloadInstallPkgWithin(installDir string, urls []string, metadata
 		}
 	}
 	if nil == winner {
-		return errNoUsableInstallPkgSource
+		if allFailed {
+			return errNoUsableInstallPkgSource
+		}
+		return errors.New("no install package source delivered data before probe selection")
 	}
 	if nil != winnerErr {
 		return fmt.Errorf("download install package [%s] failed: %w", winner.url, winnerErr)
@@ -128,18 +131,19 @@ func probeAndDownloadInstallPkgWithin(installDir string, urls []string, metadata
 	return nil
 }
 
-// awaitInstallPkgProbe 等待可以选举的时机：某个源读满上限或读完整个包，全部源都失败，或窗口到期。
-func awaitInstallPkgProbe(events <-chan *installPkgProbe, timer *time.Timer, total int) {
+// awaitInstallPkgProbe 等待选举时机，仅在全部源都明确失败时返回 true。
+func awaitInstallPkgProbe(events <-chan *installPkgProbe, timer *time.Timer, total int) bool {
 	for seen := 0; seen < total; seen++ {
 		select {
 		case probe := <-events:
 			if probe.completed.Load() {
-				return
+				return false
 			}
 		case <-timer.C:
-			return
+			return false
 		}
 	}
+	return true
 }
 
 // pickInstallPkgProbe 选出已读到最多字节且没有错误的源，并列时保留靠前的源。
@@ -207,7 +211,8 @@ func (p *installPkgProbe) run(installDir string, metadata *installPackageMetadat
 // open 打开下载连接，校验响应状态与内容编码，返回可继续读取的响应体。
 // 安装包必须拿到原始字节，因此显式声明 identity 并拒绝任何内容编码。
 func (p *installPkgProbe) open() (io.ReadCloser, error) {
-	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).DisableInsecureSkipVerify().SetUserAgent(util.UserAgent)
+	// 整次下载由探测上下文限时，避免客户端默认的两分钟超时提前中断有效连接。
+	client := req.C().SetTimeout(0).SetTLSHandshakeTimeout(7 * time.Second).DisableInsecureSkipVerify().SetUserAgent(util.UserAgent)
 	response, err := client.R().SetContext(p.ctx).SetHeader("Accept-Encoding", "identity").DisableAutoReadResponse().Get(p.url)
 	if nil != err {
 		return nil, err
@@ -255,7 +260,8 @@ func (p *installPkgProbe) download(body io.ReadCloser, installDir string, metada
 	written, chunk, lastPush := int64(len(buffer)), make([]byte, 32*1024), time.Now()
 	for {
 		var read int
-		read, err = body.Read(chunk)
+		var readErr error
+		read, readErr = body.Read(chunk)
 		if 0 < read {
 			if _, err = temporary.Write(chunk[:read]); err != nil {
 				logging.LogErrorf("write install package [%s] failed: %s", p.url, err)
@@ -268,11 +274,12 @@ func (p *installPkgProbe) download(body io.ReadCloser, installDir string, metada
 				util.PushStatusBar(fmt.Sprintf(Conf.Language(133), progress))
 			}
 		}
-		if io.EOF == err {
+		if io.EOF == readErr {
 			err = nil
 			break
 		}
-		if nil != err {
+		if nil != readErr {
+			err = readErr
 			logging.LogErrorf("download install package [%s] failed: %s", p.url, err)
 			return
 		}

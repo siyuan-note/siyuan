@@ -86,8 +86,8 @@ test("a failed assets dependency reports an error and permits another mount", as
     assert.equal(assets.mounted(), 1);
 });
 
-test("initial and repeated unused asset queries identify their own desktop or mobile frontend", () => {
-    for (const mobile of [false, true]) {
+test("desktop and mobile asset tabs identify unused queries and retry failed missing scans", async () => {
+    for (const [mobile, type] of [[false, "remove"], [false, "missing"], [true, "remove"], [true, "missing"]] as const) {
         const code = transpileModule(readFileSync("src/config/assets.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText;
@@ -96,7 +96,14 @@ test("initial and repeated unused asset queries identify their own desktop or mo
         const classList = {contains: (value: string) => value === "item", add: () => {}, remove: () => {}};
         const preview = {classList, removeAttribute: () => {}};
         const list = {nextElementSibling: preview, addEventListener: () => {}, querySelector: (): null => null};
-        const panel = {classList, getAttribute: () => "remove"};
+        const attributes = new Map<string, string>();
+        const panel = {
+            classList,
+            getAttribute: (key: string) => key === "data-type" ? type : attributes.get(key),
+            setAttribute: (key: string, value: string) => attributes.set(key, value),
+            removeAttribute: (key: string) => attributes.delete(key),
+            querySelector: () => list,
+        };
         const root = {
             classList,
             querySelector: (selector: string) => selector.includes("config-assets__list") ? list : {classList},
@@ -111,7 +118,12 @@ test("initial and repeated unused asset queries identify their own desktop or mo
                     fetchPost: (url: string, _data: any, _callback: any, headers: Record<string, string>) => {
                         requests.push({url, headers});
                     },
+                    fetchSyncPost: async (url: string): Promise<{code: number; data: null; msg: string}> => {
+                        requests.push({url, headers: {}});
+                        return {code: -1, data: null, msg: "Scan incomplete"};
+                    },
                 };
+                if (name === "../util/escape") return {escapeHtml: (text: string) => text};
                 if (name === "../util/fetchAppId") return {SIYUAN_APP_ID_HEADER: "X-SiYuan-App-ID"};
                 if (name === "../constants") return {Constants: {SIYUAN_APPID: "this-window"}};
                 if (name === "../util/functions") return {isMobile: () => mobile};
@@ -126,14 +138,90 @@ test("initial and repeated unused asset queries identify their own desktop or mo
         runInNewContext(code + "\nexports.assets = assets;", context);
         context.exports.assets.element = root;
         context.exports.assets.bindEvent({appId: "settings-host-window"});
-        click({
-            target: {classList, getAttribute: () => "remove", isEqualNode: () => false},
+        const event = {
+            target: {classList, getAttribute: () => type, isEqualNode: () => false},
             preventDefault: () => {}, stopPropagation: () => {},
-        });
+        };
+        click(event);
+        await new Promise(resolve => setImmediate(resolve));
         assert.equal(requests.length, 2);
-        requests.forEach(request => {
-            assert.equal(request.url, "/api/asset/getUnusedAssets");
-            assert.equal(request.headers["X-SiYuan-App-ID"], "this-window");
-        });
+        assert.equal(requests[0].url, "/api/asset/getUnusedAssets");
+        assert.equal(requests[0].headers["X-SiYuan-App-ID"], "this-window");
+        if (type === "remove") {
+            assert.equal(requests[1].url, "/api/asset/getUnusedAssets");
+            assert.equal(requests[1].headers["X-SiYuan-App-ID"], "this-window");
+        } else {
+            assert.equal(requests[1].url, "/api/asset/getMissingAssets");
+            assert.equal(attributes.has("data-init"), false);
+            assert.equal(attributes.has("data-loading"), false);
+            click(event);
+            await new Promise(resolve => setImmediate(resolve));
+            assert.equal(requests.length, 3);
+            assert.equal(requests[2].url, "/api/asset/getMissingAssets");
+        }
+    }
+});
+
+test("missing asset failures replace loading, remain retryable and never render an empty success", async () => {
+    const code = transpileModule(readFileSync("src/config/assets.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const rendered: unknown[] = [];
+    let complete: (response: any) => void;
+    let reject: (error: Error) => void;
+    let requests = 0;
+    let messages = 0;
+    const context = {
+        exports: {} as {loadMissingAssets: (panel: any) => Promise<void>; assets: {_renderList: (data: unknown) => void}},
+        window: {siyuan: {languages: {_kernel: {258: "Operation failed"}}}},
+        console: {error: () => {}},
+        require: (name: string) => {
+            if (name === "../util/fetch") return {
+                fetchSyncPost: (url: string) => {
+                    assert.equal(url, "/api/asset/getMissingAssets");
+                    requests++;
+                    return new Promise((resolve, fail) => { complete = resolve; reject = fail; });
+                },
+            };
+            if (name === "../util/escape") return {escapeHtml: (text: string) => text.replaceAll("<", "&lt;")};
+            if (name === "../dialog/message") return {showMessage: () => messages++};
+            return {};
+        },
+    };
+    runInNewContext(code + "\nexports.loadMissingAssets = loadMissingAssets; exports.assets = assets;", context);
+    context.exports.assets._renderList = data => rendered.push(data);
+    const attributes = new Map<string, string>();
+    const list = {innerHTML: ""};
+    const panel = {
+        getAttribute: (key: string) => attributes.get(key),
+        setAttribute: (key: string, value: string) => attributes.set(key, value),
+        removeAttribute: (key: string) => attributes.delete(key),
+        querySelector: () => list,
+    };
+    const failed = context.exports.loadMissingAssets(panel);
+    await context.exports.loadMissingAssets(panel);
+    assert.equal(requests, 1);
+    complete({code: -1, data: null, msg: "Scan incomplete: <broken.sy>"});
+    await failed;
+    assert.match(list.innerHTML, /Scan incomplete: &lt;broken.sy>/);
+    assert.doesNotMatch(list.innerHTML, /fn__loading/);
+    assert.equal(attributes.has("data-init"), false);
+    assert.equal(attributes.has("data-loading"), false);
+    assert.equal(rendered.length, 0);
+
+    const networkFailure = context.exports.loadMissingAssets(panel);
+    reject(new Error("offline"));
+    await networkFailure;
+    assert.match(list.innerHTML, /Operation failed/);
+    assert.equal(messages, 1);
+    assert.equal(attributes.has("data-init"), false);
+
+    for (const data of [[], [{item: "assets/missing.png"}]]) {
+        const retried = context.exports.loadMissingAssets(panel);
+        complete({code: 0, data, msg: ""});
+        await retried;
+        assert.equal(attributes.get("data-init"), "true");
+        assert.equal(attributes.has("data-loading"), false);
+        assert.equal(rendered.at(-1), data);
     }
 });

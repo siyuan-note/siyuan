@@ -3387,6 +3387,12 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
         output: "binary";
     };
+    /**
+     * 扫描已打开笔记本中的丢失资源，成功时返回列表（无丢失资源时为空数组）。
+     * 资源清单读取、笔记本枚举、目录遍历失败或 panic 时返回 code -1、data null。
+     * 单篇文档无法读取时继续扫描其他文档，最终也返回 code -1，msg 包含被跳过的路径，不发布不完整的列表。
+     * 保留管理员鉴权和加密笔记本请求租约，不改变资源存在性判定或任何持久化格式。
+     */
     "/api/asset/getMissingAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

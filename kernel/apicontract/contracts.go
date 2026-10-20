@@ -1171,6 +1171,11 @@ var GetUnusedEncryptedBoxAssets = define[EncryptedBoxAssetsRequest, []*AssetUnus
 // 失败补偿恢复源文件，未提交的中断批次在启动同步前恢复；清理历史只索引脱敏元数据。
 // 不改变现有全局清理行为，不修改加密格式，不生成全局资源索引或明文缓存。
 var RemoveUnusedEncryptedBoxAssets = define[RemoveEncryptedBoxAssetsRequest, AssetPathsData]("removeUnusedEncryptedBoxAssets", "/api/asset/removeUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetMissingAssets 扫描已打开笔记本中的丢失资源，成功时返回列表（无丢失资源时为空数组）。
+// 资源清单读取、笔记本枚举、目录遍历失败或 panic 时返回 code -1、data null。
+// 单篇文档无法读取时继续扫描其他文档，最终也返回 code -1，msg 包含被跳过的路径，不发布不完整的列表。
+// 保留管理员鉴权和加密笔记本请求租约，不改变资源存在性判定或任何持久化格式。
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。

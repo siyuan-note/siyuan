@@ -380,7 +380,10 @@ var removeUnusedEncryptedBoxAssets = contractHandler(apicontract.RemoveUnusedEnc
 
 var getMissingAssets = contractHandler(apicontract.GetMissingAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
-	missingAssets := model.MissingAssets()
+	missingAssets, err := model.MissingAssets()
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
 	return apicontract.Success(assetUnusedItems(missingAssets))
 })
 

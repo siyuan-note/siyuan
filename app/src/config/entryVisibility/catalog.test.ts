@@ -1124,6 +1124,7 @@ test("tab menu catalog follows its conditional menu declarations", () => {
         "pin",
         "unpin",
         "tabToWindow",
+        "tabToMainWindow",
     ]);
     assert.deepEqual(getEntryCatalogChildren("tab.split").map((item) => item.key), [
         "splitLR",

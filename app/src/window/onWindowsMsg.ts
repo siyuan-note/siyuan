@@ -8,6 +8,7 @@ import {Constants} from "../constants";
 import {flushWindowWorkspace} from "./workspace";
 import {hasNativeSettingTasks, setNativeSettingTask} from "../config/setting/taskBlocker";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../boot/globalEvent/globalShortcut";
+import {receiveTabInMainWindow} from "./moveTabToMainWindow";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);
@@ -44,6 +45,9 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
             break;
         case "closetab":
             closeTab(ipcData);
+            break;
+        case "moveTabToMainWindow":
+            void receiveTabInMainWindow(ipcData.data).catch(error => console.error(error));
             break;
         case "setTabDragData":
             window.siyuan.dragTab = ipcData.data as ITabDragData;

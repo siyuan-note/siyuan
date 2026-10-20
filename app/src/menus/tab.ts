@@ -4,6 +4,7 @@ import {Editor} from "../editor";
 import {closeTabByType, copyTab, resizeTabs} from "../layout/tabUtil";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
+import {canMoveTabToMainWindow, moveTabToMainWindow} from "../window/moveTabToMainWindow";
 /// #endif
 import {copySubMenu} from "./commonMenuItem";
 import type {App} from "../index";
@@ -239,6 +240,16 @@ export const initTabMenu = (app: App, tab: Tab) => {
             openNewWindow(tab);
         }
     }).element);
+    if (canMoveTabToMainWindow(tab)) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "tabToMainWindow",
+            label: window.siyuan.languages.tabToMainWindow,
+            icon: "iconMove",
+            click: () => {
+                void moveTabToMainWindow(tab).catch(error => console.error(error));
+            }
+        }).element);
+    }
     /// #endif
     return window.siyuan.menus.menu;
 };

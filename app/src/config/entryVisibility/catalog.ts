@@ -821,6 +821,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("pin", lang("pin")),
             node("unpin", lang("unpin")),
             node("tabToWindow", lang("tabToWindow")),
+            node("tabToMainWindow", lang("tabToMainWindow")),
         ],
     },
     {

@@ -22,7 +22,7 @@ jobs:
       GOPATH: ${{ github.workspace }}/go
       SIYUAN_E2E_SHARDS: ${{ fromJSON(inputs.config).e2e_shards }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
@@ -199,7 +199,7 @@ jobs:
         id: checkout_siyuan_testing
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-testing
           ref: main

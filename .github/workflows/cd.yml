@@ -24,7 +24,7 @@ jobs:
       release_body: ${{ steps.release_info.outputs.release_body }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Resolve editor testing revision
         id: testing_ref
@@ -55,7 +55,7 @@ jobs:
           echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
       - name: Checkout siyuan-android
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-android
           ref: main
@@ -129,7 +129,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
@@ -162,7 +162,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v6
@@ -192,7 +192,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version-file: kernel/go.mod
@@ -250,7 +250,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -299,7 +299,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -405,7 +405,7 @@ jobs:
       PLAYWRIGHT_JSON_OUTPUT_FILE: editor-results-${{ matrix.group }}.json
     steps:
       - name: Checkout test orchestration
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: source
 
@@ -420,7 +420,7 @@ jobs:
           test "$(uname -m)" = arm64
 
       - name: Checkout pinned siyuan-testing
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-testing
           ref: ${{ needs.prepare.outputs.testing_ref }}
@@ -582,7 +582,7 @@ jobs:
     needs: [prepare, languages, contracts]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
@@ -670,7 +670,7 @@ jobs:
           JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
 
       - name: Checkout siyuan-android
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-android
           ref: ${{ needs.prepare.outputs.android_ref }}

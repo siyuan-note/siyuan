@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Subdocument depth",
+	"automationCollectionDepthUnlimited": "Unlimited",
+	"automationCollectionDepthCurrent": "Current document only",
+	"automationCollectionDepthLimited": "Limit depth",
+	"automationCollectionDepthTip": "Includes each selected document itself; depth applies only to document scopes. Notebook and document scopes are combined",
 	"mindmapPasteChild": "Paste as child node",
 	"mindmapPasteSibling": "Paste as sibling node",
 	"embedBlockBreadcrumbParentPath": "Show parent path in breadcrumbs",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Copy OCR text",
 	"exportTitleImage": "Export title image",
 	"automationCollectBlocks": "Block matches conditions",
-	"automationCollectionScope": "Watch scope (includes subdocuments)",
+	"automationCollectionScope": "Watch scope",
 	"automationCollectionPreview": "Preview matching blocks",
 	"automationCollectPage": "Collect matches on this page",
 	"automationCollectionTip": "Automatic collection adds matching blocks. Source or rule changes keep existing entries and fields; use the collection review to clean up explicitly",

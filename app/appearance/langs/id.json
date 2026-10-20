@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Kedalaman subdokumen",
+	"automationCollectionDepthUnlimited": "Tanpa batas",
+	"automationCollectionDepthCurrent": "Hanya dokumen saat ini",
+	"automationCollectionDepthLimited": "Kedalaman maksimum",
+	"automationCollectionDepthTip": "Mencakup setiap dokumen yang dipilih; kedalaman hanya membatasi cakupan dokumen. Cakupan buku catatan dan dokumen digabungkan",
 	"mindmapPasteChild": "Tempel sebagai simpul anak",
 	"mindmapPasteSibling": "Tempel sebagai simpul sejajar",
 	"embedBlockBreadcrumbParentPath": "Tampilkan jalur induk di remah roti",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Salin teks OCR",
 	"exportTitleImage": "Ekspor gambar judul",
 	"automationCollectBlocks": "Blok memenuhi kondisi",
-	"automationCollectionScope": "Cakupan pemantauan (termasuk subdokumen)",
+	"automationCollectionScope": "Cakupan pemantauan",
 	"automationCollectionPreview": "Pratinjau blok yang cocok",
 	"automationCollectPage": "Kumpulkan kecocokan di halaman ini",
 	"automationCollectionTip": "Pengumpulan otomatis menambahkan blok yang cocok. Perubahan sumber atau aturan mempertahankan entri dan kolom yang ada; gunakan pemeriksaan pengumpulan untuk membersihkan secara eksplisit",

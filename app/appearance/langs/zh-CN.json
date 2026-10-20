@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "子文档深度",
+	"automationCollectionDepthUnlimited": "不限",
+	"automationCollectionDepthCurrent": "仅当前文档",
+	"automationCollectionDepthLimited": "最多层数",
+	"automationCollectionDepthTip": "包含每个选中文档本身，深度仅限制文档范围；笔记本与文档范围取并集",
 	"mindmapPasteChild": "粘贴为子节点",
 	"mindmapPasteSibling": "粘贴为同级节点",
 	"embedBlockBreadcrumbParentPath": "面包屑显示文档上层路径",
@@ -114,7 +119,7 @@
 	"copyOCRText": "复制 OCR 文本",
 	"exportTitleImage": "导出题头图",
 	"automationCollectBlocks": "普通块符合条件",
-	"automationCollectionScope": "监听范围（包含子文档）",
+	"automationCollectionScope": "监听范围",
 	"automationCollectionPreview": "预览匹配块",
 	"automationCollectPage": "收集本页匹配块",
 	"automationCollectionTip": "自动收集只添加匹配内容，原文或规则变化均保留已有条目及字段；可通过检查收集结果主动清理",

@@ -24,11 +24,14 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 		if name == "" {
 			name = "default"
 		}
-		t.Run(name, func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target) })
+		t.Run(name, func(t *testing.T) {
+			t.Run("unlimited", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, nil) })
+			t.Run("current", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, new(0)) })
+		})
 	}
 }
 
-func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) {
+func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, depth *int) {
 	fixture, view, keyID := setupBlockCollectionTest(t)
 	boxID := fixture.box.ID
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
@@ -93,6 +96,10 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 		view.Automations.Rules[0].BlockSource.Tags = nil
 	}
 	view.Automations.Rules[0].BlockSource.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-state", Operator: "equals", Value: "active"}}
+	if depth != nil {
+		view.Automations.Spec = 5
+		view.Automations.Rules[0].BlockSource.DocumentDepth = depth
+	}
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}

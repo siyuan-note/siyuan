@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "ความลึกของเอกสารย่อย",
+	"automationCollectionDepthUnlimited": "ไม่จำกัด",
+	"automationCollectionDepthCurrent": "เฉพาะเอกสารปัจจุบัน",
+	"automationCollectionDepthLimited": "ความลึกสูงสุด",
+	"automationCollectionDepthTip": "รวมตัวเอกสารแต่ละฉบับที่เลือกด้วย ความลึกจำกัดเฉพาะขอบเขตเอกสาร โดยรวมขอบเขตสมุดบันทึกและเอกสารเข้าด้วยกัน",
 	"mindmapPasteChild": "วางเป็นโหนดลูก",
 	"mindmapPasteSibling": "วางเป็นโหนดระดับเดียวกัน",
 	"embedBlockBreadcrumbParentPath": "แสดงเส้นทางหลักในเส้นทางนำทาง",
@@ -114,7 +119,7 @@
 	"copyOCRText": "คัดลอกข้อความ OCR",
 	"exportTitleImage": "ส่งออกรูปภาพส่วนหัว",
 	"automationCollectBlocks": "บล็อกตรงตามเงื่อนไข",
-	"automationCollectionScope": "ขอบเขตการติดตาม (รวมเอกสารย่อย)",
+	"automationCollectionScope": "ขอบเขตการติดตาม",
 	"automationCollectionPreview": "ดูตัวอย่างบล็อกที่ตรงกัน",
 	"automationCollectPage": "รวบรวมบล็อกที่ตรงกันในหน้านี้",
 	"automationCollectionTip": "การรวบรวมอัตโนมัติเพิ่มบล็อกที่ตรงเงื่อนไข การเปลี่ยนต้นฉบับหรือกฎจะคงรายการและเขตข้อมูลเดิมไว้ ใช้การตรวจสอบผลการรวบรวมเพื่อล้างข้อมูลด้วยตนเอง",

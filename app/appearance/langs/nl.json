@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Diepte van subdocumenten",
+	"automationCollectionDepthUnlimited": "Onbeperkt",
+	"automationCollectionDepthCurrent": "Alleen huidig document",
+	"automationCollectionDepthLimited": "Maximale diepte",
+	"automationCollectionDepthTip": "Omvat elk geselecteerd document zelf; de diepte geldt alleen voor documentbereiken. Notitieboek- en documentbereiken worden samengevoegd",
 	"mindmapPasteChild": "Plakken als onderliggend knooppunt",
 	"mindmapPasteSibling": "Plakken als knooppunt op hetzelfde niveau",
 	"embedBlockBreadcrumbParentPath": "Bovenliggend pad in het kruimelpad tonen",
@@ -114,7 +119,7 @@
 	"copyOCRText": "OCR-tekst kopiëren",
 	"exportTitleImage": "Titelafbeelding exporteren",
 	"automationCollectBlocks": "Blok voldoet aan voorwaarden",
-	"automationCollectionScope": "Volgbereik (inclusief subdocumenten)",
+	"automationCollectionScope": "Bewakingsbereik",
 	"automationCollectionPreview": "Voorbeeld van overeenkomende blokken",
 	"automationCollectPage": "Overeenkomsten op deze pagina verzamelen",
 	"automationCollectionTip": "Automatisch verzamelen voegt passende blokken toe. Wijzigingen in bron of regels behouden bestaande items en velden; gebruik de controle om expliciet op te ruimen",

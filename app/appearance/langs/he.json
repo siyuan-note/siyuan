@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "עומק מסמכי המשנה",
+	"automationCollectionDepthUnlimited": "ללא הגבלה",
+	"automationCollectionDepthCurrent": "המסמך הנוכחי בלבד",
+	"automationCollectionDepthLimited": "עומק מרבי",
+	"automationCollectionDepthTip": "כולל כל מסמך שנבחר עצמו; העומק מגביל רק טווחי מסמכים. טווחי מחברות ומסמכים משולבים יחד",
 	"mindmapPasteChild": "הדבקה כצומת ילד",
 	"mindmapPasteSibling": "הדבקה כצומת אח",
 	"embedBlockBreadcrumbParentPath": "הצגת נתיב האב בנתיב הניווט",
@@ -114,7 +119,7 @@
 	"copyOCRText": "העתקת טקסט OCR",
 	"exportTitleImage": "ייצוא תמונת כותרת",
 	"automationCollectBlocks": "בלוק תואם לתנאים",
-	"automationCollectionScope": "טווח מעקב (כולל מסמכי משנה)",
+	"automationCollectionScope": "טווח המעקב",
 	"automationCollectionPreview": "תצוגה מקדימה של בלוקים תואמים",
 	"automationCollectPage": "איסוף התאמות בעמוד זה",
 	"automationCollectionTip": "איסוף אוטומטי מוסיף בלוקים תואמים. שינויים במקור או בכללים שומרים על הרשומות והשדות הקיימים; ניתן לנקות במפורש דרך בדיקת האיסוף",

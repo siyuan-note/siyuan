@@ -7,6 +7,39 @@ import (
 	"testing"
 )
 
+func TestAVAutomationDocumentDepthContract(t *testing.T) {
+	endpoint := Endpoint[AVAutomationBlockSource, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, test := range []struct {
+		body  string
+		depth *int
+	}{
+		{`{}`, nil}, {`{"documentDepth":null}`, nil}, {`{"documentDepth":0}`, new(0)},
+		{`{"documentDepth":1}`, new(1)}, {`{"documentDepth":12}`, new(12)},
+	} {
+		value, err := endpoint.Decode(strings.NewReader(test.body))
+		if err != nil || (value.DocumentDepth == nil) != (test.depth == nil) ||
+			value.DocumentDepth != nil && *value.DocumentDepth != *test.depth {
+			t.Fatalf("depth input %s: %+v %v", test.body, value, err)
+		}
+		raw, err := json.Marshal(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var output map[string]json.RawMessage
+		if err = json.Unmarshal(raw, &output); err != nil {
+			t.Fatal(err)
+		}
+		if (output["documentDepth"] != nil) != (test.depth != nil) {
+			t.Fatalf("depth presence lost: %s", raw)
+		}
+	}
+	for _, body := range []string{`{"documentDepth":1.5}`, `{"documentDepth":"1"}`, `{"documentDepth":true}`} {
+		if _, err := endpoint.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid depth type accepted: %s", body)
+		}
+	}
+}
+
 func TestAVRequestCompatibility(t *testing.T) {
 	group, err := SetAttrViewGroup.Decode(strings.NewReader(`{"avID":" av ","blockID":" block ","group":{"FIELD":"key","method":2,"unknown":true},"ignoreRows":"ignored"}`))
 	if err != nil || group.AvID != " av " || group.BlockID != " block " || group.Group.Field != "key" || group.Group.Method != 2 || group.IgnoreRows {

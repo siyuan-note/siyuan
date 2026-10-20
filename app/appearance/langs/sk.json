@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Hĺbka poddokumentov",
+	"automationCollectionDepthUnlimited": "Bez obmedzenia",
+	"automationCollectionDepthCurrent": "Iba aktuálny dokument",
+	"automationCollectionDepthLimited": "Maximálna hĺbka",
+	"automationCollectionDepthTip": "Zahŕňa každý vybraný dokument; hĺbka obmedzuje iba rozsahy dokumentov. Rozsahy zápisníkov a dokumentov sa zjednocujú",
 	"mindmapPasteChild": "Prilepiť ako podradený uzol",
 	"mindmapPasteSibling": "Prilepiť ako uzol rovnakej úrovne",
 	"embedBlockBreadcrumbParentPath": "Zobraziť nadradenú cestu v navigačnej ceste",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Kopírovať text OCR",
 	"exportTitleImage": "Exportovať titulný obrázok",
 	"automationCollectBlocks": "Blok spĺňa podmienky",
-	"automationCollectionScope": "Rozsah sledovania (vrátane poddokumentov)",
+	"automationCollectionScope": "Rozsah sledovania",
 	"automationCollectionPreview": "Náhľad zodpovedajúcich blokov",
 	"automationCollectPage": "Zhromaždiť zhody na tejto stránke",
 	"automationCollectionTip": "Automatické zbieranie pridáva vyhovujúce bloky. Zmeny zdroja alebo pravidiel zachovajú existujúce položky a polia; na výslovné čistenie použite kontrolu zbierania",

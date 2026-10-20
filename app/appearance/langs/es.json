@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Profundidad de subdocumentos",
+	"automationCollectionDepthUnlimited": "Sin límite",
+	"automationCollectionDepthCurrent": "Solo el documento actual",
+	"automationCollectionDepthLimited": "Profundidad máxima",
+	"automationCollectionDepthTip": "Incluye cada documento seleccionado; la profundidad solo limita los ámbitos de documentos. Los ámbitos de cuadernos y documentos se unen",
 	"mindmapPasteChild": "Pegar como nodo hijo",
 	"mindmapPasteSibling": "Pegar como nodo hermano",
 	"embedBlockBreadcrumbParentPath": "Mostrar la ruta superior en la ruta de navegación",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Copiar texto OCR",
 	"exportTitleImage": "Exportar imagen de título",
 	"automationCollectBlocks": "Un bloque cumple las condiciones",
-	"automationCollectionScope": "Ámbito de seguimiento (incluye subdocumentos)",
+	"automationCollectionScope": "Ámbito de supervisión",
 	"automationCollectionPreview": "Vista previa de bloques coincidentes",
 	"automationCollectPage": "Recopilar coincidencias de esta página",
 	"automationCollectionTip": "La recopilación automática añade bloques coincidentes. Los cambios en el origen o las reglas conservan las entradas y los campos existentes; use la revisión para limpiarlos explícitamente",

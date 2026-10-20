@@ -1,7 +1,7 @@
 package apicontract
 
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
-// spec 为 1 至 4；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4。
+// spec 为 1 至 5；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
 // 旧读取器拒绝新版本，防止配置静默丢失。
 // 缺省配置不会触发自动化，既有版本的主类型匹配含义不变。
 // 普通条目新增、字段编辑及对应 API 会触发启用的规则，
@@ -30,6 +30,9 @@ type AVAutomationRule struct {
 }
 
 // AVAutomationBlockSource 监听范围取笔记本与文档的并集，文档包含子文档；范围至少选择一项。
+// documentDepth 缺省或 null 表示不限；非负整数限制每个所选文档的最大子文档深度，0 仅自身，1 包含自身及一级子文档。
+// 深度按文档 ID 路径相对计算，不限制文档内部块层级；不影响笔记本范围，重叠范围仍取并集；有限深度要求 spec 5。
+// 修改深度保留已有条目及字段，不自动补收存量；预览、显式收集和清理检查使用相同范围判断。
 // 类型组取或关系；标签和属性组各自通过 tagMatch、attributeMatch 选择 and（缺省）或 or（至少 spec 3）。
 // 各条件组之间取与关系，空组不限制；标签精确匹配，全部标签必须出现在同一个来源块中。
 // types 为空不限制类型；主类型匹配其全部子类型，类型之间取或关系。
@@ -47,6 +50,7 @@ type AVAutomationRule struct {
 type AVAutomationBlockSource struct {
 	NotebookIDs    []string                      `json:"notebookIDs,omitempty" api:"optional"`
 	DocumentIDs    []string                      `json:"documentIDs,omitempty" api:"optional"`
+	DocumentDepth  *int                          `json:"documentDepth,omitempty" api:"optional"`
 	Types          []string                      `json:"types,omitempty" api:"optional"`
 	Tags           []string                      `json:"tags,omitempty" api:"optional"`
 	Attributes     []*AVAutomationBlockAttribute `json:"attributes,omitempty" api:"optional"`

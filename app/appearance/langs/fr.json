@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Profondeur des sous-documents",
+	"automationCollectionDepthUnlimited": "Illimitée",
+	"automationCollectionDepthCurrent": "Document actuel uniquement",
+	"automationCollectionDepthLimited": "Profondeur maximale",
+	"automationCollectionDepthTip": "Inclut chaque document sélectionné ; la profondeur limite uniquement les périmètres de documents. Les périmètres des carnets et des documents sont réunis",
 	"mindmapPasteChild": "Coller comme nœud enfant",
 	"mindmapPasteSibling": "Coller comme nœud de même niveau",
 	"embedBlockBreadcrumbParentPath": "Afficher le chemin parent dans le fil d'Ariane",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Copier le texte OCR",
 	"exportTitleImage": "Exporter l’image de titre",
 	"automationCollectBlocks": "Un bloc remplit les conditions",
-	"automationCollectionScope": "Portée de surveillance (sous-documents inclus)",
+	"automationCollectionScope": "Périmètre de surveillance",
 	"automationCollectionPreview": "Aperçu des blocs correspondants",
 	"automationCollectPage": "Collecter les résultats de cette page",
 	"automationCollectionTip": "La collecte automatique ajoute les blocs correspondants. Les changements de source ou de règles conservent les entrées et champs existants ; utilisez la vérification pour les nettoyer explicitement",

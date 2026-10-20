@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "عمق المستندات الفرعية",
+	"automationCollectionDepthUnlimited": "بلا حدود",
+	"automationCollectionDepthCurrent": "المستند الحالي فقط",
+	"automationCollectionDepthLimited": "العمق الأقصى",
+	"automationCollectionDepthTip": "يشمل كل مستند محدد نفسه؛ يقتصر تطبيق العمق على نطاقات المستندات. يتم دمج نطاقات دفاتر الملاحظات والمستندات",
 	"mindmapPasteChild": "لصق كعقدة فرعية",
 	"mindmapPasteSibling": "لصق كعقدة شقيقة",
 	"embedBlockBreadcrumbParentPath": "إظهار المسار الأصل في مسار التنقل",
@@ -114,7 +119,7 @@
 	"copyOCRText": "نسخ نص OCR",
 	"exportTitleImage": "تصدير صورة العنوان",
 	"automationCollectBlocks": "الكتلة تطابق الشروط",
-	"automationCollectionScope": "نطاق المراقبة (يشمل المستندات الفرعية)",
+	"automationCollectionScope": "نطاق المراقبة",
 	"automationCollectionPreview": "معاينة الكتل المطابقة",
 	"automationCollectPage": "جمع المطابقات في هذه الصفحة",
 	"automationCollectionTip": "يضيف الجمع التلقائي الكتل المطابقة. تحتفظ تغييرات المصدر أو القواعد بالإدخالات والحقول الحالية؛ استخدم مراجعة الجمع للتنظيف الصريح",

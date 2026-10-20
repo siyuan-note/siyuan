@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261018144949"
+		"updated": "20261020211145"
 	},
 	"Children": [
 		{
@@ -4540,12 +4540,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-nrq3k5z",
-				"updated": "20261018120429"
+				"updated": "20261020211145"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope (includes subdocuments) to select notebooks or documents. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined. Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them. Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction. Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
+					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope to select notebooks or documents. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined. Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them. Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction. Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
+				}
+			]
+		},
+		{
+			"ID": "20261020211145-1vqtmd6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020211145-1vqtmd6",
+				"updated": "20261020211145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When document scopes are selected, Subdocument depth appears below Watch scope. Unlimited is the default and includes all descendant documents. Current document only includes each selected document itself. With Limit depth, enter a positive integer: 1 includes the selected document and its direct children, 2 also includes grandchildren, and so on. This setting is shared by all document scopes in the rule and does not limit notebook scopes; overlapping scopes are combined. Changing depth preserves existing entries and fields and does not collect existing content automatically. Use collection management to preview and collect matches or review and remove unmatched entries. Limited depth requires automation format 5; older clients reject it without rewriting the database."
 				}
 			]
 		},

@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Глубина вложенных документов",
+	"automationCollectionDepthUnlimited": "Без ограничений",
+	"automationCollectionDepthCurrent": "Только текущий документ",
+	"automationCollectionDepthLimited": "Максимальная глубина",
+	"automationCollectionDepthTip": "Включает каждый выбранный документ; глубина ограничивает только области документов. Области блокнотов и документов объединяются",
 	"mindmapPasteChild": "Вставить как дочерний узел",
 	"mindmapPasteSibling": "Вставить как узел того же уровня",
 	"embedBlockBreadcrumbParentPath": "Показывать родительский путь в навигационной цепочке",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Копировать текст OCR",
 	"exportTitleImage": "Экспортировать заглавное изображение",
 	"automationCollectBlocks": "Блок соответствует условиям",
-	"automationCollectionScope": "Область отслеживания (с дочерними документами)",
+	"automationCollectionScope": "Область отслеживания",
 	"automationCollectionPreview": "Просмотр подходящих блоков",
 	"automationCollectPage": "Собрать совпадения на этой странице",
 	"automationCollectionTip": "Автоматический сбор добавляет подходящие блоки. Изменения источника или правил сохраняют существующие записи и поля; используйте проверку сбора для явной очистки",

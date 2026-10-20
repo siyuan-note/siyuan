@@ -260,9 +260,9 @@ export type AVAutomationBlockAttribute = { "name": string; "operator": "equals" 
 
 export type AVAutomationBlockAttributeInput = { "name": string; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentDepth"?: number; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentDepth"?: number | null; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
 export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
@@ -8032,10 +8032,12 @@ export interface APIPOSTRoutes {
     /**
      * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 4，所有视图共享数据库级规则。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 5，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
      * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
      * spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
+     * spec 5 的 blockSource.documentDepth 限制各文档范围的子文档深度，0 仅自身，1 包含自身及一级子文档。
+     * 深度缺省或 null 不限，不影响笔记本范围，各范围仍取并集；修改不自动清理或补收已有内容。
      * 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。
      * 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
      * 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。

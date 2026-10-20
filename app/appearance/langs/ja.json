@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "子文書の深さ",
+	"automationCollectionDepthUnlimited": "無制限",
+	"automationCollectionDepthCurrent": "現在の文書のみ",
+	"automationCollectionDepthLimited": "最大階層数",
+	"automationCollectionDepthTip": "選択した各文書自体を含み、深さは文書の範囲にのみ適用されます。ノートブックと文書の範囲は和集合です",
 	"mindmapPasteChild": "子ノードとして貼り付け",
 	"mindmapPasteSibling": "同階層のノードとして貼り付け",
 	"embedBlockBreadcrumbParentPath": "パンくずリストに文書の上位パスを表示",
@@ -114,7 +119,7 @@
 	"copyOCRText": "OCR テキストをコピー",
 	"exportTitleImage": "題頭画像をエクスポート",
 	"automationCollectBlocks": "通常ブロックが条件に一致",
-	"automationCollectionScope": "監視範囲（子文書を含む）",
+	"automationCollectionScope": "監視範囲",
 	"automationCollectionPreview": "一致するブロックをプレビュー",
 	"automationCollectPage": "このページの一致ブロックを収集",
 	"automationCollectionTip": "自動収集は一致する内容を追加します。元の内容やルールが変わっても既存項目とフィールドは保持され、収集結果の確認から明示的に整理できます",

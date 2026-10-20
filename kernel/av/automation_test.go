@@ -134,7 +134,7 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, spec := range []int{1, 2, 3, 4} {
+	for _, spec := range []int{1, 2, 3, 4, 5} {
 		view, err := ParseAttributeViewData("20260921000000-layouts", data)
 		if err != nil {
 			t.Fatal(err)
@@ -162,8 +162,19 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 			rule.BlockSource.TagTarget = target
 			raw, _ = json.Marshal(view)
 			_, err = ParseAttributeViewData(view.ID, raw)
-			if (err == nil) != (spec == 4) {
+			if (err == nil) != (spec >= 4) {
 				t.Fatalf("tag target %s spec %d: %v", target, spec, err)
+			}
+		}
+		for _, depth := range []int{0, 1, 12} {
+			rule.BlockSource.DocumentDepth = &depth
+			raw, _ = json.Marshal(view)
+			parsed, parseErr := ParseAttributeViewData(view.ID, raw)
+			if (parseErr == nil) != (spec >= 5) {
+				t.Fatalf("document depth %d spec %d: %v", depth, spec, parseErr)
+			}
+			if parseErr == nil && *parsed.Automations.Rules[0].BlockSource.DocumentDepth != depth {
+				t.Fatal("document depth was not preserved")
 			}
 		}
 	}

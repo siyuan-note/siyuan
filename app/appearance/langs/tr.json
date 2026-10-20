@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Alt belge derinliği",
+	"automationCollectionDepthUnlimited": "Sınırsız",
+	"automationCollectionDepthCurrent": "Yalnızca mevcut belge",
+	"automationCollectionDepthLimited": "En fazla derinlik",
+	"automationCollectionDepthTip": "Seçilen her belgenin kendisini içerir; derinlik yalnızca belge kapsamlarını sınırlar. Not defteri ve belge kapsamları birleştirilir",
 	"mindmapPasteChild": "Alt düğüm olarak yapıştır",
 	"mindmapPasteSibling": "Aynı düzeyde düğüm olarak yapıştır",
 	"embedBlockBreadcrumbParentPath": "Gezinti yolunda üst yolu göster",
@@ -114,7 +119,7 @@
 	"copyOCRText": "OCR metnini kopyala",
 	"exportTitleImage": "Başlık görselini dışa aktar",
 	"automationCollectBlocks": "Blok koşulları karşılıyor",
-	"automationCollectionScope": "İzleme kapsamı (alt belgeler dahil)",
+	"automationCollectionScope": "İzleme kapsamı",
 	"automationCollectionPreview": "Eşleşen blokları önizle",
 	"automationCollectPage": "Bu sayfadaki eşleşmeleri topla",
 	"automationCollectionTip": "Otomatik toplama eşleşen blokları ekler. Kaynak veya kural değişiklikleri mevcut kayıt ve alanları korur; açıkça temizlemek için toplama incelemesini kullanın",

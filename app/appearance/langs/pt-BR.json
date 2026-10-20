@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Profundidade dos subdocumentos",
+	"automationCollectionDepthUnlimited": "Sem limite",
+	"automationCollectionDepthCurrent": "Somente o documento atual",
+	"automationCollectionDepthLimited": "Profundidade máxima",
+	"automationCollectionDepthTip": "Inclui cada documento selecionado; a profundidade limita apenas os escopos de documentos. Os escopos de cadernos e documentos são unidos",
 	"mindmapPasteChild": "Colar como nó filho",
 	"mindmapPasteSibling": "Colar como nó irmão",
 	"embedBlockBreadcrumbParentPath": "Mostrar o caminho superior na trilha de navegação",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Copiar texto OCR",
 	"exportTitleImage": "Exportar imagem de título",
 	"automationCollectBlocks": "Bloco atende às condições",
-	"automationCollectionScope": "Escopo de monitoramento (inclui subdocumentos)",
+	"automationCollectionScope": "Escopo de monitoramento",
 	"automationCollectionPreview": "Visualizar blocos correspondentes",
 	"automationCollectPage": "Coletar correspondências desta página",
 	"automationCollectionTip": "A coleta automática adiciona blocos correspondentes. Alterações na origem ou nas regras mantêm as entradas e campos existentes; use a verificação para limpar explicitamente",

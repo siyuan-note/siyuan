@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Дубина поддокумената",
+	"automationCollectionDepthUnlimited": "Неограничено",
+	"automationCollectionDepthCurrent": "Само тренутни документ",
+	"automationCollectionDepthLimited": "Највећа дубина",
+	"automationCollectionDepthTip": "Укључује сваки изабрани документ; дубина ограничава само опсеге докумената. Опсези бележница и докумената се обједињују",
 	"mindmapPasteChild": "Налепи као подређени чвор",
 	"mindmapPasteSibling": "Налепи као чвор истог нивоа",
 	"embedBlockBreadcrumbParentPath": "Прикажи надређену путању у навигационој путањи",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Копирај OCR текст",
 	"exportTitleImage": "Извези насловну слику",
 	"automationCollectBlocks": "Блок испуњава услове",
-	"automationCollectionScope": "Опсег праћења (укључује поддокументе)",
+	"automationCollectionScope": "Опсег праћења",
 	"automationCollectionPreview": "Преглед одговарајућих блокова",
 	"automationCollectPage": "Прикупи поклапања са ове странице",
 	"automationCollectionTip": "Аутоматско прикупљање додаје одговарајуће блокове. Промене извора или правила чувају постојеће ставке и поља; за изричито чишћење користите проверу прикупљања",

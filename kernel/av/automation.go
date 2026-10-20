@@ -27,10 +27,11 @@ type AutomationRule struct {
 	NotifyOnSuccess *bool                  `json:"notifyOnSuccess,omitempty"`
 }
 
-// AutomationBlockSource 的范围取并集，各类条件取交集；文档范围包含其子文档。
+// AutomationBlockSource 的范围取并集，各类条件取交集；文档深度缺省不限，0 仅包含文档本身。
 type AutomationBlockSource struct {
 	NotebookIDs    []string                    `json:"notebookIDs,omitempty"`
 	DocumentIDs    []string                    `json:"documentIDs,omitempty"`
+	DocumentDepth  *int                        `json:"documentDepth,omitempty"`
 	Types          []string                    `json:"types,omitempty"`
 	Tags           []string                    `json:"tags,omitempty"`
 	Attributes     []*AutomationBlockAttribute `json:"attributes,omitempty"`
@@ -68,6 +69,9 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		if rule.BlockSource.DocumentDepth != nil {
+			return 5
+		}
 		if rule.BlockSource.TagTarget != "" {
 			return 4
 		}
@@ -97,7 +101,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 4 {
+	if config.Spec < 1 || config.Spec > 5 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

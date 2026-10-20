@@ -6740,6 +6740,9 @@
             ]
           }
         },
+        "documentDepth": {
+          "type": "integer"
+        },
         "documentIDs": {
           "type": "array",
           "items": {
@@ -6806,6 +6809,16 @@
               }
             ]
           }
+        },
+        "documentDepth": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "documentIDs": {
           "type": "array",

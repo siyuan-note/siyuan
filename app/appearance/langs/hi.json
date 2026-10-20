@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "उपदस्तावेज़ों की गहराई",
+	"automationCollectionDepthUnlimited": "असीमित",
+	"automationCollectionDepthCurrent": "केवल वर्तमान दस्तावेज़",
+	"automationCollectionDepthLimited": "अधिकतम गहराई",
+	"automationCollectionDepthTip": "प्रत्येक चयनित दस्तावेज़ स्वयं भी शामिल है; गहराई केवल दस्तावेज़ों के दायरे को सीमित करती है। नोटबुक और दस्तावेज़ों के दायरे संयुक्त होते हैं",
 	"mindmapPasteChild": "चाइल्ड नोड के रूप में पेस्ट करें",
 	"mindmapPasteSibling": "समान स्तर के नोड के रूप में पेस्ट करें",
 	"embedBlockBreadcrumbParentPath": "ब्रेडक्रंब में मूल पथ दिखाएँ",
@@ -114,7 +119,7 @@
 	"copyOCRText": "OCR टेक्स्ट कॉपी करें",
 	"exportTitleImage": "शीर्षक चित्र निर्यात करें",
 	"automationCollectBlocks": "ब्लॉक शर्तों से मेल खाता है",
-	"automationCollectionScope": "निगरानी का दायरा (उपदस्तावेज़ सहित)",
+	"automationCollectionScope": "निगरानी का दायरा",
 	"automationCollectionPreview": "मेल खाने वाले ब्लॉक का पूर्वावलोकन",
 	"automationCollectPage": "इस पृष्ठ के मेल खाते ब्लॉक एकत्र करें",
 	"automationCollectionTip": "स्वचालित संग्रह मेल खाने वाले ब्लॉक जोड़ता है। स्रोत या नियम बदलने पर मौजूदा प्रविष्टियाँ और फ़ील्ड सुरक्षित रहते हैं; स्पष्ट सफ़ाई के लिए संग्रह समीक्षा का उपयोग करें",

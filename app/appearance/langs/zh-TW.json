@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "子文件深度",
+	"automationCollectionDepthUnlimited": "不限",
+	"automationCollectionDepthCurrent": "僅目前文件",
+	"automationCollectionDepthLimited": "最多層數",
+	"automationCollectionDepthTip": "包含每個所選文件本身，深度僅限制文件範圍；筆記本與文件範圍取聯集",
 	"mindmapPasteChild": "貼上為子節點",
 	"mindmapPasteSibling": "貼上為同層級節點",
 	"embedBlockBreadcrumbParentPath": "麵包屑顯示文件上層路徑",
@@ -114,7 +119,7 @@
 	"copyOCRText": "複製 OCR 文字",
 	"exportTitleImage": "匯出題頭圖",
 	"automationCollectBlocks": "一般區塊符合條件",
-	"automationCollectionScope": "監聽範圍（包含子文件）",
+	"automationCollectionScope": "監聽範圍",
 	"automationCollectionPreview": "預覽符合的區塊",
 	"automationCollectPage": "收集本頁符合的區塊",
 	"automationCollectionTip": "自動收集只新增相符內容，原文或規則變更均保留既有項目與欄位；可透過檢查收集結果主動清理",

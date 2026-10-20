@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Głębokość dokumentów podrzędnych",
+	"automationCollectionDepthUnlimited": "Bez ograniczeń",
+	"automationCollectionDepthCurrent": "Tylko bieżący dokument",
+	"automationCollectionDepthLimited": "Maksymalna głębokość",
+	"automationCollectionDepthTip": "Obejmuje każdy wybrany dokument; głębokość ogranicza tylko zakresy dokumentów. Zakresy notatników i dokumentów są łączone",
 	"mindmapPasteChild": "Wklej jako węzeł podrzędny",
 	"mindmapPasteSibling": "Wklej jako węzeł równorzędny",
 	"embedBlockBreadcrumbParentPath": "Pokaż ścieżkę nadrzędną w nawigacji okruszkowej",
@@ -114,7 +119,7 @@
 	"copyOCRText": "Kopiuj tekst OCR",
 	"exportTitleImage": "Eksportuj obraz tytułowy",
 	"automationCollectBlocks": "Blok spełnia warunki",
-	"automationCollectionScope": "Zakres obserwacji (z dokumentami podrzędnymi)",
+	"automationCollectionScope": "Zakres monitorowania",
 	"automationCollectionPreview": "Podgląd pasujących bloków",
 	"automationCollectPage": "Zbierz dopasowania z tej strony",
 	"automationCollectionTip": "Automatyczne zbieranie dodaje pasujące bloki. Zmiany źródła lub reguł zachowują istniejące wpisy i pola; do jawnego porządkowania służy przegląd zbierania",

@@ -1,4 +1,9 @@
 {
+	"automationCollectionDepth": "Tiefe der Unterdokumente",
+	"automationCollectionDepthUnlimited": "Unbegrenzt",
+	"automationCollectionDepthCurrent": "Nur aktuelles Dokument",
+	"automationCollectionDepthLimited": "Maximale Tiefe",
+	"automationCollectionDepthTip": "Schließt jedes ausgewählte Dokument selbst ein; die Tiefe gilt nur für Dokumentbereiche. Notizbuch- und Dokumentbereiche werden vereinigt",
 	"mindmapPasteChild": "Als untergeordneten Knoten einfügen",
 	"mindmapPasteSibling": "Als gleichgeordneten Knoten einfügen",
 	"embedBlockBreadcrumbParentPath": "Übergeordneten Pfad in der Brotkrumennavigation anzeigen",
@@ -114,7 +119,7 @@
 	"copyOCRText": "OCR-Text kopieren",
 	"exportTitleImage": "Titelbild exportieren",
 	"automationCollectBlocks": "Block erfüllt Bedingungen",
-	"automationCollectionScope": "Überwachungsbereich (mit Unterdokumenten)",
+	"automationCollectionScope": "Überwachungsbereich",
 	"automationCollectionPreview": "Passende Blöcke anzeigen",
 	"automationCollectPage": "Treffer dieser Seite erfassen",
 	"automationCollectionTip": "Die automatische Sammlung fügt passende Blöcke hinzu. Änderungen an Quelle oder Regeln erhalten vorhandene Einträge und Felder; bereinigen Sie ausdrücklich über die Sammlungsprüfung",

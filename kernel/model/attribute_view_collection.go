@@ -40,7 +40,11 @@ func collectionScopeMatches(source *av.AutomationBlockSource, tree *parse.Tree) 
 		return true
 	}
 	for _, id := range source.DocumentIDs {
-		if tree.ID == id || strings.Contains(tree.Path, "/"+id+"/") {
+		if tree.ID == id {
+			return true
+		}
+		if _, suffix, found := strings.Cut(tree.Path, "/"+id+"/"); found &&
+			(source.DocumentDepth == nil || strings.Count(suffix, "/")+1 <= *source.DocumentDepth) {
 			return true
 		}
 	}
@@ -189,6 +193,9 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		len(source.NotebookIDs)+len(source.DocumentIDs) > 100 || len(source.Tags) > 20 || len(source.Attributes) > 20 ||
 		len(rule.Conditions) != 0 || rule.KeyID != "" || len(rule.Actions) != 1 {
 		return fmt.Errorf("invalid block collection source")
+	}
+	if source.DocumentDepth != nil && *source.DocumentDepth < 0 {
+		return fmt.Errorf("invalid block collection document depth")
 	}
 	if !slices.Contains([]string{"", "and", "or"}, source.TagMatch) ||
 		!slices.Contains([]string{"", "and", "or"}, source.AttributeMatch) ||

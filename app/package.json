@@ -64,7 +64,7 @@
   ],
   "devDependencies": {
     "@breezystack/lamejs": "1.2.7",
-    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.0",
     "@types/node": "^24.0.0",
     "@types/zxcvbn": "4.4.5",
@@ -79,7 +79,7 @@
     "electron-builder": "26.15.7",
     "encoding": "^0.1.13",
     "esbuild-loader": "^4.5.0",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "file-loader": "^6.2.0",
     "filesize": "^11.0.13",
     "globals": "^15.12.0",

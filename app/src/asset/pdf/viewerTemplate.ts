@@ -180,6 +180,9 @@ export const getPdfViewerHTML = () => `<div class="pdf__outer" id="outerContaine
         <div class="pdf__toolbar">
           <div id="toolbarContainer">
             <div id="toolbarViewer">
+                <button id="pdfMaximize" class="toolbarButton b3-tooltips b3-tooltips__se fn__none" aria-label="${window.siyuan.languages.max}" aria-pressed="false">
+                  <svg><use xlink:href="#iconFullscreen"></use></svg>
+                </button>
                 <button id="sidebarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
                     <svg><use xlink:href="#iconLayoutLeft"></use></svg>
                 </button>

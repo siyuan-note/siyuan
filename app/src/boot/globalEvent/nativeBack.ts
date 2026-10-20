@@ -44,6 +44,9 @@ export const closeDesktopBackLayer = () => {
     document.querySelectorAll<HTMLElement>(".protyle-img").forEach(element => {
         addLayer(element, () => element.remove());
     });
+    document.querySelectorAll<HTMLElement>(".pdf__outer--maximized").forEach(element => {
+        addLayer(element, () => element.querySelector<HTMLButtonElement>("#pdfMaximize")?.click());
+    });
     document.querySelectorAll<HTMLElement>(".av__panel").forEach(element => {
         addLayer(element, () => {
             if ((element.querySelector('[data-type="goSearchRollupCol"]') && !element.querySelector(".b3-text-field")) ||

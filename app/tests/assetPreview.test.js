@@ -378,6 +378,7 @@ const runCases = async source => {
         "../../constants": {Constants: {PROTYLE_CDN: "/stage/protyle"}},
         "../anno": {initAnno: () => annotations++, destroyAnno: () => cleanup++},
         "../annoRuntime": {registerPdfInstance: () => registrations++},
+        "../pdfMaximize": {bindPdfMaximize: () => () => {}},
         "./pdfjs": {AnnotationEditorType: {DISABLE: 0}},
     });
     const viewerElement = document.createElement("div");

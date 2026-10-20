@@ -71,6 +71,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         "layout/dock/agent/path": {},
         "util/pathName": {},
         "util/upDownHint": {},
+        "dialog/message": {},
         "util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: false})},
         "asset/pdf/internal_evt.js": {internalOpt: {}},
         "asset/pdf/pdf_viewer.js": {PagesCountLimit: {FORCE_SCROLL_MODE_PAGE: 10000}},

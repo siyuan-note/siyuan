@@ -12,6 +12,7 @@ import {useShell} from "../../../util/pathName";
 import {getHostCapabilities} from "../../../util/hostCapabilities";
 import {isInMobileApp, isPhablet} from "../../../protyle/util/compatibility";
 import {bindMenuMouseScroll} from "../../../menus/menuMouseScroll";
+import {showMessage} from "../../../dialog/message";
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -230,12 +231,15 @@ export class AgentSessionPanel {
                 html += '<div class="b3-list-item' + (this.mobile ? "" : " b3-list-item--hide-action") +
                     (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
                     statusHTML +
+                    (s.pinnedAt ? '<svg class="b3-list-item__graphic ariaLabel" aria-label="' + escapeHtml(L.pinDoc) + '"><use xlink:href="#iconPin"></use></svg>' : "") +
                     '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(title) + '">' + escapeHtml(title) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (L.more || "More") + '">' +
                         '<svg><use xlink:href="#iconMore"></use></svg>' +
                         '<div class="b3-menu__submenu">' +
                             '<div class="b3-menu__items">' +
+                            '<button class="b3-menu__item" data-action="pin"><svg class="b3-menu__icon"><use xlink:href="#' + (s.pinnedAt ? "iconUnpin" : "iconPin") +
+                            '"></use></svg><span class="b3-menu__label">' + escapeHtml(s.pinnedAt ? L.unpinDoc : L.pinDoc) + "</span></button>" +
                             (isDesktop && getHostCapabilities().localFileSystem ? '<button class="b3-menu__item" data-action="folder"><svg class="b3-menu__icon"><use xlink:href="#iconFolder"></use></svg><span class="b3-menu__label">' + escapeHtml(L.showInFolder) + "</span></button>" : "") +
                             '<button class="b3-menu__item b3-menu__item--warning" data-action="delete"><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">' + escapeHtml(L.delete) + "</span></button>" +
                             "</div>" +
@@ -274,7 +278,7 @@ export class AgentSessionPanel {
 
             const actionBtn = hasClosestByClassName(target, "b3-list-item__action");
             if (actionBtn) {
-                // "更多"按钮：弹出文件夹（桌面端）和删除操作。
+                // "更多"按钮：置顶、文件夹（桌面端）和删除操作。
                 if (actionBtn.classList.contains("agent-session-more")) {
                     e.stopPropagation();
                     const id = (actionBtn as HTMLElement).getAttribute("data-id") || "";
@@ -472,6 +476,18 @@ export class AgentSessionPanel {
                     if (!btn) { return; }
                     e.stopPropagation();
                     const action = btn.getAttribute("data-action");
+                    if (action === "pin") {
+                        if ((btn as HTMLButtonElement).disabled) {
+                            return;
+                        }
+                        (btn as HTMLButtonElement).disabled = true;
+                        const pinned = !this.items.find(item => item.id === id)?.pinnedAt;
+                        void SessionStore.setPinned(id, pinned).then(() => this.refresh()).catch(error => {
+                            showMessage(error.message);
+                        }).finally(() => {
+                            (btn as HTMLButtonElement).disabled = false;
+                        });
+                    }
                     if (action === "delete") {
                         this.callbacks.onDelete(id).then(() => {
                             this.refresh();

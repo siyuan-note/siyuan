@@ -1457,6 +1457,7 @@ export class AgentChat extends Model {
     // - streamEnd：后端 eventCh 关闭（流结束），只解除占位锁定；已提交内容由 saveSession 的 update
     //   同步，未提交内容由后端紧随其后的恢复 update 同步。
     // - permission：只刷新当前会话权限，不重绘正在流式生成的消息。
+    // - pin：只刷新列表，不影响当前对话或输入草稿。
     // - delete：当前会话被删除则清空视图。
     private onWsMessage(data: IWebSocketData) {
         if (!data || data.cmd !== "agentSessionChanged") {

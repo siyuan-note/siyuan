@@ -195,6 +195,7 @@ func registerAiRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/chat", contractRouteHandlers(apicontract.AIAgentChat, agentChat)...)
 	ginServer.Handle("POST", "/api/ai/agent/confirm", contractRouteHandlers(apicontract.AIAgentConfirm, agentChatConfirm)...)
 	ginServer.Handle("POST", "/api/ai/agent/setPermission", contractRouteHandlers(apicontract.AIAgentSetPermission, setAgentSessionPermission)...)
+	ginServer.Handle("POST", "/api/ai/agent/setPinned", contractRouteHandlers(apicontract.AISetSessionPinned, setAgentSessionPinned)...)
 	ginServer.Handle("POST", "/api/ai/agent/question", contractRouteHandlers(apicontract.AIAgentQuestion, agentChatQuestion)...)
 	ginServer.Handle("POST", "/api/ai/agent/browserCapabilityResult", contractRouteHandlers(apicontract.AIAgentBrowserCapabilityResult, agentChatBrowserCapabilityResult)...)
 	ginServer.Handle("POST", "/api/ai/lsCapabilities", contractRouteHandlers(apicontract.AIListCapabilities, lsCapabilities)...)

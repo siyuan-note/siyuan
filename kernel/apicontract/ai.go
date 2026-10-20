@@ -47,6 +47,15 @@ type AISessionIDRequest struct {
 	ID string `json:"id" api:"optional,nullable"`
 }
 
+type AISessionPinnedRequest struct {
+	ID     string `json:"id"`
+	Pinned bool   `json:"pinned"`
+}
+
+type AISessionPinnedData struct {
+	PinnedAt int64 `json:"pinnedAt"`
+}
+
 type AISkillNameRequest struct {
 	Name string `json:"name" api:"optional,nullable"`
 	// Source 省略时保持工作空间和用户技能解析；显式内置来源拒绝由普通 HTTP 读取或修改。
@@ -133,6 +142,7 @@ type AISessionIndex struct {
 	Title        string `json:"title"`
 	CreatedAt    int64  `json:"createdAt"`
 	UpdatedAt    int64  `json:"updatedAt"`
+	PinnedAt     int64  `json:"pinnedAt,omitempty"`
 	AgentRunning bool   `json:"agentRunning,omitempty"`
 }
 

@@ -170,19 +170,23 @@ export type AISessionExtensionAISessionEntryStep = ({ "content"?: string | null;
 
 export type AISessionExtensionAISessionEntryStepInput = ({ "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAISessionFields = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntry> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessage> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAISessionFields = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntry> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessage> | null; "model"?: string | null; "permissionMode"?: string | null; "pinnedAt"?: number | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAISessionFieldsInput = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAISessionFieldsInput = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "pinnedAt"?: number | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
 
-export type AISessionFields = { "agentRunning"?: boolean; "alwaysAllow"?: boolean; "commitTurnID"?: string; "completionTokens"?: number; "contextCachedTokens"?: number; "contextLimit"?: number; "contextTokenBreakdown"?: Record<string, number>; "contextTokens"?: number; "createdAt"?: number; "entries"?: Array<AISessionEntry>; "expectedRevision"?: number; "id": string; "lastCommittedTurnID"?: string; "messageHistory"?: Array<string>; "messages"?: Array<AIAgentMessage>; "model"?: string; "permissionMode"?: string; "promptTokens"?: number; "recoveryRevision"?: number; "recoveryState"?: string; "recoveryTurnID"?: string; "revision"?: number; "snapshots"?: Array<string>; "title"?: string; "titled"?: boolean; "totalDuration"?: number; "updatedAt"?: number; };
+export type AISessionFields = { "agentRunning"?: boolean; "alwaysAllow"?: boolean; "commitTurnID"?: string; "completionTokens"?: number; "contextCachedTokens"?: number; "contextLimit"?: number; "contextTokenBreakdown"?: Record<string, number>; "contextTokens"?: number; "createdAt"?: number; "entries"?: Array<AISessionEntry>; "expectedRevision"?: number; "id": string; "lastCommittedTurnID"?: string; "messageHistory"?: Array<string>; "messages"?: Array<AIAgentMessage>; "model"?: string; "permissionMode"?: string; "pinnedAt"?: number; "promptTokens"?: number; "recoveryRevision"?: number; "recoveryState"?: string; "recoveryTurnID"?: string; "revision"?: number; "snapshots"?: Array<string>; "title"?: string; "titled"?: boolean; "totalDuration"?: number; "updatedAt"?: number; };
 
-export type AISessionFieldsInput = { "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; };
+export type AISessionFieldsInput = { "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "pinnedAt"?: number | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; };
 
 export type AISessionIDRequestInput = { "id"?: string | null; };
 
-export type AISessionIndex = { "agentRunning"?: boolean; "createdAt": number; "id": string; "title": string; "updatedAt": number; };
+export type AISessionIndex = { "agentRunning"?: boolean; "createdAt": number; "id": string; "pinnedAt"?: number; "title": string; "updatedAt": number; };
 
 export type AISessionList = { "page": number; "pageSize": number; "sessions": Array<AISessionIndex | null> | null; "total": number; };
+
+export type AISessionPinnedData = { "pinnedAt": number; };
+
+export type AISessionPinnedRequestInput = { "id": string; "pinned": boolean; };
 
 export type AISessionSaveData = { "revision": number; "session"?: AISessionExtensionAISessionFields; };
 
@@ -2892,6 +2896,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Filter by title, then paginate sessions with pinned entries first, ordered by pinnedAt descending.
+     * Unpinned sessions retain createdAt descending order; equal timestamps use descending session IDs.
+     * Missing pinnedAt in older sessions means unpinned. Pinning survives index reconstruction.
+     */
     "/api/ai/agent/lsSessions": {
         request: AISessionsRequestInput;
         response: { "code": 0; "data": AISessionList; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2950,6 +2959,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * Save conversation content with revision checks. The stored pinnedAt is preserved regardless of the
+     * submitted snapshot; clients must use setPinned to update list pinning independently of active turns.
+     */
     "/api/ai/agent/saveSession": {
         request: AISessionExtensionAISessionFieldsInput;
         response: { "code": 0; "data": AISessionSaveData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "revision"?: never; "session"?: never; }) | null | (AISessionSaveData & { "closeTimeout"?: never; }); "msg": string; };
@@ -2981,6 +2994,19 @@ export interface APIPOSTRoutes {
         request: AIPermissionRequestInput;
         response: { "code": 0; "data": AIPermissionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * Persist pinning for an existing session. Requires administrator write access.
+     * pinned is a required boolean. Repeated pin requests preserve the original millisecond timestamp;
+     * unpinning returns pinnedAt=0. Missing or corrupt sessions fail without replacing their data.
+     * Pinning does not change conversation revisions, timestamps or active turns; stale saveSession requests cannot overwrite it.
+     */
+    "/api/ai/agent/setPinned": {
+        request: AISessionPinnedRequestInput;
+        response: { "code": 0; "data": AISessionPinnedData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

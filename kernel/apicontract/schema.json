@@ -4405,6 +4405,16 @@
             }
           ]
         },
+        "pinnedAt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "promptTokens": {
           "anyOf": [
             {
@@ -4694,6 +4704,16 @@
             }
           ]
         },
+        "pinnedAt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "promptTokens": {
           "anyOf": [
             {
@@ -4870,6 +4890,9 @@
         },
         "permissionMode": {
           "type": "string"
+        },
+        "pinnedAt": {
+          "type": "integer"
         },
         "promptTokens": {
           "type": "integer"
@@ -5088,6 +5111,16 @@
             }
           ]
         },
+        "pinnedAt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "promptTokens": {
           "anyOf": [
             {
@@ -5225,6 +5258,9 @@
         "id": {
           "type": "string"
         },
+        "pinnedAt": {
+          "type": "integer"
+        },
         "title": {
           "type": "string"
         },
@@ -5278,6 +5314,34 @@
         "pageSize",
         "sessions",
         "total"
+      ],
+      "additionalProperties": false
+    },
+    "AISessionPinnedData": {
+      "type": "object",
+      "properties": {
+        "pinnedAt": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pinnedAt"
+      ],
+      "additionalProperties": false
+    },
+    "AISessionPinnedRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pinned": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "pinned"
       ],
       "additionalProperties": false
     },
@@ -123023,6 +123087,86 @@
               },
               "data": {
                 "$ref": "#/$defs/AIPermissionData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/agent/setPinned",
+      "handler": "setAgentSessionPinned",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AISessionPinnedRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AISessionPinnedData"
               },
               "msg": {
                 "type": "string"

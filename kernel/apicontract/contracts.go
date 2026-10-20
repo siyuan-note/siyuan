@@ -1386,10 +1386,20 @@ var AIReindexEmbedding = define[EmptyRequest, Null]("reindexEmbedding", "/api/ai
 var AIRetryFailedEmbedding = define[EmptyRequest, Null]("retryFailedEmbedding", "/api/ai/retryFailedEmbedding", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 var AIAgentConfirm = define[AIConfirmRequest, Null]("agentChatConfirm", "/api/ai/agent/confirm", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
 var AIAgentSetPermission = define[AIPermissionRequest, AIPermissionData]("setAgentSessionPermission", "/api/ai/agent/setPermission", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// Persist pinning for an existing session. Requires administrator write access.
+// pinned is a required boolean. Repeated pin requests preserve the original millisecond timestamp;
+// unpinning returns pinnedAt=0. Missing or corrupt sessions fail without replacing their data.
+// Pinning does not change conversation revisions, timestamps or active turns; stale saveSession requests cannot overwrite it.
+var AISetSessionPinned = define[AISessionPinnedRequest, AISessionPinnedData]("setAgentSessionPinned", "/api/ai/agent/setPinned", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIAgentQuestion = define[AIQuestionRequest, Null]("agentChatQuestion", "/api/ai/agent/question", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
 var AIAgentBrowserCapabilityResult = define[AIBrowserCapabilityResultRequest, Null]("agentChatBrowserCapabilityResult", "/api/ai/agent/browserCapabilityResult", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
 var AIListCapabilities = define[EmptyRequest, []AICapabilityManifest]("lsCapabilities", "/api/ai/lsCapabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/agent/title", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// Filter by title, then paginate sessions with pinned entries first, ordered by pinnedAt descending.
+// Unpinned sessions retain createdAt descending order; equal timestamps use descending session IDs.
+// Missing pinnedAt in older sessions means unpinned. Pinning survives index reconstruction.
 var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
 var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1419,6 +1429,9 @@ var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/ed
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
+
+// Save conversation content with revision checks. The stored pinnedAt is preserved regardless of the
+// submitted snapshot; clients must use setPinned to update list pinning independently of active turns.
 var AISaveSession = define[AISession, AISessionSaveData]("saveSession", "/api/ai/agent/saveSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true, AdditionalErrorStatuses: []int{400, 409, 500}}, "POST")
 
 // URL、TLS 和 Cookie 诊断对象包含标准库的原始 JSON。

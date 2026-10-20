@@ -144,14 +144,16 @@ type AISessionFields struct {
 	MessageHistory        []string         `json:"messageHistory,omitempty" api:"optional,nullable"`
 	CreatedAt             int64            `json:"createdAt,omitempty" api:"optional,nullable"`
 	UpdatedAt             int64            `json:"updatedAt,omitempty" api:"optional,nullable"`
-	Revision              int64            `json:"revision,omitempty" api:"optional,nullable"`
-	ExpectedRevision      *int64           `json:"expectedRevision,omitempty" api:"optional,nullable"`
-	CommitTurnID          string           `json:"commitTurnID,omitempty" api:"optional,nullable"`
-	LastCommittedTurnID   string           `json:"lastCommittedTurnID,omitempty" api:"optional,nullable"`
-	RecoveryTurnID        string           `json:"recoveryTurnID,omitempty" api:"optional,nullable"`
-	RecoveryState         string           `json:"recoveryState,omitempty" api:"optional,nullable"`
-	RecoveryRevision      int64            `json:"recoveryRevision,omitempty" api:"optional,nullable"`
-	AgentRunning          bool             `json:"agentRunning,omitempty" api:"optional,nullable"`
+	// PinnedAt is server-managed list metadata. Use setPinned to change it; saveSession preserves the stored value.
+	PinnedAt            int64  `json:"pinnedAt,omitempty" api:"optional,nullable"`
+	Revision            int64  `json:"revision,omitempty" api:"optional,nullable"`
+	ExpectedRevision    *int64 `json:"expectedRevision,omitempty" api:"optional,nullable"`
+	CommitTurnID        string `json:"commitTurnID,omitempty" api:"optional,nullable"`
+	LastCommittedTurnID string `json:"lastCommittedTurnID,omitempty" api:"optional,nullable"`
+	RecoveryTurnID      string `json:"recoveryTurnID,omitempty" api:"optional,nullable"`
+	RecoveryState       string `json:"recoveryState,omitempty" api:"optional,nullable"`
+	RecoveryRevision    int64  `json:"recoveryRevision,omitempty" api:"optional,nullable"`
+	AgentRunning        bool   `json:"agentRunning,omitempty" api:"optional,nullable"`
 }
 type AISessionSaveData struct {
 	Revision int64      `json:"revision"`

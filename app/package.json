@@ -97,7 +97,7 @@
     "sass-loader": "^16.0.5",
     "sharp": "^0.35.5",
     "stylelint": "^17.16.0",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "unzipper": "0.12.5",
     "webpack": "^5.104.1",

@@ -1,9 +1,43 @@
 import type {ListMindmapPosition} from "./model";
+import type {ListMindmapSummaryPosition} from "./summary";
 
 export const LIST_MINDMAP_CONNECTOR_STYLES = ["spline", "orthogonal", "bezier", "rounded"] as const;
 export type ListMindmapConnectorStyle = typeof LIST_MINDMAP_CONNECTOR_STYLES[number];
 
 type ConnectorPath = Pick<CanvasPath, "moveTo" | "lineTo" | "bezierCurveTo" | "quadraticCurveTo">;
+
+// 概要范围与标签之间的连线使用导图样式，预览、绘制和命中检测共用路径。
+export const buildListMindmapSummaryConnector = <T extends ConnectorPath>(
+    position: ListMindmapSummaryPosition, style: ListMindmapConnectorStyle, makePath: () => T,
+) => {
+    const {x, top, bottom, labelX} = position;
+    const startX = x - 10;
+    const endX = labelX - 6;
+    const centerY = (top + bottom) / 2;
+    const path = makePath();
+    if (style === "spline" || style === "bezier") {
+        const centerX = (startX + endX) / 2;
+        [top, bottom].forEach(y => {
+            path.moveTo(endX, centerY);
+            path.bezierCurveTo(style === "spline" ? endX : centerX, centerY, centerX, y, startX, y);
+        });
+    } else {
+        const radius = style === "rounded" ? Math.min(6, Math.max(0, bottom - top) / 2) : 0;
+        path.moveTo(startX, top);
+        path.lineTo(x - radius, top);
+        if (radius) {
+            path.quadraticCurveTo(x, top, x, top + radius);
+        }
+        path.lineTo(x, bottom - radius);
+        if (radius) {
+            path.quadraticCurveTo(x, bottom, x - radius, bottom);
+        }
+        path.lineTo(startX, bottom);
+        path.moveTo(x, centerY);
+        path.lineTo(endX, centerY);
+    }
+    return path;
+};
 
 // 连线路径只使用已完成的节点布局，共享主干不进入分支的命中路径。
 export const buildListMindmapConnectors = <T extends ConnectorPath>(

@@ -21,7 +21,7 @@ import {clampMindmapPanOffset, clampMindmapPanPosition, MindmapPanRect} from "./
 import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindmapSummarySelection, getListMindmapSummarySnapshot,
     layoutListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
-import {buildListMindmapConnectors} from "./connectors";
+import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -1394,19 +1394,9 @@ export class ListMindmapView {
             if (!position) {
                 return;
             }
-            const {x, top, bottom, labelX, labelY} = position;
-            const radius = Math.min(6, (bottom - top) / 2);
-            const path = new Path2D();
-            path.moveTo(x - 10, top);
-            if (bottom > top) {
-                path.lineTo(x - radius, top);
-                path.quadraticCurveTo(x, top, x, top + radius);
-                path.lineTo(x, bottom - radius);
-                path.quadraticCurveTo(x, bottom, x - radius, bottom);
-                path.lineTo(x - 10, bottom);
-                path.moveTo(x, (top + bottom) / 2);
-            }
-            path.lineTo(labelX - 6, (top + bottom) / 2);
+            const {labelX, labelY} = position;
+            const path = buildListMindmapSummaryConnector(position,
+                this.model.metadata.connectorStyle || "bezier", () => new Path2D());
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
             const hovered = this.hoveredLine === `summary:${summary.id}` && !this.printTransform && !this.options.printLayout;
             const style = resolveStyle(summary.color, selected, hovered);
@@ -1422,6 +1412,31 @@ export class ListMindmapView {
             element.classList.toggle("mindmap-view__node--selected", selected);
             element.setAttribute("aria-pressed", String(selected));
         });
+    }
+
+    private drawSummaryPreview(context: CanvasRenderingContext2D, color: string) {
+        if (!this.summarySelecting || this.printTransform || this.options.printLayout || !this.summaryRanges.length) {
+            return;
+        }
+        const previews = this.summaryRanges.map((range, index) => ({...range, id: `preview:${index}`, label: ""}));
+        const sizes = new Map([...this.summaryPositions].map(([id, position]) =>
+            [id, {width: position.width, height: position.height}]));
+        previews.forEach(preview => sizes.set(preview.id, {width: 0, height: 0}));
+        const model = {...this.model, metadata: {...this.model.metadata,
+            summaries: [...(this.model.metadata.summaries || []), ...previews]}};
+        const positions = layoutListMindmapSummaries(model, this.positions, sizes);
+        context.save();
+        context.strokeStyle = color;
+        context.lineWidth = 1.5 / this.scale;
+        context.setLineDash([4 / this.scale, 4 / this.scale]);
+        previews.forEach(preview => {
+            const position = positions.get(preview.id);
+            if (position) {
+                context.stroke(buildListMindmapSummaryConnector(position,
+                    this.model.metadata.connectorStyle || "bezier", () => new Path2D()));
+            }
+        });
+        context.restore();
     }
 
     private updateRelations() {
@@ -1926,31 +1941,7 @@ export class ListMindmapView {
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
         this.drawSummaries(context, (color, selected, hovered) =>
             resolveLineStyle(summaryStyles, color, undefined, defaultLine, selected, hovered));
-        if (this.summarySelecting && !this.printTransform && !this.options.printLayout && this.summaryRanges.length) {
-            const previews = this.summaryRanges.map((range, index) => ({...range, id: `preview:${index}`, label: ""}));
-            const sizes = new Map([...this.summaryPositions].map(([id, position]) =>
-                [id, {width: position.width, height: position.height}]));
-            previews.forEach(preview => sizes.set(preview.id, {width: 0, height: 0}));
-            const model = {...this.model, metadata: {...this.model.metadata,
-                summaries: [...(this.model.metadata.summaries || []), ...previews]}};
-            const positions = layoutListMindmapSummaries(model, this.positions, sizes);
-            context.save();
-            context.strokeStyle = primary;
-            context.lineWidth = 1.5 / this.scale;
-            context.setLineDash([4 / this.scale, 4 / this.scale]);
-            previews.forEach(preview => {
-                const position = positions.get(preview.id);
-                if (position) {
-                    context.beginPath();
-                    context.moveTo(position.x - 10, position.top);
-                    context.lineTo(position.x, position.top);
-                    context.lineTo(position.x, position.bottom);
-                    context.lineTo(position.x - 10, position.bottom);
-                    context.stroke();
-                }
-            });
-            context.restore();
-        }
+        this.drawSummaryPreview(context, primary);
         this.renderRouteControls();
     }
 

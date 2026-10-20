@@ -44,6 +44,7 @@ import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
+import {getListMindmapFoldMenuItems} from "./foldMenu";
 import {isMobile} from "../../../util/functions";
 import {addListMindmapSummaryRanges, getListMindmapSiblingIDs, getListMindmapSummaryParentID, getListMindmapSummaryRange,
     getListMindmapSummarySnapshot} from "./summary";
@@ -242,7 +243,7 @@ class ListMindmapController {
             onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
                 metadata.viewLocked = locked;
             }) : Promise.resolve(true),
-            onSettingsMenu: anchor => {
+            onSettingsMenu: (anchor, expand) => {
                 toggleMenu({
                     target: anchor,
                     build: (_menu, session) => {
@@ -268,6 +269,12 @@ class ListMindmapController {
                                 setDefaultListMindmapConnectorStyle(style);
                             }
                         }, window.siyuan.languages, "default"));
+                        if (expand) {
+                            menu.addItem({
+                                id: "expandLevel", icon: "iconExpandLevel", label: window.siyuan.languages.expandLevel,
+                                submenu: getListMindmapFoldMenuItems(expand, window.siyuan.languages),
+                            });
+                        }
                         if (isMobile()) {
                             session.show(() => menu.fullscreen("bottom"));
                         } else {
@@ -282,23 +289,7 @@ class ListMindmapController {
                     target: anchor,
                     build: (_menu, session) => {
                         const menu = new Menu();
-                        for (let level = 1; level <= 6; level++) {
-                            menu.addItem({
-                                id: `level${level}`,
-                                iconHTML: "",
-                                label: window.siyuan.languages.listMindmapExpandToLevel.replace("${level}", String(level)),
-                                click: () => select(level),
-                            });
-                        }
-                        menu.addSeparator({id: "separator_all"});
-                        menu.addItem({
-                            id: "expandAll", icon: "iconExpand", label: window.siyuan.languages.expandAll,
-                            click: () => select("expandAll")
-                        });
-                        menu.addItem({
-                            id: "foldAll", icon: "iconContract", label: window.siyuan.languages.foldAll,
-                            click: () => select("foldAll")
-                        });
+                        getListMindmapFoldMenuItems(select, window.siyuan.languages).forEach(item => menu.addItem(item));
                         if (isMobile()) {
                             session.show(() => menu.fullscreen("bottom"));
                         } else {

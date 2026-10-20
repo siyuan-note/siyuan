@@ -55,7 +55,7 @@ export interface ListMindmapViewOptions {
     onFoldSiblings?: (id: string) => Promise<boolean>;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
-    onSettingsMenu?: (anchor: HTMLElement) => void;
+    onSettingsMenu?: (anchor: HTMLElement, expand?: (level: ListMindmapFoldTarget) => void) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
     onTaskMenu?: (id: string, anchor: HTMLElement) => void;
     onTabTaskToggle?: (id: string, itemId: string) => void;
@@ -338,7 +338,10 @@ export class ListMindmapView {
                 }
             }
         });
-        this.resizeObserver = new ResizeObserver(() => this.refreshLayout());
+        this.resizeObserver = new ResizeObserver(() => {
+            this.updateToolbarLayout();
+            this.refreshLayout();
+        });
         this.resizeObserver.observe(this.viewport);
         this.update(this.model);
     }
@@ -541,10 +544,15 @@ export class ListMindmapView {
 
     private createToolbar() {
         const controls = createElement("div", "mindmap-view__toolbar-group");
-        const add = (id: string, key: string, icon: string, action: () => void) => {
+        const add = (id: string, key: string, icon: string, action: () => void, nodeAction = false) => {
             const button = this.makeButton(key, icon, action);
             this.buttons.set(id, button);
-            controls.append(button);
+            if (nodeAction) {
+                button.className = "color__square";
+                button.querySelector("svg").classList.add("svg--mid");
+            } else {
+                controls.append(button);
+            }
         };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
         this.levelSelect = undefined;
@@ -562,6 +570,7 @@ export class ListMindmapView {
             }).catch(error => console.error(error)).finally(() => button.disabled = false);
         });
         this.buttons.get("lock").setAttribute("aria-pressed", String(this.locked));
+        this.buttons.get("lock").classList.toggle("block__icon--active", this.locked);
         this.buttons.get("lock").setAttribute("data-subtype", this.locked ? "lock" : "unlock");
         if (this.locked) {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
@@ -569,7 +578,13 @@ export class ListMindmapView {
         }
         if (!this.readOnly) {
             if (this.options.onSettingsMenu) {
-                add("settings", "listMindmapConnectors", "iconLine", () => this.options.onSettingsMenu(this.buttons.get("settings")));
+                add("settings", "more", "iconMore", () => {
+                    const selectedId = this.selectedId;
+                    this.options.onSettingsMenu(this.buttons.get("settings"),
+                        this.buttons.get("expandLevel").hidden ? level => this.finishThen(() => {
+                            void this.expandToLevel(level, selectedId).catch(error => console.error(error));
+                        }) : undefined);
+                });
                 this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
             }
             add("summary", "listMindmapSummary", "iconGroups", () => {
@@ -589,7 +604,7 @@ export class ListMindmapView {
                     }
                     this.updateSelection();
                 });
-            });
+            }, true);
             add("relation", "connect", "iconRoute", () => {
                 this.setInteractionActive(true);
                 this.cancelSummarySelection();
@@ -598,7 +613,7 @@ export class ListMindmapView {
                 this.relationFrom = this.relationFrom ? undefined : this.selectedId;
                 this.relationPreview = undefined;
                 this.updateSelection();
-            });
+            }, true);
         }
         add("expandLevel", "expandLevel", "iconExpandLevel", () => {
             const selectedId = this.selectedId;
@@ -662,6 +677,17 @@ export class ListMindmapView {
         this.buttons.get("documentLayout").hidden = !this.fullscreenMarker;
         this.buttons.get("documentLayout").setAttribute("aria-pressed", String(!this.documentFrame.hidden));
         add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+        this.updateToolbarLayout();
+    }
+
+    private updateToolbarLayout() {
+        const expand = this.buttons.get("expandLevel");
+        if (expand && this.options.onSettingsMenu && !this.readOnly) {
+            expand.hidden = this.viewport.clientWidth > 0 && this.viewport.clientWidth < 360;
+            if (this.levelSelect) {
+                this.levelSelect.parentElement.hidden = expand.hidden;
+            }
+        }
     }
 
     private setPanning(value: boolean) {
@@ -669,6 +695,7 @@ export class ListMindmapView {
             this.cancelSummarySelection();
         }
         this.panning = value;
+        this.options.host.classList.toggle("mindmap-view--pan", value);
         this.viewport.classList.toggle("mindmap-view__viewport--pan", value);
         const button = this.buttons.get("pan");
         button?.classList.toggle("block__icon--active", value);
@@ -3370,7 +3397,8 @@ export class ListMindmapView {
         const id = this.selectedId;
         const style = this.model.metadata.nodes[id] || {};
         const change = (patch: Partial<ListMindmapNodeStyle>) => this.options.onNodeStyle?.(id, patch);
-        const nodePalette = createElement("div", "fn__flex");
+        this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"));
+        const nodePalette = createElement("div", "mindmap-view__palette");
         nodePalette.setAttribute("role", "group");
         nodePalette.setAttribute("aria-label", this.label("color"));
         const nodeColors: ReturnType<NonNullable<ListMindmapViewOptions["nodeColors"]>> = [
@@ -3397,10 +3425,10 @@ export class ListMindmapView {
         const node = this.model.nodes.get(id);
         if (node?.taskMarker !== undefined && this.options.onTaskMenu) {
             const task = squareButton("checkToggle", "iconCheck", () => this.openTaskMenu(id, task));
-            nodePalette.append(task);
+            this.inspector.append(task);
         }
         if (node && !node.virtual && node !== this.model.root) {
-            nodePalette.append(squareButton("delete", "iconTrashcan", () => this.deleteSelection()));
+            this.inspector.append(squareButton("delete", "iconTrashcan", () => this.deleteSelection()));
         }
     }
 

@@ -4,6 +4,7 @@ import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isPropertyAssignment, ScriptTarget, transpileModule} from "typescript";
 import {getListMindmapConnectorMenuItem} from "./connectorMenu";
+import {getListMindmapFoldMenuItems} from "./foldMenu";
 
 const source = createSourceFile("index.ts", readFileSync("src/protyle/render/listMindmap/index.ts", "utf8"),
     ScriptTarget.ES2021, true);
@@ -35,6 +36,7 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         let editable = true;
         let item: IMenu;
         let defaultItem: IMenu;
+        let expandItem: IMenu;
         let defaultStyle = "bezier";
         const defaults: string[] = [];
         const placements: unknown[] = [];
@@ -43,6 +45,7 @@ test("desktop and mobile connector menus persist one undoable change and preserv
             owner: {}, list,
             canEdit: () => editable,
             getListMindmapConnectorMenuItem,
+            getListMindmapFoldMenuItems,
             getDefaultListMindmapConnectorStyle: () => defaultStyle,
             setDefaultListMindmapConnectorStyle: (style: string) => { defaultStyle = style; defaults.push(style); },
             getListMindmapSiblingIDs: () => new Map(),
@@ -62,12 +65,13 @@ test("desktop and mobile connector menus persist one undoable change and preserv
             Menu: class {
                 addItem(value: IMenu) {
                     if (value.id === "defaultConnectorStyle") { defaultItem = value; }
+                    else if (value.id === "expandLevel") { expandItem = value; }
                     else { item = value; }
                 }
                 open(position: unknown) { placements.push(position); }
                 fullscreen(position: unknown) { placements.push(position); }
             },
-            window: {siyuan: {languages: {}}}, console,
+            window: {siyuan: {languages: {listMindmapExpandToLevel: "Level ${level}"}}}, console,
         };
         runInNewContext(compiled, context);
         const target = new context.Controller();
@@ -76,6 +80,13 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         target.onSettingsMenu(anchor);
         assert.equal((item.submenu as IMenu[]).find(entry => entry.checked).id, "bezier");
         assert.deepEqual(JSON.parse(JSON.stringify(placements)), [mobile ? "bottom" : {x: 20, y: 100, h: 24}]);
+        assert.equal(expandItem, undefined, "wide views keep expansion in the direct toolbar");
+        let selectedLevel: unknown;
+        target.onSettingsMenu(anchor, (level: unknown) => selectedLevel = level);
+        assert.deepEqual((expandItem.submenu as IMenu[]).map(entry => entry.id),
+            ["level1", "level2", "level3", "level4", "level5", "level6", "separator_all", "expandAll", "foldAll"]);
+        (expandItem.submenu as IMenu[])[2].click(undefined, undefined);
+        assert.equal(selectedLevel, 3, "narrow desktop and mobile views retain global expansion in More");
         (defaultItem.submenu as IMenu[]).find(entry => entry.id === "rounded").click(undefined, undefined);
         assert.deepEqual(defaults, ["rounded"]);
         assert.equal(transactions.length, 0, "changing the preference must not enter document undo history");

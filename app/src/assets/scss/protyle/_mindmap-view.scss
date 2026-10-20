@@ -93,6 +93,8 @@
   }
 
   &.fullscreen &__toolbar,
+  &--locked &__toolbar,
+  &--pan &__toolbar,
   &--active &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
@@ -100,10 +102,14 @@
   }
 
   &.fullscreen &__toolbar .block__icon,
+  &--locked &__toolbar .block__icon,
+  &--pan &__toolbar .block__icon,
   &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
   &__toolbar:focus-within .block__icon,
   &.fullscreen &__toolbar-group,
+  &--locked &__toolbar-group,
+  &--pan &__toolbar-group,
   &--active &__toolbar-group,
   &:hover &__toolbar-group,
   &__toolbar:focus-within &__toolbar-group {
@@ -859,6 +865,13 @@
     box-sizing: border-box;
     overflow-x: auto;
     overflow-y: hidden;
+    align-items: center;
+    flex-wrap: nowrap;
+
+    > button,
+    > select {
+      flex-shrink: 0;
+    }
   }
 
   &__relation-editor {
@@ -882,12 +895,6 @@
 
     .mindmap-view__palette {
       margin: 0;
-      flex-shrink: 0;
-    }
-
-    > button,
-    > select {
-      flex-shrink: 0;
     }
   }
 
@@ -911,6 +918,14 @@
   &__palette {
     display: flex;
     flex-wrap: nowrap;
+    order: 1;
+    min-width: 0;
+    overflow-x: auto;
+    flex-shrink: 1;
+
+    .color__square {
+      flex-shrink: 0;
+    }
   }
 
 }

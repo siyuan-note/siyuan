@@ -4,6 +4,7 @@ import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isPropertyAssignment, ScriptTarget, transpileModule} from "typescript";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
+import {getListMindmapFoldMenuItems} from "./foldMenu";
 import type {ListMindmapFoldTarget} from "./fold";
 import type {ListMindmapNode} from "./model";
 const {loadMenuToggle} = require("../../../../tests/menu-toggle-fixture.cjs");
@@ -77,6 +78,7 @@ test("desktop and mobile menus offer six levels without icon placeholders follow
         const positions: unknown[] = [];
         const selected: ListMindmapFoldTarget[] = [];
         const context = {
+            getListMindmapFoldMenuItems,
             Menu: class {
                 addItem(item: typeof entries[number]) { entries.push(item); }
                 addSeparator(item: typeof entries[number]) { entries.push(item); }

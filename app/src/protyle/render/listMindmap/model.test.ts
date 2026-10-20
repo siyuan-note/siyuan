@@ -1161,6 +1161,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let undo = 0;
     let redo = 0;
     let settingsOpened = 0;
+    let overflowExpand: ((level: number | "expandAll" | "foldAll") => void) | undefined;
     let finishAllowed: boolean | Promise<boolean> = true;
     const options = {
         host, model,
@@ -1188,7 +1189,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onFold: (id: string) => folds.push(id),
         onUndo: () => undo++,
         onRedo: () => redo++,
-        onSettingsMenu: () => settingsOpened++,
+        onSettingsMenu: (_anchor: HTMLElement, expand?: typeof overflowExpand) => {
+            settingsOpened++;
+            overflowExpand = expand;
+        },
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
         onRelationChange: (...args: unknown[]) => relationChanges.push(args),
@@ -1512,10 +1516,29 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const view = new api.ListMindmapView(options);
     await settle();
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
-    const settings = host.querySelector<HTMLButtonElement>('[aria-label="listMindmapConnectors"]');
+    const settings = host.querySelector<HTMLButtonElement>('[aria-label="more"]');
     check.equal(settings.getAttribute("aria-haspopup"), "menu");
     settings.click();
     check.equal(settingsOpened, 1, "the editable toolbar opens the shared settings menu");
+    const toolbarWidth = host.style.width;
+    for (const width of [320, 760]) {
+        host.style.width = `${width}px`;
+        await settle();
+        settings.click();
+        check.equal(typeof overflowExpand === "function", width < 360,
+            "More includes global expansion only when its direct entry is hidden");
+        check.equal(view.buttons.get("expandLevel").hidden, width < 360);
+        if (overflowExpand) {
+            let level: unknown;
+            const expandToLevel = view.expandToLevel;
+            view.expandToLevel = async (value: unknown) => { level = value; };
+            overflowExpand(3);
+            check.equal(level, 3, "the overflow entry invokes the same global folding action");
+            view.expandToLevel = expandToLevel;
+        }
+    }
+    host.style.width = toolbarWidth;
+    await settle();
     const originalConnectorPositions = JSON.stringify([...view.positions]);
     const connectorSource = list.getAttribute("custom-sy-list-mindmap-data");
     for (const connectorStyle of ["spline", "orthogonal", "bezier", "rounded"]) {
@@ -1544,7 +1567,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(view.findLine(branch).id, child.id, "the real canvas hit test selects each horizontal branch");
         }
         view.setReadOnly(true);
-        check.equal(host.querySelector('[aria-label="listMindmapConnectors"]'), null, "read-only views render saved styles without an edit menu");
+        check.equal(host.querySelector('[aria-label="more"]'), null, "read-only views render saved styles without an edit menu");
         check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
         view.setReadOnly(false);
     }
@@ -1951,10 +1974,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const toolbar = host.querySelector(".mindmap-view__toolbar");
     ["listMindmapChild", "delete", "fold"].forEach(label =>
         check.equal(toolbar.querySelector(`[aria-label="${label}"]`), null));
-    const relationButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="connect"]');
+    const relationButton = host.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="connect"]');
     const toolbarPanButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
-    check.ok(relationButton.nextElementSibling.classList.contains("mindmap-view__level-control"));
-    check.equal(relationButton.nextElementSibling.nextElementSibling, toolbarPanButton);
+    check.equal(toolbar.querySelector('[aria-label="connect"]'), null);
+    check.equal(toolbar.querySelector('[aria-label="listMindmapSummary"]'), null);
+    check.ok(toolbarPanButton.previousElementSibling.classList.contains("mindmap-view__level-control"));
     check.ok(toolbarPanButton.nextElementSibling.classList.contains("mindmap-view__zoom-control"));
     check.equal(relationButton.querySelector("use").getAttribute("xlink:href"), "#iconRoute");
     const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
@@ -1968,6 +1992,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
             host.style.fontSize = `${fontSize}px`;
+            await settle();
             toolbarZoom.focus();
             const bounds = host.getBoundingClientRect();
             for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
@@ -1980,7 +2005,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
             const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
-            check.equal(lastButton.top > firstButton.top, width < 360, "narrow toolbars wrap controls");
+            check.equal(lastButton.top > firstButton.top, width < 260, "compact global toolbars wrap only when necessary");
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
             if (width === 180) {
                 const popupBounds = toolbarPopup.getBoundingClientRect();
@@ -2012,6 +2037,28 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(Math.abs(nodeMenuBounds.left + nodeMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(nodeMenuBounds.width < panelBounds.width / 2);
     check.ok(panelBounds.bottom - nodeMenuBounds.bottom >= 8);
+    const originalNodeColors = options.nodeColors;
+    options.nodeColors = () => Array.from({length: 30}, (_, i) => ({
+        label: `Color ${i}`, color: `rgb(${i}, 0, 0)`, backgroundColor: "",
+        preview: {color: `rgb(${i}, 0, 0)`, backgroundColor: ""},
+    }));
+    for (const width of [240, 320, 760]) {
+        host.style.width = `${width}px`;
+        view.renderInspector();
+        await settle();
+        const palette = inspector.querySelector<HTMLElement>(".mindmap-view__palette");
+        check.ok(palette.scrollWidth > palette.clientWidth, "long palettes scroll independently");
+        palette.scrollLeft = palette.scrollWidth;
+        const bounds = inspector.getBoundingClientRect();
+        for (const key of ["connect", "listMindmapSummary", "delete"]) {
+            const action = inspector.querySelector<HTMLElement>(`[aria-label="${key}"]`).getBoundingClientRect();
+            check.ok(action.left >= bounds.left && action.right <= bounds.right,
+                `node action ${key} stays visible at width ${width} while the palette scrolls`);
+        }
+    }
+    host.style.cssText = originalHostStyle;
+    options.nodeColors = originalNodeColors;
+    view.renderInspector();
     for (const borderColor of ["#d4d4d4", "#484848"]) {
         host.style.setProperty("--b3-border-color", borderColor);
         check.equal(getComputedStyle(inspector).boxShadow,
@@ -2755,6 +2802,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(view.isLocked(), true);
     check.equal(getComputedStyle(viewport).touchAction, "pan-y");
     check.ok(host.querySelector('[aria-label="listMindmapUnlock"]'));
+    check.equal(getComputedStyle(toolbar).opacity, "1", "locked maps keep the unlock entry visible");
+    check.equal(host.querySelector('[aria-label="listMindmapUnlock"]').getAttribute("aria-pressed"), "true");
     check.equal(host.querySelector('[aria-label="cursorHand"]'), null);
     for (const ctrlKey of [false, true]) {
         const wheel = new WheelEvent("wheel", {bubbles: true, cancelable: true, deltaY: 120, ctrlKey});
@@ -2913,7 +2962,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     });
     await settle();
     const levelButton = host.querySelector<HTMLButtonElement>('.mindmap-view__toolbar button[aria-label="expandLevel"]');
-    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "connect");
+    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "more");
     check.equal(levelButton.nextElementSibling.getAttribute("aria-label"), "cursorHand");
     check.equal(host.querySelector(".mindmap-view__level-select"), null);
     levelView.selectNode(levelChild);
@@ -4660,10 +4709,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             return added;
         }});
     await settle();
-    const batchButton = batchHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    batchView.focusNode(api.readListMindmap(batchList).root.id);
+    const batchButton = batchHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
     const batchViewport = batchHost.querySelector<HTMLElement>(".mindmap-view__viewport");
-    batchView.clearSelection();
-    check.equal(batchButton.disabled, false, "batch selection can start without choosing a parent");
+    check.equal(batchButton.disabled, false, "the root node menu starts batch selection without choosing a parent range");
     batchButton.click();
     const batchModel = api.readListMindmap(batchList);
     const leafIDs = batchModel.root.children.flatMap((node: ListMindmapNode) => node.children.map(child => child.id));
@@ -4838,7 +4887,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         readFileSync(path.join(__dirname, "../../wysiwyg/transaction.ts"), "utf8"), typescript.ScriptTarget.Latest, true);
     const updateTransaction = transactionSource.statements.find(statement => typescript.isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(transactionSource) === "updateTransaction"));
-    const controllerSource = compile(path.join(__dirname, "../../util/hasClosest.ts")) +
+    const controllerSource = compile(path.join(__dirname, "foldMenu.ts")) +
+        compile(path.join(__dirname, "../../util/hasClosest.ts")) +
         compile(path.join(__dirname, "../../wysiwyg/getBlock.ts")) + compile(path.join(__dirname, "index.ts")) +
         typescript.transpileModule(updateTransaction.getText(transactionSource).replace(/^export /, ""), {
             compilerOptions: {target: typescript.ScriptTarget.ES2021},

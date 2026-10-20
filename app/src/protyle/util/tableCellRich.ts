@@ -7,6 +7,8 @@ import {getTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "./tableVirtualizatio
 
 export const TABLE_CELL_INLINE_ATTRIBUTE = "data-sy-table-cell-inline";
 
+let tableCellPreviewCache: Map<string, string> | undefined;
+
 export const updateTableCellContentLayout = (element: HTMLElement, blockDOM: string) => {
     const inline = getTableCellInlineHTML(blockDOM);
     element.classList.toggle("table__cell--inline", inline !== null);
@@ -198,13 +200,23 @@ export const renderTableCellRich = (cell: Element) => {
         return;
     }
     cell.removeAttribute(TABLE_CELL_INLINE_ATTRIBUTE);
-    decodeTableCellRich(encoded);
-    const template = document.createElement("template");
-    // 由 Lute 从源数据产生预览，事务、剪贴板和静态渲染使用同一套单元格协议。
-    template.innerHTML = getAVRichTextLute().SpinBlockDOM(
-        `<div data-type="NodeTable" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">` +
-        `<table><thead><tr><th ${TABLE_CELL_RICH_ATTRIBUTE}="${encoded}"></th></tr></thead></table></div></div>`);
-    cell.innerHTML = template.content.querySelector("th").innerHTML;
+    if (!tableCellPreviewCache) {
+        // 同一轮快照和事务清理复用静态预览，微任务边界释放单元格源与预览内容。
+        tableCellPreviewCache = new Map();
+        queueMicrotask(() => { tableCellPreviewCache = undefined; });
+    }
+    let preview = tableCellPreviewCache.get(encoded);
+    if (preview === undefined) {
+        decodeTableCellRich(encoded);
+        const template = document.createElement("template");
+        // 由 Lute 从源数据产生预览，事务、剪贴板和静态渲染使用同一套单元格协议。
+        template.innerHTML = getAVRichTextLute().SpinBlockDOM(
+            `<div data-type="NodeTable" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">` +
+            `<table><thead><tr><th ${TABLE_CELL_RICH_ATTRIBUTE}="${encoded}"></th></tr></thead></table></div></div>`);
+        preview = template.content.querySelector("th").innerHTML;
+        tableCellPreviewCache.set(encoded, preview);
+    }
+    cell.innerHTML = preview;
     cell.setAttribute("contenteditable", "false");
     cell.closest('[data-type="NodeTable"]')?.setAttribute(Constants.CUSTOM_SY_TABLE_RICH, "1");
 };

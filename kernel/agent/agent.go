@@ -1070,6 +1070,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 
 			firstResponsePending := true
+			outputLimitReached := false
 			for {
 				resp := firstResp
 				var recvErr error
@@ -1117,6 +1118,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				}
 
 				for _, choice := range resp.Choices {
+					if choice.FinishReason == openai.FinishReasonLength {
+						outputLimitReached = true
+					}
 					if choice.Delta.Content != "" {
 						writeTaggedContent(choice.Delta.Content)
 					}
@@ -1157,6 +1161,35 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			roundCancel()
 			turn.DraftContent = ""
 			turn.DraftRoundID = ""
+
+			if outputLimitReached {
+				// 保留已收到的文本，并在执行可能被截断的工具调用前结束本轮。
+				partial := AgentMessage{
+					Role:                 "assistant",
+					Content:              contentBuilder.String(),
+					ReasoningContent:     reasoningBuilder.String(),
+					NativeContent:        nativeContent,
+					ResponseOutput:       responseOutput,
+					ResponseOutputTokens: responseOutputTokens,
+					RoundID:              roundID,
+				}
+				if len(toolCallAccumulator.ToolCalls()) > 0 {
+					// 不将缺少执行结果的工具请求带入下一轮模型上下文。
+					partial.NativeContent = nil
+					partial.ResponseOutput = nil
+					partial.ResponseOutputTokens = 0
+				}
+				if partial.Content != "" || partial.ReasoningContent != "" || partial.NativeContent != nil || len(partial.ResponseOutput) > 0 {
+					checkpointMsgs = append(checkpointMsgs, partial)
+				}
+				turn.TokenBreakdown = computeBreakdownIfNeeded(model, requestMessages, requestTools, lastPromptTokens)
+				if !saveTurn("interrupted") {
+					return
+				}
+				sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(297)})
+				return
+			}
 
 			aggregatedToolCalls := toolCallAccumulator.ToolCalls()
 			if len(aggregatedToolCalls) > 0 {

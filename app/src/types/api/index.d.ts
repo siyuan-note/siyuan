@@ -2440,9 +2440,13 @@ export type TemplatePlan = { "count": number; "id": string; "nodes": Array<Templ
 
 export type TemplatePlanNode = { "depth": number; "hPath": string; "id": string; "parentID": string; "title": string; };
 
+export type TestSyncProviderLocalRequestInput = { "local": SyncLocalInput; };
+
 export type TestSyncProviderS3Data = { "kind": string; "msg": string; };
 
 export type TestSyncProviderS3RequestInput = { "s3": SyncS3Input; };
+
+export type TestSyncProviderWebDAVRequestInput = { "cloudName"?: string; "webdav": SyncWebDAVInput; };
 
 export type Transaction = { "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
 
@@ -7552,6 +7556,18 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
+     * 只探测候选配置：端点必须是已有目录且不能与工作空间重叠。
+     * 在独占临时目录中写入、读回比对并尽力删除探针，不读取或保存同步配置；kind 沿用 S3 的 ok/config/network 语义。
+     * 只读模式可调用，不修改快照或同步开关。删除失败只记脱敏日志，不改变探测结果。
+     */
+    "/api/sync/testSyncProviderLocal": {
+        request: TestSyncProviderLocalRequestInput;
+        response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
      * 使用请求中的候选配置探测云端：写入探针对象、按前缀列举并比对、尽力删除探针，不读取或保存用户配置。
      * 请求字段与保存接口一致；缺少必填项或地址无效时同样返回 code 0，由 kind 为 config 表示，避免与网络故障混淆。
      * kind 为 ok 表示写入与列举指向同一个对象键；config 表示可确定的配置错误；network 表示网络或服务端不可达，无法判定配置。
@@ -7560,6 +7576,19 @@ export interface APIPOSTRoutes {
      */
     "/api/sync/testSyncProviderS3": {
         request: TestSyncProviderS3RequestInput;
+        response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 只探测候选配置：验证端点为集合，创建独占探针目录并写入、读回比对，最后尽力删除。
+     * 不读取或保存同步配置，不修改快照或同步开关；只读模式可调用。kind 沿用 S3 的 ok/config/network 语义。
+     * cloudName 可省略；指定时在该云端目录的 siyuan/repo 下探测，省略时使用独占的随机云端目录并尽力删除。
+     * 上传失败后同样尝试清理；删除失败只记脱敏日志，不改变探测结果。需要集合查询、目录创建、读写和删除权限。
+     */
+    "/api/sync/testSyncProviderWebDAV": {
+        request: TestSyncProviderWebDAVRequestInput;
         response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */

@@ -48,6 +48,15 @@ type TestSyncProviderS3Data struct {
 	Msg  string `json:"msg"`
 }
 
+type TestSyncProviderWebDAVRequest struct {
+	WebDAV    SyncWebDAV `json:"webdav"`
+	CloudName string     `json:"cloudName" api:"optional"`
+}
+
+type TestSyncProviderLocalRequest struct {
+	Local SyncLocal `json:"local"`
+}
+
 type ClearSyncProviderConfigData struct {
 	Enabled bool        `json:"enabled"`
 	S3      *SyncS3     `json:"s3,omitempty"`

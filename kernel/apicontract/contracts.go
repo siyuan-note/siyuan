@@ -881,6 +881,17 @@ var GetSyncProviderConfigRules = define[SyncProviderConfigRulesRequest, SyncProv
 // 只读模式下也可调用，不修改已有快照或同步开关。
 var TestSyncProviderS3 = define[TestSyncProviderS3Request, TestSyncProviderS3Data]("testSyncProviderS3", "/api/sync/testSyncProviderS3", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
+// TestSyncProviderWebDAV 只探测候选配置：验证端点为集合，创建独占探针目录并写入、读回比对，最后尽力删除。
+// 不读取或保存同步配置，不修改快照或同步开关；只读模式可调用。kind 沿用 S3 的 ok/config/network 语义。
+// cloudName 可省略；指定时在该云端目录的 siyuan/repo 下探测，省略时使用独占的随机云端目录并尽力删除。
+// 上传失败后同样尝试清理；删除失败只记脱敏日志，不改变探测结果。需要集合查询、目录创建、读写和删除权限。
+var TestSyncProviderWebDAV = define[TestSyncProviderWebDAVRequest, TestSyncProviderS3Data]("testSyncProviderWebDAV", "/api/sync/testSyncProviderWebDAV", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// TestSyncProviderLocal 只探测候选配置：端点必须是已有目录且不能与工作空间重叠。
+// 在独占临时目录中写入、读回比对并尽力删除探针，不读取或保存同步配置；kind 沿用 S3 的 ok/config/network 语义。
+// 只读模式可调用，不修改快照或同步开关。删除失败只记脱敏日志，不改变探测结果。
+var TestSyncProviderLocal = define[TestSyncProviderLocalRequest, TestSyncProviderS3Data]("testSyncProviderLocal", "/api/sync/testSyncProviderLocal", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
 var SetCloudSyncDir = define[SyncNameRequest, Null]("setCloudSyncDir", "/api/sync/setCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData]("setSyncAssetDownloadMode", "/api/sync/setSyncAssetDownloadMode", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var CreateCloudSyncDir = define[SyncNameRequest, Null]("createCloudSyncDir", "/api/sync/createCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

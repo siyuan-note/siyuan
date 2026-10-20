@@ -54174,6 +54174,18 @@
       ],
       "additionalProperties": false
     },
+    "TestSyncProviderLocalRequestInput": {
+      "type": "object",
+      "properties": {
+        "local": {
+          "$ref": "#/$defs/SyncLocalInput"
+        }
+      },
+      "required": [
+        "local"
+      ],
+      "additionalProperties": false
+    },
     "TestSyncProviderS3Data": {
       "type": "object",
       "properties": {
@@ -54199,6 +54211,21 @@
       },
       "required": [
         "s3"
+      ],
+      "additionalProperties": false
+    },
+    "TestSyncProviderWebDAVRequestInput": {
+      "type": "object",
+      "properties": {
+        "cloudName": {
+          "type": "string"
+        },
+        "webdav": {
+          "$ref": "#/$defs/SyncWebDAVInput"
+        }
+      },
+      "required": [
+        "webdav"
       ],
       "additionalProperties": false
     },
@@ -170146,6 +170173,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/sync/testSyncProviderLocal",
+      "handler": "testSyncProviderLocal",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TestSyncProviderLocalRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TestSyncProviderS3Data"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/sync/testSyncProviderS3",
       "handler": "testSyncProviderS3",
       "authorization": [
@@ -170155,6 +170261,85 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/TestSyncProviderS3RequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TestSyncProviderS3Data"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/testSyncProviderWebDAV",
+      "handler": "testSyncProviderWebDAV",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TestSyncProviderWebDAVRequestInput"
       },
       "response": {
         "anyOf": [

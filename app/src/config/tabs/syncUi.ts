@@ -120,11 +120,13 @@ type SyncProviderIntroDef = {
 };
 
 type SyncThirdPartyProviderDef = SyncProviderIntroDef & {
-    configKey: SyncProviderConfigKey;
     api: string;
-    getConfig: () => Config.ISync[SyncProviderConfigKey];
     fields: SyncProviderFieldDef[];
-};
+} & (
+    | {configKey: "s3"; getConfig: () => Config.ISync["s3"]}
+    | {configKey: "webdav"; getConfig: () => Config.ISync["webdav"]}
+    | {configKey: "local"; getConfig: () => Config.ISync["local"]}
+);
 
 type SyncProviderDef = SyncProviderIntroDef | SyncThirdPartyProviderDef;
 
@@ -466,9 +468,9 @@ const openSyncProviderConfigDialog = (root: Element) => {
     }
     const L = window.siyuan.languages;
     const warning = def.configKey === "s3" ? L.s3EndpointBucketWarning : "";
-    // 测试连接仅用于 S3：探测会写入并删除探针对象，WebDAV 与本地目录没有等价的列举语义
-    const testButton = def.configKey === "s3" ? `<div class="fn__space"></div>
-    <button class="b3-button b3-button--outline" data-action="test"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${L.testConnection}</span></button>` : "";
+    const testButton = `<div class="fn__space"></div>
+    <button class="b3-button b3-button--outline" data-action="test"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${L.testConnection}</span></button>`;
+    const cloudName = window.siyuan.config.sync.cloudName;
     let closed = false;
     let rulesVersion = 0;
     let rulesTimer: ReturnType<typeof setTimeout>;
@@ -655,8 +657,12 @@ const openSyncProviderConfigDialog = (root: Element) => {
                 configElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
                 return;
             }
-            const response = await fetchSyncPost("/api/sync/testSyncProviderS3", {
-                s3: readProviderConfigFields(configElement, template),
+            const response = def.configKey === "s3" ? await fetchSyncPost("/api/sync/testSyncProviderS3", {
+                s3: readProviderConfigFields(configElement, def.getConfig()),
+            }) : def.configKey === "webdav" ? await fetchSyncPost("/api/sync/testSyncProviderWebDAV", {
+                webdav: readProviderConfigFields(configElement, def.getConfig()), cloudName,
+            }) : await fetchSyncPost("/api/sync/testSyncProviderLocal", {
+                local: readProviderConfigFields(configElement, def.getConfig()),
             });
             if (closed) {
                 return;

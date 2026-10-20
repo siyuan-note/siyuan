@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20261016111950"
+		"updated": "20261020224352"
 	},
 	"Children": [
 		{
@@ -519,6 +519,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "。輸入過程不會儲存，關閉已修改的表單時會詢問是否放棄草稿。"
+				}
+			]
+		},
+		{
+			"ID": "20261020224352-a5ax2ei",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020224352-a5ax2ei",
+				"updated": "20261020224352"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存前可點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "測試連線"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 檢查目前 S3、WebDAV 或本機檔案系統設定草稿，測試不會儲存設定。WebDAV 會檢查建立目錄和探針讀寫權限，本機檔案系統會檢查目錄讀寫權限，結束後盡力清理探針。測試失敗時可依提示修改後重試，已儲存的設定會保留。"
 				}
 			]
 		},

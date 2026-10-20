@@ -6,6 +6,30 @@ import (
 	"testing"
 )
 
+func TestSyncProviderProbeContracts(t *testing.T) {
+	for _, body := range []string{`{"webdav":{}}`, `{"webdav":{"endpoint":"https://example.com","skipTlsVerify":true},"cloudName":"main"}`} {
+		if _, err := TestSyncProviderWebDAV.Decode(strings.NewReader(body)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, body := range []string{`{}`, `{"webdav":null}`, `{"webdav":{"timeout":"wrong"}}`, `{"webdav":{},"cloudName":1}`} {
+		if _, err := TestSyncProviderWebDAV.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid WebDAV probe accepted: %s", body)
+		}
+	}
+	if _, err := TestSyncProviderLocal.Decode(strings.NewReader(`{"local":{"endpoint":"draft","timeout":7}}`)); err != nil {
+		t.Fatal(err)
+	}
+	for _, body := range []string{`{}`, `{"local":null}`, `{"local":{"endpoint":1}}`} {
+		if _, err := TestSyncProviderLocal.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid local probe accepted: %s", body)
+		}
+	}
+	if TestSyncProviderWebDAV.definition.Authorization != AuthenticatedAccess|AdminAccess || TestSyncProviderLocal.definition.Authorization != AuthenticatedAccess|AdminAccess {
+		t.Fatal("probe authorization changed")
+	}
+}
+
 func TestSyncConditionalDirection(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"upload":null}`, `{"upload":"wrong"}`, `{"upload":[]}`} {
 		request, err := PerformSync.Decode(strings.NewReader(body))

@@ -326,6 +326,13 @@ const focusStack = async (app: App, stack: IBackStack) => {
     }
 };
 
+export const hasBackHistory = () => {
+    const stacks = window.siyuan.backStack;
+    const last = stacks[stacks.length - 1];
+    // 后退后当前记录位于前进栈；未后退时，已关闭的当前页签也可作为返回目标。
+    return Boolean(last && (previousIsBack || stacks.length > 1 || !document.contains(last.protyle.element)));
+};
+
 export const goBack = async (app: App) => {
     const current = previousIsBack ? forwardStack[forwardStack.length - 1] :
         window.siyuan.backStack[window.siyuan.backStack.length - 1];

@@ -5,11 +5,11 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const source = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
-const names = ["pushBack", "goBack", "goForward", "forwardStack", "previousIsBack"];
+const names = ["pushBack", "goBack", "goForward", "hasBackHistory", "forwardStack", "previousIsBack"];
 const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
     statement.declarationList.declarations.some(item => names.includes(item.name.getText(source))));
 const compiled = transpileModule(declarations.map(item => item.getText(source).replace(/^export /, "")).join("\n") +
-    "\nglobalThis.history = {pushBack, goBack, goForward};", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    "\nglobalThis.history = {pushBack, goBack, goForward, hasBackHistory};", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const setup = () => {
     const stacks: any[] = [];
@@ -87,4 +87,38 @@ test("an invalid navigation record does not discard forward history", async () =
     history.pushBack(a);
     await history.goForward({});
     assert.equal(visited.at(-1).protyle, c);
+});
+
+test("back availability follows document history through back, forward and new navigation", async () => {
+    const {tabs: [a, b, c], push, history} = setup();
+    assert.equal(history.hasBackHistory(), false);
+    push(a);
+    assert.equal(history.hasBackHistory(), false);
+    push(b);
+    assert.equal(history.hasBackHistory(), true);
+    push(c);
+    await history.goBack({});
+    assert.equal(history.hasBackHistory(), true);
+    await history.goBack({});
+    assert.equal(history.hasBackHistory(), false);
+    await history.goForward({});
+    assert.equal(history.hasBackHistory(), true);
+    await history.goBack({});
+    push(c);
+    assert.equal(history.hasBackHistory(), true);
+    await history.goBack({});
+    assert.equal(history.hasBackHistory(), false);
+});
+
+test("a closed current tab remains a back destination and deleted records can exhaust history", async () => {
+    const {tabs: [a, b], context, push, history} = setup();
+    push(a);
+    context.document.contains = () => false;
+    assert.equal(history.hasBackHistory(), true);
+    await history.goBack({});
+    assert.equal(history.hasBackHistory(), false);
+    push(b);
+    context.focusStack = async () => false;
+    await history.goBack({});
+    assert.equal(history.hasBackHistory(), false);
 });

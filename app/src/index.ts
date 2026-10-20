@@ -411,7 +411,7 @@ window.openFileByURL = (openURL) => {
 };
 
 /// #if BROWSER
-registerDesktopBackNavigation();
+registerDesktopBackNavigation(siyuanApp);
 window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
 };

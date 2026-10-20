@@ -5677,7 +5677,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 取消尚未提交且仍有效的 Data.zip 预检；不能删除已提交批次的恢复材料。
+     * 取消尚未提交的 Data.zip 预检，包括过期预检；不能删除已提交批次的恢复材料。
      */
     "/api/import/cancelDataImport": {
         request: DataImportRequestInput;
@@ -5796,6 +5796,8 @@ export interface APIPOSTRoutes {
     /**
      * 预检 Data.zip 并保存原件，返回加密冲突及需要认证的笔记本 ID，不修改活动数据。
      * 预检有效期为 30 分钟；提交前必须显式选择 skip 或 overwrite，取消会移除尚未提交的暂存文件。
+     * 过期且未提交的预检在启动或下一次导入时清理；预检失败时也清理本次暂存副本。
+     * 存在未完成批次时，先在独占访问下恢复；恢复失败会继续阻断其他写入、笔记本操作和同步。
      */
     "/api/import/prepareDataImport": {
         request: ImportDataRequestInput;

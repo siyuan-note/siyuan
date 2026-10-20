@@ -1875,6 +1875,9 @@ func normalizeSnapshotMemo(memo string) string {
 }
 
 func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -2010,6 +2013,9 @@ func formatSyncRepoErrorMsg(err error) string {
 }
 
 func syncRepoDownload() (err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		planSyncAfter(fixSyncInterval)
 
@@ -2085,6 +2091,9 @@ func syncRepoDownload() (err error) {
 }
 
 func syncRepoUpload() (err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		planSyncAfter(fixSyncInterval)
 
@@ -2160,6 +2169,9 @@ func syncRepoUpload() (err error) {
 var isBootSyncing = atomic.Bool{}
 
 func bootSyncRepo() (err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
@@ -2302,6 +2314,9 @@ func bootSyncRepo() (err error) {
 }
 
 func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)

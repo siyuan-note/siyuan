@@ -195,9 +195,16 @@ func CheckReadonly(c *gin.Context) {
 		return
 	}
 	// 导入提交期间暂停其他写接口，避免已确认的磁盘快照被并发请求修改。
-	if c.Request.URL.Path != "/api/import/commitDataImport" {
+	if c.Request.URL.Path != "/api/import/commitDataImport" && c.Request.URL.Path != "/api/import/prepareDataImport" {
 		dataImportAccess.RLock()
 		defer dataImportAccess.RUnlock()
+		if err := checkDataImportRecovery(); err != nil {
+			result := util.NewResult()
+			result.Code, result.Msg = -1, err.Error()
+			c.JSON(http.StatusOK, result)
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

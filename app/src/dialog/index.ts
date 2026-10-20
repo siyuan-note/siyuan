@@ -13,6 +13,7 @@ export class Dialog {
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
+    private closeGuard: () => boolean;
     public editors: { [key: string]: Protyle };
     public data: any;
     private resizeCallback: (type: string) => void;
@@ -65,6 +66,8 @@ export class Dialog {
         width?: string,
         height?: string,
         destroyCallback?: (options?: IObject) => void,
+        // 返回 false 时保留对话框，覆盖按钮、键盘、移动端返回和直接销毁调用。
+        beforeClose?: () => boolean,
         disableClose?: boolean,
         hideCloseIcon?: boolean,
         disableAnimation?: boolean,
@@ -82,6 +85,7 @@ export class Dialog {
         }
         this.resizeCallback = options.resizeCallback;
         this.disableClose = options.disableClose;
+        this.closeGuard = options.beforeClose;
         this.id = genUUID();
         window.siyuan.dialogs.push(this);
         this.destroyCallback = options.destroyCallback;
@@ -149,7 +153,7 @@ left:${left || "auto"};top:${top || "auto"}">
     }
 
     public destroy(options?: IObject) {
-        if (this.destroying) {
+        if (this.destroying || this.closeGuard?.() === false) {
             return;
         }
         this.destroying = true;

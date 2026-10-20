@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -190,6 +191,58 @@ func TestDataImportCanSkipEveryFile(t *testing.T) {
 	}
 }
 
+func TestDataImportRejectsNotebookPathAliases(t *testing.T) {
+	kek := dataImportTestWorkspace(t)
+	defer zeroAndClear(kek)
+	source := t.TempDir()
+	alias := strings.ToUpper(dataImportTestID)
+	if err := writeDataImportJSON(filepath.Join(source, alias, ".siyuan", "conf.json"), conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, alias, dataImportTestID+".sy"), []byte("unauthenticated replacement"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	before, err := archiveDirectoryFiles(util.DataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = PrepareDataImport(dataImportTestZip(t, source)); err == nil {
+		t.Fatal("accepted a noncanonical notebook ID that aliases an encrypted directory")
+	}
+	if _, err = validateImportedNotebookIdentities(source); err == nil {
+		t.Fatal("legacy import accepted a notebook path alias")
+	}
+	after, err := archiveDirectoryFiles(util.DataDir)
+	if err != nil || !reflect.DeepEqual(before, after) {
+		t.Fatalf("path alias changed active data: %v", err)
+	}
+}
+
+func TestDataImportRejectsNestedDestinationAliases(t *testing.T) {
+	kek := dataImportTestWorkspace(t)
+	defer zeroAndClear(kek)
+	if _, err := os.Stat(filepath.Join(util.DataDir, ".SIYUAN")); os.IsNotExist(err) {
+		t.Skip("filesystem distinguishes directory name case")
+	} else if err != nil {
+		t.Fatal(err)
+	}
+	source := t.TempDir()
+	if err := writeDataImportBytes(filepath.Join(source, ".SIYUAN", "unrecognized-key.json"), []byte("source")); err != nil {
+		t.Fatal(err)
+	}
+	before, err := archiveDirectoryFiles(util.DataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = PrepareDataImport(dataImportTestZip(t, source)); err == nil {
+		t.Fatal("accepted a destination directory alias outside notebook roots")
+	}
+	after, err := archiveDirectoryFiles(util.DataDir)
+	if err != nil || !reflect.DeepEqual(before, after) {
+		t.Fatalf("directory alias changed active data: %v", err)
+	}
+}
+
 func TestDataImportRestoresEncryptedNotebookInUnconfiguredWorkspace(t *testing.T) {
 	kek := dataImportTestWorkspace(t)
 	defer zeroAndClear(kek)
@@ -329,6 +382,12 @@ func TestDataImportRejectsUnsafeArchives(t *testing.T) {
 			if _, err = PrepareDataImport(p); err == nil {
 				t.Fatal("accepted an unsafe archive")
 			}
+			if entries, err := os.ReadDir(dataImportBase()); err != nil || len(entries) != 0 {
+				t.Fatalf("failed preflight retained temporary uploads: %v", err)
+			}
+			if _, err := os.Stat(p); err != nil {
+				t.Fatalf("failed preflight removed the original archive: %v", err)
+			}
 			files, err := archiveDirectoryFiles(util.DataDir)
 			if err != nil || len(files) != 0 {
 				t.Fatalf("invalid archive changed active data: %v", err)
@@ -422,6 +481,51 @@ func TestDataImportBlocksOtherWriteRequestsDuringCommit(t *testing.T) {
 	if len(called) != 1 {
 		t.Fatal("write handler was not invoked exactly once")
 	}
+}
+
+func TestDataImportPreparationWaitsForExistingWriteRequests(t *testing.T) {
+	notebookArchiveTestWorkspace(t)
+	previousReadonly := util.ReadOnly
+	util.ReadOnly = false
+	t.Cleanup(func() { util.ReadOnly = previousReadonly })
+	source := t.TempDir()
+	if err := os.WriteFile(filepath.Join(source, "ordinary.txt"), []byte("source"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	archive := dataImportTestZip(t, source)
+	entered, release, finished := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	var once sync.Once
+	releaseWriter := func() { once.Do(func() { close(release) }) }
+	defer releaseWriter()
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) })
+	engine.POST("/api/test/write", CheckReadonly, func(c *gin.Context) {
+		close(entered)
+		<-release
+		c.Status(http.StatusNoContent)
+	})
+	go func() {
+		engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPost, "/api/test/write", nil))
+		close(finished)
+	}()
+	<-entered
+	prepared := make(chan error, 1)
+	go func() { _, err := PrepareDataImport(archive); prepared <- err }()
+	select {
+	case err := <-prepared:
+		t.Fatalf("preparation recovery entered while another writer was active: %v", err)
+	case <-time.After(30 * time.Millisecond):
+	}
+	releaseWriter()
+	select {
+	case err := <-prepared:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("preparation remained blocked after the writer finished")
+	}
+	<-finished
 }
 
 func TestDataImportAdoptsNewerCompatibleKeyConfiguration(t *testing.T) {
@@ -569,6 +673,161 @@ func TestDataImportCancelChangesAndExpiration(t *testing.T) {
 	if _, err = CommitDataImport(plan.ID, "overwrite", ""); err == nil {
 		t.Fatal("accepted expired preflight")
 	}
+	if _, err = os.Stat(directory); !os.IsNotExist(err) {
+		t.Fatal("expired preparation was not reclaimed")
+	}
+}
+
+func TestDataImportExpiredCancelAndCleanup(t *testing.T) {
+	notebookArchiveTestWorkspace(t)
+	source := t.TempDir()
+	if err := os.WriteFile(filepath.Join(source, "ordinary.txt"), []byte("source"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	prepareExpired := func() (DataImportPlan, string) {
+		plan, err := PrepareDataImport(dataImportTestZip(t, source))
+		if err != nil {
+			t.Fatal(err)
+		}
+		directory, stage, err := loadDataImportStage(plan.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stage.Created = time.Now().Add(-time.Hour).Unix()
+		if err = writeDataImportJSON(filepath.Join(directory, "stage.json"), stage); err != nil {
+			t.Fatal(err)
+		}
+		return plan, directory
+	}
+	plan, directory := prepareExpired()
+	if err := CancelDataImport(plan.ID); err != nil {
+		t.Fatalf("cannot cancel an expired preparation: %v", err)
+	}
+	if _, err := os.Stat(directory); !os.IsNotExist(err) {
+		t.Fatal("expired cancellation left the uploaded archive")
+	}
+	_, directory = prepareExpired()
+	if _, err := PrepareDataImport(dataImportTestZip(t, source)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(directory); !os.IsNotExist(err) {
+		t.Fatal("new preparation did not reclaim an expired preparation")
+	}
+	if err := recoverDataImports(); err != nil {
+		t.Fatal(err)
+	}
+	// 已提交的恢复材料不受过期清理影响。
+	committed, err := PrepareDataImport(dataImportTestZip(t, source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = CommitDataImport(committed.ID, "skip", ""); err != nil {
+		t.Fatal(err)
+	}
+	committedDir, _ := dataImportDirectory(committed.ID)
+	stageData, err := os.ReadFile(filepath.Join(committedDir, "stage.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var committedStage dataImportStage
+	if err = json.Unmarshal(stageData, &committedStage); err != nil {
+		t.Fatal(err)
+	}
+	committedStage.Created = time.Now().Add(-time.Hour).Unix()
+	if err = writeDataImportJSON(filepath.Join(committedDir, "stage.json"), committedStage); err != nil {
+		t.Fatal(err)
+	}
+	if err = recoverDataImports(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = os.Stat(filepath.Join(committedDir, "source.zip")); err != nil {
+		t.Fatalf("cleanup discarded committed recovery material: %v", err)
+	}
+}
+
+func TestDataImportFailedRollbackQuarantinesWritesUntilRecovery(t *testing.T) {
+	notebookArchiveTestWorkspace(t)
+	previousPending, previousReadonly := dataImportRecoveryRequired.Load(), util.ReadOnly
+	util.ReadOnly = false
+	t.Cleanup(func() { dataImportRecoveryRequired.Store(previousPending); util.ReadOnly = previousReadonly })
+	directory, _ := dataImportDirectory("20261020230000-reviewa")
+	install := filepath.Join(directory, "install")
+	for _, name := range []string{"a.txt", "b.txt"} {
+		if err := writeDataImportBytes(filepath.Join(install, name), []byte("new")); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(util.DataDir, name), []byte("original"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	backup := filepath.Join(directory, "rollback", "a.txt")
+	writes := 0
+	err := applyDataImport(directory, install, func(source, target string) error {
+		writes++
+		if writes == 2 {
+			if err := os.Rename(backup, backup+".unavailable"); err != nil {
+				t.Fatal(err)
+			}
+			return errors.New("write failure with temporarily unavailable rollback source")
+		}
+		return copyDataImportFile(source, target)
+	})
+	if err == nil || !dataImportRecoveryRequired.Load() {
+		t.Fatal("failed rollback did not keep write quarantine")
+	}
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) })
+	entered := false
+	engine.POST("/api/test/write", CheckReadonly, func(c *gin.Context) { entered = true; c.Status(http.StatusNoContent) })
+	writeRequest := func() {
+		engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPost, "/api/test/write", nil))
+	}
+	writeRequest()
+	if entered {
+		t.Fatal("admitted another write after failed rollback")
+	}
+	if err = AcquireEncryptedBoxOperation(""); err == nil {
+		t.Fatal("admitted a new notebook operation during pending recovery")
+	}
+	if _, err = deriveKEK("any-password"); err == nil {
+		t.Fatal("admitted key adoption during pending recovery")
+	}
+	if _, _, err = CreateRepoSnapshot("must not capture a partial import"); err == nil {
+		t.Fatal("allowed a snapshot of a partially installed batch")
+	}
+	for _, syncAttempt := range []func() error{
+		func() error { return syncDataLocked(false, false) }, syncRepoDownload, syncRepoUpload, bootSyncRepo,
+		func() error { _, err := syncRepo(false, false); return err },
+	} {
+		if err = syncAttempt(); err == nil {
+			t.Fatal("allowed sync of a partially installed batch")
+		}
+	}
+	source := t.TempDir()
+	if err = os.WriteFile(filepath.Join(source, "next.txt"), []byte("next"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	archive := dataImportTestZip(t, source)
+	if _, err = PrepareDataImport(archive); err == nil || !dataImportRecoveryRequired.Load() {
+		t.Fatal("failed recovery reopened admission")
+	}
+	if err = os.Rename(backup+".unavailable", backup); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = PrepareDataImport(archive); err != nil {
+		t.Fatalf("preparation could not retry recovery safely: %v", err)
+	}
+	if dataImportRecoveryRequired.Load() {
+		t.Fatal("successful recovery did not reopen admission")
+	}
+	content, err := os.ReadFile(filepath.Join(util.DataDir, "a.txt"))
+	if err != nil || string(content) != "original" {
+		t.Fatalf("original data was not recovered: %v", err)
+	}
+	writeRequest()
+	if !entered {
+		t.Fatal("write admission remained blocked after recovery")
+	}
 }
 
 func TestDataImportTransactionFailureAndRestartRecovery(t *testing.T) {
@@ -577,7 +836,7 @@ func TestDataImportTransactionFailureAndRestartRecovery(t *testing.T) {
 			notebookArchiveTestWorkspace(t)
 			directory, _ := dataImportDirectory("20261020180002-importc")
 			install := filepath.Join(directory, "install")
-			for name, content := range map[string]string{"a.txt": "new", "new/b.txt": "new"} {
+			for name, content := range map[string]string{"a.txt": "new", "new/b.txt": "new", "new/c.txt": "new"} {
 				if err := writeDataImportBytes(filepath.Join(install, filepath.FromSlash(name)), []byte(content)); err != nil {
 					t.Fatal(err)
 				}
@@ -599,7 +858,7 @@ func TestDataImportTransactionFailureAndRestartRecovery(t *testing.T) {
 				}()
 				err = applyDataImport(directory, install, func(source, target string) error {
 					writes++
-					if writes == 2 {
+					if writes == 3 {
 						if crash {
 							panic(crashed)
 						}

@@ -326,6 +326,9 @@ func syncData(exit, byHand bool) (err error) {
 }
 
 func syncDataLocked(exit, byHand bool) error {
+	if err := checkDataImportRecovery(); err != nil {
+		return err
+	}
 	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if exit {

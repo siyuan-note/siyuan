@@ -149,6 +149,9 @@ func notebookCryptoConfigurationComplete(notebookCrypto *conf.NotebookCrypto) bo
 
 // AcquireEncryptedBoxOperation 为需要把明文结果保留到响应结束的操作取得准入租约。
 func AcquireEncryptedBoxOperation(boxID string) error {
+	if err := checkDataImportRecovery(); err != nil {
+		return err
+	}
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return nil
 	}

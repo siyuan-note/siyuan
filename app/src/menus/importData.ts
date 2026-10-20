@@ -30,6 +30,8 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
     };
     const dialog = new Dialog({
         title: `${lang.import} Data`,
+        hideCloseIcon: true,
+        beforeClose: () => !busy || committed,
         width: isMobile() ? "92vw" : "560px",
         content: `<div class="b3-dialog__content">
     <div class="ft__breakword">${lang.importDataTip}</div>
@@ -55,6 +57,7 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
     });
     const password = dialog.element.querySelector<HTMLInputElement>('[data-type="password"]');
     const button = dialog.element.querySelector<HTMLButtonElement>('[data-type="import"]');
+    const cancelButton = dialog.element.querySelector<HTMLButtonElement>('[data-type="cancel"]');
     const modes = dialog.element.querySelectorAll<HTMLInputElement>('[name="data-import-mode"]');
     const mode = (): "skip" | "overwrite" =>
         dialog.element.querySelector<HTMLInputElement>('[name="data-import-mode"]:checked')?.value === "overwrite" ? "overwrite" : "skip";
@@ -63,11 +66,16 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
         dialog.element.querySelector('[data-type="password-label"]').classList.toggle("fn__none", !required);
         password.required = required;
         password.disabled = busy;
+        cancelButton.disabled = busy;
         button.disabled = busy || required && !password.value.trim();
     };
     modes.forEach((item) => item.addEventListener("change", update));
     password.addEventListener("input", update);
-    dialog.element.querySelector('[data-type="cancel"]').addEventListener("click", () => dialog.destroy());
+    cancelButton.addEventListener("click", () => {
+        if (!busy) {
+            dialog.destroy();
+        }
+    });
     button.addEventListener("click", async () => {
         if (busy || button.disabled) {
             return;

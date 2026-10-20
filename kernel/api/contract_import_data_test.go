@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -50,9 +51,10 @@ func TestAPIContractDataImportPrepareCancelAndInvalidCommit(t *testing.T) {
 		model.Conf, util.DataDir, util.ConfDir, util.TempDir, util.HistoryDir = oldConf, oldData, oldConfig, oldTemp, oldHistory
 	})
 	engine := gin.New()
-	engine.POST("/api/import/prepareDataImport", prepareDataImport)
-	engine.POST("/api/import/commitDataImport", commitDataImport)
-	engine.POST("/api/import/cancelDataImport", cancelDataImport)
+	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
+	engine.POST("/api/import/prepareDataImport", model.CheckReadonly, prepareDataImport)
+	engine.POST("/api/import/commitDataImport", model.CheckReadonly, commitDataImport)
+	engine.POST("/api/import/cancelDataImport", model.CheckReadonly, cancelDataImport)
 	var archive bytes.Buffer
 	writer := archivezip.NewWriter(&archive)
 	file, err := writer.Create("data/ordinary.txt")
@@ -107,6 +109,23 @@ func TestAPIContractDataImportPrepareCancelAndInvalidCommit(t *testing.T) {
 		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code == 0 {
 			t.Fatalf("accepted invalid commit: %s", recorder.Body.String())
 		}
+	}
+	stagePath := filepath.Join(util.ConfDir, "data-imports", prepared.Data.ID, "stage.json")
+	stageData, err := os.ReadFile(stagePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stage map[string]any
+	if err = json.Unmarshal(stageData, &stage); err != nil {
+		t.Fatal(err)
+	}
+	stage["created"] = time.Now().Add(-time.Hour).Unix()
+	stageData, err = json.Marshal(stage)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(stagePath, stageData, 0600); err != nil {
+		t.Fatal(err)
 	}
 	recorder = httptest.NewRecorder()
 	request = httptest.NewRequest(http.MethodPost, "/api/import/cancelDataImport", strings.NewReader(`{"id":" `+prepared.Data.ID+` "}`))

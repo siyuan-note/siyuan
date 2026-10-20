@@ -23,7 +23,7 @@ class Control {
     }
 }
 
-const setup = (encrypted = ["box"], conflicts = ["box"]) => {
+const setup = (encrypted = ["box"], conflicts = ["box"], commitWait = Promise.resolve()) => {
     const requests: Array<{url: string, data: {id?: string, mode?: string, password?: string}}> = [];
     const dialogs: MockDialog[] = [];
     let selectedMode = "skip";
@@ -45,14 +45,14 @@ const setup = (encrypted = ["box"], conflicts = ["box"]) => {
             },
             querySelectorAll: () => this.modes,
         };
-        constructor(public options: {content: string, width: string, destroyCallback: () => void}) {
+        constructor(public options: {content: string, width: string, destroyCallback: () => void, beforeClose?: () => boolean}) {
             for (const name of ["password", "password-label", "import", "cancel", "confirm"]) {
                 this.controls.set(`[data-type="${name}"]`, new Control());
             }
             dialogs.push(this);
         }
         destroy() {
-            if (!this.destroyed) {
+            if (!this.destroyed && this.options.beforeClose?.() !== false) {
                 this.destroyed = true;
                 this.options.destroyCallback();
             }
@@ -77,6 +77,7 @@ const setup = (encrypted = ["box"], conflicts = ["box"]) => {
                 return {code: prepareCode, data: {id: "plan-id", encrypted, conflicts}};
             }
             if (url.endsWith("commitDataImport")) {
+                await commitWait;
                 return {code: commitCode, data: {skipped: data.mode === "skip" ? conflicts : []}};
             }
             return {code: 0};
@@ -145,6 +146,24 @@ test("Data.zip cancellation only cancels the prepared upload", async () => {
     await state.dialogs[0].control("cancel").dispatch("click");
     assert.equal(state.requests.filter((item) => item.url.endsWith("cancelDataImport")).length, 1);
     assert.equal(state.requests.some((item) => item.url.endsWith("commitDataImport")), false);
+});
+
+test("Data.zip blocks cancel and shared dialog close paths while commit is pending", async () => {
+    let finish: () => void;
+    const wait = new Promise<void>((resolve) => finish = resolve);
+    const state = setup([], [], wait);
+    await state.exports.importDataFile({} as File);
+    const dialog = state.dialogs[0];
+    const committing = dialog.control("import").dispatch("click");
+    assert.equal(dialog.control("cancel").disabled, true);
+    await dialog.control("cancel").dispatch("click");
+    dialog.destroy();
+    assert.equal(dialog.destroyed, false);
+    assert.equal(state.requests.some((item) => item.url.endsWith("cancelDataImport")), false);
+    finish();
+    await committing;
+    assert.equal(dialog.destroyed, true);
+    assert.equal(state.dialogs.length, 2);
 });
 
 test("Data.zip still authenticates non-conflicting encrypted notebooks when conflicts are skipped", () => {

@@ -682,6 +682,8 @@ var ImportData = define[ImportDataRequest, Null]("importData", "/api/import/impo
 
 // 预检 Data.zip 并保存原件，返回加密冲突及需要认证的笔记本 ID，不修改活动数据。
 // 预检有效期为 30 分钟；提交前必须显式选择 skip 或 overwrite，取消会移除尚未提交的暂存文件。
+// 过期且未提交的预检在启动或下一次导入时清理；预检失败时也清理本次暂存副本。
+// 存在未完成批次时，先在独占访问下恢复；恢复失败会继续阻断其他写入、笔记本操作和同步。
 var PrepareDataImport = define[ImportDataRequest, DataImportPlan]("prepareDataImport", "/api/import/prepareDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 // 按路径覆盖并保留目标独有文件，skip 保留冲突目录及其密钥材料，返回明确的跳过清单。
@@ -690,7 +692,7 @@ var PrepareDataImport = define[ImportDataRequest, DataImportPlan]("prepareDataIm
 // 成功批次的原件、旧密文和密钥材料保留在工作空间 conf/data-imports 下。
 var CommitDataImport = define[CommitDataImportRequest, DataImportResult]("commitDataImport", "/api/import/commitDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
-// 取消尚未提交且仍有效的 Data.zip 预检；不能删除已提交批次的恢复材料。
+// 取消尚未提交的 Data.zip 预检，包括过期预检；不能删除已提交批次的恢复材料。
 var CancelDataImport = define[DataImportRequest, Null]("cancelDataImport", "/api/import/cancelDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 压缩包中的 Markdown 使用与 `/api/import/importStdMd` 相同的标准脚注转换规则。

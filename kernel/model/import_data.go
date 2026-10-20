@@ -30,6 +30,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -41,6 +42,14 @@ const dataImportTTL = 30 * time.Minute
 
 var dataImportMu sync.Mutex
 var dataImportAccess sync.RWMutex
+var dataImportRecoveryRequired atomic.Bool
+
+func checkDataImportRecovery() error {
+	if dataImportRecoveryRequired.Load() {
+		return errors.New(Conf.Language(424))
+	}
+	return nil
+}
 
 type DataImportPlan struct {
 	ID        string   `json:"id"`
@@ -68,11 +77,14 @@ func dataImportDirectory(id string) (string, error) {
 	return directory, nil
 }
 
-// PrepareDataImport 仅保存上传原件和预检结果，不修改活动数据或解锁笔记本。
+// PrepareDataImport 先在独占访问下恢复未完成批次，再保存上传原件和预检结果，不安装上传内容。
 func PrepareDataImport(zipPath string) (plan DataImportPlan, err error) {
+	if err = recoverDataImportsForPrepare(); err != nil {
+		return
+	}
 	dataImportMu.Lock()
 	defer dataImportMu.Unlock()
-	if err = recoverDataImports(); err != nil {
+	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
 	plan = DataImportPlan{ID: ast.NewNodeID(), Conflicts: []string{}, Encrypted: []string{}}
@@ -80,6 +92,11 @@ func PrepareDataImport(zipPath string) (plan DataImportPlan, err error) {
 	if err != nil {
 		return
 	}
+	defer func() {
+		if err != nil {
+			err = errors.Join(err, os.RemoveAll(directory))
+		}
+	}()
 	if err = archiveCopyFile(zipPath, filepath.Join(directory, "source.zip")); err != nil {
 		return
 	}
@@ -176,6 +193,9 @@ func inspectDataImportNotebooks(root string) (map[string]*conf.BoxEncryption, er
 		return nil, err
 	}
 	identities := map[string]*conf.BoxEncryption{}
+	if err = validateDataImportNotebookPaths(root, entries); err != nil {
+		return nil, err
+	}
 	for _, entry := range entries {
 		if strings.HasSuffix(entry.Name(), ".sy") {
 			return nil, errors.New(Conf.Language(198))
@@ -236,15 +256,66 @@ func inspectDataImportNotebooks(root string) (map[string]*conf.BoxEncryption, er
 	return identities, nil
 }
 
+// validateDataImportNotebookPaths 拒绝非规范 ID，并逐级核对已有目录项，防止大小写和短文件名别名绕过身份检查。
+func validateDataImportNotebookPaths(root string, entries []os.DirEntry) error {
+	for _, entry := range entries {
+		if name := entry.Name(); ast.IsNodeIDPattern(strings.ToLower(name)) && !ast.IsNodeIDPattern(name) {
+			return errors.New(Conf.Language(198))
+		}
+	}
+	directories := map[string]map[string]bool{}
+	return archiveWalk(root, func(name, _ string) error {
+		parent := util.DataDir
+		for _, part := range strings.Split(name, "/") {
+			names, cached := directories[parent]
+			if !cached {
+				children, err := os.ReadDir(parent)
+				if os.IsNotExist(err) {
+					return nil
+				}
+				if err != nil {
+					return err
+				}
+				names = map[string]bool{}
+				for _, child := range children {
+					names[child.Name()] = true
+				}
+				directories[parent] = names
+			}
+			parent = filepath.Join(parent, part)
+			if names[part] {
+				continue
+			}
+			if _, err := os.Lstat(parent); err == nil {
+				return errors.New(Conf.Language(198))
+			} else if !os.IsNotExist(err) {
+				return err
+			}
+			return nil
+		}
+		return nil
+	})
+}
+
 func loadDataImportStage(id string) (string, *dataImportStage, error) {
+	directory, stage, err := readDataImportStage(id)
+	if err != nil {
+		return "", nil, err
+	}
+	if time.Now().Unix()-stage.Created > int64(dataImportTTL.Seconds()) || stage.Created > time.Now().Unix() {
+		return "", nil, errors.New(Conf.Language(422))
+	}
+	return directory, stage, nil
+}
+
+func readDataImportStage(id string) (string, *dataImportStage, error) {
 	directory, err := dataImportDirectory(id)
 	if err != nil {
 		return "", nil, err
 	}
 	data, err := os.ReadFile(filepath.Join(directory, "stage.json"))
 	stage := &dataImportStage{}
-	if err != nil || json.Unmarshal(data, stage) != nil || stage.Version != 1 || stage.Plan.ID != id ||
-		time.Now().Unix()-stage.Created > int64(dataImportTTL.Seconds()) || stage.Created > time.Now().Unix() {
+	if err != nil || json.Unmarshal(data, stage) != nil || stage.Version != 1 || stage.Plan.ID != id || stage.Created <= 0 {
 		return "", nil, errors.New(Conf.Language(422))
 	}
 	if _, err = os.Lstat(filepath.Join(directory, "operation.json")); !os.IsNotExist(err) {
@@ -256,7 +327,7 @@ func loadDataImportStage(id string) (string, *dataImportStage, error) {
 func CancelDataImport(id string) error {
 	dataImportMu.Lock()
 	defer dataImportMu.Unlock()
-	directory, _, err := loadDataImportStage(id)
+	directory, _, err := readDataImportStage(id)
 	if err != nil {
 		return err
 	}

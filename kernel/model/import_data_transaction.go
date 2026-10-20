@@ -26,8 +26,10 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -151,6 +153,7 @@ func applyDataImport(directory, install string, write func(string, string) error
 	if err = writeDataImportJSON(filepath.Join(directory, "operation.json"), operation); err != nil {
 		return err
 	}
+	dataImportRecoveryRequired.Store(true)
 	for _, entry := range operation.Files {
 		target, targetErr := dataImportTarget(entry.Path)
 		if targetErr == nil {
@@ -163,15 +166,22 @@ func applyDataImport(directory, install string, write func(string, string) error
 			targetErr = write(filepath.Join(install, filepath.FromSlash(entry.Path)), target)
 		}
 		if targetErr != nil {
-			return errors.Join(targetErr, rollbackDataImport(directory, operation))
+			return abortDataImport(directory, operation, targetErr)
 		}
 	}
 	operation.State = "committed"
 	if err = writeDataImportJSON(filepath.Join(directory, "operation.json"), operation); err != nil {
 		operation.State = "committing"
-		return errors.Join(err, rollbackDataImport(directory, operation))
+		return abortDataImport(directory, operation, err)
 	}
+	dataImportRecoveryRequired.Store(false)
 	return nil
+}
+
+func abortDataImport(directory string, operation *dataImportOperation, cause error) error {
+	err := rollbackDataImport(directory, operation)
+	dataImportRecoveryRequired.Store(err != nil)
+	return errors.Join(cause, err)
 }
 
 func rollbackDataImport(directory string, operation *dataImportOperation) error {
@@ -217,11 +227,15 @@ func rollbackDataImport(directory string, operation *dataImportOperation) error 
 		}
 	}
 	operation.State = "rolledback"
-	return writeDataImportJSON(filepath.Join(directory, "operation.json"), operation)
+	if err := writeDataImportJSON(filepath.Join(directory, "operation.json"), operation); err != nil {
+		return err
+	}
+	return nil
 }
 
 // recoverDataImports 在挂载和同步前补偿未完成的批次，成功批次的原件和恢复材料继续保留。
-func recoverDataImports() error {
+func recoverDataImports() (err error) {
+	defer func() { dataImportRecoveryRequired.Store(err != nil) }()
 	entries, err := os.ReadDir(dataImportBase())
 	if os.IsNotExist(err) {
 		return nil
@@ -255,9 +269,49 @@ func recoverDataImports() error {
 			seen[strings.ToLower(file.Path)] = true
 		}
 		if operation.State == "committing" {
+			dataImportRecoveryRequired.Store(true)
 			if err = rollbackDataImport(directory, operation); err != nil {
 				return fmt.Errorf("%s: %w", Conf.Language(424), err)
 			}
+		}
+	}
+	if cleanupErr := cleanupExpiredDataImports(); cleanupErr != nil {
+		logging.LogWarnf("clean up expired Data.zip preparations failed: %s", cleanupErr)
+	}
+	return nil
+}
+
+// recoverDataImportsForPrepare 在独占写准入、同步和密钥锁下恢复，预检自身不持共享锁执行补偿写入。
+func recoverDataImportsForPrepare() error {
+	dataImportAccess.Lock()
+	defer dataImportAccess.Unlock()
+	dataImportMu.Lock()
+	defer dataImportMu.Unlock()
+	lockSync()
+	defer unlockSync()
+	notebookCryptoMu.Lock()
+	defer notebookCryptoMu.Unlock()
+	return recoverDataImports()
+}
+
+func cleanupExpiredDataImports() error {
+	entries, err := os.ReadDir(dataImportBase())
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) {
+			continue
+		}
+		directory, stage, readErr := readDataImportStage(entry.Name())
+		if readErr != nil || time.Now().Unix()-stage.Created <= int64(dataImportTTL.Seconds()) {
+			continue
+		}
+		if err = os.RemoveAll(directory); err != nil {
+			return err
 		}
 	}
 	return nil

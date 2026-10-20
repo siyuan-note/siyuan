@@ -1237,6 +1237,9 @@ func deriveNotebookCryptoBackupCandidate(password string) (backup *conf.Notebook
 
 // deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
 func deriveKEK(password string) ([]byte, error) {
+	if err := checkDataImportRecovery(); err != nil {
+		return nil, err
+	}
 	if err := checkPendingNotebookArchives(); err != nil {
 		return nil, err
 	}

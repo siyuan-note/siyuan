@@ -54,7 +54,6 @@ describe("search request scheduling", () => {
             onIdle: idle.resolve,
             createTask(version) {
                 return {
-                    method: 0,
                     version,
                     run(_signal, isCurrent) {
                         firstIsCurrent = isCurrent;
@@ -76,7 +75,6 @@ describe("search request scheduling", () => {
             onIdle: idle.resolve,
             createTask(version) {
                 return {
-                    method: 0,
                     version,
                     run() {
                         activeRequests++;
@@ -97,68 +95,19 @@ describe("search request scheduling", () => {
         assert.equal(maxActiveRequests, 1);
     });
 
-    it("aborts a running SQL request when a newer search is scheduled", async () => {
+    it("aborts a running search when a newer search is scheduled", async () => {
         const element = {isConnected: true} as Element;
         const firstStarted = deferred();
         const secondStarted = deferred();
         const idle = deferred();
-        let sqlSignal!: AbortSignal;
-
-        scheduleSearchRequest({
-            element,
-            delay: 0,
-            onIdle: idle.resolve,
-            createTask(version) {
-                return {
-                    method: 2,
-                    version,
-                    run(signal) {
-                        sqlSignal = signal;
-                        firstStarted.resolve();
-                        return new Promise<void>((resolve) => {
-                            signal.addEventListener("abort", () => resolve(), {once: true});
-                        });
-                    },
-                };
-            },
-        });
-        await firstStarted.promise;
-
-        scheduleSearchRequest({
-            element,
-            delay: 0,
-            onIdle: idle.resolve,
-            createTask(version) {
-                return {
-                    method: 0,
-                    version,
-                    run() {
-                        secondStarted.resolve();
-                    },
-                };
-            },
-        });
-
-        assert.equal(sqlSignal.aborted, true);
-        await secondStarted.promise;
-        await idle.promise;
-    });
-
-    it("aborts the active request and drops the queued request when canceled", async () => {
-        const element = {isConnected: true} as Element;
-        const firstStarted = deferred();
         let firstSignal!: AbortSignal;
-        let secondStarted = false;
 
         scheduleSearchRequest({
             element,
             delay: 0,
-            onIdle() {
-                // 搜索作用域销毁后无需更新界面
-            },
+            onIdle: idle.resolve,
             createTask(version) {
                 return {
-                    method: 0,
                     version,
                     run(signal) {
                         firstSignal = signal;
@@ -175,12 +124,133 @@ describe("search request scheduling", () => {
         scheduleSearchRequest({
             element,
             delay: 0,
+            onIdle: idle.resolve,
+            createTask(version) {
+                return {
+                    version,
+                    run() {
+                        secondStarted.resolve();
+                    },
+                };
+            },
+        });
+
+        assert.equal(firstSignal.aborted, true);
+        await secondStarted.promise;
+        await idle.promise;
+    });
+
+    it("keeps non-cancelable backend searches serialized while invalidating their response", async () => {
+        const element = {isConnected: true} as Element;
+        const started = deferred();
+        const done = deferred();
+        const idle = deferred();
+        let signal: AbortSignal;
+        let isCurrent: () => boolean;
+        let nextRuns = 0;
+        scheduleSearchRequest({
+            element, delay: 0, onIdle: idle.resolve,
+            createTask: version => ({version, abortable: false, run(currentSignal, current) {
+                signal = currentSignal;
+                isCurrent = current;
+                started.resolve();
+                return done.promise;
+            }}),
+        });
+        await started.promise;
+        scheduleSearchRequest({
+            element, delay: 0, onIdle: idle.resolve,
+            createTask: version => ({version, run() { nextRuns++; }}),
+        });
+        await nextTimer();
+        assert.equal(signal.aborted, false);
+        assert.equal(isCurrent(), false);
+        assert.equal(nextRuns, 0);
+        done.resolve();
+        await idle.promise;
+        assert.equal(nextRuns, 1);
+    });
+
+    it("continues with the newest request after an aborted request rejects", async () => {
+        const element = {isConnected: true} as Element;
+        const started = deferred();
+        const idle = deferred();
+        let obsoleteRuns = 0;
+        let currentRuns = 0;
+        scheduleSearchRequest({
+            element, delay: 0, onIdle: idle.resolve,
+            createTask: version => ({version, run(signal) {
+                started.resolve();
+                return new Promise<void>((_resolve, reject) => {
+                    signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), {once: true});
+                });
+            }}),
+        });
+        await started.promise;
+        scheduleSearchRequest({
+            element, delay: 10, onIdle: idle.resolve,
+            createTask: version => ({version, run() { obsoleteRuns++; }}),
+        });
+        scheduleSearchRequest({
+            element, delay: 0, onIdle: idle.resolve,
+            createTask: version => ({version, run(_signal, isCurrent) {
+                assert.equal(isCurrent(), true);
+                currentRuns++;
+            }}),
+        });
+        await idle.promise;
+        assert.equal(obsoleteRuns, 0);
+        assert.equal(currentRuns, 1);
+    });
+
+    it("does not dispatch a search after its scope is disconnected", async () => {
+        const element = {isConnected: true} as Element;
+        let runs = 0;
+        scheduleSearchRequest({
+            element, delay: 0, onIdle() { /* 已销毁的作用域无需更新 */ },
+            createTask: version => ({version, run() { runs++; }}),
+        });
+        Object.assign(element, {isConnected: false});
+        await nextTimer();
+        assert.equal(runs, 0);
+        cancelSearchRequest(element);
+    });
+
+    it("aborts the active request and drops the queued request when canceled", async () => {
+        const element = {isConnected: true} as Element;
+        const firstStarted = deferred();
+        const firstDone = deferred();
+        let firstSignal!: AbortSignal;
+        let secondStarted = false;
+
+        scheduleSearchRequest({
+            element,
+            delay: 0,
             onIdle() {
                 // 搜索作用域销毁后无需更新界面
             },
             createTask(version) {
                 return {
-                    method: 0,
+                    version,
+                    run(signal) {
+                        firstSignal = signal;
+                        firstStarted.resolve();
+                        // 保持旧请求未结束，让新任务真正排队后再销毁作用域。
+                        return firstDone.promise;
+                    },
+                };
+            },
+        });
+        await firstStarted.promise;
+
+        scheduleSearchRequest({
+            element,
+            delay: 0,
+            onIdle() {
+                // 搜索作用域销毁后无需更新界面
+            },
+            createTask(version) {
+                return {
                     version,
                     run() {
                         secondStarted = true;
@@ -190,6 +260,7 @@ describe("search request scheduling", () => {
         });
         await nextTimer();
         cancelSearchRequest(element);
+        firstDone.resolve();
         await nextTimer();
 
         assert.equal(firstSignal.aborted, true);

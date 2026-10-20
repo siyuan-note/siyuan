@@ -50,7 +50,8 @@ type AttributeViewRenderContext struct {
 	templateErrors             map[string]*attributeViewTemplateRenderError
 	renderingRelationTemplates bool
 	renderingRollupTargets     map[rollupTargetID]bool
-	ReadOnly                   bool // 预览只允许修正内存副本，不保存缺失字段等订正结果。
+	templateStoredValues       map[av.Collection]map[*av.Value]*av.Value // 分页前后共享原始值副本，保持 _raw 访问语义。
+	ReadOnly                   bool                                      // 预览只允许修正内存副本，不保存缺失字段等订正结果。
 }
 
 type attributeViewTemplateRenderError struct {
@@ -67,6 +68,11 @@ type attributeViewTemplateRenderError struct {
 // NewAttributeViewRenderContext 创建属性视图渲染上下文。
 func NewAttributeViewRenderContext() *AttributeViewRenderContext {
 	return &AttributeViewRenderContext{templateErrors: map[string]*attributeViewTemplateRenderError{}}
+}
+
+// HasTemplateErrors 判断本次求值是否产生模板错误，错误结果不参与跨请求复用。
+func (context *AttributeViewRenderContext) HasTemplateErrors() bool {
+	return context != nil && len(context.templateErrors) != 0
 }
 
 func (context *AttributeViewRenderContext) addTemplateError(attrView *av.AttributeView, templateKey *av.Key,
@@ -275,6 +281,14 @@ func RenderViewWithContext(attrView *av.AttributeView, view *av.View, query stri
 func RenderViewWithDeferredTemplatesContext(attrView *av.AttributeView, view *av.View, query string, ignoreRows bool,
 	renderContext *AttributeViewRenderContext) (ret av.Viewable) {
 	ret = renderViewWithContext(attrView, view, query, ignoreRows, true, renderContext)
+	if !ignoreRows && strings.TrimSpace(query) == "" {
+		if collection, ok := ret.(av.Collection); ok {
+			clearAttributeViewRenderedContents(collection, nil)
+			if renderContext != nil {
+				delete(renderContext.templateStoredValues, collection)
+			}
+		}
+	}
 	return
 }
 
@@ -505,8 +519,18 @@ func executeTemplateField(tpl *template.Template, ial map[string]string, keyValu
 
 func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[string][]*av.KeyValues) {
 	ret = map[string][]*av.KeyValues{}
+	var included map[string]bool
+	if view.GroupItemIDs != nil {
+		included = make(map[string]bool, len(view.GroupItemIDs))
+		for _, id := range view.GroupItemIDs {
+			included[id] = true
+		}
+	}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
+			if included != nil && !included[val.BlockID] {
+				continue
+			}
 			values := ret[val.BlockID]
 			if nil == values {
 				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
@@ -986,6 +1010,16 @@ func GetFurtherCollectionsWithContext(attrView *av.AttributeView, cachedAttrView
 // FillAttributeViewTemplateValuesWithContext 计算集合中当前条目的模板字段值和显示模板结果。
 func FillAttributeViewTemplateValuesWithContext(attrView *av.AttributeView, view *av.View, collection av.Collection,
 	renderContext *AttributeViewRenderContext) {
+	FillAttributeViewTemplateValuesForKeysWithContext(attrView, view, collection, nil, renderContext)
+}
+
+// FillAttributeViewTemplateValuesForKeysWithContext 只求值指定字段，保留其他字段已计算的显示结果。
+// keys 为 nil 时求值全部模板，非 nil 的空集合不执行模板。
+func FillAttributeViewTemplateValuesForKeysWithContext(attrView *av.AttributeView, view *av.View, collection av.Collection,
+	keys map[string]bool, renderContext *AttributeViewRenderContext) {
+	if keys != nil && len(keys) == 0 {
+		return
+	}
 	var ialIDs []string
 	for _, item := range collection.GetItems() {
 		blockValue := item.GetBlockValue()
@@ -994,11 +1028,30 @@ func FillAttributeViewTemplateValuesWithContext(attrView *av.AttributeView, view
 		}
 		ialIDs = append(ialIDs, blockValue.Block.ID)
 	}
-	fillAttributeViewTemplateValues(attrView, view, collection, BatchGetBlockAttrs(ialIDs), renderContext)
+	fillAttributeViewTemplateValuesForKeys(attrView, view, collection, BatchGetBlockAttrs(ialIDs), renderContext, keys)
 }
 
 func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, collection av.Collection,
 	ials map[string]map[string]string, renderContext *AttributeViewRenderContext) {
+	fillAttributeViewTemplateValuesForKeys(attrView, view, collection, ials, renderContext, nil)
+}
+
+func clearAttributeViewRenderedContents(collection av.Collection, keys map[string]bool) {
+	for _, item := range collection.GetItems() {
+		for _, value := range item.GetValues() {
+			if value != nil && (keys == nil || keys[value.KeyID]) {
+				value.RenderedContent = ""
+				value.HasRenderTemplate = false
+			}
+		}
+	}
+}
+
+func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av.View, collection av.Collection,
+	ials map[string]map[string]string, renderContext *AttributeViewRenderContext, keys map[string]bool) {
+	timing := util.BeginPerformance("database.templates")
+	var evaluated int64
+	defer func() { timing.Count("values", evaluated); timing.Finish() }()
 	items := generateAttrViewItems(attrView, view)
 	existTemplateField := false
 	for _, kVals := range attrView.KeyValues {
@@ -1007,14 +1060,7 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 			break
 		}
 	}
-	for _, item := range collection.GetItems() {
-		for _, value := range item.GetValues() {
-			if nil != value {
-				value.RenderedContent = ""
-				value.HasRenderTemplate = false
-			}
-		}
-	}
+	clearAttributeViewRenderedContents(collection, keys)
 	if !existTemplateField {
 		return
 	}
@@ -1024,7 +1070,21 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 	tplCache := map[string]*template.Template{}
 	compileErrCache := map[string]error{}
 	storedValueCache := map[*av.Value]*av.Value{}
+	if keys != nil && renderContext != nil {
+		if renderContext.templateStoredValues == nil {
+			renderContext.templateStoredValues = map[av.Collection]map[*av.Value]*av.Value{}
+		}
+		storedValueCache = renderContext.templateStoredValues[collection]
+		if storedValueCache == nil {
+			storedValueCache = map[*av.Value]*av.Value{}
+			renderContext.templateStoredValues[collection] = storedValueCache
+		}
+	}
+	timing.Stage("evaluate")
 	for _, templateKey := range templateKeys {
+		if keys != nil && !keys[templateKey.ID] {
+			continue
+		}
 		templateContent := templateKey.Template
 		isRenderTemplate := av.KeyTypeTemplate != templateKey.Type
 		if isRenderTemplate {
@@ -1035,6 +1095,7 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 			if nil == value || (!isRenderTemplate && nil == value.Template) {
 				continue
 			}
+			evaluated++
 
 			keyValues := items[item.GetID()]
 			var ial map[string]string

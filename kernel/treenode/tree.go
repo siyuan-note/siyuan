@@ -36,6 +36,11 @@ import (
 )
 
 func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
+	return NodeHashWithHeadingParent(node, tree, luteEngine, HeadingParent(node))
+}
+
+// NodeHashWithHeadingParent 复用本次投影已解析的语义父级，避免重复查找前面的标题。
+func NodeHashWithHeadingParent(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute, headingParent *ast.Node) string {
 	var ialArray [][]string
 	if 0 < len(node.KramdownIAL) {
 		ialArray = make([][]string, len(node.KramdownIAL))
@@ -55,8 +60,8 @@ func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
 	if nil != node.Parent {
 		parentID = node.Parent.ID
 	}
-	if h := HeadingParent(node); nil != h {
-		parentID = h.ID
+	if headingParent != nil {
+		parentID = headingParent.ID
 	}
 	data += parentID
 	return fmt.Sprintf("%x", sha256.Sum256(gulu.Str.ToBytes(data)))[:7]

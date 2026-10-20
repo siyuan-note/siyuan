@@ -44,7 +44,7 @@ type fileOperationTestFixture struct {
 	childID    string
 }
 
-func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
+func setupFileOperationTest(t testing.TB) *fileOperationTestFixture {
 	originalConf := Conf
 	originalDataDir := util.DataDir
 	originalBlockTreeDBPath := util.BlockTreeDBPath

@@ -50,13 +50,14 @@ type dbQueueOperation struct {
 	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
 	indexTree                     *parse.Tree // index/rename/move
 	upsertTree                    *parse.Tree // upsert/update_refs/delete_refs
-	removeTreeBox, removeTreePath string      // delete
-	removeTreeID                  string      // delete_id
-	removeTreeIDs                 []string    // delete_ids
-	box                           string      // delete_box/delete_box_refs/index/index_node
-	block                         *Block      // update_block_content
-	id                            string      // index_node
-	removeAssetHashes             []string    // delete_assets
+	indexChanges                  *TreeIndexChanges
+	removeTreeBox, removeTreePath string   // delete
+	removeTreeID                  string   // delete_id
+	removeTreeIDs                 []string // delete_ids
+	box                           string   // delete_box/delete_box_refs/index/index_node
+	block                         *Block   // update_block_content
+	id                            string   // index_node
+	removeAssetHashes             []string // delete_assets
 	beginTxRetries                uint8
 	recoveryEntry                 *indexEntry
 	recoveredIndex                bool
@@ -216,17 +217,22 @@ func clearQueue() {
 var flushingTx = atomic.Bool{}
 
 func FlushQueue() {
+	timing := util.BeginPerformance("index.flush")
+	timing.Stage("wait_lock")
 	diagnostic := util.WatchOperation("flush database index", "wait for index lock")
 	defer diagnostic.Finish()
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
 	diagnostic.Stage("take queued operations")
+	timing.Stage("take_queue")
 	ops, indexSnapshot := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
 		return
 	}
+	defer timing.Finish()
+	timing.Count("operations", int64(total))
 
 	flushingTx.Store(true)
 	defer func() {
@@ -261,6 +267,17 @@ func FlushQueue() {
 	for _, op := range ops {
 		groupOpsTotal[op.action]++
 	}
+	if timing != nil {
+		var oldest time.Time
+		for _, op := range ops {
+			if !op.inQueueTime.IsZero() && (oldest.IsZero() || op.inQueueTime.Before(oldest)) {
+				oldest = op.inQueueTime
+			}
+		}
+		if !oldest.IsZero() {
+			timing.Count("oldest_wait_us", time.Since(oldest).Microseconds())
+		}
+	}
 
 	groupOpsCurrent := map[string]int{}
 	backlinkChange := newBacklinkIndexChange()
@@ -294,6 +311,7 @@ func FlushQueue() {
 		}
 
 		diagnostic.Stage("begin " + op.action)
+		timing.Stage("begin")
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
 			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
@@ -314,6 +332,7 @@ func FlushQueue() {
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
 		diagnostic.Stage("execute " + op.action)
+		timing.Stage("execute")
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
@@ -327,6 +346,7 @@ func FlushQueue() {
 		}
 
 		diagnostic.Stage("commit " + op.action)
+		timing.Stage("commit")
 		if err = commitTx(tx); err != nil {
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
@@ -369,12 +389,14 @@ func FlushQueue() {
 
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
 	diagnostic.Stage("notify index completion")
+	timing.Stage("notify")
 	util.BroadcastByType("main", "databaseIndexCommit", 0, "", backlinkChange.data())
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
 
 	// 刷新期间追加的操作仍在内存队列中，磁盘队列仅用于进程重启恢复，不能在这里重复执行。
 	diagnostic.Stage("persist index queue completion")
+	timing.Stage("persist_queue")
 	clearIndexQueue(indexSnapshot)
 }
 
@@ -415,7 +437,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 		err = indexTree(tx, op.indexTree, context)
 	case "upsert":
-		err = upsertTree(tx, op.upsertTree, context)
+		err = upsertTreeWithChanges(tx, op.upsertTree, context, op.indexChanges)
 	case "delete":
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 		if nil == err {
@@ -598,14 +620,27 @@ func IndexTreeQueue(tree *parse.Tree) {
 }
 
 func UpsertTreeQueue(tree *parse.Tree) {
+	UpsertTreeQueueWithChanges(tree, nil)
+}
+
+// UpsertTreeQueueWithChanges 合并同一文档的影响集合；未知影响范围或有序操作边界保留完整更新。
+func UpsertTreeQueueWithChanges(tree *parse.Tree, changes *TreeIndexChanges) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "upsert"}
-	for i, op := range operationQueue {
-		if "upsert" == op.action && op.upsertTree != nil && op.upsertTree.ID == tree.ID { // 相同树则覆盖
+	newOp := &dbQueueOperation{upsertTree: tree, indexChanges: mergeTreeIndexChanges(changes, changes), inQueueTime: time.Now(), action: "upsert"}
+	for i := len(operationQueue) - 1; i >= 0; i-- {
+		op := operationQueue[i]
+		if "upsert" == op.action && op.upsertTree != nil && op.upsertTree.Box == tree.Box && op.upsertTree.ID == tree.ID && op.upsertTree.Path == tree.Path {
+			newOp.indexChanges = mergeTreeIndexChanges(op.indexChanges, newOp.indexChanges)
+			newOp.inQueueTime = op.inQueueTime
 			operationQueue[i] = newOp
 			return
+		}
+		// 删除、移动、重命名及其他索引操作不参与快照覆盖，保留原始执行顺序。
+		if op.action != "upsert" && (op.boxID() == tree.Box || op.boxID() == "" || op.action == "delete_ids") ||
+			op.action == "upsert" && op.upsertTree != nil && op.upsertTree.Box == tree.Box && op.upsertTree.ID == tree.ID {
+			break
 		}
 	}
 	appendOperation(newOp)

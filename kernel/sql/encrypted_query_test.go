@@ -21,6 +21,7 @@ import (
 	gosql "database/sql"
 	"errors"
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -300,6 +301,88 @@ func TestSelectBlocksRawStmtInBoxContextCancellation(t *testing.T) {
 				t.Fatal("SQL query was not canceled")
 			}
 		})
+	}
+}
+
+func TestParameterizedSearchQueriesCancelAndReleaseConnection(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	insertEncryptedQueryTestBlock(t, testDB, "block", "", "block", "d")
+	previousDB := db
+	db = testDB
+	t.Cleanup(func() { db = previousDB })
+	const sequence = `WITH RECURSIVE sequence(value) AS (
+		VALUES(0) UNION ALL SELECT value + 1 FROM sequence WHERE value < ?)
+		SELECT blocks.* FROM blocks WHERE (SELECT COUNT(*) FROM sequence) > 0`
+	queries := map[string]func(context.Context, string) (int, error){
+		"count": func(ctx context.Context, box string) (int, error) {
+			rows, err := QueryNoLimitArgsInBoxContext(ctx, sequence, box, 100000000)
+			return len(rows), err
+		},
+		"blocks": func(ctx context.Context, box string) (int, error) {
+			rows, err := SelectBlocksRawStmtArgsInBoxContext(ctx, sequence, []any{100000000}, 32, box)
+			return len(rows), err
+		},
+		"regexp": func(ctx context.Context, box string) (int, error) {
+			rows, err := SelectBlocksRegexArgsInBoxContext(ctx, sequence, regexp.MustCompile("block"), false, false, false, false, 1, 32, box, 100000000)
+			return len(rows), err
+		},
+	}
+	for name, query := range queries {
+		for scope, targetBox := range map[string]string{"global": "", "encrypted": boxID} {
+			t.Run(name+"/"+scope, func(t *testing.T) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				done := make(chan error, 1)
+				go func() {
+					count, err := query(ctx, targetBox)
+					if count != 0 {
+						done <- fmt.Errorf("canceled query returned %d rows", count)
+						return
+					}
+					done <- err
+				}()
+				// 等到查询占用唯一连接，确保覆盖运行中的 SQLite 查询。
+				deadline := time.Now().Add(time.Second)
+				for testDB.Stats().InUse == 0 && time.Now().Before(deadline) {
+					time.Sleep(time.Millisecond)
+				}
+				if testDB.Stats().InUse == 0 {
+					t.Fatal("query did not acquire a connection")
+				}
+				time.Sleep(10 * time.Millisecond)
+				cancel()
+				select {
+				case err := <-done:
+					if !errors.Is(err, context.Canceled) {
+						t.Fatalf("expected cancellation, got %v", err)
+					}
+				case <-time.After(3 * time.Second):
+					t.Fatal("running query was not canceled")
+				}
+				followup, stop := context.WithTimeout(context.Background(), time.Second)
+				defer stop()
+				rows, err := SelectBlocksRawStmtArgsInBoxContext(followup, "SELECT * FROM blocks WHERE id = ?", []any{"block"}, 32, targetBox)
+				if err != nil || len(rows) != 1 || rows[0].ID != "block" {
+					t.Fatalf("connection was not reusable: rows=%v err=%v", rows, err)
+				}
+			})
+		}
+	}
+}
+
+func TestSearchQueriesRejectCanceledContextBeforeReading(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	insertEncryptedQueryTestBlock(t, testDB, "block", "", "block", "d")
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if rows, err := QueryNoLimitArgsInBoxContext(ctx, "SELECT * FROM blocks WHERE id = ?", boxID, "block"); !errors.Is(err, context.Canceled) || len(rows) != 0 {
+		t.Fatalf("canceled raw query returned rows=%v err=%v", rows, err)
+	}
+	if rows := GetBlocksInBoxContext(ctx, []string{"block"}, boxID); len(rows) != 0 {
+		t.Fatalf("canceled block lookup returned %v", rows)
+	}
+	if counts := QueryRefCountInBoxContext(ctx, []string{"block"}, boxID); len(counts) != 0 {
+		t.Fatalf("canceled reference lookup returned %v", counts)
 	}
 }
 

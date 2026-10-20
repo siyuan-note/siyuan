@@ -12,6 +12,7 @@
 | Encrypted notebooks | [ENCRYPTED-NOTEBOOK.md](ENCRYPTED-NOTEBOOK.md) | [ENCRYPTED-NOTEBOOK.zh-CN.md](ENCRYPTED-NOTEBOOK.zh-CN.md) |
 | Document titles and addressing (design draft) | [DOCUMENT-ADDRESSING.md](DOCUMENT-ADDRESSING.md) | [DOCUMENT-ADDRESSING.zh-CN.md](DOCUMENT-ADDRESSING.zh-CN.md) |
 | Pinned documents | [PINNED-DOCUMENTS.md](PINNED-DOCUMENTS.md) | [PINNED-DOCUMENTS.zh-CN.md](PINNED-DOCUMENTS.zh-CN.md) |
+| Performance measurement | [PERFORMANCE.md](PERFORMANCE.md) | [PERFORMANCE.zh-CN.md](PERFORMANCE.zh-CN.md) |
 | Tab blocks | [TAB-BLOCK.md](TAB-BLOCK.md) | [TAB-BLOCK.zh-CN.md](TAB-BLOCK.zh-CN.md) |
 | Template manager | [TEMPLATE-MANAGER.md](TEMPLATE-MANAGER.md) | [TEMPLATE-MANAGER.zh-CN.md](TEMPLATE-MANAGER.zh-CN.md) |
 | `.sy` file structure | [SY-FORMAT.md](SY-FORMAT.md) | [SY-FORMAT.zh-CN.md](SY-FORMAT.zh-CN.md) |

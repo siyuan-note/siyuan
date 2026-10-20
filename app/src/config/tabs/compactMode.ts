@@ -1,10 +1,9 @@
 import {Constants} from "../../constants";
-import {isInMobileApp} from "../../protyle/util/compatibility";
 import {getFrontend} from "../../util/functions";
 import {appearanceConfigApi} from "./appearanceRuntime";
 
 export const isCompactModeAvailable = () =>
-    !isInMobileApp() && ["desktop", "desktop-window", "browser-desktop"].includes(getFrontend());
+    ["desktop", "desktop-window", "browser-desktop"].includes(getFrontend());
 
 export const isCompactModeEnabled = () =>
     isCompactModeAvailable() && window.siyuan.config.appearance?.compactMode === true;

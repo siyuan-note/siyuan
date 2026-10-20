@@ -56,6 +56,13 @@ describe("Unicode 17 emoji fonts", () => {
         }
     });
 
+    it("compensates file tree emoji only when using the bundled Windows fallback", () => {
+        for (const platform of ["apple", "windows11", "other"] as const) {
+            assert.ok(getEmojiFontStyle(platform, "").includes(
+                `--b3-file-tree-emoji-offset: ${platform === "other" ? "-1px" : "0px"}`));
+        }
+    });
+
     it("resolves the same bundled font from app, PDF and offline HTML paths", () => {
         const font = readFileSync(path.join(appPath, NOTO_EMOJI_FONT_PATH));
         assert.equal(font.subarray(0, 4).toString(), "wOF2");

@@ -97,5 +97,6 @@ export const getEmojiFontStyle = (platform: "apple" | "windows11" | "other", ser
   size-adjust: 92%;
 }`;
     }
-    return style;
+    // 内置字体分支供 Windows 文档树保留字形补偿，原生字体分支由字体度量完成对齐。
+    return `${style}\n:root { --b3-file-tree-emoji-offset: ${platform === "other" ? "-1px" : "0px"}; }`;
 };

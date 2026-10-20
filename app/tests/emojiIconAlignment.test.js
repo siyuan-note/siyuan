@@ -18,7 +18,7 @@ const UNCALIBRATED_TOLERANCE = 1.5;
 // 独立格子里没有文字可参照，度量按文字对齐标定后会略微上移，这里只限制在可见范围内
 const STANDALONE_TOLERANCE = 2;
 
-const icon = () => `<span class="b3-list-item__icon" id="icon">${GLYPH}</span>`;
+const icon = () => `<span class="b3-list-item__icon" id="icon"><span class="b3-list-item__emoji">${GLYPH}</span></span>`;
 const text = (className) => `<span class="${className}" id="text">${TEXT}</span>`;
 
 // 每个图标位使用最贴近真实标记的结构；reference 指明该位置的对齐参照物
@@ -77,16 +77,16 @@ const getFileTreeIconHTML = (iconValue, defaultIcon, className = "", needSpan = 
 
 // 文字必须使用与产品相同的字体栈，否则测到的文字墨迹中心没有参考价值
 const themeVars = () => fs.readFileSync(path.join(root, "appearance/themes/daylight/theme.css"), "utf8")
-    .match(/--b3-font-family[-a-z]*: [^;]+;/g).join(" ");
+    .match(/[^{}]+\{[^{}]*\}/g).map(rule => {
+        const declarations = rule.match(/--b3-font-family[-a-z]*: [^;]+;/g);
+        return declarations ? `${rule.slice(0, rule.indexOf("{"))} { ${declarations.join(" ")} }` : "";
+    }).join("\n");
 
-const buildPage = ({css, fontStyle, servePath, body, rowClass = ""}) => {
-    // Emojis Additional 只补充 Unicode 17 新增码位，不覆盖图标字符。它在 file:// 离屏页面里会被错误地
-    // 分配给图标文本且不绘制（产品由 HTTP 提供字体，不存在此情况），因此测试页排除该 face。
-    const fontCSS = fontStyle("windows11", servePath)
-        .replace(/@font-face \{[^}]*font-family: "Emojis Additional";[^}]*\}/, "");
-    return `<!doctype html><meta charset="utf-8">
+const buildPage = ({css, fontStyle, body, rowClass = "", bodyClass = "body--windows", lang = "ja"}) => {
+    const fontCSS = fontStyle();
+    return `<!doctype html><html lang="${lang}"><meta charset="utf-8">
 <style>${fontCSS}</style>
-<style>:root { ${themeVars()} }</style>
+<style>${themeVars()}</style>
 <style>${css}</style>
 <style>
 body { margin: 0; padding: 20px; background: #808080; font-size: 14px; }
@@ -94,7 +94,7 @@ body { margin: 0; padding: 20px; background: #808080; font-size: 14px; }
 .measure-list { width: 220px; }
 ${rowClass}
 </style>
-<body class="body--windows">${body}</body>`;
+<body class="${bodyClass}">${body}</body></html>`;
 };
 
 const inkIn = (bitmap, size, fromX, toX, fromY, toY) => {
@@ -153,16 +153,25 @@ const runElectron = async () => {
             {logger: {warn() {}, debug() {}}}).css;
         const mobileCSS = require("sass").compile(path.join(root, "src/assets/scss/mobile.scss"),
             {logger: {warn() {}, debug() {}}}).css;
-        // 内置字体需与产品一样可加载：主题里 Emojis Additional 排在最前，加载失败会让整段图标不渲染
+        // 通过 HTTP 加载完整字体栈，覆盖补充字体与原生字体混用的情况。
         const notoSource = path.join(root, "appearance/fonts/Noto-COLRv1-2.051/Noto-COLRv1.woff2");
-        const notoTarget = path.join(process.argv[2], "appearance/fonts/Noto-COLRv1-2.051/Noto-COLRv1.woff2");
-        fs.mkdirSync(path.dirname(notoTarget), {recursive: true});
-        fs.copyFileSync(notoSource, notoTarget);
-        const servePath = "file:///" + process.argv[2].replace(/\\/g, "/") + "/";
+        let pageHTML = "";
+        const server = require("node:http").createServer((request, response) => {
+            if (request.url === "/") {
+                response.setHeader("Content-Type", "text/html; charset=utf-8");
+                response.end(pageHTML);
+            } else if (request.url === "/appearance/fonts/Noto-COLRv1-2.051/Noto-COLRv1.woff2") {
+                response.setHeader("Content-Type", "font/woff2");
+                response.end(fs.readFileSync(notoSource));
+            } else {
+                response.writeHead(404).end();
+            }
+        });
+        await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+        const servePath = `http://127.0.0.1:${server.address().port}/`;
         const load = async page => {
-            const htmlPath = path.join(process.argv[2], "page.html");
-            fs.writeFileSync(htmlPath, page);
-            await win.loadFile(htmlPath);
+            pageHTML = page;
+            await win.loadURL(servePath);
             await win.webContents.executeJavaScript(`document.fonts.ready.then(() => Promise.all([
                 document.fonts.load('12px "Emojis Icon"'), document.fonts.load('14px "Emojis Icon"'),
                 document.fonts.load('16px "Emojis Icon"'), document.fonts.load('19px "Emojis Icon"'),
@@ -172,8 +181,13 @@ const runElectron = async () => {
         };
 
         // 文档树图标：逐字形核对与文字的对齐，并确认图片/SVG 图标不受影响
-        for (const [platform, tolerance] of [["windows11", TEXT_TOLERANCE], ["other", UNCALIBRATED_TOLERANCE]]) {
-            for (const fontSize of [14, 16]) {
+        for (const [platform, bodyClass, tolerance] of [
+            ["windows11", "body--windows", TEXT_TOLERANCE],
+            ["other", "body--windows", UNCALIBRATED_TOLERANCE],
+            ["other", "body--linux", UNCALIBRATED_TOLERANCE],
+            ["other", "body--android", UNCALIBRATED_TOLERANCE],
+        ]) {
+            for (const [fontSize, lang] of [[14, "ja"], [16, "ja"], [16, "en"], [16, "zh-CN"]]) {
                 const rows = Object.entries(TREE_ICONS).map(([name, value]) =>
                     `<li class="b3-list-item" id="row-${name}">
                         <span class="b3-list-item__icon" id="icon-${name}">${
@@ -187,7 +201,7 @@ const runElectron = async () => {
                         getFileTreeIconHTML("", "file", "", false, true)}</span>
                     <span class="b3-list-item__text" id="text-svg">${TEXT}</span></li>`);
                 await load(buildPage({css: baseCSS, fontStyle: () => fontModule.getEmojiFontStyle(platform, servePath),
-                    servePath, body: `<div class="file-tree sy__file"><ul class="b3-list measure-list">${
+                    bodyClass, lang, body: `<div class="file-tree sy__file"><ul class="b3-list measure-list">${
                         rows.join("")}</ul></div>`,
                     rowClass: `.measure-list .b3-list-item__icon { font-size: ${fontSize}px; }`}));
                 const image = await win.webContents.capturePage();
@@ -210,13 +224,29 @@ const runElectron = async () => {
                             `${name} graphic must stay centered`);
                         continue;
                     }
-                    // emoji 字形不应被包裹，也不应依赖 transform 做几何补偿
-                    assert.equal(iconBox.childTag, null, `${name}: emoji glyph must not be wrapped`);
+                    assert.equal(iconBox.childTag, "SPAN", `${name}: emoji glyph has a separate click-neutral wrapper`);
+                    const shift = await win.webContents.executeJavaScript(`(() => {
+                        const icon = document.querySelector("#icon-${name}");
+                        const emoji = icon.firstElementChild;
+                        const before = emoji.getBoundingClientRect();
+                        const pointerTarget = document.elementFromPoint(before.x + before.width / 2,
+                            before.y + before.height / 2);
+                        emoji.style.transform = "none";
+                        const original = emoji.getBoundingClientRect();
+                        emoji.style.transform = "";
+                        return {delta: before.y - original.y, hitsIcon: pointerTarget === icon,
+                            parentY: icon.getBoundingClientRect().y, parentHeight: icon.getBoundingClientRect().height};
+                    })()`);
+                    assert.equal(shift.delta, platform === "other" && bodyClass === "body--windows" ? -1 : 0,
+                        `${platform}/${bodyClass}: only the Windows fallback shifts emoji ink`);
+                    assert.equal(shift.hitsIcon, true, `${name}: glyph preserves the icon click target`);
+                    assert.equal(shift.parentY, iconBox.y);
+                    assert.equal(shift.parentHeight, iconBox.height);
                     const textBox = await measure(win, `#text-${name}`);
                     const iconInk = inkOf(bitmap, size, iconBox);
                     const textInk = inkOf(bitmap, size, textBox);
                     const delta = iconInk.center - textInk.center;
-                    console.log(`${platform}/${fontSize}px ${name}: ink ${iconInk.top.toFixed(1)}..` +
+                    console.log(`${platform}/${bodyClass}/${lang}/${fontSize}px ${name}: ink ${iconInk.top.toFixed(1)}..` +
                         `${iconInk.bottom.toFixed(1)} text center ${textInk.center.toFixed(2)} delta ${delta.toFixed(2)}px`);
                     assert.ok(Math.abs(delta) <= tolerance,
                         `${platform}/${fontSize}px ${name}: emoji ink center is ${delta.toFixed(2)}px ` +
@@ -229,14 +259,15 @@ const runElectron = async () => {
         for (const site of SITES) {
             await load(buildPage({css: site.entry === "mobile" ? mobileCSS : baseCSS,
                 fontStyle: () => fontModule.getEmojiFontStyle("windows11", servePath),
-                servePath, body: site.markup}));
+                body: site.markup}));
             const image = await win.webContents.capturePage();
             const size = image.getSize();
             const bitmap = image.getBitmap();
             const iconBox = await measure(win, "#icon");
             assert.ok(iconBox.fontFamily.includes('"Emojis Icon"'),
                 `${site.name}: must use the icon emoji font, got ${iconBox.fontFamily}`);
-            assert.equal(iconBox.childTag, null, `${site.name}: emoji glyph must not be wrapped`);
+            assert.equal(iconBox.childTag, site.name === "document tree icon" ? "SPAN" : null,
+                `${site.name}: only file tree emoji use the compensation wrapper`);
             const iconInk = inkOf(bitmap, size, iconBox);
             if (site.reference === "text") {
                 const textInk = inkOf(bitmap, size, await measure(win, "#text"));

@@ -74,16 +74,16 @@ describe("file tree icon", () => {
     });
 
     it("keeps the Emoji defaults when SVG icons are disabled", () => {
-        assert.equal(getFileTreeIconHTML("", "notebook", "", false, false), '<span class="b3-list-item__emoji">🗃</span>');
-        assert.equal(getFileTreeIconHTML("", "folder", "", false, false), '<span class="b3-list-item__emoji">📑</span>');
-        assert.equal(getFileTreeIconHTML("", "file", "", false, false), '<span class="b3-list-item__emoji">📄</span>');
-        assert.equal(getFileTreeIconHTML("", "lock", "", false, false), '<span class="b3-list-item__emoji">🔒️</span>');
+        assert.equal(getFileTreeIconHTML("", "notebook", "", false, false), "🗃");
+        assert.equal(getFileTreeIconHTML("", "folder", "", false, false), "📑");
+        assert.equal(getFileTreeIconHTML("", "file", "", false, false), "📄");
+        assert.equal(getFileTreeIconHTML("", "lock", "", false, false), "🔒️");
         assert.equal(getDocumentIconHTML("", "mobile-tabs__item-icon", false),
             '<span class="mobile-tabs__item-icon">📄</span>');
     });
 
     it("treats an explicitly configured icon as custom", () => {
-        assert.equal(getFileTreeIconHTML("1f4c4", "folder", "", false, true), '<span class="b3-list-item__emoji">📄</span>');
+        assert.equal(getFileTreeIconHTML("1f4c4", "folder", "", false, true), "📄");
         assert.equal(getDocumentIconHTML("1f4c4", "mobile-tabs__item-icon", true),
             '<span class="mobile-tabs__item-icon">📄</span>');
         assert.equal(getFileTreeDefaultIconAttr("1f4c4", "folder"), "");
@@ -111,13 +111,13 @@ describe("file tree icon", () => {
 
         updateFileTreeItemIcon(liElement, "1f4c4");
         assert.equal("defaultIcon" in dataset, false);
-        assert.equal(iconElement.innerHTML, '<span class="b3-list-item__emoji">📄</span>');
+        assert.equal(iconElement.innerHTML, "📄");
 
         updateFileTreeItemIcon(liElement, "", "file");
         window.siyuan.config.fileTree.useSVGDefaultIcon = false;
         refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
         assert.equal(dataset.defaultIcon, "file");
-        assert.equal(iconElement.innerHTML, '<span class="b3-list-item__emoji">📄</span>');
+        assert.equal(iconElement.innerHTML, "📄");
     });
 
     it("refreshes locked notebook icons with the SVG setting", () => {
@@ -131,17 +131,17 @@ describe("file tree icon", () => {
         assert.match(iconElement.innerHTML, /#iconLock/);
         window.siyuan.config.fileTree.useSVGDefaultIcon = false;
         refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
-        assert.equal(iconElement.innerHTML, '<span class="b3-list-item__emoji">🔒️</span>');
+        assert.equal(iconElement.innerHTML, "🔒️");
     });
 
-    it("keeps the compensation wrapper limited to emoji when switching icon kinds", () => {
+    it("switches between bare emoji, images and SVG icons", () => {
         const iconElement = {classList: {contains: (value: string) => value === "b3-list-item__icon"}, innerHTML: ""};
         const liElement = {
             children: [iconElement],
             dataset: {} as Record<string, string>,
         } as unknown as HTMLElement;
         updateFileTreeItemIcon(liElement, "1f4c4", "file");
-        assert.equal(iconElement.innerHTML, '<span class="b3-list-item__emoji">📄</span>');
+        assert.equal(iconElement.innerHTML, "📄");
         updateFileTreeItemIcon(liElement, "custom.png", "file");
         assert.equal(iconElement.innerHTML, '<img class="" src="/emojis/custom.png"/>');
         window.siyuan.config.fileTree.useSVGDefaultIcon = true;
@@ -149,6 +149,6 @@ describe("file tree icon", () => {
         assert.equal(iconElement.innerHTML, '<svg><use xlink:href="#iconFile"></use></svg>');
         window.siyuan.config.fileTree.useSVGDefaultIcon = false;
         refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
-        assert.equal(iconElement.innerHTML, '<span class="b3-list-item__emoji">📄</span>');
+        assert.equal(iconElement.innerHTML, "📄");
     });
 });

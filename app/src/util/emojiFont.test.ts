@@ -15,7 +15,7 @@ const getFace = (style: string, family: string) => style.split("@font-face").fin
 describe("Unicode 17 emoji fonts", () => {
     it("covers every code point of the 163 new fully qualified sequences in each platform override", () => {
         assert.equal(sequences.length, 163);
-        for (const platform of ["apple", "windows11", "other"] as const) {
+        for (const platform of ["apple", "windows11", "windows", "other"] as const) {
             const style = getEmojiFontStyle(platform, "../../../");
             const firstFace = style.slice(0, style.indexOf("}"));
             assert.ok(firstFace.includes(NOTO_EMOJI_FONT_PATH));
@@ -56,10 +56,19 @@ describe("Unicode 17 emoji fonts", () => {
         }
     });
 
-    it("compensates file tree emoji only when using the bundled Windows fallback", () => {
+    it("aligns the bundled Windows file tree font without changing body or other platform metrics", () => {
+        const windows = getEmojiFontStyle("windows", "");
+        const treeFace = getFace(windows, "Emojis File Tree");
+        assert.ok(treeFace.includes(`src: url(${NOTO_EMOJI_FONT_PATH})`));
+        assert.ok(treeFace.includes("size-adjust: 92%"));
+        assert.ok(treeFace.includes("ascent-override: 86%"));
+        assert.ok(treeFace.includes("descent-override: 31%"));
+        assert.ok(treeFace.includes("line-gap-override: 0%"));
+        for (const family of ["Emojis", "Emojis Reset"]) {
+            assert.equal(getFace(windows, family).trim(), getFace(getEmojiFontStyle("other", ""), family).trim());
+        }
         for (const platform of ["apple", "windows11", "other"] as const) {
-            assert.ok(getEmojiFontStyle(platform, "").includes(
-                `--b3-file-tree-emoji-offset: ${platform === "other" ? "-1px" : "0px"}`));
+            assert.equal(getFace(getEmojiFontStyle(platform, ""), "Emojis File Tree"), "");
         }
     });
 

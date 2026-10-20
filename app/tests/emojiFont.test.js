@@ -28,14 +28,16 @@ const runElectron = async () => {
         const characters = [...sequences, ...oldSequences].map(sequence => String.fromCodePoint(...sequence.split("-").map(value => parseInt(value, 16))));
         win.webContents.debugger.attach("1.3");
         const command = (method, params) => win.webContents.debugger.sendCommand(method, params);
-        for (const platform of ["apple", "windows11", "other"]) {
+        for (const platform of ["apple", "windows11", "windows", "other"]) {
             // 从导出目录加载真实 WOFF2，确保字体声明及相对路径能在离线页面使用。
             const html = `<html><meta charset="utf-8"><style>${getEmojiFontStyle(platform, "")}
 body { background: white; }
 .emoji { display: inline-block; font-size: 32px; margin: 3px; font-family: "Emojis Additional", "Emojis"; }
 .text { font-family: "Emojis Additional", "Emojis Reset", Arial, "Emojis"; }
+.tree { font-family: "Emojis File Tree", "Emojis Additional", "Emojis"; }
 </style><body>${characters.map((char, index) => `<span id="emoji-${index}" class="emoji">${char}</span>`).join("")}
 <hr>${characters.map((char, index) => `<span id="text-${index}" class="emoji text">${char}</span>`).join("")}
+<hr>${characters.map((char, index) => `<span id="tree-${index}" class="emoji tree">${char}</span>`).join("")}
 ${characters.map((char, index) => `<span id="native-${index}" style='font-family:"Emojis"'>${char}</span>`).join("")}</body></html>`;
             const htmlPath = path.join(profile, `${platform}.html`);
             writeFileSync(htmlPath, html);
@@ -44,13 +46,13 @@ ${characters.map((char, index) => `<span id="native-${index}" style='font-family
             await command("CSS.enable");
             await win.webContents.executeJavaScript("document.fonts.ready.then(() => true)");
             const {root} = await command("DOM.getDocument");
-            for (const context of ["emoji", "text"]) {
+            for (const context of ["emoji", "text", "tree"]) {
                 for (let index = 0; index < characters.length; index++) {
                     const {nodeId} = await command("DOM.querySelector", {nodeId: root.nodeId, selector: `#${context}-${index}`});
                     const {fonts} = await command("CSS.getPlatformFontsForNode", {nodeId});
                     const label = `${platform}/${context}: ${[...sequences, ...oldSequences][index]}`;
                     const glyphCount = fonts.reduce((count, font) => count + font.glyphCount, 0);
-                    if (index < sequences.length || platform === "other") {
+                    if (index < sequences.length || platform === "other" || platform === "windows") {
                         assert.equal(glyphCount, 1, `${label}: ${JSON.stringify(fonts)}`);
                         assert.ok(fonts.every(font => font.isCustomFont), `${label}: ${JSON.stringify(fonts)}`);
                     } else {

@@ -297,7 +297,7 @@
 
       text-align: center;
       font-size: 14px;
-      font-family: var(--b3-font-family-emoji);
+      font-family: "Emojis File Tree", var(--b3-font-family-emoji);
       font-variant-emoji: emoji;
       margin-right: 4px;
       line-height: 22px;
@@ -311,18 +311,10 @@
       align-items: center;
       justify-content: center;
 
-      body.body--windows & > .b3-list-item__emoji {
-        transform: translateY(var(--b3-file-tree-emoji-offset, 0px));
-      }
-
       &:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
       }
-    }
-
-    &__emoji {
-      pointer-events: none;
     }
 
     &__hinttext {

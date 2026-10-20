@@ -18,7 +18,7 @@ const UNCALIBRATED_TOLERANCE = 1.5;
 // 独立格子里没有文字可参照，度量按文字对齐标定后会略微上移，这里只限制在可见范围内
 const STANDALONE_TOLERANCE = 2;
 
-const icon = () => `<span class="b3-list-item__icon" id="icon"><span class="b3-list-item__emoji">${GLYPH}</span></span>`;
+const icon = () => `<span class="b3-list-item__icon" id="icon">${GLYPH}</span>`;
 const text = (className) => `<span class="${className}" id="text">${TEXT}</span>`;
 
 // 每个图标位使用最贴近真实标记的结构；reference 指明该位置的对齐参照物
@@ -175,7 +175,8 @@ const runElectron = async () => {
             await win.webContents.executeJavaScript(`document.fonts.ready.then(() => Promise.all([
                 document.fonts.load('12px "Emojis Icon"'), document.fonts.load('14px "Emojis Icon"'),
                 document.fonts.load('16px "Emojis Icon"'), document.fonts.load('19px "Emojis Icon"'),
-                document.fonts.load('20px "Emojis Icon"'), document.fonts.load('68px "Emojis Icon"')]))
+                document.fonts.load('20px "Emojis Icon"'), document.fonts.load('68px "Emojis Icon"'),
+                document.fonts.load('14px "Emojis File Tree"'), document.fonts.load('16px "Emojis File Tree"')]))
                 .then(() => new Promise(resolve => requestAnimationFrame(() =>
                     requestAnimationFrame(() => setTimeout(resolve, 80)))))`);
         };
@@ -183,7 +184,7 @@ const runElectron = async () => {
         // 文档树图标：逐字形核对与文字的对齐，并确认图片/SVG 图标不受影响
         for (const [platform, bodyClass, tolerance] of [
             ["windows11", "body--windows", TEXT_TOLERANCE],
-            ["other", "body--windows", UNCALIBRATED_TOLERANCE],
+            ["windows", "body--windows", UNCALIBRATED_TOLERANCE],
             ["other", "body--linux", UNCALIBRATED_TOLERANCE],
             ["other", "body--android", UNCALIBRATED_TOLERANCE],
         ]) {
@@ -207,8 +208,10 @@ const runElectron = async () => {
                 const image = await win.webContents.capturePage();
                 const size = image.getSize();
                 const bitmap = image.getBitmap();
+                const iconBoxes = new Map();
                 for (const name of [...Object.keys(TREE_ICONS), "image", "svg"]) {
                     const iconBox = await measure(win, `#icon-${name}`);
+                    iconBoxes.set(name, iconBox);
                     if (name === "image" || name === "svg") {
                         // 图片与 SVG 图标是替换元素，按 16px 居中，不参与墨迹对齐
                         const child = await win.webContents.executeJavaScript(`(() => {
@@ -224,24 +227,15 @@ const runElectron = async () => {
                             `${name} graphic must stay centered`);
                         continue;
                     }
-                    assert.equal(iconBox.childTag, "SPAN", `${name}: emoji glyph has a separate click-neutral wrapper`);
-                    const shift = await win.webContents.executeJavaScript(`(() => {
+                    assert.equal(iconBox.childTag, null, `${name}: emoji glyph must not be wrapped`);
+                    const target = await win.webContents.executeJavaScript(`(() => {
                         const icon = document.querySelector("#icon-${name}");
-                        const emoji = icon.firstElementChild;
-                        const before = emoji.getBoundingClientRect();
-                        const pointerTarget = document.elementFromPoint(before.x + before.width / 2,
-                            before.y + before.height / 2);
-                        emoji.style.transform = "none";
-                        const original = emoji.getBoundingClientRect();
-                        emoji.style.transform = "";
-                        return {delta: before.y - original.y, hitsIcon: pointerTarget === icon,
-                            parentY: icon.getBoundingClientRect().y, parentHeight: icon.getBoundingClientRect().height};
+                        const rect = icon.getBoundingClientRect();
+                        return {transform: getComputedStyle(icon).transform,
+                            hitsIcon: document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2) === icon};
                     })()`);
-                    assert.equal(shift.delta, platform === "other" && bodyClass === "body--windows" ? -1 : 0,
-                        `${platform}/${bodyClass}: only the Windows fallback shifts emoji ink`);
-                    assert.equal(shift.hitsIcon, true, `${name}: glyph preserves the icon click target`);
-                    assert.equal(shift.parentY, iconBox.y);
-                    assert.equal(shift.parentHeight, iconBox.height);
+                    assert.equal(target.transform, "none", `${name}: alignment must not transform the icon`);
+                    assert.equal(target.hitsIcon, true, `${name}: glyph preserves the icon click target`);
                     const textBox = await measure(win, `#text-${name}`);
                     const iconInk = inkOf(bitmap, size, iconBox);
                     const textInk = inkOf(bitmap, size, textBox);
@@ -251,6 +245,28 @@ const runElectron = async () => {
                     assert.ok(Math.abs(delta) <= tolerance,
                         `${platform}/${fontSize}px ${name}: emoji ink center is ${delta.toFixed(2)}px ` +
                         "off the adjacent text ink center");
+                }
+                if (platform === "windows") {
+                    // 与同一字体的正文度量对比，验证实际墨迹上移，且按钮盒子保持原位。
+                    await win.webContents.executeJavaScript(`(() => {
+                        document.querySelectorAll(".b3-list-item__icon").forEach(icon => {
+                            icon.style.fontFamily = "var(--b3-font-family-emoji)";
+                        });
+                        return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    })()`);
+                    const originalImage = await win.webContents.capturePage();
+                    const originalBitmap = originalImage.getBitmap();
+                    for (const name of Object.keys(TREE_ICONS)) {
+                        const geometry = await measure(win, `#icon-${name}`);
+                        const corrected = inkOf(bitmap, size, geometry);
+                        const original = inkOf(originalBitmap, size, geometry);
+                        const shift = corrected.center - original.center;
+                        assert.ok(shift >= -1.5 && shift <= -0.5,
+                            `${lang}/${fontSize}px ${name}: font metrics shift ink by ${shift}px`);
+                        for (const field of ["x", "y", "width", "height"]) {
+                            assert.equal(geometry[field], iconBoxes.get(name)[field], `${name}: preserves button ${field}`);
+                        }
+                    }
                 }
             }
         }
@@ -266,8 +282,7 @@ const runElectron = async () => {
             const iconBox = await measure(win, "#icon");
             assert.ok(iconBox.fontFamily.includes('"Emojis Icon"'),
                 `${site.name}: must use the icon emoji font, got ${iconBox.fontFamily}`);
-            assert.equal(iconBox.childTag, site.name === "document tree icon" ? "SPAN" : null,
-                `${site.name}: only file tree emoji use the compensation wrapper`);
+            assert.equal(iconBox.childTag, null, `${site.name}: emoji glyph must not be wrapped`);
             const iconInk = inkOf(bitmap, size, iconBox);
             if (site.reference === "text") {
                 const textInk = inkOf(bitmap, size, await measure(win, "#text"));

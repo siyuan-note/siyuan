@@ -771,6 +771,8 @@ body.mobile-topbar--merged {
     margin-right: 8px;
     color: var(--b3-theme-on-surface-light);
     font-size: 16px;
+    font-family: var(--b3-font-family-emoji);
+    font-variant-emoji: emoji;
     // 行高与条目等高，emoji 图标才不会顶出自身盒子而与文字错位
     line-height: 40px;
 

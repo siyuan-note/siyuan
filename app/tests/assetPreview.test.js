@@ -34,7 +34,10 @@ const runCases = async source => {
     const check = require("node:assert/strict");
     const load = (code, modules = {}) => {
         const exports = {};
-        new Function("require", "exports", code)(name => modules[name] || {}, exports);
+        new Function("require", "exports", code)(name => {
+            check.ok(Object.hasOwn(modules, name), "Unexpected asset preview fixture module: " + name);
+            return modules[name];
+        }, exports);
         return exports;
     };
     const settle = () => new Promise(resolve => setTimeout(resolve, 10));
@@ -43,27 +46,33 @@ const runCases = async source => {
         const promise = new Promise(done => { resolve = done; });
         return {promise, resolve};
     };
-    const Constants = {SIYUAN_ASSETS_IMAGE: [".png"], SIYUAN_ASSETS_AUDIO: [".mp3"], SIYUAN_ASSETS_VIDEO: [".mp4"],
-        LOCAL_PDFTHEME: "pdfTheme"};
+    const Constants = {SIYUAN_ASSETS_IMAGE: [".png"], SIYUAN_ASSETS_AUDIO: [".mp3"], SIYUAN_ASSETS_VIDEO: [".mp4"]};
     let mobile = false;
-    window.siyuan = {languages: source.languages, config: {appearance: {mode: 0}, editor: {}},
-        storage: {pdfTheme: {light: "light", dark: "dark"}}};
+    window.siyuan = {languages: source.languages, config: {
+        appearance: {mode: 0, pdfTheme: {light: "light", dark: "dark"}}, editor: {}, readonly: false,
+    }, storage: {}};
+    const themePatches = [];
     const viewerTemplate = load(source.viewerTemplate, {
         "../../protyle/util/compatibility": {updateHotkeyTip: value => value},
     });
     const pdfTheme = load(source.pdfTheme, {
-        "../constants": {Constants}, "../protyle/util/compatibility": {setStorageVal: () => {}},
+        "../constants": {Constants},
+        "../config/tabs/appearancePreferences": {patchAppearancePreference: async (key, value) => {
+            themePatches.push([key, value]);
+        }},
     });
     const highlight = load(source.highlight, {
         "../util/addScript": {addScript: () => Promise.resolve()},
         "../../constants": {Constants}, "./util": {setCodeTheme() {}},
         "./foldedContent": {isFoldedRenderContent: () => false},
+        "../util/selectionOffsets": {}, "../wysiwyg/getBlock": {}, "../../util/escape": {},
     });
     const pathName = {getAssetExtension: value => require("node:path").extname(value.split(/[?#]/)[0])};
     const previewPath = load(source.previewPath);
     const escape = load(source.escape);
     const media = load(source.media, {"../constants": {Constants}, "../util/pathName": pathName,
-        "../util/escape": escape, "./previewPath": previewPath});
+        "../util/escape": escape, "./previewPath": previewPath,
+        "../layout/getAll": {}, dayjs: {}, "./html": {}, "../util/imageURL": {}});
     const pdfCalls = [];
     let destroyed = 0;
     let loaded = 0;
@@ -171,15 +180,27 @@ const runCases = async source => {
     }
     check.equal(destroyed, 2);
     const themed = document.createElement("div");
-    themed.innerHTML = viewerTemplate.getPdfViewerHTML();
     for (const mode of [0, 1]) {
+        themed.innerHTML = viewerTemplate.getPdfViewerHTML();
         window.siyuan.config.appearance.mode = mode;
         pdfTheme.bindPdfTheme(themed);
         check.equal(themed.firstElementChild.classList.contains("pdf__outer--dark"), mode === 1);
+        themed.querySelector(mode === 0 ? "#pdfDark" : "#pdfLight").click();
+        check.equal(themed.firstElementChild.classList.contains("pdf__outer--dark"), mode === 0);
     }
-    themed.querySelector("#pdfLight").click();
-    check.equal(window.siyuan.storage.pdfTheme.dark, "light");
+    check.deepEqual(themePatches, [["pdfTheme.light", "dark"], ["pdfTheme.dark", "light"]]);
+    check.equal(window.siyuan.config.appearance.pdfTheme.light, "light");
+    check.equal(window.siyuan.config.appearance.pdfTheme.dark, "dark", "theme changes await confirmed configuration");
     check.equal(themed.firstElementChild.classList.contains("pdf__outer--dark"), false);
+    for (const protectedMode of ["readonly", "publish"]) {
+        window.siyuan.config.readonly = protectedMode === "readonly";
+        window.siyuan.isPublish = protectedMode === "publish";
+        themed.querySelector("#pdfDark").click();
+        check.equal(themePatches.length, 2);
+        check.equal(themed.firstElementChild.classList.contains("pdf__outer--dark"), false);
+    }
+    window.siyuan.config.readonly = false;
+    window.siyuan.isPublish = false;
 
     const read = async response => {
         window.fetch = async (_url, options) => {
@@ -211,6 +232,7 @@ const runCases = async source => {
 
     let model;
     const mobileAPI = load(source.mobilePDF, {
+        "../dialog/message": {}, "../util/fetch": {},
         "../util/escape": escape,
         "../asset/pdf/viewerTemplate": viewerTemplate,
         "../util/pathName": {getDisplayName: value => value, getAssetPathWithoutQuery: value => value.split("?")[0]},
@@ -242,7 +264,9 @@ const runCases = async source => {
             "../util/functions": {isMobile: () => mobile, isBrowser: () => true},
             "../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: false})},
             "../protyle/util/hasClosest": {hasClosestByClassName: (element, name) => element.closest("." + name)},
-            "./ocr": {mountOCRSettings: () => () => {}},
+            ...Object.fromEntries(["./setting/maintenance", "../dialog/confirmDialog", "../util/fetchAppId",
+                "../layout/getAll", "path", "../editor/util", "../protyle/util/compatibility", "../dialog/message",
+                "../protyle/util/lute", "./setting/mount", "../mobile/editor", "../block/Panel"].map(name => [name, {}])),
             "../protyle": {Protyle: class {
                 constructor(_app, element) { this.protyle = {element}; }
                 destroy() {}
@@ -347,6 +371,7 @@ const runCases = async source => {
     };
     const viewerAPI = load(source.viewer, {
         "./ui_utils.js": {RenderingStates: {}, ScrollMode: {}, SpreadMode: {}, TextLayerMode: {}},
+        "./renderable_view.js": {},
         "./app_options.js": {AppOptions: {set() {}}},
         "./pdf_link_service.js": {LinkTarget: {}},
         "./app.js": {PDFViewerApplication: application},
@@ -373,11 +398,18 @@ const runCases = async source => {
     const runtime = load(source.annotationRuntime);
     const annotationRequests = [];
     const anno = load(source.annotations, {
+        ...Object.fromEntries(["../util/setPosition", "../protyle/util/hasClosest", "../protyle/util/compatibility",
+            "../config/tabs/appearancePreferences", "../protyle/util/selectionOffsets", "../constants", "../dialog",
+            "../dialog/message", "../util/functions", "../dialog/confirmDialog", "../util/escape", "filesize",
+            "blueimp-md5", "./rectAnnotationResize", "./pdfRectCapture", "../protyle/upload",
+            "../protyle/upload/uploadResult", "../editor/pdfAssetLink", "./pdfTextAnnotation", "./pdfCoordinates",
+            "./pdfSelectionText"].map(name => [name, {}])),
         "./annoRuntime": runtime,
         "../layout/getAll": {getAllModels: () => ({asset: []})},
         "../util/fetch": {fetchPost: (...args) => annotationRequests.push(args)},
     });
     const {TextLayerBuilder} = load(source.textLayer, {
+        "./ui_utils.js": {},
         "../anno": anno,
         "./pdfjs": {TextLayer: class {
             textDivs = [];

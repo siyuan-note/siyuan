@@ -35,6 +35,7 @@ import {openSkillManager} from "../../../ai/skills/manager";
 import {openAgentInstructions} from "./aiInstructions";
 import {genDecisionCardsHtml, mountDecisionCards} from "./aiDecisionUi";
 import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
+import {registerAiWebGroup} from "./aiWeb";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -382,6 +383,7 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
+    registerAiWebGroup(tab);
     registerAiDecisionGroup(tab);
     registerAiSkillsGroup(tab);
     registerAiImageGenerationGroup(tab);

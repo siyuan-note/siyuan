@@ -169,6 +169,10 @@ interface Window {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
             finishKeyboardComposition?: { postMessage: (data: string) => Promise<boolean> }
+            showTextMenu?: { postMessage: (data: string) => Promise<boolean> }
+            pickPhotos?: { postMessage: (data: string) => Promise<Array<{
+                name: string, mimeType: string, data: string, pair: string, kind: "photo" | "video"
+            }>> }
             saveExportFile: { postMessage: (url: string) => void }
             saveExportFileV2?: { postMessage: (data: {uri: string, requestID: string}) => void }
             openLink: { postMessage: (url: string) => void }

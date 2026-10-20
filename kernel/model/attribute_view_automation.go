@@ -40,6 +40,23 @@ type attributeViewAutomationState struct {
 	recordUndo bool
 	paused     []automationPausedRule
 	results    map[string]*automationRuleResult
+	blockAttrs map[string]*Operation
+}
+
+// 将自动化产生的最终属性补在正文操作之后，避免旧正文覆盖新绑定。
+func (tx *Transaction) appendAutomationBlockAttrs() {
+	state := tx.attributeViewAutomations
+	if state == nil {
+		return
+	}
+	ids := make([]string, 0, len(state.blockAttrs))
+	for id := range state.blockAttrs {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		tx.DoOperations = append(tx.DoOperations, state.blockAttrs[id])
+	}
 }
 
 type automationUnavailableReference struct {

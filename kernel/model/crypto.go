@@ -1567,6 +1567,7 @@ func lockBoxWithPreparationHeld(boxID string, prepare func()) {
 func lockBoxHeld(boxID string) {
 	// 此时已排空在途操作并持有 box 写锁，可以安全清除该笔记本的明文 HEIF 预览缓存。
 	heif.ClearMemoryCache(boxID)
+	LivePhotoPreviews.Clear(boxID)
 	RevokeManagedEncryptedExportsForBox(boxID)
 	ClearRichClipboardBox(boxID)
 	ClearGlobalBacklinkSnapshots(boxID)

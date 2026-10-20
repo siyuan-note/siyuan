@@ -322,7 +322,7 @@ type streamChunk struct {
 // HttpResponse.statusCode 中指定的状态码（而不是固定 200）：写入循环每写完一块、Flush 之后才向事件循环请求
 // 下一块，不提前拉取——这是背压的关键，避免插件在没有人消费数据的情况下把响应体生产得远远超前；一块数据的
 // 请求与到达都经由 p.worker.Run 异步完成，不占用事件循环线程等待任何 I/O，不会因为写入循环暂时写不出数据
-// （例如客户端读取缓慢）而卡住插件的其它脚本任务。chunk 必须是 BufferSource（ArrayBuffer 或其视图，如
+// （例如客户端读取缓慢）而卡住插件的其他脚本任务。chunk 必须是 BufferSource（ArrayBuffer 或其视图，如
 // Uint8Array）或字符串（按 UTF-8 写入），和 siyuan.client.fetch 的 response.body 用同一套鸭子类型。客户端
 // 提前断开连接时取消 reader，不再继续向一个没有人读的响应体生产数据。
 func (p *KernelPlugin) writeStreamResponse(c *gin.Context, statusCode int, response *ResponseStream) {

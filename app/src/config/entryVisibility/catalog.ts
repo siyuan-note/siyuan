@@ -593,6 +593,7 @@ const slashMenuBuiltinChildren = [
     node("tag", lang("tag")),
     node("inlineMath", lang("inline-math")),
     separator("separator_3"),
+    node("insertIOSPhotos", lang("insertImage")),
     node("insertAsset", lang("insertAsset")),
     node("insertHTMLFile", lang("insertHTMLFile")),
     node("insertIframeURL", lang("insertIframeURL")),

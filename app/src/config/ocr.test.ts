@@ -74,11 +74,17 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
     assert.match(readFileSync("src/mobile/menu/settingPanel.ts", "utf8"), /tabId === "ocr"[\s\S]*?unmountOCRTab\(root\)/);
 });
 
-const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
+const defaultOCRConfig = (value: Partial<SettingOCR> = {}): SettingOCR => ({
+    provider: "paddleocr", model: "tiny", auto: false, aiModelId: "", reasoningEffort: "",
+    showText: true, showEmpty: false, showError: false,
+    thresholds: {detection: null, box: null, recognition: null}, ...value,
+});
+
+const createOCRPanel = async (initial?: {config?: Partial<SettingOCR>}) => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const config: {ocr: SettingOCR} = {ocr: initial?.config ?? {provider: "paddleocr", model: "tiny", auto: false}};
+    const config: {ocr: SettingOCR} = {ocr: defaultOCRConfig(initial?.config)};
     let serverConfig = {...config.ocr};
     let models = [{id: "tiny", name: "Tiny", builtIn: true}];
     let aiModels: Array<{id: string; name: string; provider: string}> = [];
@@ -197,7 +203,7 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
     };
     runInNewContext(transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports: searchRuntime, require: () => ({})});
+    }).outputText, {exports: searchRuntime, require: () => ({syncSettingGroupCollapse() {}})});
     const builderRuntime = {} as {SettingBuilder: typeof SettingBuilder};
     runInNewContext(transpileModule(readFileSync("src/config/setting/builder.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -239,7 +245,7 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
             return listeners.get("change")({target: controls.ocrReasoningEffort, stopPropagation() {}});
         },
         deferRead: () => { deferredRead = true; },
-        updateServer: (next: typeof config.ocr) => { serverConfig = next; },
+        updateServer: (next: Partial<typeof config.ocr>) => { serverConfig = defaultOCRConfig(next); },
         addModel: (id: string) => { models = [...models, {id, name: "Imported", builtIn: false}]; },
         changeAuto: (checked: boolean) => {
             controls.ocrAuto.checked = checked;

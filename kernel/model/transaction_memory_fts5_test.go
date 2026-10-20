@@ -67,6 +67,9 @@ func TestCompletedTransactionBatchReleasesDocumentTrees(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	for _, tx := range transactions {
+		if tx.indexChanges != nil {
+			t.Fatal("completed transaction retained its index change set")
+		}
 		if tx.state.Load() != 2 || !slices.Equal(tx.GetChangedRootIDs(), []string{fixture.sourceID}) ||
 			!slices.Equal(tx.GetMutatedRootIDs(), []string{fixture.sourceID}) {
 			t.Fatal("releasing document trees changed committed transaction metadata")

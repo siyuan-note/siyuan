@@ -224,6 +224,27 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	}
 
 	util.PushEvent(evt)
+	if pushMode == util.PushModeBroadcastExcludeSelf {
+		// 发起编辑器只补充自动操作，正文继续使用本地输入和光标。
+		var automatic []*model.Transaction
+		for _, tx := range transactions {
+			var operations []*model.Operation
+			for _, operation := range tx.DoOperations {
+				if operation.IsAutomaticAttributeViewOperation() {
+					operations = append(operations, operation)
+				}
+			}
+			if len(operations) > 0 {
+				automatic = append(automatic, &model.Transaction{Timestamp: tx.Timestamp,
+					DoOperations: operations, UndoOperations: []*model.Operation{}})
+			}
+		}
+		if len(automatic) > 0 {
+			evt.PushMode = util.PushModeSingleSelf
+			evt.Data = automatic
+			util.PushEvent(evt)
+		}
+	}
 }
 
 // undoState 查询指定文档的撤销/重做可用性及栈顶关联的 mutatedRootIDs。
@@ -237,7 +258,7 @@ var undoState = contractHandler(apicontract.UndoState, func(c *gin.Context, requ
 })
 
 // performUndo 撤销指定文档最近一次操作。
-// 弹出 rootID 撤销栈顶，同步执行其逆操作，广播给其它窗口/端。
+// 弹出 rootID 撤销栈顶，同步执行其逆操作，广播给其他窗口/端。
 // 单文档撤销：发起窗口靠响应数据本地乐观应用，广播排除发起方（ExcludeSelf）。
 // 跨文档撤销：发起窗口无法本地乐观应用（锚点分散），广播含发起方（Broadcast）刷新其 DOM。
 // 逆操作失败时回滚栈状态（UndoRollback）并返回 data.failed=true，前端镜像不动。
@@ -268,7 +289,7 @@ var performUndo = contractHandler(apicontract.PerformUndo, func(c *gin.Context, 
 		return apicontract.Success(apicontract.FailedTransactionHistory("undo failed: " + err.Error()))
 	}
 
-	// 成功：联动从其它关联栈移除该 entry
+	// 成功：联动从其他关联栈移除该 entry
 	model.GlobalUndoLog.UndoCommit(entry, request.RootID)
 
 	crossDoc := len(entry.MutatedRootIDs()) > 1
@@ -315,7 +336,7 @@ var performRedo = contractHandler(apicontract.PerformRedo, func(c *gin.Context, 
 		return apicontract.Success(apicontract.FailedTransactionHistory("redo failed: " + err.Error()))
 	}
 
-	// 成功：联动把 entry 重新挂到其它关联栈
+	// 成功：联动把 entry 重新挂到其他关联栈
 	model.GlobalUndoLog.RedoCommit(entry, request.RootID)
 
 	crossDoc := len(entry.MutatedRootIDs()) > 1
@@ -336,7 +357,7 @@ var performRedo = contractHandler(apicontract.PerformRedo, func(c *gin.Context, 
 	}))
 })
 
-// clearHistory 清理撤销日志。rootID 非空时清该文档栈并联动移除其它栈相关条目；为空时清空全部。
+// clearHistory 清理撤销日志。rootID 非空时清该文档栈并联动移除其他栈相关条目；为空时清空全部。
 var clearHistory = contractHandler(apicontract.ClearHistory, func(c *gin.Context, request apicontract.TransactionClearHistoryRequest) apicontract.Response[apicontract.Null] {
 	model.GlobalUndoLog.Clear(request.RootID)
 	return apicontract.Success(apicontract.Null{})
@@ -401,7 +422,8 @@ func holdBlockSwapReplayRequests(c *gin.Context, tx *model.Transaction, rootIDs 
 func shouldBroadcastAttrViewTransactions(transactions []*model.Transaction) bool {
 	for _, tx := range transactions {
 		for _, operation := range tx.DoOperations {
-			if nil != operation && "setAttrViewName" != operation.Action && strings.Contains(strings.ToLower(operation.Action), "attrview") {
+			if nil != operation && !operation.IsAutomaticAttributeViewOperation() &&
+				"setAttrViewName" != operation.Action && strings.Contains(strings.ToLower(operation.Action), "attrview") {
 				return true
 			}
 		}

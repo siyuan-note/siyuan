@@ -47,7 +47,7 @@ import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold"
 import {isMobile} from "../../../util/functions";
 import {addListMindmapSummaryRanges, getListMindmapSiblingIDs, getListMindmapSummaryParentID, getListMindmapSummaryRange,
     getListMindmapSummarySnapshot} from "./summary";
-import {isProtyleListItemFragment} from "../../runtimeCapabilities";
+import {getProtyleTransactionOwner, isProtyleListItemFragment} from "../../runtimeCapabilities";
 import {isFoldedRenderContent} from "../foldedContent";
 import {disposeCustomBlocksInElement} from "../../../plugin/customBlockRender";
 import {processRender} from "../../util/processCode";
@@ -56,6 +56,8 @@ import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {getListMindmapConnectorMenuItem} from "./connectorMenu";
 import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
+import {getEmbedChildOperationContext} from "../../wysiwyg/getBlock";
+import {requestRedo, requestUndo} from "../../undo/globalUndo";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void, focusRevision: number,
@@ -79,7 +81,8 @@ const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled &&
     list.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
 
 const canEdit = (owner: IProtyle, list: HTMLElement) => canToggleView(owner, list) &&
-    !list.closest(".protyle-wysiwyg__embed");
+    (!list.closest(".protyle-wysiwyg__embed") ||
+        !!getEmbedChildOperationContext(list)?.resultElement.dataset.rootId);
 
 export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     if (!["NodeList", "NodeMindmap"].includes(list.dataset.type) || !canToggleView(owner, list)) {
@@ -233,7 +236,7 @@ class ListMindmapController {
         this.view = new ListMindmapView({
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
-            onPreviewImage: src => previewDocImage(src, owner.block.rootID),
+            onPreviewImage: (src, video) => previewDocImage(src, owner.block.rootID, video),
             onInteractionStart: event => suspendBlockPopover(this.host, event),
             readOnly: !canEdit(owner, list),
             onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
@@ -643,6 +646,19 @@ class ListMindmapController {
             const siblings = selected?.parentId ? model.nodes.get(selected.parentId)?.children || [] : [];
             const index = siblings.findIndex(node => node.id === selectedID);
             const previous = getListMindmapSiblingIDs(model);
+            const focusContext = (id: string, source: ListMindmapModel): Record<string, string> => {
+                const embed = this.list.closest(".protyle-wysiwyg__embed");
+                if (!embed) {
+                    return {};
+                }
+                const element = source.nodes.get(id)?.element || this.list;
+                const index = Array.from(this.owner.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`))
+                    .indexOf(element);
+                const query = embed.closest<HTMLElement>('[data-type="NodeBlockQueryEmbed"]');
+                return {...(index >= 0 ? {undoFocusIndex: String(index)} : {}),
+                    ...(query?.dataset.nodeId ? {undoFocusEmbedId: query.dataset.nodeId} : {})};
+            };
+            const undoFocus = focusContext(selectedID, model);
             if (change() === false) {
                 return false;
             }
@@ -655,10 +671,12 @@ class ListMindmapController {
                 updateTransaction(this.owner, this.list, before, {
                     undoFocusId: selectedID, undoFocusStart: "0", undoFocusEnd: "0",
                     mindmapSnapshotId: this.list.dataset.nodeId,
+                    ...undoFocus,
                     ...(selection?.undo ? {undoFocusMindmapSelection: JSON.stringify(selection.undo)} : {}),
                 }, {doOperations: [], undoOperations: [], context: {
                     undoFocusId: nextID, undoFocusStart: "0", undoFocusEnd: "0",
                     mindmapSnapshotId: this.list.dataset.nodeId,
+                    ...focusContext(nextID, next),
                     ...(selection?.redo ? {undoFocusMindmapSelection: JSON.stringify(selection.redo)} : {}),
                 }});
             }
@@ -718,6 +736,7 @@ class ListMindmapController {
         this.view.setEditing(id);
         const editor = openListMindmapEditor({
             owner: this.owner, node, host, replaceFirstParagraph, selection,
+            rootID: this.list.closest<HTMLElement>(".protyle-wysiwyg__embed")?.dataset.rootId,
             canEdit: () => !this.disposed && this.list.isConnected && canEdit(this.owner, this.list),
             onSave: (html, undo, redo) => this.change(() => replaceListMindmapContent(this.list, id, html), true, id, {undo, redo}),
             onResize: () => this.view.refreshLayout(),
@@ -775,7 +794,25 @@ class ListMindmapController {
                 this.view.focusNode(editingID);
             }
             const focusRevision = root?.focusRevision;
-            if (redo) {
+            const sourceRootID = this.list.closest<HTMLElement>(".protyle-wysiwyg__embed")?.dataset.rootId;
+            if (sourceRootID) {
+                // 全屏视图和节点片段的选区不在嵌入源块内，撤销始终使用源文档和实际提交事务的编辑器。
+                const owner = this.owner.lite && getProtyleTransactionOwner(this.owner,
+                    [{action: "update", id: this.list.dataset.nodeId, data: before}]) || this.owner;
+                if (!owner.lite) {
+                    await (redo ? requestRedo(owner, sourceRootID) : requestUndo(owner, sourceRootID));
+                    if (this.owner.lite && this.list.isConnected && !this.disposed) {
+                        // 全屏中的片段不在外层编辑器内，按源块补齐撤销结果，并保留等待期间的新修改。
+                        const snapshot = cleanListMindmapHTML(this.list.outerHTML);
+                        const response = await fetchSyncPost("/api/block/getBlockDOM",
+                            {id: this.list.dataset.nodeId, notebook: this.owner.notebookId});
+                        if (response.code === 0 && canEdit(this.owner, this.list) && !this.disposed &&
+                            cleanListMindmapHTML(this.list.outerHTML) === snapshot) {
+                            this.replay(response.data.dom);
+                        }
+                    }
+                }
+            } else if (redo) {
                 await this.owner.undo.redo(this.owner);
             } else {
                 await this.owner.undo.undo(this.owner);
@@ -895,14 +932,20 @@ class ListMindmapController {
 
 // 补齐折叠隐藏的正文后才允许改动列表，避免以局部视图覆盖完整块树。
 const completeList = async (owner: IProtyle, list: HTMLElement) => {
+    const rootID = owner.block.rootID;
+    const notebookId = owner.notebookId;
+    const id = list.dataset.nodeId;
+    const type = list.dataset.type;
+    const isCurrent = () => canEdit(owner, list) && owner.block.rootID === rootID &&
+        owner.notebookId === notebookId && list.dataset.nodeId === id && list.dataset.type === type;
     await owner.wysiwyg.flushPendingInput();
     await waitForPendingTransactions(owner);
-    if (!list.isConnected) {
+    if (!isCurrent()) {
         return "failed";
     }
     const before = cleanListMindmapHTML(list.outerHTML);
-    const response = await fetchSyncPost("/api/block/getBlockDOM", {id: list.dataset.nodeId, notebook: owner.notebookId});
-    if (response.code !== 0 || !list.isConnected) {
+    const response = await fetchSyncPost("/api/block/getBlockDOM", {id, notebook: notebookId});
+    if (response.code !== 0 || !isCurrent()) {
         return "failed";
     }
     if (cleanListMindmapHTML(list.outerHTML) !== before) {
@@ -929,6 +972,10 @@ export const initListMindmaps = (owner: IProtyle) => {
     const placeholders = new Map<HTMLElement, HTMLElement>();
     const failed = new WeakSet<HTMLElement>();
     const newlyCreated = new WeakSet<HTMLElement>();
+    const completeSources = new WeakSet<HTMLElement>();
+    const needsCompleteSource = (list: HTMLElement) =>
+        (!owner.lite || !!list.closest(".protyle-wysiwyg__embed")) && canEdit(owner, list) &&
+        !newlyCreated.has(list) && !completeSources.has(list);
     let pendingFocus: {list: HTMLElement, candidateIDs: string[], selection?: Record<string, string>, guard?: () => boolean};
     let frame = 0;
     let disposed = false;
@@ -969,7 +1016,7 @@ export const initListMindmaps = (owner: IProtyle) => {
         }
         const lists = new Set(getListMindmapElements(root));
         instances.forEach((instance, list) => {
-            if (!lists.has(list)) {
+            if (!lists.has(list) || needsCompleteSource(list)) {
                 instance.destroy();
                 instances.delete(list);
             } else if (!isFoldedRenderContent(list, true)) {
@@ -983,6 +1030,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                 }
             }
         });
+        prepare();
         lists.forEach(list => {
             if (instances.has(list) || loading.has(list) || failed.has(list) || isFoldedRenderContent(list, true)) {
                 return;
@@ -1008,11 +1056,12 @@ export const initListMindmaps = (owner: IProtyle) => {
                     list.removeAttribute("data-mindmap-view-rendered");
                 }
             };
-            if (!owner.lite && canEdit(owner, list) && !newlyCreated.has(list)) {
+            if (needsCompleteSource(list)) {
                 loading.add(list);
                 let retry = false;
                 void completeList(owner, list).then(complete => {
                     if (complete === "complete") {
+                        completeSources.add(list);
                         mount();
                     } else if (complete === "changed") {
                         retry = true;
@@ -1031,6 +1080,9 @@ export const initListMindmaps = (owner: IProtyle) => {
                     }
                 });
             } else {
+                if (newlyCreated.has(list)) {
+                    completeSources.add(list);
+                }
                 newlyCreated.delete(list);
                 mount();
             }

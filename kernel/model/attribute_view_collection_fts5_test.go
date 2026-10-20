@@ -5,6 +5,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -104,6 +105,75 @@ func TestBlockCollectionTransitionsAndUndo(t *testing.T) {
 	row = view.GetBlockValueByBoundID(fixture.sourceID)
 	if row == nil || row.BlockID != itemID || view.GetValue(keyID, row.BlockID).Text.Content != "Edited" {
 		t.Fatal("re-adding tag reset or replaced the preserved entry")
+	}
+}
+
+func TestBlockCollectionSynchronizesFinalBindingAttrs(t *testing.T) {
+	fixture, view, _ := setupBlockCollectionTest(t)
+	tx := blockCollectionTags(t, fixture.sourceID, "todo")
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	last := tx.DoOperations[len(tx.DoOperations)-1]
+	if last.Action != "updateAttrs" || last.ID != fixture.sourceID || !last.IsAutomaticAttributeViewOperation() {
+		t.Fatalf("final binding attributes must follow the source and database operations: %+v", last)
+	}
+	data := last.Data.(map[string]any)
+	attrs := data["new"].(map[string]string)
+	if attrs[av.NodeAttrNameAvs] != view.ID || attrs[av.NodeAttrViewNames] == "" {
+		t.Fatalf("missing binding or badge in the transaction: %v", attrs)
+	}
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tree.Root.IALAttr(av.NodeAttrNameAvs) != attrs[av.NodeAttrNameAvs] {
+		t.Fatal("broadcast binding differs from the persisted source")
+	}
+	for _, operations := range [][]*Operation{cloneOperations(tx.UndoOperations), cloneOperations(tx.DoOperations)} {
+		replay := &Transaction{DoOperations: operations, isReplay: true}
+		if err = PerformTxSync(replay); err != nil {
+			t.Fatal(err)
+		}
+		last = replay.DoOperations[len(replay.DoOperations)-1]
+		if last.Action != "updateAttrs" || last.ID != fixture.sourceID {
+			t.Fatalf("replay did not finish with the current binding attributes: %+v", last)
+		}
+		tree, err = LoadTreeByBlockID(fixture.sourceID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		attrs = last.Data.(map[string]any)["new"].(map[string]string)
+		if attrs[av.NodeAttrNameAvs] != tree.Root.IALAttr(av.NodeAttrNameAvs) {
+			t.Fatal("replay sent a stale binding")
+		}
+	}
+}
+
+func TestBlockCollectionPreservesBindingDuringQueuedEdits(t *testing.T) {
+	fixture, view, _ := setupBlockCollectionTest(t)
+	view.Automations.Rules[0].BlockSource.Types = []string{"p"}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	for _, content := range []string{`<span data-type="tag">todo</span>`, `More <span data-type="tag">todo</span> text`} {
+		// 连续输入的正文快照可能早于上一笔自动绑定的属性通知。
+		dom := fmt.Sprintf(`<div data-node-id="%s" data-type="NodeParagraph"><div contenteditable="true">%s</div></div>`, fixture.childID, content)
+		tx := &Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "update", ID: fixture.childID, Data: dom}}}
+		if err := PerformTxSync(tx); err != nil {
+			t.Fatal(err)
+		}
+		tree, err := LoadTreeByBlockID(fixture.childID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if treenode.GetNodeInTree(tree, fixture.childID).IALAttr(av.NodeAttrNameAvs) != view.ID {
+			t.Fatal("queued source edit discarded the existing database binding")
+		}
+		view = readAttributeViewItemsTest(t, view.ID)
+		if len(view.GetBlockKeyValues().Values) != 1 || view.GetBlockValueByBoundID(fixture.childID) == nil {
+			t.Fatal("queued source edit duplicated or removed the collected row")
+		}
 	}
 }
 

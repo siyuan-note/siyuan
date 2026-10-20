@@ -10,7 +10,8 @@ import {useShell} from "../../../util/pathName";
 
 /// #endif
 import {getHostCapabilities} from "../../../util/hostCapabilities";
-import {isPhablet} from "../../../protyle/util/compatibility";
+import {isInMobileApp, isPhablet} from "../../../protyle/util/compatibility";
+import {bindMenuMouseScroll} from "../../../menus/menuMouseScroll";
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -115,6 +116,10 @@ export class AgentSessionPanel {
             this.popup.innerHTML = html;
 
             const itemsContainer = this.popup.querySelector(".b3-list") as HTMLElement;
+            if (!this.mobile) {
+                bindMenuMouseScroll(this.popup, () => !isInMobileApp() &&
+                    window.siyuan.config.appearance?.menuMouseScroll === true, itemsContainer);
+            }
             this.renderItems(itemsContainer, result.sessions, false);
             const searchInput = this.popup.querySelector(".agent-session-popup__search") as HTMLInputElement;
             this.popup.querySelector('[data-type="back"]')?.addEventListener("click", () => this.close());

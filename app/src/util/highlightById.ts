@@ -101,7 +101,9 @@ export const scrollCenter = (
                 const hljsElement = blockElement.querySelector(".hljs");
                 const scrollLeft = hljsElement.scrollLeft;
                 const brElement = document.createElement("br");
-                range.insertNode(brElement);
+                // 滚动占位使用克隆 Range，避免扩展当前光标或改变文字选区。
+                const scrollRange = range.cloneRange();
+                scrollRange.insertNode(brElement);
                 brElement.scrollIntoView({block: position, behavior});
                 brElement.remove();
                 hljsElement.scrollLeft = scrollLeft;

@@ -108,7 +108,7 @@ func TestAttributeViewGroupMoveEncrypted(t *testing.T) {
 	_, before, tx := setupAttributeViewGroupMoveTest(t, av.LayoutTypeKanban, "C")
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x65}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x65}, 32))
 	av.SetAVBoxID(before.ID, boxID)
 	t.Cleanup(func() {
 		av.SetAVBoxID(before.ID, "")

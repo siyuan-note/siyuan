@@ -19,10 +19,15 @@ const setup = (options: {
     visualHeight?: number,
     visualOffsetTop?: number,
     preserveKeyboard?: boolean,
+        expanded?: boolean,
+        expandable?: boolean,
 }) => {
     const windowResizeListeners = new Set<() => void>();
     const viewportResizeListeners = new Set<() => void>();
     const classes = new Set<string>(["b3-menu--sheet"]);
+    if (options.expanded) {
+        classes.add("b3-menu--expanded");
+    }
     if (options.fit) {
         classes.add("b3-menu--fit");
     }
@@ -42,6 +47,7 @@ const setup = (options: {
         classList: {
             contains: (name: string) => classes.has(name),
         },
+        getAttribute: () => options.expandable ? "true" : null,
     };
     const module = {exports: {} as {Menu: typeof Menu}};
     runInNewContext(compiled, {
@@ -87,6 +93,21 @@ const setup = (options: {
 };
 
 describe("mobile menu sheet content fit", () => {
+    it("fits an expanded database sheet above the keyboard", () => {
+        const {menu, element} = setup({fit: false, contentHeight: 2000, viewportHeight: 800,
+            visualHeight: 420, expanded: true, expandable: true});
+        menu.resetPosition();
+        assert.equal(element.style.height, "420px");
+        assert.equal(element.style.bottom, "380px");
+    });
+
+    it("keeps a half-height database sheet visible above the keyboard", () => {
+        const {menu, element} = setup({fit: false, contentHeight: 2000, viewportHeight: 800,
+            visualHeight: 360, expandable: true});
+        menu.resetPosition();
+        assert.equal(element.style.height, "360px");
+        assert.equal(element.style.bottom, "440px");
+    });
     it("positions a keyboard-preserving sheet within the visible viewport", () => {
         const {menu, element} = setup({
             fit: false,

@@ -448,6 +448,10 @@ func (tx *Transaction) runAttributeViewCollections() error {
 			row := view.GetBlockValueByBoundID(blockID)
 			// 已有条目及用户字段始终保留，失配不触发隐式清理。
 			if row != nil {
+				// 连续输入可能使用绑定通知前的快照，按数据库现存条目补回绑定属性。
+				if !slices.Contains(strings.Split(afterNodes[blockID].IALAttr(av.NodeAttrNameAvs), ","), id) {
+					bindBlockAv0(tx, id, afterNodes[blockID], tree)
+				}
 				continue
 			}
 			for _, rule := range rules {

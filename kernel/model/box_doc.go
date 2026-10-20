@@ -94,7 +94,7 @@ func writeBoxDocID(boxID string) error {
 func IsBoxDocEnabled() bool {
 	confFileTreeSnapshot := Conf.LoadFileTree()
 
-	return nil != Conf && nil != confFileTreeSnapshot && nil != confFileTreeSnapshot.BoxDocEnabled && *confFileTreeSnapshot.BoxDocEnabled
+	return nil != Conf && nil != confFileTreeSnapshot && confFileTreeSnapshot.BoxDocEnabled
 }
 
 func hiddenBoxDocRootIDs() (ret []string) {

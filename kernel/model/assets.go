@@ -2526,7 +2526,7 @@ func assetLinkDestBlockID(node *ast.Node) string {
 }
 
 func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool, normalize ...func(string) string) []string {
-	if !node.IsBlock() && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
+	if !node.IsBlock() && ast.NodeImage != node.Type && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
 		ast.NodeIFrame != node.Type && ast.NodeWidget != node.Type && ast.NodeAudio != node.Type && ast.NodeVideo != node.Type &&
 		ast.NodeAttributeView != node.Type && ast.NodeFileAnnotationRefID != node.Type && !node.IsTextMarkType("a") &&
 		!node.IsTextMarkType("file-annotation-ref") {
@@ -2629,6 +2629,11 @@ func getAssetsLinkDestsWithOptions(
 ) (ret []string) {
 	ret = []string{}
 	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			if dest := normalizeScannedAsset(treenode.ImageLivePhotoVideo(n), normalize); dest != "" && util.IsAssetLinkDest([]byte(dest), includeServePath) {
+				ret = append(ret, dest)
+			}
+		}
 		if n.IsBlock() {
 			// 以 custom-data-assets 开头的块属性值可能是多个资源文件链接，需要计入
 			// Ignore assets associated with the `custom-data-assets` block attribute when cleaning unreferenced assets https://github.com/siyuan-note/siyuan/issues/12574
@@ -2852,7 +2857,11 @@ func getAssetsLinkDestsInTree(tree *parse.Tree, includeServePath bool) (nodes []
 }
 
 func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
-	if ast.NodeLinkDest == node.Type {
+	if ast.NodeImage == node.Type {
+		if video := treenode.ImageLivePhotoVideo(node); video != "" {
+			treenode.SetImageLivePhotoVideo(node, strings.ReplaceAll(video, oldDest, dest))
+		}
+	} else if ast.NodeLinkDest == node.Type {
 		if bytes.HasPrefix(node.Tokens, []byte("//")) {
 			node.Tokens = append([]byte("https:"), node.Tokens...)
 		}

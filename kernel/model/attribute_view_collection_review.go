@@ -44,18 +44,28 @@ func (tx *Transaction) newCollectionReview(view *av.AttributeView, boxID string)
 
 // 仅有明确的不匹配结论才能进入清理预览；不可读取和没有规则均不解释为不匹配。
 func (review *collectionReview) item(row *av.Value) *apicontract.AVCollectionReviewItem {
-	ret := &apicontract.AVCollectionReviewItem{Status: "unknown"}
+	ret := &apicontract.AVCollectionReviewItem{Status: "unknown", Reason: "invalidItem"}
 	if row == nil {
 		return ret
 	}
 	ret.ItemID = row.BlockID
+	ret.IsDetached = row.IsDetached
 	if row.Block == nil {
 		return ret
 	}
 	ret.BlockID, ret.Content = row.Block.ID, util.UnescapeHTML(row.Block.Content)
-	if row.IsDetached || row.Block.ID == "" || len(review.rules) == 0 {
+	if row.IsDetached || row.Block.ID == "" {
+		ret.Reason = "detached"
 		return ret
 	}
+	if len(review.rules) == 0 {
+		ret.Reason = "noRules"
+		if review.uncertain {
+			ret.Reason = "invalidRule"
+		}
+		return ret
+	}
+	ret.Reason = "unavailable"
 	bt := attributeViewBindingBlockTree(row.Block.ID, review.boxID)
 	if bt == nil || !IsSameCryptoBoundary(review.boxID, bt.BoxID) {
 		return ret
@@ -66,6 +76,7 @@ func (review *collectionReview) item(row *av.Value) *apicontract.AVCollectionRev
 		tree, err = review.tx.loadTreeByBlockTree(bt)
 		if err != nil {
 			review.trees[bt.RootID] = nil
+			ret.Reason = "unreadable"
 			return ret
 		}
 		review.trees[bt.RootID] = tree
@@ -82,6 +93,7 @@ func (review *collectionReview) item(row *av.Value) *apicontract.AVCollectionRev
 		review.matches[bt.RootID] = matches
 	}
 	if tree == nil {
+		ret.Reason = "unreadable"
 		return ret
 	}
 	if !review.present[bt.RootID][row.Block.ID] {
@@ -89,14 +101,19 @@ func (review *collectionReview) item(row *av.Value) *apicontract.AVCollectionRev
 	}
 	ret.HPath = tree.HPath
 	if review.matches[bt.RootID][row.Block.ID] {
-		ret.Status = "matched"
+		ret.Status, ret.Reason = "matched", ""
 	} else if !review.uncertain {
-		ret.Status = "unmatched"
+		ret.Status, ret.Reason = "unmatched", ""
+	} else {
+		ret.Reason = "invalidRule"
 	}
 	return ret
 }
 
-func ReviewAttributeViewCollection(avID string, page int) (*apicontract.AVCollectionReview, error) {
+func ReviewAttributeViewCollection(avID string, page int, status string) (*apicontract.AVCollectionReview, error) {
+	if status != "" && status != "matched" && status != "unmatched" && status != "unknown" {
+		return nil, fmt.Errorf("invalid collection review status")
+	}
 	FlushTxQueue()
 	tx := &Transaction{luteEngine: util.NewLute(), trees: map[string]*parse.Tree{}}
 	defer tx.finishAttributeViewMutation(false)
@@ -111,7 +128,8 @@ func ReviewAttributeViewCollection(avID string, page int) (*apicontract.AVCollec
 		page = 1
 	}
 	values := view.GetBlockKeyValues().Values
-	for index, row := range values {
+	count := 0
+	for _, row := range values {
 		item := review.item(row)
 		switch item.Status {
 		case "matched":
@@ -121,11 +139,15 @@ func ReviewAttributeViewCollection(avID string, page int) (*apicontract.AVCollec
 		default:
 			ret.Unknown++
 		}
-		if index/100 == page-1 {
+		if status != "" && item.Status != status {
+			continue
+		}
+		if count/100 == page-1 {
 			ret.Items = append(ret.Items, item)
 		}
+		count++
 	}
-	ret.HasMore = page <= len(values)/100 && len(values) > page*100
+	ret.HasMore = page <= count/100 && count > page*100
 	return ret, nil
 }
 

@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {isBrowserRenderableImagePath} from "../../util/imageURL";
 import {copyPNGByLink, writeAssetToClipboard} from "../../menus/util";
 import {isEncryptedBox} from "../../util/pathName";
+import {createLivePhotoPlayer} from "./livePhoto";
 
 const getCopyFileMenu = (src: string) => {
     try {
@@ -22,22 +23,34 @@ const getCopyFileMenu = (src: string) => {
     }
 };
 
-export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
+export const previewImages = (srcList: Array<string | {src: string, video?: string, notebook?: string}>, currentSrc?: string, onHidden?: () => void, currentVideo?: string) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.14.0`, "protyleViewerScript").then(() => {
         const imagesElement = document.createElement("ul");
         let html = "";
         let initialViewIndex = -1;
-        srcList.forEach((item: string, index: number) => {
+        srcList.forEach((source, index: number) => {
+            const item = typeof source === "string" ? source : source.src;
             if (item) {
                 html += `<li><img src="${encodeURI(item)}"></li>`;
-                if (currentSrc && initialViewIndex === -1 && (currentSrc.endsWith(encodeURI(item)) || currentSrc.endsWith(item))) {
+                if (currentSrc && initialViewIndex === -1 && (currentSrc.endsWith(encodeURI(item)) || currentSrc.endsWith(item)) &&
+                    (currentVideo === undefined || (typeof source === "string" ? "" : source.video || "") === currentVideo)) {
                     initialViewIndex = index;
                 }
             }
         });
         imagesElement.innerHTML = html;
         let cleanedUp = false;
+        let stopLivePhoto: () => void;
+        let liveButton: HTMLElement;
+        let currentIndex = initialViewIndex >= 0 ? initialViewIndex : 0;
+        const stopLive = () => {
+            stopLivePhoto?.();
+            stopLivePhoto = undefined;
+        };
+        imagesElement.addEventListener("play", stopLive);
+        imagesElement.addEventListener("playing", stopLive);
         const close = () => {
+            stopLive();
             viewer.destroy();
             if (!cleanedUp) {
                 cleanedUp = true;
@@ -59,6 +72,37 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             navigation: true,
             transition: false,
             ready: () => {
+                if (srcList.some(source => typeof source !== "string" && source.video)) {
+                    liveButton = document.createElement("li");
+                    liveButton.className = "viewer-live-photo ariaLabel fn__none";
+                    liveButton.tabIndex = 0;
+                    liveButton.setAttribute("role", "button");
+                    liveButton.setAttribute("aria-label", window.siyuan.languages.livePhoto);
+                    liveButton.setAttribute("data-position", "north");
+                    liveButton.innerHTML = '<svg><use xlink:href="#iconVideo"></use></svg>';
+                    const play = () => {
+                        if (stopLivePhoto) {
+                            stopLive();
+                            return;
+                        }
+                        const source = srcList[currentIndex];
+                        if (source && typeof source !== "string" && source.video) {
+                            stopLivePhoto = createLivePhotoPlayer(viewer.viewer, source.video, viewer.image.src, source.notebook);
+                        }
+                    };
+                    liveButton.addEventListener("click", event => {
+                        event.stopPropagation();
+                        play();
+                    });
+                    liveButton.addEventListener("keydown", event => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            play();
+                        }
+                    });
+                    viewer.toolbar.querySelector("ul").append(liveButton);
+                }
                 viewer.toolbar.querySelector(".viewer-play").classList.remove("viewer-large");
                 const copyElement = viewer.toolbar.querySelector(".viewer-copy");
                 copyElement.innerHTML = '<svg><use xlink:href="#iconImage"></use></svg>';
@@ -95,7 +139,11 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 });
             },
             hidden: close,
-            view: () => {
+            view: event => {
+                stopLive();
+                currentIndex = event?.detail?.index ?? currentIndex;
+                const source = srcList[currentIndex];
+                liveButton?.classList.toggle("fn__none", typeof source === "string" || !source?.video);
                 viewer.toolbar.querySelector(".viewer-copy-file").classList.add("fn__none");
             },
             viewed: () => {
@@ -125,24 +173,35 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 },
             },
         });
+        const destroyViewer = viewer.destroy.bind(viewer);
+        viewer.destroy = () => {
+            stopLive();
+            imagesElement.removeEventListener("play", stopLive);
+            imagesElement.removeEventListener("playing", stopLive);
+            destroyViewer();
+        };
         window.siyuan.viewer = viewer;
         viewer.show();
     });
 };
 
-export const previewDocImage = (currentSrc: string, id: string) => {
-    fetchPost("/api/asset/getDocImageAssets", {id}, (response) => {
-        previewImages(response.data, currentSrc);
+export const previewDocImage = (currentSrc: string, id: string, currentVideo?: string) => {
+    fetchPost("/api/asset/getDocPreviewImages", {id}, (response) => {
+        previewImages(response.data, currentSrc, undefined, currentVideo);
     });
 };
 
-export const previewAttrViewImages = (currentSrc: string, avID: string, blockID: string, viewID: string, query: string) => {
+export const previewAttrViewImages = (currentSrc: string, avID: string, blockID: string, viewID: string, query: string, groupID?: string) => {
     fetchPost("/api/av/getCurrentAttrViewImages", {
         id: avID,
         blockID,
         viewID,
         query,
+        groupID,
     }, (response) => {
-        previewImages(response.data.filter((item: string) => isBrowserRenderableImagePath(item)), currentSrc);
+        const images = (response.data || []).filter((item: string) => isBrowserRenderableImagePath(item));
+        if (images.length > 0) {
+            previewImages(images, currentSrc);
+        }
     });
 };

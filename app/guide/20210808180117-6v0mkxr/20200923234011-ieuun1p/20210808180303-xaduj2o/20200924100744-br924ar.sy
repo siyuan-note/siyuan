@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261018221152"
 	},
 	"Children": [
 		{
@@ -493,6 +493,72 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hover over an image to see its file name, format, loaded original dimensions, title, and tooltip text, even if it has no title. Local workspace images also show file size when available. File size is omitted for remote and encrypted notebook images."
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-70wtkp3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018221152-70wtkp3",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Live Photos"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261018221152-5v49fj9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-5v49fj9",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On iOS, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Insert image"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the editor to select Live Photos from Photos. SiYuan retains the original photo and its paired video, including their original metadata."
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-wun4xf3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-wun4xf3",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the image preview on any client, then select Live Photo to play it. If the original video cannot play, SiYuan generates a compatible preview on demand. The first playback may take longer; the local cache is reused afterward and is not synchronized. The compatible preview is lossy, while the original files stay unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-qkagk4i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-qkagk4i",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HDR and some uncommon encodings currently cannot be converted for compatible playback. The still image and original files remain available. Android Motion Photo import and restoring a system Live Photo from exported files are not supported yet."
 				}
 			]
 		},

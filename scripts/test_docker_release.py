@@ -26,6 +26,7 @@ def module(name, file):
 release = module("docker_release", "verify-docker-release.py")
 cache = module("docker_cache", "check-docker-cache.py")
 onnx = module("docker_onnx", "build-docker-onnx.py")
+tag_cleanup = module("docker_tag_cleanup", "cleanup-docker-tags.py")
 IMAGE = "b3log/siyuan@sha256:" + "a" * 64
 
 
@@ -46,6 +47,141 @@ def report():
     return {"image": IMAGE, "version": "3.8.7", "status": "passed", "platforms": [
         {"platform": platform, "digest": digest, "checks": sorted(release.CHECKS)}
         for platform, digest in release.manifests(manifest()).items()]}
+
+
+class CandidateTagCleanupTests(unittest.TestCase):
+    def tag(self, name, **values):
+        return {"name": name, "last_updated": "2026-10-18T12:00:00Z", **values}
+
+    def select(self, tags, published=False):
+        return tag_cleanup.select_tags(tags, published=published)
+
+    def test_only_complete_known_candidate_names_are_eligible(self):
+        protected = ["v3.8.7", "v3.8.8-alpha.1", "latest", "buildcache-release-v2-amd64", "buildcache-onnx-v3-armv7",
+                     "onnx-amd64-" + "a" * 64, "build-123-2", "build-123-2-amd64-extra", "build-123-2-unknown",
+                     "prefix-build-123-2-amd64", "build-123-2-amd64\n", "build-123-2-../latest"]
+        tags = [self.tag(name) for name in protected] + [self.tag("build-122-1-verified")]
+        self.assertEqual(self.select(tags, True), ["build-122-1-verified"])
+
+    def test_success_cleans_every_candidate_of_the_repository(self):
+        candidates = [f"build-123-2-{platform}" for platform in ("amd64", "arm64", "armv7", "armv8", "verified")]
+        tags = [self.tag(name) for name in candidates] + [self.tag("build-123-1-amd64"),
+                self.tag("build-123-3-amd64"), self.tag("build-1234-2-amd64")]
+        self.assertEqual(self.select(tags, True), sorted(candidates + ["build-123-1-amd64",
+                                                                       "build-123-3-amd64", "build-1234-2-amd64"]))
+
+    def test_unpublished_run_preserves_every_candidate(self):
+        tags = [self.tag("build-123-1-amd64"), self.tag("build-123-2-verified"),
+                self.tag("build-122-1-amd64"), self.tag("build-121-1-armv7")]
+        self.assertEqual(self.select(tags), [])
+
+    def test_all_pages_are_read_before_tag_deletion_and_duplicates_are_deleted_once(self):
+        first = self.tag("build-122-1-amd64")
+        second = self.tag("build-122-1-verified")
+        calls = []
+
+        def request(path, token, **kwargs):
+            calls.append((path, token, kwargs.get("method", "GET")))
+            if "page=1" in path:
+                return {"results": [first, self.tag("latest")], "next": "https://other.invalid/page2"}
+            if "page=2" in path:
+                return {"results": [first, second], "next": None}
+
+        with patch.object(tag_cleanup, "hub_request", side_effect=request), contextlib.redirect_stdout(io.StringIO()):
+            selected = tag_cleanup.cleanup("b3log/siyuan", token="token", execute=True, published=True)
+        self.assertEqual(selected, [first["name"], second["name"]])
+        self.assertEqual([call[2] for call in calls], ["GET", "GET", "DELETE", "DELETE"])
+        self.assertTrue(all(path.startswith("/v2/repositories/b3log/siyuan/tags/") for path, _, _ in calls))
+        self.assertTrue(all("manifests" not in path for path, _, _ in calls))
+        self.assertTrue(all(token == "token" for _, token, _ in calls))
+
+    def test_listing_failure_or_invalid_page_never_starts_deletion(self):
+        first = {"results": [self.tag("build-122-1-amd64")], "next": "page2"}
+        for second in (RuntimeError("listing failed"), {"next": None}, {"results": [None], "next": None}, first):
+            with self.subTest(second=second), \
+                    patch.object(tag_cleanup, "hub_request", side_effect=[first, second]) as request:
+                with self.assertRaises((ValueError, RuntimeError)):
+                    tag_cleanup.cleanup("b3log/siyuan", token="token", execute=True, published=True)
+                self.assertEqual(request.call_count, 2)
+                self.assertFalse(any(call.kwargs.get("method") == "DELETE" for call in request.call_args_list))
+
+    def test_preview_never_sends_deletions(self):
+        page = {"results": [self.tag("build-122-1-amd64")], "next": None}
+        with patch.object(tag_cleanup, "hub_request", return_value=page) as request, \
+                contextlib.redirect_stdout(io.StringIO()) as output:
+            tag_cleanup.cleanup("b3log/siyuan", published=True)
+        request.assert_called_once()
+        self.assertIn("Would delete b3log/siyuan:build-122-1-amd64", output.getvalue())
+
+    def test_one_failed_delete_does_not_skip_other_tags(self):
+        page = {"results": [self.tag("build-122-1-amd64"), self.tag("build-122-1-verified")], "next": None}
+        with patch.object(tag_cleanup, "hub_request", side_effect=[page, RuntimeError("HTTP 403"), None]) as request, \
+                contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(RuntimeError, "1 candidate tags"):
+                tag_cleanup.cleanup("b3log/siyuan", token="token", execute=True, published=True)
+        self.assertEqual([call.kwargs.get("method") for call in request.call_args_list], [None, "DELETE", "DELETE"])
+
+    def test_invalid_repository_or_missing_credentials_never_accesses_hub(self):
+        for repository, token in (("other.example/repo:tag", "token"), ("b3log/siyuan/../other", "token"),
+                                  ("b3log/siyuan", "")):
+            with self.subTest(repository=repository, token=token), patch.object(tag_cleanup, "hub_request") as request:
+                with self.assertRaises(ValueError):
+                    tag_cleanup.cleanup(repository, token=token, execute=True)
+                request.assert_not_called()
+
+    def test_credentials_are_exchanged_for_bearer_and_not_used_for_tag_requests(self):
+        with patch.object(tag_cleanup, "hub_request", return_value={"access_token": "short-lived"}) as request:
+            self.assertEqual(tag_cleanup.hub_token("username", "password"), "short-lived")
+        request.assert_called_once_with("/v2/auth/token", method="POST",
+                                        payload={"identifier": "username", "secret": "password"})
+        for result in ({}, {"access_token": ""}, {"access_token": 123}, None):
+            with self.subTest(result=result), patch.object(tag_cleanup, "hub_request", return_value=result):
+                with self.assertRaises(ValueError):
+                    tag_cleanup.hub_token("username", "password")
+
+    def test_http_delete_uses_tag_endpoint_bearer_token_and_accepts_empty_response(self):
+        response = Mock()
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+        response.read.return_value = b""
+        opener = Mock()
+        opener.open.return_value = response
+        with patch.object(tag_cleanup.urllib.request, "build_opener", return_value=opener):
+            self.assertIsNone(tag_cleanup.hub_request("/v2/repositories/b3log/siyuan/tags/build-123-2-amd64/",
+                                                      "token", method="DELETE"))
+        request = opener.open.call_args.args[0]
+        self.assertEqual(request.full_url, "https://hub.docker.com/v2/repositories/b3log/siyuan/tags/build-123-2-amd64/")
+        self.assertEqual(request.get_method(), "DELETE")
+        self.assertEqual(request.get_header("Authorization"), "Bearer token")
+        self.assertEqual(opener.open.call_args.kwargs["timeout"], 30)
+
+    def test_missing_tag_is_idempotent_but_other_http_errors_are_reported_without_body(self):
+        for method, status in (("DELETE", 404), ("GET", 404), ("DELETE", 401), ("POST", 403), ("DELETE", 500)):
+            error = tag_cleanup.urllib.error.HTTPError("https://hub.docker.com", status, "failure", {},
+                                                       io.BytesIO(b"sensitive response"))
+            opener = Mock()
+            opener.open.side_effect = error
+            with self.subTest(method=method, status=status), \
+                    patch.object(tag_cleanup.urllib.request, "build_opener", return_value=opener):
+                if method == "DELETE" and status == 404:
+                    self.assertIsNone(tag_cleanup.hub_request("/test", "token", method=method))
+                else:
+                    with self.assertRaisesRegex(RuntimeError, f"HTTP {status}") as raised:
+                        tag_cleanup.hub_request("/test", "token", method=method)
+                    self.assertNotIn("sensitive", str(raised.exception))
+
+    def test_cli_requires_credentials_for_execution_and_passes_publication_state(self):
+        args = ["cleanup-docker-tags.py", "--repository", "b3log/siyuan"]
+        with patch("sys.argv", args + ["--execute"]), patch.dict(os.environ, {}, clear=True), \
+                patch.object(tag_cleanup, "cleanup") as cleanup, contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                tag_cleanup.main()
+            cleanup.assert_not_called()
+        with patch("sys.argv", args + ["--execute", "--published"]), \
+                patch.dict(os.environ, {"DOCKER_HUB_USER": "username", "DOCKER_HUB_PWD": "password"}), \
+                patch.object(tag_cleanup, "hub_token", return_value="token"), patch.object(tag_cleanup, "cleanup") as cleanup:
+            tag_cleanup.main()
+        cleanup.assert_called_once_with("b3log/siyuan", token="token", execute=True, published=True)
 
 
 class ManifestTests(unittest.TestCase):

@@ -137,10 +137,12 @@ type AVCollectBlocks struct {
 
 // AVCollectionReviewRequest 检查当前数据库全部已有条目，按全部启用的普通块规则取并集。
 // 自动和手动绑定条目采用相同判断；无可用规则、规则无效、游离条目或源块不可读取均为 unknown。
-// page 从 1 开始，每页最多 100 项，计数覆盖整个数据库；不修改数据或自动补收。
+// page 从 1 开始，每页最多 100 项，计数覆盖整个数据库；status 可选，指定后先筛选再分页。
+// 省略 status 保留混合分页；unknown 的 reason 描述当前无法判断的原因，不修改数据或自动补收。
 type AVCollectionReviewRequest struct {
-	AvID string `json:"avID"`
-	Page int    `json:"page" api:"optional"`
+	AvID   string `json:"avID"`
+	Page   int    `json:"page" api:"optional"`
+	Status string `json:"status" api:"optional,enum=|matched|unmatched|unknown"`
 }
 
 type AVCollectionReview struct {
@@ -153,11 +155,13 @@ type AVCollectionReview struct {
 }
 
 type AVCollectionReviewItem struct {
-	ItemID  string `json:"itemID"`
-	BlockID string `json:"blockID"`
-	Content string `json:"content"`
-	HPath   string `json:"hPath"`
-	Status  string `json:"status" api:"enum=matched|unmatched|unknown"`
+	ItemID     string `json:"itemID"`
+	BlockID    string `json:"blockID"`
+	Content    string `json:"content"`
+	HPath      string `json:"hPath"`
+	Status     string `json:"status" api:"enum=matched|unmatched|unknown"`
+	Reason     string `json:"reason,omitempty" api:"optional,enum=invalidItem|detached|noRules|invalidRule|unavailable|unreadable"`
+	IsDetached bool   `json:"isDetached"`
 }
 
 type AVCollectionCleanupItem struct {

@@ -1568,7 +1568,6 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
             const searchResultElement = element.querySelector("#searchResult");
             if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
                 return {
-                    method: requestConfig.method,
                     version,
                     run(signal: AbortSignal, isCurrent: () => boolean) {
                         return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
@@ -1600,8 +1599,8 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 }
             }
             return {
-                method: requestConfig.method,
                 version,
+                abortable: requestConfig.method !== 4,
                 run(signal: AbortSignal, isCurrent: () => boolean) {
                     return fetchPost(endpoint, searchParam, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
                         if (!isCurrent()) {

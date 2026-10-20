@@ -17,16 +17,16 @@ export const openAutomationRules = (target: HTMLElement, rules: RuleSummary[], c
     let menu: Menu;
     toggleMenu({target, build: () => {
         menu = new Menu();
-    menu.addItem({type: "empty", label: `<div class="b3-menu__filter fn__flex-column">
+    menu.addItem({type: "empty", label: `<div class="b3-menu__filter av__automation-menu fn__flex-column">
 <input class="b3-text-field" data-search placeholder="${escapeAttr(lang.searchPlaceholder)}" aria-label="${escapeAttr(lang.search)}">
-<div class="fn__hr"></div><div class="b3-list b3-list--background fn__flex-1" data-rules></div></div>`, bind: element => {
+<div class="b3-list b3-list--background av__automation-menu-list fn__flex-1" data-rules></div></div>`, bind: element => {
         const search = element.querySelector<HTMLInputElement>("[data-search]");
         const list = element.querySelector<HTMLElement>("[data-rules]");
         const render = () => {
             const keyword = search.value.trim().toLowerCase();
             list.innerHTML = rules.filter(rule => rule.name.toLowerCase().includes(keyword)).map(rule =>
                 `<div class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}${rule.id === currentID ? " b3-list-item--focus" : ""}" data-id="${escapeAttr(rule.id)}" tabindex="0">
-<svg class="b3-list-item__graphic ariaLabel" aria-label="${escapeAttr(rule.enabled ? lang.enable : lang.disable)}"><use xlink:href="#${rule.enabled ? "iconPlay" : "iconPause"}"></use></svg>
+<svg class="b3-list-item__hinticon ariaLabel" aria-label="${escapeAttr(rule.enabled ? lang.enable : lang.disable)}"><use xlink:href="#${rule.enabled ? "iconPlay" : "iconPause"}"></use></svg>
 <span class="b3-list-item__text ariaLabel" aria-label="${escapeAttr(rule.name)}">${escapeHtml(rule.name)}</span>
 <span class="b3-list-item__action ariaLabel" data-rename role="button" tabindex="0" aria-label="${escapeAttr(lang.rename)}"><svg><use xlink:href="#iconEdit"></use></svg></span>
 <span class="b3-list-item__action ariaLabel" data-more role="button" tabindex="0" aria-label="${escapeAttr(lang.more)}"><svg><use xlink:href="#iconMore"></use></svg><div class="b3-menu__submenu"><div class="b3-menu__items">${rule.trigger === "block" ? `<div class="ft__on-surface ft__smaller av__automation-rule-warning" data-rule-change-tip>${lang.automationCollectionRuleChangeTip}</div>` : ""}<button class="b3-menu__item b3-menu__item--warning" data-delete><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">${lang.delete}</span></button></div></div></span>

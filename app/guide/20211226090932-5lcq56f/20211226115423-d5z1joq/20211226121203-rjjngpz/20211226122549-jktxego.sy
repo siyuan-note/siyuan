@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261017003000"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -4357,7 +4357,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261016013311"
+				"updated": "20261018200107"
 			},
 			"Children": [
 				{
@@ -13103,13 +13103,40 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261017003000"
+				"updated": "20261018200107"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "心智圖區塊"
+				}
+			]
+		},
+		{
+			"ID": "20261018163000-e1khci4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-e1khci4"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在畫布上按 Esc 可恢復閱讀，讓滾輪捲動文件。如果正在編輯節點、選取摘要範圍或拖曳關係線，Esc 會先結束或取消目前操作；全螢幕時按 Esc 離開全螢幕。"
+				}
+			]
+		},
+		{
+			"ID": "20261018200107-s3tp7x9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018200107-s3tp7x9",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 Ctrl（macOS 為 Command）並用滑鼠右鍵拖曳畫布可暫時平移，不會改變鍵盤焦點或啟用閱讀中的畫布，之後一般滾輪仍捲動文件。檢視鎖定時此手勢無法使用。一般模式下空白區域的左鍵拖曳不會平移畫布；啟用手形工具後可用左鍵拖曳平移。"
 				}
 			]
 		},

@@ -92,6 +92,9 @@ test("row navigation replaces only its original desktop preview across bound and
         "../../../dialog/message": {showMessage() {}},
         "../../../layout/util": {saveLayout() {}},
         "./rowReadonly": {inheritDatabaseRowReadonly() {}},
+        "../../header/backgroundActions": {updateBackgroundActions: (protyle: {element: {dataset: {databaseRowId: string}}}) => {
+            assert.ok(protyle.element.dataset.databaseRowId, "desktop row opening updates actions after assigning its bound block");
+        }},
         "./databaseRowNavigation": {
             getDatabaseRowNavigation: (): undefined => undefined,
             mountDatabaseRowNavigation: (root: object, _data: unknown, open: (data: IDatabaseRowOpenData) => Promise<boolean>) => callbacks.set(root, open),

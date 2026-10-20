@@ -12,12 +12,41 @@ const rendererSource = () => {
     assert.ok(focus);
     const source = "const Constants = {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 460};\n" +
         "const revealTabsForTarget = () => {};\n" + focus.getText(selection) + "\n" +
-        ["wysiwyg/compositionInput", "wysiwyg/touchNavigation", "wysiwyg/touchCaret"].map(name => {
+        ["wysiwyg/compositionInput", "wysiwyg/touchNavigation", "wysiwyg/touchCaret", "wysiwyg/nativeTextMenu"].map(name => {
             const parsed = ts.createSourceFile(name + ".ts", read(name), ts.ScriptTarget.Latest, true);
             return parsed.statements.filter(statement => !ts.isImportDeclaration(statement))
                 .map(statement => statement.getText(parsed)).join("\n");
         }).join("\n");
-    return ts.transpileModule(source, {compilerOptions: {
+    const wysiwyg = ts.createSourceFile("index.ts", read("wysiwyg/index"), ts.ScriptTarget.Latest, true);
+    let doubleClick;
+    const visit = node => {
+        if (ts.isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
+            node.arguments[0]?.getText(wysiwyg) === '"dblclick"') {
+            doubleClick = node.getText(wysiwyg);
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(wysiwyg);
+    assert.ok(doubleClick);
+    const menus = ts.createSourceFile("protyle.ts", readFileSync(path.join(__dirname, "../src/menus/protyle.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    const contentMenu = menus.statements.find(statement => ts.isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(declaration => declaration.name.getText(menus) === "contentMenu"));
+    assert.ok(contentMenu);
+    const integration = `exports.bindNativeDoubleClick = function(element, toolbar) {
+        const protyle = {toolbar};
+        const isIOSDevice = () => true;
+        const getAVTemplateInteractiveElement = () => undefined;
+        (function() { ${doubleClick}; }).call({element});
+    };
+    exports.callNativeContentMenu = function(protyle, nodeElement) {
+        const getEditorRange = () => document.getSelection().getRangeAt(0);
+        const isIOSDevice = () => true;
+        const isInEmbedBlock = () => false;
+        ${contentMenu.getText(menus).replace(/^export /u, "")}
+        contentMenu(protyle, nodeElement);
+    };`;
+    return ts.transpileModule(source + integration, {compilerOptions: {
         module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021,
     }}).outputText;
 };
@@ -62,7 +91,7 @@ const runCases = async () => {
             const touch = new Touch({identifier: 1, target, ...point});
             const event = new TouchEvent(type, {bubbles: true, cancelable: true,
                 touches: type === "touchend" || type === "touchcancel" ? [] : [touch], changedTouches: [touch], ...options});
-            Object.defineProperty(event, "timeStamp", {value: time});
+            Object.defineProperty(event, "timeStamp", {value: options.timeStamp ?? time});
             target.dispatchEvent(event);
             return event;
         };
@@ -96,6 +125,246 @@ const runCases = async () => {
         }
     };
     try {
+        await run(async f => {
+            const subElement = document.createElement("div");
+            f.place(1, f.text, 6);
+            window.touchCaret.callNativeContentMenu({wysiwyg: {element: f.root}, toolbar: {subElement}}, f.editable.parentElement);
+            check.equal(subElement.classList.contains("fn__none"), true);
+        });
+        await run(async f => {
+            const originalWebkit = window.webkit;
+            window.webkit = {};
+            try {
+                f.place(1, f.text, 6);
+                window.touchCaret.requestNativeTextMenu(f.root, selection.getRangeAt(0));
+            } finally {
+                window.webkit = originalWebkit;
+            }
+        });
+        for (const kind of ["selected", "native", "changed", "scroll"]) {
+            await run(async f => {
+                let calls = 0;
+                const originalWebkit = window.webkit;
+                window.webkit = {messageHandlers: {showTextMenu: {postMessage: async () => { calls++; return true; }}}};
+                try {
+                    const point = f.pointAt(4);
+                    f.send("touchstart", point);
+                    time += 100;
+                    f.send("touchstart", point);
+                    if (kind === "native") {
+                        f.place(2, f.text, 6);
+                    }
+                    await nextFrame();
+                    if (kind === "changed") {
+                        time += 1000;
+                        f.place(f.text.length);
+                    } else if (kind === "scroll") {
+                        f.root.dispatchEvent(new Event("scroll"));
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    check.equal(calls, kind === "selected" || kind === "native" ? 1 : 0, kind);
+                } finally {
+                    window.webkit = originalWebkit;
+                }
+            });
+        }
+        for (const kind of ["collapsed", "changed", "outside", "ancestorScroll", "unrelatedScroll", "input", "duplicate", "dispose"]) {
+            await run(async f => {
+                const originalWebkit = window.webkit;
+                const messages = [];
+                window.webkit = {messageHandlers: {showTextMenu: {postMessage: async text => {
+                    messages.push(text);
+                    return true;
+                }}}};
+                try {
+                    f.place(2, f.text, 6);
+                    const text = selection.toString();
+                    window.touchCaret.requestNativeTextMenu(f.root, selection.getRangeAt(0));
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    check.deepEqual(messages, [text]);
+                    if (kind === "collapsed" || kind === "changed") {
+                        f.place(1, f.text, kind === "collapsed" ? 1 : 3);
+                        document.dispatchEvent(new Event("selectionchange"));
+                    } else if (kind === "outside") {
+                        document.querySelector("#outside").dispatchEvent(new Event("pointerdown", {bubbles: true}));
+                    } else if (kind === "ancestorScroll") {
+                        document.body.dispatchEvent(new Event("scroll"));
+                    } else if (kind === "unrelatedScroll") {
+                        document.querySelector("#outside").dispatchEvent(new Event("scroll"));
+                    } else if (kind === "input") {
+                        f.editable.dispatchEvent(new InputEvent("beforeinput", {bubbles: true, inputType: "insertText"}));
+                    } else if (kind === "duplicate") {
+                        window.touchCaret.requestNativeTextMenu(f.root, selection.getRangeAt(0));
+                    } else if (kind === "dispose") {
+                        f.dispose();
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    check.deepEqual(messages, kind === "unrelatedScroll" || kind === "duplicate" ? [text] : [text, ""], kind);
+                } finally {
+                    window.webkit = originalWebkit;
+                }
+            });
+        }
+        await run(async f => {
+            const other = f.root.querySelectorAll('[contenteditable="true"]')[1];
+            const oldText = other.firstChild;
+            other.focus();
+            f.place(0, oldText, 2);
+            const point = f.pointAt(4);
+            f.send("touchstart", point);
+            const staleTouch = new Touch({identifier: 2, target: other, ...point});
+            f.send("touchend", point, f.editable, {touches: [staleTouch]});
+            time += 100;
+            f.send("touchstart", point);
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent, "double tap replaces the adjacent block's stale selection");
+            check.equal(selection.anchorNode, f.text);
+            check.equal(document.activeElement, f.editable);
+        });
+        await run(async f => {
+            f.text.textContent = "alpha beta";
+            f.place(0, f.text, 5);
+            const point = f.pointAt(8);
+            f.send("touchstart", point);
+            time += 100;
+            f.send("touchstart", point);
+            await nextFrame();
+            check.equal(selection.toString(), "beta", "double tap works when neither touch sends an end event");
+        });
+        await run(async f => {
+            const point = f.pointAt(4);
+            f.send("touchstart", point);
+            time += 100;
+            f.send("touchstart", point);
+            f.place(2, f.text, 6);
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent.slice(2, 6));
+        });
+        await run(async f => {
+            f.text.textContent = "alpha beta";
+            const point = f.pointAt(2);
+            f.send("touchstart", point);
+            time += 100;
+            f.send("touchstart", point);
+            time += 100;
+            f.send("touchstart", point);
+            f.place(0, f.text, f.text.length);
+            await nextFrame();
+            check.equal(selection.toString(), "alpha beta");
+        });
+        for (const kind of ["touchcancel", "scroll", "move", "multitouch"]) {
+            await run(async f => {
+                const point = f.pointAt(4);
+                f.send("touchstart", point);
+                if (kind === "scroll") {
+                    f.root.dispatchEvent(new Event("scroll"));
+                } else if (kind === "move") {
+                    f.send("touchmove", {...point, clientY: point.clientY + 10});
+                } else if (kind === "multitouch") {
+                    const touch = new Touch({identifier: 2, target: f.editable, ...point});
+                    f.send("touchstart", point, f.editable, {touches: [touch, touch]});
+                } else {
+                    f.send("touchcancel", point);
+                }
+                time += 100;
+                f.tap(4);
+                await nextFrame();
+                f.caret(4);
+            });
+        }
+        await run(async f => {
+            const subElement = document.createElement("div");
+            window.touchCaret.bindNativeDoubleClick(f.root, {isMultiSelectMode: () => false, subElement});
+            f.place(1, f.text, 6);
+            f.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true, detail: 2, ...f.pointAt(4)}));
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent.slice(1, 6));
+            check.equal(subElement.classList.contains("fn__none"), true);
+        });
+        await run(async f => {
+            const point = f.pointAt(4);
+            f.tap(4);
+            await nextFrame();
+            time += 100;
+            f.send("touchstart", point);
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent);
+            f.send("touchcancel", point);
+            check.equal(selection.toString(), f.text.textContent);
+        }, false);
+        await run(async f => {
+            const point = f.pointAt(4);
+            f.tap(4);
+            await nextFrame();
+            time += 100;
+            f.send("touchstart", point);
+            f.send("touchcancel", point);
+            f.place(f.text.length);
+            f.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true, detail: 2, ...point}));
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent);
+        }, false);
+        await run(async f => {
+            const point = f.pointAt(4);
+            f.tap(4);
+            await nextFrame();
+            time += 100;
+            f.tap(4);
+            f.root.dispatchEvent(new Event("scroll"));
+            f.place(f.text.length);
+            f.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true, detail: 2, ...point}));
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent);
+        }, false);
+        await run(async f => {
+            const point = f.pointAt(4);
+            f.tap(4);
+            await nextFrame();
+            time += 100;
+            f.place(1, f.text, 6);
+            f.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true, detail: 2, ...point}));
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent.slice(1, 6));
+        });
+        await run(async f => {
+            const {usesNativeTextMenu} = window.touchCaret;
+            check.equal(usesNativeTextMenu(f.editable, f.root), true);
+            f.editable.innerHTML = "<b>formatted text</b>";
+            check.equal(usesNativeTextMenu(f.editable.firstChild, f.root), true);
+            for (const markup of ["<a href='#'>link</a>", "<span data-type='block-ref'>reference</span>",
+                "<span data-type='inline-math'>math</span>", "<span contenteditable='false'>readonly</span>",
+                "<button>action</button>", "<img>", "<span class='protyle-action'>1.</span>"]) {
+                f.editable.innerHTML = markup;
+                check.equal(usesNativeTextMenu(f.editable.firstChild, f.root), false, markup);
+            }
+            check.equal(usesNativeTextMenu(document.getElementById("outside"), f.root), false);
+            check.equal(usesNativeTextMenu(f.root, f.root), false);
+        });
+        await run(async f => {
+            const point = f.pointAt(4);
+            const touchTime = time;
+            f.send("touchstart", point, f.editable, {timeStamp: touchTime});
+            f.send("touchend", point, f.editable, {timeStamp: touchTime + 30});
+            await nextFrame();
+            f.root.style.paddingTop = "100px";
+            time += 800;
+            f.send("touchstart", point, f.root, {timeStamp: touchTime + 160});
+            f.send("touchend", point, f.root, {timeStamp: touchTime + 190});
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent);
+        }, false);
+        await run(async f => {
+            const point = f.pointAt(4);
+            const touchTime = time;
+            f.send("touchstart", point, f.editable, {timeStamp: touchTime});
+            f.send("touchend", point, f.editable, {timeStamp: touchTime + 30});
+            await nextFrame();
+            time += 800;
+            f.send("touchstart", point, f.editable, {timeStamp: touchTime + 160});
+            f.send("touchend", point, f.editable, {timeStamp: touchTime + 190});
+            await nextFrame();
+            check.equal(selection.toString(), f.text.textContent);
+        });
         await run(async f => {
             check.equal(selection.rangeCount, 0);
             f.tap(4);
@@ -408,7 +677,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /iOS touch caret: 35 DOM cases passed/);
+            assert.match(stdout, /iOS touch caret: 65 DOM cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-ios-touch-caret-"));

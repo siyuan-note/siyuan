@@ -3339,3 +3339,61 @@ img.av__cellassetimg {
   max-height: 60vh;
   overflow: auto;
 }
+
+.av__automation-menu {
+  > .b3-text-field {
+    flex-shrink: 0;
+    margin: 0 0 4px;
+  }
+}
+
+.av__automation-menu-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+
+  > .b3-list-item {
+    flex-shrink: 0;
+    margin-inline: 0;
+  }
+}
+
+.b3-menu:not(.b3-menu--fullscreen) .av__automation-menu--types {
+  width: 14em;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 32px));
+}
+
+.av__collection-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .layout-tab-bar {
+    flex-shrink: 0;
+  }
+
+  .item {
+    min-width: 0;
+    height: auto;
+    min-height: 40px;
+
+    .item__text {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+.av__collection-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+
+  > .b3-button {
+    flex-shrink: 0;
+    max-width: 40%;
+  }
+}

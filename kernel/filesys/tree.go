@@ -487,11 +487,15 @@ func TreeSize(tree *parse.Tree) (size uint64) {
 }
 
 func WriteTree(tree *parse.Tree) (size uint64, err error) {
+	timing := util.BeginPerformance("document.save")
+	defer timing.Finish()
 	data, filePath, err := prepareWriteTree(tree)
 	if err != nil {
 		return
 	}
 
+	timing.Count("bytes", int64(len(data)))
+	timing.Stage("encrypt")
 	dek, encrypted, releaseCryptoLease, leaseErr := acquireCryptoLease(tree.Box)
 	if leaseErr != nil {
 		err = leaseErr
@@ -507,6 +511,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	}
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
+	timing.Stage("compare")
 	if cachedData, ok := cache.GetTreeDataInBox(tree.ID, tree.Box); ok {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
 			return
@@ -522,6 +527,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		}
 	}
 
+	timing.Stage("write")
 	if encrypted {
 		// 加密密文必须通过临时文件原子替换，避免 mmap 先截断目标后崩溃导致认证密文永久损坏。
 		if err = writeTreeByWriteFile(filePath, encData); nil != err {
@@ -538,6 +544,8 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		util.PushErrMsg(msg, 7000)
 	}
 
+	timing.Stage("notify")
+	timing.Count("written_bytes", int64(len(data)))
 	cache.SetTreeDataInBox(tree.ID, tree.Box, data)
 	afterWriteTree(tree)
 	size = uint64(len(data))

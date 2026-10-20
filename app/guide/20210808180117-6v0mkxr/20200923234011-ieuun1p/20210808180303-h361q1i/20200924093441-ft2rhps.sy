@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261017113835"
+		"updated": "20261019201307"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-sg4pt12",
-				"updated": "20261016202856"
+				"updated": "20261019194432"
 			},
 			"Children": [
 				{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091509-8csaq4j",
-				"updated": "20261016202856"
+				"updated": "20261019194432"
 			},
 			"Children": [
 				{
@@ -105,7 +105,7 @@
 					},
 					"Properties": {
 						"id": "20220916200111-8pnrqr2",
-						"updated": "20261016202856"
+						"updated": "20261019194432"
 					},
 					"Children": [
 						{
@@ -127,12 +127,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210604225055-4pq8g38",
-								"updated": "20261016202856"
+								"updated": "20261019194432"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Support direct copy and paste or drag and upload. After uploading, you can adjust the size by dragging the sidebar"
+									"Data": "Paste or drag images to upload them. Hover over an image to reveal the small handles outside its border, then drag the right, bottom, or bottom-right handle to resize it proportionally. On touchscreens, tap an image to reveal its handles, then drag a handle"
 								}
 							]
 						},
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261017113835"
+				"updated": "20261019201307"
 			},
 			"Children": [
 				{
@@ -1996,6 +1996,66 @@
 			]
 		},
 		{
+			"ID": "20261018163000-gjcy3xw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-gjcy3xw",
+				"updated": "20261019201307"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mind maps initially leave the mouse wheel and one-finger swipes to document scrolling. Click the map on desktop or tap it once on mobile to activate canvas interaction. On mobile, use the Hand Tool for one-finger panning, or double-tap a node to edit it. Turn off the Hand Tool to select or drag nodes. An active canvas has a highlighted border. Use the wheel or drag with the right mouse button to pan; the Hand Tool also allows left-button panning. Ordinary left dragging on blank canvas does not pan. Active one-finger gestures pan the canvas on touch screens. At the pan boundary, input stays with the canvas instead of scrolling the document. Click outside the map, move keyboard focus outside it, or press Esc on the canvas to return to reading. Full-screen maps stay active until you exit full screen."
+				}
+			]
+		},
+		{
+			"ID": "20261019142953-4rt40w7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261019142953-4rt40w7",
+				"updated": "20261019142953"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Switching between the document and full screen preserves the map's center and zoom. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Toggle Fullscreen"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document layout"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the toolbar to show a centered frame matching the map viewport in the document. Pan and zoom while viewing this frame to preview the area that will appear after leaving full screen. Click the button again to hide the frame. The frame does not change the block's width or height."
+				}
+			]
+		},
+		{
+			"ID": "20261018163000-cvdncjc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-cvdncjc",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Without activating the canvas, hold Ctrl (Command on macOS) while using the mouse wheel to zoom around the pointer, or hold the same key and drag with the right mouse button to pan temporarily. Temporary panning preserves keyboard focus and node selection. On a touch screen, use two fingers to zoom and pan. These gestures preserve the current reading or active state. A saved view lock still disables editing, zooming, and panning; activate the canvas after unlocking when needed."
+				}
+			]
+		},
+		{
 			"ID": "20260928143000-4j2cxng",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2005,7 +2065,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block."
+					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block. When directly embedding a complete mind map block or a document containing it, unlock the map to edit its nodes and styles. Changes update the source block and other embedded copies. Read-only and history previews remain non-editable."
 				}
 			]
 		},
@@ -4580,12 +4640,44 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-oihpzcz",
-				"updated": "20210415200955"
+				"updated": "20261018213321"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Flow chart"
+				}
+			]
+		},
+		{
+			"ID": "20261018213321-j5qp01p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018213321-j5qp01p",
+				"updated": "20261018213321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the handle on the right edge of a Mermaid block to adjust its width. After reducing the width, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Layout"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Center"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from the block menu to center the block."
 				}
 			]
 		},

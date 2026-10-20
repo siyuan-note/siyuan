@@ -44,9 +44,15 @@ const sources = () => {
     };
     const touchSelection = readFileSync(path.join(__dirname, "../src/protyle/wysiwyg/touchBlockSelection.ts"), "utf8")
         .replace(/^import .*;\r?\n/gm, "").replaceAll("export const ", "const ");
+    const nativeMenu = ts.createSourceFile("nativeTextMenu.ts", readFileSync(path.join(__dirname,
+        "../src/protyle/wysiwyg/nativeTextMenu.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+    const usesNativeTextMenu = nativeMenu.statements.find(node => ts.isVariableStatement(node) &&
+        node.declarationList.declarations.some(item => item.name.getText(nativeMenu) === "usesNativeTextMenu"));
+    assert.ok(usesNativeTextMenu);
     return [false, true].map(mobile => ts.transpileModule(preprocess(
         `const bind = function(protyle) {let beforeContextmenuRange; ${bindings.join(";\n")};};\n` +
-        range.getText(selection).replace("export ", "") + "\n" + wordSelection + "\n" + touchSelection, mobile), {
+        range.getText(selection).replace("export ", "") + "\n" + wordSelection + "\n" + touchSelection + "\n" +
+        usesNativeTextMenu.getText(nativeMenu).replace("export ", ""), mobile), {
         compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS},
     }).outputText);
 };
@@ -63,13 +69,15 @@ const cases = async compiled => {
         const selection = getSelection();
         const menus = [];
         const callbacks = {};
+        let iosDevice = false;
         const protyle = {element: root, wysiwyg: {element: root}, toolbar: {
-            isMultiSelectMode: () => false, element: document.createElement("div"),
+            isMultiSelectMode: () => false, element: document.createElement("div"), subElement: document.createElement("div"),
         }, gutter: {renderMenu: () => menus.push({blockMenu: true})}};
         protyle.toolbar.element.classList.add("fn__none");
         const closest = node => (node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement).closest("[data-node-id]");
         const dependencies = {
             isMobile: () => mobile,
+            isIOSDevice: () => iosDevice,
             getBlockSelectionModeElement: () => undefined,
             isInEmbedBlock: () => undefined,
             hasClosestBlock: closest,
@@ -93,7 +101,7 @@ const cases = async compiled => {
         const eventErrors = [];
         const recordEventError = event => { eventErrors.push(event.error); event.preventDefault(); };
         window.addEventListener("error", recordEventError);
-        bind.call({element: {addEventListener: (name, callback) => {
+        bind.call({element: {contains: node => root.contains(node), addEventListener: (name, callback) => {
             callbacks[name] = callback;
             if (name === "pointerdown") root.addEventListener(name, callback);
         }}}, protyle);
@@ -154,6 +162,18 @@ const cases = async compiled => {
         check.equal(menus[0].copy(), "为什么");
         check.equal(selection.toString(), "为什么");
         delete dependencies.window.JSAndroid;
+        if (mobile) {
+            iosDevice = true;
+            const selectedText = selection.toString();
+            menus.length = 0;
+            prevented = false;
+            await callbacks.contextmenu({shiftKey: false, target: blocks[1].firstElementChild, detail: {},
+                clientX: 20, clientY: 20, stopPropagation() {}, preventDefault() { prevented = true; }});
+            check.equal(prevented, false, "iOS keeps the native text menu");
+            check.equal(menus.length, 0, "iOS does not overlay the application text menu");
+            check.equal(selection.toString(), selectedText);
+            check.equal(protyle.toolbar.subElement.classList.contains("fn__none"), true);
+        }
         window.removeEventListener("error", recordEventError);
     }
     return "Text selection context menu cases passed";

@@ -233,7 +233,7 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "Mermaid",
-        "12.1.0",
+        "12.2.0",
         "MIT",
         "https://github.com/mermaid-js/mermaid",
         "app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file",
@@ -243,28 +243,28 @@ BUNDLED_COMPONENTS = [
         "3.4.12",
         "Apache-2.0 OR MPL-2.0",
         "https://github.com/cure53/DOMPurify",
-        "Bundled by Mermaid 12.1.0",
+        "Bundled by Mermaid 12.2.0",
     ),
     (
         "ELK.js",
         "0.9.3",
         "EPL-2.0",
         "https://github.com/kieler/elkjs",
-        "Bundled by Mermaid 12.1.0; app/stage/protyle/js/mermaid/LICENSE-elkjs.md",
+        "Bundled by Mermaid 12.2.0; app/stage/protyle/js/mermaid/LICENSE-elkjs.md",
     ),
     (
         "lodash-es and Underscore-derived code",
         "Bundled snapshot",
         "MIT",
         "https://github.com/lodash/lodash",
-        "Bundled by Mermaid 12.1.0",
+        "Bundled by Mermaid 12.2.0",
     ),
     (
         "Cytoscape.js and retained embedded utilities",
         "Bundled snapshot",
         "MIT",
         "https://github.com/cytoscape/cytoscape.js",
-        "Bundled by Mermaid 12.1.0",
+        "Bundled by Mermaid 12.2.0",
     ),
     (
         "@mermaid-js/layout-tidy-tree",
@@ -770,6 +770,7 @@ def module_license(module_path, license_files):
         "github.com/dop251/goja": "MIT AND BSD-3-Clause",
         "github.com/klauspost/compress": "BSD-3-Clause AND Apache-2.0 AND MIT",
         "github.com/mattn/go-sqlite3": "MIT AND BSD-3-Clause AND Public Domain",
+        "github.com/tphakala/go-aac": "LGPL-2.1-or-later AND BSD-3-Clause",
         "gopkg.in/yaml.v2": "Apache-2.0 AND MIT",
     }
     if module_path in mixed_license_overrides:

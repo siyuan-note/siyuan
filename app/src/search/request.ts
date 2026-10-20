@@ -1,6 +1,6 @@
 interface ISearchRequestTask {
-    method: number,
     version: number,
+    abortable?: boolean,
     run: (signal: AbortSignal, isCurrent: () => boolean) => Promise<unknown> | void,
 }
 
@@ -42,7 +42,16 @@ const runRequestTask = (element: Element, state: ISearchRequestState, task: ISea
         return element.isConnected && state.version === task.version && state.running === running;
     };
     void Promise.resolve()
-        .then(() => task.run(controller.signal, isCurrent))
+        .then(() => {
+            if (!controller.signal.aborted && isCurrent()) {
+                return task.run(controller.signal, isCurrent);
+            }
+        })
+        .catch(error => {
+            if (!controller.signal.aborted) {
+                console.error("Search request failed", error);
+            }
+        })
         .finally(() => {
             if (state.running !== running) {
                 return;
@@ -71,7 +80,7 @@ export const scheduleSearchRequest = (options: {
     if (state.timeout !== undefined) {
         window.clearTimeout(state.timeout);
     }
-    if (state.running?.task.method === 2) {
+    if (state.running && state.running.task.abortable !== false) {
         state.running.controller.abort();
     }
     const version = state.version;

@@ -2,6 +2,7 @@ import {stopScrollAnimation} from "../boot/globalEvent/dragover";
 import {Constants} from "../constants";
 import {isInAndroid, isInHarmony} from "../protyle/util/compatibility";
 import {isMobile} from "./functions";
+import {setGutterTouchDragging} from "../protyle/ui/gutterVisibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -127,7 +128,7 @@ interface DragState {
     pendingDropSequence?: number;
     pendingDropTimeout?: number;
     restoreDraggable?: boolean;
-    gutterLongPress?: {touchID: number, timer?: number, moved: boolean};
+    gutterLongPress?: {touchID: number, timer?: number, moved: boolean, gutter: HTMLElement};
 }
 
 interface ForeignDragState {
@@ -247,8 +248,11 @@ const handleTouchStart = (e: TouchEvent) => {
                 const currentState = dragState;
                 currentState.requireLongPress = true;
                 currentState.lastPoint = copyDragPoint(touch);
-                const longPress: DragState["gutterLongPress"] = {touchID: touch.identifier, moved: false};
+                const longPress: DragState["gutterLongPress"] = {
+                    touchID: touch.identifier, moved: false, gutter: draggable.closest<HTMLElement>(".protyle-gutters"),
+                };
                 currentState.gutterLongPress = longPress;
+                setGutterTouchDragging(longPress.gutter, true);
                 // 块标静止长按后直接显示选中块和拖拽影像，无需先移动手指。
                 longPress.timer = window.setTimeout(() => {
                     longPress.timer = undefined;
@@ -356,6 +360,9 @@ const handleTouchMove = (e: TouchEvent) => {
         if (!dragState.isDragging) {
             // 长按门槛：文件树、画廊、列表标记等触摸后短时间滑动视为滚动，放行原生滚动
             if (shouldYieldToScroll(dragState, touch.clientX, touch.clientY)) {
+                if (longPress && dragState.longPressCancelled) {
+                    setGutterTouchDragging(longPress.gutter, false);
+                }
                 return;
             }
             e.preventDefault();
@@ -752,6 +759,8 @@ const startBridgeDrag = (point: DragPoint) => {
     const dragStartEvent = createBridgeDragEvent("dragstart", point, dt);
     // 部分拖拽处理会在 dragstart 中再次检查 draggable 属性，派发合成事件时短暂恢复。
     dispatchWithNativeDragEnabled(dragState, () => dragState.draggableElement.dispatchEvent(dragStartEvent));
+    // 块标先根据原文本选区确定拖动范围，再清除原生选区，避免选词手柄接管后续触摸。
+    clearGutterTextSelection();
 
     dragState.ghostElement = window.siyuan.touchDragGhost || null;
     if (dragState.ghostElement) {
@@ -848,6 +857,9 @@ const cleanupDrag = () => {
     const completedState = dragState;
     dragState = null;
     clearGutterLongPressTimer(completedState);
+    if (completedState?.gutterLongPress) {
+        setGutterTouchDragging(completedState.gutterLongPress.gutter, false);
+    }
     stopScrollAnimation();
     clearDragoverClasses();
     dragRefreshQueue.cancel();
@@ -880,6 +892,15 @@ const clearGutterLongPressTimer = (state: DragState | null) => {
     if (state?.gutterLongPress?.timer !== undefined) {
         window.clearTimeout(state.gutterLongPress.timer);
         state.gutterLongPress.timer = undefined;
+    }
+};
+
+const clearGutterTextSelection = () => {
+    if (dragState?.gutterLongPress && dragState.isDragging) {
+        const selection = document.getSelection();
+        if (selection?.rangeCount) {
+            selection.removeAllRanges();
+        }
     }
 };
 
@@ -1227,6 +1248,13 @@ export const initTouchDragBridge = () => {
     document.addEventListener("keydown", handleDragKey, {capture: true});
     document.addEventListener("keyup", handleDragKey, {capture: true});
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("selectstart", event => {
+        // 候选块标手势只阻止原生选词，完整块标栏仍可在长按前滑动滚动。
+        if (dragState?.gutterLongPress && !dragState.longPressCancelled) {
+            event.preventDefault();
+        }
+    }, {capture: true});
+    document.addEventListener("selectionchange", clearGutterTextSelection);
     window.addEventListener("blur", () => {
         if (dragState?.gutterLongPress) {
             completeBridgeDrag(undefined, true);

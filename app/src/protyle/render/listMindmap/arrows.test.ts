@@ -50,6 +50,8 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
     const sandbox: any = {
         buildListMindmapConnectors,
         Path2D: TestPath, window: {devicePixelRatio: 1},
+        // 绘制入口会取消上一帧的合并绘制请求，替身环境没有帧调度
+        cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1,
         getComputedStyle: (element: {style?: {color?: string}}) => ({
             getPropertyValue: () => "", color: element.style?.color || "black",
         }),

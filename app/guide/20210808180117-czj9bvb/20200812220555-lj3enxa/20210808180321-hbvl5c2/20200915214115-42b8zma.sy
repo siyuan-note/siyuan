@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261018221152"
 	},
 	"Children": [
 		{
@@ -493,6 +493,72 @@
 				{
 					"Type": "NodeText",
 					"Data": "鼠标悬浮图片可查看文件名、格式、已加载图片的原始尺寸、标题和提示文本，无标题的图片也会显示这些信息。本地工作空间图片还会显示可获取的文件大小。网络图片和加密笔记本图片不显示文件大小。"
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-tpxbk0c",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261018221152-tpxbk0c",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "实况照片"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261018221152-76xy9qt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-76xy9qt",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 iOS 客户端中，使用编辑器的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插入图片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 从相册选择实况照片。思源保留原图及配对视频，包括原始元数据。"
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-p3gr5em",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-p3gr5em",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在任意客户端打开图片预览后，点击实况照片按钮播放。如果无法直接播放原视频，思源会按需生成兼容预览。首次播放可能需要等待，之后复用本地缓存，缓存不参与同步。兼容预览为有损转换，原始文件保持不变。"
+				}
+			]
+		},
+		{
+			"ID": "20261018221152-3qje4cz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018221152-3qje4cz",
+				"updated": "20261018221152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HDR 和部分特殊编码目前无法转换为兼容预览，静态图片和原始文件仍会保留。暂不支持 Android 动态照片导入，以及从导出文件还原系统实况照片。"
 				}
 			]
 		},

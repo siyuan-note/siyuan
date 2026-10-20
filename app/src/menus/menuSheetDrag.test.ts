@@ -11,13 +11,15 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const createSheet = () => {
+const createSheet = (expandable = false) => {
     let closes = 0;
     const listeners = new Map<string, (event: object) => void>();
+    const classes = new Set(["b3-menu--sheet"]);
     const element = {
         id: "testMenu",
-        style: {transform: "", transition: ""},
-        classList: {contains: (name: string) => name === "b3-menu--sheet"},
+        style: {transform: "", transition: "", height: "448px"},
+        classList: {contains: (name: string) => classes.has(name)},
+        getAttribute: () => expandable ? "true" : null,
         clientHeight: 400,
         querySelector: () => ({innerHTML: ""}),
         addEventListener: (type: string, listener: (event: object) => void) => listeners.set(type, listener),
@@ -26,15 +28,25 @@ const createSheet = () => {
     runInNewContext(compiled, {
         exports,
         isMobile: () => true,
+        setSheetExpanded: (_element: unknown, expanded: boolean) => {
+            if (expanded) {
+                classes.add("b3-menu--expanded");
+            } else {
+                classes.delete("b3-menu--expanded");
+            }
+        },
         performance: {now: () => 1000},
         getComputedStyle: () => ({overflowY: "auto"}),
         updateMenuGroupsOnMutation() {},
         MutationObserver: class { observe() {} },
         document: {createElement: () => ({})},
-        window: {siyuan: {languages: {back: "Back"}}, setTimeout() {}},
+        window: {innerHeight: 800, siyuan: {languages: {back: "Back"}}, setTimeout() {}},
     });
     const menu = new exports.Menu(element as unknown as HTMLElement);
     menu.closeSheet = () => { closes++; };
+    (menu as unknown as {setSheetHeight: () => void}).setSheetHeight = () => {
+        element.style.height = classes.has("b3-menu--expanded") ? "800px" : "448px";
+    };
     const swipe = (options: {sortable?: boolean, title?: boolean, scrollTop?: number}, offset: number) => {
         const items = {scrollHeight: 1000, clientHeight: 400, scrollTop: options.scrollTop || 0, parentElement: element};
         const target = {
@@ -65,7 +77,7 @@ const createSheet = () => {
         listeners.get("touchend")(event);
         return {transform, prevented: event.defaultPrevented};
     };
-    return {swipe, closes: () => closes};
+    return {swipe, element, classes, closes: () => closes};
 };
 
 test("sorting a menu item downward does not move or dismiss its bottom sheet", () => {
@@ -93,3 +105,21 @@ for (const title of [false, true]) {
         assert.equal(sheet.closes(), 1);
     });
 }
+
+test("pulling a database menu title upward expands it and pulling down restores half height", () => {
+    const sheet = createSheet(true);
+    assert.equal(sheet.swipe({title: true}, -100).prevented, true);
+    assert.equal(sheet.classes.has("b3-menu--expanded"), true);
+    assert.equal(sheet.element.style.height, "800px");
+    sheet.swipe({title: true}, 200);
+    assert.equal(sheet.classes.has("b3-menu--expanded"), false);
+    assert.equal(sheet.element.style.height, "448px");
+    assert.equal(sheet.closes(), 0);
+});
+
+test("scrolling database menu content upward keeps the half-height menu", () => {
+    const sheet = createSheet(true);
+    assert.equal(sheet.swipe({}, -100).prevented, false);
+    assert.equal(sheet.classes.has("b3-menu--expanded"), false);
+    assert.equal(sheet.element.style.height, "448px");
+});

@@ -96,7 +96,7 @@ const setupNavigation = (loaded: boolean, action: "focus" | "highlight") => {
             CB_GET_CONTEXT: "context", CB_GET_ALL: "all", CB_GET_HTML: "html", CB_GET_SETID: "setid",
             CB_GET_ROOTSCROLL: "root-scroll", CB_GET_SEARCH: "search", LOCAL_OUTLINE: "outlineStorage"}, AbortController,
         options: {app: {}},
-        window: {siyuan: {config: {editor: {dynamicLoadBlocks: 64}}, storage: {outlineStorage: {keepCurrentExpand: false}},
+        window: {siyuan: {config: {editor: {dynamicLoadBlocks: 64}, appearance: {outlineKeepCurrentExpand: false}},
             menus: {menu: {remove() {}}}}},
         getSelection: () => ({rangeCount: 1, getRangeAt: () => selected}),
         hasClosestByAttribute: (node: typeof old, name: string) => name === "data-node-id" ? node : undefined,

@@ -57,6 +57,7 @@ jobs:
             .dockerignore
             scripts/verify-docker-release.py
             scripts/check-docker-cache.py
+            scripts/cleanup-docker-tags.py
             scripts/build-docker-onnx.py
             scripts/docker-onnx-build.sh
             scripts/docker-onnx-toolchain.cmake
@@ -395,3 +396,32 @@ jobs:
           name: docker-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/docker-verification.json
           if-no-files-found: ignore
+
+  cleanup:
+    name: Clean up build candidate tags
+    needs: publish
+    if: ${{ always() && github.repository_owner == 'siyuan-note' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # 清理失败只保留诊断，不改变已经发布的镜像或发布结果。
+    continue-on-error: true
+    steps:
+      - name: Checkout pinned tag cleanup
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/cleanup-docker-tags.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Delete build candidate tags after publishing
+        env:
+          DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+          DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
+          PUBLISHED: ${{ needs.publish.result == 'success' }}
+        run: |
+          # 发布成功时删除仓库内全部候选标签；本次未发布成功时保留候选供重试。
+          ARGS=()
+          if [ "$PUBLISHED" = "true" ]; then ARGS+=(--published); fi
+          python3 scripts/cleanup-docker-tags.py --repository "$IMAGE_REPOSITORY" \
+            --execute "${ARGS[@]}"

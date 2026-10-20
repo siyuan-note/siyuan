@@ -137,7 +137,7 @@ func TestUpdateBoundBlockAvsAttributeDoesNotWriteOutsideBox(t *testing.T) {
 	util.Langs["en"][382] = "Cannot export database [%s]. Check database bindings and notebook location"
 	const encryptedBoxID = "20260909101000-encbox0"
 	markRuntimeEncryptedBox(encryptedBoxID)
-	setDEKForTest(encryptedBoxID, bytes.Repeat([]byte{0x73}, 32))
+	prepareUnlockedEncryptedBoxTest(t, encryptedBoxID, bytes.Repeat([]byte{0x73}, 32))
 	av.SetAVBoxID(fixture.attrView.ID, encryptedBoxID)
 	t.Cleanup(func() {
 		av.SetAVBoxID(fixture.attrView.ID, "")

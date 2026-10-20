@@ -19,6 +19,8 @@ const compiled = transpileModule(declarations.map(item => item.getText(source).r
 const setup = (embedded = true) => {
     const root = {};
     const embed = {};
+    let allowChildOperation = false;
+    const resultElement = {dataset: {rootId: "source-document"}};
     const owner = {disabled: false, lite: false, options: {action: [] as string[]}, wysiwyg: {element: root}};
     const attribute = "custom-sy-list-mindmap";
     const attrs = new Map([[attribute, "1"]]);
@@ -49,6 +51,7 @@ const setup = (embedded = true) => {
         getListConversionType,
         roots: new WeakMap(), hideElements: () => {}, readListMindmap: () => {},
         getDefaultListMindmapConnectorStyle: () => "rounded",
+        getEmbedChildOperationContext: () => allowChildOperation ? {resultElement} : undefined,
         initializeListMindmapConnectorStyle: (element: unknown, style: string) => {
             assert.equal(element, list);
             if (!attrs.has("custom-sy-list-mindmap-data")) {
@@ -75,8 +78,31 @@ const setup = (embedded = true) => {
         },
     };
     runInNewContext(compiled, context);
-    return {owner, list, attrs, attribute, operations, updates, replaced, context, api: context.api};
+    return {owner, list, attrs, attribute, operations, updates, replaced, context, api: context.api,
+        allowChildren: () => { allowChildOperation = true; }, resultElement};
 };
+
+test("embedded mind maps follow container permissions and require their source document", () => {
+    const state = setup();
+    assert.equal(state.api.canEdit(state.owner, state.list), false);
+    state.allowChildren();
+    assert.equal(state.api.canEdit(state.owner, state.list), true);
+    for (const mode of ["readonly", "history", "lite", "removed", "root"]) {
+        const blocked = setup();
+        blocked.allowChildren();
+        if (mode === "readonly") { blocked.owner.disabled = true; }
+        if (mode === "history") { blocked.owner.options.action.push("history"); }
+        if (mode === "lite") { blocked.owner.lite = true; }
+        if (mode === "removed") { blocked.list.isConnected = false; }
+        if (mode === "root") { blocked.resultElement.dataset.rootId = ""; }
+        assert.equal(blocked.api.canEdit(blocked.owner, blocked.list), false, mode);
+    }
+    const fragment = setup();
+    fragment.allowChildren();
+    fragment.owner.lite = true;
+    registerProtyleRuntimeCapabilities(fragment.owner as unknown as IProtyle, {listItemFragment: true});
+    assert.equal(fragment.api.canEdit(fragment.owner, fragment.list), true);
+});
 
 test("a regular list becomes a dedicated mind map block", () => {
     const {owner, list, attrs, attribute, operations, updates, api} = setup();

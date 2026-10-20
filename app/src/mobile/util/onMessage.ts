@@ -1,10 +1,9 @@
 import {openMobileFileById} from "../editor";
 import {refreshSettingConfig} from "../../config/setting/sync";
-import {onAgentStreamingMarkdownStorageChanged} from "../../config/tabs/ai/agentStreamingMarkdown";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
-import {MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
-import {showMobileBars} from "./mobileBars";
+import {closeNotebookLivePhotos} from "../../protyle/preview/livePhoto";
 import {
+    downloadProgress,
     forceQuit,
     processBacklinkIndexCommit,
     processSync,
@@ -78,7 +77,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 appearanceConfigApi.apply(data.data);
                 break;
             case "settingChanged":
-                void refreshSettingConfig(data.data.namespace);
+                void refreshSettingConfig(data.data.namespace, data.data.revision);
                 break;
             case "refreshAppearance":
                 void refreshAppearance(data.data);
@@ -131,6 +130,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "closeBox":
             case "removeBox": {
                 closeNotebookHistoryDialogs(data.data.box);
+                closeNotebookLivePhotos(data.data.box);
                 removeMobileBacklinkContent({notebookId: data.data.box});
                 removeMobileReferenceSheet({notebookId: data.data.box});
                 window.siyuan.mobile.tabs?.removeNotebook(data.data.box);
@@ -150,10 +150,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setLocalStorageVal":
                 window.siyuan.storage[data.data.key] = data.data.val;
-                onAgentStreamingMarkdownStorageChanged(data.data.key);
-                if (data.data.key === MOBILE_BARS_CONFIG_KEY) {
-                    showMobileBars();
-                }
                 if (data.data.key === Constants.LOCAL_MOBILE_BOTTOM_BAR) {
                     renderMobileBottomBar();
                 }
@@ -165,10 +161,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 Object.keys(data.data.keyVals).forEach((k) => {
                     window.siyuan.storage[k] = data.data.keyVals[k];
                 });
-                Object.keys(data.data.keyVals).forEach(onAgentStreamingMarkdownStorageChanged);
-                if (Object.prototype.hasOwnProperty.call(data.data.keyVals, MOBILE_BARS_CONFIG_KEY)) {
-                    showMobileBars();
-                }
                 if (Object.prototype.hasOwnProperty.call(data.data.keyVals, Constants.LOCAL_MOBILE_BOTTOM_BAR)) {
                     renderMobileBottomBar();
                 }
@@ -178,10 +170,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "removeLocalStorageVal":
                 delete window.siyuan.storage[data.data.key];
-                onAgentStreamingMarkdownStorageChanged(data.data.key);
-                if (data.data.key === MOBILE_BARS_CONFIG_KEY) {
-                    showMobileBars();
-                }
                 if (data.data.key === Constants.LOCAL_MOBILE_BOTTOM_BAR) {
                     renderMobileBottomBar();
                 }
@@ -193,16 +181,15 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 data.data.keys.forEach((k: string) => {
                     delete window.siyuan.storage[k];
                 });
-                data.data.keys.forEach(onAgentStreamingMarkdownStorageChanged);
-                if (data.data.keys.includes(MOBILE_BARS_CONFIG_KEY)) {
-                    showMobileBars();
-                }
                 if (data.data.keys.includes(Constants.LOCAL_MOBILE_BOTTOM_BAR)) {
                     renderMobileBottomBar();
                 }
                 if (data.data.keys.includes(Constants.LOCAL_MOBILE_SIDE_PANEL)) {
                     dispatchMobileSidePanelConfigChange();
                 }
+                break;
+            case "downloadProgress":
+                downloadProgress(data.data);
                 break;
             case"progress":
                 progressLoading(data);

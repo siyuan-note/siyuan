@@ -1090,6 +1090,10 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 		"copyright ©",
 		"2 < 3 and 4 > 1",
 		"heart <3",
+		"&lt;a",
+		"vector&lt;T&gt;",
+		"&lt;script&gt;alert(1)&lt;/script&gt;",
+		"&amp;lt;img src=x onerror=alert(1)&amp;gt;",
 		"tab\tline",
 		"line one\nline two\rline three",
 		"\U0001f469\u200d\U0001f4bb developer",
@@ -1098,8 +1102,7 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 	blocked := []string{
 		"<img src=x onerror=alert(1)>",
 		"<span data-type=\"file-annotation-ref\" data-id=\"assets/document.pdf/id\">fake</span>",
-		"&lt;script&gt;alert(1)&lt;/script&gt;",
-		"&amp;lt;img src=x onerror=alert(1)&amp;gt;",
+		"<script>alert(1)</script>",
 		"memo\x00control",
 	}
 	for _, content := range allowed {
@@ -1125,13 +1128,46 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 	malicious := []string{
 		`<span data-type="inline-memo" data-inline-memo-content="&lt;img src=x onerror=alert(1)&gt;">image</span>`,
 		`<span data-type="inline-memo" data-inline-memo-content="&lt;span data-type='file-annotation-ref'&gt;fake&lt;/span&gt;">fake</span>`,
-		`<span data-type="inline-memo" data-inline-memo-content="&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;">entity</span>`,
+		`<span data-type="inline-memo" data-inline-memo-content="<script">incomplete</span>`,
 		"<span data-type=\"inline-memo\" data-inline-memo-content=\"memo&#127;control\">control</span>",
 	}
 	for _, content := range malicious {
 		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: content}
 		if _, err := NormalizeValueTextRich(rich); nil == err {
 			t.Fatalf("active inline memo was accepted: %q", content)
+		}
+	}
+}
+
+func TestValueTextRichEscapedInlineMemoRoundTrip(t *testing.T) {
+	luteEngine := newValueTextRichLute()
+	for _, content := range []string{"&lt;a", "vector&lt;T&gt;", "&amp;lt;a", "&lt;img src=x onerror=alert(1)&gt;"} {
+		blockDOM := `<div data-node-id="20261018120000-abcdefg" data-type="NodeParagraph"><div contenteditable="true"><span data-type="inline-memo" data-inline-memo-content="` + html.EscapeString(content) + `">note</span></div></div>`
+		for round := 0; round < 3; round++ {
+			markdown := luteEngine.BlockDOM2Md(blockDOM)
+			rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: markdown}
+			tree, err := NormalizeValueTextRich(rich)
+			if nil != err {
+				t.Fatalf("normalize escaped memo %q on round %d: %v", content, round, err)
+			}
+			found := false
+			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && node.IsTextMarkType("inline-memo") {
+					found = true
+					if node.TextMarkInlineMemoContent != content {
+						t.Fatalf("memo = %q, want %q", node.TextMarkInlineMemoContent, content)
+					}
+				}
+				return ast.WalkContinue
+			})
+			if !found {
+				t.Fatal("inline memo was lost")
+			}
+			output := luteEngine.Tree2HTML(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+			if !strings.Contains(output, content) || strings.Contains(output, "<img") || strings.Contains(output, "<script") {
+				t.Fatalf("escaped memo changed or became markup: %q", output)
+			}
+			blockDOM = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		}
 	}
 }

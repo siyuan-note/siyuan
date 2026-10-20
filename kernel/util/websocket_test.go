@@ -17,12 +17,63 @@
 package util
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 
+	"github.com/gorilla/websocket"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/eventbus"
+	"github.com/siyuan-note/logging"
 )
+
+func TestLogWebSocketError(t *testing.T) {
+	originalPath := logging.LogPath
+	t.Cleanup(func() { logging.SetLogPath(originalPath) })
+	session := &melody.Session{}
+	session.Set("app", "test-app")
+	session.Set("id", "test-id")
+	session.Set("type", "main")
+	for _, test := range []struct {
+		name string
+		err  error
+		want string
+	}{
+		{name: "normal closure", err: &websocket.CloseError{Code: websocket.CloseNormalClosure}},
+		{name: "going away", err: &websocket.CloseError{Code: websocket.CloseGoingAway}},
+		{name: "wrapped going away", err: fmt.Errorf("read: %w", &websocket.CloseError{Code: websocket.CloseGoingAway})},
+		{name: "abnormal closure", err: &websocket.CloseError{Code: websocket.CloseAbnormalClosure}, want: "D "},
+		{name: "protocol error", err: &websocket.CloseError{Code: websocket.CloseProtocolError}, want: "D "},
+		{name: "read error", err: io.ErrUnexpectedEOF, want: "D "},
+		{name: "buffer full", err: melody.ErrMessageBufferFull, want: "W "},
+		{name: "wrapped buffer full", err: fmt.Errorf("write: %w", melody.ErrMessageBufferFull), want: "W "},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "websocket.log")
+			logging.SetLogPath(path)
+			LogWebSocketError(session, "test-channel", test.err)
+			data, err := os.ReadFile(path)
+			if os.IsNotExist(err) && test.want == "" {
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if test.want == "" {
+				t.Fatalf("normal closure logged as a failure: %s", data)
+			}
+			for _, text := range []string{test.want, `channel="test-channel", app=test-app, id=test-id, type=main`, test.err.Error()} {
+				if !strings.Contains(string(data), text) {
+					t.Fatalf("missing diagnostic %q: %s", text, data)
+				}
+			}
+		})
+	}
+}
 
 func TestContextPushMsgIgnoresInvalidContext(t *testing.T) {
 	contexts := []map[string]any{

@@ -8,6 +8,9 @@ import * as insertPosition from "./insertPosition";
 import * as uploadResult from "./uploadResult";
 import * as fetchAppId from "../../util/fetchAppId";
 
+Object.assign(globalThis, {SIYUAN_VERSION: "test", NODE_ENV: "test"});
+const livePhotoPairs = require("./livePhotoPairs") as typeof import("./livePhotoPairs");
+
 // 执行完整上传模块，替换网络、界面和插件等待，以控制文档切换发生的时刻。
 const createHarness = (failLocalUpload = false) => {
     const results: Array<{status: string}> = [];
@@ -18,6 +21,8 @@ const createHarness = (failLocalUpload = false) => {
     let onComplete = () => {};
     let confirm: (() => void) | undefined;
     let delayConfirmation = false;
+    let renderRange: Range | undefined;
+    let insertedHTML = "";
     const protyle = {
         lite: false,
         element: {isConnected: true},
@@ -53,12 +58,21 @@ const createHarness = (failLocalUpload = false) => {
         }
     }
     const mocks: Record<string, unknown> = {
-        "./insertPosition": insertPosition,
+        "./insertPosition": {...insertPosition, getAvailableUploadInsertRange:
+            (...args: Parameters<typeof insertPosition.getAvailableUploadInsertRange>) =>
+                renderRange || insertPosition.getAvailableUploadInsertRange(...args)},
         "../../util/fetchAppId": fetchAppId,
         "./uploadResult": uploadResult,
+        "./livePhotoPairs": livePhotoPairs,
+        "../util/insertHTML": {insertHTML: (html: string) => { insertedHTML = html; }},
+        "../util/hasClosest": {hasClosestBlock: (): undefined => undefined},
+        "../../util/pathName": {pathPosix: () => ({extname: (name: string) => name.slice(name.lastIndexOf("."))})},
+        "../../asset/renderAssets": {genAssetHTML: (type: string, path: string) =>
+            type === ".heic" ? `<img src="${path}">` : `<video src="${path}"></video>`},
         "../runtimeCapabilities": {isProtyleUploadDisabled: () => false},
         "../../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: true})},
-        "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024, SIYUAN_APPID: "upload-window"}},
+        "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024, SIYUAN_APPID: "upload-window",
+            SIYUAN_ASSETS_IMAGE: [".heic"], SIYUAN_ASSETS_AUDIO: [], SIYUAN_ASSETS_VIDEO: [".mov"]}},
         "../../util/escape": {escapeHtml: (value: string) => value},
         "../../dialog/message": {showMessage: () => "message", hideMessage: () => {}},
         "../../dialog/confirmDialog": {confirmDialog: (_title: string, _msg: string, yes: () => void) => {
@@ -86,14 +100,17 @@ const createHarness = (failLocalUpload = false) => {
     const compiled = ts.transpileModule(source, {compilerOptions: {
         module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
     }}).outputText;
-    runInNewContext(compiled, {
+    runInNewContext(compiled + "\nexports.renderUploadedLabel = genUploadedLabel;", {
         module, exports: module.exports, require: (name: string) => mocks[name] || {}, Promise,
         FormData: FormDataStub, XMLHttpRequest: XHRStub, DataTransferItem: class {},
         location: {origin: "https://siyuan.test"},
         document: {baseURI: "https://siyuan.test/stage/build/app/", body: {contains: () => protyle.element.isConnected}},
-        window: {siyuan: {languages: {uploading: "uploading"}}}, console,
+        window: {siyuan: {languages: {uploading: "uploading"}}}, console, setTimeout: () => 0,
     });
-    const api = module.exports as typeof import("./index");
+    const api = module.exports as typeof import("./index") & {
+        renderUploadedLabel(responseText: string, protyle: IProtyle,
+                            options: import("./index").IUploadInsertOptions, input: IAssetUploadInput): Promise<void>;
+    };
     let consumed = 0;
     const start = (kind: "files" | "local-files", document?: insertPosition.IUploadDocument) => {
         const options = {target: "background" as const, document};
@@ -108,12 +125,30 @@ const createHarness = (failLocalUpload = false) => {
     };
     return {protyle, requests, results, completions, start, headers, resume: () => resolvePlugin(undefined),
         delayConfirmation: () => { delayConfirmation = true; }, confirm: () => confirm(),
-        consumed: () => consumed, onComplete: (callback: () => void) => { onComplete = callback; }};
+        consumed: () => consumed, onComplete: (callback: () => void) => { onComplete = callback; },
+        renderLivePhotos: async (files: File[], pairs: import("./livePhotoPairs").ILivePhotoPair[],
+                                succMap: Record<string, string>) => {
+            renderRange = {toString: () => "", startContainer: {nodeType: 1}} as unknown as Range;
+            await api.renderUploadedLabel(JSON.stringify({code: 0, data: {succMap}}), protyle as unknown as IProtyle,
+                {livePhotoPairs: pairs}, {kind: "files", files});
+            return insertedHTML;
+        }};
 };
 
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 describe("upload document binding", () => {
+    it("inserts both successful stills and only their matching legacy Live Photo video after a partial upload", async () => {
+        const harness = createHarness();
+        const files = ["a.heic", "a.mov", "b.heic", "b.mov"].map(name => new File([name], name));
+        const html = await harness.renderLivePhotos(files,
+            [{photo: files[0], video: files[1]}, {photo: files[2], video: files[3]}],
+            {"a.heic": "assets/a.heic", "b.heic": "assets/b.heic", "b.mov": "assets/b.mov"});
+        assert.match(html, /<img src="assets\/a.heic">/);
+        assert.match(html, /<img custom-sy-live-photo="1" custom-sy-live-photo-video="assets\/b.mov" src="assets\/b.heic">/);
+        assert.doesNotMatch(html, /<video/);
+    });
+
     it("delivers failed local resource results to the completion callback", async () => {
         const harness = createHarness(true);
         harness.start("local-files");

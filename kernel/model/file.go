@@ -650,6 +650,11 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 // 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
 func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
+	timing := util.BeginPerformance("document.load")
+	defer func() {
+		timing.Count("blocks", int64(blockCount))
+		timing.Finish()
+	}()
 	confEditorSnapshot := Conf.LoadEditor()
 
 	//os.MkdirAll("pprof", 0755)
@@ -657,10 +662,10 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	//pprof.StartCPUProfile(cpuProfile)
 	//defer pprof.StopCPUProfile()
 
-	FlushTxQueue() // 写入数据时阻塞，避免获取到的数据不一致
+	timing.Stage("wait_transactions")
 
 	inputIndex := index
-	tree, err := loadTreeByBlockIDInBox0(id, boxID, false)
+	tree, err := loadDocumentAtTransactionBoundary(id, boxID, timing)
 	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			if 0 == mode {
@@ -677,6 +682,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 		docInfo = getDocInfoByTree(tree.Root.ID, tree)
 	}
 
+	timing.Stage("locate")
 	luteEngine := NewLute()
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
@@ -965,6 +971,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	}
 
 	luteEngine.RenderOptions.NodeIndexStart = index
+	timing.Stage("render")
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 
 	if 1 > len(keywords) {
@@ -1214,12 +1221,16 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
+	return writeTreeUpsertQueueWithChanges(tree, nil)
+}
+
+func writeTreeUpsertQueueWithChanges(tree *parse.Tree, changes *sql.TreeIndexChanges) (err error) {
 	isNew := !filelock.IsExist(filepath.Join(util.DataDir, tree.Box, tree.Path))
 	size, err := filesys.WriteTree(tree)
 	if err != nil {
 		return
 	}
-	sql.UpsertTreeQueue(tree)
+	sql.UpsertTreeQueueWithChanges(tree, changes)
 	refreshDocInfoWithSize(tree, size)
 	if isNew {
 		refreshBoxDocInfo(tree)

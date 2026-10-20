@@ -592,13 +592,8 @@ func normalizeFileTreeDefaultIcon(fileTree *conf.FileTree, confFileExists bool) 
 	if nil == fileTree {
 		fileTree = conf.NewFileTree()
 		if confFileExists {
-			fileTree.UseSVGDefaultIcon = new(bool)
+			fileTree.UseSVGDefaultIcon = false
 		}
-		return fileTree
-	}
-	if nil == fileTree.UseSVGDefaultIcon {
-		useSVGDefaultIcon := !confFileExists
-		fileTree.UseSVGDefaultIcon = &useSVGDefaultIcon
 	}
 	return fileTree
 }
@@ -748,7 +743,7 @@ func markPendingWorkspaceExit() {
 }
 
 func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
-	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
+	diagnostic := util.WatchOperation("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
@@ -904,7 +899,7 @@ func ExitKernel() {
 	}
 
 	go func() {
-		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for frontend exit event")
+		diagnostic := util.WatchOperation("exit kernel servers", "wait for frontend exit event")
 		time.Sleep(500 * time.Millisecond)
 		diagnostic.Stage("close HTTP servers")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -1334,6 +1329,7 @@ func clearCorruptedNotebooks() {
 
 func clearWorkspaceTemp(preserveInstallPkgPath string) {
 	heif.ClearMemoryCache("")
+	LivePhotoPreviews.Clear("")
 	os.RemoveAll(filepath.Join(util.TempDir, "assets-cache"))
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))

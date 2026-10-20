@@ -21,6 +21,9 @@ test("decision connection testing waits for queued AI saves and detects save fai
         window: {siyuan, dispatchEvent: () => true},
         CustomEvent: class {},
         require: (name: string) => {
+            if (name === "./agentStreamingMarkdown") {
+                return {AGENT_STREAMING_MARKDOWN_CHANGED_EVENT: "siyuan-agent-streaming-markdown-changed"};
+            }
             assert.equal(name, "../../util/namespaceApi");
             return {createConfigNamespaceApi: (options: {
                 namespace: string;

@@ -12,6 +12,7 @@ import {Dialog} from "../../dialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {isMobile} from "../../util/functions";
 import {canPurgeRepo} from "../../history/repoPurge";
+import {refreshSyncCloudDirBlock} from "../../sync/syncGuide";
 
 /** 按当前配置刷新同步 Tab 可见性与动态面板（供 syncRuntime 调用） */
 export const refreshSyncTabPanels = (root: Element) => {
@@ -567,9 +568,12 @@ const openSyncProviderConfigDialog = (root: Element) => {
         }
     };
     const refresh = () => {
-        const currentRoot = root.isConnected ? root : document.querySelector("#syncProviderConfig")?.closest(".config__tab-container");
+        const currentRoot = root.isConnected ? root : document.querySelector("#syncProviderConfig")?.closest(".config__tab-container, .config");
         if (currentRoot) {
             refreshSyncTabPanels(currentRoot);
+            if (window.siyuan.config.sync.provider === 2) {
+                refreshSyncCloudDirBlock(currentRoot);
+            }
             const enabled = currentRoot.querySelector<HTMLInputElement>('[id="sync.enabled"]');
             if (enabled) {
                 enabled.checked = window.siyuan.config.sync.enabled;

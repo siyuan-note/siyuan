@@ -10,7 +10,9 @@ const source = createSourceFile("extend.ts", readFileSync(join(__dirname, "exten
 const declaration = source.statements.find(node => isVariableStatement(node) &&
     node.declarationList.declarations.some(item => item.name.getText(source) === "hintRef"));
 assert.ok(declaration);
-const code = transpileModule(declaration.getText(source).replace("export ", "") + "\nhintRef;", {
+const searchRefSource = readFileSync(join(__dirname, "searchRef.ts"), "utf8")
+    .replace(/^import .*;\r?\n/gm, "").replace("export ", "");
+const code = transpileModule(searchRefSource + "\n" + declaration.getText(source).replace("export ", "") + "\nhintRef;", {
     compilerOptions: {target: ScriptTarget.ES2020},
 }).outputText;
 
@@ -71,7 +73,7 @@ test("closing a reference resolves exact titles before daily notes or configured
                     assert.equal(original, closeContext);
                     commits.push(value);
                 },
-                genHTML: () => { rendered = true; },
+                genHTML: (data: IHintData[]) => { rendered = data.length > 0; },
             }};
         hintRef("Title", protyle, "hint");
         await setImmediate();

@@ -171,6 +171,7 @@ const slashMenuBuiltinOrder = [
     "tag",
     "inlineMath",
     "separator_3",
+    "insertIOSPhotos",
     "insertAsset",
     "insertHTMLFile",
     "insertIframeURL",
@@ -574,7 +575,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), ["frequent", ...slashMenuBuiltinOrder]);
-    assert.equal(children.filter((item) => item.type === "entry").length, 69);
+    assert.equal(children.filter((item) => item.type === "entry").length, 70);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
     assert.equal(children.filter(item => item.key !== "frequent").every((item) => item.simple), true);
 });

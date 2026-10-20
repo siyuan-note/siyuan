@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261017003000"
+		"updated": "20261018200107"
 	},
 	"Children": [
 		{
@@ -4365,7 +4365,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261016013311"
+				"updated": "20261018200107"
 			},
 			"Children": [
 				{
@@ -13115,13 +13115,40 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261017003000"
+				"updated": "20261018200107"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Mind map block"
+				}
+			]
+		},
+		{
+			"ID": "20261018163000-tgvsr1a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-tgvsr1a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor, summary selection, or relationship-line drag is active, Esc first finishes or cancels that operation. In full screen, Esc exits full screen."
+				}
+			]
+		},
+		{
+			"ID": "20261018200107-p7ncdxc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018200107-p7ncdxc",
+				"updated": "20261018200107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hold Ctrl (Command on macOS) and drag the canvas with the right mouse button to pan temporarily without changing keyboard focus or activating a reading canvas. Ordinary wheel input then continues scrolling the document. This gesture is unavailable while the view is locked. Ordinary left dragging on blank canvas does not pan; the Hand Tool allows left-button panning."
 				}
 			]
 		},

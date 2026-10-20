@@ -214,7 +214,7 @@ func TestAutomationEncryptedUnavailableReferencePause(t *testing.T) {
 	_, source, target, statusID, _ := setupAutomationTest(t)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x72}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x72}, 32))
 	t.Cleanup(func() {
 		for _, view := range []*av.AttributeView{source, target} {
 			av.SetAVBoxID(view.ID, "")
@@ -407,7 +407,7 @@ func TestAutomationRelationKeywordsKeepCryptoBoundary(t *testing.T) {
 	_, source, target, _, logsID := setupAutomationTest(t)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x62}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x62}, 32))
 	t.Cleanup(func() {
 		av.SetAVBoxID(target.ID, "")
 		forgetRuntimeEncryptedBox(boxID)
@@ -731,7 +731,7 @@ func TestAutomationEncryptedExecutionAndFailures(t *testing.T) {
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x71}, 32)
-	setDEKForTest(boxID, key)
+	prepareUnlockedEncryptedBoxTest(t, boxID, key)
 	t.Cleanup(func() {
 		for _, view := range []*av.AttributeView{source, target} {
 			av.SetAVBoxID(view.ID, "")

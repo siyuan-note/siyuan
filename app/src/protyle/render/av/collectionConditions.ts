@@ -37,8 +37,9 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
     const addButton = (action: string, label: string) => `<button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" ${action}><svg><use xlink:href="#iconAdd"></use></svg><span>${escapeHtml(label)}</span></button>`;
     const chip = (kind: string, index: number, label: string, editable = false) => `<div class="b3-chip b3-chip--middle"><span class="fn__ellipsis${editable ? " b3-chip--pointer" : ""} ariaLabel" ${editable ? `data-edit-attribute="${index}" role="button" tabindex="0"` : ""} aria-label="${escapeAttr(label)}">${escapeHtml(label)}</span><svg class="b3-chip__close" data-remove-filter="${kind}" data-index="${index}" role="button" tabindex="0" aria-label="${escapeAttr(lang.delete)}"><use xlink:href="#iconClose"></use></svg></div>`;
     host.className = "av__automation-control";
-    host.innerHTML = `<div class="av__automation-control"><span class="av__automation-control-label">${lang.automationCollectionTypes}</span><div class="fn__flex-column"><div class="b3-chips b3-chips__doctag av__automation-chips" data-type-chips></div>${addButton("data-types", `${lang.addAttr} - ${lang.automationCollectionTypes}`)}</div></div>
-<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.tag}</span>${modeButton("tagMatch", lang.tag)}</div><div class="fn__flex-column" data-tags></div><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.automationCollectionTarget}</span><button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" data-tag-target aria-label="${escapeAttr(lang.automationCollectionTarget)}"><span>${tagTargets[source.tagTarget || ""]}</span><svg><use xlink:href="#iconDown"></use></svg></button></div><div class="ft__on-surface ft__smaller av__automation-tip" data-tag-target-tip>${tagTargetTips[source.tagTarget || ""]}</div><div class="ft__on-surface ft__smaller av__automation-tip fn__none" data-tag-target-change-tip>${lang.automationCollectionTargetChangeTip}</div></div>
+    host.innerHTML = `<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.automationCollectionTarget}</span><button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" data-tag-target aria-label="${escapeAttr(lang.automationCollectionTarget)}"><span>${tagTargets[source.tagTarget || ""]}</span><svg><use xlink:href="#iconDown"></use></svg></button></div><div class="ft__on-surface ft__smaller av__automation-tip" data-tag-target-tip>${tagTargetTips[source.tagTarget || ""]}</div><div class="ft__on-surface ft__smaller av__automation-tip fn__none" data-tag-target-change-tip>${lang.automationCollectionTargetChangeTip}</div></div>
+<div class="av__automation-control"><span class="av__automation-control-label">${lang.automationCollectionTypes}</span><div class="fn__flex-column"><div class="b3-chips b3-chips__doctag av__automation-chips" data-type-chips></div>${addButton("data-types", `${lang.addAttr} - ${lang.automationCollectionTypes}`)}</div></div>
+<div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.tag}</span>${modeButton("tagMatch", lang.tag)}</div><div class="fn__flex-column" data-tags></div></div>
 <div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.attr}</span>${modeButton("attributeMatch", lang.attr)}</div><div class="fn__flex-column"><div class="b3-chips b3-chips__doctag av__automation-chips" data-attribute-chips></div>${addButton("data-add-attribute", `${lang.addAttr} - ${lang.attr}`)}</div><div data-attribute-editor></div></div>`;
     const typeChips = host.querySelector<HTMLElement>("[data-type-chips]");
     const attributes = host.querySelector<HTMLElement>("[data-attribute-chips]");
@@ -93,7 +94,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
         let menu: Menu;
         toggleMenu({target, build: () => {
             menu = new Menu();
-            menu.addItem({type: "empty", label: `<div class="b3-menu__filter fn__flex-column"><input class="b3-text-field" data-type-search placeholder="${escapeAttr(lang.searchPlaceholder)}" aria-label="${escapeAttr(lang.search)}"><div class="fn__hr"></div><div class="b3-list b3-list--background fn__flex-1" data-type-list>${Object.entries(types).map(([type, label]) => `<button type="button" class="b3-list-item" data-collection-type="${escapeAttr(type)}"><span class="b3-list-item__text">${escapeHtml(label)}</span><svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></button>`).join("")}</div>${addButton("data-custom-callout", `${lang.callout} - ${lang.custom}`)}</div>`, bind: element => {
+            menu.addItem({type: "empty", label: `<div class="b3-menu__filter av__automation-menu av__automation-menu--types fn__flex-column"><input class="b3-text-field" data-type-search placeholder="${escapeAttr(lang.searchPlaceholder)}" aria-label="${escapeAttr(lang.search)}"><div class="b3-list b3-list--background av__automation-menu-list fn__flex-1" data-type-list>${Object.entries(types).map(([type, label]) => `<button type="button" class="b3-list-item" data-collection-type="${escapeAttr(type)}"><span class="b3-list-item__text ariaLabel" aria-label="${escapeAttr(label)}">${escapeHtml(label)}</span><svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></button>`).join("")}<button type="button" class="b3-list-item" data-custom-callout><svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg><span class="b3-list-item__text">${escapeHtml(`${lang.callout} - ${lang.custom}`)}</span></button></div></div>`, bind: element => {
                 const search = element.querySelector<HTMLInputElement>("[data-type-search]");
                 const list = element.querySelector<HTMLElement>("[data-type-list]");
                 const refresh = () => {
@@ -152,7 +153,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
         let menu: Menu;
         toggleMenu({target, build: () => {
             menu = new Menu();
-            items.forEach(item => menu.addItem({label: item.label, checked: item.value === current, click: () => select(item.value)}));
+            items.forEach(item => menu.addItem({iconHTML: "", label: item.label, checked: item.value === current, click: () => select(item.value)}));
         }, show: () => {
             const rect = target.getBoundingClientRect();
             menu.open({x: rect.left, y: rect.bottom, h: rect.height, target});
@@ -193,7 +194,9 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
             if (editing < 0 && source.attributes?.length >= 20) { return; }
             draft = editing >= 0 ? {...source.attributes[editing]} : {name: "custom-", operator: "exists"};
             renderEditor();
-            editor.querySelector<HTMLInputElement>("input").focus();
+            const input = editor.querySelector<HTMLInputElement>("[data-attr-name]");
+            input.focus();
+            if (editing < 0) { input.setSelectionRange(input.value.length, input.value.length); }
         } else if (target.dataset.removeFilter) {
             const index = Number(target.dataset.index);
             if (target.dataset.removeFilter === "type") { source.types.splice(index, 1); }

@@ -9,7 +9,7 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const names = ["wheel", "boundedPan", "contentRectangles", "contentBounds", "pointerMove"];
+const names = ["wheel", "boundedPan", "contentRectangles", "contentBounds", "pointerMove", "requestDraw"];
 const methods = view.members.filter(item => item.name && names.includes(item.name.getText(source)));
 assert.equal(methods.length, names.length);
 const compiled = transpileModule(`class View {
@@ -18,13 +18,15 @@ const compiled = transpileModule(`class View {
 globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const setup = () => {
-    const context: any = {clampMindmapPanOffset, clampMindmapPanPosition, WheelEvent: {DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2}};
+    const frames: (() => void)[] = [];
+    const context: any = {clampMindmapPanOffset, clampMindmapPanPosition, WheelEvent: {DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2},
+        requestAnimationFrame: (action: () => void) => frames.push(action)};
     runInNewContext(compiled, context);
     const target = new context.View();
     let draws = 0;
     const zooms: number[][] = [];
     Object.assign(target, {
-        scale: 1, offsetX: 0, offsetY: 0,
+        scale: 1, offsetX: 0, offsetY: 0, interactionActive: true,
         viewport: {
             clientWidth: 400, clientHeight: 300, contains: (element: unknown) => !!element,
             getBoundingClientRect: () => ({left: 10, top: 20}),
@@ -33,7 +35,7 @@ const setup = () => {
         summaryPositions: new Map(), relationElements: new Map(), relationRoutes: new Map(),
         draw: () => draws++, zoomAt: (...args: number[]) => zooms.push(args),
     });
-    return {target, draws: () => draws, zooms};
+    return {target, draws: () => draws, zooms, frames};
 };
 
 const wheel = (overrides: Record<string, unknown> = {}) => {
@@ -49,10 +51,11 @@ const wheel = (overrides: Record<string, unknown> = {}) => {
     };
 };
 
-test("vertical wheel scrolls the document when the embedded mind map is fully visible", () => {
+test("inactive maps leave vertical wheel input to the document", () => {
     for (const deltaY of [-1, 1]) {
         for (const deltaMode of [0, 1, 2]) {
             const {target, draws} = setup();
+            target.interactionActive = false;
             const event = wheel({deltaY, deltaMode});
             target.wheel(event.event);
             assert.equal(event.prevented(), 0);
@@ -64,24 +67,25 @@ test("vertical wheel scrolls the document when the embedded mind map is fully vi
     }
 });
 
-test("visibility uses scaled content bounds and current offsets, including exact viewport edges", () => {
+test("inactive maps leave scrolling to the document regardless of scale and content clipping", () => {
     const {target, draws} = setup();
     target.positions = new Map([["root", {x: 100, y: 51, width: 800, height: 599}]]);
-    Object.assign(target, {scale: .5, offsetX: -50, offsetY: -25});
+    Object.assign(target, {scale: .5, offsetX: -50, offsetY: -100, interactionActive: false});
     const event = wheel();
     target.wheel(event.event);
     assert.equal(event.prevented(), 0);
     assert.equal(draws(), 0);
     assert.equal(target.offsetX, -50);
-    assert.equal(target.offsetY, -25);
+    assert.equal(target.offsetY, -100);
 });
 
-test("horizontal clipping does not change pure vertical wheel handling", () => {
+test("inactive maps do not capture horizontal, diagonal or Shift wheel input", () => {
     for (const x of [-101, 201]) {
         const {target, draws} = setup();
+        target.interactionActive = false;
         target.offsetX = x;
         for (const deltaY of [-20, 20]) {
-            const event = wheel({deltaY});
+            const event = wheel({deltaX: 20, deltaY, shiftKey: deltaY < 0});
             target.wheel(event.event);
             assert.equal(event.prevented(), 0);
             assert.equal(event.stopped(), 0);
@@ -92,8 +96,9 @@ test("horizontal clipping does not change pure vertical wheel handling", () => {
     }
 });
 
-test("vertically clipped content keeps the original canvas scrolling range", () => {
+test("active maps pan visible and clipped content within the existing bounds", () => {
     for (const bounds of [
+        {left: 100, top: 100, right: 300, bottom: 200},
         {left: 100, top: -1, right: 300, bottom: 200},
         {left: 100, top: 100, right: 300, bottom: 301},
     ]) {
@@ -123,7 +128,7 @@ test("wheel retains actual visible content when extreme nodes are horizontally c
     assert.equal(target.positions.get("visible").y + 79 + target.offsetY, 64);
     const next = wheel();
     target.wheel(next.event);
-    assert.equal(next.prevented(), 0, "further vertical input scrolls the document");
+    assert.equal(next.prevented(), 1, "active canvas retains wheel ownership at the pan boundary");
     assert.equal(target.offsetY, -116);
 });
 
@@ -139,7 +144,7 @@ test("vertical wheel still pans beyond the content edge until only a small porti
     assert.equal(target.offsetY, -636);
     const next = wheel();
     target.wheel(next.event);
-    assert.equal(next.prevented(), 0);
+    assert.equal(next.prevented(), 1);
 });
 
 test("visible relation and summary labels remain reachable as pan references", () => {
@@ -155,14 +160,14 @@ test("visible relation and summary labels remain reachable as pan references", (
         "hidden annotations cannot keep an otherwise empty viewport within range");
 });
 
-test("mobile touch panning retains visible content and chains overflow to the document", () => {
+test("active mobile touch panning retains visible content without scrolling the document", () => {
     const {target} = setup();
     target.positions = new Map([
         ["visible", {x: 100, y: 101, width: 100, height: 79}],
         ["clipped", {x: 600, y: 901, width: 100, height: 99}],
     ]);
     const document = {scrollTop: 0};
-    target.pointer = {pointerId: 1, x: 0, y: 0, startX: 100, startY: 100};
+    target.pointer = {pointerId: 1, pan: true, x: 0, y: 0, startX: 100, startY: 100};
     target.viewport.classList = {add: () => {}};
     target.options = {host: {closest: () => document}};
     target.setHoveredLine = () => {};
@@ -170,10 +175,37 @@ test("mobile touch panning retains visible content and chains overflow to the do
     target.pointerMove(event);
     assert.equal(target.offsetX, 0);
     assert.equal(target.offsetY, -116);
-    assert.equal(document.scrollTop, 1884);
+    assert.equal(document.scrollTop, 0);
     target.pointerMove({...event, clientY: -1920});
     assert.equal(target.offsetY, -116);
-    assert.equal(document.scrollTop, 1904, "further touch movement scrolls the document at the same content boundary");
+    assert.equal(document.scrollTop, 0, "active canvas retains touch ownership at the pan boundary");
+});
+
+test("rapid mouse and touch pans draw the latest position once per frame, including after an idle frame", () => {
+    for (const pointerType of ["mouse", "touch"]) {
+        const {target, draws, frames} = setup();
+        target.viewport.classList = {add: () => {}};
+        target.setHoveredLine = () => {};
+        target.pointer = {pointerId: 1, pan: true, x: 0, y: 0, startX: 100, startY: 100, moved: true};
+        for (let gesture = 0; gesture < 2; gesture++) {
+            const startX = target.pointer.startX;
+            const startY = target.pointer.startY;
+            for (let step = 1; step <= 60; step++) {
+                target.pointerMove({pointerId: 1, pointerType, clientX: startX + step / 10,
+                    clientY: startY + step / 10, preventDefault: () => {}});
+            }
+            assert.equal(draws(), gesture, "input events do not repeatedly redraw the map");
+            assert.equal(frames.length, 1);
+            assert.equal(target.offsetX, (gesture + 1) * 6);
+            assert.equal(target.offsetY, (gesture + 1) * 6);
+            frames.shift()();
+            assert.equal(draws(), gesture + 1);
+            assert.equal(target.drawFrame, 0);
+        }
+        target.destroyed = true;
+        target.requestDraw();
+        assert.equal(frames.length, 0, "destroyed views do not schedule rendering");
+    }
 });
 
 test("fullscreen, horizontal, diagonal and Shift wheel keep canvas panning", () => {
@@ -185,6 +217,7 @@ test("fullscreen, horizontal, diagonal and Shift wheel keep canvas panning", () 
     ]) {
         const {target, draws} = setup();
         target.fullscreenMarker = options.fullscreenMarker;
+        target.interactionActive = !options.fullscreenMarker;
         const event = wheel(options.event);
         target.wheel(event.event);
         assert.equal(event.prevented(), 1);
@@ -195,14 +228,18 @@ test("fullscreen, horizontal, diagonal and Shift wheel keep canvas panning", () 
     }
 });
 
-test("Ctrl wheel keeps anchored zoom even when all content is visible", () => {
-    const {target, draws, zooms} = setup();
-    const event = wheel({ctrlKey: true});
-    target.wheel(event.event);
-    assert.equal(event.prevented(), 1);
-    assert.equal(event.stopped(), 1);
-    assert.equal(draws(), 0);
-    assert.deepEqual(zooms, [[Math.exp(-.2), 100, 100]]);
+test("Ctrl and Meta wheel zoom an inactive canvas without activating ordinary wheel capture", () => {
+    for (const key of ["ctrlKey", "metaKey"]) {
+        const {target, draws, zooms} = setup();
+        target.interactionActive = false;
+        const event = wheel({[key]: true});
+        target.wheel(event.event);
+        assert.equal(event.prevented(), 1);
+        assert.equal(event.stopped(), 1);
+        assert.equal(draws(), 0);
+        assert.deepEqual(zooms, [[Math.exp(-.2), 100, 100]]);
+        assert.equal(target.interactionActive, false);
+    }
 });
 
 test("locked maps, node editing and relation dragging retain their existing wheel handling", () => {

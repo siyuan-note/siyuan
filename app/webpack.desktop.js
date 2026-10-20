@@ -1,4 +1,5 @@
 const path = require("path");
+const PreserveWatchAssetsPlugin = require("./scripts/preserve-watch-assets");
 const webpack = require("webpack");
 const pkg = require("./package.json");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -12,8 +13,8 @@ module.exports = (env, argv) => {
         watch: argv.mode !== "production",
         devtool: argv.mode !== "production" ? "eval-source-map" : false,
         output: {
-            // 开发期间保留旧资源，避免已打开窗口引用的哈希文件被清除。
-            clean: argv.mode === "production",
+            // 首次输出时清理，开发期间的后续输出由插件保留旧资源。
+            clean: true,
             publicPath: "/stage/build/desktop/",
             filename: "[name].[chunkhash].js",
             path: path.resolve(__dirname, "stage/build/desktop"),
@@ -112,6 +113,7 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
+            new PreserveWatchAssetsPlugin(),
             // new BundleAnalyzerPlugin(),
             new webpack.DefinePlugin({
                 SIYUAN_VERSION: JSON.stringify(pkg.version),

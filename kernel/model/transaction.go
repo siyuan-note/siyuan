@@ -110,7 +110,7 @@ func performTxSyncLocked(tx *Transaction) (err error) {
 var (
 	txQueue     []*Transaction
 	txQueueLock sync.Mutex
-	flushLock   sync.Mutex
+	flushLock   sync.RWMutex
 	isFlushing  atomic.Bool
 )
 
@@ -275,6 +275,9 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	if 1 > len(tx.DoOperations) {
 		return
 	}
+	timing := util.BeginPerformance("transaction")
+	timing.Count("operations", int64(len(tx.DoOperations)))
+	defer timing.Finish()
 	diagnostic := util.WatchOperation("editing transaction", "begin transaction")
 	defer diagnostic.Finish()
 
@@ -307,11 +310,13 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}()
 
 	diagnostic.Stage("prepare database automations")
+	timing.Stage("automations")
 	if err = tx.prepareAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
 	}
 	diagnostic.Stage("process bulk operations")
+	timing.Stage("apply")
 	isLargeInsert, ret := tx.processLargeInsert()
 	if ret != nil {
 		tx.rollback()
@@ -562,6 +567,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}
 
 	diagnostic.Stage("finalize database bindings and block structure")
+	timing.Stage("finalize")
 	if err = tx.runAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -581,6 +587,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	tx.UndoOperations = append(tx.UndoOperations, tx.attributeViewDeletionUndo...)
 
 	diagnostic.Stage("commit transaction")
+	timing.Stage("commit")
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		if 1 == tx.state.Load() {
@@ -2122,6 +2129,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		tx.markListItemFoldCandidate(oldNode, tree)
 	}
 
+	tx.captureIndexReplacement(tree, oldNode, updatedNode)
 	if oldNode.IsContainerBlock() {
 		// 更新容器块的话需要考虑其子块中可能存在的折叠标题，需要把这些折叠标题的下方块移动到新节点下面
 		treenode.MoveFoldHeading(updatedNode, oldNode)
@@ -2191,8 +2199,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	}
 
 	treenode.CreatedUpdated(updatedNode)
+	tx.captureIndexReplacement(tree, updatedNode, updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
-	tx.writeTree(tree)
+	tx.writeTreeWithIndexChanges(tree)
 
 	upsertAvBlockRel(updatedNode)
 
@@ -2747,8 +2756,9 @@ type Transaction struct {
 	nodes          map[string]*ast.Node   // 事务中变更的节点
 	relatedAvIDs   []string               // 事务中变更的属性视图 ID
 	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
-	mutatedRootIDs []string               // 提交后保留实际修改的文档 ID，避免为查询结果持有文档树
-	boxIcons       map[string]string      // 事务提交后需要同步的笔记本图标
+	indexChanges   map[string]*transactionIndexChanges
+	mutatedRootIDs []string          // 提交后保留实际修改的文档 ID，避免为查询结果持有文档树
+	boxIcons       map[string]string // 事务提交后需要同步的笔记本图标
 
 	isGlobalAssetsInit           bool   // 是否初始化过全局资源判断
 	isGlobalAssets               bool   // 是否属于全局资源
@@ -2847,6 +2857,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
+	tx.indexChanges = nil
 	tx.mindmapSummarySiblings = nil
 	tx.mutatedRootIDs = nil
 	tx.changedRootIDs = nil
@@ -3001,7 +3012,9 @@ func (tx *Transaction) commit() (err error) {
 		}
 		writeTransactionTree := tx.writeTransactionTree
 		if nil == writeTransactionTree {
-			writeTransactionTree = writeTreeUpsertQueue
+			writeTransactionTree = func(source *parse.Tree) error {
+				return writeTreeUpsertQueueWithChanges(source, tx.treeIndexChanges(source))
+			}
 		}
 		if err = writeTransactionTree(tree); err != nil {
 			return
@@ -3066,6 +3079,7 @@ func (tx *Transaction) commit() (err error) {
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
 	IncSync()
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
+	tx.appendAutomationBlockAttrs()
 	tx.state.Store(2)
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
@@ -3083,6 +3097,7 @@ func (tx *Transaction) commit() (err error) {
 // releaseCommittedResources 释放执行期间的文档树；操作中的撤销快照及广播所需的文档 ID 继续保留。
 func (tx *Transaction) releaseCommittedResources() {
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
+	tx.indexChanges = nil
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
@@ -3104,6 +3119,7 @@ func (tx *Transaction) releaseCommittedResources() {
 }
 
 func (tx *Transaction) rollback() {
+	tx.indexChanges = nil
 	tx.mindmapSummarySiblings = nil
 	tx.rollbackCollectionCreatedTrees()
 	tx.finishAttributeViewMutation(true)
@@ -3266,6 +3282,14 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 }
 
 func (tx *Transaction) writeTree(tree *parse.Tree) {
+	if tx.indexChanges == nil {
+		tx.indexChanges = map[string]*transactionIndexChanges{}
+	}
+	tx.indexChanges[tree.ID] = &transactionIndexChanges{full: true}
+	tx.writeTreeWithIndexChanges(tree)
+}
+
+func (tx *Transaction) writeTreeWithIndexChanges(tree *parse.Tree) {
 	tx.trees[tree.ID] = tree
 	if err := tx.captureCollectionTree(tree); err != nil {
 		tx.collectionState().err = err

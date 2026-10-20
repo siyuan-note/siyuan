@@ -53,7 +53,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=12.1.0`, "protyleMermaidScript").then(async () => {
+    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=12.2.0`, "protyleMermaidScript").then(async () => {
         await registerMermaidExternalDiagrams(mermaidElements, cdn);
         await registerMermaidLayouts(mermaidElements, cdn);
         window.mermaid.registerIconPacks([
@@ -164,6 +164,15 @@ const initMermaid = (mermaidElements: Element[]) => {
             let svg = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);
             svg = window.DOMPurify.sanitize(svg, MERMAID_SANITIZE_OPTIONS);
             diagramElement.innerHTML = svg;
+            if (wysiswgElement && !item.closest(".protyle-wysiwyg__embed, .mindmap-view__preview-block") &&
+                !item.querySelector(":scope > .protyle-action__drag")) {
+                const handle = item.ownerDocument.createElement("span");
+                handle.className = "protyle-action__drag protyle-block-resize";
+                handle.contentEditable = "false";
+                handle.dataset.resizeAxis = "width";
+                handle.setAttribute("data-prevent-swipe", "true");
+                renderElement.insertAdjacentElement("afterend", handle);
+            }
         } catch (e) {
             if (renderElement.lastElementChild !== diagramElement) {
                 return;

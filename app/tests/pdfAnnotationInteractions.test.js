@@ -25,7 +25,8 @@ async function runElectron() {
         const result = await win.webContents.executeJavaScript(`(async () => {
             window.pdfjsLib = await import(${JSON.stringify(runtime)});
             globalThis.pdfjsWorker = await import(${JSON.stringify(worker)});
-            window.siyuan = {languages: new Proxy({}, {get: (_, key) => key}), storage: {pdf: {}}};
+            window.siyuan = {languages: new Proxy({}, {get: (_, key) => key}), storage: {},
+                config: {appearance: {pdfTheme: {}}}};
             let nextID = 0;
             window.Lute = {NewNodeID: () => "20261010120000-" + String(++nextID).padStart(7, "0")};
             const {getPdfViewerHTML, webViewerLoad, getPdfSelectionText, PDFViewer, PDFThumbnailViewer, TextLayerBuilder} = await import(${JSON.stringify(bundle)});

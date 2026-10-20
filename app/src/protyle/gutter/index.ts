@@ -43,7 +43,7 @@ import {focusBlock, getBlockElementsByRange, getEditorRange, selectBlocksByRange
 import {focusByRange} from "../util/selectionOffsets";
 import {getHeadingConversionElements} from "../wysiwyg/headingConversion";
 import {hideElements} from "../ui/hideElements";
-import {markGutterForFoldRestore} from "../ui/gutterVisibility";
+import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {toggleListMindmap} from "../render/listMindmap";
@@ -1600,6 +1600,9 @@ export class Gutter {
             embedContext.targetElement.querySelectorAll(":scope > [data-type=\"NodeListItem\"]").length === 1;
         const allowRemoval = allowStructuralMutation && !isOnlyTargetListItem;
         const type = nodeElement.getAttribute("data-type");
+        if (type === "NodeAttributeView") {
+            window.siyuan.menus.menu.element.setAttribute("data-sheet-expandable", "true");
+        }
         const subType = nodeElement.getAttribute("data-subtype");
         const turnIntoSubmenu: IMenu[] = [];
         hideElements(["select"], protyle);
@@ -3676,6 +3679,9 @@ export class Gutter {
     }
 
     public render(protyle: IProtyle, element: Element, target?: Element) {
+        if (isGutterTouchDragging(this.element)) {
+            return;
+        }
         const cellFragment = element.closest(".table__cell-rich, .table__cell-editor") ||
             target?.closest(".table__cell-rich, .table__cell-editor");
         if (cellFragment) {

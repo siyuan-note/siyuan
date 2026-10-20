@@ -3,6 +3,7 @@ import {ensureLute} from "../protyle/util/lute";
 import {completeStartup, guardStartup, reportStartupError, setStartupLanguage, setStartupStage} from "../boot/startupError";
 import {Constants} from "../constants";
 import {systemConfig} from "../config/systemConfig";
+import {refreshSettingConfig} from "../config/setting/sync";
 import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
@@ -25,6 +26,7 @@ import {
     handleTouchSelectionChange,
     handleTouchStart,
     handleTouchUp,
+    handleTouchFocusOut,
 } from "./util/touch";
 import {fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
@@ -101,6 +103,11 @@ class App {
         mainWs.connect({
             id: genUUID(),
             type: "main",
+            callback: () => {
+                if (window.siyuan.isReady) {
+                    void refreshSettingConfig().catch(error => console.error("Could not refresh settings", error));
+                }
+            },
             msgCallback: (data) => {
                 emitToPlugins("ws-main", data);
                 onMessage(this, data);
@@ -274,6 +281,7 @@ class App {
             document.addEventListener("touchend", handleTouchEnd, false);
             document.addEventListener("touchcancel", handleTouchCancel, false);
             document.addEventListener("contextmenu", handleTouchContextMenu, true);
+            document.addEventListener("focusout", handleTouchFocusOut, true);
             document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
             window.addEventListener("keyup", () => {

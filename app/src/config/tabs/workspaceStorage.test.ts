@@ -103,8 +103,23 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
         requests[index].resolve({code: 0, msg: "", data});
         await tick();
     };
+    check.equal(requests.length, 0, "opening the settings must not scan the workspace");
+    check.equal(button().disabled, false);
+    check.equal(button().textContent.trim(), languages.workspaceStorageView);
+    check.equal(button().querySelector("use").getAttribute("xlink:href"), "#iconEye");
+    check.ok(loading().classList.contains("fn__none"));
+    check.equal(status().textContent, "");
+    check.equal(getComputedStyle(root.querySelector<HTMLElement>("[data-storage-time]")).display, "none",
+        "idle state must not reserve a time row");
+    check.equal(getComputedStyle(status()).marginTop, "0px", "idle state must not reserve status spacing");
+    check.equal(getComputedStyle(root.querySelector<HTMLElement>(".workspace-storage__header")).paddingBottom, "0px",
+        "idle state must not reserve header spacing");
+    await captures("desktop-initial-idle");
+    button().dispatchEvent(new Event("click"));
     check.equal(requests.length, 1);
     check.equal(button().disabled, true);
+    check.equal(button().textContent.trim(), languages.refresh);
+    check.equal(button().querySelector("use").getAttribute("xlink:href"), "#iconRefresh");
     check.ok(button().querySelector("svg").classList.contains("fn__rotate"));
     check.equal(status().textContent, "");
     check.ok(!loading().classList.contains("fn__none"));
@@ -191,8 +206,10 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     await succeed(3);
     check.equal(root.querySelector("[data-storage-total]").textContent, oldTotal, "late responses must not update an unmounted page");
     mount();
+    button().click();
     const replacedRequest = requests[4];
     mount();
+    button().click();
     check.equal(replacedRequest.signal.aborted, true, "remount must release the previous request");
     await succeed(4);
     check.equal(root.querySelector("[data-storage-total]").textContent, "");
@@ -216,6 +233,7 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     check.ok(!Array.from(root.querySelectorAll("dt")).some(node => node.textContent === "repo"));
     exports.unmountWorkspaceStorage(root);
     mount();
+    button().click();
     requests[8].resolve({code: -1, msg: "unreadable", data: null});
     await tick();
     check.ok(loading().classList.contains("fn__none"), "initial failure must dismiss loading");
@@ -232,13 +250,16 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
         document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
         await surface(mobile, width, fontSize);
         const requestIndex = requests.length;
+        const context = `${locale}-${mobile ? "mobile" : "desktop"}-${width}-${fontSize}`;
         mount();
+        check.equal(requests.length, requestIndex, `${context}: opening the settings must not scan`);
+        await captures(`${context}-idle`);
+        button().click();
         if (mobile && locale === "zh-CN") {
             check.ok(!loading().classList.contains("fn__none"));
             await captures("mobile-initial-loading");
         }
         await succeed(requestIndex, result(1024 ** 4 * 987.654));
-        const context = `${locale}-${mobile ? "mobile" : "desktop"}-${width}-${fontSize}`;
         await captures(context);
         check.ok(root.scrollWidth <= root.clientWidth, `${context}: horizontal overflow`);
         const refreshRect = button().getBoundingClientRect();

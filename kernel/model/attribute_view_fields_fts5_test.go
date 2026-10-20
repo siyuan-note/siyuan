@@ -298,7 +298,7 @@ func TestAttributeViewFieldsEncryptedReplay(t *testing.T) {
 	_, before, tx := setupAttributeViewFieldsTest(t, av.KeyTypeText)
 	boxID := ast.NewNodeID()
 	markRuntimeEncryptedBox(boxID)
-	setDEKForTest(boxID, bytes.Repeat([]byte{0x62}, 32))
+	prepareUnlockedEncryptedBoxTest(t, boxID, bytes.Repeat([]byte{0x62}, 32))
 	av.SetAVBoxID(before.ID, boxID)
 	t.Cleanup(func() {
 		av.SetAVBoxID(before.ID, "")

@@ -59,6 +59,17 @@ type AttributeView struct {
 	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
 
 	cardCoverPositionsChanged bool
+	sourceVersion             uint64
+	sourceGeneration          uint64
+	liveOrdinarySource        bool
+}
+
+// RenderSourceVersion 只标识当前工作区普通数据库的已认证源版本，临时副本不参与跨请求复用。
+func (attrView *AttributeView) RenderSourceVersion() (version, generation uint64) {
+	if attrView != nil && attrView.liveOrdinarySource {
+		return attrView.sourceVersion, attrView.sourceGeneration
+	}
+	return 0, 0
 }
 
 // CustomColorRenderContext 为历史和仓库快照渲染解析关联数据库当时的调色板。
@@ -835,6 +846,7 @@ func ReadAttributeViewCustomColorUsageByPath(avJSONPath string) (avID string, in
 }
 
 func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveColors bool) (ret *AttributeView, err error) {
+	generation := cache.GetAVCacheGeneration()
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
@@ -886,6 +898,8 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		}
 	}
 	if nil == err {
+		ret.sourceVersion, ret.sourceGeneration = dataVersion, generation
+		ret.liveOrdinarySource = boxID == "" && filepath.Clean(avJSONPath) == filepath.Join(util.DataDir, "storage", "av", avID+".json")
 		if resolveColors {
 			ret.ResolveDirectColors()
 			cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))

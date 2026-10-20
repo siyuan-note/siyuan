@@ -4349,7 +4349,7 @@ func attrViewGroupLayoutID(view *av.View) string {
 	return ""
 }
 
-func GetCurrentAttributeViewImages(c *gin.Context, avID, blockID, viewID, query string) (ret []string, err error) {
+func GetCurrentAttributeViewImages(c *gin.Context, avID, blockID, viewID, query, groupID string) (ret []string, err error) {
 	var attrView *av.AttributeView
 	attrView, err = avParseView(avID, blockID)
 	if err != nil {
@@ -4378,9 +4378,29 @@ func GetCurrentAttributeViewImages(c *gin.Context, avID, blockID, viewID, query 
 		return
 	}
 
+	imageView := view
+	if groupID != "" {
+		// 动态分组沿用界面渲染的刷新规则，仅在内存中更新，不写入数据库。
+		if view.Groups == nil || isGroupByTemplate(attrView, view) ||
+			(isGroupByDate(view) && time.UnixMilli(view.GroupCreated).Format("2006-01-02") != time.Now().Format("2006-01-02")) {
+			genAttrViewGroups(view, attrView)
+		}
+		group := view.GetGroupByID(groupID)
+		if !view.IsGroupView() || group == nil {
+			return nil, av.ErrViewNotFound
+		}
+		// 保留父视图字段、筛选及排序，使用分组条目集合和组内手动顺序。
+		groupView := *view
+		groupView.ID = group.ID
+		groupView.GroupItemIDs = append([]string{}, group.GroupItemIDs...)
+		// 分组生成可能缓存父视图，图片列表需要独立执行当前分组的搜索和筛选。
+		delete(attrView.RenderedViewables, group.ID)
+		imageView = &groupView
+	}
+
 	cachedAttrViews := map[string]*av.AttributeView{}
 	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
-	table := getAttrViewTable(attrView, view, query)
+	table := getAttrViewTable(attrView, imageView, query)
 	av.FilterWithContext(table, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
 	av.Sort(table, attrView)
 	if IsReadOnlyRoleContext(c) {
@@ -6619,13 +6639,13 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 				}
 				// Remove av block also remove node attr https://github.com/siyuan-note/siyuan/issues/9091#issuecomment-1709824006
 				if !val.IsDetached && nil != val.Block {
-					bt := treenode.GetBlockTree(val.Block.ID)
-					if nil == bt {
-						for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-							if encBT := treenode.GetBlockTreeInBox(val.Block.ID, encBoxID); nil != encBT {
-								bt = encBT
-								break
+					bt := attributeViewBindingBlockTree(val.Block.ID, av.GetAVBoxID(avID))
+					if bt != nil && (tx == nil || tx.trees[bt.RootID] == nil) {
+						if _, statErr := os.Stat(filepath.Join(util.DataDir, bt.BoxID, bt.Path)); statErr != nil {
+							if !errors.Is(statErr, os.ErrNotExist) {
+								return statErr
 							}
+							bt = nil
 						}
 					}
 					if nil != bt {

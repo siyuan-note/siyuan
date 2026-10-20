@@ -26,7 +26,8 @@ test("resizing uses one source update with both dimensions and retains the exact
     }
     globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     let title = "Before editing";
-    const list = {isConnected: true, dataset: {nodeId: "map-resize"}, parentElement: {classList: {contains: () => false}},
+    const list = {isConnected: true, dataset: {nodeId: "map-resize"}, closest: (): null => null,
+        parentElement: {classList: {contains: () => false}},
         style: {width: "50%", height: "40vh", flex: ""},
         get outerHTML() { return JSON.stringify({style: this.style, title}); }};
     const transactions: {before: string, after: string}[] = [];

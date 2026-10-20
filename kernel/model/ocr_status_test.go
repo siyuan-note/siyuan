@@ -59,14 +59,29 @@ func TestOCRFailureStatusBounded(t *testing.T) {
 		ocrFailures.paths = previous
 		ocrFailures.Unlock()
 	})
-	for i := range ocrFailureLimit + 1 {
-		recordOCRFailure(fmt.Sprintf("assets/ocr-status-%04d.png", i), errors.New("inference failed"))
+	oldest := time.Unix(0, 0)
+	for i := range ocrFailureLimit {
+		path := fmt.Sprintf("assets/ocr-status-%04d.png", i)
+		recordOCRFailure(path, errors.New("inference failed"))
+		if !HasOCRFailure(path) {
+			t.Fatalf("failure was not recorded: %s", path)
+		}
+		// 固定严格递增的更新时间，避免时钟精度和 map 遍历顺序影响最旧项选择。
+		ocrFailures.Lock()
+		ocrFailures.paths[path] = oldest.Add(time.Duration(i) * time.Second)
+		ocrFailures.Unlock()
 	}
+	recordOCRFailure(fmt.Sprintf("assets/ocr-status-%04d.png", ocrFailureLimit), errors.New("inference failed"))
 	ocrFailures.Lock()
 	count := len(ocrFailures.paths)
 	ocrFailures.Unlock()
 	if count != ocrFailureLimit || HasOCRFailure("assets/ocr-status-0000.png") ||
 		!HasOCRFailure(fmt.Sprintf("assets/ocr-status-%04d.png", ocrFailureLimit)) {
 		t.Fatalf("failure cache limit: %d", count)
+	}
+	for i := 1; i <= ocrFailureLimit; i++ {
+		if !HasOCRFailure(fmt.Sprintf("assets/ocr-status-%04d.png", i)) {
+			t.Fatalf("failure cache evicted a newer entry: %d", i)
+		}
 	}
 }

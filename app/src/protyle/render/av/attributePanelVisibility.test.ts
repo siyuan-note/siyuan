@@ -18,7 +18,8 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
         _attrView: {dateCalendar: "Calendar", solarCalendar: "Gregorian", lunarCalendar: "Chinese lunar"},
     }}});
-    const Panel = new Function("cancelHeightAnimation", source + "\nreturn AVAttributePanel;")(() => {});
+    const Panel = new Function("cancelHeightAnimation", "escapeHtmlTextAndAttr", source + "\nreturn AVAttributePanel;")(
+        () => {}, (value: string) => value);
     const style = document.createElement("style");
     style.textContent = css + ".fn__none {display:none} .av__row {display:flex}";
     document.head.append(style);
@@ -104,6 +105,34 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     check.equal(pending.length, 1, "subsequent refreshes request fresh attributes");
     pending.shift()();
     boundPanel.element.remove();
+    config.editor.databaseAttrUseTabs = true;
+    const tabPanel = new Panel({disabled: false});
+    tabPanel.element.dataset.rendered = "true";
+    const tabBody = tabPanel.element.querySelector(".protyle-db-attr__body") as HTMLElement;
+    tabBody.innerHTML = ["first", "second"].map(id => `<div data-av-id="${id}">
+        <div class="custom-attr__avheader"><div class="block__logo"><span>${id}</span></div></div>
+    </div>`).join("");
+    document.body.append(tabPanel.element);
+    tabPanel.updateDisplayConfig();
+    const tabButtons = Array.from(tabBody.querySelectorAll<HTMLButtonElement>('[data-type="av-tab"]'));
+    const tabChanges = new MutationObserver(() => {});
+    tabChanges.observe(tabBody.querySelector(".protyle-db-attr__tabs"), {childList: true, subtree: true});
+    for (const pointerType of ["mouse", "touch"]) {
+        for (const index of [1, 0, 1]) {
+            tabButtons[index].focus();
+            tabButtons[index].querySelector("span").dispatchEvent(new PointerEvent("click", {bubbles: true, pointerType}));
+            check.equal(document.activeElement, tabButtons[index], "switching databases preserves keyboard focus");
+            check.equal(tabChanges.takeRecords().length, 0, "switching databases keeps hovered tab nodes connected");
+            tabButtons.forEach((button, buttonIndex) => {
+                check.equal(button.classList.contains("item--focus"), buttonIndex === index);
+                check.equal(tabBody.querySelector(`[data-av-id="${button.dataset.id}"]`).classList.contains("fn__none"),
+                    buttonIndex !== index);
+            });
+        }
+    }
+    tabChanges.disconnect();
+    tabPanel.element.remove();
+    config.editor.databaseAttrUseTabs = false;
     const transactions: unknown[][] = [];
     const escape = (value: string) => value || "";
     let mobile = false;
@@ -243,9 +272,12 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         })),
     }));
     const openedLinks: string[] = [];
+    const splitOpens: IOpenFileOptions[] = [];
+    let foldedTarget = false;
     const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
         "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", "getAVTemplateInteractiveElement",
-        "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", blockSource + "\nreturn renderAVAttribute;")(
+        "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", "checkFold", "openFileById", "Constants",
+        blockSource + "\nreturn renderAVAttribute;")(
         (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
             callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
         }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
@@ -256,7 +288,10 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         (element: HTMLElement, attribute: string, value: string) => element?.closest(
             value ? `[${attribute}="${value}"]` : `[${attribute}]`),
         (element: HTMLElement) => element?.closest('[data-type="NodeAttributeView"]'),
-        (_app: unknown, link: string) => openedLinks.push(link));
+        (_app: unknown, link: string) => openedLinks.push(link),
+        (_id: string, callback: (zoomIn: boolean, action: string[], isRoot: boolean) => void) =>
+            callback(foldedTarget, foldedTarget ? ["all"] : ["context", "scroll"], false),
+        (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"});
     for (const className of ["custom-attr protyle-db-row__body", "custom-attr"]) {
         const body = document.createElement("div");
         body.className = className;
@@ -324,6 +359,33 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     topBody.querySelector<HTMLElement>('[data-av-id="database-a"] .popover__block span').click();
     check.equal(openedLinks.length, 2, "databases without carriers do not open an invalid link");
     check.equal(dialogClosed, 2, "databases without carriers keep the attribute dialog open");
+    const relation = document.createElement("span");
+    bubbled = false;
+    relation.className = "av__cell--relation";
+    relation.innerHTML = '<span data-type="block-ref" data-id="related-document"><span>Related</span></span>';
+    topBody.append(relation);
+    const relationLabel = relation.querySelector("span span");
+    for (const pointerType of ["mouse", "touch"]) {
+        relationLabel.dispatchEvent(new PointerEvent("click", {bubbles: true, cancelable: true, pointerType}));
+        check.equal(openedLinks.at(-1), "siyuan://blocks/related-document");
+        check.equal(splitOpens.length, 0, "plain clicks and taps keep normal navigation");
+    }
+    for (const modifiers of [{altKey: true}, {shiftKey: true}, {altKey: true, shiftKey: true}]) {
+        for (foldedTarget of [false, true]) {
+            const click = new MouseEvent("click", {bubbles: true, cancelable: true, ...modifiers});
+            relationLabel.dispatchEvent(click);
+            check.equal(click.defaultPrevented, true);
+            check.equal(bubbled, false, "relation navigation does not trigger parent handlers");
+            const options = splitOpens.at(-1);
+            check.equal(options.id, "related-document");
+            check.equal(options.position, modifiers.shiftKey ? "bottom" : "right");
+            check.equal(options.zoomIn, foldedTarget);
+            check.deepEqual(options.action, foldedTarget ? ["all", "highlight"] : ["context", "scroll", "highlight"]);
+            check.equal(options.scrollPosition, "start");
+        }
+    }
+    check.equal(openedLinks.length, 4, "modified relation clicks use split navigation");
+    check.equal(splitOpens.length, 6);
     dialogs.pop();
     dialog.remove();
     return "Attribute panel visibility cases passed";

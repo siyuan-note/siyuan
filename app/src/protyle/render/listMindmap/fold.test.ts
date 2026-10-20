@@ -141,7 +141,8 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     };
     collect(root);
     const snapshot = () => JSON.stringify([...nodes].map(([id, current]) => [id, current.collapsed]));
-    const list = {isConnected: true, dataset: {nodeId: "map-fold"}, get outerHTML() { return snapshot(); }};
+    const list = {isConnected: true, dataset: {nodeId: "map-fold"}, closest: (): null => null,
+        get outerHTML() { return snapshot(); }};
     const transactions: {before: string, after: string}[] = [];
     let allowed = true;
     const context: any = {

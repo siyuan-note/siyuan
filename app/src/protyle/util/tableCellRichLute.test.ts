@@ -13,7 +13,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const codeTabAttribute = "custom-sy-code-tab-spaces";
     const api = new Function("Constants", source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
-        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, restoreTableVirtualizationDOM, " +
+        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, getAVRichTextPreviewHTML, restoreTableVirtualizationDOM, " +
         "copyTableCellContent, renderTableCellRich, getTableCellPlainText, encodeTableCellRich, getTextWithoutSemanticMarkers, prepareInlineElementBoundaryMutation};")({
         CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute,
     }) as
@@ -24,6 +24,29 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const base = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const lute = api.getTableCellEditorLute(base);
+    for (const content of ["&lt;a", "vector&lt;T&gt;", "&amp;lt;a", "&lt;img src=x onerror=alert(1)&gt;"]) {
+        const holder = document.createElement("div");
+        holder.innerHTML = base.Md2BlockDOM("note");
+        const span = document.createElement("span");
+        span.dataset.type = "inline-memo";
+        span.dataset.inlineMemoContent = content;
+        span.textContent = "note";
+        holder.querySelector('[contenteditable="true"]').replaceChildren(span);
+        for (let round = 0; round < 3; round++) {
+            const cell = document.createElement("td");
+            const value = api.serializeTableCellRich(holder.innerHTML);
+            api.updateTableCellEditingValue(cell, value);
+            holder.innerHTML = api.getTableCellRichBlockDOM(cell);
+            check.equal(holder.querySelector('[data-type="inline-memo"]').getAttribute("data-inline-memo-content"), content);
+            const preview = document.createElement("div");
+            preview.innerHTML = base.BlockDOM2HTML(holder.innerHTML);
+            check.equal(preview.querySelector("sup").textContent, `(${Lute.UnEscapeHTMLStr(content)})`);
+            check.equal(preview.querySelector("img, script, [onerror]"), null);
+            preview.innerHTML = api.getAVRichTextPreviewHTML(value.markdown);
+            check.equal(preview.querySelector("sup").textContent, `(${Lute.UnEscapeHTMLStr(content)})`);
+            check.equal(preview.querySelector("img, script, [onerror]"), null);
+        }
+    }
     for (const [markdown, expected, blockCount] of [
         ["first\n\nsecond", "first\n\nsecond", 2],
         ["first<br />second\n\nlast", "first\nsecond\n\nlast", 2],
@@ -484,7 +507,9 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         const range = prepare(prefix + "/");
         range.setStart(range.startContainer, prefix.length);
         const context = {source: "hint", splitChar: "/", lastIndex: -1, fixImageCursor: () => {},
-            consumeRefBracketClose: Hint.prototype.consumeRefBracketClose};
+            consumeRefBracketClose: Hint.prototype.consumeRefBracketClose,
+            // 选区不在表格单元格内时接管不生效，这里只验证代码块插入
+            openNewTableCell: () => {}};
         fill.call(context, "```", protyle, false);
         const code = verifyCode(wysiwyg, window.siyuan.storage.codeLanguage);
         check.equal(calls.rendered, code);
@@ -819,6 +844,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-code-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
+    const htmlPath = path.resolve(__dirname, "../../../stage/protyle/js/protyle-html.js");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -827,6 +853,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
+        await win.webContents.executeJavaScript("{const module=undefined,exports=undefined;" + require("node:fs").readFileSync(${JSON.stringify(htmlPath)}, "utf8") + "}");
         const result = await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
         browserCases.toString() + ")(" + [source, compile(read("../wysiwyg/enter.ts")), hintSource, keydownSource, copySource,
             selectionSource, highlightSource, blockSource]

@@ -7,6 +7,15 @@ const runCases = async (sources, css, mobile) => {
     const assert = require("node:assert/strict");
     const path = require("node:path").posix;
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
+    const waitForDialogLayout = async dialog => {
+        const container = dialog.element.querySelector(".b3-dialog__container");
+        for (let attempt = 0; !dialog.element.classList.contains("b3-dialog--open") && attempt < 100; attempt++) {
+            await tick();
+        }
+        assert.equal(dialog.element.classList.contains("b3-dialog--open"), true, "the dialog has opened before measuring its layout");
+        await Promise.all(container.getAnimations().map(animation => animation.finished));
+        assert.equal(getComputedStyle(container).transform, "none", "the dialog opening animation has finished");
+    };
     document.head.innerHTML = "";
     document.body.innerHTML = '<div class="av__panel"><div class="b3-menu"></div></div>';
     document.body.className = "body--windows";
@@ -36,11 +45,13 @@ const runCases = async (sources, css, mobile) => {
     const transactions = [];
     const templatePreviews = [];
     const searches = [];
+    const scopePreviews = [];
+    const scopeRequests = [];
     let fieldMenu;
     let collectionTypeInput;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
-    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {},
+    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {}, blockPanels: [],
         menus: {menu: {element: document.createElement("div"), remove() {}}}};
     const mocks = {
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
@@ -50,13 +61,21 @@ const runCases = async (sources, css, mobile) => {
             addItem(item) {
                 this.items.push(item);
                 if (item.bind) {
-                    this.element.innerHTML = item.label;
-                    item.bind(this.element);
+                    this.element.innerHTML = '<div class="b3-menu__items"><div></div></div>';
+                    const custom = this.element.firstElementChild.firstElementChild;
+                    custom.innerHTML = item.label;
+                    item.bind(custom);
                 }
             }
             open() {
                 document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
-                this.element.className = "b3-menu";
+                this.element.className = `b3-menu${mobile ? " b3-menu--fullscreen b3-menu--sheet" : ""}`;
+                if (mobile) {
+                    this.element.style.top = "auto";
+                    this.element.style.bottom = "0";
+                    this.element.style.height = "56vh";
+                    this.element.style.transform = "translateY(0)";
+                }
                 document.body.append(this.element);
                 fieldMenu = {items: this.items, element: this.element};
             }
@@ -71,13 +90,29 @@ const runCases = async (sources, css, mobile) => {
         "dialog/anchoredInput": {getAnchoredInputMask() {}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
-        "util/fetch": {fetchSyncPost: async (url, request) => url.includes("previewAttributeViewTemplate") ?
-            (templatePreviews.push(request), {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}}) : url.includes("getHPathByID") ? {code: 0, data: "/Tasks"} :
-            url.includes("reviewAttributeViewCollection") ? {code: 0, data: {ruleVersion: "snapshot", matched: 7, unmatched: 7, unknown: 6, hasMore: false,
-                items: Array.from({length: 20}, (_, index) => ({itemID: `entry-${index}`, blockID: `block-${index}`,
+        "block/Panel": {BlockPanel: class {constructor(options) {scopePreviews.push(options);}}},
+        "util/pathName": {movePathTo: options => scopeRequests.push(options)},
+        "util/fetch": {fetchSyncPost: async (url, request) => {
+            if (url.includes("previewAttributeViewTemplate")) {
+                templatePreviews.push(request);
+                return {code: 0, data: {type: "date", date: {content: 1792713600000, isNotEmpty: true, isNotTime: true}}};
+            }
+            if (url.includes("getHPathByID")) return {code: 0, data: "/Tasks"};
+            if (url === "/api/av/reviewAttributeViewCollection") {
+                const items = Array.from({length: 20}, (_, index) => ({itemID: `entry-${index}`,
+                    blockID: index % 3 === 2 ? "" : `block-${index}`, isDetached: index % 3 === 2,
                     content: index === 0 ? "<img src=x onerror=alert(1)>" : `Collected entry ${index + 1} with manually maintained fields`,
-                    hPath: "/Tasks/" + "a-long-document-title".repeat(8), status: ["matched", "unmatched", "unknown"][index % 3]}))}} :
-            {code: 0, data: {av: request.id === "source" ? database : targetDatabase}},
+                    hPath: "/Tasks/" + "a-long-document-title".repeat(8),
+                    reason: index % 3 === 2 ? "detached" : undefined, status: ["matched", "unmatched", "unknown"][index % 3]}));
+                return {code: 0, data: {ruleVersion: "snapshot", matched: 7, unmatched: 7, unknown: 6, hasMore: false,
+                    items: items.filter(item => !request.status || item.status === request.status)}};
+            }
+            if (url.includes("previewAttributeViewCollection")) return {code: 0, data: {hasMore: false, blocks: [
+                {id: "bound", content: "Bound block", hPath: "/Tasks", collected: true},
+                {id: "new", content: "Unbound block", hPath: "/Tasks", collected: false},
+            ]}};
+            return {code: 0, data: {av: request.id === "source" ? database : targetDatabase}};
+        },
         fetchPost: (_url, _request, callback) => searches.push(() => callback({code: 0, data: {rows: {values: [
             {blockID: "related", block: {content: "Related"}},
         ]}}}))},
@@ -122,6 +157,19 @@ const runCases = async (sources, css, mobile) => {
     };
     const click = async selector => {get(selector).dispatchEvent(new MouseEvent("click", {bubbles: true})); await tick();};
     const latest = () => transactions.at(-1).perform[0].data.rules[0];
+    const assertSearchAlignment = (popup, inputSelector, listSelector) => {
+        const input = popup.querySelector(inputSelector).getBoundingClientRect();
+        const list = popup.querySelector(listSelector);
+        const row = list.querySelector(".b3-list-item:not(.fn__none)").getBoundingClientRect();
+        assert.ok(Math.abs(input.left - row.left) <= 1, "search and list entries share their left edge");
+        assert.ok(Math.abs(input.right - row.right - (list.offsetWidth - list.clientWidth)) <= 1,
+            `search and entries share their right inset: ${input.right}/${row.right}`);
+        const items = list.closest(".b3-menu__items");
+        const filter = list.closest(".b3-menu__filter");
+        const edge = popup.getBoundingClientRect().left + parseFloat(getComputedStyle(popup).borderLeftWidth) +
+            parseFloat(getComputedStyle(items).paddingLeft) + parseFloat(getComputedStyle(filter).paddingLeft);
+        assert.ok(Math.abs(input.left - edge) <= 1, "search and rows use the common menu inset without a second margin");
+    };
     const assertChipActionSpacing = (listSelector, buttonSelector) => {
         const chips = Array.from(get(listSelector).querySelectorAll(".b3-chip"));
         assert.ok(chips.length > 0, "spacing checks require visible chips");
@@ -151,7 +199,8 @@ const runCases = async (sources, css, mobile) => {
     const nameRect = get('[data-action="rules"]').getBoundingClientRect();
     const enabledRect = get("[data-enabled]").getBoundingClientRect();
     assert.ok(Math.abs((nameRect.top + nameRect.bottom) / 2 - (enabledRect.top + enabledRect.bottom) / 2) <= 1,
-        "the enable switch aligns with the rule name");
+        `the enable switch aligns with the rule name: ${JSON.stringify({mobile, width: window.innerWidth,
+            nameRect, enabledRect, font: getComputedStyle(menu).font, rowGap: getComputedStyle(get("[data-enabled]").parentElement).rowGap})}`);
     const ruleRect = nameRect;
     for (const action of ["add-rule"]) {
         const button = get(`[data-action="${action}"]`).getBoundingClientRect();
@@ -160,6 +209,7 @@ const runCases = async (sources, css, mobile) => {
     }
     await click('[data-action="rules"]');
     const rulePopup = fieldMenu.element;
+    assertSearchAlignment(rulePopup, "[data-search]", "[data-rules]");
     rulePopup.querySelector("[data-rename]").click();
     const renameInput = rulePopup.querySelector("[data-rules] input");
     renameInput.value = "Cancelled";
@@ -187,14 +237,19 @@ const runCases = async (sources, css, mobile) => {
         ['[data-actions] [data-index="0"]', '[data-actions] [data-action="remove-action"]'],
         ['[data-field-id="finished"]', '[data-actions] [data-action="remove-field"]'],
     ];
-    assert.equal(matchMedia("(hover: none), (any-pointer: coarse)").matches, mobile, "touch devices have visible removal controls");
+    // 可见性由媒体查询决定：带触摸屏的桌面主机在未模拟触控时同样命中 coarse 指针
+    const touchControls = matchMedia("(hover: none), (any-pointer: coarse)").matches;
+    if (mobile) {
+        assert.ok(matchMedia("(hover: none)").matches, "touch emulation switches the hover capability");
+    }
     for (const [rowSelector, buttonSelector] of removals) {
         const button = get(buttonSelector);
         button.scrollIntoView({block: "center"});
         await require("electron").ipcRenderer.invoke("automation-pointer", window.innerWidth - 2, 2);
         await tick();
         const before = button.getBoundingClientRect();
-        assert.equal(getComputedStyle(button).opacity, mobile ? "1" : "0", "removal is contextual on desktop and visible on touch");
+        assert.equal(getComputedStyle(button).opacity, touchControls ? "1" : "0",
+            "removal is contextual on desktop and visible on touch");
         button.focus();
         assert.equal(getComputedStyle(button).opacity, "1", "keyboard focus reveals the removal button");
         button.blur();
@@ -366,8 +421,10 @@ const runCases = async (sources, css, mobile) => {
     await change("[data-mode]", "currentTime");
     const theme = document.createElement("style");
     await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 560, 620);
-    for (let attempt = 0; window.innerHeight !== 620 && attempt < 100; attempt++) { await tick(); }
-    assert.equal(window.innerHeight, 620, "the resized viewport is ready before testing assignment scrolling");
+    // 非 100% 缩放下窗口内容高度可能有 1 像素的取整偏差
+    for (let attempt = 0; Math.abs(window.innerHeight - 620) > 1 && attempt < 100; attempt++) { await tick(); }
+    assert.ok(Math.abs(window.innerHeight - 620) <= 1,
+        `the resized viewport is ready before testing assignment scrolling: ${window.innerHeight}`);
     get("[data-mode]").scrollIntoView({block: "center"});
     await tick();
     const scroller = get(".b3-menu__items");
@@ -448,7 +505,7 @@ const runCases = async (sources, css, mobile) => {
             await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}`);
             get('[data-action="add-action"]').scrollIntoView({block: "nearest"});
             await tick();
-            assert.ok(get('[data-action="add-action"]').getBoundingClientRect().bottom <= 901,
+            assert.ok(get('[data-action="add-action"]').getBoundingClientRect().bottom <= window.innerHeight + 1,
                 `${mobile}/${width}: actions remain reachable by scrolling: ${JSON.stringify(get('[data-action="add-action"]').getBoundingClientRect())}`);
             await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-actions`);
         }
@@ -459,12 +516,46 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(get("[data-rule-change-tip]").textContent, lang.automationCollectionRuleChangeTip);
     assert.equal(get("[data-source-conditions]").closest("section").textContent.includes(lang.automationBlockConditions), true);
     assert.equal(menu.querySelector("[data-add-condition]"), null);
+    const targetControl = get("[data-tag-target]").closest(".av__automation-control");
+    const typeControl = get("[data-types]").closest(".av__automation-control");
+    const tagControl = get("[data-tags]").closest(".av__automation-control");
+    assert.equal(targetControl.nextElementSibling, typeControl, "collection target precedes block types");
+    assert.equal(typeControl.nextElementSibling, tagControl, "tag conditions follow block types");
     assert.ok(get("[data-scope]"));
-    assert.equal(get('[data-action="preview-collection"]').disabled, true);
+    assert.equal(get("[data-scope-control] > .av__automation-control-label").textContent, lang.automationCollectionScope);
+    assert.equal(get("[data-scope-control] > .av__automation-control-label").closest("button"), null);
+    assert.ok(get("[data-scope]").textContent.includes(lang.addAttr), "scope has its own add button like the other groups");
+    assert.ok(get("[data-scope]").compareDocumentPosition(get(".av__automation-source-list")) & Node.DOCUMENT_POSITION_PRECEDING,
+        "the add scope action follows existing entries");
+    const writesBeforeScopePreview = transactions.length;
+    const sourceButton = get("[data-preview-document]");
+    assert.equal(sourceButton.tagName, "BUTTON");
+    await click("[data-preview-document]");
+    sourceButton.focus();
+    assert.equal(document.activeElement, sourceButton, "scope document titles are keyboard focusable");
+    await require("electron").ipcRenderer.invoke("automation-enter");
+    await tick();
+    assert.equal(scopePreviews.length, 2, "scope documents support pointer and native keyboard button activation");
+    assert.equal(scopePreviews[0].targetElement, sourceButton);
+    assert.deepEqual(scopePreviews[0].refDefs, [{refID: "document"}]);
+    assert.equal(scopePreviews[0].isBacklink, false);
+    assert.equal(menu.isConnected, true, "preview preserves the automation panel");
+    assert.ok(menu.querySelector("[data-trigger]"));
+    assert.equal(transactions.length, writesBeforeScopePreview, "preview does not change collection configuration");
+    assert.equal(get(".popover__block").dataset.id, "document", "the document icon keeps its hover preview");
+    await click("[data-scope]");
+    scopeRequests[0].cb(["/", "/new-document.sy", "/new-document.sy"], ["notebook", "notebook", "notebook"]);
+    await tick();
+    assert.deepEqual(latest().blockSource.notebookIDs, ["notebook"]);
+    assert.deepEqual(latest().blockSource.documentIDs, ["document", "new-document"], "scope additions retain existing entries and deduplicate");
+    await click('[data-remove="document"][data-index="1"]');
+    await click('[data-remove="notebook"]');
+    assert.deepEqual(latest().blockSource.documentIDs, ["document"]);
+    assert.equal(get('[data-action="manage-collection"]').disabled, false, "management remains available without an enabled rule");
     assert.equal(get("[data-status]").textContent, lang.automationReady);
     get("[data-enabled]").click();
     assert.equal(latest().enabled, true);
-    assert.equal(get('[data-action="preview-collection"]').disabled, false);
+    assert.equal(menu.querySelector('[data-action="preview-collection"]'), null, "rule actions do not contain database-level management");
     assert.equal(latest().actions[0].type, "collect");
     assert.deepEqual(database.automations.rules[0].conditions, [currentCondition]);
     for (const width of mobile ? [360, 740] : [420, 1000]) {
@@ -500,6 +591,42 @@ const runCases = async (sources, css, mobile) => {
     }
     await click("[data-types] svg");
     const typePopup = fieldMenu.element;
+    const typeList = typePopup.querySelector("[data-type-list]");
+    const customCallout = typePopup.querySelector("[data-custom-callout]");
+    assert.equal(typeList.lastElementChild, customCallout, "custom callout is the final scrollable list entry");
+    for (const width of mobile ? [360, 740] : [420, 1000]) {
+        await require("electron").ipcRenderer.invoke("automation-size", width, 900);
+        for (const name of ["daylight", "midnight"]) {
+            theme.textContent = sources[name];
+            for (const size of [16, 24]) {
+                typePopup.style.fontSize = `${size}px`;
+                typeList.scrollTop = 0;
+                await tick();
+                assertSearchAlignment(typePopup, "[data-type-search]", "[data-type-list]");
+                const popupWidth = typePopup.getBoundingClientRect().width;
+                if (!mobile) {
+                    assert.ok(popupWidth <= (size === 16 ? 242 : 338), "type menu stays compact while scaling for larger text");
+                }
+                assert.ok(popupWidth <= window.innerWidth, "compact menu stays within narrow viewports");
+                const popupRect = typePopup.getBoundingClientRect();
+                assert.ok(popupRect.top >= -1 && popupRect.bottom <= window.innerHeight + 1,
+                    "opened search menus stay vertically inside the viewport");
+                const first = typeList.firstElementChild.getBoundingClientRect();
+                for (const item of typeList.children) {
+                    assert.ok(Math.abs(item.getBoundingClientRect().width - first.width) <= 1, "all type rows stretch to the same full width");
+                }
+                assert.ok(typeList.scrollHeight > typeList.clientHeight, "long type lists scroll inside the popup");
+                assert.ok(customCallout.getBoundingClientRect().top > typeList.getBoundingClientRect().bottom,
+                    "custom callout is not pinned below the search list");
+                typeList.scrollTop = typeList.scrollHeight;
+                assert.ok(customCallout.getBoundingClientRect().bottom <= typeList.getBoundingClientRect().bottom + 1,
+                    "the final custom action is reachable by scrolling");
+                typeList.scrollTop = 0;
+                await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-${size === 16 ? "types" : "types-large"}`);
+            }
+        }
+    }
+    typePopup.style.fontSize = "";
     typePopup.querySelector('[data-collection-type="l"]').click();
     assert.deepEqual(latest().blockSource.types, ["l"]);
     assertChipActionSpacing("[data-type-chips]", "[data-types]");
@@ -528,6 +655,11 @@ const runCases = async (sources, css, mobile) => {
     const draftWrites = transactions.length;
     await click("[data-add-attribute] svg");
     assert.equal(transactions.length, draftWrites, "adding an attribute starts an unsaved draft");
+    const attributeName = get("[data-attr-name]");
+    assert.equal(document.activeElement, attributeName, "adding an attribute focuses its name");
+    assert.equal(attributeName.value, "custom-");
+    assert.deepEqual([attributeName.selectionStart, attributeName.selectionEnd], [7, 7],
+        "the caret starts after the custom attribute prefix");
     await change("[data-attr-name]", "custom-status");
     await click("[data-attr-operator]");
     fieldMenu.items.find(item => item.label === lang.filterOperatorIs).click();
@@ -584,9 +716,11 @@ const runCases = async (sources, css, mobile) => {
     await click("[data-tags] .b3-chip__close");
     assert.deepEqual(latest().blockSource.tags, []);
     const writesBeforeReview = transactions.length;
-    await click('[data-action="review-collection"]');
+    database.automations.rules = [structuredClone(latest())];
+    await click('[data-action="manage-collection"]');
     assert.equal(window.siyuan.dialogs.length, 1, "collection review uses the shared dialog on desktop and mobile");
     const reviewDialog = window.siyuan.dialogs[0];
+    await waitForDialogLayout(reviewDialog);
     assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "source text is escaped");
     assert.equal(transactions.length, writesBeforeReview, "reviewing entries does not mutate the database");
     const reviewTheme = document.createElement("style");
@@ -608,11 +742,16 @@ const runCases = async (sources, css, mobile) => {
                 const previous = reviewDialog.element.querySelector("[data-prev]").getBoundingClientRect();
                 const cleanup = reviewDialog.element.querySelector("[data-cleanup]").getBoundingClientRect();
                 if (cleanup.top > previous.bottom) {
-                    assert.ok(cleanup.top - previous.bottom >= 8, "wrapped review actions preserve their spacing");
+                    assert.ok(cleanup.top - previous.bottom >= 8,
+                        `wrapped review actions preserve their spacing: ${JSON.stringify({mobile, width, fontSize, theme: name,
+                            previous, cleanup, gap: cleanup.top - previous.bottom,
+                            transform: getComputedStyle(reviewDialog.element.querySelector(".b3-dialog__container")).transform,
+                            rowGap: getComputedStyle(reviewDialog.element.querySelector(".b3-dialog__action")).rowGap})}`);
                 }
                 reviewDialog.element.querySelector("[data-cleanup]").click();
                 await tick();
                 const confirmation = window.siyuan.dialogs[1];
+                await waitForDialogLayout(confirmation);
                 for (const element of confirmation.element.querySelectorAll(".b3-dialog__body, button")) {
                     assert.ok(element.scrollWidth <= element.clientWidth + 1, "confirmation wraps at narrow widths and large fonts");
                 }
@@ -637,6 +776,32 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(cleanup.action, "cleanupAttrViewBlocks");
     assert.equal(cleanup.data.items.length, 7, "cleanup only submits the page's unmatched entries");
     assert.equal(cleanup.data.ruleVersion, "snapshot");
+    reviewDialog.element.querySelector('[data-collection-status="matched"]').click();
+    await tick();
+    assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "matching source text is escaped");
+    assert.equal(reviewDialog.element.querySelectorAll("[data-remove-item]").length, 0, "matching entries have no removal action");
+    reviewDialog.element.querySelector('[data-collection-status="unknown"]').click();
+    await tick();
+    assert.ok(reviewDialog.element.querySelector("[data-results]").textContent.includes(lang.automationCollectionReasonDetached));
+    assert.equal(reviewDialog.element.querySelector("[data-cleanup]").classList.contains("fn__none"), true);
+    await require("electron").ipcRenderer.invoke("automation-size", mobile ? 360 : 420, 900);
+    await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${window.innerWidth}-midnight-review-unknown`);
+    reviewDialog.element.querySelector("[data-remove-item]").click();
+    await tick();
+    document.querySelector("#confirmDialogConfirmBtn").click();
+    await tick();
+    assert.equal(transactions.at(-1).perform[0].action, "removeAttrViewBlock");
+    assert.equal(transactions.at(-1).undo[0].action, "insertAttrViewBlock");
+    reviewDialog.element.querySelector('[data-collection-view="rules"]').click();
+    await tick();
+    assert.equal(reviewDialog.element.querySelector("[data-status-tabs]").classList.contains("fn__none"), true);
+    assert.equal(reviewDialog.element.querySelector("[data-collection-rule]").options.length, 1);
+    assert.ok(reviewDialog.element.querySelector("[data-results]").textContent.includes(lang.automationCollectionNotCollected));
+    await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${window.innerWidth}-midnight-review-rules`);
+    reviewDialog.element.querySelector("[data-collect]").click();
+    await tick();
+    assert.equal(transactions.at(-1).perform[0].action, "collectAttrViewBlocks");
+    assert.deepEqual(transactions.at(-1).perform[0].data.blockIDs, ["new"]);
     reviewDialog.destroy();
     reviewTheme.remove();
     await tick();
@@ -672,10 +837,16 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             ipcMain.handle("automation-size", (_event, width, height) => win.setContentSize(width, height));
+            ipcMain.handle("automation-enter", () => {
+                win.webContents.focus();
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "ENTER"});
+                win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "ENTER"});
+            });
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-review-unknown|-review-rules|-types|-types-large)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -707,7 +878,9 @@ if (process.versions.electron && process.type === "browser") {
             for (const mobile of [false, true]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 if (!win.webContents.debugger.isAttached()) win.webContents.debugger.attach("1.3");
-                await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: mobile});
+                if (mobile) {
+                    await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});
+                }
                 const css = sources.daylight + sass.compile(path.join(__dirname, `../src/assets/scss/${mobile ? "mobile" : "base"}.scss`), {logger: sass.Logger.silent}).css;
                 await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)}, ${mobile})`);
             }

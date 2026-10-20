@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -418,6 +419,7 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 				"references":    []any{map[string]any{"id": "block-1", "title": "First block"}},
 				"editorContext": map[string]any{"activeDocID": "old-doc"},
 				"blockHTML":     `<div data-node-id="original">original prompt</div>`,
+				"timestamp":     int64(1),
 			},
 			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
 			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
@@ -445,9 +447,14 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	turn.UserBlockHTML = new(editedBlockHTML)
 	turn.UserReferences = &emptyReferences
 	turn.UserEditorContext = &EditorContext{ActiveDocID: "new-doc"}
+	startedAt := time.Now().UnixMilli()
 	if err := beginRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
+	if turn.UserTimestamp < startedAt || turn.UserTimestamp > time.Now().UnixMilli() {
+		t.Fatalf("edited user timestamp was not initialized at turn start: %d", turn.UserTimestamp)
+	}
+	userTimestamp := turn.UserTimestamp
 	turn.State = "interrupted"
 	if err := saveRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
@@ -458,6 +465,9 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	entries := recovered["entries"].([]any)
+	if timestamp := numberToInt64(entries[0].(map[string]any)["timestamp"]); timestamp != userTimestamp {
+		t.Fatalf("recovered edit lost its send time: %d, want %d", timestamp, userTimestamp)
+	}
 	if len(entries) != 2 || entries[0].(map[string]any)["content"] != "edited prompt" ||
 		entries[1].(map[string]any)["content"] != "new answer" {
 		t.Fatalf("regenerated runtime was not recovered consistently: %#v", entries)
@@ -478,6 +488,9 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		t.Fatalf("commit recovered regenerate turn failed: revision=%d, err=%v", revision, err)
 	}
 	committedEntries := canonical["entries"].([]any)
+	if timestamp := numberToInt64(committedEntries[0].(map[string]any)["timestamp"]); timestamp != userTimestamp {
+		t.Fatalf("committed edit lost its send time: %d, want %d", timestamp, userTimestamp)
+	}
 	if len(committedEntries) != 2 || committedEntries[0].(map[string]any)["content"] != "edited prompt" {
 		t.Fatalf("committed regenerate turn lost edited content: %#v", committedEntries)
 	}
@@ -493,6 +506,9 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	persistedEntries := persisted["entries"].([]any)
+	if timestamp := numberToInt64(persistedEntries[0].(map[string]any)["timestamp"]); timestamp != userTimestamp {
+		t.Fatalf("persisted edit lost its send time: %d, want %d", timestamp, userTimestamp)
+	}
 	if blockHTML := persistedEntries[0].(map[string]any)["blockHTML"]; blockHTML != editedBlockHTML {
 		t.Fatalf("persisted regenerate turn lost edited block HTML: %#v", persistedEntries[0])
 	}
@@ -822,6 +838,7 @@ func TestApplyRegenerateRuntimeReplacesUserContent(t *testing.T) {
 			map[string]any{
 				"id": "user-1", "type": "user", "content": "original prompt",
 				"blockHTML": `<div data-node-id="original">original prompt</div>`,
+				"timestamp": int64(42),
 			},
 			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
 			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
@@ -847,6 +864,9 @@ func TestApplyRegenerateRuntimeReplacesUserContent(t *testing.T) {
 	if len(entries) != 2 {
 		t.Fatalf("regenerated history was not truncated: %#v", entries)
 	}
+	if timestamp := numberToInt64(entries[0].(map[string]any)["timestamp"]); timestamp != 42 {
+		t.Fatalf("legacy runtime without a send time changed user timestamp: %d", timestamp)
+	}
 	if content := entries[0].(map[string]any)["content"]; content != "edited prompt" {
 		t.Fatalf("edited user content was not restored: %v", content)
 	}
@@ -865,6 +885,7 @@ func TestApplyRegenerateRuntimePreservesUneditedUserBlockHTML(t *testing.T) {
 			map[string]any{
 				"id": "user-1", "type": "user", "content": "original prompt",
 				"blockHTML": originalBlockHTML,
+				"timestamp": int64(42),
 			},
 		},
 	}
@@ -879,6 +900,9 @@ func TestApplyRegenerateRuntimePreservesUneditedUserBlockHTML(t *testing.T) {
 		t.Fatal(err)
 	}
 	entry := session["entries"].([]any)[0].(map[string]any)
+	if timestamp := numberToInt64(entry["timestamp"]); timestamp != 42 {
+		t.Fatalf("regenerate without an edit changed user send time: %d", timestamp)
+	}
 	if blockHTML := entry["blockHTML"]; blockHTML != originalBlockHTML {
 		t.Fatalf("regenerate without an edit changed user block HTML: %#v", entry)
 	}

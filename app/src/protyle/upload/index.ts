@@ -4,6 +4,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
 import {escapeHtml} from "../../util/escape";
+import {attachLivePhotoVideo, getLivePhotoUploadPairs, ILivePhotoPair} from "./livePhotoPairs";
 import {fetchSyncPost} from "../../util/fetch";
 import {getEditorRange, getUndoFocusContext, restoreFocusContext} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
@@ -45,6 +46,8 @@ export interface IUploadInsertOptions {
     allowedInputKinds?: Array<IAssetUploadInput["kind"]>;
     /** 本机 HTML 粘贴需要沿用内核的敏感路径校验。 */
     fromHTMLPaste?: boolean;
+    /** 原始文件对象随插件链排序，关联只依据实际上传索引及成功返回的路径。 */
+    livePhotoPairs?: ILivePhotoPair[];
 }
 
 export class Upload {
@@ -122,7 +125,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
     return {files: uploadFileList, rejected, msgId};
 };
 
-const genUploadedLabel = async (responseText: string, protyle: IProtyle, options?: IUploadInsertOptions) => {
+const genUploadedLabel = async (responseText: string, protyle: IProtyle, options?: IUploadInsertOptions, input?: IAssetUploadInput) => {
     const response = JSON.parse(responseText);
     let errorTip = "";
 
@@ -157,7 +160,15 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
-    const successes = getAssetUploadSuccesses(response.data);
+    let successes = getAssetUploadSuccesses(response.data, input);
+    const livePhotos = options?.livePhotoPairs && input?.kind === "files" ?
+        getLivePhotoUploadPairs(options.livePhotoPairs, input.files, successes) : undefined;
+    if (livePhotos) {
+        successes = successes.filter(item => !livePhotos.hidden.has(item.index));
+        if (livePhotos.incomplete) {
+            showMessage(window.siyuan.languages.livePhotoPairUnavailable);
+        }
+    }
     // https://github.com/siyuan-note/siyuan/issues/7624
     const nodeElement = hasClosestBlock(range.startContainer);
     if (nodeElement) {
@@ -180,8 +191,12 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         const filename = protyle.options.upload.filename(success.name);
         const name = filename.substring(0, filename.length - type.length);
         hasImage = Constants.SIYUAN_ASSETS_IMAGE.includes(type);
-        successFileText += genAssetHTML(type, success.path, name, filename,
+        let label = genAssetHTML(type, success.path, name, filename,
             getHostCapabilities().localFileSystem && options?.htmlAsIframe);
+        if (hasImage && livePhotos?.videos.has(success.index)) {
+            label = attachLivePhotoVideo(label, livePhotos.videos.get(success.index));
+        }
+        successFileText += label;
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             successes.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
@@ -595,6 +610,13 @@ const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAss
             return;
         }
         if (prepared.task.input.kind === "files") {
+            const files = prepared.task.input.files;
+            if (options.livePhotoPairs?.some(pair =>
+                !files.includes(pair.photo) || !files.includes(pair.video))) {
+                finishUpload(prepared.task, callbacks, {status: "failed", error: window.siyuan.languages.livePhotoPairUnavailable});
+                showMessage(window.siyuan.languages.livePhotoPairUnavailable);
+                return;
+            }
             uploadPreparedFiles(prepared.task.input, protyle, callbacks, prepared.task, options);
         } else {
             uploadPreparedLocalFiles(prepared.task.input, protyle, true, callbacks, prepared.task, options);
@@ -698,7 +720,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
             if (successCB) {
                 return successCB(response, result);
             } else {
-                return genUploadedLabel(responseText, protyle, uploadOptions);
+                return genUploadedLabel(responseText, protyle, uploadOptions, _input);
             }
         },
         complete: completeCB,
@@ -790,7 +812,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
             } else if (successCB) {
                 return successCB(responseText, result);
             } else {
-                return genUploadedLabel(responseText, protyle, uploadOptions);
+                return genUploadedLabel(responseText, protyle, uploadOptions, input);
             }
         },
         formatResponse: !protyle.options.upload.success && !successCB && protyle.options.upload.format ?

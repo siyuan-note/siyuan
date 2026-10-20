@@ -17,6 +17,7 @@
 package model
 
 import (
+	"context"
 	gosql "database/sql"
 	"regexp"
 	"slices"
@@ -29,6 +30,23 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestFullTextSearchRejectsCanceledRequest(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	for _, method := range []int{0, 1, 2, 3} {
+		blocks, matched, roots, pages, docMode := FullTextSearchBlock(BlockSearchOptions{
+			Context: ctx, Query: "alpha beta", Method: method, GroupBy: 1, Page: 1, PageSize: 1,
+		})
+		if len(blocks) != 0 || matched != 0 || roots != 0 || pages != 0 || docMode {
+			t.Fatalf("method %d returned a canceled result: %v %d %d %d %t", method, blocks, matched, roots, pages, docMode)
+		}
+	}
+	blocks := []*sql.Block{{ID: "must-not-format"}}
+	if got := fromSQLBlocksContext(ctx, &blocks, "alpha", 36); len(got) != 0 {
+		t.Fatalf("canceled result formatting returned %v", got)
+	}
+}
 
 func TestFromSQLBlockMapsTimestamps(t *testing.T) {
 	previousConf := Conf
@@ -850,7 +868,7 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 	}
 }
 
-func newSearchHPathTestDB(t *testing.T) *gosql.DB {
+func newSearchHPathTestDB(t testing.TB) *gosql.DB {
 	t.Helper()
 	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
 	if err != nil {
@@ -875,7 +893,7 @@ func insertSearchHPathTestBlock(t *testing.T, testDB *gosql.DB, id, rootID, hPat
 	}
 }
 
-func setSearchCaseSensitive(t *testing.T, caseSensitive bool) {
+func setSearchCaseSensitive(t testing.TB, caseSensitive bool) {
 	t.Helper()
 	previousConf := Conf
 	Conf = NewAppConf()

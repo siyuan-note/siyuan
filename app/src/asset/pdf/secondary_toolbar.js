@@ -25,6 +25,10 @@ import {
   toggleExpandedBtn,
 } from "./ui_utils.js";
 import { PagesCountLimit } from "./pdf_viewer.js";
+import {bindMenuMouseScroll} from "../../menus/menuMouseScroll";
+import {isMobile} from "../../util/functions";
+import {isInMobileApp} from "../../protyle/util/compatibility";
+import {Constants} from "../../constants";
 
 /**
  * @typedef {Object} SecondaryToolbarOptions
@@ -59,6 +63,7 @@ import { PagesCountLimit } from "./pdf_viewer.js";
 
 class SecondaryToolbar {
   #opts;
+  #resetMouseScroll;
 
   /**
    * @param {SecondaryToolbarOptions} options
@@ -166,6 +171,10 @@ class SecondaryToolbar {
     // Bind the event listeners for click, cursor tool, and scroll/spread mode
     // actions.
     this.#bindListeners(buttons);
+    if (!isMobile()) {
+      this.#resetMouseScroll = bindMenuMouseScroll(options.toolbar, () =>
+        !isInMobileApp() && window.siyuan.config.appearance?.menuMouseScroll === true);
+    }
 
     this.reset();
   }
@@ -188,6 +197,7 @@ class SecondaryToolbar {
   }
 
   reset() {
+    this.#resetMouseScroll?.();
     this.pageNumber = 0;
     this.pagesCount = 0;
     this.#updateUIState();
@@ -298,6 +308,7 @@ class SecondaryToolbar {
       return;
     }
     this.opened = true;
+    this.#resetMouseScroll?.();
 
     const { toggleButton, toolbar } = this.#opts;
     toggleExpandedBtn(toggleButton, true, toolbar);
@@ -308,6 +319,7 @@ class SecondaryToolbar {
       return;
     }
     this.opened = false;
+    this.#resetMouseScroll?.();
 
     const { toggleButton, toolbar } = this.#opts;
     toggleExpandedBtn(toggleButton, false, toolbar);

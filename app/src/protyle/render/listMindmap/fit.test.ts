@@ -21,7 +21,9 @@ const setup = (right = 200, bottom = 100) => {
     const target = new context.View();
     Object.assign(target, {
         scale: 2.5, offsetX: -200, offsetY: 150,
-        viewport: {clientWidth: 800, clientHeight: 420},
+        viewport: {clientWidth: 800, clientHeight: 420, offsetHeight: 420,
+            getBoundingClientRect: () => ({left: 0, top: 0, right: 800, bottom: 420, width: 800, height: 420})},
+        getToolbarBounds: (): unknown[] => [],
         positions: new Map([["root", {}]]),
         contentBounds: () => ({left: 20, top: 10, right, bottom}),
         draw: () => {},
@@ -71,4 +73,49 @@ test("fit keeps the existing minimum zoom and ignores an unavailable canvas", ()
     target.positions.clear();
     target.fit();
     assert.deepEqual(transform(target), fitted);
+});
+
+test("fit centers the whole map below visible toolbar controls and is stable across repeated clicks", () => {
+    for (const height of [32, 64]) {
+        const target = setup(2020, 1010);
+        target.getToolbarBounds = () => [{left: 500, top: 0, right: 780, bottom: height, width: 280, height}];
+        target.fit();
+        const availableHeight = 420 - height - 16 - 66;
+        assert.equal(target.scale, availableHeight / 1000);
+        assert.ok(Math.abs(10 * target.scale + target.offsetY - height - 16) < 1e-9);
+        assert.ok(Math.abs(1010 * target.scale + target.offsetY - 420 + 66) < 1e-9);
+        const fitted = transform(target);
+        target.fit();
+        assert.deepEqual(transform(target), fitted);
+    }
+});
+
+test("fit converts scaled toolbar bounds to local canvas coordinates", () => {
+    const target = setup(2020, 1010);
+    target.viewport.getBoundingClientRect = () =>
+        ({left: 10, top: 20, right: 410, bottom: 230, width: 400, height: 210});
+    target.getToolbarBounds = () => [{left: 260, top: 20, right: 400, bottom: 44, width: 140, height: 24}];
+    target.fit();
+    assert.equal(target.scale, .29);
+    assert.ok(Math.abs(10 * target.scale + target.offsetY - 64) < 1e-9);
+    assert.ok(Math.abs(1010 * target.scale + target.offsetY - 354) < 1e-9);
+});
+
+test("toolbar controls outside the viewport do not reduce the fitting area", () => {
+    const target = setup(2020, 1010);
+    target.getToolbarBounds = () => [
+        {left: 810, top: 0, right: 900, bottom: 64, width: 90, height: 64},
+        {left: 500, top: 430, right: 780, bottom: 480, width: 280, height: 50},
+    ];
+    target.fit();
+    assert.equal(target.scale, .338);
+    assert.ok(Math.abs(10 * target.scale + target.offsetY - 16) < 1e-9);
+});
+
+test("fit at minimum zoom keeps the map top below the toolbar when the map is too tall", () => {
+    const target = setup(1020, 5010);
+    target.getToolbarBounds = () => [{left: 500, top: 0, right: 780, bottom: 48, width: 280, height: 48}];
+    target.fit();
+    assert.equal(target.scale, .15);
+    assert.equal(10 * target.scale + target.offsetY, 64);
 });

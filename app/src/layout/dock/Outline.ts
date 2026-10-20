@@ -1,3 +1,4 @@
+import {patchAppearancePreference} from "../../config/tabs/appearancePreferences";
 import {saveOutlineState} from "../../config/util/resourceConfig";
 import {toggleMenu} from "../../menus/menuToggle";
 import {bindPanelSearch} from "./panelSearch";
@@ -13,7 +14,6 @@ import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {
     isPhablet,
-    setStorageVal,
     updateHotkeyAfterTip,
     writeBlockDOMClipboard
 } from "../../protyle/util/compatibility";
@@ -83,7 +83,7 @@ export class Outline extends Model {
         <svg><use xlink:href='#iconSearch'></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="keepCurrentExpand" class="block__icon ariaLabel${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " block__icon--active" : ""}" data-position="north" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand}">
+    <span data-type="keepCurrentExpand" class="block__icon ariaLabel${window.siyuan.config.appearance.outlineKeepCurrentExpand ? " block__icon--active" : ""}" data-position="north" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand}">
         <svg><use xlink:href="#iconFocus"></use></svg>
     </span>
     <span class="fn__space"></span>
@@ -194,19 +194,19 @@ export class Outline extends Model {
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 保持当前标题展开功能
-        options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
+        options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", async (event: MouseEvent & {
             target: Element
         }) => {
             const iconElement = hasClosestByClassName(event.target, "block__icon");
             if (!iconElement) {
                 return;
             }
-            if (iconElement.classList.contains("block__icon--active")) {
+            if (window.siyuan.config.readonly || window.siyuan.isPublish) return;
+            await patchAppearancePreference("outlineKeepCurrentExpand", !window.siyuan.config.appearance.outlineKeepCurrentExpand);
+            if (!window.siyuan.config.appearance.outlineKeepCurrentExpand) {
                 iconElement.classList.remove("block__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = false;
             } else {
                 iconElement.classList.add("block__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = true;
                 let focusElement;
                 getAllModels().editor.find(editItem => {
                     if (editItem.editor.protyle.block.rootID === this.blockId) {
@@ -224,8 +224,6 @@ export class Outline extends Model {
                     this.setCurrent(focusElement);
                 }
             }
-            // 保存keepCurrentExpand状态到localStorage
-            setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
         });
         options.tab.panelElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -668,7 +666,7 @@ export class Outline extends Model {
         if (!currentElement) {
             return;
         }
-        if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
+        if (window.siyuan.config.appearance.outlineKeepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {
                 ulElement.classList.remove("fn__none");
@@ -896,8 +894,6 @@ export class Outline extends Model {
             });
         }
         this.saveExpendIds();
-        window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel = targetLevel;
-        setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
     public setAllExpanded(expanded: boolean) {

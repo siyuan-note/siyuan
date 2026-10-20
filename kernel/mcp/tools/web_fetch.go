@@ -17,12 +17,15 @@
 package tools
 
 import (
+	"context"
+	"fmt"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var WebFetchTool = &Tool{
-	Name:        "web_fetch",
-	Description: "Fetch a web page and convert to Markdown or text. url (http/https), format: markdown (default) or text.",
+	Name:           "web_fetch",
+	Description:    "Fetch a public page using the configured provider (direct HTTP or DeepSeek), as markdown (default) or text. No browser session is used. DeepSeek receives the target URL, charges per successful request, and returns page content only; direct HTTP also downloads files. For client-rendered pages, use native/frontend/web_page_fetch when available in the desktop Electron app.",
+	ResolveEffects: func(string) (ToolEffects, bool) { return webToolEffects(webToolConfig().FetchProvider) },
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -31,21 +34,31 @@ var WebFetchTool = &Tool{
 		},
 		Required: []string{"url"},
 	},
-	Handler: webFetchHandler,
+	ContextHandler: webFetchHandler,
 }
 
 func init() {
 	register(WebFetchTool)
 }
 
-func webFetchHandler(args map[string]any) (CallToolResult, error) {
+func webFetchHandler(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	rawURL, _ := args["url"].(string)
 	format, _ := args["format"].(string)
 	if format == "" {
 		format = "markdown"
 	}
 
-	result, err := util.WebFetch(rawURL, format)
+	config := webToolConfig()
+	var result string
+	var err error
+	switch config.FetchProvider {
+	case "deepseek":
+		result, err = util.DeepSeekWebFetch(ctx, util.DeepSeekWebOptions{APIKey: config.APIKey, Timeout: config.Timeout}, rawURL, format)
+	case "direct", "":
+		result, err = util.WebFetchContext(ctx, rawURL, format, config.Timeout)
+	default:
+		err = fmt.Errorf("unknown web fetch provider: %s", config.FetchProvider)
+	}
 	if err != nil {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: "web_fetch error: " + err.Error()}},

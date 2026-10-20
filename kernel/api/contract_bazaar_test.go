@@ -1694,6 +1694,57 @@ func TestBazaarContractTransportCompatibility(t *testing.T) {
 		}
 	}
 }
+
+func TestBazaarContractAppearanceTransportCompatibility(t *testing.T) {
+	bundle, err := apicontract.BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name       string
+		appearance *conf.Appearance
+	}{
+		{"nil", nil},
+		{"zero", &conf.Appearance{}},
+		{"defaults", conf.NewAppearance()},
+		{"configured", &conf.Appearance{
+			CompactMode:              true,
+			MenuMouseScroll:          true,
+			PDFTheme:                 &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "#abcdef"},
+			OutlineKeepCurrentExpand: true,
+			MobileBars:               &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(true)},
+		}},
+		{"disabled", &conf.Appearance{
+			PDFTheme:   &conf.PDFTheme{},
+			MobileBars: &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(false), SidebarButtons: new(false)},
+		}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			payload := bazaarAppearance(test.appearance)
+			expected, err := json.Marshal(test.appearance)
+			if err != nil {
+				t.Fatal(err)
+			}
+			actual, err := json.Marshal(payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(actual, expected) {
+				t.Fatalf("appearance transport mismatch:\ngot  %s\nwant %s", actual, expected)
+			}
+			response, err := json.Marshal(apicontract.Success(apicontract.BazaarAppearancePackagesData{Appearance: payload}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, endpoint := range []string{"installBazaarIcon", "uninstallBazaarIcon", "installBazaarTheme", "uninstallBazaarTheme"} {
+				if err := bundle.ValidateResponse(http.MethodPost, "/api/bazaar/"+endpoint, response); err != nil {
+					t.Errorf("%s: %v", endpoint, err)
+				}
+			}
+		})
+	}
+}
+
 func TestBazaarContractHTTPFailures(t *testing.T) {
 	document, err := apicontract.BuildBundle()
 	if err != nil {

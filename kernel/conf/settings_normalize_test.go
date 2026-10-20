@@ -34,7 +34,7 @@ func TestNormalizeSettingsFileTreeAndSearch(t *testing.T) {
 	fileTree := NormalizeFileTree(&FileTree{CloseTabsOnStart: true, ShorthandSavePath: "notes", MaxOpenTabCount: 99})
 	if *fileTree.TabStartupMode != 2 || !fileTree.CloseTabsOnStart || fileTree.ShorthandSavePath != "/notes" ||
 		fileTree.MaxOpenTabCount != 32 || fileTree.MaxListCount != 512 || fileTree.LargeFileWarningSize != 8 ||
-		!*fileTree.CreateDocAtTop || *fileTree.BoxDocEnabled {
+		!*fileTree.CreateDocAtTop || fileTree.BoxDocEnabled {
 		t.Fatalf("unexpected file tree normalization: %+v", fileTree)
 	}
 	for _, entry := range []struct{ input, want int }{{-1, 64}, {0, 64}, {1, 32}, {31, 32}, {32, 32}, {128, 128}} {

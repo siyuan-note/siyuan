@@ -43,15 +43,18 @@ func ocrModelFilesChanged(changes ...[]string) bool {
 	return false
 }
 
-// 新设备使用内置 PaddleOCR 并关闭自动识别，已有设备缺少 OCR 配置时保留 Tesseract 自动识别。
+// normalizeOCRConfig 按工作空间新旧补全默认值：新工作空间使用内置 PaddleOCR，已有工作空间沿用 Tesseract 自动识别。
 func normalizeOCRConfig(value *conf.OCR, confFileExists bool) *conf.OCR {
-	if value == nil {
-		// 已有工作空间缺失 OCR 配置时沿用升级前的 Tesseract 自动识别行为。
+	missing := nil == value
+	if missing {
 		value = conf.NewOCR()
-		if confFileExists {
-			value.Provider = string(ocr.Tesseract)
-			value.Auto = true
-		}
+	}
+	if confFileExists && (missing || "" == value.Provider) {
+		value.Provider = string(ocr.Tesseract)
+		value.Auto = true
+	}
+	if "" == value.Model {
+		value.Model = "tiny"
 	}
 	return conf.NormalizeOCR(value)
 }

@@ -46,7 +46,7 @@ func TestServeTIFFEncryptedLifecycle(t *testing.T) {
 		}
 		return
 	}
-	root := t.TempDir()
+	root := filepath.Join(t.TempDir(), "notes#1")
 	util.WorkspaceDir = root
 	util.DataDir, util.TempDir, util.ConfDir, util.HistoryDir = filepath.Join(root, "data"), filepath.Join(root, "temp"), filepath.Join(root, "conf"), filepath.Join(root, "history")
 	util.QueueDir = filepath.Join(util.TempDir, "queue")
@@ -91,7 +91,12 @@ func TestServeTIFFEncryptedLifecycle(t *testing.T) {
 	historyPath := filepath.Join(util.HistoryDir, "2026-10-21-120000-update", boxID, "assets", "preview.tif")
 	writeTIFFTestFile(t, assetPath, ciphertext)
 	writeTIFFTestFile(t, historyPath, ciphertext)
-	writeTIFFTestFile(t, filepath.Join(util.TempDir, "repo", "diff", boxID, "assets", "preview.tif"), source)
+	repoPath := filepath.ToSlash(filepath.Join(boxID, "assets", "preview.tif"))
+	previews := openTIFFSnapshots(t, repoPath)
+	stagedPath := filepath.Join(util.TempDir, "repo", "diff", filepath.FromSlash(repoPath))
+	if staged, err := os.ReadFile(stagedPath); err != nil || !bytes.Equal(staged, ciphertext) {
+		t.Fatalf("encrypted snapshot did not preserve ciphertext: %v", err)
+	}
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator); c.Next() })
 	serveAssets(engine)
@@ -99,7 +104,7 @@ func TestServeTIFFEncryptedLifecycle(t *testing.T) {
 	urls := []string{
 		"/assets/preview.tif?box=" + boxID,
 		"/history/2026-10-21-120000-update/" + boxID + "/assets/preview.tif?box=" + boxID,
-		"/repo/diff/" + boxID + "/assets/preview.tif?box=" + boxID,
+		previews[repoPath] + "?box=" + boxID,
 	}
 	for _, url := range urls {
 		for _, query := range []string{"", "&style=thumb", "&download=true"} {
@@ -120,7 +125,7 @@ func TestServeTIFFEncryptedLifecycle(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(util.TempDir, "assets-cache", "tiff")); !os.IsNotExist(err) {
 		t.Fatal("encrypted TIFF preview leaked to disk cache")
 	}
-	for _, path := range []string{assetPath, historyPath} {
+	for _, path := range []string{assetPath, historyPath, stagedPath} {
 		before, _ := os.ReadFile(path)
 		if !bytes.Equal(before, ciphertext) {
 			t.Fatal("preview modified ciphertext")
@@ -129,7 +134,7 @@ func TestServeTIFFEncryptedLifecycle(t *testing.T) {
 		corrupt[len(corrupt)-1] ^= 1
 		writeTIFFTestFile(t, path, corrupt)
 	}
-	for _, url := range urls[:2] {
+	for _, url := range urls {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, url, nil))
 		if recorder.Code != http.StatusInternalServerError {
@@ -138,6 +143,7 @@ func TestServeTIFFEncryptedLifecycle(t *testing.T) {
 	}
 	writeTIFFTestFile(t, assetPath, ciphertext)
 	writeTIFFTestFile(t, historyPath, ciphertext)
+	writeTIFFTestFile(t, stagedPath, ciphertext)
 	writer := &tiffBlockedWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan struct{}), release: make(chan struct{})}
 	var release sync.Once
 	defer release.Do(func() { close(writer.release) })

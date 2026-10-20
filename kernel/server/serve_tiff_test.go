@@ -9,9 +9,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/entity"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/tiffpreview"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -35,13 +39,16 @@ func tiffTestEngine(t *testing.T) *gin.Engine {
 	t.Helper()
 	originalData, originalTemp, originalHistory, originalConf := util.DataDir, util.TempDir, util.HistoryDir, model.Conf
 	originalWorkspace := util.WorkspaceDir
-	root := t.TempDir()
+	originalRepo, originalConfDir := util.RepoDir, util.ConfDir
+	root := filepath.Join(t.TempDir(), "notes#1")
 	util.WorkspaceDir = root
 	util.DataDir, util.TempDir, util.HistoryDir = filepath.Join(root, "data"), filepath.Join(root, "temp"), filepath.Join(root, "history")
+	util.RepoDir, util.ConfDir = filepath.Join(root, "repo"), filepath.Join(root, "conf")
 	model.Conf = model.NewAppConf()
 	t.Cleanup(func() {
 		util.DataDir, util.TempDir, util.HistoryDir, model.Conf = originalData, originalTemp, originalHistory, originalConf
 		util.WorkspaceDir = originalWorkspace
+		util.RepoDir, util.ConfDir = originalRepo, originalConfDir
 	})
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) {
@@ -51,6 +58,97 @@ func tiffTestEngine(t *testing.T) *gin.Engine {
 	serveAssets(engine)
 	serveRepoDiff(engine)
 	return engine
+}
+
+// openTIFFSnapshots 从真实仓库文件元数据走快照预览生产链路，不预先构造临时预览文件。
+func openTIFFSnapshots(t *testing.T, paths ...string) map[string]string {
+	t.Helper()
+	model.Conf.Repo.Store(conf.NewRepo())
+	model.Conf.Repo.Load().Key = []byte("0123456789abcdef0123456789abcdef")
+	if model.Conf.System.Load() == nil {
+		model.Conf.System.Store(conf.NewSystem())
+	}
+	if model.Conf.Sync.Load() == nil {
+		model.Conf.Sync.Store(conf.NewSync())
+	}
+	model.Conf.Sync.Load().Provider = conf.ProviderLocal
+	model.Conf.Sync.Load().Local = &conf.Local{Endpoint: filepath.Join(util.WorkspaceDir, "cloud")}
+	model.Conf.Sync.Load().CloudName = "tiff-test"
+	util.RepoDir = filepath.Join(util.WorkspaceDir, "repo")
+	for _, directory := range []string{util.ConfDir, util.TempDir, util.HistoryDir} {
+		if err := os.MkdirAll(directory, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir,
+		"tiff-test", "tiff-test", "windows", model.Conf.Repo.Load().Key, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	index, err := repo.Index("TIFF preview", true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	files := map[string]string{}
+	if err = repo.GetFilesIter(index, func(file *entity.File) error {
+		files[strings.TrimPrefix(file.Path, "/")] = file.ID
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	previews := map[string]string{}
+	for _, path := range paths {
+		id := files[path]
+		if id == "" {
+			t.Fatalf("TIFF missing from snapshot: %s", path)
+		}
+		_, content, _, _, err := model.OpenRepoSnapshotFile(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if content != "repo/diff/"+path {
+			t.Fatalf("TIFF snapshot preview missing: %q", content)
+		}
+		previews[path] = "/" + content
+	}
+	return previews
+}
+
+func TestServeTIFFRealRepoSnapshots(t *testing.T) {
+	engine := tiffTestEngine(t)
+	source := tiffSource(t)
+	paths := []string{"assets/image.tif", "assets/image.TIFF"}
+	for _, path := range paths {
+		writeTIFFTestFile(t, filepath.Join(util.DataDir, filepath.FromSlash(path)), source)
+	}
+	previews := openTIFFSnapshots(t, paths...)
+	for _, path := range paths {
+		staged, err := os.ReadFile(filepath.Join(util.TempDir, "repo", "diff", filepath.FromSlash(path)))
+		if err != nil || !bytes.Equal(staged, source) {
+			t.Fatalf("snapshot preview source was not staged: %v", err)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, previews[path], nil))
+		assertTIFFPreview(t, recorder)
+	}
+}
+
+func TestServeTIFFWorkspaceWithHash(t *testing.T) {
+	engine := tiffTestEngine(t)
+	if !strings.Contains(util.WorkspaceDir, "#") {
+		t.Fatal("test workspace must contain a hash")
+	}
+	source := tiffSource(t)
+	for _, test := range []struct{ url, path string }{
+		{"/assets/image.tif", filepath.Join(util.DataDir, "assets", "image.tif")},
+		{"/history/2026-10-21-120000-update/assets/image.tif", filepath.Join(util.HistoryDir, "2026-10-21-120000-update", "assets", "image.tif")},
+		{"/repo/diff/assets/image.tif", filepath.Join(util.TempDir, "repo", "diff", "assets", "image.tif")},
+	} {
+		writeTIFFTestFile(t, test.path, source)
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, test.url+"?style=thumb", nil))
+		assertTIFFPreview(t, recorder)
+	}
 }
 
 func writeTIFFTestFile(t *testing.T, path string, data []byte) {
@@ -159,7 +257,7 @@ func TestServeTIFFLockedNotebook(t *testing.T) {
 	writeTIFFTestFile(t, filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json"), []byte(`{"encrypted":true}`))
 	writeTIFFTestFile(t, filepath.Join(util.DataDir, boxID, "assets", "image.tif"), []byte("SYAE"))
 	writeTIFFTestFile(t, filepath.Join(util.HistoryDir, "2026-10-21-120000-update", boxID, "assets", "image.tif"), []byte("SYAE"))
-	writeTIFFTestFile(t, filepath.Join(util.TempDir, "repo", "diff", boxID, "assets", "image.tif"), tiffSource(t))
+	writeTIFFTestFile(t, filepath.Join(util.TempDir, "repo", "diff", boxID, "assets", "image.tif"), []byte("SYAE"))
 	for _, url := range []string{
 		"/assets/image.tif?box=" + boxID,
 		"/history/2026-10-21-120000-update/" + boxID + "/assets/image.tif",

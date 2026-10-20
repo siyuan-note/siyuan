@@ -62,6 +62,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/tiffpreview"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/studio-b12/gowebdav"
@@ -483,8 +484,7 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 			content = gulu.Str.FromBytes(data)
 		} else {
 			if strings.Contains(file.Path, "assets/") { // 剔除笔记本级或者文档级资源文件路径前缀
-				// 加密 notebook 的 asset 在仓库里是密文，不解密直接写临时目录会泄漏密文
-				// 先用原始 path 检测是否加密 box，再裁剪 file.Path 到 assets/ 前缀
+				// 先按原始路径确定加密笔记本身份并认证，再整理资源路径用于预览。
 				repoBoxID := ""
 				origPath := strings.TrimPrefix(file.Path, "/")
 				if parts := strings.SplitN(origPath, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) {
@@ -503,7 +503,12 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 						plainData, decErr := DecryptAsset(repoBoxID, diskName, dek, data)
 						clear(dek)
 						if decErr == nil {
-							data = plainData
+							if tiffpreview.IsPath(file.Path) {
+								// TIFF 快照经认证后仍暂存原密文，HTTP 预览和下载在请求内存中解密。
+								clear(plainData)
+							} else {
+								data = plainData
+							}
 						} else {
 							logging.LogWarnf("decrypt repo snapshot asset [%s] failed: %s", file.Path, decErr)
 							err = decErr

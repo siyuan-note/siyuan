@@ -1260,7 +1260,7 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 		if transcodeTIFF {
-			servePlainTIFFPreview(context, p, false)
+			servePlainTIFFPreview(context, p)
 			return
 		}
 		if transcodeHEIF {
@@ -1761,6 +1761,7 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）
 		parts := strings.SplitN(strings.TrimPrefix(requestPath, "/"), "/", 2)
 		encryptedBoxID := ""
+		var tiffDEK []byte
 		if len(parts) >= 1 && model.IsEncryptedBox(parts[0]) {
 			encryptedBoxID = parts[0]
 			setEncryptedAssetCacheHeaders(context)
@@ -1776,15 +1777,24 @@ func serveRepoDiff(ginServer *gin.Engine) {
 				context.Status(http.StatusForbidden)
 				return
 			}
-			clear(dek)
+			if tiffpreview.IsPath(requestPath) {
+				tiffDEK = dek
+				defer clear(tiffDEK)
+			} else {
+				clear(dek)
+			}
 		}
 		p := filepath.Join(repoDiffBaseDir, filepath.FromSlash(strings.TrimPrefix(requestPath, "/")))
 		if !gulu.File.IsSubPath(repoDiffBaseDir, p) {
 			context.Status(http.StatusUnauthorized)
 			return
 		}
+		if encryptedBoxID != "" && tiffpreview.IsPath(p) {
+			serveTIFFBytes(context, p, encryptedBoxID, tiffDEK, transcodeTIFF)
+			return
+		}
 		if transcodeTIFF {
-			servePlainTIFFPreview(context, p, encryptedBoxID != "")
+			servePlainTIFFPreview(context, p)
 			return
 		}
 		if transcodeHEIF {

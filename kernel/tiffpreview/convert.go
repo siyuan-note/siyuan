@@ -35,8 +35,8 @@ var (
 	ErrImageTooLarge = errors.New("TIFF image exceeds the dimension limit")
 )
 
+// IsPath 按文件系统路径识别 TIFF；URL 查询参数由调用方解析，不截断合法路径中的井号。
 func IsPath(path string) bool {
-	path = strings.SplitN(strings.SplitN(path, "?", 2)[0], "#", 2)[0]
 	ext := strings.ToLower(filepath.Ext(path))
 	return ext == ".tif" || ext == ".tiff"
 }

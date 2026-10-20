@@ -47,11 +47,26 @@ func serveTIFFPreview(c *gin.Context, path string) {
 		}
 		defer clear(dek)
 	}
+	if !encrypted {
+		boxID = ""
+	}
+	serveTIFFBytes(c, path, boxID, dek, true)
+}
+
+// serveTIFFBytes 读取 TIFF 原件，按请求输出预览或原件；调用方持有加密笔记本的租约和读锁。
+func serveTIFFBytes(c *gin.Context, path, boxID string, dek []byte, preview bool) {
+	encrypted := boxID != ""
 	limit := int64(tiffpreview.MaxInputBytes)
 	if encrypted {
 		limit += 2 * 1024 * 1024
 	}
-	source, err := tiffpreview.ReadFileLimited(path, limit)
+	var source []byte
+	var err error
+	if preview {
+		source, err = tiffpreview.ReadFileLimited(path, limit)
+	} else {
+		source, err = os.ReadFile(path)
+	}
 	if err != nil {
 		tiffPreviewError(c, err)
 		return
@@ -66,20 +81,17 @@ func serveTIFFPreview(c *gin.Context, path string) {
 		source = decrypted
 		defer clear(source)
 	}
-	writeTIFFPreview(c, source, encrypted)
-}
-
-// servePlainTIFFPreview 处理普通历史文件或已解密的快照预览；加密来源不写入预览缓存。
-func servePlainTIFFPreview(c *gin.Context, path string, encrypted bool) {
-	source, err := tiffpreview.ReadFileLimited(path, tiffpreview.MaxInputBytes)
-	if err != nil {
-		tiffPreviewError(c, err)
+	if preview {
+		writeTIFFPreview(c, source, encrypted)
 		return
 	}
-	if encrypted {
-		defer clear(source)
-	}
-	writeTIFFPreview(c, source, encrypted)
+	secureAssetContentHeaders(c, path, path)
+	c.Data(http.StatusOK, "image/tiff", source)
+}
+
+// servePlainTIFFPreview 处理普通历史文件或快照预览。
+func servePlainTIFFPreview(c *gin.Context, path string) {
+	serveTIFFBytes(c, path, "", nil, true)
 }
 
 func writeTIFFPreview(c *gin.Context, source []byte, encrypted bool) {

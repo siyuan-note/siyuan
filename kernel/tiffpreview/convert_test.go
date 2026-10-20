@@ -8,11 +8,28 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"path/filepath"
 	"sort"
 	"testing"
 
 	"golang.org/x/image/tiff"
 )
+
+func TestIsPathPreservesFilesystemCharacters(t *testing.T) {
+	for _, path := range []string{
+		"image.tif", "image.TIFF", filepath.Join("notes#1", "assets", "image.tif"),
+		filepath.Join("notes?1", "assets", "image.tiff"), filepath.Join("assets", "image#1.tif"),
+	} {
+		if !IsPath(path) {
+			t.Fatalf("TIFF filesystem path was not recognized: %s", path)
+		}
+	}
+	for _, path := range []string{"image.png", "image.tif.txt", "image.tif?style=thumb", "image.tif#preview"} {
+		if IsPath(path) {
+			t.Fatalf("non-TIFF filesystem path was accepted: %s", path)
+		}
+	}
+}
 
 func encodeTIFF(t *testing.T, img image.Image, compression tiff.CompressionType) []byte {
 	t.Helper()

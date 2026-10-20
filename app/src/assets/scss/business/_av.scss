@@ -3370,15 +3370,13 @@ img.av__cellassetimg {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
 
-  .layout-tab-bar {
-    flex-shrink: 0;
-  }
+.av__collection-tabs {
+  flex-shrink: 0;
 
   .item {
     min-width: 0;
-    height: auto;
-    min-height: 40px;
 
     .item__text {
       white-space: normal;

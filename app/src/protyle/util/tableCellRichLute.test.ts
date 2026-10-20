@@ -507,7 +507,9 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         const range = prepare(prefix + "/");
         range.setStart(range.startContainer, prefix.length);
         const context = {source: "hint", splitChar: "/", lastIndex: -1, fixImageCursor: () => {},
-            consumeRefBracketClose: Hint.prototype.consumeRefBracketClose};
+            consumeRefBracketClose: Hint.prototype.consumeRefBracketClose,
+            // 选区不在表格单元格内时接管不生效，这里只验证代码块插入
+            openNewTableCell: () => {}};
         fill.call(context, "```", protyle, false);
         const code = verifyCode(wysiwyg, window.siyuan.storage.codeLanguage);
         check.equal(calls.rendered, code);

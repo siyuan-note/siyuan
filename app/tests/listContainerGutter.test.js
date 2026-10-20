@@ -103,7 +103,7 @@ const cases = (source, fullSource, css) => {
         getLangByType: type => type,
         setDragTipGhost: noop, stringifyBlockDragData: JSON.stringify, restoreGutterRange: noop,
         setFold: (_owner, element) => {folded.push(element.dataset.nodeId); return {fold: 1};},
-        markGutterForFoldRestore: () => true,
+        markGutterForFoldRestore: () => true, isGutterTouchDragging: noop,
         toggleMenu: options => options.build(null, {show: callback => callback()}),
     };
     const render = new Function(...Object.keys(dependencies), source + "\nreturn render;")(...Object.values(dependencies));

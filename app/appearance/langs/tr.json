@@ -3372,6 +3372,13 @@
 		"421": "Başka bir çalışma alanı güncelleme paketlerini işliyor. Lütfen daha sonra güncellemeleri tekrar kontrol edin",
 		"422": "Data.zip içe aktarımının süresi doldu veya veriler değişti; arşivi yeniden seçin",
 		"423": "Şifreleme durumları veya veri anahtarları farklı olan not defterleri birleştirilemez [%s]",
-		"424": "Data.zip içe aktarımı kurtarılamadı; çalışma alanını koruyun ve kurtarmayı yeniden deneyin"
+		"424": "Data.zip içe aktarımı kurtarılamadı; çalışma alanını koruyun ve kurtarmayı yeniden deneyin",
+		"425": "WebDAV isteği reddetti; adresi, protokolü ve bağlantı noktasını kontrol edin",
+		"426": "WebDAV kimlik doğrulaması başarısız; kullanıcı adını ve parolayı kontrol edin",
+		"427": "WebDAV hesabı bu dizine yazamıyor; izinleri kontrol edin",
+		"428": "Sunucu burada dizin oluşturmaya izin vermiyor; WebDAV yolunu ve yazma izinlerini kontrol edin",
+		"429": "Bulut dizini oluşturulamıyor; üst öğenin bir dizin olduğunu ve aynı adlı bir dosya bulunmadığını kontrol edin",
+		"430": "WebDAV uç noktası bir dizin veya eşitleme verisi döndürmedi; adresi ve WebDAV hizmetini kontrol edin",
+		"431": "Otomatik eşitleme %s saatinde yeniden denenecek; elle de eşitleyebilirsiniz"
 	}
 }

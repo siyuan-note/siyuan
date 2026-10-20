@@ -3372,6 +3372,13 @@
 		"421": "Un altro spazio di lavoro sta elaborando i pacchetti di aggiornamento. Cerca nuovamente gli aggiornamenti più tardi",
 		"422": "L’importazione di Data.zip è scaduta o è cambiata; seleziona nuovamente l’archivio",
 		"423": "Impossibile unire quaderni con stati di crittografia o chiavi dei dati diversi [%s]",
-		"424": "Ripristino dell’importazione di Data.zip non riuscito; conserva lo spazio di lavoro e riprova il ripristino"
+		"424": "Ripristino dell’importazione di Data.zip non riuscito; conserva lo spazio di lavoro e riprova il ripristino",
+		"425": "WebDAV ha rifiutato la richiesta; controllare indirizzo, protocollo e porta",
+		"426": "Autenticazione WebDAV non riuscita; controllare nome utente e password",
+		"427": "L’account WebDAV non può scrivere in questa cartella; controllare i permessi",
+		"428": "Il server non consente di creare cartelle qui; controllare il percorso WebDAV e i permessi di scrittura",
+		"429": "Impossibile creare la cartella nel cloud; verificare che l’elemento superiore sia una cartella e che non esista un file con lo stesso nome",
+		"430": "L’endpoint WebDAV non ha restituito una cartella o dati di sincronizzazione; controllare l’indirizzo e il servizio WebDAV",
+		"431": "La sincronizzazione automatica riproverà alle %s; è possibile anche sincronizzare manualmente"
 	}
 }

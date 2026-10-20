@@ -3078,6 +3078,7 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
 		webdavClient := gowebdav.NewClient(cloudConf.WebDAV.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
+		logging.LogInfof("WebDAV sync endpoint [%s], directory [%q]", safeWebDAVEndpoint(cloudConf.WebDAV.Endpoint), cloudConf.Dir)
 		a := cloudConf.WebDAV.Username + ":" + cloudConf.WebDAV.Password
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)

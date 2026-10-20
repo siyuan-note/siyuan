@@ -3372,6 +3372,13 @@
 		"421": "Ein anderer Arbeitsbereich verarbeitet Updatepakete. Bitte später erneut nach Updates suchen",
 		"422": "Der Data.zip-Import ist abgelaufen oder wurde geändert; wählen Sie das Archiv erneut aus",
 		"423": "Notizbücher mit unterschiedlichem Verschlüsselungsstatus oder Datenschlüssel können nicht zusammengeführt werden [%s]",
-		"424": "Wiederherstellung des Data.zip-Imports fehlgeschlagen; bewahren Sie den Arbeitsbereich auf und versuchen Sie die Wiederherstellung erneut"
+		"424": "Wiederherstellung des Data.zip-Imports fehlgeschlagen; bewahren Sie den Arbeitsbereich auf und versuchen Sie die Wiederherstellung erneut",
+		"425": "WebDAV hat die Anfrage abgelehnt; Adresse, Protokoll und Port prüfen",
+		"426": "WebDAV-Authentifizierung fehlgeschlagen; Benutzername und Passwort prüfen",
+		"427": "Das WebDAV-Konto kann nicht in dieses Verzeichnis schreiben; Berechtigungen prüfen",
+		"428": "Der Server erlaubt hier keine Verzeichniserstellung; WebDAV-Pfad und Schreibrechte prüfen",
+		"429": "Cloud-Verzeichnis kann nicht erstellt werden; prüfen, ob das übergeordnete Element ein Verzeichnis ist und keine gleichnamige Datei existiert",
+		"430": "Der WebDAV-Endpunkt hat weder ein Verzeichnis noch Synchronisationsdaten geliefert; Adresse und WebDAV-Dienst prüfen",
+		"431": "Die automatische Synchronisation versucht es um %s erneut; manuelle Synchronisation ist ebenfalls möglich"
 	}
 }

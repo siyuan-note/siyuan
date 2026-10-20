@@ -3372,6 +3372,13 @@
 		"421": "Ruang kerja lain sedang memproses paket pembaruan. Silakan periksa pembaruan lagi nanti",
 		"422": "Impor Data.zip telah kedaluwarsa atau berubah; pilih kembali arsipnya",
 		"423": "Tidak dapat menggabungkan buku catatan dengan status enkripsi atau kunci data yang berbeda [%s]",
-		"424": "Pemulihan impor Data.zip gagal; pertahankan ruang kerja dan coba pemulihan lagi"
+		"424": "Pemulihan impor Data.zip gagal; pertahankan ruang kerja dan coba pemulihan lagi",
+		"425": "WebDAV menolak permintaan; periksa alamat, protokol, dan port",
+		"426": "Autentikasi WebDAV gagal; periksa nama pengguna dan kata sandi",
+		"427": "Akun WebDAV tidak dapat menulis ke direktori ini; periksa izinnya",
+		"428": "Server tidak mengizinkan pembuatan direktori di sini; periksa jalur WebDAV dan izin tulis",
+		"429": "Tidak dapat membuat direktori awan; pastikan induknya adalah direktori dan tidak ada berkas dengan nama yang sama",
+		"430": "Titik akhir WebDAV tidak mengembalikan direktori atau data sinkronisasi; periksa alamat dan layanan WebDAV",
+		"431": "Sinkronisasi otomatis akan dicoba lagi pada %s; Anda juga dapat menyinkronkan secara manual"
 	}
 }

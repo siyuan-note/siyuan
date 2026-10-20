@@ -3372,6 +3372,13 @@
 		"421": "Outro espaço de trabalho está processando pacotes de atualização. Verifique novamente se há atualizações mais tarde",
 		"422": "A importação de Data.zip expirou ou foi alterada; selecione o arquivo novamente",
 		"423": "Não é possível mesclar cadernos com estados de criptografia ou chaves de dados diferentes [%s]",
-		"424": "Falha na recuperação da importação de Data.zip; preserve o espaço de trabalho e tente a recuperação novamente"
+		"424": "Falha na recuperação da importação de Data.zip; preserve o espaço de trabalho e tente a recuperação novamente",
+		"425": "O WebDAV rejeitou a solicitação; verifique o endereço, o protocolo e a porta",
+		"426": "Falha na autenticação WebDAV; verifique o usuário e a senha",
+		"427": "A conta WebDAV não pode gravar neste diretório; verifique as permissões",
+		"428": "O servidor não permite criar diretórios aqui; verifique o caminho WebDAV e as permissões de gravação",
+		"429": "Não foi possível criar o diretório na nuvem; verifique se o item superior é um diretório e se não há um arquivo com o mesmo nome",
+		"430": "O endereço WebDAV não retornou um diretório nem dados de sincronização; verifique o endereço e o serviço WebDAV",
+		"431": "A sincronização automática tentará novamente às %s; você também pode sincronizar manualmente"
 	}
 }

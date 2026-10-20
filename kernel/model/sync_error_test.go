@@ -15,6 +15,7 @@ import (
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/studio-b12/gowebdav"
 )
 
 func TestCloudLockErrorDetail(t *testing.T) {
@@ -42,6 +43,52 @@ func TestCloudLockErrorDetail(t *testing.T) {
 				t.Fatalf("got %q, want %q", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestWebDAVErrorDetail(t *testing.T) {
+	previousConf, previousLangs := Conf, util.Langs
+	t.Cleanup(func() { Conf, util.Langs = previousConf, previousLangs })
+	Conf = &AppConf{Lang: "en", Sync: NewConfSection(&conf.Sync{Provider: conf.ProviderWebDAV})}
+	util.Langs = map[string]map[int]string{"en": {188: "lock failed"}}
+	for _, number := range []int{219, 249, 250, 425, 426, 427, 428, 429, 430} {
+		util.Langs["en"][number] = fmt.Sprint(number)
+	}
+	for _, tc := range []struct{ status, number int }{{400, 425}, {401, 426}, {403, 427}, {405, 428}, {409, 429}, {429, 250}, {500, 219}, {404, 249}} {
+		err := &os.PathError{Op: "Mkdir", Path: "https://user:password@host/private?token=secret", Err: gowebdav.StatusError{Status: tc.status}}
+		want := fmt.Sprintf("%d (HTTP %d)", tc.number, tc.status)
+		if got := webDAVErrorDetail(fmt.Errorf("private body: %w", err), Conf.Language); got != want {
+			t.Fatalf("got %q want %q", got, want)
+		}
+		for _, locked := range []bool{false, true} {
+			var input error = err
+			expected := want
+			if locked {
+				input = fmt.Errorf("%w: %w", dejavu.ErrLockCloudFailed, err)
+				expected = "lock failed " + expected
+			}
+			if got := formatRepoErrorMsg(input); got != expected+" (Provider: WebDAV)" {
+				t.Fatalf("wrong formatted diagnostic: %q", got)
+			}
+		}
+	}
+	if got := webDAVErrorDetail(cloud.ErrWebDAVInvalidResponse, Conf.Language); got != "430" {
+		t.Fatal(got)
+	}
+	if got := webDAVErrorDetail(&os.PathError{Op: "Mkdir", Path: "private", Err: os.ErrExist}, Conf.Language); got != "429" {
+		t.Fatal(got)
+	}
+}
+
+func TestSafeWebDAVEndpoint(t *testing.T) {
+	for _, tc := range []struct{ source, want string }{
+		{"https://user:password@example.com:443/private?token=secret#fragment", "https://example.com:443"},
+		{"http://user:password@[::1]:8080/private?token=secret", "http://[::1]:8080"},
+		{"https://example.com\nprivate", ""}, {"ftp://host/path", ""}, {"https://bad_host/private", ""},
+	} {
+		if got := safeWebDAVEndpoint(tc.source); got != tc.want {
+			t.Fatalf("got %q want %q", got, tc.want)
+		}
 	}
 }
 

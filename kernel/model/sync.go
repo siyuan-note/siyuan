@@ -420,7 +420,6 @@ func checkSync(boot, exit, byHand bool) bool {
 	}
 
 	if !byHand && !exit && notifyAutoSyncPaused() {
-		planSyncAfter(64 * time.Minute)
 		return false
 	}
 	return true
@@ -934,6 +933,8 @@ func formatRepoErrorMsg(err error) string {
 		msg = Conf.language(250)
 	} else if errors.Is(err, cloud.ErrDecryptFailed) {
 		msg = Conf.Language(135)
+	} else if detail := webDAVErrorDetail(err, Conf.Language); detail != "" {
+		msg = detail
 	} else {
 		logging.LogErrorf("unclassified repository error: %s", msg)
 		msgLowerCase := strings.ToLower(msg)

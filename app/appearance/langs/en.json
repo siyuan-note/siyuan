@@ -3372,6 +3372,13 @@
 		"421": "Another workspace is processing update packages. Please check for updates again later",
 		"422": "Data.zip import has expired or changed; select the archive again",
 		"423": "Cannot merge notebooks with different encryption states or data keys [%s]",
-		"424": "Data.zip import recovery failed; preserve the workspace and retry recovery"
+		"424": "Data.zip import recovery failed; preserve the workspace and retry recovery",
+		"425": "WebDAV rejected the request; check the address, protocol and port",
+		"426": "WebDAV authentication failed; check the username and password",
+		"427": "The WebDAV account cannot write to this directory; check its permissions",
+		"428": "The server does not allow directory creation here; check the WebDAV path and write permissions",
+		"429": "Cannot create the cloud directory; check that its parent is a directory and no file has the same name",
+		"430": "The WebDAV endpoint did not return a directory or sync data; check the address and WebDAV service",
+		"431": "Automatic sync will retry at %s; you can also sync manually"
 	}
 }

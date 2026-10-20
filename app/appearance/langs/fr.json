@@ -3372,6 +3372,13 @@
 		"421": "Un autre espace de travail traite les paquets de mise à jour. Veuillez rechercher à nouveau les mises à jour plus tard",
 		"422": "L’importation de Data.zip a expiré ou a changé ; sélectionnez à nouveau l’archive",
 		"423": "Impossible de fusionner des carnets dont l’état de chiffrement ou la clé de données diffère [%s]",
-		"424": "Échec de la récupération de l’importation de Data.zip ; conservez l’espace de travail et réessayez la récupération"
+		"424": "Échec de la récupération de l’importation de Data.zip ; conservez l’espace de travail et réessayez la récupération",
+		"425": "WebDAV a refusé la requête ; vérifiez l’adresse, le protocole et le port",
+		"426": "Échec de l’authentification WebDAV ; vérifiez le nom d’utilisateur et le mot de passe",
+		"427": "Le compte WebDAV ne peut pas écrire dans ce dossier ; vérifiez ses autorisations",
+		"428": "Le serveur interdit la création de dossiers ici ; vérifiez le chemin WebDAV et les droits d’écriture",
+		"429": "Impossible de créer le dossier distant ; vérifiez que son parent est un dossier et qu’aucun fichier ne porte le même nom",
+		"430": "Le point de terminaison WebDAV n’a renvoyé ni dossier ni données de synchronisation ; vérifiez l’adresse et le service WebDAV",
+		"431": "La synchronisation automatique réessaiera à %s ; vous pouvez aussi synchroniser manuellement"
 	}
 }

@@ -3372,6 +3372,13 @@
 		"421": "Inny obszar roboczy przetwarza pakiety aktualizacji. Sprawdź dostępność aktualizacji ponownie później",
 		"422": "Import Data.zip wygasł lub uległ zmianie; wybierz archiwum ponownie",
 		"423": "Nie można scalić notatników o różnych stanach szyfrowania lub kluczach danych [%s]",
-		"424": "Nie udało się odzyskać importu Data.zip; zachowaj obszar roboczy i ponów odzyskiwanie"
+		"424": "Nie udało się odzyskać importu Data.zip; zachowaj obszar roboczy i ponów odzyskiwanie",
+		"425": "WebDAV odrzucił żądanie; sprawdź adres, protokół i port",
+		"426": "Uwierzytelnianie WebDAV nie powiodło się; sprawdź nazwę użytkownika i hasło",
+		"427": "Konto WebDAV nie może zapisywać w tym katalogu; sprawdź uprawnienia",
+		"428": "Serwer nie pozwala tutaj tworzyć katalogów; sprawdź ścieżkę WebDAV i uprawnienia do zapisu",
+		"429": "Nie można utworzyć katalogu w chmurze; sprawdź, czy element nadrzędny jest katalogiem i nie istnieje plik o tej samej nazwie",
+		"430": "Punkt końcowy WebDAV nie zwrócił katalogu ani danych synchronizacji; sprawdź adres i usługę WebDAV",
+		"431": "Automatyczna synchronizacja ponowi próbę o %s; można też synchronizować ręcznie"
 	}
 }

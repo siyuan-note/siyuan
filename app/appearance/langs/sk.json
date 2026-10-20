@@ -3372,6 +3372,13 @@
 		"421": "Iný pracovný priestor spracúva aktualizačné balíky. Skontrolujte aktualizácie znova neskôr",
 		"422": "Import Data.zip vypršal alebo sa zmenil; vyberte archív znova",
 		"423": "Nie je možné zlúčiť poznámkové bloky s odlišným stavom šifrovania alebo dátovými kľúčmi [%s]",
-		"424": "Obnova importu Data.zip zlyhala; zachovajte pracovný priestor a skúste obnovu znova"
+		"424": "Obnova importu Data.zip zlyhala; zachovajte pracovný priestor a skúste obnovu znova",
+		"425": "WebDAV odmietol požiadavku; skontrolujte adresu, protokol a port",
+		"426": "Overenie WebDAV zlyhalo; skontrolujte používateľské meno a heslo",
+		"427": "Účet WebDAV nemôže zapisovať do tohto adresára; skontrolujte oprávnenia",
+		"428": "Server tu neumožňuje vytvárať adresáre; skontrolujte cestu WebDAV a oprávnenia na zápis",
+		"429": "Cloudový adresár sa nedá vytvoriť; overte, že nadradená položka je adresár a neexistuje súbor s rovnakým názvom",
+		"430": "Koncový bod WebDAV nevrátil adresár ani údaje synchronizácie; skontrolujte adresu a službu WebDAV",
+		"431": "Automatická synchronizácia sa zopakuje o %s; môžete synchronizovať aj ručne"
 	}
 }

@@ -97,13 +97,15 @@ Android 工程默认位于思源仓库同级，可用 `--android-dir=<路径>` �
 * `./build.sh` （Windows 模拟器使用 `./build-win.sh`）
 * https://github.com/siyuan-note/siyuan-harmony
 
-ARM64 真机可在思源仓库根目录执行 `node scripts/harmony-dev-run.mjs`，构建移动端前端、打包资源、构建内核和已签名的调试 HAP，然后通过 HDC 安装并启动独立调试包。先在 DevEco Studio 为设备配置鸿蒙工程的 `debug` 签名，并准备原生 OCR 运行库和模型（参考鸿蒙仓库 README）。Windows 通过 WSL 在当前检出目录中执行 `kernel/harmony/build.sh`，WSL 内仍需具备下述鸿蒙 SDK 和修改后的 Go 工具链。脚本使用支持 ZIP 的 bsdtar（Windows 自带的 `tar`），不会自动卸载应用。
+ARM64 真机可在思源仓库根目录执行 `node scripts/harmony-dev-run.mjs`，构建移动端前端、打包资源、构建内核和已签名的调试 HAP，然后通过 HDC 安装并启动独立调试包。先在 DevEco Studio 为设备配置鸿蒙工程的 `debug` 签名，并准备原生 OCR 运行库和模型（参考鸿蒙仓库 README）。Windows 通过 WSL 在当前检出目录中执行内核构建，WSL 内需具备鸿蒙 SDK、Go 和 Python 3.10+。脚本使用支持 ZIP 的 bsdtar（Windows 自带的 `tar`），不会自动卸载应用。
 
 通过 `--deveco=<路径>`、`--harmony-dir=<路径>`、`--device=<连接标识>` 指定工具、工程和设备。`--skip-ui` 复用现有前端产物（需包含 mobile、desktop、export），`--skip-kernel` 复制现有 `kernel/harmony/libkernel.so` 和 `libkernel.h`，`--skip-hvigor` 则仅重新安装并启动已有的调试 HAP，跳过所有构建及资源复制。更多参数见 `node scripts/harmony-dev-run.mjs --help`。运行脚本测试：`node --test app/scripts/harmony-dev-run.test.js`。
 
 Windows 下，部署脚本会在临时工作区中将当前 `go.work` 的模块路径和本地替换路径转换为 WSL 路径，保留本地依赖覆盖，不修改原始工作区文件。如果已禁用工作区模式，WSL 构建同样使用 `GOWORK=off`。
 
-修改 Go 源码：
+部署脚本通过 `scripts/prepare-harmony-go.py` 将实际选中的 Go 工具链复制到 Linux 用户缓存（默认 `~/.cache/siyuan-harmony/go`），在副本中应用下面三处鸿蒙适配，再通过 `GOTOOLCHAIN=local` 固定使用该副本。系统 Go 和自动下载的共享工具链均保持不变；版本或适配输入变化时创建另一份缓存，不识别的源码或损坏的缓存会报错。工具链准备测试：`python3 -m unittest scripts/test_prepare_harmony_go.py`；Linux 下还会验证构建包装脚本的工具链选择流程，测试不编译内核。
+
+直接运行 `kernel/harmony/build.sh` 时，需自行修改实际使用的 Go 源码：
 
 1. go/src/runtime/tls_arm64.s
 

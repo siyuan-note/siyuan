@@ -101,9 +101,10 @@ export function main(args = process.argv.slice(2), execute = spawnSync, root = r
 
 Builds product=debug, buildMode=debug for ARM64 devices. Configure the debug
 signing profile in DevEco Studio for your device first. Uses build.sh and its
-Linux SDK / patched Go toolchain (see .github/CONTRIBUTING.md); Windows uses WSL
+Linux SDK / Python 3.10+ (see .github/CONTRIBUTING.md); Windows uses WSL
 against this checkout. Existing OCR native libraries and models are required.
 Windows go.work paths are translated in a temporary workspace, preserving local modules.
+The selected Go toolchain is copied and patched in the Linux user cache for Harmony.
 No uninstall is attempted if installation fails.`);
         return;
     }
@@ -182,12 +183,12 @@ No uninstall is attempted if installation fails.`);
                     }
                     // 去掉检出脚本的 CRLF，使用临时工作区保留本地依赖，不更改原始工作区文件。
                     run("wsl.exe", [...wsl, "--cd", linuxPath, "--exec", "env", `GOWORK=${gowork}`,
-                        "bash", "-e", "-o", "pipefail", "-c", "sed 's/\\r$//' build.sh | bash -e"], {stdio: "inherit"});
+                        "bash", "-e", "-o", "pipefail", "-c", "sed 's/\\r$//' ../../scripts/harmony-kernel-build.sh | bash -e -s -- ../../scripts/harmony-kernel-build.sh"], {stdio: "inherit"});
                 } finally {
                     removeTemp(workTemp);
                 }
             } else {
-                run("bash", ["-e", "build.sh"], {cwd: kernel, stdio: "inherit"});
+                run("bash", ["-e", path.join(root, "scripts/harmony-kernel-build.sh")], {cwd: kernel, stdio: "inherit"});
             }
         }
         checkKernel(path.join(kernel, "libkernel.so"));

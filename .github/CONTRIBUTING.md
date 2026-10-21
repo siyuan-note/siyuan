@@ -97,13 +97,15 @@ Only support compilation under Linux, need to install Harmony SDK, and need to m
 * `./build.sh` (`./build-win.sh` for Windows Emulator)
 * https://github.com/siyuan-note/siyuan-harmony
 
-For ARM64 devices, run `node scripts/harmony-dev-run.mjs` from the SiYuan repository root to build the mobile frontend, package resources, build the kernel and signed debug HAP, then install and launch the separate debug app through HDC. First configure the Harmony project's `debug` signing profile for your device in DevEco Studio and prepare the native OCR runtime and models (see the Harmony repository README). On Windows, WSL runs `kernel/harmony/build.sh` against the current checkout; the Harmony SDK and patched Go toolchain described below must be available inside WSL. The script requires ZIP-capable bsdtar (the bundled Windows `tar`) and never automatically uninstalls the app.
+For ARM64 devices, run `node scripts/harmony-dev-run.mjs` from the SiYuan repository root to build the mobile frontend, package resources, build the kernel and signed debug HAP, then install and launch the separate debug app through HDC. First configure the Harmony project's `debug` signing profile for your device in DevEco Studio and prepare the native OCR runtime and models (see the Harmony repository README). On Windows, WSL builds the kernel against the current checkout; the Harmony SDK, Go, and Python 3.10+ must be available inside WSL. The script requires ZIP-capable bsdtar (the bundled Windows `tar`) and never automatically uninstalls the app.
 
 Use `--deveco=<path>`, `--harmony-dir=<path>`, and `--device=<connect-key>` to select tools, project, and device. `--skip-ui` reuses existing frontend output (mobile, desktop, and export are required), `--skip-kernel` copies existing `kernel/harmony/libkernel.so` and `libkernel.h`, and `--skip-hvigor` only reinstalls and launches the existing debug HAP, skipping all builds and resource copies. See `node scripts/harmony-dev-run.mjs --help` for more options. Run script tests with `node --test app/scripts/harmony-dev-run.test.js`.
 
 On Windows, the deployment script translates active `go.work` module paths and local replacements into WSL paths in a temporary workspace. Local dependency overrides remain active; the original workspace files are not changed. If workspace mode is disabled, the WSL build also uses `GOWORK=off`.
 
-Modify Go source code:
+The deployment script uses `scripts/prepare-harmony-go.py` to copy the selected Go toolchain into the Linux user cache (default: `~/.cache/siyuan-harmony/go`), applies the three Harmony adaptations below to that copy, and pins it with `GOTOOLCHAIN=local`. The system installation and shared downloaded toolchains remain unchanged. Toolchain version or patch input changes produce another cache entry; unsupported sources and corrupted caches cause an error. Run preparation tests with `python3 -m unittest scripts/test_prepare_harmony_go.py`; on Linux, these also check toolchain selection in the build wrapper without compiling the kernel.
+
+When running `kernel/harmony/build.sh` directly, modify the Go sources actually used by the build:
 
 1. go/src/runtime/vim tls_arm64.s
 

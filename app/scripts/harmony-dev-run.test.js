@@ -148,6 +148,7 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
         if (command === "wsl.exe" && argv.includes("--cd")) {
             assert.equal(argv[argv.indexOf("--cd") + 1], "/linux/harmony");
             assert.ok(argv.includes("pipefail"));
+            assert.match(argv.at(-1), /harmony-kernel-build.sh/);
             const gowork = argv.find(value => value.startsWith("GOWORK="));
             if (workspace) {
                 temporaryWork = translated.get(gowork.slice("GOWORK=".length));

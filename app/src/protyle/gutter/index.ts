@@ -1,5 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
-import {copyBlockSelection} from "../util/blockClipboard";
+import {copyBlockSelection, cutBlockSelection} from "../util/blockClipboard";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1391,7 +1391,7 @@ export class Gutter {
                 icon: "iconCut",
                 click: () => {
                     focusBlock(selectsElement[0]);
-                    document.execCommand("cut");
+                    cutBlockSelection(selectsElement[0]);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2050,7 +2050,7 @@ export class Gutter {
                 accelerator: "⌘X",
                 click: () => {
                     focusBlock(nodeElement);
-                    document.execCommand("cut");
+                    cutBlockSelection(nodeElement);
                 }
             }).element);
         }

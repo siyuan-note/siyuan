@@ -89,8 +89,8 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         let selectedLevel: unknown;
         target.onSettingsMenu(anchor, (level: unknown) => selectedLevel = level);
         assert.deepEqual((expandItem.submenu as IMenu[]).map(entry => entry.id),
-            ["level1", "level2", "level3", "level4", "level5", "level6", "separator_all", "expandAll", "foldAll"]);
-        (expandItem.submenu as IMenu[])[2].click(undefined, undefined);
+            ["expandAll", "foldAll", "separator_all", "level1", "level2", "level3", "level4", "level5", "level6"]);
+        (expandItem.submenu as IMenu[]).find(entry => entry.id === "level3").click(undefined, undefined);
         assert.equal(selectedLevel, 3, "narrow desktop and mobile views retain global expansion in More");
         (defaultItem.submenu as IMenu[]).find(entry => entry.id === "rounded").click(undefined, undefined);
         assert.deepEqual(defaults, ["rounded"]);

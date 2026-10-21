@@ -740,12 +740,12 @@ export class ListMindmapView {
             const placeholder = new Option(this.label("expandLevel"), "");
             placeholder.disabled = true;
             this.levelSelect.replaceChildren(placeholder);
+            this.levelSelect.add(new Option(this.label("expandAll"), "expandAll"));
+            this.levelSelect.add(new Option(this.label("foldAll"), "foldAll"));
             for (let level = 1; level <= 6; level++) {
                 this.levelSelect.add(new Option(this.label("listMindmapExpandToLevel").replace("${level}", String(level)),
                     String(level)));
             }
-            this.levelSelect.add(new Option(this.label("expandAll"), "expandAll"));
-            this.levelSelect.add(new Option(this.label("foldAll"), "foldAll"));
             this.levelSelect.value = "";
         }
         const descendants = new Map<string, number>();

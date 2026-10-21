@@ -61,7 +61,7 @@ test("six-level expansion handles deep trees and invalid levels leave nodes unto
     }
 });
 
-test("desktop and mobile menus offer six levels without icon placeholders followed by expand and collapse actions", () => {
+test("desktop and mobile menus put expand and collapse actions before the six levels without icon placeholders", () => {
     const source = createSourceFile("index.ts", readFileSync("src/protyle/render/listMindmap/index.ts", "utf8"),
         ScriptTarget.ES2021, true);
     let callback = "";
@@ -95,12 +95,12 @@ test("desktop and mobile menus offer six levels without icon placeholders follow
         }).outputText, context);
         open({closest: (): null => null, setAttribute() {}, getBoundingClientRect: () => ({left: 10, bottom: 30, height: 20})},
             (level: ListMindmapFoldTarget) => selected.push(level));
-        assert.deepEqual(entries.map(item => item.id), [...Array.from({length: 6}, (_, i) => `level${i + 1}`),
-            "separator_all", "expandAll", "foldAll"]);
-        entries.slice(0, 6).forEach(item => assert.equal(item.iconHTML, ""));
-        entries[5].click();
-        entries[7].click();
+        assert.deepEqual(entries.map(item => item.id), ["expandAll", "foldAll", "separator_all",
+            ...Array.from({length: 6}, (_, i) => `level${i + 1}`)]);
+        entries.slice(3).forEach(item => assert.equal(item.iconHTML, ""));
         entries[8].click();
+        entries[0].click();
+        entries[1].click();
         assert.deepEqual(selected, [6, "expandAll", "foldAll"]);
         assert.deepEqual(JSON.parse(JSON.stringify(positions)), mobile ? ["bottom"] : [{x: 10, y: 30, h: 20}]);
     }

@@ -2998,7 +2998,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(list.outerHTML, persistedBeforeFold);
     const levelSelect = host.querySelector<HTMLSelectElement>(".mindmap-view__level-select");
     check.deepEqual(Array.from(levelSelect.options).map(option => option.value),
-        ["", "1", "2", "3", "4", "5", "6", "expandAll", "foldAll"]);
+        ["", "expandAll", "foldAll", "1", "2", "3", "4", "5", "6"]);
     const levelChild = model.nodes.get(alpha).children[0].id;
     readonly.selectNode(levelChild);
     const scaleBeforeLevel = readonly.scale;

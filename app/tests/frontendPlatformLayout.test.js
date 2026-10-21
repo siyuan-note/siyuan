@@ -71,6 +71,12 @@ const browserCases = ({css, mobile}) => {
                         check.ok(button.right <= controls.left - 4, `${label} functional and window buttons do not overlap`);
                         check.ok(Math.abs((header.top + header.bottom - controls.top - controls.bottom) / 2) <= .5,
                             `${label} header and window controls share their vertical center`);
+                        const icon = document.querySelector(".block__icon svg").getBoundingClientRect();
+                        for (const nativeIcon of document.querySelectorAll("#windowControls svg")) {
+                            const rect = nativeIcon.getBoundingClientRect();
+                            check.ok(Math.abs((icon.top + icon.bottom - rect.top - rect.bottom) / 2) < .1,
+                                `${label} functional and native SVG icons share their vertical center`);
+                        }
                     }
                 }
             }

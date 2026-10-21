@@ -218,6 +218,11 @@ body.body--harmony {
       cursor: not-allowed;
     }
 
+    &--win,
+    &--close {
+      align-items: center;
+    }
+
     &--win {
       padding: var(--b3-ui-toolbar-control-padding, 9px) 13px;
       margin: 0;

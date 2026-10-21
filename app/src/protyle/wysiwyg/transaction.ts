@@ -2705,6 +2705,12 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         element.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(getHTML()))));
     }
+    // 插入相邻块等操作可能在同 ID 的其他副本上遗留编辑标记，本次更新只能保护实际修改的副本。
+    protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach(item => {
+        if (item !== element) {
+            item.removeAttribute(Constants.ATTRIBUTE_EDITING);
+        }
+    });
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     const doOperations: IOperation[] = [{
         id,

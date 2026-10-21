@@ -63,12 +63,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
-        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
+        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
         typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
-        typeof import("../util/hasClosest") & typeof import("../wysiwyg/list") & typeof import("../wysiwyg/taskListMarker");
+        typeof import("../util/hasClosest") & typeof import("../wysiwyg/getBlock") & typeof import("../wysiwyg/list") & typeof import("../wysiwyg/taskListMarker");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -191,11 +191,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         cleanListMindmapHTML: (html: string) => html, cleanHeadingNumberHTML: (html: string) => html,
         cleanBlockSelectionModeHTML: (html: string) => html,
         getVisibleFoldHeadingHTML: (html: string) => { snapshotParses++; return html; },
-        getEmbedChildOperationContext: (element: Element) => {
-            const resultElement = element.closest?.(".protyle-wysiwyg__embed");
-            return resultElement ? {resultElement} : undefined;
-        },
-        isInEmbedBlock: (element: Element) => element.closest(".protyle-wysiwyg__embed"),
+        getEmbedChildOperationContext: api.getEmbedChildOperationContext,
+        isInEmbedBlock: api.isInEmbedBlock,
         captureBlockSelectionModeState: noop, restoreBlockSelectionModeState: noop,
         disposeCustomBlocksInElement: noop, processRender: noop, highlightRender: noop,
         focusRestoredBlockSelectionMode: noop, syncTrackedRanges: noop, queueTransactionBatch: noop,
@@ -487,8 +484,13 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         const embed = document.createElement("div");
         embed.className = "protyle-wysiwyg__embed";
         embed.dataset.id = table.dataset.nodeId;
+        embed.dataset.allowChildOperation = "true";
         embed.innerHTML = table.outerHTML;
-        wysiwyg.appendChild(embed);
+        const embedBlock = document.createElement("div");
+        embedBlock.dataset.type = "NodeBlockQueryEmbed";
+        embedBlock.dataset.nodeId = "embed";
+        embedBlock.appendChild(embed);
+        wysiwyg.appendChild(embedBlock);
         const embedded = embed.querySelector<HTMLElement>('[data-type="NodeTable"]');
         const source = editEmbedded ? embedded : table;
         const other = editEmbedded ? table : embedded;
@@ -521,6 +523,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             isOnlyMeta: absent, repairHiddenTabSelection: noop, clearSelect: noop,
             countBlockWord: noop, hideAllElements: noop, globalClickHideMenu: noop,
             dragOverScroll: noop, stopScrollAnimation: noop,
+            updateTransaction: (protyle: IProtyle, node: Element, oldHTML: string) => {
+                const before = changes.length;
+                transactionAPI.updateTransaction(protyle, node, oldHTML);
+                check.equal(changes.length, before + 1, "resizing submits the changed table snapshot");
+                transactionAPI.promiseTransaction({protyle, doOperations: changes.at(-1).doOperations});
+            },
         };
         element.style.cssText = "width:640px;height:480px";
         wysiwyg.style.cssText = "padding:20px 64px;box-sizing:border-box";
@@ -567,6 +575,36 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         mouse(cells[4], "mouseup");
         check.deepEqual(selectedRanges, [[cells[1], cells[4]]]);
         check.equal(wysiwyg.classList.contains("fn__pointer-none"), false);
+        for (const [embeddedSource, allowChildOperation] of [[false, false], [true, false], [false, true], [true, true]]) {
+            const sourceTable = wysiwyg.querySelector<HTMLElement>('[data-type="NodeTable"]');
+            sourceTable.querySelectorAll("th, td").forEach(cell => {cell.textContent = "";});
+            sourceTable.setAttribute("colgroup", Array.from(sourceTable.querySelectorAll("col"))
+                .map(column => column.getAttribute("style") || "").join("|"));
+            const embedBlock = document.createElement("div");
+            embedBlock.dataset.type = "NodeBlockQueryEmbed";
+            embedBlock.dataset.nodeId = "embed";
+            embedBlock.innerHTML = `<div class="protyle-wysiwyg__embed" data-id="${sourceTable.dataset.nodeId}" data-allow-child-operation="${allowChildOperation}">${sourceTable.outerHTML}</div>`;
+            wysiwyg.appendChild(embedBlock);
+            const embeddedTable = embedBlock.querySelector<HTMLElement>('[data-type="NodeTable"]');
+            const source = embeddedSource ? embeddedTable : sourceTable;
+            // 在原块旁插入嵌入块后，未修改的副本可能带有上一笔事务遗留的编辑标记。
+            (embeddedSource ? sourceTable : embeddedTable).setAttribute("data-editing", "true");
+            const handle = source.querySelector<HTMLElement>(".table__resize");
+            const beforeResizeChanges = changes.length;
+            const beforeWidth = source.querySelector<HTMLElement>("col").style.width;
+            const resizeX = handle.getBoundingClientRect().left + handle.getBoundingClientRect().width / 2 + 80;
+            handle.dataset.colIndex = "0";
+            mouse(handle, "mousedown");
+            document.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: resizeX, clientY: 120}));
+            document.dispatchEvent(new MouseEvent("mouseup", {bubbles: true, clientX: resizeX, clientY: 120}));
+            check.deepEqual(errors, []);
+            check.equal(changes.length, beforeResizeChanges + 1, "the complete mouse gesture submits one resize transaction");
+            const copies = Array.from(wysiwyg.querySelectorAll<HTMLElement>('[data-type="NodeTable"] col:first-child'));
+            check.equal(copies.length, 2);
+            check.notEqual(copies[0].style.width, beforeWidth, "the gesture changes the rendered column width");
+            check.equal(copies[0].style.width, copies[1].style.width, "full mouse resize synchronizes source and embed widths");
+            embedBlock.remove();
+        }
         window.removeEventListener("error", collectError);
         await finish(element);
     }

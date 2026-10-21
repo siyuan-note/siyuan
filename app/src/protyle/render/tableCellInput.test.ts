@@ -191,7 +191,10 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         cleanListMindmapHTML: (html: string) => html, cleanHeadingNumberHTML: (html: string) => html,
         cleanBlockSelectionModeHTML: (html: string) => html,
         getVisibleFoldHeadingHTML: (html: string) => { snapshotParses++; return html; },
-        getEmbedChildOperationContext: noop,
+        getEmbedChildOperationContext: (element: Element) => {
+            const resultElement = element.closest?.(".protyle-wysiwyg__embed");
+            return resultElement ? {resultElement} : undefined;
+        },
         isInEmbedBlock: (element: Element) => element.closest(".protyle-wysiwyg__embed"),
         captureBlockSelectionModeState: noop, restoreBlockSelectionModeState: noop,
         disposeCustomBlocksInElement: noop, processRender: noop, highlightRender: noop,
@@ -479,6 +482,34 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     }
 
     // 执行外层编辑器的完整鼠标监听器，区分单元格点击与真正的跨单元格拖选。
+    for (const editEmbedded of [false, true]) {
+        const {owner, element, wysiwyg, table} = fixture();
+        const embed = document.createElement("div");
+        embed.className = "protyle-wysiwyg__embed";
+        embed.dataset.id = table.dataset.nodeId;
+        embed.innerHTML = table.outerHTML;
+        wysiwyg.appendChild(embed);
+        const embedded = embed.querySelector<HTMLElement>('[data-type="NodeTable"]');
+        const source = editEmbedded ? embedded : table;
+        const other = editEmbedded ? table : embedded;
+        const range = document.createRange();
+        range.selectNodeContents(other.querySelector("th"));
+        range.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        source.querySelector<HTMLElement>("col").style.width = "180px";
+        source.setAttribute("data-editing", "true");
+        transactionAPI.promiseTransaction({protyle: owner, doOperations: [{
+            action: "update", id: source.dataset.nodeId, data: api.getTableBlockHTML(source),
+        }]});
+        check.ok(source.isConnected, "column resizing preserves the explicitly edited occurrence");
+        check.equal(source.querySelector<HTMLElement>("col").style.width, "180px");
+        check.equal(other.isConnected, false, "a stale text selection must not prevent the other occurrence from refreshing");
+        check.equal(wysiwyg.querySelectorAll('[data-type="NodeTable"] col[style*="180px"]').length, 2,
+            "source and embedded column widths synchronize in both directions");
+        element.remove();
+    }
+
     for (const mobile of [false, true]) {
         const {owner, element, wysiwyg, table} = fixture();
         const absent = () => false;
@@ -660,6 +691,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
 
     {
         const {owner, element, wysiwyg, table} = fixture();
+        snapshotParses = 0;
         await open(owner, table.querySelector("th"));
         const host = table.querySelector(".table__cell-editor");
         const operation = {action: "update", id: table.dataset.nodeId, data: api.getTableBlockHTML(table)};

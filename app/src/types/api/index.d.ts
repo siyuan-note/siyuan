@@ -2322,6 +2322,8 @@ export type SystemCustomFont = { "aliases"?: Array<string>; "displayName": strin
 
 export type SystemD3 = { "arrow": boolean; "centerStrength": number; "collideRadius": number; "collideStrength": number; "lineOpacity": number; "linkDistance": number; "linkWidth": number; "nodeSize": number; };
 
+export type SystemDownloadUpdateRequestInput = { "version": string; };
+
 export type SystemEmoji = { "description": string; "description_ja_jp": string; "description_zh_cn": string; "keywords": string; "unicode": string; };
 
 export type SystemEmojiGroup = { "id": string; "items": Array<SystemEmoji | null> | null; "title": string; "title_ja_jp": string; "title_zh_cn": string; };
@@ -7715,6 +7717,19 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemOnboarding | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 异步下载当前更新通道中指定版本的桌面安装包，不修改自动下载设置。
+     * version 必须与该通道当前可用的新版本完全一致；不接受下载 URL，不支持的运行环境或缺少校验值时返回 -1。
+     * 成功返回 null，进度和完成状态沿用更新通知；下载包通过校验后可供退出安装，自动下载关闭时仍可使用。
+     * 需要管理员和可写权限；已有下载任务时复用下载互斥保护，并通知正在下载。
+     */
+    "/api/system/downloadUpdate": {
+        request: SystemDownloadUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

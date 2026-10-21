@@ -3386,6 +3386,7 @@
 		"433": "Sinkronisasi dibatalkan; berkas yang selesai dipertahankan. Sinkronkan lagi untuk menyelesaikan",
 		"434": "Ruang disk tidak cukup untuk memulihkan berkas ini: diperlukan %s, tersedia %s",
 		"435": "Berkas sementara dari sinkronisasi terputus dihapus, mengosongkan %s",
-		"436": "Menerapkan perubahan tersinkron; penyuntingan dapat dilanjutkan setelah pemrosesan atau pemulihan pembatalan selesai"
+		"436": "Menerapkan perubahan tersinkron; penyuntingan dapat dilanjutkan setelah pemrosesan atau pemulihan pembatalan selesai",
+		"437": "Unduh versi ini"
 	}
 }

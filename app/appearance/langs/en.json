@@ -3386,6 +3386,7 @@
 		"433": "Sync canceled; completed files were kept. Sync again to finish",
 		"434": "Not enough disk space to restore this file: required %s, available %s",
 		"435": "Removed interrupted sync temporary files, freeing %s",
-		"436": "Applying synced changes; editing resumes after processing or cancellation recovery finishes"
+		"436": "Applying synced changes; editing resumes after processing or cancellation recovery finishes",
+		"437": "Download this version"
 	}
 }

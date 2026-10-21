@@ -3386,6 +3386,7 @@
 		"433": "Sincronización cancelada; se conservaron los archivos completados. Sincronice de nuevo para terminar",
 		"434": "No hay espacio suficiente para restaurar este archivo: necesario %s, disponible %s",
 		"435": "Se eliminaron los archivos temporales de la sincronización interrumpida, liberando %s",
-		"436": "Aplicando cambios sincronizados; podrás editar cuando termine el procesamiento o la recuperación tras cancelar"
+		"436": "Aplicando cambios sincronizados; podrás editar cuando termine el procesamiento o la recuperación tras cancelar",
+		"437": "Descargar esta versión"
 	}
 }

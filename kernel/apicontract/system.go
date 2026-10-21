@@ -28,6 +28,10 @@ type SystemChangelogData struct {
 type SystemCheckUpdateRequest struct {
 	ShowMsg bool `json:"showMsg"`
 }
+
+type SystemDownloadUpdateRequest struct {
+	Version string `json:"version"`
+}
 type SystemZipData struct {
 	Zip string `json:"zip"`
 }

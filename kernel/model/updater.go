@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"path/filepath"
@@ -60,7 +61,7 @@ var errUpdatePackageUnavailable = errors.New("update package is unavailable")
 func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	defer logging.Recover()
 
-	if skipNewVerInstallPkg() {
+	if skipNewVerInstallPkg() || !Conf.LoadSystem().DownloadInstallPkg {
 		return
 	}
 
@@ -79,6 +80,10 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
+	installUpdatePackage(pkg)
+}
+
+func installUpdatePackage(pkg *installPackageDownload) {
 	existingPkgPath, err := reuseInstallPackage(sharedInstallPackageDir(), &pkg.Metadata, Conf.CookieKey)
 	if err != nil {
 		logging.LogErrorf("prepare existing install package failed: %s", err)
@@ -108,7 +113,10 @@ func getUpdatePkg() (ret *installPackageDownload, err error) {
 	if err != nil {
 		return
 	}
+	return getReleaseInstallPackage(release)
+}
 
+func getReleaseInstallPackage(release *updateRelease) (ret *installPackageDownload, err error) {
 	if isVersionUpToDate(release.Version) {
 		err = fmt.Errorf("version is up to date")
 		return
@@ -139,6 +147,35 @@ func getUpdatePkg() (ret *installPackageDownload, err error) {
 		URLs: append([]string(nil), pkg.URLs...),
 	}
 	return
+}
+
+// DownloadUpdate 只下载当前通道中与通知版本一致的安装包，不修改自动下载设置。
+func DownloadUpdate(version string) error {
+	if skipNewVerInstallPkg() || version == "" {
+		return errUpdatePackageUnavailable
+	}
+	release, err := getUpdateRelease(false)
+	if err != nil {
+		return err
+	}
+	if release.Version != version {
+		pushNewVersionNotification(release)
+		return errUpdatePackageUnavailable
+	}
+	pkg, err := getReleaseInstallPackage(release)
+	if err != nil {
+		return err
+	}
+	go func() {
+		defer logging.Recover()
+		if !checkDownloadInstallPkgLock.TryLock() {
+			util.PushUpdateMsg("update-pkg-downloading", Conf.Language(421), 7000)
+			return
+		}
+		defer checkDownloadInstallPkgLock.Unlock()
+		installUpdatePackage(pkg)
+	}()
+	return nil
 }
 
 func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err error) {
@@ -323,7 +360,14 @@ func CheckUpdate(showMsg bool) {
 
 func pushNewVersionNotification(release *updateRelease) {
 	releaseLink := "<a href=\"" + release.ReleaseURL + "\">" + release.ReleaseURL + "</a>"
-	util.PushUpdateMsg("update-notify", fmt.Sprintf(Conf.Language(9), releaseLink), 15000)
+	message := fmt.Sprintf(Conf.Language(9), releaseLink)
+	if !skipNewVerInstallPkg() {
+		if _, err := getReleaseInstallPackage(release); err == nil {
+			message += fmt.Sprintf(` <button type="button" class="b3-button b3-button--outline" data-type="download-update" data-version="%s">%s</button>`,
+				html.EscapeString(release.Version), html.EscapeString(Conf.Language(437)))
+		}
+	}
+	util.PushUpdateMsg("update-notify", message, 15000)
 }
 
 func isVersionUpToDate(releaseVer string) bool {
@@ -351,7 +395,7 @@ func skipNewVerInstallPkg() bool {
 		}
 	}
 
-	if skipInstallPkgPlatformCached == 1 || !confSystemSnapshot.DownloadInstallPkg {
+	if skipInstallPkgPlatformCached == 1 {
 		return true
 	}
 	return false

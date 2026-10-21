@@ -3386,6 +3386,7 @@
 		"433": "Sincronizzazione annullata; i file completati sono stati conservati. Sincronizzare di nuovo per terminare",
 		"434": "Spazio su disco insufficiente per ripristinare questo file: necessario %s, disponibile %s",
 		"435": "File temporanei della sincronizzazione interrotta rimossi, liberati %s",
-		"436": "Applicazione delle modifiche sincronizzate; la modifica riprende al termine dell’elaborazione o del ripristino dopo l’annullamento"
+		"436": "Applicazione delle modifiche sincronizzate; la modifica riprende al termine dell’elaborazione o del ripristino dopo l’annullamento",
+		"437": "Scarica questa versione"
 	}
 }

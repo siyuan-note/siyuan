@@ -3386,6 +3386,7 @@
 		"433": "Synchronizácia zrušená; dokončené súbory zostali zachované. Na dokončenie spustite synchronizáciu znova",
 		"434": "Nedostatok miesta na obnovenie súboru: potrebné %s, dostupné %s",
 		"435": "Dočasné súbory prerušenej synchronizácie odstránené, uvoľnené %s",
-		"436": "Používajú sa synchronizované zmeny; úpravy budú dostupné po spracovaní alebo obnovení po zrušení"
+		"436": "Používajú sa synchronizované zmeny; úpravy budú dostupné po spracovaní alebo obnovení po zrušení",
+		"437": "Stiahnuť túto verziu"
 	}
 }

@@ -3386,6 +3386,7 @@
 		"433": "Synchronizacja anulowana; ukończone pliki zostały zachowane. Uruchom synchronizację ponownie, aby dokończyć",
 		"434": "Za mało miejsca na przywrócenie tego pliku: wymagane %s, dostępne %s",
 		"435": "Usunięto pliki tymczasowe przerwanej synchronizacji, zwolniono %s",
-		"436": "Trwa stosowanie zsynchronizowanych zmian; edycja będzie dostępna po zakończeniu przetwarzania lub przywracania po anulowaniu"
+		"436": "Trwa stosowanie zsynchronizowanych zmian; edycja będzie dostępna po zakończeniu przetwarzania lub przywracania po anulowaniu",
+		"437": "Pobierz tę wersję"
 	}
 }

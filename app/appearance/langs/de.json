@@ -3386,6 +3386,7 @@
 		"433": "Synchronisation abgebrochen; fertige Dateien bleiben erhalten. Zum Abschließen erneut synchronisieren",
 		"434": "Nicht genügend Speicherplatz für diese Datei: benötigt %s, verfügbar %s",
 		"435": "Temporäre Dateien der unterbrochenen Synchronisation entfernt, %s freigegeben",
-		"436": "Synchronisierte Änderungen werden angewendet; nach der Verarbeitung oder Wiederherstellung nach Abbruch ist die Bearbeitung wieder möglich"
+		"436": "Synchronisierte Änderungen werden angewendet; nach der Verarbeitung oder Wiederherstellung nach Abbruch ist die Bearbeitung wieder möglich",
+		"437": "Diese Version herunterladen"
 	}
 }

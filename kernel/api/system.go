@@ -430,6 +430,14 @@ var checkUpdate = contractHandler(apicontract.SystemCheckUpdate, func(c *gin.Con
 	return
 })
 
+var downloadUpdate = contractHandler(apicontract.SystemDownloadUpdate, func(c *gin.Context, request apicontract.SystemDownloadUpdateRequest) apicontract.Response[apicontract.Null] {
+	if err := model.DownloadUpdate(request.Version); err != nil {
+		logging.LogWarnf("download selected update failed: %s", err)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(104))
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
 var exportLog = contractHandler(apicontract.SystemExportLog, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemZipData]) {
 	ret = apicontract.Success(apicontract.SystemZipData{})
 

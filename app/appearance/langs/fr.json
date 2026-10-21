@@ -3386,6 +3386,7 @@
 		"433": "Synchronisation annulée ; les fichiers terminés ont été conservés. Relancez la synchronisation pour finir",
 		"434": "Espace disque insuffisant pour restaurer ce fichier : nécessaire %s, disponible %s",
 		"435": "Fichiers temporaires de synchronisation interrompue supprimés, %s libérés",
-		"436": "Application des modifications synchronisées ; la modification reprend après le traitement ou la récupération suivant une annulation"
+		"436": "Application des modifications synchronisées ; la modification reprend après le traitement ou la récupération suivant une annulation",
+		"437": "Télécharger cette version"
 	}
 }

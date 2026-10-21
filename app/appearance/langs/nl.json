@@ -3386,6 +3386,7 @@
 		"433": "Synchronisatie geannuleerd; voltooide bestanden zijn behouden. Synchroniseer opnieuw om af te ronden",
 		"434": "Onvoldoende schijfruimte om dit bestand te herstellen: nodig %s, beschikbaar %s",
 		"435": "Tijdelijke bestanden van de onderbroken synchronisatie verwijderd, %s vrijgemaakt",
-		"436": "Gesynchroniseerde wijzigingen worden toegepast; bewerken kan weer na de verwerking of het herstel na annulering"
+		"436": "Gesynchroniseerde wijzigingen worden toegepast; bewerken kan weer na de verwerking of het herstel na annulering",
+		"437": "Deze versie downloaden"
 	}
 }

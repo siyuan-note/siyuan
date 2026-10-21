@@ -87,6 +87,25 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 	compareSettingPayload(t, "", systemCustomFontPayload)
 }
 
+func TestAPIContractSystemDownloadUpdate(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = previousConf })
+	for _, body := range []string{`{}`, `{"version":null}`, `{"version":42}`, `{"version":""}`} {
+		recorder := systemContractRequest(t, "POST", "downloadUpdate", downloadUpdate, strings.NewReader(body))
+		var result struct {
+			Code int `json:"code"`
+			Data any `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Code != -1 || result.Data != nil {
+			t.Fatalf("invalid update version accepted: %s", recorder.Body.String())
+		}
+	}
+}
+
 func TestAPIContractSystemRuntimeInfo(t *testing.T) {
 	previousWorkspace, previousContainer := util.WorkspaceDir, util.Container
 	util.WorkspaceDir = "/private/runtime-info-workspace"

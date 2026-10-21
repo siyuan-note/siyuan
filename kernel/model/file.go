@@ -2547,11 +2547,15 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 	if IsEncryptedBox(tree.Box) {
 		boundary = tree.Box
 	}
-	collections, err := av.BlockCollectionViewIDsInBox(boundary)
-	if err != nil {
-		return err
+	collects := false
+	if !av.BlockCollectionIndexKnownEmpty(boundary) {
+		index, indexErr := av.BlockCollectionIndexInBox(boundary)
+		if indexErr != nil {
+			return indexErr
+		}
+		collects = index.MatchesDocument(tree.Box, tree.ID, tree.Path)
 	}
-	if syncWrite || len(collections) > 0 {
+	if syncWrite || collects {
 		if err = PerformTxSync(transaction); nil != err {
 			// 事务在写文件前会更新块树，失败时清理未落盘文档的索引。
 			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)

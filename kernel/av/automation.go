@@ -47,6 +47,25 @@ type AutomationBlockAttribute struct {
 	Value        string `json:"value,omitempty"`
 }
 
+func (source *AutomationBlockSource) MatchesDocument(notebookID, documentID, documentPath string) bool {
+	if source == nil {
+		return false
+	}
+	if slices.Contains(source.NotebookIDs, notebookID) {
+		return true
+	}
+	for _, id := range source.DocumentIDs {
+		if documentID == id {
+			return true
+		}
+		if _, suffix, found := strings.Cut(documentPath, "/"+id+"/"); found &&
+			(source.DocumentDepth == nil || strings.Count(suffix, "/")+1 <= *source.DocumentDepth) {
+			return true
+		}
+	}
+	return false
+}
+
 // IsAutomationBlockType 校验主类型或主类型与子类型的组合，提示块允许自定义类型名称。
 func IsAutomationBlockType(value string) bool {
 	typ, sub, qualified := strings.Cut(value, ":")

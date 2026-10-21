@@ -25,6 +25,7 @@ import (
 )
 
 type attributeViewCollectionState struct {
+	indexes   map[string]*av.BlockCollectionIndex
 	checked   map[string]bool
 	before    map[string]*parse.Tree
 	views     map[string]*av.AttributeView
@@ -34,22 +35,7 @@ type attributeViewCollectionState struct {
 }
 
 func collectionScopeMatches(source *av.AutomationBlockSource, tree *parse.Tree) bool {
-	if source == nil || tree == nil {
-		return false
-	}
-	if slices.Contains(source.NotebookIDs, tree.Box) {
-		return true
-	}
-	for _, id := range source.DocumentIDs {
-		if tree.ID == id {
-			return true
-		}
-		if _, suffix, found := strings.Cut(tree.Path, "/"+id+"/"); found &&
-			(source.DocumentDepth == nil || strings.Count(suffix, "/")+1 <= *source.DocumentDepth) {
-			return true
-		}
-	}
-	return false
+	return tree != nil && source.MatchesDocument(tree.Box, tree.ID, tree.Path)
 }
 
 func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node, attributes []func(*ast.Node) bool) bool {
@@ -302,7 +288,7 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 func (tx *Transaction) collectionState() *attributeViewCollectionState {
 	if tx.attributeViewCollections == nil {
 		tx.attributeViewCollections = &attributeViewCollectionState{checked: map[string]bool{}, before: map[string]*parse.Tree{},
-			views: map[string]*av.AttributeView{}, requested: map[string]map[string][]string{}}
+			views: map[string]*av.AttributeView{}, requested: map[string]map[string][]string{}, indexes: map[string]*av.BlockCollectionIndex{}}
 	}
 	return tx.attributeViewCollections
 }
@@ -323,19 +309,25 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 	if !observesBlocks {
 		return nil
 	}
-	state := tx.collectionState()
 	defer func() {
 		if captureErr != nil {
-			state.err = captureErr
+			tx.collectionState().err = captureErr
 		}
 	}()
-	if state.running || state.checked[tree.ID] {
+	state := tx.attributeViewCollections
+	if state != nil && (state.running || state.checked[tree.ID] || state.err != nil) {
 		return state.err
 	}
-	state.checked[tree.ID] = true
 	boxID := ""
 	if IsEncryptedBox(tree.Box) {
 		boxID = tree.Box
+	}
+	var index *av.BlockCollectionIndex
+	if state != nil {
+		index = state.indexes[boxID]
+	}
+	if index == nil && av.BlockCollectionIndexKnownEmpty(boxID) {
+		return nil
 	}
 	if boxID != "" {
 		if tx.attributeViewRollback == nil {
@@ -348,14 +340,27 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 			tx.attributeViewRollback.leases[boxID] = true
 		}
 	}
-	ids, err := av.BlockCollectionViewIDsInBox(boxID)
-	if err != nil {
-		return err
+	if index == nil || !index.Current() {
+		var err error
+		index, err = av.BlockCollectionIndexInBox(boxID)
+		if err != nil {
+			return err
+		}
+		if index.Empty() {
+			return nil
+		}
+		state = tx.collectionState()
+		state.indexes[boxID] = index
+	}
+	state.checked[tree.ID] = true
+	if !index.MatchesDocument(tree.Box, tree.ID, tree.Path) {
+		return nil
 	}
 	matched := false
-	for _, id := range ids {
+	for id := range index.ViewIDsForDocument(tree.Box, tree.ID, tree.Path) {
 		view := state.views[boxID+"/"+id]
 		if view == nil {
+			var err error
 			view, err = av.ParseAttributeViewForIndexInBox(id, boxID)
 			if errors.Is(err, av.ErrViewNotFound) {
 				continue
@@ -729,6 +734,7 @@ func (tx *Transaction) rollbackCollectionCreatedTrees() {
 // 属性 API 仍不生成编辑器撤销记录，但与自动收集共同提交；没有收集规则时沿用普通属性路径。
 func performCollectionAttributeOperations(attrs []map[string]any, batch bool) (bool, error) {
 	before := map[string]*parse.Tree{}
+	indexes := map[string]*av.BlockCollectionIndex{}
 	active := false
 	for _, item := range attrs {
 		id := item["id"].(string)
@@ -741,11 +747,18 @@ func performCollectionAttributeOperations(attrs []map[string]any, batch bool) (b
 		if IsEncryptedBox(tree.Box) {
 			boxID = tree.Box
 		}
-		ids, err := av.BlockCollectionViewIDsInBox(boxID)
-		if err != nil {
-			return false, err
+		index := indexes[boxID]
+		if index == nil && av.BlockCollectionIndexKnownEmpty(boxID) {
+			continue
 		}
-		active = active || len(ids) > 0
+		if index == nil || !index.Current() {
+			index, err = av.BlockCollectionIndexInBox(boxID)
+			if err != nil {
+				return false, err
+			}
+			indexes[boxID] = index
+		}
+		active = active || index.MatchesDocument(tree.Box, tree.ID, tree.Path)
 	}
 	if !active {
 		return false, nil

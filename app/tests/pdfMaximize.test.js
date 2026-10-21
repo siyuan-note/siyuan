@@ -91,7 +91,8 @@ async function runElectron() {
                     check(outer.classList.contains("pdf__outer--maximized"), "maximize state missing");
                     check(button.getAttribute("aria-label") === "restore" && button.getAttribute("aria-pressed") === "true", "restore entry missing");
                     const rect = outer.getBoundingClientRect();
-                    check(rect.left === 0 && rect.top === 32 && rect.width === innerWidth, "pane did not fill available width");
+                    check(rect.left === 0 && rect.top === 32 && rect.width === document.documentElement.clientWidth,
+                        "pane did not fill available width");
                     check(pdf.pdfDocument === documentInstance, "PDF was reloaded");
                     assertPosition(before, "maximize");
                     button.click(); await wait();
@@ -112,7 +113,9 @@ async function runElectron() {
                 const f = window.pdfPaneFixture;
                 await f.wait(); await f.wait();
                 f.assertPosition(f.anchor, "viewport resize");
-                f.check(f.outer.clientWidth === innerWidth, "viewport width not followed");
+                f.check(f.outer.clientWidth === document.documentElement.clientWidth,
+                    "viewport width not followed: " + JSON.stringify({pane: f.outer.clientWidth,
+                        viewport: document.documentElement.clientWidth, window: innerWidth}));
             })()`);
         }
         await win.webContents.executeJavaScript(`(async () => {
@@ -160,7 +163,7 @@ if (process.versions.electron && process.type === "browser") {
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-pdf-maximize-"));
-            fs.rmSync(profile, {recursive: true, force: true});
+            fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
         }
     });
 }

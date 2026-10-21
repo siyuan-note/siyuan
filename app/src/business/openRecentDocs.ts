@@ -115,7 +115,7 @@ export const openRecentDocs = (openOnly = false) => {
 <div class="fn__flex-1"></div>
 <input spellcheck="false" placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__size200">
 <span class="fn__space"></span>
-<div class="fn__flex-center">
+<div class="fn__flex fn__flex-center">
     <select class="b3-select" id="recentDocsSort">
         <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
         <option value="created">${window.siyuan.languages.recentCreated}</option>

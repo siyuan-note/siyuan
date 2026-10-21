@@ -8,6 +8,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -184,4 +185,113 @@ func newDocBlocksOrdersTestTree(boxID, docID string, childIDs []string) *parse.T
 		tree.Root.AppendChild(treenode.NewParagraph(childID))
 	}
 	return tree
+}
+
+func TestNodeRefTextExcludesInlineMemo(t *testing.T) {
+	oldConf := Conf
+	Conf = &AppConf{Editor: NewConfSection(conf.NewEditor())}
+	t.Cleanup(func() { Conf = oldConf })
+	for _, markType := range []string{"inline-memo", "strong inline-memo", "inline-math inline-memo"} {
+		t.Run(markType, func(t *testing.T) {
+			paragraph := &ast.Node{Type: ast.NodeParagraph}
+			paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("before ")})
+			memo := &ast.Node{Type: ast.NodeTextMark, TextMarkType: markType,
+				TextMarkTextContent: "visible", TextMarkInlineMathContent: "visible",
+				TextMarkInlineMemoContent: "private memo"}
+			paragraph.AppendChild(memo)
+			paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" after")})
+			for _, container := range []ast.NodeType{ast.NodeParagraph, ast.NodeBlockquote, ast.NodeTabItem} {
+				t.Run(container.String(), func(t *testing.T) {
+					node := paragraph
+					if container == ast.NodeBlockquote {
+						node = &ast.Node{Type: container}
+						node.AppendChild(cloneRenderNode(paragraph))
+					} else if container == ast.NodeTabItem {
+						node = &ast.Node{Type: container, TabItemTitle: `<span data-type="inline-memo" data-inline-memo-content="private memo">before visible after</span>`}
+					}
+					if text := getNodeRefText(node); text != "before visible after" {
+						t.Fatalf("unexpected reference text: %q", text)
+					}
+					if text := getNodeRefText0(node, 10, true); text != "before vis..." {
+						t.Fatalf("unexpected truncated reference text: %q", text)
+					}
+				})
+			}
+			if memo.TextMarkInlineMemoContent != "private memo" {
+				t.Fatal("reference text extraction modified the source memo")
+			}
+		})
+	}
+}
+
+func TestUpdateRefTextExcludesInlineMemo(t *testing.T) {
+	oldConf := Conf
+	Conf = &AppConf{Editor: NewConfSection(conf.NewEditor())}
+	t.Cleanup(func() { Conf = oldConf })
+	const defID = "20261021000000-def0001"
+	t.Cleanup(func() { treenode.DynamicRefTexts.Delete(defID) })
+	def := &ast.Node{Type: ast.NodeParagraph, ID: defID}
+	memo := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "inline-memo", TextMarkTextContent: "visible",
+		TextMarkInlineMemoContent: "private memo"}
+	def.AppendChild(memo)
+	refs := &ast.Node{Type: ast.NodeParagraph}
+	dynamic := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: defID,
+		TextMarkBlockRefSubtype: "d", TextMarkTextContent: "old"}
+	static := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: defID,
+		TextMarkBlockRefSubtype: "s", TextMarkTextContent: "manual anchor"}
+	refs.AppendChild(dynamic)
+	refs.AppendChild(static)
+	if changed, defs := updateRefText(refs, map[string]*ast.Node{defID: def}); !changed || len(defs) != 1 || defs[0].refText != "visible" {
+		t.Fatalf("unexpected dynamic reference update: changed=%v, definitions=%+v", changed, defs)
+	}
+	if dynamic.TextMarkTextContent != "visible" || static.TextMarkTextContent != "manual anchor" {
+		t.Fatalf("unexpected anchors: dynamic=%q, static=%q", dynamic.TextMarkTextContent, static.TextMarkTextContent)
+	}
+	memo.TextMarkInlineMemoContent = "edited memo"
+	if changed, _ := updateRefText(refs, map[string]*ast.Node{defID: def}); changed {
+		t.Fatal("editing only the memo changed the reference text")
+	}
+	if text := getNodeRefText(def); text != dynamic.TextMarkTextContent || memo.TextMarkInlineMemoContent != "edited memo" {
+		t.Fatalf("inconsistent reference text or modified source: text=%q, memo=%q", text, memo.TextMarkInlineMemoContent)
+	}
+}
+
+func TestGetBlockRefTextKeepsInlineMemo(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	Conf.Editor.Store(conf.NewEditor())
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	paragraph := tree.Root.FirstChild
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "inline-memo strong",
+		TextMarkTextContent: "visible", TextMarkInlineMemoContent: "private memo"})
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	for _, getter := range []struct {
+		name string
+		text func() string
+	}{
+		{"default", func() string { return GetBlockRefText(paragraph.ID) }},
+		{"in box", func() string { return GetBlockRefTextInBox(paragraph.ID, tree.Box) }},
+	} {
+		t.Run(getter.name, func(t *testing.T) {
+			for range 2 {
+				cache.RemoveTreeDataInBox(tree.ID, tree.Box)
+				if text := getter.text(); text != "visible" {
+					t.Fatalf("unexpected reference text: %q", text)
+				}
+				loaded, loadErr := LoadTreeByBlockID(paragraph.ID)
+				if loadErr != nil {
+					t.Fatal(loadErr)
+				}
+				memo := treenode.GetNodeInTree(loaded, paragraph.ID).FirstChild
+				if memo.TextMarkInlineMemoContent != "private memo" {
+					t.Fatalf("source memo changed after reading reference text: %q", memo.TextMarkInlineMemoContent)
+				}
+			}
+		})
+	}
 }

@@ -17,7 +17,6 @@
 package model
 
 import (
-	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
@@ -44,17 +43,6 @@ func GetBlockRefTextInBox(id, boxID string) string {
 	if nil == node {
 		return ErrBlockNotFound.Error()
 	}
-
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-		if n.IsTextMarkType("inline-memo") {
-			n.TextMarkInlineMemoContent = ""
-			return ast.WalkContinue
-		}
-		return ast.WalkContinue
-	})
 
 	return getNodeRefText(node)
 }

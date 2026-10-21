@@ -42,6 +42,51 @@ test("Harmony requires an explicit choice for multiple devices and rejects missi
     assert.throws(() => selectDevice("a\n", "b"), /not found/);
 });
 
+test("Harmony Windows build environment retains system paths and merges differently cased path keys", async () => {
+    const {createBuildEnvironment} = await import("../../scripts/harmony-dev-run.mjs");
+    const inherited = {Path: "C:\\Windows\\System32", PATH: "C:\\custom-tools", ComSpec: "C:\\Windows\\System32\\cmd.exe"};
+    const result = createBuildEnvironment("D:\\DevEco", "D:\\DevEco\\tools\\node\\node.exe", inherited, "win32");
+    assert.equal(result.PATH, "D:\\DevEco\\tools\\node;C:\\Windows\\System32;C:\\custom-tools");
+    assert.deepEqual(Object.keys(result).filter(key => key.toLowerCase() === "path"), ["PATH"]);
+    assert.equal(result.ComSpec, inherited.ComSpec);
+    assert.equal(result.JAVA_HOME, "D:\\DevEco\\jbr");
+    assert.equal(result.DEVECO_SDK_HOME, "D:\\DevEco\\sdk");
+    assert.equal(inherited.Path, "C:\\Windows\\System32");
+    assert.equal(inherited.PATH, "C:\\custom-tools");
+    for (const key of ["PATH", "Path", "path"]) {
+        const env = createBuildEnvironment("D:\\DevEco", "D:\\DevEco\\tools\\node\\node.exe", {[key]: "C:\\Windows\\System32"}, "win32");
+        assert.equal(env.PATH, "D:\\DevEco\\tools\\node;C:\\Windows\\System32");
+    }
+});
+
+test("Harmony Linux build environment respects case-sensitive environment keys", async () => {
+    const {createBuildEnvironment} = await import("../../scripts/harmony-dev-run.mjs");
+    const result = createBuildEnvironment("/opt/deveco", "/opt/deveco/tools/node/bin/node", {PATH: "/usr/bin:/bin", Path: "custom"}, "linux");
+    assert.equal(result.PATH, "/opt/deveco/tools/node/bin:/usr/bin:/bin");
+    assert.equal(result.Path, "custom");
+    assert.equal(result.JAVA_HOME, "/opt/deveco/jbr");
+});
+
+test("Harmony child Node can launch cmd.exe with inherited Windows system paths", {skip: process.platform !== "win32"}, async () => {
+    const {createBuildEnvironment} = await import("../../scripts/harmony-dev-run.mjs");
+    const {spawnSync} = require("node:child_process");
+    const inherited = {...process.env};
+    for (const key of Object.keys(inherited)) {
+        if (key.toLowerCase() === "path") delete inherited[key];
+    }
+    inherited.Path = path.join(process.env.SystemRoot, "System32");
+    const probe = env => {
+        const result = spawnSync(process.execPath, ["-e", `
+            const result = require("node:child_process").spawnSync("cmd.exe", ["/d", "/s", "/c", "exit 0"]);
+            process.stdout.write(JSON.stringify({status: result.status, error: result.error?.code}));
+        `], {env, encoding: "utf8"});
+        assert.equal(result.status, 0, result.stderr);
+        return JSON.parse(result.stdout);
+    };
+    assert.equal(probe({...inherited, PATH: path.dirname(process.execPath)}).error, "ENOENT");
+    assert.deepEqual(probe(createBuildEnvironment("D:\\DevEco", process.execPath, inherited)), {status: 0});
+});
+
 test("Harmony kernel validation rejects emulator and invalid libraries", async t => {
     const {checkKernel} = await import("../../scripts/harmony-dev-run.mjs");
     const {write} = fixture(t);
@@ -173,6 +218,10 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
             assert.ok(argv.includes("product=debug"));
             assert.ok(argv.includes("buildMode=debug"));
             assert.ok(argv.includes("module=entry@default"));
+            assert.ok(settings.env.PATH.endsWith(process.env.PATH || process.env.Path || ""));
+            if (process.platform === "win32") {
+                assert.deepEqual(Object.keys(settings.env).filter(key => key.toLowerCase() === "path"), ["PATH"]);
+            }
             write(hap);
         }
         return {status: 0, stdout: argv.includes("install") && command === "test-hdc" ?

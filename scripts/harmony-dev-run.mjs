@@ -84,6 +84,17 @@ export function translateWorkspace(workspace, directory, translate) {
     return lines.join("\n") + "\n";
 }
 
+export function createBuildEnvironment(deveco, node, inherited = process.env, platform = process.platform) {
+    const paths = platform === "win32" ? path.win32 : path.posix;
+    const env = {...inherited, DEVECO_SDK_HOME: paths.join(deveco, "sdk"), JAVA_HOME: paths.join(deveco, "jbr")};
+    // Windows 环境键不区分大小写，普通对象须合并 Path 和 PATH，避免丢失系统命令搜索路径。
+    const keys = Object.keys(env).filter(key => platform === "win32" ? key.toLowerCase() === "path" : key === "PATH");
+    const directories = [paths.dirname(node), ...new Set(keys.map(key => env[key]).filter(Boolean))];
+    for (const key of keys) delete env[key];
+    env.PATH = directories.join(paths.delimiter);
+    return env;
+}
+
 export function main(args = process.argv.slice(2), execute = spawnSync, root = repoRoot) {
     const options = parseArgs(args);
     if (options.help) {
@@ -131,9 +142,7 @@ No uninstall is attempted if installation fails.`);
         const node = requireFile(path.join(options.deveco, "tools/node", process.platform === "win32" ? "node.exe" : "bin/node"));
         const hvigor = requireFile(path.join(options.deveco, "tools/hvigor/bin/hvigorw.js"));
         const ohpm = requireFile(path.join(options.deveco, "tools/ohpm/bin/pm-cli.js"));
-        const env = {...process.env, DEVECO_SDK_HOME: path.join(options.deveco, "sdk"),
-            JAVA_HOME: path.join(options.deveco, "jbr")};
-        env.PATH = path.dirname(node) + path.delimiter + (env.PATH || "");
+        const env = createBuildEnvironment(options.deveco, node);
         if (!options.skipUi) {
             // 使用现有开发资源目录，不运行会清空整个 stage 的总构建命令。
             if (process.platform === "win32") {

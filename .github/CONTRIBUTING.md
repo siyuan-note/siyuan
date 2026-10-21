@@ -101,6 +101,8 @@ For ARM64 devices, run `node scripts/harmony-dev-run.mjs` from the SiYuan reposi
 
 Use `--deveco=<path>`, `--harmony-dir=<path>`, and `--device=<connect-key>` to select tools, project, and device. `--skip-ui` reuses existing frontend output (mobile, desktop, and export are required), `--skip-kernel` copies existing `kernel/harmony/libkernel.so` and `libkernel.h`, and `--skip-hvigor` only reinstalls and launches the existing debug HAP, skipping all builds and resource copies. See `node scripts/harmony-dev-run.mjs --help` for more options. Run script tests with `node --test app/scripts/harmony-dev-run.test.js`.
 
+On Windows, the deployment script translates active `go.work` module paths and local replacements into WSL paths in a temporary workspace. Local dependency overrides remain active; the original workspace files are not changed. If workspace mode is disabled, the WSL build also uses `GOWORK=off`.
+
 Modify Go source code:
 
 1. go/src/runtime/vim tls_arm64.s

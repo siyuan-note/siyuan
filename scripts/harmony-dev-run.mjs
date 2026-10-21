@@ -70,6 +70,20 @@ export function checkKernel(file) {
     }
 }
 
+export function translateWorkspace(workspace, directory, translate) {
+    const localPath = value => translate(path.resolve(directory, value));
+    const lines = [`go ${workspace.Go}`];
+    if (workspace.Toolchain) lines.push(`toolchain ${workspace.Toolchain}`);
+    for (const item of workspace.Godebug || []) lines.push(`godebug ${item.Key}=${item.Value}`);
+    for (const item of workspace.Use || []) lines.push(`use ${JSON.stringify(localPath(item.DiskPath))}`);
+    for (const item of workspace.Replace || []) {
+        const before = item.Old.Path + (item.Old.Version ? ` ${item.Old.Version}` : "");
+        const after = item.New.Version ? `${item.New.Path} ${item.New.Version}` : JSON.stringify(localPath(item.New.Path));
+        lines.push(`replace ${before} => ${after}`);
+    }
+    return lines.join("\n") + "\n";
+}
+
 export function main(args = process.argv.slice(2), execute = spawnSync, root = repoRoot) {
     const options = parseArgs(args);
     if (options.help) {
@@ -89,6 +103,7 @@ Builds product=debug, buildMode=debug for ARM64 devices. Configure the debug
 signing profile in DevEco Studio for your device first. Uses build.sh and its
 Linux SDK / patched Go toolchain (see .github/CONTRIBUTING.md); Windows uses WSL
 against this checkout. Existing OCR native libraries and models are required.
+Windows go.work paths are translated in a temporary workspace, preserving local modules.
 No uninstall is attempted if installation fails.`);
         return;
     }
@@ -120,7 +135,11 @@ No uninstall is attempted if installation fails.`);
         env.PATH = path.dirname(node) + path.delimiter + (env.PATH || "");
         if (!options.skipUi) {
             // 使用现有开发资源目录，不运行会清空整个 stage 的总构建命令。
-            run("pnpm", ["run", "build:mobile"], {cwd: app, shell: process.platform === "win32", stdio: "inherit"});
+            if (process.platform === "win32") {
+                run(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", "pnpm run build:mobile"], {cwd: app, stdio: "inherit"});
+            } else {
+                run("pnpm", ["run", "build:mobile"], {cwd: app, stdio: "inherit"});
+            }
         }
         const stageFiles = androidStageFiles(path.join(app, "stage"))
             .filter(name => !name.startsWith("stage/ocr/runtime/"));
@@ -146,12 +165,27 @@ No uninstall is attempted if installation fails.`);
                 if (options.wslDistro) wsl.push("--distribution", options.wslDistro);
                 if (options.wslUser) wsl.push("--user", options.wslUser);
                 // WSL 的 Windows 侧诊断使用不同于 Linux 输出的编码，直接交给终端显示。
-                const linuxPath = run("wsl.exe", [...wsl, "--exec", "wslpath", "-a", "-u", kernel], {
+                const translate = value => run("wsl.exe", [...wsl, "--exec", "wslpath", "-a", "-u", value], {
                     stdio: ["inherit", "pipe", "inherit"],
                 }).trim();
-                // 去掉检出脚本的 CRLF，不更改工作树中的文件。
-                run("wsl.exe", [...wsl, "--cd", linuxPath, "--exec", "bash", "-e", "-o", "pipefail", "-c",
-                    "sed 's/\\r$//' build.sh | bash -e"], {stdio: "inherit"});
+                const linuxPath = translate(kernel);
+                const workspace = run("go", ["env", "GOWORK"], {cwd: kernel}).trim();
+                const workTemp = mkdtempSync(path.join(os.tmpdir(), "siyuan-harmony-work-"));
+                try {
+                    let gowork = "off";
+                    if (workspace && workspace !== "off") {
+                        const config = JSON.parse(run("go", ["work", "edit", "-json", workspace], {cwd: kernel}));
+                        const workFile = path.join(workTemp, "go.work");
+                        writeFileSync(workFile, translateWorkspace(config, path.dirname(workspace), translate), "utf8");
+                        if (existsSync(workspace + ".sum")) copyFileSync(workspace + ".sum", workFile + ".sum");
+                        gowork = translate(workFile);
+                    }
+                    // 去掉检出脚本的 CRLF，使用临时工作区保留本地依赖，不更改原始工作区文件。
+                    run("wsl.exe", [...wsl, "--cd", linuxPath, "--exec", "env", `GOWORK=${gowork}`,
+                        "bash", "-e", "-o", "pipefail", "-c", "sed 's/\\r$//' build.sh | bash -e"], {stdio: "inherit"});
+                } finally {
+                    removeTemp(workTemp);
+                }
             } else {
                 run("bash", ["-e", "build.sh"], {cwd: kernel, stdio: "inherit"});
             }

@@ -101,6 +101,8 @@ ARM64 真机可在思源仓库根目录执行 `node scripts/harmony-dev-run.mjs`
 
 通过 `--deveco=<路径>`、`--harmony-dir=<路径>`、`--device=<连接标识>` 指定工具、工程和设备。`--skip-ui` 复用现有前端产物（需包含 mobile、desktop、export），`--skip-kernel` 复制现有 `kernel/harmony/libkernel.so` 和 `libkernel.h`，`--skip-hvigor` 则仅重新安装并启动已有的调试 HAP，跳过所有构建及资源复制。更多参数见 `node scripts/harmony-dev-run.mjs --help`。运行脚本测试：`node --test app/scripts/harmony-dev-run.test.js`。
 
+Windows 下，部署脚本会在临时工作区中将当前 `go.work` 的模块路径和本地替换路径转换为 WSL 路径，保留本地依赖覆盖，不修改原始工作区文件。如果已禁用工作区模式，WSL 构建同样使用 `GOWORK=off`。
+
 修改 Go 源码：
 
 1. go/src/runtime/tls_arm64.s

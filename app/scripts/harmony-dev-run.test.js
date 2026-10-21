@@ -87,8 +87,22 @@ test("Harmony stops on missing signed HAP, tool errors and zero-exit installatio
         "install bundle successfully.\n" : "error: failed to start ability\n"}), root), /ability startup/);
 });
 
-for (const reuse of [true, false]) {
-test(`Harmony build packages resources and builds signed debug HAP (reuse=${reuse})`, async t => {
+test("Harmony workspace translation preserves local modules, replacements and toolchain directives", async () => {
+    const {translateWorkspace} = await import("../../scripts/harmony-dev-run.mjs");
+    const directory = path.resolve("workspace");
+    const result = translateWorkspace({Go: "1.26.10", Toolchain: "go1.26.10", Godebug: [{Key: "default", Value: "go1.26"}],
+        Use: [{DiskPath: "./kernel"}, {DiskPath: path.resolve("local lute")}], Replace: [
+            {Old: {Path: "example.org/a", Version: "v1.0.0"}, New: {Path: "../local-a"}},
+            {Old: {Path: "example.org/b"}, New: {Path: "example.org/c", Version: "v1.2.0"}},
+        ]}, directory, value => "/linux/" + path.basename(value));
+    assert.equal(result, "go 1.26.10\ntoolchain go1.26.10\ngodebug default=go1.26\n" +
+        "use \"/linux/kernel\"\nuse \"/linux/local lute\"\n" +
+        "replace example.org/a v1.0.0 => \"/linux/local-a\"\nreplace example.org/b => example.org/c v1.2.0\n");
+});
+
+for (const {reuse, workspace, failKernel} of [{reuse: true, workspace: false}, {reuse: false, workspace: false},
+    {reuse: false, workspace: true}, {reuse: false, workspace: true, failKernel: true}]) {
+test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=${workspace}, failure=${!!failKernel})`, async t => {
     const {main} = await import("../../scripts/harmony-dev-run.mjs");
     const {root, native, write, hap, args} = fixture(t);
     const deveco = path.join(root, "DevEco Studio");
@@ -111,18 +125,38 @@ test(`Harmony build packages resources and builds signed debug HAP (reuse=${reus
     write("kernel/harmony/libkernel.so", header);
     write("kernel/harmony/libkernel.h", "kernel header");
     write(hap, "stale HAP");
+    const originalWork = write("go.work", "original workspace");
+    write("go.work.sum", "original checksums");
+    const translated = new Map();
+    let temporaryWork;
     let list;
     const calls = [];
-    main([...args, `--deveco=${deveco}`, ...(reuse ? ["--skip-ui", "--skip-kernel"] : [])], (command, argv, settings) => {
+    const build = () => main([...args, `--deveco=${deveco}`, ...(reuse ? ["--skip-ui", "--skip-kernel"] : [])], (command, argv, settings) => {
         calls.push([command, argv]);
+        assert.ok(!settings.shell);
         if (argv[0] === "list") return {status: 0, stdout: "phone\n"};
+        if (command === "go") {
+            return {status: 0, stdout: argv[0] === "env" ? (workspace ? originalWork : "off") :
+                JSON.stringify({Go: "1.26.10", Use: [{DiskPath: "./kernel"}, {DiskPath: path.join(root, "local-lute")} ]})};
+        }
         if (argv.includes("wslpath")) {
             assert.deepEqual(settings.stdio, ["inherit", "pipe", "inherit"]);
-            return {status: 0, stdout: "/mnt/c/native project/kernel/harmony\n"};
+            const value = "/linux/" + path.basename(argv.at(-1));
+            translated.set(value, argv.at(-1));
+            return {status: 0, stdout: value + "\n"};
         }
         if (command === "wsl.exe" && argv.includes("--cd")) {
-            assert.equal(argv[argv.indexOf("--cd") + 1], "/mnt/c/native project/kernel/harmony");
+            assert.equal(argv[argv.indexOf("--cd") + 1], "/linux/harmony");
             assert.ok(argv.includes("pipefail"));
+            const gowork = argv.find(value => value.startsWith("GOWORK="));
+            if (workspace) {
+                temporaryWork = translated.get(gowork.slice("GOWORK=".length));
+                assert.match(readFileSync(temporaryWork, "utf8"), /use "\/linux\/local-lute"/);
+                assert.equal(readFileSync(temporaryWork + ".sum", "utf8"), "original checksums");
+            } else {
+                assert.equal(gowork, "GOWORK=off");
+            }
+            if (failKernel) return {status: 1};
         }
         if (command === "tar") {
             list = argv[argv.indexOf("-T") + 1];
@@ -143,12 +177,22 @@ test(`Harmony build packages resources and builds signed debug HAP (reuse=${reus
         return {status: 0, stdout: argv.includes("install") && command === "test-hdc" ?
             "install bundle successfully.\n" : argv.includes("start") ? "start ability successfully.\n" : ""};
     }, root);
+    if (failKernel) {
+        assert.throws(build, /wsl.exe failed/);
+        assert.equal(existsSync(temporaryWork), false);
+        assert.equal(readFileSync(originalWork, "utf8"), "original workspace");
+        assert.ok(!calls.some(([, argv]) => argv.includes("assembleHap")));
+        return;
+    }
+    build();
     assert.equal(existsSync(list), false);
     assert.deepEqual(readFileSync(path.join(native, "entry/libs/arm64-v8a/libkernel.so")), header);
     assert.equal(readFileSync(path.join(native, "entry/src/main/cpp/include/libkernel.h"), "utf8"), "kernel header");
     assert.ok(calls.some(([, argv]) => argv.includes("clean")));
     assert.ok(calls.some(([, argv]) => argv[0].endsWith("pm-cli.js")));
-    assert.equal(calls.some(([command]) => command === "pnpm"), !reuse);
+    assert.equal(readFileSync(originalWork, "utf8"), "original workspace");
+    if (temporaryWork) assert.equal(existsSync(temporaryWork), false);
+    assert.equal(calls.some(([command, argv]) => command === "pnpm" || argv.includes("pnpm run build:mobile")), !reuse);
     assert.equal(calls.some(([command]) => command === "wsl.exe" || command === "bash"), !reuse);
 });
 }

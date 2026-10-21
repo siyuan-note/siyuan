@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Installation en cours...",
 	"collapseSyncDetails": "Masquer les détails",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md et data/storage/ai/AGENTS.md diffèrent ; fusionnez leur contenu dans le nouveau fichier, puis supprimez l’ancien fichier",
 	"dataImportConflicts": "Carnets en conflit",
@@ -3020,7 +3021,7 @@
 		"66": "Fichier de données [%s] créé",
 		"67": "Transféré à %s, téléchargé à %s",
 		"68": "Les données locales ont dépassé la capacité de stockage maximale [%s] de l'espace cloud pendant la période d'essai, et les données ne peuvent plus être téléchargées. Après <a target='_blank' href='${accountServer}/subscribe/siyuan'>l'abonnement</a>, la capacité de stockage cloud sera mise à niveau à 8GB",
-		"69": "Téléchargement terminé",
+		"69": "Installation terminée",
 		"70": "Traitement de [%s], veuillez patienter...",
 		"71": "L'insertion du fichier asset a échoué, veuillez rouvrir le document.",
 		"72": "Le contenu a été copié dans le presse-papiers du système, veuillez vous rendre sur SiYuan pour le coller.",

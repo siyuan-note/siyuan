@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "설치 중...",
 	"collapseSyncDetails": "세부 정보 접기",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md와 data/storage/ai/AGENTS.md의 내용이 다릅니다. 새 파일에 내용을 병합한 후 이전 파일을 삭제하세요",
 	"dataImportConflicts": "충돌하는 노트북",
@@ -3020,7 +3021,7 @@
 		"66": "데이터 파일 [%s] 생성됨",
 		"67": "%s에 업로드됨, %s에 다운로드됨",
 		"68": "로컬 데이터가 평가판 기간 동안 클라우드 공간 [%s]의 최대 저장 용량을 초과하여 데이터를 계속 동기화할 수 없습니다. <a target='_blank' href='${accountServer}/subscribe/siyuan'>구독</a> 후 클라우드 저장 용량이 [8GB]로 업그레이드됩니다",
-		"69": "다운로드 완료",
+		"69": "설치 완료",
 		"70": "[%s] 처리 중, 잠시만 기다려 주세요...",
 		"71": "에셋 파일을 삽입하지 못했습니다. 문서를 다시 여세요",
 		"72": "콘텐츠가 시스템 클립보드에 복사되었습니다. 붙여넣으려면 SiYuan으로 이동하세요",

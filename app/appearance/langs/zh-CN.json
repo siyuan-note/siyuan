@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "正在安装...",
 	"collapseSyncDetails": "收起详情",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md 与 data/storage/ai/AGENTS.md 内容不同，请将内容合并到新文件后移除旧文件",
 	"dataImportConflicts": "冲突的笔记本",
@@ -3020,7 +3021,7 @@
 		"66": "已创建数据文件 [%s]",
 		"67": "上传于 %s，下载于 %s",
 		"68": "本地数据已超过试用期云端空间最大存储容量 [%s]，无法继续同步数据，<a target='_blank' href='${accountServer}/subscribe/siyuan'>订阅</a>后云端存储容量将升级为 [8 GB]",
-		"69": "下载完毕",
+		"69": "安装完毕",
 		"70": "正在处理 [%s]，请稍等...",
 		"71": "插入资源文件失败，请重新打开文档",
 		"72": "内容已经复制到系统剪切板，请到思源中进行粘贴",

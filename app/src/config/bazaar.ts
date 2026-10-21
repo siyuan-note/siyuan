@@ -750,6 +750,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         if (this._updateState === "loading" || this._updateState === "idle") {
             counterElement.classList.add("fn__none");
             contentElement.innerHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+            renderBazaarInstall(bazaar.element);
             return;
         }
         if (this._updateState === "error") {
@@ -759,12 +760,14 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     <span class="fn__space"></span>
     <button class="b3-button" data-type="retry-update">${window.siyuan.languages.retry}</button>
 </div>`;
+            renderBazaarInstall(bazaar.element);
             return;
         }
         const items: Array<{type: TBazaarType, item: IUpdatedBazaarItem}> = this._getUpdatedItems();
         if (items.length === 0) {
             counterElement.classList.add("fn__none");
             contentElement.innerHTML = `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            renderBazaarInstall(bazaar.element);
             return;
         }
         counterElement.classList.remove("fn__none");
@@ -773,6 +776,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             !items.some(({item}) => !item.available.disallowUpdate));
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
         loadUpdatedRatings(this);
+        renderBazaarInstall(bazaar.element);
     },
     _syncDownloadedUpdateButtons() {
         bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card[data-package-source='downloaded']").forEach((card) => {
@@ -796,6 +800,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 sideElement.setAttribute("data-progress-id", available?.repoURL || sideElement.getAttribute("data-repourl") || "");
             }
         }
+        renderBazaarInstall(bazaar.element);
     },
     _cacheBazaarDeprecations(bazaarType: TBazaarType, packages: IBazaarItem[]) {
         const metadata = new Map<string, IBazaarItem>();
@@ -954,6 +959,7 @@ type="checkbox">
             bazaar._data.downloadedType = bazaarType;
             const scrollTop = contentElement.scrollTop;
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            renderBazaarInstall(bazaar.element);
             if (preserveOrder) contentElement.scrollTop = scrollTop;
             if (bazaarType === "plugins") {
                 bazaar._downloadedPluginsReady = true;
@@ -1862,7 +1868,9 @@ type="checkbox">
         }
         state.observer?.unobserve(card);
         card.removeAttribute("data-bazaar-index");
+        const previousCard = card.previousElementSibling;
         card.outerHTML = this._genCardHTML(state.packages[Number(index)], state.bazaarType);
+        renderBazaarInstall(previousCard?.nextElementSibling || state.cardsElement.firstElementChild);
         state.cursor++;
         if (state.cursor >= state.packages.length) {
             this._stopBazaarCardWatcher(state);
@@ -1918,6 +1926,7 @@ type="checkbox">
         };
         this._bazaarCardRenderStates.set(container, state);
         this._watchBazaarCardBatch(state);
+        renderBazaarInstall(container);
     },
     _onBazaar(response: IWebSocketData, bazaarType: TBazaarType, mount: IBazaarMountSnapshot, preserveView = false) {
         if (!bazaar._isBazaarRequestCurrent(bazaarType, mount)) {

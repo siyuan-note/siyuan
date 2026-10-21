@@ -4061,6 +4061,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 取消请求会停止当前下载及后续更新；已提交的包会保留并完成运行时刷新。
+     */
     "/api/bazaar/batchUpdatePackage": {
         request: BatchUpdatePackageRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4188,7 +4191,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarIcon": {
@@ -4199,7 +4202,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarPlugin": {
@@ -4210,7 +4213,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTemplate": {
@@ -4221,7 +4224,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTheme": {
@@ -4232,7 +4235,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarWidget": {
@@ -4292,7 +4295,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的更新不会回滚。
      */
     "/api/bazaar/updateBazaarPackage": {
         request: UpdateBazaarPackageRequestInput;

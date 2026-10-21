@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Installeren...",
 	"collapseSyncDetails": "Details verbergen",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md en data/storage/ai/AGENTS.md verschillen; voeg de inhoud samen in het nieuwe bestand en verwijder daarna het oude bestand",
 	"dataImportConflicts": "Notitieboeken met conflicten",
@@ -3020,7 +3021,7 @@
 		"66": "Gegevensbestand [%s] aangemaakt",
 		"67": "Geupload: %s, Gedownload: %s",
 		"68": "Lokale gegevens overschrijden proefcapaciteit [%s]; na <a target='_blank' href='${accountServer}/subscribe/siyuan'>abonnement</a> wordt cloudopslag uitgebreid naar [8 GB]",
-		"69": "Download voltooid",
+		"69": "Installatie voltooid",
 		"70": "Verwerken [%s]...",
 		"71": "Invoegen van assetbestand mislukt; open het document opnieuw",
 		"72": "Gekopieerd naar klembord; plakken in SiYuan",

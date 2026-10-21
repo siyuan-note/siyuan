@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Yükleniyor...",
 	"collapseSyncDetails": "Ayrıntıları gizle",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md ve data/storage/ai/AGENTS.md farklı; içeriklerini yeni dosyada birleştirin, ardından eski dosyayı kaldırın",
 	"dataImportConflicts": "Çakışan not defterleri",
@@ -3020,7 +3021,7 @@
 		"66": "Veri dosyası oluşturuldu [%s]",
 		"67": "%s tarihinde yüklendi, %s tarihinde indirildi",
 		"68": "Deneme süresinde bulut alanı [%s] kapasitesi aşıldı, senkron devam edemez. <a target='_blank' href='${accountServer}/subscribe/siyuan'>Abonelik</a> sonrası kapasite [8 GB] olur",
-		"69": "İndirme tamamlandı",
+		"69": "Kurulum tamamlandı",
 		"70": "[%s] işleniyor, lütfen bekle...",
 		"71": "Varlık dosyası eklenemedi, lütfen belgeyi yeniden aç",
 		"72": "İçerik panoya kopyalandı, lütfen SiYuan’a dönüp yapıştır",

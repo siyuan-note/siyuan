@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Instalando...",
 	"collapseSyncDetails": "Ocultar detalles",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md y data/storage/ai/AGENTS.md difieren; combine su contenido en el archivo nuevo y luego elimine el antiguo",
 	"dataImportConflicts": "Cuadernos en conflicto",
@@ -3020,7 +3021,7 @@
 		"66": "Archivo de datos [%s] creado",
 		"67": "Cargado en %s, descargado en %s",
 		"68": "Los datos locales han superado la capacidad máxima de almacenamiento del espacio en la nube [%s] durante el período de prueba y no se puede continuar sincronizando datos. Después de la <a target='_blank' href='${accountServer}/subscribe/siyuan'>suscripción</a>, la capacidad de almacenamiento en la nube se actualizará a 8 GB",
-		"69": "Descarga completada",
+		"69": "Instalación completada",
 		"70": "Procesando [%s], por favor espere...",
 		"71": "Fallo en la inserción del archivo de recursos, por favor reabra el documento",
 		"72": "El contenido se ha copiado en el portapapeles del sistema, por favor vaya a SiYuan para pegar",

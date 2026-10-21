@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Inštaluje sa...",
 	"collapseSyncDetails": "Skryť podrobnosti",
 	"agentInstructionsLocationConflict": "Súbory data/ai/AGENTS.md a data/storage/ai/AGENTS.md sa líšia; zlúčte ich obsah do nového súboru a potom odstráňte starý súbor",
 	"dataImportConflicts": "Konfliktné poznámkové bloky",
@@ -3020,7 +3021,7 @@
 		"66": "Dátový súbor [%s] vytvorený",
 		"67": "Nahrané: %s, Stiahnuté: %s",
 		"68": "Lokálne dáta počas skúšobného obdobia prekročili maximálnu kapacitu cloudového priestoru [%s] a nemožno ich naďalej synchronizovať. Po <a target='_blank' href='${accountServer}/subscribe/siyuan'>predplatnom</a> sa kapacita cloudového úložiska zvýši na [8 GB]",
-		"69": "Sťahovanie dokončené",
+		"69": "Inštalácia dokončená",
 		"70": "Spracúvam [%s]...",
 		"71": "Vloženie prílohy zlyhalo, znova otvorte dokument",
 		"72": "Obsah skopírovaný do schránky",

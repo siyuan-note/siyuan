@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Installing...",
 	"collapseSyncDetails": "Hide details",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md and data/storage/ai/AGENTS.md differ; merge their contents into the new file, then remove the old file",
 	"dataImportConflicts": "Conflicting notebooks",
@@ -3020,7 +3021,7 @@
 		"66": "Data file [%s] created",
 		"67": "Uploaded at %s, downloaded at %s",
 		"68": "The local data has exceeded the maximum storage capacity of cloud space [%s] during the trial period, and cannot continue to sync data. After the <a target='_blank' href='${accountServer}/subscribe/siyuan'>subscription</a>, the cloud storage capacity will be upgraded to [8 GB]",
-		"69": "Download completed",
+		"69": "Installation completed",
 		"70": "Processing [%s], please wait...",
 		"71": "Failed to insert asset file, please reopen the document",
 		"72": "Content has been copied to the system clipboard, please go to SiYuan to paste",

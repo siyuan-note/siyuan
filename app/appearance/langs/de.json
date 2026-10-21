@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Wird installiert...",
 	"collapseSyncDetails": "Details ausblenden",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md und data/storage/ai/AGENTS.md unterscheiden sich; führen Sie die Inhalte in der neuen Datei zusammen und entfernen Sie dann die alte Datei",
 	"dataImportConflicts": "Notizbücher mit Konflikten",
@@ -3020,7 +3021,7 @@
 		"66": "Daten-Datei [%s] erstellt",
 		"67": "Hochgeladen am %s, heruntergeladen am %s",
 		"68": "Die lokalen Daten haben während der Testphase die maximale Speicherkapazität des Cloud-Speichers [%s] überschritten und können nicht weiter synchronisiert werden. Nach dem <a target='_blank' href='${accountServer}/subscribe/siyuan'>Abonnement</a> wird die Cloud-Speicherkapazität auf [8 GB] erhöht",
-		"69": "Herunterladen abgeschlossen",
+		"69": "Installation abgeschlossen",
 		"70": "Verarbeite [%s], bitte warten...",
 		"71": "Fehler beim Einfügen der Asset-Datei, bitte Dokument erneut öffnen",
 		"72": "Inhalt wurde in die Systemzwischenablage kopiert, bitte gehen Sie zu SiYuan, um einzufügen",

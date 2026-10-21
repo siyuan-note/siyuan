@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Инсталирање...",
 	"collapseSyncDetails": "Сакриј детаље",
 	"agentInstructionsLocationConflict": "Садржаји датотека data/ai/AGENTS.md и data/storage/ai/AGENTS.md се разликују; обједините их у новој датотеци, па уклоните стару датотеку",
 	"dataImportConflicts": "Бележнице у сукобу",
@@ -3020,7 +3021,7 @@
 		"66": "Fajl podataka [%s] je kreiran",
 		"67": "Otpremljeno u %s, preuzeto u %s",
 		"68": "Lokalni podaci su tokom probnog perioda prekoračili maksimalni kapacitet prostora u oblaku [%s], pa sinhronizacija podataka ne može da se nastavi. Nakon <a target='_blank' href='${accountServer}/subscribe/siyuan'>pretplate</a>, kapacitet prostora u oblaku će biti povećan na [8 GB]",
-		"69": "Preuzimanje je završeno",
+		"69": "Инсталација је завршена",
 		"70": "Obrada [%s], sačekajte...",
 		"71": "Umetanje fajla priloga nije uspelo, ponovo otvorite dokument",
 		"72": "Sadržaj je kopiran u sistemsku privremenu memoriju, otvorite SiYuan da ga nalepite",

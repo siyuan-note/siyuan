@@ -1,4 +1,5 @@
 {
+	"bazaarInstalling": "Sedang memasang...",
 	"collapseSyncDetails": "Sembunyikan detail",
 	"agentInstructionsLocationConflict": "Isi data/ai/AGENTS.md dan data/storage/ai/AGENTS.md berbeda; gabungkan isinya ke berkas baru, lalu hapus berkas lama",
 	"dataImportConflicts": "Buku catatan yang berkonflik",
@@ -3020,7 +3021,7 @@
 		"66": "File data [%s] dibuat",
 		"67": "Diunggah pada %s, diunduh pada %s",
 		"68": "Data lokal telah melebihi kapasitas penyimpanan maksimum ruang cloud [%s] selama masa uji coba, dan tidak dapat melanjutkan sinkronisasi data. Setelah <a target='_blank' href='${accountServer}/subscribe/siyuan'>berlangganan</a>, kapasitas penyimpanan cloud akan ditingkatkan menjadi [8 GB]",
-		"69": "Unduh selesai",
+		"69": "Pemasangan selesai",
 		"70": "Memproses [%s], harap tunggu...",
 		"71": "Gagal menyisipkan file aset, harap buka kembali dokumen",
 		"72": "Konten telah disalin ke clipboard sistem, silakan buka SiYuan untuk menempel",

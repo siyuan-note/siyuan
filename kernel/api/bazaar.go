@@ -101,7 +101,7 @@ var installLocalBazaarPackage = contractHandler(apicontract.InstallLocalBazaarPa
 }, prepareLocalBazaarUpload)
 
 var batchUpdatePackage = contractHandler(apicontract.BatchUpdatePackage, func(c *gin.Context, request apicontract.BatchUpdatePackageRequest) apicontract.Response[apicontract.Null] {
-	if err := model.BatchUpdatePackages(request.Frontend); err != nil {
+	if err := model.BatchUpdatePackagesContext(c.Request.Context(), request.Frontend); err != nil {
 		return apicontract.Failure[apicontract.Null](1, err.Error())
 	}
 
@@ -122,7 +122,7 @@ var updateBazaarPackage = contractHandler(apicontract.UpdateBazaarPackage, func(
 	if !validPackageTypes[request.PackageType] {
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, "Invalid package type")
 	}
-	if err := model.UpdateBazaarPackage(request.PackageType, request.PackageName, request.Frontend); err != nil {
+	if err := model.UpdateBazaarPackageContext(c.Request.Context(), request.PackageType, request.PackageName, request.Frontend); err != nil {
 		return apicontract.Failure[apicontract.BazaarPackagesData](1, err.Error())
 	}
 	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)

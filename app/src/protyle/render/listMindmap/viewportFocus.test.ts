@@ -46,7 +46,7 @@ const setup = () => {
             if (selector === ".mindmap-view") {
                 return host;
             }
-            return kind !== "background" && selector.includes(kind) ? element() : null;
+            return kind !== "background" && selector.split(",").some(item => item.trim() === kind) ? element() : null;
         },
     });
     const event = (kind = "background", overrides: Record<string, unknown> = {}) => ({
@@ -221,8 +221,8 @@ test("bottom clearance preserves the node top below the toolbar when the node is
     assert.equal(100 + target.offsetY, 64);
 });
 
-test("hand-tool, right-button and primary touch panning preserve the editing focus", () => {
-    for (const overrides of [{}, {button: 2}, {pointerType: "touch"}]) {
+test("hand-tool, middle-button, right-button and primary touch panning preserve the editing focus", () => {
+    for (const overrides of [{}, {button: 1}, {button: 2}, {pointerType: "touch"}]) {
         const {target, event, focus, finished} = setup();
         target.panning = !Object.keys(overrides).length;
         const down = event("background", overrides);
@@ -259,12 +259,12 @@ test("touch activation waits for a click and ignores an unfinished pinch or a ne
     assert.equal(target.interactionActive, false);
 });
 
-test("Ctrl and Meta right dragging preserves reading state, node selection and editor focus", () => {
-    for (const key of ["ctrlKey", "metaKey"]) {
+test("middle dragging and Ctrl or Meta right dragging preserve reading state, node selection and editor focus", () => {
+    for (const overrides of [{button: 1}, {button: 2, ctrlKey: true}, {button: 2, metaKey: true}]) {
         for (const interactionActive of [false, true]) {
             const {target, event, focus, finished} = setup();
             target.interactionActive = interactionActive;
-            const down = event("background", {button: 2, [key]: true});
+            const down = event("background", overrides);
             target.dismissControls(down);
             target.activatePointer(down);
             target.pointerDown(down);
@@ -282,7 +282,7 @@ test("Ctrl and Meta right dragging preserves reading state, node selection and e
         const {target, event, finished} = setup();
         target.locked = true;
         target.interactionActive = false;
-        const down = event("background", {button: 2, [key]: true});
+        const down = event("background", overrides);
         target.activatePointer(down);
         target.pointerDown(down);
         assert.equal(target.pointer, undefined, "temporary gestures cannot bypass a saved view lock");
@@ -291,7 +291,7 @@ test("Ctrl and Meta right dragging preserves reading state, node selection and e
         for (const mode of ["relationFrom", "summarySelecting"]) {
             const {target, event, finished} = setup();
             target[mode] = mode === "relationFrom" ? "new" : true;
-            const down = event("background", {button: 2, [key]: true});
+            const down = event("background", overrides);
             target.dismissControls(down);
             target.activatePointer(down);
             target.pointerDown(down);
@@ -301,6 +301,43 @@ test("Ctrl and Meta right dragging preserves reading state, node selection and e
             assert.equal(finished(), 0, "temporary panning does not finish a pending annotation");
         }
     }
+});
+
+test("middle clicks preserve selection and editing without moving or finishing annotations", () => {
+    for (const kind of ["background", ".mindmap-view__node", ".mindmap-view__summary"]) {
+        for (const mode of ["normal", "readOnly", "relationFrom", "summarySelecting"]) {
+            const {target, event, finished, focus} = setup();
+            if (mode !== "normal") {
+                target[mode] = mode === "relationFrom" ? "new" : true;
+            }
+            const down = event(kind, {button: 1});
+            target.dismissControls(down);
+            target.activatePointer(down);
+            target.pointerDown(down);
+            assert.equal(target.pointer.pan, true);
+            assert.equal(target.pointer.id, undefined);
+            assert.equal(target.pointer.selection, undefined);
+            target.pointerUp(down);
+            assert.equal(target.selectedId, "new");
+            assert.equal(target.editingId, "new");
+            assert.equal(finished(), 0);
+            assert.equal(focus(), "editor");
+        }
+    }
+});
+
+test("middle panning excludes controls, node editors, nested maps and pinches", () => {
+    const {target, event} = setup();
+    for (const kind of ["button", "input", "select", "textarea", "audio", "video", "iframe", ".mindmap-view__node--editing"]) {
+        const down = event(kind, {button: 1});
+        assert.equal(target.isPanTarget(down), false, kind);
+        target.pointerDown(down);
+        assert.equal(target.pointer, undefined, kind);
+    }
+    assert.equal(target.isPanTarget(event("background", {button: 1, target: {closest: () => ({})}})), false);
+    target.pinching = true;
+    target.pointerDown(event("background", {button: 1}));
+    assert.equal(target.pointer, undefined);
 });
 
 test("a background click still finishes editing while a canceled drag leaves it active", () => {

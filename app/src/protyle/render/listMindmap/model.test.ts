@@ -3465,7 +3465,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         reader.value = "Document reading selection";
         reader.style.cssText = "position:fixed;top:0;left:0";
         document.body.append(reader);
-        for (const modifier of ["control", "meta"]) {
+        for (const modifier of ["control", "meta", "middle"]) {
+            const button = modifier === "middle" ? "middle" : "right";
+            const modifiers = modifier === "middle" ? [] : [modifier];
             panView.setReadOnly(modifier === "meta");
             panView.selectNode(panModel.root.id);
             panView.inspector.hidden = true;
@@ -3476,17 +3478,36 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             const point = centerPoint(node);
             const end = {x: point.x + 30, y: point.y + 20};
             const before = [panView.offsetX, panView.offsetY];
+            let auxiliaryClick: MouseEvent;
+            if (button === "middle") {
+                viewport.addEventListener("auxclick", event => auxiliaryClick = event, {once: true});
+            }
             await nativeInput([
                 {type: "mouseMove", ...point},
-                {type: "mouseDown", ...point, button: "right", clickCount: 1, modifiers: [modifier]},
-                {type: "mouseMove", ...end, button: "right", modifiers: [modifier]},
-                {type: "mouseUp", ...end, button: "right", clickCount: 1, modifiers: [modifier]},
+                {type: "mouseDown", ...point, button, clickCount: 1, modifiers},
+                {type: "mouseMove", ...end, button, modifiers},
+                {type: "mouseUp", ...end, button, clickCount: 1, modifiers},
             ]);
             check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 30, before[1] + 20]);
-            check.equal(panView.interactionActive, false, "temporary right dragging preserves reading mode");
-            check.equal(document.activeElement, reader, "temporary right dragging does not steal document focus");
+            check.equal(panView.interactionActive, false, "temporary dragging preserves reading mode");
+            check.equal(document.activeElement, reader, "temporary dragging does not steal document focus");
             check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
             check.equal(panView.getSelectedId(), panModel.root.id);
+            if (button === "middle") {
+                check.equal(auxiliaryClick?.defaultPrevented, true, "middle release cancels the browser auxiliary action");
+                await nativeInput([
+                    {type: "mouseDown", ...end, button, clickCount: 1},
+                    {type: "mouseUp", ...end, button, clickCount: 1},
+                ]);
+                check.equal(panView.getSelectedId(), panModel.root.id, "a middle click preserves the selected node");
+                check.equal(document.activeElement, reader, "a middle click preserves document focus");
+                await nativeInput([{type: "mouseDown", ...end, button, clickCount: 1}]);
+                check.ok(panView.pointer?.pan);
+                viewport.dispatchEvent(new PointerEvent("pointercancel", {
+                    pointerId: panView.pointer.pointerId, pointerType: "mouse"}));
+                check.equal(panView.pointer, undefined, "canceling a middle drag releases its state");
+                await nativeInput([{type: "mouseUp", ...end, button, clickCount: 1}]);
+            }
             let receivedWheel: WheelEvent;
             let scrollingFinished = false;
             viewport.addEventListener("wheel", event => receivedWheel = event, {once: true});

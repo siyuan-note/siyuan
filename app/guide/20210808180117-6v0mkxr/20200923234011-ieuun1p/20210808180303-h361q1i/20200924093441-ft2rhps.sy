@@ -2065,7 +2065,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Without activating the canvas, hold Ctrl (Command on macOS) while using the mouse wheel to zoom around the pointer, or hold the same key and drag with the right mouse button to pan temporarily. Temporary panning preserves keyboard focus and node selection. On a touch screen, use two fingers to zoom and pan. These gestures preserve the current reading or active state. A saved view lock still disables editing, zooming, and panning; activate the canvas after unlocking when needed."
+					"Data": "Without activating the canvas, hold Ctrl (Command on macOS) while using the mouse wheel to zoom around the pointer, or hold the same key and drag with the right mouse button to pan temporarily. You can also hold the middle mouse button and drag to pan temporarily without switching to the hand tool; release it to stop. Temporary panning preserves keyboard focus and node selection. On a touch screen, use two fingers to zoom and pan. These gestures preserve the current reading or active state. A saved view lock still disables editing, zooming, and panning; activate the canvas after unlocking when needed."
 				}
 			]
 		},

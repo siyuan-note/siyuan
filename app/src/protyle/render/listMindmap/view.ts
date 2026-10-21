@@ -81,7 +81,7 @@ export interface ListMindmapViewOptions {
 
 interface PointerState {
     pointerId: number;
-    rightButton?: boolean;
+    panButton?: boolean;
     pan?: boolean;
     id?: string;
     nodeId?: string;
@@ -278,6 +278,11 @@ export class ListMindmapView {
         this.listen(this.viewport, "pointermove", this.pointerMove);
         this.listen(this.viewport, "pointerleave", () => this.setHoveredLine());
         this.listen(this.viewport, "pointerup", this.pointerUp);
+        this.listen(this.viewport, "auxclick", (event: MouseEvent) => {
+            if (event.button === 1 && this.isPanTarget(event as PointerEvent)) {
+                event.preventDefault();
+            }
+        });
         this.listen(this.viewport, "touchstart", this.pinchStart, {passive: false});
         this.listen(this.viewport, "touchmove", this.pinchMove, {passive: false});
         this.listen(this.viewport, "touchend", this.pinchEnd, {passive: false});
@@ -2292,17 +2297,17 @@ export class ListMindmapView {
     };
 
     private isTemporaryPan(event: PointerEvent) {
-        return event.button === 2 && (event.ctrlKey || event.metaKey);
+        return event.button === 1 || event.button === 2 && (event.ctrlKey || event.metaKey);
     }
 
     public isPanTarget(event: PointerEvent) {
         const target = event.target as HTMLElement;
-        return !this.locked && !this.pinching && (event.button === 2 || !this.summarySelecting && !this.relationFrom) &&
+        return !this.locked && !this.pinching && (event.button === 1 || event.button === 2 || !this.summarySelecting && !this.relationFrom) &&
             (event.pointerType !== "touch" || this.interactionActive || !!this.fullscreenMarker) &&
-            (event.pointerType !== "touch" || event.isPrimary) && [0, 2].includes(event.button) &&
+            (event.pointerType !== "touch" || event.isPrimary) && [0, 1, 2].includes(event.button) &&
             this.viewport.contains(target) && target.closest(".mindmap-view") === this.options.host &&
             !target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing") &&
-            (this.panning || event.button === 2 ||
+            (this.panning || event.button === 1 || event.button === 2 ||
                 event.pointerType === "touch" && !target.closest(".mindmap-view__node, .mindmap-view__summary") &&
                 !this.findLine(event));
     }
@@ -2316,7 +2321,7 @@ export class ListMindmapView {
         this.suppressLinkClick = false;
         this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
-        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe") ||
+        if (![0, 1, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe") ||
             this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
@@ -2386,11 +2391,11 @@ export class ListMindmapView {
             this.updateSelection();
             return;
         }
-        if (this.panning || event.button === 2) {
+        if (this.panning || event.button === 1 || event.button === 2) {
             id = undefined;
             event.preventDefault();
         }
-        if (event.button !== 2 && !this.panning && !id && !this.readOnly && !this.relationFrom) {
+        if (event.button === 0 && !this.panning && !id && !this.readOnly && !this.relationFrom) {
             const line = this.findLine(event);
             const points = line?.relation && this.relationRoutes.get(line.id);
             if (points) {
@@ -2441,8 +2446,8 @@ export class ListMindmapView {
             .filter(element => element.closest(".mindmap-view") === this.options.host);
         this.pointer = {
             pointerId: event.pointerId,
-            rightButton: event.button === 2,
-            pan: this.panning || event.button === 2 || event.pointerType === "touch",
+            panButton: event.button === 1 || event.button === 2,
+            pan: this.panning || event.button === 1 || event.button === 2 || event.pointerType === "touch",
             id: event.pointerType !== "touch" && !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
             nodeId: id,
             touchNode: event.pointerType === "touch" && !this.readOnly && this.options.onMove &&
@@ -2493,7 +2498,7 @@ export class ListMindmapView {
         if (this.pinching) {
             return;
         }
-        if (this.relationFrom && !this.pointer?.rightButton) {
+        if (this.relationFrom && !this.pointer?.panButton) {
             const bounds = this.viewport.getBoundingClientRect();
             const id = (event.target as Element).closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId;
             this.relationPreview = {
@@ -2749,7 +2754,7 @@ export class ListMindmapView {
         }
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
-        } else if (!moved && !pointer.nodeId && !pointer.rightButton && !this.readOnly && !this.panning) {
+        } else if (!moved && !pointer.nodeId && !pointer.panButton && !this.readOnly && !this.panning) {
             if (this.editingId) {
                 this.clearSelection();
             }

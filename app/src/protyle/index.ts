@@ -200,6 +200,7 @@ export class Protyle {
 
         this.protyle.element.innerHTML = "";
         this.protyle.element.classList.add("protyle");
+        this.protyle.element.dataset.protyleLite = String(this.protyle.lite);
         if (this.protyle.notebookId) {
             this.protyle.element.setAttribute("data-notebook-id", this.protyle.notebookId);
         } else {

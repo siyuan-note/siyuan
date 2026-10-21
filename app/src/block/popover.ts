@@ -170,7 +170,8 @@ export const initBlockPopover = (app: App) => {
         }
         const listItemActionElement = hasClosestByClassName(event.target, "protyle-action");
         const isListItemAction = isListItemActionElement(listItemActionElement);
-        if (isListItemAction && (listItemActionElement as HTMLElement).closest(".protyle-lite-fragment")) {
+        if (isListItemAction && ((listItemActionElement as HTMLElement).closest(".protyle")?.getAttribute("data-protyle-lite") === "true" ||
+            (listItemActionElement as HTMLElement).closest(".protyle-lite-fragment"))) {
             hideTooltip();
             return;
         }

@@ -304,6 +304,7 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
             const mobile = isMobile();
             if (mobile) {
                 menu.element.setAttribute("data-sheet-expandable", "true");
+                menu.element.setAttribute("data-sheet-actions", "false");
                 pickerElement.style.height = "100%";
             }
             const openMenu = () => {

@@ -622,6 +622,7 @@ export class Menu {
         setPopoverMenuOpen(this.element, false);
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--fit", "b3-menu--expanded");
         this.element.removeAttribute("data-sheet-expandable");
+        this.element.removeAttribute("data-sheet-actions");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
@@ -789,7 +790,8 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-        if (this.element.getAttribute("data-sheet-expandable") === "true") {
+        if (this.element.getAttribute("data-sheet-expandable") === "true" &&
+            this.element.getAttribute("data-sheet-actions") !== "false") {
             this.element.firstElementChild.classList.add("b3-menu__title--actions");
             if (!this.element.firstElementChild.querySelector(".b3-menu__actions")) {
                 this.element.firstElementChild.insertAdjacentHTML("beforeend", getSheetActionsHTML());

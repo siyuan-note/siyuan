@@ -18,7 +18,6 @@
 	"closeWindowOnLastTabClosedTip": "Close the new window when its last tab is closed or dragged to another window",
 	"tabToMainWindow": "Move to main window",
 	"workspaceStorageView": "View",
-	"listMindmapDocumentLayout": "Document layout",
 	"livePhoto": "Live Photo",
 	"livePhotoPreviewUnavailable": "This Live Photo cannot be previewed. The original files are preserved",
 	"livePhotoPairUnavailable": "The Live Photo was not fully uploaded. Please import it again",

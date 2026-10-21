@@ -199,9 +199,8 @@ export class ListMindmapView {
     private destroyed = false;
     private readonly resizeObserver: ResizeObserver;
     private fullscreenMarker?: Comment;
-    private documentViewport?: {width: number, height: number};
+    private documentView?: {scale: number, center: {x: number, y: number}};
     private viewportCenter?: {x: number, y: number};
-    private readonly documentFrame = createElement("div", "mindmap-view__document-frame");
     private readonly disposers: (() => void)[] = [];
     private printTransform?: {scale: number, offsetX: number, offsetY: number};
 
@@ -229,9 +228,6 @@ export class ListMindmapView {
         this.inspector.hidden = true;
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.viewport.append(this.canvas, this.world);
-        this.documentFrame.hidden = true;
-        this.documentFrame.setAttribute("aria-hidden", "true");
-        this.viewport.append(this.documentFrame);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -666,14 +662,6 @@ export class ListMindmapView {
         zoomActions.append(this.zoomSlider, reset, fit);
         zoomControl.append(this.zoomLabel, zoomActions);
         controls.append(zoomControl);
-        add("documentLayout", "listMindmapDocumentLayout", "iconLayout", () => {
-            this.documentFrame.hidden = !this.documentFrame.hidden;
-            const button = this.buttons.get("documentLayout");
-            button.classList.toggle("block__icon--active", !this.documentFrame.hidden);
-            button.setAttribute("aria-pressed", String(!this.documentFrame.hidden));
-        });
-        this.buttons.get("documentLayout").hidden = !this.fullscreenMarker;
-        this.buttons.get("documentLayout").setAttribute("aria-pressed", String(!this.documentFrame.hidden));
         add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
         if (this.options.onSettingsMenu) {
             add("settings", "more", "iconMore", () => {
@@ -3647,8 +3635,11 @@ export class ListMindmapView {
         if (this.destroyed || this.fullscreenMarker) {
             return;
         }
-        this.documentViewport = {width: this.viewport.clientWidth, height: this.viewport.clientHeight};
         this.captureViewportCenter();
+        if (this.viewportCenter) {
+            // 文档视角只在本次全屏期间暂存，全屏内的平移和缩放独立生效。
+            this.documentView = {scale: this.scale, center: this.viewportCenter};
+        }
         // 移到独立容器，避免编辑器祖先的变换和裁剪改变全屏覆盖范围。
         this.fullscreenMarker = document.createComment("mindmap-view");
         this.options.host.before(this.fullscreenMarker);
@@ -3664,7 +3655,11 @@ export class ListMindmapView {
         if (!this.fullscreenMarker) {
             return;
         }
-        this.captureViewportCenter();
+        if (this.documentView) {
+            this.scale = this.documentView.scale;
+            this.viewportCenter = this.documentView.center;
+            this.documentView = undefined;
+        }
         this.options.onFullscreen?.(false, this.buttons.get("fullscreen"));
         this.options.host.classList.remove("fullscreen");
         this.fullscreenMarker.replaceWith(this.options.host);
@@ -3682,19 +3677,6 @@ export class ListMindmapView {
         const button = this.buttons.get("fullscreen");
         button.setAttribute("aria-label", this.label(active ? "exitFullscreen" : "fullscreen"));
         button.querySelector("use").setAttribute("xlink:href", active ? "#iconFullscreenExit" : "#iconFullscreen");
-        const layout = this.buttons.get("documentLayout");
-        if (layout) {
-            layout.hidden = !active;
-            layout.classList.toggle("block__icon--active", !this.documentFrame.hidden && active);
-            layout.setAttribute("aria-pressed", String(!this.documentFrame.hidden && active));
-        }
-        if (!active || this.locked) {
-            this.documentFrame.hidden = true;
-        }
-        if (active && this.documentViewport) {
-            this.documentFrame.style.width = `${this.documentViewport.width}px`;
-            this.documentFrame.style.height = `${this.documentViewport.height}px`;
-        }
         this.refreshLayout();
     };
 

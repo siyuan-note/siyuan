@@ -18,7 +18,6 @@
 	"closeWindowOnLastTabClosedTip": "Закрывать новое окно при закрытии его последней вкладки или её перетаскивании в другое окно",
 	"tabToMainWindow": "Переместить в главное окно",
 	"workspaceStorageView": "Показать",
-	"listMindmapDocumentLayout": "Макет документа",
 	"livePhoto": "Живое фото",
 	"livePhotoPreviewUnavailable": "Не удалось воспроизвести это живое фото. Исходные файлы сохранены",
 	"livePhotoPairUnavailable": "Живое фото загружено не полностью. Импортируйте его ещё раз",

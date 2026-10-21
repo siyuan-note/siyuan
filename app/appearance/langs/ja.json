@@ -18,7 +18,6 @@
 	"closeWindowOnLastTabClosedTip": "新しいウィンドウの最後のタブを閉じるか別のウィンドウへドラッグしたときに、そのウィンドウを閉じます",
 	"tabToMainWindow": "メインウィンドウに移動",
 	"workspaceStorageView": "表示",
-	"listMindmapDocumentLayout": "文書内のレイアウト",
 	"livePhoto": "Live Photo",
 	"livePhotoPreviewUnavailable": "この Live Photo を再生できません。元のファイルは保持されています",
 	"livePhotoPairUnavailable": "Live Photo のアップロードが完了していません。もう一度インポートしてください",

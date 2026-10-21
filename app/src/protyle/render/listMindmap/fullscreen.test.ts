@@ -37,49 +37,37 @@ const browserCases = async (source: string, css: string) => {
             const view = new api.ListMindmapView({host, model: api.readListMindmap(list), onExit: () => {}});
             await settle();
             const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
-            const guide = host.querySelector<HTMLElement>(".mindmap-view__document-frame");
             const center = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
                 (viewport.clientHeight / 2 - view.offsetY) / view.scale];
             const equalCenter = (expected: number[]) => center().forEach((value, index) =>
                 check.ok(Math.abs(value - expected[index]) < 1e-8, "mode changes preserve the logical center"));
             const button = (label: string) => host.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
             const initialStyle = host.style.cssText;
-            const size = [viewport.clientWidth, viewport.clientHeight];
-            check.equal(button("listMindmapDocumentLayout").hidden, true);
             for (const scale of [.75, 1.25]) {
                 view.zoomAt(scale);
                 const documentCenter = center();
                 const documentTransform = [view.scale, view.offsetX, view.offsetY];
+                const root = host.querySelector<HTMLElement>(".mindmap-view__node");
+                const documentPosition = root.getBoundingClientRect();
+                const equalDocumentView = () => {
+                    equalCenter(documentCenter);
+                    [view.scale, view.offsetX, view.offsetY].forEach((value, index) => {
+                        check.ok(Math.abs(value - documentTransform[index]) < 1e-8,
+                            "leaving fullscreen restores the document transform");
+                    });
+                };
                 button("fullscreen").click();
                 await settle();
                 equalCenter(documentCenter);
                 check.equal(view.scale, scale);
                 check.equal(host.parentElement, document.body);
-                check.equal(guide.hidden, true);
-                button("listMindmapDocumentLayout").click();
-                check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
-                check.equal(getComputedStyle(guide).pointerEvents, "none");
-                const bounds = guide.getBoundingClientRect();
-                const full = viewport.getBoundingClientRect();
-                check.deepEqual([bounds.width, bounds.height], size);
-                check.ok(Math.abs(bounds.left + bounds.width / 2 - full.left - full.width / 2) < 1);
-                check.ok(Math.abs(bounds.top + bounds.height / 2 - full.top - full.height / 2) < 1);
-                check.equal(getComputedStyle(guide).borderTopStyle, "dashed");
-                button("listMindmapDocumentLayout").click();
-                check.equal(guide.hidden, true);
-                button("listMindmapDocumentLayout").click();
                 button("exitFullscreen").click();
                 await settle();
-                equalCenter(documentCenter);
-                [view.scale, view.offsetX, view.offsetY].forEach((value, index) => {
-                    check.ok(Math.abs(value - documentTransform[index]) < 1e-8,
-                        "an unchanged round trip restores the document transform");
-                });
-                check.equal(guide.hidden, true);
+                equalDocumentView();
 
                 button("fullscreen").click();
                 await settle();
-                button("listMindmapDocumentLayout").click();
+                const full = viewport.getBoundingClientRect();
                 if (mobile) {
                     const touches = (distance: number) => [0, 1].map(index => new Touch({identifier: index,
                         target: viewport, clientX: full.left + full.width / 2 + (index ? distance : -distance),
@@ -87,7 +75,7 @@ const browserCases = async (source: string, css: string) => {
                     viewport.dispatchEvent(new TouchEvent("touchstart", {touches: touches(50), cancelable: true}));
                     viewport.dispatchEvent(new TouchEvent("touchmove", {touches: touches(60), cancelable: true}));
                     viewport.dispatchEvent(new TouchEvent("touchend", {touches: [], cancelable: true}));
-                    check.ok(view.scale > scale, "two fingers can zoom through the document frame");
+                    check.ok(view.scale > scale, "two fingers can zoom the fullscreen view");
                 } else {
                     viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 12, deltaY: 8,
                         bubbles: true, cancelable: true}));
@@ -96,62 +84,108 @@ const browserCases = async (source: string, css: string) => {
                     slider.dispatchEvent(new Event("input", {bubbles: true}));
                     check.equal(view.scale, 1.5);
                 }
-                const adjusted = center();
-                const adjustedScale = view.scale;
-                const root = host.querySelector<HTMLElement>(".mindmap-view__node");
-                const preview = root.getBoundingClientRect();
-                const previewPosition = [preview.left - bounds.left, preview.top - bounds.top];
+                check.notEqual(view.scale, scale);
+                viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 60, deltaY: 40,
+                    bubbles: true, cancelable: true}));
+                check.notDeepEqual(center(), documentCenter, "fullscreen panning changes the current center");
                 view.setReadOnly(true);
-                check.equal(guide.hidden, false, "control refresh preserves the preview");
-                check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
                 host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
                 await settle();
-                equalCenter(adjusted);
-                check.equal(view.scale, adjustedScale);
+                equalDocumentView();
                 check.equal(host.parentElement, parent);
                 check.equal(host.style.cssText, initialStyle);
-                check.equal(guide.hidden, true);
                 const restored = root.getBoundingClientRect();
-                const documentBounds = viewport.getBoundingClientRect();
-                check.ok(Math.abs(restored.left - documentBounds.left - previewPosition[0]) < 1 &&
-                    Math.abs(restored.top - documentBounds.top - previewPosition[1]) < 1,
-                "the document matches the frame preview after pan and zoom");
+                check.ok(Math.abs(restored.left - documentPosition.left) < 1 &&
+                    Math.abs(restored.top - documentPosition.top) < 1,
+                "fullscreen pan and zoom leave the document reading position unchanged");
                 check.equal(list.outerHTML, originalSource);
                 view.setReadOnly(false);
+                button("fullscreen").click();
+                await settle();
+                equalCenter(documentCenter);
+                check.equal(view.scale, scale, "reentering starts from the document, not the discarded fullscreen view");
+                button("exitFullscreen").click();
+                await settle();
+                equalDocumentView();
             }
             const rapid = center();
+            button("fullscreen").click();
+            button("exitFullscreen").click();
             button("fullscreen").click();
             button("exitFullscreen").click();
             await settle();
             equalCenter(rapid);
             button("fullscreen").click();
             await settle();
-            button("listMindmapDocumentLayout").click();
             viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: -100000, bubbles: true, cancelable: true}));
-            const croppedCenter = center();
+            check.notDeepEqual(center(), rapid);
             button("exitFullscreen").click();
             await settle();
-            equalCenter(croppedCenter);
+            equalCenter(rapid);
             view.refreshLayout();
             await settle();
-            equalCenter(croppedCenter);
+            equalCenter(rapid);
+
+            const beforeResize = center();
+            const beforeResizeScale = view.scale;
             button("fullscreen").click();
             await settle();
-            button("listMindmapDocumentLayout").click();
+            parent.style.width = `${mobile ? 360 : 680}px`;
+            view.zoomAt(1.8);
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(beforeResize);
+            check.equal(view.scale, beforeResizeScale, "resizing the document restores its logical center and zoom");
+
+            const beforeEdit = center();
+            const beforeEditScale = view.scale;
+            button("fullscreen").click();
+            await settle();
+            view.zoomAt(1.8);
+            const content = view.model.root.contentBlocks[0].querySelector('[contenteditable="true"]');
+            content.textContent = "Edited root";
+            const editedSource = list.outerHTML;
+            view.update(api.readListMindmap(list));
+            await settle();
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(beforeEdit);
+            check.equal(view.scale, beforeEditScale);
+            check.equal(view.getContentHost(view.model.root.id).textContent, "Edited root",
+                "restoring the document viewport keeps content updates made in fullscreen");
+            check.equal(list.outerHTML, editedSource);
+
+            const beforeLock = center();
+            const beforeLockScale = view.scale;
+            button("fullscreen").click();
+            await settle();
+            view.zoomAt(1.8);
             view.setLocked(true);
-            check.equal(guide.hidden, true, "locked maps hide the layout preview");
-            check.equal(button("listMindmapDocumentLayout"), null);
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(beforeLock);
+            check.equal(view.scale, beforeLockScale, "locking in fullscreen does not replace the saved document view");
+            button("fullscreen").click();
+            await settle();
             view.destroy();
             check.equal(host.parentElement, parent);
             check.equal(host.classList.contains("fullscreen"), false);
             check.equal(Array.from(parent.childNodes).some(node => node.nodeType === Node.COMMENT_NODE), false);
+            const initializing = new api.ListMindmapView({host, model: api.readListMindmap(list), onExit: () => {}});
+            button("fullscreen").click();
+            button("exitFullscreen").click();
+            await settle();
+            check.equal(initializing.initialFit, false, "an early round trip still completes the initial document layout");
+            check.equal(host.parentElement, parent);
+            check.ok(Number.isFinite(initializing.offsetX) && Number.isFinite(initializing.offsetY));
+            initializing.destroy();
             parent.remove();
         }
     }
     return "Mindmap fullscreen cases passed";
 };
 
-test("fullscreen preserves the viewport and previews the document layout on desktop and touch screens", {
+test("fullscreen preserves entry focus and restores the document viewport without reverting content updates", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {

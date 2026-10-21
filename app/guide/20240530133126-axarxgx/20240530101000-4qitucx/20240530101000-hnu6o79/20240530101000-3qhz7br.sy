@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261020181700"
+		"updated": "20261021132218"
 	},
 	"Children": [
 		{
@@ -2090,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261020181700"
+				"updated": "20261021132218"
 			},
 			"Children": [
 				{
@@ -2161,30 +2161,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261019142953-j4zhvo2",
-				"updated": "20261019142953"
+				"updated": "20261021132218"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文書と全画面表示を切り替えても、マインドマップの中心と拡大率は維持されます。ツールバーの "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "禅モードの切り替え"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "文書内のレイアウト"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を押すと、文書内のマインドマップ表示領域と同じ大きさの枠が中央に表示されます。枠を目安にキャンバスを移動・拡大縮小すると、全画面表示を終了した後の表示範囲を確認できます。もう一度押すと枠を非表示にします。この枠でブロックの幅や高さは変わりません。"
+					"Data": "全画面表示に切り替えると、マインドマップの現在の中心と拡大率が維持されます。全画面表示中の移動と拡大・縮小は、その全画面表示にのみ適用されます。全画面表示を終了すると、文書内の表示は切り替え前の中心と拡大率に戻ります。ノードの編集内容は引き続き反映されます。"
 				}
 			]
 		},

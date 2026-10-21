@@ -18,7 +18,6 @@
 	"closeWindowOnLastTabClosedTip": "把新窗口的最后一个页签关闭或拖拽到其他窗口之后，关闭该窗口",
 	"tabToMainWindow": "移动到主窗口",
 	"workspaceStorageView": "查看",
-	"listMindmapDocumentLayout": "文档布局",
 	"livePhoto": "实况照片",
 	"livePhotoPreviewUnavailable": "暂时无法播放这张实况照片，原始文件已保留",
 	"livePhotoPairUnavailable": "实况照片未完整上传，请重新导入",

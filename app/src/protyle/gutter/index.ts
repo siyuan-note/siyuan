@@ -4021,8 +4021,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 horizontalAnchorLeft = action.getBoundingClientRect().left;
                 space = 0;
             }
-        }
-        if (listItem && element.classList.contains("protyle-action") &&
+        } else if (listItem && element.classList.contains("protyle-action") &&
             element.parentElement.getAttribute("data-type") === "NodeListItem") {
             const listItemElement = element.parentElement;
             const contentElement = listItemElement.querySelector<HTMLElement>(":scope > [data-node-id]");

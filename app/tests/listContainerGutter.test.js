@@ -376,8 +376,30 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
             const before = state();
             check.deepEqual(hover(root.querySelector(".protyle-action")), before,
                 "moving from a paragraph to the list marker retains the complete chain");
+            gutter.render(protyle, root.querySelector(".protyle-action"));
+            check.equal(state().left, before.left, "direct marker entry uses the same horizontal anchor as its content");
+            check.ok(gutter.element.getBoundingClientRect().right <= root.querySelector(".protyle-action").getBoundingClientRect().left,
+                "complete indicators do not overlap unordered, ordered or task markers");
         }
     }
+
+    for (const full of [false, true]) {
+        window.siyuan.config.editor.blockGutterMode = full;
+        for (const rtl of [false, true]) {
+            window.siyuan.config.editor.rtl = rtl;
+            for (const subtype of ["u", "o", "t"]) {
+                root.innerHTML = `<div data-node-id="outer-list" data-type="NodeList" class="list"><div data-node-id="outer-item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p("outer")}<div data-node-id="list" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="item" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p("paragraph")}${attr}</div>${attr}</div>${attr}</div>${attr}</div>`;
+                const paragraph = root.querySelector('[data-node-id="paragraph"]');
+                const marker = paragraph.previousElementSibling;
+                gutter.render(protyle, paragraph);
+                const before = state().left;
+                gutter.render(protyle, marker);
+                check.equal(state().left, before, `nested ${subtype} marker anchor: full=${full}, rtl=${rtl}`);
+            }
+        }
+    }
+    window.siyuan.config.editor.rtl = false;
+    window.siyuan.config.editor.blockGutterMode = true;
 
     root.innerHTML = `<div data-node-id="outer-list" data-type="NodeList" class="list"><div data-node-id="outer-item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p("first")}<div data-node-id="quote" data-type="NodeBlockquote" class="bq">${p("qfirst")}<div data-node-id="tabs" data-type="NodeTabs" class="tabs"><div class="tabs-header">Tabs</div><div data-node-id="tab" data-type="NodeTabItem" class="tab-item"><div class="tab-item-content">${p("leaf")}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>`;
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));

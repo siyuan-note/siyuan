@@ -179,7 +179,7 @@ export class ListMindmapView {
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
     private pinching = false;
-    private pinch?: {distance: number, scale: number, x: number, y: number};
+    private pinch?: {distance: number, scale: number, x: number, y: number, zooming?: boolean};
     private pendingPointerId?: number;
     private endInteraction?: () => void;
     private linkTimer = 0;
@@ -2270,8 +2270,10 @@ export class ListMindmapView {
         this.offsetY += y - this.pinch.y;
         this.pinch.x = x;
         this.pinch.y = y;
-        this.zoomAt(this.pinch.scale * Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY) /
-            this.pinch.distance, x, y);
+        const distance = Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+        // 起始容差过滤平移时的间距抖动，进入缩放后保留连续的捏合反馈。
+        this.pinch.zooming ||= Math.abs(distance - this.pinch.distance) > Math.max(8, this.pinch.distance * .04);
+        this.zoomAt(this.pinch.zooming ? this.pinch.scale * distance / this.pinch.distance : this.pinch.scale, x, y);
     };
 
     private pinchEnd = (event: TouchEvent) => {

@@ -80,6 +80,27 @@ test("saved view locks prohibit two-finger gestures", () => {
     assert.equal(cancelled(), 0);
 });
 
+test("two-finger panning ignores small distance jitter until a deliberate pinch starts", () => {
+    for (const [distance, jitter] of [[100, 6], [400, 12]]) {
+        const {target} = setup();
+        target.pinchStart(event(touch(60), touch(60 + distance)));
+        target.pinchMove(event(touch(80), touch(80 + distance + jitter)));
+        assert.equal(target.scale, 1);
+        assert.equal(target.offsetX, 20 + jitter / 2);
+        target.pinchMove(event(touch(90), touch(90 + distance - jitter)));
+        assert.equal(target.scale, 1);
+        target.pinchMove(event(touch(90), touch(90 + distance * 1.5)));
+        assert.equal(target.scale, 1.5);
+        target.pinchMove(event(touch(90), touch(90 + distance + jitter)));
+        assert.equal(target.scale, (distance + jitter) / distance);
+        target.pinchEnd(event());
+        const scale = target.scale;
+        target.pinchStart(event(touch(60), touch(60 + distance)));
+        target.pinchMove(event(touch(80), touch(80 + distance + jitter)));
+        assert.equal(target.scale, scale);
+    }
+});
+
 test("remaining fingers cannot start a drag and a new gesture starts at the current scale", () => {
     const {target} = setup();
     target.pinchStart(event(touch(60), touch(160)));

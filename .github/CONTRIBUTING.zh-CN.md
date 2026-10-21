@@ -85,6 +85,10 @@ NPM 镜像：
 * `gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
+Windows 下可在思源仓库根目录执行 `node scripts/android-dev-run.mjs`，构建移动端前端、打包资源、构建 `kernel.aar` 和调试 APK，然后通过 ADB 安装并启动独立调试包，默认使用 `official` 渠道。需准备 Node.js、pnpm、Go、gomobile、JDK、Android SDK 和 NDK，以及支持 ZIP 的 bsdtar（Windows 自带的 `tar`）。在 Android 工程的 `local.properties` 中配置 `sdk.dir`，或设置 `ANDROID_HOME`；脚本会选择 SDK 目录下版本最高的 NDK。设备需开启并授权调试连接。
+
+Android 工程默认位于思源仓库同级，可用 `--android-dir=<路径>` 或 `SIYUAN_ANDROID_DIR` 指定；使用 `--device=<序列号>` 选择 ADB 连接。`--skip-ui` 复用现有前端产物（需包含 mobile、desktop、export），`--skip-kernel` 复用并复制现有 `kernel/kernel.aar`，`--skip-gradle` 仅跳过 APK 构建，仍会执行前面的资源打包和内核处理。仅重新安装已有 APK 时同时传入这三个参数；SDK 和 NDK 仍需可用。更多参数见 `node scripts/android-dev-run.mjs --help`。
+
 ### Harmony
 
 仅支持在 Linux 下编译，需要安装鸿蒙 SDK，并且需要修改 Go 源码。
@@ -92,6 +96,10 @@ NPM 镜像：
 * `cd kernel/harmony`
 * `./build.sh` （Windows 模拟器使用 `./build-win.sh`）
 * https://github.com/siyuan-note/siyuan-harmony
+
+ARM64 真机可在思源仓库根目录执行 `node scripts/harmony-dev-run.mjs`，构建移动端前端、打包资源、构建内核和已签名的调试 HAP，然后通过 HDC 安装并启动独立调试包。先在 DevEco Studio 为设备配置鸿蒙工程的 `debug` 签名，并准备原生 OCR 运行库和模型（参考鸿蒙仓库 README）。Windows 通过 WSL 在当前检出目录中执行 `kernel/harmony/build.sh`，WSL 内仍需具备下述鸿蒙 SDK 和修改后的 Go 工具链。脚本使用支持 ZIP 的 bsdtar（Windows 自带的 `tar`），不会自动卸载应用。
+
+通过 `--deveco=<路径>`、`--harmony-dir=<路径>`、`--device=<连接标识>` 指定工具、工程和设备。`--skip-ui` 复用现有前端产物（需包含 mobile、desktop、export），`--skip-kernel` 复制现有 `kernel/harmony/libkernel.so` 和 `libkernel.h`，`--skip-hvigor` 则仅重新安装并启动已有的调试 HAP，跳过所有构建及资源复制。更多参数见 `node scripts/harmony-dev-run.mjs --help`。运行脚本测试：`node --test app/scripts/harmony-dev-run.test.js`。
 
 修改 Go 源码：
 

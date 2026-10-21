@@ -85,6 +85,10 @@ Desktop packaging runs `scripts/prepare-ocr.py` to prepare the pinned models and
 * `gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
+On Windows, run `node scripts/android-dev-run.mjs` from the SiYuan repository root to build the mobile frontend, package resources, build `kernel.aar` and the debug APK, then install and launch the separate debug app through ADB. The default flavor is `official`. Prepare Node.js, pnpm, Go, gomobile, a JDK, the Android SDK and NDK, and ZIP-capable bsdtar (the bundled Windows `tar`). Configure `sdk.dir` in the Android project's `local.properties`, or set `ANDROID_HOME`; the script selects the highest NDK version under the SDK directory. Enable debugging on the device and authorize the connection.
+
+The Android project defaults to a sibling of the SiYuan repository; override it with `--android-dir=<path>` or `SIYUAN_ANDROID_DIR`. Use `--device=<serial>` to select an ADB connection. `--skip-ui` reuses existing frontend output (mobile, desktop, and export are required), `--skip-kernel` reuses and copies existing `kernel/kernel.aar`, and `--skip-gradle` only skips APK compilation while still performing resource packaging and kernel processing. Pass all three flags to reinstall an existing APK without rebuilding; the SDK and NDK must still be available. See `node scripts/android-dev-run.mjs --help` for more options.
+
 ### Harmony
 
 Only support compilation under Linux, need to install Harmony SDK, and need to modify Go source code.
@@ -92,6 +96,10 @@ Only support compilation under Linux, need to install Harmony SDK, and need to m
 * `cd kernel/harmony`
 * `./build.sh` (`./build-win.sh` for Windows Emulator)
 * https://github.com/siyuan-note/siyuan-harmony
+
+For ARM64 devices, run `node scripts/harmony-dev-run.mjs` from the SiYuan repository root to build the mobile frontend, package resources, build the kernel and signed debug HAP, then install and launch the separate debug app through HDC. First configure the Harmony project's `debug` signing profile for your device in DevEco Studio and prepare the native OCR runtime and models (see the Harmony repository README). On Windows, WSL runs `kernel/harmony/build.sh` against the current checkout; the Harmony SDK and patched Go toolchain described below must be available inside WSL. The script requires ZIP-capable bsdtar (the bundled Windows `tar`) and never automatically uninstalls the app.
+
+Use `--deveco=<path>`, `--harmony-dir=<path>`, and `--device=<connect-key>` to select tools, project, and device. `--skip-ui` reuses existing frontend output (mobile, desktop, and export are required), `--skip-kernel` copies existing `kernel/harmony/libkernel.so` and `libkernel.h`, and `--skip-hvigor` only reinstalls and launches the existing debug HAP, skipping all builds and resource copies. See `node scripts/harmony-dev-run.mjs --help` for more options. Run script tests with `node --test app/scripts/harmony-dev-run.test.js`.
 
 Modify Go source code:
 

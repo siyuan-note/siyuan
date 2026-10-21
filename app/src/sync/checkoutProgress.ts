@@ -13,6 +13,7 @@ let previousFocus: HTMLElement | undefined;
 let revision = 0;
 let connection: {appID: string; clientID: string};
 let preparation: string;
+let unsavedPreparation = false;
 let refreshing: string;
 let refreshTail = Promise.resolve();
 let statePoll: number;
@@ -45,6 +46,7 @@ const setEditingGuard = (enabled: boolean) => {
 const clear = () => {
     state = undefined;
     preparation = undefined;
+    unsavedPreparation = false;
     refreshing = undefined;
     window.clearInterval(statePoll);
     statePoll = undefined;
@@ -136,6 +138,8 @@ const prepare = async (task: CheckoutState) => {
     const failureVersion = getEditorSaveFailureVersion();
     try {
         await refreshTail;
+        if (state?.taskID !== task.taskID || preparation !== task.token) return;
+        unsavedPreparation = true;
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         await Promise.all(getAllEditor().filter(editor => editor?.protyle?.wysiwyg)
             .map(editor => {
@@ -144,6 +148,7 @@ const prepare = async (task: CheckoutState) => {
             }));
         await flushPendingEditorSaves(failureVersion);
         saved = true;
+        if (state?.taskID === task.taskID && preparation === task.token) unsavedPreparation = false;
     } catch (error) {
         console.error("Could not save input before sync checkout", error);
     }
@@ -159,7 +164,8 @@ const finish = (task: CheckoutState, resume?: CheckoutState) => {
     const refreshID = task.taskID + ":" + task.revision;
     if (refreshing === refreshID) return;
     refreshing = refreshID;
-    if (!task.blocking) {
+    // 未确认保存的准备轮次不会进入落盘，保留当前草稿并直接恢复输入。
+    if (!task.blocking || unsavedPreparation) {
         clear();
         return;
     }
@@ -240,14 +246,14 @@ export const reconcileSyncCheckout = async (clientID?: string, reconnect = false
         if (response.code !== 0) return;
         if (kernelID && kernelID !== response.data.kernelID) revision = 0;
         kernelID = response.data.kernelID;
-        if (reconnect && state?.blocking) {
+        if (reconnect && state?.blocking && !unsavedPreparation) {
             window.location.reload();
             return;
         }
         if (response.data.revision < revision) return;
         if (!response.data.task) {
             revision = response.data.revision;
-            if (state?.blocking) window.location.reload();
+            if (state?.blocking && !unsavedPreparation) window.location.reload();
             else clear();
         } else {
             syncCheckoutProgress({cmd: "syncProgress", code: response.data.task.phase === "done" ? 2 : 0, msg: "", data: response.data.task});

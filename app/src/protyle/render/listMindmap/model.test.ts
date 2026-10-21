@@ -1210,6 +1210,32 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panMenu.toggle();
     };
 
+    // 应用菜单位于导图外，按下菜单项会先停用交互，随后才执行菜单的点击动作。
+    for (const pointerType of ["mouse", "touch"]) {
+        const menuHost = document.createElement("div");
+        hostParent.append(menuHost);
+        const menuView = new api.ListMindmapView({...options, host: menuHost,
+            onSettingsMenu: (_anchor: HTMLElement, _expand: unknown, pan: typeof panMenu) => panMenu = pan});
+        const menuItem = document.createElement("button");
+        document.body.append(menuItem);
+        for (const active of [false, true, false, true]) {
+            menuHost.querySelector<HTMLButtonElement>('[aria-label="more"]').click();
+            check.equal(panMenu.active, active);
+            const toggle = panMenu.toggle;
+            menuItem.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType}));
+            check.equal(menuHost.classList.contains("mindmap-view--pan"), false);
+            toggle();
+            check.equal(menuHost.classList.contains("mindmap-view--pan"), !active,
+                `${pointerType} menu clicks apply the inverse of the displayed checked state`);
+            const hand = menuHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+            check.equal(hand.getAttribute("aria-pressed"), String(!active));
+            check.equal(hand.hidden, active);
+        }
+        menuItem.remove();
+        menuView.destroy();
+        menuHost.remove();
+    }
+
     // 方向键选中视口外的节点时自动平移，待完成的布局和只读视图使用同一定位逻辑。
     const navigationHost = document.createElement("div");
     navigationHost.style.width = "400px";

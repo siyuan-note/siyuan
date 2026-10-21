@@ -666,10 +666,11 @@ export class ListMindmapView {
         if (this.options.onSettingsMenu) {
             add("settings", "more", "iconMore", () => {
                 const selectedId = this.selectedId;
+                const panning = this.panning;
                 this.options.onSettingsMenu(this.buttons.get("settings"),
                     this.buttons.get("expandLevel").hidden ? level => this.finishThen(() => {
                         void this.expandToLevel(level, selectedId).catch(error => console.error(error));
-                    }) : undefined, {active: this.panning, toggle: () => this.togglePanning()});
+                    }) : undefined, {active: panning, toggle: () => this.togglePanning(!panning)});
             });
             this.buttons.get("settings").setAttribute("aria-haspopup", "menu");
         }
@@ -686,7 +687,7 @@ export class ListMindmapView {
         }
     }
 
-    private togglePanning() {
+    private togglePanning(value = !this.panning) {
         this.finishThen(() => {
             if (this.locked || this.destroyed) {
                 return;
@@ -694,7 +695,7 @@ export class ListMindmapView {
             this.setInteractionActive(true);
             this.finishRelationEdit?.(true);
             this.cancelPointer();
-            this.setPanning(!this.panning);
+            this.setPanning(value);
             this.relationFrom = undefined;
             this.relationPreview = undefined;
             this.inspector.hidden = true;

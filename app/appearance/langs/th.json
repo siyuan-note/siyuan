@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "ล้างประวัติเอกสารล่าสุด",
+	"confirmClearRecentDocs": "ล้างบันทึกการดู เปิด และปิดเอกสารทั้งหมดหรือไม่? เอกสารจะยังคงอยู่และจะยังคงบันทึกกิจกรรมใหม่ต่อไป",
 	"bazaarInstalling": "กำลังติดตั้ง...",
 	"collapseSyncDetails": "ซ่อนรายละเอียด",
 	"agentInstructionsLocationConflict": "เนื้อหาใน data/ai/AGENTS.md และ data/storage/ai/AGENTS.md ต่างกัน โปรดรวมเนื้อหาไว้ในไฟล์ใหม่แล้วลบไฟล์เดิม",

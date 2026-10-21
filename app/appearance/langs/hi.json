@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "हाल के दस्तावेज़ों का इतिहास साफ़ करें",
+	"confirmClearRecentDocs": "दस्तावेज़ देखने, खोलने और बंद करने के सभी रिकॉर्ड साफ़ करें? दस्तावेज़ सुरक्षित रहेंगे और नई गतिविधि रिकॉर्ड होती रहेगी।",
 	"bazaarInstalling": "इंस्टॉल हो रहा है...",
 	"collapseSyncDetails": "विवरण छिपाएँ",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md और data/storage/ai/AGENTS.md की सामग्री अलग है; सामग्री को नई फ़ाइल में मिलाएँ, फिर पुरानी फ़ाइल हटाएँ",

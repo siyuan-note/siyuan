@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261021161724"
 	},
 	"Children": [
 		{
@@ -1260,6 +1260,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261021161724-4je25jy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021161724-4je25jy",
+				"updated": "20261021161724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the desktop and mobile recent documents list, select recently viewed, opened, or closed documents and click the trash button at the top to clear all three types of records after confirmation. This clears only the local records in the current workspace; documents, recent creation and modification lists, and tab navigation history are kept. New browsing, opening, or closing activity will be recorded again, including closing a tab that was already open."
 				}
 			]
 		},

@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "최근 문서 기록 지우기",
+	"confirmClearRecentDocs": "문서를 열람하고 열고 닫은 기록을 모두 지우시겠습니까? 문서는 유지되며 새로운 활동은 계속 기록됩니다.",
 	"bazaarInstalling": "설치 중...",
 	"collapseSyncDetails": "세부 정보 접기",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md와 data/storage/ai/AGENTS.md의 내용이 다릅니다. 새 파일에 내용을 병합한 후 이전 파일을 삭제하세요",

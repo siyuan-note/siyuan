@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Hapus riwayat dokumen terbaru",
+	"confirmClearRecentDocs": "Hapus semua catatan penelusuran, pembukaan, dan penutupan dokumen? Dokumen tetap disimpan dan aktivitas baru akan tetap dicatat.",
 	"bazaarInstalling": "Sedang memasang...",
 	"collapseSyncDetails": "Sembunyikan detail",
 	"agentInstructionsLocationConflict": "Isi data/ai/AGENTS.md dan data/storage/ai/AGENTS.md berbeda; gabungkan isinya ke berkas baru, lalu hapus berkas lama",

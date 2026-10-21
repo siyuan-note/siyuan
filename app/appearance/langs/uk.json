@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Очистити історію нещодавніх документів",
+	"confirmClearRecentDocs": "Очистити всі записи про перегляд, відкриття та закриття документів? Документи залишаться, а нові дії й надалі записуватимуться.",
 	"bazaarInstalling": "Встановлення...",
 	"collapseSyncDetails": "Приховати подробиці",
 	"agentInstructionsLocationConflict": "Вміст data/ai/AGENTS.md і data/storage/ai/AGENTS.md відрізняється; об’єднайте його в новому файлі, а потім видаліть старий файл",

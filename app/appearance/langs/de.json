@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Verlauf zuletzt verwendeter Dokumente leeren",
+	"confirmClearRecentDocs": "Alle Einträge zum Anzeigen, Öffnen und Schließen von Dokumenten löschen? Die Dokumente bleiben erhalten und neue Aktivitäten werden weiterhin aufgezeichnet.",
 	"bazaarInstalling": "Wird installiert...",
 	"collapseSyncDetails": "Details ausblenden",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md und data/storage/ai/AGENTS.md unterscheiden sich; führen Sie die Inhalte in der neuen Datei zusammen und entfernen Sie dann die alte Datei",

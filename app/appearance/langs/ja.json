@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "最近のドキュメント履歴を消去",
+	"confirmClearRecentDocs": "ドキュメントの閲覧、開いた履歴、閉じた履歴をすべて消去しますか？ドキュメントは保持され、今後の操作は引き続き記録されます。",
 	"bazaarInstalling": "インストール中...",
 	"collapseSyncDetails": "詳細を閉じる",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md と data/storage/ai/AGENTS.md の内容が異なります。内容を新しいファイルに統合してから古いファイルを削除してください",

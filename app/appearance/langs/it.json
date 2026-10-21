@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Cancella la cronologia dei documenti recenti",
+	"confirmClearRecentDocs": "Cancellare tutti i dati relativi alla consultazione, apertura e chiusura dei documenti? I documenti saranno conservati e le nuove attività continueranno a essere registrate.",
 	"bazaarInstalling": "Installazione in corso...",
 	"collapseSyncDetails": "Nascondi dettagli",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md e data/storage/ai/AGENTS.md sono diversi; unisci i contenuti nel nuovo file, quindi rimuovi quello precedente",

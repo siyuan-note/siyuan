@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Wyczyść historię ostatnich dokumentów",
+	"confirmClearRecentDocs": "Wyczyścić wszystkie wpisy dotyczące przeglądania, otwierania i zamykania dokumentów? Dokumenty zostaną zachowane, a nowe działania będą nadal rejestrowane.",
 	"bazaarInstalling": "Instalowanie...",
 	"collapseSyncDetails": "Ukryj szczegóły",
 	"agentInstructionsLocationConflict": "Pliki data/ai/AGENTS.md i data/storage/ai/AGENTS.md różnią się; scal ich zawartość w nowym pliku, a następnie usuń stary plik",

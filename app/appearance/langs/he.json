@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "ניקוי היסטוריית המסמכים האחרונים",
+	"confirmClearRecentDocs": "לנקות את כל רשומות העיון, הפתיחה והסגירה של מסמכים? המסמכים יישמרו ופעילות חדשה תמשיך להירשם.",
 	"bazaarInstalling": "מתקין...",
 	"collapseSyncDetails": "הסתר פרטים",
 	"agentInstructionsLocationConflict": "התוכן של data/ai/AGENTS.md ושל data/storage/ai/AGENTS.md שונה; יש למזג את התוכן בקובץ החדש ואז להסיר את הקובץ הישן",

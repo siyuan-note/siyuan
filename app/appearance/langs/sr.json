@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Обриши историју недавних докумената",
+	"confirmClearRecentDocs": "Обрисати све записе о прегледању, отварању и затварању докумената? Документи ће бити сачувани, а нове активности ће се и даље бележити.",
 	"bazaarInstalling": "Инсталирање...",
 	"collapseSyncDetails": "Сакриј детаље",
 	"agentInstructionsLocationConflict": "Садржаји датотека data/ai/AGENTS.md и data/storage/ai/AGENTS.md се разликују; обједините их у новој датотеци, па уклоните стару датотеку",

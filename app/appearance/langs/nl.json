@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Geschiedenis van recente documenten wissen",
+	"confirmClearRecentDocs": "Alle gegevens over het bekijken, openen en sluiten van documenten wissen? Documenten blijven behouden en nieuwe activiteiten worden nog steeds vastgelegd.",
 	"bazaarInstalling": "Installeren...",
 	"collapseSyncDetails": "Details verbergen",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md en data/storage/ai/AGENTS.md verschillen; voeg de inhoud samen in het nieuwe bestand en verwijder daarna het oude bestand",

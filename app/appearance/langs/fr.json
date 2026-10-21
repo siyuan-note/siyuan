@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Effacer l’historique des documents récents",
+	"confirmClearRecentDocs": "Effacer tous les enregistrements de consultation, d’ouverture et de fermeture de documents ? Les documents seront conservés et les nouvelles activités continueront d’être enregistrées.",
 	"bazaarInstalling": "Installation en cours...",
 	"collapseSyncDetails": "Masquer les détails",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md et data/storage/ai/AGENTS.md diffèrent ; fusionnez leur contenu dans le nouveau fichier, puis supprimez l’ancien fichier",

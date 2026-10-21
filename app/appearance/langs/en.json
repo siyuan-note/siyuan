@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Clear recent document history",
+	"confirmClearRecentDocs": "Clear all document browsing, opening and closing records? Documents are kept and new activity will still be recorded.",
 	"bazaarInstalling": "Installing...",
 	"collapseSyncDetails": "Hide details",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md and data/storage/ai/AGENTS.md differ; merge their contents into the new file, then remove the old file",

@@ -19,6 +19,8 @@ const createHarness = () => {
         callbacks.set("input:" + name, callback)};
     const select = {value: "", addEventListener: (name: string, callback: (...args: any[]) => void) =>
         callbacks.set("select:" + name, callback)};
+    let clearCallback: () => void;
+    let clearUpdates = 0;
     const host = {innerHTML: ""};
     const path = {innerHTML: "", previousElementSibling: host};
     let icons: Array<{tagName: string, classes: Set<string>, classList: {add: (name: string) => void},
@@ -84,6 +86,13 @@ const createHarness = () => {
             assert.equal(element, root);
             cleanups.push(host.innerHTML);
         }},
+        "./clearRecentDocs": {
+            clearRecentDocsButtonHTML: () => "<button data-action=\"clear-recent-docs\"></button>",
+            bindClearRecentDocs: (_button: unknown, _getSort: unknown, _isActive: unknown, callback: () => void) => {
+                clearCallback = callback;
+                return () => clearUpdates++;
+            },
+        },
         "../dialog": {Dialog: class {
             element = root;
             constructor(options: any) {
@@ -94,7 +103,7 @@ const createHarness = () => {
     }, "\nexports.render = renderRecentDocsContent;");
     const settle = async () => { await new Promise(resolve => setImmediate(resolve)); };
     return {api, root, host, path, input, select, siyuan, pathRequests, requests, callbacks, cleanups, patches, settle,
-        icons: () => icons, dialogOptions: () => dialogOptions};
+        icons: () => icons, dialogOptions: () => dialogOptions, clear: () => clearCallback(), clearUpdates: () => clearUpdates};
 };
 
 test("recent document SVG, Unicode and image icons receive the shared document preview target", async () => {
@@ -212,4 +221,51 @@ test("recent Arrow and Enter handlers ignore popover editors and closing dialog 
     closing = true;
     exports.keydown({key: "Enter", target: input, preventDefault() {}}, {});
     assert.equal(calls, 3);
+});
+
+test("clearing invalidates pending sort and path responses and refreshes the current filter", async () => {
+    const h = createHarness();
+    h.api.openRecentDocs();
+    h.requests[0].receive({data: [{rootID: "old", title: "Old"}]});
+    h.select.value = "closedAt";
+    h.callbacks.get("select:change")();
+    assert.equal(h.clearUpdates(), 1);
+    h.clear();
+    assert.doesNotMatch(h.host.innerHTML, /data-node-id/);
+    assert.equal(h.requests[2].data.sortBy, "closedAt");
+    h.requests[1].receive({data: [{rootID: "stale", title: "Stale"}]});
+    h.pathRequests[0].resolve({code: 0, data: "/Old"});
+    await h.settle();
+    assert.doesNotMatch(h.host.innerHTML, /data-node-id/);
+    h.requests[2].receive({data: []});
+    h.input.value = "Old";
+    h.callbacks.get("input:input")({isComposing: false});
+    assert.doesNotMatch(h.host.innerHTML, /data-node-id/, "search must not restore cleared cached data");
+});
+
+test("clearing after switching to created documents preserves that list and reloads the current mode", async () => {
+    const h = createHarness();
+    h.api.openRecentDocs();
+    h.requests[0].receive({data: []});
+    h.select.value = "created";
+    h.callbacks.get("select:change")();
+    h.requests[1].receive({data: [{rootID: "created", title: "Created"}]});
+    h.pathRequests[0].resolve({code: 0, data: "/Created"});
+    await h.settle();
+    h.clear();
+    assert.match(h.host.innerHTML, /data-node-id="created"/);
+    assert.equal(h.requests[2].data.sortBy, "created");
+});
+
+test("clearing invalidates a pending history render even when a creation query is now selected", async () => {
+    const h = createHarness();
+    h.api.openRecentDocs();
+    h.requests[0].receive({data: [{rootID: "old", title: "Old"}]});
+    h.select.value = "created";
+    h.callbacks.get("select:change")();
+    h.clear();
+    h.pathRequests[0].resolve({code: 0, data: "/Old"});
+    await h.settle();
+    assert.doesNotMatch(h.host.innerHTML, /data-node-id="old"/);
+    assert.equal(h.requests[2].data.sortBy, "created");
 });

@@ -238,6 +238,7 @@ func registerStorageRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/setCriterion", contractRouteHandlers(apicontract.SetCriterion, setCriterion)...)
 	ginServer.Handle("POST", "/api/storage/removeCriterion", contractRouteHandlers(apicontract.RemoveCriterion, removeCriterion)...)
 	ginServer.Handle("POST", "/api/storage/getRecentDocs", contractRouteHandlers(apicontract.GetRecentDocs, getRecentDocs)...)
+	ginServer.Handle("POST", "/api/storage/clearRecentDocs", contractRouteHandlers(apicontract.ClearRecentDocs, clearRecentDocs)...)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocOpenTime", contractRouteHandlers(apicontract.UpdateRecentDocOpenTime, updateRecentDocOpenTime)...)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocViewTime", contractRouteHandlers(apicontract.UpdateRecentDocViewTime, updateRecentDocViewTime)...)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocCloseTime", contractRouteHandlers(apicontract.UpdateRecentDocCloseTime, updateRecentDocCloseTime)...)

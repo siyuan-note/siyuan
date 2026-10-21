@@ -11,6 +11,7 @@ import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 import {destroyDialogBlockPanels} from "../block/panelOwnership";
+import {bindClearRecentDocs, clearRecentDocsButtonHTML} from "./clearRecentDocs";
 
 const recentDocsRenderVersions = new WeakMap<Element, number>();
 
@@ -122,6 +123,8 @@ export const openRecentDocs = (openOnly = false) => {
         <option value="openAt">${window.siyuan.languages.recentOpened}</option>
         <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
     </select>
+    <span class="fn__space"></span>
+    ${clearRecentDocsButtonHTML()}
 </div>
 </div>`,
             content: `<div class="fn__flex-column switch-doc">
@@ -155,19 +158,30 @@ export const openRecentDocs = (openOnly = false) => {
             }
         });
 
-        // 添加排序下拉框事件监听
+        const isActive = () => dialog.element.isConnected && !dialog.element.hasAttribute("data-dialog-closing");
         let sortRequestId = 0;
-        sortSelect.addEventListener("change", () => {
+        const loadRecentDocs = () => {
             const requestId = ++sortRequestId;
-            // 重新调用 API 获取排序后的数据
             fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
-                if (requestId !== sortRequestId || !dialog.element.isConnected ||
-                    dialog.element.hasAttribute("data-dialog-closing")) {
+                if (requestId !== sortRequestId || !isActive()) {
                     return;
                 }
                 response = newResponse;
                 renderRecentDocsContent(newResponse.data, dialog.element, searchElement.value);
             });
+        };
+        const updateClearButton = bindClearRecentDocs(dialog.element.querySelector('[data-action="clear-recent-docs"]'),
+            () => sortSelect.value, isActive, () => {
+                recentDocsRenderVersions.set(dialog.element, (recentDocsRenderVersions.get(dialog.element) || 0) + 1);
+                if (!["created", "updated"].includes(sortSelect.value)) {
+                    response.data = [];
+                    void renderRecentDocsContent([], dialog.element, searchElement.value);
+                }
+                loadRecentDocs();
+            });
+        sortSelect.addEventListener("change", () => {
+            updateClearButton();
+            loadRecentDocs();
             if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
                 void fileConfigApi.patch("recentDocsSort", sortSelect.value);
             }

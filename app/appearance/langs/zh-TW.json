@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "清空最近文件記錄",
+	"confirmClearRecentDocs": "確定清空所有文件瀏覽、開啟和關閉記錄？文件將保留，後續操作仍會產生新記錄。",
 	"bazaarInstalling": "正在安裝...",
 	"collapseSyncDetails": "收起詳細資訊",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md 與 data/storage/ai/AGENTS.md 內容不同，請將內容合併至新檔案後移除舊檔案",

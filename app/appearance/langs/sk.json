@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Vymazať históriu nedávnych dokumentov",
+	"confirmClearRecentDocs": "Vymazať všetky záznamy o prezeraní, otváraní a zatváraní dokumentov? Dokumenty zostanú zachované a nové činnosti sa budú naďalej zaznamenávať.",
 	"bazaarInstalling": "Inštaluje sa...",
 	"collapseSyncDetails": "Skryť podrobnosti",
 	"agentInstructionsLocationConflict": "Súbory data/ai/AGENTS.md a data/storage/ai/AGENTS.md sa líšia; zlúčte ich obsah do nového súboru a potom odstráňte starý súbor",

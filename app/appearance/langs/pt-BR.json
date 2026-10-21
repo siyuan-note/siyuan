@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Limpar histórico de documentos recentes",
+	"confirmClearRecentDocs": "Limpar todos os registros de consulta, abertura e fechamento de documentos? Os documentos serão mantidos e novas atividades continuarão sendo registradas.",
 	"bazaarInstalling": "Instalando...",
 	"collapseSyncDetails": "Ocultar detalhes",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md e data/storage/ai/AGENTS.md são diferentes; mescle o conteúdo no novo arquivo e remova o antigo",

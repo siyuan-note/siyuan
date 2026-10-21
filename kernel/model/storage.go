@@ -333,6 +333,13 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	return getRecentDocs(sortBy)
 }
 
+// ClearRecentDocs 清空当前工作区的浏览、打开和关闭记录，后续访问继续记录。
+func ClearRecentDocs() error {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+	return setRecentDocs([]*RecentDoc{})
+}
+
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
 	if !canPersistRecentDoc(rootID) {

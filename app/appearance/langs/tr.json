@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "Son belge geçmişini temizle",
+	"confirmClearRecentDocs": "Belgeleri görüntüleme, açma ve kapatmayla ilgili tüm kayıtlar temizlensin mi? Belgeler korunur ve yeni etkinlikler kaydedilmeye devam eder.",
 	"bazaarInstalling": "Yükleniyor...",
 	"collapseSyncDetails": "Ayrıntıları gizle",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md ve data/storage/ai/AGENTS.md farklı; içeriklerini yeni dosyada birleştirin, ardından eski dosyayı kaldırın",

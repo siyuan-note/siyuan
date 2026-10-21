@@ -1,4 +1,6 @@
 {
+	"clearRecentDocs": "مسح سجل المستندات الأخيرة",
+	"confirmClearRecentDocs": "هل تريد مسح جميع سجلات تصفح المستندات وفتحها وإغلاقها؟ ستبقى المستندات، وسيستمر تسجيل النشاط الجديد.",
 	"bazaarInstalling": "جارٍ التثبيت...",
 	"collapseSyncDetails": "إخفاء التفاصيل",
 	"agentInstructionsLocationConflict": "يختلف محتوى data/ai/AGENTS.md عن data/storage/ai/AGENTS.md؛ ادمج المحتوى في الملف الجديد ثم احذف الملف القديم",

@@ -229,6 +229,11 @@ export class AVAttributePanel {
         if (!avID) {
             return;
         }
+        if (operation.action === "replaceAttrViewBlock" &&
+            (this.hasDatabase(avID) || this.hasItem(operation.previousID) || operation.nextID === this.targetID)) {
+            this.refresh();
+            return;
+        }
         if (operation.action === "insertAttrViewBlock" && operation.srcs?.some(item => item.id === this.targetID)) {
             this.refresh();
             return;

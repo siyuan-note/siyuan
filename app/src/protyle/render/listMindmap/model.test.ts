@@ -3386,6 +3386,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform);
         check.equal(panView.interactionActive, false);
         scrollHost.scrollTop = 0;
+        const externalEditor = document.createElement("div");
+        externalEditor.contentEditable = "true";
+        externalEditor.textContent = "Outside editor";
+        externalEditor.style.cssText = "position:fixed;top:0;left:0;z-index:1000;background:white";
+        document.body.append(externalEditor);
+        externalEditor.focus({preventScroll: true});
+        getSelection().collapse(externalEditor.firstChild, 2);
         await nativeTouch([
             {type: "touchStart", touchPoints: [fingerAt(1), fingerAt(2, 100)]},
             {type: "touchMove", touchPoints: [fingerAt(1, 30, -20), fingerAt(2, 130, -20)]},
@@ -3397,6 +3404,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.notEqual(panView.offsetX, readingTransform[1], "native two-finger input pans the reading canvas");
         check.equal(panView.interactionActive, false);
         check.equal(scrollHost.scrollTop, 0, "explicit two-finger input does not scroll the document");
+        check.equal(document.activeElement, panHost, "a native pinch leaves focus on the non-editable canvas");
+        check.equal(panHost.isContentEditable, false);
+        check.equal(getSelection().anchorNode, externalEditor.firstChild, "focus transfer retains the document caret");
+        const externalPoint = centerPoint(externalEditor);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [{id: 3, ...externalPoint}]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(document.activeElement, externalEditor, "tapping text after a pinch restores normal editing focus");
+        externalEditor.remove();
         panView.scale = readingTransform[0];
         panView.offsetX = readingTransform[1];
         panView.offsetY = readingTransform[2];

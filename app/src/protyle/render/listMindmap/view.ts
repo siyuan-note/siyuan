@@ -2252,6 +2252,12 @@ export class ListMindmapView {
         event.preventDefault();
         this.cancelPointer();
         clearTimeout(this.linkTimer);
+        // 双指操作转移外部编辑焦点，避免鸿蒙在松手后重新唤起输入法。
+        const active = this.options.host.ownerDocument.activeElement;
+        if (active instanceof HTMLElement && !this.options.host.contains(active) &&
+            (active.isContentEditable || active.matches("input, textarea"))) {
+            this.options.host.focus({preventScroll: true});
+        }
         this.suppressLinkClick = true;
         this.pinching = true;
         const [first, second] = Array.from(event.touches);

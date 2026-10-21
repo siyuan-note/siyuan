@@ -17,18 +17,34 @@ const compiled = transpileModule(`class View {
 globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const setup = () => {
-    const context: any = {clearTimeout};
+    class Element {
+        isContentEditable = false;
+        input = false;
+        inside = false;
+        matches() { return this.input; }
+    }
+    const document = {activeElement: new Element()};
+    const host = {
+        ownerDocument: document,
+        contains: (element: Element) => element.inside,
+        focus: (options: {preventScroll: boolean}) => {
+            assert.equal(options.preventScroll, true);
+            document.activeElement = Object.assign(new Element(), {inside: true});
+        },
+    };
+    const context: any = {clearTimeout, HTMLElement: Element};
     runInNewContext(compiled, context);
     const target = new context.View();
     let cancelled = 0;
     Object.assign(target, {
         scale: 1, offsetX: 0, offsetY: 0, pinching: false, interactionActive: false,
+        options: {host},
         viewport: {contains: (element: {outside?: boolean} | null) => !!element && !element.outside,
             getBoundingClientRect: () => ({left: 10, top: 20})},
         cancelPointer: () => { cancelled++; target.pendingPointerId = undefined; },
         boundedPan: (x: number, y: number) => ({x, y}), draw: () => {},
     });
-    return {target, cancelled: () => cancelled};
+    return {target, document, cancelled: () => cancelled};
 };
 
 const touch = (clientX: number, clientY = 120, excluded = false, outside = false) => ({
@@ -143,5 +159,46 @@ test("additional contacts cancel a pending node hold even when a control or thir
         target.pinchStart(event(...contacts));
         assert.equal(cancelled(), 1);
         assert.equal(target.pinching, false);
+    }
+});
+
+test("a valid pinch transfers external editing focus to the canvas without restoring it on release", () => {
+    for (const property of ["isContentEditable", "input"] as const) {
+        const {target, document} = setup();
+        const editor = document.activeElement;
+        editor[property] = true;
+        target.pinchStart(event(touch(60), touch(160)));
+        assert.notEqual(document.activeElement, editor);
+        assert.equal(document.activeElement.inside, true);
+        target.pinchEnd(event(touch(60)));
+        target.pinchEnd(event());
+        assert.equal(document.activeElement.inside, true);
+    }
+});
+
+test("pinches preserve internal editing and non-editable focus", () => {
+    for (const editing of [false, true]) {
+        const {target, document} = setup();
+        const active = document.activeElement;
+        active.inside = editing;
+        active.isContentEditable = editing;
+        target.pinchStart(event(touch(60), touch(160)));
+        assert.equal(document.activeElement, active);
+    }
+});
+
+test("single touches, excluded controls, outside contacts and locked maps preserve external editing focus", () => {
+    for (const {locked, contacts} of [
+        {locked: false, contacts: [touch(60)]},
+        {locked: false, contacts: [touch(60), touch(160, 120, true)]},
+        {locked: false, contacts: [touch(60), touch(160, 120, false, true)]},
+        {locked: true, contacts: [touch(60), touch(160)]},
+    ]) {
+        const {target, document} = setup();
+        const active = document.activeElement;
+        active.isContentEditable = true;
+        target.locked = locked;
+        target.pinchStart(event(...contacts));
+        assert.equal(document.activeElement, active);
     }
 });

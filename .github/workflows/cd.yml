@@ -10,6 +10,7 @@ on:
 
 env:
   package_json: "app/package.json"
+  GOMODCACHE: ${{ github.workspace }}/go/pkg/mod
 
 jobs:
   prepare:
@@ -147,7 +148,7 @@ jobs:
       - name: Test workflow outcome reporting
         id: workflow_report_tests
         continue-on-error: true
-        run: node --test scripts/test-report-workflow-outcomes.mjs
+        run: node --test scripts/test-report-workflow-outcomes.mjs scripts/go-cache.test.mjs
 
       - name: Report non-blocking step outcomes
         if: always()
@@ -168,12 +169,24 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: kernel/go.mod
-          cache-dependency-path: kernel/go.sum
+          cache: false
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Install repository pnpm version
-        run: npm install --global ${{ needs.prepare.outputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: app
@@ -196,10 +209,22 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: kernel/go.mod
-          cache-dependency-path: kernel/go.sum
+          cache: false
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Install filesystem fault injection dependency
         run: |
           sudo apt-get update
@@ -235,6 +260,16 @@ jobs:
           path: ${{ runner.temp }}/kernel-test-results
           if-no-files-found: ignore
 
+      # 同一平台只有指定作业保存缓存，其他并行作业只恢复。
+      - name: Save Go cache
+        if: ${{ steps.restore-go-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Report non-blocking step outcomes
         if: always()
         env:
@@ -257,7 +292,19 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: kernel/go.mod
-          cache-dependency-path: kernel/go.sum
+          cache: false
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Set up Windows kernel test compiler
         uses: msys2/setup-msys2@v2
         with:
@@ -285,6 +332,16 @@ jobs:
           path: ${{ runner.temp }}/kernel-test-results
           if-no-files-found: ignore
 
+      # 同一平台只有指定作业保存缓存，其他并行作业只恢复。
+      - name: Save Go cache
+        if: ${{ steps.restore-go-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Report non-blocking step outcomes
         if: always()
         env:
@@ -304,7 +361,7 @@ jobs:
         with:
           node-version: 24
       - name: Install repository pnpm version
-        run: npm install --global ${{ needs.prepare.outputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: app
@@ -434,7 +491,7 @@ jobs:
       - name: Install test dependencies
         id: dependencies
         run: |
-          npm install --global ${{ needs.prepare.outputs.packageManager }}
+          npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
           pnpm install --frozen-lockfile
         working-directory: siyuan-testing
 
@@ -590,8 +647,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
-          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: true
+          cache: false
       - run: go version
 
       - name: Set up Node
@@ -599,8 +655,21 @@ jobs:
         with:
           node-version: 24
 
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Install Node pnpm
-        run: npm install -g ${{ needs.prepare.outputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Get pnpm store path
@@ -611,12 +680,13 @@ jobs:
           echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
-      - name: Cache pnpm store
-        uses: actions/cache@v6
+      - name: Restore pnpm store
+        id: restore-pnpm-cache
+        uses: actions/cache/restore@v6
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
-          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
+          key: pnpm-v2-${{ runner.os }}-${{ runner.arch }}-${{ needs.prepare.outputs.packageManager }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
+          restore-keys: pnpm-v2-${{ runner.os }}-${{ runner.arch }}-${{ needs.prepare.outputs.packageManager }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -728,6 +798,10 @@ jobs:
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x ./gradlew
+          # 新版 Android 工程验证所有渠道；固定到旧提交的构建仍可使用原有流程。
+          if [ -f scripts/verify-build.gradle ]; then
+            ./gradlew --init-script scripts/verify-build.gradle :app:verifyBuildConfiguration
+          fi
           ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
           mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.version }}.apk

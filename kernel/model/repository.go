@@ -2823,7 +2823,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	for boxID := range needUnindexBoxes {
-		(&Box{ID: boxID}).Unindex()
+		if len(immediateIndex) != 0 && immediateIndex[0] {
+			unindex(boxID)
+		} else {
+			(&Box{ID: boxID}).Unindex()
+		}
 	}
 	for boxID := range needIndexBoxes {
 		if box := Conf.GetBox(boxID); nil != box {
@@ -2833,11 +2837,23 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			if _, err := EnsureBoxDoc(boxID); nil != err {
 				logging.LogErrorf("ensure box document [%s] after sync failed: %s", boxID, err)
 			}
-			box.Index()
+			if len(immediateIndex) != 0 && immediateIndex[0] {
+				removeBoxRefs(boxID)
+				indexBox(boxID)
+			} else {
+				box.Index()
+			}
 		}
 	}
 
 	needReloadUI := 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes)
+	if needReloadUI && len(immediateIndex) != 0 && immediateIndex[0] {
+		// 应用保护内完成笔记本和引用索引，不将这些任务留到恢复编辑之后。
+		sql.FlushQueue()
+		IndexRefs()
+		sql.FlushQueue()
+		ResetVirtualBlockRefCache()
+	}
 	if needReloadUI {
 		util.ReloadUI()
 	}

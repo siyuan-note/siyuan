@@ -48,22 +48,26 @@ func (task *syncCheckoutTask) snapshotLocked() apicontract.SyncCheckoutState {
 		Blocking: task.phase != "background" && task.phase != "done", Canceling: task.canceling,
 		Current: task.progress.Written, Total: task.progress.Size, Message: task.message,
 		UpsertRootIDs: []string{}, RemoveRootIDs: []string{}}
+	roots := map[string]bool{}
 	if task.phase == "background" || task.phase == "done" {
 		for id, upsert := range task.refreshedRoots {
-			if upsert {
-				state.UpsertRootIDs = append(state.UpsertRootIDs, id)
-			} else {
-				state.RemoveRootIDs = append(state.RemoveRootIDs, id)
-			}
-		}
-	}
-	for path := range task.upserts {
-		if id := checkoutDocumentID(path); id != "" {
-			state.UpsertRootIDs = append(state.UpsertRootIDs, id)
+			roots[id] = upsert
 		}
 	}
 	for path := range task.removes {
 		if id := checkoutDocumentID(path); id != "" {
+			roots[id] = false
+		}
+	}
+	for path := range task.upserts {
+		if id := checkoutDocumentID(path); id != "" {
+			roots[id] = true
+		}
+	}
+	for id, upsert := range roots {
+		if upsert {
+			state.UpsertRootIDs = append(state.UpsertRootIDs, id)
+		} else {
 			state.RemoveRootIDs = append(state.RemoveRootIDs, id)
 		}
 	}
@@ -201,16 +205,17 @@ func (task *syncCheckoutTask) completeApply() {
 	if task.refreshedRoots == nil {
 		task.refreshedRoots = map[string]bool{}
 	}
-	for _, file := range changes.Upserts {
-		task.indexedPaths[file.Path] = true
-		if id := checkoutDocumentID(file.Path); id != "" {
-			task.refreshedRoots[id] = true
-		}
-	}
+	// 文档移动会同时删除旧路径、写入新路径，最终仍存在的根文档按更新处理。
 	for _, file := range changes.Removes {
 		task.indexedPaths[file.Path] = true
 		if id := checkoutDocumentID(file.Path); id != "" {
 			task.refreshedRoots[id] = false
+		}
+	}
+	for _, file := range changes.Upserts {
+		task.indexedPaths[file.Path] = true
+		if id := checkoutDocumentID(file.Path); id != "" {
+			task.refreshedRoots[id] = true
 		}
 	}
 	task.upserts, task.removes = map[string]*entity.File{}, map[string]*entity.File{}

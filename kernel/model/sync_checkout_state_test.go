@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -43,6 +44,22 @@ func prepareSyncCheckoutStateTest(t *testing.T) *syncCheckoutTask {
 		util.Langs = previousLangs
 	})
 	return task
+}
+
+func TestSyncCheckoutSnapshotKeepsMovedDocumentsAsUpserts(t *testing.T) {
+	checkout := prepareSyncCheckoutStateTest(t)
+	const rootID = "20261021090001-moved01"
+	oldPath, newPath := "/box/"+rootID+".sy", "/box/parent/"+rootID+".sy"
+	checkout.upserts[newPath] = &entity.File{Path: newPath}
+	checkout.removes[oldPath] = &entity.File{Path: oldPath}
+	checkout.refreshedRoots = map[string]bool{rootID: false}
+	for _, phase := range []string{"applying", "background", "done"} {
+		checkout.phase = phase
+		state := GetSyncCheckout("", "").Task
+		if !slices.Contains(state.UpsertRootIDs, rootID) || slices.Contains(state.RemoveRootIDs, rootID) {
+			t.Fatalf("%s reported a moved document as removed: %+v", phase, state)
+		}
+	}
 }
 
 func connectSyncCheckoutClient(t *testing.T, id string) *websocket.Conn {

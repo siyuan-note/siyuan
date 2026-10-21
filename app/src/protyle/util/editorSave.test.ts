@@ -48,7 +48,8 @@ const response = (data: unknown) => new Response(JSON.stringify(data), {headers:
 
 const loadSyncSaves = () => {
     const exports = {} as Pick<typeof import("./editorSave"),
-        "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion">;
+        "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion" |
+        "registerSyncEditorSave" | "disposeSyncEditorSave">;
     runInNewContext(source("editorSave.ts"), {exports,
         window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}}});
     return exports;
@@ -84,6 +85,84 @@ test("sync save confirmation preserves structural failures and ignores supersede
     await saves.trackEditorSaveRequest("/api/transactions", request("drawer", "move"), Promise.resolve({code: -1}));
     await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
     await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+});
+
+test("closing an editor clears only its failed text and structural saves, including late responses", async () => {
+    for (const action of ["update", "move"]) {
+        const saves = loadSyncSaves();
+        const closed = {id: "closed"} as IProtyle;
+        const open = {id: "open"} as IProtyle;
+        saves.registerSyncEditorSave(closed);
+        saves.registerSyncEditorSave(open);
+        await saves.trackEditorSaveRequest("/api/transactions", request(closed.id, action), Promise.resolve({code: -1}));
+        await saves.trackEditorSaveRequest("/api/transactions", request(open.id), Promise.resolve({code: -1}));
+        saves.disposeSyncEditorSave(closed);
+        await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+        await saves.trackEditorSaveRequest("/api/transactions", request(open.id), Promise.resolve(success));
+        await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+
+        let finish: (value: unknown) => void;
+        const pending = saves.trackEditorSaveRequest("/api/transactions", request(open.id, action), new Promise(resolve => finish = resolve));
+        const failureVersion = saves.getEditorSaveFailureVersion();
+        saves.disposeSyncEditorSave(open);
+        finish({code: -1});
+        await pending;
+        await saves.flushPendingEditorSaves(failureVersion);
+
+        const reopened = {id: "reopened"} as IProtyle;
+        saves.registerSyncEditorSave(reopened);
+        await saves.trackEditorSaveRequest("/api/transactions", request(reopened.id), Promise.resolve(success));
+        await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+    }
+});
+
+test("failed title saves remain protected until the final editor for that document is destroyed", async () => {
+    const saves = loadSyncSaves();
+    const first = {id: "first", notebookId: "box", path: "/root.sy"} as IProtyle;
+    const second = {...first, id: "second"};
+    const other = {...first, id: "other", path: "/other.sy"};
+    [first, second, other].forEach(saves.registerSyncEditorSave);
+    const title = {notebook: "box", path: "/root.sy", title: "unconfirmed"};
+    await saves.trackEditorSaveRequest("/api/filetree/renameDoc", title, Promise.resolve({code: -1}));
+    saves.disposeSyncEditorSave(first);
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    let finish: (value: unknown) => void;
+    const pending = saves.trackEditorSaveRequest("/api/filetree/renameDoc", title, new Promise(resolve => finish = resolve));
+    const failureVersion = saves.getEditorSaveFailureVersion();
+    saves.disposeSyncEditorSave(second);
+    finish({code: -1});
+    await pending;
+    await saves.flushPendingEditorSaves(failureVersion);
+});
+
+test("destroying a moved editor clears title failures associated with its previous path", async () => {
+    const saves = loadSyncSaves();
+    const protyle = {id: "moved", notebookId: "box", path: "/before.sy"} as IProtyle;
+    saves.registerSyncEditorSave(protyle);
+    await saves.trackEditorSaveRequest("/api/filetree/renameDoc",
+        {notebook: "box", path: protyle.path, title: "unconfirmed"}, Promise.resolve({code: -1}));
+    protyle.path = "/parent/before.sy";
+    saves.disposeSyncEditorSave(protyle);
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+});
+
+test("editor destruction cancels pending title input and removes its sync save failures", async () => {
+    const saves = loadSyncSaves();
+    let cancelled = false;
+    const noop = () => {};
+    const protyle = {id: "destroyed", notebookId: "box", path: "/root.sy",
+        title: {cancelPendingInput: () => cancelled = true},
+        element: {classList: {remove: noop}, removeAttribute: noop},
+    } as unknown as IProtyle;
+    saves.registerSyncEditorSave(protyle);
+    await saves.trackEditorSaveRequest("/api/transactions", request(protyle.id), Promise.resolve({code: -1}));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    const exports = {} as Pick<typeof import("./destroy"), "destroy">;
+    runInNewContext(source("destroy.ts"), {exports, require: (name: string) =>
+        name === "./editorSave" ? saves : new Proxy({}, {get: () => noop})});
+    exports.destroy(protyle);
+    assert.equal(cancelled, true);
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
 });
 
 test("tracks actual fetchPost business, network, HTTP and malformed save failures despite swallowed errors", async () => {

@@ -66,17 +66,31 @@ export const reloadSync = (
                 setEmpty(app);
             }
         } else {
-            trackSyncReload(reloadProtyleAndWait(window.siyuan.mobile.editor.protyle, updateReadonly));
+            const editor = window.siyuan.mobile.editor;
+            const protyle = editor.protyle;
+            const rootID = protyle.block.rootID;
+            const notebookID = protyle.notebookId;
             const docInfoParam: BlockQueryRequestInput = {
-                id: window.siyuan.mobile.editor.protyle.block.rootID
+                id: rootID
             };
-            if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
-                docInfoParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
+            if (isEncryptedBox(notebookID)) {
+                docInfoParam.notebook = notebookID;
             }
-            fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
-                setTitle(response.data.name);
-                window.siyuan.mobile.editor.protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+            const title = new Promise<void>((resolve, reject) => {
+                void fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
+                    if (response.code !== 0 || !response.data) {
+                        reject(new Error("Could not refresh synchronized document title"));
+                        return;
+                    }
+                    if (window.siyuan.mobile.editor === editor && editor.protyle === protyle &&
+                        protyle.block.rootID === rootID && protyle.notebookId === notebookID) {
+                        setTitle(response.data.name);
+                        protyle.title?.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+                    }
+                    resolve();
+                }, undefined, () => reject(new Error("Could not refresh synchronized document title"))).catch(reject);
             });
+            trackSyncReload(Promise.all([reloadProtyleAndWait(protyle, updateReadonly), title]).then(() => {}));
             // 同步刷新移动端大纲，避免大纲与重载后的编辑器数据不一致
             const outline = window.siyuan.mobile.docks.outline;
             if (outline) {

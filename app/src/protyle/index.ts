@@ -9,6 +9,7 @@ import {LocalUndo, Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
 import {destroy} from "./util/destroy";
+import {registerSyncEditorSave} from "./util/editorSave";
 import {Scroll} from "./scroll";
 import {Model} from "../layout/Model";
 import {genUUID} from "../util/genID";
@@ -174,6 +175,7 @@ export class Protyle {
             }
         };
         registerProtyleRuntimeCapabilities(this.protyle, runtimeCapabilities);
+        registerSyncEditorSave(this.protyle);
         if (runtimeCapabilities.upload === false) {
             disableProtyleUpload(this.protyle);
         }

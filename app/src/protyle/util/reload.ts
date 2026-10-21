@@ -110,7 +110,10 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             updateReadonly,
             isValid: reloadScroll?.isValid,
             beforeAVRender: reloadScroll?.beforeAVRender,
-            afterAVRender: reloadScroll?.afterAVRender,
+            afterAVRender: async () => {
+                await reloadScroll?.afterAVRender();
+                callback?.();
+            },
             onRenderError: () => {
                 reloadScroll?.cancel();
                 onError?.();
@@ -122,7 +125,6 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
                 }
                 protyle.databaseAttributePanel?.refresh();
                 protyle.model?.refreshBottomBacklinkPanel();
-                callback?.();
             }
         });
     }

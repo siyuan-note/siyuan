@@ -70,6 +70,7 @@ export const onGet = (options: {
     suppressFocus?: boolean,
 }) => {
     if (options.isValid && !options.isValid()) {
+        options.onAVRenderError?.();
         return;
     }
     if (!options.action) {
@@ -201,6 +202,7 @@ export const onGet = (options: {
 
     const renderDoc = (response: IWebSocketData) => {
         if (options.isValid && !options.isValid()) {
+            options.onAVRenderError?.();
             return;
         }
         if (options.protyle.options.render.title) {
@@ -267,6 +269,7 @@ const setHTML = (options: {
     isValid?: () => boolean,
 }, protyle: IProtyle) => {
     if (options.isValid && !options.isValid()) {
+        options.onAVRenderError?.();
         return;
     }
     if (!options.isSyncing && migrateLegacyMindmapsBeforeRender(protyle, options.content, options.action || [], content => {
@@ -275,6 +278,7 @@ const setHTML = (options: {
         return;
     }
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
+        options.onAVRenderError?.();
         return;
     }
     const timing = beginPerformance("editor.content");
@@ -415,6 +419,7 @@ const setHTML = (options: {
             if (rendered && (!options.isValid || options.isValid())) {
                 return options.afterAVRender?.();
             }
+            options.onAVRenderError?.();
         }).catch(error => {
             console.error(error);
             options.onAVRenderError?.();

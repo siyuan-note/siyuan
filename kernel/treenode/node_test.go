@@ -23,7 +23,29 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestExportNodeStdMdListSpacing(t *testing.T) {
+	for _, test := range []struct {
+		name, source, expected string
+	}{
+		{"tight nested list", "- parent\n\n  - child\n- sibling\n", "- parent\n  - child\n- sibling"},
+		{"multiple paragraphs", "- first\n\n  second\n- sibling\n", "- first\n\n  second\n\n- sibling"},
+		{"thematic break", "- text\n\n  ---\n- sibling\n", "- text\n\n  ---\n\n- sibling"},
+		{"non-one ordered sublist", "- parent\n\n  2. child\n- sibling\n", "- parent\n\n  2. child\n\n- sibling"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			engine := util.NewLute()
+			tree := engine.BlockDOM2Tree(engine.Md2BlockDOM(test.source, true))
+			// 标准 Markdown 导出使用文档树，但不输出块属性。
+			engine.SetKramdownIAL(false)
+			if got := ExportNodeStdMd(tree.Root, engine); got != test.expected {
+				t.Fatalf("expected %q, got %q", test.expected, got)
+			}
+		})
+	}
+}
 
 func TestCustomBlockTypeAbbr(t *testing.T) {
 	if actual := TypeAbbr(ast.NodeCustomBlock.String()); "custom" != actual {

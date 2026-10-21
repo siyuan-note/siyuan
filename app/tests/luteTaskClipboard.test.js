@@ -11,14 +11,15 @@ describe("task status Markdown copying and export", () => {
         lute.SetArbitraryTaskListItemMarker(true);
         lute.SetUnorderedListMarker("-");
         const markdown = "- [ ] todo\n- [/] progress\n\n  - [-] canceled\n- [X] done\n- [!] custom\n";
+        const copied = "- [ ] todo\n- [/] progress\n  - [-] canceled\n- [X] done\n- [!] custom\n";
         const blockDOM = lute.Md2BlockDOM(markdown);
         lute.SetExportNormalizeTaskListMarker(false);
-        assert.equal(lute.BlockDOM2StdMd(blockDOM), markdown);
+        assert.equal(lute.BlockDOM2StdMd(blockDOM), copied);
         const roundTrip = lute.Md2BlockDOM(lute.BlockDOM2StdMd(blockDOM));
         assert.ok(roundTrip.includes('data-task="/"'));
         assert.ok(roundTrip.includes('data-task="-"'));
         assert.ok(roundTrip.includes('data-task="!"'));
         lute.SetExportNormalizeTaskListMarker(true);
-        assert.equal(lute.BlockDOM2StdMd(blockDOM), markdown.replace(/\[[/!\-]\]/g, "[X]"));
+        assert.equal(lute.BlockDOM2StdMd(blockDOM), copied.replace(/\[[/!\-]\]/g, "[X]"));
     });
 });

@@ -16,23 +16,17 @@
     opacity: 1;
   }
 
-  &__progress {
-    width: 100%;
-    margin: 16px 0;
-    accent-color: var(--b3-theme-primary);
-  }
-
   &__details {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   &__notice {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   &__actions {
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 8px;
 
     .b3-button {
@@ -61,6 +55,26 @@
       top: auto;
       bottom: 16px;
       transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      width: max-content;
     }
+
+    .sync-checkout__notice {
+      flex: 1 1 200px;
+      margin-bottom: 0;
+    }
+
+    .sync-checkout__actions {
+      margin-left: auto;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .sync-checkout__panel {
+    width: calc(100vw - 32px);
   }
 }

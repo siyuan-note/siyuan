@@ -15,25 +15,49 @@ const run = async () => {
     }).outputText;
     const source = compile("sync/checkoutProgress.ts");
     const escape = compile("util/escape.ts");
+    const progressContent = compile("dialog/progress.ts");
     const sass = require("sass");
-    const css = ["dialog", "button", "sync-checkout"].map(name => sass.compile(path.join(__dirname,
-        `../src/assets/scss/component/_${name}.scss`)).css).join("\n");
+    const css = ["component/_dialog.scss", "component/_button.scss", "component/_sync-checkout.scss", "util/_function.scss"]
+        .map(file => sass.compile(path.join(__dirname, "../src/assets/scss", file)).css).join("\n");
     try {
         for (const [width, height, font, dark] of [[1100, 720, 16, false], [1100, 720, 24, true], [360, 640, 24, false], [640, 360, 24, true]]) {
             win.setContentSize(width, height);
             await win.loadURL("data:text/html,<html><body><input id='editor' value='original'></body></html>");
             await win.webContents.insertCSS(css + `
                 :root {--b3-theme-primary:#357;--b3-mask-background:#0008;--b3-theme-background:${dark ? "#222" : "#fff"};
-                    --b3-theme-on-surface:${dark ? "#eee" : "#222"};--b3-theme-surface:#888;--b3-border-radius:4px;--b3-border-radius-b:8px;}
-                body,button {font-size:${font}px;} .fn__none {display:none;} .fn__flex {display:flex;align-items:center;}
-                .fn__flex-1 {flex:1;} .fn__space {width:8px;} .b3-button {background-color:rgb(90,100,110);}
-                .ft__breakword {word-break:break-all;}
+                    --b3-theme-on-surface:${dark ? "#9aa0a6" : "#5f6368"};--b3-theme-secondary:${dark ? "#f3a92f" : "#ff9200"};
+                    --b3-theme-surface:#888;--b3-border-radius:4px;--b3-border-radius-b:8px;}
+                body,button {font-size:${font}px;}
                 #editor {position:fixed;left:8px;top:8px;}`);
+            const themeOverride = await win.webContents.insertCSS(".b3-button {background-color:rgb(90,100,110);}");
             const result = await win.webContents.executeJavaScript(`(async () => {
                 const assert = require("node:assert/strict");
-                window.siyuan = {zIndex:100,languages:{sync:"Sync",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{436:"Applying synchronized changes"}}};
+                window.siyuan = {zIndex:100,languages:{sync:"Sync",expand:"Expand",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{436:"Applying synchronized changes"}}};
                 const escapeExports = {};
                 new Function("exports", ${JSON.stringify(escape)})(escapeExports);
+                const progressExports = {};
+                new Function("exports", ${JSON.stringify(progressContent)})(progressExports);
+                progressExports.progressLoading({code:0,msg:"<img src=x>",data:{current:1,total:10}},"standard-progress");
+                const standard = document.getElementById("standard-progress");
+                assert.equal(standard.querySelector(".b3-dialog__progress-label").textContent,"1/10");
+                assert.equal(standard.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"10");
+                assert.equal(standard.querySelector('[data-type="message"]').textContent,"<img src=x>");
+                assert.equal(standard.querySelector("img"),null);
+                const sharedBarHeight = getComputedStyle(standard.querySelector(".b3-dialog__progress")).height;
+                const sharedColor = getComputedStyle(standard.querySelector(".b3-dialog__loading")).color;
+                assert.equal(sharedBarHeight,"8px");
+                progressExports.progressLoading({code:0,msg:"overrun",data:{current:999,total:10}},"standard-progress");
+                assert.equal(standard.querySelector(".b3-dialog__progressbar").style.width,"100%");
+                progressExports.progressLoading({code:0,msg:"unknown",data:{current:NaN,total:0}},"standard-progress");
+                assert.equal(standard.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
+                assert.ok(standard.querySelector(".b3-dialog__progress--indeterminate"));
+                progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress");
+                progressExports.progressLoading({code:1,msg:"<img src=y>"},"other-progress");
+                assert.equal(document.querySelector('#other-progress [data-type="message"]').textContent,"<img src=y>");
+                assert.equal(document.querySelector("#other-progress img"),null);
+                progressExports.progressLoading({code:2},"standard-progress");
+                assert.ok(document.getElementById("other-progress"),"closing sync progress removed another task");
+                progressExports.progressLoading({code:2},"other-progress");
                 const calls = [];
                 const flushes = [];
                 const titles = [];
@@ -56,6 +80,7 @@ const run = async () => {
                 const runtime = {};
                 new Function("exports","require","window",${JSON.stringify(source)})(runtime, name => {
                     if (name.includes("escape")) return escapeExports;
+                    if (name === "../dialog/progress") return progressExports;
                     if (name.includes("constants")) return {Constants:{SIYUAN_APPID:"app"}};
                     if (name.includes("getAll")) return {getAllEditor:() => editors};
                     if (name.includes("editorSave")) return {getEditorSaveFailureVersion:() => 0,flushPendingEditorSaves:() => pendingRequests};
@@ -88,6 +113,12 @@ const run = async () => {
                 progress("first",0,2,"preparing",{token:"window-token"});
                 root = document.getElementById("sync-checkout-progress");
                 assert.ok(root && root.contains(document.activeElement));
+                assert.equal(root.classList.contains("sync-checkout--compact"),false,"local checkout should open the existing full progress view");
+                assert.equal(root.querySelector(".sync-checkout__panel").hasAttribute("tabindex"),false,"the progress panel must not acquire a focus outline");
+                assert.equal(document.activeElement,root.querySelector('[data-action="toggle"]'));
+                assert.equal(getComputedStyle(root.querySelector(".sync-checkout__panel")).color,sharedColor);
+                assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"sync notice should use the normal progress text color");
+                assert.equal(getComputedStyle(root.querySelector(".b3-dialog__progress")).height,sharedBarHeight);
                 await tick();
                 assert.deepEqual(flushes,["desktop","mobile","secondary"]);
                 assert.deepEqual(titles,flushes);
@@ -106,7 +137,8 @@ const run = async () => {
                 assert.equal(document.activeElement,root.querySelector('[data-action="cancel"]'));
                 assert.equal(root.querySelector("img"),null);
                 assert.equal(root.querySelector('[data-type="message"]').textContent,"<img src=x onerror='window.compromised=true'>");
-                assert.equal(root.querySelector("progress").value,10);
+                assert.equal(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"10");
+                assert.equal(root.querySelector(".b3-dialog__progress-label").textContent,"10%");
                 assert.equal(getComputedStyle(root.querySelector("button")).backgroundColor,"rgb(90, 100, 110)");
                 for (const type of ["beforeinput","paste","drop","keydown"]) {
                     const event = type === "keydown" ? new KeyboardEvent(type,{key:"a",bubbles:true,cancelable:true}) : new Event(type,{bubbles:true,cancelable:true});
@@ -116,14 +148,16 @@ const run = async () => {
                 root.querySelector('[data-action="toggle"]').click();
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 assert.ok(root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
+                assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"collapsed sync notice should use the normal progress text color");
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
                 progress("first",0,3,"applying",{current:9,message:"Still restoring"});
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 root.querySelector('[data-action="toggle"]').click();
-                assert.equal(root.querySelector("progress").value,90);
+                assert.equal(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"90");
                 const panel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
                 assert.ok(panel.left>=0 && panel.right<=innerWidth && panel.top>=0 && panel.bottom<=innerHeight,JSON.stringify(panel));
+                if (innerWidth <= 600) assert.ok(panel.width >= innerWidth - 40,"narrow progress view wastes available width");
                 assert.ok(root.querySelector(".sync-checkout__panel").scrollWidth <= Math.ceil(panel.width),"narrow panel has horizontal overflow");
                 root.querySelectorAll("button").forEach(button => {
                     const rect = button.getBoundingClientRect();
@@ -183,11 +217,19 @@ const run = async () => {
                 assert.equal(document.getElementById("sync-checkout-progress"),null);
                 progress("second",0,3,"applying",{current:999,message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
                 runtime.openSyncCheckoutProgress();
-                assert.equal(document.querySelector("progress").value,100);
+                assert.equal(document.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"100");
+                assert.equal(document.querySelector(".b3-dialog__progressbar").style.width,"100%");
                 assert.equal(document.querySelector('[data-action="cancel"]').disabled,false);
+                progress("second",0,3,"applying",{total:0});
+                assert.equal(document.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
+                assert.ok(document.querySelector(".b3-dialog__progress--indeterminate"));
+                progress("second",0,3,"applying",{current:460,total:1050,
+                    message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
+                assert.equal(document.querySelector(".b3-dialog__progress--indeterminate"),null);
                 return "passed";
             })()`);
             assert.equal(result, "passed");
+            await win.webContents.removeInsertedCSS(themeOverride);
             await new Promise(resolve => setTimeout(resolve, 200));
             if (process.env.SIYUAN_CHECKOUT_CAPTURE) {
                 mkdirSync(process.env.SIYUAN_CHECKOUT_CAPTURE, {recursive: true});

@@ -6,6 +6,7 @@ import {reloadProtyleAndWait} from "../protyle/util/reload";
 import {waitForSyncReloads} from "../util/reloadSync";
 import {flushPendingEditorSaves, getEditorSaveFailureVersion} from "../protyle/util/editorSave";
 import type {SyncCheckoutState} from "../types/api";
+import {getProgressContentHTML, updateProgressContent} from "../dialog/progress";
 
 type CheckoutState = SyncCheckoutState & {compact: boolean; expanded: boolean};
 let state: CheckoutState | undefined;
@@ -71,14 +72,11 @@ const render = () => {
         root.style.zIndex = String(++window.siyuan.zIndex);
         document.body.appendChild(root);
         root.innerHTML = `<div class="b3-dialog__scrim sync-checkout__scrim"></div>
-<div class="sync-checkout__panel b3-dialog__loading" role="dialog" aria-label="${escapeHtml(window.siyuan.languages.sync)}" tabindex="-1">
-    <div class="sync-checkout__details">
-        <div data-type="message" class="ft__breakword" role="status"></div>
-        <progress class="sync-checkout__progress" max="100"></progress>
-    </div>
-    <div class="sync-checkout__notice ft__secondary">${escapeHtml(window.siyuan.languages._kernel[436])}</div>
+<div class="sync-checkout__panel b3-dialog__loading" role="dialog" aria-label="${escapeHtml(window.siyuan.languages.sync)}">
+    <div class="sync-checkout__details">${getProgressContentHTML()}</div>
+    <div class="sync-checkout__notice ft__smaller">${escapeHtml(window.siyuan.languages._kernel[436])}</div>
     <div class="fn__flex sync-checkout__actions">
-        <button class="b3-button b3-button--outline b3-button--wrap" data-action="toggle"><svg class="b3-button__icon"><use xlink:href="#iconRefresh"></use></svg><span></span></button>
+        <button class="b3-button b3-button--cancel b3-button--wrap" data-action="toggle"><span></span></button>
         <button class="b3-button b3-button--cancel b3-button--wrap" data-action="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
     </div>
 </div>`;
@@ -118,16 +116,13 @@ const render = () => {
     root.classList.toggle("sync-checkout--compact", state.compact || !state.blocking);
     root.querySelector(".sync-checkout__details").classList.toggle("fn__none", state.compact);
     root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking);
-    root.querySelector('[data-type="message"]').textContent = state.message;
-    const progress = root.querySelector<HTMLProgressElement>("progress");
-    if (state.total > 0) progress.value = Math.max(0, Math.min(100, state.current / state.total * 100));
-    else progress.removeAttribute("value");
+    updateProgressContent(root, state.message, state.current, state.total, "percent");
     root.querySelector('[data-action="toggle"] span').textContent = state.compact ?
-        window.siyuan.languages.sync : window.siyuan.languages.collapseSyncDetails;
+        window.siyuan.languages.expand : window.siyuan.languages.collapseSyncDetails;
     root.querySelector<HTMLButtonElement>('[data-action="cancel"]').disabled = state.canceling;
     if (state.blocking && !root.contains(document.activeElement)) {
         previousFocus ||= document.activeElement as HTMLElement;
-        panel.focus();
+        root.querySelector<HTMLButtonElement>('[data-action="toggle"]').focus();
     }
 };
 
@@ -228,7 +223,7 @@ export const syncCheckoutProgress = (data: IWebSocketData) => {
     const next: CheckoutState = {...incoming, phase: incoming.phase || "applying", blocking: incoming.blocking !== false,
         message: incoming.message || data.msg || "", current: Number(incoming.current) || 0, total: Number(incoming.total) || 0,
         canceling: Boolean(incoming.canceling), upsertRootIDs: incoming.upsertRootIDs || [], removeRootIDs: incoming.removeRootIDs || [],
-        compact: same ? state.compact : true, expanded: same ? state.expanded : false};
+        compact: same ? state.compact : false, expanded: same ? state.expanded : false};
     if (same && state.blocking && !next.blocking) {
         finish({...state, revision: nextRevision, upsertRootIDs: next.upsertRootIDs, removeRootIDs: next.removeRootIDs}, next);
         return;

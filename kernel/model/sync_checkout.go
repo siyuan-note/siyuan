@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/88250/go-humanize"
+	"github.com/olahol/melody"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/logging"
@@ -18,6 +19,16 @@ import (
 type syncCheckoutTask struct {
 	sync.Mutex
 	id                   string
+	ctx                  context.Context
+	phase                string
+	revision             int64
+	message              string
+	canceling            bool
+	clients              map[*melody.Session]*syncCheckoutClient
+	confirmations        chan bool
+	releaseWrites        func()
+	indexedPaths         map[string]bool
+	refreshedRoots       map[string]bool
 	cancel               context.CancelFunc
 	done                 chan struct{}
 	worker               sync.WaitGroup
@@ -46,11 +57,11 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 		return nil
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	task := &syncCheckoutTask{id: util.RandString(16), cancel: cancel, done: make(chan struct{}), upserts: map[string]*entity.File{}, removes: map[string]*entity.File{}, beforePetals: getPetals()}
+	task := &syncCheckoutTask{id: util.RandString(16), ctx: ctx, phase: "background", revision: syncCheckoutRevision.Add(1), cancel: cancel, done: make(chan struct{}), upserts: map[string]*entity.File{}, removes: map[string]*entity.File{}, beforePetals: getPetals()}
 	activeSyncCheckout.task = task
 	activeSyncCheckout.Unlock()
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
-		Context: ctx, Before: checkCheckoutSpace, Cleaned: notifyCheckoutCleanup,
+		Context: ctx, Apply: task.prepareApply, Applied: task.completeApply, Before: checkCheckoutSpace, Cleaned: notifyCheckoutCleanup,
 		Progress: func(progress dejavu.CheckoutProgress) {
 			task.Lock()
 			newFile := task.progress.Path != progress.Path
@@ -67,8 +78,11 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 			}
 		},
 		Committed: func(file *entity.File) {
+			task.Lock()
 			task.upserts[file.Path] = file
 			delete(task.removes, file.Path)
+			delete(task.indexedPaths, file.Path)
+			task.Unlock()
 			if file.Size >= 50*1024*1024 {
 				task.Lock()
 				elapsed := time.Since(task.fileStarted)
@@ -76,7 +90,13 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 				logging.LogInfof("sync checkout file committed [file=%q, bytes=%d, elapsed=%.2fs]", file.Path, file.Size, elapsed.Seconds())
 			}
 		},
-		Removed: func(file *entity.File) { task.removes[file.Path] = file; delete(task.upserts, file.Path) },
+		Removed: func(file *entity.File) {
+			task.Lock()
+			task.removes[file.Path] = file
+			delete(task.upserts, file.Path)
+			delete(task.indexedPaths, file.Path)
+			task.Unlock()
+		},
 	})
 	task.push()
 	task.worker.Add(1)
@@ -104,6 +124,10 @@ func CancelSyncCheckout(taskID string) bool {
 		return false
 	}
 	activeSyncCheckout.task.cancel()
+	activeSyncCheckout.task.Lock()
+	activeSyncCheckout.task.canceling = true
+	activeSyncCheckout.task.revision = syncCheckoutRevision.Add(1)
+	activeSyncCheckout.task.Unlock()
 	return true
 }
 
@@ -112,7 +136,8 @@ func (task *syncCheckoutTask) push() {
 	defer task.Unlock()
 	p := task.progress
 	if p.Path == "" {
-		util.BroadcastByType("main", "syncProgress", 0, Conf.Language(81), map[string]any{"taskID": task.id, "current": 0, "total": 0})
+		task.message = Conf.Language(81)
+		task.broadcastLocked(0)
 		return
 	}
 	// 首个文件和最终完成数量立即推送，其余变化合并到时间窗口，避免小文件造成消息洪泛。
@@ -129,14 +154,27 @@ func (task *syncCheckoutTask) push() {
 		remaining = formatCheckoutDuration(time.Duration(float64(max(p.Size-p.Written, 0))/rate) * time.Second)
 	}
 	msg := fmt.Sprintf(Conf.Language(432), p.Path, p.Count, p.Total, checkoutBytes(p.Written), checkoutBytes(p.Size), checkoutBytes(int64(rate)), remaining)
+	task.message = msg
 	util.SetBootDetails(msg)
 	pushSyncStatusBar(msg)
-	util.BroadcastByType("main", "syncProgress", 0, msg, map[string]any{"taskID": task.id, "current": p.Written, "total": p.Size})
+	task.broadcastLocked(0)
 	if time.Since(task.lastLog) >= 5*time.Second || task.lastLogPath != p.Path || (p.Written == p.Size && task.lastLogBytes != p.Written) {
 		logging.LogInfof("sync checkout [file=%q, count=%d/%d, bytes=%d/%d, elapsed=%.2fs]", p.Path, p.Count, p.Total, p.Written, p.Size, elapsed.Seconds())
 		task.lastLog = time.Now()
 		task.lastLogPath = p.Path
 		task.lastLogBytes = p.Written
+	}
+}
+
+func (task *syncCheckoutTask) broadcastLocked(code int) {
+	for _, session := range util.SessionsByType("main") {
+		state := task.snapshotLocked()
+		if client := task.clients[session]; client != nil {
+			state.Token = client.token
+		}
+		event := util.NewResult()
+		event.Cmd, event.Code, event.Msg, event.Data = "syncProgress", code, task.message, state
+		session.Write(event.Bytes())
 	}
 }
 
@@ -195,12 +233,19 @@ func (task *syncCheckoutTask) finish(repo *dejavu.Repo, syncErr *error) {
 	task.worker.Wait()
 	task.cancel()
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{})
+	if task.releaseWrites != nil {
+		task.releaseWrites()
+		task.releaseWrites = nil
+	}
+	task.Lock()
+	task.phase, task.revision = "done", syncCheckoutRevision.Add(1)
+	task.broadcastLocked(2)
+	task.Unlock()
 	activeSyncCheckout.Lock()
 	if activeSyncCheckout.task == task {
 		activeSyncCheckout.task = nil
 	}
 	activeSyncCheckout.Unlock()
-	util.BroadcastByType("main", "syncProgress", 2, "", map[string]any{"taskID": task.id})
 }
 
 // cleanupInterruptedCheckout 在加载笔记本索引前回收有明确归属的临时文件。

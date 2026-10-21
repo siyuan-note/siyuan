@@ -984,6 +984,12 @@ func EnableEncryptedNotebookWithSync(password string) error {
 	if err := SyncDataBeforeEnableEncryptedNotebook(); err != nil {
 		return err
 	}
+	// 同步准备需独占写接口；完成同步后再为密钥配置操作取得导入读租约。
+	dataImportAccess.RLock()
+	defer dataImportAccess.RUnlock()
+	if err := checkDataImportRecovery(); err != nil {
+		return err
+	}
 
 	// 同步可能已经从其他设备恢复了完整配置。此时校验用户输入的是原主密码，不能再创建新的密钥体系。
 	if NotebookCryptoEnabled() {

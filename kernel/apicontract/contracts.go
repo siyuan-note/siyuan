@@ -903,10 +903,21 @@ var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/per
 
 // CancelSyncCheckout 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
 // requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。
-// 在分块和文件替换边界检查取消，保留已完成文件，清理当前临时文件，不写成功同步点。
+// 取消同时传递到准备、云端请求和文件替换边界，保留已完成文件并清理当前临时文件。
 // 解除界面编辑阻挡前同步已落盘变更的索引；不回滚已完成文件，不改变全部下载或按需下载设置。
 // 只读模式可请求取消，不会更改同步配置；调用要求登录和管理员权限。
 var CancelSyncCheckout = define[CancelSyncCheckoutRequest, CancelSyncCheckoutData]("cancelSyncCheckout", "/api/sync/cancelSyncCheckout", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetSyncCheckout 查询当前同步任务及单调递增版本，空任务表示当前没有同步任务。
+// 普通后台同步不阻断编辑；准备落盘、应用改动和恢复索引期间 blocking 为 true。
+// 前端启动和重连时查询，以恢复错过的开始、取消或结束通知；appID 和 clientID 用于匹配当前主连接的准备令牌。
+// phase 为 preparing 时先阻止新输入、提交既有编辑，再使用 token 确认保存结果；取消不计入自动同步失败。
+var GetSyncCheckout = define[SyncCheckoutClientRequest, SyncCheckoutSnapshot]("getSyncCheckout", "/api/sync/getSyncCheckout", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// ConfirmSyncCheckout 确认当前连接已停止新输入并提交既有编辑，saved 为 false 时本轮应用中止。
+// token 仅来自该连接的 syncProgress 消息或状态查询，重复确认幂等，旧任务和未知令牌返回 requested 为 false。
+// 必须确认全部既有连接，且等待期间没有新接入的连接，内核才会应用本地改动。
+var ConfirmSyncCheckout = define[ConfirmSyncCheckoutRequest, CancelSyncCheckoutData]("confirmSyncCheckout", "/api/sync/confirmSyncCheckout", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformBootSync = define[EmptyRequest, Null]("performBootSync", "/api/sync/performBootSync", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBootSync = define[EmptyRequest, Null]("getBootSync", "/api/sync/getBootSync", AuthenticatedAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetSyncInfo = define[EmptyRequest, SyncInfoData]("getSyncInfo", "/api/sync/getSyncInfo", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

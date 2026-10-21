@@ -46,6 +46,46 @@ const request = (session = "drawer", action = "update", id = "block") => ({
 const success = {code: 0, data: [{doOperations: [{action: "update"}]}]};
 const response = (data: unknown) => new Response(JSON.stringify(data), {headers: {"Content-Type": "application/json"}});
 
+const loadSyncSaves = () => {
+    const exports = {} as Pick<typeof import("./editorSave"),
+        "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion">;
+    runInNewContext(source("editorSave.ts"), {exports,
+        window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}}});
+    return exports;
+};
+
+test("sync preparation waits for ordinary unregistered editor requests and rejects earlier unconfirmed saves", async () => {
+    const saves = loadSyncSaves();
+    let complete: (value: unknown) => void;
+    saves.trackEditorSaveRequest("/api/transactions", request("main"), new Promise(resolve => complete = resolve));
+    let flushed = false;
+    const flushing = saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()).then(() => flushed = true);
+    await Promise.resolve();
+    assert.equal(flushed, false);
+    complete(success);
+    await flushing;
+    await saves.trackEditorSaveRequest("/api/transactions", request("main"), Promise.resolve({code: -1}));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request("other"), Promise.resolve(success));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request("main"), Promise.resolve(success));
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+});
+
+test("sync save confirmation preserves structural failures and ignores superseded text failures", async () => {
+    const saves = loadSyncSaves();
+    let finishOld: (value: unknown) => void;
+    const old = saves.trackEditorSaveRequest("/api/transactions", request(), new Promise(resolve => finishOld = resolve));
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
+    finishOld({code: -1});
+    await old;
+    await Promise.resolve();
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+    await saves.trackEditorSaveRequest("/api/transactions", request("drawer", "move"), Promise.resolve({code: -1}));
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+});
+
 test("tracks actual fetchPost business, network, HTTP and malformed save failures despite swallowed errors", async () => {
     for (const failure of ["negative", "positive", "network", "http", "missing-result", "missing-operations"]) {
         const guard = registerEditorSave(editor());

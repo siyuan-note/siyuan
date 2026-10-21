@@ -10,6 +10,19 @@ import {getAllModels} from "../layout/getAll";
 import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
 import {setTitle} from "./processTitle";
+import {reloadProtyleAndWait} from "../protyle/util/reload";
+
+const pendingSyncReloads = new Set<Promise<void>>();
+const trackSyncReload = (task: Promise<void>) => {
+    pendingSyncReloads.add(task);
+    void task.catch(error => console.error(error)).finally(() => pendingSyncReloads.delete(task));
+};
+
+export const waitForSyncReloads = async () => {
+    while (pendingSyncReloads.size) {
+        await Promise.all([...pendingSyncReloads]);
+    }
+};
 /// #if MOBILE
 import {getMobileBacklinkPanels, removeMobileBacklinkContent} from "../mobile/util/backlinkPanels";
 import {refreshMobileReferenceSheet, removeMobileReferenceSheet} from "../mobile/util/openReference";
@@ -42,7 +55,7 @@ export const reloadSync = (
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);
         } else {
-            window.siyuan.mobile.popEditor.reload(false, updateReadonly);
+            trackSyncReload(reloadProtyleAndWait(window.siyuan.mobile.popEditor.protyle, updateReadonly));
         }
     }
     window.siyuan.mobile.tabs?.removeRoots(data.removeRootIDs);
@@ -53,7 +66,7 @@ export const reloadSync = (
                 setEmpty(app);
             }
         } else {
-            window.siyuan.mobile.editor.reload(false, updateReadonly);
+            trackSyncReload(reloadProtyleAndWait(window.siyuan.mobile.editor.protyle, updateReadonly));
             const docInfoParam: BlockQueryRequestInput = {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             };
@@ -100,11 +113,19 @@ export const reloadSync = (
             if (isEncryptedBox(item.editor.protyle.notebookId)) {
                 docInfoParam.notebook = item.editor.protyle.notebookId;
             }
-            fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
-                item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
-                item.editor.reload(false, updateReadonly);
-                updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
-            });
+            trackSyncReload(new Promise<void>((resolve, reject) => {
+                void fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
+                    if (response.code !== 0 || !response.data) {
+                        reject(new Error("Could not refresh synchronized document"));
+                        return;
+                    }
+                    item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
+                    const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
+                    item.parent.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
+                    item.editor.protyle.title?.setTitle(response.data.name, titleEmpty);
+                    void reloadProtyleAndWait(item.editor.protyle, updateReadonly).then(resolve, reject);
+                }, undefined, () => reject(new Error("Could not refresh synchronized document"))).catch(reject);
+            }));
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
             delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][item.editor.protyle.block.rootID];

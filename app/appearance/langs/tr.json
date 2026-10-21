@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "Ayrıntıları gizle",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md ve data/storage/ai/AGENTS.md farklı; içeriklerini yeni dosyada birleştirin, ardından eski dosyayı kaldırın",
 	"dataImportConflicts": "Çakışan not defterleri",
 	"dataImportSkip": "Çakışmaları atla",
@@ -3385,6 +3386,6 @@
 		"433": "Eşitleme iptal edildi; tamamlanan dosyalar korundu. Bitirmek için yeniden eşitleyin",
 		"434": "Bu dosyayı geri yüklemek için disk alanı yetersiz: gereken %s, kullanılabilir %s",
 		"435": "Kesilen eşitlemenin geçici dosyaları kaldırıldı, %s alan boşaltıldı",
-		"436": "Eşitleme sürüyor; tamamlanana veya iptal işlemi bitene kadar düzenleme engellenir"
+		"436": "Eşitlenen değişiklikler uygulanıyor; işleme veya iptal sonrası kurtarma tamamlanınca düzenlemeye devam edebilirsiniz"
 	}
 }

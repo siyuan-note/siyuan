@@ -62,6 +62,8 @@ export class Model {
         if (!this.socketDisposed && window.siyuan.isReady) {
             const {refreshSettingConfig}: typeof import("../config/setting/sync") = require("../config/setting/sync");
             void refreshSettingConfig();
+            const {reconcileSyncCheckout}: typeof import("../sync/checkoutProgress") = require("../sync/checkoutProgress");
+            void reconcileSyncCheckout(new URL(this.ws.url).searchParams.get("id"));
         }
     }
 
@@ -77,6 +79,8 @@ export class Model {
                 markKernelConnectionAlive();
             }
             if (options.type === "main" && window.siyuan.isReady) {
+                const {reconcileSyncCheckout}: typeof import("../sync/checkoutProgress") = require("../sync/checkoutProgress");
+                void reconcileSyncCheckout(options.id, true);
                 const {reloadSettingsResetOnReconnect}: typeof import("../config/setting/reset") = require("../config/setting/reset");
                 if (reloadSettingsResetOnReconnect()) return;
                 const {resetSettingTaskRevision}: typeof import("../config/setting/taskBlocker") = require("../config/setting/taskBlocker");

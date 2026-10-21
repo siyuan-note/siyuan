@@ -886,6 +886,8 @@ export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean
 
 export type ConfirmSettingsResetRequestInput = { "saved": boolean; "token": string; };
 
+export type ConfirmSyncCheckoutRequestInput = { "saved": boolean; "taskID": string; "token": string; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
@@ -2241,6 +2243,12 @@ export type StorageSetRequestInput = { "app"?: string | null; "key": string; "va
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "originalToEmbed"?: boolean; "refID": string; };
 
 export type SyncAssetDownloadModeData = { "assetDownloadMode": number; };
+
+export type SyncCheckoutClientRequestInput = { "appID"?: string; "clientID"?: string; };
+
+export type SyncCheckoutSnapshot = { "kernelID": string; "revision": number; "task": SyncCheckoutState | null; };
+
+export type SyncCheckoutState = { "blocking": boolean; "canceling": boolean; "current": number; "message": string; "phase": string; "removeRootIDs": Array<string>; "revision": number; "taskID": string; "token": string; "total": number; "upsertRootIDs": Array<string>; };
 
 export type SyncEnabledRequestInput = { "enabled": boolean; };
 
@@ -7368,7 +7376,7 @@ export interface APIPOSTRoutes {
     /**
      * 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
      * requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。
-     * 在分块和文件替换边界检查取消，保留已完成文件，清理当前临时文件，不写成功同步点。
+     * 取消同时传递到准备、云端请求和文件替换边界，保留已完成文件并清理当前临时文件。
      * 解除界面编辑阻挡前同步已落盘变更的索引；不回滚已完成文件，不改变全部下载或按需下载设置。
      * 只读模式可请求取消，不会更改同步配置；调用要求登录和管理员权限。
      */
@@ -7390,6 +7398,18 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 确认当前连接已停止新输入并提交既有编辑，saved 为 false 时本轮应用中止。
+     * token 仅来自该连接的 syncProgress 消息或状态查询，重复确认幂等，旧任务和未知令牌返回 requested 为 false。
+     * 必须确认全部既有连接，且等待期间没有新接入的连接，内核才会应用本地改动。
+     */
+    "/api/sync/confirmSyncCheckout": {
+        request: ConfirmSyncCheckoutRequestInput;
+        response: { "code": 0; "data": CancelSyncCheckoutData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/sync/createCloudSyncDir": {
         request: SyncNameRequestInput;
@@ -7416,6 +7436,19 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 查询当前同步任务及单调递增版本，空任务表示当前没有同步任务。
+     * 普通后台同步不阻断编辑；准备落盘、应用改动和恢复索引期间 blocking 为 true。
+     * 前端启动和重连时查询，以恢复错过的开始、取消或结束通知；appID 和 clientID 用于匹配当前主连接的准备令牌。
+     * phase 为 preparing 时先阻止新输入、提交既有编辑，再使用 token 确认保存结果；取消不计入自动同步失败。
+     */
+    "/api/sync/getSyncCheckout": {
+        request: SyncCheckoutClientRequestInput;
+        response: { "code": 0; "data": SyncCheckoutSnapshot; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };

@@ -17,7 +17,7 @@ type ListResponse = {
     };
 };
 
-const loadSyncGuide = (mobile: boolean, provider: number) => {
+const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false) => {
     const source = readFileSync(resolve(process.cwd(), "src/sync/syncGuide.ts"), "utf8");
     const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -31,11 +31,13 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
         renderSyncCloudList: (element: Element, reload: boolean, cb: (ready: boolean) => void) => void;
         bindSyncCloudListEvent: (element: Element, cb?: (ready: boolean) => void) => void;
         refreshSyncCloudDirBlock: (root: Element) => void;
+        syncGuide: () => void;
     };
     runInNewContext(code, {
         exports: moduleExports,
         window: {siyuan: {config: {sync}, languages: {emptyContent: "Empty", cloudConfigTip: "Configure storage"}}},
         require: (name: string) => {
+            if (name === "./checkoutProgress") return {openSyncCheckoutProgress: () => activeCheckout};
             if (name === "../config/util/configApi") {
                 return {config: {set: (_path: string, value: unknown, applied?: () => void) => {
                     requests.push({url: "/api/setting/patch", data: {sync: {cloudName: value}}, reply: (response: ListResponse) => {
@@ -114,6 +116,11 @@ const listResponse = (cloudName: string, checkedSyncDir: string): ListResponse =
 });
 
 for (const mobile of [false, true]) {
+    test(`the sync control opens current checkout details without starting another sync (mobile=${mobile})`, () => {
+        const guide = loadSyncGuide(mobile, 2, true);
+        guide.syncGuide();
+        assert.equal(guide.requests.length, 0);
+    });
     test(`S3 shows the configured bucket without the config toggle (mobile=${mobile})`, () => {
         const guide = loadSyncGuide(mobile, 2);
         guide.refreshCloudDir();

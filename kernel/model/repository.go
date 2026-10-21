@@ -2197,7 +2197,7 @@ func bootSyncRepo() (err error) {
 	defer func() { handleCloudError(err) }()
 	repo, err := newSyncRepository()
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", html.EscapeString(err.Error()))
@@ -2254,7 +2254,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
@@ -2342,7 +2342,7 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	defer func() { handleCloudError(err) }()
 	repo, err := newSyncRepository()
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
@@ -2362,14 +2362,14 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		if 1 > autoSyncErrCount.Load() || byHand {
+		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
 			util.PushErrMsg(msg, 0)
 		}
 		return
@@ -2399,14 +2399,14 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		if 1 > autoSyncErrCount.Load() || byHand {
+		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
 			util.PushErrMsg(msg, 0)
 		}
 		return
@@ -2854,13 +2854,13 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		ReloadFiletree()
 	}
 
+	// 先通知编辑器刷新，再发送任务结束；前端会等待实际渲染完成才恢复输入。
+	if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
+		util.BroadcastByType("main", "syncMergeResult", 0, "",
+			map[string]any{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+	}
 	go func() {
 		util.WaitForUILoaded()
-
-		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
-			util.BroadcastByType("main", "syncMergeResult", 0, "",
-				map[string]any{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
-		}
 
 		time.Sleep(2 * time.Second)
 		if mode != "c" {

@@ -21273,6 +21273,26 @@
       ],
       "additionalProperties": false
     },
+    "ConfirmSyncCheckoutRequestInput": {
+      "type": "object",
+      "properties": {
+        "saved": {
+          "type": "boolean"
+        },
+        "taskID": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "saved",
+        "taskID",
+        "token"
+      ],
+      "additionalProperties": false
+    },
     "ContentWordCountRequestInput": {
       "type": "object",
       "properties": {
@@ -51075,6 +51095,103 @@
       },
       "required": [
         "assetDownloadMode"
+      ],
+      "additionalProperties": false
+    },
+    "SyncCheckoutClientRequestInput": {
+      "type": "object",
+      "properties": {
+        "appID": {
+          "type": "string"
+        },
+        "clientID": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SyncCheckoutSnapshot": {
+      "type": "object",
+      "properties": {
+        "kernelID": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "task": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncCheckoutState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kernelID",
+        "revision",
+        "task"
+      ],
+      "additionalProperties": false
+    },
+    "SyncCheckoutState": {
+      "type": "object",
+      "properties": {
+        "blocking": {
+          "type": "boolean"
+        },
+        "canceling": {
+          "type": "boolean"
+        },
+        "current": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "phase": {
+          "type": "string"
+        },
+        "removeRootIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "taskID": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "upsertRootIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "blocking",
+        "canceling",
+        "current",
+        "message",
+        "phase",
+        "removeRootIDs",
+        "revision",
+        "taskID",
+        "token",
+        "total",
+        "upsertRootIDs"
       ],
       "additionalProperties": false
     },
@@ -168275,6 +168392,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/sync/confirmSyncCheckout",
+      "handler": "confirmSyncCheckout",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ConfirmSyncCheckoutRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/CancelSyncCheckoutData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/sync/createCloudSyncDir",
       "handler": "createCloudSyncDir",
       "authorization": [
@@ -168555,6 +168750,84 @@
                 "enum": [
                   -1,
                   1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/getSyncCheckout",
+      "handler": "getSyncCheckout",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SyncCheckoutClientRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SyncCheckoutSnapshot"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
                 ]
               },
               "data": {

@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "收起詳細資訊",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md 與 data/storage/ai/AGENTS.md 內容不同，請將內容合併至新檔案後移除舊檔案",
 	"dataImportConflicts": "衝突的筆記本",
 	"dataImportSkip": "略過衝突",
@@ -3385,6 +3386,6 @@
 		"433": "同步已取消，已完成的檔案會保留，請再次同步以完成剩餘內容",
 		"434": "磁碟空間不足，無法還原此檔案：需要 %s，可用 %s",
 		"435": "已清理中斷同步遺留的暫存檔，釋放 %s",
-		"436": "正在同步，完成或取消處理結束前無法編輯筆記"
+		"436": "正在套用同步變更，處理或取消復原結束後即可繼續編輯"
 	}
 }

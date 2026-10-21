@@ -22,11 +22,16 @@ func processAssetDownloadRecovery(repo *dejavu.Repo, recoverFiles bool) error {
 		id, changes, err = repo.AssetDownloadChanges()
 	}
 	if changes != nil && changes.DataChanged() {
-		mode := "a"
-		if !recoverFiles {
-			mode = "c"
+		changes = syncCheckoutUnindexed(changes)
+		if handled, prepareErr := reconcileSyncCheckoutChanges(changes); prepareErr != nil {
+			return errors.Join(err, prepareErr)
+		} else if !handled {
+			mode := "a"
+			if !recoverFiles {
+				mode = "c"
+			}
+			processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, mode, 0, true)
 		}
-		processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, mode, 0, true)
 	}
 	if id != "" && err == nil {
 		err = repo.AcknowledgeAssetDownloadChanges(id)
@@ -40,7 +45,7 @@ func processAssetSyncMergeResult(repo *dejavu.Repo, exit, byHand bool, changes *
 	if err != nil {
 		return err
 	}
-	processSyncMergeResult(exit, byHand, changes, traffic, mode, elapsed, id != "")
+	processSyncMergeResult(exit, byHand, syncCheckoutUnindexed(changes), traffic, mode, elapsed, id != "" || IsSyncCheckoutApplying())
 	if exit || id == "" {
 		return nil
 	}

@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "Hide details",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md and data/storage/ai/AGENTS.md differ; merge their contents into the new file, then remove the old file",
 	"dataImportConflicts": "Conflicting notebooks",
 	"dataImportSkip": "Skip conflicts",
@@ -3385,6 +3386,6 @@
 		"433": "Sync canceled; completed files were kept. Sync again to finish",
 		"434": "Not enough disk space to restore this file: required %s, available %s",
 		"435": "Removed interrupted sync temporary files, freeing %s",
-		"436": "Sync is in progress; editing stays blocked until it finishes or cancellation completes"
+		"436": "Applying synced changes; editing resumes after processing or cancellation recovery finishes"
 	}
 }

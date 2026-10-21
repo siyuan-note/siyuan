@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "Nascondi dettagli",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md e data/storage/ai/AGENTS.md sono diversi; unisci i contenuti nel nuovo file, quindi rimuovi quello precedente",
 	"dataImportConflicts": "Quaderni in conflitto",
 	"dataImportSkip": "Salta i conflitti",
@@ -3385,6 +3386,6 @@
 		"433": "Sincronizzazione annullata; i file completati sono stati conservati. Sincronizzare di nuovo per terminare",
 		"434": "Spazio su disco insufficiente per ripristinare questo file: necessario %s, disponibile %s",
 		"435": "File temporanei della sincronizzazione interrotta rimossi, liberati %s",
-		"436": "Sincronizzazione in corso; la modifica resta bloccata fino al termine o al completamento dell’annullamento"
+		"436": "Applicazione delle modifiche sincronizzate; la modifica riprende al termine dell’elaborazione o del ripristino dopo l’annullamento"
 	}
 }

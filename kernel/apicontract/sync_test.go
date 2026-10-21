@@ -45,6 +45,28 @@ func TestSyncCheckoutCancellationContract(t *testing.T) {
 	}
 }
 
+func TestSyncCheckoutPreparationContracts(t *testing.T) {
+	request, err := ConfirmSyncCheckout.Decode(strings.NewReader(`{"taskID":" current ","token":" window ","saved":false}`))
+	if err != nil || request.TaskID != "current" || request.Token != "window" || request.Saved {
+		t.Fatalf("preparation fields not bound: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"taskID":"task","token":"window"}`, `{"taskID":"task","token":" ","saved":true}`,
+		`{"taskID":"task","token":"window","saved":"true"}`} {
+		if _, err := ConfirmSyncCheckout.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid preparation accepted: %s", body)
+		}
+	}
+	if _, err := GetSyncCheckout.Decode(strings.NewReader(`{}`)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := GetSyncCheckout.Decode(strings.NewReader(`{"clientID":1}`)); err == nil {
+		t.Fatal("invalid client ID accepted")
+	}
+	if GetSyncCheckout.definition.Authorization != AuthenticatedAccess || ConfirmSyncCheckout.definition.Authorization != AuthenticatedAccess {
+		t.Fatal("read-only clients must also prepare and reconcile their windows")
+	}
+}
+
 func TestSyncConditionalDirection(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"upload":null}`, `{"upload":"wrong"}`, `{"upload":[]}`} {
 		request, err := PerformSync.Decode(strings.NewReader(body))

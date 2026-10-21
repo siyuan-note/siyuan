@@ -7,6 +7,7 @@ import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
+import {openSyncCheckoutProgress} from "./checkoutProgress";
 /// #if !MOBILE
 import {openSetting} from "../config";
 /// #endif
@@ -193,6 +194,7 @@ export const refreshSyncCloudDirBlock = (root: Element) => {
 };
 
 export const syncGuide = (app?: App) => {
+    if (openSyncCheckoutProgress()) return;
     if (window.siyuan.config.readonly) {
         return;
     }

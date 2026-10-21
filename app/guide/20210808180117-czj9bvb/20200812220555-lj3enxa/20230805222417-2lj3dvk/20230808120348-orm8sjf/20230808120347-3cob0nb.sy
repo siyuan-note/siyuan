@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20261020231029"
+		"updated": "20261021104922"
 	},
 	"Children": [
 		{
@@ -587,21 +587,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261020231029-gzbucu8",
-				"updated": "20261020231029"
+				"updated": "20261021104922"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "同步时会显示当前文件、已写入字节数、速度和预计剩余时间。点击 "
+					"Data": "自动同步通常在后台进行，不会弹出面板或打断编辑。点击同步图标可查看当前文件、已写入字节数、速度和预计剩余时间。"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "折叠"
+					"TextMarkTextContent": "收起详情"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可收起详情，再点击 "
+					"Data": " 可收起进度详情，点击 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -610,7 +610,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 按钮可重新展开。同步完成或取消处理结束前，编辑操作仍会被阻止。点击 "
+					"Data": " 可重新展开。仅在应用本地改动、恢复索引及刷新相关文档期间暂停编辑；取消后的恢复也需完成后才能继续编辑。点击 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -619,7 +619,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可请求在文件或分块边界取消。"
+					"Data": " 可请求取消准备、网络传输或文件恢复。"
 				}
 			]
 		},

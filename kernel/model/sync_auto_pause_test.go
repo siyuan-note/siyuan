@@ -1,7 +1,9 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -12,9 +14,27 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/olahol/melody"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAutoSyncPauseExcludesCancellationAndPreparationRetry(t *testing.T) {
+	previous := autoSyncErrCount.Load()
+	t.Cleanup(func() { autoSyncErrCount.Store(previous) })
+	autoSyncErrCount.Store(7)
+	for range 10 {
+		recordAutoSyncFailure(errors.Join(errors.New("network request stopped"), context.Canceled))
+		recordAutoSyncFailure(dejavu.ErrIndexFileChanged)
+	}
+	if autoSyncErrCount.Load() != 7 {
+		t.Fatal("user cancellation or active editing triggered automatic backoff")
+	}
+	recordAutoSyncFailure(errors.New("cloud unavailable"))
+	if autoSyncErrCount.Load() != 8 {
+		t.Fatal("real failures no longer reach the existing backoff threshold")
+	}
+}
 
 func TestAutoSyncPauseNotificationAndStatus(t *testing.T) {
 	prepareSyncDirectoryTest(t)

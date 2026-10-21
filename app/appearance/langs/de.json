@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "Details ausblenden",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md und data/storage/ai/AGENTS.md unterscheiden sich; führen Sie die Inhalte in der neuen Datei zusammen und entfernen Sie dann die alte Datei",
 	"dataImportConflicts": "Notizbücher mit Konflikten",
 	"dataImportSkip": "Konflikte überspringen",
@@ -3385,6 +3386,6 @@
 		"433": "Synchronisation abgebrochen; fertige Dateien bleiben erhalten. Zum Abschließen erneut synchronisieren",
 		"434": "Nicht genügend Speicherplatz für diese Datei: benötigt %s, verfügbar %s",
 		"435": "Temporäre Dateien der unterbrochenen Synchronisation entfernt, %s freigegeben",
-		"436": "Synchronisation läuft; Bearbeitung bleibt bis zum Abschluss oder Ende des Abbruchs gesperrt"
+		"436": "Synchronisierte Änderungen werden angewendet; nach der Verarbeitung oder Wiederherstellung nach Abbruch ist die Bearbeitung wieder möglich"
 	}
 }

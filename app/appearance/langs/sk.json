@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "Skryť podrobnosti",
 	"agentInstructionsLocationConflict": "Súbory data/ai/AGENTS.md a data/storage/ai/AGENTS.md sa líšia; zlúčte ich obsah do nového súboru a potom odstráňte starý súbor",
 	"dataImportConflicts": "Konfliktné poznámkové bloky",
 	"dataImportSkip": "Preskočiť konflikty",
@@ -3385,6 +3386,6 @@
 		"433": "Synchronizácia zrušená; dokončené súbory zostali zachované. Na dokončenie spustite synchronizáciu znova",
 		"434": "Nedostatok miesta na obnovenie súboru: potrebné %s, dostupné %s",
 		"435": "Dočasné súbory prerušenej synchronizácie odstránené, uvoľnené %s",
-		"436": "Prebieha synchronizácia; úpravy zostávajú zablokované do jej dokončenia alebo ukončenia rušenia"
+		"436": "Používajú sa synchronizované zmeny; úpravy budú dostupné po spracovaní alebo obnovení po zrušení"
 	}
 }

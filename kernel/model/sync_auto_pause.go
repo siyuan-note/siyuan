@@ -1,14 +1,25 @@
 package model
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// recordAutoSyncFailure 用户取消和本地编辑竞态不属于云端连续失败。
+func recordAutoSyncFailure(err error) {
+	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) {
+		return
+	}
+	autoSyncErrCount.Add(1)
+}
 
 var autoSyncPauseNotice struct {
 	sync.Mutex

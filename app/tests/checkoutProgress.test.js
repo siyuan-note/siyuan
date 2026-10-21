@@ -31,23 +31,76 @@ const run = async () => {
                 #editor {position:fixed;left:8px;top:8px;}`);
             const result = await win.webContents.executeJavaScript(`(async () => {
                 const assert = require("node:assert/strict");
-                window.siyuan = {zIndex:100,languages:{sync:"Sync",collapse:"Collapse",cancel:"Cancel",_kernel:{436:"Editing stays blocked during sync"}}};
+                window.siyuan = {zIndex:100,languages:{sync:"Sync",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{436:"Applying synchronized changes"}}};
                 const escapeExports = {};
                 new Function("exports", ${JSON.stringify(escape)})(escapeExports);
                 const calls = [];
+                const flushes = [];
+                const titles = [];
+                const reloads = [];
+                let saveInput, saveRequests, refreshQueued;
+                let pendingRequests = new Promise(resolve => saveRequests = resolve);
+                let pendingReloads = Promise.resolve();
+                let snapshot;
+                let reloadCount = 0;
+                let poll;
+                window.setInterval = callback => { poll = callback; return 1; };
+                window.clearInterval = () => {};
+                const editors = ["desktop", "mobile", "secondary"].map((id, index) => ({
+                    protyle:{id,block:{rootID:"changed"},wysiwyg:{},title:{flushPendingInput:() => titles.push(id)}},
+                    flushPendingTransactions:() => {
+                        flushes.push(id);
+                        return index ? Promise.resolve() : new Promise(resolve => saveInput = resolve);
+                    }
+                }));
                 const runtime = {};
-                new Function("exports","require",${JSON.stringify(source)})(runtime, name => name.includes("escape") ? escapeExports : {
-                    fetchSyncPost:(url,data) => new Promise((resolve,reject) => calls.push({url,data,resolve,reject}))
-                });
+                new Function("exports","require","window",${JSON.stringify(source)})(runtime, name => {
+                    if (name.includes("escape")) return escapeExports;
+                    if (name.includes("constants")) return {Constants:{SIYUAN_APPID:"app"}};
+                    if (name.includes("getAll")) return {getAllEditor:() => editors};
+                    if (name.includes("editorSave")) return {getEditorSaveFailureVersion:() => 0,flushPendingEditorSaves:() => pendingRequests};
+                    if (name.includes("reloadSync")) return {waitForSyncReloads:() => pendingReloads};
+                    if (name.includes("reload")) return {reloadProtyleAndWait:protyle => new Promise(resolve => reloads.push({protyle,resolve}))};
+                    return {fetchSyncPost:(url,data) => {
+                        if (url.endsWith("getSyncCheckout")) return Promise.resolve({code:0,data:snapshot});
+                        if (url.endsWith("confirmSyncCheckout")) { calls.push({url,data}); return Promise.resolve({code:0,data:{requested:true}}); }
+                        return new Promise((resolve,reject) => calls.push({url,data,resolve,reject}));
+                    }};
+                }, {siyuan:window.siyuan,setInterval:window.setInterval,clearInterval:window.clearInterval,
+                    location:{reload:() => reloadCount++}});
+                const tick = () => new Promise(resolve => setTimeout(resolve,0));
                 const editor = document.getElementById("editor");
                 editor.focus();
-                const progress = (taskID,code,current=1,total=10,msg="<img src=x onerror='window.compromised=true'>") =>
-                    runtime.syncCheckoutProgress({code,msg,data:{taskID,current,total}});
-                progress("first",0);
+                const progress = (taskID,code,revision,phase="applying",extra={}) => runtime.syncCheckoutProgress({code,msg:"",
+                    data:{taskID,revision,phase,blocking:phase!=="background",current:1,total:10,
+                    message:"<img src=x onerror='window.compromised=true'>",...extra}});
+                progress("first",0,1,"background");
+                assert.equal(document.getElementById("sync-checkout-progress"),null);
+                assert.equal(document.activeElement,editor);
+                assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),true);
+                assert.equal(runtime.openSyncCheckoutProgress(),true);
                 let root = document.getElementById("sync-checkout-progress");
+                assert.equal(root.querySelector('[role="dialog"]').getAttribute("aria-modal"),"false");
+                assert.equal(document.activeElement,editor);
+                assert.equal(getComputedStyle(root.querySelector(".sync-checkout__scrim")).display,"none");
+                root.querySelector('[data-action="toggle"]').click();
+                assert.equal(document.getElementById("sync-checkout-progress"),null);
+                progress("first",0,2,"preparing",{token:"window-token"});
+                root = document.getElementById("sync-checkout-progress");
                 assert.ok(root && root.contains(document.activeElement));
+                await tick();
+                assert.deepEqual(flushes,["desktop","mobile","secondary"]);
+                assert.deepEqual(titles,flushes);
+                assert.equal(calls.length,0);
+                saveInput(); await tick();
+                assert.equal(calls.length,0,"acknowledged before transaction requests completed");
+                saveRequests(); await tick();
+                assert.equal(calls.length,1);
+                assert.deepEqual(calls.shift().data,{taskID:"first",token:"window-token",saved:true});
+                progress("first",0,3);
+                root.querySelector('[data-action="toggle"]').focus();
                 document.activeElement.dispatchEvent(new KeyboardEvent("keydown",{key:"Tab",bubbles:true,cancelable:true}));
-                assert.equal(document.activeElement,root.querySelector('[data-action="toggle"]'));
+                assert.equal(document.activeElement,root.querySelector('[data-action="cancel"]'));
                 assert.equal(root.querySelector("img"),null);
                 assert.equal(root.querySelector('[data-type="message"]').textContent,"<img src=x onerror='window.compromised=true'>");
                 assert.equal(root.querySelector("progress").value,10);
@@ -62,12 +115,17 @@ const run = async () => {
                 assert.ok(root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
-                progress("first",0,9,10,"Still restoring");
+                progress("first",0,3,"applying",{current:9,message:"Still restoring"});
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 root.querySelector('[data-action="toggle"]').click();
                 assert.equal(root.querySelector("progress").value,90);
                 const panel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
                 assert.ok(panel.left>=0 && panel.right<=innerWidth && panel.top>=0 && panel.bottom<=innerHeight,JSON.stringify(panel));
+                assert.ok(root.querySelector(".sync-checkout__panel").scrollWidth <= Math.ceil(panel.width),"narrow panel has horizontal overflow");
+                root.querySelectorAll("button").forEach(button => {
+                    const rect = button.getBoundingClientRect();
+                    assert.ok(rect.left >= panel.left && rect.right <= panel.right,"action is clipped at large font sizes");
+                });
                 const cancel = root.querySelector('[data-action="cancel"]');
                 cancel.click(); cancel.click();
                 assert.equal(calls.length,1);
@@ -78,13 +136,40 @@ const run = async () => {
                 assert.equal(cancel.disabled,false);
                 cancel.click(); calls[1].resolve({code:0,data:{requested:true}});
                 await new Promise(resolve=>setTimeout(resolve,0));
-                progress("stale",2);
+                progress("stale",2,2);
                 assert.ok(document.getElementById("sync-checkout-progress"));
-                progress("first",2);
+                pendingReloads = new Promise(resolve => refreshQueued = resolve);
+                progress("first",0,4,"background",{upsertRootIDs:["changed"]});
+                await tick();
+                assert.equal(reloads.length,0,"did not wait for queued syncMergeResult refresh");
+                assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
+                refreshQueued(); await tick();
+                assert.equal(reloads.length,3,"did not refresh every affected editor");
+                assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
+                reloads.forEach(item => item.resolve()); await tick();
                 assert.equal(document.getElementById("sync-checkout-progress"),null);
                 assert.equal(document.activeElement,editor);
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),true);
-                progress("second",0,999,10,"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining");
+                progress("first",2,5,"done");
+                assert.equal(runtime.openSyncCheckoutProgress(),false);
+                progress("lost",0,6);
+                snapshot = {kernelID:"kernel-one",revision:7,task:null};
+                await runtime.reconcileSyncCheckout("secondary",true);
+                assert.equal(reloadCount,1,"reconnect did not recover a lost terminal event");
+                progress("lost",2,7,"done"); await tick();
+                progress("lost-again",0,8);
+                snapshot = {kernelID:"kernel-one",revision:9,task:null};
+                poll(); await tick();
+                assert.equal(reloadCount,2,"polling did not recover a dropped terminal frame");
+                progress("lost-again",2,9,"done"); await tick();
+                snapshot = {kernelID:"kernel-two",revision:1,task:{taskID:"restarted",revision:1,phase:"background",blocking:false}};
+                await runtime.reconcileSyncCheckout();
+                assert.equal(runtime.openSyncCheckoutProgress(),true,"kernel restart retained an obsolete revision");
+                progress("restarted",2,2,"done");
+                progress("stale",0,1);
+                assert.equal(document.getElementById("sync-checkout-progress"),null);
+                progress("second",0,3,"applying",{current:999,message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
+                runtime.openSyncCheckoutProgress();
                 assert.equal(document.querySelector("progress").value,100);
                 assert.equal(document.querySelector('[data-action="cancel"]').disabled,false);
                 return "passed";
@@ -113,19 +198,19 @@ const run = async () => {
 if (process.versions.electron && process.type === "browser") {
     run().catch(error => {console.error(error);require("electron").app.exit(1);});
 } else {
-    require("node:test").test("sync checkout progress guards editing, handles cancellation, and fits desktop/mobile layouts", {
+    require("node:test").test("sync stays editable in background, saves all editors, waits for refresh and recovers lost events across desktop/mobile layouts", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 60000,
+        timeout: 90000,
     }, async () => {
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-sync-checkout-"));
         const env = {...process.env};delete env.ELECTRON_RUN_AS_NODE;
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(require("electron"),
-                [__filename,profile], {env, windowsHide: true, timeout: 55000});
+                [__filename,profile], {env, windowsHide: true, timeout: 75000});
             assert.match(stdout,/Sync checkout interaction and layout cases passed/);
         } finally {
             assert.ok(path.resolve(profile).startsWith(path.resolve(os.tmpdir())+path.sep));
-            rmSync(profile,{recursive:true,force:true});
+            rmSync(profile,{recursive:true,force:true,maxRetries:20,retryDelay:100});
         }
     });
 }

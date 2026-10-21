@@ -1169,6 +1169,38 @@ func TestListEncryptedNotebooksReturnsScanError(t *testing.T) {
 	}
 }
 
+func TestEnableEncryptedNotebookWithSyncRetainsDataImportProtection(t *testing.T) {
+	prepareSyncDirectoryTest(t)
+	Conf.Sync.Load().Enabled = false
+	previous := dataImportRecoveryRequired.Load()
+	dataImportRecoveryRequired.Store(true)
+	t.Cleanup(func() { dataImportRecoveryRequired.Store(previous) })
+	dataImportAccess.Lock()
+	locked := true
+	defer func() {
+		if locked {
+			dataImportAccess.Unlock()
+		}
+	}()
+	done := make(chan error, 1)
+	go func() { done <- EnableEncryptedNotebookWithSync("password") }()
+	select {
+	case err := <-done:
+		t.Fatalf("key configuration bypassed an active import: %v", err)
+	case <-time.After(30 * time.Millisecond):
+	}
+	dataImportAccess.Unlock()
+	locked = false
+	select {
+	case err := <-done:
+		if err == nil || Conf.NotebookCrypto != nil && len(Conf.NotebookCrypto.MasterSalt) != 0 {
+			t.Fatalf("unrecovered import allowed a new key configuration: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("key configuration did not resume after import admission was released")
+	}
+}
+
 func TestEnableEncryptedNotebookRestoresConfigWhenBackupWriteFails(t *testing.T) {
 	originalConf := Conf
 	originalDataDir := util.DataDir

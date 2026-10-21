@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261020231029"
+		"updated": "20261021104922"
 	},
 	"Children": [
 		{
@@ -591,21 +591,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261020231029-lr7z60a",
-				"updated": "20261020231029"
+				"updated": "20261021104922"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "During sync, progress shows the current file, written bytes, speed, and estimated remaining time. Click "
+					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Collapse"
+					"TextMarkTextContent": "Hide details"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to shrink the details and the "
+					"Data": " hides the details; "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -614,7 +614,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " button to reopen them. Editing stays blocked until sync or cancellation processing finishes. Click "
+					"Data": " reopens them. Editing pauses only while local changes are applied and affected documents are refreshed, including recovery after cancellation. Click "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -623,7 +623,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to request cancellation at a file or chunk boundary."
+					"Data": " to request cancellation of preparation, network transfer, or file restoration."
 				}
 			]
 		},

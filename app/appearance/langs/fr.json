@@ -1,4 +1,5 @@
 {
+	"collapseSyncDetails": "Masquer les détails",
 	"agentInstructionsLocationConflict": "data/ai/AGENTS.md et data/storage/ai/AGENTS.md diffèrent ; fusionnez leur contenu dans le nouveau fichier, puis supprimez l’ancien fichier",
 	"dataImportConflicts": "Carnets en conflit",
 	"dataImportSkip": "Ignorer les conflits",
@@ -3385,6 +3386,6 @@
 		"433": "Synchronisation annulée ; les fichiers terminés ont été conservés. Relancez la synchronisation pour finir",
 		"434": "Espace disque insuffisant pour restaurer ce fichier : nécessaire %s, disponible %s",
 		"435": "Fichiers temporaires de synchronisation interrompue supprimés, %s libérés",
-		"436": "Synchronisation en cours ; la modification reste bloquée jusqu’à la fin ou l’achèvement de l’annulation"
+		"436": "Application des modifications synchronisées ; la modification reprend après le traitement ou la récupération suivant une annulation"
 	}
 }

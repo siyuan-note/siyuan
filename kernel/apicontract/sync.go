@@ -20,6 +20,37 @@ type CancelSyncCheckoutRequest struct {
 type CancelSyncCheckoutData struct {
 	Requested bool `json:"requested"`
 }
+
+type SyncCheckoutClientRequest struct {
+	AppID    string `json:"appID" api:"optional"`
+	ClientID string `json:"clientID" api:"optional"`
+}
+
+type ConfirmSyncCheckoutRequest struct {
+	TaskID string `json:"taskID" api:"trim"`
+	Token  string `json:"token" api:"trim"`
+	Saved  bool   `json:"saved"`
+}
+
+type SyncCheckoutState struct {
+	TaskID        string   `json:"taskID"`
+	Revision      int64    `json:"revision"`
+	Phase         string   `json:"phase"`
+	Blocking      bool     `json:"blocking"`
+	Canceling     bool     `json:"canceling"`
+	Current       int64    `json:"current"`
+	Total         int64    `json:"total"`
+	Message       string   `json:"message"`
+	Token         string   `json:"token"`
+	UpsertRootIDs []string `json:"upsertRootIDs" api:"nonnullable"`
+	RemoveRootIDs []string `json:"removeRootIDs" api:"nonnullable"`
+}
+
+type SyncCheckoutSnapshot struct {
+	KernelID string             `json:"kernelID"`
+	Revision int64              `json:"revision"`
+	Task     *SyncCheckoutState `json:"task"`
+}
 type SyncIntervalRequest struct {
 	Interval float64 `json:"interval"`
 }

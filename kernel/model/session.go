@@ -196,14 +196,35 @@ func CheckReadonly(c *gin.Context) {
 	}
 	// 导入提交期间暂停其他写接口，避免已确认的磁盘快照被并发请求修改。
 	if c.Request.URL.Path != "/api/import/commitDataImport" && c.Request.URL.Path != "/api/import/prepareDataImport" {
-		dataImportAccess.RLock()
-		defer dataImportAccess.RUnlock()
+		if !dataImportAccess.TryRLock() {
+			if IsSyncCheckoutApplying() {
+				result := util.NewResult()
+				result.Code, result.Msg = -1, Conf.Language(436)
+				result.Data = map[string]any{"closeTimeout": 5000}
+				c.JSON(http.StatusOK, result)
+				c.Abort()
+				return
+			}
+			dataImportAccess.RLock()
+		}
+		released := false
+		defer func() {
+			if !released {
+				dataImportAccess.RUnlock()
+			}
+		}()
 		if err := checkDataImportRecovery(); err != nil {
 			result := util.NewResult()
 			result.Code, result.Msg = -1, err.Error()
 			c.JSON(http.StatusOK, result)
 			c.Abort()
 			return
+		}
+		// 同步控制接口会在实际应用阶段取得写租约，不跨整轮网络请求持有读租约。
+		switch c.Request.URL.Path {
+		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks":
+			dataImportAccess.RUnlock()
+			released = true
 		}
 		c.Next()
 	}

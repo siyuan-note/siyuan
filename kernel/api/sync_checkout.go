@@ -11,3 +11,15 @@ var cancelSyncCheckout = contractHandler(apicontract.CancelSyncCheckout, cancelS
 func cancelSyncCheckoutContract(_ *gin.Context, request apicontract.CancelSyncCheckoutRequest) apicontract.Response[apicontract.CancelSyncCheckoutData] {
 	return apicontract.Success(apicontract.CancelSyncCheckoutData{Requested: model.CancelSyncCheckout(request.TaskID)})
 }
+
+var getSyncCheckout = contractHandler(apicontract.GetSyncCheckout,
+	func(_ *gin.Context, request apicontract.SyncCheckoutClientRequest) apicontract.Response[apicontract.SyncCheckoutSnapshot] {
+		return apicontract.Success(model.GetSyncCheckout(request.AppID, request.ClientID))
+	})
+
+var confirmSyncCheckout = contractHandler(apicontract.ConfirmSyncCheckout,
+	func(_ *gin.Context, request apicontract.ConfirmSyncCheckoutRequest) apicontract.Response[apicontract.CancelSyncCheckoutData] {
+		return apicontract.Success(apicontract.CancelSyncCheckoutData{
+			Requested: model.ConfirmSyncCheckout(request.TaskID, request.Token, request.Saved),
+		})
+	})

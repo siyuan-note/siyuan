@@ -40,6 +40,27 @@ func TestAVAutomationDocumentDepthContract(t *testing.T) {
 	}
 }
 
+func TestAVAutomationAttributeNameContract(t *testing.T) {
+	endpoint := Endpoint[AVAutomationBlockAttribute, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, mode := range []string{"", "equals", "contains", "regex"} {
+		raw, _ := json.Marshal(map[string]string{"name": "custom-state", "nameOperator": mode, "operator": "exists"})
+		value, err := endpoint.Decode(strings.NewReader(string(raw)))
+		if err != nil || value.NameOperator != mode {
+			t.Fatalf("name operator %q: %+v %v", mode, value, err)
+		}
+	}
+	value, err := endpoint.Decode(strings.NewReader(`{"name":"custom-state","operator":"exists"}`))
+	if err != nil || value.NameOperator != "" {
+		t.Fatalf("legacy exact default: %+v %v", value, err)
+	}
+	for _, raw := range []string{`{"name":"state","nameOperator":"glob","operator":"exists"}`,
+		`{"name":"state","nameOperator":1,"operator":"exists"}`} {
+		if _, err := endpoint.Decode(strings.NewReader(raw)); err == nil {
+			t.Fatalf("invalid name operator accepted: %s", raw)
+		}
+	}
+}
+
 func TestAVRequestCompatibility(t *testing.T) {
 	group, err := SetAttrViewGroup.Decode(strings.NewReader(`{"avID":" av ","blockID":" block ","group":{"FIELD":"key","method":2,"unknown":true},"ignoreRows":"ignored"}`))
 	if err != nil || group.AvID != " av " || group.BlockID != " block " || group.Group.Field != "key" || group.Group.Method != 2 || group.IgnoreRows {

@@ -112,7 +112,7 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 6
+	source.Automations.Spec = 7
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")
@@ -134,7 +134,7 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, spec := range []int{1, 2, 3, 4, 5} {
+	for _, spec := range []int{1, 2, 3, 4, 5, 6} {
 		view, err := ParseAttributeViewData("20260921000000-layouts", data)
 		if err != nil {
 			t.Fatal(err)
@@ -175,6 +175,42 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 			}
 			if parseErr == nil && *parsed.Automations.Rules[0].BlockSource.DocumentDepth != depth {
 				t.Fatal("document depth was not preserved")
+			}
+		}
+	}
+}
+
+func TestAutomationAttributeNameSpecCompatibility(t *testing.T) {
+	data, err := os.ReadFile("testdata/spec9-layouts.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for spec := 1; spec <= 6; spec++ {
+		for _, mode := range []string{"", "equals", "contains", "regex"} {
+			view, err := ParseAttributeViewData("20260921000000-layouts", data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			attr := &AutomationBlockAttribute{Name: "custom-state", NameOperator: mode, Operator: "exists"}
+			view.Automations = &AutomationConfig{Spec: spec, Rules: []*AutomationRule{{BlockSource: &AutomationBlockSource{
+				Attributes: []*AutomationBlockAttribute{attr}, DocumentDepth: new(0),
+			}}}}
+			// 先检查独立的名称语义，再叠加文档深度，避免较低优先级覆盖新格式要求。
+			view.Automations.Rules[0].BlockSource.DocumentDepth = nil
+			raw, _ := json.Marshal(view)
+			read, err := ParseAttributeViewData(view.ID, raw)
+			want := spec >= 6 || mode == "" || mode == "equals"
+			if (err == nil) != want {
+				t.Fatalf("name mode %q spec %d: %v", mode, spec, err)
+			}
+			if want && read.Automations.Rules[0].BlockSource.Attributes[0].NameOperator != mode {
+				t.Fatal("name operator lost during storage round trip")
+			}
+			if mode == "contains" || mode == "regex" {
+				view.Automations.Rules[0].BlockSource.DocumentDepth = new(0)
+				if got := view.Automations.Rules[0].RequiredSpec(); got != 6 {
+					t.Fatalf("combined spec = %d", got)
+				}
 			}
 		}
 	}

@@ -25,13 +25,16 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 			name = "default"
 		}
 		t.Run(name, func(t *testing.T) {
-			t.Run("unlimited", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, nil) })
-			t.Run("current", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, new(0)) })
+			t.Run("unlimited", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, nil, "") })
+			t.Run("current", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, new(0), "") })
 		})
+	}
+	for _, mode := range []string{"contains", "regex"} {
+		t.Run(mode, func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, "", nil, mode) })
 	}
 }
 
-func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, depth *int) {
+func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, depth *int, nameOperator string) {
 	fixture, view, keyID := setupBlockCollectionTest(t)
 	boxID := fixture.box.ID
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
@@ -99,6 +102,15 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, 
 	if depth != nil {
 		view.Automations.Spec = 5
 		view.Automations.Rules[0].BlockSource.DocumentDepth = depth
+	}
+	if nameOperator != "" {
+		view.Automations.Spec = 6
+		attr := view.Automations.Rules[0].BlockSource.Attributes[0]
+		attr.NameOperator = nameOperator
+		attr.Name = "state"
+		if nameOperator == "regex" {
+			attr.Name = "^custom-st(?:ate|atus)$"
+		}
 	}
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)

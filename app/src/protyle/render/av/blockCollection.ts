@@ -10,7 +10,9 @@ import {toggleMenu} from "../../../menus/menuToggle";
 export const collectionSourceIncomplete = (source: AVAutomationBlockSourceInput) => !source ||
     !(source.notebookIDs?.length || source.documentIDs?.length) ||
     (source.documentDepth != null && (!Number.isSafeInteger(source.documentDepth) || source.documentDepth < 0)) ||
-    (source.attributes || []).some(attr => !attr || !/^custom-[\w-]+$/.test(attr.name));
+    (source.attributes || []).some(attr => !attr || !attr.name || attr.name.length > 256 ||
+        (attr.nameOperator === "regex" ? false :
+            !(attr.nameOperator === "contains" ? /^[a-z0-9-]+$/ : /^custom-[\w-]+$/).test(attr.name)));
 
 export const mountBlockCollectionSource = (host: HTMLElement, source: AVAutomationBlockSourceInput,
                                            protyle: IProtyle, save: () => void, onResize: () => void) => {

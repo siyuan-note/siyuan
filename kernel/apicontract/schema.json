@@ -6672,6 +6672,15 @@
         "name": {
           "type": "string"
         },
+        "nameOperator": {
+          "type": "string",
+          "enum": [
+            "",
+            "equals",
+            "contains",
+            "regex"
+          ]
+        },
         "operator": {
           "type": "string",
           "enum": [
@@ -6696,6 +6705,15 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "nameOperator": {
+          "type": "string",
+          "enum": [
+            "",
+            "equals",
+            "contains",
+            "regex"
+          ]
         },
         "operator": {
           "type": "string",

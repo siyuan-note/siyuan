@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261020211145"
+		"updated": "20261021135332"
 	},
 	"Children": [
 		{
@@ -4560,6 +4560,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "When document scopes are selected, Subdocument depth appears below Watch scope. Unlimited is the default and includes all descendant documents. Current document only includes each selected document itself. With Limit depth, enter a positive integer: 1 includes the selected document and its direct children, 2 also includes grandchildren, and so on. This setting is shared by all document scopes in the rule and does not limit notebook scopes; overlapping scopes are combined. Changing depth preserves existing entries and fields and does not collect existing content automatically. Use collection management to preview and collect matches or review and remove unmatched entries. Limited depth requires automation format 5; older clients reject it without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261021135332-1brkvpw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021135332-1brkvpw",
+				"updated": "20261021135332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Attribute name supports Equals (the default), Contains, and Regex, independently of the attribute value condition. Equals uses the full name, such as custom-state. Contains accepts a literal substring without the custom- prefix: dailynote matches custom-dailynote-20261021. Regex uses Go syntax against the full name, for example ^custom-dailynote-[0-9]{8}$. Only custom attributes are checked. Names and values are case-sensitive and must match the same attribute; Exists requires any matching name, while Does not exist requires none and ignores the value. Invalid regular expressions cannot be saved, and patterns are limited to 256 bytes. Contains and Regex require automation format 6; existing formats 1–5 remain readable, while older clients reject format 6 without rewriting the database."
 				}
 			]
 		},

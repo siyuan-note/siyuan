@@ -30,6 +30,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
     (source.types || []).filter(type => type.startsWith("callout:")).forEach(type => types[type] = `${lang.callout} - ${type.slice(8)}`);
     const operators = {equals: lang.filterOperatorIs, contains: lang.filterOperatorContains,
         exists: lang.automationAttrExists, notExists: lang.automationAttrNotExists};
+    const nameOperators = {equals: lang.filterOperatorIs, contains: lang.filterOperatorContains, regex: lang.regex};
     const modeLabel = (mode: string) => mode === "or" ? lang.filterMatchAny : lang.filterMatchAll;
     const tagTargets = {"": lang.default, block: lang.automationCollectionTargetBlock, container: lang.automationCollectionTargetContainer};
     const tagTargetTips = {"": lang.automationCollectionTargetDefaultTip, block: lang.automationCollectionTargetBlockTip, container: lang.automationCollectionTargetContainerTip};
@@ -50,13 +51,13 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
     const renderChips = () => {
         typeChips.innerHTML = (source.types || []).map((type, i) => chip("type", i, types[type] || type)).join("");
         attributes.innerHTML = (source.attributes || []).map((attr, i) => chip("attribute", i,
-            `${attr.name} ${operators[attr.operator]}${["equals", "contains"].includes(attr.operator) ? " " + (attr.value || "") : ""}`, true)).join("");
+            `${attr.nameOperator && attr.nameOperator !== "equals" ? nameOperators[attr.nameOperator] + " " : ""}${attr.name} ${operators[attr.operator]}${["equals", "contains"].includes(attr.operator) ? " " + (attr.value || "") : ""}`, true)).join("");
         typeChips.classList.toggle("fn__none", !source.types?.length);
         attributes.classList.toggle("fn__none", !source.attributes?.length);
         resize();
     };
     const renderEditor = () => {
-        editor.innerHTML = draft ? `<div class="av__automation-control"><input class="b3-text-field" data-attr-name aria-label="${escapeAttr(lang.attr)}" placeholder="custom-name" maxlength="256" value="${escapeAttr(draft.name)}"><div class="av__automation-row"><button type="button" class="b3-button b3-button--cancel" data-attr-operator>${operators[draft.operator]}<svg><use xlink:href="#iconDown"></use></svg></button>${["equals", "contains"].includes(draft.operator) ? `<input class="b3-text-field fn__flex-1" data-attr-value aria-label="${escapeAttr(lang.text)}" value="${escapeAttr(draft.value || "")}">` : ""}</div><div class="av__automation-row"><button type="button" class="b3-button b3-button--text" data-confirm-attribute>${lang.confirm}</button><button type="button" class="b3-button b3-button--cancel" data-cancel-attribute>${lang.cancel}</button></div></div>` : "";
+        editor.innerHTML = draft ? `<div class="av__automation-control"><div class="av__automation-row"><span class="fn__flex-1">${lang.attrName}</span><button type="button" class="b3-button b3-button--cancel" data-attr-name-operator>${nameOperators[draft.nameOperator || "equals"]}<svg><use xlink:href="#iconDown"></use></svg></button></div><input class="b3-text-field" data-attr-name aria-label="${escapeAttr(lang.attrName)}" placeholder="${draft.nameOperator === "regex" ? "^custom-dailynote-[0-9]{8}$" : draft.nameOperator === "contains" ? "dailynote" : "custom-name"}" maxlength="256" value="${escapeAttr(draft.name)}"><div class="av__automation-row"><button type="button" class="b3-button b3-button--cancel" data-attr-operator>${operators[draft.operator]}<svg><use xlink:href="#iconDown"></use></svg></button>${["equals", "contains"].includes(draft.operator) ? `<input class="b3-text-field fn__flex-1" data-attr-value aria-label="${escapeAttr(lang.text)}" value="${escapeAttr(draft.value || "")}">` : ""}</div><div class="av__automation-row"><button type="button" class="b3-button b3-button--text" data-confirm-attribute>${lang.confirm}</button><button type="button" class="b3-button b3-button--cancel" data-cancel-attribute>${lang.cancel}</button></div></div>` : "";
         host.querySelector<HTMLElement>("[data-add-attribute]").classList.toggle("fn__none", !!draft);
         resize();
     };
@@ -64,8 +65,10 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
         if (!draft) { return; }
         if (!cancel) {
             const input = editor.querySelector<HTMLInputElement>("[data-attr-name]");
-            draft.name = input.value.trim().toLowerCase();
-            input.setCustomValidity(/^custom-[\w-]+$/.test(draft.name) ? "" : lang.invalid);
+            draft.name = draft.nameOperator === "regex" ? input.value.trim() : input.value.trim().toLowerCase();
+            const valid = draft.nameOperator === "regex" ? !!draft.name :
+                (draft.nameOperator === "contains" ? /^[a-z0-9-]+$/ : /^custom-[\w-]+$/).test(draft.name);
+            input.setCustomValidity(valid ? "" : lang.invalid);
             if (!input.reportValidity()) { return; }
             const next = [...(source.attributes || [])];
             if (editing >= 0) { next[editing] = {...draft}; } else { next.push({...draft}); }
@@ -180,6 +183,12 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
                 source[field] = mode === "or" ? "or" : "and";
                 save();
                 target.firstChild.textContent = modeLabel(mode);
+            });
+        } else if (target.hasAttribute("data-attr-name-operator") && draft) {
+            choose(target, Object.entries(nameOperators).map(([value, label]) => ({value, label})), draft.nameOperator || "equals", value => {
+                if (value === "contains" || value === "regex") { draft.nameOperator = value; }
+                else { delete draft.nameOperator; }
+                renderEditor();
             });
         } else if (target.hasAttribute("data-attr-operator") && draft) {
             choose(target, Object.entries(operators).map(([value, label]) => ({value, label})), draft.operator, value => {

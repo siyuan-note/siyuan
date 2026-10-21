@@ -289,6 +289,45 @@ func TestAVContractAutomationWrites(t *testing.T) {
 			t.Fatalf("document depth contract round trip: %s", response.Body.String())
 		}
 	}
+	previousAttributes := collection.BlockSource.Attributes
+	for _, mode := range []string{"equals", "contains", "regex"} {
+		attr := &av.AutomationBlockAttribute{Name: "custom-state", NameOperator: mode, Operator: "exists"}
+		if mode == "contains" {
+			attr.Name = "state"
+		}
+		if mode == "regex" {
+			attr.Name = "^custom-state$"
+		}
+		collection.BlockSource.Attributes = []*av.AutomationBlockAttribute{attr}
+		if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+			Data: &av.AutomationConfig{Spec: 6, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+			t.Fatal(err)
+		}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		readBack.Data.AV.Automations = av.AutomationConfig{}
+		if err = json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		got := readBack.Data.AV.Automations.Rules[0].BlockSource.Attributes[0]
+		if got.NameOperator != mode || got.Name != attr.Name || got.Operator != "exists" {
+			t.Fatalf("attribute name contract round trip: %s", response.Body.String())
+		}
+	}
+	collection.BlockSource.Attributes[0].Name = "["
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 6, Rules: []*av.AutomationRule{collection}}}}); err == nil {
+		t.Fatal("invalid attribute name expression was saved")
+	}
+	persisted, err := av.ParseAttributeView(database.ID)
+	if err != nil || persisted.Automations.Rules[0].BlockSource.Attributes[0].Name != "^custom-state$" {
+		t.Fatal("invalid expression changed the previous saved rule", err)
+	}
+	collection.BlockSource.Attributes = previousAttributes
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 5, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
 	call("/api/block/appendBlock", map[string]any{"parentID": tree.ID, "dataType": "markdown", "data": "> First #collect#\n>\n> Second #collect#"}, appendBlock)
 	stored, _ = av.ParseAttributeView(database.ID)
 	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)

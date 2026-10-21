@@ -675,6 +675,23 @@ const runCases = async (sources, css, mobile) => {
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
     await click('[data-remove-filter="attribute"]');
     assert.equal(latest().blockSource.attributes.length, 0);
+    for (const [nameOperator, label, name] of [
+        ["contains", lang.filterOperatorContains, "dailynote"],
+        ["regex", lang.regex, "^custom-\\D+-[0-9]{8}$"],
+    ]) {
+        await click("[data-add-attribute]");
+        await click("[data-attr-name-operator]");
+        assert.equal(fieldMenu.items.find(item => item.label === lang.filterOperatorIs).checked, true);
+        fieldMenu.items.find(item => item.label === label).click();
+        await change("[data-attr-name]", name);
+        await click("[data-confirm-attribute]");
+        assert.deepEqual(latest().blockSource.attributes, [{name, nameOperator, operator: "exists"}]);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 6);
+        await click("[data-edit-attribute]");
+        assert.equal(get("[data-attr-name]").value, name, "regex escapes retain their case");
+        await click("[data-cancel-attribute]");
+        await click('[data-remove-filter="attribute"]');
+    }
     await click('[data-match="tagMatch"]');
     fieldMenu.items.find(item => item.label === lang.filterMatchAny).click();
     assert.equal(latest().blockSource.tagMatch, "or");
@@ -689,7 +706,7 @@ const runCases = async (sources, css, mobile) => {
         assert.equal(targetOption.checked, true, "the current target is checked in the shared menu");
         fieldMenu.items.find(item => item.label === label).click();
         assert.equal(latest().blockSource.tagTarget, value || undefined);
-        assert.equal(transactions.at(-1).perform[0].data.spec, 4);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 6);
         assert.equal(get("[data-tag-target] span").textContent, label);
         assert.ok(get("[data-tag-target]").scrollWidth <= get("[data-tag-target]").clientWidth + 1, "all target labels wrap at narrow widths and large fonts");
         assert.equal(get("[data-tag-target-change-tip]").classList.contains("fn__none"), false);

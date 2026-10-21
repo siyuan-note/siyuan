@@ -11,7 +11,7 @@ const compiled = transpileModule(readFileSync("src/protyle/render/av/automation.
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
 }).outputText;
 
-test("document depth autosave upgrades format including zero and preserves undo snapshots", async () => {
+test("collection autosave versions document depth and attribute name modes with independent undo snapshots", async () => {
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     let source: AVAutomationBlockSourceInput;
     let save: () => void;
@@ -58,6 +58,18 @@ test("document depth autosave upgrades format including zero and preserves undo 
     assert.equal(last.rules[0].blockSource.documentDepth, undefined);
     assert.equal(last.rules[0].enabled, true);
     assert.equal(database.automations.spec, 1);
+    source.attributes = [{name: "dailynote", nameOperator: "contains", operator: "exists"}];
+    save();
+    const named = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(named.perform[0].data.spec, 6);
+    assert.equal(named.perform[0].data.rules[0].blockSource.attributes[0].nameOperator, "contains");
+    assert.equal(named.undo[0].data.spec, 5);
+    source.attributes[0] = {name: "^custom-dailynote-[0-9]{8}$", nameOperator: "regex", operator: "notExists"};
+    save();
+    assert.equal(JSON.parse(JSON.stringify(transactions.at(-1).perform[0].data)).spec, 6);
+    source.attributes = [];
+    save();
+    assert.equal(JSON.parse(JSON.stringify(transactions.at(-1).perform[0].data)).spec, 6);
 });
 
 test("automation settings reject readonly, publishing and historical editors before fetching data", async () => {

@@ -1,7 +1,8 @@
 package apicontract
 
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
-// spec 为 1 至 5；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// spec 为 1 至 6；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// 属性名包含或正则匹配至少使用 6；缺省或 equals 保持既有的精确匹配。
 // 旧读取器拒绝新版本，防止配置静默丢失。
 // 缺省配置不会触发自动化，既有版本的主类型匹配含义不变。
 // 普通条目新增、字段编辑及对应 API 会触发启用的规则，
@@ -59,10 +60,16 @@ type AVAutomationBlockSource struct {
 	AttributeMatch string                        `json:"attributeMatch,omitempty" api:"optional,enum=|and|or"`
 }
 
+// AVAutomationBlockAttribute 仅匹配 custom- 前缀的自定义属性，名称与值必须在同一条属性上满足条件。
+// nameOperator 缺省、空值或 equals 精确匹配完整名称；contains 匹配名称中的字面子串，无需输入 custom- 前缀。
+// regex 使用 Go 正则语法匹配含 custom- 前缀的完整名称，可用 ^、$ 限定边界；表达式最长 256 字节，非法表达式拒绝保存。
+// exists 要求至少一个名称匹配，notExists 要求没有名称匹配；两者忽略 value。
+// 名称与值均区分大小写；包含和正则名称匹配要求自动化 spec 6，等于匹配兼容 spec 1 至 5。
 type AVAutomationBlockAttribute struct {
-	Name     string `json:"name"`
-	Operator string `json:"operator" api:"enum=equals|contains|exists|notExists"`
-	Value    string `json:"value,omitempty" api:"optional"`
+	Name         string `json:"name"`
+	NameOperator string `json:"nameOperator,omitempty" api:"optional,enum=|equals|contains|regex"`
+	Operator     string `json:"operator" api:"enum=equals|contains|exists|notExists"`
+	Value        string `json:"value,omitempty" api:"optional"`
 }
 
 // AVAutomationAction 的 current 指触发条目所在数据库，related 通过源关联字段选择条目，

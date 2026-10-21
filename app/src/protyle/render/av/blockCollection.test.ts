@@ -21,6 +21,10 @@ test("collection scope requires a notebook or document and complete attribute na
     assert.equal(methods.collectionSourceIncomplete({documentIDs: ["doc"]}), false);
     assert.equal(methods.collectionSourceIncomplete({notebookIDs: ["notebook"], attributes: [{name: "custom-", operator: "exists"}]}), true);
     assert.equal(methods.collectionSourceIncomplete({documentIDs: ["doc"], attributes: [{name: "custom-state", operator: "equals", value: "open"}]}), false);
+    for (const [nameOperator, name] of [["contains", "dailynote"], ["regex", "^custom-dailynote-[0-9]{8}$"]] as const) {
+        assert.equal(methods.collectionSourceIncomplete({documentIDs: ["doc"], attributes: [{name, nameOperator, operator: "exists"}]}), false);
+        assert.equal(methods.collectionSourceIncomplete({documentIDs: ["doc"], attributes: [{name: "", nameOperator, operator: "exists"}]}), true);
+    }
     for (const documentDepth of [undefined, null, 0, 1, 12]) {
         assert.equal(methods.collectionSourceIncomplete({documentIDs: ["doc"], documentDepth}), false);
     }

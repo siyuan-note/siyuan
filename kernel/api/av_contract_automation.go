@@ -82,6 +82,7 @@ func toContractAVAutomationBlockSource(source *av.AutomationBlockSource) *apicon
 			if attr == nil {
 				return nil
 			}
-			return &apicontract.AVAutomationBlockAttribute{Name: attr.Name, Operator: attr.Operator, Value: attr.Value}
+			return &apicontract.AVAutomationBlockAttribute{Name: attr.Name, NameOperator: attr.NameOperator,
+				Operator: attr.Operator, Value: attr.Value}
 		})}
 }

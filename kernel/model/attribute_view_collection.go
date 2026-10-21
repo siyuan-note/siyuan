@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -51,7 +52,7 @@ func collectionScopeMatches(source *av.AutomationBlockSource, tree *parse.Tree) 
 	return false
 }
 
-func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node) bool {
+func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node, attributes []func(*ast.Node) bool) bool {
 	if len(source.Types) > 0 {
 		typ := treenode.TypeAbbr(node.Type.String())
 		matched := slices.Contains(source.Types, typ)
@@ -62,8 +63,8 @@ func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.
 			return false
 		}
 	}
-	return collectionConditionsMatch(source.Attributes, source.AttributeMatch, func(attr *av.AutomationBlockAttribute) bool {
-		return collectionAttributeMatches(attr, node)
+	return collectionConditionsMatch(attributes, source.AttributeMatch, func(matches func(*ast.Node) bool) bool {
+		return matches(node)
 	})
 }
 
@@ -100,6 +101,10 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 	if !collectionScopeMatches(source, tree) {
 		return ret
 	}
+	attributes := make([]func(*ast.Node) bool, 0, len(source.Attributes))
+	for _, attr := range source.Attributes {
+		attributes = append(attributes, collectionAttributeMatcher(attr))
+	}
 	var containers []*ast.Node
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -112,14 +117,14 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 			return ast.WalkContinue
 		}
 		if len(source.Tags) == 0 {
-			if collectionBlockConditionsMatch(source, node) {
+			if collectionBlockConditionsMatch(source, node, attributes) {
 				ret[node.ID] = true
 			}
 			return ast.WalkContinue
 		}
 		if source.TagTarget == "container" && node.IsContainerBlock() &&
 			(node.Type != ast.NodeDocument || slices.Contains(source.Types, "d")) &&
-			collectionBlockConditionsMatch(source, node) {
+			collectionBlockConditionsMatch(source, node, attributes) {
 			containers = append(containers, node)
 		}
 		if !collectionTagsMatch(source, node) {
@@ -132,15 +137,15 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 				target = containers[len(containers)-1]
 			}
 		case "block":
-			if collectionBlockConditionsMatch(source, node) {
+			if collectionBlockConditionsMatch(source, node, attributes) {
 				target = node
 			}
 		default:
 			parent := node.Parent
 			if parent != nil && parent.Type == ast.NodeListItem && treenode.FirstLeafBlock(parent) == node &&
-				collectionBlockConditionsMatch(source, parent) {
+				collectionBlockConditionsMatch(source, parent, attributes) {
 				target = parent
-			} else if collectionBlockConditionsMatch(source, node) {
+			} else if collectionBlockConditionsMatch(source, node, attributes) {
 				target = node
 			}
 		}
@@ -163,28 +168,69 @@ func collectionConditionsMatch[T any](values []T, mode string, matches func(T) b
 	return !slices.ContainsFunc(values, func(value T) bool { return !matches(value) })
 }
 
-func collectionAttributeMatches(attr *av.AutomationBlockAttribute, node *ast.Node) bool {
-	if attr == nil {
-		return false
+// 每次扫描文档前编译名称条件，避免按块重复编译正则；非法条件始终不匹配。
+func collectionAttributeMatcher(attr *av.AutomationBlockAttribute) func(*ast.Node) bool {
+	invalid := func(*ast.Node) bool { return false }
+	pattern, err := validateCollectionAttribute(attr)
+	if err != nil {
+		return invalid
 	}
-	value, present := "", false
-	for _, pair := range node.KramdownIAL {
-		if len(pair) == 2 && pair[0] == attr.Name {
-			value, present = util.UnescapeHTML(pair[1]), true
-			break
-		}
-	}
-	switch attr.Operator {
-	case "equals":
-		return present && value == attr.Value
+	matchesName := func(name string) bool { return name == attr.Name }
+	switch attr.NameOperator {
 	case "contains":
-		return present && strings.Contains(value, attr.Value)
-	case "exists":
-		return present
-	case "notExists":
-		return !present
+		matchesName = func(name string) bool { return strings.Contains(name, attr.Name) }
+	case "regex":
+		matchesName = pattern.MatchString
 	}
-	return false
+	return func(node *ast.Node) bool {
+		for _, pair := range node.KramdownIAL {
+			if len(pair) != 2 || !strings.HasPrefix(pair[0], "custom-") || !matchesName(pair[0]) {
+				continue
+			}
+			value := util.UnescapeHTML(pair[1])
+			switch attr.Operator {
+			case "equals":
+				if value == attr.Value {
+					return true
+				}
+			case "contains":
+				if strings.Contains(value, attr.Value) {
+					return true
+				}
+			case "exists":
+				return true
+			case "notExists":
+				return false
+			}
+		}
+		return attr.Operator == "notExists"
+	}
+}
+
+func validateCollectionAttribute(attr *av.AutomationBlockAttribute) (*regexp.Regexp, error) {
+	if attr == nil || attr.Name == "" || len(attr.Name) > 256 ||
+		!slices.Contains([]string{"equals", "contains", "exists", "notExists"}, attr.Operator) {
+		return nil, fmt.Errorf("invalid collection attribute")
+	}
+	switch attr.NameOperator {
+	case "", "equals":
+		if !strings.HasPrefix(attr.Name, "custom-") || len(attr.Name) <= len("custom-") || !isValidAttrName(attr.Name) {
+			return nil, fmt.Errorf("invalid collection attribute name")
+		}
+	case "contains":
+		if !validateChars(attr.Name, 0, len(attr.Name)) {
+			return nil, fmt.Errorf("invalid collection attribute name")
+		}
+	case "regex":
+		pattern, err := regexp.Compile(attr.Name)
+		if err != nil {
+			return nil, fmt.Errorf("invalid collection attribute name expression: %w", err)
+		}
+		return pattern, nil
+	default:
+		return nil, fmt.Errorf("invalid collection attribute name operator")
+	}
+	return nil, nil
 }
 
 func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule *av.AutomationRule, boxID string) error {
@@ -224,10 +270,8 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		}
 	}
 	for _, attr := range source.Attributes {
-		if attr == nil || !strings.HasPrefix(attr.Name, "custom-") || len(attr.Name) <= len("custom-") ||
-			len(attr.Name) > 256 || !isValidAttrName(attr.Name) ||
-			!slices.Contains([]string{"equals", "contains", "exists", "notExists"}, attr.Operator) {
-			return fmt.Errorf("invalid collection attribute")
+		if _, err := validateCollectionAttribute(attr); err != nil {
+			return err
 		}
 	}
 	action := rule.Actions[0]

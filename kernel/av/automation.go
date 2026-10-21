@@ -41,9 +41,10 @@ type AutomationBlockSource struct {
 }
 
 type AutomationBlockAttribute struct {
-	Name     string `json:"name"`
-	Operator string `json:"operator"`
-	Value    string `json:"value,omitempty"`
+	Name         string `json:"name"`
+	NameOperator string `json:"nameOperator,omitempty"`
+	Operator     string `json:"operator"`
+	Value        string `json:"value,omitempty"`
 }
 
 // IsAutomationBlockType 校验主类型或主类型与子类型的组合，提示块允许自定义类型名称。
@@ -69,6 +70,11 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		for _, attr := range rule.BlockSource.Attributes {
+			if attr != nil && attr.NameOperator != "" && attr.NameOperator != "equals" {
+				return 6
+			}
+		}
 		if rule.BlockSource.DocumentDepth != nil {
 			return 5
 		}
@@ -101,7 +107,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 5 {
+	if config.Spec < 1 || config.Spec > 6 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

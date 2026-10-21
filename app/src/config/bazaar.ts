@@ -662,6 +662,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
+        ${genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
         ${bazaar._genDeprecatedChipHTML(available)}
         ${bazaar._genFundingHTML(installed.preferredFunding, false)}
@@ -670,7 +671,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </span>
         ${bazaar._genOpenStorageHTML(installed, bazaarType)}
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
-        ${genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
     </div>
 </div>`;
     },

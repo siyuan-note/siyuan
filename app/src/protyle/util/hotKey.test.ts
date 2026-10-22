@@ -64,11 +64,43 @@ test("iOS Chinese input matches Option alignment shortcuts before composition st
     assert.equal(match("⌥⇧C", event("C", {metaKey: false, altKey: true, shiftKey: true})), true);
 });
 
+test("iOS Option symbols use physical letter codes when legacy key codes are unavailable", () => {
+    const match = fixture();
+    for (const keyCode of [0, 229, 231]) {
+        for (const [key, code, binding] of [["ç", "KeyC", "⌥C"], ["¬", "KeyL", "⌥L"],
+            ["®", "KeyR", "⌥R"], ["≈", "KeyX", "⌥X"]]) {
+            const input = event(key, {code, keyCode, metaKey: false, altKey: true});
+            assert.equal(match(binding, input), true, `${binding}, keyCode=${keyCode}`);
+            assert.equal(match(binding === "⌥C" ? "⌥L" : "⌥C", input), false);
+        }
+    }
+    const input = event("ç", {code: "KeyC", metaKey: false, altKey: true});
+    assert.equal(match("⌥⇧C", {...input, shiftKey: true}), true);
+    assert.equal(match("⌥⌘C", {...input, metaKey: true}), true);
+    assert.equal(match("⌃⌥C", {...input, ctrlKey: true}), true);
+    assert.equal(match("⌥C", event("c", {code: "KeyR", metaKey: false, altKey: true})), true);
+    assert.equal(match("⌥R", event("c", {code: "KeyR", metaKey: false, altKey: true})), false);
+});
+
+test("Option physical fallback excludes composition, named keys, and invalid physical codes", () => {
+    const match = fixture();
+    const input = event("ç", {code: "KeyC", metaKey: false, altKey: true});
+    for (const overrides of [{isComposing: true}, {altKey: false}, {metaKey: true}, {ctrlKey: true},
+        {shiftKey: true}, {key: "Process"}, {key: "Unidentified"}, {key: "Dead"}, {key: ""},
+        {code: ""}, {code: "Unidentified"}, {code: "Keyc"}, {code: "KeyCC"}, {code: "Digit1"},
+        {code: "ArrowLeft"}, {code: "Numpad1"}]) {
+        assert.equal(match("⌥C", {...input, ...overrides}), false, JSON.stringify(overrides));
+    }
+    assert.equal(fixture(false)("⌥C", input), false);
+    assert.equal(match("C", {...input, altKey: false}), false);
+    assert.equal(match("⌘C", {...input, altKey: false, metaKey: true}), false);
+});
+
 test("iOS Option fallback preserves composition, text input, and modifier boundaries", () => {
     const match = fixture();
     const input = event("c", {metaKey: false, altKey: true});
     for (const overrides of [{isComposing: true}, {altKey: false}, {metaKey: true}, {ctrlKey: true},
-        {shiftKey: true}, {key: "Process"}, {key: "Unidentified"}, {key: "Dead"}, {key: "ç"}, {key: ""}]) {
+        {shiftKey: true}, {key: "Process"}, {key: "Unidentified"}, {key: "Dead"}, {key: "ç", code: ""}, {key: ""}]) {
         assert.equal(match("⌥C", {...input, ...overrides}), false, JSON.stringify(overrides));
     }
     assert.equal(match("C", event("c", {metaKey: false})), false);
@@ -97,9 +129,12 @@ test("Option fallback follows custom bindings and explicit unbinding", () => {
     assert.equal(match(binding, input("c")), false);
     assert.equal(match(binding, input("l")), true);
     assert.equal(match(binding, input("r", true)), true);
+    const symbolInput = event("¬", {code: "KeyL", metaKey: false, altKey: true});
+    assert.equal(match(binding, symbolInput), true);
     keymapBindings.setKeymapBindings(binding, []);
     assert.equal(match(binding, input("l")), false);
     assert.equal(match(binding, input("r", true)), false);
+    assert.equal(match(binding, symbolInput), false);
 });
 
 test("ordinary key codes and non-iOS platform matching remain unchanged", () => {
@@ -108,6 +143,9 @@ test("ordinary key codes and non-iOS platform matching remain unchanged", () => 
         assert.equal(match("⌘F", event("f", {keyCode: 70})), true);
         assert.equal(match("⌘P", event("p", {keyCode: 80})), true);
         assert.equal(match("⌥C", event("ç", {keyCode: 67, metaKey: false, altKey: true})), true);
+        const input = event("ç", {keyCode: 67, code: "KeyR", metaKey: false, altKey: true});
+        assert.equal(match("⌥C", input), true);
+        assert.equal(match("⌥R", input), false);
     }
     assert.equal(fixture(false)("⌘F", event("f")), false);
     assert.equal(fixture(false)("⌥C", event("c", {metaKey: false, altKey: true})), false);

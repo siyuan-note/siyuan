@@ -30,13 +30,16 @@ test("summary previews and committed paths match across styles, zoom levels and 
             const sandbox: any = {Path2D: PathFixture, buildListMindmapSummaryConnector, layoutListMindmapSummaries, getListMindmapSummarySelection};
             runInNewContext(compiled, sandbox);
             const view = new sandbox.View();
-            const child: ListMindmapNode = {id: "a", parentId: "root", children: [], contentBlocks: [], virtual: false, collapsed: false};
-            const root: ListMindmapNode = {id: "root", children: [child], contentBlocks: [], virtual: true, collapsed: false};
-            const range = {parentId: "root", nodeIds: ["a"]};
-            const model: ListMindmapModel = {list: undefined, root, nodes: new Map([["root", root], ["a", child]]),
+            const children = ["a", "b"].map((id): ListMindmapNode =>
+                ({id, parentId: "root", children: [], contentBlocks: [], virtual: false, collapsed: false}));
+            const root: ListMindmapNode = {id: "root", children, contentBlocks: [], virtual: true, collapsed: false};
+            const range = {parentId: "root", nodeIds: ["a", "b"]};
+            const model: ListMindmapModel = {list: undefined, root, nodes: new Map([root, ...children].map(node => [node.id, node])),
                 metadata: {version: 1, nodes: {}, relations: [], connectorStyle}};
-            const positions = new Map([["a", {id: "a", x: 100, y: 40, width: 120, height: 50}]]);
-            Object.assign(view, {model, positions, summaryPositions: new Map(), getSelectedIds: () => ["a"],
+            const positions = new Map(children.map((node, index) =>
+                [node.id, {id: node.id, x: 100, y: 40 + index * 80, width: 120, height: 50}]));
+            let selected = ["a"];
+            Object.assign(view, {model, positions, summaryPositions: new Map(), getSelectedIds: () => selected,
                 inspector: {hidden: false, getBoundingClientRect: () => ({left: 0, right: 0, top: 0, bottom: 0})},
                 summaryAction: {offsetWidth: 80, offsetHeight: 32, style: {}, setAttribute: () => {}},
                 label: (key: string) => key, offsetX: 0, offsetY: 0, getToolbarBounds: (): DOMRect[] => [],
@@ -45,6 +48,10 @@ test("summary previews and committed paths match across styles, zoom levels and 
             const strokes: PathFixture[] = [];
             const context = {save: () => {}, restore: () => {}, setLineDash: () => {},
                 stroke: (path: PathFixture) => strokes.push(path)};
+            view.drawSummaryPreview(context, "blue");
+            assert.equal(strokes.length, 0, "single selection does not draw a summary preview");
+            assert.equal(view.summaryAction.hidden, true);
+            selected = ["a", "b"];
             view.drawSummaryPreview(context, "blue");
             assert.equal(strokes.length, 1);
             assert.equal(view.summaryAction.hidden, false);
@@ -141,9 +148,10 @@ test("summary creation consumes the current selection once and retains the snaps
     assert.equal(calls.length, 1, "identical ranges do not submit again");
 });
 
-test("invalid, crossing, duplicate and read-only summary selections never submit", async () => {
-    for (const mode of ["empty", "virtual", "crossing", "duplicate", "readonly", "locked", "export"]) {
+test("single, invalid, crossing, duplicate and read-only summary selections never submit", async () => {
+    for (const mode of ["single", "empty", "virtual", "crossing", "duplicate", "readonly", "locked", "export"]) {
         const {view, model, calls, select} = create();
+        if (mode === "single") { select(["a"]); }
         if (mode === "empty") { select([]); }
         if (mode === "virtual") { select(["root"]); }
         if (mode === "crossing" || mode === "duplicate") {

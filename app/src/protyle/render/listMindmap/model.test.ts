@@ -4682,12 +4682,42 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     summaryView.focusNode(summaryIds[0]);
     const summaryButton = summaryHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action");
-    check.equal(summaryButton.disabled, false);
+    for (const id of [summaryModel.root.id, summaryIds[0]]) {
+        summaryView.focusNode(id);
+        check.equal(summaryButton.hidden, true, "a single selected node has no summary action");
+        check.equal(summaryButton.disabled, true, "a single selected node cannot create a summary");
+        summaryButton.click();
+        check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0);
+    }
     for (const id of summaryIds.slice(1)) {
         summaryView.selectNode(id, true);
     }
     await settle();
     check.equal(summaryButton.hidden, false);
+    check.equal(summaryButton.disabled, false);
+    const summaryCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas");
+    const outsideSummary = document.createElement("button");
+    document.body.append(outsideSummary);
+    for (const leave of [
+        () => window.dispatchEvent(new Event("blur")),
+        () => summaryHost.dispatchEvent(new FocusEvent("focusout", {relatedTarget: outsideSummary})),
+    ]) {
+        const preview = summaryCanvas.toDataURL();
+        const selected = summaryView.getSelectedIds();
+        leave();
+        check.equal(summaryButton.hidden, true, "leaving the mindmap hides the summary action");
+        check.deepEqual(summaryView.getSelectedIds(), selected, "focus changes preserve the node selection");
+        const inactive = summaryCanvas.toDataURL();
+        check.ok(inactive !== preview, "leaving the mindmap immediately clears the dashed summary preview");
+        summaryView.draw();
+        check.equal(summaryCanvas.toDataURL(), inactive, "no stale preview remains until a later redraw");
+        summaryView.focusNode(summaryIds[0]);
+        for (const id of summaryIds.slice(1)) {
+            summaryView.selectNode(id, true);
+        }
+        check.equal(summaryButton.hidden, false, "multi-selection restores the summary action");
+    }
+    outsideSummary.remove();
     check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), null);
     const summaryActionBounds = summaryButton.getBoundingClientRect();
     check.equal(document.elementFromPoint(summaryActionBounds.left + summaryActionBounds.width / 2,

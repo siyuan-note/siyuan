@@ -490,6 +490,7 @@ export class ListMindmapView {
             this.summaryStatus.hidden = true;
             this.summaryAction.hidden = true;
             const selecting = !!this.relationFrom || this.multiSelect;
+            const inspectorVisible = !this.inspector.hidden;
             this.multiSelect = false;
             this.pinching = false;
             this.pinch = undefined;
@@ -500,6 +501,8 @@ export class ListMindmapView {
             this.inspector.hidden = true;
             if (selecting) {
                 this.updateSelection();
+            } else if (inspectorVisible) {
+                this.draw();
             }
         }
     }
@@ -1324,6 +1327,9 @@ export class ListMindmapView {
             return;
         }
         const selected = this.getSelectedIds();
+        if (selected.length < 2) {
+            return;
+        }
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(selected));
         if (conflict || !ranges.length) {
             return;
@@ -1432,7 +1438,8 @@ export class ListMindmapView {
     }
 
     private drawSummaryPreview(context: CanvasRenderingContext2D, color: string) {
-        if (this.readOnly || this.inspector.hidden || this.printTransform || this.options.printLayout) {
+        if (this.readOnly || this.inspector.hidden || this.getSelectedIds().length < 2 ||
+            this.printTransform || this.options.printLayout) {
             this.summaryAction.hidden = true;
             return;
         }
@@ -2148,7 +2155,8 @@ export class ListMindmapView {
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(this.getSelectedIds()));
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual || this.getSelectedIds().length > 1,
-            summary: this.readOnly || this.summaryPending || conflict || !ranges.length || !this.options.onSummaryBatchAdd,
+            summary: this.readOnly || this.summaryPending || this.getSelectedIds().length < 2 ||
+                conflict || !ranges.length || !this.options.onSummaryBatchAdd,
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };
         Object.keys(disabled).forEach((key) => {

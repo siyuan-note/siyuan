@@ -12,29 +12,37 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func installPrivateRoot() string {
-	confDir := util.ConfDir
-	if confDir == "" && filepath.IsAbs(util.DataDir) {
-		confDir = filepath.Join(filepath.Dir(util.DataDir), "conf")
-	}
-	if confDir == "" {
-		return ""
-	}
-	return filepath.Join(confDir, "plugin-development")
+// PackageLayout 描述一类集市包在文件系统中的安装布局。
+type PackageLayout struct {
+	BasePath string // 安装目录的父目录
+	Manifest string // 清单文件名
+	URLPath  string // 前端访问该包目录的路径前缀
 }
 
-// makePrivateInstallDir 拒绝工作空间内部的链接目录及非绝对根；已有目录同样逐层检查。
-func makePrivateInstallDir(root string) error {
-	if !filepath.IsAbs(root) {
-		return errors.New("private package operation root is unavailable")
+// GetPackageLayout 集中维护包类型到安装目录、清单文件名和访问路径的映射。
+// 清单文件名始终由 localPackageManifests 反查，避免同一映射散落在多处。
+func GetPackageLayout(pkgType string) (layout PackageLayout, ok bool) {
+	var basePath, urlPath string
+	switch pkgType {
+	case "plugins":
+		basePath, urlPath = filepath.Join(util.DataDir, "plugins"), "/plugins/"
+	case "themes":
+		basePath, urlPath = util.ThemesPath, "/appearance/themes/"
+	case "icons":
+		basePath, urlPath = util.IconsPath, "/appearance/icons/"
+	case "templates":
+		basePath, urlPath = filepath.Join(util.DataDir, "templates"), "/templates/"
+	case "widgets":
+		basePath, urlPath = filepath.Join(util.DataDir, "widgets"), "/widgets/"
+	default:
+		return PackageLayout{}, false
 	}
-	if err := rejectInstallPathLinks(root); err != nil {
-		return err
+	for manifest, packageType := range localPackageManifests {
+		if packageType == pkgType {
+			return PackageLayout{BasePath: basePath, Manifest: manifest, URLPath: urlPath}, true
+		}
 	}
-	if err := os.MkdirAll(root, 0700); err != nil {
-		return err
-	}
-	return rejectInstallPathLinks(root)
+	return PackageLayout{}, false
 }
 
 func rejectInstallPathLinks(target string) error {

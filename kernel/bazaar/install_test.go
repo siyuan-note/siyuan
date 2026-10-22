@@ -24,8 +24,6 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestIncPackageDownloadsIncludesPackageName(t *testing.T) {
@@ -53,10 +51,7 @@ func TestIncPackageDownloadsIncludesPackageName(t *testing.T) {
 // TestInstallPackageNameMismatch 校验下载包声明的名称与请求安装的包名不一致时拒绝安装
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 func TestInstallPackageNameMismatch(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "trusted-plugin")
 	if err := os.MkdirAll(installPath, 0755); err != nil {
 		t.Fatal(err)
@@ -85,10 +80,7 @@ func TestInstallPackageNameMismatch(t *testing.T) {
 // TestInstallPackageRefusesOverwriteWithoutUpdate 校验非更新安装时拒绝覆盖非空目标目录
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 func TestInstallPackageRefusesOverwriteWithoutUpdate(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
 	if err := os.MkdirAll(installPath, 0755); err != nil {
 		t.Fatal(err)
@@ -116,10 +108,7 @@ func TestInstallPackageRefusesOverwriteWithoutUpdate(t *testing.T) {
 // TestInstallPackageUpdateReplacesDirectory 校验在线更新会整目录替换，新版本已删除的文件不会残留
 // https://github.com/siyuan-note/siyuan/issues/18933
 func TestInstallPackageUpdateReplacesDirectory(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
 	if err := os.MkdirAll(installPath, 0755); err != nil {
 		t.Fatal(err)
@@ -155,10 +144,7 @@ func TestInstallPackageUpdateReplacesDirectory(t *testing.T) {
 
 // TestInstallPackageUpdateOverwrites 校验对同名已安装包的更新安装正常覆盖
 func TestInstallPackageUpdateOverwrites(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
 	if err := os.MkdirAll(installPath, 0755); err != nil {
 		t.Fatal(err)
@@ -182,10 +168,7 @@ func TestInstallPackageUpdateOverwrites(t *testing.T) {
 
 // TestInstallPackageFreshInstall 校验新安装写入目标目录
 func TestInstallPackageFreshInstall(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
 	data := buildInstallPackageArchive(t, map[string]string{
 		"plugin.json": `{"name":"sample","version":"1.0.0"}`,
@@ -201,10 +184,7 @@ func TestInstallPackageFreshInstall(t *testing.T) {
 
 // TestInstallPackageFreshInstallReplacesEmptyDirectoryTree 校验新安装可以替换仅包含空目录的目标目录
 func TestInstallPackageFreshInstallReplacesEmptyDirectoryTree(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
 	if err := os.MkdirAll(filepath.Join(installPath, "i18n"), 0755); err != nil {
 		t.Fatal(err)
@@ -296,10 +276,7 @@ func TestReplacePackageDirectoryRefreshesFileTimes(t *testing.T) {
 
 // TestInstallPackageMissingManifest 校验下载包缺少清单文件时拒绝安装
 func TestInstallPackageMissingManifest(t *testing.T) {
-	oldTempDir := util.TempDir
-	util.TempDir = t.TempDir()
-	t.Cleanup(func() { util.TempDir = oldTempDir })
-
+	useInstallTempDir(t)
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
 	data := buildInstallPackageArchive(t, map[string]string{
 		"index.js": "new",

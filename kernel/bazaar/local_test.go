@@ -27,6 +27,7 @@ import (
 )
 
 func TestExtractLocalPackage(t *testing.T) {
+	useInstallTempDir(t)
 	tests := []struct {
 		name         string
 		files        map[string]string
@@ -119,6 +120,7 @@ func TestExtractLocalPackage(t *testing.T) {
 }
 
 func TestExtractLocalPackageRejectsTraversal(t *testing.T) {
+	useInstallTempDir(t)
 	archivePath := filepath.Join(t.TempDir(), "package.zip")
 	writeLocalPackageArchive(t, archivePath, map[string]string{
 		"plugin.json": `{"name":"sample"}`,
@@ -134,6 +136,7 @@ func TestExtractLocalPackageRejectsTraversal(t *testing.T) {
 }
 
 func TestExtractLocalPackageRejectsSymlink(t *testing.T) {
+	useInstallTempDir(t)
 	archivePath := filepath.Join(t.TempDir(), "package.zip")
 	file, err := os.Create(archivePath)
 	if err != nil {

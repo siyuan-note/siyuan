@@ -60,28 +60,17 @@ func getPackageInstallPath(pkgType, packageName string) (string, string, error) 
 		return "", "", errors.New("invalid package name")
 	}
 
-	var baseDir, jsonFileName string
-	switch pkgType {
-	case "plugins":
-		baseDir, jsonFileName = filepath.Join(util.DataDir, "plugins"), "plugin.json"
-	case "themes":
-		baseDir, jsonFileName = util.ThemesPath, "theme.json"
-	case "icons":
-		baseDir, jsonFileName = util.IconsPath, "icon.json"
-	case "templates":
-		baseDir, jsonFileName = filepath.Join(util.DataDir, "templates"), "template.json"
-	case "widgets":
-		baseDir, jsonFileName = filepath.Join(util.DataDir, "widgets"), "widget.json"
-	default:
+	layout, ok := bazaar.GetPackageLayout(pkgType)
+	if !ok {
 		logging.LogErrorf("invalid package type: %s", pkgType)
 		return "", "", errors.New("invalid package type")
 	}
 
-	installPath := filepath.Join(baseDir, packageName)
-	if !gulu.File.IsSubPath(baseDir, installPath) {
+	installPath := filepath.Join(layout.BasePath, packageName)
+	if !gulu.File.IsSubPath(layout.BasePath, installPath) {
 		return "", "", errors.New("invalid package name")
 	}
-	return installPath, jsonFileName, nil
+	return installPath, layout.Manifest, nil
 }
 
 // installMeta 记录安装前后的状态，供安装后处理使用
@@ -283,23 +272,14 @@ func buildUpdatedPackages(installedPackages []*bazaar.Package, bazaarPackagesMap
 
 // GetInstalledPackageInfos 获取本地集市包信息，并返回路径相关字段供调用方复用
 func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installedPackageInfo, basePath, baseURLPathPrefix string, err error) {
-	var jsonFileName string
-	switch pkgType {
-	case "plugins":
-		basePath, jsonFileName, baseURLPathPrefix = filepath.Join(util.DataDir, "plugins"), "plugin.json", "/plugins/"
-	case "themes":
-		basePath, jsonFileName, baseURLPathPrefix = util.ThemesPath, "theme.json", "/appearance/themes/"
-	case "icons":
-		basePath, jsonFileName, baseURLPathPrefix = util.IconsPath, "icon.json", "/appearance/icons/"
-	case "templates":
-		basePath, jsonFileName, baseURLPathPrefix = filepath.Join(util.DataDir, "templates"), "template.json", "/templates/"
-	case "widgets":
-		basePath, jsonFileName, baseURLPathPrefix = filepath.Join(util.DataDir, "widgets"), "widget.json", "/widgets/"
-	default:
+	layout, ok := bazaar.GetPackageLayout(pkgType)
+	if !ok {
 		logging.LogErrorf("invalid package type: %s", pkgType)
 		err = errors.New("invalid package type")
 		return
 	}
+	basePath, baseURLPathPrefix = layout.BasePath, layout.URLPath
+	jsonFileName := layout.Manifest
 
 	dirs, err := bazaar.ReadInstalledPackageDirs(basePath)
 	if err != nil {
@@ -576,7 +556,7 @@ func installBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins", Context: ctx}
+	options := bazaar.PackageInstallOptions{Context: ctx}
 	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.Load().ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)

@@ -22,7 +22,7 @@ import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindma
     layoutListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
-import {getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
+import {getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -1934,13 +1934,23 @@ export class ListMindmapView {
                 baseWidth,
             };
         };
+        const canvasColor = this.themeColors?.size ? resolveColor(this.model.metadata.appearance?.backgroundColor ||
+            theme.getPropertyValue("--b3-theme-background").trim(), "#ffffff") : "";
+        const paletteLines = new Map<string, string>();
+        const themeLineColor = (id: string) => {
+            const color = this.themeColors?.get(id)?.lineColor;
+            if (color && !paletteLines.has(color)) {
+                paletteLines.set(color, getMindmapLineColor(color, canvasColor));
+            }
+            return paletteLines.get(color);
+        };
         const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
             this.model.metadata.connectorStyle || "bezier", () => new Path2D());
         const rootStyle = this.model.metadata.nodes[this.model.root.id] || {};
         connectors.trunks.forEach((path, index) => {
             const id = connectors.trunkParents[index];
             const style = this.themeColors?.size ? {...rootStyle, ...this.model.metadata.nodes[id]} : rootStyle;
-            const trunkStyle = resolveLineStyle(lineStyles, style.lineColor || this.themeColors?.get(id)?.lineColor,
+            const trunkStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
                 style.lineWidth, defaultLine, false, false);
             context.strokeStyle = trunkStyle.color;
             context.lineWidth = trunkStyle.width;
@@ -1953,7 +1963,7 @@ export class ListMindmapView {
             context.beginPath();
             const selected = this.selectedEdge === id;
             const hovered = this.hoveredLine === `edge:${id}`;
-            const lineStyle = resolveLineStyle(lineStyles, style.lineColor || this.themeColors?.get(id)?.lineColor,
+            const lineStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
                 style.lineWidth, defaultLine, selected, hovered);
             context.strokeStyle = lineStyle.color;
             context.lineWidth = lineStyle.width;

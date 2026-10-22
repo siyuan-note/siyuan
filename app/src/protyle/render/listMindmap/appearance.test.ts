@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {assignListMindmapBranchColors, clearListMindmapManualColors, getListMindmapAppearanceMenu,
-    getMindmapTextColor, isListMindmapAppearance, LIST_MINDMAP_PALETTES, resolveListMindmapColors} from "./appearance";
+    getMindmapLineColor, getMindmapTextColor, isListMindmapAppearance, LIST_MINDMAP_PALETTES, resolveListMindmapColors} from "./appearance";
 import type {ListMindmapModel, ListMindmapNode} from "./model";
 import {execFile} from "node:child_process";
 import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
@@ -59,7 +59,11 @@ test("all seven built-in palettes remain selectable after reload and provide rea
         assert.deepEqual(model.metadata.appearance.palette, preset.colors);
         assert.equal(model.metadata.appearance.backgroundColor, "#ffffff");
         assert.equal(model.metadata.nodes.a.textColor, "red");
-        for (const color of preset.colors) {
+        for (const [index, color] of preset.colors.entries()) {
+            const lightFill = preset.id === "soft" ||
+                (["lavender", "monochrome"].includes(preset.id) && index >= 4);
+            assert.equal(getMindmapTextColor(color), lightFill ? "#000000" : "#ffffff",
+                `${preset.id} branch ${index + 1} retains its intended foreground`);
             const foreground = luminance(getMindmapTextColor(color));
             const background = luminance(color);
             const contrast = (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
@@ -67,6 +71,31 @@ test("all seven built-in palettes remain selectable after reload and provide rea
         }
     }
 });
+
+for (const fixture of [
+    {id: "ocean", colors: ["#0c4a6e", "#0369a1", "#0284c7", "#0891b2", "#0d9488", "#0f766e"]},
+    {id: "sunset", colors: ["#9a3412", "#c2410c", "#ea580c", "#be123c", "#9f1239", "#7e22ce"]},
+    {id: "lavender", colors: ["#4c1d95", "#6d28d9", "#7c3aed", "#a855f7", "#c084fc", "#e9d5ff"]},
+]) {
+    test(`previous ${fixture.id} palettes retain saved colors and selection until explicitly reapplied`, () => {
+        const model = makeModel();
+        const preset = LIST_MINDMAP_PALETTES.find(preset => preset.id === fixture.id);
+        const previous = fixture.colors;
+        model.metadata.appearance = {version: 1, palette: previous, backgroundColor: "#ffffff"};
+        model.metadata.nodes.a = {branchColor: 2, textColor: "#ff0000"};
+        const before = JSON.stringify(model.metadata);
+        const menu = getListMindmapAppearanceMenu(model.metadata, update => update(model.metadata), {},
+            {id: "connectorStyle", label: "Connectors"});
+        const themes = (menu.submenu as IMenu[]).find(item => item.id === "theme").submenu as IMenu[];
+        assert.deepEqual(themes.filter(item => item.checked).map(item => item.id), [fixture.id]);
+        assert.equal(resolveListMindmapColors(model).get("a").backgroundColor, previous[2]);
+        assert.equal(JSON.stringify(model.metadata), before, "opening the menu never migrates document colors");
+        themes.find(item => item.id === fixture.id).click(undefined, undefined);
+        assert.deepEqual(model.metadata.appearance.palette, preset.colors);
+        assert.equal(model.metadata.appearance.backgroundColor, "#ffffff");
+        assert.deepEqual(model.metadata.nodes.a, {branchColor: 2, textColor: "#ff0000"});
+    });
+}
 
 test("branch identity survives reordering, theme changes, insertion, reparenting and serialized reload", () => {
     const model = makeModel();
@@ -103,6 +132,32 @@ test("branch identity survives reordering, theme changes, insertion, reparenting
     }
 });
 
+test("theme lines contrast with every canvas preset while retaining sufficiently visible colors", () => {
+    const luminance = (color: string) => {
+        const linear = color.match(/[a-f\d]{2}/gi).map(channel => parseInt(channel, 16) / 255)
+            .map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4);
+        return linear.reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+    };
+    const contrast = (line: string, background: string) => {
+        const values = [luminance(line), luminance(background)];
+        return (Math.max(...values) + .05) / (Math.min(...values) + .05);
+    };
+    for (const background of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_PALETTES[1].colors]) {
+        for (const preset of LIST_MINDMAP_PALETTES) {
+            for (const color of preset.colors) {
+                const adjusted = getMindmapLineColor(color, background);
+                assert.ok(contrast(adjusted, background) >= 3, `${preset.id} ${color} on ${background}`);
+                if (contrast(color, background) >= 3) {
+                    assert.equal(adjusted, color, "visible theme lines retain their original color");
+                }
+            }
+        }
+    }
+    assert.equal(getMindmapLineColor("#bfdbfe", "rgb(255, 255, 255)"), getMindmapLineColor("#bfdbfe", "#ffffff"));
+    assert.equal(getMindmapLineColor("#166534", "rgba(30, 30, 30, 1)"), getMindmapLineColor("#166534", "#1e1e1e"));
+    assert.equal(getMindmapLineColor("#166534", "rgba(0, 0, 0, 0)"), "#166534");
+});
+
 test("appearance menu preserves manual colors and non-color metadata until explicit reset", () => {
     const model = makeModel();
     model.metadata.nodes.a = {textColor: "red", backgroundColor: "blue", lineColor: "green", bold: true};
@@ -135,7 +190,7 @@ test("appearance menu preserves manual colors and non-color metadata until expli
 const contrastCases = (source: string, css: string) => {
     const check = require("node:assert/strict");
     const api = new Function("Constants", "mathRender", "tabsRender", "destroyTabsRender", source +
-        "; return {ListMindmapView, readListMindmap, retagMindmapBranch};")({
+        "; return {ListMindmapView, readListMindmap, retagMindmapBranch, getMindmapLineColor, LIST_MINDMAP_PALETTES};")({
         CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data",
     }, async () => {}, () => {}, () => {});
     const sheet = document.createElement("style");
@@ -214,11 +269,43 @@ const contrastCases = (source: string, css: string) => {
         check.equal(getComputedStyle(view.nodeElements.get(quoteNode.id).querySelector(".bq")).color,
             computedColor(surface), "removing a palette restores the application quote color");
     }
+    const context = view.canvas.getContext("2d");
+    const stroke = context.stroke.bind(context);
+    const lines: string[] = [];
+    context.stroke = (path: Path2D) => { lines.push(computedColor(context.strokeStyle)); stroke(path); };
+    // 固定几何位置，绘制断言不依赖隐藏窗口的动画帧调度。
+    view.positions = new Map([model.root, emptyNode, quoteNode].map((node, index) => [node.id,
+        {id: node.id, x: index ? 180 : 20, y: index * 80, width: 120, height: 40}]));
+    view.edges = [emptyNode, quoteNode].map(node => ({from: model.root.id, to: node.id}));
+    for (const preset of api.LIST_MINDMAP_PALETTES) {
+        for (const background of ["#ffffff", "#1e1e1e"]) {
+            for (const printLayout of [false, true]) {
+                view.options.printLayout = printLayout;
+                view.readOnly = printLayout;
+                document.documentElement.style.setProperty("--b3-theme-background", background);
+                for (const savedBackground of [undefined, background]) {
+                    model.metadata.appearance = {version: 1, palette: preset.colors, backgroundColor: savedBackground};
+                    model.metadata.nodes[quoteNode.id] = {lineColor: "#abcdef"};
+                    const before = JSON.stringify(model.metadata);
+                    view.update(model);
+                    lines.length = 0;
+                    view.draw();
+                    check.ok(lines.includes(computedColor(api.getMindmapLineColor(preset.colors[0], background))),
+                        `theme lines adapt to canvas: ${preset.id} ${background} ${savedBackground} ${printLayout} ${JSON.stringify(lines)}`);
+                    check.ok(lines.includes("rgb(171, 205, 239)"), "manual line colors stay authoritative");
+                    check.equal(JSON.stringify(model.metadata), before, "contrast correction never rewrites document colors");
+                    check.equal(getComputedStyle(view.nodeElements.get(emptyNode.id)).backgroundColor,
+                        computedColor(preset.colors[0]), "node fill retains its saved palette color");
+                }
+            }
+        }
+    }
+    context.stroke = stroke;
     view.destroy();
     return "mindmap-contrast-ok";
 };
 
-test("palette quote text and placeholders stay readable while manual colors and legacy styles survive", {
+test("palette text and canvas connectors stay readable while manual colors and legacy styles survive", {
     timeout: 20000,
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
@@ -237,12 +324,14 @@ test("palette quote text and placeholders stay readable while manual colors and 
 app.setPath("userData", ${JSON.stringify(path.join(dir, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false,
+        backgroundThrottling: false}});
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("fs").readFileSync(${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${contrastCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
+        `const __name = value => value; (async () => { try { return await (${contrastCases.toString()})` +
+        `(${JSON.stringify(source)}, ${JSON.stringify(css)}); } catch (error) { return error.stack; } })()`)}));
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }
 });`, "utf8");

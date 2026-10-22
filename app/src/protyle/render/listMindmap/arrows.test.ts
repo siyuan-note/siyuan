@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 import type {ListMindmapRelation} from "./model";
 import {buildListMindmapConnectors} from "./connectors";
+import {getMindmapLineColor} from "./appearance";
 
 // 执行实际绘制和命中方法，画布替身仅记录路径与箭头，避免依赖图形显示环境。
 const source = createSourceFile("view.ts", readFileSync("src/protyle/render/listMindmap/view.ts", "utf8"),
@@ -49,6 +50,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
     };
     const sandbox: any = {
         buildListMindmapConnectors,
+        getMindmapLineColor,
         Path2D: TestPath, window: {devicePixelRatio: 1},
         // 绘制入口会取消上一帧的合并绘制请求，替身环境没有帧调度
         cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1,

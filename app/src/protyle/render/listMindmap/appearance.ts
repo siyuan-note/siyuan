@@ -6,13 +6,16 @@ export interface ListMindmapAppearance {
     backgroundColor?: string;
 }
 
-export const LIST_MINDMAP_PALETTES = [
+export const LIST_MINDMAP_PALETTES: {id: string, label: string, colors: string[], previousColors?: string[][]}[] = [
     {id: "colorful", label: "listMindmapPaletteColorful", colors: ["#2563eb", "#dc2626", "#15803d", "#9333ea", "#c2410c", "#0e7490"]},
     {id: "soft", label: "listMindmapPaletteSoft", colors: ["#bfdbfe", "#fecaca", "#bbf7d0", "#e9d5ff", "#fed7aa", "#a5f3fc"]},
     {id: "forest", label: "listMindmapPaletteForest", colors: ["#166534", "#047857", "#4d7c0f", "#0f766e", "#3f6212", "#15803d"]},
-    {id: "ocean", label: "listMindmapPaletteOcean", colors: ["#0c4a6e", "#0369a1", "#0284c7", "#0891b2", "#0d9488", "#0f766e"]},
-    {id: "sunset", label: "listMindmapPaletteSunset", colors: ["#9a3412", "#c2410c", "#ea580c", "#be123c", "#9f1239", "#7e22ce"]},
-    {id: "lavender", label: "listMindmapPaletteLavender", colors: ["#4c1d95", "#6d28d9", "#7c3aed", "#a855f7", "#c084fc", "#e9d5ff"]},
+    {id: "ocean", label: "listMindmapPaletteOcean", colors: ["#0c4a6e", "#0369a1", "#0277b4", "#087e9b", "#087f75", "#0f766e"],
+        previousColors: [["#0c4a6e", "#0369a1", "#0284c7", "#0891b2", "#0d9488", "#0f766e"]]},
+    {id: "sunset", label: "listMindmapPaletteSunset", colors: ["#9a3412", "#c2410c", "#c94c0d", "#be123c", "#9f1239", "#7e22ce"],
+        previousColors: [["#9a3412", "#c2410c", "#ea580c", "#be123c", "#9f1239", "#7e22ce"]]},
+    {id: "lavender", label: "listMindmapPaletteLavender", colors: ["#4c1d95", "#6d28d9", "#7c3aed", "#9842db", "#c084fc", "#e9d5ff"],
+        previousColors: [["#4c1d95", "#6d28d9", "#7c3aed", "#a855f7", "#c084fc", "#e9d5ff"]]},
     {id: "monochrome", label: "listMindmapPaletteMonochrome", colors: ["#1f2937", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db"]},
 ];
 
@@ -52,13 +55,45 @@ export const assignListMindmapBranchColors = (model: ListMindmapModel) => {
     return changed;
 };
 
-// 文字颜色按实际填充色的相对亮度选择，浅色与深色画布使用同一份文档配色。
-export const getMindmapTextColor = (color: string) => {
+const getMindmapLuminance = (color: string) => {
     const values = [1, 3, 5].map(index => {
         const value = parseInt(color.slice(index, index + 2), 16) / 255;
         return value <= .04045 ? value / 12.92 : Math.pow((value + .055) / 1.055, 2.4);
     });
-    return values[0] * .2126 + values[1] * .7152 + values[2] * .0722 > .179 ? "#000000" : "#ffffff";
+    return values[0] * .2126 + values[1] * .7152 + values[2] * .0722;
+};
+
+// 文字颜色按实际填充色的相对亮度选择，浅色与深色画布使用同一份文档配色。
+export const getMindmapTextColor = (color: string) =>
+    getMindmapLuminance(color) > .179 ? "#000000" : "#ffffff";
+
+// 只调整主题连线的显示色，避免浅色线融入浅色画布、深色线融入深色画布。
+export const getMindmapLineColor = (color: string, background: string) => {
+    if (!/^#[0-9a-f]{6}$/i.test(background)) {
+        const rgb = background.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*1)?\)$/);
+        if (!rgb) {
+            return color;
+        }
+        background = "#" + rgb.slice(1).map(value => Number(value).toString(16).padStart(2, "0")).join("");
+    }
+    const luminance = getMindmapLuminance(background);
+    const contrast = (value: string) => {
+        const line = getMindmapLuminance(value);
+        return (Math.max(line, luminance) + .05) / (Math.min(line, luminance) + .05);
+    };
+    if (contrast(color) >= 3) {
+        return color;
+    }
+    const target = luminance > .179 ? 0 : 255;
+    const channels = [1, 3, 5].map(index => parseInt(color.slice(index, index + 2), 16));
+    for (let step = 1; step <= 100; step++) {
+        const adjusted = "#" + channels.map(value => Math.round(value + (target - value) * step / 100)
+            .toString(16).padStart(2, "0")).join("");
+        if (contrast(adjusted) >= 3) {
+            return adjusted;
+        }
+    }
+    return color;
 };
 
 export const resolveListMindmapColors = (model: ListMindmapModel) => {
@@ -103,7 +138,8 @@ export const getListMindmapAppearanceMenu = (metadata: ListMindmapMetadata,
                 ...LIST_MINDMAP_PALETTES.map(preset => ({
                     id: preset.id, iconHTML: `<span class="b3-menu__icon b3-menu__icon--color" style="background-color:${preset.colors[0]}"></span>`,
                     label: labels[preset.label],
-                    checked: JSON.stringify(palette) === JSON.stringify(preset.colors),
+                    checked: [preset.colors, ...preset.previousColors || []]
+                        .some(colors => JSON.stringify(palette) === JSON.stringify(colors)),
                     click: () => change(data => {
                         data.appearance = {...data.appearance, version: 1, palette: [...preset.colors]};
                     }),

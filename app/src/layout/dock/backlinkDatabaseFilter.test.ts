@@ -31,6 +31,7 @@ const setup = () => {
     const options = {
         id: "topic", notebook: "", keyword: "", filter: {dailyNote: "all", excludeSelf: false, excludedNotebookIDs: []} as IBacklinkSourceFilter,
         target: {getBoundingClientRect: () => targetRect} as HTMLElement,
+        anchorRect: targetRect,
         isCurrent: () => current,
         getSelected: () => selected,
         apply: (value?: IBacklinkSourceFilter["database"]) => { selected = value; },
@@ -74,8 +75,8 @@ test("database candidates arriving after the target changes do not reopen a filt
 
 test("database filtering retains the toolbar position across candidate loading and source refresh", async () => {
     const h = setup();
-    const pending = h.methods.loadBacklinkDatabaseFilterMenu(h.options);
     h.hideTarget();
+    const pending = h.methods.loadBacklinkDatabaseFilterMenu(h.options);
     h.respond({code: 0, data: [{id: "tasks", name: "Tasks", keys: []}]});
     const menu = await pending;
     menu[2].click(null, null);

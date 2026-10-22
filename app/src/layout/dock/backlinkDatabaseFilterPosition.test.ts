@@ -24,12 +24,13 @@ const browserCases = async (sources: string[], css: string) => {
     document.body.append(toolbar);
     const target = toolbar.firstElementChild as HTMLElement;
     const originalRect = target.getBoundingClientRect();
-    let selected: {avID: string, filters: IAVFilter[]};
+    type Selection = {avID: string, filters: IAVFilter[]};
     let finishFields: () => void;
     let context: {menuElement: HTMLElement};
     const fieldsReady = new Promise<void>(resolve => { finishFields = resolve; });
     window.siyuan = {zIndex: 0, config: {editor: {backlinkContainChildren: true}},
-        languages: {reset: "Reset"}, menus: {menu: {remove() {}}}} as unknown as typeof window.siyuan;
+        notebooks: [], languages: {reset: "Reset", backlinkDatabaseFields: "Database fields"},
+        menus: {menu: {remove() {}, append() {}, popup() {}}}} as unknown as typeof window.siyuan;
     const position = load(sources[0], {getTopBarHeight: () => 42});
     const panel = load(sources[1], new Proxy({
         ...position, getPageSize: () => ({}), isMobile: () => false,
@@ -47,14 +48,33 @@ const browserCases = async (sources: string[], css: string) => {
         ...panel, escapeHtml: (value: string) => value,
         fetchSyncPost: async () => ({code: 0, data: databases}),
     });
-    const items: IMenu[] = await databaseFilter.loadBacklinkDatabaseFilterMenu({
-        id: "topic", notebook: "", keyword: "", filter: {}, target,
-        isCurrent: () => true, getSelected: () => selected,
-        apply: (value: typeof selected) => {
-            selected = value;
+    const menuItems: IMenu[] = [];
+    const backlinkModule = load(sources[3], new Proxy({
+        Model: class {}, BACKLINK_BLOCK_TYPES: [],
+        normalizeBacklinkFoldTypes: (): string[] => [], getBacklinkSourceFilterParam: (): undefined => undefined,
+        isEncryptedBox: () => false, ...databaseFilter,
+        toggleMenu: (options: {build: (menu: object, session: {show: (render: () => void) => void}) => void}) => {
+            options.build({}, {show: render => render()});
+        },
+        MenuItem: class {
+            element = document.createElement("button");
+            constructor(options: IMenu) { menuItems.push(options); options.bind?.(this.element); }
+        },
+    }, {get: (object, key) => key in object ? Reflect.get(object, key) : () => {}}));
+    const backlink = Object.create(backlinkModule.BacklinkContent.prototype);
+    Object.assign(backlink, {
+        sourceFilter: {dailyNote: "all", excludeSelf: false, excludedRefDefIDs: [], excludedNotebookIDs: []},
+        blockId: "topic", inputsElement: [{value: ""}], editors: [],
+        applySourceFilter: (filter: {database: Selection}) => {
+            backlink.sourceFilter = filter;
             target.replaceWith(target.cloneNode(true));
         },
     });
+    backlink.showSourceFilterMenu(target);
+    // 移入子菜单后，原工具栏按钮不再处于悬停显示状态。
+    target.style.display = "none";
+    check.equal(target.getBoundingClientRect().width, 0);
+    const items: IMenu[] = await menuItems.find(item => item.label === "Database fields").loadSubmenu();
     items[2].click(null, null);
     check.equal(target.isConnected, false);
     finishFields();
@@ -67,6 +87,7 @@ const browserCases = async (sources: string[], css: string) => {
     window.dispatchEvent(new Event("resize"));
     check.equal(menu.getBoundingClientRect().top, originalRect.bottom, "a detached button cannot reset the anchor to the origin");
     toolbar.replaceChildren(target);
+    target.style.display = "";
     target.style.left = "760px";
     target.style.top = "300px";
     window.dispatchEvent(new Event("resize"));
@@ -87,7 +108,7 @@ test("backlink database filters stay anchored during source refresh, field loadi
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = ["../../util/setPosition.ts", "../../protyle/render/av/openMenuPanel.ts", "backlinkDatabaseFilter.ts"].map(file =>
+    const sources = ["../../util/setPosition.ts", "../../protyle/render/av/openMenuPanel.ts", "backlinkDatabaseFilter.ts", "BacklinkContent.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);

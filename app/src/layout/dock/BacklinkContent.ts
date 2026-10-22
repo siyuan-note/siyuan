@@ -993,6 +993,8 @@ export class BacklinkContent extends Model {
     }
 
     private showSourceFilterMenu(target: HTMLElement) {
+        // 工具栏离开悬停后会隐藏按钮，在打开菜单前保留其位置。
+        const rect = target.getBoundingClientRect();
         toggleMenu({
             target: target,
             build: (_menu, session) => {
@@ -1130,6 +1132,7 @@ export class BacklinkContent extends Model {
                         keyword: this.inputsElement[0].value,
                         filter: this.sourceFilter,
                         target,
+                        anchorRect: rect,
                         protyle: this.ownerProtyle || this.editors[0]?.protyle,
                         getSelected: () => this.sourceFilter.database,
                         isCurrent: () => !this.destroyed && refFilterGeneration === this.viewStateGeneration,
@@ -1170,7 +1173,6 @@ export class BacklinkContent extends Model {
                         applyFoldTypes([]);
                     }
                 }).element);
-                const rect = target.getBoundingClientRect();
                 session.show(() => window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
 
             },

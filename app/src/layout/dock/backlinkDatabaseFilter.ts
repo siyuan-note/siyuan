@@ -27,12 +27,13 @@ export const loadBacklinkDatabaseFilterMenu = async (options: {
     keyword: string;
     filter: IBacklinkSourceFilter;
     target: HTMLElement;
+    anchorRect: DOMRect;
     protyle?: IProtyle;
     isCurrent: () => boolean;
     getSelected: () => IBacklinkSourceFilter["database"];
     apply: (database?: IBacklinkSourceFilter["database"]) => void;
 }): Promise<IMenu[]> => {
-    const anchorRect = options.target.getBoundingClientRect();
+    const anchorRect = options.anchorRect;
     const response = await fetchSyncPost("/api/ref/getBacklinkDatabases", {
         id: options.id,
         notebook: options.notebook,

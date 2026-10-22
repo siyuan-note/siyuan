@@ -8,7 +8,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 
-test("image gallery releases playing and converting Live Photos on navigation and slideshow", async () => {
+test("image gallery counts entries and releases Live Photos on navigation and slideshow", async () => {
     const root = realpathSync(tmpdir());
     const temporary = mkdtempSync(path.join(root, "siyuan-live-photo-gallery-"));
     const server = createServer((request, response) => {
@@ -59,6 +59,12 @@ test("image gallery releases playing and converting Live Photos on navigation an
             exports.previewDocImage(image,"document","assets/second.mov");
             await wait(()=>window.siyuan.viewer?.viewed);
             const viewer=window.siyuan.viewer;
+            const checkCount = expected => {
+                if (!viewer.title.textContent.startsWith(expected + " ")) {
+                    throw new Error("gallery count mismatch: " + viewer.title.textContent);
+                }
+            };
+            checkCount("2/3");
             const button=viewer.toolbar.querySelector(".viewer-live-photo");
             if (!button || button.classList.contains("fn__none")) {throw new Error("Live Photo action missing");}
             const icon=button.querySelector("use");
@@ -68,6 +74,7 @@ test("image gallery releases playing and converting Live Photos on navigation an
             button.click();
             viewer.view(0);
             await wait(()=>viewer.index===0 && viewer.viewed);
+            checkCount("1/3");
             button.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));
             viewer.options.autoplay=false;
             viewer.play();
@@ -80,6 +87,7 @@ test("image gallery releases playing and converting Live Photos on navigation an
             viewer.stop();
             viewer.view(2);
             await wait(()=>viewer.index===2 && viewer.viewed);
+            checkCount("3/3");
             const hidden=button.classList.contains("fn__none");
             viewer.destroy();
             return {starts,stopped,hidden,closed};

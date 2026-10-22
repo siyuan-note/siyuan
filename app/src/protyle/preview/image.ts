@@ -65,7 +65,7 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
                     name = image.src.substring(image.src.lastIndexOf("/") + 1);
                 }
                 name = name.substring(0, name.lastIndexOf(".")).replace(/-\d{14}-\w{7}$/, "");
-                return `${name} [${imageData.naturalWidth} × ${imageData.naturalHeight}]`;
+                return `${currentIndex + 1}/${imagesElement.childElementCount} ${name} [${imageData.naturalWidth} × ${imageData.naturalHeight}]`;
             }],
             button: false,
             magnifier: false,

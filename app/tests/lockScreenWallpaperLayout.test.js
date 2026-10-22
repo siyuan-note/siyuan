@@ -107,10 +107,24 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
         check.equal(cover.hidden, false);
         check.ok(document.getElementById("lockScreenTime").textContent);
         check.ok(document.getElementById("lockScreenDate").textContent);
+        const group = document.getElementById("lockScreenClock").getBoundingClientRect();
         const clock = document.getElementById("lockScreenTime").getBoundingClientRect();
+        const date = document.getElementById("lockScreenDate").getBoundingClientRect();
         const hint = document.getElementById("lockScreenHint").getBoundingClientRect();
-        check.ok(clock.left >= 0 && hint.right <= innerWidth && hint.bottom <= innerHeight,
+        check.ok(clock.left >= 0 && clock.right <= innerWidth && date.left >= 0 && date.right <= innerWidth &&
+            hint.left >= 0 && hint.right <= innerWidth && hint.bottom <= innerHeight,
             "clock and reveal hint fit narrow and short screens");
+        check.ok(Math.abs((group.left + group.right) / 2 - innerWidth / 2) < 1 &&
+            Math.abs((group.top + group.bottom) / 2 - innerHeight / 2) < 1,
+            "time and date are centered together in the viewport");
+        check.ok(Math.abs((clock.left + clock.right) / 2 - innerWidth / 2) < 1 &&
+            Math.abs((date.left + date.right) / 2 - innerWidth / 2) < 1,
+            "time and date each align with the horizontal center");
+        check.ok(hint.top > group.bottom && Math.abs((hint.left + hint.right) / 2 - innerWidth / 2) < 1,
+            "reveal hint stays centered below the clock without overlapping it");
+        const drag = document.querySelector(remote ? "#windowBar" : "[data-auth-drag]");
+        check.ok(drag.contains(document.elementFromPoint(innerWidth / 2, 16)),
+            "the top window drag area remains above the cover");
         cover.click();
         check.equal(panel.inert, false);
         check.equal(cover.hidden, true);
@@ -125,28 +139,43 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
         check.ok(rect.top >= 32 && rect.bottom <= innerHeight, "login panel fits below the drag area");
         check.ok(panel.scrollWidth <= panel.clientWidth, "login controls do not overflow the panel");
         check.equal(style.backgroundColor, forcedColors ? getComputedStyle(document.body).backgroundColor : (glass ?
-            (dark ? "rgba(30, 30, 30, 0.9)" : "rgba(255, 255, 255, 0.9)") :
+            (dark ? "rgba(0, 0, 0, 0.28)" : "rgba(255, 255, 255, 0.5)") :
             (dark ? "rgb(30, 30, 30)" : "rgb(255, 255, 255)")));
-        check.equal(blur, glass ? "blur(16px)" : "none");
+        check.equal(blur, glass ? "blur(16px) saturate(1.1)" : "none");
         check.equal(style.opacity, "1", "glass affects the panel background, not its text and controls");
         check.equal(getComputedStyle(document.getElementById("authCode")).opacity, "1");
-        // 将面板底色与纯黑、纯白壁纸合成，检查正文和小字号说明的最差对比度。
+        // 更薄的玻璃使用反色细描边辅助阅读，同时检查壁纸合成色与描边的对比度。
         const luminance = rgb => rgb.map(value => value / 255).map(value =>
             value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
             .reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
-        const text = panel.querySelector(remote ? "label" : ".ft__on-surface");
-        const textStyle = getComputedStyle(text);
-        const foreground = textStyle.color.match(/[\d.]+/g).map(Number);
-        const alpha = (foreground[3] ?? 1) * Number(textStyle.opacity);
-        for (const wallpaperColor of [0, 255]) {
-            if (forcedColors) break;
-            const base = dark ? 30 : 255;
-            const background = Array(3).fill(glass ? base * .9 + wallpaperColor * .1 : base);
-            const color = foreground.slice(0, 3).map((value, index) => value * alpha + background[index] * (1 - alpha));
-            const values = [luminance(background), luminance(color)];
-            const contrast = (Math.max(...values) + .05) / (Math.min(...values) + .05);
-            check.ok(contrast >= 4.5,
-                `small login text contrast ${contrast} over wallpaper ${wallpaperColor} (dark=${dark}, remote=${remote}, glass=${glass})`);
+        const panelColor = style.backgroundColor.match(/[\d.]+/g).map(Number);
+        const panelAlpha = panelColor[3] ?? 1;
+        const brightness = Number(/brightness\(([\d.]+)\)/.exec(blur)?.[1] ?? 1);
+        const selectors = remote ? ["h1", "label", ...(glass ? ["#origin"] : [])] : [".ft__on-surface", "label", "h1"];
+        for (const selector of forcedColors ? [] : selectors) {
+            const textStyle = getComputedStyle(panel.querySelector(selector));
+            const foreground = textStyle.color.match(/[\d.]+/g).map(Number);
+            const alpha = (foreground[3] ?? 1) * Number(textStyle.opacity);
+            let outlineContrast = 0;
+            if (glass && dark) {
+                const outline = dark ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)";
+                check.equal(textStyle.textShadow, ["-0.35px 0px 0px", "0.35px 0px 0px",
+                    "0px -0.35px 0px", "0px 0.35px 0px"].map(offset => `${outline} ${offset}`).join(", "));
+                const outlineLight = dark ? 0 : 1;
+                const foregroundLight = luminance(foreground.slice(0, 3));
+                outlineContrast = (Math.max(outlineLight, foregroundLight) + .05) /
+                    (Math.min(outlineLight, foregroundLight) + .05);
+                check.ok(outlineContrast >= 4.5, "the text outline remains distinct from its fill");
+            }
+            for (const wallpaperColor of [0, 255]) {
+                const background = panelColor.slice(0, 3).map(value =>
+                    value * panelAlpha + Math.min(255, wallpaperColor * brightness) * (1 - panelAlpha));
+                const color = foreground.slice(0, 3).map((value, index) => value * alpha + background[index] * (1 - alpha));
+                const values = [luminance(background), luminance(color)];
+                const contrast = (Math.max(...values) + .05) / (Math.min(...values) + .05);
+                check.ok(Math.max(contrast, outlineContrast) >= 4.5,
+                    `${selector} contrast ${contrast} over wallpaper ${wallpaperColor} (dark=${dark}, remote=${remote}, glass=${glass})`);
+            }
         }
         panel.scrollTop = panel.scrollHeight;
         const last = panel.querySelector(remote ? "#submit" : ".b3-button--white").getBoundingClientRect();
@@ -177,12 +206,13 @@ const prepareKeyboardCase = async () => {
     });
 };
 
-const assertKeyboardState = (value, submits) => {
+const assertKeyboardState = async (value, submits) => {
+    await new Promise(resolve => requestAnimationFrame(resolve));
     const check = require("node:assert/strict");
     check.equal(document.getElementById("lockScreenCover").hidden, true);
     check.equal(document.getElementById("authCode").value, value);
     check.equal(document.activeElement, document.getElementById("authCode"));
-    check.equal(window.testSubmits, submits);
+    check.equal(window.testSubmits, submits, "native Enter events reach the revealed login form");
 };
 
 if (process.versions.electron && process.type === "browser") {

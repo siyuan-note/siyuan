@@ -89,15 +89,35 @@
 
         @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
             body.has-wallpaper main {
-                background: rgba(255, 255, 255, .9);
+                --auth-text-outline: transparent;
+                background: rgba(255, 255, 255, .5);
+                color: #111;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, .16), inset 0 0 0 1px rgba(255, 255, 255, .4);
-                -webkit-backdrop-filter: blur(16px);
-                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px) saturate(110%);
+                backdrop-filter: blur(16px) saturate(110%);
+            }
+
+            body.has-wallpaper #origin {
+                color: #111;
+                opacity: 1;
+            }
+
+            body.has-wallpaper main h1,
+            body.has-wallpaper main label,
+            body.has-wallpaper #origin {
+                text-shadow: -.35px 0 0 var(--auth-text-outline), .35px 0 0 var(--auth-text-outline),
+                    0 -.35px 0 var(--auth-text-outline), 0 .35px 0 var(--auth-text-outline);
             }
 
             @media (prefers-color-scheme: dark) {
                 body.has-wallpaper main {
-                    background: rgba(30, 30, 30, .9);
+                    --auth-text-outline: #000;
+                    background: rgba(0, 0, 0, .28);
+                    color: #fff;
+                }
+
+                body.has-wallpaper #origin {
+                    color: #f4f6fa;
                 }
             }
         }
@@ -113,6 +133,8 @@
             @media (prefers-color-scheme: dark) {
                 body.has-wallpaper main {
                     background: #1e1e1e;
+                    -webkit-backdrop-filter: none;
+                    backdrop-filter: none;
                 }
             }
         }
@@ -170,7 +192,7 @@
         }
 
         #lockScreenCover {
-            align-items: flex-start;
+            align-items: center;
             background: transparent;
             border: 0;
             box-sizing: border-box;
@@ -179,15 +201,15 @@
             display: flex;
             flex-direction: column;
             font: inherit;
-            height: calc(100% - 32px);
-            justify-content: flex-end;
+            height: 100%;
+            justify-content: center;
             left: 0;
             margin: 0;
-            padding: 24px clamp(24px, 6vw, 96px) max(40px, 12vh);
+            padding: 32px 24px;
             position: fixed;
-            text-align: left;
+            text-align: center;
             text-shadow: 0 2px 8px #000, 0 0 24px #000;
-            top: 32px;
+            top: 0;
             width: 100%;
             z-index: 2;
         }
@@ -199,6 +221,13 @@
         #lockScreenCover:focus-visible {
             outline: 2px solid #fff;
             outline-offset: -8px;
+        }
+
+        #lockScreenClock {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
         }
 
         #lockScreenTime {
@@ -213,8 +242,11 @@
         }
 
         #lockScreenHint {
+            bottom: clamp(16px, 6vh, 48px);
             font-size: 14px;
-            margin-top: 24px;
+            left: 16px;
+            position: absolute;
+            right: 16px;
         }
 
         body.wallpaper-cover main {
@@ -230,8 +262,10 @@
 <body>
 <img id="lockScreenWallpaper" alt="" hidden>
 <button id="lockScreenCover" type="button" aria-labelledby="lockScreenHint" hidden>
-    <time id="lockScreenTime" aria-live="off"></time>
-    <span id="lockScreenDate"></span>
+    <span id="lockScreenClock">
+        <time id="lockScreenTime" aria-live="off"></time>
+        <span id="lockScreenDate"></span>
+    </span>
     <span id="lockScreenHint"></span>
 </button>
 <div id="windowBar"><button id="closeWindow" type="button">×</button></div>

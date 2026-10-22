@@ -48,15 +48,13 @@ test("selected mind map nodes paste all clipboard files into a new child after f
 });
 
 test("mind map paste respects edit state, selection and read-only boundaries", () => {
-    for (const mode of ["readonly", "editing", "relation", "summary", "batch", "multiple", "missing", "unselected",
+    for (const mode of ["readonly", "editing", "relation", "multiple", "missing", "unselected",
         "input", "editable", "handled", "text", "export"]) {
         const current = create();
         switch (mode) {
             case "readonly": current.target.readOnly = true; break;
             case "editing": current.target.editingId = "node"; break;
             case "relation": current.target.relationFrom = "node"; break;
-            case "summary": current.target.summaryFrom = "node"; current.target.summarySelecting = true; break;
-            case "batch": current.target.summarySelecting = true; break;
             case "multiple": current.target.getSelectedIds = () => ["node", "other"]; break;
             case "missing": current.target.model.nodes.clear(); break;
             case "unselected": current.target.selectedId = undefined; break;

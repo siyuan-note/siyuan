@@ -134,6 +134,15 @@ test("batch selection partitions contiguous siblings, omits descendants and dete
     assert.deepEqual(getListMindmapSummarySelection(model, new Set(["a", "b"])).ranges, []);
 });
 
+test("virtual centers do not suppress selected real nodes or create their own summaries", () => {
+    const model = makeModel();
+    model.root.virtual = true;
+    assert.deepEqual(getListMindmapSummarySelection(model, new Set(["root", "a", "b", "nested", "missing"])), {
+        ranges: [{parentId: "root", nodeIds: ["a", "b"]}], conflict: false,
+    });
+    assert.deepEqual(getListMindmapSummarySelection(model, new Set(["root"])), {ranges: [], conflict: false});
+});
+
 test("batch creation is atomic and upgrades only configurations that require nesting", () => {
     const model = makeModel();
     let next = 0;

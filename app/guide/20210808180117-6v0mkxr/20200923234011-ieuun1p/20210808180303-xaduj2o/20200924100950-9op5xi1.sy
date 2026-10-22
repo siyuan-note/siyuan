@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261020181700"
+		"updated": "20261022132341"
 	},
 	"Children": [
 		{
@@ -13115,7 +13115,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261020181700"
+				"updated": "20261022132341"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13129,12 +13129,13 @@
 			"ID": "20261018163000-tgvsr1a",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-tgvsr1a"
+				"id": "20261018163000-tgvsr1a",
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor, summary selection, or relationship-line drag is active, Esc first finishes or cancels that operation. In full screen, Esc exits full screen."
+					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor or relationship-line drag is active, Esc first finishes or cancels that operation. Esc also leaves multi-select mode. In full screen, Esc exits full screen."
 				}
 			]
 		},
@@ -13959,12 +13960,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-8trdt10",
-				"updated": "20260926152753"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the summary batch preview, Enter creates all groups in one undoable operation and Esc cancels. While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+					"Data": "Select nodes, then activate "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Summary"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom node menu to create all valid groups in one undoable operation. Esc leaves multi-select mode. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
 				}
 			]
 		},

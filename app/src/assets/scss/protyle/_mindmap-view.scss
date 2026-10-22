@@ -247,10 +247,6 @@
     pointer-events: none;
   }
 
-  &__viewport--summary {
-    cursor: crosshair;
-  }
-
   &__selection-box {
     position: absolute;
     pointer-events: none;
@@ -258,26 +254,6 @@
     background: var(--b3-theme-primary-lightest);
     box-sizing: border-box;
     z-index: 5;
-  }
-
-  &__summary-controls {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-
-    > span {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-  }
-
-  &__summary-actions {
-    display: flex;
-    flex-shrink: 0;
-    gap: 8px;
-    margin-left: auto;
   }
 
   &__viewport--pan {

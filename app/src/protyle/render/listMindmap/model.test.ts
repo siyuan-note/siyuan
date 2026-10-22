@@ -2103,7 +2103,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                         `More stays rightmost after wrapping, width=${width}, fontSize=${fontSize}`);
                 }
             }
-            check.equal(lastButton.top > firstButton.top, width < 180,
+            check.equal(lastButton.top > firstButton.top, width < 220,
                 `compact global toolbars wrap only when necessary, width=${width}, fontSize=${fontSize}`);
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
             if (width >= 240) {
@@ -3074,7 +3074,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     });
     await settle();
     const levelButton = host.querySelector<HTMLButtonElement>('.mindmap-view__toolbar button[aria-label="expandLevel"]');
-    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "listMindmapLock");
+    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "multiSelect");
+    check.equal(levelButton.previousElementSibling.previousElementSibling.getAttribute("aria-label"), "listMindmapLock");
     check.equal(levelButton.nextElementSibling.getAttribute("aria-label"), "cursorHand");
     check.equal(host.querySelector(".mindmap-view__level-select"), null);
     levelView.selectNode(levelChild);
@@ -3923,7 +3924,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     doubleClickImage();
     check.equal(previewed.length, 3, "locked nodes support image previews without editing");
     richView.setLocked(false);
-    for (const mode of ["relationFrom", "summarySelecting", "panning", "pinching"]) {
+    for (const mode of ["relationFrom", "panning", "pinching"]) {
         richView[mode] = true;
         doubleClickImage();
         check.equal(previewed.length, 3, "active canvas interactions do not open image previews");
@@ -4621,14 +4622,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let summaryView: any;
     summaryView = new api.ListMindmapView({host: summaryHost, model: summaryModel, onExit: () => {},
         labels: new Proxy({}, {get: (_target, key) => String(key)}),
-        onSummaryAdd: async (from: string, to: string) => {
+        onSummaryBatchAdd: async (ranges: any[], expected: string) => {
             const model = api.readListMindmap(summaryList);
-            const nodeIds = api.getListMindmapSummaryRange(model, from, to);
-            check.equal(nodeIds.length, 3);
-            model.metadata.summaries = [{id: "summary", parentId: model.root.id, nodeIds, label: "Summary"}];
+            check.equal(api.getListMindmapSummarySnapshot(model), expected);
+            const added = api.addListMindmapSummaryRanges(model, ranges, () => "summary", "Summary");
+            check.deepEqual(added, ["summary"]);
             api.writeListMindmapMetadata(summaryList, model.metadata);
             summaryView.update(api.readListMindmap(summaryList));
-            return "summary";
+            return added;
         },
         onSummaryChange: (id: string, patch: object, expected: string) => {
             const model = api.readListMindmap(summaryList);
@@ -4642,11 +4643,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     summaryView.focusNode(summaryIds[0]);
     const summaryButton = summaryHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
     check.equal(summaryButton.disabled, false);
+    for (const id of summaryIds.slice(1)) {
+        summaryView.selectNode(id, true);
+    }
     summaryButton.click();
-    check.equal(summaryButton.getAttribute("aria-pressed"), "true");
-    summaryHost.querySelector(`[data-mindmap-id="${summaryIds[2]}"]`).dispatchEvent(new PointerEvent("pointerdown",
-        {bubbles: true, pointerId: 71, pointerType: "touch", isPrimary: true, button: 0}));
-    await settle();
     await settle();
     const summaryInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
     check.ok(summaryInput, "new summaries enter text editing on touch selection");
@@ -4804,19 +4804,35 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const copiedSummary = api.readListMindmap(copied).metadata.summaries[0];
     check.equal(copiedSummary.parentId, copiedIDs.get(savedSummary.parentId));
     check.deepEqual(copiedSummary.nodeIds, savedSummary.nodeIds.map((id: string) => copiedIDs.get(id)));
+    const crossingModel = api.readListMindmap(summaryList);
+    crossingModel.metadata.summaries = [{...savedSummary, nodeIds: summaryIds.slice(0, 2)}];
+    api.writeListMindmapMetadata(summaryList, crossingModel.metadata);
+    summaryView.update(api.readListMindmap(summaryList));
+    summaryView.focusNode(summaryIds[1]);
+    summaryView.selectNode(summaryIds[2], true);
+    check.equal(summaryButton.disabled, true, "crossing ranges disable direct creation");
+    check.equal(summaryButton.getAttribute("aria-description"), "listMindmapSummaryConflict");
+    check.equal(summaryView.summaryStatus.hidden, false, "touch users can see why creation is disabled");
+    summaryButton.click();
+    check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, summaryIds.slice(0, 2));
+    summaryView.clearSelection();
+    check.equal(summaryView.summaryStatus.hidden, true);
     const keyboardModel = api.readListMindmap(summaryList);
     keyboardModel.metadata.summaries = [];
     api.writeListMindmapMetadata(summaryList, keyboardModel.metadata);
     summaryView.update(api.readListMindmap(summaryList));
     summaryView.focusNode(summaryIds[0]);
-    summaryButton.click();
-    for (const key of ["ArrowDown", "ArrowDown", "Enter"]) {
-        summaryHost.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true}));
+    for (const id of summaryIds.slice(1)) {
+        summaryView.selectNode(id, true);
     }
-    await settle();
+    summaryButton.focus();
+    const summaryKey = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+    summaryButton.dispatchEvent(summaryKey);
+    check.equal(summaryKey.defaultPrevented, false, "summary buttons retain native keyboard activation");
+    summaryButton.click();
     await settle();
     const keyboardInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
-    check.ok(keyboardInput, "keyboard range selection creates an editable summary");
+    check.ok(keyboardInput, "keyboard activation creates an editable summary from selected nodes");
     keyboardInput.value = savedSummary.label;
     keyboardInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
     await settle();
@@ -4941,13 +4957,55 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             return added;
         }});
     await settle();
-    batchView.focusNode(api.readListMindmap(batchList).root.id);
-    const batchButton = batchHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
     const batchViewport = batchHost.querySelector<HTMLElement>(".mindmap-view__viewport");
-    check.equal(batchButton.disabled, false, "the root node menu starts batch selection without choosing a parent range");
-    batchButton.click();
+    const multiSelect = batchHost.querySelector<HTMLButtonElement>('.mindmap-view__toolbar [aria-label="multiSelect"]');
+    check.ok(multiSelect, "multi-select is available before choosing a node");
+    multiSelect.click();
+    check.equal(multiSelect.getAttribute("aria-pressed"), "true");
     const batchModel = api.readListMindmap(batchList);
     const leafIDs = batchModel.root.children.flatMap((node: ListMindmapNode) => node.children.map(child => child.id));
+    for (const id of leafIDs) {
+        batchHost.querySelector(`[data-mindmap-id="${id}"]`).dispatchEvent(new PointerEvent("pointerdown", {
+            bubbles: true, pointerId: 81, pointerType: "touch", isPrimary: true, button: 0,
+        }));
+    }
+    check.equal(batchView.getSelectedIds().length, 4, "touch multi-select uses the ordinary selection");
+    check.equal(batchView.pointer, undefined, "multi-select taps cannot arm node dragging");
+    check.equal(batchHistory.length, 0);
+    const batchInspector = batchHost.querySelector<HTMLElement>(".mindmap-view__inspector");
+    check.equal(batchInspector.hidden, false);
+    check.equal(batchInspector.querySelector('[aria-label="multiSelect"]'), null);
+    const batchButton = batchInspector.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    check.equal(batchButton.disabled, false);
+    check.equal(batchButton.dataset.tooltip, batchLabels.listMindmapSummaryBatch.replace("${count}", "2"));
+    check.equal(batchInspector.querySelector<HTMLButtonElement>('[aria-label="connect"]').disabled, true);
+    for (const width of [240, 320, 700]) {
+        batchHost.style.width = `${width}px`;
+        batchHost.style.fontSize = "32px";
+        await settle();
+        const bounds = batchInspector.getBoundingClientRect();
+        check.ok(bounds.width <= batchHost.offsetWidth - 16);
+        for (const control of [batchButton, multiSelect]) {
+            const rect = control.getBoundingClientRect();
+            const hostBounds = batchHost.getBoundingClientRect();
+            check.ok(rect.left >= hostBounds.left && rect.right <= hostBounds.right);
+        }
+    }
+    batchHost.style.fontSize = "";
+    batchButton.click();
+    await settle();
+    check.equal(batchHistory.length, 1, "clicking summary submits all groups once without a confirmation step");
+    check.equal(api.readListMindmap(batchList).metadata.summaries.length, 2);
+    check.equal(batchButton.disabled, true, "identical groups cannot be created twice");
+    const restoreBatch = (html: string) => {
+        const restored = document.createElement("div");
+        restored.innerHTML = html;
+        return restored.firstElementChild;
+    };
+    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].before)).metadata.summaries, undefined);
+    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].after)).metadata.summaries.length, 2);
+    multiSelect.click();
+    batchView.clearSelection();
     const leafRects = leafIDs.map((id: string) => batchHost.querySelector(`[data-mindmap-id="${id}"]`).getBoundingClientRect());
     const left = Math.min(...leafRects.map((rect: DOMRect) => rect.left)) - 1;
     const top = Math.min(...leafRects.map((rect: DOMRect) => rect.top)) - 1;
@@ -4956,72 +5014,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     sendPointer(batchViewport, "pointerdown", left, top);
     sendPointer(batchViewport, "pointermove", right, bottom);
     sendPointer(batchViewport, "pointerup", right, bottom);
-    check.equal(batchView.summaryRanges.length, 2);
-    check.equal(batchHistory.length, 0, "dragging only previews the groups");
-    check.equal(batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls").hidden, false);
-    const controls = batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls");
-    const actions = [...controls.querySelectorAll("button")];
-    const checkButtonRow = () => {
-        check.equal(actions[0].getBoundingClientRect().top, actions[1].getBoundingClientRect().top,
-            "cancel and confirm stay on one row");
-    };
-    checkButtonRow();
-    const countBounds = controls.querySelector("span").getBoundingClientRect();
-    const actionBounds = actions[0].getBoundingClientRect();
-    check.ok(Math.abs(countBounds.top + countBounds.height / 2 - actionBounds.top - actionBounds.height / 2) < 1,
-        "compact localized labels do not force actions onto a separate row");
-    check.equal(actions[0].textContent, batchLabels.cancel);
-    check.equal(actions[1].textContent, batchLabels.confirm);
-    actions[0].focus();
-    const cancelKey = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
-    actions[0].dispatchEvent(cancelKey);
-    check.equal(cancelKey.defaultPrevented, false, "focused cancel keeps native keyboard activation");
-    check.equal(batchHistory.length, 0, "Enter on cancel never confirms the batch");
-    batchHost.style.width = "280px";
-    batchHost.style.fontSize = "32px";
-    await settle();
-    const controlsBounds = controls.getBoundingClientRect();
-    checkButtonRow();
-    check.ok(controlsBounds.width <= batchHost.offsetWidth - 16);
-    controls.querySelectorAll("button").forEach(button => {
-        const rect = button.getBoundingClientRect();
-        check.ok(rect.left >= controlsBounds.left && rect.right <= controlsBounds.right);
-        check.ok(rect.top >= controlsBounds.top && rect.bottom <= controlsBounds.bottom);
-        check.ok(button.classList.contains("b3-button"));
-    });
-    batchHost.style.width = "700px";
-    batchHost.style.fontSize = "";
-    await settle();
-    batchHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    await settle();
-    check.equal(batchHistory.length, 1, "all groups use a single submission");
-    check.equal(api.readListMindmap(batchList).metadata.summaries.length, 2);
-    const restoreBatch = (html: string) => {
-        const restored = document.createElement("div");
-        restored.innerHTML = html;
-        return restored.firstElementChild;
-    };
-    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].before)).metadata.summaries, undefined);
-    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].after)).metadata.summaries.length, 2);
-    batchButton.click();
-    const batchBlank = batchViewport.getBoundingClientRect();
-    sendPointer(batchViewport, "pointerdown", batchBlank.left + 1, batchBlank.top + 1);
-    sendPointer(batchViewport, "pointerup", batchBlank.left + 1, batchBlank.top + 1);
-    for (const id of leafIDs.slice(0, 2)) {
-        batchHost.querySelector(`[data-mindmap-id="${id}"]`).dispatchEvent(new PointerEvent("pointerdown", {
-            bubbles: true, pointerId: 81, pointerType: "touch", isPrimary: true, button: 0,
-        }));
-    }
-    check.equal(batchView.summarySelected.size, 2, "touch taps build a batch selection");
-    check.equal(batchView.summaryRanges.length, 0, "existing groups are not duplicated");
+    check.equal(batchView.getSelectedIds().length, 4);
+    check.equal(batchInspector.hidden, false, "ordinary marquee selection opens the node menu");
+    check.equal(batchButton.disabled, true, "existing groups are not duplicated after marquee selection");
     batchView.update(api.readListMindmap(batchList));
-    check.equal(batchView.summarySelecting, false, "external updates invalidate pending selections");
-    batchButton.click();
-    sendPointer(batchViewport, "pointerdown", left, top);
-    sendPointer(batchViewport, "pointermove", right, bottom);
+    check.equal(batchButton.disabled, true, "external updates recalculate action availability");
+    multiSelect.click();
     batchHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
-    check.equal(batchView.summarySelecting, false);
-    check.equal(batchHistory.length, 1, "canceling never submits a second batch");
+    check.equal(batchView.multiSelect, false);
+    check.equal(multiSelect.getAttribute("aria-pressed"), "false");
+    check.equal(batchHistory.length, 1, "leaving selection mode does not create another batch");
     batchView.destroy();
     batchHost.remove();
     style.remove();

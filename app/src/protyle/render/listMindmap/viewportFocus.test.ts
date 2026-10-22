@@ -25,7 +25,7 @@ const setup = () => {
     const host = {focus: () => focus = "canvas", contains: () => true};
     const target = Object.assign(new context.View(), {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
-        selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
+        selectedId: "new", tooltip: {}, inspector: {hidden: true},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         world: {querySelectorAll: (): HTMLElement[] => []},
         nodeElements: new Map(), offsetX: 0, offsetY: 0,
@@ -83,21 +83,19 @@ test("focusing visible, missing or removed nodes does not pan", () => {
 });
 
 test("node focus avoids the actual bottom panel bounds after the pending layout", () => {
-    for (const panel of ["inspector", "summaryControls"]) {
-        for (const top of [250, 210]) {
-            const {target, frames, drawn} = setup();
-            target.frame = 1;
-            target[panel] = {hidden: false, getBoundingClientRect: () =>
-                ({left: 80, right: 320, top, bottom: 292, width: 240, height: 292 - top})};
-            target.nodeElements.set("new", {getBoundingClientRect: () =>
-                ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
-            target.focusNode("new");
-            assert.equal(drawn(), 0);
-            frames.forEach(action => action());
-            assert.equal(280 + target.offsetY, top - 16);
-            assert.equal(target.offsetX, 0);
-            assert.equal(drawn(), 1);
-        }
+    for (const top of [250, 210]) {
+        const {target, frames, drawn} = setup();
+        target.frame = 1;
+        target.inspector = {hidden: false, getBoundingClientRect: () =>
+            ({left: 80, right: 320, top, bottom: 292, width: 240, height: 292 - top})};
+        target.nodeElements.set("new", {getBoundingClientRect: () =>
+            ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
+        target.focusNode("new");
+        assert.equal(drawn(), 0);
+        frames.forEach(action => action());
+        assert.equal(280 + target.offsetY, top - 16);
+        assert.equal(target.offsetX, 0);
+        assert.equal(drawn(), 1);
     }
 });
 
@@ -288,7 +286,7 @@ test("middle dragging and Ctrl or Meta right dragging preserve reading state, no
         assert.equal(target.pointer, undefined, "temporary gestures cannot bypass a saved view lock");
         assert.equal(target.interactionActive, false);
         assert.equal(finished(), 0);
-        for (const mode of ["relationFrom", "summarySelecting"]) {
+        for (const mode of ["relationFrom", "multiSelect"]) {
             const {target, event, finished} = setup();
             target[mode] = mode === "relationFrom" ? "new" : true;
             const down = event("background", overrides);
@@ -305,7 +303,7 @@ test("middle dragging and Ctrl or Meta right dragging preserve reading state, no
 
 test("middle clicks preserve selection and editing without moving or finishing annotations", () => {
     for (const kind of ["background", ".mindmap-view__node", ".mindmap-view__summary"]) {
-        for (const mode of ["normal", "readOnly", "relationFrom", "summarySelecting"]) {
+        for (const mode of ["normal", "readOnly", "relationFrom"]) {
             const {target, event, finished, focus} = setup();
             if (mode !== "normal") {
                 target[mode] = mode === "relationFrom" ? "new" : true;
@@ -367,7 +365,7 @@ test("nodes, controls, nested maps, lines and non-pan modes retain their own int
     target.findLine = () => ({relation: true});
     assert.equal(target.isPanTarget(event()), false);
     target.findLine = (): unknown => undefined;
-    for (const key of ["locked", "pinching", "summarySelecting", "relationFrom"]) {
+    for (const key of ["locked", "pinching", "relationFrom"]) {
         target[key] = true;
         assert.equal(target.isPanTarget(event()), false, key);
         target[key] = false;

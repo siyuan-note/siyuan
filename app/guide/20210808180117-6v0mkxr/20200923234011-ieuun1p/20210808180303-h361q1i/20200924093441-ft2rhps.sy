@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022122318"
+		"updated": "20261022132341"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261021132218"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
@@ -2270,12 +2270,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-5nohuq1",
-				"updated": "20261022102848"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select multiple nodes, then use the bottom palette to change their text and background colors together. The branch line palette changes the incoming hierarchy lines of the selected nodes. Each batch change can be undone in one step. Choose Default in a palette to restore the theme or default colors. On touch screens, use the multiple-selection button in the bottom node menu to select the nodes."
+					"Data": "Select multiple nodes, then use the bottom palette to change their text and background colors together. The branch line palette changes the incoming hierarchy lines of the selected nodes. Each batch change can be undone in one step. Choose Default in a palette to restore the theme or default colors. On touch screens, use the Multi-select button in the top toolbar to select the nodes."
 				}
 			]
 		},
@@ -3646,12 +3646,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-kkcg79g",
-				"updated": "20261020162345"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select the first node in a range, click "
+					"Data": "Select nodes, then click "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3660,7 +3660,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the bottom node menu, then select the last sibling node to add a bracket and summary text. The range must be contiguous. Single-node summaries and nested ranges are supported; ranges may contain each other but must not cross. The bracket encloses the visible subtree and any inner summaries. To create several summaries, activate Summary and drag a selection on blank canvas. You can also tap blank canvas, then tap nodes individually. The preview groups consecutive selected siblings by parent; selected ancestors take precedence over their descendants. Existing identical summaries are skipped, and crossing ranges prevent creation. Use the confirm button or Enter to create all previewed groups in one undoable operation; Esc cancels. Document updates cancel a pending selection. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
+					"Data": " in the bottom node menu to create summaries immediately, without selecting again or confirming. On desktop, drag on blank canvas or Ctrl/Command-click nodes; on touch screens, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Multi-select"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the top toolbar, then tap nodes. Consecutive selected siblings form one summary; separate ranges and different parents form separate summaries, without including unselected nodes. Selected ancestors take precedence over their descendants. Single-node and nested summaries are supported. Existing identical summaries are skipped; crossing ranges disable creation and show a warning. The bracket encloses the visible subtree and inner summaries. All groups are created in one undoable operation. Unavailable node actions are disabled. Esc leaves multi-select mode."
 				}
 			]
 		},

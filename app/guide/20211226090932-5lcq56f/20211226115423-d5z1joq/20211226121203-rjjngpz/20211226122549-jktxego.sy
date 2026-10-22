@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261020181700"
+		"updated": "20261022132551"
 	},
 	"Children": [
 		{
@@ -13103,7 +13103,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261020181700"
+				"updated": "20261022132551"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13117,12 +13117,13 @@
 			"ID": "20261018163000-e1khci4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-e1khci4"
+				"id": "20261018163000-e1khci4",
+				"updated": "20261022132551"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在畫布上按 Esc 可恢復閱讀，讓滾輪捲動文件。如果正在編輯節點、選取摘要範圍或拖曳關係線，Esc 會先結束或取消目前操作；全螢幕時按 Esc 離開全螢幕。"
+					"Data": "在畫布上按 Esc 可恢復閱讀，讓滾輪捲動文件。如果正在編輯節點或拖曳關係線，Esc 會先結束或取消目前操作；Esc 也可結束多選模式；全螢幕時按 Esc 離開全螢幕。"
 				}
 			]
 		},
@@ -13947,12 +13948,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-0k1m0f6",
-				"updated": "20260926152753"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "批次概要預覽中，Enter 一次建立所有分組概要，Esc 取消，建立後可一次復原。選擇概要範圍時，使用上下方向鍵選擇末端同層節點，Enter 確認，Esc 取消。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
+					"Data": "選取節點後，啟動底部節點選單中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "概要"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可一次建立所有有效分組，並可一次復原。Esc 結束多選模式。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
 				}
 			]
 		},

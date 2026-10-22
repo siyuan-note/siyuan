@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261022122318"
+		"updated": "20261022132341"
 	},
 	"Children": [
 		{
@@ -1964,7 +1964,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261021132218"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
@@ -2273,12 +2273,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-xfgxiox",
-				"updated": "20261022102848"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选中多个节点后，可用底部色板统一修改文字和背景颜色，也可用分支连线色板修改所选节点的入线颜色。每次批量修改均可一次撤销。在对应色板中选择默认，可恢复主题或默认配色。触屏上可使用底部节点菜单的多选按钮选择多个节点。"
+					"Data": "选中多个节点后，可用底部色板统一修改文字和背景颜色，也可用分支连线色板修改所选节点的入线颜色。每次批量修改均可一次撤销。在对应色板中选择默认，可恢复主题或默认配色。触屏上可使用顶部工具栏的多选按钮选择多个节点。"
 				}
 			]
 		},
@@ -3649,12 +3649,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-8wl1iml",
-				"updated": "20261020162345"
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选中范围的第一个节点，点击底部节点菜单中的 "
+					"Data": "选中节点后，点击底部节点菜单中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3663,7 +3663,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，再选择末端同级节点，即可添加方括号和概要文字。范围必须连续，支持单节点概要和范围嵌套，范围可以相互包含，但不能交叉。括号包围可见子树及内层概要。批量创建时，点击概要按钮后在画布空白处框选；也可以先点击空白处，再逐个点选节点。预览按父节点和连续范围分组，父子同时选中时以最外层节点为准。已有相同概要会跳过，交叉范围会阻止创建。点击确认按钮或按 Enter 一次创建全部预览概要，并可一次撤销；Esc 取消。文档更新会取消待确认的选择。移动端也可按相同步骤操作。选择范围时也可使用上下方向键选择末端节点，Enter 确认范围，Esc 取消。"
+					"Data": " 即可直接创建，无需再次选择或确认。桌面端可在空白画布框选，或按住 Ctrl/Command 点选节点；触屏上先开启顶部工具栏的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "多选"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再逐个点选节点。同一父节点下连续的选中节点生成一个概要，不连续或不同父节点下的选区分别生成多个概要，不会纳入未选节点。父子同时选中时以最外层节点为准。支持单节点概要和范围嵌套，已有相同概要会跳过；范围交叉时禁用创建并显示提示。括号包围可见子树及内层概要。全部分组一次创建，并可一次撤销。节点菜单中不适用的操作置灰，Esc 退出多选模式。"
 				}
 			]
 		},

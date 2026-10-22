@@ -70,6 +70,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         scale: 1, offsetX: 0, offsetY: 0, world: {style: {}}, zoomLabel: {}, zoomSlider: {},
         viewport: {clientWidth: 400, clientHeight: 200, getBoundingClientRect: () => ({left: 0, top: 0})},
         canvas: {getContext: () => context}, options: {host: {}}, colorProbe: {style: {}},
+        inspector: {hidden: true},
         model: {root: {id: "a"}, metadata: {nodes: {}, relations: [relation]}}, edges: [],
         positions: new Map([["a", {id: "a", x: 100, y: 0, width: 20, height: 20}],
             ["b", {id: "b", x: -20, y: 0, width: 20, height: 20}]]),

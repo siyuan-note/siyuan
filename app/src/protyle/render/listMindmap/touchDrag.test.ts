@@ -29,7 +29,7 @@ const setup = () => {
         remove: (...names: string[]) => names.forEach(name => classes.delete(name))}};
     const target = Object.assign(new context.View(), {
         options: {}, model: {nodes: new Map([["child", {}]])},
-        nodeElements: new Map([["child", element]]), inspector: {}, summaryBox: {},
+        nodeElements: new Map([["child", element]]), inspector: {}, selectionBox: {},
         viewport: {classList: element.classList},
         selectNode: (id: string) => selected.push(id), clearDrop: () => {},
         setHoveredLine: () => {}, requestDraw: () => {},
@@ -100,7 +100,7 @@ test("cancellation and pointer replacement cannot leave a delayed node drag", ()
 });
 
 test("read-only, locked, gesture and selection modes, destroyed and removed-node states reject a pending hold", () => {
-    for (const mode of ["readOnly", "locked", "pinching", "panning", "multiSelect", "summarySelecting", "relationFrom", "destroyed", "removed"]) {
+    for (const mode of ["readOnly", "locked", "pinching", "panning", "multiSelect", "relationFrom", "destroyed", "removed"]) {
         const {target, pointer, selected, flush} = setup();
         if (mode === "readOnly") {
             target.options.readOnly = true;

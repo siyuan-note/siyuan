@@ -46,7 +46,7 @@ import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import {getListMindmapFoldMenuItems} from "./foldMenu";
 import {isMobile} from "../../../util/functions";
-import {addListMindmapSummaryRanges, getListMindmapSiblingIDs, getListMindmapSummaryParentID, getListMindmapSummaryRange,
+import {addListMindmapSummaryRanges, getListMindmapSiblingIDs,
     getListMindmapSummarySnapshot} from "./summary";
 import {getProtyleTransactionOwner, isProtyleListItemFragment} from "../../runtimeCapabilities";
 import {isFoldedRenderContent} from "../foldedContent";
@@ -517,23 +517,6 @@ class ListMindmapController {
             onRelationDelete: id => this.metadata(metadata => {
                 metadata.relations = metadata.relations.filter(item => item.id !== id);
             }),
-            onSummaryAdd: async (from, to) => {
-                let ids: string[];
-                const saved = await this.change(() => {
-                    const model = readListMindmap(list);
-                    const nodeIds = getListMindmapSummaryRange(model, from, to);
-                    if (!nodeIds.length) {
-                        return false;
-                    }
-                    ids = addListMindmapSummaryRanges(model, [{parentId: getListMindmapSummaryParentID(model, from), nodeIds}],
-                        () => Lute.NewNodeID(), window.siyuan.languages.listMindmapSummary);
-                    if (!ids) {
-                        return false;
-                    }
-                    writeListMindmapMetadata(list, model.metadata);
-                });
-                return saved ? ids?.[0] : undefined;
-            },
             onSummaryBatchAdd: async (ranges, expected) => {
                 let ids: string[];
                 const saved = await this.change(() => {

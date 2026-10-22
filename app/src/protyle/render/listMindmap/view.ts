@@ -814,11 +814,17 @@ export class ListMindmapView {
             element.classList.toggle("mindmap-view__node--root", id === model.root.id);
             this.renderTask(element, id);
             element.classList.toggle("mindmap-view__node--branch", node.children.length > 0);
+            element.classList.toggle("mindmap-view__node--colored", this.themeColors.has(id));
             const style = model.metadata.nodes[id];
             const background = style?.backgroundColor || this.themeColors.get(id)?.backgroundColor || "";
             element.style.backgroundColor = background;
             element.style.color = style?.textColor || (this.themeColors.has(id) && isMindmapColor(background) ?
                 getMindmapTextColor(background) : this.themeColors.get(id)?.textColor) || "";
+            if (this.themeColors.has(id)) {
+                element.style.setProperty("--mindmap-node-text-color", element.style.color);
+            } else {
+                element.style.removeProperty("--mindmap-node-text-color");
+            }
             const collapsed = this.folded.get(id) ?? node.collapsed;
             element.setAttribute("aria-expanded", String(!collapsed));
             const fold = element.querySelector<HTMLButtonElement>(".mindmap-view__fold");

@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022102848"
+		"updated": "20261022122318"
 	},
 	"Children": [
 		{
@@ -2304,7 +2304,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-sbqeaum",
-				"updated": "20261022102848"
+				"updated": "20261022122318"
 			},
 			"Children": [
 				{
@@ -2332,7 +2332,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で、現在のマップにカラフル、ソフト、フォレストの配色を選択できます。第 1 階層のブランチにパレットの色を割り当て、子孫ノードは所属するブランチの色を継承します。並べ替えても割り当てた色は保持され、新しいノードも配色に従います。手動で設定したノードや線の色は保持されます。デフォルトを選ぶとパレットを解除し、手動の色と背景は保持します。テーマはノードの内容、構造、折りたたみ状態を変更しません。"
+					"Data": " で、現在のマップにカラフル、ソフト、フォレスト、海、夕日、ラベンダー、モノクロの配色を選択できます。第 1 階層のブランチにパレットの色を割り当て、子孫ノードは所属するブランチの色を継承します。並べ替えても割り当てた色は保持され、新しいノードも配色に従います。手動で設定したノードや線の色は保持されます。デフォルトを選ぶとパレットを解除し、手動の色と背景は保持します。テーマはノードの内容、構造、折りたたみ状態を変更しません。"
 				}
 			]
 		},

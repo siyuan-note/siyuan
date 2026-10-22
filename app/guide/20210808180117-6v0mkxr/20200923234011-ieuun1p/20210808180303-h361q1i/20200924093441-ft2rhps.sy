@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022102848"
+		"updated": "20261022122318"
 	},
 	"Children": [
 		{
@@ -2161,7 +2161,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-11epv5y",
-				"updated": "20261022102848"
+				"updated": "20261022122318"
 			},
 			"Children": [
 				{
@@ -2193,7 +2193,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose Colorful, Soft, or Forest for the current map. First-level branches receive colors from the palette, and descendants inherit their branch color. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual node and line colors are retained. Choosing Default removes the palette while preserving manual colors and the canvas background. The theme does not change node content, structure, or folding states."
+					"Data": " to choose Colorful, Soft, Forest, Ocean, Sunset, Lavender, or Monochrome for the current map. First-level branches receive colors from the palette, and descendants inherit their branch color. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual node and line colors are retained. Choosing Default removes the palette while preserving manual colors and the canvas background. The theme does not change node content, structure, or folding states."
 				}
 			]
 		},

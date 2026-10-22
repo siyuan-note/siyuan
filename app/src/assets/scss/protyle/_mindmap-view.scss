@@ -26,6 +26,7 @@
 }
 
 .mindmap-view {
+  --mindmap-node-text-color: initial;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -437,7 +438,7 @@
 
       &::before {
         content: attr(data-placeholder);
-        color: var(--b3-theme-on-surface-light);
+        color: var(--mindmap-node-text-color, var(--b3-theme-on-surface-light));
       }
     }
 
@@ -493,6 +494,17 @@
     }
   }
 
+  &__node--colored > .mindmap-view__content {
+    .bq,
+    .callout {
+      color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
+    }
+
+    .protyle-wysiwyg--empty:empty::before {
+      color: var(--mindmap-node-text-color, var(--b3-empty-color));
+    }
+  }
+
   &__node[data-task] {
     display: grid;
     // 空任务正文也保留输入宽度，确保光标能落入编辑器。
@@ -519,7 +531,7 @@
     border: 0;
     border-radius: var(--b3-border-radius);
     background: transparent;
-    color: var(--b3-theme-on-surface);
+    color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
     font: inherit;
     cursor: pointer;
     transition: var(--b3-transition);

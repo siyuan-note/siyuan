@@ -29,6 +29,16 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         options.destroyCallback?.();
         return;
     }
+    let anchorRect = options.anchorRect;
+    const getAnchorRect = () => {
+        const rect = options.anchorElement?.getBoundingClientRect();
+        if (rect?.width > 0 && rect.height > 0) {
+            anchorRect = rect;
+        }
+        return anchorRect;
+    };
+    // 在菜单关闭和字段异步加载前保留锚点，按钮被隐藏或替换时继续使用有效坐标。
+    getAnchorRect();
     const avID = options.data?.id || options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
     // config/properties/sorts/filters/contextFilter/switcher 菜单只需要字段/视图元数据，不需要行数据，
@@ -148,13 +158,13 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                 inputElement.dispatchEvent(new Event("input"));
             }
         };
-        let tabRect = options.anchorElement?.getBoundingClientRect() ||
+        let tabRect = getAnchorRect() ||
             options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
         const resizeMenu = ignoreRows && !isMobile() ? () => {
             if (!menuElement.isConnected) {
                 return;
             }
-            tabRect = options.anchorElement?.getBoundingClientRect() || options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
+            tabRect = getAnchorRect() || options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
             if (!tabRect) {
                 return;
             }

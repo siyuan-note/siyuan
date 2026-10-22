@@ -12,6 +12,7 @@ const setup = () => {
     let opened: IOpenAVPanelOptions;
     let resolve: (value: unknown) => void;
     const requests: unknown[] = [];
+    let targetRect = {right: 1500, bottom: 460, width: 24, height: 24} as DOMRect;
     const methods = {} as typeof import("./backlinkDatabaseFilter");
     runInNewContext(transpileModule(readFileSync("src/layout/dock/backlinkDatabaseFilter.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
@@ -29,12 +30,13 @@ const setup = () => {
     });
     const options = {
         id: "topic", notebook: "", keyword: "", filter: {dailyNote: "all", excludeSelf: false, excludedNotebookIDs: []} as IBacklinkSourceFilter,
-        target: {} as HTMLElement,
+        target: {getBoundingClientRect: () => targetRect} as HTMLElement,
         isCurrent: () => current,
         getSelected: () => selected,
         apply: (value?: IBacklinkSourceFilter["database"]) => { selected = value; },
     };
     return {methods, options, requests, respond: (value: unknown) => resolve(value),
+        hideTarget: () => { targetRect = {right: 0, bottom: 0, width: 0, height: 0} as DOMRect; },
         stale: () => { current = false; }, get selected() { return selected; }, get opened() { return opened; }};
 };
 
@@ -68,4 +70,15 @@ test("database candidates arriving after the target changes do not reopen a filt
     h.respond({code: 0, data: [{id: "tasks", name: "Tasks", keys: []}]});
     assert.equal((await pending).length, 0);
     assert.equal(h.opened, undefined);
+});
+
+test("database filtering retains the toolbar position across candidate loading and source refresh", async () => {
+    const h = setup();
+    const pending = h.methods.loadBacklinkDatabaseFilterMenu(h.options);
+    h.hideTarget();
+    h.respond({code: 0, data: [{id: "tasks", name: "Tasks", keys: []}]});
+    const menu = await pending;
+    menu[2].click(null, null);
+    assert.equal(h.opened.anchorRect.right, 1500);
+    assert.equal(h.opened.anchorRect.bottom, 460);
 });

@@ -14,6 +14,7 @@ export interface IOpenAVPanelOptions {
     keepMenuOpen?: boolean;
     filterOperation?: FilterEditorOptions;
     anchorElement?: HTMLElement;
+    anchorRect?: DOMRect;
     requireExplicitChange?: boolean;
 }
 

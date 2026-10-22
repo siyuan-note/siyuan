@@ -3410,6 +3410,7 @@
 		"436": "Menerapkan perubahan tersinkron; penyuntingan dapat dilanjutkan setelah pemrosesan atau pemulihan pembatalan selesai",
 		"437": "Unduh versi ini",
 		"438": "Pilih gambar JPEG, PNG, atau WebP yang valid, maksimal 10 MiB dan 16 megapiksel",
-		"439": "Tidak dapat menyimpan wallpaper layar kunci; periksa izin tulis ruang kerja"
+		"439": "Tidak dapat menyimpan wallpaper layar kunci; periksa izin tulis ruang kerja",
+		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan"
 	}
 }

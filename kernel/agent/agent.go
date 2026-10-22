@@ -942,10 +942,14 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				return
 			}
 			requestTools := roundCapabilities.definitions
-			if maxRounds > 0 && toolCallRounds >= maxRounds {
+			toolRoundLimitReached := maxRounds > 0 && toolCallRounds >= maxRounds
+			if toolRoundLimitReached {
 				// 工具调用达到上限后仍允许模型完成一次最终回答，但不再提供工具定义。
 				requestTools = nil
-				roundCapabilities = &capabilitySet{registrations: map[string]*capabilityRegistration{}}
+				roundCapabilities = &capabilitySet{
+					registrations:         map[string]*capabilityRegistration{},
+					toolRoundLimitReached: true,
+				}
 			}
 			capabilities = roundCapabilities
 			contextMsgs = projectCompactionContext(checkpointMsgs, coveredMessages)
@@ -1034,14 +1038,18 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					return
 				}
 				contentBuilder.WriteString(token)
-				sendEvent(ch, AgentEvent{Type: "content", Token: token})
+				if !toolRoundLimitReached {
+					sendEvent(ch, AgentEvent{Type: "content", Token: token})
+				}
 			}
 			writeReasoning := func(token string) {
 				if token == "" {
 					return
 				}
 				reasoningBuilder.WriteString(token)
-				sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+				if !toolRoundLimitReached {
+					sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+				}
 			}
 			writeTaggedContent := func(token string) {
 				if !splitTaggedReasoning {
@@ -1085,6 +1093,11 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						break
 					}
 					logging.LogErrorf("agent stream error: %s", recvErr.Error())
+					if toolRoundLimitReached {
+						// 最后一轮尚未校验，不把可能含原始工具标记的部分输出写入会话。
+						contentBuilder.Reset()
+						reasoningBuilder.Reset()
+					}
 					content := contentBuilder.String()
 					if content != "" || reasoningBuilder.String() != "" {
 						checkpointMsgs = append(checkpointMsgs, AgentMessage{
@@ -1108,8 +1121,15 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				select {
 				case <-ctx.Done():
 					flushTaggedContent()
+					if toolRoundLimitReached {
+						contentBuilder.Reset()
+						reasoningBuilder.Reset()
+					}
 					turn.DraftContent = contentBuilder.String()
 					turn.DraftRoundID = roundID
+					if toolRoundLimitReached {
+						turn.DraftRoundID = ""
+					}
 					saveTurn("interrupted")
 					stream.Close()
 					roundCancel()
@@ -1131,7 +1151,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 
 					toolCallAccumulator.Add(choice.Delta.ToolCalls)
 				}
-				if contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
+				if !toolRoundLimitReached && contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
 					turn.DraftContent = contentBuilder.String()
 					turn.DraftRoundID = roundID
 					saveTurn("running")
@@ -1162,6 +1182,26 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			turn.DraftContent = ""
 			turn.DraftRoundID = ""
 
+			if toolRoundLimitReached {
+				// 先校验完整收尾，覆盖跨流片段的标记；既不展示，也不持久化越界调用。
+				if len(toolCallAccumulator.ToolCalls()) > 0 || containsTextToolCall(contentBuilder.String()) ||
+					containsTextToolCall(reasoningBuilder.String()) {
+					contentBuilder.Reset()
+					reasoningBuilder.Reset()
+					toolCallAccumulator = toolCallStreamAccumulator{}
+					nativeContent = nil
+					responseOutput = nil
+					responseOutputTokens = 0
+				} else {
+					if reasoningBuilder.Len() > 0 {
+						sendEvent(ch, AgentEvent{Type: "reasoning", Token: reasoningBuilder.String()})
+					}
+					if contentBuilder.Len() > 0 {
+						sendEvent(ch, AgentEvent{Type: "content", Token: contentBuilder.String()})
+					}
+				}
+			}
+
 			if outputLimitReached {
 				// 保留已收到的文本，并在执行可能被截断的工具调用前结束本轮。
 				partial := AgentMessage{
@@ -1187,7 +1227,11 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					return
 				}
 				sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(297)})
+				errMsg := kernelModel.Conf.Language(297)
+				if toolRoundLimitReached {
+					errMsg = kernelModel.Conf.Language(440)
+				}
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 				return
 			}
 
@@ -1631,11 +1675,19 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				ReasoningContent: reasoningBuilder.String(),
 			})
 			turn.TokenBreakdown = computeBreakdownIfNeeded(model, requestMessages, requestTools, lastPromptTokens)
-			if !saveTurn("finished") {
+			state := "finished"
+			if toolRoundLimitReached {
+				state = "interrupted"
+			}
+			if !saveTurn(state) {
 				return
 			}
 
 			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+			if toolRoundLimitReached {
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(440)})
+				return
+			}
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
@@ -2122,6 +2174,9 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 
 	var sb strings.Builder
 	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
+	if capabilities != nil && capabilities.toolRoundLimitReached {
+		sb.WriteString(toolRoundLimitPrompt)
+	}
 	if len(instructions) > 0 && strings.TrimSpace(instructions[0]) != "" {
 		sb.WriteString("\n\n## Workspace instructions\nThe following AGENTS.md contains persistent user preferences for this workspace. " +
 			"Follow them where applicable; the current user's explicit request overrides general preferences. " +

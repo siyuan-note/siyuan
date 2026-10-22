@@ -3410,6 +3410,7 @@
 		"436": "Aplicando alterações sincronizadas; a edição será retomada após o processamento ou a recuperação do cancelamento",
 		"437": "Baixar esta versão",
 		"438": "Selecione uma imagem JPEG, PNG ou WebP válida de até 10 MiB e 16 megapixels",
-		"439": "Não foi possível salvar o papel de parede da tela de bloqueio; verifique as permissões de gravação do espaço de trabalho"
+		"439": "Não foi possível salvar o papel de parede da tela de bloqueio; verifique as permissões de gravação do espaço de trabalho",
+		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar"
 	}
 }

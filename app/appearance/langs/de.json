@@ -3410,6 +3410,7 @@
 		"436": "Synchronisierte Änderungen werden angewendet; nach der Verarbeitung oder Wiederherstellung nach Abbruch ist die Bearbeitung wieder möglich",
 		"437": "Diese Version herunterladen",
 		"438": "Wähle ein gültiges JPEG-, PNG- oder WebP-Bild mit maximal 10 MiB und 16 Megapixeln",
-		"439": "Der Sperrbildschirm-Hintergrund konnte nicht gespeichert werden; prüfe die Schreibrechte des Arbeitsbereichs"
+		"439": "Der Sperrbildschirm-Hintergrund konnte nicht gespeichert werden; prüfe die Schreibrechte des Arbeitsbereichs",
+		"440": "Das Rundenlimit für Werkzeugaufrufe wurde erreicht. Verbleibende Werkzeugaufrufe wurden nicht ausgeführt; sende eine weitere Nachricht, um fortzufahren"
 	}
 }

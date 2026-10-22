@@ -3410,6 +3410,7 @@
 		"436": "Používajú sa synchronizované zmeny; úpravy budú dostupné po spracovaní alebo obnovení po zrušení",
 		"437": "Stiahnuť túto verziu",
 		"438": "Vyberte platný obrázok JPEG, PNG alebo WebP s veľkosťou najviac 10 MiB a 16 megapixelov",
-		"439": "Tapetu zamknutej obrazovky sa nepodarilo uložiť; skontrolujte oprávnenia na zápis do pracovného priestoru"
+		"439": "Tapetu zamknutej obrazovky sa nepodarilo uložiť; skontrolujte oprávnenia na zápis do pracovného priestoru",
+		"440": "Bol dosiahnutý limit kôl volaní nástrojov. Zostávajúce volania sa nevykonali; na pokračovanie odošlite ďalšiu správu"
 	}
 }

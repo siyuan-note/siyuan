@@ -3410,6 +3410,7 @@
 		"436": "Aplicando cambios sincronizados; podrás editar cuando termine el procesamiento o la recuperación tras cancelar",
 		"437": "Descargar esta versión",
 		"438": "Selecciona una imagen JPEG, PNG o WebP válida de hasta 10 MiB y 16 megapíxeles",
-		"439": "No se pudo guardar el fondo de bloqueo; comprueba los permisos de escritura del espacio de trabajo"
+		"439": "No se pudo guardar el fondo de bloqueo; comprueba los permisos de escritura del espacio de trabajo",
+		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar"
 	}
 }

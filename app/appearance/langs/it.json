@@ -3410,6 +3410,7 @@
 		"436": "Applicazione delle modifiche sincronizzate; la modifica riprende al termine dell’elaborazione o del ripristino dopo l’annullamento",
 		"437": "Scarica questa versione",
 		"438": "Scegli un’immagine JPEG, PNG o WebP valida fino a 10 MiB e 16 megapixel",
-		"439": "Impossibile salvare lo sfondo della schermata di blocco; controlla i permessi di scrittura dello spazio di lavoro"
+		"439": "Impossibile salvare lo sfondo della schermata di blocco; controlla i permessi di scrittura dello spazio di lavoro",
+		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare"
 	}
 }

@@ -3410,6 +3410,7 @@
 		"436": "Application des modifications synchronisées ; la modification reprend après le traitement ou la récupération suivant une annulation",
 		"437": "Télécharger cette version",
 		"438": "Choisissez une image JPEG, PNG ou WebP valide, de 10 MiB et 16 mégapixels maximum",
-		"439": "Impossible d’enregistrer le fond d’écran de verrouillage ; vérifiez les droits d’écriture de l’espace de travail"
+		"439": "Impossible d’enregistrer le fond d’écran de verrouillage ; vérifiez les droits d’écriture de l’espace de travail",
+		"440": "La limite de tours d’appels d’outils est atteinte. Les appels restants n’ont pas été exécutés ; envoyez un autre message pour continuer"
 	}
 }

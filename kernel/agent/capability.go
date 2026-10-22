@@ -125,9 +125,10 @@ func (registration *capabilityRegistration) browserEffectsFor(action string) (to
 }
 
 type capabilitySet struct {
-	definitions   []openai.Tool
-	registrations map[string]*capabilityRegistration
-	ids           map[string]*capabilityRegistration
+	definitions           []openai.Tool
+	registrations         map[string]*capabilityRegistration
+	ids                   map[string]*capabilityRegistration
+	toolRoundLimitReached bool
 }
 
 func (set *capabilitySet) registration(modelName string) *capabilityRegistration {

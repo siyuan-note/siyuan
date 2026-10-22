@@ -3410,6 +3410,7 @@
 		"436": "Eşitlenen değişiklikler uygulanıyor; işleme veya iptal sonrası kurtarma tamamlanınca düzenlemeye devam edebilirsiniz",
 		"437": "Bu sürümü indir",
 		"438": "En fazla 10 MiB ve 16 megapiksel boyutunda geçerli bir JPEG, PNG veya WebP görüntüsü seçin",
-		"439": "Kilit ekranı duvar kâğıdı kaydedilemedi; çalışma alanının yazma izinlerini kontrol edin"
+		"439": "Kilit ekranı duvar kâğıdı kaydedilemedi; çalışma alanının yazma izinlerini kontrol edin",
+		"440": "Araç çağrısı tur sınırına ulaşıldı. Kalan araç çağrıları yürütülmedi; devam etmek için başka bir mesaj gönderin"
 	}
 }

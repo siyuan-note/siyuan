@@ -29,6 +29,11 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     const editor = composer.querySelector<HTMLElement>(".protyle-wysiwyg");
     const handle = panel.querySelector<HTMLElement>(".protyle-block-resize");
     const tick = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const input = async (method: string, params: object) => {
+        await require("electron").ipcRenderer.invoke("composer-input", method, params);
+        await tick();
+    };
+    const moveMouse = (x: number, y: number) => input("Input.dispatchMouseEvent", {type: "mouseMoved", x, y});
     const paragraph = (text: string) => '<div class="p" data-node-id="20261022000000-abcdefg" data-type="NodeParagraph">' +
         `<div contenteditable="true" spellcheck="false">${text}</div></div>`;
     const short = () => editor.innerHTML = paragraph("Short input");
@@ -37,6 +42,23 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     await tick();
     const small = composer.clientHeight;
     check.ok(small < 100, `short input stays compact: ${small}`);
+    await moveMouse(900, 10);
+    check.equal(getComputedStyle(handle).opacity, "0", "idle handles stay hidden on devices with a mouse");
+    const inputRect = composer.getBoundingClientRect();
+    await moveMouse(inputRect.left + 10, inputRect.top + 10);
+    check.equal(getComputedStyle(handle).opacity, "1", "hovering the input reveals the handle even for short content");
+    await moveMouse(900, 10);
+    check.equal(getComputedStyle(handle).opacity, "0", "leaving the input hides the handle");
+    await input("Input.dispatchKeyEvent", {type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9});
+    await input("Input.dispatchKeyEvent", {type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9});
+    check.equal(document.activeElement, handle, "the handle remains reachable by keyboard");
+    check.equal(getComputedStyle(handle).opacity, "1", "keyboard focus reveals the handle without hover");
+    check.equal(getComputedStyle(handle).outlineStyle, "solid", "keyboard navigation retains its focus indicator");
+    handle.blur();
+    await input("Emulation.setTouchEmulationEnabled", {enabled: true});
+    check.equal(matchMedia("(hover: none) and (pointer: coarse)").matches, true);
+    check.equal(getComputedStyle(handle).opacity, "1", "touch devices retain a visible handle without hover");
+    await input("Emulation.setTouchEmulationEnabled", {enabled: false});
     const image = '<span class="img"><span></span><span><img alt="Image" ' +
         'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></span></span>';
     editor.innerHTML = paragraph(image) + paragraph("After image") + paragraph("Last line");
@@ -71,13 +93,29 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     // 原生指针事件验证捕获、鼠标拖动以及触摸取消。
     handle.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     await tick();
+    const editable = editor.querySelector<HTMLElement>('[contenteditable="true"]');
+    editable.focus();
     const rect = handle.getBoundingClientRect();
     const x = Math.round(rect.left + rect.width / 2);
     const y = Math.round(rect.top + rect.height / 2);
     await require("electron").ipcRenderer.invoke("composer-drag", {x, y, dy: -100, touch: false});
     check.ok(composer.clientHeight >= 338 && composer.clientHeight <= 342, "mouse dragging raises the height cap");
     check.equal(handle.classList.contains("touch-resize-active"), false);
+    check.equal(document.activeElement, editable, "mouse dragging keeps focus in the composer");
+    check.equal(getComputedStyle(handle).outlineStyle, "none", "mouse dragging does not leave a keyboard focus box");
+    await moveMouse(900, 10);
+    check.equal(getComputedStyle(handle).opacity, "0", "the handle hides after dragging and leaving the input");
     const preferred = composer.style.maxHeight;
+    const escapeRect = handle.getBoundingClientRect();
+    let escapedEditor = false;
+    editable.addEventListener("keydown", event => escapedEditor ||= event.key === "Escape");
+    await require("electron").ipcRenderer.invoke("composer-drag", {
+        x: Math.round(escapeRect.left + escapeRect.width / 2), y: Math.round(escapeRect.top + escapeRect.height / 2),
+        dy: -50, touch: false, escape: true,
+    });
+    check.equal(composer.style.maxHeight, preferred, "Escape cancels dragging while focus stays in the editor");
+    check.equal(escapedEditor, false, "canceling a drag does not trigger editor Escape actions");
+    check.equal(handle.classList.contains("touch-resize-active"), false);
     const touchRect = handle.getBoundingClientRect();
     await require("electron").ipcRenderer.invoke("composer-drag", {
         x: Math.round(touchRect.left + touchRect.width / 2), y: Math.round(touchRect.top + touchRect.height / 2),
@@ -122,10 +160,13 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     destroy();
     key("End");
     check.equal(composer.style.maxHeight, "", "destroy removes listeners and the temporary geometry");
+    const escape = new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true});
+    panel.dispatchEvent(escape);
+    check.equal(escape.defaultPrevented, false, "Escape is not intercepted after disposal");
     return "Composer resize and scrolling passed";
 };
 
-test("composer grows, resizes and preserves scroll space on desktop and mobile", {
+test("composer grows, resizes and preserves focus, handle visibility and scroll space on desktop and mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {
@@ -143,7 +184,8 @@ app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 1000, height: 900,
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     win.webContents.debugger.attach("1.3");
-    ipcMain.handle("composer-drag", async (_event, {x, y, dy, touch}) => {
+    ipcMain.handle("composer-input", (_event, method, params) => win.webContents.debugger.sendCommand(method, params));
+    ipcMain.handle("composer-drag", async (_event, {x, y, dy, touch, escape}) => {
         const send = async (method, params) => {
             await win.webContents.debugger.sendCommand(method, params);
             await new Promise(resolve => setTimeout(resolve, 40));
@@ -157,6 +199,10 @@ app.whenReady().then(async () => {
         } else {
             await send("Input.dispatchMouseEvent", {type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1});
             await send("Input.dispatchMouseEvent", {type: "mouseMoved", x, y: y + dy, button: "left", buttons: 1});
+            if (escape) {
+                await send("Input.dispatchKeyEvent", {type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27});
+                await send("Input.dispatchKeyEvent", {type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27});
+            }
             await send("Input.dispatchMouseEvent", {type: "mouseReleased", x, y: y + dy, button: "left", buttons: 0, clickCount: 1});
         }
     });

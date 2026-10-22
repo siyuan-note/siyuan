@@ -688,6 +688,10 @@
   margin: 0 16px 12px;
   padding: 8px;
   flex-shrink: 0;
+
+  &:hover .agent-chat__input-resize .protyle-block-resize {
+    opacity: 1;
+  }
 }
 
 .agent-chat__input-resize {
@@ -697,7 +701,6 @@
   .protyle-block-resize[data-resize-axis="height"] {
     top: -16px;
     bottom: auto;
-    opacity: 1;
   }
 }
 

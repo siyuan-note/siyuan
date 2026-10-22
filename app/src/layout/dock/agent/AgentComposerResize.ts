@@ -44,7 +44,6 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         drag = {id: event.pointerId, y: event.clientY, height: composer.clientHeight, previous: preferred};
         handle.setPointerCapture(event.pointerId);
         handle.classList.add("touch-resize-active");
-        handle.focus({preventScroll: true});
     };
     const move = (event: PointerEvent) => {
         if (!drag || drag.id !== event.pointerId) {
@@ -65,10 +64,15 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         }
     };
     const cancel = () => finish(true);
-    const keydown = (event: KeyboardEvent) => {
+    const cancelKeydown = (event: KeyboardEvent) => {
         if (event.key === "Escape" && drag) {
             cancel();
-        } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
+    const keydown = (event: KeyboardEvent) => {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
             preferred = Math.max(40, Math.min(maximum, value + (event.key === "ArrowUp" ? 24 : -24)));
             update();
         } else if (event.key === "Home" || event.key === "End") {
@@ -93,6 +97,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
     handle.addEventListener("keydown", keydown);
     handle.addEventListener("dblclick", reset);
     windowSelf.addEventListener("blur", cancel);
+    windowSelf.addEventListener("keydown", cancelKeydown, true);
     windowSelf.addEventListener("resize", update);
     windowSelf.visualViewport?.addEventListener("resize", update);
     const observer = new ResizeObserver(update);
@@ -109,6 +114,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         handle.removeEventListener("keydown", keydown);
         handle.removeEventListener("dblclick", reset);
         windowSelf.removeEventListener("blur", cancel);
+        windowSelf.removeEventListener("keydown", cancelKeydown, true);
         windowSelf.removeEventListener("resize", update);
         windowSelf.visualViewport?.removeEventListener("resize", update);
         composer.style.maxHeight = "";

@@ -2162,7 +2162,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.ok(palette.scrollWidth > palette.clientWidth, "long palettes scroll independently");
         palette.scrollLeft = palette.scrollWidth;
         const bounds = inspector.getBoundingClientRect();
-        for (const key of ["connect", "listMindmapSummary", "delete"]) {
+        for (const key of ["connect", "delete"]) {
             const action = inspector.querySelector<HTMLElement>(`[aria-label="${key}"]`).getBoundingClientRect();
             check.ok(action.left >= bounds.left && action.right <= bounds.right,
                 `node action ${key} stays visible at width ${width} while the palette scrolls`);
@@ -4641,13 +4641,18 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }});
     await settle();
     summaryView.focusNode(summaryIds[0]);
-    const summaryButton = summaryHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    const summaryButton = summaryHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action");
     check.equal(summaryButton.disabled, false);
     for (const id of summaryIds.slice(1)) {
         summaryView.selectNode(id, true);
     }
-    summaryButton.click();
     await settle();
+    check.equal(summaryButton.hidden, false);
+    check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), null);
+    const summaryActionBounds = summaryButton.getBoundingClientRect();
+    check.equal(document.elementFromPoint(summaryActionBounds.left + summaryActionBounds.width / 2,
+        summaryActionBounds.top + summaryActionBounds.height / 2)?.closest("button"), summaryButton);
+    await clickMouse(summaryButton);
     const summaryInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
     check.ok(summaryInput, "new summaries enter text editing on touch selection");
     summaryInput.value = "<script>plain text</script> " + "Long summary ".repeat(25);
@@ -4813,6 +4818,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(summaryButton.disabled, true, "crossing ranges disable direct creation");
     check.equal(summaryButton.getAttribute("aria-description"), "listMindmapSummaryConflict");
     check.equal(summaryView.summaryStatus.hidden, false, "touch users can see why creation is disabled");
+    await settle();
+    check.equal(summaryButton.hidden, true, "conflicting selections do not expose a creation control");
     summaryButton.click();
     check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, summaryIds.slice(0, 2));
     summaryView.clearSelection();
@@ -4849,7 +4856,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(printedBounds.bottom <= printViewport.bottom + 1, "PDF previews include tall summary labels");
     printedLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(summaryHost.querySelector(".mindmap-view__summary-editor"), null);
-    check.equal(summaryHost.querySelector('[aria-label="listMindmapSummary"]'), null);
+    check.equal(summaryHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action").hidden, true);
     summaryView.destroy();
     summaryHost.remove();
     api.deleteListMindmapNode(summaryList, summaryIds[0]);
@@ -4975,10 +4982,29 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const batchInspector = batchHost.querySelector<HTMLElement>(".mindmap-view__inspector");
     check.equal(batchInspector.hidden, false);
     check.equal(batchInspector.querySelector('[aria-label="multiSelect"]'), null);
-    const batchButton = batchInspector.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    const batchButton = batchHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action");
+    check.equal(batchInspector.querySelector('[aria-label="listMindmapSummary"]'), null);
+    await settle();
+    check.equal(batchButton.hidden, false);
+    check.equal(batchButton.textContent, batchLabels.listMindmapSummaryBatch.replace("${count}", "2"));
     check.equal(batchButton.disabled, false);
     check.equal(batchButton.dataset.tooltip, batchLabels.listMindmapSummaryBatch.replace("${count}", "2"));
     check.equal(batchInspector.querySelector<HTMLButtonElement>('[aria-label="connect"]').disabled, true);
+    await moveMouse();
+    for (const [background, primary] of [["#ffffff", "#2563eb"], ["#1e1e1e", "#93c5fd"]]) {
+        batchHost.style.setProperty("--b3-theme-background", background);
+        batchHost.style.setProperty("--b3-theme-primary", primary);
+        const colorProbe = document.createElement("span");
+        colorProbe.style.color = background;
+        batchHost.append(colorProbe);
+        check.equal(getComputedStyle(batchButton).backgroundColor, getComputedStyle(colorProbe).color,
+            "floating controls retain the theme background in light and dark themes");
+        colorProbe.style.color = primary;
+        check.equal(getComputedStyle(batchButton).color, getComputedStyle(colorProbe).color);
+        colorProbe.remove();
+    }
+    batchHost.style.removeProperty("--b3-theme-background");
+    batchHost.style.removeProperty("--b3-theme-primary");
     for (const width of [240, 320, 700]) {
         batchHost.style.width = `${width}px`;
         batchHost.style.fontSize = "32px";
@@ -4992,6 +5018,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }
     }
     batchHost.style.fontSize = "";
+    const selectedBeforeAction = [...batchView.getSelectedIds()];
+    const actionBounds = batchButton.getBoundingClientRect();
+    batchButton.dispatchEvent(new PointerEvent("pointerdown", {pointerId: 85, pointerType: "touch", isPrimary: true,
+        button: 0, bubbles: true, clientX: actionBounds.left + 1, clientY: actionBounds.top + 1}));
+    check.deepEqual(batchView.getSelectedIds(), selectedBeforeAction, "touching the graph action preserves the selection");
     batchButton.click();
     await settle();
     check.equal(batchHistory.length, 1, "clicking summary submits all groups once without a confirmation step");

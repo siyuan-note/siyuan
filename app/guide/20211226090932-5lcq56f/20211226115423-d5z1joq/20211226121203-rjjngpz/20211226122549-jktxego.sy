@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261022132551"
+		"updated": "20261022134112"
 	},
 	"Children": [
 		{
@@ -13103,7 +13103,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261022132551"
+				"updated": "20261022134112"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13948,12 +13948,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-0k1m0f6",
-				"updated": "20261022132341"
+				"updated": "20261022134112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "選取節點後，啟動底部節點選單中的 "
+					"Data": "選取節點後，啟動畫布預覽括號旁的 "
 				},
 				{
 					"Type": "NodeTextMark",

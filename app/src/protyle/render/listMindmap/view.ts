@@ -138,6 +138,7 @@ export class ListMindmapView {
     private readonly summaryElements = new Map<string, HTMLDivElement>();
     private summaryPositions = new Map<string, ListMindmapSummaryPosition>();
     private readonly summaryStatus = createElement("div", "mindmap-view__route-status");
+    private readonly summaryAction: HTMLButtonElement;
     private selectedSummary?: string;
     private summaryPending = false;
     private readonly selectionBox = createElement("div", "mindmap-view__selection-box");
@@ -220,8 +221,11 @@ export class ListMindmapView {
         this.inspector = createElement("div", "mindmap-view__inspector");
         this.inspector.setAttribute("data-prevent-swipe", "true");
         this.inspector.hidden = true;
+        this.summaryAction = this.makeButton("listMindmapSummary", "", () => void this.createSummary());
+        this.summaryAction.className = "b3-button b3-button--outline mindmap-view__summary-action";
+        this.summaryAction.hidden = true;
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
-        this.viewport.append(this.canvas, this.world);
+        this.viewport.append(this.canvas, this.world, this.summaryAction);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -398,6 +402,7 @@ export class ListMindmapView {
     private clearSelection() {
         this.inspector.hidden = true;
         this.summaryStatus.hidden = true;
+        this.summaryAction.hidden = true;
         if (!this.selectedId && !this.selectedRelation && !this.selectedEdge && !this.relationFrom &&
             !this.selectedSummary) {
             return;
@@ -483,6 +488,7 @@ export class ListMindmapView {
         this.options.host.classList.toggle("mindmap-view--active", value);
         if (!value) {
             this.summaryStatus.hidden = true;
+            this.summaryAction.hidden = true;
             const selecting = !!this.relationFrom || this.multiSelect;
             this.multiSelect = false;
             this.pinching = false;
@@ -517,6 +523,7 @@ export class ListMindmapView {
         this.finishSummaryEdit?.(false);
         this.multiSelect = false;
         this.summaryStatus.hidden = true;
+        this.summaryAction.hidden = true;
         this.cancelPointer();
         this.relationFrom = undefined;
         this.inspector.hidden = true;
@@ -539,6 +546,7 @@ export class ListMindmapView {
     }
 
     private createToolbar() {
+        this.buttons.set("summary", this.summaryAction);
         const controls = createElement("div", "mindmap-view__toolbar-group");
         const add = (id: string, key: string, icon: string, action: () => void, nodeAction = false) => {
             const button = this.makeButton(key, icon, action);
@@ -585,7 +593,6 @@ export class ListMindmapView {
                 this.updateSelection();
             });
             this.buttons.get("multiSelect").setAttribute("aria-pressed", String(this.multiSelect));
-            add("summary", "listMindmapSummary", "iconGroups", () => void this.createSummary(), true);
             add("relation", "connect", "iconRoute", () => {
                 this.setInteractionActive(true);
                 this.setPanning(false);
@@ -1417,10 +1424,12 @@ export class ListMindmapView {
 
     private drawSummaryPreview(context: CanvasRenderingContext2D, color: string) {
         if (this.readOnly || this.inspector.hidden || this.printTransform || this.options.printLayout) {
+            this.summaryAction.hidden = true;
             return;
         }
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(this.getSelectedIds()));
         if (conflict || !ranges.length) {
+            this.summaryAction.hidden = true;
             return;
         }
         const previews = ranges.map((range, index) => ({...range, id: `preview:${index}`, label: ""}));
@@ -1442,6 +1451,60 @@ export class ListMindmapView {
             }
         });
         context.restore();
+        const anchor = ranges.findIndex(range => range.nodeIds.includes(this.selectedId));
+        const ordered = anchor < 1 ? previews : [previews[anchor], ...previews.filter((_preview, index) => index !== anchor)];
+        this.positionSummaryAction(ordered.map(preview => positions.get(preview.id)).filter(Boolean), ranges.length);
+    }
+
+    private positionSummaryAction(positions: ListMindmapSummaryPosition[], count: number) {
+        const action = this.summaryAction;
+        const width = this.viewport.clientWidth;
+        const height = this.viewport.clientHeight;
+        if (!positions.length || width < 32 || height < 32) {
+            action.hidden = true;
+            return;
+        }
+        const label = count === 1 ? this.label("listMindmapSummary") :
+            this.label("listMindmapSummaryBatch").replace("${count}", String(count));
+        if (action.textContent !== label) {
+            action.textContent = label;
+        }
+        action.setAttribute("aria-label", label);
+        action.hidden = false;
+        const actionWidth = action.offsetWidth;
+        const actionHeight = action.offsetHeight;
+        if (actionWidth > width - 16 || actionHeight > height - 16) {
+            action.hidden = true;
+            return;
+        }
+        const viewport = this.viewport.getBoundingClientRect();
+        const scaleX = viewport.width / width || 1;
+        const scaleY = viewport.height / height || 1;
+        const controls = [...this.getToolbarBounds(), ...(!this.inspector.hidden ? [this.inspector.getBoundingClientRect()] : [])]
+            .map(rect => ({left: (rect.left - viewport.left) / scaleX, top: (rect.top - viewport.top) / scaleY,
+                right: (rect.right - viewport.left) / scaleX, bottom: (rect.bottom - viewport.top) / scaleY}));
+        const content = [...this.positions.values(), ...[...this.summaryPositions.values()].map(summary =>
+            ({x: summary.labelX, y: summary.labelY, width: summary.width, height: summary.height}))];
+        const nodes = content.map(node => ({left: this.offsetX + node.x * this.scale,
+            top: this.offsetY + node.y * this.scale, right: this.offsetX + (node.x + node.width) * this.scale,
+            bottom: this.offsetY + (node.y + node.height) * this.scale}));
+        const overlap = (x: number, y: number, rect: {left: number, top: number, right: number, bottom: number}) =>
+            Math.max(0, Math.min(x + actionWidth + 4, rect.right) - Math.max(x - 4, rect.left)) *
+            Math.max(0, Math.min(y + actionHeight + 4, rect.bottom) - Math.max(y - 4, rect.top));
+        const candidates = positions.flatMap(position => {
+            const x = this.offsetX + position.labelX * this.scale;
+            const top = this.offsetY + position.top * this.scale;
+            const bottom = this.offsetY + position.bottom * this.scale;
+            return [{x, y: (top + bottom - actionHeight) / 2}, {x, y: top - actionHeight - 8}, {x, y: bottom + 8}];
+        }).map(point => {
+            const x = Math.max(8, Math.min(width - actionWidth - 8, point.x));
+            const y = Math.max(8, Math.min(height - actionHeight - 8, point.y));
+            return {x, y, score: controls.reduce((sum, rect) => sum + overlap(x, y, rect), 0) * 1000 +
+                nodes.reduce((sum, rect) => sum + overlap(x, y, rect), 0)};
+        });
+        const best = candidates.reduce((best, point) => point.score < best.score ? point : best);
+        action.style.left = `${best.x}px`;
+        action.style.top = `${best.y}px`;
     }
 
     private updateRelations() {
@@ -3454,7 +3517,7 @@ export class ListMindmapView {
         const remove = squareButton("delete", "iconTrashcan", () => this.deleteSelection());
         remove.disabled = ids.includes(this.model.root.id) ||
             this.model.root.virtual && this.model.root.children.every(node => ids.includes(node.id));
-        this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"), remove);
+        this.inspector.append(this.buttons.get("relation"), remove);
         const change = (patch: Partial<ListMindmapNodeStyle>) => multiple ? this.options.onNodesStyle?.(ids, patch) :
             this.options.onNodeStyle?.(id, patch);
         const nodePalette = createElement("div", "mindmap-view__palette");

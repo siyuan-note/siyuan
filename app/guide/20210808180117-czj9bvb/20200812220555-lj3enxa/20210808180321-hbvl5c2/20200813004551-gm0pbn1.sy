@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261022132551"
+		"updated": "20261022134112"
 	},
 	"Children": [
 		{
@@ -13097,7 +13097,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261022132551"
+				"updated": "20261022134112"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14030,12 +14030,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-tamny2o",
-				"updated": "20261022132341"
+				"updated": "20261022134112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选中节点后，激活底部节点菜单中的 "
+					"Data": "选中节点后，激活画布预览括号旁的 "
 				},
 				{
 					"Type": "NodeTextMark",

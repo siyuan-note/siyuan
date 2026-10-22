@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Warna-warni",
+	"listMindmapPaletteSoft": "Lembut",
+	"listMindmapPaletteForest": "Hutan",
+	"listMindmapCanvasBackground": "Latar belakang kanvas",
+	"listMindmapClearManualColors": "Hapus warna manual",
+	"listMindmapLineColor": "Warna garis cabang",
 	"lockScreenWallpaper": "Wallpaper layar kunci",
 	"lockScreenWallpaperTip": "Satu gambar JPEG, PNG, atau WebP, maksimal 10 MiB dan 16 megapiksel; disimpan di ruang kerja ini tanpa sinkronisasi dan terlihat sebelum masuk",
 	"automationCollectionIncludeSelf": "Sertakan dokumen yang dipilih itu sendiri",

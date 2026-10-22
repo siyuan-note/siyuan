@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Разноцветная",
+	"listMindmapPaletteSoft": "Мягкая",
+	"listMindmapPaletteForest": "Лесная",
+	"listMindmapCanvasBackground": "Фон холста",
+	"listMindmapClearManualColors": "Сбросить ручные цвета",
+	"listMindmapLineColor": "Цвет линий ветвей",
 	"lockScreenWallpaper": "Обои экрана блокировки",
 	"lockScreenWallpaperTip": "Одно изображение JPEG, PNG или WebP, до 10 MiB и 16 мегапикселей; хранится в текущем рабочем пространстве без синхронизации и видно до входа",
 	"automationCollectionIncludeSelf": "Включать сами выбранные документы",

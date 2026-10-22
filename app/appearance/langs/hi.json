@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "रंगीन",
+	"listMindmapPaletteSoft": "सौम्य",
+	"listMindmapPaletteForest": "वन",
+	"listMindmapCanvasBackground": "कैनवास की पृष्ठभूमि",
+	"listMindmapClearManualColors": "मैन्युअल रंग साफ़ करें",
+	"listMindmapLineColor": "शाखा रेखा का रंग",
 	"lockScreenWallpaper": "लॉक स्क्रीन वॉलपेपर",
 	"lockScreenWallpaperTip": "एक JPEG, PNG या WebP छवि, अधिकतम 10 MiB और 16 मेगापिक्सेल; इस कार्यक्षेत्र में बिना सिंक के सहेजी जाती है और लॉगिन से पहले दिखाई देती है",
 	"automationCollectionIncludeSelf": "चयनित दस्तावेज़ों को स्वयं शामिल करें",

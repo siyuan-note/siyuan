@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261021132218"
+		"updated": "20261022102848"
 	},
 	"Children": [
 		{
@@ -2091,7 +2091,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-6mghas7",
-				"updated": "20261020162345"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2110,7 +2110,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "连线"
+					"TextMarkTextContent": "外观"
 				},
 				{
 					"Type": "NodeText",
@@ -2123,7 +2123,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中选择曲线分叉、正交折线、曲线汇聚或圆角折线。选择应用于整张脑图，随文档保存，并支持撤销和重做。切换只改变父子节点间的连线，不改变节点位置或关系线。正交样式共用的竖线沿用默认线色，不单独选中；横向分支仍可单独选中和配色。思源格式的 HTML 和 PDF 预览使用保存的样式。"
+					"Data": " 中选择曲线分叉、正交折线、曲线汇聚或圆角折线。选择应用于整张脑图，随文档保存，并支持撤销和重做。切换只改变父子节点间的连线，不改变节点位置或关系线。共用主干不能单独选中，启用色卡后跟随所属父分支的颜色；横向分支仍可单独选中和配色。思源格式的 HTML 和 PDF 预览使用保存的样式。"
 				}
 			]
 		},
@@ -2132,7 +2132,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017113512-kojg0bw",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2142,7 +2142,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "连线"
+					"TextMarkTextContent": "更多"
 				},
 				{
 					"Type": "NodeText",
@@ -2156,6 +2156,129 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中选择新建导图的连线样式，也适用于首次将列表或页签转换为导图。此偏好保存在当前工作空间的本地配置中，不参与云同步。修改它不会改变已有导图；复制、导入及列表或页签往返转换保留原样式。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-idam1p2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-idam1p2",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主题"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中为当前导图选择缤纷、柔和或森林配色。一级分支按色卡分配颜色，后代节点继承所属分支的颜色；调整分支顺序会保留原有配色，新增节点自动跟随导图配色。已有的节点和线条手工配色会保留。选择默认可移除色卡，并保留手工配色和画布背景。主题不会改变节点内容、结构或折叠状态。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-m1dh0tw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-m1dh0tw",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画布背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择纯色背景，选择默认则跟随应用主题。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清除手工配色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中清除节点、层级连线、关系线和概要的手工配色，恢复使用色卡或默认颜色；画布背景和其他格式保持不变。外观随文档保存，支持撤销和重做，并用于思源格式的 HTML 和 PDF 预览。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-xfgxiox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-xfgxiox",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中多个节点后，可用底部色板统一修改文字和背景颜色，也可用分支连线色板修改所选节点的入线颜色。每次批量修改均可一次撤销。在对应色板中选择默认，可恢复主题或默认配色。触屏上可使用底部节点菜单的多选按钮选择多个节点。"
 				}
 			]
 		},

@@ -168,6 +168,24 @@ test("connector presets extend both metadata versions without migrating legacy c
     }
 });
 
+test("appearance metadata is additive and rejects invalid palettes and branch slots without changing source", () => {
+    for (const version of [1, 2]) {
+        const base = {version, nodes: {a: {branchColor: 2, lineColor: "red"}}, relations: [] as unknown[], extension: "keep"};
+        const appearance = {version: 1, palette: ["#123456", "#abcdef"], backgroundColor: "#ffffff", extension: "keep"};
+        const source = JSON.stringify({...base, appearance});
+        assert.equal(JSON.stringify(parseListMindmapMetadata(source)), source);
+        for (const invalid of [null, [], {}, {...appearance, version: 2}, {...appearance, palette: ["red"]},
+            {...appearance, backgroundColor: "url(x)"}]) {
+            const value = JSON.stringify({...base, appearance: invalid});
+            assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+        }
+        for (const branchColor of [-1, .5, null, "1", 9007199254740992]) {
+            const value = JSON.stringify({...base, nodes: {a: {branchColor}}, appearance});
+            assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+        }
+    }
+});
+
 test("manual relation routes are optional, versioned and validated without dropping extension fields", () => {
     const route = {version: 1, points: [{x: -40, y: 25.5, t: .4, extension: "keep"}], extension: "keep"};
     const metadata = {version: 1, nodes: {}, relations: [{id: "r", from: "a", to: "b", label: "", route}]};
@@ -5082,7 +5100,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "connectors.ts")) +
-        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
+        compile(path.join(__dirname, "appearance.ts")) + compile(path.join(__dirname, "model.ts")) +
+        compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
         compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +

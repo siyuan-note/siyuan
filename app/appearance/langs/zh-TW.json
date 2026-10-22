@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "繽紛",
+	"listMindmapPaletteSoft": "柔和",
+	"listMindmapPaletteForest": "森林",
+	"listMindmapCanvasBackground": "畫布背景",
+	"listMindmapClearManualColors": "清除手動配色",
+	"listMindmapLineColor": "分支連線顏色",
 	"lockScreenWallpaper": "鎖定畫面桌布",
 	"lockScreenWallpaperTip": "僅保留一張 JPEG、PNG 或 WebP 圖片，最大 10 MiB、1600 萬像素；儲存在目前工作空間，不參與同步，登入前可見",
 	"automationCollectionIncludeSelf": "包含所選文件本身",

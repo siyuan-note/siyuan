@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Kolorowy",
+	"listMindmapPaletteSoft": "Łagodny",
+	"listMindmapPaletteForest": "Las",
+	"listMindmapCanvasBackground": "Tło płótna",
+	"listMindmapClearManualColors": "Wyczyść ręczne kolory",
+	"listMindmapLineColor": "Kolor linii gałęzi",
 	"lockScreenWallpaper": "Tapeta ekranu blokady",
 	"lockScreenWallpaperTip": "Jeden obraz JPEG, PNG lub WebP, do 10 MiB i 16 megapikseli; zapisany w tej przestrzeni roboczej bez synchronizacji i widoczny przed logowaniem",
 	"automationCollectionIncludeSelf": "Uwzględnij same wybrane dokumenty",

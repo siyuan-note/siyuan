@@ -22,6 +22,7 @@ import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindma
     layoutListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
+import {getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -69,6 +70,7 @@ export interface ListMindmapViewOptions {
     onUndo?: () => void;
     onRedo?: () => void;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
+    onNodesStyle?: (ids: string[], patch: Partial<ListMindmapNodeStyle>) => void;
     onRelationAdd?: (from: string, to: string) => void;
     onRelationChange?: (id: string, patch: Partial<ListMindmapRelation>, expected?: string) => void;
     onRelationDelete?: (id: string) => void;
@@ -120,6 +122,7 @@ const createElement = <T extends keyof HTMLElementTagNameMap>(tag: T, className:
 };
 
 export class ListMindmapView {
+    private themeColors = new Map<string, ListMindmapNodeStyle>();
     private suppressPanContextMenu = false;
     private readonly options: ListMindmapViewOptions;
     private model: ListMindmapModel;
@@ -731,6 +734,8 @@ export class ListMindmapView {
             return;
         }
         this.model = model;
+        this.themeColors = resolveListMindmapColors(model);
+        this.viewport.style.backgroundColor = model.metadata.appearance?.backgroundColor || "";
         this.selectedIds.forEach(id => {
             if (!model.nodes.has(id)) {
                 this.selectedIds.delete(id);
@@ -809,8 +814,11 @@ export class ListMindmapView {
             element.classList.toggle("mindmap-view__node--root", id === model.root.id);
             this.renderTask(element, id);
             element.classList.toggle("mindmap-view__node--branch", node.children.length > 0);
-            element.style.backgroundColor = model.metadata.nodes[id]?.backgroundColor || "";
-            element.style.color = model.metadata.nodes[id]?.textColor || "";
+            const style = model.metadata.nodes[id];
+            const background = style?.backgroundColor || this.themeColors.get(id)?.backgroundColor || "";
+            element.style.backgroundColor = background;
+            element.style.color = style?.textColor || (this.themeColors.has(id) && isMindmapColor(background) ?
+                getMindmapTextColor(background) : this.themeColors.get(id)?.textColor) || "";
             const collapsed = this.folded.get(id) ?? node.collapsed;
             element.setAttribute("aria-expanded", String(!collapsed));
             const fold = element.querySelector<HTMLButtonElement>(".mindmap-view__fold");
@@ -1923,18 +1931,24 @@ export class ListMindmapView {
         const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
             this.model.metadata.connectorStyle || "bezier", () => new Path2D());
         const rootStyle = this.model.metadata.nodes[this.model.root.id] || {};
-        const trunkStyle = resolveLineStyle(lineStyles, rootStyle.lineColor, rootStyle.lineWidth, defaultLine, false, false);
-        context.strokeStyle = trunkStyle.color;
-        context.lineWidth = trunkStyle.width;
-        context.setLineDash(rootStyle.lineDash ? [6, 4] : []);
-        connectors.trunks.forEach(path => context.stroke(path));
+        connectors.trunks.forEach((path, index) => {
+            const id = connectors.trunkParents[index];
+            const style = this.themeColors?.size ? {...rootStyle, ...this.model.metadata.nodes[id]} : rootStyle;
+            const trunkStyle = resolveLineStyle(lineStyles, style.lineColor || this.themeColors?.get(id)?.lineColor,
+                style.lineWidth, defaultLine, false, false);
+            context.strokeStyle = trunkStyle.color;
+            context.lineWidth = trunkStyle.width;
+            context.setLineDash(style.lineDash ? [6, 4] : []);
+            context.stroke(path);
+        });
         connectors.branches.forEach(({id, path}) => {
             const style = {...rootStyle, ...this.model.metadata.nodes[id]};
             this.linePaths.push({id, relation: false, path});
             context.beginPath();
             const selected = this.selectedEdge === id;
             const hovered = this.hoveredLine === `edge:${id}`;
-            const lineStyle = resolveLineStyle(lineStyles, style.lineColor, style.lineWidth, defaultLine, selected, hovered);
+            const lineStyle = resolveLineStyle(lineStyles, style.lineColor || this.themeColors?.get(id)?.lineColor,
+                style.lineWidth, defaultLine, selected, hovered);
             context.strokeStyle = lineStyle.color;
             context.lineWidth = lineStyle.width;
             context.setLineDash(style.lineDash ? [6, 4] : []);
@@ -3596,12 +3610,12 @@ export class ListMindmapView {
             remove.disabled = ids.includes(this.model.root.id) ||
                 this.model.root.virtual && this.model.root.children.every(node => ids.includes(node.id));
             this.inspector.append(remove);
-            appendMore();
-            return;
         }
-        const style = this.model.metadata.nodes[id] || {};
-        const change = (patch: Partial<ListMindmapNodeStyle>) => this.options.onNodeStyle?.(id, patch);
-        this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"));
+        const change = (patch: Partial<ListMindmapNodeStyle>) => multiple ? this.options.onNodesStyle?.(ids, patch) :
+            this.options.onNodeStyle?.(id, patch);
+        if (!multiple) {
+            this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"));
+        }
         const nodePalette = createElement("div", "mindmap-view__palette");
         nodePalette.setAttribute("role", "group");
         nodePalette.setAttribute("aria-label", this.label("color"));
@@ -3612,7 +3626,10 @@ export class ListMindmapView {
             const button = this.makeButton("color", "iconFont", () => change({
                 textColor: item.color, backgroundColor: item.backgroundColor,
             }));
-            const selected = (style.textColor || "") === item.color && (style.backgroundColor || "") === item.backgroundColor;
+            const selected = ids.every(nodeID => {
+                const nodeStyle = this.model.metadata.nodes[nodeID] || {};
+                return (nodeStyle.textColor || "") === item.color && (nodeStyle.backgroundColor || "") === item.backgroundColor;
+            });
             button.className = "color__square" + (selected ? " color__square--current" : "");
             button.textContent = "A";
             button.setAttribute("aria-label", item.label);
@@ -3626,6 +3643,11 @@ export class ListMindmapView {
             nodePalette.append(manage);
         }
         this.inspector.append(nodePalette);
+        if (multiple) {
+            color(undefined, value => change({lineColor: value}), "listMindmapLineColor");
+            appendMore();
+            return;
+        }
         const node = this.model.nodes.get(id);
         if (node?.taskMarker !== undefined && this.options.onTaskMenu) {
             const task = squareButton("checkToggle", "iconCheck", () => this.openTaskMenu(id, task));

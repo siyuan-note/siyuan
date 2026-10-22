@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Multicolore",
+	"listMindmapPaletteSoft": "Tenue",
+	"listMindmapPaletteForest": "Foresta",
+	"listMindmapCanvasBackground": "Sfondo della tela",
+	"listMindmapClearManualColors": "Cancella colori manuali",
+	"listMindmapLineColor": "Colore delle linee dei rami",
 	"lockScreenWallpaper": "Sfondo della schermata di blocco",
 	"lockScreenWallpaperTip": "Una sola immagine JPEG, PNG o WebP, fino a 10 MiB e 16 megapixel; salvata in questo spazio di lavoro senza sincronizzazione e visibile prima dell’accesso",
 	"automationCollectionIncludeSelf": "Includi i documenti selezionati stessi",

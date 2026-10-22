@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "متعدد الألوان",
+	"listMindmapPaletteSoft": "ناعم",
+	"listMindmapPaletteForest": "غابة",
+	"listMindmapCanvasBackground": "خلفية اللوحة",
+	"listMindmapClearManualColors": "مسح الألوان اليدوية",
+	"listMindmapLineColor": "لون خطوط الفروع",
 	"lockScreenWallpaper": "خلفية شاشة القفل",
 	"lockScreenWallpaperTip": "صورة واحدة بتنسيق JPEG أو PNG أو WebP، بحجم أقصى 10 MiB و16 ميغابكسل؛ تُحفظ في مساحة العمل هذه دون مزامنة وتظهر قبل تسجيل الدخول",
 	"automationCollectionIncludeSelf": "تضمين المستندات المحددة نفسها",

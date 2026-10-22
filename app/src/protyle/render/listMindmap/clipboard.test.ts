@@ -19,7 +19,7 @@ const browserCases = async (source: string, css: string) => {
         "genListItemElement", "disposeCustomBlocksInElement", "processRender", "highlightRender", "avRender", "blockRender",
         source + "; return {readListMindmap, retagMindmapBranch, writeListMindmapMetadata, copyMindmapBranches, " +
         "readMindmapClipboard, pasteMindmapBranches, canCutMindmapBranches, removeMindmapBranches, " +
-        "ListMindmapView, ClipboardController};")(
+        "ListMindmapView, ClipboardController, assignListMindmapBranchColors, resolveListMindmapColors};")(
         constants, async () => {}, (owner: {disabled?: boolean}) => !owner.disabled,
         (message: string) => messages.push(message), () => write(), () => read(),
         (html: string) => html, (html: string) => html, (): null => null, (): void => {}, (): void => {},
@@ -52,6 +52,8 @@ const browserCases = async (source: string, css: string) => {
         const model = api.readListMindmap(list);
         const [a, b, c] = model.root.children;
         model.metadata.nodes[a.id] = {backgroundColor: "red"};
+        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], backgroundColor: "#1e1e1e"};
+        api.assignListMindmapBranchColors(model);
         model.metadata.relations = [
             {id: Lute.NewNodeID(), from: a.id, to: b.id, label: "Inside"},
             {id: Lute.NewNodeID(), from: a.id, to: c.id, label: "Outside"},
@@ -64,13 +66,18 @@ const browserCases = async (source: string, css: string) => {
         check.equal(list.outerHTML, before);
         const payload = api.readMindmapClipboard(copied);
         const selected = api.readListMindmap(payload);
+        check.deepEqual(selected.metadata.appearance, model.metadata.appearance);
         check.deepEqual(selected.root.children.map((node: {id: string}) => node.id), [a.id, b.id],
             "copy follows source order and excludes duplicate descendants");
         check.equal(selected.nodes.size, 4);
         check.equal(selected.metadata.relations.length, 1);
         check.equal(selected.metadata.summaries[0].parentId, payload.dataset.nodeId);
         for (const placement of ["child", "after"]) {
-            const pasted = api.pasteMindmapBranches(list, payload, c.id, placement, lute);
+            const destination = list.cloneNode(true) as HTMLElement;
+            const destinationModel = api.readListMindmap(destination);
+            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], backgroundColor: "#ffffff"};
+            api.writeListMindmapMetadata(destination, destinationModel.metadata);
+            const pasted = api.pasteMindmapBranches(destination, payload, c.id, placement, lute);
             check.ok(pasted);
             const next = api.readListMindmap(pasted.list);
             const oldIDs = new Set([list.dataset.nodeId, ...Array.from(list.querySelectorAll<HTMLElement>("[data-node-id]"))
@@ -81,6 +88,10 @@ const browserCases = async (source: string, css: string) => {
             check.equal(next.nodes.get(pasted.ids[0]).children.length, 1);
             check.match(next.nodes.get(pasted.ids[0]).element.outerHTML, /bold/);
             check.equal(next.metadata.nodes[pasted.ids[0]].backgroundColor, "red");
+            check.equal(next.metadata.nodes[pasted.ids[0]].branchColor, model.metadata.nodes[a.id].branchColor,
+                "copied branch color slots follow remapped node IDs");
+            check.deepEqual(next.metadata.appearance, destinationModel.metadata.appearance,
+                "pasting branches retains the destination appearance");
             check.equal(next.metadata.relations.length, 3);
             const relation = next.metadata.relations[2];
             check.deepEqual([relation.from, relation.to], pasted.ids);
@@ -120,6 +131,11 @@ const browserCases = async (source: string, css: string) => {
     document.body.append(list);
     const model = api.readListMindmap(list);
     const [a, b] = model.root.children;
+    model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], backgroundColor: "#1e1e1e"};
+    api.assignListMindmapBranchColors(model);
+    model.metadata.nodes[a.id].backgroundColor = "red";
+    model.metadata.nodes[a.id].textColor = "white";
+    api.writeListMindmapMetadata(list, model.metadata);
     const host = document.createElement("div");
     host.className = "mindmap-view";
     host.style.cssText = "position:relative;width:850px;height:500px";
@@ -127,6 +143,7 @@ const browserCases = async (source: string, css: string) => {
     const copied: {ids: string[], cut: boolean}[] = [];
     const pasted: {id: string, kind: string}[] = [];
     const menus: {anchor: HTMLElement, ids: string[]}[] = [];
+    const styleChanges: {ids: string[], patch: Record<string, string>}[] = [];
     // Synthetic events have no native pointer capture; geometry and handlers still run in Chromium.
     const capture = HTMLElement.prototype.setPointerCapture;
     const hasCapture = HTMLElement.prototype.hasPointerCapture;
@@ -135,9 +152,22 @@ const browserCases = async (source: string, css: string) => {
     const view = new api.ListMindmapView({host, model, onExit() {},
         onCopy: (ids: string[], cut: boolean) => copied.push({ids, cut}),
         onPaste: (id: string, kind: string) => pasted.push({id, kind}),
-        onClipboardMenu: (anchor: HTMLElement, ids: string[]) => menus.push({anchor, ids}), onDeleteNodes() {}});
+        onClipboardMenu: (anchor: HTMLElement, ids: string[]) => menus.push({anchor, ids}), onDeleteNodes() {},
+        nodeColors: () => [{label: "Batch orange", color: "#000000", backgroundColor: "#fed7aa"}],
+        colors: () => [{label: "Branch green", value: "#15803d"}],
+        onNodesStyle: (ids: string[], patch: Record<string, string>) => {
+            styleChanges.push({ids, patch});
+            ids.forEach(id => model.metadata.nodes[id] = {...model.metadata.nodes[id], ...patch});
+            api.writeListMindmapMetadata(list, model.metadata);
+            view.update(model);
+        }});
     const wait = () => new Promise(resolve => setTimeout(resolve, 40));
     await wait();
+    check.equal(view.viewport.style.backgroundColor, "rgb(30, 30, 30)");
+    check.equal(view.nodeElements.get(a.id).style.backgroundColor, "red", "manual colors survive applying a theme");
+    check.equal(view.nodeElements.get(b.id).style.backgroundColor, "rgb(21, 128, 61)");
+    check.equal(view.nodeElements.get(a.children[0].id).style.backgroundColor, "rgb(37, 99, 235)",
+        "descendants follow their branch theme independently of a parent's manual override");
     const pointer = (id: string, modifiers: PointerEventInit = {}) => {
         const node = view.nodeElements.get(id) as HTMLElement;
         const rect = node.getBoundingClientRect();
@@ -169,6 +199,34 @@ const browserCases = async (source: string, css: string) => {
     pointer(b.id, {ctrlKey: true});
     await checkNodeMenu();
     check.deepEqual(new Set(view.getSelectedIds()), new Set([a.id, b.id]));
+    host.querySelector<HTMLButtonElement>('[aria-label="Batch orange"]').click();
+    check.equal(styleChanges.length, 1, "batch colors use one callback for the complete selection");
+    check.deepEqual(new Set(styleChanges[0].ids), new Set([a.id, b.id]));
+    check.equal(view.nodeElements.get(a.id).style.backgroundColor, "rgb(254, 215, 170)");
+    check.equal(view.nodeElements.get(b.id).style.backgroundColor, "rgb(254, 215, 170)");
+    host.querySelector<HTMLButtonElement>('[aria-label="Branch green"]').click();
+    check.equal(styleChanges.length, 2);
+    check.equal(model.metadata.nodes[a.id].lineColor, "#15803d");
+    check.equal(model.metadata.nodes[b.id].lineColor, "#15803d");
+    const nodePalette = host.querySelector<HTMLElement>('.mindmap-view__palette[aria-label="color"]');
+    nodePalette.querySelector<HTMLButtonElement>('[aria-label="default"]').click();
+    check.equal(view.nodeElements.get(a.id).style.backgroundColor, "rgb(37, 99, 235)",
+        "resetting manual node colors restores the branch theme");
+    const persisted = api.readMindmapClipboard(lute.SpinBlockDOM(list.outerHTML));
+    for (const printLayout of [false, true]) {
+        const previewHost = document.createElement("div");
+        previewHost.className = "mindmap-view";
+        previewHost.style.cssText = "width:760px;height:460px";
+        document.body.append(previewHost);
+        const preview = new api.ListMindmapView({host: previewHost, model: api.readListMindmap(persisted),
+            readOnly: true, printLayout, onExit() {}});
+        await wait();
+        check.equal(preview.viewport.style.backgroundColor, "rgb(30, 30, 30)");
+        check.equal(preview.nodeElements.get(a.id).style.backgroundColor, "rgb(37, 99, 235)",
+            "read-only HTML and PDF layout render the saved palette");
+        preview.destroy();
+        previewHost.remove();
+    }
     check.equal(host.querySelectorAll('[aria-selected="true"]').length, 2);
     host.dispatchEvent(new ClipboardEvent("copy", {bubbles: true, cancelable: true, clipboardData: new DataTransfer()}));
     check.deepEqual(new Set(copied[0].ids), new Set([a.id, b.id]));
@@ -311,7 +369,7 @@ test("mind map selection and clipboard preserve branches, metadata, identities a
     const methods = controller.members.filter(member =>
         ["copyNodes", "removeNodes", "replaceClipboardSource", "replaceSourceChildren", "pasteNodes", "add"]
             .includes(member.name?.getText(sourceFile)));
-    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "model.ts", "../../util/tabsCopy.ts", "clipboard.ts",
+    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "appearance.ts", "model.ts", "../../util/tabsCopy.ts", "clipboard.ts",
         "fold.ts", "routing.ts", "pan.ts", "connectors.ts", "../av/richTextValue.ts", "view.ts",
         "../../util/blockDOMClipboard.ts", "../../util/clipboardData.ts"].map(compile).join("\n") +
         ts.transpileModule(`class ClipboardController {${methods.map(method => method.getText(sourceFile)).join("\n")}}`,

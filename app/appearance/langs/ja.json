@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "カラフル",
+	"listMindmapPaletteSoft": "ソフト",
+	"listMindmapPaletteForest": "フォレスト",
+	"listMindmapCanvasBackground": "キャンバスの背景",
+	"listMindmapClearManualColors": "手動の配色をクリア",
+	"listMindmapLineColor": "枝線の色",
 	"lockScreenWallpaper": "ロック画面の壁紙",
 	"lockScreenWallpaperTip": "JPEG、PNG、WebP の画像を1枚保存できます（最大 10 MiB、1600万画素）。現在のワークスペースに保存され、同期されず、ログイン前に表示されます",
 	"automationCollectionIncludeSelf": "選択した文書自体を含める",

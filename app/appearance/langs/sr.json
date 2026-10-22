@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Шарено",
+	"listMindmapPaletteSoft": "Нежно",
+	"listMindmapPaletteForest": "Шума",
+	"listMindmapCanvasBackground": "Позадина платна",
+	"listMindmapClearManualColors": "Обриши ручно подешене боје",
+	"listMindmapLineColor": "Боја линија грана",
 	"lockScreenWallpaper": "Позадина закључаног екрана",
 	"lockScreenWallpaperTip": "Једна JPEG, PNG или WebP слика, до 10 MiB и 16 мегапиксела; чува се у овом радном простору без синхронизације и видљива је пре пријављивања",
 	"automationCollectionIncludeSelf": "Укључи саме изабране документе",

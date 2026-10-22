@@ -45,6 +45,7 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
     style: ListMindmapConnectorStyle, makePath: () => T,
 ) => {
     const trunks: T[] = [];
+    const trunkParents: string[] = [];
     const branches: {id: string, path: T}[] = [];
     const groups = new Map<string, ListMindmapPosition[]>();
     edges.forEach(edge => {
@@ -101,6 +102,7 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
             trunk.lineTo(trunkX, bottom);
         }
         trunks.push(trunk);
+        trunkParents.push(parentID);
     });
-    return {trunks, branches};
+    return {trunks, trunkParents, branches};
 };

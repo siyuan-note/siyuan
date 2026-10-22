@@ -183,7 +183,8 @@ const cases = async (source: string, css: string) => {
     const node = {id: "table-node", children: [] as unknown[], contentBlocks: [richTable], virtual: false};
     const model = {root: node, nodes: new Map([[node.id, node]]), metadata: {nodes: {}, relations: [] as {id: string}[]}};
     const view = Object.assign(new api.MindmapPreviewView(), {
-        options: {}, persistedLocked: false, nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
+        options: {}, viewport: document.createElement("div"), persistedLocked: false,
+        nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
         cancelSummarySelection: () => {}, renderTask: () => {}, destroyContentViews: () => {},
         label: (key: string) => key, updateRelations: () => {}, updateSummaries: () => {},
         updateSelection: () => {}, renderInspector: () => {}, refreshLayout: () => {},
@@ -260,6 +261,8 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +
         extract("../../util/tableControl.ts", ["getCell", "getTableNode"]) +
         compile(`class TablePreviewControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
+        compile(readFileSync(path.join(__dirname, "appearance.ts"), "utf8")
+            .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")) +
         compile(`class MindmapPreviewView {${viewMethods.map(method => method.getText(viewSource)).join("\n")}}`) +
         extract("../av/richText.ts", ["ALLOWED_BLOCK_TYPES", "isSupportedAVRichTextBlock", "getAVRichTextUnsupportedPasteBlocks"]) +
         extract("../av/richTextValue.ts", ["EXECUTABLE_CODE_LANGUAGES", "isAVRichTextExecutableCodeLanguage"]);

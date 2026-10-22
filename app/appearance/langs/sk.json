@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Pestrá",
+	"listMindmapPaletteSoft": "Jemná",
+	"listMindmapPaletteForest": "Lesná",
+	"listMindmapCanvasBackground": "Pozadie plátna",
+	"listMindmapClearManualColors": "Vymazať ručné farby",
+	"listMindmapLineColor": "Farba čiar vetiev",
 	"lockScreenWallpaper": "Tapeta zamknutej obrazovky",
 	"lockScreenWallpaperTip": "Jeden obrázok JPEG, PNG alebo WebP, najviac 10 MiB a 16 megapixelov; uložený v tomto pracovnom priestore bez synchronizácie a viditeľný pred prihlásením",
 	"automationCollectionIncludeSelf": "Zahrnúť samotné vybrané dokumenty",

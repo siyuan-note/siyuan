@@ -57,6 +57,7 @@ import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {getListMindmapConnectorMenuItem} from "./connectorMenu";
 import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
+import {assignListMindmapBranchColors, getListMindmapAppearanceMenu} from "./appearance";
 import {getEmbedChildOperationContext} from "../../wysiwyg/getBlock";
 import {requestRedo, requestUndo} from "../../undo/globalUndo";
 import {buildBlockDOMClipboardData} from "../../util/blockDOMClipboard";
@@ -261,7 +262,10 @@ class ListMindmapController {
                             });
                         }
                         if (canEdit(owner, list)) {
-                            menu.addItem(getListMindmapConnectorMenuItem(readListMindmap(list).metadata.connectorStyle || "bezier",
+                            const current = readListMindmap(list).metadata;
+                            menu.addItem(getListMindmapAppearanceMenu(current,
+                                update => void this.metadata(update), window.siyuan.languages,
+                                getListMindmapConnectorMenuItem(current.connectorStyle || "bezier",
                                 style => {
                                     void this.metadata(metadata => {
                                         if ((metadata.connectorStyle || "bezier") === style) {
@@ -273,7 +277,7 @@ class ListMindmapController {
                                             metadata.connectorStyle = style;
                                         }
                                     });
-                                }, window.siyuan.languages));
+                                }, window.siyuan.languages)));
                             menu.addItem(getListMindmapConnectorMenuItem(getDefaultListMindmapConnectorStyle(), style => {
                                 if (canEdit(owner, list)) {
                                     setDefaultListMindmapConnectorStyle(style);
@@ -476,6 +480,12 @@ class ListMindmapController {
             onRedo: () => this.undo(true),
             onNodeStyle: (id, patch) => this.metadata(metadata => {
                 metadata.nodes[id] = {...metadata.nodes[id], ...patch};
+            }),
+            onNodesStyle: (ids, patch) => this.metadata(metadata => {
+                const nodes = readListMindmap(list).nodes;
+                ids.filter(id => nodes.has(id)).forEach(id => {
+                    metadata.nodes[id] = {...metadata.nodes[id], ...patch};
+                });
             }),
             onRelationAdd: (from, to) => this.metadata(metadata => {
                 if (from !== to && !metadata.relations.some(relation => relation.from === from && relation.to === to)) {
@@ -688,8 +698,11 @@ class ListMindmapController {
                 return false;
             }
             normalizeListMindmapSummaryMetadata(this.list, previous);
+            const next = readListMindmap(this.list);
+            if (next.metadata.appearance?.palette.length && assignListMindmapBranchColors(next)) {
+                writeListMindmapMetadata(this.list, next.metadata);
+            }
             if (cleanListMindmapHTML(this.list.outerHTML) !== before) {
-                const next = readListMindmap(this.list);
                 const nextID = [focusID, selectedID, siblings[index + 1]?.id, siblings[index - 1]?.id,
                     selected?.parentId].find(id => next.nodes.has(id)) || next.root.id;
                 // 将操作前后的节点分别记录在事务中，重做时可定位到重新插入的节点。

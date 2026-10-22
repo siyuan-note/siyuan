@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261021132218"
+		"updated": "20261022102848"
 	},
 	"Children": [
 		{
@@ -2235,7 +2235,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-562ro9u",
-				"updated": "20261020162345"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2254,7 +2254,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "接続線"
+					"TextMarkTextContent": "スタイル"
 				},
 				{
 					"Type": "NodeText",
@@ -2267,7 +2267,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を開き、分岐曲線、直角線、扇形曲線、角丸直角線から選択できます。選択はマップ全体に適用され、文書とともに保存され、取り消しとやり直しに対応します。親子ノード間の接続線のみを変更し、ノードの位置や関連線は変更しません。直角のスタイルでは共通の縦線に既定の線色を使用し、縦線を個別に選択することはできません。横方向の分岐は個別に選択して色を変更できます。SiYuan 形式の HTML と PDF プレビューには保存したスタイルが反映されます。"
+					"Data": " を開き、分岐曲線、直角線、扇形曲線、角丸直角線から選択できます。選択はマップ全体に適用され、文書とともに保存され、取り消しとやり直しに対応します。親子ノード間の接続線のみを変更し、ノードの位置や関連線は変更しません。共通の幹線は個別に選択できず、パレットを有効にすると親ブランチの色に従います。横方向の分岐は個別に選択して色を変更できます。SiYuan 形式の HTML と PDF プレビューには保存したスタイルが反映されます。"
 				}
 			]
 		},
@@ -2276,13 +2276,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017113512-geqkoea",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "接続線"
+					"TextMarkTextContent": "詳細"
 				},
 				{
 					"Type": "NodeText",
@@ -2296,6 +2296,121 @@
 				{
 					"Type": "NodeText",
 					"Data": " で、新規マップやリスト・タブから初めて変換するマップの接続線スタイルを選択できます。この設定は現在のワークスペースのローカル設定に保存され、クラウド同期には含まれません。変更しても既存のマップには影響しません。コピー、インポート、リストやタブとの往復変換では元のスタイルが保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-sbqeaum",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-sbqeaum",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "テーマ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、現在のマップにカラフル、ソフト、フォレストの配色を選択できます。第 1 階層のブランチにパレットの色を割り当て、子孫ノードは所属するブランチの色を継承します。並べ替えても割り当てた色は保持され、新しいノードも配色に従います。手動で設定したノードや線の色は保持されます。デフォルトを選ぶとパレットを解除し、手動の色と背景は保持します。テーマはノードの内容、構造、折りたたみ状態を変更しません。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-lteviyd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-lteviyd",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "キャンバスの背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で単色の背景を選択できます。デフォルトではアプリのテーマに従います。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手動の配色をクリア"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、ノード、階層の接続線、関連線、要約の手動配色を解除し、パレットまたは既定の色に戻せます。背景とその他の書式は保持されます。外観は文書とともに保存され、取り消しとやり直しに対応し、SiYuan 形式の HTML と PDF プレビューにも反映されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-vdgjx9w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-vdgjx9w",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "複数のノードを選択すると、下部のパレットで文字色と背景色をまとめて変更できます。枝線のパレットでは、選択したノードに入る階層の接続線の色を変更できます。一括変更は一度の取り消しで元に戻せます。パレットでデフォルトを選ぶと、テーマまたは既定の色に戻ります。タッチ画面では、下部のノードメニューにある複数選択ボタンでノードを選択できます。"
 				}
 			]
 		},

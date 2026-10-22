@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Kleurrijk",
+	"listMindmapPaletteSoft": "Zacht",
+	"listMindmapPaletteForest": "Bos",
+	"listMindmapCanvasBackground": "Canvasachtergrond",
+	"listMindmapClearManualColors": "Handmatige kleuren wissen",
+	"listMindmapLineColor": "Kleur van taklijnen",
 	"lockScreenWallpaper": "Achtergrond van het vergrendelscherm",
 	"lockScreenWallpaperTip": "Eén JPEG-, PNG- of WebP-afbeelding, maximaal 10 MiB en 16 megapixel; opgeslagen in deze werkruimte zonder synchronisatie en zichtbaar vóór het aanmelden",
 	"automationCollectionIncludeSelf": "Geselecteerde documenten zelf opnemen",

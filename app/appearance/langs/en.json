@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Colorful",
+	"listMindmapPaletteSoft": "Soft",
+	"listMindmapPaletteForest": "Forest",
+	"listMindmapCanvasBackground": "Canvas background",
+	"listMindmapClearManualColors": "Clear manual colors",
+	"listMindmapLineColor": "Branch line color",
 	"lockScreenWallpaper": "Lock screen wallpaper",
 	"lockScreenWallpaperTip": "One JPEG, PNG or WebP image, up to 10 MiB and 16 megapixels; stored in this workspace without sync and visible before login",
 	"automationCollectionIncludeSelf": "Include selected documents themselves",

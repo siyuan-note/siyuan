@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "หลากสี",
+	"listMindmapPaletteSoft": "นุ่มนวล",
+	"listMindmapPaletteForest": "ป่า",
+	"listMindmapCanvasBackground": "พื้นหลังผืนผ้าใบ",
+	"listMindmapClearManualColors": "ล้างสีที่กำหนดเอง",
+	"listMindmapLineColor": "สีเส้นกิ่ง",
 	"lockScreenWallpaper": "ภาพพื้นหลังหน้าจอล็อก",
 	"lockScreenWallpaperTip": "ภาพ JPEG, PNG หรือ WebP หนึ่งภาพ ขนาดไม่เกิน 10 MiB และ 16 ล้านพิกเซล บันทึกในพื้นที่ทำงานนี้โดยไม่ซิงค์และมองเห็นได้ก่อนเข้าสู่ระบบ",
 	"automationCollectionIncludeSelf": "รวมตัวเอกสารที่เลือกด้วย",

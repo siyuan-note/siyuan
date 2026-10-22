@@ -149,7 +149,7 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     let allowed = true;
     const context: any = {
         canEdit: () => allowed,
-        readListMindmap: () => ({root, nodes}),
+        readListMindmap: () => ({root, nodes, metadata: {version: 1, nodes: {}, relations: [] as unknown[]}}),
         getListMindmapSiblingIDs: () => new Map(),
         normalizeListMindmapSummaryMetadata: () => {},
         getListMindmapFoldStates,

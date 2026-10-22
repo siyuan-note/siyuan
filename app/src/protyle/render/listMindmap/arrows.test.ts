@@ -104,6 +104,33 @@ test("shared orthogonal trunks keep the default color and stay outside branch se
     }
 });
 
+test("palette colors reach hierarchy paths and parent trunks while manual line colors remain authoritative", () => {
+    for (const connectorStyle of ["spline", "bezier", "orthogonal", "rounded"]) {
+        for (const printLayout of [false, true]) {
+            const {target, strokeStyles} = setup();
+            target.model.root.id = "root";
+            Object.assign(target.model.metadata, {connectorStyle, relations: [], nodes: {a: {lineColor: "#abcdef"}}});
+            target.themeColors = new Map([
+                ["root", {lineColor: "#111111"}], ["a", {lineColor: "#222222"}],
+                ["b", {lineColor: "#333333"}], ["c", {lineColor: "#333333"}],
+            ]);
+            target.options.printLayout = printLayout;
+            target.readOnly = printLayout;
+            target.positions = new Map([
+                ["root", {id: "root", x: 20, y: 100, width: 100, height: 40}],
+                ["a", {id: "a", x: 160, y: 0, width: 100, height: 40}],
+                ["b", {id: "b", x: 160, y: 200, width: 100, height: 40}],
+                ["c", {id: "c", x: 300, y: 200, width: 100, height: 40}],
+            ]);
+            target.edges = [{from: "root", to: "a"}, {from: "root", to: "b"}, {from: "b", to: "c"}];
+            target.draw();
+            const trunks = connectorStyle === "orthogonal" || connectorStyle === "rounded" ? ["#111111", "#333333"] : [];
+            assert.deepEqual(strokeStyles, [...trunks, "#abcdef", "#333333", "#333333"]);
+            assert.equal(target.linePaths.length, 3, "shared trunks never become selectable branch paths");
+        }
+    }
+});
+
 test("all arrow modes use endpoint identity rather than canonical path drawing order", () => {
     for (const mode of [undefined, "forward", "reverse", "both", "none"] as const) {
         for (const scale of [.5, 1, 2]) {

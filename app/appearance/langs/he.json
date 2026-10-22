@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "צבעוני",
+	"listMindmapPaletteSoft": "רך",
+	"listMindmapPaletteForest": "יער",
+	"listMindmapCanvasBackground": "רקע הקנבס",
+	"listMindmapClearManualColors": "ניקוי צבעים ידניים",
+	"listMindmapLineColor": "צבע קווי הענפים",
 	"lockScreenWallpaper": "טפט מסך הנעילה",
 	"lockScreenWallpaperTip": "תמונת JPEG, PNG או WebP אחת, עד 10 MiB ו־16 מגה־פיקסל; נשמרת בסביבת עבודה זו ללא סנכרון וגלויה לפני הכניסה",
 	"automationCollectionIncludeSelf": "כלילת המסמכים שנבחרו עצמם",

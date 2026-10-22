@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261021132218"
+		"updated": "20261022102848"
 	},
 	"Children": [
 		{
@@ -2088,7 +2088,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-mq248cg",
-				"updated": "20261020162345"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2107,7 +2107,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Connectors"
+					"TextMarkTextContent": "Appearance"
 				},
 				{
 					"Type": "NodeText",
@@ -2120,7 +2120,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to select Curved fork, Orthogonal, Curved fan, or Rounded orthogonal. The choice applies to the whole map, is saved with the document, and supports undo and redo. It changes parent-child connectors without moving nodes or changing relationship lines. Orthogonal styles use a shared vertical trunk in the default line color; the trunk cannot be selected separately, while horizontal branches can still be selected and colored individually. SiYuan-format HTML and PDF previews use the saved style."
+					"Data": " to select Curved fork, Orthogonal, Curved fan, or Rounded orthogonal. The choice applies to the whole map, is saved with the document, and supports undo and redo. It changes parent-child connectors without moving nodes or changing relationship lines. Shared trunks cannot be selected separately; with a palette enabled, they follow their parent branch color. Horizontal branches can still be selected and colored individually. SiYuan-format HTML and PDF previews use the saved style."
 				}
 			]
 		},
@@ -2129,7 +2129,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017113512-rxzvh9f",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2139,7 +2139,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Connectors"
+					"TextMarkTextContent": "More"
 				},
 				{
 					"Type": "NodeText",
@@ -2153,6 +2153,129 @@
 				{
 					"Type": "NodeText",
 					"Data": " you can choose the style used when creating a map or converting a list or tabs to a map for the first time. This preference is saved locally in the current workspace and is not included in cloud sync. Changing it does not affect existing maps. Copies, imports, and maps converted to lists or tabs and back retain their original style."
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-11epv5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-11epv5y",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Theme"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose Colorful, Soft, or Forest for the current map. First-level branches receive colors from the palette, and descendants inherit their branch color. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual node and line colors are retained. Choosing Default removes the palette while preserving manual colors and the canvas background. The theme does not change node content, structure, or folding states."
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-3decujr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-3decujr",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Canvas background"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose a solid canvas background, or Default to follow the application theme. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear manual colors"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to remove manual colors from nodes, hierarchy lines, relationship lines, and summaries so that palette or default colors apply again. This does not reset the canvas background or other formatting. Appearance changes are saved with the document, support undo and redo, and are included in SiYuan-format HTML and PDF previews."
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-5nohuq1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-5nohuq1",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select multiple nodes, then use the bottom palette to change their text and background colors together. The branch line palette changes the incoming hierarchy lines of the selected nodes. Each batch change can be undone in one step. Choose Default in a palette to restore the theme or default colors. On touch screens, use the multiple-selection button in the bottom node menu to select the nodes."
 				}
 			]
 		},

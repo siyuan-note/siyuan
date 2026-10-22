@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Барвиста",
+	"listMindmapPaletteSoft": "М’яка",
+	"listMindmapPaletteForest": "Лісова",
+	"listMindmapCanvasBackground": "Тло полотна",
+	"listMindmapClearManualColors": "Скинути ручні кольори",
+	"listMindmapLineColor": "Колір ліній гілок",
 	"lockScreenWallpaper": "Шпалери екрана блокування",
 	"lockScreenWallpaperTip": "Одне зображення JPEG, PNG або WebP, до 10 MiB і 16 мегапікселів; зберігається в поточному робочому просторі без синхронізації та видиме до входу",
 	"automationCollectionIncludeSelf": "Включати самі вибрані документи",

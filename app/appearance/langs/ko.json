@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "다채로운 색상",
+	"listMindmapPaletteSoft": "부드러운 색상",
+	"listMindmapPaletteForest": "숲",
+	"listMindmapCanvasBackground": "캔버스 배경",
+	"listMindmapClearManualColors": "수동 색상 지우기",
+	"listMindmapLineColor": "분기 연결선 색상",
 	"lockScreenWallpaper": "잠금 화면 배경화면",
 	"lockScreenWallpaperTip": "JPEG, PNG 또는 WebP 이미지 한 장, 최대 10 MiB 및 1,600만 화소; 현재 작업 공간에 저장되며 동기화되지 않고 로그인 전에 표시됨",
 	"automationCollectionIncludeSelf": "선택한 문서 자체 포함",

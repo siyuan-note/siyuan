@@ -1,4 +1,10 @@
 {
+	"listMindmapPaletteColorful": "Bunt",
+	"listMindmapPaletteSoft": "Sanft",
+	"listMindmapPaletteForest": "Wald",
+	"listMindmapCanvasBackground": "Hintergrund der Zeichenfläche",
+	"listMindmapClearManualColors": "Manuelle Farben löschen",
+	"listMindmapLineColor": "Farbe der Zweiglinien",
 	"lockScreenWallpaper": "Sperrbildschirm-Hintergrund",
 	"lockScreenWallpaperTip": "Ein JPEG-, PNG- oder WebP-Bild, maximal 10 MiB und 16 Megapixel; wird in diesem Arbeitsbereich ohne Synchronisierung gespeichert und vor der Anmeldung angezeigt",
 	"automationCollectionIncludeSelf": "Ausgewählte Dokumente selbst einschließen",

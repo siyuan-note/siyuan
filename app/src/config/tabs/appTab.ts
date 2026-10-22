@@ -178,7 +178,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
 const genImportUploadButtonHtml = (inputId: string, label: string): string =>
     `<button class="b3-button b3-button--outline fn__flex-center fn__size200" style="position: relative">
     <input id="${inputId}" class="b3-form__upload" type="file">
-    <svg><use xlink:href="#iconDownload"></use></svg>
+    <svg><use xlink:href="#iconUpload"></use></svg>
     ${label}
 </button>`;
 
@@ -416,7 +416,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         title: `${window.siyuan.languages.export} Data`,
         desc: window.siyuan.languages.exportDataTip,
         label: window.siyuan.languages.export,
-        icon: "iconUpload",
+        icon: "iconDownload",
         afterMount: mountExportData,
     });
     group.slot({
@@ -443,7 +443,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.exportConf,
         desc: window.siyuan.languages.exportConfTip,
         label: window.siyuan.languages.export,
-        icon: "iconUpload",
+        icon: "iconDownload",
         afterMount: (root) => {
             root.querySelector("#exportConf")?.addEventListener("click", () => {
                 fetchPost("/api/system/exportConf", {}, (response) => {
@@ -577,7 +577,7 @@ const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.systemLog,
             desc: window.siyuan.languages.systemLogTip,
             label: window.siyuan.languages.export,
-            icon: "iconUpload",
+            icon: "iconDownload",
             afterMount: (root) => {
                 root.querySelector("#exportLog")?.addEventListener("click", () => {
                     fetchPost("/api/system/exportLog", {}, (response) => {

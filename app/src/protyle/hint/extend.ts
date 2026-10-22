@@ -457,7 +457,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         filter: [window.siyuan.languages.insertAsset, "insert image or file", "upload", "插入图片或文件", "charutupianhuowenjian", "crtphwj", "上传", "sc"],
         id: "insertAsset",
         value: Constants.ZWSP + 3,
-        icon: "iconDownload",
+        icon: "iconUpload",
         suffix: `<input class="b3-form__upload" type="file" multiple="multiple"${protyle.options.upload.accept ?
             ` accept="${protyle.options.upload.accept}"` : ""}>`,
     }, ...(getHostCapabilities().localFileSystem ? [{

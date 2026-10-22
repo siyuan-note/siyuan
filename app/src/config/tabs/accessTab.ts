@@ -513,7 +513,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.exportCACert,
             desc: window.siyuan.languages.exportCACertTip,
             label: window.siyuan.languages.export,
-            icon: "iconUpload",
+            icon: "iconDownload",
             afterMount: (root) => {
                 root.querySelector("#exportCACert")?.addEventListener("click", () => {
                     fetchPost("/api/system/exportTLSCACert", {}, (response) => {
@@ -527,7 +527,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.exportCABundle,
             desc: window.siyuan.languages.exportCABundleTip,
             label: window.siyuan.languages.export,
-            icon: "iconUpload",
+            icon: "iconDownload",
             afterMount: (root) => {
                 root.querySelector("#exportCABundle")?.addEventListener("click", () => {
                     fetchPost("/api/system/exportTLSCABundle", {}, (response) => {
@@ -541,7 +541,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.importCABundle,
             desc: window.siyuan.languages.importCABundleTip,
             label: window.siyuan.languages.import,
-            icon: "iconDownload",
+            icon: "iconUpload",
             afterMount: (root) => {
                 root.querySelector("#importCABundle")?.addEventListener("click", () => {
                     const input = document.createElement("input");
@@ -747,13 +747,13 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             </button>
             <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="exportCryptoBackupBtn">
-                <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
+                <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
                 ${window.siyuan.languages.exportNotebookCryptoBackup}
             </button>
             <span class="fn__space"></span>
         </div>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="importCryptoBackupBtn">
-            <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
+            <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
             ${window.siyuan.languages.importNotebookCryptoBackup}
         </button>
     </div>
@@ -766,7 +766,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.archiveEncryptedNotebooks,
             desc: window.siyuan.languages.archiveEncryptedNotebooksTip,
             label: window.siyuan.languages.archiveEncryptedNotebooks,
-            icon: "iconUpload",
+            icon: "iconDownload",
             afterMount: (root) => root.querySelector("#archiveEncryptedNotebooks")?.addEventListener("click", () => {
                 openNotebookArchiveDialog(() => refreshEncryptedNotebookStatus(root));
             }),
@@ -776,7 +776,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.restoreEncryptedNotebooks,
             desc: window.siyuan.languages.restoreEncryptedNotebooksTip,
             label: window.siyuan.languages.import,
-            icon: "iconDownload",
+            icon: "iconUpload",
             afterMount: (root) => root.querySelector("#restoreEncryptedNotebooks")?.addEventListener("click", () => {
                 openNotebookArchiveImportDialog(() => {});
             }),

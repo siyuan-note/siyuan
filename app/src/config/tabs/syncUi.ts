@@ -311,11 +311,11 @@ const genProviderConfigRowHtml = (def: SyncThirdPartyProviderDef): string => {
     const importExportHtml = canImportExport ? `<div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" style="position: relative"${disabled}>
         <input id="importSyncConfig" class="b3-form__upload" type="file" data-type="${def.configKey}">
-        <svg><use xlink:href="#iconDownload"></use></svg>${L.import}
+        <svg><use xlink:href="#iconUpload"></use></svg>${L.import}
     </button>
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="exportSyncConfig" data-type="${def.configKey}"${disabled}>
-        <svg><use xlink:href="#iconUpload"></use></svg>${L.export}
+        <svg><use xlink:href="#iconDownload"></use></svg>${L.export}
     </button>` : "";
     return `<div class="fn__flex">
     <div class="fn__flex-1 config-item__main">

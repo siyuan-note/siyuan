@@ -87,6 +87,36 @@
             }
         }
 
+        @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
+            body.has-wallpaper main {
+                background: rgba(255, 255, 255, .9);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, .16), inset 0 0 0 1px rgba(255, 255, 255, .4);
+                -webkit-backdrop-filter: blur(16px);
+                backdrop-filter: blur(16px);
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body.has-wallpaper main {
+                    background: rgba(30, 30, 30, .9);
+                }
+            }
+        }
+
+        @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+            body.has-wallpaper main {
+                background: #fff;
+                box-shadow: none;
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body.has-wallpaper main {
+                    background: #1e1e1e;
+                }
+            }
+        }
+
         #origin {
             font-size: 12px;
             opacity: .7;

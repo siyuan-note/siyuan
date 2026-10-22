@@ -63,7 +63,7 @@ const checkSettingsLayout = async (html, css, fontSize) => {
 };
 
 // 只替换模板数据和无关的登录脚本，保留实际认证页的结构、样式及壁纸加载函数。
-const fixtureHTML = (file, dark) => {
+const fixtureHTML = (file, dark, glassSupported = true) => {
     let source = readFileSync(path.join(__dirname, "..", file), "utf8");
     const loader = /const loadLockScreenWallpaper = \(\) => \{[\s\S]*?\n {4}\};/.exec(source)[0];
     source = source.replace(/<script>[\s\S]*?<\/script>/g, "")
@@ -74,10 +74,14 @@ const fixtureHTML = (file, dark) => {
         .replace(/{{\.lockScreenReveal}}/g, "Click or press a key to sign in")
         .replace("<main hidden>", "<main>");
     if (dark) source = source.replace('<html style="height: 100%">', '<html class="dark" style="height: 100%">');
+    // 仅替换能力条件，验证不支持背景模糊时的实色回退样式。
+    if (!glassSupported) source = source.replace(
+        "@supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))",
+        "@supports (siyuan-unsupported: true)");
     return source.replace("</body>", `<script>${loader}\nwindow.loadLockScreenWallpaper = loadLockScreenWallpaper;</script></body>`);
 };
 
-const checkLayout = async (wallpaperPresent, dark, remote) => {
+const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
     const check = require("node:assert/strict");
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
@@ -113,12 +117,37 @@ const checkLayout = async (wallpaperPresent, dark, remote) => {
         check.equal(getComputedStyle(panel).visibility, "visible");
     }
     const rect = panel.getBoundingClientRect();
+    const style = getComputedStyle(panel);
+    const blur = style.backdropFilter || style.webkitBackdropFilter;
+    const forcedColors = matchMedia("(forced-colors: active)").matches;
     if (wallpaperPresent) {
         check.ok(rect.left >= 0 && rect.right <= innerWidth, "login panel fits the viewport horizontally");
         check.ok(rect.top >= 32 && rect.bottom <= innerHeight, "login panel fits below the drag area");
         check.ok(panel.scrollWidth <= panel.clientWidth, "login controls do not overflow the panel");
-        const background = getComputedStyle(panel).backgroundColor;
-        check.equal(background, dark ? "rgb(30, 30, 30)" : "rgb(255, 255, 255)");
+        check.equal(style.backgroundColor, forcedColors ? getComputedStyle(document.body).backgroundColor : (glass ?
+            (dark ? "rgba(30, 30, 30, 0.9)" : "rgba(255, 255, 255, 0.9)") :
+            (dark ? "rgb(30, 30, 30)" : "rgb(255, 255, 255)")));
+        check.equal(blur, glass ? "blur(16px)" : "none");
+        check.equal(style.opacity, "1", "glass affects the panel background, not its text and controls");
+        check.equal(getComputedStyle(document.getElementById("authCode")).opacity, "1");
+        // 将面板底色与纯黑、纯白壁纸合成，检查正文和小字号说明的最差对比度。
+        const luminance = rgb => rgb.map(value => value / 255).map(value =>
+            value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
+            .reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+        const text = panel.querySelector(remote ? "label" : ".ft__on-surface");
+        const textStyle = getComputedStyle(text);
+        const foreground = textStyle.color.match(/[\d.]+/g).map(Number);
+        const alpha = (foreground[3] ?? 1) * Number(textStyle.opacity);
+        for (const wallpaperColor of [0, 255]) {
+            if (forcedColors) break;
+            const base = dark ? 30 : 255;
+            const background = Array(3).fill(glass ? base * .9 + wallpaperColor * .1 : base);
+            const color = foreground.slice(0, 3).map((value, index) => value * alpha + background[index] * (1 - alpha));
+            const values = [luminance(background), luminance(color)];
+            const contrast = (Math.max(...values) + .05) / (Math.min(...values) + .05);
+            check.ok(contrast >= 4.5,
+                `small login text contrast ${contrast} over wallpaper ${wallpaperColor} (dark=${dark}, remote=${remote}, glass=${glass})`);
+        }
         panel.scrollTop = panel.scrollHeight;
         const last = panel.querySelector(remote ? "#submit" : ".b3-button--white").getBoundingClientRect();
         check.ok(last.bottom <= rect.bottom && last.top >= rect.top, "login and exit actions remain reachable");
@@ -128,6 +157,9 @@ const checkLayout = async (wallpaperPresent, dark, remote) => {
         if (innerWidth >= 640 && innerHeight >= 600) {
             check.ok(rect.width > rect.height, "desktop login panel is wider than it is tall");
         }
+    } else {
+        check.equal(blur, "none", "default login has no glass effect");
+        check.equal(style.backgroundColor, "rgba(0, 0, 0, 0)", "default login keeps its original panel background");
     }
 };
 
@@ -169,15 +201,28 @@ if (process.versions.electron && process.type === "browser") {
                     win.setContentSize(width, height);
                     for (const dark of [false, true]) {
                         nativeTheme.themeSource = dark ? "dark" : "light";
-                        for (const present of [false, true]) {
-                            await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark)));
+                        for (const [present, glass] of [[false, true], [true, true], [true, false]]) {
+                            await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark, glass)));
                             await win.webContents.executeJavaScript(`(async () => {
-                                try { await (${checkLayout.toString()})(${present}, ${dark}, ${file.startsWith("electron")}); }
+                                try { await (${checkLayout.toString()})(${present}, ${dark}, ${file.startsWith("electron")}, ${glass}); }
                                 catch (error) { console.error(error.stack); throw error; }
                             })()`);
                         }
                     }
                 }
+                win.webContents.debugger.attach("1.3");
+                for (const feature of ["prefers-reduced-transparency", "forced-colors"]) {
+                    await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                        features: [{name: feature, value: feature === "forced-colors" ? "active" : "reduce"}],
+                    });
+                    for (const dark of [false, true]) {
+                        nativeTheme.themeSource = dark ? "dark" : "light";
+                        await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark)));
+                        await win.webContents.executeJavaScript(`(${checkLayout.toString()})(true, ${dark}, ${file.startsWith("electron")}, false)`);
+                    }
+                }
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features: []});
+                win.webContents.debugger.detach();
                 win.setContentSize(1000, 700);
                 const start = async () => {
                     await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, false)));

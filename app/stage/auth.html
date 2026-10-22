@@ -222,6 +222,29 @@
             width: 480px;
         }
 
+        @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
+            body.has-wallpaper #authPanel {
+                background-color: rgba(255, 255, 255, .9);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, .16), inset 0 0 0 1px rgba(255, 255, 255, .4);
+                -webkit-backdrop-filter: blur(16px);
+                backdrop-filter: blur(16px);
+            }
+
+            .dark body.has-wallpaper #authPanel {
+                background-color: rgba(30, 30, 30, .9);
+            }
+        }
+
+        @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+            body.has-wallpaper #authPanel,
+            .dark body.has-wallpaper #authPanel {
+                background-color: var(--b3-theme-background);
+                box-shadow: none;
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+            }
+        }
+
         #lockScreenCover {
             align-items: flex-start;
             background: transparent;

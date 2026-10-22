@@ -28,7 +28,7 @@ const setup = () => {
         selectedId: "new", tooltip: {}, inspector: {hidden: true},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         world: {querySelectorAll: (): HTMLElement[] => []},
-        nodeElements: new Map(), offsetX: 0, offsetY: 0,
+        nodeElements: new Map(), summaryElements: new Map(), offsetX: 0, offsetY: 0,
         interactionActive: true, setInteractionActive: (value: boolean) => target.interactionActive = value,
         buttons: new Map(),
         viewport: {contains: (element: unknown) => !!element, setPointerCapture: () => {},
@@ -80,6 +80,16 @@ test("focusing visible, missing or removed nodes does not pan", () => {
     target.destroyed = true;
     target.focusNode("new");
     assert.equal(drawn(), 0);
+});
+
+test("new summary labels are revealed even though they are not source nodes", () => {
+    const {target, drawn} = setup();
+    target.summaryElements.set("summary", {getBoundingClientRect: () =>
+        ({left: 420, top: 320, right: 500, bottom: 360, width: 80, height: 40})});
+    target.revealNode("summary");
+    assert.equal(target.offsetX, -116);
+    assert.equal(target.offsetY, -76);
+    assert.equal(drawn(), 1);
 });
 
 test("node focus avoids the actual bottom panel bounds after the pending layout", () => {

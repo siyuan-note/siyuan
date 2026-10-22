@@ -834,17 +834,6 @@
     }
   }
 
-  &__summary-action {
-    position: absolute;
-    z-index: 6;
-    min-width: 44px;
-    min-height: 32px;
-    max-width: calc(100% - 16px);
-    box-sizing: border-box;
-    white-space: normal;
-    background-color: var(--b3-theme-background);
-  }
-
   &__route-status {
     position: absolute;
     bottom: 72px;
@@ -956,10 +945,6 @@
 }
 
 @media (any-pointer: coarse) {
-  .mindmap-view__summary-action {
-    min-height: 44px;
-  }
-
   .mindmap-view__route-endpoint {
     width: 28px;
     height: 28px;
@@ -981,7 +966,6 @@
     &__route-handle,
     &__route-status,
     &__selection-box,
-    &__summary-action,
     &__add-bridge,
     &__fold,
     &__add-child {

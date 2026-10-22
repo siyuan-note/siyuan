@@ -12,8 +12,8 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const methods = view.members.filter(item => ["relationPath", "draw", "drawSummaryPreview", "findLine", "renderInspector"].includes(item.name?.getText(source)));
-assert.equal(methods.length, 5);
+const methods = view.members.filter(item => ["relationPath", "draw", "findLine", "renderInspector"].includes(item.name?.getText(source)));
+assert.equal(methods.length, 4);
 const compiled = transpileModule(`class View {
     ${methods.map(item => item.getText(source)).join("\n")}
 }
@@ -70,7 +70,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         scale: 1, offsetX: 0, offsetY: 0, world: {style: {}}, zoomLabel: {}, zoomSlider: {},
         viewport: {clientWidth: 400, clientHeight: 200, getBoundingClientRect: () => ({left: 0, top: 0})},
         canvas: {getContext: () => context}, options: {host: {}}, colorProbe: {style: {}},
-        inspector: {hidden: true}, summaryAction: {hidden: true},
+        inspector: {hidden: true},
         model: {root: {id: "a"}, metadata: {nodes: {}, relations: [relation]}}, edges: [],
         positions: new Map([["a", {id: "a", x: 100, y: 0, width: 20, height: 20}],
             ["b", {id: "b", x: -20, y: 0, width: 20, height: 20}]]),

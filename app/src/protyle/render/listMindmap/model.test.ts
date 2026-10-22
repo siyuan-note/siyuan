@@ -2178,7 +2178,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.ok(palette.scrollWidth > palette.clientWidth, "long palettes scroll independently");
         palette.scrollLeft = palette.scrollWidth;
         const bounds = inspector.getBoundingClientRect();
-        for (const key of ["connect", "delete"]) {
+        for (const key of ["connect", "listMindmapSummary", "delete"]) {
             const action = inspector.querySelector<HTMLElement>(`[aria-label="${key}"]`).getBoundingClientRect();
             check.ok(action.left >= bounds.left && action.right <= bounds.right,
                 `node action ${key} stays visible at width ${width} while the palette scrolls`);
@@ -2461,7 +2461,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const narrowPanelBounds = host.getBoundingClientRect();
     check.ok(narrowInspectorBounds.left > narrowPanelBounds.left);
     check.ok(narrowInspectorBounds.right < narrowPanelBounds.right);
-    check.ok(inspector.scrollWidth > inspector.clientWidth);
+    hostParent.style.width = "180px";
+    check.ok(inspector.scrollWidth > inspector.clientWidth, "the line menu scrolls when its actual controls no longer fit");
     inspector.scrollLeft = inspector.scrollWidth;
     check.ok(inspector.scrollLeft > 0);
     inspector.scrollLeft = 0;
@@ -4681,14 +4682,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }});
     await settle();
     summaryView.focusNode(summaryIds[0]);
-    const summaryButton = summaryHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action");
+    const summaryButton = summaryHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
     for (const id of [summaryModel.root.id, summaryIds[0]]) {
         summaryView.focusNode(id);
-        check.equal(summaryButton.hidden, true, "a single selected node has no summary action");
+        check.equal(summaryButton.hidden, false, "the node menu keeps the summary action in a stable position");
         check.equal(summaryButton.disabled, true, "a single selected node cannot create a summary");
         summaryButton.click();
         check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0);
     }
+    summaryView.draw();
+    const singleSelectionCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas").toDataURL();
     for (const id of summaryIds.slice(1)) {
         summaryView.selectNode(id, true);
     }
@@ -4696,6 +4699,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(summaryButton.hidden, false);
     check.equal(summaryButton.disabled, false);
     const summaryCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas");
+    check.equal(summaryCanvas.toDataURL(), singleSelectionCanvas, "multi-selection does not draw summary brackets");
+    check.equal(summaryHost.querySelector(".mindmap-view__summary-action"), null, "selection has no graph creation control");
+    check.equal(summaryHost.querySelector(".mindmap-view__summary"), null, "selection alone does not create a summary");
     const outsideSummary = document.createElement("button");
     document.body.append(outsideSummary);
     for (const leave of [
@@ -4705,26 +4711,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const preview = summaryCanvas.toDataURL();
         const selected = summaryView.getSelectedIds();
         leave();
-        check.equal(summaryButton.hidden, true, "leaving the mindmap hides the summary action");
+        check.equal(summaryButton.closest<HTMLElement>(".mindmap-view__inspector").hidden, true, "leaving the mindmap hides the node menu");
         check.deepEqual(summaryView.getSelectedIds(), selected, "focus changes preserve the node selection");
         const inactive = summaryCanvas.toDataURL();
-        check.ok(inactive !== preview, "leaving the mindmap immediately clears the dashed summary preview");
+        check.equal(inactive, preview, "ordinary selection does not add summary graphics that need blur cleanup");
         summaryView.draw();
         check.equal(summaryCanvas.toDataURL(), inactive, "no stale preview remains until a later redraw");
         summaryView.focusNode(summaryIds[0]);
         for (const id of summaryIds.slice(1)) {
             summaryView.selectNode(id, true);
         }
-        check.equal(summaryButton.hidden, false, "multi-selection restores the summary action");
+        check.equal(summaryButton.closest<HTMLElement>(".mindmap-view__inspector").hidden, false, "multi-selection restores the node menu");
     }
     outsideSummary.remove();
-    check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), null);
+    await settle();
+    await moveMouse(summaryButton);
+    check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), summaryButton,
+        "the node menu retains the summary button across selection and focus changes");
     const summaryActionBounds = summaryButton.getBoundingClientRect();
     check.equal(document.elementFromPoint(summaryActionBounds.left + summaryActionBounds.width / 2,
-        summaryActionBounds.top + summaryActionBounds.height / 2)?.closest("button"), summaryButton);
+        summaryActionBounds.top + summaryActionBounds.height / 2)?.closest("button"), summaryButton,
+    "the bottom summary button is reachable at its rendered position");
     await clickMouse(summaryButton);
     const summaryInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
-    check.ok(summaryInput, "new summaries enter text editing on touch selection");
+    check.ok(summaryInput, "new summaries enter text editing after the menu action");
+    check.equal(document.activeElement, summaryInput, "creation focuses the new summary text");
     summaryInput.value = "<script>plain text</script> " + "Long summary ".repeat(25);
     summaryInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
     await settle();
@@ -4887,13 +4898,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     summaryView.selectNode(summaryIds[2], true);
     check.equal(summaryButton.disabled, true, "crossing ranges disable direct creation");
     check.equal(summaryButton.getAttribute("aria-description"), "listMindmapSummaryConflict");
-    check.equal(summaryView.summaryStatus.hidden, false, "touch users can see why creation is disabled");
     await settle();
-    check.equal(summaryButton.hidden, true, "conflicting selections do not expose a creation control");
+    check.equal(summaryButton.hidden, false, "conflicting selections retain the disabled menu action");
     summaryButton.click();
     check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, summaryIds.slice(0, 2));
     summaryView.clearSelection();
-    check.equal(summaryView.summaryStatus.hidden, true);
     const keyboardModel = api.readListMindmap(summaryList);
     keyboardModel.metadata.summaries = [];
     api.writeListMindmapMetadata(summaryList, keyboardModel.metadata);
@@ -4926,7 +4935,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(printedBounds.bottom <= printViewport.bottom + 1, "PDF previews include tall summary labels");
     printedLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(summaryHost.querySelector(".mindmap-view__summary-editor"), null);
-    check.equal(summaryHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action").hidden, true);
+    check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), null);
     summaryView.destroy();
     summaryHost.remove();
     api.deleteListMindmapNode(summaryList, summaryIds[0]);
@@ -5052,11 +5061,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const batchInspector = batchHost.querySelector<HTMLElement>(".mindmap-view__inspector");
     check.equal(batchInspector.hidden, false);
     check.equal(batchInspector.querySelector('[aria-label="multiSelect"]'), null);
-    const batchButton = batchHost.querySelector<HTMLButtonElement>(".mindmap-view__summary-action");
-    check.equal(batchInspector.querySelector('[aria-label="listMindmapSummary"]'), null);
+    const batchButton = batchInspector.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    check.equal(batchHost.querySelector(".mindmap-view__summary-action"), null);
     await settle();
     check.equal(batchButton.hidden, false);
-    check.equal(batchButton.textContent, batchLabels.listMindmapSummaryBatch.replace("${count}", "2"));
+    check.equal(batchButton.querySelector("use").getAttribute("xlink:href"), "#iconGroups");
     check.equal(batchButton.disabled, false);
     check.equal(batchButton.dataset.tooltip, batchLabels.listMindmapSummaryBatch.replace("${count}", "2"));
     check.equal(batchInspector.querySelector<HTMLButtonElement>('[aria-label="connect"]').disabled, true);
@@ -5064,14 +5073,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     for (const [background, primary] of [["#ffffff", "#2563eb"], ["#1e1e1e", "#93c5fd"]]) {
         batchHost.style.setProperty("--b3-theme-background", background);
         batchHost.style.setProperty("--b3-theme-primary", primary);
-        const colorProbe = document.createElement("span");
-        colorProbe.style.color = background;
-        batchHost.append(colorProbe);
-        check.equal(getComputedStyle(batchButton).backgroundColor, getComputedStyle(colorProbe).color,
-            "floating controls retain the theme background in light and dark themes");
-        colorProbe.style.color = primary;
-        check.equal(getComputedStyle(batchButton).color, getComputedStyle(colorProbe).color);
-        colorProbe.remove();
+        const sibling = batchInspector.querySelector('[aria-label="delete"]');
+        for (const property of ["color", "background-color", "border-radius", "padding"]) {
+            check.equal(getComputedStyle(batchButton).getPropertyValue(property), getComputedStyle(sibling).getPropertyValue(property),
+                "summary actions use the shared node controls in light and dark themes");
+        }
     }
     batchHost.style.removeProperty("--b3-theme-background");
     batchHost.style.removeProperty("--b3-theme-primary");
@@ -5092,11 +5098,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const actionBounds = batchButton.getBoundingClientRect();
     batchButton.dispatchEvent(new PointerEvent("pointerdown", {pointerId: 85, pointerType: "touch", isPrimary: true,
         button: 0, bubbles: true, clientX: actionBounds.left + 1, clientY: actionBounds.top + 1}));
-    check.deepEqual(batchView.getSelectedIds(), selectedBeforeAction, "touching the graph action preserves the selection");
+    check.deepEqual(batchView.getSelectedIds(), selectedBeforeAction, "touching the menu action preserves the selection");
     batchButton.click();
     await settle();
     check.equal(batchHistory.length, 1, "clicking summary submits all groups once without a confirmation step");
     check.equal(api.readListMindmap(batchList).metadata.summaries.length, 2);
+    const firstBatchSummary = batchHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+    check.ok(firstBatchSummary, "batch creation immediately opens the first new summary for editing");
+    check.equal(document.activeElement, firstBatchSummary);
+    check.equal(batchView.selectedSummary, api.readListMindmap(batchList).metadata.summaries[0].id);
+    firstBatchSummary.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     check.equal(batchButton.disabled, true, "identical groups cannot be created twice");
     const restoreBatch = (html: string) => {
         const restored = document.createElement("div");
@@ -5210,6 +5221,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
         compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_svg.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_button.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_select.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +

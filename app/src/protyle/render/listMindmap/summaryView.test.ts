@@ -11,8 +11,8 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const declaration = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(declaration && isClassDeclaration(declaration));
-const methods = declaration.members.filter(item => ["drawSummaries", "drawSummaryPreview", "positionSummaryAction"].includes(item.name?.getText(source)));
-assert.equal(methods.length, 3);
+const methods = declaration.members.filter(item => ["drawSummaries"].includes(item.name?.getText(source)));
+assert.equal(methods.length, 1);
 const compiled = transpileModule(`class View { ${methods.map(item => item.getText(source)).join("\n")} }
 globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
@@ -24,90 +24,32 @@ class PathFixture {
     quadraticCurveTo(...values: number[]) { this.commands.push(["quadratic", ...values]); }
 }
 
-test("summary previews and committed paths match across styles, zoom levels and the legacy default", () => {
+test("committed summary paths retain their shapes and hit testing across styles, zoom levels and the legacy default", () => {
     for (const connectorStyle of [undefined, ...LIST_MINDMAP_CONNECTOR_STYLES]) {
         for (const scale of [.5, 1, 2]) {
-            const sandbox: any = {Path2D: PathFixture, buildListMindmapSummaryConnector, layoutListMindmapSummaries, getListMindmapSummarySelection};
+            const sandbox: any = {Path2D: PathFixture, buildListMindmapSummaryConnector};
             runInNewContext(compiled, sandbox);
             const view = new sandbox.View();
             const children = ["a", "b"].map((id): ListMindmapNode =>
                 ({id, parentId: "root", children: [], contentBlocks: [], virtual: false, collapsed: false}));
             const root: ListMindmapNode = {id: "root", children, contentBlocks: [], virtual: true, collapsed: false};
-            const range = {parentId: "root", nodeIds: ["a", "b"]};
             const model: ListMindmapModel = {list: undefined, root, nodes: new Map([root, ...children].map(node => [node.id, node])),
-                metadata: {version: 1, nodes: {}, relations: [], connectorStyle}};
+                metadata: {version: 1, nodes: {}, relations: [], connectorStyle,
+                    summaries: [{parentId: "root", nodeIds: ["a", "b"], id: "summary", label: "Summary"}]}};
             const positions = new Map(children.map((node, index) =>
                 [node.id, {id: node.id, x: 100, y: 40 + index * 80, width: 120, height: 50}]));
-            let selected = ["a"];
-            Object.assign(view, {model, positions, summaryPositions: new Map(), getSelectedIds: () => selected,
-                inspector: {hidden: false, getBoundingClientRect: () => ({left: 0, right: 0, top: 0, bottom: 0})},
-                summaryAction: {offsetWidth: 80, offsetHeight: 32, style: {}, setAttribute: () => {}},
-                label: (key: string) => key, offsetX: 0, offsetY: 0, getToolbarBounds: (): DOMRect[] => [],
-                viewport: {clientWidth: 600, clientHeight: 400, getBoundingClientRect: () => ({left: 0, top: 0, width: 600, height: 400})},
-                options: {}, scale, linePaths: [], summaryElements: new Map()});
-            const strokes: PathFixture[] = [];
-            const context = {save: () => {}, restore: () => {}, setLineDash: () => {},
-                stroke: (path: PathFixture) => strokes.push(path)};
-            view.drawSummaryPreview(context, "blue");
-            assert.equal(strokes.length, 0, "single selection does not draw a summary preview");
-            assert.equal(view.summaryAction.hidden, true);
-            selected = ["a", "b"];
-            view.drawSummaryPreview(context, "blue");
-            assert.equal(strokes.length, 1);
-            assert.equal(view.summaryAction.hidden, false);
-            const preview = strokes.pop();
-            Object.assign(model.metadata, {summaries: [{...range, id: "summary", label: "Summary"}]});
-            view.summaryPositions = layoutListMindmapSummaries(model, positions,
-                new Map([["summary", {width: 100, height: 40}]]));
+            Object.assign(view, {model, options: {}, scale, linePaths: [], summaryElements: new Map(),
+                summaryPositions: layoutListMindmapSummaries(model, positions, new Map([["summary", {width: 100, height: 40}]]))});
             view.summaryElements.set("summary", {style: {}, classList: {toggle: () => {}}, setAttribute: () => {}});
+            const strokes: PathFixture[] = [];
+            const context = {setLineDash: () => {}, stroke: (path: PathFixture) => strokes.push(path)};
             view.drawSummaries(context, () => ({color: "blue", width: 1.5}));
             assert.equal(strokes.length, 1);
-            assert.deepEqual(strokes[0].commands, preview.commands);
             assert.equal(view.linePaths[0].path, strokes[0], "hit testing uses the rendered shape");
             assert.deepEqual(strokes[0].commands, buildListMindmapSummaryConnector(
                 view.summaryPositions.get("summary"), connectorStyle || "bezier", () => new PathFixture()).commands);
-            strokes.length = 0;
-            view.options.printLayout = true;
-            view.drawSummaryPreview(context, "blue");
-            assert.equal(strokes.length, 0, "creation previews are excluded from exports");
-            assert.equal(view.summaryAction.hidden, true, "creation controls are excluded from exports");
         }
     }
-});
-
-test("graph summary actions follow canvas transforms, show the batch count and avoid visible controls", () => {
-    const sandbox: any = {};
-    runInNewContext(compiled, sandbox);
-    const view = new sandbox.View();
-    const attributes = new Map<string, string>();
-    const action = {hidden: true, offsetWidth: 80, offsetHeight: 32, textContent: "", style: {left: "", top: ""},
-        setAttribute: (key: string, value: string) => attributes.set(key, value)};
-    const position = {id: "preview", x: 276, labelX: 300, labelY: 150, top: 100, bottom: 200, width: 0, height: 0};
-    Object.assign(view, {summaryAction: action, viewport: {clientWidth: 600, clientHeight: 400,
-        getBoundingClientRect: () => ({left: 20, top: 30, width: 1200, height: 800})},
-        inspector: {hidden: true}, positions: new Map(), summaryPositions: new Map(), getToolbarBounds: (): DOMRect[] => [],
-        label: (key: string) => key === "listMindmapSummaryBatch" ? "Create ${count} summaries" : "Summary"});
-    for (const scale of [.5, 1, 1.5]) {
-        Object.assign(view, {scale, offsetX: 12, offsetY: 20});
-        view.positionSummaryAction([position], 1);
-        assert.equal(action.hidden, false);
-        assert.equal(action.textContent, "Summary");
-        assert.equal(parseFloat(action.style.left), 12 + position.labelX * scale);
-        assert.equal(parseFloat(action.style.top), 20 + (position.top + position.bottom) * scale / 2 - 16);
-    }
-    Object.assign(view, {scale: 1, offsetX: 0, offsetY: 0,
-        getToolbarBounds: () => [{left: 600, right: 900, top: 270, bottom: 410}]});
-    view.positionSummaryAction([position], 3);
-    assert.equal(action.textContent, "Create 3 summaries");
-    assert.equal(attributes.get("aria-label"), action.textContent);
-    assert.equal(parseFloat(action.style.top), 60, "a scaled toolbar moves the action above the selected range");
-    view.viewport.clientWidth = 240;
-    view.positionSummaryAction([position], 3);
-    assert.ok(parseFloat(action.style.left) >= 8);
-    assert.ok(parseFloat(action.style.left) + action.offsetWidth <= 232);
-    view.viewport.clientWidth = 40;
-    view.positionSummaryAction([position], 3);
-    assert.equal(action.hidden, true, "an action that cannot fit is not clipped into a misleading hit target");
 });
 
 const creation = declaration.members.find(item => item.name?.getText(source) === "createSummary");
@@ -131,7 +73,7 @@ const create = () => {
             calls.push({ranges, expected});
             return addListMindmapSummaryRanges(model, ranges, () => "new", "Summary");
         }}, updateSelection: () => {}, selectSummary: (id: string) => { view.selectedSummary = id; },
-        editSummaryLabel: (id: string) => edited.push(id)});
+        revealNode: () => {}, editSummaryLabel: (id: string) => edited.push(id)});
     return {view, model, calls, frames, edited, select: (ids: string[]) => selected = ids};
 };
 
@@ -166,7 +108,7 @@ test("single, invalid, crossing, duplicate and read-only summary selections neve
 });
 
 test("pending summaries reject repeated activation and late results preserve a changed selection", async () => {
-    for (const outcome of ["success", "selection", "readonly", "destroyed", "failed", "rejected"]) {
+    for (const outcome of ["success", "multiple", "selection", "readonly", "destroyed", "failed", "rejected"]) {
         const {view, select, frames, edited} = create();
         let resolve: (ids?: string[]) => void;
         let reject: (error: Error) => void;
@@ -183,10 +125,10 @@ test("pending summaries reject repeated activation and late results preserve a c
         if (outcome === "readonly") { view.readOnly = true; }
         if (outcome === "destroyed") { view.destroyed = true; }
         if (outcome === "rejected") { reject(new Error("write failed")); }
-        else { resolve(outcome === "failed" ? undefined : ["new"]); }
+        else { resolve(outcome === "failed" ? undefined : outcome === "multiple" ? ["new", "second"] : ["new"]); }
         await pending;
         frames.forEach(action => action());
         assert.equal(view.summaryPending, false);
-        assert.deepEqual(edited, outcome === "success" ? ["new"] : [], outcome);
+        assert.deepEqual(edited, ["success", "multiple"].includes(outcome) ? ["new"] : [], outcome);
     }
 });

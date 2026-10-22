@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261022134112"
+		"updated": "20261022235541"
 	},
 	"Children": [
 		{
@@ -13115,7 +13115,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261022134112"
+				"updated": "20261022235541"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13960,12 +13960,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-8trdt10",
-				"updated": "20261022134112"
+				"updated": "20261022235541"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select nodes, then activate "
+					"Data": "Select at least two nodes, then activate "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -13974,7 +13974,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " beside the preview bracket on the canvas to create all valid groups in one undoable operation. Esc leaves multi-select mode. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+					"Data": " in the bottom node menu to create all valid groups in one undoable operation and edit the first new summary. Esc on the canvas leaves multi-select mode. While editing summary text, Enter saves and Esc cancels the text edit. Delete or Backspace removes the selected summary."
 				}
 			]
 		},

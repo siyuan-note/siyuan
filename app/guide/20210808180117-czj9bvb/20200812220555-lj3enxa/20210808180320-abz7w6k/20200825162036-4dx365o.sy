@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261022190543"
+		"updated": "20261022235541"
 	},
 	"Children": [
 		{
@@ -1964,7 +1964,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261022181804"
+				"updated": "20261022235541"
 			},
 			"Children": [
 				{
@@ -3663,12 +3663,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-8wl1iml",
-				"updated": "20261022134112"
+				"updated": "20261022235541"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选中节点后，点击画布预览括号旁的 "
+					"Data": "选中至少两个节点后，点击底部节点菜单中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3677,7 +3677,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 即可直接创建，无需再次选择或确认。多组时，按钮显示将创建的概要数量。桌面端可在空白画布框选，或按住 Ctrl/Command 点选节点；触屏上先开启顶部工具栏的 "
+					"Data": " 即可直接创建，无需再次选择或确认。仅选择节点时不显示概要预览，也不会创建概要。桌面端可在空白画布框选，或按住 Ctrl/Command 点选节点；触屏上先开启顶部工具栏的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3686,7 +3686,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，再逐个点选节点。同一父节点下连续的选中节点生成一个概要，不连续或不同父节点下的选区分别生成多个概要，不会纳入未选节点。父子同时选中时以最外层节点为准。支持单节点概要和范围嵌套，已有相同概要会跳过；范围交叉时禁用创建并显示提示。括号包围可见子树及内层概要。全部分组一次创建，并可一次撤销。节点菜单中不适用的操作置灰，Esc 退出多选模式。"
+					"Data": "，再逐个点选节点。同一父节点下连续的选中节点生成一个概要，不连续或不同父节点下的选区分别生成多个概要，不会纳入未选节点。父子同时选中时以最外层节点为准。分组可只含一个节点，支持范围嵌套，已有相同概要会跳过；范围交叉时概要按钮置灰，并提供原因提示。括号包围可见子树及内层概要。全部分组一次创建，并可一次撤销；创建后自动定位到第一个新概要并进入文字编辑。节点菜单中不适用的操作置灰，在画布上按 Esc 退出多选模式。"
 				}
 			]
 		},

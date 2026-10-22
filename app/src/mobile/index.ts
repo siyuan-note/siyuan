@@ -241,7 +241,6 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     initMobileSelect();
                     document.title = window.siyuan.languages.siyuanNote;
-                    bootSync();
                     void Promise.resolve(appearanceConfigApi.apply(window.siyuan.config.appearance)).catch(reportStartupError);
                     initMessage();
                     initAssets(true);
@@ -270,6 +269,7 @@ class App {
                             window.siyuan.isReady = true;
                             finishMobileSystemUris(this);
                             mainWs.flushMainMessages();
+                            bootSync();
                             completeStartup();
                             fetchPost("/api/setting/getCloudUser", {});
                         }), undefined, startupRequestFailed);

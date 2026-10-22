@@ -352,7 +352,6 @@ export class App {
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
-                    bootSync();
                     fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
@@ -370,6 +369,7 @@ export class App {
                         /// #endif
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        bootSync();
                         exitAfterSettingsReset();
                         fetchPost("/api/setting/getCloudUser", {});
                     });

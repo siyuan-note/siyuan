@@ -56,6 +56,8 @@ func NewCommand(cmdStr string, cmdId float64, param map[string]any, session *mel
 		ret = &closews{baseCmd}
 	case "ping":
 		ret = &ping{baseCmd}
+	case "ready":
+		ret = &ready{baseCmd}
 	}
 
 	if nil == ret {

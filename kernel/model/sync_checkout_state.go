@@ -127,7 +127,23 @@ func (task *syncCheckoutTask) prepareApply() error {
 		task.Unlock()
 		return nil
 	}
-	sessions := util.SessionsByType("main")
+	task.Unlock()
+	var sessions []*melody.Session
+	for {
+		if err := waitForSyncUI(task.ctx, false, false); err != nil {
+			return err
+		}
+		// 就绪检查后仍可能接入新窗口，确认超时只约束这次取得的已就绪会话。
+		sessions = util.SessionsByType("main")
+		ready := true
+		for _, session := range sessions {
+			ready = ready && util.IsSessionReady(session)
+		}
+		if ready {
+			break
+		}
+	}
+	task.Lock()
 	task.phase, task.revision = "preparing", syncCheckoutRevision.Add(1)
 	task.clients = map[*melody.Session]*syncCheckoutClient{}
 	task.confirmations = make(chan bool, len(sessions))

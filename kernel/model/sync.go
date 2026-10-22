@@ -17,6 +17,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -178,6 +179,13 @@ func SyncDataJob() {
 
 func BootSyncData() {
 	defer logging.Recover()
+	if scheduleBootSync() {
+		return
+	}
+	bootSyncData()
+}
+
+func bootSyncData() {
 	refreshLANSyncManager()
 
 	if Conf.Sync.Load().Perception {
@@ -191,12 +199,12 @@ func BootSyncData() {
 	lockSync()
 	defer unlockSync()
 
-	iosAfterBoot := util.ContainerIOS == util.Container && util.IsBooted()
-	if !iosAfterBoot {
+	afterBoot := util.IsBooted()
+	if !afterBoot {
 		util.IncBootProgress(3, Conf.Language(307))
 	}
 	BootSyncSucc.Store(-1)
-	if iosAfterBoot {
+	if afterBoot {
 		logging.LogInfof("sync after boot")
 	} else {
 		logging.LogInfof("sync before boot")
@@ -205,23 +213,33 @@ func BootSyncData() {
 	now := util.CurrentTimeMillis()
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 	revision := pendingSync.begin()
-	if iosAfterBoot {
+	if afterBoot {
 		// 本地界面已可编辑，保持同步入口可见直到云端合并成功。
 		notifySyncPending(true)
 	}
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	var cloudPublished bool
 	var err error
-	if iosAfterBoot {
+	if afterBoot {
 		cloudPublished, err = syncRepoWithDNSRetry(false, false)
 	} else {
-		err = bootSyncRepoWithDNSRetry()
+		var scheduled bool
+		scheduled, err = bootSyncRepoWithDNSRetry(func(err error) {
+			finishBootSync(revision, false, err)
+		})
+		if scheduled {
+			return
+		}
 	}
+	finishBootSync(revision, cloudPublished, err)
+}
+
+func finishBootSync(revision uint64, cloudPublished bool, err error) {
 	code := 1
 	if err != nil {
 		code = 2
 		BootSyncSucc.Store(1)
-		if iosAfterBoot {
+		if util.IsBooted() && !errors.Is(err, context.Canceled) && !errors.Is(err, errSyncRemoteRequestSkipped) {
 			msg := formatSyncRepoErrorMsg(err)
 			UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 			pushSyncStatusBar(msg)
@@ -236,7 +254,7 @@ func BootSyncData() {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
 		consumeShorthands()
 	}
-	if iosAfterBoot {
+	if util.IsBooted() {
 		completeSyncPerception(cloudPublished, err)
 	}
 }
@@ -382,6 +400,9 @@ func completeSyncPerception(cloudPublished bool, err error) {
 }
 
 func checkSync(boot, exit, byHand bool) bool {
+	if !boot && !exit && !byHand && bootSyncScheduled.Load() {
+		return false
+	}
 	confSyncReadSnapshot := Conf.LoadSync()
 
 	if 2 == confSyncReadSnapshot.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
@@ -1027,10 +1048,10 @@ func syncRepoUploadWithDNSRetry() (err error) {
 	return
 }
 
-func bootSyncRepoWithDNSRetry() (err error) {
-	err = bootSyncRepo()
+func bootSyncRepoWithDNSRetry(complete func(error)) (scheduled bool, err error) {
+	scheduled, err = bootSyncRepo(complete)
 	if nil != err && flushAndRetryOnDNSError(err) {
-		err = bootSyncRepo()
+		scheduled, err = bootSyncRepo(complete)
 	}
 	return
 }

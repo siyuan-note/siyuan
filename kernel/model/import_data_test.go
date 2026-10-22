@@ -796,7 +796,8 @@ func TestDataImportFailedRollbackQuarantinesWritesUntilRecovery(t *testing.T) {
 		t.Fatal("allowed a snapshot of a partially installed batch")
 	}
 	for _, syncAttempt := range []func() error{
-		func() error { return syncDataLocked(false, false) }, syncRepoDownload, syncRepoUpload, bootSyncRepo,
+		func() error { return syncDataLocked(false, false) }, syncRepoDownload, syncRepoUpload,
+		func() error { _, err := bootSyncRepo(func(error) {}); return err },
 		func() error { _, err := syncRepo(false, false); return err },
 	} {
 		if err = syncAttempt(); err == nil {

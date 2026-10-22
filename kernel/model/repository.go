@@ -1970,7 +1970,6 @@ func SetRepoSnapshotMemo(id, memo string) error {
 }
 
 var syncingFiles = sync.Map{}
-var syncingStorages = atomic.Bool{}
 
 func waitForSyncingStorages() {
 	for isSyncingStorages() {
@@ -1979,7 +1978,7 @@ func waitForSyncingStorages() {
 }
 
 func isSyncingStorages() bool {
-	return syncingStorages.Load() || isBootSyncing.Load()
+	return isBootSyncing.Load()
 }
 
 func IsSyncingFile(rootID string) (ret bool) {
@@ -2178,7 +2177,7 @@ func syncRepoUpload() (err error) {
 
 var isBootSyncing = atomic.Bool{}
 
-func bootSyncRepo() (err error) {
+func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -2213,6 +2212,7 @@ func bootSyncRepo() (err error) {
 	preparedSourceScope := assetDownloadScope(Conf.Sync.Load().Provider, preparedSourceConf, Conf.Repo.Load().Key)
 
 	isBootSyncing.Store(true)
+	defer isBootSyncing.Store(false)
 
 	waitGroup := sync.WaitGroup{}
 	var indexErr error
@@ -2263,36 +2263,31 @@ func bootSyncRepo() (err error) {
 		pushSyncStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		BootSyncSucc.Store(1)
-		isBootSyncing.Store(false)
 		return
 	}
 
-	syncingFiles = sync.Map{}
-	syncingStorages.Store(false)
 	if 1 > len(fetchedFiles) {
 		cleanupSyncedBoxResiduals(nil)
 	}
-	for _, fetchedFile := range fetchedFiles {
-		name := path.Base(fetchedFile.Path)
-		if strings.HasSuffix(name, ".sy") {
-			id := name[:len(name)-3]
-			syncingFiles.Store(id, true)
-			continue
-		}
-		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
-			syncingStorages.Store(true)
-		}
-	}
 
 	if 0 < len(fetchedFiles) {
+		scheduled = true
 		go func() {
-			confSyncSnapshot := Conf.LoadSync()
-
 			defer logging.Recover()
-			defer isBootSyncing.Store(false)
+			// 预取结束后不再用文件标记阻塞初始化，实际应用由 checkout 的保存确认和写保护负责。
+			if waitErr := waitForSyncUI(context.Background(), false, true); waitErr != nil {
+				complete(waitErr)
+				return
+			}
 
 			lockSync()
 			defer unlockSync()
+			syncErr := errSyncRemoteRequestSkipped
+			defer func() { complete(syncErr) }()
+			if !checkSync(true, false, false) {
+				return
+			}
+			confSyncSnapshot := Conf.LoadSync()
 			currentSourceConf, sourceErr := buildCloudConf()
 			if sourceErr != nil || preparedSourceScope != assetDownloadScope(confSyncSnapshot.Provider, currentSourceConf, Conf.Repo.Load().Key) {
 				logging.LogInfof("skip prepared boot sync after repository source changed")
@@ -2300,6 +2295,7 @@ func bootSyncRepo() (err error) {
 			}
 			repo, repoErr := newSyncRepository()
 			if repoErr != nil {
+				syncErr = repoErr
 				logging.LogErrorf("reopen prepared boot repository failed: %s", repoErr)
 				return
 			}
@@ -2307,7 +2303,7 @@ func bootSyncRepo() (err error) {
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.Load().ID, KernelID, confSyncSnapshot.Provider)
 			syncStart := time.Now()
 			indexStart := time.Now()
-			_, _, syncErr := indexRepoBeforeCloudSync(repo)
+			_, _, syncErr = indexRepoBeforeCloudSync(repo)
 			indexElapsed := time.Since(indexStart)
 			if nil == syncErr {
 				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, syncStart, indexElapsed, prefetchTraffic)
@@ -2317,8 +2313,6 @@ func bootSyncRepo() (err error) {
 				return
 			}
 		}()
-	} else {
-		isBootSyncing.Store(false)
 	}
 	return
 }
@@ -2786,7 +2780,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	removeEmptyPackageDirs(filepath.Join(util.DataDir, "widgets"), removeWidgetDirSet)
 
 	syncingFiles = sync.Map{}
-	syncingStorages.Store(false)
 	if needReloadInlineStyles && !exit {
 		invalidateWorkspaceAVPaletteCache()
 		util.BroadcastByType("main", "reloadInlineStyles", 0, "", nil)

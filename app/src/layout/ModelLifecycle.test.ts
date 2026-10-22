@@ -103,7 +103,9 @@ test("main socket recovery is recorded and obsolete sockets cannot finish a faul
 test("main windows query their own checkout preparation on startup and reconnect", () => {
     const sockets: Socket[] = [];
     const queries: {id: string, reconnect?: boolean}[] = [];
+    const messages: string[] = [];
     class Socket {
+        static CONNECTING = 0;
         onopen: () => void;
         onclose: unknown;
         onmessage: unknown;
@@ -111,6 +113,7 @@ test("main windows query their own checkout preparation on startup and reconnect
         readyState = 1;
         constructor(public url: string) { sockets.push(this); }
         close() {}
+        send(message: string) { messages.push(message); }
     }
     const api = {} as {Model: new (options: unknown) => {
         connect: (options: unknown) => void, flushMainMessages: () => void, destroy: () => void,
@@ -134,9 +137,22 @@ test("main windows query their own checkout preparation on startup and reconnect
     });
     const model = new api.Model({app: {}});
     model.connect({id: "detached-window", type: "main"});
+    assert.equal(new URL(sockets[0].url).searchParams.get("ready"), "false");
+    sockets[0].onopen();
+    assert.equal(messages.length, 0, "a connected window must not report readiness during initialization");
     window.siyuan.isReady = true;
+    sockets[0].readyState = Socket.CONNECTING;
+    model.flushMainMessages();
+    assert.equal(messages.length, 0, "readiness must wait for the socket to open");
+    sockets[0].readyState = 1;
     model.flushMainMessages();
     sockets[0].onopen();
-    assert.deepEqual(queries, [{id: "detached-window", reconnect: undefined}, {id: "detached-window", reconnect: true}]);
+    assert.deepEqual(messages.map(message => JSON.parse(message).cmd), ["ready", "ready"]);
+    assert.deepEqual(queries, [{id: "detached-window", reconnect: undefined},
+        {id: "detached-window", reconnect: undefined}, {id: "detached-window", reconnect: true}]);
+    model.connect({id: "detached-window", type: "main"});
+    assert.equal(new URL(sockets[1].url).searchParams.get("ready"), "false");
+    sockets[1].onopen();
+    assert.equal(JSON.parse(messages.at(-1)).cmd, "ready");
     model.destroy();
 });

@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,51 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSyncCheckoutPreparationStartsTimeoutOnlyAfterUIReady(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		task := prepareSyncCheckoutStateTest(t)
+		client := addBootSyncSession(t, "loading")
+		done := make(chan error, 1)
+		go func() { done <- task.prepareApply() }()
+		time.Sleep(20 * time.Second)
+		synctest.Wait()
+		if state := GetSyncCheckout("boot-sync-test", "loading").Task; state.Phase != "background" || state.Token != "" {
+			t.Fatalf("save confirmation started during initialization: %+v", state)
+		}
+		if !dataImportAccess.TryLock() {
+			t.Fatal("initialization wait holds a write lease")
+		}
+		dataImportAccess.Unlock()
+		client.Set("uiReady", true)
+		time.Sleep(time.Second)
+		synctest.Wait()
+		state := GetSyncCheckout("boot-sync-test", "loading").Task
+		if state.Phase != "preparing" || state.Token == "" {
+			t.Fatalf("ready window did not receive its own save confirmation: %+v", state)
+		}
+		ConfirmSyncCheckout(task.id, state.Token, true)
+		if err := <-done; err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
+func TestSyncCheckoutPreparationCanCancelWhileLoading(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		task := prepareSyncCheckoutStateTest(t)
+		addBootSyncSession(t, "loading")
+		done := make(chan error, 1)
+		go func() { done <- task.prepareApply() }()
+		synctest.Wait()
+		if !CancelSyncCheckout(task.id) {
+			t.Fatal("loading task could not be canceled")
+		}
+		if err := <-done; !errors.Is(err, context.Canceled) || task.releaseWrites != nil {
+			t.Fatalf("canceled initialization entered application: %v", err)
+		}
+	})
+}
 
 func prepareSyncCheckoutStateTest(t *testing.T) *syncCheckoutTask {
 	t.Helper()

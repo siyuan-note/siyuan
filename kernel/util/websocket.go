@@ -122,6 +122,12 @@ func SessionsByType(typ string) (ret []*melody.Session) {
 	return sessionsByType(typ, false)
 }
 
+// IsSessionReady 未声明就绪协议的旧客户端沿用连接后即可接收控制消息的行为。
+func IsSessionReady(session *melody.Session) bool {
+	ready, exists := session.Get("uiReady")
+	return !exists || ready == true
+}
+
 func publishSessionsByType(typ string) (ret []*melody.Session) {
 	return sessionsByType(typ, true)
 }
@@ -172,6 +178,9 @@ func AddPushChan(session *melody.Session) {
 		return
 	}
 	session.Set("type", typ)
+	if typ == "main" && session.Request.URL.Query().Get("ready") == "false" {
+		session.Set("uiReady", false)
+	}
 
 	if IsAuthSession(session) {
 		if appSessions, ok := authSessions.Load(appID); !ok {

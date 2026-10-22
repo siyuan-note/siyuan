@@ -6,7 +6,7 @@
 		"id": "20260614104254-4ifhixg",
 		"title": "网络代理",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261022120655"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104306-tylh2a2",
-				"updated": "20261016112115"
+				"updated": "20261022120655"
 			},
 			"Children": [
 				{
@@ -109,7 +109,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104306-s1ddhjq",
-				"updated": "20261016112115"
+				"updated": "20261022120655"
 			},
 			"Children": [
 				{
@@ -145,7 +145,7 @@
 					"Type": "NodeListItem",
 					"Properties": {
 						"id": "20261016112115-zd0i0ab",
-						"updated": "20261016112115"
+						"updated": "20261022120655"
 					},
 					"ListData": {
 						"BulletChar": 42,
@@ -157,12 +157,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261016112115-bggswt8",
-								"updated": "20261016112115"
+								"updated": "20261022120655"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "系统模式使用受支持的系统设置，或内核启动时继承的代理环境变量。内核支持读取 Windows 手动代理和 Linux GNOME 手动代理，Linux 上显式代理环境变量优先。这些读取器不支持自动 PAC 配置，Windows 自动检测也不受支持；其他平台的内核保留启动时的代理环境，不读取操作系统代理设置"
+									"Data": "系统模式使用受支持的系统设置，或内核启动时继承的代理环境变量。内核支持读取 Windows、Linux GNOME 和 macOS 的手动代理，Linux 和 macOS 上显式代理环境变量优先。这些读取器不支持自动 PAC 配置，Windows 和 macOS 自动检测也不受支持；其他平台的内核保留启动时的代理环境，不读取操作系统代理设置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261022120655-1dv9u99",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261022120655-1dv9u99",
+						"updated": "20261022120655"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261022120655-iobo4nv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261022120655-iobo4nv",
+								"updated": "20261022120655"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "macOS 支持手动 HTTP、HTTPS 和 SOCKS5 代理。例外列表转换为 NO_PROXY 规则，支持 IP 地址、CIDR 网段（包括 169.254/16）、域名、以 *. 开头的域名模式，以及 10.* 等 IPv4 尾部通配符。不支持“排除简单主机名”和其他通配模式，请改用明确的例外条目。读取或转换失败时，内核记录警告并保留启动时的代理环境。修改 macOS 系统代理后，需重启内核，或先切换到其他代理模式再切回系统模式"
 								}
 							]
 						}

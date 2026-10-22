@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "รวมตัวเอกสารที่เลือกด้วย",
+	"automationCollectionIncludeSelfTip": "เมื่อปิดจะติดตามเฉพาะเอกสารลูกหลาน หากใช้ร่วมกับเฉพาะเอกสารปัจจุบัน ขอบเขตเอกสารนั้นจะว่าง",
 	"clearRecentDocs": "ล้างประวัติเอกสารล่าสุด",
 	"confirmClearRecentDocs": "ล้างบันทึกการดู เปิด และปิดเอกสารทั้งหมดหรือไม่? เอกสารจะยังคงอยู่และจะยังคงบันทึกกิจกรรมใหม่ต่อไป",
 	"bazaarInstalling": "กำลังติดตั้ง...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "ไม่จำกัด",
 	"automationCollectionDepthCurrent": "เฉพาะเอกสารปัจจุบัน",
 	"automationCollectionDepthLimited": "ความลึกสูงสุด",
-	"automationCollectionDepthTip": "รวมตัวเอกสารแต่ละฉบับที่เลือกด้วย ความลึกจำกัดเฉพาะขอบเขตเอกสาร โดยรวมขอบเขตสมุดบันทึกและเอกสารเข้าด้วยกัน",
+	"automationCollectionDepthTip": "ความลึกจำกัดเฉพาะขอบเขตเอกสาร โดยรวมขอบเขตสมุดบันทึกและเอกสารเข้าด้วยกัน",
 	"mindmapPasteChild": "วางเป็นโหนดลูก",
 	"mindmapPasteSibling": "วางเป็นโหนดระดับเดียวกัน",
 	"embedBlockBreadcrumbParentPath": "แสดงเส้นทางหลักในเส้นทางนำทาง",

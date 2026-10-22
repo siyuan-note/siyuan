@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Incluir os próprios documentos selecionados",
+	"automationCollectionIncludeSelfTip": "Quando desativado, apenas documentos descendentes são monitorados; com Apenas o documento atual, o escopo do documento fica vazio",
 	"clearRecentDocs": "Limpar histórico de documentos recentes",
 	"confirmClearRecentDocs": "Limpar todos os registros de consulta, abertura e fechamento de documentos? Os documentos serão mantidos e novas atividades continuarão sendo registradas.",
 	"bazaarInstalling": "Instalando...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Sem limite",
 	"automationCollectionDepthCurrent": "Somente o documento atual",
 	"automationCollectionDepthLimited": "Profundidade máxima",
-	"automationCollectionDepthTip": "Inclui cada documento selecionado; a profundidade limita apenas os escopos de documentos. Os escopos de cadernos e documentos são unidos",
+	"automationCollectionDepthTip": "A profundidade limita apenas os escopos de documentos. Os escopos de cadernos e documentos são unidos",
 	"mindmapPasteChild": "Colar como nó filho",
 	"mindmapPasteSibling": "Colar como nó irmão",
 	"embedBlockBreadcrumbParentPath": "Mostrar o caminho superior na trilha de navegação",

@@ -6767,6 +6767,9 @@
             "type": "string"
           }
         },
+        "includeSelectedDocuments": {
+          "type": "boolean"
+        },
         "notebookIDs": {
           "type": "array",
           "items": {
@@ -6843,6 +6846,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "includeSelectedDocuments": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "notebookIDs": {
           "type": "array",

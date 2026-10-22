@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Ausgewählte Dokumente selbst einschließen",
+	"automationCollectionIncludeSelfTip": "Wenn deaktiviert, werden nur untergeordnete Dokumente überwacht; mit Nur aktuelles Dokument ist der Dokumentbereich leer",
 	"clearRecentDocs": "Verlauf zuletzt verwendeter Dokumente leeren",
 	"confirmClearRecentDocs": "Alle Einträge zum Anzeigen, Öffnen und Schließen von Dokumenten löschen? Die Dokumente bleiben erhalten und neue Aktivitäten werden weiterhin aufgezeichnet.",
 	"bazaarInstalling": "Wird installiert...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Unbegrenzt",
 	"automationCollectionDepthCurrent": "Nur aktuelles Dokument",
 	"automationCollectionDepthLimited": "Maximale Tiefe",
-	"automationCollectionDepthTip": "Schließt jedes ausgewählte Dokument selbst ein; die Tiefe gilt nur für Dokumentbereiche. Notizbuch- und Dokumentbereiche werden vereinigt",
+	"automationCollectionDepthTip": "Die Tiefe gilt nur für Dokumentbereiche. Notizbuch- und Dokumentbereiche werden vereinigt",
 	"mindmapPasteChild": "Als untergeordneten Knoten einfügen",
 	"mindmapPasteSibling": "Als gleichgeordneten Knoten einfügen",
 	"embedBlockBreadcrumbParentPath": "Übergeordneten Pfad in der Brotkrumennavigation anzeigen",

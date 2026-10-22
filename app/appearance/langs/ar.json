@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "تضمين المستندات المحددة نفسها",
+	"automationCollectionIncludeSelfTip": "عند التعطيل، تتم مراقبة المستندات التابعة فقط؛ ومع خيار المستند الحالي فقط، يصبح نطاق المستند فارغًا",
 	"clearRecentDocs": "مسح سجل المستندات الأخيرة",
 	"confirmClearRecentDocs": "هل تريد مسح جميع سجلات تصفح المستندات وفتحها وإغلاقها؟ ستبقى المستندات، وسيستمر تسجيل النشاط الجديد.",
 	"bazaarInstalling": "جارٍ التثبيت...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "بلا حدود",
 	"automationCollectionDepthCurrent": "المستند الحالي فقط",
 	"automationCollectionDepthLimited": "العمق الأقصى",
-	"automationCollectionDepthTip": "يشمل كل مستند محدد نفسه؛ يقتصر تطبيق العمق على نطاقات المستندات. يتم دمج نطاقات دفاتر الملاحظات والمستندات",
+	"automationCollectionDepthTip": "يقتصر تطبيق العمق على نطاقات المستندات. يتم دمج نطاقات دفاتر الملاحظات والمستندات",
 	"mindmapPasteChild": "لصق كعقدة فرعية",
 	"mindmapPasteSibling": "لصق كعقدة شقيقة",
 	"embedBlockBreadcrumbParentPath": "إظهار المسار الأصل في مسار التنقل",

@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Zahrnúť samotné vybrané dokumenty",
+	"automationCollectionIncludeSelfTip": "Po vypnutí sa sledujú iba vnorené dokumenty; s možnosťou Iba aktuálny dokument je rozsah dokumentu prázdny",
 	"clearRecentDocs": "Vymazať históriu nedávnych dokumentov",
 	"confirmClearRecentDocs": "Vymazať všetky záznamy o prezeraní, otváraní a zatváraní dokumentov? Dokumenty zostanú zachované a nové činnosti sa budú naďalej zaznamenávať.",
 	"bazaarInstalling": "Inštaluje sa...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Bez obmedzenia",
 	"automationCollectionDepthCurrent": "Iba aktuálny dokument",
 	"automationCollectionDepthLimited": "Maximálna hĺbka",
-	"automationCollectionDepthTip": "Zahŕňa každý vybraný dokument; hĺbka obmedzuje iba rozsahy dokumentov. Rozsahy zápisníkov a dokumentov sa zjednocujú",
+	"automationCollectionDepthTip": "Hĺbka obmedzuje iba rozsahy dokumentov. Rozsahy zápisníkov a dokumentov sa zjednocujú",
 	"mindmapPasteChild": "Prilepiť ako podradený uzol",
 	"mindmapPasteSibling": "Prilepiť ako uzol rovnakej úrovne",
 	"embedBlockBreadcrumbParentPath": "Zobraziť nadradenú cestu v navigačnej ceste",

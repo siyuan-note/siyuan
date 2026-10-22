@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Seçilen belgelerin kendilerini dahil et",
+	"automationCollectionIncludeSelfTip": "Kapalıyken yalnızca alt belgeler izlenir; Yalnızca geçerli belge ile birlikte kullanıldığında belge kapsamı boş olur",
 	"clearRecentDocs": "Son belge geçmişini temizle",
 	"confirmClearRecentDocs": "Belgeleri görüntüleme, açma ve kapatmayla ilgili tüm kayıtlar temizlensin mi? Belgeler korunur ve yeni etkinlikler kaydedilmeye devam eder.",
 	"bazaarInstalling": "Yükleniyor...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Sınırsız",
 	"automationCollectionDepthCurrent": "Yalnızca mevcut belge",
 	"automationCollectionDepthLimited": "En fazla derinlik",
-	"automationCollectionDepthTip": "Seçilen her belgenin kendisini içerir; derinlik yalnızca belge kapsamlarını sınırlar. Not defteri ve belge kapsamları birleştirilir",
+	"automationCollectionDepthTip": "Derinlik yalnızca belge kapsamlarını sınırlar. Not defteri ve belge kapsamları birleştirilir",
 	"mindmapPasteChild": "Alt düğüm olarak yapıştır",
 	"mindmapPasteSibling": "Aynı düzeyde düğüm olarak yapıştır",
 	"embedBlockBreadcrumbParentPath": "Gezinti yolunda üst yolu göster",

@@ -146,7 +146,7 @@ func TestBlockCollectionIndexScopesAndSnapshots(t *testing.T) {
 		t.Fatal("disabling last rule did not update empty fast path")
 	}
 	view.Automations.Rules[0].Enabled = true
-	view.Automations.Spec = 7
+	view.Automations.Spec = 8
 	rememberCollectionView(view, "")
 	unknown, err := BlockCollectionIndexInBox("")
 	if err != nil || !unknown.MatchesDocument("unrelated", child, "/child.sy") {
@@ -155,6 +155,52 @@ func TestBlockCollectionIndexScopesAndSnapshots(t *testing.T) {
 	ClearBlockCollectionIndex("")
 	if unknown.Current() || BlockCollectionIndexKnownEmpty("") {
 		t.Fatal("explicit clear retained snapshot")
+	}
+}
+
+func TestBlockCollectionIndexSelectedDocuments(t *testing.T) {
+	setupCollectionIndexTest(t)
+	view := collectionIndexTestView()
+	source := view.Automations.Rules[0].BlockSource
+	parent, child := source.DocumentIDs[0], ast.NewNodeID()
+	writeCollectionIndexView(t, view)
+	before, err := BlockCollectionIndexInBox("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source.IncludeSelectedDocuments = new(true)
+	rememberCollectionView(view, "")
+	if !before.Current() {
+		t.Fatal("explicit default invalidated identical scope")
+	}
+	view.Automations.Spec = 7
+	source.IncludeSelectedDocuments = new(false)
+	rememberCollectionView(view, "")
+	index, err := BlockCollectionIndexInBox("")
+	if err != nil || before.Current() || index.MatchesDocument("", parent, "/"+parent+".sy") ||
+		!index.MatchesDocument("", child, "/"+parent+"/"+child+".sy") {
+		t.Fatal("scope exclusion did not update snapshot", err)
+	}
+	if !before.MatchesDocument("", parent, "/"+parent+".sy") {
+		t.Fatal("exclusion mutated previous snapshot")
+	}
+	*source.IncludeSelectedDocuments = true
+	if index.MatchesDocument("", parent, "/"+parent+".sy") {
+		t.Fatal("caller mutated immutable exclusion snapshot")
+	}
+	// Persist and reload to cover cold discovery, not just the hot save path.
+	*source.IncludeSelectedDocuments = false
+	writeCollectionIndexView(t, view)
+	cache.ClearAVCache()
+	index, err = BlockCollectionIndexInBox("")
+	if err != nil || index.MatchesDocument("", parent, "/"+parent+".sy") {
+		t.Fatal("cold discovery lost scope exclusion", err)
+	}
+	source.IncludeSelectedDocuments = nil
+	rememberCollectionView(view, "")
+	restored, err := BlockCollectionIndexInBox("")
+	if err != nil || index.Current() || !restored.MatchesDocument("", parent, "/"+parent+".sy") {
+		t.Fatal("restoring default did not invalidate exclusion snapshot", err)
 	}
 }
 

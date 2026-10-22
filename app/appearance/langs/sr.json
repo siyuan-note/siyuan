@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Укључи саме изабране документе",
+	"automationCollectionIncludeSelfTip": "Када је искључено, прате се само подређени документи; уз Само тренутни документ, опсег документа је празан",
 	"clearRecentDocs": "Обриши историју недавних докумената",
 	"confirmClearRecentDocs": "Обрисати све записе о прегледању, отварању и затварању докумената? Документи ће бити сачувани, а нове активности ће се и даље бележити.",
 	"bazaarInstalling": "Инсталирање...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Неограничено",
 	"automationCollectionDepthCurrent": "Само тренутни документ",
 	"automationCollectionDepthLimited": "Највећа дубина",
-	"automationCollectionDepthTip": "Укључује сваки изабрани документ; дубина ограничава само опсеге докумената. Опсези бележница и докумената се обједињују",
+	"automationCollectionDepthTip": "Дубина ограничава само опсеге докумената. Опсези бележница и докумената се обједињују",
 	"mindmapPasteChild": "Налепи као подређени чвор",
 	"mindmapPasteSibling": "Налепи као чвор истог нивоа",
 	"embedBlockBreadcrumbParentPath": "Прикажи надређену путању у навигационој путањи",

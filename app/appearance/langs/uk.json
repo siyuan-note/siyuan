@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Включати самі вибрані документи",
+	"automationCollectionIncludeSelfTip": "Після вимкнення відстежуються лише дочірні документи; разом із параметром Лише поточний документ область документа буде порожньою",
 	"clearRecentDocs": "Очистити історію нещодавніх документів",
 	"confirmClearRecentDocs": "Очистити всі записи про перегляд, відкриття та закриття документів? Документи залишаться, а нові дії й надалі записуватимуться.",
 	"bazaarInstalling": "Встановлення...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Без обмежень",
 	"automationCollectionDepthCurrent": "Лише поточний документ",
 	"automationCollectionDepthLimited": "Максимальна глибина",
-	"automationCollectionDepthTip": "Включає кожен вибраний документ; глибина обмежує лише області документів. Області записників і документів об’єднуються",
+	"automationCollectionDepthTip": "Глибина обмежує лише області документів. Області записників і документів об’єднуються",
 	"mindmapPasteChild": "Вставити як дочірній вузол",
 	"mindmapPasteSibling": "Вставити як вузол того самого рівня",
 	"embedBlockBreadcrumbParentPath": "Показувати батьківський шлях у навігаційному ланцюжку",

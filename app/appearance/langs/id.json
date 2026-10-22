@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Sertakan dokumen yang dipilih itu sendiri",
+	"automationCollectionIncludeSelfTip": "Jika dinonaktifkan, hanya dokumen turunan yang dipantau; dengan Hanya dokumen saat ini, cakupan dokumen menjadi kosong",
 	"clearRecentDocs": "Hapus riwayat dokumen terbaru",
 	"confirmClearRecentDocs": "Hapus semua catatan penelusuran, pembukaan, dan penutupan dokumen? Dokumen tetap disimpan dan aktivitas baru akan tetap dicatat.",
 	"bazaarInstalling": "Sedang memasang...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Tanpa batas",
 	"automationCollectionDepthCurrent": "Hanya dokumen saat ini",
 	"automationCollectionDepthLimited": "Kedalaman maksimum",
-	"automationCollectionDepthTip": "Mencakup setiap dokumen yang dipilih; kedalaman hanya membatasi cakupan dokumen. Cakupan buku catatan dan dokumen digabungkan",
+	"automationCollectionDepthTip": "Kedalaman hanya membatasi cakupan dokumen. Cakupan buku catatan dan dokumen digabungkan",
 	"mindmapPasteChild": "Tempel sebagai simpul anak",
 	"mindmapPasteSibling": "Tempel sebagai simpul sejajar",
 	"embedBlockBreadcrumbParentPath": "Tampilkan jalur induk di remah roti",

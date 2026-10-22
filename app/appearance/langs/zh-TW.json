@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "包含所選文件本身",
+	"automationCollectionIncludeSelfTip": "關閉後僅監聽子文件；與「僅目前文件」組合時，該文件範圍為空",
 	"clearRecentDocs": "清空最近文件記錄",
 	"confirmClearRecentDocs": "確定清空所有文件瀏覽、開啟和關閉記錄？文件將保留，後續操作仍會產生新記錄。",
 	"bazaarInstalling": "正在安裝...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "不限",
 	"automationCollectionDepthCurrent": "僅目前文件",
 	"automationCollectionDepthLimited": "最多層數",
-	"automationCollectionDepthTip": "包含每個所選文件本身，深度僅限制文件範圍；筆記本與文件範圍取聯集",
+	"automationCollectionDepthTip": "深度僅限制文件範圍；筆記本與文件範圍取聯集",
 	"mindmapPasteChild": "貼上為子節點",
 	"mindmapPasteSibling": "貼上為同層級節點",
 	"embedBlockBreadcrumbParentPath": "麵包屑顯示文件上層路徑",

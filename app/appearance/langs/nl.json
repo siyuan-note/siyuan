@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Geselecteerde documenten zelf opnemen",
+	"automationCollectionIncludeSelfTip": "Bij uitschakeling worden alleen onderliggende documenten gevolgd; met Alleen huidig document is het documentbereik leeg",
 	"clearRecentDocs": "Geschiedenis van recente documenten wissen",
 	"confirmClearRecentDocs": "Alle gegevens over het bekijken, openen en sluiten van documenten wissen? Documenten blijven behouden en nieuwe activiteiten worden nog steeds vastgelegd.",
 	"bazaarInstalling": "Installeren...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Onbeperkt",
 	"automationCollectionDepthCurrent": "Alleen huidig document",
 	"automationCollectionDepthLimited": "Maximale diepte",
-	"automationCollectionDepthTip": "Omvat elk geselecteerd document zelf; de diepte geldt alleen voor documentbereiken. Notitieboek- en documentbereiken worden samengevoegd",
+	"automationCollectionDepthTip": "De diepte geldt alleen voor documentbereiken. Notitieboek- en documentbereiken worden samengevoegd",
 	"mindmapPasteChild": "Plakken als onderliggend knooppunt",
 	"mindmapPasteSibling": "Plakken als knooppunt op hetzelfde niveau",
 	"embedBlockBreadcrumbParentPath": "Bovenliggend pad in het kruimelpad tonen",

@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "כלילת המסמכים שנבחרו עצמם",
+	"automationCollectionIncludeSelfTip": "כאשר האפשרות כבויה, מתבצע מעקב רק אחר מסמכים צאצאים; בשילוב עם המסמך הנוכחי בלבד, טווח המסמך ריק",
 	"clearRecentDocs": "ניקוי היסטוריית המסמכים האחרונים",
 	"confirmClearRecentDocs": "לנקות את כל רשומות העיון, הפתיחה והסגירה של מסמכים? המסמכים יישמרו ופעילות חדשה תמשיך להירשם.",
 	"bazaarInstalling": "מתקין...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "ללא הגבלה",
 	"automationCollectionDepthCurrent": "המסמך הנוכחי בלבד",
 	"automationCollectionDepthLimited": "עומק מרבי",
-	"automationCollectionDepthTip": "כולל כל מסמך שנבחר עצמו; העומק מגביל רק טווחי מסמכים. טווחי מחברות ומסמכים משולבים יחד",
+	"automationCollectionDepthTip": "העומק מגביל רק טווחי מסמכים. טווחי מחברות ומסמכים משולבים יחד",
 	"mindmapPasteChild": "הדבקה כצומת ילד",
 	"mindmapPasteSibling": "הדבקה כצומת אח",
 	"embedBlockBreadcrumbParentPath": "הצגת נתיב האב בנתיב הניווט",

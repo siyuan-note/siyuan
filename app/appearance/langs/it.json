@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Includi i documenti selezionati stessi",
+	"automationCollectionIncludeSelfTip": "Se disattivato, vengono monitorati solo i documenti discendenti; con Solo documento corrente, l’ambito del documento è vuoto",
 	"clearRecentDocs": "Cancella la cronologia dei documenti recenti",
 	"confirmClearRecentDocs": "Cancellare tutti i dati relativi alla consultazione, apertura e chiusura dei documenti? I documenti saranno conservati e le nuove attività continueranno a essere registrate.",
 	"bazaarInstalling": "Installazione in corso...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Illimitata",
 	"automationCollectionDepthCurrent": "Solo il documento corrente",
 	"automationCollectionDepthLimited": "Profondità massima",
-	"automationCollectionDepthTip": "Include ogni documento selezionato; la profondità limita solo gli ambiti dei documenti. Gli ambiti dei taccuini e dei documenti vengono uniti",
+	"automationCollectionDepthTip": "La profondità limita solo gli ambiti dei documenti. Gli ambiti dei taccuini e dei documenti vengono uniti",
 	"mindmapPasteChild": "Incolla come nodo figlio",
 	"mindmapPasteSibling": "Incolla come nodo allo stesso livello",
 	"embedBlockBreadcrumbParentPath": "Mostra il percorso superiore nelle briciole di pane",

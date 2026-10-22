@@ -27,17 +27,19 @@ type AutomationRule struct {
 	NotifyOnSuccess *bool                  `json:"notifyOnSuccess,omitempty"`
 }
 
-// AutomationBlockSource 的范围取并集，各类条件取交集；文档深度缺省不限，0 仅包含文档本身。
+// AutomationBlockSource 的范围取并集，各类条件取交集；文档深度缺省不限，0 仅自身。
+// 所选文档自身缺省包含；显式关闭时跳过该文档及内部块，子文档仍按深度匹配。
 type AutomationBlockSource struct {
-	NotebookIDs    []string                    `json:"notebookIDs,omitempty"`
-	DocumentIDs    []string                    `json:"documentIDs,omitempty"`
-	DocumentDepth  *int                        `json:"documentDepth,omitempty"`
-	Types          []string                    `json:"types,omitempty"`
-	Tags           []string                    `json:"tags,omitempty"`
-	Attributes     []*AutomationBlockAttribute `json:"attributes,omitempty"`
-	TagMatch       string                      `json:"tagMatch,omitempty"`
-	TagTarget      string                      `json:"tagTarget,omitempty"`
-	AttributeMatch string                      `json:"attributeMatch,omitempty"`
+	NotebookIDs              []string                    `json:"notebookIDs,omitempty"`
+	DocumentIDs              []string                    `json:"documentIDs,omitempty"`
+	DocumentDepth            *int                        `json:"documentDepth,omitempty"`
+	IncludeSelectedDocuments *bool                       `json:"includeSelectedDocuments,omitempty"`
+	Types                    []string                    `json:"types,omitempty"`
+	Tags                     []string                    `json:"tags,omitempty"`
+	Attributes               []*AutomationBlockAttribute `json:"attributes,omitempty"`
+	TagMatch                 string                      `json:"tagMatch,omitempty"`
+	TagTarget                string                      `json:"tagTarget,omitempty"`
+	AttributeMatch           string                      `json:"attributeMatch,omitempty"`
 }
 
 type AutomationBlockAttribute struct {
@@ -56,7 +58,10 @@ func (source *AutomationBlockSource) MatchesDocument(notebookID, documentID, doc
 	}
 	for _, id := range source.DocumentIDs {
 		if documentID == id {
-			return true
+			if source.IncludeSelectedDocuments == nil || *source.IncludeSelectedDocuments {
+				return true
+			}
+			continue
 		}
 		if _, suffix, found := strings.Cut(documentPath, "/"+id+"/"); found &&
 			(source.DocumentDepth == nil || strings.Count(suffix, "/")+1 <= *source.DocumentDepth) {
@@ -89,6 +94,9 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		if rule.BlockSource.IncludeSelectedDocuments != nil && !*rule.BlockSource.IncludeSelectedDocuments {
+			return 7
+		}
 		for _, attr := range rule.BlockSource.Attributes {
 			if attr != nil && attr.NameOperator != "" && attr.NameOperator != "equals" {
 				return 6
@@ -126,7 +134,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 6 {
+	if config.Spec < 1 || config.Spec > 7 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

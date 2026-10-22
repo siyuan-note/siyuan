@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261021135332"
+		"updated": "20261022092813"
 	},
 	"Children": [
 		{
@@ -3855,7 +3855,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261016202856"
+				"updated": "20261022092813"
 			},
 			"Children": [
 				{
@@ -4526,7 +4526,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-fm4qoja",
-				"updated": "20261016202856"
+				"updated": "20261022092813"
 			},
 			"Children": [
 				{
@@ -4560,6 +4560,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "When document scopes are selected, Subdocument depth appears below Watch scope. Unlimited is the default and includes all descendant documents. Current document only includes each selected document itself. With Limit depth, enter a positive integer: 1 includes the selected document and its direct children, 2 also includes grandchildren, and so on. This setting is shared by all document scopes in the rule and does not limit notebook scopes; overlapping scopes are combined. Changing depth preserves existing entries and fields and does not collect existing content automatically. Use collection management to preview and collect matches or review and remove unmatched entries. Limited depth requires automation format 5; older clients reject it without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261022092813-uxiousu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022092813-uxiousu",
+				"updated": "20261022092813"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Include selected documents themselves is enabled by default. Disable it to skip each selected document and all blocks inside it while continuing to watch descendant documents up to the configured depth. For example, disable this option and set depth to 1 to watch only direct child documents; combined with Current document only, each document scope is empty. This option is shared by the rule’s document scopes. Notebook scopes and other overlapping document scopes can still include the document because scopes are combined by union. Changing this option preserves existing entries and fields and does not backfill or remove entries automatically; use collection management to preview, collect, or review and remove entries. Excluding selected documents requires automation format 7; existing formats 1–6 remain readable, and older clients reject format 7 without rewriting the database."
 				}
 			]
 		},

@@ -112,7 +112,7 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 7
+	source.Automations.Spec = 8
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")
@@ -134,7 +134,7 @@ func TestAutomationBlockTypeAndSpecCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, spec := range []int{1, 2, 3, 4, 5, 6} {
+	for _, spec := range []int{1, 2, 3, 4, 5, 6, 7} {
 		view, err := ParseAttributeViewData("20260921000000-layouts", data)
 		if err != nil {
 			t.Fatal(err)
@@ -185,7 +185,7 @@ func TestAutomationAttributeNameSpecCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for spec := 1; spec <= 6; spec++ {
+	for spec := 1; spec <= 7; spec++ {
 		for _, mode := range []string{"", "equals", "contains", "regex"} {
 			view, err := ParseAttributeViewData("20260921000000-layouts", data)
 			if err != nil {
@@ -210,6 +210,43 @@ func TestAutomationAttributeNameSpecCompatibility(t *testing.T) {
 				view.Automations.Rules[0].BlockSource.DocumentDepth = new(0)
 				if got := view.Automations.Rules[0].RequiredSpec(); got != 6 {
 					t.Fatalf("combined spec = %d", got)
+				}
+			}
+		}
+	}
+}
+
+func TestAutomationSelectedDocumentsSpecCompatibility(t *testing.T) {
+	data, err := os.ReadFile("testdata/spec9-layouts.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for spec := 1; spec <= 7; spec++ {
+		for _, include := range []*bool{nil, new(true), new(false)} {
+			view, err := ParseAttributeViewData("20260921000000-layouts", data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			source := &AutomationBlockSource{DocumentIDs: []string{"parent"}, IncludeSelectedDocuments: include}
+			view.Automations = &AutomationConfig{Spec: spec, Rules: []*AutomationRule{{BlockSource: source}}}
+			raw, _ := json.Marshal(view)
+			read, err := ParseAttributeViewData(view.ID, raw)
+			want := include == nil || *include || spec >= 7
+			if (err == nil) != want {
+				t.Fatalf("include %v spec %d: %v", include, spec, err)
+			}
+			if want {
+				got := read.Automations.Rules[0].BlockSource.IncludeSelectedDocuments
+				if (got == nil) != (include == nil) || got != nil && *got != *include {
+					t.Fatal("selected document inclusion lost during storage round trip")
+				}
+			}
+			if include != nil && !*include {
+				source.DocumentDepth = new(1)
+				source.TagTarget = "container"
+				source.Attributes = []*AutomationBlockAttribute{{Name: "state", NameOperator: "contains", Operator: "exists"}}
+				if got := view.Automations.Rules[0].RequiredSpec(); got != 7 {
+					t.Fatalf("combined required spec = %d", got)
 				}
 			}
 		}

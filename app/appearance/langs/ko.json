@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "선택한 문서 자체 포함",
+	"automationCollectionIncludeSelfTip": "끄면 하위 문서만 감시합니다. 현재 문서만과 함께 사용하면 해당 문서 범위가 비게 됩니다",
 	"clearRecentDocs": "최근 문서 기록 지우기",
 	"confirmClearRecentDocs": "문서를 열람하고 열고 닫은 기록을 모두 지우시겠습니까? 문서는 유지되며 새로운 활동은 계속 기록됩니다.",
 	"bazaarInstalling": "설치 중...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "제한 없음",
 	"automationCollectionDepthCurrent": "현재 문서만",
 	"automationCollectionDepthLimited": "최대 깊이",
-	"automationCollectionDepthTip": "선택한 각 문서 자체를 포함하며 깊이는 문서 범위에만 적용됩니다. 노트북과 문서 범위는 합집합으로 결합됩니다",
+	"automationCollectionDepthTip": "깊이는 문서 범위에만 적용됩니다. 노트북과 문서 범위는 합집합으로 결합됩니다",
 	"mindmapPasteChild": "하위 노드로 붙여넣기",
 	"mindmapPasteSibling": "같은 수준의 노드로 붙여넣기",
 	"embedBlockBreadcrumbParentPath": "탐색 경로에 문서의 상위 경로 표시",

@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Incluir los propios documentos seleccionados",
+	"automationCollectionIncludeSelfTip": "Al desactivar, solo se supervisan los documentos descendientes; con Solo el documento actual, el ámbito del documento queda vacío",
 	"clearRecentDocs": "Borrar el historial de documentos recientes",
 	"confirmClearRecentDocs": "¿Borrar todos los registros de consulta, apertura y cierre de documentos? Los documentos se conservarán y se seguirá registrando la nueva actividad.",
 	"bazaarInstalling": "Instalando...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Sin límite",
 	"automationCollectionDepthCurrent": "Solo el documento actual",
 	"automationCollectionDepthLimited": "Profundidad máxima",
-	"automationCollectionDepthTip": "Incluye cada documento seleccionado; la profundidad solo limita los ámbitos de documentos. Los ámbitos de cuadernos y documentos se unen",
+	"automationCollectionDepthTip": "La profundidad solo limita los ámbitos de documentos. Los ámbitos de cuadernos y documentos se unen",
 	"mindmapPasteChild": "Pegar como nodo hijo",
 	"mindmapPasteSibling": "Pegar como nodo hermano",
 	"embedBlockBreadcrumbParentPath": "Mostrar la ruta superior en la ruta de navegación",

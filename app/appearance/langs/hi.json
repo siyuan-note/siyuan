@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "चयनित दस्तावेज़ों को स्वयं शामिल करें",
+	"automationCollectionIncludeSelfTip": "बंद होने पर केवल वंशज दस्तावेज़ों की निगरानी होती है; केवल वर्तमान दस्तावेज़ के साथ दस्तावेज़ का दायरा खाली होता है",
 	"clearRecentDocs": "हाल के दस्तावेज़ों का इतिहास साफ़ करें",
 	"confirmClearRecentDocs": "दस्तावेज़ देखने, खोलने और बंद करने के सभी रिकॉर्ड साफ़ करें? दस्तावेज़ सुरक्षित रहेंगे और नई गतिविधि रिकॉर्ड होती रहेगी।",
 	"bazaarInstalling": "इंस्टॉल हो रहा है...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "असीमित",
 	"automationCollectionDepthCurrent": "केवल वर्तमान दस्तावेज़",
 	"automationCollectionDepthLimited": "अधिकतम गहराई",
-	"automationCollectionDepthTip": "प्रत्येक चयनित दस्तावेज़ स्वयं भी शामिल है; गहराई केवल दस्तावेज़ों के दायरे को सीमित करती है। नोटबुक और दस्तावेज़ों के दायरे संयुक्त होते हैं",
+	"automationCollectionDepthTip": "गहराई केवल दस्तावेज़ों के दायरे को सीमित करती है। नोटबुक और दस्तावेज़ों के दायरे संयुक्त होते हैं",
 	"mindmapPasteChild": "चाइल्ड नोड के रूप में पेस्ट करें",
 	"mindmapPasteSibling": "समान स्तर के नोड के रूप में पेस्ट करें",
 	"embedBlockBreadcrumbParentPath": "ब्रेडक्रंब में मूल पथ दिखाएँ",

@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Uwzględnij same wybrane dokumenty",
+	"automationCollectionIncludeSelfTip": "Po wyłączeniu monitorowane są tylko dokumenty potomne; z opcją Tylko bieżący dokument zakres dokumentu jest pusty",
 	"clearRecentDocs": "Wyczyść historię ostatnich dokumentów",
 	"confirmClearRecentDocs": "Wyczyścić wszystkie wpisy dotyczące przeglądania, otwierania i zamykania dokumentów? Dokumenty zostaną zachowane, a nowe działania będą nadal rejestrowane.",
 	"bazaarInstalling": "Instalowanie...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Bez ograniczeń",
 	"automationCollectionDepthCurrent": "Tylko bieżący dokument",
 	"automationCollectionDepthLimited": "Maksymalna głębokość",
-	"automationCollectionDepthTip": "Obejmuje każdy wybrany dokument; głębokość ogranicza tylko zakresy dokumentów. Zakresy notatników i dokumentów są łączone",
+	"automationCollectionDepthTip": "Głębokość ogranicza tylko zakresy dokumentów. Zakresy notatników i dokumentów są łączone",
 	"mindmapPasteChild": "Wklej jako węzeł podrzędny",
 	"mindmapPasteSibling": "Wklej jako węzeł równorzędny",
 	"embedBlockBreadcrumbParentPath": "Pokaż ścieżkę nadrzędną w nawigacji okruszkowej",

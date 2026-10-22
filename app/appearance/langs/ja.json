@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "選択した文書自体を含める",
+	"automationCollectionIncludeSelfTip": "無効にすると子孫文書のみを監視します。「現在の文書のみ」と組み合わせると、その文書範囲は空になります",
 	"clearRecentDocs": "最近のドキュメント履歴を消去",
 	"confirmClearRecentDocs": "ドキュメントの閲覧、開いた履歴、閉じた履歴をすべて消去しますか？ドキュメントは保持され、今後の操作は引き続き記録されます。",
 	"bazaarInstalling": "インストール中...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "無制限",
 	"automationCollectionDepthCurrent": "現在の文書のみ",
 	"automationCollectionDepthLimited": "最大階層数",
-	"automationCollectionDepthTip": "選択した各文書自体を含み、深さは文書の範囲にのみ適用されます。ノートブックと文書の範囲は和集合です",
+	"automationCollectionDepthTip": "深さは文書の範囲にのみ適用されます。ノートブックと文書の範囲は和集合です",
 	"mindmapPasteChild": "子ノードとして貼り付け",
 	"mindmapPasteSibling": "同階層のノードとして貼り付け",
 	"embedBlockBreadcrumbParentPath": "パンくずリストに文書の上位パスを表示",

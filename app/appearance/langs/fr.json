@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Inclure les documents sélectionnés eux-mêmes",
+	"automationCollectionIncludeSelfTip": "Si désactivé, seuls les documents descendants sont surveillés ; avec Document actuel uniquement, le périmètre du document est vide",
 	"clearRecentDocs": "Effacer l’historique des documents récents",
 	"confirmClearRecentDocs": "Effacer tous les enregistrements de consultation, d’ouverture et de fermeture de documents ? Les documents seront conservés et les nouvelles activités continueront d’être enregistrées.",
 	"bazaarInstalling": "Installation en cours...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Illimitée",
 	"automationCollectionDepthCurrent": "Document actuel uniquement",
 	"automationCollectionDepthLimited": "Profondeur maximale",
-	"automationCollectionDepthTip": "Inclut chaque document sélectionné ; la profondeur limite uniquement les périmètres de documents. Les périmètres des carnets et des documents sont réunis",
+	"automationCollectionDepthTip": "La profondeur limite uniquement les périmètres de documents. Les périmètres des carnets et des documents sont réunis",
 	"mindmapPasteChild": "Coller comme nœud enfant",
 	"mindmapPasteSibling": "Coller comme nœud de même niveau",
 	"embedBlockBreadcrumbParentPath": "Afficher le chemin parent dans le fil d'Ariane",

@@ -11,7 +11,7 @@ const compiled = transpileModule(readFileSync("src/protyle/render/av/automation.
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
 }).outputText;
 
-test("collection autosave versions document depth and attribute name modes with independent undo snapshots", async () => {
+test("collection autosave versions document depth, attribute names and self exclusion with independent undo snapshots", async () => {
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     let source: AVAutomationBlockSourceInput;
     let save: () => void;
@@ -70,6 +70,19 @@ test("collection autosave versions document depth and attribute name modes with 
     source.attributes = [];
     save();
     assert.equal(JSON.parse(JSON.stringify(transactions.at(-1).perform[0].data)).spec, 6);
+    source.includeSelectedDocuments = false;
+    save();
+    const excluded = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(excluded.perform[0].data.spec, 7);
+    assert.equal(excluded.perform[0].data.rules[0].blockSource.includeSelectedDocuments, false);
+    assert.equal(excluded.undo[0].data.spec, 6);
+    assert.equal(excluded.undo[0].data.rules[0].blockSource.includeSelectedDocuments, undefined);
+    delete source.includeSelectedDocuments;
+    save();
+    const included = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(included.perform[0].data.spec, 7);
+    assert.equal(included.perform[0].data.rules[0].blockSource.includeSelectedDocuments, undefined);
+    assert.deepEqual(included.undo, excluded.perform);
 });
 
 test("automation settings reject readonly, publishing and historical editors before fetching data", async () => {

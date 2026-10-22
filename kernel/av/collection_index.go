@@ -120,6 +120,10 @@ func collectionScopes(config *AutomationConfig) (ret []*AutomationBlockSource) {
 			depth := *source.DocumentDepth
 			scope.DocumentDepth = &depth
 		}
+		if source.IncludeSelectedDocuments != nil {
+			include := *source.IncludeSelectedDocuments
+			scope.IncludeSelectedDocuments = &include
+		}
 		ret = append(ret, scope)
 	}
 	return
@@ -131,6 +135,7 @@ func equalCollectionScopes(left, right []*AutomationBlockSource) bool {
 			return a == b
 		}
 		return slices.Equal(a.NotebookIDs, b.NotebookIDs) && slices.Equal(a.DocumentIDs, b.DocumentIDs) &&
+			(a.IncludeSelectedDocuments == nil || *a.IncludeSelectedDocuments) == (b.IncludeSelectedDocuments == nil || *b.IncludeSelectedDocuments) &&
 			(a.DocumentDepth == nil && b.DocumentDepth == nil || a.DocumentDepth != nil && b.DocumentDepth != nil && *a.DocumentDepth == *b.DocumentDepth)
 	})
 }

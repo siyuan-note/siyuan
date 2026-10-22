@@ -290,6 +290,28 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		}
 	}
 	previousAttributes := collection.BlockSource.Attributes
+	for _, include := range []*bool{nil, new(true), new(false)} {
+		collection.BlockSource.IncludeSelectedDocuments = include
+		if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+			Data: &av.AutomationConfig{Spec: 7, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+			t.Fatal(err)
+		}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		readBack.Data.AV.Automations = av.AutomationConfig{}
+		if err = json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		got := readBack.Data.AV.Automations.Rules[0].BlockSource.IncludeSelectedDocuments
+		if readBack.Data.AV.Automations.Spec != 7 || (got == nil) != (include == nil) || got != nil && *got != *include {
+			t.Fatalf("selected document inclusion contract round trip: %s", response.Body.String())
+		}
+	}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 6, Rules: []*av.AutomationRule{collection}}}}); err == nil {
+		t.Fatal("scope exclusion saved without its required format")
+	}
+	collection.BlockSource.IncludeSelectedDocuments = nil
 	for _, mode := range []string{"equals", "contains", "regex"} {
 		attr := &av.AutomationBlockAttribute{Name: "custom-state", NameOperator: mode, Operator: "exists"}
 		if mode == "contains" {

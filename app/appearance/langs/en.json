@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Include selected documents themselves",
+	"automationCollectionIncludeSelfTip": "When disabled, only descendant documents are watched; combined with Current document only, the document scope is empty",
 	"clearRecentDocs": "Clear recent document history",
 	"confirmClearRecentDocs": "Clear all document browsing, opening and closing records? Documents are kept and new activity will still be recorded.",
 	"bazaarInstalling": "Installing...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Unlimited",
 	"automationCollectionDepthCurrent": "Current document only",
 	"automationCollectionDepthLimited": "Limit depth",
-	"automationCollectionDepthTip": "Includes each selected document itself; depth applies only to document scopes. Notebook and document scopes are combined",
+	"automationCollectionDepthTip": "Depth applies only to document scopes. Notebook and document scopes are combined",
 	"mindmapPasteChild": "Paste as child node",
 	"mindmapPasteSibling": "Paste as sibling node",
 	"embedBlockBreadcrumbParentPath": "Show parent path in breadcrumbs",

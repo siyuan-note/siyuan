@@ -1,4 +1,6 @@
 {
+	"automationCollectionIncludeSelf": "Включать сами выбранные документы",
+	"automationCollectionIncludeSelfTip": "При отключении отслеживаются только дочерние документы; вместе с параметром Только текущий документ область документа будет пустой",
 	"clearRecentDocs": "Очистить историю недавних документов",
 	"confirmClearRecentDocs": "Очистить все записи о просмотре, открытии и закрытии документов? Документы сохранятся, а новые действия будут по-прежнему записываться.",
 	"bazaarInstalling": "Установка...",
@@ -12,7 +14,7 @@
 	"automationCollectionDepthUnlimited": "Без ограничений",
 	"automationCollectionDepthCurrent": "Только текущий документ",
 	"automationCollectionDepthLimited": "Максимальная глубина",
-	"automationCollectionDepthTip": "Включает каждый выбранный документ; глубина ограничивает только области документов. Области блокнотов и документов объединяются",
+	"automationCollectionDepthTip": "Глубина ограничивает только области документов. Области блокнотов и документов объединяются",
 	"mindmapPasteChild": "Вставить как дочерний узел",
 	"mindmapPasteSibling": "Вставить как узел того же уровня",
 	"embedBlockBreadcrumbParentPath": "Показывать родительский путь в навигационной цепочке",

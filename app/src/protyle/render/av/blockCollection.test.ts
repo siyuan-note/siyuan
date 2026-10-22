@@ -72,6 +72,7 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         api.mountBlockCollectionSource(host, source, {notebookId: "box"} as IProtyle, save, () => {});
         await tick();
         check.equal(host.querySelector("[data-depth-mode]"), null);
+        check.equal(host.querySelector("[data-include-selected-documents]"), null);
         host.querySelector<HTMLButtonElement>("[data-scope]").click();
         addScope(["/doc.sy"], ["box"]);
         await tick();
@@ -84,9 +85,15 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         };
         check.match(host.querySelector("[data-depth-mode]").textContent, /Unlimited/);
         check.equal(source.documentDepth, undefined);
+        const include = host.querySelector<HTMLInputElement>("[data-include-selected-documents]");
+        check.equal(include.checked, true);
+        include.click();
+        check.equal(source.includeSelectedDocuments, false);
+        check.equal(saves.at(-1).includeSelectedDocuments, false);
         await choose(languages.automationCollectionDepthCurrent);
         check.equal(source.documentDepth, 0);
         check.equal(host.querySelector("[data-document-depth]"), null);
+        check.equal(host.querySelector<HTMLInputElement>("[data-include-selected-documents]").checked, false);
         await choose(languages.automationCollectionDepthLimited);
         check.equal(source.documentDepth, 1);
         const input = host.querySelector<HTMLInputElement>("[data-document-depth]");
@@ -117,13 +124,17 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         check.match(host.querySelector("[data-depth-mode]").textContent, /Current document only/);
         check.equal(source.documentDepth, 0);
         check.deepEqual(source.notebookIDs, ["box"]);
+        check.equal(host.querySelector<HTMLInputElement>("[data-include-selected-documents]").checked, false);
+        host.querySelector<HTMLInputElement>("[data-include-selected-documents]").click();
+        check.equal(source.includeSelectedDocuments, undefined);
+        check.equal(saves.at(-1).includeSelectedDocuments, undefined);
         host.remove();
     }
     menu.remove();
     return "Collection depth DOM cases passed";
 };
 
-test("collection depth controls preserve zero, validate edits and support narrow layouts", {
+test("collection depth and self inclusion controls preserve values, validate edits and support narrow layouts", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

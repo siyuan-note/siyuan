@@ -34,7 +34,7 @@ export const showSelectAllIncompleteTip = (protyle: IProtyle) => {
         button.disabled = true;
         try {
             if (hasUnloadedDocumentBlocks(editorElement, protyle.block.scroll) &&
-                !await protyle.scroll.loadAll(protyle)) {
+                !await protyle.scroll.loadAll(protyle, {messageId: messageID})) {
                 return;
             }
             if (!isCurrent()) {

@@ -108,7 +108,8 @@ data-message-id="${safeMessageId || ""}">${safeMessage}</div>`);
             }, timeout);
             existElement.setAttribute("data-timeoutid", timeoutId.toString());
         }
-        return;
+        // 复用已有通知时同样返回 id，调用方才能按 id 关闭它
+        return id;
     }
     let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div data-type="textMenu" class="b3-snackbar__content${timeout === 0 ? " b3-snackbar__content--close" : ""}">${messageVersion}</div>`;
     if (timeout === 0) {

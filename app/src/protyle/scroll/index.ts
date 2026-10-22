@@ -230,7 +230,8 @@ export class Scroll {
         return true;
     }
 
-    public async loadAll(protyle: IProtyle) {
+    // messageId 用于复用调用方已展示的通知，避免新增一条提示把通知列表挤得跳动
+    public async loadAll(protyle: IProtyle, options?: { messageId?: string }) {
         const rootID = protyle.block.rootID;
         if (this.loadingAll || !rootID || protyle.block.showAll || !protyle.block.scroll) {
             return false;
@@ -238,7 +239,7 @@ export class Scroll {
 
         this.loadingAll = true;
         this.invalidateDynamicLoad(protyle);
-        const messageID = showMessage(window.siyuan.languages.loading, -1);
+        const messageID = showMessage(window.siyuan.languages.loading, -1, "info", options?.messageId);
         const size = Math.max(
             window.siyuan.config.editor.dynamicLoadBlocks,
             protyle.block.blockCount || 0

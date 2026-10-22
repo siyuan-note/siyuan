@@ -78,7 +78,7 @@
             overflow: auto;
             overflow-wrap: anywhere;
             padding: 16px 24px;
-            width: 328px;
+            width: 480px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -138,10 +138,72 @@
             font-size: 12px;
             min-height: 18px;
         }
+
+        #lockScreenCover {
+            align-items: flex-start;
+            background: transparent;
+            border: 0;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            font: inherit;
+            height: calc(100% - 32px);
+            justify-content: flex-end;
+            left: 0;
+            margin: 0;
+            padding: 24px clamp(24px, 6vw, 96px) max(40px, 12vh);
+            position: fixed;
+            text-align: left;
+            text-shadow: 0 2px 8px #000, 0 0 24px #000;
+            top: 32px;
+            width: 100%;
+            z-index: 2;
+        }
+
+        #lockScreenCover[hidden] {
+            display: none;
+        }
+
+        #lockScreenCover:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: -8px;
+        }
+
+        #lockScreenTime {
+            font-size: clamp(48px, 9vw, 112px);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.15;
+        }
+
+        #lockScreenDate {
+            font-size: clamp(18px, 2.5vw, 28px);
+            margin-top: 8px;
+        }
+
+        #lockScreenHint {
+            font-size: 14px;
+            margin-top: 24px;
+        }
+
+        body.wallpaper-cover main {
+            visibility: hidden;
+        }
+
+        body.has-wallpaper h1 {
+            margin: 0 0 12px;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
 <img id="lockScreenWallpaper" alt="" hidden>
+<button id="lockScreenCover" type="button" aria-labelledby="lockScreenHint" hidden>
+    <time id="lockScreenTime" aria-live="off"></time>
+    <span id="lockScreenDate"></span>
+    <span id="lockScreenHint"></span>
+</button>
 <div id="windowBar"><button id="closeWindow" type="button">×</button></div>
 <main hidden>
     <h1 id="title">SiYuan</h1>
@@ -161,21 +223,110 @@
 <script>
     const loadLockScreenWallpaper = () => {
         const wallpaper = document.getElementById("lockScreenWallpaper");
+        const cover = document.getElementById("lockScreenCover");
+        const panel = document.getElementById("authPanel") || document.querySelector("main");
+        let pending = true;
+        let interacted = false;
+        let clockTimer;
+        const focusInput = () => {
+            const input = document.getElementById("authCode");
+            const target = input && !input.disabled && input.getClientRects().length ? input :
+                Array.from(panel.querySelectorAll("button:not(:disabled), a[href]")).find(item => item.getClientRects().length);
+            target?.focus({preventScroll: true});
+            return target;
+        };
+        const stopClock = () => {
+            clearInterval(clockTimer);
+            clockTimer = undefined;
+        };
+        const updateClock = () => {
+            const now = new Date();
+            const time = document.getElementById("lockScreenTime");
+            time.textContent = now.toLocaleTimeString(undefined, {hour: "2-digit", minute: "2-digit"});
+            time.dateTime = now.toISOString();
+            document.getElementById("lockScreenDate").textContent = now.toLocaleDateString(undefined,
+                {weekday: "long", month: "long", day: "numeric"});
+        };
+        const refreshClock = () => {
+            stopClock();
+            if (!cover.hidden && !document.hidden) {
+                updateClock();
+                clockTimer = setInterval(updateClock, 1000);
+            }
+        };
+        const reveal = () => {
+            interacted = true;
+            if (cover.hidden) return pending ? focusInput() : undefined;
+            cover.hidden = true;
+            panel.inert = false;
+            document.body.classList.remove("wallpaper-cover");
+            stopClock();
+            return focusInput();
+        };
+        cover.addEventListener("click", reveal);
+        document.addEventListener("pointerdown", event => {
+            if (event.target.closest("#windowBar, [data-auth-drag]")) return;
+            if (!cover.hidden) event.preventDefault();
+            reveal();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "v") {
+                reveal();
+                return;
+            }
+            const altGraph = event.getModifierState?.("AltGraph");
+            if ((event.ctrlKey || event.metaKey || event.altKey) && !altGraph) return;
+            const covered = !cover.hidden;
+            const target = reveal();
+            if (!covered || event.isComposing || event.key === "Process" || event.key === "Dead") return;
+            // 唤起按键不触发登录；可直接输入的首字符只写入密码框一次。
+            if (target?.type === "password" && Array.from(event.key).length === 1 && event.key !== " ") {
+                target.setRangeText(event.key, target.selectionStart, target.selectionEnd, "end");
+                target.dispatchEvent(new Event("input", {bubbles: true}));
+            }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+        document.addEventListener("compositionstart", reveal, true);
+        document.addEventListener("visibilitychange", refreshClock);
+        window.addEventListener("pagehide", stopClock);
+        window.addEventListener("pageshow", refreshClock);
         wallpaper.onload = () => {
+            pending = false;
             wallpaper.hidden = false;
             document.body.classList.add("has-wallpaper");
             const background = document.getElementById("authDefaultBackground");
             if (background) background.hidden = true;
+            // 慢加载不打断已经开始的输入，也不遮住密码管理器填入的内容。
+            if (!interacted && !document.getElementById("authCode")?.value) {
+                cover.hidden = false;
+                panel.inert = true;
+                document.body.classList.add("wallpaper-cover");
+                refreshClock();
+                cover.focus({preventScroll: true});
+            } else if (!interacted) {
+                focusInput();
+            }
         };
         wallpaper.onerror = () => {
+            pending = false;
+            const covered = !cover.hidden;
+            const shouldFocus = !interacted;
+            reveal();
             wallpaper.hidden = true;
             document.body.classList.remove("has-wallpaper");
             const background = document.getElementById("authDefaultBackground");
             if (background) background.hidden = false;
+            if (!covered && shouldFocus) focusInput();
         };
         wallpaper.src = "/api/system/getLockScreenWallpaper";
+        return {focus: () => {
+            if (pending) return;
+            if (cover.hidden) focusInput();
+            else cover.focus({preventScroll: true});
+        }};
     };
-    loadLockScreenWallpaper();
+    const lockScreenWallpaperState = loadLockScreenWallpaper();
 
     (() => {
         const params = new URLSearchParams(window.location.search);
@@ -298,8 +449,9 @@
                 captchaElement.placeholder = languages._kernel["175"];
                 document.getElementById("rememberLabel").textContent = languages._kernel["257"];
                 submitElement.textContent = languages._kernel["174"];
+                document.getElementById("lockScreenHint").textContent = languages.lockScreenReveal;
                 document.querySelector("main").hidden = false;
-                authCodeElement.focus();
+                lockScreenWallpaperState.focus();
             });
     })();
 </script>

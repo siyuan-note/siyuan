@@ -943,6 +943,7 @@ func serveAuthPage(c *gin.Context) {
 		"oidcEnabled":            model.Conf.GetOIDC().Enabled,
 		"appearanceMode":         confAppearanceSnapshot.Mode,
 		"appearanceModeOS":       confAppearanceSnapshot.ModeOS,
+		"lockScreenReveal":       util.I18nTerm(model.Conf.Lang, "lockScreenReveal"),
 		"workspace":              util.WorkspaceName,
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],

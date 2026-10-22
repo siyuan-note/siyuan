@@ -71,6 +71,7 @@ const fixtureHTML = (file, dark) => {
         .replace(/{{(?:if \.\w+|end)}}/g, "")
         .replace(/{{\.workspace}}/g, "Workspace")
         .replace(/{{\.l\d+}}/g, "Sign in")
+        .replace(/{{\.lockScreenReveal}}/g, "Click or press a key to sign in")
         .replace("<main hidden>", "<main>");
     if (dark) source = source.replace('<html style="height: 100%">', '<html class="dark" style="height: 100%">');
     return source.replace("</body>", `<script>${loader}\nwindow.loadLockScreenWallpaper = loadLockScreenWallpaper;</script></body>`);
@@ -95,6 +96,22 @@ const checkLayout = async (wallpaperPresent, dark, remote) => {
     check.equal(document.body.classList.contains("has-wallpaper"), wallpaperPresent);
     check.equal(wallpaper.hidden, !wallpaperPresent);
     const panel = document.querySelector(remote ? "main" : "#authPanel");
+    const cover = document.getElementById("lockScreenCover");
+    if (wallpaperPresent) {
+        check.equal(panel.inert, true);
+        check.equal(getComputedStyle(panel).visibility, "hidden");
+        check.equal(cover.hidden, false);
+        check.ok(document.getElementById("lockScreenTime").textContent);
+        check.ok(document.getElementById("lockScreenDate").textContent);
+        const clock = document.getElementById("lockScreenTime").getBoundingClientRect();
+        const hint = document.getElementById("lockScreenHint").getBoundingClientRect();
+        check.ok(clock.left >= 0 && hint.right <= innerWidth && hint.bottom <= innerHeight,
+            "clock and reveal hint fit narrow and short screens");
+        cover.click();
+        check.equal(panel.inert, false);
+        check.equal(cover.hidden, true);
+        check.equal(getComputedStyle(panel).visibility, "visible");
+    }
     const rect = panel.getBoundingClientRect();
     if (wallpaperPresent) {
         check.ok(rect.left >= 0 && rect.right <= innerWidth, "login panel fits the viewport horizontally");
@@ -108,7 +125,32 @@ const checkLayout = async (wallpaperPresent, dark, remote) => {
         const image = wallpaper.getBoundingClientRect();
         check.equal(image.width, innerWidth);
         check.equal(image.height, innerHeight);
+        if (innerWidth >= 640 && innerHeight >= 600) {
+            check.ok(rect.width > rect.height, "desktop login panel is wider than it is tall");
+        }
     }
+};
+
+const prepareKeyboardCase = async () => {
+    const wallpaper = document.getElementById("lockScreenWallpaper");
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    window.loadLockScreenWallpaper();
+    const loaded = new Promise(resolve => wallpaper.addEventListener("load", resolve, {once: true}));
+    wallpaper.src = canvas.toDataURL();
+    await loaded;
+    window.testSubmits = 0;
+    document.getElementById("authCode").addEventListener("keydown", event => {
+        if (event.key === "Enter") window.testSubmits++;
+    });
+};
+
+const assertKeyboardState = (value, submits) => {
+    const check = require("node:assert/strict");
+    check.equal(document.getElementById("lockScreenCover").hidden, true);
+    check.equal(document.getElementById("authCode").value, value);
+    check.equal(document.activeElement, document.getElementById("authCode"));
+    check.equal(window.testSubmits, submits);
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -118,6 +160,9 @@ if (process.versions.electron && process.type === "browser") {
         const win = new BrowserWindow({show: false, frame: false, webPreferences: {
             nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
         }});
+        win.webContents.on("console-message", event => {
+            if (event.message.includes("AssertionError")) console.error(event.message);
+        });
         try {
             for (const file of ["stage/auth.html", "electron/remote-auth.html"]) {
                 for (const [width, height] of [[1200, 800], [320, 640], [640, 320], [320, 280]]) {
@@ -126,10 +171,40 @@ if (process.versions.electron && process.type === "browser") {
                         nativeTheme.themeSource = dark ? "dark" : "light";
                         for (const present of [false, true]) {
                             await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark)));
-                            await win.webContents.executeJavaScript(`(${checkLayout.toString()})(${present}, ${dark}, ${file.startsWith("electron")})`);
+                            await win.webContents.executeJavaScript(`(async () => {
+                                try { await (${checkLayout.toString()})(${present}, ${dark}, ${file.startsWith("electron")}); }
+                                catch (error) { console.error(error.stack); throw error; }
+                            })()`);
                         }
                     }
                 }
+                win.setContentSize(1000, 700);
+                const start = async () => {
+                    await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, false)));
+                    await win.webContents.executeJavaScript(`(${prepareKeyboardCase.toString()})()`);
+                };
+                await start();
+                for (const [type, keyCode] of [["keyDown", "A"], ["char", "a"], ["keyUp", "A"],
+                    ["keyDown", "B"], ["char", "b"], ["keyUp", "B"]]) {
+                    win.webContents.sendInputEvent({type, keyCode});
+                }
+                await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("ab", 0)`);
+                await start();
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});
+                await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 0)`);
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});
+                await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 1)`);
+                await start();
+                win.webContents.sendInputEvent({type: "mouseDown", x: 40, y: 300, button: "left", clickCount: 1});
+                win.webContents.sendInputEvent({type: "mouseUp", x: 40, y: 300, button: "left", clickCount: 1});
+                await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 0)`);
+                await start();
+                await win.webContents.executeJavaScript(`document.getElementById("lockScreenCover").dispatchEvent(
+                    new KeyboardEvent("keydown", {key: "Process", isComposing: true, bubbles: true, cancelable: true}));`);
+                await win.webContents.insertText("\u4e2d");
+                await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("\\u4e2d", 0)`);
             }
             const html = settingsHTML();
             for (const name of ["base", "mobile"]) {

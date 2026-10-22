@@ -1,4 +1,5 @@
 {
+	"lockScreenReveal": "화면을 클릭하거나 키를 눌러 로그인",
 	"loadAllAndSelectAll": "전체 문서를 불러오고 모두 선택",
 	"autoFitRowHeight": "행 높이 자동 맞춤",
 	"backlinkDatabaseFields": "데이터베이스 필드",

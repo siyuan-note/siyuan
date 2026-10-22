@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Papel de parede da tela de bloqueio",
+	"lockScreenWallpaperTip": "Uma imagem JPEG, PNG ou WebP, de até 10 MiB e 16 megapixels; salva neste espaço de trabalho sem sincronização e visível antes do login",
 	"automationCollectionIncludeSelf": "Incluir os próprios documentos selecionados",
 	"automationCollectionIncludeSelfTip": "Quando desativado, apenas documentos descendentes são monitorados; com Apenas o documento atual, o escopo do documento fica vazio",
 	"clearRecentDocs": "Limpar histórico de documentos recentes",
@@ -3391,6 +3393,8 @@
 		"434": "Espaço em disco insuficiente para restaurar este arquivo: necessário %s, disponível %s",
 		"435": "Arquivos temporários da sincronização interrompida removidos, liberando %s",
 		"436": "Aplicando alterações sincronizadas; a edição será retomada após o processamento ou a recuperação do cancelamento",
-		"437": "Baixar esta versão"
+		"437": "Baixar esta versão",
+		"438": "Selecione uma imagem JPEG, PNG ou WebP válida de até 10 MiB e 16 megapixels",
+		"439": "Não foi possível salvar o papel de parede da tela de bloqueio; verifique as permissões de gravação do espaço de trabalho"
 	}
 }

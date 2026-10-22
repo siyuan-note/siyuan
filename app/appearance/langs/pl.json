@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Tapeta ekranu blokady",
+	"lockScreenWallpaperTip": "Jeden obraz JPEG, PNG lub WebP, do 10 MiB i 16 megapikseli; zapisany w tej przestrzeni roboczej bez synchronizacji i widoczny przed logowaniem",
 	"automationCollectionIncludeSelf": "Uwzględnij same wybrane dokumenty",
 	"automationCollectionIncludeSelfTip": "Po wyłączeniu monitorowane są tylko dokumenty potomne; z opcją Tylko bieżący dokument zakres dokumentu jest pusty",
 	"clearRecentDocs": "Wyczyść historię ostatnich dokumentów",
@@ -3391,6 +3393,8 @@
 		"434": "Za mało miejsca na przywrócenie tego pliku: wymagane %s, dostępne %s",
 		"435": "Usunięto pliki tymczasowe przerwanej synchronizacji, zwolniono %s",
 		"436": "Trwa stosowanie zsynchronizowanych zmian; edycja będzie dostępna po zakończeniu przetwarzania lub przywracania po anulowaniu",
-		"437": "Pobierz tę wersję"
+		"437": "Pobierz tę wersję",
+		"438": "Wybierz prawidłowy obraz JPEG, PNG lub WebP o rozmiarze do 10 MiB i 16 megapikseli",
+		"439": "Nie można zapisać tapety ekranu blokady; sprawdź uprawnienia do zapisu w przestrzeni roboczej"
 	}
 }

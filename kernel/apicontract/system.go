@@ -2,6 +2,10 @@ package apicontract
 
 import "mime/multipart"
 
+type SystemWallpaperUploadRequest struct {
+	File *multipart.FileHeader `json:"file"`
+}
+
 // SystemRuntimeInfoData 提供可复制的运行诊断文本，不包含工作空间路径或设备标识。
 type SystemRuntimeInfoData struct {
 	Text string `json:"text"`

@@ -467,6 +467,8 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 	}
 
 	if nil != clonedConf.Appearance.Load() {
+		// 壁纸文件仅属于本工作空间，不包含在设置导出中。
+		clonedConf.Appearance.Load().LockScreenWallpaper = false
 		clonedConf.Appearance.Load().DarkThemes = nil
 		clonedConf.Appearance.Load().LightThemes = nil
 		clonedConf.Appearance.Load().Icons = nil

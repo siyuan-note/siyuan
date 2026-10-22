@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261022093855"
 	},
 	"Children": [
 		{
@@ -346,6 +346,70 @@
 			"Properties": {
 				"id": "20210117211053-tq2km4f"
 			}
+		},
+		{
+			"ID": "20261022093855-9vgq1sq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-9vgq1sq",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Authentication"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Login and tokens"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Lock screen wallpaper"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", upload one JPEG, PNG or WebP image (up to 10 MiB and 16 megapixels) to customize the authentication page shown at startup and after locking. Uploading another image replaces it; click Reset to restore the default background."
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-vbzdq85",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-vbzdq85",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The wallpaper belongs to the current workspace, is not synced with notes, and is not included in settings exports. Anyone who can access the authentication page can see it before login, so avoid images containing sensitive information."
+				}
+			]
 		},
 		{
 			"ID": "20260804120101-oidclog",

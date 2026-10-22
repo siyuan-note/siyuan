@@ -1916,3 +1916,12 @@
     pointer-events: auto;
   }
 }
+
+.config-lock-screen-wallpaper {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  margin: 8px 0;
+}

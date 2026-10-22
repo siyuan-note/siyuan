@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "锁屏壁纸",
+	"lockScreenWallpaperTip": "仅保留一张 JPEG、PNG 或 WebP 图片，最大 10 MiB、1600 万像素；保存在当前工作空间，不参与同步，登录前可见",
 	"automationCollectionIncludeSelf": "包含所选文档自身",
 	"automationCollectionIncludeSelfTip": "关闭后仅监听子文档；与“仅当前文档”组合时，该文档范围为空",
 	"clearRecentDocs": "清空最近文档记录",
@@ -3391,6 +3393,8 @@
 		"434": "磁盘空间不足，无法恢复此文件：需要 %s，可用 %s",
 		"435": "已清理中断同步遗留的临时文件，释放 %s",
 		"436": "正在应用同步改动，处理或取消恢复结束后可继续编辑",
-		"437": "下载此版本"
+		"437": "下载此版本",
+		"438": "请选择有效的 JPEG、PNG 或 WebP 图片，最大 10 MiB、1600 万像素",
+		"439": "无法保存锁屏壁纸，请检查工作空间写入权限"
 	}
 }

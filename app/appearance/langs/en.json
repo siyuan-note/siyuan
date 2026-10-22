@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Lock screen wallpaper",
+	"lockScreenWallpaperTip": "One JPEG, PNG or WebP image, up to 10 MiB and 16 megapixels; stored in this workspace without sync and visible before login",
 	"automationCollectionIncludeSelf": "Include selected documents themselves",
 	"automationCollectionIncludeSelfTip": "When disabled, only descendant documents are watched; combined with Current document only, the document scope is empty",
 	"clearRecentDocs": "Clear recent document history",
@@ -3391,6 +3393,8 @@
 		"434": "Not enough disk space to restore this file: required %s, available %s",
 		"435": "Removed interrupted sync temporary files, freeing %s",
 		"436": "Applying synced changes; editing resumes after processing or cancellation recovery finishes",
-		"437": "Download this version"
+		"437": "Download this version",
+		"438": "Choose a valid JPEG, PNG or WebP image up to 10 MiB and 16 megapixels",
+		"439": "Could not save the lock screen wallpaper; check workspace write permissions"
 	}
 }

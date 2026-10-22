@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Wallpaper layar kunci",
+	"lockScreenWallpaperTip": "Satu gambar JPEG, PNG, atau WebP, maksimal 10 MiB dan 16 megapiksel; disimpan di ruang kerja ini tanpa sinkronisasi dan terlihat sebelum masuk",
 	"automationCollectionIncludeSelf": "Sertakan dokumen yang dipilih itu sendiri",
 	"automationCollectionIncludeSelfTip": "Jika dinonaktifkan, hanya dokumen turunan yang dipantau; dengan Hanya dokumen saat ini, cakupan dokumen menjadi kosong",
 	"clearRecentDocs": "Hapus riwayat dokumen terbaru",
@@ -3391,6 +3393,8 @@
 		"434": "Ruang disk tidak cukup untuk memulihkan berkas ini: diperlukan %s, tersedia %s",
 		"435": "Berkas sementara dari sinkronisasi terputus dihapus, mengosongkan %s",
 		"436": "Menerapkan perubahan tersinkron; penyuntingan dapat dilanjutkan setelah pemrosesan atau pemulihan pembatalan selesai",
-		"437": "Unduh versi ini"
+		"437": "Unduh versi ini",
+		"438": "Pilih gambar JPEG, PNG, atau WebP yang valid, maksimal 10 MiB dan 16 megapiksel",
+		"439": "Tidak dapat menyimpan wallpaper layar kunci; periksa izin tulis ruang kerja"
 	}
 }

@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261022093855"
 	},
 	"Children": [
 		{
@@ -363,6 +363,66 @@
 				"ID": "20240530101000-83ekc6g",
 				"id": "20240530101000-4ocdywp"
 			}
+		},
+		{
+			"ID": "20261022093855-2gm31el",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-2gm31el",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ログインとトークン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ロック画面の壁紙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で JPEG、PNG、WebP の画像を1枚アップロードすると（最大 10 MiB、1600万画素）、起動時やロック後の認証画面の背景を変更できます。新しい画像をアップロードすると置き換わります。「リセット」で既定の背景に戻せます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-jx42i28",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-jx42i28",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "壁紙は現在のワークスペースに保存され、ノートの同期や設定のエクスポートには含まれません。認証ページにアクセスできる人はログイン前でも画像を見られるため、機密情報を含む画像は選ばないでください。"
+				}
+			]
 		},
 		{
 			"ID": "20260804120301-oidclog",

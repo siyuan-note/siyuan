@@ -27,6 +27,7 @@ import {sendAppSetting} from "./appRuntime";
 import zxcvbn = require("zxcvbn");
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
 import {openNotebookArchiveDialog, openNotebookArchiveImportDialog} from "../notebookArchive";
+import {genLockScreenWallpaperHtml, mountLockScreenWallpaper} from "./lockScreenWallpaper";
 
 const getPasswordStrength = (password: string) => {
     const score = zxcvbn(password).score;
@@ -77,6 +78,14 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
             title: window.siyuan.languages.about7,
             desc: window.siyuan.languages.about8,
             save: (value) => sendAppSetting("system.lockScreenMode", value),
+        });
+    }
+    if (!window.siyuan.config.readonly) {
+        group.slot({
+            key: "lockScreenWallpaper",
+            keywords: [window.siyuan.languages.lockScreenWallpaper, window.siyuan.languages.lockScreenWallpaperTip],
+            html: genLockScreenWallpaperHtml,
+            afterMount: mountLockScreenWallpaper,
         });
     }
     if (!window.siyuan.config.readonly && getHostCapabilities().oidcAuthentication) {

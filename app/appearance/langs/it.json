@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Sfondo della schermata di blocco",
+	"lockScreenWallpaperTip": "Una sola immagine JPEG, PNG o WebP, fino a 10 MiB e 16 megapixel; salvata in questo spazio di lavoro senza sincronizzazione e visibile prima dell’accesso",
 	"automationCollectionIncludeSelf": "Includi i documenti selezionati stessi",
 	"automationCollectionIncludeSelfTip": "Se disattivato, vengono monitorati solo i documenti discendenti; con Solo documento corrente, l’ambito del documento è vuoto",
 	"clearRecentDocs": "Cancella la cronologia dei documenti recenti",
@@ -3391,6 +3393,8 @@
 		"434": "Spazio su disco insufficiente per ripristinare questo file: necessario %s, disponibile %s",
 		"435": "File temporanei della sincronizzazione interrotta rimossi, liberati %s",
 		"436": "Applicazione delle modifiche sincronizzate; la modifica riprende al termine dell’elaborazione o del ripristino dopo l’annullamento",
-		"437": "Scarica questa versione"
+		"437": "Scarica questa versione",
+		"438": "Scegli un’immagine JPEG, PNG o WebP valida fino a 10 MiB e 16 megapixel",
+		"439": "Impossibile salvare lo sfondo della schermata di blocco; controlla i permessi di scrittura dello spazio di lavoro"
 	}
 }

@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "鎖定畫面桌布",
+	"lockScreenWallpaperTip": "僅保留一張 JPEG、PNG 或 WebP 圖片，最大 10 MiB、1600 萬像素；儲存在目前工作空間，不參與同步，登入前可見",
 	"automationCollectionIncludeSelf": "包含所選文件本身",
 	"automationCollectionIncludeSelfTip": "關閉後僅監聽子文件；與「僅目前文件」組合時，該文件範圍為空",
 	"clearRecentDocs": "清空最近文件記錄",
@@ -3391,6 +3393,8 @@
 		"434": "磁碟空間不足，無法還原此檔案：需要 %s，可用 %s",
 		"435": "已清理中斷同步遺留的暫存檔，釋放 %s",
 		"436": "正在套用同步變更，處理或取消復原結束後即可繼續編輯",
-		"437": "下載此版本"
+		"437": "下載此版本",
+		"438": "請選擇有效的 JPEG、PNG 或 WebP 圖片，最大 10 MiB、1600 萬像素",
+		"439": "無法儲存鎖定畫面桌布，請檢查工作空間寫入權限"
 	}
 }

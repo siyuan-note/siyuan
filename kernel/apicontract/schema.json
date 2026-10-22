@@ -16674,6 +16674,9 @@
             }
           ]
         },
+        "lockScreenWallpaper": {
+          "type": "boolean"
+        },
         "menuMouseScroll": {
           "type": "boolean"
         },
@@ -16755,6 +16758,7 @@
         "icons",
         "lang",
         "lightThemes",
+        "lockScreenWallpaper",
         "menuMouseScroll",
         "mobileBars",
         "mode",
@@ -40479,6 +40483,16 @@
             }
           ]
         },
+        "lockScreenWallpaper": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "menuMouseScroll": {
           "anyOf": [
             {
@@ -43822,6 +43836,9 @@
             }
           ]
         },
+        "lockScreenWallpaper": {
+          "type": "boolean"
+        },
         "menuMouseScroll": {
           "type": "boolean"
         },
@@ -43903,6 +43920,7 @@
         "icons",
         "lang",
         "lightThemes",
+        "lockScreenWallpaper",
         "menuMouseScroll",
         "mobileBars",
         "mode",
@@ -44147,6 +44165,16 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lockScreenWallpaper": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -53987,6 +54015,19 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SystemWallpaperUploadRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "required": [
+        "file"
+      ],
       "additionalProperties": false
     },
     "SystemWebDAV": {
@@ -118865,6 +118906,76 @@
     },
     {
       "method": "GET",
+      "path": "/api/system/getLockScreenWallpaper",
+      "handler": "getLockScreenWallpaper",
+      "authorization": [
+        "public"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 404,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "image/jpeg"
+        }
+      ],
+      "emptyResponseStatuses": [
+        404
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/api/system/oidc/callback",
       "handler": "oidcCallback",
       "authorization": [
@@ -174344,6 +174455,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/removeLockScreenWallpaper",
+      "handler": "removeLockScreenWallpaper",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/removeWorkspaceDir",
       "handler": "removeWorkspaceDir",
       "authorization": [
@@ -175709,6 +175900,86 @@
       "emptyResponseStatuses": [
         200
       ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/uploadLockScreenWallpaper",
+      "handler": "uploadLockScreenWallpaper",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/SystemWallpaperUploadRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
     },
     {
       "method": "POST",

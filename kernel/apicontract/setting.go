@@ -420,6 +420,8 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
+	// LockScreenWallpaper 默认关闭；图片单独保存在 conf/lockscreen/wallpaper.jpg，不进入设置导出或笔记同步。
+	LockScreenWallpaper bool `json:"lockScreenWallpaper" api:"optional,nullable"`
 	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。
 	// 重置外观设置时恢复默认；紧凑模式与菜单鼠标滚动默认关闭，新建空工作空间的菜单鼠标滚动默认开启。
 	CompactMode              bool                      `json:"compactMode" api:"optional,nullable"`

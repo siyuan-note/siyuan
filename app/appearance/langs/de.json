@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Sperrbildschirm-Hintergrund",
+	"lockScreenWallpaperTip": "Ein JPEG-, PNG- oder WebP-Bild, maximal 10 MiB und 16 Megapixel; wird in diesem Arbeitsbereich ohne Synchronisierung gespeichert und vor der Anmeldung angezeigt",
 	"automationCollectionIncludeSelf": "Ausgewählte Dokumente selbst einschließen",
 	"automationCollectionIncludeSelfTip": "Wenn deaktiviert, werden nur untergeordnete Dokumente überwacht; mit Nur aktuelles Dokument ist der Dokumentbereich leer",
 	"clearRecentDocs": "Verlauf zuletzt verwendeter Dokumente leeren",
@@ -3391,6 +3393,8 @@
 		"434": "Nicht genügend Speicherplatz für diese Datei: benötigt %s, verfügbar %s",
 		"435": "Temporäre Dateien der unterbrochenen Synchronisation entfernt, %s freigegeben",
 		"436": "Synchronisierte Änderungen werden angewendet; nach der Verarbeitung oder Wiederherstellung nach Abbruch ist die Bearbeitung wieder möglich",
-		"437": "Diese Version herunterladen"
+		"437": "Diese Version herunterladen",
+		"438": "Wähle ein gültiges JPEG-, PNG- oder WebP-Bild mit maximal 10 MiB und 16 Megapixeln",
+		"439": "Der Sperrbildschirm-Hintergrund konnte nicht gespeichert werden; prüfe die Schreibrechte des Arbeitsbereichs"
 	}
 }

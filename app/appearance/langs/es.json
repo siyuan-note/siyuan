@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Fondo de la pantalla de bloqueo",
+	"lockScreenWallpaperTip": "Una imagen JPEG, PNG o WebP, de hasta 10 MiB y 16 megapíxeles; se guarda en este espacio de trabajo sin sincronización y es visible antes de iniciar sesión",
 	"automationCollectionIncludeSelf": "Incluir los propios documentos seleccionados",
 	"automationCollectionIncludeSelfTip": "Al desactivar, solo se supervisan los documentos descendientes; con Solo el documento actual, el ámbito del documento queda vacío",
 	"clearRecentDocs": "Borrar el historial de documentos recientes",
@@ -3391,6 +3393,8 @@
 		"434": "No hay espacio suficiente para restaurar este archivo: necesario %s, disponible %s",
 		"435": "Se eliminaron los archivos temporales de la sincronización interrumpida, liberando %s",
 		"436": "Aplicando cambios sincronizados; podrás editar cuando termine el procesamiento o la recuperación tras cancelar",
-		"437": "Descargar esta versión"
+		"437": "Descargar esta versión",
+		"438": "Selecciona una imagen JPEG, PNG o WebP válida de hasta 10 MiB y 16 megapíxeles",
+		"439": "No se pudo guardar el fondo de bloqueo; comprueba los permisos de escritura del espacio de trabajo"
 	}
 }

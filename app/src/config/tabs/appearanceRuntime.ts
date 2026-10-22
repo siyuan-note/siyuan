@@ -22,6 +22,7 @@ import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 import {createSectionRuntime} from "../util/sectionRuntime";
 import {syncBodyGradient} from "./bodyGradient";
+import {syncLockScreenWallpaper} from "./lockScreenWallpaper";
 import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
 import {closeSettingsWindow, isSettingsWindow} from "../setting/windowContext";
 import {syncAppearancePreferences} from "./appearancePreferences";
@@ -78,7 +79,7 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
     // 启动初始化传入当前配置本身，需要完整加载外观资源；重复推送仍使用原位同步。
     const appearanceKeys = Object.keys({...prevAppearance, ...data}) as Array<keyof Config.IAppearance>;
     const inPlaceKeys = new Set(["bodyGradient", "compactMode", "menuMouseScroll", "pdfTheme",
-        "outlineKeepCurrentExpand", "mobileBars"]);
+        "outlineKeepCurrentExpand", "mobileBars", "lockScreenWallpaper"]);
     const inPlace = !refresh && prevAppearance !== data &&
         appearanceKeys.every(key => inPlaceKeys.has(key) ||
             JSON.stringify(prevAppearance[key]) === JSON.stringify(data[key]));
@@ -102,6 +103,10 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
             name: "preferences",
             changed: () => true,
             apply: () => { syncAppearancePreferences(); },
+        }, {
+            name: "lock-screen-wallpaper",
+            changed: (old, next) => old.lockScreenWallpaper !== next.lockScreenWallpaper,
+            apply: () => { syncLockScreenWallpaper(); },
         }, {
             name: "gradient",
             changed: () => inPlace,

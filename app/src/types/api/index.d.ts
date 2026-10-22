@@ -684,7 +684,7 @@ export type BatchUpdateBlockRequestInput = { "blocks": Array<UpdateBlockRequestI
 
 export type BatchUpdatePackageRequestInput = { "frontend": string; };
 
-export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "menuMouseScroll": boolean; "mobileBars": BazaarMobileBars | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": BazaarPDFTheme | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "lockScreenWallpaper": boolean; "menuMouseScroll": boolean; "mobileBars": BazaarMobileBars | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": BazaarPDFTheme | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type BazaarAppearanceIcon = { "label": string; "name": string; };
 
@@ -1896,7 +1896,7 @@ export type SearchWidgetResult = { "content": string; "name": string; };
 
 export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
 
-export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
+export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "lockScreenWallpaper"?: boolean | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SetAssetAnnotationRequestInput = { "data": string; "path": string; };
 
@@ -1988,13 +1988,13 @@ export type SettingAgentSkills = { "builtinDisabled": Array<string> | null; "use
 
 export type SettingAgentSkillsInput = { "builtinDisabled"?: Array<string> | null; "userEnabled"?: Array<string> | null; };
 
-export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "menuMouseScroll": boolean; "mobileBars": SettingMobileBars | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": SettingPDFTheme | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "lockScreenWallpaper": boolean; "menuMouseScroll": boolean; "mobileBars": SettingMobileBars | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": SettingPDFTheme | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type SettingAppearanceIcon = { "label": string; "name": string; };
 
 export type SettingAppearanceIconInput = { "label"?: string | null; "name"?: string | null; };
 
-export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
+export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "lockScreenWallpaper"?: boolean | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SettingAppearanceTheme = { "frontends"?: Array<string>; "label": string; "name": string; };
 
@@ -2422,6 +2422,8 @@ export type SystemTypeFilter = { "blockquote": boolean; "callout": boolean; "cod
 
 export type SystemUILayoutRequestInput = { "layout"?: { [key: string]: JSONValue } | null; };
 
+export type SystemWallpaperUploadRequestInput = { "file": Blob; };
+
 export type SystemWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
 
 export type SystemWorkspace = { "closed": boolean; "path": string; };
@@ -2726,6 +2728,20 @@ export interface APIGETRoutes {
         output: "binary";
         emptyResponseStatuses: [500];
         contentVariants: [{"status":200,"contentType":"image/png"}];
+    };
+    /**
+     * 无需登录，仅返回已启用的单张壁纸，不接受文件路径或笔记本参数。
+     * 成功返回 image/jpeg 且禁止缓存；未启用、文件缺失或不可读时返回无正文的 404，认证页保留默认背景。
+     */
+    "/api/system/getLockScreenWallpaper": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
+        output: "binary";
+        emptyResponseStatuses: [404];
+        contentVariants: [{"status":200,"contentType":"image/jpeg"}];
     };
     /**
      * 从 URL 查询参数读取 state、code 和 error，验证登录事务及会话绑定，不读取请求体。
@@ -7995,6 +8011,17 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 删除本工作空间唯一的壁纸文件，需管理员写权限；文件不存在时仍成功。
+     * 客户端应先通过配置 patch 关闭 appearance.lockScreenWallpaper，再删除图片。
+     */
+    "/api/system/removeLockScreenWallpaper": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/system/removeWorkspaceDir": {
         request: SystemPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8120,6 +8147,19 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
         emptyResponseStatuses: [200];
+    };
+    /**
+     * 替换本工作空间唯一的壁纸文件，需管理员写权限。
+     * file 必须是 JPEG、PNG 或 WebP，最多 10 MiB、1600 万像素；重编码为 JPEG，移除元数据。
+     * 图片保存在 conf/lockscreen/wallpaper.jpg，不同步、不包含在设置导出中。
+     * 上传不修改 appearance.lockScreenWallpaper，客户端须通过配置 patch 启用；失败保留原文件。
+     */
+    "/api/system/uploadLockScreenWallpaper": {
+        request: SystemWallpaperUploadRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/vacuumDataIndex": {
         request: EmptyRequestInput;

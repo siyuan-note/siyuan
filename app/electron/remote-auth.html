@@ -28,6 +28,7 @@
             position: absolute;
             right: 0;
             top: 0;
+            z-index: 3;
         }
 
         #closeWindow {
@@ -53,6 +54,37 @@
         main {
             text-align: center;
             width: 280px;
+            position: relative;
+            z-index: 2;
+        }
+
+        #lockScreenWallpaper {
+            height: 100%;
+            inset: 0;
+            object-fit: cover;
+            pointer-events: none;
+            position: fixed;
+            width: 100%;
+            z-index: 1;
+        }
+
+        body.has-wallpaper main {
+            background: #fff;
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 40px 16px 16px;
+            max-height: calc(100% - 56px);
+            max-width: calc(100% - 32px);
+            overflow: auto;
+            overflow-wrap: anywhere;
+            padding: 16px 24px;
+            width: 328px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body.has-wallpaper main {
+                background: #1e1e1e;
+            }
         }
 
         #origin {
@@ -109,6 +141,7 @@
     </style>
 </head>
 <body>
+<img id="lockScreenWallpaper" alt="" hidden>
 <div id="windowBar"><button id="closeWindow" type="button">×</button></div>
 <main hidden>
     <h1 id="title">SiYuan</h1>
@@ -126,6 +159,24 @@
     <button id="connections" type="button"></button>
 </main>
 <script>
+    const loadLockScreenWallpaper = () => {
+        const wallpaper = document.getElementById("lockScreenWallpaper");
+        wallpaper.onload = () => {
+            wallpaper.hidden = false;
+            document.body.classList.add("has-wallpaper");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = true;
+        };
+        wallpaper.onerror = () => {
+            wallpaper.hidden = true;
+            document.body.classList.remove("has-wallpaper");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = false;
+        };
+        wallpaper.src = "/api/system/getLockScreenWallpaper";
+    };
+    loadLockScreenWallpaper();
+
     (() => {
         const params = new URLSearchParams(window.location.search);
         const allowedPaths = ["/stage/build/app/", "/stage/build/app/window.html"];

@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Kilit ekranı duvar kâğıdı",
+	"lockScreenWallpaperTip": "En fazla 10 MiB ve 16 megapiksel boyutunda tek bir JPEG, PNG veya WebP görüntüsü; bu çalışma alanında eşitleme yapılmadan saklanır ve girişten önce görünür",
 	"automationCollectionIncludeSelf": "Seçilen belgelerin kendilerini dahil et",
 	"automationCollectionIncludeSelfTip": "Kapalıyken yalnızca alt belgeler izlenir; Yalnızca geçerli belge ile birlikte kullanıldığında belge kapsamı boş olur",
 	"clearRecentDocs": "Son belge geçmişini temizle",
@@ -3391,6 +3393,8 @@
 		"434": "Bu dosyayı geri yüklemek için disk alanı yetersiz: gereken %s, kullanılabilir %s",
 		"435": "Kesilen eşitlemenin geçici dosyaları kaldırıldı, %s alan boşaltıldı",
 		"436": "Eşitlenen değişiklikler uygulanıyor; işleme veya iptal sonrası kurtarma tamamlanınca düzenlemeye devam edebilirsiniz",
-		"437": "Bu sürümü indir"
+		"437": "Bu sürümü indir",
+		"438": "En fazla 10 MiB ve 16 megapiksel boyutunda geçerli bir JPEG, PNG veya WebP görüntüsü seçin",
+		"439": "Kilit ekranı duvar kâğıdı kaydedilemedi; çalışma alanının yazma izinlerini kontrol edin"
 	}
 }

@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Tapeta zamknutej obrazovky",
+	"lockScreenWallpaperTip": "Jeden obrázok JPEG, PNG alebo WebP, najviac 10 MiB a 16 megapixelov; uložený v tomto pracovnom priestore bez synchronizácie a viditeľný pred prihlásením",
 	"automationCollectionIncludeSelf": "Zahrnúť samotné vybrané dokumenty",
 	"automationCollectionIncludeSelfTip": "Po vypnutí sa sledujú iba vnorené dokumenty; s možnosťou Iba aktuálny dokument je rozsah dokumentu prázdny",
 	"clearRecentDocs": "Vymazať históriu nedávnych dokumentov",
@@ -3391,6 +3393,8 @@
 		"434": "Nedostatok miesta na obnovenie súboru: potrebné %s, dostupné %s",
 		"435": "Dočasné súbory prerušenej synchronizácie odstránené, uvoľnené %s",
 		"436": "Používajú sa synchronizované zmeny; úpravy budú dostupné po spracovaní alebo obnovení po zrušení",
-		"437": "Stiahnuť túto verziu"
+		"437": "Stiahnuť túto verziu",
+		"438": "Vyberte platný obrázok JPEG, PNG alebo WebP s veľkosťou najviac 10 MiB a 16 megapixelov",
+		"439": "Tapetu zamknutej obrazovky sa nepodarilo uložiť; skontrolujte oprávnenia na zápis do pracovného priestoru"
 	}
 }

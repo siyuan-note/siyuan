@@ -1,4 +1,6 @@
 {
+	"lockScreenWallpaper": "Achtergrond van het vergrendelscherm",
+	"lockScreenWallpaperTip": "Eén JPEG-, PNG- of WebP-afbeelding, maximaal 10 MiB en 16 megapixel; opgeslagen in deze werkruimte zonder synchronisatie en zichtbaar vóór het aanmelden",
 	"automationCollectionIncludeSelf": "Geselecteerde documenten zelf opnemen",
 	"automationCollectionIncludeSelfTip": "Bij uitschakeling worden alleen onderliggende documenten gevolgd; met Alleen huidig document is het documentbereik leeg",
 	"clearRecentDocs": "Geschiedenis van recente documenten wissen",
@@ -3391,6 +3393,8 @@
 		"434": "Onvoldoende schijfruimte om dit bestand te herstellen: nodig %s, beschikbaar %s",
 		"435": "Tijdelijke bestanden van de onderbroken synchronisatie verwijderd, %s vrijgemaakt",
 		"436": "Gesynchroniseerde wijzigingen worden toegepast; bewerken kan weer na de verwerking of het herstel na annulering",
-		"437": "Deze versie downloaden"
+		"437": "Deze versie downloaden",
+		"438": "Kies een geldige JPEG-, PNG- of WebP-afbeelding van maximaal 10 MiB en 16 megapixel",
+		"439": "De vergrendelachtergrond kon niet worden opgeslagen; controleer de schrijfrechten van de werkruimte"
 	}
 }

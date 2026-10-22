@@ -198,11 +198,34 @@
         .auth-actions > .b3-button {
             margin: 16px 0 0;
         }
+
+        #lockScreenWallpaper {
+            height: 100%;
+            inset: 0;
+            object-fit: cover;
+            pointer-events: none;
+            position: fixed;
+            width: 100%;
+            z-index: 1;
+        }
+
+        body.has-wallpaper #authPanel {
+            background-color: var(--b3-theme-background);
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 40px 16px 16px;
+            max-height: calc(100% - 56px);
+            max-width: calc(100% - 32px);
+            overflow: auto;
+            overflow-wrap: anywhere;
+            padding: 16px 24px;
+        }
     </style>
 </head>
 <body>
-<div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
-<div style="position: relative;z-index: 2;text-align: center">
+<img id="lockScreenWallpaper" alt="" hidden>
+<div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;z-index: 3;"></div>
+<div id="authPanel" style="position: relative;z-index: 2;text-align: center">
     <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.workspace}}</h1>
     <div id="authCodePanel"{{if not .accessAuthCodeEnabled}} style="display: none"{{end}}>
         <input class="b3-text-field" id="authCode" type="password" placeholder="{{.l0}}"/><br>
@@ -224,7 +247,7 @@
         {{.l7}}
     </div>
 </div>
-<div style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
+<div id="authDefaultBackground" style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
     <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;"
          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"
          viewBox="0 0 2769 1602" width="2769">
@@ -442,6 +465,24 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
+    const loadLockScreenWallpaper = () => {
+        const wallpaper = document.getElementById("lockScreenWallpaper");
+        wallpaper.onload = () => {
+            wallpaper.hidden = false;
+            document.body.classList.add("has-wallpaper");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = true;
+        };
+        wallpaper.onerror = () => {
+            wallpaper.hidden = true;
+            document.body.classList.remove("has-wallpaper");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = false;
+        };
+        wallpaper.src = "/api/system/getLockScreenWallpaper";
+    };
+    loadLockScreenWallpaper();
+
     window.showKeyboardToolbar = function () {}
     window.hideKeyboardToolbar = function () {}
 

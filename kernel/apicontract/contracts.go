@@ -1562,6 +1562,20 @@ var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 var SystemLoginAuth = define[SystemLoginAuthRequest, Null]("loginAuth", "/api/system/loginAuth", PublicAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// SystemUploadLockScreenWallpaper 替换本工作空间唯一的壁纸文件，需管理员写权限。
+// file 必须是 JPEG、PNG 或 WebP，最多 10 MiB、1600 万像素；重编码为 JPEG，移除元数据。
+// 图片保存在 conf/lockscreen/wallpaper.jpg，不同步、不包含在设置导出中。
+// 上传不修改 appearance.lockScreenWallpaper，客户端须通过配置 patch 启用；失败保留原文件。
+var SystemUploadLockScreenWallpaper = define[SystemWallpaperUploadRequest, Null]("uploadLockScreenWallpaper", "/api/system/uploadLockScreenWallpaper", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// SystemRemoveLockScreenWallpaper 删除本工作空间唯一的壁纸文件，需管理员写权限；文件不存在时仍成功。
+// 客户端应先通过配置 patch 关闭 appearance.lockScreenWallpaper，再删除图片。
+var SystemRemoveLockScreenWallpaper = define[EmptyRequest, Null]("removeLockScreenWallpaper", "/api/system/removeLockScreenWallpaper", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+
+// SystemGetLockScreenWallpaper 无需登录，仅返回已启用的单张壁纸，不接受文件路径或笔记本参数。
+// 成功返回 image/jpeg 且禁止缓存；未启用、文件缺失或不可读时返回无正文的 404，认证页保留默认背景。
+var SystemGetLockScreenWallpaper = define[EmptyRequest, BinaryContent]("getLockScreenWallpaper", "/api/system/getLockScreenWallpaper", PublicAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 404, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/jpeg"}}, EmptyResponseStatuses: []int{404}}, "GET")
 var SystemLogoutAuth = define[EmptyRequest, Null]("logoutAuth", "/api/system/logoutAuth", PublicAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var SystemOIDCMobileCallback = define[SystemOIDCMobileRequest, SystemOIDCMobileData]("oidcMobileCallback", "/api/system/oidc/mobileCallback", PublicAccess, StructJSONBody, ResponseOptions{}, "POST")
 var SystemOIDCPoll = define[SystemOIDCPollRequest, SystemOIDCPollData]("oidcPoll", "/api/system/oidc/poll", PublicAccess, StructJSONBody, ResponseOptions{}, "POST")

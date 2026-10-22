@@ -1,4 +1,5 @@
 {
+	"loadAllAndSelectAll": "Cargar el documento completo y seleccionar todo",
 	"autoFitRowHeight": "Ajustar automáticamente la altura de fila",
 	"backlinkDatabaseFields": "Campos de la base de datos",
 	"listMindmapPaletteOcean": "Océano",

@@ -475,7 +475,37 @@ body.body--harmony {
 .switch-doc {
   max-height: 70vh;
   max-width: 100%;
-  min-width: 426px;
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__search {
+    flex: 0 1 200px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+
+    .b3-select {
+      flex: 1;
+      min-width: 0;
+    }
+  }
 
   .b3-list {
     padding: 8px 0;

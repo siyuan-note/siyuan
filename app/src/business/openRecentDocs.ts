@@ -110,12 +110,10 @@ export const openRecentDocs = (openOnly = false) => {
     fetchPost("/api/storage/getRecentDocs", {sortBy}, (response) => {
         const dialog = new Dialog({
             positionId: Constants.DIALOG_RECENTDOCS,
-            title: `<div class="fn__flex">
-<div class="fn__flex-center">${window.siyuan.languages.recentDocs}</div>
-<div class="fn__flex-1"></div>
-<input spellcheck="false" placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__size200">
-<span class="fn__space"></span>
-<div class="fn__flex fn__flex-center">
+            title: `<div class="switch-doc__header">
+<div class="switch-doc__title">${window.siyuan.languages.recentDocs}</div>
+<input spellcheck="false" placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field switch-doc__search">
+<div class="switch-doc__actions">
     <select class="b3-select" id="recentDocsSort">
         <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
         <option value="created">${window.siyuan.languages.recentCreated}</option>

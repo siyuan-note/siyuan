@@ -63,10 +63,14 @@ const cases = async (source: string) => {
     api.showMessage(notification, -1, "info", "unrelated");
     button().click();
     check.equal(requests, 2, "only the update notification can invoke the download action");
+    api.showMessage("Select all", -1, "info", "select-all-tip");
+    const selectAllTip = message.querySelector('[data-id="select-all-tip"]');
     check.equal(api.showMessage("Loading...", -1, "info", "select-all-tip"), "select-all-tip",
         "replacing an existing notification returns its id so callers can hide it");
     check.equal(message.querySelectorAll('[data-id="select-all-tip"]').length, 1,
         "replacing an existing notification reuses its element");
+    check.equal(message.querySelector('[data-id="select-all-tip"]'), selectAllTip);
+    check.equal(selectAllTip.textContent, "Loading...");
     return "update-message-ok";
 };
 

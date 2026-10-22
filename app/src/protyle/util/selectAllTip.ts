@@ -32,10 +32,16 @@ export const showSelectAllIncompleteTip = (protyle: IProtyle) => {
             return;
         }
         button.disabled = true;
+        let messageContent: Element = button.closest(".b3-snackbar__content");
+        let selected = false;
         try {
-            if (hasUnloadedDocumentBlocks(editorElement, protyle.block.scroll) &&
-                !await protyle.scroll.loadAll(protyle, {messageId: messageID})) {
-                return;
+            if (hasUnloadedDocumentBlocks(editorElement, protyle.block.scroll)) {
+                const loading = protyle.scroll.loadAll(protyle, {messageId: messageID});
+                // 加载提示同步替换内容；保存节点以区分后来同 ID 的通知。
+                messageContent = document.querySelector(`#message [data-id="${messageID}"]`)?.firstElementChild;
+                if (!await loading) {
+                    return;
+                }
             }
             if (!isCurrent()) {
                 return;
@@ -56,13 +62,19 @@ export const showSelectAllIncompleteTip = (protyle: IProtyle) => {
                     protyle.toolbar.showMultiSelectMode(protyle, elements[0] as HTMLElement);
                 }
             }
-            if (button.isConnected) {
-                hideMessage(messageID);
-            }
+            selected = true;
         } catch (error) {
             showMessage(escapeHtml(error.message), 7000, "error");
         } finally {
             button.disabled = false;
+            if (messageContent?.isConnected) {
+                if (!selected && isCurrent()) {
+                    showSelectAllIncompleteTip(protyle);
+                }
+                if (messageContent.isConnected) {
+                    hideMessage(messageID);
+                }
+            }
         }
     });
 };

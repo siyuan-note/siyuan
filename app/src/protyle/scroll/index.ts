@@ -230,7 +230,7 @@ export class Scroll {
         return true;
     }
 
-    // messageId 用于复用调用方已展示的通知，避免新增一条提示把通知列表挤得跳动
+    // 传入 messageId 时复用调用方的通知，由调用方负责关闭或恢复，避免覆盖后续提示。
     public async loadAll(protyle: IProtyle, options?: { messageId?: string }) {
         const rootID = protyle.block.rootID;
         if (this.loadingAll || !rootID || protyle.block.showAll || !protyle.block.scroll) {
@@ -255,7 +255,7 @@ export class Scroll {
             return true;
         } finally {
             this.loadingAll = false;
-            if (messageID) {
+            if (messageID && !options?.messageId) {
                 hideMessage(messageID);
             }
         }

@@ -31,6 +31,14 @@ const runCases = async sources => {
         "protyle/wysiwyg/verticalNavigationState": {},
         "menus/menuToggle": {},
     };
+    // 仅替换滚动条构造及其他操作的依赖，通知流程使用真实的 loadAll。
+    for (const name of ["protyle/util/onGet", "protyle/util/compatibility", "protyle/util/hasClosest",
+        "protyle/wysiwyg/commonHotkey", "dialog/tooltip", "util/pathName", "protyle/scroll/visibility",
+        "protyle/scroll/loadAll", "protyle/scroll/dynamicLoadState", "protyle/scroll/saveScroll",
+        "protyle/scroll/slider", "util/touchDragBridge", "protyle/util/transactionQueue",
+        "util/keymapBindings", "protyle/scroll/page", "protyle/scroll/pageButtons"]) {
+        modules[name] = {};
+    }
     const load = name => {
         if (modules[name]) {
             return modules[name];
@@ -53,46 +61,58 @@ const runCases = async sources => {
     };
     const {showSelectAllIncompleteTip} = load("protyle/util/selectAllTip");
     const {initMessage} = load("dialog/message");
+    const {Scroll} = load("protyle/scroll/index");
     const {renderMultiSelectToolbar} = load("mobile/util/multiSelectToolbar");
     const settle = () => new Promise(resolve => setTimeout(resolve, 10));
-    const fixture = () => {
-        document.body.innerHTML = '<div id="message"></div><div id="editor"><div id="wysiwyg"></div></div><div id="toolbar"></div>';
-        window.siyuan = {zIndex: 0, config: {appearance: {notifications: {}}}, languages: {
-            selectAllIncompleteTip: "Unloaded blocks remain unselected",
-            loadAllAndSelectAll: "Load full document and select all",
-        }};
-        initMessage();
+    const fixture = (reset = true) => {
+        if (reset) {
+            document.body.innerHTML = '<div id="message"></div>';
+            window.siyuan = {zIndex: 0, config: {appearance: {notifications: {}}, editor: {dynamicLoadBlocks: 64}}, languages: {
+                selectAllIncompleteTip: "Unloaded blocks remain unselected",
+                loadAllAndSelectAll: "Load full document and select all",
+                loading: "Loading...",
+            }};
+            initMessage();
+        }
         counted = undefined;
         focused = undefined;
         toolbarOpened = 0;
-        const element = document.getElementById("wysiwyg");
+        const editor = document.createElement("div");
+        const element = document.createElement("div");
+        editor.append(element);
+        document.body.append(editor);
         element.innerHTML = '<div data-node-id="middle" class="protyle-wysiwyg--select"><div contenteditable="true">Middle</div>' +
             '<div data-node-id="nested" class="protyle-wysiwyg--select protyle-wysiwyg--select-mode" select-start="0" select-end="1">Nested</div></div>';
-        const subElement = document.getElementById("toolbar");
+        const subElement = document.createElement("div");
+        document.body.append(subElement);
         let complete;
         let requests = 0;
-        let loadAllOptions;
         const protyle = {
-            element: document.getElementById("editor"),
+            element: editor,
             block: {rootID: "document", parentID: "document", scroll: true},
             options: {}, wysiwyg: {element},
-            scroll: {loadAll: (currentProtyle, options) => {
-                requests++;
-                loadAllOptions = options;
-                return new Promise((resolve, reject) => complete = (success, error) => {
-                    if (error) {
-                        reject(new Error("Loading failed"));
-                    } else {
-                        if (success) {
-                            element.insertAdjacentHTML("afterbegin", '<div data-node-id="first" data-node-index="0"><div contenteditable="true">First</div></div>');
-                            element.insertAdjacentHTML("beforeend", '<div data-node-id="last"><div contenteditable="true">Last</div></div><div class="placeholder"></div>');
-                            element.setAttribute("data-bottom-eof", "");
-                            protyle.block.scroll = false;
-                        }
-                        resolve(success);
+            scroll: Object.assign(Object.create(Scroll.prototype), {
+                invalidateDynamicLoad: () => {},
+                update: () => {},
+                loadUntilBoundary: (currentProtyle, rootID, mode) => {
+                    if (mode === 2) {
+                        return Promise.resolve(true);
                     }
-                });
-            }},
+                    requests++;
+                    return new Promise((resolve, reject) => complete = (success, error) => {
+                        if (error) {
+                            reject(new Error("Loading failed"));
+                        } else {
+                            if (success) {
+                                element.insertAdjacentHTML("afterbegin", '<div data-node-id="first" data-node-index="0"><div contenteditable="true">First</div></div>');
+                                element.insertAdjacentHTML("beforeend", '<div data-node-id="last"><div contenteditable="true">Last</div></div><div class="placeholder"></div>');
+                                element.setAttribute("data-bottom-eof", "");
+                            }
+                            resolve(success);
+                        }
+                    });
+                },
+            }),
             toolbar: {
                 subElement,
                 isMultiSelectMode: () => !!subElement.querySelector(".multiSelectCount"),
@@ -104,9 +124,10 @@ const runCases = async sources => {
         };
         const show = () => showSelectAllIncompleteTip(protyle);
         const button = () => document.querySelector('#message [data-id="selectAllIncompleteTip"] button');
+        const notification = () => document.querySelector('#message [data-id="selectAllIncompleteTip"]');
         const selected = () => Array.from(element.querySelectorAll(".protyle-wysiwyg--select"), item => item.dataset.nodeId);
-        return {protyle, element, show, button, selected, complete: (...args) => complete(...args),
-            requests: () => requests, loadAllOptions: () => loadAllOptions};
+        return {protyle, element, show, button, notification, selected, complete: (...args) => complete(...args),
+            requests: () => requests};
     };
 
     // 重复提示会替换按钮，必须绑定最新按钮，并等待全文成功加载后再选择顶层块。
@@ -119,12 +140,17 @@ const runCases = async sources => {
         const previous = f.button();
         f.show();
         check.notEqual(previous, f.button());
-        f.button().click();
-        f.button().click();
+        const button = f.button();
+        const notification = f.notification();
+        button.click();
+        button.click();
         check.equal(f.requests(), 1);
         // 加载提示复用本条通知的 id，避免新增通知导致列表位置跳动
-        check.deepEqual(f.loadAllOptions(), {messageId: "selectAllIncompleteTip"});
-        check.equal(f.button().disabled, true);
+        check.equal(f.notification(), notification);
+        check.equal(document.querySelectorAll("#message .b3-snackbar").length, 1);
+        check.equal(notification.textContent, "Loading...");
+        check.equal(f.button(), null);
+        check.equal(button.disabled, true);
         check.deepEqual(f.selected(), ["middle", "nested"]);
         f.complete(true);
         await settle();
@@ -147,31 +173,91 @@ const runCases = async sources => {
     const reopened = fixture();
     reopened.show();
     reopened.button().click();
-    reopened.button().closest(".b3-snackbar").remove();
+    reopened.notification().remove();
     reopened.complete(true);
     await settle();
     check.equal(toolbarOpened, 1);
     check.deepEqual(reopened.selected(), ["first", "middle", "last"]);
 
-    mobile = false;
-    for (const error of [false, true]) {
+    for (mobile of [false, true]) {
+        for (const error of [false, true]) {
+            const f = fixture();
+            f.show();
+            const notification = f.notification();
+            f.button().click();
+            f.complete(false, error);
+            await settle();
+            check.deepEqual(f.selected(), ["middle", "nested"]);
+            check.equal(counted, undefined);
+            check.equal(f.button().disabled, false);
+            check.equal(f.notification(), notification, "retry reuses the same notification");
+            if (error) {
+                check.match(document.getElementById("message").textContent, /Loading failed/);
+            }
+            f.button().click();
+            f.complete(true);
+            await settle();
+            check.deepEqual(f.selected(), ["first", "middle", "last"]);
+        }
+    }
+
+    // 用户关闭提示或禁用通知后，失败的加载不重新显示提示，也不遗留加载状态。
+    for (const dismiss of [f => f.notification().remove(),
+        () => window.siyuan.config.appearance.notifications.selectAllIncompleteTip = false]) {
         const f = fixture();
         f.show();
         f.button().click();
-        f.complete(false, error);
+        dismiss(f);
+        f.complete(false);
         await settle();
-        check.deepEqual(f.selected(), ["middle", "nested"]);
-        check.equal(counted, undefined);
-        check.equal(f.button().disabled, false);
-        if (error) {
-            check.match(document.getElementById("message").textContent, /Loading failed/);
-        }
-        f.button().click();
-        f.complete(true);
-        await settle();
-        check.deepEqual(f.selected(), ["first", "middle", "last"]);
+        check.equal(f.notification(), null);
     }
 
+    // 旧加载结束后不能关闭或恢复已被其他文档替换的提示，包括新的加载状态。
+    for (mobile of [false, true]) {
+        for (const outcome of ["success", "failure", "error"]) {
+            for (const startNewLoad of [false, true]) {
+                const first = fixture();
+                first.show();
+                first.button().click();
+                const second = fixture(false);
+                second.protyle.block.rootID = "other-document";
+                second.show();
+                const secondButton = second.button();
+                if (startNewLoad) {
+                    secondButton.click();
+                }
+                const content = second.notification().firstElementChild;
+                first.complete(outcome === "success", outcome === "error");
+                await settle();
+                check.equal(content.isConnected, true);
+                check.equal(second.notification().firstElementChild, content);
+                if (startNewLoad) {
+                    check.equal(second.notification().textContent, "Loading...");
+                    second.complete(true);
+                    await settle();
+                    check.deepEqual(second.selected(), ["first", "middle", "last"]);
+                    check.equal(second.notification(), null);
+                } else {
+                    check.equal(second.button(), secondButton);
+                    check.equal(secondButton.disabled, false);
+                }
+            }
+        }
+    }
+
+    // 非通知按钮调用 loadAll 时，仍自行清理独立的加载提示。
+    for (const success of [false, true]) {
+        const f = fixture();
+        const loading = f.protyle.scroll.loadAll(f.protyle);
+        check.match(document.getElementById("message").textContent, /Loading/);
+        f.complete(success);
+        check.equal(await loading, success);
+        await settle();
+        check.equal(document.querySelector("#message .b3-snackbar"), null);
+    }
+
+    mobile = false;
     for (const change of [f => f.protyle.block.rootID = "other", f => f.protyle.block.parentID = "zoomed",
         f => f.protyle.element.remove(), f => f.protyle.wysiwyg.element = document.createElement("div")]) {
         for (const duringLoad of [false, true]) {
@@ -222,7 +308,7 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             const sources = Object.fromEntries(["protyle/util/selectAllTip", "protyle/util/documentRange",
-                "protyle/wysiwyg/blockSelection", "dialog/message", "mobile/util/multiSelectToolbar", "util/escape"].map(name => [name,
+                "protyle/wysiwyg/blockSelection", "protyle/scroll/index", "dialog/message", "mobile/util/multiSelectToolbar", "util/escape"].map(name => [name,
                 ts.transpileModule(readFileSync(path.join(__dirname, `../src/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
                 }).outputText]));

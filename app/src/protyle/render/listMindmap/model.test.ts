@@ -1230,6 +1230,15 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             panMenu = pan;
         },
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
+        onNodeWidths: async (widths: {id: string, width: number}[], expected: string) => {
+            check.equal(expected, JSON.stringify(widths.map(({id}) => ({id, width: model.metadata.nodes[id]?.width || 0}))));
+            widths.forEach(({id, width}) => {
+                nodeStyles.push([id, {width}]);
+                model.metadata.nodes[id] = {...model.metadata.nodes[id], width};
+            });
+            view.update(model);
+            return true;
+        },
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
         onRelationChange: (...args: unknown[]) => relationChanges.push(args),
         onRelationDelete: (id: string) => relationDeletions.push(id),
@@ -2174,9 +2183,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         host.style.width = `${width}px`;
         view.renderInspector();
         await settle();
-        const palette = inspector.querySelector<HTMLElement>(".mindmap-view__palette");
-        check.ok(palette.scrollWidth > palette.clientWidth, "long palettes scroll independently");
-        palette.scrollLeft = palette.scrollWidth;
+        inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+        const popup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
+        const palette = popup.querySelector<HTMLElement>(".mindmap-view__palette");
+        check.equal(palette.children.length, 31);
+        const popupBounds = popup.getBoundingClientRect();
+        check.ok(popupBounds.width <= host.offsetWidth - 16, "long palettes wrap within the canvas");
+        check.ok(popupBounds.bottom <= inspector.getBoundingClientRect().top, "node settings open above the bottom bar");
         const bounds = inspector.getBoundingClientRect();
         for (const key of ["connect", "listMindmapSummary", "delete"]) {
             const action = inspector.querySelector<HTMLElement>(`[aria-label="${key}"]`).getBoundingClientRect();
@@ -2193,22 +2206,85 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             getComputedStyle(host).borderTopColor + " 0px 0px 0px 1px");
     }
     host.style.removeProperty("--b3-border-color");
-    check.equal(inspector.querySelectorAll('input[type="number"]').length, 1, "node width is editable");
-    const widthInput = inspector.querySelector<HTMLInputElement>('input[type="number"]');
-    widthInput.value = "640";
-    widthInput.dispatchEvent(new Event("change", {bubbles: true}));
+    check.equal(inspector.querySelectorAll('input[type="number"]').length, 0, "the width field is kept out of the main bar");
+    inspector.querySelector<HTMLButtonElement>('[aria-label="width"]').click();
+    const nodePopup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
+    const widthInput = () => nodePopup.querySelector<HTMLInputElement>('input[type="number"]');
+    widthInput().value = "640";
+    widthInput().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
     check.deepEqual(nodeStyles.at(-1), [beta, {width: 640}]);
     const styleCount = nodeStyles.length;
-    widthInput.value = "12";
-    widthInput.dispatchEvent(new Event("change", {bubbles: true}));
+    widthInput().value = "12";
+    widthInput().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
     check.equal(nodeStyles.length, styleCount, "invalid widths do not change metadata");
-    widthInput.value = "";
-    widthInput.dispatchEvent(new Event("change", {bubbles: true}));
+    widthInput().value = "";
+    widthInput().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
     check.deepEqual(nodeStyles.at(-1), [beta, {width: 0}], "clearing restores automatic width");
-    check.equal(inspector.querySelectorAll('input[type="checkbox"]').length, 0);
-    check.equal(inspector.querySelector('input[type="color"]'), null);
-    check.equal(inspector.querySelectorAll('[role="group"]').length, 1);
-    const nodePalette = inspector.querySelector<HTMLElement>('[role="group"][aria-label="color"]');
+    const oldAlphaWidth = model.metadata.nodes[alpha]?.width || 0;
+    model.metadata.nodes[alpha] = {...model.metadata.nodes[alpha], width: 0};
+    model.metadata.nodes[beta] = {...model.metadata.nodes[beta], width: 480};
+    view.update(model);
+    await settle();
+    view.focusNode(alpha);
+    view.selectNode(beta, true);
+    const mixedWidthSelection = view.getSelectedIds();
+    const widthButton = inspector.querySelector<HTMLButtonElement>('[aria-label="width"]');
+    await moveMouse(widthButton);
+    check.equal(nodePopup.hidden, false, "mouse hover opens node settings");
+    const slider = () => nodePopup.querySelector<HTMLInputElement>('input[type="range"]');
+    check.equal(slider().value, "0", "the slider starts centered on the current width");
+    const beforeWidthDrag = nodeStyles.length;
+    slider().value = "50";
+    slider().dispatchEvent(new Event("input", {bubbles: true}));
+    await settle();
+    check.equal(nodeStyles.length, beforeWidthDrag, "drag previews do not write intermediate transactions");
+    check.equal(nodeElement(beta).style.width, "960px");
+    slider().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.equal(nodeStyles.length, beforeWidthDrag + 2, "release saves one callback for all selected nodes");
+    check.equal(model.metadata.nodes[alpha].width, 960);
+    check.equal(model.metadata.nodes[beta].width, 960);
+    widthInput().focus();
+    widthInput().value = "1000";
+    widthInput().dispatchEvent(new Event("input", {bubbles: true}));
+    const beforeRestoreWidth = nodeStyles.length;
+    await clickMouse(nodePopup.querySelector('[aria-label="listMindmapRestoreWidth"]'));
+    check.equal(nodeStyles.length, beforeRestoreWidth + 2, "Restore replaces an unsaved numeric preview without an extra save");
+    check.equal(model.metadata.nodes[alpha].width, 0, "restore retains an originally automatic width");
+    check.equal(model.metadata.nodes[beta].width, 480, "restore retains each node's individual width");
+    await clickMouse(nodePopup.querySelector('[aria-label="default"]'));
+    check.equal(model.metadata.nodes[beta].width, 0, "default makes every selected width automatic");
+    const beforeCancelWidth = nodeStyles.length;
+    slider().value = "50";
+    slider().dispatchEvent(new Event("input", {bubbles: true}));
+    slider().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    await settle();
+    check.equal(nodePopup.hidden, true, "Escape closes the popup");
+    check.equal(nodeStyles.length, beforeCancelWidth, "canceling a preview does not save a width");
+    check.equal(nodeElement(beta).style.width, "", "canceled previews restore persisted geometry");
+    check.deepEqual(view.getSelectedIds(), mixedWidthSelection, "popup keyboard handling preserves node selection");
+    const touchWidthButton = inspector.querySelector<HTMLButtonElement>('[aria-label="width"]');
+    const touchWidthPoint = centerPoint(touchWidthButton);
+    await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+        {type: "touchStart", touchPoints: [{id: 1, ...touchWidthPoint}]},
+        {type: "touchEnd", touchPoints: []},
+    ]);
+    await settle();
+    check.equal(nodePopup.hidden, false, "a native touch tap opens the width panel");
+    check.deepEqual(view.getSelectedIds(), mixedWidthSelection, "touch popup activation preserves the selection");
+    host.focus();
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    check.equal(nodePopup.hidden, true, "Escape also closes a hovered panel while canvas focus is retained");
+    check.deepEqual(view.getSelectedIds(), mixedWidthSelection);
+    model.metadata.nodes[alpha].width = oldAlphaWidth;
+    view.update(model);
+    view.focusNode(beta);
+    inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+    check.equal(inspector.querySelectorAll('[role="group"]').length, 0, "palettes are kept out of the main bar");
+    const nodePalette = nodePopup.querySelector<HTMLElement>('[role="group"][aria-label="color"]');
     const nodeColorButton = nodePalette.querySelector<HTMLButtonElement>('[aria-label="Appearance combined"]');
     check.equal(nodeColorButton.textContent, "A");
     check.equal(nodeColorButton.classList.contains("color__square"), true);
@@ -2222,11 +2298,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.update(model);
     check.equal(getComputedStyle(nodeElement(beta)).backgroundColor, "rgb(171, 205, 239)");
     check.equal(getComputedStyle(nodeElement(beta)).color, "rgb(18, 52, 86)");
-    check.equal(inspector.querySelector('[aria-label="Appearance combined"]').getAttribute("aria-pressed"), "true");
+    check.equal(nodePopup.querySelector('[aria-label="Appearance combined"]').getAttribute("aria-pressed"), "true");
     host.style.setProperty("--b3-font-background1", "#334455");
     check.equal(getComputedStyle(nodeElement(beta)).backgroundColor, "rgb(51, 68, 85)",
         "node colors follow changes to the appearance palette");
-    inspector.querySelector<HTMLButtonElement>('[aria-label="color"] [aria-label="default"]').click();
+    nodePopup.querySelector<HTMLButtonElement>('[aria-label="color"] [aria-label="default"]').click();
     check.deepEqual(nodeStyles[nodeStyles.length - 1], [beta, {textColor: "", backgroundColor: ""}]);
     model.metadata.nodes[beta].backgroundColor = "";
     model.metadata.nodes[beta].textColor = "";
@@ -5217,11 +5293,13 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         compile(path.join(__dirname, "appearance.ts")) + compile(path.join(__dirname, "model.ts")) +
         compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
-        compile(path.join(__dirname, "view.ts")) +
+        compile(path.join(__dirname, "clipboard.ts")) + compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
         compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_svg.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_slider.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_text-field.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_button.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_select.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
@@ -5351,7 +5429,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const executable = require("electron") as unknown as string;
-        const result = await promisify(execFile)(executable, [script], {env, timeout: 40000, windowsHide: true});
+        const result = await promisify(execFile)(executable, [script], {env, timeout: 80000, windowsHide: true});
         assert.match(result.stdout, /List mindmap DOM cases passed/);
     } finally {
         rmSync(temporary, {recursive: true, force: true});

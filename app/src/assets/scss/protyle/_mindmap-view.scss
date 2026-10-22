@@ -935,6 +935,40 @@
     .b3-text-field {
       width: 80px;
     }
+
+    .b3-slider {
+      width: 100px;
+      min-width: 48px;
+      flex: 1;
+    }
+
+    .color__square {
+      flex-shrink: 0;
+    }
+  }
+
+  &__inspector-popover {
+    @include protyle-toolbar-surface;
+    position: absolute;
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100% - 16px);
+    padding: 8px;
+    box-sizing: border-box;
+    overflow: auto;
+
+    .mindmap-view__palette {
+      flex-wrap: wrap;
+      overflow: visible;
+      max-width: 320px;
+    }
+
+    .mindmap-view__node-width {
+      min-width: 0;
+      flex-shrink: 1;
+      flex-wrap: wrap;
+    }
   }
 
 }
@@ -961,6 +995,7 @@
     &__route-handle,
     &__route-status,
     &__selection-box,
+    &__inspector-popover,
     &__add-bridge,
     &__fold,
     &__add-child {

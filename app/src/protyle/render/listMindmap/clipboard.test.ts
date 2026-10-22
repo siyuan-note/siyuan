@@ -196,9 +196,28 @@ const browserCases = async (source: string, css: string) => {
     };
     pointer(a.id);
     await checkNodeMenu();
+    const action = (key: string) => host.querySelector<HTMLButtonElement>(`.mindmap-view__inspector > [aria-label="${key}"]`);
+    for (const key of ["copy", "cut", "paste"]) {
+        check.ok(action(key), `${key} is directly available on the bottom bar`);
+        check.equal(action(key).disabled, false);
+        action(key).dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch", pointerId: 12}));
+        check.deepEqual(view.getSelectedIds(), [a.id], "touching a clipboard button keeps the node selection");
+        action(key).click();
+    }
+    check.deepEqual(copied.map(item => item.cut), [false, true]);
+    check.deepEqual(pasted, [{id: a.id, kind: "child"}]);
+    copied.length = 0;
+    pasted.length = 0;
     pointer(b.id, {ctrlKey: true});
     await checkNodeMenu();
+    check.equal(action("paste").disabled, true, "multiple targets cannot receive a paste");
+    view.focusNode(model.root.id);
+    check.equal(action("cut").disabled, true, "the map root cannot be cut away");
+    check.equal(action("delete").disabled, true, "the map root cannot be deleted");
+    pointer(a.id);
+    pointer(b.id, {ctrlKey: true});
     check.deepEqual(new Set(view.getSelectedIds()), new Set([a.id, b.id]));
+    host.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="color"]').click();
     host.querySelector<HTMLButtonElement>('[aria-label="Batch orange"]').click();
     check.equal(styleChanges.length, 1, "batch colors use one callback for the complete selection");
     check.deepEqual(new Set(styleChanges[0].ids), new Set([a.id, b.id]));
@@ -374,7 +393,9 @@ test("mind map selection and clipboard preserve branches, metadata, identities a
         "../../util/blockDOMClipboard.ts", "../../util/clipboardData.ts"].map(compile).join("\n") +
         ts.transpileModule(`class ClipboardController {${methods.map(method => method.getText(sourceFile)).join("\n")}}`,
             {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText;
-    const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_mindmap-view.scss")).css;
+    const css = ["business/_block.scss", "business/_color.scss", "component/_svg.scss", "component/_slider.scss",
+        "component/_text-field.scss", "protyle/_mindmap-view.scss"].map(file =>
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss", file)).css).join("\n");
     const dir = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-clipboard-"));
     const script = path.join(dir, "run.cjs");
     const browser = ts.transpileModule(`(${browserCases.toString()})`, {compilerOptions: {target: ts.ScriptTarget.ES2021}})

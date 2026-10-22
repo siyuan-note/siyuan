@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022235541"
+		"updated": "20261023003125"
 	},
 	"Children": [
 		{
@@ -2090,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261022235541"
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
@@ -2125,16 +2125,82 @@
 			]
 		},
 		{
-			"ID": "20261022181804-s1vt5mf",
+			"ID": "20261023003125-j5vqqpm",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261022181804-s1vt5mf",
-				"updated": "20261022181804"
+				"id": "20261023003125-j5vqqpm",
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "1 つ以上のノードを選択し、フローティングスタイルバーの「幅」にピクセル値を入力すると、ノードの幅を調整できます。値を空にすると自動調整に戻ります。ノードを広げると、長いインライン数式を 1 行で表示できます。幅は文書とともに保存され、取り消しとやり直しに対応します。"
+					"Data": "下部のノードメニューには削除、コピー、切り取り、貼り付けを直接表示します。貼り付けは子ノードを追加し、「その他」では同じ階層への貼り付けも選べます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "にマウスを合わせるかタップすると、バーの上にノードのスタイルとスタイル管理のパネルが開きます。利用できない操作は無効になります。"
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-s1vt5mf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-s1vt5mf",
+				"updated": "20261023003125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "1 つ以上のノードを選択し、下部のノードメニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "幅"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "にマウスを合わせるかタップすると、バーの上にパネルが開きます。スライダーの中央はパネルを開いたときの現在の幅です。左に動かすと狭く、右に動かすと広くなります。ドラッグ中はプレビューし、指を離すと取り消し可能な 1 回の変更として保存します。ピクセル値を直接入力することもできます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "元の幅に戻す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "は各ノードをパネルを開いたときの幅に戻し、自動幅も復元します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "デフォルト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "または数値欄を空にすると内容に合わせて自動調整します。幅を広げると長いインライン数式を 1 行で表示できます。幅は文書とともに保存され、取り消しとやり直しに対応します。"
 				}
 			]
 		},

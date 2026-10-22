@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261022235541"
+		"updated": "20261023003125"
 	},
 	"Children": [
 		{
@@ -13103,7 +13103,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20261022235541"
+				"updated": "20261023003125"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13948,7 +13948,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-0k1m0f6",
-				"updated": "20261022235541"
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
@@ -13963,6 +13963,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " 可一次建立所有有效分組，並可一次復原，隨後編輯第一個新概要。在畫布上按 Esc 結束多選模式。編輯概要文字時，Enter 儲存，Esc 取消文字編輯。選取概要後，Delete 或 Backspace 刪除概要。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "顏色或寬度面板開啟時，按 Esc 關閉面板，並取消尚未儲存的寬度預覽。"
 				}
 			]
 		},

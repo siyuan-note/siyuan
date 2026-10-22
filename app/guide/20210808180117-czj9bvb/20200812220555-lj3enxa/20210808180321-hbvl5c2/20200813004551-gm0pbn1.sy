@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261022235541"
+		"updated": "20261023003125"
 	},
 	"Children": [
 		{
@@ -13097,7 +13097,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261022235541"
+				"updated": "20261023003125"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14030,7 +14030,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-tamny2o",
-				"updated": "20261022235541"
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
@@ -14045,6 +14045,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " 可一次创建所有有效分组，并可一次撤销，随后编辑第一个新概要。在画布上按 Esc 退出多选模式。编辑概要文字时，Enter 保存，Esc 取消文字编辑。选中概要后，Delete 或 Backspace 删除概要。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "颜色或宽度面板打开时，按 Esc 关闭面板，并取消尚未保存的宽度预览。"
 				}
 			]
 		},

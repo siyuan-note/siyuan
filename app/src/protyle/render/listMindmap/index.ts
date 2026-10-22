@@ -487,6 +487,16 @@ class ListMindmapController {
                     metadata.nodes[id] = {...metadata.nodes[id], ...patch};
                 });
             }),
+            onNodeWidths: (widths, expected) => this.metadata(metadata => {
+                const nodes = readListMindmap(list).nodes;
+                const current = widths.map(({id}) => ({id, width: metadata.nodes[id]?.width || 0}));
+                if (JSON.stringify(current) !== expected || widths.some(({id, width}) =>
+                    !nodes.has(id) || !Number.isFinite(width) || width < 0)) {
+                    showMessage(window.siyuan.languages.listMindmapStale);
+                    return false;
+                }
+                widths.forEach(({id, width}) => metadata.nodes[id] = {...metadata.nodes[id], width});
+            }),
             onRelationAdd: (from, to) => this.metadata(metadata => {
                 if (from !== to && !metadata.relations.some(relation => relation.from === from && relation.to === to)) {
                     metadata.relations.push({id: Lute.NewNodeID(), from, to, label: ""});

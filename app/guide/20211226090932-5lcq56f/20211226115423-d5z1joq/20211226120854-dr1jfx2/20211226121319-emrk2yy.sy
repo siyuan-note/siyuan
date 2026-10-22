@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261022235541"
+		"updated": "20261023003125"
 	},
 	"Children": [
 		{
@@ -1962,7 +1962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261022235541"
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
@@ -1997,16 +1997,87 @@
 			]
 		},
 		{
-			"ID": "20261022181804-9n8owq8",
+			"ID": "20261023003125-gh1vclp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261022181804-9n8owq8",
-				"updated": "20261022181804"
+				"id": "20261023003125-gh1vclp",
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "選取一個或多個節點後，在浮動樣式列的「寬度」中輸入像素值即可調整節點寬度；清空數值可恢復自動寬度。加寬節點可讓較長的行內公式在同一行顯示。寬度隨文件儲存，支援復原與重做。"
+					"Data": "底部節點選單直接提供刪除、複製、剪下和貼上。貼上會新增子節點，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "保留貼上為同層節點的選項。懸停或點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顏色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可在底欄上方開啟節點樣式及樣式管理面板。不適用的操作會停用。"
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-9n8owq8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-9n8owq8",
+				"updated": "20261023003125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取一個或多個節點後，懸停或點擊底部節點選單的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "寬度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，在底欄上方開啟面板。滑桿以開啟面板時的目前寬度為中心，向左縮窄，向右加寬所選節點。拖動時預覽，放開後儲存為一次可復原的修改，也可輸入精確的像素寬度。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "還原原始寬度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "會還原各節點開啟面板時的寬度，包括原先的自動寬度；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "預設"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "或清空數值輸入框會依內容自動調整。加寬節點可讓較長的行內公式在一行中顯示。寬度隨文件儲存，支援復原和重做。"
 				}
 			]
 		},

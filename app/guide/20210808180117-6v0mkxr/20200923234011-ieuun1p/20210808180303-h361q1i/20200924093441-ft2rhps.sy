@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022235541"
+		"updated": "20261023003049"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261022235541"
+				"updated": "20261023003049"
 			},
 			"Children": [
 				{
@@ -1996,16 +1996,120 @@
 			]
 		},
 		{
-			"ID": "20261022181804-c0rm54w",
+			"ID": "20261023003049-1oqzzuq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261022181804-c0rm54w",
-				"updated": "20261022181804"
+				"id": "20261023003049-1oqzzuq",
+				"updated": "20261023003049"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select one or more nodes and set Width in the floating style bar to adjust their width in pixels. Clear the value to restore automatic sizing. Widen a node to show a long inline formula on one line. The width is saved with the document and supports undo and redo."
+					"Data": "The bottom node menu provides "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cut"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Paste"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " directly. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Paste"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " adds child nodes; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " retains the sibling paste option. Hover over or tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Color"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to open the styles and style management panel above the bar. Unsupported actions are disabled."
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-c0rm54w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-c0rm54w",
+				"updated": "20261023003049"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select one or more nodes and hover over or tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Width"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom node menu. The panel opens above the bar. The slider starts centered on the current width; move left to narrow or right to widen the selected nodes. Dragging previews the result, and releasing saves one undoable change. You can also enter a pixel width. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Restore original widths"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " returns each selected node to its width when this panel was opened, including automatic widths. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or clearing the number field, fits the width to the content. Widening a node can keep a long inline formula on one line. Widths are saved with the document and support undo and redo."
 				}
 			]
 		},

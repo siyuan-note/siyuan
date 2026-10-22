@@ -23,6 +23,7 @@ import {getListMindmapSummarySelection, getListMindmapSummarySnapshot,
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
 import {getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
+import {canCutMindmapBranches} from "./clipboard";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -71,6 +72,7 @@ export interface ListMindmapViewOptions {
     onRedo?: () => void;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
     onNodesStyle?: (ids: string[], patch: Partial<ListMindmapNodeStyle>) => void;
+    onNodeWidths?: (widths: {id: string, width: number}[], expected: string) => Promise<boolean>;
     onRelationAdd?: (from: string, to: string) => void;
     onRelationChange?: (id: string, patch: Partial<ListMindmapRelation>, expected?: string) => void;
     onRelationDelete?: (id: string) => void;
@@ -129,6 +131,12 @@ export class ListMindmapView {
     private readonly canvas: HTMLCanvasElement;
     private readonly toolbar: HTMLDivElement;
     private readonly inspector: HTMLDivElement;
+    private readonly inspectorPopover = createElement("div", "mindmap-view__inspector-popover");
+    private inspectorPanel?: {
+        kind: "color" | "width", ids: string[], anchor: HTMLButtonElement,
+        widths: {id: string, width: number}[], baseWidth: number, slider: number, preview: boolean,
+    };
+    private widthPending = false;
     private readonly zoomLabel: HTMLSpanElement;
     private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
@@ -219,6 +227,9 @@ export class ListMindmapView {
         this.inspector = createElement("div", "mindmap-view__inspector");
         this.inspector.setAttribute("data-prevent-swipe", "true");
         this.inspector.hidden = true;
+        this.inspectorPopover.hidden = true;
+        this.inspectorPopover.setAttribute("role", "group");
+        this.inspectorPopover.setAttribute("data-prevent-swipe", "true");
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.viewport.append(this.canvas, this.world);
         this.tooltip.hidden = true;
@@ -226,7 +237,24 @@ export class ListMindmapView {
         this.colorProbe.setAttribute("aria-hidden", "true");
         this.routeStatus.hidden = true;
         this.routeStatus.setAttribute("role", "status");
-        options.host.append(this.toolbar, this.viewport, this.inspector, this.tooltip, this.colorProbe, this.routeStatus);
+        options.host.append(this.toolbar, this.viewport, this.inspector, this.inspectorPopover,
+            this.tooltip, this.colorProbe, this.routeStatus);
+        this.listen(this.inspector, "scroll", () => this.closeInspectorPanel());
+        this.listen(this.inspectorPopover, "mousedown", (event: MouseEvent) => {
+            // 面板按钮保留输入焦点，恢复和默认操作直接替换未提交的宽度预览。
+            if ((event.target as Element).closest("button")) {
+                event.preventDefault();
+            }
+        });
+        this.listen(this.inspectorPopover, "keydown", (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                const anchor = this.inspectorPanel?.anchor;
+                this.closeInspectorPanel();
+                anchor?.focus({preventScroll: true});
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
         this.selectionBox.hidden = true;
         this.viewport.append(this.selectionBox);
         this.createToolbar();
@@ -330,6 +358,7 @@ export class ListMindmapView {
         this.resizeObserver = new ResizeObserver(() => {
             this.updateToolbarLayout();
             this.refreshLayout();
+            this.positionInspectorPanel();
         });
         this.resizeObserver.observe(this.viewport);
         this.update(this.model);
@@ -362,7 +391,7 @@ export class ListMindmapView {
     private showButtonTooltip = (event: Event) => {
         const button = (event.target as Element).closest<HTMLButtonElement>("button[aria-label]");
         if (!button || button.closest(".mindmap-view") !== this.options.host ||
-            !(this.toolbar.contains(button) || this.inspector.contains(button) ||
+            !(this.toolbar.contains(button) || this.inspector.contains(button) || this.inspectorPopover.contains(button) ||
                 button.classList.contains("mindmap-view__add-child") || button.classList.contains("mindmap-view__fold"))) {
             this.tooltip.hidden = true;
             return;
@@ -407,6 +436,9 @@ export class ListMindmapView {
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (!this.inspectorPopover.contains(target) && !this.inspectorPanel?.anchor.contains(target)) {
+            this.closeInspectorPanel();
+        }
         if (!this.options.host.contains(target)) {
             this.setInteractionActive(false);
         }
@@ -419,7 +451,7 @@ export class ListMindmapView {
         if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle, .mindmap-view__summary-editor")) {
             return;
         }
-        if (this.inspector.contains(target) || this.buttons.get("style")?.contains(target) ||
+        if (this.inspector.contains(target) || this.inspectorPopover.contains(target) || this.buttons.get("style")?.contains(target) ||
             this.buttons.get("relation")?.contains(target) || this.buttons.get("expandLevel")?.contains(target) ||
             this.buttons.get("summary")?.contains(target) || this.buttons.get("multiSelect")?.contains(target) ||
             this.levelSelect?.contains(target)) {
@@ -476,6 +508,7 @@ export class ListMindmapView {
         this.interactionActive = value;
         this.options.host.classList.toggle("mindmap-view--active", value);
         if (!value) {
+            this.closeInspectorPanel();
             const selecting = !!this.relationFrom || this.multiSelect;
             const inspectorVisible = !this.inspector.hidden;
             this.multiSelect = false;
@@ -2036,6 +2069,10 @@ export class ListMindmapView {
     }
 
     private updateSelection() {
+        if (this.inspector.hidden || this.readOnly || this.selectedRelation || this.selectedEdge || this.selectedSummary ||
+            this.inspectorPanel && JSON.stringify(this.inspectorPanel.ids) !== JSON.stringify(this.getSelectedIds())) {
+            this.closeInspectorPanel();
+        }
         if (!this.selectedId) {
             this.selectedIds.clear();
         }
@@ -3137,6 +3174,14 @@ export class ListMindmapView {
     };
 
     private keyDown = (event: KeyboardEvent) => {
+        if (event.key === "Escape" && this.inspectorPanel) {
+            const anchor = this.inspectorPanel.anchor;
+            this.closeInspectorPanel();
+            anchor.focus({preventScroll: true});
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (this.locked) {
             if (event.key === "Escape" && this.fullscreenMarker) {
                 event.preventDefault();
@@ -3334,6 +3379,217 @@ export class ListMindmapView {
         event.stopPropagation();
     };
 
+    private closeInspectorPanel() {
+        const panel = this.inspectorPanel;
+        this.inspectorPanel = undefined;
+        this.inspectorPopover.hidden = true;
+        panel?.anchor.setAttribute("aria-expanded", "false");
+        if (panel?.preview && !this.destroyed) {
+            this.previewNodeWidths(this.nodeWidths(panel.ids));
+        }
+    }
+
+    private nodeWidths(ids: string[]) {
+        return ids.map(id => ({id, width: this.model.metadata.nodes[id]?.width || 0}));
+    }
+
+    private openInspectorPanel(kind: "color" | "width", anchor: HTMLButtonElement) {
+        if (this.readOnly || this.inspector.hidden || anchor.disabled) {
+            return;
+        }
+        if (this.inspectorPanel?.kind !== kind) {
+            this.closeInspectorPanel();
+            const ids = this.getSelectedIds();
+            this.inspectorPanel = {kind, ids, anchor, widths: this.nodeWidths(ids), slider: 0, preview: false,
+                baseWidth: Math.max(32, this.positions.get(this.selectedId)?.width || 32)};
+        }
+        anchor.setAttribute("aria-expanded", "true");
+        this.renderInspectorPanel();
+    }
+
+    private positionInspectorPanel() {
+        if (this.inspectorPopover.hidden || !this.inspectorPanel) {
+            return;
+        }
+        const host = this.options.host.getBoundingClientRect();
+        const anchor = this.inspectorPanel.anchor.getBoundingClientRect();
+        const scaleX = host.width / this.options.host.offsetWidth || 1;
+        const scaleY = host.height / this.options.host.offsetHeight || 1;
+        const bottom = (host.bottom - this.inspector.getBoundingClientRect().top) / scaleY + 4;
+        const left = (anchor.left + anchor.width / 2 - host.left) / scaleX - this.inspectorPopover.offsetWidth / 2;
+        this.inspectorPopover.style.left = `${Math.max(8,
+            Math.min(left, this.options.host.offsetWidth - this.inspectorPopover.offsetWidth - 8))}px`;
+        this.inspectorPopover.style.bottom = `${bottom}px`;
+        this.inspectorPopover.style.maxHeight = `${Math.max(48, this.options.host.offsetHeight - bottom - 8)}px`;
+    }
+
+    private previewNodeWidths(widths: {id: string, width: number}[]) {
+        widths.forEach(({id, width}) => {
+            const element = this.nodeElements.get(id);
+            if (element) {
+                element.style.width = width ? `${Math.max(32, width)}px` : "";
+                element.style.maxWidth = width ? "none" : "";
+            }
+        });
+        this.refreshLayout();
+    }
+
+    private async commitInspectorWidths(widths: {id: string, width: number}[]) {
+        const panel = this.inspectorPanel;
+        if (!panel || this.widthPending || this.readOnly || !this.options.onNodeWidths) {
+            return;
+        }
+        const expected = JSON.stringify(this.nodeWidths(panel.ids));
+        const focus = this.inspectorPopover.contains(document.activeElement) ?
+            document.activeElement.getAttribute("data-width-control") : undefined;
+        this.widthPending = true;
+        try {
+            await this.options.onNodeWidths(widths, expected);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.widthPending = false;
+            if (!this.destroyed) {
+                panel.preview = false;
+                this.previewNodeWidths(this.nodeWidths(panel.ids));
+                if (this.inspectorPanel === panel) {
+                    this.renderInspector();
+                    if (focus) {
+                        this.inspectorPopover.querySelector<HTMLInputElement>(`[data-width-control="${focus}"]`)?.focus({preventScroll: true});
+                    }
+                }
+            }
+        }
+    }
+
+    private renderInspectorPanel() {
+        const panel = this.inspectorPanel;
+        if (!panel) {
+            return;
+        }
+        const focus = this.inspectorPopover.contains(document.activeElement) ?
+            document.activeElement.getAttribute("data-width-control") : undefined;
+        this.inspectorPopover.replaceChildren();
+        this.inspectorPopover.hidden = false;
+        this.inspectorPopover.setAttribute("aria-label", this.label(panel.kind));
+        const current = () => this.inspectorPanel === panel && !this.readOnly && !this.inspector.hidden &&
+            JSON.stringify(panel.ids) === JSON.stringify(this.getSelectedIds());
+        const button = (key: string, icon: string, action: () => void) => {
+            const control = this.makeButton(key, icon, () => { if (current()) { action(); } });
+            control.className = "color__square";
+            control.querySelector("svg")?.classList.add("svg--mid");
+            return control;
+        };
+        if (panel.kind === "color") {
+            const change = (patch: Partial<ListMindmapNodeStyle>) => {
+                if (current()) {
+                    if (panel.ids.length > 1) {
+                        this.options.onNodesStyle?.(panel.ids, patch);
+                    } else {
+                        this.options.onNodeStyle?.(panel.ids[0], patch);
+                    }
+                }
+            };
+            const palette = createElement("div", "mindmap-view__palette");
+            palette.setAttribute("role", "group");
+            palette.setAttribute("aria-label", this.label("color"));
+            [{label: this.label("default"), color: "", backgroundColor: "", preview: undefined},
+                ...(this.options.nodeColors?.() || [])].forEach(item => {
+                const selected = panel.ids.every(id => {
+                    const style = this.model.metadata.nodes[id] || {};
+                    return (style.textColor || "") === item.color && (style.backgroundColor || "") === item.backgroundColor;
+                });
+                const control = button("color", "", () => change({textColor: item.color, backgroundColor: item.backgroundColor}));
+                control.textContent = "A";
+                control.setAttribute("aria-label", item.label);
+                control.setAttribute("aria-pressed", String(selected));
+                control.classList.toggle("color__square--current", selected);
+                control.style.color = item.preview?.color ?? item.color;
+                control.style.backgroundColor = item.preview?.backgroundColor ?? item.backgroundColor;
+                palette.append(control);
+            });
+            if (this.options.onManageNodeColors) {
+                palette.append(button("manageColors", "iconSettings", this.options.onManageNodeColors));
+            }
+            this.inspectorPopover.append(palette);
+            if (panel.ids.length > 1) {
+                const lines = createElement("div", "mindmap-view__palette");
+                lines.setAttribute("role", "group");
+                lines.setAttribute("aria-label", this.label("listMindmapLineColor"));
+                [{label: this.label("default"), value: ""}, ...(this.options.colors?.() || [])].forEach(item => {
+                    const control = button("color", "", () => change({lineColor: item.value}));
+                    control.setAttribute("aria-label", item.label);
+                    control.style.backgroundColor = item.value || "var(--b3-theme-background)";
+                    lines.append(control);
+                });
+                if (this.options.onManageLineColors) {
+                    lines.append(button("manageColors", "iconSettings", this.options.onManageLineColors));
+                }
+                this.inspectorPopover.append(lines);
+            }
+        } else {
+            const row = createElement("div", "mindmap-view__node-width");
+            const slider = createElement("input", "b3-slider");
+            slider.type = "range";
+            slider.min = "-100";
+            slider.max = "100";
+            slider.step = "1";
+            slider.value = String(panel.slider);
+            slider.setAttribute("aria-label", this.label("width"));
+            slider.dataset.widthControl = "slider";
+            const width = createElement("input", "b3-text-field");
+            width.type = "number";
+            width.min = "32";
+            width.step = "1";
+            width.placeholder = this.label("default");
+            width.setAttribute("aria-label", this.label("width"));
+            width.dataset.widthControl = "number";
+            const widths = this.nodeWidths(panel.ids);
+            width.value = widths[0].width && widths.every(item => item.width === widths[0].width) ? String(widths[0].width) : "";
+            const preview = () => {
+                if (current() && !this.widthPending && width.validity.valid) {
+                    panel.preview = true;
+                    this.previewNodeWidths(panel.ids.map(id => ({id, width: width.valueAsNumber || 0})));
+                }
+            };
+            slider.addEventListener("input", () => {
+                panel.slider = slider.valueAsNumber;
+                width.value = String(Math.max(32, Math.round(panel.baseWidth * Math.pow(2, panel.slider / 50))));
+                preview();
+            });
+            width.addEventListener("input", () => {
+                if (width.valueAsNumber >= 32) {
+                    panel.slider = Math.max(-100, Math.min(100, 50 * Math.log2(width.valueAsNumber / panel.baseWidth)));
+                    slider.value = String(panel.slider);
+                }
+                preview();
+            });
+            const save = () => {
+                if (current() && width.validity.valid) {
+                    this.finishThen(() => void this.commitInspectorWidths(panel.ids.map(id => ({id, width: width.valueAsNumber || 0}))));
+                }
+            };
+            slider.addEventListener("change", save);
+            width.addEventListener("change", save);
+            const restore = button("listMindmapRestoreWidth", "iconRefresh", () => {
+                panel.slider = 0;
+                void this.commitInspectorWidths(panel.widths);
+            });
+            const automatic = button("default", "iconFocus", () => {
+                panel.slider = 0;
+                void this.commitInspectorWidths(panel.ids.map(id => ({id, width: 0})));
+            });
+            [slider, width, restore, automatic].forEach(control => control.disabled = this.widthPending);
+            row.append(slider, width, restore, automatic);
+            this.inspectorPopover.append(row);
+            if (focus) {
+                this.inspectorPopover.querySelector<HTMLInputElement>(`[data-width-control="${focus}"]`)?.focus({preventScroll: true});
+            }
+        }
+        this.positionInspectorPanel();
+        requestAnimationFrame(() => this.positionInspectorPanel());
+    }
+
     private renderInspector() {
         if (this.inspector.hidden || this.readOnly) {
             return;
@@ -3421,6 +3677,7 @@ export class ListMindmapView {
         const id = this.selectedId;
         const ids = this.getSelectedIds();
         const multiple = ids.length > 1;
+        const sameSelection = () => !this.readOnly && JSON.stringify(ids) === JSON.stringify(this.getSelectedIds());
         const appendMore = () => {
             if (this.options.onClipboardMenu) {
                 const more = squareButton("more", "iconMore", () => this.options.onClipboardMenu(more, ids));
@@ -3432,61 +3689,48 @@ export class ListMindmapView {
         const remove = squareButton("delete", "iconTrashcan", () => this.deleteSelection());
         remove.disabled = ids.includes(this.model.root.id) ||
             this.model.root.virtual && this.model.root.children.every(node => ids.includes(node.id));
-        this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"), remove);
-        const change = (patch: Partial<ListMindmapNodeStyle>) => multiple ? this.options.onNodesStyle?.(ids, patch) :
-            this.options.onNodeStyle?.(id, patch);
-        const nodePalette = createElement("div", "mindmap-view__palette");
-        nodePalette.setAttribute("role", "group");
-        nodePalette.setAttribute("aria-label", this.label("color"));
-        const nodeColors: ReturnType<NonNullable<ListMindmapViewOptions["nodeColors"]>> = [
-            {label: this.label("default"), color: "", backgroundColor: ""}, ...(this.options.nodeColors?.() || []),
-        ];
-        nodeColors.forEach(item => {
-            const button = this.makeButton("color", "iconFont", () => change({
-                textColor: item.color, backgroundColor: item.backgroundColor,
-            }));
-            const selected = ids.every(nodeID => {
-                const nodeStyle = this.model.metadata.nodes[nodeID] || {};
-                return (nodeStyle.textColor || "") === item.color && (nodeStyle.backgroundColor || "") === item.backgroundColor;
+        this.inspector.append(remove);
+        if (this.options.onCopy) {
+            const copy = squareButton("copy", "iconCopy", () => {
+                if (sameSelection()) {
+                    this.options.onCopy(ids, false);
+                }
             });
-            button.className = "color__square" + (selected ? " color__square--current" : "");
-            button.textContent = "A";
-            button.setAttribute("aria-label", item.label);
-            button.setAttribute("aria-pressed", String(selected));
-            button.style.color = item.preview?.color ?? item.color;
-            button.style.backgroundColor = item.preview?.backgroundColor ?? item.backgroundColor;
-            nodePalette.append(button);
-        });
-        if (this.options.onManageNodeColors) {
-            const manage = squareButton("manageColors", "iconSettings", this.options.onManageNodeColors);
-            nodePalette.append(manage);
+            const cut = squareButton("cut", "iconCut", () => {
+                if (sameSelection() && canCutMindmapBranches(this.model, ids)) {
+                    this.options.onCopy(ids, true);
+                }
+            });
+            cut.disabled = !canCutMindmapBranches(this.model, ids);
+            this.inspector.append(copy, cut);
         }
-        this.inspector.append(nodePalette);
-        const widthLabel = createElement("label", "mindmap-view__node-width");
-        widthLabel.append(this.label("width"));
-        const width = createElement("input", "b3-text-field");
-        width.type = "number";
-        width.min = "32";
-        width.step = "1";
-        width.placeholder = this.label("default");
-        width.setAttribute("aria-label", this.label("width"));
-        const selectedWidth = this.model.metadata.nodes[id]?.width || 0;
-        width.value = ids.every(nodeID => (this.model.metadata.nodes[nodeID]?.width || 0) === selectedWidth) &&
-            selectedWidth ? String(selectedWidth) : "";
-        width.addEventListener("change", () => {
-            if (!width.validity.valid) {
-                return;
+        if (this.options.onPaste) {
+            const paste = squareButton("paste", "iconPaste", () => {
+                if (sameSelection() && ids.length === 1) {
+                    this.options.onPaste(id, "child");
+                }
+            });
+            paste.disabled = multiple;
+            paste.dataset.tooltip = this.label("mindmapPasteChild");
+            this.inspector.append(paste);
+        }
+        this.inspector.append(this.buttons.get("relation"), this.buttons.get("summary"));
+        for (const [kind, key, icon] of [["color", "color", "iconFont"], ["width", "width", "iconWidth"]] as const) {
+            const button = squareButton(key, icon, () => this.openInspectorPanel(kind, button));
+            button.setAttribute("aria-expanded", String(this.inspectorPanel?.kind === kind));
+            button.disabled = kind === "width" && (!this.options.onNodeWidths || this.widthPending);
+            button.addEventListener("pointerenter", event => {
+                if (event.pointerType === "mouse" && !button.disabled) {
+                    this.openInspectorPanel(kind, button);
+                }
+            });
+            this.inspector.append(button);
+            if (this.inspectorPanel?.kind === kind) {
+                this.inspectorPanel.anchor = button;
+                this.renderInspectorPanel();
             }
-            if (width.value === "") {
-                change({width: 0});
-            } else if (Number.isFinite(width.valueAsNumber)) {
-                change({width: width.valueAsNumber});
-            }
-        });
-        widthLabel.append(width);
-        this.inspector.append(widthLabel);
+        }
         if (multiple) {
-            color(undefined, value => change({lineColor: value}), "listMindmapLineColor");
             appendMore();
             return;
         }

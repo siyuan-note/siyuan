@@ -8,7 +8,7 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "dismissControls", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
+const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "dismissControls", "closeInspectorPanel", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
 const methods = view.members.filter(item => item.name && names.includes(item.name.getText(source)));
 assert.equal(methods.length, names.length);
 const compiled = transpileModule(`class View { ${methods.map(item => item.getText(source)).join("\n")} }
@@ -26,6 +26,7 @@ const setup = () => {
     const target = Object.assign(new context.View(), {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
         selectedId: "new", tooltip: {}, inspector: {hidden: true},
+        inspectorPopover: {hidden: true, contains: () => false},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         world: {querySelectorAll: (): HTMLElement[] => []},
         nodeElements: new Map(), summaryElements: new Map(), offsetX: 0, offsetY: 0,

@@ -116,6 +116,7 @@ import {openBy, openFileById} from "../../editor/util";
 /// #endif
 import {alignImgCenter, alignImgLeft, commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {bindMenuKeydown} from "../../menus/Menu";
 import {foldBlocksRecursively, foldHeadingGroup, getFoldBlock, setFold} from "../util/blockFold";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -509,6 +510,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             (["←", "↑", "→", "↓"].includes(Constants.KEYCODELIST[event.keyCode]) || Constants.KEYCODELIST[event.keyCode] === "↩") &&
             !event.altKey && !event.shiftKey && isNotCtrl(event)) {
             event.preventDefault();
+            event.stopPropagation();
+            bindMenuKeydown(event);
             return;
         } else if (!["Escape", "Control", "Shift", "Alt", "Meta"].includes(event.key)) {
             window.siyuan.menus.menu.remove();

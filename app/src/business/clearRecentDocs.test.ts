@@ -17,7 +17,7 @@ const harness = () => {
     const requests: Array<{resolve: (response: {code: number}) => void, reject: (error: Error) => void}> = [];
     const errors: string[] = [];
     const siyuan = {config: {readonly: false}, isPublish: false,
-        languages: {clearRecentDocs: "Clear recent history", confirmClearRecentDocs: "Confirm clear"}};
+        languages: {clear: "Clear", clearRecentDocs: "Clear recent history", confirmClearRecentDocs: "Confirm clear"}};
     const exports: any = {};
     runInNewContext(transpileModule(readFileSync("src/business/clearRecentDocs.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -32,7 +32,7 @@ const harness = () => {
         "../util/escape": {escapeHtmlTextAndAttr: (text: string) => text},
     })});
     const update = exports.bindClearRecentDocs(button, () => sortBy, () => active, () => cleared++);
-    return {button, hidden, confirmations, requests, errors, siyuan, update, click: () => click(),
+    return {exports, button, hidden, confirmations, requests, errors, siyuan, update, click: () => click(),
         sort: (value: string) => { sortBy = value; update(); }, deactivate: () => { active = false; }, cleared: () => cleared};
 };
 
@@ -73,16 +73,34 @@ test("failed clears retain records and allow retry", async () => {
     }
 });
 
+test("footer button carries its own label instead of relying on a hover tip", () => {
+    const h = harness();
+    const textButton = h.exports.clearRecentDocsTextButtonHTML();
+    assert.match(textButton, /data-action="clear-recent-docs"/);
+    assert.match(textButton, /Clear<\/button>/);
+    // 中性色按钮，避免底部操作在列表内容之上产生主色强调
+    assert.match(textButton, /b3-button--cancel/);
+    assert.doesNotMatch(textButton, /b3-button--text/);
+    assert.doesNotMatch(textButton, /b3-tooltips/);
+    const iconButton = h.exports.clearRecentDocsButtonHTML();
+    assert.match(iconButton, /b3-tooltips/);
+    assert.match(iconButton, /aria-label="Clear recent history"/);
+});
+
 test("clear is available only in writable history views", () => {
     const h = harness();
     for (const mode of ["created", "updated"]) {
         h.sort(mode);
-        assert.equal(h.hidden.has("fn__none"), true);
+        // 不可清空的排序保留按钮占位，只禁用，避免切换排序时推挤相邻控件
+        assert.equal(h.hidden.has("fn__none"), false);
+        assert.equal(h.button.disabled, true);
         h.click();
     }
+    assert.equal(h.confirmations.length, 0);
     for (const mode of ["viewedAt", "openAt", "closedAt"]) {
         h.sort(mode);
         assert.equal(h.hidden.has("fn__none"), false);
+        assert.equal(h.button.disabled, false);
     }
     h.siyuan.config.readonly = true;
     h.update();

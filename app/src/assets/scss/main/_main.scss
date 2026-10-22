@@ -515,9 +515,19 @@ body.body--harmony {
     border-left: 1px solid var(--b3-theme-surface-lighter);
   }
 
-  &__path {
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 4px 8px;
     border-top: 1px solid var(--b3-theme-surface-lighter);
+    min-height: 36px;
+    box-sizing: border-box;
+  }
+
+  &__path {
+    flex: 1;
+    min-width: 0;
     color: var(--b3-theme-on-surface);
     font-size: 12px;
     white-space: nowrap;

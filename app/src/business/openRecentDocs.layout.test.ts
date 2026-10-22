@@ -84,7 +84,7 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
                             const rect = container.getBoundingClientRect();
                             check.ok(Math.abs(rect.width - width) <= 2, `${direction}: requested ${width}, got ${rect.width}`);
                             const label = `${theme}/${lang.recentDocs}/${fontSize}/${isDetached}/${direction}/${width}`;
-                            for (const control of root.querySelectorAll<HTMLElement>(".b3-dialog__header input, .b3-dialog__header select, .b3-dialog__header button")) {
+                            for (const control of root.querySelectorAll<HTMLElement>(".b3-dialog__header input, .b3-dialog__header select, .switch-doc__footer button")) {
                                 const controlRect = control.getBoundingClientRect();
                                 check.ok(controlRect.width > 0 && controlRect.left >= rect.left && controlRect.right <= rect.right &&
                                     controlRect.top >= rect.top && controlRect.bottom <= rect.bottom, label);

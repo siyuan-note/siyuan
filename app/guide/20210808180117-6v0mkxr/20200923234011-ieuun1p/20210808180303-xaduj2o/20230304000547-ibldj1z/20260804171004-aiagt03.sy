@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261021001816"
+		"updated": "20261022182404"
 	},
 	"Children": [
 		{
@@ -496,7 +496,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20260816114944"
+				"updated": "20261022182404"
 			},
 			"Children": [
 				{
@@ -547,6 +547,79 @@
 				{
 					"Type": "NodeText",
 					"Data": "While the agent is running, select the stop button to interrupt the current task. Results are generally more reliable when the goal, scope, and destination are explicit."
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-71cve53",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-71cve53",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The input grows automatically as you add text and images, then scrolls when it reaches its height limit. Drag the small handle at the top upward or downward to adjust that limit; touch screens support the same gesture. Double-click the handle to restore the automatic limit. Space above and below the content makes the first and last lines easier to inspect."
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-jbp15g8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-jbp15g8",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "With the height handle focused, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to increase or decrease the limit, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for the minimum, or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for the maximum available height. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " during a drag to cancel it."
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261021001816"
+		"updated": "20261022182404"
 	},
 	"Children": [
 		{
@@ -496,7 +496,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20260820190627"
+				"updated": "20261022182404"
 			},
 			"Children": [
 				{
@@ -547,6 +547,79 @@
 				{
 					"Type": "NodeText",
 					"Data": "智能体运行时可以点击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-g6vs2ax",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-g6vs2ax",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入框随文字和图片自动增高，达到高度上限后滚动。向上或向下拖动输入框顶部的小把手可调整上限，触摸屏也支持拖动；双击把手可恢复自动上限。内容首尾保留滚动余量，便于完整查看首行和末行。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-hm91uco",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-hm91uco",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高度把手获得键盘焦点后，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 增大或减小上限，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调至最小高度，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调至当前可用的最大高度；拖动过程中按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可取消调整。"
 				}
 			]
 		},

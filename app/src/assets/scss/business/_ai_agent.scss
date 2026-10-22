@@ -690,11 +690,30 @@
   flex-shrink: 0;
 }
 
+.agent-chat__input-resize {
+  position: relative;
+  height: 0;
+
+  .protyle-block-resize[data-resize-axis="height"] {
+    top: -16px;
+    bottom: auto;
+    opacity: 1;
+  }
+}
+
 .agent-chat__composer-host {
   min-height: 40px;
-  max-height: 120px;
-  overflow-y: auto;
+  max-height: min(240px, 40vh);
+  overflow: hidden;
   cursor: text;
+
+  .protyle-content {
+    min-height: 0;
+    flex: 0 1 auto;
+    padding: 8px 0 24px;
+    scroll-padding-block: 8px 24px;
+    box-sizing: border-box;
+  }
 
   .protyle-wysiwyg .img {
     & > span:nth-child(2) {
@@ -1308,10 +1327,6 @@
 
   .agent-chat__input-area {
     margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(env(safe-area-inset-bottom) + 8px)) max(8px, env(safe-area-inset-left));
-  }
-
-  .agent-chat__composer-host {
-    max-height: min(120px, 30vh);
   }
 
   .agent-chat__button-options {

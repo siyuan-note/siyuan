@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "행 높이 자동 맞춤",
 	"convertCurrentList": "현재 목록을 ${name}(으)로 변환",
 	"cancelCurrentList": "현재 목록 해제",
 	"createList": "${name} 만들기",

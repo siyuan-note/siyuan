@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Sesuaikan tinggi baris secara otomatis",
 	"convertCurrentList": "Ubah daftar saat ini menjadi ${name}",
 	"cancelCurrentList": "Hapus format daftar saat ini",
 	"createList": "Buat ${name}",

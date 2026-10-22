@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261022181804"
+		"updated": "20261022190543"
 	},
 	"Children": [
 		{
@@ -4382,7 +4382,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-1bq55o9",
-				"updated": "20261008221006"
+				"updated": "20261022190543"
 			},
 			"Children": [
 				{
@@ -4475,6 +4475,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "内部段落和列表项没有独立块 ID，支持引用已有块。图片及原有行级格式可以保留。不支持嵌套表格、数据库、超级块、页签、提示块、查询嵌入、分隔线、可执行图表、音视频、挂件、HTML 和自定义块。粘贴内容包含不支持的块时，会拒绝整次粘贴并提示不支持的类型，原有内容不变。标准 Markdown 导出为可读的行级内容，HTML、PDF 和 Word 导出保留富文本排版。"
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-t8zgv8r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-t8zgv8r",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖动行下边界可调整行高；移动端先轻点水平单元格分隔线，再拖动出现的手柄。设置的行高是最小高度，内容较多时仍会自动撑高。选中行后，在菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自适应行高"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢复自动高度。行高随文档保存，标准 Markdown 导出不保证保留行高。"
 				}
 			]
 		},

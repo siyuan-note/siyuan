@@ -54,6 +54,7 @@ import {TableTouchControl, type ITableTouchState} from "./tableTouch";
 import {finishTableCellEditing} from "./tableCellRichContext";
 import {buildBlockDOMClipboardRichData} from "./blockDOMClipboard";
 import {showMessage} from "../../dialog/message";
+import {getTableRowBoundary, getTableRowOpeningHTML, startTableRowResize} from "./tableRowHeight";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -368,6 +369,9 @@ export class TableControl {
     private touch: TableTouchControl;
     private dragCleanup?: () => void;
     private columnResizeCleanup?: () => void;
+    private rowResizeCleanup?: () => void;
+    private rowResizeHandle: HTMLButtonElement;
+    private rowBoundary?: {cell: HTMLTableCellElement, row: HTMLTableRowElement};
 
     constructor(protyle: IProtyle, wysiwygElement: HTMLElement) {
         this.protyle = protyle;
@@ -403,6 +407,18 @@ export class TableControl {
         this.addBothButton = this.element.querySelector('[data-type="add-both"]');
         this.resizeLabel = this.element.querySelector(".protyle-table-control__size");
         this.dropIndicator = this.element.querySelector(".protyle-table-control__drop");
+        this.rowResizeHandle = document.createElement("button");
+        this.rowResizeHandle.type = "button";
+        this.rowResizeHandle.className = "protyle-table-control__handle protyle-table-control__height fn__none";
+        this.rowResizeHandle.setAttribute("aria-label", window.siyuan.languages.height);
+        this.element.append(this.rowResizeHandle);
+        this.rowResizeHandle.addEventListener("pointerdown", event => {
+            if (this.rowBoundary && event.button === 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.startRowResize(event, this.rowBoundary.cell, this.rowBoundary.row);
+            }
+        });
         protyle.element.append(this.element);
         this.bindEvents();
         if (isMobile()) {
@@ -436,6 +452,7 @@ export class TableControl {
                     }
                 },
                 width: (event, cell, column) => this.startColumnResize(event, cell, column),
+                height: (event, cell, row) => this.startRowResize(event, cell, row),
                 menu: () => this.openMenu(0, 0),
                 selectAll: () => {
                     const state = this.getTouchState();
@@ -499,6 +516,7 @@ export class TableControl {
     }
 
     public destroy() {
+        this.rowResizeCleanup?.();
         this.touch?.destroy();
         this.dragCleanup?.();
         this.columnResizeCleanup?.();
@@ -514,6 +532,8 @@ export class TableControl {
     }
 
     public clear() {
+        this.rowResizeCleanup?.();
+        this.rowBoundary = undefined;
         this.touch?.reset();
         this.dragCleanup?.();
         this.columnResizeCleanup?.();
@@ -590,6 +610,25 @@ export class TableControl {
                 indexes: this.selection.indexes,
                 rectangle: this.isRectangle(),
             } : undefined};
+    }
+
+    private startRowResize(event: PointerEvent, cell: HTMLTableCellElement, row: HTMLTableRowElement) {
+        this.rowResizeCleanup?.();
+        this.columnResizeCleanup?.();
+        this.rowResizeCleanup = startTableRowResize(this.protyle, cell, row, event, (height, x, y) => {
+            this.resizeLabel.textContent = `${height}px`;
+            this.setPosition(this.resizeLabel, x + 12, y + 12);
+            this.resizeLabel.classList.remove("fn__none");
+            this.scheduleRender();
+        }, () => {
+            this.rowResizeCleanup = undefined;
+            this.rowBoundary = undefined;
+            this.resizeLabel.classList.add("fn__none");
+            this.scheduleRender();
+        });
+        if (this.rowResizeCleanup && this.touch) {
+            this.blurTouchEditor();
+        }
     }
 
     private startColumnResize(event: PointerEvent, cell: HTMLTableCellElement, index: number) {
@@ -726,6 +765,10 @@ export class TableControl {
         // 控件容器位于事件冒泡路径上，在这里兜底执行相同的边缘检测
         this.element.addEventListener("pointermove", event => this.handleTablePointerMove(event, true), {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
+            if (!this.rowResizeCleanup && !this.element.contains(event.relatedTarget as Node)) {
+                this.rowBoundary = undefined;
+                this.rowResizeHandle.classList.add("fn__none");
+            }
             if (this.dragState || this.resizeState || this.element.contains(event.relatedTarget as Node)) {
                 return;
             }
@@ -903,6 +946,10 @@ export class TableControl {
             if (this.dragState || this.wysiwygElement.contains(event.relatedTarget as Node)) {
                 return;
             }
+            if (!this.rowResizeCleanup) {
+                this.rowBoundary = undefined;
+                this.rowResizeHandle.classList.add("fn__none");
+            }
             this.hoverCell = undefined;
             this.hoverType = undefined;
             this.scheduleRender();
@@ -980,6 +1027,12 @@ export class TableControl {
         const eventCell = getCell(event.target);
         // 内嵌编辑器只处理自身表格，避免将外层单元格识别为自己的内容。
         const targetCell = eventCell && this.wysiwygElement.contains(eventCell) ? eventCell : undefined;
+        if (!this.rowResizeCleanup && !fromControl) {
+            const row = targetCell && !this.protyle.disabled && getTableNode(targetCell) ?
+                getTableRowBoundary(targetCell, event.clientX, event.clientY, 4) : undefined;
+            this.rowBoundary = row ? {cell: targetCell, row} : undefined;
+            this.renderRowBoundary();
+        }
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
         const edgeHover = !targetCell || (targetViewportRect &&
@@ -1592,8 +1645,26 @@ export class TableControl {
         this.pinnedTableActions = actions;
     }
 
+    private renderRowBoundary() {
+        const boundary = this.rowBoundary;
+        this.rowResizeHandle.classList.add("fn__none");
+        if (this.touch || this.protyle.disabled || !boundary?.row.isConnected || this.dragState || this.resizeState) {
+            return;
+        }
+        const table = boundary.cell.closest("table");
+        const viewport = this.getTableGridViewportRect(table);
+        const rect = boundary.row.getBoundingClientRect();
+        if (rect.bottom <= viewport.top || rect.bottom > viewport.bottom + 1 || viewport.right <= viewport.left) {
+            return;
+        }
+        this.setPosition(this.rowResizeHandle, (viewport.left + viewport.right) / 2, rect.bottom);
+        this.rowResizeHandle.style.width = `${viewport.right - viewport.left}px`;
+        this.rowResizeHandle.classList.remove("fn__none");
+    }
+
     private render() {
         this.renderPinnedTableFrames();
+        this.renderRowBoundary();
         this.touch?.render();
         if (this.resizeState?.dragging && this.resizeState.table.isConnected) {
             this.renderResize();
@@ -1612,7 +1683,7 @@ export class TableControl {
             item.classList.add("fn__none");
             item.classList.remove("protyle-table-control__add--active");
         });
-        if (!this.columnResizeCleanup) {
+        if (!this.columnResizeCleanup && !this.rowResizeCleanup) {
             this.resizeLabel.classList.add("fn__none");
         }
         if (visible && !this.touch) {
@@ -1878,6 +1949,28 @@ export class TableControl {
                                 disabled: columns.length === 0 || columns.every(column =>
                                     isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
                                 click: () => this.setSelectedColumnWidth(TABLE_DEFAULT_COLUMN_WIDTH),
+                            }).element);
+                        } else {
+                            const node = this.selection.node;
+                            const rows = Array.from(this.selection.indexes).map(index => this.selection.table.rows[index]);
+                            menu.append(new MenuItem({
+                                id: "autoFitRowHeight",
+                                label: window.siyuan.languages.autoFitRowHeight,
+                                disabled: rows.every(row => !row.style.height),
+                                click: () => {
+                                    if (this.protyle.disabled || !node.isConnected || rows.some(row => !row.isConnected)) {
+                                        return;
+                                    }
+                                    const oldHTML = node.outerHTML;
+                                    rows.forEach(row => {
+                                        row.style.removeProperty("height");
+                                        if (!row.getAttribute("style")) {
+                                            row.removeAttribute("style");
+                                        }
+                                    });
+                                    updateTransaction(this.protyle, node, oldHTML);
+                                    this.scheduleRender();
+                                },
                             }).element);
                         }
                         menu.append(new MenuItem({type: "separator"}).element);
@@ -3172,7 +3265,7 @@ export class TableControl {
                 html += `<${nextSection}>`;
                 section = nextSection;
             }
-            html += "<tr>";
+            html += getTableRowOpeningHTML(selection.table.rows[rows[row]]);
             for (let column = 0; column < columns.length; column++) {
                 const item = outputGrid[row][column];
                 const tag = nextSection === "thead" ? "th" : "td";

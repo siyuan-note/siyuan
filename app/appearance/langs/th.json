@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "ปรับความสูงของแถวโดยอัตโนมัติ",
 	"convertCurrentList": "แปลงรายการปัจจุบันเป็น ${name}",
 	"cancelCurrentList": "ยกเลิกรูปแบบรายการปัจจุบัน",
 	"createList": "สร้าง${name}",

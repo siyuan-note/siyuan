@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "自适应行高",
 	"convertCurrentList": "将当前列表转换为${name}",
 	"cancelCurrentList": "取消当前列表",
 	"createList": "创建${name}",

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022181804"
+		"updated": "20261022190543"
 	},
 	"Children": [
 		{
@@ -4390,7 +4390,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-qr9enpx",
-				"updated": "20261008221006"
+				"updated": "20261022190543"
 			},
 			"Children": [
 				{
@@ -4483,6 +4483,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and existing inline formatting are supported. Nested tables, databases, super blocks, tabs, callouts, query embeds, thematic breaks, executable diagrams, audio, video, widgets, HTML, and custom blocks are not supported. If pasted content contains an unsupported block, the entire paste is rejected with a message listing the unsupported types; existing content stays unchanged. Standard Markdown exports readable inline content, while HTML, PDF, and Word preserve rich text layout."
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-c7n71wx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-c7n71wx",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the lower edge of a row to adjust its height. On mobile, tap a horizontal cell boundary first, then drag the handle. The height is a minimum: content can still expand the row. Select the row and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Auto-fit row height"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from its menu to restore automatic height. Row heights are saved with the document; standard Markdown export does not guarantee that they are retained."
 				}
 			]
 		},

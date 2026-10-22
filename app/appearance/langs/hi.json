@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "पंक्ति की ऊँचाई अपने आप समायोजित करें",
 	"convertCurrentList": "वर्तमान सूची को ${name} में बदलें",
 	"cancelCurrentList": "वर्तमान सूची का प्रारूप हटाएँ",
 	"createList": "${name} बनाएँ",

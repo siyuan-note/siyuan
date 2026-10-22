@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "התאמה אוטומטית של גובה השורה",
 	"convertCurrentList": "המרת הרשימה הנוכחית ל־${name}",
 	"cancelCurrentList": "ביטול הרשימה הנוכחית",
 	"createList": "יצירת ${name}",

@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022181804"
+		"updated": "20261022190543"
 	},
 	"Children": [
 		{
@@ -4546,7 +4546,7 @@
 			"Properties": {
 				"ID": "20240530101000-grqaq7u",
 				"id": "20240530101000-hen4g1y",
-				"updated": "20261008221006"
+				"updated": "20261022190543"
 			},
 			"Children": [
 				{
@@ -4639,6 +4639,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "内部の段落とリスト項目に独立したブロック ID はありません。既存のブロックへの参照、画像、既存のインライン書式に対応しています。入れ子のテーブル、データベース、スーパーブロック、タブ、コールアウト、クエリ埋め込み、区切り線、実行可能な図表、音声、動画、ウィジェット、HTML、カスタムブロックには対応していません。貼り付ける内容に未対応のブロックが含まれる場合は、貼り付け全体を拒否して未対応の種類を通知し、既存の内容を維持します。標準 Markdown では読みやすいインライン内容としてエクスポートされ、HTML、PDF、Word ではリッチテキストのレイアウトが保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-t2a8r2z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-t2a8r2z",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行の下端をドラッグすると高さを調整できます。モバイルでは、セルの水平境界をタップしてから、表示されたハンドルをドラッグします。設定値は最小の高さであり、内容が増えると行は自動的に広がります。行を選択し、メニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行の高さを自動調整"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと自動の高さに戻ります。行の高さは文書とともに保存されますが、標準 Markdown へのエクスポートでは保持されるとは限りません。"
 				}
 			]
 		},

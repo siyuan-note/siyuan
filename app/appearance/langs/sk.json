@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Automaticky prispôsobiť výšku riadka",
 	"convertCurrentList": "Zmeniť aktuálny zoznam na: ${name}",
 	"cancelCurrentList": "Zrušiť formát aktuálneho zoznamu",
 	"createList": "Vytvoriť: ${name}",

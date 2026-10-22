@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Automatycznie dopasuj wysokość wiersza",
 	"convertCurrentList": "Przekształć bieżącą listę w: ${name}",
 	"cancelCurrentList": "Usuń format bieżącej listy",
 	"createList": "Utwórz: ${name}",

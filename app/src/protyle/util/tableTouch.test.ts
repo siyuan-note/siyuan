@@ -129,6 +129,7 @@ const browserCases = async (sources: Record<string, string>) => {
     const {TableControl} = load("src/protyle/util/tableControl.ts") as typeof import("./tableControl");
     const context = load("src/protyle/util/tableCellRichContext.ts") as typeof import("./tableCellRichContext");
     const virtual = load("src/protyle/util/tableVirtualizationDOM.ts") as typeof import("./tableVirtualizationDOM");
+    const rowHeight = load("src/protyle/util/tableRowHeight.ts") as typeof import("./tableRowHeight");
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const frames = async (count: number) => {
         for (let frame = 0; frame < count; frame++) {
@@ -871,6 +872,106 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.table.rows[3].textContent, "A1A2A3", "desktop row dragging retains its existing behavior");
         f.dispose();
     }
+    for (const touchMode of [true, false]) {
+        mobile = touchMode;
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const row = f.table.rows[1];
+        row.style.backgroundColor = "red";
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.bottom;
+        if (touchMode) {
+            cell.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true, clientX: x, clientY: y}));
+            f.render();
+        } else {
+            pointer(cell, "pointermove", x, y);
+            f.render();
+        }
+        const handle = f.touch(touchMode ? '[data-action="height"]' : ".protyle-table-control__height");
+        check.ok(handle && !handle.classList.contains("fn__none"), "a horizontal boundary exposes the row height handle");
+        if (!touchMode) {
+            handle.parentElement.dispatchEvent(new PointerEvent("pointerleave", {relatedTarget: document.body}));
+            check.ok(handle.classList.contains("fn__none"), "leaving the controls hides the row divider");
+            pointer(cell, "pointermove", x, y);
+        }
+        const before = transactions.length;
+        const oldHeight = row.getBoundingClientRect().height;
+        pointer(handle, "pointerdown", x, y, 71);
+        pointer(document, "pointermove", x, y + 40, 72);
+        check.equal(row.style.height, "", "another pointer cannot resize the row");
+        pointer(document, "pointermove", x, y + 40, 71);
+        check.equal(row.style.height, `${Math.round(oldHeight + 40)}px`);
+        check.equal(transactions.length, before, "height preview does not create transactions");
+        pointer(document, "pointerup", x, y + 40, 71);
+        check.equal(transactions.length, before + 1, "a completed drag creates one undoable transaction");
+        check.equal(row.style.backgroundColor, "red");
+        for (const cancel of ["pointercancel", "Escape", "blur"]) {
+            const saved = row.getAttribute("style");
+            f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 73, clientY: y}), cell, row);
+            pointer(document, "pointermove", x, y + 90, 73);
+            if (cancel === "Escape") {
+                document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+            } else if (cancel === "blur") {
+                window.dispatchEvent(new Event("blur"));
+            } else {
+                pointer(document, cancel, x, y + 90, 73);
+            }
+            check.equal(row.getAttribute("style"), saved, `${cancel} restores all original row styles`);
+            check.equal(transactions.length, before + 1);
+        }
+        f.invoke("selectFromCell", "row", cell, false, false);
+        f.invoke("openMenu", 0, 0);
+        const reset = items.find(item => item.id === "autoFitRowHeight");
+        check.ok(reset && !reset.disabled);
+        reset.click(undefined, undefined);
+        check.equal(row.style.height, "", "auto-fit clears explicit row height");
+        check.equal(row.style.backgroundColor, "red", "auto-fit preserves unrelated style");
+        const minimumHeight = row.getBoundingClientRect().height;
+        f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 75, clientY: y}), cell, row);
+        pointer(document, "pointermove", x, y - 500, 75);
+        pointer(document, "pointerup", x, y - 500, 75);
+        check.equal(row.style.height, "1px");
+        check.ok(row.getBoundingClientRect().height >= minimumHeight, "content determines the minimum rendered height");
+        f.owner.disabled = true;
+        reset.click(undefined, undefined);
+        check.equal(row.style.height, "1px", "a menu opened before readonly mode cannot reset row height");
+        f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 74, clientY: y}), cell, row);
+        pointer(document, "pointermove", x, y + 90, 74);
+        pointer(document, "pointerup", x, y + 90, 74);
+        check.equal(row.style.height, "1px", "readonly tables cannot change height");
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        const merged = f.cell(1, 0);
+        merged.rowSpan = 2;
+        f.cell(2, 0).remove();
+        const rect = merged.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        check.equal(rowHeight.getTableRowBoundary(merged, x, f.table.rows[1].getBoundingClientRect().bottom, 4), undefined,
+            "a merged cell has no internal row divider");
+        check.equal(rowHeight.getTableRowBoundary(merged, x, rect.bottom, 4), f.table.rows[2],
+            "the merged cell bottom targets its last logical row");
+        check.equal(rowHeight.getTableRowBoundary(merged, rect.right, rect.bottom, 4), undefined,
+            "column corners retain their column resize hit area");
+        f.dispose();
+    }
+    {
+        mobile = false;
+        const f = fixture();
+        f.table.rows[1].style.height = "80px";
+        f.table.rows[3].style.height = "100px";
+        f.core.selectCellRange(f.cell(1, 0), f.cell(2, 2));
+        let copied = f.invoke("getSelectionClipboardContent");
+        check.match(copied.textSiyuan, /<tr style="height: 80px;">/, "rectangular clipboard retains row height");
+        f.invoke("selectFromCell", "row", f.cell(1, 0), false, false);
+        f.invoke("selectFromCell", "row", f.cell(3, 0), true, false);
+        copied = f.invoke("getSelectionClipboardContent");
+        check.match(copied.textSiyuan, /height: 80px/);
+        check.match(copied.textSiyuan, /height: 100px/, "noncontiguous row clipboard retains each source height");
+        f.dispose();
+    }
     menuElement.remove();
     menuScrim.remove();
     fixtureStyle.remove();
@@ -881,7 +982,7 @@ test("mobile table selection, editing handoff, operations and gesture cancellati
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableColumnWidth", "tableGridCache",
+    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableColumnWidth", "tableGridCache",
         "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
         .map(file => "src/protyle/util/" + file + ".ts");
     files.push("src/mobile/util/multiSelectToolbar.ts");

@@ -3,6 +3,7 @@ import {TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
 import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
 import {TABLE_ADD_CONTROL_GAP, TABLE_ADD_CONTROL_THICKNESS} from "./tableResize";
 import {Constants} from "../../constants";
+import {getTableRowBoundary} from "./tableRowHeight";
 
 type SelectionMode = "cell" | "row" | "column";
 const TABLE_TOUCH_INTERACTIVE_SELECTOR = "a, [data-type~='a'], [data-type~='block-ref'], [data-type~='file-annotation-ref'], " +
@@ -34,6 +35,7 @@ interface ITableTouchActions {
     resize: (event: PointerEvent, cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both") => void;
     add: (cell: HTMLTableCellElement, type: "add-row" | "add-column" | "add-both") => void;
     width: (event: PointerEvent, cell: HTMLTableCellElement, column: number) => void;
+    height: (event: PointerEvent, cell: HTMLTableCellElement, row: HTMLTableRowElement) => void;
     menu: () => void;
     selectAll: () => void;
     copy: () => void;
@@ -57,6 +59,7 @@ export class TableTouchControl {
     };
     private longPressContextCell?: HTMLTableCellElement;
     private columnBoundary?: {cell: HTMLTableCellElement, column: number};
+    private rowBoundary?: {cell: HTMLTableCellElement, row: HTMLTableRowElement};
 
     constructor(editor: HTMLElement, container: HTMLElement, private content: () => HTMLElement,
                 private actions: ITableTouchActions) {
@@ -147,10 +150,14 @@ export class TableTouchControl {
                 this.columnBoundary = undefined;
                 this.actions.render();
             }
+            if (this.rowBoundary && !this.controls.querySelector('[data-action="height"]')?.contains(event.target as Node)) {
+                this.rowBoundary = undefined;
+                this.actions.render();
+            }
         }, {capture: true, signal});
         // 点击改变选区，滑动内容仍交给浏览器滚动，不在 pointerdown 阶段阻止默认行为。
         editor.addEventListener("click", event => {
-            if (this.activateColumnBoundary(event, editor)) {
+            if (this.activateRowBoundary(event, editor) || this.activateColumnBoundary(event, editor)) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 return;
@@ -176,6 +183,7 @@ export class TableTouchControl {
         this.multiSelect = false;
         this.longPressContextCell = undefined;
         this.columnBoundary = undefined;
+        this.rowBoundary = undefined;
         this.cancelGesture();
     }
 
@@ -236,6 +244,7 @@ export class TableTouchControl {
             column.addEventListener("pointerdown", event => this.selectHandle(event, cell, "column", column));
         }
         this.renderColumnBoundary(state);
+        this.renderRowBoundary(state);
         const tableRect = table.getBoundingClientRect();
         const addOffset = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2;
         if (tableRect.bottom <= viewport.bottom + 1) {
@@ -254,7 +263,7 @@ export class TableTouchControl {
     }
 
     public renderResize() {
-        this.controls.querySelectorAll<HTMLElement>(".protyle-table-control__handle, .protyle-table-control__width-guide")
+        this.controls.querySelectorAll<HTMLElement>(".protyle-table-control__handle, .protyle-table-control__width-guide, .protyle-table-control__height-guide")
             .forEach(control => control.classList.add("fn__none"));
         this.endpoints.forEach(button => button.classList.add("fn__none"));
         return ["add-row", "add-column", "add-both"].map(type =>
@@ -305,6 +314,68 @@ export class TableTouchControl {
             state.viewport.top = Math.max(state.viewport.top, this.toolbar.getBoundingClientRect().bottom + 8);
         }
         return state;
+    }
+
+    private activateRowBoundary(event: MouseEvent, editor: HTMLElement) {
+        const target = event.target as Element;
+        const cell = target.closest<HTMLTableCellElement>("td, th");
+        if (event.defaultPrevented || !this.actions.enabled() || event.button !== 0 ||
+            event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || target.closest(TABLE_TOUCH_INTERACTIVE_SELECTOR) ||
+            !cell?.closest('[data-type="NodeTable"]') || cell.closest(".protyle-wysiwyg") !== editor ||
+            cell.closest(`tr[${TABLE_VIRTUAL_ROWS}]`)) {
+            return false;
+        }
+        const row = getTableRowBoundary(cell, event.clientX, event.clientY, 8);
+        if (!row || !this.actions.activate(cell)) {
+            return false;
+        }
+        this.rowBoundary = {cell, row};
+        this.actions.render();
+        return true;
+    }
+
+    private renderRowBoundary(state: ITableTouchState) {
+        const boundary = this.rowBoundary;
+        if (!boundary?.row.isConnected || boundary.cell.closest("table") !== state.table) {
+            return;
+        }
+        const {viewport} = state;
+        const edge = boundary.row.getBoundingClientRect().bottom;
+        if (edge <= viewport.top || edge > viewport.bottom + 1) {
+            return;
+        }
+        const guide = document.createElement("div");
+        guide.className = "protyle-table-control__height-guide";
+        guide.style.left = `${viewport.left}px`;
+        guide.style.top = `${edge}px`;
+        guide.style.width = `${viewport.right - viewport.left}px`;
+        this.controls.append(guide);
+        const height = this.button(window.siyuan.languages.height, undefined, (viewport.left + viewport.right) / 2, edge, false);
+        height.className = "protyle-table-control__handle protyle-table-control__height";
+        height.style.width = `${viewport.right - viewport.left}px`;
+        height.dataset.action = "height";
+        height.setAttribute("aria-pressed", "true");
+        height.addEventListener("pointerdown", event => {
+            if (event.button !== 0 || !this.actions.enabled()) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.holdControls(event);
+            Array.from(this.controls.children).forEach(control => {
+                if (control !== height && control !== guide) {
+                    control.classList.add("fn__none");
+                }
+            });
+            this.actions.height(event, boundary.cell, boundary.row);
+            document.addEventListener("pointermove", move => {
+                if (move.pointerId === event.pointerId) {
+                    const top = `${boundary.row.getBoundingClientRect().bottom}px`;
+                    guide.style.top = top;
+                    height.style.top = top;
+                }
+            }, {signal: this.gesture.signal});
+        });
     }
 
     private activateColumnBoundary(event: MouseEvent, editor: HTMLElement) {

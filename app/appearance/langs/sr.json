@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Аутоматски прилагоди висину реда",
 	"convertCurrentList": "Претвори тренутну листу у: ${name}",
 	"cancelCurrentList": "Уклони формат тренутне листе",
 	"createList": "Направи: ${name}",

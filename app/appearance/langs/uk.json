@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Автоматично підібрати висоту рядка",
 	"convertCurrentList": "Перетворити поточний список на: ${name}",
 	"cancelCurrentList": "Прибрати формат поточного списку",
 	"createList": "Створити: ${name}",

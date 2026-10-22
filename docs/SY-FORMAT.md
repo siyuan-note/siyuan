@@ -421,6 +421,7 @@ Notes:
 - `Properties.colgroup` stores a `|`-separated CSS style string for each column; empty segments represent columns without an explicit style.
 - A table's optional `Properties.caption` stores its caption HTML.
 - A `NodeTableCell` may contain `Properties.colspan`, `Properties.rowspan`, and `Properties.style` for merged-cell and cell-style state.
+- A `NodeTableRow` may contain `Properties.style`, for example `height: 80px;`, to set a minimum row height. Rows without a height remain content-sized. Internal Kramdown stores row styles in a dedicated `{: row-style="..."}` IAL after the row's final pipe; ordinary standard Markdown export omits this layout metadata. Existing readers remain compatible with documents without row styles; older clients may discard the new row styling when editing.
 
 A cell with rich block content additionally contains `"TableCellRich": {"spec": 1, "format": "kramdown", "content": "- first\n- second"}`. This source is authoritative; `Children` remains an inline projection with readable list markers and line breaks. Internal paragraphs, lists, code, and math do not become document blocks and have no persistent block IDs. Images, references to existing blocks, and supported inline formatting remain in the projection for indexing and resource handling. A rich table retains `Properties.custom-sy-table-rich = "1"`; BlockDOM updates must retain this marker even when all rich cells become inline-only or empty, so a writer that omits the source cannot silently replace a rich table.
 

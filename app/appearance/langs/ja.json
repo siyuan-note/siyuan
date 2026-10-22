@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "行の高さを自動調整",
 	"convertCurrentList": "現在のリストを${name}に変換",
 	"cancelCurrentList": "現在のリストを解除",
 	"createList": "${name}を作成",

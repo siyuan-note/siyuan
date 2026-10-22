@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261022181804"
+		"updated": "20261022190543"
 	},
 	"Children": [
 		{
@@ -4380,7 +4380,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-8glkpvq",
-				"updated": "20261008221006"
+				"updated": "20261022190543"
 			},
 			"Children": [
 				{
@@ -4473,6 +4473,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "內部段落和列表項目沒有獨立區塊 ID，支援引用既有區塊。圖片及原有行級格式可以保留。不支援巢狀表格、資料庫、超級區塊、頁籤、提示區塊、查詢嵌入、分隔線、可執行圖表、音訊、影片、掛件、HTML 和自訂區塊。貼上內容包含不支援的區塊時，會拒絕整次貼上並提示不支援的類型，原有內容不變。標準 Markdown 匯出為可讀的行級內容，HTML、PDF 和 Word 匯出保留富文字排版。"
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-6w6ibfu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-6w6ibfu",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖曳列下邊界可調整列高；行動端先輕點儲存格的水平分隔線，再拖曳出現的控制柄。設定的列高是最小高度，內容較多時仍會自動撐高。選取列後，在選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自動調整列高"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢復自動高度。列高隨文件儲存，標準 Markdown 匯出不保證保留列高。"
 				}
 			]
 		},

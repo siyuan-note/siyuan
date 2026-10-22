@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "ملاءمة ارتفاع الصف تلقائيًا",
 	"convertCurrentList": "تحويل القائمة الحالية إلى ${name}",
 	"cancelCurrentList": "إلغاء القائمة الحالية",
 	"createList": "إنشاء ${name}",

@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Satır yüksekliğini otomatik sığdır",
 	"convertCurrentList": "Geçerli listeyi dönüştür: ${name}",
 	"cancelCurrentList": "Geçerli liste biçimini kaldır",
 	"createList": "${name} oluştur",

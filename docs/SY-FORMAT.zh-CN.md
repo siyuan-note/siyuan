@@ -420,6 +420,7 @@ NodeList                        NodeList
 - `Properties.colgroup` 使用 `|` 分隔各列的 CSS 样式字符串；空段表示该列没有显式样式。
 - 表格可选的 `Properties.caption` 保存标题 HTML。
 - `NodeTableCell` 可使用 `Properties.colspan`、`Properties.rowspan` 和 `Properties.style` 保存合并单元格及单元格样式状态。
+- `NodeTableRow` 可使用 `Properties.style`（例如 `height: 80px;`）设置最小行高，没有高度时仍随内容自动布局。内部 Kramdown 在该行最后一个管道符后使用专用 `{: row-style="..."}` IAL 保存行样式；普通表格的标准 Markdown 导出省略这类排版信息。没有行样式的旧文档保持兼容；旧客户端编辑时可能丢弃新的行样式。
 
 含有富文本块内容的单元格额外携带 `"TableCellRich": {"spec": 1, "format": "kramdown", "content": "- first\n- second"}`。该源内容是权威数据；`Children` 仍是包含可读列表标记和换行的内联投影。内部段落、列表、代码和公式不会成为文档块，也没有持久化块 ID。图片、对已有块的引用及支持的行级格式保留在投影中，用于索引和资源处理。富文本表格保留 `Properties.custom-sy-table-rich = "1"`；即使所有富文本单元格只剩行级内容或为空，BlockDOM 更新也必须保留此标记，防止遗漏源内容的写入器静默替换富文本表格。
 

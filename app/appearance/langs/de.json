@@ -1,4 +1,5 @@
 {
+	"autoFitRowHeight": "Zeilenhöhe automatisch anpassen",
 	"convertCurrentList": "Aktuelle Liste umwandeln in: ${name}",
 	"cancelCurrentList": "Aktuelle Liste aufheben",
 	"createList": "${name} erstellen",

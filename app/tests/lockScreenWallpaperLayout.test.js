@@ -3,6 +3,55 @@ const {mkdtempSync, readFileSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const {test} = require("node:test");
+const {runInNewContext} = require("node:vm");
+const ts = require("typescript");
+const sass = require("sass");
+
+const settingsHTML = () => {
+    const exports = {};
+    const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"));
+    const source = readFileSync(path.join(__dirname, "../src/config/tabs/lockScreenWallpaper.ts"), "utf8");
+    runInNewContext(ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS}}).outputText, {
+        exports, require: () => ({}), window: {siyuan: {languages}},
+    });
+    return `<div class="fn__flex b3-label config-item">
+        <div class="fn__flex-1 config-item__main">${languages.about5}</div><span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-reference>${languages.config}</button>
+    </div>${exports.genLockScreenWallpaperHtml()}`;
+};
+
+const checkSettingsLayout = async (html, css, fontSize) => {
+    const check = require("node:assert/strict");
+    document.head.innerHTML = "<style></style>";
+    document.querySelector("style").textContent = css + `body {font-size:${fontSize}px; --b3-font-size:${fontSize}px;}`;
+    document.body.innerHTML = html;
+    const item = document.querySelector("[data-lock-screen-wallpaper]");
+    const actions = document.querySelector("[data-wallpaper-upload]").parentElement;
+    const preview = item.querySelector("[data-wallpaper-preview]");
+    const canvas = document.createElement("canvas");
+    canvas.width = 240;
+    canvas.height = 160;
+    const loaded = new Promise(resolve => preview.addEventListener("load", resolve, {once: true}));
+    preview.src = canvas.toDataURL();
+    await loaded;
+    for (const showPreview of [false, true]) {
+        preview.classList.toggle("fn__none", !showPreview);
+        const rect = item.getBoundingClientRect();
+        const group = actions.getBoundingClientRect();
+        check.ok(item.scrollWidth <= item.clientWidth, "wallpaper setting does not overflow horizontally");
+        check.ok(group.left >= rect.left && group.right <= rect.right, "actions fit the setting row");
+        if (innerWidth > 750) {
+            const reference = document.querySelector("[data-reference]").getBoundingClientRect();
+            const main = item.querySelector(".config-item__main").getBoundingClientRect();
+            check.ok(group.left >= main.right, "actions are to the right of the description and preview");
+            check.ok(Math.abs(group.right - reference.right) < 1, "actions align with adjacent setting controls");
+            check.equal(group.width, 200);
+            for (const button of actions.querySelectorAll("button")) {
+                check.ok(Math.abs(button.getBoundingClientRect().width - 96) < 1);
+            }
+        }
+    }
+};
 
 // 只替换模板数据和无关的登录脚本，保留实际认证页的结构、样式及壁纸加载函数。
 const fixtureHTML = (file, dark) => {
@@ -70,6 +119,20 @@ if (process.versions.electron && process.type === "browser") {
                             await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark)));
                             await win.webContents.executeJavaScript(`(${checkLayout.toString()})(${present}, ${dark}, ${file.startsWith("electron")})`);
                         }
+                    }
+                }
+            }
+            const html = settingsHTML();
+            for (const name of ["base", "mobile"]) {
+                const styles = sass.compile(path.join(__dirname, `../src/assets/scss/${name}.scss`), {logger: sass.Logger.silent}).css;
+                for (const theme of ["daylight", "midnight"]) {
+                    const css = readFileSync(path.join(__dirname, `../appearance/themes/${theme}/theme.css`), "utf8") + styles;
+                    for (const width of [1000, 600, 320]) {
+                        win.setContentSize(width, 800);
+                        await win.loadURL("data:text/html,<html><body></body></html>");
+                        await win.webContents.executeJavaScript(`(${checkSettingsLayout.toString()})(${[
+                            html, css, width === 1000 ? 16 : 24,
+                        ].map(value => JSON.stringify(value)).join(",")})`);
                     }
                 }
             }

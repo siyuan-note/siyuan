@@ -7,16 +7,19 @@ const wallpaperURL = "/api/system/getLockScreenWallpaper";
 
 export const genLockScreenWallpaperHtml = () => {
     const lang = window.siyuan.languages;
-    return `<div class="b3-label config-item" data-lock-screen-wallpaper>
-    <div class="config-name">${lang.lockScreenWallpaper}</div>
-    <div class="b3-label__text">${lang.lockScreenWallpaperTip}</div>
-    <img class="config-lock-screen-wallpaper fn__none" alt="${lang.lockScreenWallpaper}" data-wallpaper-preview>
-    <div class="fn__flex fn__flex-wrap">
-        <button class="b3-button b3-button--outline" data-wallpaper-upload>${lang.upload}</button>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline" data-wallpaper-reset>${lang.reset}</button>
-        <input class="fn__none" type="file" accept="image/jpeg,image/png,image/webp" data-wallpaper-file>
+    return `<div class="fn__flex b3-label config-item" data-lock-screen-wallpaper>
+    <div class="fn__flex-1 config-item__main">
+        <div class="config-name">${lang.lockScreenWallpaper}</div>
+        <div class="b3-label__text">${lang.lockScreenWallpaperTip}</div>
+        <img class="config-lock-screen-wallpaper fn__none" alt="${lang.lockScreenWallpaper}" data-wallpaper-preview>
     </div>
+    <span class="fn__space"></span>
+    <div class="fn__flex fn__flex-center fn__size200">
+        <button class="b3-button b3-button--outline fn__flex-1" data-wallpaper-upload>${lang.upload}</button>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-1" data-wallpaper-reset>${lang.reset}</button>
+    </div>
+    <input class="fn__none" type="file" accept="image/jpeg,image/png,image/webp" data-wallpaper-file>
 </div>`;
 };
 

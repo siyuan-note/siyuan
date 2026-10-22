@@ -37,6 +37,13 @@ describe("shouldDeferBottomBacklinkRefresh", () => {
 });
 
 describe("getBottomBacklinkVisibility", () => {
+    it("keeps the filter controls available after a database condition matches nothing", () => {
+        assert.deepEqual(getBottomBacklinkVisibility(0, 0, "", "", true), {
+            hideBacklinks: false,
+            hideMentions: true,
+            hidePanel: false,
+        });
+    });
     it("hides empty sections independently", () => {
         assert.deepEqual(getBottomBacklinkVisibility(0, 0, "", ""), {
             hideBacklinks: true,

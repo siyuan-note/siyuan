@@ -510,6 +510,7 @@ func registerFileRoutes(ginServer *gin.Engine) {
 func registerRefRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", contractRouteHandlers(apicontract.RefreshBacklink, refreshBacklink)...)
 	ginServer.Handle("POST", "/api/ref/getBacklink2", contractRouteHandlers(apicontract.GetBacklink2, getBacklink2)...)
+	ginServer.Handle("POST", "/api/ref/getBacklinkDatabases", contractRouteHandlers(apicontract.GetBacklinkDatabases, getBacklinkDatabases)...)
 	ginServer.Handle("POST", "/api/ref/getGlobalBacklinks", contractRouteHandlers(apicontract.GetGlobalBacklinks, getGlobalBacklinks)...)
 	ginServer.Handle("POST", "/api/ref/getGlobalBacklinkContexts", contractRouteHandlers(apicontract.GetGlobalBacklinkContexts, getGlobalBacklinkContexts)...)
 	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", contractRouteHandlers(apicontract.GetBacklinkDoc, getBacklinkDoc)...)

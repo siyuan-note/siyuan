@@ -41,6 +41,12 @@ export const configPanel: IAVPanelDescriptor = {
             return "handled";
         },
         "go-config": (context, action) => {
+            if (context.options.filterOperation?.save) {
+                context.avPanelElement.remove();
+                action.event.preventDefault();
+                action.event.stopPropagation();
+                return "handled";
+            }
             if (context.menuElement.classList.contains("av__conditional-panel") ||
                 context.menuElement.classList.contains("av__automation-panel")) {
                 delete context.menuElement.dataset.positionX;

@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261022133332"
 	},
 	"Children": [
 		{
@@ -172,7 +172,7 @@
 			"Properties": {
 				"ID": "20240530101000-at31i2r",
 				"id": "20240530101000-avpxozm",
-				"updated": "20240530101000"
+				"updated": "20261022133332"
 			},
 			"Children": [
 				{
@@ -361,6 +361,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-0jxmx6d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-0jxmx6d",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースのフィールドでバックリンクを絞り込む"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-do55tkp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-do55tkp",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "バックリンクパネルまたは下部のバックリンクで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "バックリンク元を絞り込む"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データベースのフィールド"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、参照元ブロックが登録されているデータベースを選択して、フィールド条件を組み合わせます。選択したデータベースにバインドされ、条件を満たす参照元のみが表示されます。フィールド条件を設定しない場合は、そのデータベースにバインドされた参照元がすべて表示されます。データベースの元のビューのフィルタやメンションは変更されません。デスクトップ版とモバイル版の両方で利用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-68vgkre",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-68vgkre",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースのメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "リセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、データベースの条件だけを解除できます。他の参照元フィルタは保持されます。"
 				}
 			]
 		},

@@ -1107,9 +1107,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 			return err
 		}
 		cacheAttributeViewData(av, avBoxID, data)
-		if RichTextSpec <= av.Spec {
-			NotifyAttributeViewSaved(av.ID, avBoxID)
-		}
+		NotifyAttributeViewSaved(av.ID, avBoxID)
 		return nil
 	}
 	if cachedData, version, ok := cache.GetAVDataWithVersionInBox(av.ID, avBoxID); ok {
@@ -1158,9 +1156,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	cacheAttributeViewData(av, avBoxID, data)
-	if RichTextSpec <= av.Spec {
-		NotifyAttributeViewSaved(av.ID, avBoxID)
-	}
+	NotifyAttributeViewSaved(av.ID, avBoxID)
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
 		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize.Load())

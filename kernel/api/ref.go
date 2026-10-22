@@ -147,6 +147,9 @@ var getBacklinkDoc = contractHandler(apicontract.GetBacklinkDoc, func(c *gin.Con
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			return apicontract.Failure[apicontract.BacklinkContextData](1, err.Error())
 		}
+		if err := validateBacklinkDatabaseRequest(c, backlinkSourceFilterModel(request.SourceFilter), notebook); err != nil {
+			return apicontract.Failure[apicontract.BacklinkContextData](1, err.Error())
+		}
 	}
 	containChildren := model.Conf.Editor.Load().BacklinkContainChildren
 	if request.ContainChildren != nil {
@@ -189,8 +192,13 @@ func backlinkSourceFilterModel(filter *apicontract.BacklinkSourceFilter) *model.
 	if filter == nil {
 		return nil
 	}
-	return model.NormalizeBacklinkSourceFilter(&model.BacklinkSourceFilter{DailyNote: filter.DailyNote, ExcludeSelf: filter.ExcludeSelf,
-		ExcludedRefDefIDs: filter.ExcludedRefDefIDs, ExcludedNotebookIDs: filter.ExcludedNotebookIDs})
+	ret := &model.BacklinkSourceFilter{DailyNote: filter.DailyNote, ExcludeSelf: filter.ExcludeSelf,
+		ExcludedRefDefIDs: filter.ExcludedRefDefIDs, ExcludedNotebookIDs: filter.ExcludedNotebookIDs}
+	if filter.Database != nil {
+		ret.Database = &model.BacklinkDatabaseFilter{AvID: filter.Database.AvID,
+			Filters: avContractSlice(filter.Database.Filters, fromContractAVViewFilter)}
+	}
+	return model.NormalizeBacklinkSourceFilter(ret)
 }
 
 var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context, request apicontract.BacklinkListRequest) apicontract.Response[apicontract.BacklinkListData] {
@@ -253,8 +261,14 @@ var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context
 			return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
+			if err := validateBacklinkDatabaseRequest(c, sourceFilter, notebook); err != nil {
+				return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
+			}
 			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter, includeMentions, includeBacklinks, notify)
 		} else {
+			if err := validateBacklinkDatabaseRequest(c, sourceFilter, ""); err != nil {
+				return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
+			}
 			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions, includeBacklinks, notify)
 		}
 	}

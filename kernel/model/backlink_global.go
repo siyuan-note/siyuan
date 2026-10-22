@@ -185,6 +185,7 @@ func collectGlobalBacklinks(query GlobalBacklinkQuery, accessible func(string) b
 			}
 		}
 	}
+	blocks = filterBacklinkDatabaseBlocks(blocks, query.Notebook, query.SourceFilter)
 	blocks = filterBacklinkSourcesInBox(blocks, definition.RootID, query.Notebook, query.SourceFilter)
 	byRoot := map[string]map[string]*Block{}
 	for _, block := range blocks {

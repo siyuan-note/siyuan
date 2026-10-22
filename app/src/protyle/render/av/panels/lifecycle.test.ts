@@ -69,6 +69,28 @@ test("window resizing uses the automation height constraint only while its panel
     assert.deepEqual(h.calls, ["setPosition"]);
 });
 
+for (const mobile of [false, true]) {
+    test(`query filter panels save without database transactions or an editor (${mobile ? "mobile" : "desktop"})`, async () => {
+        const h = createPanel(mobile);
+        const saved: IAVFilter[][] = [];
+        h.options.type = "filters";
+        h.options.protyle = undefined;
+        h.options.anchorElement = {getBoundingClientRect: () => ({right: 400, bottom: 50, height: 20})} as HTMLElement;
+        h.options.filterOperation = {save: filters => saved.push(filters)};
+        h.open(h.options);
+        await Promise.resolve();
+        const filters: IAVFilter[] = [{combination: "and", filters: []}];
+        h.context.saveFilters(filters, []);
+        assert.equal(saved[0], filters);
+        assert.equal(h.context.avID, "av");
+        assert.ok(!h.calls.includes("transaction"));
+        h.calls.length = 0;
+        await h.click("close");
+        assert.ok(h.calls.includes("remove"));
+        assert.ok(!h.calls.includes("focusBlock"));
+    });
+}
+
 test("mobile back returns within a database panel and closes the root through its save callback", async () => {
     const h = createPanel(true);
     h.options.keepMenuOpen = true;

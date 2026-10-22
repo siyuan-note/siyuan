@@ -23,6 +23,9 @@ func globalBacklinkQuery(c *gin.Context, request apicontract.GlobalBacklinkQuery
 	if err := holdEncryptedBoxRequest(c, query.Notebook); err != nil {
 		return query, err
 	}
+	if err := validateBacklinkDatabaseRequest(c, query.SourceFilter, query.Notebook); err != nil {
+		return query, err
+	}
 	return query, nil
 }
 

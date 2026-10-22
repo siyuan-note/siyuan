@@ -15,7 +15,7 @@ import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
 import {closeInlineFilterDropdowns} from "./filterDropdown";
 
-interface FilterEditorOptions {
+export interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
     keyID?: string;
     save?: (filters: IAVFilter[]) => void;
@@ -196,12 +196,16 @@ export const addFilter = (options: {
                     targetGroupFilters.push(filter);
                     const blockID = options.blockElement.getAttribute("data-node-id");
                     // 保存新增的占位条件，inline 控件立即可编辑（无需弹层）
-                    transaction(options.protyle, [
-                        getSetFiltersOperation(options.avId, blockID,
-                            JSON.parse(JSON.stringify(options.data.view.filters)), options.filterOperation)
-                    ], [
-                        getSetFiltersOperation(options.avId, blockID, oldFilters, options.filterOperation)
-                    ]);
+                    if (options.filterOperation?.save) {
+                        options.filterOperation.save(options.data.view.filters);
+                    } else {
+                        transaction(options.protyle, [
+                            getSetFiltersOperation(options.avId, blockID,
+                                JSON.parse(JSON.stringify(options.data.view.filters)), options.filterOperation)
+                        ], [
+                            getSetFiltersOperation(options.avId, blockID, oldFilters, options.filterOperation)
+                        ]);
+                    }
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height, 0, true);
                 }

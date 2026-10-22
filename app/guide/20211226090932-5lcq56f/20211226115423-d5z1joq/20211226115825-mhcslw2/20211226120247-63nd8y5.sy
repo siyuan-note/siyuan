@@ -6,7 +6,7 @@
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容區塊",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261022133332"
 	},
 	"Children": [
 		{
@@ -167,7 +167,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-nfx8mlg",
-				"updated": "20230630092034"
+				"updated": "20261022133332"
 			},
 			"Children": [
 				{
@@ -335,6 +335,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-ng7mw26",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-ng7mw26",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "依資料庫欄位篩選反向連結"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-9qfgdrg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-9qfgdrg",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在反向連結面板或底部反向連結中，開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "篩選反向連結來源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料庫欄位"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，選擇來源區塊已加入的資料庫，再設定欄位組合條件。只顯示綁定到所選資料庫且符合條件的反向連結來源；未設定欄位條件時，顯示所有綁定到該資料庫的反向連結來源。此操作不會修改資料庫原檢視的篩選，也不影響提及。桌面端和行動端均支援此功能。"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-ws4lowq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-ws4lowq",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在資料庫選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可清除資料庫條件，其他來源篩選保持不變。"
 				}
 			]
 		},

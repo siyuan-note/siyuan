@@ -14,9 +14,10 @@ export const getBottomBacklinkVisibility = (
     linkRefsCount: number,
     mentionsCount: number,
     backlinkKeyword: string,
-    mentionKeyword: string
+    mentionKeyword: string,
+    sourceFilterActive = false,
 ) => {
-    const hideBacklinks = linkRefsCount === 0 && !backlinkKeyword;
+    const hideBacklinks = linkRefsCount === 0 && !backlinkKeyword && !sourceFilterActive;
     const hideMentions = mentionsCount === 0 && !mentionKeyword;
     return {
         hideBacklinks,

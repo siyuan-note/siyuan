@@ -652,6 +652,12 @@ export type BacklinkContext = { "attributeViewTargets"?: Array<BacklinkAttribute
 
 export type BacklinkContextData = { "backlinks": Array<BacklinkContext | null> | null; "backmentions": Array<BacklinkContext | null> | null; "keywords": Array<string> | null; "revision": string; "unchanged": boolean; };
 
+export type BacklinkDatabase = { "id": string; "keys": Array<AVKey | null> | null; "name": string; };
+
+export type BacklinkDatabaseFilterInput = { "avID": string; "filters": Array<AVViewFilterInput | null>; };
+
+export type BacklinkDatabasesRequestInput = { "containChildren"?: boolean | null; "id": string; "keyword"?: string; "notebook"?: string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+
 export type BacklinkDocumentRequestInput = { "blockSort"?: number; "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
 
 export type BacklinkList = { "backlinks": Array<BacklinkPath | null> | null; "backmentions": Array<BacklinkPath | null> | null; "box": string; "k": string; "linkRefsCount": number; "mentionsCount": number; "mk": string; "revision": string; "unchanged": boolean; };
@@ -664,7 +670,7 @@ export type BacklinkRefDef = { "id": string; "path": string; "text": string; };
 
 export type BacklinkRefDefs = { "refDefs": Array<BacklinkRefDef | null> | null; };
 
-export type BacklinkSourceFilterInput = { "dailyNote"?: string | null; "excludeSelf"?: boolean | null; "excludedNotebookIDs"?: Array<string> | null; "excludedRefDefIDs"?: Array<string> | null; };
+export type BacklinkSourceFilterInput = { "dailyNote"?: string | null; "database"?: BacklinkDatabaseFilterInput | null; "excludeSelf"?: boolean | null; "excludedNotebookIDs"?: Array<string> | null; "excludedRefDefIDs"?: Array<string> | null; };
 
 export type BackmentionDocumentRequestInput = { "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; };
 
@@ -6353,6 +6359,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
+     * 可选 sourceFilter.database 按单个数据库的字段筛选反链及数量，不影响提及或数据库原视图。
      */
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
@@ -6361,6 +6368,21 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 返回实际绑定反链来源的数据库名称及字段元数据，不返回条目值。
+     * 忽略当前数据库条件并应用其他来源限制；发布读者不可查询，保持加密笔记本隔离及请求租约。
+     */
+    "/api/ref/getBacklinkDatabases": {
+        request: BacklinkDatabasesRequestInput;
+        response: { "code": 0; "data": Array<BacklinkDatabase | null> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * sourceFilter.database 在父块合并前按来源块的数据库字段筛选，不修改原数据库视图。
+     * 无条件仅筛数据库成员，失效字段不放宽结果；原来源筛选、排序及加密笔记本租约保持不变。
+     */
     "/api/ref/getBacklinkDoc": {
         request: BacklinkDocumentRequestInput;
         response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6378,6 +6400,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 数据库条件与列表快照一致，不修改来源数据或原数据库视图。
+     */
     "/api/ref/getGlobalBacklinkContexts": {
         request: GlobalBacklinkContextRequestInput;
         response: { "code": 0; "data": GlobalBacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6385,6 +6410,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * sourceFilter.database 在完整结果分页前求值，快照绑定全部筛选条件；原分页、排序和访问检查保持不变。
+     */
     "/api/ref/getGlobalBacklinks": {
         request: GlobalBacklinkListRequestInput;
         response: { "code": 0; "data": GlobalBacklinkListData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };

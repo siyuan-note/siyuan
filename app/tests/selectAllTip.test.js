@@ -71,12 +71,14 @@ const runCases = async sources => {
         const subElement = document.getElementById("toolbar");
         let complete;
         let requests = 0;
+        let loadAllOptions;
         const protyle = {
             element: document.getElementById("editor"),
             block: {rootID: "document", parentID: "document", scroll: true},
             options: {}, wysiwyg: {element},
-            scroll: {loadAll: () => {
+            scroll: {loadAll: (currentProtyle, options) => {
                 requests++;
+                loadAllOptions = options;
                 return new Promise((resolve, reject) => complete = (success, error) => {
                     if (error) {
                         reject(new Error("Loading failed"));
@@ -103,7 +105,8 @@ const runCases = async sources => {
         const show = () => showSelectAllIncompleteTip(protyle);
         const button = () => document.querySelector('#message [data-id="selectAllIncompleteTip"] button');
         const selected = () => Array.from(element.querySelectorAll(".protyle-wysiwyg--select"), item => item.dataset.nodeId);
-        return {protyle, element, show, button, selected, complete: (...args) => complete(...args), requests: () => requests};
+        return {protyle, element, show, button, selected, complete: (...args) => complete(...args),
+            requests: () => requests, loadAllOptions: () => loadAllOptions};
     };
 
     // 重复提示会替换按钮，必须绑定最新按钮，并等待全文成功加载后再选择顶层块。
@@ -119,6 +122,8 @@ const runCases = async sources => {
         f.button().click();
         f.button().click();
         check.equal(f.requests(), 1);
+        // 加载提示复用本条通知的 id，避免新增通知导致列表位置跳动
+        check.deepEqual(f.loadAllOptions(), {messageId: "selectAllIncompleteTip"});
         check.equal(f.button().disabled, true);
         check.deepEqual(f.selected(), ["middle", "nested"]);
         f.complete(true);

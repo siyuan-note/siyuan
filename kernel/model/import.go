@@ -443,6 +443,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		return
 	}
 	unzipRootPath := filepath.Join(unzipPath, entries[0].Name())
+	if err = checkImportedDocumentAddressing(unzipRootPath); err != nil {
+		return
+	}
 	name := filepath.Base(unzipRootPath)
 	if strings.HasPrefix(name, "data-20") && len("data-20230321175442") == len(name) {
 		logging.LogErrorf("invalid .sy.zip [unzipRootPath=%s, baseName=%s]", unzipRootPath, name)
@@ -562,6 +565,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		}
 	} else {
 		createdBoxID = boxID
+	}
+	if err = prepareImportedDocumentAddressing(unzipRootPath, boxID, createNotebook); err != nil {
+		return
 	}
 	encryptedTarget := IsEncryptedBox(boxID)
 	toPath = normalizeBoxDocTarget(boxID, toPath)
@@ -1284,6 +1290,9 @@ func writeImportedTree(boxID, syPath, newSyPath, relPath string, data []byte) er
 }
 
 func validateImportedNotebookIdentities(tmpDataPath string) ([]string, error) {
+	if err := checkDocumentAddressingCopy(tmpDataPath, ""); err != nil {
+		return nil, err
+	}
 	identities, err := inspectDataImportNotebooks(tmpDataPath)
 	if err != nil {
 		return nil, err

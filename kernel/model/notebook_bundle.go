@@ -334,6 +334,9 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 		return nil, errors.New(Conf.Language(199))
 	}
 	rootPath := filepath.Join(unzipPath, entries[0].Name())
+	if err = checkImportedDocumentAddressing(rootPath); err != nil {
+		return nil, err
+	}
 	ret = &inspectedSYNotebook{archivePath: zipPath, name: entries[0].Name()}
 	confPath := filepath.Join(rootPath, ".siyuan", "conf.json")
 	hasNotebookMetadata := filelock.IsExist(confPath)

@@ -2784,6 +2784,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 }
 
 func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths []string, includeBoxConf bool, config conf.Export) (zipPath string) {
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		util.PushErrMsg(err.Error(), 7000)
+		return
+	}
 	confFlashcardSnapshot := Conf.LoadFlashcard()
 
 	defer util.ClearPushProgress(100)
@@ -2861,6 +2865,10 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		}
 		if writeErr := os.WriteFile(filepath.Join(confDir, "conf.json"), confData, 0644); writeErr != nil {
 			logging.LogErrorf("write export notebook conf failed: %s", writeErr)
+			return
+		}
+		if copyErr := copyExportedDocumentAddressing(boxID, exportDir); copyErr != nil {
+			logging.LogErrorf("copy export notebook addressing metadata failed: %s", copyErr)
 			return
 		}
 		sourceBoxDocMetaPath := boxDocMetaPath(boxID)

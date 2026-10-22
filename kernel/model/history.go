@@ -687,6 +687,9 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	if filelock.IsExist(to) {
 		return errors.New(Conf.Language(371))
 	}
+	if err = checkDocumentAddressingCopy(from, boxID); err != nil {
+		return
+	}
 	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
 	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
 	if err = boundRecovery.restoreNotebookAttributeViewHistory(from, boxID); err != nil {

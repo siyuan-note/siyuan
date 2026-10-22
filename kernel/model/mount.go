@@ -34,6 +34,8 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -271,6 +273,11 @@ func RemoveBox(boxID string) (err error) {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
 	}
+	addressingErr := filesys.CheckDocumentAddressing(boxID)
+	unsupportedAddressing := errors.Is(addressingErr, documentaddressing.ErrUnsupported)
+	if addressingErr != nil && !unsupportedAddressing {
+		return addressingErr
+	}
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
 		return
@@ -326,8 +333,10 @@ func RemoveBox(boxID string) (err error) {
 	defer databaseIndexDataLock.Unlock()
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
-	if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
-		return
+	if !unsupportedAddressing {
+		if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+			return
+		}
 	}
 	if !isEncrypted {
 		unmount0(boxID)
@@ -351,7 +360,12 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
-		if !isEncrypted {
+		if !isEncrypted && unsupportedAddressing {
+			if err = backupUnsupportedNotebookAttributeViews(historyDir); err != nil {
+				return
+			}
+		}
+		if !isEncrypted && !unsupportedAddressing {
 			pages, walkErr := pagedPathsWithError(localPath, 32)
 			if walkErr != nil {
 				return walkErr
@@ -506,6 +520,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 }
 
 func mountBox(boxID string) (alreadyMount bool, err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return
+	}
 	confFileTreeSnapshot := Conf.LoadFileTree()
 
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {

@@ -104,6 +104,9 @@ func dataImportTarget(name string) (string, error) {
 
 // applyDataImport 先备份全部待覆盖文件，再登记提交日志；任何写入失败都补偿已安装的路径。
 func applyDataImport(directory, install string, write func(string, string) error) error {
+	if err := checkDocumentAddressingCopy(install, ""); err != nil {
+		return err
+	}
 	files, err := archiveDirectoryFiles(install)
 	if err != nil {
 		return err

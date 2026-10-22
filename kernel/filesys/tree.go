@@ -187,12 +187,12 @@ func validateTreePath(boxID, p string) error {
 			return fmt.Errorf("invalid document path [%s]", p)
 		}
 	}
-	return nil
+	return CheckDocumentAddressing(boxID)
 }
 
 func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
 	if err = validateTreePath(boxID, p); err != nil {
-		logging.LogErrorf("invalid tree path [%s] for box [%s]: %s", p, boxID, err)
+		logging.LogErrorf("cannot load tree [%s] for box [%s]: %s", p, boxID, err)
 		return
 	}
 
@@ -355,6 +355,11 @@ func readParentDocIAL(absPath string) (map[string]string, error) {
 
 func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 	boxID := docIALBoxID(absPath)
+	if boxID != "" {
+		if err := CheckDocumentAddressing(boxID); err != nil {
+			return nil, err
+		}
+	}
 	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
 		return nil, err
@@ -402,6 +407,11 @@ func DocIAL(absPath string) (ret map[string]string, err error) {
 	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
 	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密笔记本走原流式逻辑。
 	boxID := docIALBoxID(absPath)
+	if boxID != "" {
+		if err = CheckDocumentAddressing(boxID); err != nil {
+			return nil, err
+		}
+	}
 	if boxID != "" && DEKProvider != nil {
 		dek, encrypted, releaseCryptoLease, leaseErr := acquireCryptoLease(boxID)
 		if leaseErr != nil {

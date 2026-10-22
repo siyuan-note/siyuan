@@ -3171,6 +3171,7 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 			scope = stored
 		}
 	}
+	ret.SetCheckoutHooks(documentAddressingCheckoutHooks(ret))
 	err = ret.ConfigureAssetDownloads(confSyncSnapshot.AssetDownloadMode == 1, assetDownloadStatePath(), scope)
 	return
 }

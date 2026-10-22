@@ -127,6 +127,12 @@ func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 		boxConf := conf.NewBoxConf()
 		boxDirPath := filepath.Join(util.DataDir, id)
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
+		if addressingErr := filesys.CheckDocumentAddressing(id); addressingErr != nil {
+			// 只展示关闭的笔记本；不能进入配置修复、解密元数据或索引流程。
+			logging.LogWarnf("notebook [%s] is unavailable: %s", id, addressingErr)
+			ret = append(ret, &Box{ID: id, Name: id, Closed: true, Encrypted: IsEncryptedBox(id)})
+			continue
+		}
 		isExistConf := filelock.IsExist(boxConfPath)
 		missingEncryptedIdentity := false
 		if !isExistConf {
@@ -344,6 +350,9 @@ func (box *Box) SaveConfAndSync(conf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
+	if err := filesys.CheckDocumentAddressing(box.ID); err != nil {
+		return err
+	}
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	persisted, err := prepareBoxConfForSave(box.ID, conf)
 	if err != nil {
@@ -392,6 +401,9 @@ func (box *Box) saveConf0(data []byte) error {
 	if !ast.IsNodeIDPattern(box.ID) {
 		return fmt.Errorf("invalid box ID [%s]", box.ID)
 	}
+	if err := checkDocumentAddressingConf(box.ID, data); err != nil {
+		return err
+	}
 
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); err != nil {
@@ -407,7 +419,11 @@ func (box *Box) saveConf0(data []byte) error {
 
 // validateBoxPath 校验 box 内相对路径，拒绝 .. 和绝对路径，确保最终路径在 <DataDir>/<boxID>/ 内。
 func (box *Box) validateBoxPath(p string) (string, error) {
-	return filesys.ValidateBoxRelativePath(box.ID, p)
+	rel, err := filesys.ValidateBoxRelativePath(box.ID, p)
+	if err != nil {
+		return "", err
+	}
+	return rel, filesys.CheckDocumentAddressing(box.ID)
 }
 
 func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {

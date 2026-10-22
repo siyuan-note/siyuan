@@ -1506,8 +1506,7 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		tree := existTree
 		p = tree.Path
 		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
-			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
-			if err = indexWriteTreeUpsertQueue(tree); err != nil {
+			if err = SetBlockAttrs(tree.ID, map[string]string{DailyNoteAttrPrefix + date: date}); err != nil {
 				return
 			}
 		}
@@ -1535,8 +1534,7 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		return
 	}
 	p = tree.Path
-	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
-	if err = indexWriteTreeUpsertQueue(tree); err != nil {
+	if err = SetBlockAttrs(tree.ID, map[string]string{DailyNoteAttrPrefix + date: date}); err != nil {
 		return
 	}
 	if "" != boxConf.DailyNoteTemplatePath {

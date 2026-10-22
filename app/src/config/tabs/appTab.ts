@@ -343,8 +343,12 @@ const mountLinuxInputMethodSetting = async (root: HTMLElement) => {
 };
 /// #endif
 
+// 直接连接和使用系统代理时不使用主机与端口，由界面自行取值
+const isManualProxyScheme = (scheme: string) => "" !== scheme && "system" !== scheme;
+
 const genNetworkProxyHtml = (): string => {
     const proxy = window.siyuan.config.system.networkProxy;
+    const inputClass = `b3-text-field fn__flex-1${isManualProxyScheme(proxy.scheme || "") ? "" : " fn__none"}`;
     return `<div class="b3-label config-item">
     ${genConfigItemName(window.siyuan.languages.networkProxy)}
     <div class="b3-label__text">
@@ -359,9 +363,11 @@ const genNetworkProxyHtml = (): string => {
             <option value="http" ${proxy.scheme === "http" ? "selected" : ""}>HTTP</option>
         </select>
         <span class="fn__space"></span>
-        <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${escapeHtmlTextAndAttr(proxy.host)}"/>
-        <span class="fn__space"></span>
-        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${escapeHtmlTextAndAttr(proxy.port)}" type="number"/>
+        <div id="networkProxyManual" class="fn__flex fn__flex-1">
+            <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="${inputClass}" value="${escapeHtmlTextAndAttr(proxy.host)}"/>
+            <span class="fn__space"></span>
+            <input id="networkProxyPort" placeholder="Port" class="${inputClass}" value="${escapeHtmlTextAndAttr(proxy.port)}" type="number"/>
+        </div>
         <span class="fn__space"></span>
         <button id="networkProxyConfirm" class="b3-button fn__size200 b3-button--outline">${window.siyuan.languages.confirm}</button>
     </div>
@@ -372,13 +378,14 @@ const mountNetworkProxy = (root: HTMLElement) => {
     const schemeElement = root.querySelector("#networkProxyScheme") as HTMLSelectElement;
     const hostElement = root.querySelector("#networkProxyHost") as HTMLInputElement;
     const portElement = root.querySelector("#networkProxyPort") as HTMLInputElement;
-    const updateInputs = () => {
-        const disabled = schemeElement.value === "" || schemeElement.value === "system";
-        hostElement.disabled = disabled;
-        portElement.disabled = disabled;
+    // 容器始终占据剩余空间，隐藏输入框后确定按钮仍保持右对齐
+    const updateManualVisibility = () => {
+        const hidden = !isManualProxyScheme(schemeElement.value);
+        hostElement.classList.toggle("fn__none", hidden);
+        portElement.classList.toggle("fn__none", hidden);
     };
-    schemeElement.addEventListener("change", updateInputs);
-    updateInputs();
+    schemeElement.addEventListener("change", updateManualVisibility);
+    updateManualVisibility();
     root.querySelector("#networkProxyConfirm")?.addEventListener("click", () => {
         const scheme = schemeElement.value as Config.TSystemNetworkProxyScheme;
         const host = hostElement.value;

@@ -3310,6 +3310,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     panNode.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerId: 81, clientX: 100, clientY: 100}));
     panNode.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
     check.equal(getComputedStyle(panViewport).cursor, "grabbing");
+    for (const platform of ["body--linux", "body--windows", "body--mac", "body--android", "body--ios", "body--harmony"]) {
+        document.body.classList.add(platform);
+        check.equal(getComputedStyle(panViewport).cursor, platform === "body--linux" ? "default" : "grabbing",
+            `${platform} hand-tool dragging uses the platform cursor`);
+        document.body.classList.remove(platform);
+    }
     panNode.dispatchEvent(new PointerEvent("pointerup", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
     check.equal(getComputedStyle(panViewport).cursor, "grab");
     check.equal(single.offsetX, panBefore.x + 40, "hand tool pans from a node instead of moving it");
@@ -3482,8 +3488,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
         viewport.style.removeProperty("user-select");
         scrollHost.contentEditable = "false";
-        // 覆盖真实右键按下及空闲后重新启动，不能跳过激活、焦点和指针捕获阶段。
-        for (const idle of [0, 3000]) {
+        // 覆盖平台光标、真实右键按下及空闲后重新启动，保留激活、焦点和指针捕获阶段。
+        for (const [platform, idle] of [
+            ["body--windows", 0], ["body--windows", 3000], ["body--mac", 0],
+            ["body--linux", 0], ["body--linux", 3000],
+        ] as const) {
+            document.body.classList.add(platform);
             await new Promise(resolve => setTimeout(resolve, idle));
             panView.selectNode(panModel.root.id);
             panView.inspector.hidden = true;
@@ -3501,7 +3511,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             await settle();
             check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 24, before[1] + 16],
                 "native right dragging starts on the first move, including after idle");
-            check.equal(getComputedStyle(viewport).cursor, "grabbing", "the capturing viewport provides the pan cursor");
+            check.equal(getComputedStyle(viewport).cursor, platform === "body--linux" ? "default" : "grabbing",
+                `${platform} native right dragging uses the platform cursor, including after idle`);
             check.ok(Array.from(panHost.querySelectorAll<HTMLElement>(".mindmap-view__node"))
                 .every(element => getComputedStyle(element).cursor === "default"),
             "panning leaves every node cursor unchanged");
@@ -3519,6 +3530,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             await settle();
             check.equal(panView.pointer, undefined);
             check.equal(getComputedStyle(add).visibility, "visible", "releasing the pointer restores selected node controls");
+            check.equal(getComputedStyle(viewport).cursor, "default", "ending a drag restores the reading cursor");
+            document.body.classList.remove(platform);
         }
         panView.offsetX = readingTransform[1];
         panView.offsetY = readingTransform[2];

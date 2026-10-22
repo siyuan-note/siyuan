@@ -13,7 +13,7 @@ type Invoke = (channel: string, data: {cmd: string; enabled?: boolean}) => Promi
 type Slot = {key: string; html: () => string; afterMount: (root: unknown) => Promise<void>};
 
 const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke, slotKey = "accessibilitySupport",
-                              switches: string[] = []): Slot | undefined => {
+                              switches: string[] = [], scheme = "http"): Slot | undefined => {
     const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appTab.ts"), "utf8");
     const processed = parse(source, {BROWSER: browser, MOBILE: mobile}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -24,7 +24,7 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
         console: {warn: (): void => undefined},
         window: {siyuan: {
             languages: new Proxy({}, {get: (_, key) => String(key)}),
-            config: {system: {isMicrosoftStore: true, networkProxy: {host: 'user:"<&@host', port: "7890", scheme: "http"}}},
+            config: {system: {isMicrosoftStore: true, networkProxy: {host: 'user:"<&@host', port: "7890", scheme}}},
         }},
         require: (name: string) => {
             if (name === "electron") {
@@ -78,6 +78,71 @@ test("network proxy renders escaped values in every build target", () => {
         assert.ok(slot.html().includes('value="user:&quot;&lt;&amp;@host"'));
         assert.ok(slot.html().includes('value="7890"'));
     }
+});
+
+test("network proxy keeps its layout space and hides only the manual inputs", () => {
+    const manual = getAccessibilitySlot(true, false, undefined, "networkProxy");
+    assert.ok(manual);
+    assert.ok(manual.html().includes('<div id="networkProxyManual" class="fn__flex fn__flex-1">'));
+    assert.equal(manual.html().includes('class="b3-text-field fn__flex-1 fn__none"'), false);
+
+    for (const scheme of ["system", ""]) {
+        const automatic = getAccessibilitySlot(true, false, undefined, "networkProxy", [], scheme);
+        assert.ok(automatic);
+        assert.ok(automatic.html().includes('<div id="networkProxyManual" class="fn__flex fn__flex-1">'));
+        assert.equal(automatic.html().match(/class="b3-text-field fn__flex-1 fn__none"/g)?.length, 2);
+    }
+});
+
+const proxyControls = (scheme: string) => {
+    let change: () => Promise<void>;
+    const schemeElement = {
+        value: scheme,
+        addEventListener: (_: string, listener: () => Promise<void>) => { change = listener; },
+    };
+    const hidden: Record<string, boolean[]> = {host: [], port: []};
+    const field = (name: string) => ({
+        value: "",
+        classList: {
+            toggle: (className: string, force?: boolean): void => {
+                assert.equal(className, "fn__none");
+                hidden[name].push(Boolean(force));
+            },
+        },
+    });
+    const host = field("host");
+    const port = field("port");
+    const root = {
+        querySelector: (selector: string) => {
+            if (selector === "#networkProxyScheme") {
+                return schemeElement;
+            }
+            if (selector === "#networkProxyHost") {
+                return host;
+            }
+            if (selector === "#networkProxyPort") {
+                return port;
+            }
+            return {addEventListener: (): void => undefined};
+        },
+    };
+    return {root, schemeElement, hidden, change: () => change()};
+};
+
+test("network proxy hides host and port inputs unless a manual scheme is selected", async () => {
+    const cases = [["http", false], ["https", false], ["socks5", false], ["system", true], ["", true]] as const;
+    for (const [scheme, hidden] of cases) {
+        const slot = getAccessibilitySlot(true, false, undefined, "networkProxy");
+        const view = proxyControls(scheme);
+        await slot.afterMount(view.root);
+        assert.deepEqual(view.hidden, {host: [hidden], port: [hidden]}, `scheme ${scheme}`);
+    }
+    const slot = getAccessibilitySlot(true, false, undefined, "networkProxy");
+    const view = proxyControls("http");
+    await slot.afterMount(view.root);
+    view.schemeElement.value = "system";
+    await view.change();
+    assert.deepEqual(view.hidden, {host: [false, true], port: [false, true]});
 });
 
 const controls = () => {

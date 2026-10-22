@@ -1884,6 +1884,16 @@ export class TableControl {
                         },
                     }).element);
                 }
+                if (!this.protyle.disabled && this.selection.mode !== "cell") {
+                    menu.append(new MenuItem({
+                        icon: "iconCopy",
+                        label: window.siyuan.languages.duplicateCopy,
+                        disabled: merged,
+                        action: merged ? "iconInfo" : undefined,
+                        actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
+                        click: () => this.duplicateRowsOrColumns(),
+                    }).element);
+                }
                 menu.append(new MenuItem({
                     icon: "iconCut",
                     label: window.siyuan.languages.cut,
@@ -1910,14 +1920,6 @@ export class TableControl {
                     menu.append(new MenuItem({type: "separator"}).element);
                     this.appendInsertMenus();
                     if (this.selection.mode !== "cell") {
-                        menu.append(new MenuItem({
-                            icon: "iconCopy",
-                            label: window.siyuan.languages.duplicateCopy,
-                            disabled: merged,
-                            action: merged ? "iconInfo" : undefined,
-                            actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
-                            click: () => this.duplicateRowsOrColumns(),
-                        }).element);
                         if (this.selection.indexes.size === 1 && this.selection.indexes.has(0)) {
                             const headerType = this.selection.mode === "row" ? "row" : "column";
                             menu.append(new MenuItem({

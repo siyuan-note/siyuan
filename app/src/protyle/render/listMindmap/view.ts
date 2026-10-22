@@ -791,6 +791,8 @@ export class ListMindmapView {
             element.classList.toggle("mindmap-view__node--branch", node.children.length > 0);
             element.classList.toggle("mindmap-view__node--colored", this.themeColors.has(id));
             const style = model.metadata.nodes[id];
+            element.style.width = style?.width ? `${Math.max(32, style.width)}px` : "";
+            element.style.maxWidth = style?.width ? "none" : "";
             const background = style?.backgroundColor || this.themeColors.get(id)?.backgroundColor || "";
             element.style.backgroundColor = background;
             element.style.color = style?.textColor || (this.themeColors.has(id) && isMindmapColor(background) ?
@@ -862,6 +864,13 @@ export class ListMindmapView {
                                 item.dataset.mindmapSourceId = item.dataset.nodeId;
                             }
                             if (item.hasAttribute("spellcheck")) {
+                                // 行级公式末尾的单个换行用于放置光标，预览不把它显示成额外空行。
+                                const last = item.lastChild;
+                                if (last?.nodeType === Node.TEXT_NODE && last.textContent === "\n" &&
+                                    last.previousSibling instanceof Element &&
+                                    last.previousSibling.matches('[data-type~="inline-math"]')) {
+                                    last.remove();
+                                }
                                 item.classList.add("mindmap-view__text");
                                 item.classList.toggle("mindmap-view__text--trailing-newline", item.textContent.endsWith("\n"));
                             }
@@ -3547,6 +3556,29 @@ export class ListMindmapView {
             nodePalette.append(manage);
         }
         this.inspector.append(nodePalette);
+        const widthLabel = createElement("label", "mindmap-view__node-width");
+        widthLabel.append(this.label("width"));
+        const width = createElement("input", "b3-text-field");
+        width.type = "number";
+        width.min = "32";
+        width.step = "1";
+        width.placeholder = this.label("default");
+        width.setAttribute("aria-label", this.label("width"));
+        const selectedWidth = this.model.metadata.nodes[id]?.width || 0;
+        width.value = ids.every(nodeID => (this.model.metadata.nodes[nodeID]?.width || 0) === selectedWidth) &&
+            selectedWidth ? String(selectedWidth) : "";
+        width.addEventListener("change", () => {
+            if (!width.validity.valid) {
+                return;
+            }
+            if (width.value === "") {
+                change({width: 0});
+            } else if (Number.isFinite(width.valueAsNumber)) {
+                change({width: width.valueAsNumber});
+            }
+        });
+        widthLabel.append(width);
+        this.inspector.append(widthLabel);
         if (multiple) {
             color(undefined, value => change({lineColor: value}), "listMindmapLineColor");
             appendMore();

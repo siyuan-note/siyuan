@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022134112"
+		"updated": "20261022181804"
 	},
 	"Children": [
 		{
@@ -2090,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261022134112"
+				"updated": "20261022181804"
 			},
 			"Children": [
 				{
@@ -2121,6 +2121,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-s1vt5mf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-s1vt5mf",
+				"updated": "20261022181804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "1 つ以上のノードを選択し、フローティングスタイルバーの「幅」にピクセル値を入力すると、ノードの幅を調整できます。値を空にすると自動調整に戻ります。ノードを広げると、長いインライン数式を 1 行で表示できます。幅は文書とともに保存され、取り消しとやり直しに対応します。"
 				}
 			]
 		},

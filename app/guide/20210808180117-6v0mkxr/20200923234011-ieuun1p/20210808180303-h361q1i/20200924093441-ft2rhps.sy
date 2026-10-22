@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261022134112"
+		"updated": "20261022181804"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261022134112"
+				"updated": "20261022181804"
 			},
 			"Children": [
 				{
@@ -1992,6 +1992,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-c0rm54w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-c0rm54w",
+				"updated": "20261022181804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select one or more nodes and set Width in the floating style bar to adjust their width in pixels. Clear the value to restore automatic sizing. Widen a node to show a long inline formula on one line. The width is saved with the document and supports undo and redo."
 				}
 			]
 		},

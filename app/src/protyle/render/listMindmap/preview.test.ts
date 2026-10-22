@@ -19,7 +19,7 @@ const extract = (file: string, names: string[]) => {
     return compile(declarations.map(declaration => declaration.getText(source)).join("\n"));
 };
 
-const cases = async (source: string, css: string) => {
+const cases = async (source: string, css: string, formulas: string[]) => {
     const check = require("node:assert/strict");
     const requests: {url: string, data: Record<string, string>}[] = [];
     const dependencies = {
@@ -181,7 +181,9 @@ const cases = async (source: string, css: string) => {
     root.append(map);
     const nodeElement = map.firstElementChild;
     const node = {id: "table-node", children: [] as unknown[], contentBlocks: [richTable], virtual: false};
-    const model = {root: node, nodes: new Map([[node.id, node]]), metadata: {nodes: {}, relations: [] as {id: string}[]}};
+    const model = {root: node, nodes: new Map([[node.id, node]]), metadata: {
+        nodes: {} as Record<string, {width?: number}>, relations: [] as {id: string}[],
+    }};
     const view = Object.assign(new api.MindmapPreviewView(), {
         options: {}, viewport: document.createElement("div"), persistedLocked: false,
         nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
@@ -211,6 +213,43 @@ const cases = async (source: string, css: string) => {
             check.ok(action.getBoundingClientRect().right <= text.getBoundingClientRect().left + 1,
                 "list markers keep their shared indentation at large editor fonts");
         }
+    }
+    // 使用真实 KaTeX 排版，检查占位换行、分式、长公式和节点宽度恢复。
+    const paragraph = document.createElement("div");
+    paragraph.className = "p";
+    paragraph.dataset.type = "NodeParagraph";
+    paragraph.dataset.nodeId = "formula";
+    node.contentBlocks = [paragraph];
+    for (const formula of formulas) {
+        paragraph.innerHTML = '<div spellcheck="false"><span data-type="inline-math" data-subtype="math" ' +
+            'data-render="true">' + formula + "</span>\n</div>";
+        const original = paragraph.outerHTML;
+        view.update(model);
+        const text = map.querySelector<HTMLElement>(".mindmap-view__text");
+        check.equal(text.classList.contains("mindmap-view__text--trailing-newline"), false);
+        check.equal(text.lastChild.nodeType, Node.ELEMENT_NODE);
+        const math = text.querySelector<HTMLElement>('[data-type="inline-math"]');
+        check.ok(math.getBoundingClientRect().right <= nodeElement.getBoundingClientRect().right);
+        const narrowHeight = nodeElement.getBoundingClientRect().height;
+        const naturalWidth = math.scrollWidth;
+        model.metadata.nodes[node.id] = {width: 1000};
+        view.update(model);
+        const wideMath = map.querySelector<HTMLElement>('[data-type="inline-math"]');
+        check.equal(nodeElement.getBoundingClientRect().width, 1000);
+        check.ok(wideMath.scrollWidth <= wideMath.clientWidth + 1, "widening removes formula scrolling");
+        check.ok(nodeElement.getBoundingClientRect().height <= narrowHeight + 1, "formula never splits into separate lines");
+        check.ok(wideMath.getBoundingClientRect().width <= naturalWidth + 1,
+            `formula keeps its natural width: ${wideMath.getBoundingClientRect().width} / ${naturalWidth}`);
+        check.equal(paragraph.outerHTML, original, "formula preview leaves source and caret marker intact");
+        model.metadata.nodes[node.id] = {width: 0};
+        view.update(model);
+        check.ok(nodeElement.getBoundingClientRect().width <= 300, "reset restores automatic sizing");
+    }
+    for (const html of ["Plain text\n", '<span data-type="inline-math">x</span>\n\n',
+        '<span data-type="inline-math">x</span>\nNext line']) {
+        paragraph.innerHTML = `<div spellcheck="false">${html}</div>`;
+        view.update(model);
+        check.equal(map.querySelector(".mindmap-view__text").innerHTML, html, "real line breaks survive the preview");
     }
     style.remove();
 
@@ -251,7 +290,11 @@ test("special block previews cannot acquire document writes or lose unsupported 
     const viewClass = viewSource.statements.find(isClassDeclaration);
     const viewMethods = viewClass.members.filter(member => ["update", "getContentHost"].includes(member.name?.getText(viewSource)));
     assert.equal(viewMethods.length, 2);
-    const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
+    const katexDirectory = path.resolve(__dirname, "../../../../stage/protyle/js/katex");
+    const katex = require(path.join(katexDirectory, "katex.min.js"));
+    const formulas = ["x", "\\frac{y}{x}", "AAA=" + "A".repeat(40)].map(value =>
+        katex.renderToString(value, {output: "html"}));
+    const css = readFileSync(path.join(katexDirectory, "katex.min.css"), "utf8") + require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,
     }).css;
     const source = compile(readFileSync(path.join(__dirname, "../../../plugin/customBlockRender.ts"), "utf8")) +
@@ -277,7 +320,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript("window.Lute = {UnEscapeHTMLStr: value => value}; void 0;");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
+        `const __name = value => value; (${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(formulas)})`)}));
         win.destroy();
         app.exit(0);
     } catch (error) {

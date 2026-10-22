@@ -9,6 +9,7 @@ import {isListMindmapAppearance} from "./appearance";
 import type {ListMindmapAppearance} from "./appearance";
 
 export interface ListMindmapNodeStyle {
+    width?: number;
     branchColor?: number;
     textColor?: string;
     backgroundColor?: string;
@@ -115,7 +116,7 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
     if ("connectorStyle" in data && !LIST_MINDMAP_CONNECTOR_STYLES.some(style => style === data.connectorStyle)) {
         throw invalidMetadata();
     }
-    const numberKeys = ["fontSize", "borderWidth", "borderRadius", "lineWidth"];
+    const numberKeys = ["width", "fontSize", "borderWidth", "borderRadius", "lineWidth"];
     if ("appearance" in data && !isListMindmapAppearance(data.appearance)) {
         throw invalidMetadata();
     }

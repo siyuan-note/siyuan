@@ -152,6 +152,22 @@ test("mindmap metadata rejects unknown formats and invalid values without replac
     }
 });
 
+test("node widths round trip in both metadata versions without changing existing styles", () => {
+    for (const version of [1, 2]) {
+        const previous = {version, nodes: {a: {textColor: "red", extension: "retained"}}, relations: [] as unknown[]};
+        assert.deepEqual(parseListMindmapMetadata(JSON.stringify(previous)), previous);
+        for (const width of [0, 32, 680]) {
+            const next = {...previous, nodes: {a: {...previous.nodes.a, width}}};
+            assert.deepEqual(parseListMindmapMetadata(JSON.stringify(next)), next);
+        }
+        for (const width of [-1, "600", null]) {
+            assert.throws(() => parseListMindmapMetadata(JSON.stringify({
+                ...previous, nodes: {a: {width}},
+            })));
+        }
+    }
+});
+
 test("connector presets extend both metadata versions without migrating legacy configurations", () => {
     for (const version of [1, 2]) {
         const legacy = JSON.stringify({version, nodes: {a: {lineColor: "red"}}, relations: [], extension: "keep"});
@@ -2177,7 +2193,18 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             getComputedStyle(host).borderTopColor + " 0px 0px 0px 1px");
     }
     host.style.removeProperty("--b3-border-color");
-    check.equal(inspector.querySelectorAll('input[type="number"]').length, 0);
+    check.equal(inspector.querySelectorAll('input[type="number"]').length, 1, "node width is editable");
+    const widthInput = inspector.querySelector<HTMLInputElement>('input[type="number"]');
+    widthInput.value = "640";
+    widthInput.dispatchEvent(new Event("change", {bubbles: true}));
+    check.deepEqual(nodeStyles.at(-1), [beta, {width: 640}]);
+    const styleCount = nodeStyles.length;
+    widthInput.value = "12";
+    widthInput.dispatchEvent(new Event("change", {bubbles: true}));
+    check.equal(nodeStyles.length, styleCount, "invalid widths do not change metadata");
+    widthInput.value = "";
+    widthInput.dispatchEvent(new Event("change", {bubbles: true}));
+    check.deepEqual(nodeStyles.at(-1), [beta, {width: 0}], "clearing restores automatic width");
     check.equal(inspector.querySelectorAll('input[type="checkbox"]').length, 0);
     check.equal(inspector.querySelector('input[type="color"]'), null);
     check.equal(inspector.querySelectorAll('[role="group"]').length, 1);

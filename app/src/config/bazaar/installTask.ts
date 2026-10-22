@@ -14,6 +14,7 @@ interface IBazaarBatchUpdate {
 let batchUpdate: IBazaarBatchUpdate;
 // 按包保留安装状态，切换详情或重新挂载集市时仍能阻止重复请求。
 const installTasks = new Map<string, IBazaarInstallTask>();
+const buttonsWithTooltip = new WeakSet<HTMLElement>();
 const taskKey = (type: TBazaarType, name: string) => `${type}/${name}`;
 
 export const getBazaarInstallTask = (type: TBazaarType, name: string) => installTasks.get(taskKey(type, name));
@@ -95,6 +96,8 @@ const restoreButton = (button: HTMLElement) => {
     ["data-install-pending", "data-install-label", "data-install-disabled", "data-install-aria-label", "aria-busy"]
         .forEach(name => button.removeAttribute(name));
     button.classList.remove("b3-button--progress-text");
+    button.classList.toggle("ariaLabel", buttonsWithTooltip.has(button));
+    buttonsWithTooltip.delete(button);
     button.style.removeProperty("--b3-progress");
 };
 
@@ -111,11 +114,15 @@ const prepareButton = (element: HTMLElement) => {
         button = replacement;
     }
     if (!button.hasAttribute("data-install-pending")) {
+        if (button.classList.contains("ariaLabel")) {
+            buttonsWithTooltip.add(button);
+        }
         button.setAttribute("data-install-disabled", String(button.hasAttribute("disabled")));
         button.setAttribute("data-install-label", button.innerHTML);
         button.setAttribute("data-install-aria-label", button.getAttribute("aria-label") || "");
     }
     button.setAttribute("data-install-pending", "true");
+    button.classList.remove("ariaLabel");
     button.setAttribute("aria-busy", "true");
     return button;
 };

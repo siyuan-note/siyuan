@@ -29,6 +29,28 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     let confirmations = 0;
     let refreshed = 0;
     let failures = 0;
+    let mobileFrontend = false;
+    const tooltipElement = document.createElement("div");
+    tooltipElement.id = "tooltip";
+    tooltipElement.className = "tooltip fn__none";
+    document.body.append(tooltipElement);
+    Object.assign(window, {DOMPurify: {sanitize: (value: string) => value}});
+    const tooltipModule = {exports: {}};
+    new Function("exports", "require", sources.tooltip)(tooltipModule.exports, (name: string) => {
+        if (name === "../util/functions") return {isMobile: () => mobileFrontend};
+        if (name === "../util/hoverInput") return {initHoverInput() {}, isTouchHoverInput: () => false};
+        if (name === "../plugin/EventBusCore") return {emitToPlugins() {}, forEachPluginSubscriber() {}};
+        throw new Error(`Unexpected tooltip dependency: ${name}`);
+    });
+    (tooltipModule.exports as typeof import("../../dialog/tooltip")).initTooltips();
+    const checkTooltip = (element: HTMLElement, message = "") => {
+        tooltipElement.className = "tooltip fn__none";
+        tooltipElement.textContent = "";
+        element.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+        check.equal(tooltipElement.classList.contains("fn__none"), mobileFrontend || !message,
+            "Progress controls suppress visual tooltips while idle warnings keep their existing behavior");
+        if (!mobileFrontend && message) check.equal(tooltipElement.textContent, message);
+    };
     Object.assign(window, {siyuan: {languages: {download: "Download", cancel: "Cancel", bazaarInstalling: "Installing...",
         update: "Update", updateAll: "Update all"},
         config: {bazaar: {petalDisabled: false}}}});
@@ -78,8 +100,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             <div class="config-bazaar__panel" data-type="plugin"><input class="b3-text-field"></div>
             <div id="configBazaarReadme"><div class="item__side" data-name="sample" data-package-type="plugins" data-repourl="${update ? updatedItem.available.repoURL : item.repoURL}"></div>
             <div class="item__actions${mobile ? " item__actions--mobile" : ""}" data-name="sample" data-package-type="plugins" data-from="${update ? "updated" : "bazaar"}">
-            ${icon ? '<span data-type="install-t" class="block__icon" aria-label="Update"><svg></svg></span>' :
-        `<button class="b3-button" data-type="${update ? "install-t" : "install"}" ${disabled ? "disabled" : ""}>${update ? "Update" : "Download"}</button>`}
+            ${icon ? '<span data-type="install-t" class="block__icon ariaLabel" aria-label="Update"><svg></svg></span>' :
+        `<button class="b3-button ariaLabel" data-type="${update ? "install-t" : "install"}" ${disabled ? 'disabled aria-label="Incompatible package"' : ""}>${update ? "Update" : "Download"}</button>`}
             </div></div><button class="b3-button" data-type="install-all">Update all</button></div>`;
         events.bindBazaarEvents(controller as unknown as Parameters<typeof events.bindBazaarEvents>[0], {} as App, mount);
         tasks.renderBazaarInstall(root);
@@ -89,6 +111,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         for (let i = 0; i < 5; i++) await Promise.resolve();
     };
     for (const mobile of [false, true]) {
+        mobileFrontend = mobile;
         document.documentElement.style.setProperty("--b3-theme-primary", mobile ? "#375278" : "#3573f0");
         const pushProgress = (percent: number) => {
             const data = {id: item.repoURL, percent};
@@ -103,6 +126,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         button.click();
         check.equal(requests.length, initialRequests + 1);
         check.equal(button.textContent, "Cancel 0%", "The first click immediately shows cancellable progress");
+        check.equal(button.getAttribute("aria-label"), "Cancel 0%", "Accessible progress labels are retained");
+        checkTooltip(button);
         check.equal(button.disabled, false);
         check.equal(tasks.beginBazaarInstall("plugins", item.name, item.repoURL), undefined, "A pending package cannot start again");
         check.equal(tasks.updateBazaarInstallProgress({id: "another", percent: .8}), false);
@@ -135,6 +160,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         check.equal(button.textContent, "Cancel 0%");
         pushProgress(1);
         check.equal(button.textContent, "Installing...");
+        check.equal(button.getAttribute("aria-label"), "Installing...");
+        checkTooltip(button);
         check.equal(button.disabled, true, "Installation after downloading is not presented as cancellable");
         tasks.cancelBazaarInstall("plugins", item.name);
         check.equal(requests.at(-1).signal.aborted, false);
@@ -145,6 +172,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         await settle();
         check.equal(confirmations, mobile ? 2 : 1, "Successful installation asks to enable the plugin once");
         check.equal(button.textContent, "Download");
+        check.equal(button.classList.contains("ariaLabel"), true, "Success restores the original tooltip trigger");
 
         button.click();
         requests.at(-1).fail({msg: "network"});
@@ -152,20 +180,24 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         await settle();
         check.equal(button.disabled, false, "Network errors release the package lock");
         check.equal(button.textContent, "Download");
+        check.equal(button.classList.contains("ariaLabel"), true, "Failure restores the original tooltip trigger");
         check.equal(tasks.getBazaarInstallTask("plugins", item.name), undefined);
     }
     check.equal(refreshed, 6);
     check.equal(failures, 2);
     for (const mobile of [false, true]) {
+        mobileFrontend = mobile;
         for (const icon of [false, true]) {
             const initialRequests = requests.length;
             const original = render(mobile, false, true, icon);
+            checkTooltip(original, icon ? "Update" : "");
             original.click();
             let button = root.querySelector<HTMLButtonElement>('[data-type="install-t"]');
             check.equal(requests.length, initialRequests + 1);
             check.equal(requests.at(-1).url, "/api/bazaar/updateBazaarPackage");
             check.equal(button.tagName, "BUTTON", "Card icons use a full progress button while updating");
             check.equal(button.textContent, "Cancel 0%");
+            checkTooltip(button);
             const data = {id: updatedItem.available.repoURL, percent: .53};
             if (mobile) mobileEvents.onMessage({} as App, {cmd: "downloadProgress", data} as IWebSocketData);
             else progress.downloadProgress(data);
@@ -181,6 +213,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             const restored = root.querySelector<HTMLElement>('[data-type="install-t"]');
             check.equal(restored.tagName, icon ? "SPAN" : "BUTTON");
             check.equal(restored.hasAttribute("disabled"), false);
+            checkTooltip(restored, icon ? "Update" : "");
             const idleHTML = restored.outerHTML;
             progress.downloadProgress({id: updatedItem.available.repoURL, percent: .9});
             check.equal(restored.outerHTML, idleHTML, "Late progress after cancellation cannot overwrite idle update controls");
@@ -188,6 +221,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             button = root.querySelector<HTMLButtonElement>('[data-type="install-t"]');
             progress.downloadProgress({id: updatedItem.available.repoURL, percent: 1});
             check.equal(button.textContent, "Installing...");
+            checkTooltip(button);
             check.equal(button.disabled, true);
             requests.at(-1).callback({code: 0, data: {packages: []}});
             requests.at(-1).resolve();
@@ -200,6 +234,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         all.click();
         check.equal(requests.at(-1).url, "/api/bazaar/batchUpdatePackage");
         check.equal(all.textContent, "Cancel 0%");
+        checkTooltip(all);
+        checkTooltip(root.querySelector('[data-type="install-t"]'));
         check.equal(root.querySelector<HTMLButtonElement>('[data-type="install-t"]').disabled, true);
         progress.downloadProgress({id: updatedItem.available.repoURL, percent: .7});
         check.equal(all.textContent, "Cancel 35%", "Batch progress includes packages still waiting to download");
@@ -223,12 +259,18 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         await settle();
         check.equal(tasks.getBazaarBatchUpdate(), undefined, "A failed batch releases all package locks");
     }
-    const pending = tasks.beginBazaarInstall("plugins", item.name, item.repoURL);
-    const disabledButton = render(true, true);
-    check.equal(disabledButton.disabled, false, "An unavailable package can still cancel its pending download");
-    tasks.finishBazaarInstall("plugins", item.name, pending);
-    tasks.renderBazaarInstall(root);
-    check.equal(disabledButton.disabled, true, "Settling an installation preserves the current package availability");
+    for (const mobile of [false, true]) {
+        mobileFrontend = mobile;
+        const pending = tasks.beginBazaarInstall("plugins", item.name, item.repoURL);
+        const disabledButton = render(mobile, true);
+        check.equal(disabledButton.disabled, false, "An unavailable package can still cancel its pending download");
+        checkTooltip(disabledButton);
+        tasks.finishBazaarInstall("plugins", item.name, pending);
+        tasks.renderBazaarInstall(root);
+        check.equal(disabledButton.disabled, true, "Settling an installation preserves the current package availability");
+        check.equal(disabledButton.getAttribute("aria-label"), "Incompatible package");
+        checkTooltip(disabledButton, "Incompatible package");
+    }
     check.deepEqual(errors, []);
     return "Bazaar install interaction cases passed";
 };
@@ -248,6 +290,9 @@ test("marketplace installation, single update and batch update progress and canc
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     sources.mobile = transpileModule(readFileSync(path.join(__dirname, "../../mobile/util/onMessage.ts"), "utf8"), {
+        compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+    }).outputText;
+    sources.tooltip = transpileModule(readFileSync(path.join(__dirname, "../../dialog/tooltip.ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const css = compile(path.join(__dirname, "../../assets/scss/component/_button.scss"), {logger: Logger.silent}).css;

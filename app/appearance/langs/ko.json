@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "행 높이 자동 맞춤",
-	"convertCurrentList": "현재 목록을 ${name}(으)로 변환",
-	"cancelCurrentList": "현재 목록 해제",
-	"createList": "${name} 만들기",
-	"insertChildList": "하위 목록 삽입: ${name}",
 	"backlinkDatabaseFields": "데이터베이스 필드",
 	"listMindmapPaletteOcean": "바다",
 	"listMindmapPaletteSunset": "일몰",

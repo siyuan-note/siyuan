@@ -108,20 +108,3 @@ test("conversion refresh repairs deleted zoom targets and leaves other views unf
     refresh(protyle, {rootIDs: ["document"], removedIDs: [], focusID: "paragraph"});
     assert.deepEqual(calls, ["reload"]);
 });
-
-test("slash list removal restores the command caret after reload and falls back when it is unavailable", () => {
-    for (const restored of [false, true]) {
-        const calls: string[] = [];
-        const context = {undoFocusId: "paragraph", undoFocusStart: "7", undoFocusEnd: "7"};
-        const protyle = {block: {rootID: "document"}, wysiwyg: {element: {querySelector: () => "paragraph"}}} as unknown as IProtyle;
-        const refresh = new Function("reloadProtyle", "focusBlock", "restoreFocusContext", extract("refreshListConversion") + "\nreturn refreshListConversion;")(
-            (_protyle: IProtyle, _focus: boolean, _readonly: boolean, callback: () => void) => callback(),
-            () => calls.push("fallback"), (_protyle: IProtyle, value: unknown) => {
-                assert.equal(value, context);
-                calls.push("restore");
-                return restored;
-            });
-        refresh(protyle, {rootIDs: ["document"], removedIDs: [], focusID: "paragraph"}, true, context);
-        assert.deepEqual(calls, restored ? ["restore"] : ["restore", "fallback"]);
-    }
-});

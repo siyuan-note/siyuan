@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "Satır yüksekliğini otomatik sığdır",
-	"convertCurrentList": "Geçerli listeyi dönüştür: ${name}",
-	"cancelCurrentList": "Geçerli liste biçimini kaldır",
-	"createList": "${name} oluştur",
-	"insertChildList": "Alt liste ekle: ${name}",
 	"backlinkDatabaseFields": "Veritabanı alanları",
 	"listMindmapPaletteOcean": "Okyanus",
 	"listMindmapPaletteSunset": "Gün batımı",

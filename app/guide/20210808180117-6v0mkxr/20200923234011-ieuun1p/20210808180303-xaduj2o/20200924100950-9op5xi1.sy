@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261022181833"
+		"updated": "20261022134112"
 	},
 	"Children": [
 		{
@@ -4365,7 +4365,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261022181833"
+				"updated": "20261020181700"
 			},
 			"Children": [
 				{
@@ -12660,7 +12660,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20261022181833"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -12670,20 +12670,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "List"
-				}
-			]
-		},
-		{
-			"ID": "20261022181833-rojpzqb",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261022181833-rojpzqb",
-				"updated": "20261022181833"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In a list item, type / and choose a command to convert the current list to an ordered, unordered, or task list, or to cancel the current list. The command affects all sibling items in the nearest list; nested list types remain unchanged. The list creation commands insert a sublist inside a list item. Conversion commands are unavailable when zooming into a single list item without its parent list."
 				}
 			]
 		},

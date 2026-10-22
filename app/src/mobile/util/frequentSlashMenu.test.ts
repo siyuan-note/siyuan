@@ -120,8 +120,6 @@ for (const iosPhotos of [false, true]) {
             canPickIOSPhotos: () => iosPhotos,
             isBuiltinInlineStyleVisible: () => false,
             getSuperBlockCommand: (layout: string) => layout,
-            getListInsertLabel: (_protyle: unknown, name: string) => name,
-            getBuiltinSlashMenuItems: () => [{id: "convertCurrentListOL", value: "convert-current-list:o", filter: ["Convert current list"]}],
             escapeHtml: (value: string) => value,
             getFrequentSlashButtons,
             getFrequentSlashItems: (buttons: HTMLButtonElement[], getKey: (button: HTMLButtonElement) => string) =>
@@ -151,7 +149,6 @@ for (const iosPhotos of [false, true]) {
         assert.equal(util.innerHTML.includes('data-native-photos="true"'), iosPhotos);
         assert.equal((util.innerHTML.match(/data-slash-entry-key="insertHTMLFile"/g) || []).length, 0);
         assert.equal(boundUploads, 1);
-        assert.equal((util.innerHTML.match(/data-slash-entry-key="convertCurrentListOL"/g) || []).length, 1);
         assert.equal(protyle.hint.splitChar, "/");
         assert.equal(protyle.hint.lastIndex, -1);
         protyle.lite = true;

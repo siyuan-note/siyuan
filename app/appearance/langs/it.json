@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "Adatta automaticamente l’altezza della riga",
-	"convertCurrentList": "Converti l’elenco corrente in: ${name}",
-	"cancelCurrentList": "Rimuovi la struttura dell’elenco corrente",
-	"createList": "Crea ${name}",
-	"insertChildList": "Inserisci sottoelenco: ${name}",
 	"backlinkDatabaseFields": "Campi del database",
 	"listMindmapPaletteOcean": "Oceano",
 	"listMindmapPaletteSunset": "Tramonto",

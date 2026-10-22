@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "Автоподбор высоты строки",
-	"convertCurrentList": "Преобразовать текущий список в: ${name}",
-	"cancelCurrentList": "Убрать формат текущего списка",
-	"createList": "Создать: ${name}",
-	"insertChildList": "Вставить вложенный список: ${name}",
 	"backlinkDatabaseFields": "Поля базы данных",
 	"listMindmapPaletteOcean": "Океан",
 	"listMindmapPaletteSunset": "Закат",

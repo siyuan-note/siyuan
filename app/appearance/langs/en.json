@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "Auto-fit row height",
-	"convertCurrentList": "Convert current list to ${name}",
-	"cancelCurrentList": "Cancel current list",
-	"createList": "Create ${name}",
-	"insertChildList": "Insert sublist: ${name}",
 	"backlinkDatabaseFields": "Database fields",
 	"listMindmapPaletteOcean": "Ocean",
 	"listMindmapPaletteSunset": "Sunset",

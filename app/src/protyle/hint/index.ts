@@ -21,7 +21,6 @@ import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
 import {searchRef} from "./searchRef";
 import {getSlashEntryKey, TSlashMenuItem} from "./slashMenu";
-import {convertListCommand} from "./convertListCommand";
 import {getFrequentSlashItems, recordSlashExecution} from "./frequentSlashStorage";
 import {escapeAttr} from "../../util/escape";
 import {createDailyNoteReference} from "./dailyNote";
@@ -1317,9 +1316,6 @@ ${genHintItemHTML(item)}
                     this.enableExtend = true;
                     this.render(protyle);
                 }
-            } else if (value.startsWith("convert-current-list:")) {
-                void convertListCommand(protyle, value, range, undoContext);
-                return;
             } else if (value === "((" || value === "{{") {
                 this.enableExtend = true;
                 if (value === "((") {

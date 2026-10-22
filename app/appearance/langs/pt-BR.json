@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "Ajustar automaticamente a altura da linha",
-	"convertCurrentList": "Converter a lista atual em: ${name}",
-	"cancelCurrentList": "Remover a formatação da lista atual",
-	"createList": "Criar ${name}",
-	"insertChildList": "Inserir sublista: ${name}",
 	"backlinkDatabaseFields": "Campos do banco de dados",
 	"listMindmapPaletteOcean": "Oceano",
 	"listMindmapPaletteSunset": "Pôr do sol",

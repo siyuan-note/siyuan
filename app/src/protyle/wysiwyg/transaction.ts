@@ -9,7 +9,6 @@ import {
     focusSideBlock,
     getEditorRange,
     getUndoFocusContext,
-    restoreFocusContext,
     restoreUndoFocus
 } from "../util/selection";
 import {
@@ -2173,12 +2172,10 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
     return foldOperations.reverse();
 };
 
-export const removeListStructure = (protyle: IProtyle, nodeElements: Element[], recursively = false,
-                                    focusContext?: Record<string, string>) =>
-    turnListBlocksInto({protyle, recursively, focusContext}, nodeElements.filter(isListHeadingContainer));
+export const removeListStructure = (protyle: IProtyle, nodeElements: Element[], recursively = false) =>
+    turnListBlocksInto({protyle, recursively}, nodeElements.filter(isListHeadingContainer));
 
-const refreshListConversion = (protyle: IProtyle, result: TransactionListConversionResult, focus = false,
-                               focusContext?: Record<string, string>) => {
+const refreshListConversion = (protyle: IProtyle, result: TransactionListConversionResult, focus = false) => {
     if (!result?.rootIDs?.length) {
         return;
     }
@@ -2190,9 +2187,6 @@ const refreshListConversion = (protyle: IProtyle, result: TransactionListConvers
             protyle.block.parentID = protyle.block.rootID;
         }
         reloadProtyle(protyle, false, undefined, () => {
-            if (focus && focusContext && restoreFocusContext(protyle, focusContext)) {
-                return;
-            }
             if (focus && result.focusID) {
                 const element = protyle.wysiwyg.element.querySelector(`[data-node-id="${result.focusID}"]`);
                 if (element) {
@@ -2215,7 +2209,6 @@ const turnListBlocksInto = async (options: {
     range?: Range,
     unfocus?: boolean,
     recursively?: boolean,
-    focusContext?: Record<string, string>,
 }, elements: Element[]) => {
     const protyle = options.protyle;
     const selected = elements.filter(element => !elements.some(parent => parent !== element && parent.contains(element)));
@@ -2246,7 +2239,7 @@ const turnListBlocksInto = async (options: {
         operation.retData.rootIDs.forEach(rootID => markMirror(rootID, {canUndo: true, canRedo: false}));
         protyle.updated = true;
         hideElements(["select", "gutter"], protyle);
-        refreshListConversion(protyle, operation.retData, !options.unfocus, options.focusContext);
+        refreshListConversion(protyle, operation.retData, !options.unfocus);
         refreshUndoButtons(protyle);
     });
 };
@@ -2347,7 +2340,6 @@ export const turnsOneInto = async (options: {
         id: string,
         html: string,
     },
-    undoContext?: Record<string, string>,
     additionalOperations?: {
         doOperations: IOperation[],
         undoOperations: IOperation[],
@@ -2499,7 +2491,7 @@ export const turnsOneInto = async (options: {
         const undoFoldOperations = foldOperations.map((operation) => ({...operation}));
         transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));
     } else {
-        updateTransaction(options.protyle, options.nodeElement, oldHTML, options.undoContext);
+        updateTransaction(options.protyle, options.nodeElement, oldHTML);
     }
     focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
     options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {

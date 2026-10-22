@@ -59,7 +59,6 @@ import {
 import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
 import {getDailyNoteHints} from "./dailyNote";
-import {getListCommandLabel, getListCommandType, getListInsertLabel, getSlashListContext} from "./listCommands";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -210,46 +209,26 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         hotkey: window.siyuan.config.keymap.editor.heading.heading6.custom,
         marker: "###### ",
     }, {
-        filter: [getListInsertLabel(protyle, window.siyuan.languages.list), window.siyuan.languages.list, "unordered list", "无序列表", "wuxvliebiao", "wuxuliebiao", "wxlb"],
+        filter: [window.siyuan.languages.list, "unordered list", "无序列表", "wuxvliebiao", "wuxuliebiao", "wxlb"],
         id: "list",
         value: "- " + Lute.Caret,
         icon: "iconList",
         hotkey: window.siyuan.config.keymap.editor.insert.list.custom,
         marker: "- ",
     }, {
-        filter: [getListInsertLabel(protyle, window.siyuan.languages["ordered-list"]), window.siyuan.languages["ordered-list"], "order list", "ordered list", "有序列表", "youxvliebiao", "youxuliebiao", "yxlb"],
+        filter: [window.siyuan.languages["ordered-list"], "order list", "ordered list", "有序列表", "youxvliebiao", "youxuliebiao", "yxlb"],
         id: "orderedList",
         value: "1. " + Lute.Caret,
         icon: "iconOrderedList",
         hotkey: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
         marker: "1. ",
     }, {
-        filter: [getListInsertLabel(protyle, window.siyuan.languages.check), window.siyuan.languages.check, "task list", "todo list", "任务列表", "renwuliebiao", "rwlb"],
+        filter: [window.siyuan.languages.check, "task list", "todo list", "任务列表", "renwuliebiao", "rwlb"],
         id: "check",
         value: "- [ ] " + Lute.Caret,
         icon: "iconCheck",
         hotkey: window.siyuan.config.keymap.editor.insert.check.custom,
         marker: "[]",
-    }, {
-        filter: [getListCommandLabel("u"), "convert list", "转换列表", "zhuanhuanliebiao", "zhlb"],
-        id: "convertCurrentListUL",
-        value: "convert-current-list:u",
-        icon: "iconList",
-    }, {
-        filter: [getListCommandLabel("o"), "convert list", "转换列表", "zhuanhuanliebiao", "zhlb"],
-        id: "convertCurrentListOL",
-        value: "convert-current-list:o",
-        icon: "iconOrderedList",
-    }, {
-        filter: [getListCommandLabel("t"), "convert list", "转换列表", "zhuanhuanliebiao", "zhlb"],
-        id: "convertCurrentListTL",
-        value: "convert-current-list:t",
-        icon: "iconCheck",
-    }, {
-        filter: [getListCommandLabel("remove"), "remove list", "cancel list", "取消列表", "quxiaoliebiao", "qxlb"],
-        id: "cancelCurrentList",
-        value: "convert-current-list:remove",
-        icon: "iconParagraph",
     }, {
         filter: [window.siyuan.languages.quote, "blockquote", "bq", "引述", "yinshu", "ys"],
         id: "quote",
@@ -581,9 +560,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "separator_6",
         html: "separator",
     }];
-    const listContext = getSlashListContext(protyle);
-    return items.filter(item => !item.value.startsWith("convert-current-list:") ||
-        listContext && getListCommandType(listContext.subtype, item.value)).map((item) => "html" in item ? item : {
+    return items.map((item) => "html" in item ? item : {
         filter: item.filter,
         id: item.id,
         value: item.value,

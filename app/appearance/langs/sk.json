@@ -1,9 +1,5 @@
 {
 	"autoFitRowHeight": "Automaticky prispôsobiť výšku riadka",
-	"convertCurrentList": "Zmeniť aktuálny zoznam na: ${name}",
-	"cancelCurrentList": "Zrušiť formát aktuálneho zoznamu",
-	"createList": "Vytvoriť: ${name}",
-	"insertChildList": "Vložiť vnorený zoznam: ${name}",
 	"backlinkDatabaseFields": "Polia databázy",
 	"listMindmapPaletteOcean": "Oceán",
 	"listMindmapPaletteSunset": "Západ slnka",

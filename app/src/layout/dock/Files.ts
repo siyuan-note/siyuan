@@ -2216,7 +2216,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             if (getHostCapabilities().documentImportExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "importNotebook",
-                    icon: "iconDownload",
+                    icon: "iconUpload",
                     label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
                     bind: (element) => {
                         element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {

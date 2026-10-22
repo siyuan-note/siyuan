@@ -24,11 +24,11 @@ interface IDataMigrationOptions {
 }
 
 const getExportButton = (action: string, mode: IDataMigrationOptions["mode"]) => mode === "manage" ?
-    `<span class="fn__space"></span><button class="b3-button b3-button--outline" data-action="${action}"><svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}</button>` : "";
+    `<span class="fn__space"></span><button class="b3-button b3-button--outline" data-action="${action}"><svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.export}</button>` : "";
 
 const getImportButton = (type: string, accept: string) => `<button class="b3-button b3-button--outline" style="position:relative">
     <input class="b3-form__upload" data-type="${type}" type="file" accept="${accept}">
-    <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+    <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}
 </button>`;
 
 const openRepoKeyImport = (onComplete?: () => void) => {
@@ -163,7 +163,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
             <svg class="b3-list-item__graphic"><use xlink:href="#iconKey"></use></svg>
             <span class="b3-list-item__text">${window.siyuan.languages.dataRepoKey}</span>
             <span class="data-migration__actions">
-                ${hasRepoKey ? `<button class="b3-button b3-button--outline" data-action="copy-key"><svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}</button>` : `<button class="b3-button b3-button--outline" data-action="import-key"><svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}</button>`}
+                ${hasRepoKey ? `<button class="b3-button b3-button--outline" data-action="copy-key"><svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}</button>` : `<button class="b3-button b3-button--outline" data-action="import-key"><svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}</button>`}
             </span>
         </div>`}
     </div>` : ""}

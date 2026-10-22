@@ -104,7 +104,7 @@ ${batchMode === "replace" ? '<svg class="b3-menu__action" data-type="editAssetIt
         <span class="b3-menu__label">${window.siyuan.languages.assets}</span>
     </button>
     <button class="b3-menu__item">
-        <svg class="b3-menu__icon"><use xlink:href="#iconDownload"></use></svg>
+        <svg class="b3-menu__icon"><use xlink:href="#iconUpload"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.insertAsset}</span> 
         <input multiple class="b3-form__upload" type="file">
     </button>

@@ -215,7 +215,7 @@ const registerRepoGroup = (tab: SettingTabBuilder) => {
     </div>
     <div class="fn__space"></div>
     <div class="fn__size200 fn__flex-center fn__none" id="repoKeyActionsEmpty">
-        <button class="b3-button b3-button--outline fn__block" id="importKey"><svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}</button>
+        <button class="b3-button b3-button--outline fn__block" id="importKey"><svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.importKey}</button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__block" id="initKey"><svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}</button>
         <div class="fn__hr"></div>

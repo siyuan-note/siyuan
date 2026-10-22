@@ -34,7 +34,7 @@ func useInstallRevisionFixture(t *testing.T) (source, target string) {
 
 func installRevisionOptions(target string) PackageInstallOptions {
 	revision, _ := InstalledPackageRevision(target)
-	return PackageInstallOptions{ExpectedInstalledRevision: revision, PrivateTemp: true}
+	return PackageInstallOptions{ExpectedInstalledRevision: revision}
 }
 
 func TestInstallRevisionConflictHasNoReplacement(t *testing.T) {
@@ -149,13 +149,17 @@ func TestInstallArchiveHashConsumesVerifiedSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	hash := fmt.Sprintf("%x", sha256.Sum256(data))
+	// 解压统一落在 temp，哈希不符时不应在其中留下任何内容
+	if err := os.MkdirAll(util.TempDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	_, _, _, _, cleanup, err := ExtractLocalPackageWithHash(archivePath, strings.Repeat("0", 64))
 	cleanup()
 	if !errors.Is(err, ErrPackageHashConflict) {
 		t.Fatalf("wrong archive hash was accepted: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(installPrivateRoot(), "install-operations")); !os.IsNotExist(err) {
-		t.Fatal("hash failure created extraction directory")
+	if entries, err := os.ReadDir(util.TempDir); err != nil || len(entries) != 0 {
+		t.Fatalf("hash failure created extraction directory: %#v, %v", entries, err)
 	}
 	_, _, source, gotHash, cleanup, err := ExtractLocalPackageWithHash(archivePath, hash)
 	if err != nil {

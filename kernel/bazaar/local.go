@@ -60,7 +60,7 @@ func IsValidPackageType(pkgType string) bool {
 
 // ExtractLocalPackage 将本地集市包解压到临时目录并识别包类型。
 func ExtractLocalPackage(archivePath string) (pkgType string, pkg *Package, packagePath string, cleanup func(), err error) {
-	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(context.Background(), archivePath, "", false)
+	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(context.Background(), archivePath, "")
 	return
 }
 
@@ -70,11 +70,12 @@ func ExtractLocalPackageWithHash(archivePath, expectedHash string) (pkgType stri
 }
 
 // ExtractLocalPackageWithHashContext 在核验与解压期间响应取消，未提交的临时内容会清理。
+// 解压始终落在 temp，校验通过后才由安装流程拷入 data。
 func ExtractLocalPackageWithHashContext(ctx context.Context, archivePath, expectedHash string) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
-	return extractLocalPackageWithHash(ctx, archivePath, expectedHash, true)
+	return extractLocalPackageWithHash(ctx, archivePath, expectedHash)
 }
 
-func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash string, private bool) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
+func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash string) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
 	cleanup = func() {}
 	if err = ctx.Err(); err != nil {
 		return
@@ -96,16 +97,6 @@ func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash 
 		return
 	}
 	tempPath := filepath.Join(util.TempDir, "bazaar", "local", gulu.Rand.String(7))
-	if private {
-		root := filepath.Join(installPrivateRoot(), "install-operations")
-		if err = makePrivateInstallDir(root); err != nil {
-			return
-		}
-		tempPath, err = os.MkdirTemp(root, "extract-")
-		if err != nil {
-			return
-		}
-	}
 	cleanup = func() { _ = os.RemoveAll(tempPath) }
 	reader, readerErr := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if readerErr != nil {
@@ -155,10 +146,6 @@ func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash 
 		cleanup()
 	}
 	return
-}
-
-func extractLocalPackageReader(reader *zip.Reader, destination string) error {
-	return extractLocalPackageReaderContext(context.Background(), reader, destination)
 }
 
 func extractLocalPackageReaderContext(ctx context.Context, reader *zip.Reader, destination string) error {

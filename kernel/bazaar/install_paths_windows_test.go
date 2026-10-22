@@ -36,9 +36,6 @@ func TestInstallPathsAllowWorkspaceJunctions(t *testing.T) {
 			}
 			util.ConfDir = filepath.Join(util.WorkspaceDir, "conf")
 			util.DataDir = filepath.Join(util.WorkspaceDir, "data")
-			if err := makePrivateInstallDir(installPrivateRoot()); err != nil {
-				t.Fatalf("private operation under workspace junction: %v", err)
-			}
 			source := filepath.Join(realRoot, "source")
 			if err := os.Mkdir(source, 0755); err != nil {
 				t.Fatal(err)

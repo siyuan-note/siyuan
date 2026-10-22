@@ -158,6 +158,8 @@ const genFontListItemHTML = (font: IFontItem | undefined, currentFamily: string 
 
 let pickerID = 0;
 
+const getFontLoadingHTML = () => `<svg class="b3-menu__icon fn__rotate" role="status" aria-label="${escapeAttr(window.siyuan.languages.loading)}"><use xlink:href="#iconRefresh"></use></svg>`;
+
 const genFontPickerHTML = (fonts: IFontItem[], options: IFontFamilyPickerOptions, mobile: boolean) => {
     const currentFamily = options.mixed ? null : options.family;
     const items = [undefined, ...fonts];
@@ -166,6 +168,7 @@ const genFontPickerHTML = (fonts: IFontItem[], options: IFontFamilyPickerOptions
     const searchInput = `<input spellcheck="false" class="b3-text-field fn__flex-1" data-type="font-family-search" role="combobox" aria-expanded="true" aria-controls="${listID}" aria-label="${escapeAttr(window.siyuan.languages.fontFamily)}" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">`;
     return `<div class="fn__flex-column ${mobile ? "b3-menu__custom" : "b3-menu__filter"}" style="height:100%">
     <div class="fn__flex">
+        <span class="fn__flex fn__none" data-type="font-loading">${getFontLoadingHTML()}</span>
         ${searchInput}
     </div>
     <div class="fn__hr"></div>
@@ -176,6 +179,7 @@ const genFontPickerHTML = (fonts: IFontItem[], options: IFontFamilyPickerOptions
 const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions) => {
     const listElement = element.querySelector<HTMLElement>('[data-type="font-family-list"]');
     const inputElement = element.querySelector<HTMLInputElement>('[data-type="font-family-search"]');
+    const loadingElement = element.querySelector<HTMLElement>('[data-type="font-loading"]');
     const syncActiveDescendant = () => {
         const activeElement = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
         if (activeElement) {
@@ -217,6 +221,8 @@ const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions)
 
     const cleanupPreview = observeFontPreview(listElement, label => {
         label.style.fontFamily = getInlineFontFamilyStyle(label.dataset.family);
+    }, loading => {
+        loadingElement.classList.toggle("fn__none", !loading);
     });
     inputElement.addEventListener("keydown", event => {
         options.onInteraction?.();
@@ -299,7 +305,7 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
             const pickerElement = menu.addItem({
                 iconHTML: "",
                 type: "empty",
-                label: `<div class="b3-menu__filter">${escapeHtml(window.siyuan.languages.loading)}</div>`,
+                label: `<div class="fn__flex b3-menu__filter">${getFontLoadingHTML()}${escapeHtml(window.siyuan.languages.loading)}</div>`,
             });
             const mobile = isMobile();
             if (mobile) {

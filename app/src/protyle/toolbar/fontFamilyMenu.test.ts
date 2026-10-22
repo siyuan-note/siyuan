@@ -14,6 +14,8 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     let readonly = false;
     let fonts = Array.from({length: 60}, (_, index) => ({family: `Font ${index}`, displayName: `Font ${index}`, weight: 400}));
     let pendingFonts: Promise<{fontItems: typeof fonts}>;
+    let pendingPreviews: Promise<FontFace[]>;
+    Object.defineProperty(document.fonts, "load", {value: () => pendingPreviews || Promise.resolve([])});
     const modules: Record<string, {exports: any}> = {};
     const externals = {
         "util/functions": {isMobile: () => mobile},
@@ -28,7 +30,6 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
         "block/popoverLifecycle": {setPopoverMenuOpen() {}},
         "config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
         "util/availableFont": {loadAvailableFonts: () => pendingFonts || Promise.resolve({fontItems: fonts})},
-        "util/fontPreview": {observeFontPreview: () => () => {}},
         "protyle/util/selection": {},
     };
     const load = (name: string): any => {
@@ -137,7 +138,20 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     }
     toolbar.style.fontSize = "";
     util.style.width = "";
+    let finishPreviews: (fonts: FontFace[]) => void;
+    pendingPreviews = new Promise(resolve => { finishPreviews = resolve; });
     await tap(button);
+    const previewLoading = menuElement.querySelector<HTMLElement>('[data-type="font-loading"]');
+    const previewLabel = menuElement.querySelector<HTMLElement>('[data-family="Font 0"] .b3-menu__label');
+    check.ok(!previewLoading.classList.contains("fn__none"), "font preview waiting shows a spinner beside search");
+    check.equal(previewLoading.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh");
+    check.equal(previewLabel.style.visibility, "hidden");
+    check.equal(menuElement.querySelector<HTMLElement>('[data-family=""] .b3-menu__label').style.visibility, "");
+    finishPreviews([]);
+    await settle();
+    check.ok(previewLoading.classList.contains("fn__none"));
+    check.equal(previewLabel.style.visibility, "");
+    pendingPreviews = undefined;
     check.ok(menuElement.classList.contains("b3-menu--sheet"));
     check.equal(button.getAttribute("aria-expanded"), "true");
     check.equal(menuElement.querySelector('[data-action="fontFamilyBack"]'), null);
@@ -180,10 +194,34 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     await tap(button);
     await tap(scrim);
     check.ok(menuElement.classList.contains("fn__none"));
+    let failPreviews: (error: Error) => void;
+    pendingPreviews = new Promise((_resolve, reject) => { failPreviews = reject; });
+    await tap(button);
+    const failedLoading = menuElement.querySelector<HTMLElement>('[data-type="font-loading"]');
+    check.ok(!failedLoading.classList.contains("fn__none"));
+    failPreviews(new Error("Font unavailable"));
+    await settle();
+    check.ok(failedLoading.classList.contains("fn__none"), "failed previews also finish loading");
+    const failedLabel = menuElement.querySelector<HTMLElement>('[data-family="Font 0"] .b3-menu__label');
+    check.equal(failedLabel.style.visibility, "");
+    check.equal(failedLabel.style.fontFamily, "", "font failures retain readable fallback labels");
+    await tap(scrim);
+    pendingPreviews = new Promise(resolve => { finishPreviews = resolve; });
+    await tap(button);
+    const closedLoading = menuElement.querySelector<HTMLElement>('[data-type="font-loading"]');
+    check.ok(!closedLoading.classList.contains("fn__none"));
+    await tap(scrim);
+    const closedHTML = closedLoading.outerHTML;
+    finishPreviews([]);
+    await settle();
+    check.equal(closedLoading.outerHTML, closedHTML, "late preview completion does not update a closed picker");
+    check.ok(menuElement.classList.contains("fn__none"));
+    pendingPreviews = undefined;
     let resolve: (value: {fontItems: typeof fonts}) => void;
     pendingFonts = new Promise(done => { resolve = done; });
     const opening = api.openFontFamilyMenu(button, {disabled: false, mixed: false, onSelect() {}});
     await settle();
+    check.equal(menuElement.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh", "font list requests show the spinner too");
     await tap(scrim);
     resolve({fontItems: fonts});
     await opening;
@@ -235,10 +273,10 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     return "Font menu touch and layout cases passed";
 };
 
-test("font menus hide action buttons while preserving gesture dismissal, search viewport and selection", {timeout: 45000}, async () => {
+test("font menus show loading for list requests and previews while retaining mobile and desktop interactions", {timeout: 45000}, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
         "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
-        "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/escape", "util/upDownHint"];
+        "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/fontPreview", "util/escape", "util/upDownHint"];
     const sources = Object.fromEntries(names.map(name => [name, transpileModule(readFileSync(path.join(__dirname, "../..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));

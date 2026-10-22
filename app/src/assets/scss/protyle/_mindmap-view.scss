@@ -268,11 +268,6 @@
     }
   }
 
-  // 部分 Linux 桌面环境切换抓手光标会阻塞输入，拖动画布时保留普通箭头。
-  .body--linux &__viewport--dragging {
-    cursor: default;
-  }
-
   &__world {
     position: absolute;
     left: 0;

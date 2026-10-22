@@ -3313,7 +3313,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(getComputedStyle(panViewport).cursor, "grabbing");
     for (const platform of ["body--linux", "body--windows", "body--mac", "body--android", "body--ios", "body--harmony"]) {
         document.body.classList.add(platform);
-        check.equal(getComputedStyle(panViewport).cursor, platform === "body--linux" ? "default" : "grabbing",
+        check.equal(getComputedStyle(panViewport).cursor, "grabbing",
             `${platform} hand-tool dragging uses the platform cursor`);
         document.body.classList.remove(platform);
     }
@@ -3512,7 +3512,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             await settle();
             check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 24, before[1] + 16],
                 "native right dragging starts on the first move, including after idle");
-            check.equal(getComputedStyle(viewport).cursor, platform === "body--linux" ? "default" : "grabbing",
+            check.equal(getComputedStyle(viewport).cursor, "grabbing",
                 `${platform} native right dragging uses the platform cursor, including after idle`);
             check.ok(Array.from(panHost.querySelectorAll<HTMLElement>(".mindmap-view__node"))
                 .every(element => getComputedStyle(element).cursor === "default"),

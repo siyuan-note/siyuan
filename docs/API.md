@@ -1483,6 +1483,8 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Put file
 
 * `/api/file/putFile`
+
+Unsupported notebook addressing modes return `code: -1` before creating directories, writing content, or changing timestamps. This endpoint cannot overwrite the local `conf/document-addressing.json` capability record.
 * The parameter is an HTTP Multipart form
 
     * `path`: the file path under the workspace path
@@ -1502,6 +1504,8 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Remove file
 
 * `/api/file/removeFile`
+
+Partial deletion in a notebook with an unsupported addressing mode returns `code: -1`. Whole-notebook deletion retains its locally confirmed capability requirement. Deleting `conf/document-addressing.json` or its parent directory is rejected; existing encrypted-notebook restrictions still apply.
 * Parameters
 
   ```json
@@ -1523,6 +1527,8 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Rename file
 
 * `/api/file/renameFile`
+
+The complete move is checked for notebook addressing compatibility before creating the destination directory or moving files. Unsupported modes and attempts to move or overwrite `conf/document-addressing.json` return `code: -1`.
 * Parameters
 
   ```json

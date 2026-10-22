@@ -26,6 +26,7 @@ import (
 
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -154,6 +155,9 @@ func AcquireEncryptedBoxOperation(boxID string) error {
 	}
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return nil
+	}
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		return err
 	}
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()

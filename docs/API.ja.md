@@ -1475,6 +1475,8 @@ if (response.code === 0 && response.data) {
 ### ファイルを配置
 
 * `/api/file/putFile`
+
+ノートブックのアドレス指定モードが未対応の場合、ディレクトリの作成、内容の書き込み、更新日時の変更を行う前に `code: -1` を返します。この API ではローカルの機能要件記録 `conf/document-addressing.json` を上書きできません。
 * パラメータはHTTP Multipartフォーム
 
     * `path`: ワークスペースパス配下のファイルパス
@@ -1494,6 +1496,8 @@ if (response.code === 0 && response.data) {
 ### ファイルを削除
 
 * `/api/file/removeFile`
+
+未対応のアドレス指定モードを使うノートブックの一部を削除すると `code: -1` を返します。ノートブック全体を削除しても、ローカルで確認済みの機能要件は保持されます。`conf/document-addressing.json` またはその親ディレクトリの削除は禁止され、暗号化ノートブックの既存の制限も引き続き適用されます。
 * パラメータ
 
   ```json
@@ -1515,6 +1519,8 @@ if (response.code === 0 && response.data) {
 ### ファイルの名前を変更
 
 * `/api/file/renameFile`
+
+移動先ディレクトリの作成やファイルの移動前に、操作全体のノートブックのアドレス指定互換性を検証します。未対応のモード、および `conf/document-addressing.json` の移動や上書きは `code: -1` を返します。
 * パラメータ
 
   ```json

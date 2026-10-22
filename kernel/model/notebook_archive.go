@@ -18,6 +18,7 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -249,6 +250,10 @@ func holdNotebookArchiveBoxes(ids []string) (func(), error) {
 		}
 	}
 	for _, id := range ids {
+		if err := filesys.CheckDocumentAddressing(id); err != nil {
+			release()
+			return nil, err
+		}
 		if _, busy := boxLock.LoadOrStore(id, true); busy {
 			release()
 			return nil, ErrNotebookArchiveBusy

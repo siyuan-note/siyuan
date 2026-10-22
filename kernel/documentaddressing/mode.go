@@ -319,6 +319,10 @@ func loadStore(dataDir, confDir string) (*localStore, error) {
 		return nil, ErrInvalid
 	}
 	ret := &localStore{Version: 1, Notebooks: map[string]int{}, path: filepath.Join(confDir, "document-addressing.json")}
+	return readStore(ret)
+}
+
+func readStore(ret *localStore) (*localStore, error) {
 	data, err := filelock.ReadFile(ret.path)
 	if errors.Is(err, os.ErrNotExist) {
 		return ret, nil
@@ -326,6 +330,15 @@ func loadStore(dataDir, confDir string) (*localStore, error) {
 	if err != nil {
 		return nil, err
 	}
+	notebooks, err := parseStore(data)
+	if err != nil {
+		return nil, err
+	}
+	ret.Notebooks = notebooks
+	return ret, nil
+}
+
+func parseStore(data []byte) (map[string]int, error) {
 	fields, err := versionedObject(data)
 	if err != nil || len(fields) != 2 {
 		return nil, ErrInvalid
@@ -334,6 +347,7 @@ func loadStore(dataDir, confDir string) (*localStore, error) {
 	if err != nil {
 		return nil, err
 	}
+	ret := map[string]int{}
 	for id, value := range notebooks {
 		if !ast.IsNodeIDPattern(id) {
 			return nil, ErrInvalid
@@ -342,7 +356,7 @@ func loadStore(dataDir, confDir string) (*localStore, error) {
 		if err != nil {
 			return nil, err
 		}
-		ret.Notebooks[id] = mode
+		ret[id] = mode
 	}
 	return ret, nil
 }

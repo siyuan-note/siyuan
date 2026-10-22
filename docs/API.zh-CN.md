@@ -1481,6 +1481,8 @@ if (response.code === 0 && response.data) {
 ### 写入文件
 
 * `/api/file/putFile`
+
+笔记本寻址模式不受支持时返回 `code: -1`，不会创建目录、写入内容或更新时间。此接口不能覆盖本机 `conf/document-addressing.json` 能力记录。
 * 参数为 HTTP Multipart 表单
 
     * `path`：工作空间路径下的文件路径
@@ -1500,6 +1502,8 @@ if (response.code === 0 && response.data) {
 ### 删除文件
 
 * `/api/file/removeFile`
+
+笔记本寻址模式不受支持时，部分删除返回 `code: -1`；整本删除保留本机已确认的能力要求。禁止删除 `conf/document-addressing.json` 或其父目录，既有加密笔记本限制继续生效。
 * 参数
 
   ```json
@@ -1521,6 +1525,8 @@ if (response.code === 0 && response.data) {
 ### 重命名文件
 
 * `/api/file/renameFile`
+
+创建目标目录或移动文件之前会检查完整操作的笔记本寻址兼容性。不支持的模式，以及移动或覆盖 `conf/document-addressing.json` 的操作，返回 `code: -1`。
 * 参数
 
   ```json

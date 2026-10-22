@@ -15,6 +15,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -242,6 +243,9 @@ func removeSortConfAppendRecord(recordPath string) error {
 }
 
 func recoverSortConfAppend(confPath string) (err error) {
+	if err = CheckDocumentAddressingPath(confPath); err != nil {
+		return
+	}
 	recordPath, pathErr := sortConfAppendPath(confPath)
 	if pathErr != nil {
 		return nil
@@ -306,6 +310,10 @@ func recoverSortConfAppends() error {
 			return fmt.Errorf("invalid sort recovery notebook [%s]", boxID)
 		}
 		if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+			if errors.Is(err, documentaddressing.ErrUnsupported) || errors.Is(err, documentaddressing.ErrInvalid) {
+				logging.LogWarnf("keep sort recovery for unavailable notebook [%s]: %s", boxID, err)
+				continue
+			}
 			return err
 		}
 	}

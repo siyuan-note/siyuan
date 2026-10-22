@@ -1350,6 +1350,9 @@ func deriveKEK(password string) ([]byte, error) {
 // 返回解密后的 DEK 和实际使用的 BoxCrypt（可能来自 backup）。
 // 若 backup 被使用会自动修复 conf.json 和刷新 backup。
 func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEncryption, err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return nil, nil, err
+	}
 	boxCrypt, err = GetBoxEncryption(boxID)
 	if err != nil || boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 		return nil, nil, fmt.Errorf("no encrypted key material for box [%s]", boxID)
@@ -1427,6 +1430,9 @@ func UnlockAndMountBox(boxID, password string, boxEnc *conf.BoxEncryption) (alre
 }
 
 func unlockBoxHeld(boxID string, password string, boxEnc *conf.BoxEncryption) (err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return
+	}
 	if _, busy := boxLock.Load(boxID); busy {
 		return errors.New(Conf.language(239))
 	}
@@ -1754,6 +1760,15 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if dekCount > 0 {
 		return errors.New("cannot change master password while encrypted notebooks are unlocked (DEKs in memory), lock them first")
 	}
+	encBoxIDs, listErr := listAllEncryptedBoxIDs()
+	if listErr != nil {
+		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
+	}
+	for _, id := range encBoxIDs {
+		if err := filesys.CheckDocumentAddressing(id); err != nil {
+			return err
+		}
+	}
 
 	oldKEK, err := deriveKEK(oldPassword)
 	if err != nil {
@@ -1780,10 +1795,6 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 
 	// Phase 0: 遍历所有加密笔记本（含 conf 损坏但存在备份的），预计算新 WrappedDEK（内存操作）
 	// 允许 entries 为空：用户可能已启用加密功能但尚未创建加密笔记本，此时仍需更新全局 verifier 和 backup。
-	encBoxIDs, listErr := listAllEncryptedBoxIDs()
-	if listErr != nil {
-		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
-	}
 	var entries []migrationBoxEntry
 	for _, id := range encBoxIDs {
 		dek, boxCrypt, dErr := decryptBoxCrypt(id, oldKEK)
@@ -2578,6 +2589,9 @@ func notebookCryptoBackupPath(boxID string) string {
 func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
+	}
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		return err
 	}
 	if err := validateBoxEncryption(crypt); err != nil {
 		return err

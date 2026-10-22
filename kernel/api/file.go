@@ -84,6 +84,9 @@ func copyDecryptedAsset(src, dest string) error {
 	if decErr != nil {
 		return decErr
 	}
+	if err := model.CheckDocumentAddressingFileWrite(dest, plain, false); err != nil {
+		return err
+	}
 	if writeErr := os.WriteFile(dest, plain, 0644); writeErr != nil {
 		return writeErr
 	}
@@ -184,6 +187,13 @@ var globalCopyFiles = contractHandler(apicontract.GlobalCopyFiles, func(c *gin.C
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
 		return contractFailure[apicontract.Null](ret)
+	}
+	var destinations []string
+	for _, src := range srcs {
+		destinations = append(destinations, filepath.Join(destDir, filepath.Base(src)))
+	}
+	if err = model.CheckDocumentAddressingFileCopies(srcs, destinations); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if filelock.IsExist(destDir) {
 		destInfo, statErr := os.Stat(destDir)
@@ -290,6 +300,13 @@ var workspaceCopyFiles = contractHandler(apicontract.WorkspaceCopyFiles, func(c 
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
 		return contractFailure[apicontract.Null](ret)
+	}
+	var destinations []string
+	for _, src := range absSrcs {
+		destinations = append(destinations, filepath.Join(destDir, filepath.Base(src)))
+	}
+	if err = model.CheckDocumentAddressingFileCopies(absSrcs, destinations); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if filelock.IsExist(destDir) {
 		destInfo, err := os.Stat(destDir)
@@ -409,6 +426,9 @@ var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, reques
 		return contractFailure[apicontract.Null](ret)
 	}
 
+	if err = model.CheckDocumentAddressingFileCopies([]string{src}, []string{dest}); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
 	if err = filelock.Copy(src, dest); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1
@@ -686,6 +706,12 @@ var renameFile = contractHandler(apicontract.RenameFile, func(c *gin.Context, re
 		ret.Msg = "Field [newPath]: cannot rename a directory into its own subdirectory"
 		return contractFailure[apicontract.Null](ret)
 	}
+	if err = model.CheckDocumentAddressingFileCopies([]string{srcAbsPath}, []string{destAbsPath}); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	if err = model.CheckDocumentAddressingFileRemoval(srcAbsPath); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
 	affectsSync := model.PathsAffectSync(srcAbsPath)
 
 	destParent := filepath.Dir(destAbsPath)
@@ -744,10 +770,15 @@ var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, re
 		ret.Msg = model.Conf.Language(321)
 		return contractFailure[apicontract.Null](ret)
 	}
-	if err = prepareFileAssets(fileAbsPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+	if err = model.CheckDocumentAddressingFileRemoval(fileAbsPath); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	if model.CheckDocumentAddressingPath(fileAbsPath) == nil {
+		if err = prepareFileAssets(fileAbsPath); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return contractFailure[apicontract.Null](ret)
+		}
 	}
 	_, err = os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
@@ -839,6 +870,9 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 	}
 
 	if isDir {
+		if err = model.CheckDocumentAddressingFileWrite(fileAbsPath, nil, true); err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
 		err = os.MkdirAll(fileAbsPath, 0755)
 		if err != nil {
 			logging.LogErrorf("make dir [%s] failed: %s", fileAbsPath, err)
@@ -853,12 +887,6 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 		}
 
 		for range 1 {
-			dir := filepath.Dir(fileAbsPath)
-			if err = os.MkdirAll(dir, 0755); err != nil {
-				logging.LogErrorf("put file [%s] make dir [%s] failed: %s", fileAbsPath, dir, err)
-				break
-			}
-
 			var f multipart.File
 			f, err = fileHeader.Open()
 			if err != nil {
@@ -868,11 +896,20 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 
 			var data []byte
 			data, err = io.ReadAll(f)
+			f.Close()
 			if err != nil {
 				logging.LogErrorf("read file failed: %s", err)
 				break
 			}
 
+			if err = model.CheckDocumentAddressingFileWrite(fileAbsPath, data, false); err != nil {
+				break
+			}
+			dir := filepath.Dir(fileAbsPath)
+			if err = os.MkdirAll(dir, 0755); err != nil {
+				logging.LogErrorf("put file [%s] make dir [%s] failed: %s", fileAbsPath, dir, err)
+				break
+			}
 			err = filelock.WriteFile(fileAbsPath, data)
 			if err != nil {
 				logging.LogErrorf("write file [%s] failed: %s", fileAbsPath, err)

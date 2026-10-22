@@ -73,7 +73,11 @@ func validateInstalledRevision(revision string) error {
 
 // InstalledPackageRevision 在与安装、卸载相同的锁内读取完整代码目录摘要。
 func InstalledPackageRevision(installPath string) (string, error) {
-	if err := packageInstallLock.Acquire(context.Background(), 1); err != nil {
+	return lockedInstalledPackageRevision(context.Background(), installPath)
+}
+
+func lockedInstalledPackageRevision(ctx context.Context, installPath string) (string, error) {
+	if err := packageInstallLock.Acquire(ctx, 1); err != nil {
 		return "", err
 	}
 	defer packageInstallLock.Release(1)

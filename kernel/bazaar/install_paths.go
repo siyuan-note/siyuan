@@ -45,6 +45,24 @@ func GetPackageLayout(pkgType string) (layout PackageLayout, ok bool) {
 	return PackageLayout{}, false
 }
 
+// makePackageExtractionDir 在受文件访问守卫保护的临时根下创建独占目录，并拒绝空间内部的链接。
+func makePackageExtractionDir(kind, pattern string) (string, error) {
+	if !filepath.IsAbs(util.TempDir) {
+		return "", errors.New("package extraction root is unavailable")
+	}
+	root := filepath.Join(util.TempDir, "bazaar", kind)
+	if err := rejectInstallPathLinks(root); err != nil {
+		return "", err
+	}
+	if err := os.MkdirAll(root, 0755); err != nil {
+		return "", err
+	}
+	if err := rejectInstallPathLinks(root); err != nil {
+		return "", err
+	}
+	return os.MkdirTemp(root, pattern)
+}
+
 func rejectInstallPathLinks(target string) error {
 	target, err := filepath.Abs(target)
 	if err != nil {

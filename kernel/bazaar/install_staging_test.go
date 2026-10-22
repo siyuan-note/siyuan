@@ -5,12 +5,67 @@
 package bazaar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestInstallPackageExtractionIsProtected(t *testing.T) {
+	useInstallTempDir(t)
+	data := buildInstallPackageArchive(t, map[string]string{
+		"plugin.json": `{"name":"sample","version":"1.0.0"}`,
+		"index.js":    "approved",
+	})
+	checked := false
+	options := PackageInstallOptions{Recheck: func() error {
+		paths, err := filepath.Glob(filepath.Join(util.TempDir, "bazaar", "package", "online-*", "index.js"))
+		if err != nil || len(paths) == 0 {
+			return err
+		}
+		checked = true
+		if !util.IsForbiddenAbsPath(paths[0]) || !util.IsPluginDevelopmentRawPathForbidden(filepath.Dir(paths[0]), true) {
+			return fmt.Errorf("online extraction is accessible through raw file APIs")
+		}
+		return nil
+	}}
+	if _, err := installPackageWithOptions(data, filepath.Join(t.TempDir(), "sample"), "plugins", "sample", false, options); err != nil {
+		t.Fatal(err)
+	}
+	if !checked {
+		t.Fatal("online extraction was not inspected")
+	}
+}
+
+func TestInstallPackageStagingReleasesInstallLock(t *testing.T) {
+	source, target := useInstallRevisionFixture(t)
+	checked := false
+	options := PackageInstallOptions{Recheck: func() error {
+		paths, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-package-install-*", "staging", "index.js"))
+		if err != nil || len(paths) == 0 || checked {
+			return err
+		}
+		checked = true
+		if !packageInstallLock.TryAcquire(1) {
+			return fmt.Errorf("staging held the install lock")
+		}
+		packageInstallLock.Release(1)
+		return nil
+	}}
+	if _, err := replacePackageDirectoryWithOptions(source, target, true, options); err != nil {
+		t.Fatal(err)
+	}
+	if !checked {
+		t.Fatal("staging was not inspected")
+	}
+	// 提交后的锁仍可获取，避免初始版本读取与提交两段加锁泄漏许可。
+	if !packageInstallLock.TryAcquire(1) {
+		t.Fatal("install lock was retained after commit")
+	}
+	packageInstallLock.Release(1)
+}
 
 // useInstallTempDir 把解压目录指向独立临时目录，避免写入工作空间 temp
 func useInstallTempDir(t *testing.T) {

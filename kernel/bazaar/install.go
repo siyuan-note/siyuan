@@ -169,12 +169,8 @@ func installPackageWithOptions(data []byte, installPath, pkgType, packageName st
 	if err != nil {
 		return
 	}
-	packageTempPath := filepath.Join(util.TempDir, "bazaar", "package")
-	if err = os.MkdirAll(packageTempPath, 0755); err != nil {
-		return
-	}
 	// 先在 temp 中解压并完成归档、路径和包名校验，data 下只接收已通过校验的内容
-	unpackPath, err := os.MkdirTemp(packageTempPath, "online-")
+	unpackPath, err := makePackageExtractionDir("package", "online-")
 	if err != nil {
 		return
 	}
@@ -226,9 +222,13 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	if err = validateInstalledRevision(options.ExpectedInstalledRevision); err != nil {
 		return
 	}
-	// 逐层拒绝链接后再创建操作目录，避免把内容写入连接目录
-	if err = rejectInstallPathLinks(installPath); err != nil {
-		return
+	// 复制前固定目标版本；即使调用方未显式绑定版本，也不能覆盖复制期间发生的编辑或安装。
+	previousRevision, err := lockedInstalledPackageRevision(options.context(), installPath)
+	if err != nil {
+		return nil, err
+	}
+	if options.ExpectedInstalledRevision != "" && previousRevision != options.ExpectedInstalledRevision {
+		return nil, ErrInstalledRevisionConflict
 	}
 	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
 		return
@@ -271,11 +271,14 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	if err = options.check(); err != nil {
 		return nil, err
 	}
-	previousRevision, err := installedPackageRevision(installPath)
+	if err = rejectInstallPathLinks(installPath); err != nil {
+		return nil, err
+	}
+	currentRevision, err := installedPackageRevision(installPath)
 	if err != nil {
 		return nil, err
 	}
-	if options.ExpectedInstalledRevision != "" && previousRevision != options.ExpectedInstalledRevision {
+	if currentRevision != previousRevision {
 		return nil, ErrInstalledRevisionConflict
 	}
 	containsFile, statErr := PackageDirContainsFile(installPath)

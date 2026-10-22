@@ -57,6 +57,55 @@ func TestInstallRevisionConflictHasNoReplacement(t *testing.T) {
 	}
 }
 
+func TestInstallRevisionRejectsTargetChangeDuringStaging(t *testing.T) {
+	for _, change := range []string{"edit", "create", "delete", "empty directory"} {
+		t.Run(change, func(t *testing.T) {
+			source, target := useInstallRevisionFixture(t)
+			update := change == "edit" || change == "delete"
+			if !update {
+				if err := os.RemoveAll(target); err != nil {
+					t.Fatal(err)
+				}
+			}
+			changedRevision := ""
+			// 在线安装未显式绑定版本；在 staging 完成后模拟另一个写入方修改目标。
+			options := PackageInstallOptions{Recheck: func() error {
+				staged, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-package-install-*", "staging", "index.js"))
+				if err != nil || len(staged) == 0 || changedRevision != "" {
+					return err
+				}
+				switch change {
+				case "delete":
+					err = os.RemoveAll(target)
+				case "empty directory":
+					err = os.MkdirAll(target, 0755)
+				default:
+					if err = os.MkdirAll(target, 0755); err == nil {
+						err = os.WriteFile(filepath.Join(target, "index.js"), []byte("concurrent edit"), 0644)
+					}
+				}
+				if err != nil {
+					return err
+				}
+				changedRevision, err = installedPackageRevision(target)
+				return err
+			}}
+			if _, err := replacePackageDirectoryWithOptions(source, target, update, options); !errors.Is(err, ErrInstalledRevisionConflict) {
+				t.Fatalf("target change was not rejected: %v", err)
+			}
+			if changedRevision == "" {
+				t.Fatal("target was not changed during staging")
+			}
+			if revision, err := InstalledPackageRevision(target); err != nil || revision != changedRevision {
+				t.Fatalf("concurrent change was lost: %s, %v", revision, err)
+			}
+			if paths, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-package-install-*")); err != nil || len(paths) != 0 {
+				t.Fatalf("conflicting installation left staging: %v, %v", paths, err)
+			}
+		})
+	}
+}
+
 func TestInstallRevisionMissingBinding(t *testing.T) {
 	source, target := useInstallRevisionFixture(t)
 	options := PackageInstallOptions{ExpectedInstalledRevision: MissingInstalledRevision}
@@ -166,6 +215,10 @@ func TestInstallArchiveHashConsumesVerifiedSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cleanup()
+	if !util.IsForbiddenAbsPath(filepath.Join(source, "index.js")) ||
+		!util.IsPluginDevelopmentRawPathForbidden(source, true) {
+		t.Fatal("hash-bound extraction is accessible through raw file APIs")
+	}
 	if gotHash != hash {
 		t.Fatal("incorrect archive hash")
 	}

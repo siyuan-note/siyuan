@@ -29,7 +29,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const (
@@ -96,7 +95,10 @@ func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash 
 	if err = ctx.Err(); err != nil {
 		return
 	}
-	tempPath := filepath.Join(util.TempDir, "bazaar", "local", gulu.Rand.String(7))
+	tempPath, err := makePackageExtractionDir("local", "extract-")
+	if err != nil {
+		return
+	}
 	cleanup = func() { _ = os.RemoveAll(tempPath) }
 	reader, readerErr := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if readerErr != nil {

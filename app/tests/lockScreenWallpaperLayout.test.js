@@ -38,8 +38,17 @@ const checkSettingsLayout = async (html, css, fontSize) => {
         preview.classList.toggle("fn__none", !showPreview);
         const rect = item.getBoundingClientRect();
         const group = actions.getBoundingClientRect();
+        const upload = item.querySelector("[data-wallpaper-upload]");
+        const reset = item.querySelector("[data-wallpaper-reset]");
+        const uploadRect = upload.getBoundingClientRect();
+        const resetRect = reset.getBoundingClientRect();
         check.ok(item.scrollWidth <= item.clientWidth, "wallpaper setting does not overflow horizontally");
         check.ok(group.left >= rect.left && group.right <= rect.right, "actions fit the setting row");
+        check.ok(resetRect.top >= uploadRect.bottom, "reset appears below upload");
+        check.ok(Math.abs(uploadRect.left - resetRect.left) < 1 && Math.abs(uploadRect.right - resetRect.right) < 1,
+            "stacked actions share horizontal bounds");
+        check.equal(upload.querySelector("use").getAttribute("xlink:href"), "#iconUpload");
+        check.equal(reset.querySelector("use").getAttribute("xlink:href"), "#iconUndo");
         if (innerWidth > 750) {
             const reference = document.querySelector("[data-reference]").getBoundingClientRect();
             const main = item.querySelector(".config-item__main").getBoundingClientRect();
@@ -47,7 +56,7 @@ const checkSettingsLayout = async (html, css, fontSize) => {
             check.ok(Math.abs(group.right - reference.right) < 1, "actions align with adjacent setting controls");
             check.equal(group.width, 200);
             for (const button of actions.querySelectorAll("button")) {
-                check.ok(Math.abs(button.getBoundingClientRect().width - 96) < 1);
+                check.ok(Math.abs(button.getBoundingClientRect().width - reference.width) < 1);
             }
         }
     }

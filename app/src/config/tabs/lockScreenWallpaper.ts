@@ -14,10 +14,10 @@ export const genLockScreenWallpaperHtml = () => {
         <img class="config-lock-screen-wallpaper fn__none" alt="${lang.lockScreenWallpaper}" data-wallpaper-preview>
     </div>
     <span class="fn__space"></span>
-    <div class="fn__flex fn__flex-center fn__size200">
-        <button class="b3-button b3-button--outline fn__flex-1" data-wallpaper-upload>${lang.upload}</button>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline fn__flex-1" data-wallpaper-reset>${lang.reset}</button>
+    <div class="fn__flex fn__flex-column fn__flex-center fn__size200">
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-wallpaper-upload><svg><use xlink:href="#iconUpload"></use></svg>${lang.upload}</button>
+        <div class="fn__hr--small"></div>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-wallpaper-reset><svg><use xlink:href="#iconUndo"></use></svg>${lang.reset}</button>
     </div>
     <input class="fn__none" type="file" accept="image/jpeg,image/png,image/webp" data-wallpaper-file>
 </div>`;

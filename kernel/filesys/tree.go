@@ -42,6 +42,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -473,7 +474,7 @@ func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
 		_, _ = buffered.Discard(3)
 	}
 	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, buffered, 512)
-	var specErr error
+	var specErr, titleErr error
 	var properties []byte
 	iter.ReadObjectCB(func(iter *jsoniter.Iterator, field string) bool {
 		switch {
@@ -487,6 +488,10 @@ func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
 			}
 		case field == "Properties":
 			properties = iter.SkipAndReturnBytes()
+			if checkErr := documentaddressing.CheckLegacyTitleProperties(properties); checkErr != nil &&
+				(titleErr == nil || errors.Is(checkErr, documentaddressing.ErrModeConflict)) {
+				titleErr = checkErr
+			}
 		default:
 			iter.Skip()
 		}
@@ -498,12 +503,18 @@ func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
 	if r.err != nil {
 		return nil, r.err
 	}
+	if errors.Is(titleErr, documentaddressing.ErrModeConflict) {
+		return nil, titleErr
+	}
 	// 属性可以排在版本之前，完整检查根对象后才能返回，版本错误不能进入属性修复。
 	if specErr != nil {
 		return nil, specErr
 	}
 	if iter.Error != io.EOF {
 		return nil, ErrInvalidDocIAL
+	}
+	if titleErr != nil {
+		return nil, titleErr
 	}
 	// 先校验源版本，再按当前属性结构解码，避免把未来版本的属性表示当成损坏数据。
 	if err = jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(properties, &ret); err != nil || len(ret) == 0 {
@@ -548,10 +559,12 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
 	timing.Stage("compare")
+	var validatedSource []byte
 	if cachedData, ok := cache.GetTreeDataInBox(tree.ID, tree.Box); ok {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
 			return
 		}
+		validatedSource = cachedData
 	} else {
 		// 读盘比对：加密笔记本的磁盘数据是密文，需先解密成明文再与 data 比对
 		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr {
@@ -564,15 +577,22 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	}
 
 	timing.Stage("write")
-	if encrypted {
-		// 加密密文必须通过临时文件原子替换，避免 mmap 先截断目标后崩溃导致认证密文永久损坏。
-		if err = writeTreeByWriteFile(filePath, encData); nil != err {
-			return
+	err = util.WriteFileWithPreflight(filePath, encData, !encrypted, func(current []byte) error {
+		if current == nil {
+			return nil
 		}
-	} else if err = util.WriteFileByMmap(filePath, encData); nil != err {
-		if err = writeTreeByWriteFile(filePath, encData); nil != err {
-			return
+		plain, readErr := decryptDataWithDEK(tree.Box, tree.Path, current, dek)
+		if readErr != nil {
+			return readErr
 		}
+		// 缓存只在成功读取或写入后发布；磁盘认证结果完全一致时复用已验证的源。
+		if validatedSource != nil && bytes.Equal(plain, validatedSource) {
+			return nil
+		}
+		return treenode.CheckSpecJSON(bytes.TrimPrefix(plain, []byte("\xef\xbb\xbf")))
+	})
+	if err != nil {
+		return
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
@@ -585,16 +605,6 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	cache.SetTreeDataInBox(tree.ID, tree.Box, data)
 	afterWriteTree(tree)
 	size = uint64(len(data))
-	return
-}
-
-func writeTreeByWriteFile(filePath string, data []byte) (err error) {
-	if err = filelock.WriteFile(filePath, data); err != nil {
-		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-		logging.LogErrorf("%s", msg)
-		err = errors.New(msg)
-		return
-	}
 	return
 }
 
@@ -703,6 +713,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 		return
 	}
 	// 这里只处理解密后的 JSON，密文必须先通过认证，订正成功后才允许写回。
+	originalJSON := jsonData
 	withoutBOM := bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
 	needFix = len(withoutBOM) != len(jsonData)
 	jsonData = withoutBOM
@@ -792,7 +803,17 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 		err = encErr
 		return
 	}
-	if err = filelock.WriteFile(filePath, encData); err != nil {
+	err = util.WriteFileWithPreflight(filePath, encData, false, func(current []byte) error {
+		plain, readErr := decryptDataWithDEK(boxID, p, current, dek)
+		if readErr != nil {
+			return readErr
+		}
+		if !bytes.Equal(plain, originalJSON) {
+			return util.ErrFileChanged
+		}
+		return nil
+	})
+	if err != nil {
 		logging.LogErrorf("write data [%s] failed: %s", filePath, err)
 	}
 	return

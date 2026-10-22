@@ -45,6 +45,7 @@ func TestBackmentionNotificationPlainAndEncrypted(t *testing.T) {
 				dek := bytes.Repeat([]byte{0x65}, 32)
 				markRuntimeEncryptedBox(boxID)
 				setDEKForTest(boxID, dek)
+				encryptDocumentTestSources(t, dek, trees...)
 				boxConf := conf.NewBoxConf()
 				boxConf.Encrypted = true
 				boxConf.BoxCrypt = &conf.BoxEncryption{Spec: boxEncryptionSpec}

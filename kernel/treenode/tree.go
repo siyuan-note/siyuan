@@ -18,7 +18,6 @@ package treenode
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -32,6 +31,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -158,19 +158,17 @@ var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
 
 // CheckSpecJSON 在解析节点之前检查文档规范，避免未知节点被容错解析后覆盖原始内容。
 func CheckSpecJSON(data []byte) error {
-	var root struct {
-		Spec string
-	}
-	if err := json.Unmarshal(data, &root); nil != err {
+	spec, err := checkDocumentSourceJSON(data)
+	if err != nil {
 		return err
 	}
-	if err := CheckSpec(&parse.Tree{Root: &ast.Node{Spec: root.Spec}}); nil != err {
-		return err
-	}
-	return checkDocumentSpecJSON(data, root.Spec)
+	return checkDocumentSpecJSON(data, spec)
 }
 
 func CheckSpec(tree *parse.Tree) (err error) {
+	if err = documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")); err != nil {
+		return
+	}
 	if err = ValidateTableCellRich(tree.Root); nil != err {
 		return
 	}

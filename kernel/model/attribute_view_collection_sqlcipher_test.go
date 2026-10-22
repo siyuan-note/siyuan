@@ -53,6 +53,7 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, 
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x58}, 32)
 	prepareUnlockedEncryptedBoxTest(t, boxID, key)
+	encryptDocumentTestSources(t, key, tree, parent)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted, boxConf.BoxCrypt = true, &conf.BoxEncryption{Spec: boxEncryptionSpec}
 	if err = encryptBoxMetadata(boxID, boxConf, key); err != nil {

@@ -446,6 +446,16 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	if err = checkImportedDocumentAddressing(unzipRootPath); err != nil {
 		return
 	}
+	// 全部标题源通过检查后才导入表情、创建笔记本或重新分配身份。
+	for _, syPath := range syPaths {
+		data, readErr := filelock.ReadFile(syPath)
+		if readErr != nil {
+			return "", readErr
+		}
+		if err = treenode.CheckSpecJSON(data); err != nil {
+			return
+		}
+	}
 	name := filepath.Base(unzipRootPath)
 	if strings.HasPrefix(name, "data-20") && len("data-20230321175442") == len(name) {
 		logging.LogErrorf("invalid .sy.zip [unzipRootPath=%s, baseName=%s]", unzipRootPath, name)

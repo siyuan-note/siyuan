@@ -37,6 +37,7 @@ func TestBacklinkDatabaseEncryptedScope(t *testing.T) {
 	dek := bytes.Repeat([]byte{0x73}, 32)
 	markRuntimeEncryptedBox(boxID)
 	prepareUnlockedEncryptedBoxTest(t, boxID, dek)
+	encryptDocumentTestSources(t, dek, source, target)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted, boxConf.BoxCrypt = true, &conf.BoxEncryption{Spec: boxEncryptionSpec}
 	if err := encryptBoxMetadata(boxID, boxConf, dek); err != nil {

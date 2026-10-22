@@ -10,9 +10,24 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestParseDocIALTitleConflict(t *testing.T) {
+	for _, source := range []string{
+		`{"Spec":"2","Properties":{"title":"A/B"}}`,
+		`{"Spec":"2","Properties":{"title":"A/B","title":"Legacy"}}`,
+		`{"Spec":"2","Properties":{"title":"A/B"},"Properties":{"title":"Legacy"}}`,
+		`{"Spec":"999","Properties":{"title":"A/B"}}`,
+	} {
+		ial, err := parseDocIAL(strings.NewReader(source))
+		if ial != nil || !errors.Is(err, documentaddressing.ErrModeConflict) || errors.Is(err, ErrInvalidDocIAL) {
+			t.Fatalf("title conflict was treated as repairable properties: %v, %v", ial, err)
+		}
+	}
+}
 
 type failingDocIALReader struct {
 	err error

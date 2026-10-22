@@ -27,6 +27,8 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -36,6 +38,31 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKsLock.Lock()
 	defer cachedDEKsLock.Unlock()
 	cachedDEKs[boxID] = dek
+}
+
+// encryptDocumentTestSources 将已有普通夹具显式转换成密文，普通文档保存不能替代此准备步骤。
+func encryptDocumentTestSources(t *testing.T, dek []byte, trees ...*parse.Tree) {
+	t.Helper()
+	seen := map[string]bool{}
+	for _, tree := range trees {
+		name := filepath.Join(util.DataDir, tree.Box, tree.Path)
+		if seen[name] {
+			continue
+		}
+		seen[name] = true
+		plain, err := os.ReadFile(name)
+		if err != nil || util.IsCiphertext(plain) {
+			t.Fatal("expected a plaintext fixture before encryption", err)
+		}
+		ciphertext, err := EncryptFile(tree.Box, tree.Path, dek, plain)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(name, ciphertext, 0600); err != nil {
+			t.Fatal(err)
+		}
+		cache.RemoveTreeDataInBox(tree.ID, tree.Box)
+	}
 }
 
 // prepareUnlockedEncryptedBoxTest 为数据读写测试设置加密身份、密钥和已完成初始化的生命周期。

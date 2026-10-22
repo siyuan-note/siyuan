@@ -29,6 +29,7 @@ func TestDocumentReadBoundaryEncryptedSourceAuthenticationAndLock(t *testing.T) 
 	boxID := fixture.box.ID
 	key := bytes.Repeat([]byte{0x69}, 32)
 	prepareUnlockedEncryptedBoxTest(t, boxID, key)
+	encryptDocumentTestSources(t, key, tree)
 	oldTempDir := util.TempDir
 	util.TempDir = t.TempDir()
 	t.Cleanup(func() {

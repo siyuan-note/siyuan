@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -16,8 +17,79 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestDocumentAddressingImportTitlePreflight(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	oldConfDir := util.ConfDir
+	util.ConfDir = t.TempDir()
+	t.Cleanup(func() { util.ConfDir = oldConfDir })
+	for _, whole := range []bool{false, true} {
+		for _, sourceError := range []struct {
+			name, document string
+			err            error
+		}{
+			{"title", `{"Spec":"2","Properties":{"title":"A/B"}}`, documentaddressing.ErrModeConflict},
+			{"version", `{"Spec":"999","Spec":"2","Properties":{"title":"Legacy"}}`, treenode.ErrSpecTooNew},
+		} {
+			t.Run(sourceError.name+map[bool]string{false: "/documents", true: "/notebook"}[whole], func(t *testing.T) {
+				root := t.TempDir()
+				metadata := filepath.Join(root, ".siyuan")
+				if err := os.MkdirAll(metadata, 0755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(metadata, "conf.json"), []byte(`{"name":"Incoming"}`), 0644); err != nil {
+					t.Fatal(err)
+				}
+				for name, source := range map[string]string{
+					"20261022000000-abcdefg.sy": `{"Spec":"2","Properties":{"title":"Ordinary"}}`,
+					"20261022000001-hijklmn.sy": sourceError.document,
+				} {
+					if err := os.WriteFile(filepath.Join(root, name), []byte(source), 0644); err != nil {
+						t.Fatal(err)
+					}
+				}
+				archive := filepath.Join(t.TempDir(), "incoming.sy.zip")
+				writer, err := gulu.Zip.Create(archive)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = writer.AddDirectory("Incoming", root); err != nil {
+					_ = writer.Close()
+					t.Fatal(err)
+				}
+				if err = writer.Close(); err != nil {
+					t.Fatal(err)
+				}
+				original, err := os.ReadFile(archive)
+				if err != nil {
+					t.Fatal(err)
+				}
+				before, err := archiveDirectoryFiles(util.DataDir)
+				if err != nil {
+					t.Fatal(err)
+				}
+				created, err := importSY0(archive, fixture.box.ID, "/", whole, false, nil, false)
+				if created != "" || !errors.Is(err, sourceError.err) {
+					t.Fatalf("source preflight ran after adoption: %q, %v", created, err)
+				}
+				after, err := archiveDirectoryFiles(util.DataDir)
+				if err != nil || !reflect.DeepEqual(before, after) {
+					t.Fatal("rejected import wrote workspace data", err)
+				}
+				retained, err := os.ReadFile(archive)
+				if err != nil || !bytes.Equal(original, retained) {
+					t.Fatal("rejected import changed the archive")
+				}
+				if entries, err := os.ReadDir(util.ConfDir); err != nil || len(entries) != 0 {
+					t.Fatal("inspection of an unadopted source changed capability records")
+				}
+			})
+		}
+	}
+}
 
 func TestDocumentAddressingBlocksCachedAccessAndConfigRepair(t *testing.T) {
 	fixture := setupFileOperationTest(t)

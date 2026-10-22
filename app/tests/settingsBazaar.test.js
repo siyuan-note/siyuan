@@ -108,7 +108,7 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
             },
             isBazaarPluginEnabledInPublish: () => false, getRatingKey: (_type, name) => name,
             escapeHtml: value => value, escapeAttr: value => value, genRatePackageActionHTML: () => "",
-            loadDownloadedRatings() {}, loadDownloadedUserRatings() {},
+            loadDownloadedRatings() {}, loadDownloadedUserRatings() {}, renderBazaarInstall() {},
             window: {siyuan: {config: {publish: {enable: false}, bazaar: {petalDisabled: false}},
                 languages: {config: "Settings", uninstall: "Uninstall", disable: "Disable", enable: "Enable"}}},
         });

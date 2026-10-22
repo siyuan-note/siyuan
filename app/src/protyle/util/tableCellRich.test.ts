@@ -75,7 +75,7 @@ const browserCases = async (source: string) => {
     editable.appendChild(marked);
     const value = api.serializeTableCellRich(editor.innerHTML);
     api.updateTableCellEditingValue(cells[0], value);
-    const owner = {} as IProtyle;
+    const owner = {wysiwyg: {element: fixture}} as IProtyle;
     api.updateTransaction(owner, table, oldHTML);
     check.equal(renders, 29, "formatting one cell only converts its changed source across do/undo cleanup");
     check.equal(transactions.length, 1);

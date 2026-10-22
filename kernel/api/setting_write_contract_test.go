@@ -36,6 +36,8 @@ var settingWriteExemptions = map[string]string{
 	"/api/repo/removeRepoTagSnapshot":          "删除快照标签，不修改配置",
 	"/api/repo/removeCloudRepoTagSnapshot":     "删除云端快照标签，不修改配置",
 	"/api/system/clearTempFiles":               "清理临时文件，不修改配置",
+	"/api/storage/clearRecentDocs":             "清空最近文档记录，不修改应用配置",
+	"/api/sync/confirmSyncCheckout":            "确认窗口已排空输入，仅更新同步检出任务的运行状态",
 }
 
 // 写配置端点的命名约定：这些前缀下以写入动词开头的端点默认视为写配置。

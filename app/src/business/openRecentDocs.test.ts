@@ -22,7 +22,7 @@ const createHarness = () => {
     let clearCallback: () => void;
     let clearUpdates = 0;
     const host = {innerHTML: ""};
-    const path = {innerHTML: "", previousElementSibling: host};
+    const path = {innerHTML: ""};
     let icons: Array<{tagName: string, classes: Set<string>, classList: {add: (name: string) => void},
         dataset: Record<string, string>, parentElement: {dataset: {nodeId: string}}}> = [];
     const attributes = new Map<string, string>();
@@ -34,6 +34,9 @@ const createHarness = () => {
         querySelector: (selector: string) => {
             if (selector === ".switch-doc__path") {
                 return path;
+            }
+            if (selector === "[data-type=\"recentDocsList\"]") {
+                return host;
             }
             return selector === "input" ? input : select;
         },
@@ -87,7 +90,7 @@ const createHarness = () => {
             cleanups.push(host.innerHTML);
         }},
         "./clearRecentDocs": {
-            clearRecentDocsButtonHTML: () => "<button data-action=\"clear-recent-docs\"></button>",
+            clearRecentDocsTextButtonHTML: () => "<button data-action=\"clear-recent-docs\"></button>",
             bindClearRecentDocs: (_button: unknown, _getSort: unknown, _isActive: unknown, callback: () => void) => {
                 clearCallback = callback;
                 return () => clearUpdates++;
@@ -204,9 +207,11 @@ test("recent Arrow and Enter handlers ignore popover editors and closing dialog 
     assert.ok(statement, "load the actual recent-document branch");
     const input = {closest: (): null => null};
     const editor = {closest: (): null => null};
+    const button = {closest: (selector: string) => selector.includes("button") ? {} : null};
     let closing = false;
     let calls = 0;
-    const element = {getAttribute: () => "recent", hasAttribute: () => closing, contains: (target: unknown) => target === input};
+    const element = {getAttribute: () => "recent", hasAttribute: () => closing,
+        contains: (target: unknown) => target === input || target === button};
     const exports: any = {};
     runInNewContext(transpileModule(`exports.keydown = (event, app) => { ${statement.getText(source)} };`, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -217,6 +222,9 @@ test("recent Arrow and Enter handlers ignore popover editors and closing dialog 
         exports.keydown(event, {});
         exports.keydown({...event, target: editor}, {});
     }
+    assert.equal(calls, 3);
+    // 焦点在底部清空按钮上时 Enter 交由按钮自身处理，不得打开选中文档
+    exports.keydown({key: "Enter", target: button, preventDefault() {}}, {});
     assert.equal(calls, 3);
     closing = true;
     exports.keydown({key: "Enter", target: input, preventDefault() {}}, {});

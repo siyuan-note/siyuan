@@ -11,9 +11,10 @@ import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 import {destroyDialogBlockPanels} from "../block/panelOwnership";
-import {bindClearRecentDocs, clearRecentDocsButtonHTML} from "./clearRecentDocs";
+import {bindClearRecentDocs, clearRecentDocsTextButtonHTML} from "./clearRecentDocs";
 
 const recentDocsRenderVersions = new WeakMap<Element, number>();
+const RECENT_DOCS_LIST = "recentDocsList";
 
 const renderRecentDocsContent = async (data: {
     rootID: string,
@@ -82,9 +83,8 @@ const renderRecentDocsContent = async (data: {
         return;
     }
     destroyDialogBlockPanels(element as HTMLElement);
-    const pathElement = element.querySelector(".switch-doc__path");
-    pathElement.innerHTML = switchPath;
-    pathElement.previousElementSibling.innerHTML = `<div class="fn__flex fn__flex-1" style="overflow: auto;">
+    element.querySelector(".switch-doc__path").innerHTML = switchPath;
+    element.querySelector(`[data-type="${RECENT_DOCS_LIST}"]`).innerHTML = `<div class="fn__flex fn__flex-1" style="overflow: auto;">
     ${dockHtml}
     <ul style="${isWindow() ? "border-left: 0;" : ""}min-width: 360px;" class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
 </div>`;
@@ -121,13 +121,14 @@ export const openRecentDocs = (openOnly = false) => {
         <option value="openAt">${window.siyuan.languages.recentOpened}</option>
         <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
     </select>
-    <span class="fn__space"></span>
-    ${clearRecentDocsButtonHTML()}
 </div>
 </div>`,
             content: `<div class="fn__flex-column switch-doc">
-    <div class="fn__flex fn__flex-1" style="overflow: auto;"></div>
-    <div class="switch-doc__path"></div>
+    <div class="fn__flex fn__flex-1" data-type="${RECENT_DOCS_LIST}" style="overflow: auto;"></div>
+    <div class="switch-doc__footer">
+        <div class="switch-doc__path"></div>
+        ${clearRecentDocsTextButtonHTML()}
+    </div>
 </div>`,
             height: "80vh",
         });

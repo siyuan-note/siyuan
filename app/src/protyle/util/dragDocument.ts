@@ -194,9 +194,10 @@ export const getTopListDragTarget = (targetElement: Element) => {
     return topList;
 };
 
-export const shouldKeepListBlockDragTarget = (sourceType: string, isHorizontalDrop: boolean,
+export const shouldKeepListBlockDragTarget = (sourceType: string, targetClasses: string[],
                                                isColumnSuperBlockChild: boolean) =>
-    sourceType === "nodelist" && (isHorizontalDrop || isColumnSuperBlockChild);
+    sourceType === "nodelist" && (isColumnSuperBlockChild ||
+        targetClasses.some(className => ["dragover__top", "dragover__bottom", "dragover__left", "dragover__right"].includes(className)));
 
 export const replaceDragUndoOperation = <T>(operations: T[], operation: T, replacements: T[]) => {
     const index = operations.indexOf(operation);

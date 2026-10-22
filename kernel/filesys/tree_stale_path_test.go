@@ -119,6 +119,30 @@ func TestLoadTreePreservesInvalidParent(t *testing.T) {
 	}
 }
 
+func TestLoadTreePreservesUnsupportedParent(t *testing.T) {
+	for _, cached := range []bool{false, true} {
+		t.Run(map[bool]string{false: "disk", true: "cache"}[cached], func(t *testing.T) {
+			box, parent, p, data := setupStalePathTest(t)
+			childAbs := writeStalePathFixture(t, box, p, data)
+			future := []byte(`{"Spec":"999","Properties":{"title":"Future parent"}}`)
+			parentAbs := writeStalePathFixture(t, box, parent+".sy", future)
+			if cached {
+				cache.SetTreeDataInBox(util.GetTreeID(p), box, data)
+				waitForCachedSource(t, box, util.GetTreeID(p))
+			}
+			if _, err := LoadTree(box, p, util.NewLute()); !errors.Is(err, treenode.ErrSpecTooNew) {
+				t.Fatalf("unsupported parent did not stop child loading: %v", err)
+			}
+			for path, expected := range map[string][]byte{parentAbs: future, childAbs: data} {
+				got, err := os.ReadFile(path)
+				if err != nil || !bytes.Equal(got, expected) {
+					t.Fatalf("version rejection changed source %s: %v", path, err)
+				}
+			}
+		})
+	}
+}
+
 func TestLoadTreeRepairsMissingParent(t *testing.T) {
 	box, parent, p, data := setupStalePathTest(t)
 	if !slices.Contains(sql.Drivers(), "sqlite3_extended") {

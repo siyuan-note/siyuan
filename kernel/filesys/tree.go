@@ -373,10 +373,8 @@ func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 		return nil, err
 	}
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
-	if strict {
-		if err = treenode.CheckSpecJSON(data); err != nil {
-			return nil, err
-		}
+	if err = treenode.CheckSpecJSON(data); err != nil {
+		return nil, err
 	}
 	var doc struct {
 		ID         string
@@ -465,18 +463,40 @@ func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
 		_, _ = buffered.Discard(3)
 	}
 	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, buffered, 512)
-	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
-		if field == "Properties" {
-			iter.ReadVal(&ret)
-			break
-		} else {
+	var specErr error
+	var properties []byte
+	iter.ReadObjectCB(func(iter *jsoniter.Iterator, field string) bool {
+		switch {
+		case strings.EqualFold(field, "Spec"):
+			var spec string
+			iter.ReadVal(&spec)
+			if iter.Error != nil {
+				specErr = errors.New("invalid document spec")
+			} else if checkErr := treenode.CheckSpec(&parse.Tree{Root: &ast.Node{Spec: spec}}); checkErr != nil {
+				specErr = checkErr
+			}
+		case field == "Properties":
+			properties = iter.SkipAndReturnBytes()
+		default:
 			iter.Skip()
 		}
+		return iter.Error == nil
+	})
+	if iter.Error == nil {
+		iter.WhatIsNext()
 	}
 	if r.err != nil {
 		return nil, r.err
 	}
-	if (iter.Error != nil && iter.Error != io.EOF) || len(ret) == 0 {
+	// 属性可以排在版本之前，完整检查根对象后才能返回，版本错误不能进入属性修复。
+	if specErr != nil {
+		return nil, specErr
+	}
+	if iter.Error != io.EOF {
+		return nil, ErrInvalidDocIAL
+	}
+	// 先校验源版本，再按当前属性结构解码，避免把未来版本的属性表示当成损坏数据。
+	if err = jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(properties, &ret); err != nil || len(ret) == 0 {
 		return nil, ErrInvalidDocIAL
 	}
 

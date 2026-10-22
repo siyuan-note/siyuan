@@ -1,6 +1,7 @@
 package filesys
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -44,6 +45,15 @@ func BenchmarkDocumentJSON(b *testing.B) {
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if _, err := parseJSON2Tree(tree.Box, tree.Path, data, luteEngine); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+		b.Run(fmt.Sprintf("properties/%d", size), func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(data)))
+			for i := 0; i < b.N; i++ {
+				if _, err := parseDocIAL(bytes.NewReader(data)); err != nil {
 					b.Fatal(err)
 				}
 			}

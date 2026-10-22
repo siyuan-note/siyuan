@@ -90,7 +90,8 @@ import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {isGutterTouchDragging} from "../../protyle/ui/gutterVisibility";
 import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
 import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
-import {hintSlash} from "../../protyle/hint/extend";
+import {getBuiltinSlashMenuItems, hintSlash} from "../../protyle/hint/extend";
+import {getListInsertLabel} from "../../protyle/hint/listCommands";
 import {getFrequentSlashItems} from "../../protyle/hint/frequentSlashStorage";
 import {finishTableCellEditing, getTableCellRichContext, prepareTableCellMenuItems} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
@@ -795,9 +796,11 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("heading4", "#### " + Lute.Caret, "iconH4", window.siyuan.languages.heading4, "true")}
     ${getSlashItem("heading5", "##### " + Lute.Caret, "iconH5", window.siyuan.languages.heading5, "true")}
     ${getSlashItem("heading6", "###### " + Lute.Caret, "iconH6", window.siyuan.languages.heading6, "true")}
-    ${getSlashItem("list", "- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
-    ${getSlashItem("orderedList", "1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
-    ${getSlashItem("check", "- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem("list", "- " + Lute.Caret, "iconList", getListInsertLabel(protyle, window.siyuan.languages.list), "true")}
+    ${getSlashItem("orderedList", "1. " + Lute.Caret, "iconOrderedList", getListInsertLabel(protyle, window.siyuan.languages["ordered-list"]), "true")}
+    ${getSlashItem("check", "- [ ] " + Lute.Caret, "iconCheck", getListInsertLabel(protyle, window.siyuan.languages.check), "true")}
+    ${getBuiltinSlashMenuItems(protyle).filter(item => item.value.startsWith("convert-current-list:")).map(item =>
+        getSlashItem(item.id, item.value, item.id === "cancelCurrentList" ? "iconParagraph" : "iconList", item.filter[0], "true")).join("")}
     ${getSlashItem("quote", "> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
     ${getSlashItem("horizontalSuperBlock", getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
     ${getSlashItem("verticalSuperBlock", getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}

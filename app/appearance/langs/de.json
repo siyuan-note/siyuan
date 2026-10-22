@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "Aktuelle Liste umwandeln in: ${name}",
+	"cancelCurrentList": "Aktuelle Liste aufheben",
+	"createList": "${name} erstellen",
+	"insertChildList": "Unterliste einfügen: ${name}",
 	"backlinkDatabaseFields": "Datenbankfelder",
 	"listMindmapPaletteOcean": "Ozean",
 	"listMindmapPaletteSunset": "Sonnenuntergang",

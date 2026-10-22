@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "המרת הרשימה הנוכחית ל־${name}",
+	"cancelCurrentList": "ביטול הרשימה הנוכחית",
+	"createList": "יצירת ${name}",
+	"insertChildList": "הוספת תת־רשימה: ${name}",
 	"backlinkDatabaseFields": "שדות מסד נתונים",
 	"listMindmapPaletteOcean": "אוקיינוס",
 	"listMindmapPaletteSunset": "שקיעה",

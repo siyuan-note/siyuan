@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "Претвори тренутну листу у: ${name}",
+	"cancelCurrentList": "Уклони формат тренутне листе",
+	"createList": "Направи: ${name}",
+	"insertChildList": "Уметни подлисту: ${name}",
 	"backlinkDatabaseFields": "Поља базе података",
 	"listMindmapPaletteOcean": "Океан",
 	"listMindmapPaletteSunset": "Залазак сунца",

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261022134112"
+		"updated": "20261022181833"
 	},
 	"Children": [
 		{
@@ -4357,7 +4357,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261020181700"
+				"updated": "20261022181833"
 			},
 			"Children": [
 				{
@@ -12652,12 +12652,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-td76oes",
-				"updated": "20260923083553"
+				"updated": "20261022181833"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "列表"
+				}
+			]
+		},
+		{
+			"ID": "20261022181833-kib791u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181833-kib791u",
+				"updated": "20261022181833"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在列表項內輸入 /，可選擇將目前列表轉換為有序、無序或任務列表，也可取消目前列表。命令作用於游標所在最近一層列表中的全部同級項，子列表類型保持不變。建立列表的命令在列表項內會插入子列表。聚焦單一列表項且未顯示父列表時，不提供轉換命令。"
 				}
 			]
 		},

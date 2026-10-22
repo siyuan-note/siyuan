@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "Huidige lijst omzetten naar: ${name}",
+	"cancelCurrentList": "Huidige lijststructuur opheffen",
+	"createList": "${name} maken",
+	"insertChildList": "Sublijst invoegen: ${name}",
 	"backlinkDatabaseFields": "Databasevelden",
 	"listMindmapPaletteOcean": "Oceaan",
 	"listMindmapPaletteSunset": "Zonsondergang",

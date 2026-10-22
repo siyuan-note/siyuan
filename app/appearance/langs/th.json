@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "แปลงรายการปัจจุบันเป็น ${name}",
+	"cancelCurrentList": "ยกเลิกรูปแบบรายการปัจจุบัน",
+	"createList": "สร้าง${name}",
+	"insertChildList": "แทรกรายการย่อย: ${name}",
 	"backlinkDatabaseFields": "ฟิลด์ฐานข้อมูล",
 	"listMindmapPaletteOcean": "มหาสมุทร",
 	"listMindmapPaletteSunset": "พระอาทิตย์ตก",

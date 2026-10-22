@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "वर्तमान सूची को ${name} में बदलें",
+	"cancelCurrentList": "वर्तमान सूची का प्रारूप हटाएँ",
+	"createList": "${name} बनाएँ",
+	"insertChildList": "उपसूची डालें: ${name}",
 	"backlinkDatabaseFields": "डेटाबेस फ़ील्ड",
 	"listMindmapPaletteOcean": "महासागर",
 	"listMindmapPaletteSunset": "सूर्यास्त",

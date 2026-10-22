@@ -44,6 +44,7 @@ import {
     TOP_BAR_ROOT_PATH,
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
+import {isValidEntryOrder, mergeEntryOrderPreservingUnknown} from "./order";
 
 test("image OCR actions retain their configurable paths and order", t => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
@@ -139,6 +140,10 @@ const slashMenuBuiltinOrder = [
     "list",
     "orderedList",
     "check",
+    "convertCurrentListUL",
+    "convertCurrentListOL",
+    "convertCurrentListTL",
+    "cancelCurrentList",
     "quote",
     "horizontalSuperBlock",
     "verticalSuperBlock",
@@ -578,7 +583,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), ["frequent", ...slashMenuBuiltinOrder]);
-    assert.equal(children.filter((item) => item.type === "entry").length, 70);
+    assert.equal(children.filter((item) => item.type === "entry").length, 74);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
     assert.equal(children.filter(item => item.key !== "frequent").every((item) => item.simple), true);
 });
@@ -604,6 +609,24 @@ test("slash menu entries are indexed below their total switch", () => {
         SLASH_MENU_ROOT_PATH,
         templatePath,
     ]);
+});
+
+test("list conversion commands merge into saved slash order without losing plugin slots", () => {
+    const commands = ["convertCurrentListUL", "convertCurrentListOL", "convertCurrentListTL", "cancelCurrentList"];
+    const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
+    const defaults = children.map(item => item.key);
+    const saved = defaults.filter(key => !commands.includes(key));
+    saved.splice(saved.indexOf("check"), 0, "plugin:unavailable:entry");
+    const separators = new Set(children.filter(item => item.type === "separator").map(item => item.key));
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved, undefined, separators);
+    assert.deepEqual(merged.filter(key => !commands.includes(key)), saved);
+    assert.deepEqual(merged.slice(merged.indexOf("check") + 1, merged.indexOf("check") + 5), commands);
+    assert.ok(isValidEntryOrder(merged, separators));
+    commands.forEach(key => {
+        const entry = getEntryCatalogNode(getSlashMenuEntryPath(key));
+        assert.equal(entry.type, "entry");
+        assert.equal(entry.simple, true);
+    });
 });
 
 test("plugin slash keys encode dotted names and IDs without ambiguity", () => {

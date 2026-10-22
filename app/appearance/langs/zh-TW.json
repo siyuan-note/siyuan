@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "將目前列表轉換為${name}",
+	"cancelCurrentList": "取消目前列表",
+	"createList": "建立${name}",
+	"insertChildList": "插入子列表：${name}",
 	"backlinkDatabaseFields": "資料庫欄位",
 	"listMindmapPaletteOcean": "海洋",
 	"listMindmapPaletteSunset": "日落",

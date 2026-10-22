@@ -1,4 +1,8 @@
 {
+	"convertCurrentList": "تحويل القائمة الحالية إلى ${name}",
+	"cancelCurrentList": "إلغاء القائمة الحالية",
+	"createList": "إنشاء ${name}",
+	"insertChildList": "إدراج قائمة فرعية: ${name}",
 	"backlinkDatabaseFields": "حقول قاعدة البيانات",
 	"listMindmapPaletteOcean": "محيط",
 	"listMindmapPaletteSunset": "غروب",

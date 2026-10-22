@@ -44,10 +44,14 @@ func TestBootSyncUIWaitSurvivesSlowStartupAndRefresh(t *testing.T) {
 			t.Fatalf("slow initialization ended the readiness wait: %v", err)
 		default:
 		}
-		for _, id := range []string{"refresh-1", "refresh-2", "refresh-3"} {
-			util.RemovePushChan(first)
+		for _, id := range []string{"first", "refresh-1", "refresh-2", "refresh-3"} {
+			previous := first
 			first = addBootSyncSession(t, id)
+			util.RemovePushChan(previous)
 			time.Sleep(time.Second)
+			if syncUIReady(false) {
+				t.Fatal("late disconnect hid the loading replacement connection")
+			}
 		}
 		first.Set("uiReady", true)
 		time.Sleep(time.Second)

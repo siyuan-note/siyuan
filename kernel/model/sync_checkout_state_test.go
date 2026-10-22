@@ -65,6 +65,29 @@ func TestSyncCheckoutPreparationCanCancelWhileLoading(t *testing.T) {
 	})
 }
 
+func TestSyncCheckoutPreparationRejectsReplacedConnection(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		task := prepareSyncCheckoutStateTest(t)
+		old := addBootSyncSession(t, "reconnecting")
+		old.Set("uiReady", true)
+		done := make(chan error, 1)
+		go func() { done <- task.prepareApply() }()
+		synctest.Wait()
+		state := GetSyncCheckout("boot-sync-test", "reconnecting").Task
+		if state.Phase != "preparing" || state.Token == "" {
+			t.Fatalf("ready connection did not receive a save confirmation: %+v", state)
+		}
+		addBootSyncSession(t, "reconnecting")
+		util.RemovePushChan(old)
+		if !ConfirmSyncCheckout(task.id, state.Token, true) {
+			t.Fatal("pending confirmation was unexpectedly rejected")
+		}
+		if err := <-done; !errors.Is(err, dejavu.ErrIndexFileChanged) || task.releaseWrites != nil {
+			t.Fatalf("the previous connection's confirmation bypassed the replacement window: %v", err)
+		}
+	})
+}
+
 func prepareSyncCheckoutStateTest(t *testing.T) *syncCheckoutTask {
 	t.Helper()
 	prepareSyncDirectoryTest(t)

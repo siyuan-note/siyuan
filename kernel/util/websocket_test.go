@@ -19,6 +19,7 @@ package util
 import (
 	"fmt"
 	"io"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +31,86 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 )
+
+func TestPushChanReconnectPreservesCurrentSession(t *testing.T) {
+	for _, auth := range []bool{false, true} {
+		t.Run(fmt.Sprintf("auth=%t", auth), func(t *testing.T) {
+			registry := &sessions
+			if auth {
+				registry = &authSessions
+			}
+			connect := func() *melody.Session {
+				session := &melody.Session{Request: httptest.NewRequest("GET", "/ws?app=reconnect-test&id=main&type=main&ready=false", nil)}
+				session.Set("authSession", auth)
+				AddPushChan(session)
+				t.Cleanup(func() { RemovePushChan(session) })
+				return session
+			}
+			old := connect()
+			old.Set("uiReady", true)
+			current := connect()
+			RemovePushChan(old)
+			RemovePushChan(old)
+			appSessions, ok := registry.Load("reconnect-test")
+			if !ok {
+				t.Fatal("late disconnect removed the reconnected application")
+			}
+			if got, _ := appSessions.(*sync.Map).Load("main"); got != current || IsSessionReady(current) {
+				t.Fatal("late disconnect lost the current connection or reused its predecessor's readiness")
+			}
+			RemovePushChan(current)
+			if _, ok := registry.Load("reconnect-test"); ok {
+				t.Fatal("last disconnect retained the empty application")
+			}
+		})
+	}
+}
+
+func TestPushChanConcurrentReconnect(t *testing.T) {
+	for _, auth := range []bool{false, true} {
+		t.Run(fmt.Sprintf("auth=%t", auth), func(t *testing.T) {
+			registry := &sessions
+			if auth {
+				registry = &authSessions
+			}
+			for round := range 50 {
+				appID := fmt.Sprintf("concurrent-reconnect-%t-%d", auth, round)
+				connect := func(id int) *melody.Session {
+					session := &melody.Session{Request: httptest.NewRequest("GET", fmt.Sprintf("/ws?app=%s&id=%d&type=main&ready=false", appID, id), nil)}
+					session.Set("authSession", auth)
+					AddPushChan(session)
+					return session
+				}
+				old := connect(0)
+				const count = 16
+				current := make([]*melody.Session, count)
+				start := make(chan struct{})
+				var workers sync.WaitGroup
+				workers.Go(func() { <-start; RemovePushChan(old) })
+				for i := range current {
+					workers.Go(func() { <-start; current[i] = connect(i) })
+				}
+				close(start)
+				workers.Wait()
+				appSessions, ok := registry.Load(appID)
+				for i, session := range current {
+					if !ok {
+						t.Error("concurrent registration lost the application")
+					} else if got, _ := appSessions.(*sync.Map).Load(fmt.Sprint(i)); got != session {
+						t.Errorf("concurrent registration lost session %d", i)
+					}
+					RemovePushChan(session)
+				}
+				if _, ok := registry.Load(appID); ok {
+					t.Error("disconnects retained an empty application")
+				}
+				if t.Failed() {
+					return
+				}
+			}
+		})
+	}
+}
 
 func TestLogWebSocketError(t *testing.T) {
 	originalPath := logging.LogPath

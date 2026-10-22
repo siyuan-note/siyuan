@@ -53,6 +53,8 @@ var (
 	// map[string]map[string]*melody.Session{}
 	sessions     = sync.Map{} // {appId, {sessionId, session}}
 	authSessions = sync.Map{}
+	// 注册与清理必须串行，避免最后一个旧连接断开时删掉并发注册的新连接。
+	pushChanLock sync.Mutex
 
 	// ReloadDocInfoGuard 由 model 层注入，在广播 docInfo 前检查 box 是否仍处于可广播状态。
 	// 加密笔记本锁定后返回 false，防止 500ms 延迟任务在锁定后泄漏明文元数据。
@@ -182,6 +184,8 @@ func AddPushChan(session *melody.Session) {
 		session.Set("uiReady", false)
 	}
 
+	pushChanLock.Lock()
+	defer pushChanLock.Unlock()
 	if IsAuthSession(session) {
 		if appSessions, ok := authSessions.Load(appID); !ok {
 			appSess := &sync.Map{}
@@ -242,11 +246,15 @@ func RemovePushChan(session *melody.Session) {
 		return
 	}
 
+	pushChanLock.Lock()
+	defer pushChanLock.Unlock()
 	if IsAuthSession(session) {
 		appSess, _ := authSessions.Load(app)
 		if nil != appSess {
 			appSessions := appSess.(*sync.Map)
-			appSessions.Delete(id)
+			if !appSessions.CompareAndDelete(id, session) {
+				return
+			}
 			if 1 > lenOfSyncMap(appSessions) {
 				authSessions.Delete(app)
 			}
@@ -255,7 +263,9 @@ func RemovePushChan(session *melody.Session) {
 		appSess, _ := sessions.Load(app)
 		if nil != appSess {
 			appSessions := appSess.(*sync.Map)
-			appSessions.Delete(id)
+			if !appSessions.CompareAndDelete(id, session) {
+				return
+			}
 			if 1 > lenOfSyncMap(appSessions) {
 				sessions.Delete(app)
 			}

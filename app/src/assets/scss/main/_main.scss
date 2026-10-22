@@ -525,9 +525,17 @@ body.body--harmony {
     box-sizing: border-box;
   }
 
-  &__path {
+  &__footer > &__path {
     flex: 1;
     min-width: 0;
+  }
+
+  & > &__path {
+    padding: 4px 8px;
+    border-top: 1px solid var(--b3-theme-surface-lighter);
+  }
+
+  &__path {
     color: var(--b3-theme-on-surface);
     font-size: 12px;
     white-space: nowrap;

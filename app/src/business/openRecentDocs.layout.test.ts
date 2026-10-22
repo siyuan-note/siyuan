@@ -6,7 +6,7 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {compile} from "sass";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isPropertyAssignment, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (sources: string[], css: string, languages: Record<string, string>[], themes: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
@@ -64,6 +64,7 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
                     api.openRecentDocs();
                     await new Promise(resolve => setTimeout(resolve, 10));
                     const root = window.siyuan.dialogs[0].element;
+                    root.querySelector(".switch-doc__path").textContent = "/Notebook/" + "Long document path/".repeat(30);
                     const container = root.querySelector<HTMLElement>(".b3-dialog__container");
                     container.style.transition = "none";
                     container.parentElement.style.display = "block";
@@ -93,11 +94,50 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
                             check.ok(header.scrollWidth <= header.clientWidth + 1, "header overflow: " + label);
                             const content = root.querySelector(".switch-doc").getBoundingClientRect();
                             check.ok(content.left >= rect.left && content.right <= rect.right, "content overflow: " + label);
+                            const path = root.querySelector(".switch-doc__path");
+                            const pathStyle = getComputedStyle(path);
+                            check.equal(pathStyle.padding, "0px", "footer path padding: " + label);
+                            check.equal(pathStyle.borderTopWidth, "0px", "footer path border: " + label);
+                            check.ok(path.getBoundingClientRect().right <=
+                                root.querySelector(".switch-doc__footer button").getBoundingClientRect().left,
+                            "path overlaps clear button: " + label);
                             cases++;
                         }
                     }
                     window.siyuan.dialogs[0].destroy();
                     await new Promise(resolve => setTimeout(resolve, 10));
+                    // 页签切换复用路径栏样式，窗口拉高时仍应保持单行，并保留边距和分隔线。
+                    for (const count of [2, 40]) {
+                        const tabHTML = Array.from({length: count}, (_, index) =>
+                            `<li class="b3-list-item"><span class="b3-list-item__text">Document ${index}</span></li>`).join("");
+                        const content = new Function("dockHtml", "tabHtml", "isTabWindow", "return " + sources[4])(
+                            isDetached ? "" : `<ul class="b3-list b3-list--background" style="width:200px">${tabHTML}</ul>`,
+                            tabHTML, isDetached);
+                        const switchDialog = new dialog.Dialog({title: lang.switchTab, content, disableAnimation: true});
+                        const switchRoot = switchDialog.element as HTMLElement;
+                        const switchContainer = switchRoot.querySelector<HTMLElement>(".b3-dialog__container");
+                        const path = switchRoot.querySelector<HTMLElement>(".switch-doc__path");
+                        path.textContent = "/Notebook/" + "Long document path/".repeat(30);
+                        for (const width of [201, 680]) {
+                            for (const height of ["auto", "560px"]) {
+                                Object.assign(switchContainer.style, {width: width + "px", height});
+                                const label = `${theme}/${lang.switchTab}/${fontSize}/${isDetached}/${count}/${width}/${height}`;
+                                const pathRect = path.getBoundingClientRect();
+                                const contentRect = switchRoot.querySelector(".switch-doc").getBoundingClientRect();
+                                const style = getComputedStyle(path);
+                                check.equal(style.padding, "4px 8px", "switch path padding: " + label);
+                                check.equal(style.borderTopWidth, "1px", "switch path border: " + label);
+                                check.ok(Math.abs(pathRect.height - 27) < 1, "switch path height: " + label);
+                                check.ok(Math.abs(pathRect.top - path.previousElementSibling.getBoundingClientRect().bottom) < 1,
+                                    "switch path follows list: " + label);
+                                check.ok(pathRect.left >= contentRect.left && pathRect.right <= contentRect.right,
+                                    "switch path overflow: " + label);
+                                cases++;
+                            }
+                        }
+                        switchDialog.destroy();
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
                 }
             }
         }
@@ -105,7 +145,7 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
     return cases;
 };
 
-test("recent documents controls stay inside resized main and detached dialogs across languages", {
+test("recent documents controls fit resized dialogs without changing the shared tab switcher path", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -113,6 +153,18 @@ test("recent documents controls stay inside resized main and detached dialogs ac
         .map(file => transpileModule(readFileSync(file, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);
+    const keydown = createSourceFile("keydown.ts", readFileSync("src/boot/globalEvent/keydown.ts", "utf8"), ScriptTarget.Latest, true);
+    const switchTemplates: string[] = [];
+    const visit = (node: import("typescript").Node) => {
+        if (isPropertyAssignment(node) && node.name.getText(keydown) === "content" &&
+            node.initializer.getText(keydown).includes("switch-doc__path")) {
+            switchTemplates.push(node.initializer.getText(keydown));
+        }
+        node.forEachChild(visit);
+    };
+    visit(keydown);
+    assert.equal(switchTemplates.length, 1, "load the actual tab switcher template");
+    sources.push(switchTemplates[0]);
     const css = compile("src/assets/scss/base.scss", {logger: {warn() {}, debug() {}}}).css;
     const languages = ["en", "zh-CN", "zh-TW", "ja"].map(lang => JSON.parse(readFileSync(`appearance/langs/${lang}.json`, "utf8")));
     const themes = Object.fromEntries(["daylight", "midnight"].map(theme => [theme, readFileSync(`appearance/themes/${theme}/theme.css`, "utf8")]));
@@ -140,7 +192,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron"), [script], {env, windowsHide: true, timeout: 25000});
-        assert.deepEqual(JSON.parse(result.stdout.trim().split("\n").at(-1)), {cases: 384});
+        assert.deepEqual(JSON.parse(result.stdout.trim().split("\n").at(-1)), {cases: 640});
     } finally {
         assert.equal(path.dirname(path.resolve(temporary)), temporaryRoot);
         assert.ok(path.basename(temporary).startsWith("siyuan-recent-docs-layout-"));

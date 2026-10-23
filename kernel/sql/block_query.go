@@ -584,10 +584,11 @@ func queryRawStmtRows(stmt string, limit int, info *QueryLimitInfo, enforceLimit
 	defer rows.Close()
 
 	cols, err := rows.Columns()
-	if err != nil || nil == cols {
+	if err != nil {
 		return
 	}
 
+	// 无结果列的语句也必须调用 Next，执行 SQLite 语句并读取执行错误。
 	noLimit := !containsLimitClause(stmt)
 	if info != nil {
 		noLimit = !containsOuterLimitClause(stmt)
@@ -632,7 +633,7 @@ func queryRawStmtArgs(stmt string, args []any, limit int) (ret []map[string]any,
 	defer rows.Close()
 
 	cols, err := rows.Columns()
-	if err != nil || nil == cols {
+	if err != nil {
 		return
 	}
 
@@ -661,6 +662,7 @@ func queryRawStmtArgs(stmt string, args []any, limit int) (ret []map[string]any,
 			break
 		}
 	}
+	err = rows.Err()
 	return
 }
 

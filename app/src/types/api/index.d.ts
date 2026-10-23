@@ -6568,6 +6568,13 @@ export interface APIPOSTRoutes {
         output: "directJSON";
         noContent: true;
     };
+    /**
+     * 执行全局派生索引库 SQL，要求管理员身份及可写运行环境。
+     * mode 省略、null 或空字符串时允许单条读写语句；readonly 仅允许单条只读 SELECT 或 WITH 查询。
+     * multiple 按顺序执行多条读写语句，返回最后一条的结果；失败后停止，已完成的写入不自动回滚。
+     * 无结果列的语句成功时返回空数组，RETURNING 保留结果行；校验失败返回 -1，执行失败返回 1。
+     * 返回行数沿用搜索上限及显式外层 LIMIT 规则；直接修改索引不更新源文档、全文索引和块缓存。
+     */
     "/api/query/sql": {
         request: SQLQueryRequestInput;
         response: { "code": 0; "data": Array<Record<string, null | string | number | boolean> | null>; "limit": number; "msg": string; "truncated": boolean; } | ({ "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "limit"?: never; "truncated"?: never; });

@@ -871,7 +871,7 @@ func queryRawStmtForBox(boxID, stmt string, limit int) (ret []map[string]any, er
 	defer rows.Close()
 
 	cols, err := rows.Columns()
-	if err != nil || nil == cols {
+	if err != nil {
 		return
 	}
 
@@ -900,6 +900,7 @@ func queryRawStmtForBox(boxID, stmt string, limit int) (ret []map[string]any, er
 			break
 		}
 	}
+	err = rows.Err()
 	return
 }
 
@@ -915,7 +916,7 @@ func queryRawStmtArgsForBoxContext(ctx context.Context, boxID, stmt string, args
 	defer rows.Close()
 
 	cols, err := rows.Columns()
-	if err != nil || nil == cols {
+	if err != nil {
 		return nil, err
 	}
 
@@ -961,7 +962,7 @@ func queryRawStmtArgsForBox(boxID, stmt string, args []any, limit int) (ret []ma
 	defer rows.Close()
 
 	cols, err := rows.Columns()
-	if err != nil || nil == cols {
+	if err != nil {
 		return
 	}
 
@@ -990,5 +991,6 @@ func queryRawStmtArgsForBox(boxID, stmt string, args []any, limit int) (ret []ma
 			break
 		}
 	}
+	err = rows.Err()
 	return
 }

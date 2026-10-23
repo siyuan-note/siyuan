@@ -662,6 +662,11 @@ var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", Authe
 var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", AuthenticatedAccess, JSONBody,
 	ResponseOptions{Output: BinaryOutput, ErrorStatus: 202, AdditionalCodes: []int{-3, 403, 404, 409, 500, 503}}, "POST")
 
+// QuerySQL 执行全局派生索引库 SQL，要求管理员身份及可写运行环境。
+// mode 省略、null 或空字符串时允许单条读写语句；readonly 仅允许单条只读 SELECT 或 WITH 查询。
+// multiple 按顺序执行多条读写语句，返回最后一条的结果；失败后停止，已完成的写入不自动回滚。
+// 无结果列的语句成功时返回空数组，RETURNING 保留结果行；校验失败返回 -1，执行失败返回 1。
+// 返回行数沿用搜索上限及显式外层 LIMIT 规则；直接修改索引不更新源文档、全文索引和块缓存。
 var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, NonNullable: true}, "POST")
 
 var RenderSprig = define[RenderSprigRequest, string]("renderSprig", "/api/template/renderSprig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

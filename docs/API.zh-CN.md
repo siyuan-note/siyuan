@@ -1302,6 +1302,9 @@ if (response.code === 0 && response.data) {
   ```
 
     * `stmt`：SQL 脚本
+    * `mode`：可选模式，省略、`null` 或 `""` 允许单条读写语句；`"readonly"` 仅允许单条只读 `SELECT` 或 `WITH` 查询；`"multiple"` 按顺序执行多条语句并返回最后一条的结果
+
+没有结果列的语句（包括 `INSERT`、`UPDATE`、`DELETE` 和 DDL）也会执行，成功时返回 `data: []`；`RETURNING` 保留结果行。校验失败返回 `code: -1`，执行失败返回 `code: 1`。多语句在首次失败时停止，已完成的写入不会自动回滚。直接 SQL 写入作用于派生索引库，不会更新源文档，也不维护全文索引和块缓存；编辑文档内容请使用块接口。
 
 未显式指定外层 `LIMIT` 时，默认最多返回 `search.limit` 行，即设置中的搜索结果条数。因此，请使用显式的 `LIMIT` 和 `OFFSET` 分页，并采用稳定且唯一的排序，例如 `ORDER BY hpath, id`。显式外层 `LIMIT` 会覆盖默认限制，可以大于 `search.limit`。
 

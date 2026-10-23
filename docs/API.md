@@ -1305,6 +1305,9 @@ In the structured-title feature release, notebooks migrate automatically and thi
   ```
 
     * `stmt`: SQL statement
+    * `mode`: Optional mode; omitted, `null`, or `""` allows one read or write statement; `"readonly"` allows one read-only `SELECT` or `WITH` query; `"multiple"` executes statements in order and returns the last statement's results
+
+Statements without result columns, including `INSERT`, `UPDATE`, `DELETE`, and DDL, execute and return `data: []` on success. `RETURNING` preserves result rows. Validation failures return code `-1`; execution failures return code `1`. Multiple statements stop at the first failure; completed writes are not automatically rolled back. Direct SQL writes affect the derived index database and do not update source documents or maintain full-text indexes and block caches; use the block APIs to edit document content.
 
 Without an explicit outer `LIMIT`, results default to at most `search.limit` rows (the configured search result limit). Use explicit `LIMIT` and `OFFSET` clauses to paginate, with a stable, unique ordering such as `ORDER BY hpath, id`. However, an explicit outer `LIMIT` overrides the default, including values larger than `search.limit`.
 

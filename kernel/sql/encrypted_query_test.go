@@ -26,6 +26,27 @@ import (
 	"time"
 )
 
+func TestQueryInBoxWritesWithoutResultColumns(t *testing.T) {
+	for _, kind := range []string{"raw", "arguments", "context", "context arguments"} {
+		t.Run(kind, func(t *testing.T) {
+			testDB, boxID := useEncryptedQueryTestDB(t)
+			run := func(stmt string) ([]map[string]any, error) {
+				switch kind {
+				case "arguments":
+					return QueryNoLimitArgsInBox(stmt, boxID)
+				case "context":
+					return QueryNoLimitInBoxContext(context.Background(), stmt, boxID)
+				case "context arguments":
+					return QueryNoLimitArgsInBoxContext(context.Background(), stmt, boxID)
+				default:
+					return QueryNoLimitInBox(stmt, boxID)
+				}
+			}
+			testRawSQLWrites(t, testDB, run)
+		})
+	}
+}
+
 func TestGetBlocksInBoxPreservesInputOrder(t *testing.T) {
 	testDB, boxID := useEncryptedQueryTestDB(t)
 	insertEncryptedQueryTestBlock(t, testDB, "block-1", "", "block-1", "d")

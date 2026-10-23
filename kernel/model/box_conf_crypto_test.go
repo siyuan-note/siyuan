@@ -200,6 +200,15 @@ func TestDocumentTargetEncryptedMetadataRecovery(t *testing.T) {
 	if err = os.Remove(confPath); err != nil {
 		t.Fatal(err)
 	}
+	if _, _, err = decryptBoxCrypt(boxID, bytes.Repeat([]byte{0xff}, 32)); err == nil {
+		t.Fatal("missing configuration bypassed key authentication")
+	}
+	if err = box.SaveConf(conf.NewBoxConf()); err == nil {
+		t.Fatal("missing configuration allowed a plaintext replacement")
+	}
+	if _, err = os.Stat(confPath); !os.IsNotExist(err) {
+		t.Fatal("failed recovery created a replacement configuration", err)
+	}
 	// 删除配置后只能从已认证的备份恢复相同 DEK 和目标载荷。
 	check()
 }

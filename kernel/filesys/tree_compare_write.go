@@ -20,6 +20,9 @@ import (
 func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (size uint64, err error) {
 	unlock := lockDocumentSource()
 	defer unlock()
+	if err = validateTreePath(tree.Box, tree.Path); err != nil {
+		return 0, err
+	}
 	dek, _, release, err := acquireCryptoLease(tree.Box)
 	if err != nil {
 		return 0, err

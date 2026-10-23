@@ -6297,9 +6297,10 @@ export interface APIPOSTRoutes {
     /**
      * preserves existing configuration and permission filtering. Administrator
      * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-     * not permission to open a closed or locked notebook. The feature release migrates to mode 2
-     * automatically without a user setting. literalSlash requires consistent mode records and ready
-     * indexes; minimumReaderVersion remains null while protective-release verification is pending.
+     * not permission to open a closed or locked notebook. Ordinary builds migrate to mode 2
+     * automatically without a user setting or special build flags. literalSlash requires consistent
+     * mode records and ready indexes. minimumReaderVersion remains null while protective-release
+     * verification is pending; this informational field does not control feature activation.
      * Revision covers configuration, confirmed capability and recovery records, not a document path.
      * Malformed capability records fail the request; authentication, locking and network failures must
      * never be interpreted as an absent capability object or as permission to retry a legacy write.

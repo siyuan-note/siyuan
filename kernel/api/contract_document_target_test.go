@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -48,7 +49,7 @@ func TestAPIContractDocumentTargetPatchAndLegacyReads(t *testing.T) {
 		box.GetConf().DocCreateTarget != nil || box.GetConf().RefCreateTarget == nil {
 		t.Fatalf("explicit target removal did not stay scoped: %s", response)
 	}
-	if response := patch(map[string]interface{}{"docCreateTarget": target}); !bytes.Contains(response, []byte(`"code":-1`)) {
-		t.Fatalf("compatibility mode enabled a structured target: %s", response)
+	if response := patch(map[string]interface{}{"docCreateTarget": target}); !bytes.Contains(response, []byte(`"code":0`)) || !reflect.DeepEqual(box.GetConf().DocCreateTarget, target) {
+		t.Fatalf("default mode did not persist the structured target: %s", response)
 	}
 }

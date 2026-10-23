@@ -31,7 +31,7 @@ func TestDocumentAddressingImportTitlePreflight(t *testing.T) {
 			name, document string
 			err            error
 		}{
-			{"title", `{"Spec":"2","Properties":{"title":"A/B"}}`, documentaddressing.ErrModeConflict},
+			{"title", `{"Spec":"2","Properties":{"title":{"text":"Future"}}}`, documentaddressing.ErrInvalidTitle},
 			{"version", `{"Spec":"999","Spec":"2","Properties":{"title":"Legacy"}}`, treenode.ErrSpecTooNew},
 		} {
 			t.Run(sourceError.name+map[bool]string{false: "/documents", true: "/notebook"}[whole], func(t *testing.T) {
@@ -71,6 +71,10 @@ func TestDocumentAddressingImportTitlePreflight(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+				beforeConf, err := archiveDirectoryFiles(util.ConfDir)
+				if err != nil {
+					t.Fatal(err)
+				}
 				created, err := importSY0(archive, fixture.box.ID, "/", whole, false, nil, false)
 				if created != "" || !errors.Is(err, sourceError.err) {
 					t.Fatalf("source preflight ran after adoption: %q, %v", created, err)
@@ -83,7 +87,7 @@ func TestDocumentAddressingImportTitlePreflight(t *testing.T) {
 				if err != nil || !bytes.Equal(original, retained) {
 					t.Fatal("rejected import changed the archive")
 				}
-				if entries, err := os.ReadDir(util.ConfDir); err != nil || len(entries) != 0 {
+				if afterConf, err := archiveDirectoryFiles(util.ConfDir); err != nil || !reflect.DeepEqual(beforeConf, afterConf) {
 					t.Fatal("inspection of an unadopted source changed capability records")
 				}
 			})
@@ -108,7 +112,7 @@ func TestDocumentAddressingBlocksCachedAccessAndConfigRepair(t *testing.T) {
 		t.Fatal(err)
 	}
 	cache.PutDocIALInBox(fixture.sourcePath, boxID, map[string]string{"title": "cached"})
-	data := []byte(`{"name":"future","closed":false,"documentAddressingVersion":2}`)
+	data := []byte(`{"name":"future","closed":false,"documentAddressingVersion":3}`)
 	if err = os.WriteFile(configPath, data, 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +156,7 @@ func TestDocumentAddressingBlocksCachedAccessAndConfigRepair(t *testing.T) {
 	}
 }
 
-func TestDocumentAddressingRejectsConfigActivationBeforeWrite(t *testing.T) {
+func TestDocumentAddressingRejectsFutureConfigBeforeWrite(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	previousConfDir := util.ConfDir
 	util.ConfDir = t.TempDir()
@@ -162,7 +166,7 @@ func TestDocumentAddressingRejectsConfigActivationBeforeWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = fixture.box.saveConf0([]byte(`{"documentAddressingVersion":2}`)); !errors.Is(err, documentaddressing.ErrUnsupported) {
+	if err = fixture.box.saveConf0([]byte(`{"documentAddressingVersion":3}`)); !errors.Is(err, documentaddressing.ErrUnsupported) {
 		t.Fatal(err)
 	}
 	after, err := os.ReadFile(name)
@@ -204,10 +208,10 @@ func TestDocumentAddressingSnapshotPreflight(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			config := `{"documentAddressingVersion":2}`
+			config := `{"documentAddressingVersion":3}`
 			if marker == "floor" {
 				config = `{}`
-				write(documentaddressing.FloorPath, `{"version":1,"notebook":"`+boxID+`","minimumMode":2}`, 10)
+				write(documentaddressing.FloorPath, `{"version":1,"notebook":"`+boxID+`","minimumMode":3}`, 10)
 			}
 			write(documentaddressing.ConfigPath, config, 10)
 			write("existing.sy", "future source", 10)
@@ -288,7 +292,7 @@ func TestDocumentAddressingSyncPreflightSurvivesTaskCleanup(t *testing.T) {
 	if _, _, err = partial.Sync(nil); err != nil {
 		t.Fatal(err)
 	}
-	write(documentaddressing.ConfigPath, `{"documentAddressingVersion":2}`, 20)
+	write(documentaddressing.ConfigPath, `{"documentAddressingVersion":3}`, 20)
 	write("existing.sy", "future", 20)
 	write("new.sy", "future addition", 20)
 	if err = os.Remove(filepath.Join(fullData, boxID, "keep.sy")); err != nil {
@@ -351,7 +355,7 @@ func TestDocumentAddressingImportChecksBeforeRemapping(t *testing.T) {
 		if err := os.MkdirAll(metadata, 0755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(metadata, "conf.json"), []byte(`{"name":"future","documentAddressingVersion":2}`), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(metadata, "conf.json"), []byte(`{"name":"future","documentAddressingVersion":3}`), 0644); err != nil {
 			t.Fatal(err)
 		}
 		meta, err := json.Marshal(boxDocMeta{Spec: boxDocMetaSpec, BoxDocID: sourceBox})
@@ -453,7 +457,7 @@ func TestDocumentAddressingDataImportRejectsBeforeAnyWrite(t *testing.T) {
 	if err := os.MkdirAll(metaDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(metaDir, "conf.json"), []byte(`{"documentAddressingVersion":2}`), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(metaDir, "conf.json"), []byte(`{"documentAddressingVersion":3}`), 0644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(install, "ordinary.txt"), []byte("other batch content"), 0644); err != nil {
@@ -474,7 +478,7 @@ func TestDocumentAddressingNotebookHistoryPreservesSource(t *testing.T) {
 	util.ConfDir = t.TempDir()
 	t.Cleanup(func() { util.ConfDir = oldConfDir })
 	name := filepath.Join(util.WorkspaceDir, historyPath, documentaddressing.ConfigPath)
-	source := []byte(`{"name":"future","documentAddressingVersion":2}`)
+	source := []byte(`{"name":"future","documentAddressingVersion":3}`)
 	if err := os.WriteFile(name, source, 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -494,7 +498,7 @@ func TestDocumentAddressingNativeExportPreservesFloor(t *testing.T) {
 	const boxID = "20260101120000-abcdefg"
 	setupExportRelatedTest(t, boxID)
 	name := filepath.Join(util.DataDir, boxID, documentaddressing.FloorPath)
-	source := []byte(`{"version":1,"notebook":"` + boxID + `","minimumMode":1}`)
+	source := []byte(`{"version":1,"notebook":"` + boxID + `","minimumMode":2}`)
 	if err := os.WriteFile(name, source, 0644); err != nil {
 		t.Fatal(err)
 	}

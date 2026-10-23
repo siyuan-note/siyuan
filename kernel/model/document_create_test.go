@@ -43,7 +43,7 @@ func TestDocumentCreateByParent(t *testing.T) {
 	if err := treenode.SetDocumentMetadataState(box.ID, "ready"); err != nil {
 		t.Fatal(err)
 	}
-	parentPath, err := treenode.GetDocumentPath(box.ID, parent.ID, box.ID, 1)
+	parentPath, err := getDocumentPath(box.ID, parent.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func TestDocumentCreateByParent(t *testing.T) {
 	if err != nil || !document.Title.Empty || document.Title.Text == "" {
 		t.Fatalf("empty title lost its explicit marker: %+v, %v", document, err)
 	}
-	request.ID, request.Title = ast.NewNodeID(), "Invalid/title"
+	request.ID, request.Title = ast.NewNodeID(), "Invalid\ntitle"
 	failure(request, "invalidTitle")
 	request.TitleFormat = "markdown"
 	failure(request, "unsupportedTitleFormat")

@@ -27,7 +27,7 @@ func TestDocumentAddressingSortRecoveryPreservesPendingWrite(t *testing.T) {
 	if err = os.WriteFile(confPath, partial, 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.WriteFile(filepath.Join(filepath.Dir(confPath), "conf.json"), []byte(`{"documentAddressingVersion":2}`), 0600); err != nil {
+	if err = os.WriteFile(filepath.Join(filepath.Dir(confPath), "conf.json"), []byte(`{"documentAddressingVersion":3}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	for _, operation := range []func() error{
@@ -71,7 +71,7 @@ func documentAddressingRawPathAliases(t *testing.T, linkDirectory func(string, s
 	if err := os.MkdirAll(filepath.Join(box, ".siyuan"), 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(box, ".siyuan", "conf.json"), []byte(`{"documentAddressingVersion":2}`), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(box, ".siyuan", "conf.json"), []byte(`{"documentAddressingVersion":3}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	alias := filepath.Join(root, "alias")

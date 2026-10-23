@@ -622,9 +622,10 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 	}
 
 	// 缓存根一级的文档树展开
-	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, confFileTreeSnapshot.MaxListCount)
+	ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, confFileTreeSnapshot.MaxListCount)
 	box = Conf.Box(boxID)
-	if 0 < len(files) || (nil != box && box.Exist(boxDocPath(box.ID))) {
+	// 空笔记本也须完成索引初始化，否则结构化创建接口会一直等待元数据就绪。
+	if nil != box {
 		box.Index()
 	}
 	if Conf.Box(boxID) != nil {

@@ -53,7 +53,7 @@ type SystemMessageData struct {
 	Msg string `json:"msg"`
 }
 type SystemConfData struct {
-	// DocumentAddressingVersion 是当前内核的只读能力，不是持久化配置或可写开关。
+	// DocumentAddressingVersion 是当前内核的只读能力，普通构建默认为 2，不是持久化配置或可写开关。
 	DocumentAddressingVersion int            `json:"documentAddressingVersion"`
 	Conf                      *SystemAppConf `json:"conf"`
 	Start                     bool           `json:"start"`

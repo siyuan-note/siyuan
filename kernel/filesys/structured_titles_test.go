@@ -13,9 +13,6 @@ import (
 )
 
 func TestStructuredTitlesSourceReaders(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
 	for _, encrypted := range []bool{false, true} {
 		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
 			box, id, _, _ := setupStalePathTest(t)

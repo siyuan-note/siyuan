@@ -126,10 +126,21 @@ func BoxMode(dataDir, confDir, boxID string) (int, error) {
 		return 0, err
 	}
 	if DefaultMode() == 2 && (snapshot.Mode == 1 || snapshot.State == "recovering") {
-		// 新笔记本尚未创建配置时不生成目录；恢复旧身份时也不能重建已删除的笔记本。
+		// 配置缺失时不自动创建配置，保留已确认模式供加密备份认证及配置恢复使用。
+		// 不能降低下界，也不能借本机记录重新创建已删除的笔记本。
 		_, statErr := os.Stat(filepath.Join(dataDir, boxID, ConfigPath))
-		if errors.Is(statErr, os.ErrNotExist) && snapshot.Mode == 1 {
-			return 1, nil
+		if errors.Is(statErr, os.ErrNotExist) {
+			if snapshot.Mode == 1 {
+				return 1, nil
+			}
+			info, dirErr := os.Lstat(filepath.Join(dataDir, boxID))
+			if dirErr != nil {
+				return 0, dirErr
+			}
+			if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+				return 0, ErrInvalid
+			}
+			return snapshot.Mode, nil
 		}
 		if statErr != nil {
 			return 0, statErr

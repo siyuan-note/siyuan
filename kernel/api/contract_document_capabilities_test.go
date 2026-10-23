@@ -41,22 +41,22 @@ func TestAPIContractDocumentCapabilities(t *testing.T) {
 	if bytes.Contains(public, []byte(`"documentCapabilities"`)) {
 		t.Fatal("configuration permissions were widened by capability discovery")
 	}
-	if !capabilities.StructuredPaths || capabilities.LiteralSlash || capabilities.AddressingVersion != 1 ||
-		capabilities.ModeState != "legacy" || capabilities.IndexState != "missing" || capabilities.MinimumReaderVersion != nil ||
+	if !capabilities.StructuredPaths || capabilities.LiteralSlash || capabilities.AddressingVersion != 2 ||
+		capabilities.ModeState != "recovering" || capabilities.IndexState != "missing" || capabilities.MinimumReaderVersion != nil ||
 		len(capabilities.TitleFormats) != 1 || capabilities.TitleFormats[0] != "plain" || capabilities.Revision == "" {
 		t.Fatalf("capabilities claimed an unimplemented or unverified feature: %+v", capabilities)
 	}
 	if err := treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {
 		t.Fatal(err)
 	}
-	if current := read(); current.IndexState != "ready" || current.LiteralSlash || current.Revision != capabilities.Revision {
-		t.Fatalf("index readiness enabled new characters or changed the configuration revision: %+v", current)
+	if current := read(); current.IndexState != "ready" || !current.LiteralSlash || current.ModeState != "structured" || current.Revision != capabilities.Revision {
+		t.Fatalf("ready metadata did not enable structured titles or changed the configuration revision: %+v", current)
 	}
 	name := filepath.Join(util.DataDir, boxID, documentaddressing.FloorPath)
-	if err := os.WriteFile(name, []byte(`{"version":1,"notebook":"`+boxID+`","minimumMode":2}`), 0600); err != nil {
+	if err := os.WriteFile(name, []byte(`{"version":1,"notebook":"`+boxID+`","minimumMode":3}`), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if current := read(); current.AddressingVersion != 2 || current.ModeState != "conflict" || current.LiteralSlash || current.Revision == capabilities.Revision {
+	if current := read(); current.AddressingVersion != 3 || current.ModeState != "conflict" || current.LiteralSlash || current.Revision == capabilities.Revision {
 		t.Fatalf("unsupported mode was reported as writable: %+v", current)
 	}
 	if err := os.WriteFile(name, []byte(`{"version":99}`), 0600); err != nil {

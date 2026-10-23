@@ -77,6 +77,7 @@ func TestReadMode(t *testing.T) {
 }
 
 func TestCheckBoxPreservesSourcesAndNeverLowersFloor(t *testing.T) {
+	readerModeForTest(t, 1)
 	for _, marker := range []string{"config", "floor"} {
 		t.Run(marker, func(t *testing.T) {
 			root := t.TempDir()
@@ -121,7 +122,8 @@ func TestCheckBoxPreservesSourcesAndNeverLowersFloor(t *testing.T) {
 	}
 }
 
-func TestCheckBoxDoesNotMigrateLegacyData(t *testing.T) {
+func TestLegacyReaderDoesNotMigrateData(t *testing.T) {
+	readerModeForTest(t, 1)
 	root := t.TempDir()
 	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
 	writeTestFile(t, dataDir, testBox+"/"+ConfigPath, `{"name":"legacy"}`)
@@ -159,6 +161,7 @@ func TestCheckBoxPreservesInvalidLocalFloor(t *testing.T) {
 }
 
 func TestCheckBatchUsesIncomingModeAndRetainsObservedFloor(t *testing.T) {
+	readerModeForTest(t, 1)
 	root := t.TempDir()
 	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
 	config := testBox + "/" + ConfigPath
@@ -182,6 +185,7 @@ func TestCheckBatchUsesIncomingModeAndRetainsObservedFloor(t *testing.T) {
 }
 
 func TestCheckBatchAllowsOnlyWholeNotebookDeletion(t *testing.T) {
+	readerModeForTest(t, 1)
 	root := t.TempDir()
 	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
 	config, doc := testBox+"/"+ConfigPath, testBox+"/document.sy"
@@ -210,6 +214,7 @@ func TestCheckBatchAllowsOnlyWholeNotebookDeletion(t *testing.T) {
 }
 
 func TestCheckBatchCannotEraseAnUnobservedFloor(t *testing.T) {
+	readerModeForTest(t, 1)
 	root := t.TempDir()
 	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
 	config, floor := testBox+"/"+ConfigPath, testBox+"/"+FloorPath
@@ -233,6 +238,7 @@ func TestReadModePreservesIOErrors(t *testing.T) {
 }
 
 func TestCheckImportUsesConfirmedSourceFloorWithoutAdoptingNewIdentities(t *testing.T) {
+	readerModeForTest(t, 1)
 	root, source := t.TempDir(), t.TempDir()
 	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
 	writeTestFile(t, source, ConfigPath, `{"documentAddressingVersion":2}`)

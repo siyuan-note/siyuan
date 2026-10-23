@@ -10,7 +10,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 )
 
-func TestDocumentAddressingSourceTitleConflict(t *testing.T) {
+func TestDocumentAddressingLegacySourceTitleConflict(t *testing.T) {
 	for _, source := range []string{
 		`{"Spec":"2","Properties":{"title":"A/B"}}`,
 		`{"Spec":"2","Properties":{"title":"A\u002fB"}}`,
@@ -20,7 +20,7 @@ func TestDocumentAddressingSourceTitleConflict(t *testing.T) {
 		`{"Spec":"999","Properties":{"title":"private/title"}}`,
 		`{"Properties":{"title":"private/title"},"Spec":"999"}`,
 	} {
-		if err := CheckSpecJSON([]byte(source)); !errors.Is(err, documentaddressing.ErrModeConflict) {
+		if err := CheckSpecJSONForMode([]byte(source), 1); !errors.Is(err, documentaddressing.ErrModeConflict) {
 			t.Errorf("source title conflict was not retained: %v", err)
 		} else if strings.Contains(err.Error(), "private") {
 			t.Fatal("source title leaked into error")
@@ -29,7 +29,7 @@ func TestDocumentAddressingSourceTitleConflict(t *testing.T) {
 	for _, title := range []string{"A/B", "A&#47;B"} {
 		root := &ast.Node{Type: ast.NodeDocument, Spec: "2"}
 		root.KramdownIAL = [][]string{{"title", title}}
-		if err := CheckSpec(&parse.Tree{Root: root}); !errors.Is(err, documentaddressing.ErrModeConflict) {
+		if err := CheckSpecForMode(&parse.Tree{Root: root}, 1); !errors.Is(err, documentaddressing.ErrModeConflict) {
 			t.Fatalf("in-memory source title was accepted: %v", err)
 		}
 	}

@@ -21,9 +21,6 @@ import (
 )
 
 func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
 	if os.Getenv("SIYUAN_TEST_STRUCTURED_TITLES") != "1" {
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()

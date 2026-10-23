@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -17,9 +16,6 @@ func TestImportNotebookDocumentTargets(t *testing.T) {
 }
 
 func TestStructuredTitlesNativeImport(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
 	testImportNotebookDocumentTargets(t, "Anchor/../literal")
 }
 

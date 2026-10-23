@@ -14,9 +14,10 @@ import (
 	"github.com/siyuan-note/filelock"
 )
 
-// 保护版本验证并发布后填写。它是发布门槛，不是用户配置或笔记本开关。
-// 隔离测试使用链接参数提供测试版本，不修改产品二进制。
+// 最低读取版本只报告经过验证的兼容性信息，不控制标题功能是否启用。
 var minimumReaderVersion string
+
+var defaultMode = 2
 
 var ErrRecovering = errors.New("document addressing recovery is pending")
 
@@ -30,10 +31,7 @@ func MinimumReaderVersion() *string {
 
 // DefaultMode 是当前发行版自动采用的内部模式，不暴露为用户可写配置。
 func DefaultMode() int {
-	if minimumReaderVersion != "" {
-		return 2
-	}
-	return 1
+	return defaultMode
 }
 
 // migrationRecord 仅保存身份及阶段；源文件和认证密钥从不进入迁移记录。

@@ -14,7 +14,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -26,9 +25,6 @@ func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
 }
 
 func TestStructuredTitlesMarkdownImport(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
 	testMarkdownImportBatches(t, "Renamed/../parent%2F")
 }
 

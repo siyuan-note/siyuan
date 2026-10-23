@@ -88,20 +88,28 @@ func TestDuplicateDocHPath(t *testing.T) {
 			if err != nil || hpath != wantHPath {
 				t.Fatalf("path by ID disagrees: %q, %v", hpath, err)
 			}
-			ids, err := GetIDsByHPath(wantHPath, boxID)
-			if err != nil || len(ids) != 1 || ids[0] != source.ID {
-				t.Fatalf("duplicate is not addressable: %v, %v", ids, err)
+			if err = treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {
+				t.Fatal(err)
+			}
+			segments := []string{title}
+			if nested {
+				segments = append([]string{"Parent"}, segments...)
+			}
+			resolved, err := ResolveDocPath(boxID, "root", nil, segments)
+			if err != nil || resolved.Status != "resolved" || resolved.Resolved == nil || resolved.Resolved.ID != source.ID {
+				t.Fatalf("duplicate is not addressable: %+v, %v", resolved, err)
 			}
 			sql.FlushQueue()
 			block := sql.GetBlockInBox(source.ID, boxID)
 			if block == nil || block.Content != title || block.HPath != wantHPath {
 				t.Fatalf("SQL title and path disagree: %#v", block)
 			}
-			childID, err := CreateWithMarkdown("", boxID, wantHPath+"/Child", "Child content", "", "", false, "", nil)
+			created, err := CreateDocByParent(DocumentCreateRequest{Notebook: boxID, ParentID: &source.ID, ID: ast.NewNodeID(),
+				TitleFormat: "plain", Title: "Child", Markdown: "Child content"})
 			if err != nil {
 				t.Fatal(err)
 			}
-			child := treenode.GetBlockTreeInBox(childID, boxID)
+			child := treenode.GetBlockTreeInBox(created.ID, boxID)
 			if child == nil || path.Dir(child.Path) != strings.TrimSuffix(source.Path, ".sy") {
 				t.Fatalf("child created under a different parent: %#v", child)
 			}

@@ -8,6 +8,7 @@ import (
 )
 
 func TestInspectBoxCapabilities(t *testing.T) {
+	readerModeForTest(t, 1)
 	root := t.TempDir()
 	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
 	first, err := InspectBox(dataDir, confDir, testBox)

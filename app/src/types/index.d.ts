@@ -561,7 +561,7 @@ interface INotebook {
 }
 
 interface ISiyuan {
-    /** 当前内核的只读文档标题能力，不持久化为用户设置。 */
+    /** 当前内核的只读文档标题能力，普通构建默认为 2，不持久化为用户设置。 */
     documentAddressingVersion?: number;
     zIndex: number
     isReady?: boolean

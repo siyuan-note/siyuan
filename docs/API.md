@@ -303,7 +303,7 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Get notebook configuration
 
-Administrator responses may also include the read-only `documentCapabilities` object. It reports addressing mode, structured API support, title capabilities, index state, and the verified minimum reader release. The feature release migrates notebooks automatically without an enable setting; `literalSlash` requires mode `2`, consistent records, and ready indexes. `minimumReaderVersion` remains `null` until the protective release is verified. Existing permission filtering still applies.
+Administrator responses may also include the read-only `documentCapabilities` object. It reports addressing mode, structured API support, title capabilities, index state, and the verified minimum reader release. Ordinary builds migrate notebooks automatically by default, without a user setting or extra build flags; `literalSlash` requires mode `2`, consistent records, and ready indexes. `minimumReaderVersion` remains `null` until the protective release is verified; it does not disable the default mode. Existing permission filtering still applies.
 
 * `/api/notebook/getNotebookConf`
 * Parameters
@@ -336,7 +336,7 @@ Administrator responses may also include the read-only `documentCapabilities` ob
   }
   ```
 
-Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `literalSlash` is currently `false`, and `minimumReaderVersion` is `null` until a protective release is verified. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `literalSlash` is `true` in mode `2` with consistent mode records and ready indexes. `minimumReaderVersion` is `null` until a protective release is verified and does not control feature activation. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
 
@@ -379,7 +379,7 @@ Administrator responses also include the optional read-only `documentCapabilitie
 
 ### Create a document with Markdown
 
-This legacy name-path endpoint is available only in compatibility mode. In the structured-title feature release, notebooks migrate automatically and this endpoint returns `code: -1`, `data: {reason: "legacyPathUnsupported"}` for the entire notebook, even with ordinary titles or `parentID`. Use `/api/filetree/createDocByParent` with a separate parent identity and title. The examples below describe compatibility-mode behavior.
+This legacy name-path endpoint is available only in compatibility mode. In ordinary builds, notebooks migrate automatically to structured-title mode by default and this endpoint returns `code: -1`, `data: {reason: "legacyPathUnsupported"}` for the entire notebook, even with ordinary titles or `parentID`. Use `/api/filetree/createDocByParent` with a separate parent identity and title. The examples below describe compatibility-mode behavior.
 
 * `/api/filetree/createDocWithMd`
 * Parameters
@@ -763,7 +763,7 @@ Move documents by `id`:
 
 ### Get IDs based on human-readable path
 
-In the structured-title feature release, notebooks migrate automatically and this legacy endpoint returns `code: -1`, `data: {reason: "legacyPathUnsupported"}` for the entire notebook. Use known document IDs directly, or `/api/filetree/resolveDocPath` with explicit title segments. Displayed paths cannot distinguish a single title `A/B` from two levels `A`, `B`. The example below applies to compatibility mode.
+In ordinary builds, notebooks migrate automatically to structured-title mode by default and this legacy endpoint returns `code: -1`, `data: {reason: "legacyPathUnsupported"}` for the entire notebook. Use known document IDs directly, or `/api/filetree/resolveDocPath` with explicit title segments. Displayed paths cannot distinguish a single title `A/B` from two levels `A`, `B`. The example below applies to compatibility mode.
 
 * `/api/filetree/getIDsByHPath`
 * Parameters

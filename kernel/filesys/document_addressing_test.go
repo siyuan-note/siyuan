@@ -182,7 +182,7 @@ func TestDocumentAddressingPreservesPlainAndEncryptedSources(t *testing.T) {
 				t.Fatal(err)
 			}
 			absPath := writeStalePathFixture(t, boxID, document, source)
-			writeStalePathFixture(t, boxID, documentaddressing.ConfigPath, []byte(`{"documentAddressingVersion":2}`))
+			writeStalePathFixture(t, boxID, documentaddressing.ConfigPath, []byte(`{"documentAddressingVersion":3}`))
 			readers := map[string]func() error{
 				"properties":        func() error { _, err := DocIAL(absPath); return err },
 				"parent properties": func() error { _, err := readParentDocIAL(absPath); return err },

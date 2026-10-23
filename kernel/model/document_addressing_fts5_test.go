@@ -23,7 +23,7 @@ func TestDocumentAddressingWholeNotebookDeletionRetainsRecoveryData(t *testing.T
 	setupNotebookDocumentImportDatabase(t)
 	boxID := fixture.box.ID
 	source := []byte("unparsed future source")
-	config := []byte(`{"name":"future","closed":true,"documentAddressingVersion":2}`)
+	config := []byte(`{"name":"future","closed":true,"documentAddressingVersion":3}`)
 	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, documentaddressing.ConfigPath), config, 0644); err != nil {
 		t.Fatal(err)
 	}

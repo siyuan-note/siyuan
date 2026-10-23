@@ -42,7 +42,7 @@ func TestAPIContractDocumentAddressingArchives(t *testing.T) {
 	name := addressingAPIBox + "/" + document
 	for _, entries := range [][][2]string{
 		{{"first.txt", "first"}, {name, future}},
-		{{"first.txt", "first"}, {addressingAPIBox + "/.siyuan/conf.json", `{"documentAddressingVersion":2}`}},
+		{{"first.txt", "first"}, {addressingAPIBox + "/.siyuan/conf.json", `{"documentAddressingVersion":3}`}},
 		{{"first.txt", "first"}, {name, future}, {name, ordinary}},
 	} {
 		write(entries)

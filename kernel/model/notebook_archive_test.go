@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -189,19 +188,7 @@ func TestNotebookArchivePartialRemovalAndAuthenticatedRecovery(t *testing.T) {
 	})
 }
 
-func TestNotebookArchiveRejectsChangedSourcesAndRollsBackInterruptedMove(t *testing.T) {
-	testNotebookArchiveInterruptedMove(t)
-}
-
 func TestStructuredTitlesArchiveInterruptedMove(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
-	testNotebookArchiveInterruptedMove(t)
-}
-
-func testNotebookArchiveInterruptedMove(t *testing.T) {
-	t.Helper()
 	notebookArchiveTestWorkspace(t)
 	if err := EnableEncryptedNotebook("archive-password"); err != nil {
 		t.Fatal(err)

@@ -97,7 +97,7 @@ func addressingAPIPut(t *testing.T, name, value string, directory bool) int {
 func TestAPIContractDocumentAddressingRawWrites(t *testing.T) {
 	addressingAPIWorkspace(t)
 	confPath := filepath.Join(util.DataDir, addressingAPIBox, ".siyuan", "conf.json")
-	addressingAPIWrite(t, confPath, `{"documentAddressingVersion":2}`)
+	addressingAPIWrite(t, confPath, `{"documentAddressingVersion":3}`)
 	name := "data/" + addressingAPIBox + "/original.sy"
 	abs := filepath.Join(util.WorkspaceDir, name)
 	addressingAPIWrite(t, abs, "future source")
@@ -160,7 +160,7 @@ func TestAPIContractDocumentAddressingIncomingBatch(t *testing.T) {
 	plain := filepath.Join(source, "first.txt")
 	future := filepath.Join(source, addressingAPIBox)
 	addressingAPIWrite(t, plain, "first")
-	addressingAPIWrite(t, filepath.Join(future, ".siyuan", "conf.json"), `{"documentAddressingVersion":2}`)
+	addressingAPIWrite(t, filepath.Join(future, ".siyuan", "conf.json"), `{"documentAddressingVersion":3}`)
 	addressingAPIWrite(t, filepath.Join(future, "document.sy"), "future source")
 	if code := addressingAPIRequest(t, "globalCopyFiles", globalCopyFiles,
 		apicontract.CopyFilesRequest{Srcs: []string{plain, future}, DestDir: "data"}); code != -1 {
@@ -170,7 +170,7 @@ func TestAPIContractDocumentAddressingIncomingBatch(t *testing.T) {
 	if len(entries) != 0 {
 		t.Fatalf("batch wrote files before checking all notebooks: %v", entries)
 	}
-	if code := addressingAPIPut(t, "data/20261022120000-rawbox2/.siyuan/conf.json", `{"documentAddressingVersion":2}`, false); code != -1 {
+	if code := addressingAPIPut(t, "data/20261022120000-rawbox2/.siyuan/conf.json", `{"documentAddressingVersion":3}`, false); code != -1 {
 		t.Fatalf("incoming mode accepted: %d", code)
 	}
 	entries, _ = os.ReadDir(util.DataDir)
@@ -314,7 +314,7 @@ func TestAPIContractDocumentAddressingDocumentCopies(t *testing.T) {
 
 func TestAPIContractDocumentAddressingSettingsBackup(t *testing.T) {
 	addressingAPIWorkspace(t)
-	addressingAPIWrite(t, filepath.Join(util.DataDir, addressingAPIBox, ".siyuan", "conf.json"), `{"documentAddressingVersion":2}`)
+	addressingAPIWrite(t, filepath.Join(util.DataDir, addressingAPIBox, ".siyuan", "conf.json"), `{"documentAddressingVersion":3}`)
 	_ = documentaddressing.CheckBox(util.DataDir, util.ConfDir, addressingAPIBox)
 	recorder := systemContractRequest(t, "POST", "exportConf", exportConf, nil)
 	var response struct {

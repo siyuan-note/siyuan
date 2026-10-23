@@ -34,6 +34,10 @@ func TestTreeIOPreservesNonDocumentFiles(t *testing.T) {
 					_, err := LoadTreeByData(original, box, p, luteEngine)
 					return err
 				},
+				"snapshot": func() error {
+					_, _, err := LoadTreeSnapshot(box, p, luteEngine)
+					return err
+				},
 				"cached load": func() error {
 					id := util.GetTreeID(p)
 					cache.SetTreeDataInBox(id, box, original)

@@ -7,16 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 func TestStructuredTitlesAPIContracts(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
 	box := documentPathAPIWorkspace(t)
 	if err := filesys.CheckDocumentAddressing(box); err != nil {
 		t.Fatal(err)
@@ -52,7 +48,7 @@ func TestStructuredTitlesAPIContracts(t *testing.T) {
 	if err := treenode.SetDocumentMetadataState(box, "ready"); err != nil {
 		t.Fatal(err)
 	}
-	if current := read(); current.ModeState != "structured" || !current.LiteralSlash || current.MinimumReaderVersion == nil {
+	if current := read(); current.ModeState != "structured" || !current.LiteralSlash || current.MinimumReaderVersion != nil {
 		t.Fatal("automatic mode was not available", current)
 	}
 }

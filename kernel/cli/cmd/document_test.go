@@ -11,9 +11,6 @@ import (
 )
 
 func TestStructuredTitlesCLI(t *testing.T) {
-	if documentaddressing.DefaultMode() != 2 {
-		t.Skip("covered by the structured-title release-gate CI run")
-	}
 	previousData, previousConf := util.DataDir, util.ConfDir
 	root := t.TempDir()
 	util.DataDir, util.ConfDir = filepath.Join(root, "data"), filepath.Join(root, "conf")

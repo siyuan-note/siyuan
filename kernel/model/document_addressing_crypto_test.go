@@ -50,7 +50,7 @@ func TestDocumentAddressingEncryptedRecoveryPreservesKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	setDocumentAddressingTestMode(t, filepath.Join(util.DataDir, boxID), 2)
+	setDocumentAddressingTestMode(t, filepath.Join(util.DataDir, boxID), 3)
 	original, err := archiveDirectoryFiles(util.DataDir)
 	if err != nil {
 		t.Fatal(err)
@@ -110,7 +110,7 @@ func TestDocumentAddressingEncryptedArchiveImportPreflight(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	setDocumentAddressingTestMode(t, filepath.Join(futureDirectory, "payload", "data", boxID), 2)
+	setDocumentAddressingTestMode(t, filepath.Join(futureDirectory, "payload", "data", boxID), 3)
 	if err = writeNotebookArchive(futureDirectory, manifest); err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestDocumentAddressingEncryptedArchiveImportPreflight(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			notebookArchiveTestWorkspace(t)
 			if test.remembered {
-				backup := []byte(`{"documentAddressing":{"version":1,"notebooks":{"` + boxID + `":2}}}`)
+				backup := []byte(`{"documentAddressing":{"version":1,"notebooks":{"` + boxID + `":3}}}`)
 				if err := documentaddressing.RestoreBackup(util.ConfDir, backup); err != nil {
 					t.Fatal(err)
 				}

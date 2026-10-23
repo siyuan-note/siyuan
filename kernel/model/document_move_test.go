@@ -21,7 +21,7 @@ import (
 )
 
 func TestDocumentMovePreflightsEntireBatch(t *testing.T) {
-	for _, conflict := range []string{"sourceSpec", "destinationDirectory"} {
+	for _, conflict := range []string{"sourceSpec", "sourceIdentity", "sourceJSON", "destinationDirectory"} {
 		t.Run(conflict, func(t *testing.T) {
 			fixture := setupFileOperationTest(t)
 			first := addFileOperationTestDoc(t, fixture, ast.NewNodeID(), "First", false)
@@ -31,14 +31,21 @@ func TestDocumentMovePreflightsEntireBatch(t *testing.T) {
 				t.Fatal(err)
 			}
 			filename := filepath.Join(util.DataDir, fixture.box.ID, childPath)
-			if conflict == "sourceSpec" {
+			if conflict != "destinationDirectory" {
 				data, _ := os.ReadFile(filename)
 				var fields map[string]json.RawMessage
 				if err := json.Unmarshal(data, &fields); err != nil {
 					t.Fatal(err)
 				}
-				fields["Spec"] = json.RawMessage(`"999"`)
+				if conflict == "sourceSpec" {
+					fields["Spec"] = json.RawMessage(`"999"`)
+				} else if conflict == "sourceIdentity" {
+					fields["ID"] = json.RawMessage(`"` + ast.NewNodeID() + `"`)
+				}
 				data, _ = json.Marshal(fields)
+				if conflict == "sourceJSON" {
+					data = data[:len(data)-1]
+				}
 				if err := os.WriteFile(filename, data, 0644); err != nil {
 					t.Fatal(err)
 				}

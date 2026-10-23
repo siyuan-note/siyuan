@@ -35,14 +35,18 @@ func RecoverDocumentMetadataWrite(doc *treenode.BlockTree) error {
 }
 
 func recoverDocumentMetadataWrite(doc *treenode.BlockTree) error {
+	return newDocumentMetadataReader().recover(doc)
+}
+
+func (reader *documentMetadataReader) recover(doc *treenode.BlockTree) error {
 	cache.RemoveTreeDataInBox(doc.ID, doc.BoxID)
 	cache.RemoveDocIALInBox(doc.Path, doc.BoxID)
 	cache.RemoveBlockIALInBox(doc.ID, doc.BoxID)
-	tree, err := ReadDocumentMetadataTree(doc.BoxID, doc.Path)
+	tree, err := reader.tree(doc.BoxID, doc.Path)
 	if os.IsNotExist(err) {
 		if current := treenode.GetBlockTreeInExactBox(doc.ID, doc.BoxID); current != nil && current.Path != doc.Path {
 			// 目录变更失败时源可能仍在原位置，不能按未完成的目标路径删除原摘要。
-			tree, err = ReadDocumentMetadataTree(doc.BoxID, current.Path)
+			tree, err = reader.tree(doc.BoxID, current.Path)
 		}
 	}
 	if os.IsNotExist(err) {
@@ -51,7 +55,7 @@ func recoverDocumentMetadataWrite(doc *treenode.BlockTree) error {
 	if err != nil {
 		return err
 	}
-	tree.HPath, _, err = ReadDocHPath(doc.BoxID, tree.Path)
+	tree.HPath, err = reader.hpath(tree)
 	if err != nil {
 		return err
 	}
@@ -94,8 +98,9 @@ func MutateDocumentSourceSet(collect func() ([]*treenode.BlockTree, error), muta
 	}
 	err = mutate()
 	sort.Slice(pending, func(i, j int) bool { return pending[i].Path < pending[j].Path })
+	reader := newDocumentMetadataReader()
 	for _, doc := range pending {
-		if recoveryErr := recoverDocumentMetadataWrite(doc); recoveryErr != nil {
+		if recoveryErr := reader.recover(doc); recoveryErr != nil {
 			logging.LogErrorf("recover document metadata [%s/%s] failed: %s", doc.BoxID, doc.ID, recoveryErr)
 		}
 	}

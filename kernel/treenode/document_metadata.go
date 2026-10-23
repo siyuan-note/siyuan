@@ -105,8 +105,11 @@ func upsertDocumentMetadata(tx *sql.Tx, tree *parse.Tree) error {
 
 const documentMetadataColumns = `m.box_id, m.id, m.parent_id, b.path,
 	m.title_text, m.title_empty, m.title_format, m.source_spec, m.revision`
-const documentMetadataJoin = `document_metadata m JOIN blocktrees b ON
+const documentMetadataJoin = `document_metadata m JOIN blocktrees b INDEXED BY idx_blocktrees_id ON
 	b.box_id=m.box_id AND b.id=m.id AND b.type='d'`
+
+// 直接约束块树 ID 并固定身份索引，避免按文档类型扫描后再与摘要连接。
+const documentMetadataByIDQuery = "SELECT " + documentMetadataColumns + " FROM " + documentMetadataJoin + " WHERE m.box_id=? AND b.id=?"
 
 func scanDocumentMetadata(row interface{ Scan(...interface{}) error }) (*DocumentMetadata, error) {
 	ret := &DocumentMetadata{}
@@ -261,7 +264,7 @@ func FinishDocumentMetadataRecovery(boxID, id string, missing bool) error {
 }
 
 func GetDocumentMetadata(boxID, id string) (*DocumentMetadata, error) {
-	row := queryRowForBox(boxID, "SELECT "+documentMetadataColumns+" FROM "+documentMetadataJoin+" WHERE m.box_id=? AND m.id=?", boxID, id)
+	row := queryRowForBox(boxID, documentMetadataByIDQuery, boxID, id)
 	if row == nil {
 		return nil, ErrDocumentMetadataUnavailable
 	}
@@ -288,7 +291,7 @@ func documentPathInTx(tx *sql.Tx, boxID, id, notebookDocumentID string, mode int
 			return nil, ErrDocumentMetadataUnavailable
 		}
 		seen[currentID] = true
-		meta, err := scanDocumentMetadata(tx.QueryRow("SELECT "+documentMetadataColumns+" FROM "+documentMetadataJoin+" WHERE m.box_id=? AND m.id=?", boxID, currentID))
+		meta, err := scanDocumentMetadata(tx.QueryRow(documentMetadataByIDQuery, boxID, currentID))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				var exists bool

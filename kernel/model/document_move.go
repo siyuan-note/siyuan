@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -26,6 +27,10 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 	if err != nil {
 		return nil, err
 	}
+	mode, err := filesys.DocumentAddressingMode(toBox)
+	if err != nil {
+		return nil, err
+	}
 	toFolder := strings.TrimSuffix(toPath, ".sy")
 	destinationFolder := filepath.Join(util.DataDir, toBox, toFolder, util.GetTreeID(fromPath))
 	if fromBox != toBox || path.Dir(fromPath) != toFolder {
@@ -37,17 +42,10 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 		}
 	}
 	var documents []*treenode.BlockTree
-	for _, sourcePath := range paths {
-		tree, _, err := filesys.ReadTreeSnapshot(fromBox, sourcePath)
-		if err != nil {
-			return nil, err
-		}
-		mode, modeErr := filesys.DocumentAddressingMode(toBox)
-		if modeErr != nil {
-			return nil, modeErr
-		}
-		if err = treenode.CheckSpecForMode(tree, mode); err != nil {
-			return nil, documentAddressingError("targetModeUnsupported", err)
+	err = filesys.WalkTreeSnapshots(fromBox, paths, func(tree *parse.Tree) error {
+		sourcePath := tree.Path
+		if err := treenode.CheckSpecForMode(tree, mode); err != nil {
+			return documentAddressingError("targetModeUnsupported", err)
 		}
 		relative := strings.TrimPrefix(sourcePath, path.Dir(fromPath)+"/")
 		if path.Dir(fromPath) == "/" {
@@ -57,14 +55,15 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 		if fromBox != toBox || sourcePath != destination {
 			if _, err := os.Lstat(filepath.Join(util.DataDir, toBox, destination)); !os.IsNotExist(err) {
 				if err != nil {
-					return nil, err
+					return err
 				}
-				return nil, fmt.Errorf("document move destination already exists [%s]", tree.ID)
+				return fmt.Errorf("document move destination already exists [%s]", tree.ID)
 			}
 		}
 		documents = append(documents,
 			&treenode.BlockTree{BoxID: fromBox, ID: tree.ID, RootID: tree.ID, Path: sourcePath, Type: "d"},
 			&treenode.BlockTree{BoxID: toBox, ID: tree.ID, RootID: tree.ID, Path: destination, Type: "d"})
-	}
-	return documents, nil
+		return nil
+	})
+	return documents, err
 }

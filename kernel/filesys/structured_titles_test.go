@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -18,7 +19,9 @@ func TestStructuredTitlesSourceReaders(t *testing.T) {
 			box, id, _, _ := setupStalePathTest(t)
 			oldConf, oldProvider, oldAcquire, oldRelease := util.ConfDir, DEKProvider, DEKLockAcquire, DEKLockRelease
 			util.ConfDir = t.TempDir()
-			DEKLockAcquire, DEKLockRelease = nil, nil
+			leaseDepth := 0
+			DEKLockAcquire = func(string) { leaseDepth++ }
+			DEKLockRelease = func(string) { leaseDepth-- }
 			t.Cleanup(func() {
 				util.ConfDir, DEKProvider, DEKLockAcquire, DEKLockRelease = oldConf, oldProvider, oldAcquire, oldRelease
 			})
@@ -58,6 +61,19 @@ func TestStructuredTitlesSourceReaders(t *testing.T) {
 				if snapshot, _, err := LoadTreeSnapshot(box, p, util.NewLute()); err != nil || snapshot.Root.IALAttr("title") != title {
 					t.Fatal("snapshot changed title", err)
 				}
+				visited := false
+				if err := WalkTreeSnapshots(box, []string{p}, func(snapshot *parse.Tree) error {
+					visited = true
+					if leaseDepth < 1 {
+						t.Fatal("batch released the crypto lease before consuming its snapshot")
+					}
+					if snapshot.Root.IALAttr("title") != title || snapshot.HPath != "/"+title {
+						t.Fatal("batch snapshot changed literal title")
+					}
+					return nil
+				}); err != nil || !visited || leaseDepth != 0 {
+					t.Fatal("batch snapshot did not authenticate source", err)
+				}
 			}
 			if encrypted {
 				name := filepath.Join(util.DataDir, box, p)
@@ -75,6 +91,12 @@ func TestStructuredTitlesSourceReaders(t *testing.T) {
 				}
 				if _, _, err = LoadTreeSnapshot(box, p, util.NewLute()); err == nil {
 					t.Fatal("unauthenticated snapshot accepted")
+				}
+				if err = WalkTreeSnapshots(box, []string{p}, func(*parse.Tree) error {
+					t.Fatal("unauthenticated source reached the batch visitor")
+					return nil
+				}); err == nil || leaseDepth != 0 {
+					t.Fatal("unauthenticated batch snapshot accepted")
 				}
 				after, _ := os.ReadFile(name)
 				if !bytes.Equal(data, after) {

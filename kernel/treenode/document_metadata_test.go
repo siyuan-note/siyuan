@@ -5,6 +5,7 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/parse"
@@ -40,6 +41,35 @@ func withDocumentMetadataDB(t *testing.T, encrypted bool) string {
 		}
 	})
 	return boxID
+}
+
+func TestDocumentMetadataReadsUseIdentityIndex(t *testing.T) {
+	for _, encrypted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
+			box := withDocumentMetadataDB(t, encrypted)
+			rows, err := queryForBox(box, "EXPLAIN QUERY PLAN "+documentMetadataByIDQuery, box, "doc")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer rows.Close()
+			var plan strings.Builder
+			for rows.Next() {
+				var id, parent, unused int
+				var detail string
+				if err = rows.Scan(&id, &parent, &unused, &detail); err != nil {
+					t.Fatal(err)
+				}
+				plan.WriteString(detail + "\n")
+			}
+			if err = rows.Err(); err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(plan.String(), "SEARCH b USING INDEX idx_blocktrees_id (id=?)") ||
+				!strings.Contains(plan.String(), "SEARCH m USING INDEX sqlite_autoindex_document_metadata_1 (box_id=? AND id=?)") {
+				t.Fatalf("single document lookup scans unrelated documents: %s", plan.String())
+			}
+		})
+	}
 }
 
 func TestDocumentMetadataIdentityAndTitle(t *testing.T) {

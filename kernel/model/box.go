@@ -727,20 +727,22 @@ func moveTree(tree *parse.Tree) error {
 	if err != nil {
 		return err
 	}
+	paths := make([]string, 0, len(subFiles))
 	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}
-
-		subTree, _, err := filesys.ReadTreeSnapshot(box.ID, subFile.path) // 只读源快照重新构造 HPath，避免持有源提交锁时触发修复写入
-		if err != nil {
-			return err
-		}
-
+		paths = append(paths, subFile.path)
+	}
+	// 只读源快照重新构造 HPath，避免持有源提交锁时触发修复写入。
+	if err = filesys.WalkTreeSnapshots(box.ID, paths, func(subTree *parse.Tree) error {
 		treenode.SetBlockTreePath(subTree)
 		sql.MoveTreeQueue(subTree)
 		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
 		util.PushStatusBar(msg)
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	refreshDocInfoWithoutParent(tree)

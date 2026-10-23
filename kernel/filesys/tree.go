@@ -261,6 +261,11 @@ func NormalizeTreeForRead(tree *parse.Tree) (err error) {
 	if err = checkDocumentTreeSpec(tree); nil != err {
 		return
 	}
+	return normalizeValidatedTreeForRead(tree)
+}
+
+// normalizeValidatedTreeForRead 的调用方已检查源规格及树根；只调整内存中的展示投影。
+func normalizeValidatedTreeForRead(tree *parse.Tree) (err error) {
 	if err = treenode.RefreshTableCellRichProjection(tree.Root); nil != err {
 		return
 	}
@@ -315,7 +320,7 @@ func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, m
 		parentPath := parentAbsPath
 		parentAbsPath = filepath.Join(util.DataDir, boxID, parentAbsPath)
 
-		parentDocIAL, parentErr := readParentDocIAL(parentAbsPath)
+		parentHeader, parentErr := readDocumentHeaderInMode(parentAbsPath, false, mode)
 		if parentErr != nil && !errors.Is(parentErr, os.ErrNotExist) {
 			return nil, parentErr
 		}
@@ -337,7 +342,7 @@ func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, m
 			continue
 		}
 
-		title := parentDocIAL["title"]
+		title := parentHeader.Properties["title"]
 		if "" == title {
 			title = "Untitled"
 		}
@@ -387,6 +392,11 @@ func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
 	if err != nil {
 		return nil, err
 	}
+	return readDocumentHeaderInMode(absPath, strict, mode)
+}
+
+func readDocumentHeaderInMode(absPath string, strict bool, mode int) (*documentHeader, error) {
+	boxID := docIALBoxID(absPath)
 	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
 		return nil, err

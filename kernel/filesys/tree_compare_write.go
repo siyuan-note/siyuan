@@ -58,7 +58,8 @@ func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (size uint64, err e
 
 // LoadTreeSnapshot 从同一次磁盘读取返回文档及条件写基线，认证和格式兼容处理不写回源文件。
 func LoadTreeSnapshot(boxID, p string, luteEngine *lute.Lute) (tree *parse.Tree, original []byte, err error) {
-	if err = validateTreePath(boxID, p); err != nil {
+	mode, err := validateTreePathMode(boxID, p)
+	if err != nil {
 		return
 	}
 	dek, encrypted, release, err := acquireCryptoLease(boxID)
@@ -74,10 +75,10 @@ func LoadTreeSnapshot(boxID, p string, luteEngine *lute.Lute) (tree *parse.Tree,
 	if err != nil {
 		return nil, nil, err
 	}
-	data, _, err = fixTreeJSONData(boxID, p, data, luteEngine, dek, encrypted, false)
+	data, _, err = fixTreeJSONDataInMode(boxID, p, data, luteEngine, dek, encrypted, false, mode)
 	if err != nil {
 		return nil, nil, err
 	}
-	tree, err = LoadTreeByData(data, boxID, p, luteEngine)
+	tree, err = loadTreeByDataInMode(data, boxID, p, luteEngine, mode)
 	return
 }

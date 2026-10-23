@@ -13,6 +13,9 @@ var ErrHPathRefreshBusy = errors.New("blocktree writer is busy")
 
 const blockHPathBatchQuery = "SELECT rowid FROM blocktrees WHERE root_id = ? AND box_id = ? AND path = ? AND rowid > ? ORDER BY rowid LIMIT ?"
 
+// 按身份路径更新单篇文档，避免类型索引在每次更新时扫描整个笔记本的文档行。
+const documentHPathUpdateQuery = "UPDATE blocktrees INDEXED BY idx_blocktrees_doc_path SET hpath = ? WHERE id = ? AND box_id = ? AND path = ? AND type = 'd' AND hpath != ?"
+
 func ensureHPathIndexes(database *sql.DB) error {
 	for _, stmt := range []string{
 		"CREATE INDEX IF NOT EXISTS idx_blocktrees_doc_path ON blocktrees(box_id, path) WHERE type = 'd'",
@@ -101,7 +104,7 @@ func RefreshDocHPaths(tree *parse.Tree) (err error) {
 			hpath = parentHPath + "/" + title
 		}
 		paths[doc.Path] = hpath
-		if _, err = tx.Exec("UPDATE blocktrees SET hpath = ? WHERE id = ? AND box_id = ? AND path = ? AND type = 'd' AND hpath != ?", hpath, doc.ID, tree.Box, doc.Path, hpath); err != nil {
+		if _, err = tx.Exec(documentHPathUpdateQuery, hpath, doc.ID, tree.Box, doc.Path, hpath); err != nil {
 			return err
 		}
 	}

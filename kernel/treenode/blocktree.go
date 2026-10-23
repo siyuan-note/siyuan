@@ -837,6 +837,10 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 	execInsertBlocktreesWithMetadata(tx, tree, changedNodes, true)
 }
 
+// 既有文档按 ID 定位；初始化索引时不能为每个待插入文档扫描此前所有文档行。
+const documentBlockTreeUpdateQuery = `UPDATE blocktrees INDEXED BY idx_blocktrees_id SET root_id=?, parent_id=?, path=?, hpath=?, updated=?
+	WHERE box_id=? AND id=? AND type='d'`
+
 func execInsertBlocktreesWithMetadata(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node, publishMetadata bool) {
 	if publishMetadata {
 		if err := upsertDocumentMetadata(tx, tree); err != nil {
@@ -870,8 +874,7 @@ func execInsertBlocktreesWithMetadata(tx *sql.Tx, tree *parse.Tree, changedNodes
 			parentID = n.Parent.ID
 		}
 		if n.Type == ast.NodeDocument {
-			result, updateErr := tx.Exec(`UPDATE blocktrees SET root_id=?, parent_id=?, path=?, hpath=?, updated=?
-				WHERE box_id=? AND id=? AND type='d'`, tree.ID, parentID, tree.Path, tree.HPath,
+			result, updateErr := tx.Exec(documentBlockTreeUpdateQuery, tree.ID, parentID, tree.Path, tree.HPath,
 				n.IALAttr("updated"), tree.Box, n.ID)
 			if updateErr != nil {
 				tx.Rollback()

@@ -56,6 +56,7 @@ import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
 import {
     extractCrossBlockPasteContext,
+    getSinglePastedBlockRefID,
     serializePastedBlockDOM,
     shouldPreservePastedBlockStructure
 } from "./pasteSource";
@@ -76,6 +77,7 @@ import {expandQueryEmbedsForClipboard} from "./queryEmbedClipboard";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {getTextWithoutSemanticMarkers, normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
+import {getSelectedInlineCodeElement} from "../toolbar/inlineRangeBoundary";
 import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
@@ -92,6 +94,17 @@ import {ipcRenderer} from "electron";
 const PASTE_PLUGIN_TIMEOUT = 120_000;
 const PASTE_PLUGIN_TIMED_OUT = Symbol("paste-plugin-timed-out");
 
+const pasteBlockRef = (protyle: IProtyle, range: Range, id: string, selectedText: string) => {
+    protyle.toolbar.range = range;
+    const refElements = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+        type: "id",
+        color: `${id}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
+    });
+    if (refElements[0]) {
+        protyle.toolbar.range.selectNodeContents(refElements[0]);
+    }
+};
+
 const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
     const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
     if (!selectedText) {
@@ -100,15 +113,7 @@ const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
     const annotationReference = getPdfAnnotationReference(text.split("\n")[0]);
     const restricted = !!getProtyleBlockDOMSanitizer(protyle);
     if (isDynamicRef(text)) {
-        protyle.toolbar.range = range;
-        const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-            type: "id",
-            // 选区文本由行内标记处理，保留原始锚文本。
-            color: `${text.substring(2, 24)}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
-        });
-        if (refElement[0]) {
-            protyle.toolbar.range.selectNodeContents(refElement[0]);
-        }
+        pasteBlockRef(protyle, range, text.substring(2, 24), selectedText);
         return true;
     }
     if (annotationReference && (!restricted || getAVRichTextSafeURL(annotationReference))) {
@@ -1068,8 +1073,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
         item.classList.remove("protyle-wysiwyg--hl");
     });
+    if (nodeElement.getAttribute("data-type") !== "NodeCodeBlock" &&
+        protyle.toolbar.getCurrentType(range).includes("code") && getSelectedInlineCodeElement(range)) {
+        const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+        const refID = selectedText && getSinglePastedBlockRefID(protyle.lute, siyuanHTML, textPlain);
+        if (refID) {
+            pasteBlockRef(protyle, range, refID, selectedText);
+            return;
+        }
+    }
     if (blockDOMSanitizer && !siyuanHTML) {
-        // 受限片段保留选中文字附加引用或链接的行为，代码内容仍按纯文本粘贴。
+        // 受限片段保留普通选中文字附加引用或链接的行为，其他代码粘贴保留字面内容。
         if (nodeElement.getAttribute("data-type") !== "NodeCodeBlock" &&
             !protyle.toolbar.getCurrentType(range).includes("code") && pastePlainTextLink(protyle, range, textPlain)) {
             return;
@@ -1173,14 +1187,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
 
             if (types.includes("block-ref")) {
-                protyle.toolbar.range = range;
-                const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-                    type: "id",
-                    color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
-                });
-                if (refElement[0]) {
-                    protyle.toolbar.range.selectNodeContents(refElement[0]);
-                }
+                pasteBlockRef(protyle, range, linkElement.dataset.id, selectedText);
                 return;
             }
             if (types.includes("a")) {

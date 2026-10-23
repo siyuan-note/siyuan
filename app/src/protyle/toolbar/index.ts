@@ -103,7 +103,8 @@ import {
     canExpandInlineRangeToParent,
     canRemoveEmptyInlineElement,
     getInlineRangeElement,
-    normalizeCalloutTitleRange
+    normalizeCalloutTitleRange,
+    normalizeInlineMarkRange
 } from "./inlineRangeBoundary";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
 import {FontControl, updateFontControls} from "./fontControls";
@@ -847,6 +848,7 @@ export class Toolbar {
         }
         const editableElement = normalizeCalloutTitleRange(this.range, nodeElement,
             getContenteditableElement(nodeElement, this.range.startContainer));
+        normalizeInlineMarkRange(this.range, editableElement);
         const isBatch = remove !== undefined;
         // 在提取选区内容之前确定格式操作，空选区继续使用光标处的输入格式。
         const removeFormat = !isBatch && !this.range.collapsed && INLINE_FORMAT_TYPES.includes(type) && !textObj ?

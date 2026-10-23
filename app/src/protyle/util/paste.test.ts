@@ -205,6 +205,7 @@ describe("restricted cell selected text paste", () => {
             "./pasteSource": {extractCrossBlockPasteContext: (html: string) => ({html})},
             "../ui/hideElements": {hideElements: () => {}},
             "./inlineElementMarker": {stripSemanticMarkersFromRangeText: () => selected},
+            "../toolbar/inlineRangeBoundary": {getSelectedInlineCodeElement: (): undefined => undefined},
             "../../editor/pdfAssetLink": {getPdfAnnotationReference: (): undefined => undefined},
             "../../util/functions": {isDynamicRef: (value: string) => /^\(\(\d{14}-\w{7} '.*'\)\)$/.test(value)},
             "../toolbar/util": {resolveLinkDest: (value: string) => value.startsWith("assets/") ? value : lute.GetLinkDest(value)},

@@ -28,6 +28,7 @@ var settingWriteExemptions = map[string]string{
 	"/api/system/addCustomEmoji":               "写入表情资源文件，不修改配置",
 	"/api/system/removeWorkspaceDir":           "写入全局工作空间列表，不属于工作空间配置",
 	"/api/system/removeWorkspaceDirPhysically": "删除工作空间目录，不修改当前配置",
+	"/api/system/removeLockScreenWallpaper":    "删除壁纸资源文件，不修改启用配置",
 	"/api/repo/setSnapshotMemo":                "写入快照备注，不修改配置",
 	"/api/repo/importRepoKey":                  "数据仓库密钥事务，由密钥流程自行持久化和广播",
 	"/api/repo/initRepoKey":                    "数据仓库密钥事务，由密钥流程自行持久化和广播",

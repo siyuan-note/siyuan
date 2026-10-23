@@ -43,7 +43,7 @@ const loadMissingAssets = async (panel: Element) => {
     }
     panel.setAttribute("data-loading", "true");
     const list = panel.querySelector(".config-assets__list");
-    list.innerHTML = '<li class="fn__loading"><img src="/stage/loading-pure.svg"></li>';
+    list.innerHTML = '<li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>';
     try {
         const response = await fetchSyncPost("/api/asset/getMissingAssets", {});
         if (response.code !== 0) {
@@ -151,7 +151,7 @@ const assets = {
             </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="config-assets__preview fn__none"></div>
         </div>
@@ -166,14 +166,14 @@ const assets = {
             </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="config-assets__preview fn__none" style="display: block;padding: 8px;"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="fn__hr"></div>
         </div>

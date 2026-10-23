@@ -5,6 +5,7 @@
 @use "business/template-manager" as *;
 @use "business/skill-manager" as *;
 @use "component/chip" as *;
+@use "component/loading" as *;
 @use "component/slider" as *;
 @use "component/switch" as *;
 @use "util/scroll" as *;

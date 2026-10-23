@@ -301,7 +301,7 @@ export class Background {
                     const dialog = new Dialog({
                         title: window.siyuan.languages.builtIn,
                         content: `<div class="b3-cards" style="padding:16px;justify-content:center;align-items:center;min-height:200px">
-            <img src="/stage/loading-pure.svg" style="width:64px;height:64px">
+            <span class="b3-loading" aria-hidden="true"></span>
         </div>`,
                         width: isMobile() ? "92vw" : "912px",
                         height: isMobile() ? "80vh" : "70vh",
@@ -827,7 +827,7 @@ export class Background {
             <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
             <div class="fn__hr"></div>
             <div class="b3-list fn__flex-1 b3-list--background">
-                <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+                <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
             </div>
         </div>`,
                     bind: (element) => {

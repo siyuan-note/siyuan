@@ -55,7 +55,7 @@ export class Inbox extends Model {
     <svg data-type="more" class="toolbar__icon fn__none"><use xlink:href='#iconMore'></use></svg>
 </div>
 <div class="fn__loading fn__none">
-    <img width="64px" src="/stage/loading-pure.svg"></div>
+    <span class="b3-loading" aria-hidden="true"></span></div>
 </div>
 <div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
 <div class="fn__flex-1"></div>`;
@@ -77,7 +77,7 @@ export class Inbox extends Model {
     <span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href="#iconMin"></use></svg></span>
 </div>
 <div class="fn__loading fn__none">
-    <img width="64px" src="/stage/loading-pure.svg"></div>
+    <span class="b3-loading" aria-hidden="true"></span></div>
 </div>
 <div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
 <div class="fn__flex-1"></div>`;

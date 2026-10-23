@@ -101,12 +101,15 @@ const runRendererCase = async (sources, expected) => {
     assert.equal(getComputedStyle(loader).getPropertyValue("-webkit-app-region"), "drag");
     const rect = loader.getBoundingClientRect();
     assert.deepEqual([rect.x, rect.y, rect.width, rect.height], [0, 0, innerWidth, innerHeight]);
-    const image = loader.querySelector("img");
-    if (!image.complete) await new Promise(resolve => image.addEventListener("load", resolve, {once: true}));
-    assert.ok(image.naturalWidth > 0, "shared spinner loads");
-    const imgRect = image.getBoundingClientRect();
-    assert.ok(Math.abs(imgRect.x + imgRect.width / 2 - innerWidth / 2) < 1);
-    assert.ok(Math.abs(imgRect.y + imgRect.height / 2 - innerHeight / 2) < 1);
+    const spinner = loader.querySelector(".b3-loading");
+    assert.equal(spinner.childElementCount, 0, "shared spinner needs no icon library or image");
+    assert.equal(getComputedStyle(spinner).color, "rgb(171, 205, 239)", "startup foreground is available before the theme");
+    assert.match(getComputedStyle(spinner, "::before").backgroundImage, /conic-gradient/);
+    const spinnerRect = spinner.getBoundingClientRect();
+    assert.equal(spinnerRect.width, 48);
+    assert.equal(spinnerRect.height, 48);
+    assert.ok(Math.abs(spinnerRect.x + spinnerRect.width / 2 - innerWidth / 2) < 1);
+    assert.ok(Math.abs(spinnerRect.y + spinnerRect.height / 2 - innerHeight / 2) < 1);
     assert.equal(appearance.getWindowAppearance().backgroundColor, expected.hex);
     let done = false;
     let renderDone = false;
@@ -195,11 +198,6 @@ if (process.versions.electron && process.type === "browser") {
             if (pathname === "/base.css") {
                 response.setHeader("Content-Type", "text/css");
                 response.end(css);
-                return;
-            }
-            if (pathname === "/stage/loading-pure.svg") {
-                response.setHeader("Content-Type", "image/svg+xml");
-                response.end(fs.readFileSync(path.join(__dirname, "../stage/loading-pure.svg")));
                 return;
             }
             if (pathname === "/stage/build/app/window.html") {

@@ -174,7 +174,7 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
     </div>
-    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div></div>
 </div>
 <div id="preview" style="width: 360px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
 </div>`,

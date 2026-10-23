@@ -27,7 +27,7 @@
 </head>
 <body class="fn__flex-column body--window" aria-busy="true">
 <div id="loading" class="fn__loading window-loading" role="status">
-    <img width="48" src="../../loading-pure.svg" alt="">
+    <span class="b3-loading b3-loading--large" aria-hidden="true"></span>
 </div>
 <div class="fn__flex-1 fn__flex">
     <div id="layouts" class="layout fn__flex-1"></div>

@@ -314,7 +314,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const nextElement = element.querySelector('[data-type="next"]');
     const pageElement = nextElement.nextElementSibling.nextElementSibling;
     const searchButton = searchInputElement.nextElementSibling as HTMLButtonElement;
-    listElement.innerHTML = '<li class="history__snapshot-loading"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    listElement.innerHTML = '<li class="history__snapshot-loading"><div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div></li>';
     updateRepoSelection(element);
     element.setAttribute("data-page", String(currentPage));
     pageBtn.textContent = String(currentPage);

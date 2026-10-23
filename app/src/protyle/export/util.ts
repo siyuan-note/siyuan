@@ -80,7 +80,7 @@ export const exportImage = (id: string, copyOnly = false) => {
     <button data-type="copy" disabled class="b3-button b3-button--text${copyOnly ? " fn__none" : ""}">${window.siyuan.languages.copyAsPNG}</button><div class="fn__space${copyOnly ? " fn__none" : ""}"></div>
     <button data-type="export" disabled class="b3-button b3-button--text${copyOnly ? " fn__none" : ""}">${window.siyuan.languages.exportFile}</button>
 </div>
- <div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>`,
+ <div class="fn__loading"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>`,
         width: isMobile() ? "92vw" : "990px",
         height: "70vh",
         resizeCallback() {
@@ -258,7 +258,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         const revision = ++previewRevision;
         setActionDisabled(true);
         if (!exportDialog.element.querySelector(".fn__loading")) {
-            exportButton.parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>');
+            exportButton.parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>');
         }
         requestPreview(revision);
     };

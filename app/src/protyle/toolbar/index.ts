@@ -2156,7 +2156,7 @@ export class Toolbar {
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
     </div>
-    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div></div>
 </div>
 <div class="toolbarResize" style="    cursor: col-resize;
     box-shadow: 2px 0 0 0 var(--b3-theme-surface) inset, 3px 0 0 0 var(--b3-border-color) inset;
@@ -2318,7 +2318,7 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
     <input spellcheck="false" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
-    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div></div>
 </div>`;
         const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
         const inputElement = this.subElement.querySelector("input");

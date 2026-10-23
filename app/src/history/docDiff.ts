@@ -196,7 +196,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             panel.querySelector(".history__compare-label").textContent = index === 0 ? leftRef.label : rightRef.label;
             panel.querySelector(".protyle-title__input").textContent = "";
             panel.querySelector(".history__compare-content").innerHTML =
-                '<div class="fn__loading"><img style="height: 64px;width: 64px" src="/stage/loading-pure.svg"></div>';
+                '<div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div>';
         });
     };
 

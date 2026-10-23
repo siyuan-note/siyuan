@@ -1225,19 +1225,7 @@
 }
 
 .agent-chat__mirror-spinner {
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--b3-theme-on-surface-light);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: agent-mirror-spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes agent-mirror-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  align-self: center;
 }
 
 // 发送框和历史消息编辑器复用相同排版，尺寸和滚动按使用场景分别约束。

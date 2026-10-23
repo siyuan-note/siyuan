@@ -1124,7 +1124,7 @@ export const initListMindmaps = (owner: IProtyle) => {
             host.className = "mindmap-view";
             host.contentEditable = "false";
             host.setAttribute("aria-busy", "true");
-            host.innerHTML = '<div class="fn__loading"><img width="64" src="/stage/loading-pure.svg" alt=""></div>';
+            host.innerHTML = '<div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div>';
             syncListMindmapHeight(list, host);
             placeholders.set(list, host);
             list.appendChild(host);

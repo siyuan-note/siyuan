@@ -860,5 +860,5 @@ const buildCloudSpaceHtml = (data: CloudSpaceDisplayData, loading: boolean) =>
         </ul>
         </div>
     </div>
-    ${loading ? '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>' : ""}
+    ${loading ? '<div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div>' : ""}
 </div>`;

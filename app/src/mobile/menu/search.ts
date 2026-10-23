@@ -940,7 +940,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             <span class="fn__flex-1"></span>
          </div>
     </div>
-     <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
+     <div class="fn__loading"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>
 </div>`,
         destroyCallback() {
             destroyed = true;

@@ -264,7 +264,7 @@ export class Preview {
         let loadingElement = this.element.querySelector(".fn__loading");
         if (!loadingElement) {
             this.element.insertAdjacentHTML("beforeend", `<div style="flex-direction: column;" class="fn__loading">
-    <img width="48px" src="/stage/loading-pure.svg">
+    <span class="b3-loading b3-loading--large" aria-hidden="true"></span>
 </div>`);
             loadingElement = this.element.querySelector(".fn__loading");
         }

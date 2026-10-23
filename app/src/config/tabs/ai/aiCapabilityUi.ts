@@ -196,7 +196,7 @@ const showAgentCapabilityLoading = (root: HTMLElement) => {
     </div>
 </div>
 <div class="b3-dialog__body fn__flex-1 fn__flex-center">
-    <img src="/stage/loading-pure.svg" style="height:64px;width:64px;">
+    <span class="b3-loading" aria-hidden="true"></span>
 </div>`;
     view.onchange = null;
     view.onclick = (event) => {

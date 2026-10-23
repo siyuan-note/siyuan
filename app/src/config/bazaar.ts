@@ -298,7 +298,7 @@ export const bazaar = {
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
-        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><span class="b3-loading" aria-hidden="true"></span></div>`;
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
 <div class="config-bazaar__drop fn__none">
@@ -749,7 +749,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         installAllElement?.classList.add("fn__none");
         if (this._updateState === "loading" || this._updateState === "idle") {
             counterElement.classList.add("fn__none");
-            contentElement.innerHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+            contentElement.innerHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><span class="b3-loading" aria-hidden="true"></span></div>`;
             renderBazaarInstall(bazaar.element);
             return;
         }
@@ -1183,7 +1183,7 @@ type="checkbox">
          </blockquote>
     </div>
     <div class="item__readme b3-typography b3-typography--default">
-        <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
+        <div data-type="img-loading" class="fn__flex" style="height:64px;padding:16px 0;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
         renderBazaarInstall(bazaar.element);
@@ -1939,7 +1939,7 @@ type="checkbox">
         if (response.code === 1) {
             // 安装集市包 /api/bazaar/installBazaar* 失败
             showMessage(response.msg);
-            element.querySelectorAll("img[data-type='img-loading']").forEach((item) => {
+            element.querySelectorAll("[data-type='img-loading']").forEach((item) => {
                 item.remove();
             });
             return;

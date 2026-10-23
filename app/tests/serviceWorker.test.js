@@ -46,7 +46,8 @@ test("precache waits for every resource and preserves successes when one request
     assert.equal(completed, false);
     finishPending();
     await installation;
-    assert.equal(cached.length, 6);
+    assert.equal(cached.length, 5);
+    assert.ok(!cached.some(resource => resource.endsWith("loading-pure.svg")), "CSS loading indicators need no image precache");
     assert.equal(warnings.length, 1);
     assert.equal(warnings[0][1], "/favicon.ico");
     const font = cached.find(resource => resource.endsWith(".woff2"));

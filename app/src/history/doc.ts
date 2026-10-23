@@ -115,7 +115,7 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string,
     pageNumElement.textContent = currentPage.toString();
     previousElement.setAttribute("disabled", "disabled");
     nextElement.setAttribute("disabled", "disabled");
-    listElement.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    listElement.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div></li>';
 
     let response: APIPOSTRoutes["/api/repo/getRepoDocHistory"]["response"] | APITransportError;
     try {
@@ -224,7 +224,7 @@ export const openDocHistory = (options: {
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
                 <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
-                    <li class="fn__loading"><img style="height: 64px;width: 64px" src="/stage/loading-pure.svg"></li>
+                    <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
                 </ul>
                 <div class="history__resize"></div>
                 <div class="fn__flex-1 fn__flex-column">

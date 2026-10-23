@@ -1540,7 +1540,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--mirror";
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--mirror">' +
-            '<span class="agent-chat__mirror-spinner"></span>' +
+            '<span class="b3-loading b3-loading--small agent-chat__mirror-spinner" aria-hidden="true"></span>' +
             "<span>" + escapeHtml(message) + "</span>" +
             "</div>";
         this.messagesContainer.appendChild(el);

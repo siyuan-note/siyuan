@@ -144,7 +144,7 @@ export const goSearchRollupCol = (options: {
     <input spellcheck="false" class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages[options.isRelation ? "searchRelation" : "searchRollupProperty"]}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
-        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+        <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>
 </div>`,
         bind(element) {

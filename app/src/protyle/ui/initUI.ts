@@ -353,7 +353,7 @@ export const addLoading = (protyle: IProtyle, msg?: string) => {
     setTimeout(() => {
         if (protyle.element.getAttribute("data-loading") !== "finished") {
             protyle.element.insertAdjacentHTML("beforeend", `<div style="background-color: var(--b3-theme-background);flex-direction: column;" class="fn__loading wysiwygLoading">
-    <img width="48px" src="/stage/loading-pure.svg">
+    <span class="b3-loading b3-loading--large" aria-hidden="true"></span>
     <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${sanitizeKernelHTML(msg || "")}</div>
 </div>`);
         }

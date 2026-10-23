@@ -690,7 +690,7 @@ export class Hint {
         this.destroyEmojiPanel();
         const wasHidden = this.element.classList.contains("fn__none");
         if (this.element.classList.contains("fn__none")) {
-            this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
+            this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><span class="b3-loading" aria-hidden="true"></span></div>';
             this.element.classList.remove("fn__none");
             if (this.source === "av") {
                 const cellElement = getAVBindingCell(protyle.toolbar.range);
@@ -712,7 +712,7 @@ export class Hint {
                 /// #endif
             }
         } else if (!this.element.querySelector(".fn__loading")) {
-            this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
+            this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div>');
         }
         if (delay > 0) {
             // 首次打开时延迟显示整个占位面板，更新候选项时只延迟显示加载遮罩
@@ -922,7 +922,7 @@ export class Hint {
 
     private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string, source: THintSource) {
         const createTarget = this.prepareCreateTarget(protyle, "ref");
-        this.element.lastElementChild.innerHTML = '<div class="ft__center"><img style="height:32px;width:32px;" src="/stage/loading-pure.svg"></div>';
+        this.element.lastElementChild.innerHTML = '<div class="ft__center"><span class="b3-loading" aria-hidden="true"></span></div>';
         const searchParam: import("../../types/api").SearchRefBlockRequestInput = {
             k: searchElement.value,
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,

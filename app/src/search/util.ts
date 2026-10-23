@@ -284,7 +284,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
-<div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>`;
+<div class="fn__loading"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>`;
 
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);

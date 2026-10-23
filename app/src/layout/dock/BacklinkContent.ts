@@ -1848,7 +1848,7 @@ export class BacklinkContent extends Model {
         this.showingLoading = true;
         this.resetRenderedData(false);
         this.element.classList.remove("sy__backlink--backlinks-empty", "sy__backlink--mentions-empty");
-        const loadingHTML = '<div class="backlinkList__loading"><img width="32px" height="32px" src="/stage/loading-pure.svg"></div>';
+        const loadingHTML = '<div class="backlinkList__loading"><span class="b3-loading" aria-hidden="true"></span></div>';
         this.tree.element.innerHTML = loadingHTML;
         this.mTree.element.innerHTML = loadingHTML;
         this.element.querySelector(".listCount").textContent = "";

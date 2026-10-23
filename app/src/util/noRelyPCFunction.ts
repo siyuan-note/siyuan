@@ -40,7 +40,7 @@ export const renameTag = (labelName: string) => {
         value: labelName,
         bindInput: false,
         extraContent: `<div class="b3-list fn__flex-1 b3-list--background fn__none protyle-hint" style="position: absolute;width: calc(100% - 48px);">
-        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+        <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>`,
         onConfirm: (value, dialog) => {
             fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: value}, () => {

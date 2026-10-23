@@ -1,7 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {join} from "node:path";
+import {join, posix} from "node:path";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {DOMFixture, DOMElement} from "./testDOM";
@@ -99,7 +99,7 @@ const createHarness = (standalone = true) => {
         "./col": {getColId: (item: HTMLElement) => item.dataset.colId},
         "./row": {getFieldIdByCellElement: (item: HTMLElement) => item.dataset.rowId},
         "./batchValue": {getAVBatchEditMode: () => "replace"},
-        "../../../util/pathName": {getAssetExtension: (name: string) => name.slice(name.lastIndexOf("."))},
+        "../../../util/pathName": {pathPosix: () => posix},
         "../../util/hasClosest": {hasClosestBlock: (item: HTMLElement) => item.parentElement},
         "../../wysiwyg/transaction": {transaction: (_p: unknown, ops: IOperation[]) => operations.push(...ops)},
         "./action": {updateAttrViewCellAnimation() {}},

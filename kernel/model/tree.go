@@ -261,6 +261,9 @@ func loadTreeByBlockIDWithoutNotFoundLog(id string) (ret *parse.Tree, err error)
 }
 
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
+	if nil == bt {
+		return nil, ErrTreeNotFound
+	}
 	luteEngine := util.NewLute()
 	ret, needFix, err := filesys.LoadTreeWithFix(bt.BoxID, bt.Path, luteEngine)
 	if nil != err {

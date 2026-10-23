@@ -25,6 +25,7 @@ import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
 import {closeMobileEditorSheets} from "./util/MobileEditorDialog";
 import {invalidateMobileReferenceOpen} from "./util/openReference";
+import {clearMobileSearchHighlight} from "./menu/searchHighlight";
 import {closeAVCellEditor} from "../protyle/render/av/cellEditor";
 import {clearDatabaseRowNavigation} from "../protyle/render/av/databaseRowNavigation";
 import {prepareDatabaseAttributePanel} from "../protyle/render/av/attributePanel";
@@ -76,6 +77,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    onFailure?: (invalid?: boolean, editorUnchanged?: boolean) => void, keepPanels = false,
                                    waitForDatabaseAttributes = false) => {
     invalidateMobileReferenceOpen();
+    clearMobileSearchHighlight();
     const closing = closeMobileEditorSheets() || closeMobileBottomBacklinkPanel();
     if (closing) {
         void closing.then(() => {
@@ -382,6 +384,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false,
                                    waitForDatabaseAttributes = false): Promise<boolean> => {
+    clearMobileSearchHighlight();
     const closing = closeMobileEditorSheets();
     if (closing) {
         return closing.then(() => openMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen,

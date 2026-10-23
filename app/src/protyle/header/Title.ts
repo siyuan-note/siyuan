@@ -6,7 +6,7 @@ import {
 } from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {fetchPost} from "../../util/fetch";
-import {normalizeDocumentTitle, validateName} from "../../editor/rename";
+import {normalizeDocumentTitle, truncateDocumentTitle, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
 import {openFileAttr,} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -350,7 +350,7 @@ export class Title {
         if (!validateName(this.editElement.textContent, this.editElement, true)) {
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
-            this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
+            this.setTitle(truncateDocumentTitle(this.editElement.textContent));
             focusByOffset(this.editElement, offset.start, offset.end);
             return false;
         }

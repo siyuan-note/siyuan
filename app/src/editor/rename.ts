@@ -42,12 +42,17 @@ export const replaceFileName = (name: string) => {
     return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|/g, "").substring(0, Constants.SIZE_TITLE);
 };
 
+export const truncateDocumentTitle = (name: string) => {
+    return window.siyuan.documentAddressingVersion === 2 ?
+        Array.from(name).slice(0, Constants.SIZE_TITLE).join("") : name.substring(0, Constants.SIZE_TITLE);
+};
+
 // 文档标题与文件名分开处理；旧内核保留既有输入规则。
 export const normalizeDocumentTitle = (name: string) => {
     if (window.siyuan.documentAddressingVersion !== 2) {
         return replaceFileName(name);
     }
-    return Array.from(name.replace(/\r\n|\r|\n|\u2028|\u2029|\t/g, "")).slice(0, Constants.SIZE_TITLE).join("");
+    return truncateDocumentTitle(name.replace(/\r\n|\r|\n|\u2028|\u2029|\t/g, ""));
 };
 
 export const replaceLocalPath = (name: string) => {

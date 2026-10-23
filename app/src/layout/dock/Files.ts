@@ -2174,7 +2174,7 @@ class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item
     </span>
     <span class="b3-list-item__icon${iconChanges ? " ariaLabel" : ""} popover__block${editingPublishAccess ? " fn__none" : ""}" data-position="8east" data-id="${item.id}"${iconChanges ? ` aria-label="${window.siyuan.languages.changeIcon}"` : ""}>${getFileTreeIconHTML(item.icon, defaultIcon)}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
-    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
+    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE" data-tooltip-encoding="none"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     <span data-type="more-file" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>

@@ -46,7 +46,7 @@ const browserCases = async (sources: Record<string, string>) => {
     const ordinary = document.getElementById("ordinary");
     const tip = document.getElementById("tooltip");
     tooltip.initTooltips();
-    const doc = {id: "doc", notebook: "box", name: 'Title "quotes" <tag> & text', path: "/doc.sy", subFileCount: 2,
+    const doc = {id: "doc", notebook: "box", name: 'A//%2F/%3Ctag%3E/Title "quotes" <tag> & text.sy', path: "/doc.sy", subFileCount: 2,
         hSize: "2 KB", hMtime: "2026-10-17 11:00:00", hCtime: "2026-09-01 10:00:00",
         bookmark: 'Mark "quoted"', name1: "Named <tag>", alias: "Alias & text", memo: "Memo <img src=x>"};
     for (const depth of [0, 1]) {
@@ -54,6 +54,8 @@ const browserCases = async (sources: Record<string, string>) => {
         await panel.appendDoc(pinned, doc, "doc", depth, 0);
         ordinary.innerHTML = regular.render.call({element: ordinary}, doc);
         const title = pinned.querySelector(".b3-list-item__text");
+        check.equal(title.textContent, doc.name);
+        check.equal(ordinary.querySelector(".b3-list-item__text").textContent, doc.name);
         check.equal(title.getAttribute("aria-label"), ordinary.querySelector(".b3-list-item__text").getAttribute("aria-label"));
         title.dispatchEvent(new PointerEvent("pointerover", {bubbles: true, pointerType: "mouse"}));
         title.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));

@@ -169,7 +169,7 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
 };
 
 export const getAssetPathWithoutQuery = (assetPath: string) => {
-    return assetPath.split("?", 1)[0];
+    return assetPath.split(/[?#]/, 1)[0];
 };
 
 export const getAssetExtension = (assetPath: string) => {

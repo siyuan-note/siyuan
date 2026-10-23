@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -75,6 +76,10 @@ func GetDocPaths(boxID string, ids []string) (documents []*treenode.DocumentPath
 		return
 	}
 	defer ReleaseEncryptedBoxOperation(boxID)
+	mode, modeErr := filesys.DocumentAddressingMode(boxID)
+	if modeErr != nil {
+		return nil, nil, modeErr
+	}
 	documents, missing = []*treenode.DocumentPath{}, []string{}
 	seen := map[string]bool{}
 	for _, id := range ids {
@@ -82,7 +87,7 @@ func GetDocPaths(boxID string, ids []string) (documents []*treenode.DocumentPath
 			continue
 		}
 		seen[id] = true
-		document, readErr := treenode.GetDocumentPath(boxID, id, boxID, 1)
+		document, readErr := treenode.GetDocumentPath(boxID, id, boxID, mode)
 		if errors.Is(readErr, sql.ErrNoRows) {
 			missing = append(missing, id)
 			continue
@@ -96,7 +101,53 @@ func GetDocPaths(boxID string, ids []string) (documents []*treenode.DocumentPath
 }
 
 func documentRootRevision(boxID string) string {
-	return treenode.DocumentRevision([]interface{}{1, boxID, 1, IsBoxDocEnabled()})
+	return treenode.DocumentRevision([]interface{}{1, boxID, documentaddressing.DefaultMode(), IsBoxDocEnabled()})
+}
+
+func getDocumentPath(boxID, id string) (*treenode.DocumentPath, error) {
+	mode, err := filesys.DocumentAddressingMode(boxID)
+	if err != nil {
+		return nil, err
+	}
+	return treenode.GetDocumentPath(boxID, id, boxID, mode)
+}
+
+func resolveDocumentPath(boxID string, parentID *string, segments []string) (*treenode.ResolvedDocumentPath, error) {
+	mode, err := filesys.DocumentAddressingMode(boxID)
+	if err != nil {
+		return nil, err
+	}
+	return treenode.ResolveDocumentPath(boxID, parentID, segments, boxID, documentRootRevision(boxID), mode)
+}
+
+func normalizeDocumentTitle(title string) string {
+	if documentaddressing.DefaultMode() == 1 {
+		return normalizeDocTitle(title)
+	}
+	return normalizeTitleText(title)
+}
+
+// appendDocumentHPath 只拼接显示文字，不对标题中的斜杠、点段或尾部字符做路径规范化。
+func appendDocumentHPath(parent, title string) string {
+	if parent == "/" {
+		parent = ""
+	}
+	if title == "" {
+		return parent
+	}
+	return parent + "/" + title
+}
+
+// CheckLegacyDocumentPath 按整本模式拒绝旧名称寻址，不根据某个请求是否包含斜杠放行。
+func CheckLegacyDocumentPath(boxID string) error {
+	mode, err := filesys.DocumentAddressingMode(boxID)
+	if err != nil {
+		return err
+	}
+	if mode > 1 {
+		return documentaddressing.ErrLegacyPathUnsupported
+	}
+	return nil
 }
 
 // ValidateDocumentTitle 校验新协议的完整输入，不通过截断、修剪或字符替换悄悄改变标题。
@@ -104,7 +155,7 @@ func ValidateDocumentTitle(format, text string) error {
 	if format != "plain" {
 		return documentAddressingError("unsupportedTitleFormat", errors.New("unsupported document title format"))
 	}
-	if !utf8.ValidString(text) || utf8.RuneCountInString(text) > 512 || text != normalizeDocTitle(text) || text == "." || text == ".." {
+	if !utf8.ValidString(text) || utf8.RuneCountInString(text) > 512 || text != normalizeDocumentTitle(text) || text == "." || text == ".." {
 		return documentAddressingError("invalidTitle", errors.New("invalid document title"))
 	}
 	return nil
@@ -143,7 +194,7 @@ func ResolveDocPath(boxID, startKind string, startID *string, segments []string)
 		}
 		startID = nil
 	}
-	ret, err := treenode.ResolveDocumentPath(boxID, startID, segments, boxID, documentRootRevision(boxID), 1)
+	ret, err := resolveDocumentPath(boxID, startID, segments)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, documentAddressingError("parentUnavailable", fmt.Errorf("parent document is unavailable in notebook [%s]", boxID))
 	}

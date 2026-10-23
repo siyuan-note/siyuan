@@ -1486,6 +1486,12 @@ export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": s
 
 export type LegacyDocumentTarget = { "notebook": string; "path": string; "version": 1; };
 
+export type LegacyPathDocumentResult = string | LegacyPathUnsupported;
+
+export type LegacyPathIDsResult = Array<string> | null | LegacyPathUnsupported;
+
+export type LegacyPathUnsupported = { "reason": "legacyPathUnsupported"; };
+
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
@@ -2394,7 +2400,7 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "documentAddressingVersion": number; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
@@ -5400,7 +5406,8 @@ export interface APIPOSTRoutes {
      * 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
      * ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
      * 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
-     * 当前兼容阶段仍不允许标题包含 /，不提升已有文档 Spec；加密笔记本使用原有认证写入与响应租约。
+     * 功能版本默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，保护版本仍拒绝 /。
+     * 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
      */
     "/api/filetree/createDocByParent": {
         request: CreateDocByParentRequestInput;
@@ -5412,10 +5419,11 @@ export interface APIPOSTRoutes {
     /**
      * 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
      * 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
+     * 模式 2 对整个笔记本返回 legacyPathUnsupported，即使提供 parentID；改用 createDocByParent。
      */
     "/api/filetree/createDocWithMd": {
         request: FileTreeCreateMarkdownRequestInput;
-        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": LegacyPathDocumentResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | LegacyPathDocumentResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
@@ -5518,9 +5526,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 在兼容模式保留旧名称路径查询；模式 2 整本返回 legacyPathUnsupported，改用 resolveDocPath。
+     */
     "/api/filetree/getIDsByHPath": {
         request: FileTreeOptionalPathRequestInput;
-        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": LegacyPathIDsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | LegacyPathIDsResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
@@ -5681,7 +5692,7 @@ export interface APIPOSTRoutes {
      * 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
      * candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
      * 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
-     * 索引未就绪返回 indexUnavailable；普通标题仍遵守兼容模式限制，不隐式启用新字符。
+     * 索引未就绪返回 indexUnavailable；功能版本默认保留段内 /，保护版本仍遵守兼容模式限制。
      */
     "/api/filetree/resolveDocPath": {
         request: ResolveDocPathRequestInput;
@@ -6286,9 +6297,10 @@ export interface APIPOSTRoutes {
     /**
      * preserves existing configuration and permission filtering. Administrator
      * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-     * not permission to open a closed or locked notebook. literalSlash remains false until structured
-     * title mode is implemented and enabled; minimumReaderVersion is null until a protective release
-     * is verified. Revision covers configuration and confirmed capability records, not a document path.
+     * not permission to open a closed or locked notebook. The feature release migrates to mode 2
+     * automatically without a user setting. literalSlash requires consistent mode records and ready
+     * indexes; minimumReaderVersion remains null while protective-release verification is pending.
+     * Revision covers configuration, confirmed capability and recovery records, not a document path.
      * Malformed capability records fail the request; authentication, locking and network failures must
      * never be interpreted as an absent capability object or as permission to retry a legacy write.
      */

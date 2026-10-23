@@ -468,7 +468,7 @@ func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.
 	if nil == blockTree {
 		return nil, ErrBlockNotFound
 	}
-	primary = normalizeDocTitle(primary)
+	primary = normalizeDocumentTitle(primary)
 
 	target, err := resolveNewItemDocumentTarget(blockTree.BoxID, itemTemplate.SaveLocation)
 	if err != nil {

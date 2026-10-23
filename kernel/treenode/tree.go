@@ -152,13 +152,20 @@ func ContainOnlyDefaultIAL(tree *parse.Tree) bool {
 
 const BaseSpec = "2"
 
-var CurrentSpec = "5"
+const DocumentTitleSpec = "6"
+
+var CurrentSpec = DocumentTitleSpec
 
 var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
 
-// CheckSpecJSON 在解析节点之前检查文档规范，避免未知节点被容错解析后覆盖原始内容。
+// CheckSpecJSON 按当前发行版能力校验独立源（如导入和历史），不能代替笔记本模式与授权预检。
+// 在解析节点之前检查，避免未知节点被容错解析后覆盖原始内容。
 func CheckSpecJSON(data []byte) error {
-	spec, err := checkDocumentSourceJSON(data)
+	return CheckSpecJSONForMode(data, documentaddressing.DefaultMode())
+}
+
+func CheckSpecJSONForMode(data []byte, mode int) error {
+	spec, err := checkDocumentSourceJSON(data, mode)
 	if err != nil {
 		return err
 	}
@@ -166,9 +173,14 @@ func CheckSpecJSON(data []byte) error {
 }
 
 func CheckSpec(tree *parse.Tree) (err error) {
-	if err = documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")); err != nil {
+	return CheckSpecForMode(tree, documentaddressing.DefaultMode())
+}
+
+func CheckSpecForMode(tree *parse.Tree, mode int) (err error) {
+	if err = documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")); mode < 2 && err != nil {
 		return
 	}
+	err = nil
 	if err = ValidateTableCellRich(tree.Root); nil != err {
 		return
 	}
@@ -223,6 +235,10 @@ func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
 			}
 			return ast.WalkContinue
 		})
+	}
+	if version, err := strconv.Atoi(tree.Root.Spec); err == nil && version < 6 &&
+		strings.Contains(tree.Root.IALAttr("title"), "/") {
+		tree.Root.Spec = DocumentTitleSpec
 	}
 	return oldSpec != tree.Root.Spec
 }

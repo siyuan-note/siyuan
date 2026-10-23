@@ -1,7 +1,6 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"io/fs"
 	"os"
@@ -38,13 +37,22 @@ func isDocumentAddressingSource(paths []string) bool {
 	return false
 }
 
-func checkDocumentAddressingSource(data []byte) error {
-	return treenode.CheckSpecJSON(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")))
+func checkDocumentAddressingSource(absPath string, data []byte) error {
+	paths, err := documentAddressingDataPaths(absPath)
+	if err != nil {
+		return err
+	}
+	for _, doc := range documentSourcesFromPaths(paths) {
+		if err = filesys.CheckDocumentSpecJSON(doc.BoxID, data); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // checkDocumentAddressingSourceOverwrite 在创建目录及写入批次前检查新旧文档；不修改原始字节。
 func checkDocumentAddressingSourceOverwrite(absPath string, data []byte) error {
-	if err := checkDocumentAddressingSource(data); err != nil {
+	if err := checkDocumentAddressingSource(absPath, data); err != nil {
 		return err
 	}
 	current, err := filelock.ReadFile(absPath)
@@ -54,7 +62,7 @@ func checkDocumentAddressingSourceOverwrite(absPath string, data []byte) error {
 	if err != nil {
 		return err
 	}
-	return checkDocumentAddressingSource(current)
+	return checkDocumentAddressingSource(absPath, current)
 }
 
 // WriteFileWithDocumentAddressing 在文件锁内重新检查当前文档，再原样写入已验证的请求内容。
@@ -75,7 +83,7 @@ func WriteFileWithDocumentAddressing(absPath string, data []byte) error {
 			if current == nil {
 				return nil
 			}
-			return checkDocumentAddressingSource(current)
+			return checkDocumentAddressingSource(absPath, current)
 		})
 	})
 }

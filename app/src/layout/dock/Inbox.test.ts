@@ -106,7 +106,7 @@ const loadMoveInbox = (fetchEntry: (id: string) => Promise<void> = async () => {
                 created.push(input.id);
                 options.onCreated();
             }},
-            "../../editor/rename": {replaceFileName: (value: string) => value},
+            "../../editor/rename": {normalizeDocumentTitle: (value: string) => value},
             "../../util/escape": {escapeHtml: (value: string) => value},
             "../../dialog/message": {showMessage() {}},
         })[name] || {},

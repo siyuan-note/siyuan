@@ -2,16 +2,12 @@ package model
 
 import (
 	"errors"
-	"path/filepath"
 	"strings"
 
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type DocumentTargetRevision struct {
@@ -35,14 +31,12 @@ func ValidateNotebookDocumentTarget(boxID string, target *conf.DocumentTarget) e
 	if err := target.Validate(); err != nil || target == nil {
 		return err
 	}
-	mode, err := documentaddressing.ReadMode(boxID, func(name string) ([]byte, error) {
-		return filelock.ReadFile(filepath.Join(util.DataDir, boxID, name))
-	})
+	mode, err := filesys.DocumentAddressingMode(boxID)
 	if err != nil {
 		return err
 	}
 	if mode != 2 {
-		return errors.New("structured document targets require an enabled notebook")
+		return errors.New("structured document targets are unavailable in this release")
 	}
 	return filesys.CheckDocumentAddressing(boxID)
 }

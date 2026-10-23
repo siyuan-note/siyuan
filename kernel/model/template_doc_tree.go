@@ -154,7 +154,7 @@ func (state *templateDocTreeParseState) parseNodes(value any, depth int) ([]*Tem
 		if !ok {
 			return nil, errors.New("createDocTree document title must be a string")
 		}
-		title = normalizeDocTitle(title)
+		title = normalizeDocumentTitle(title)
 		if "" == title {
 			return nil, errors.New("createDocTree document title must not be empty")
 		}
@@ -235,7 +235,7 @@ func (collector *templateDocTreeCollector) bindNodes(nodes []*TemplateDocTreeNod
 	for _, node := range nodes {
 		node.ParentID = parentID
 		node.path = strings.TrimSuffix(parentPath, ".sy") + "/" + node.ID + ".sy"
-		node.HPath = strings.TrimRight(parentHPath, "/") + "/" + node.Title
+		node.HPath = parentHPath + "/" + node.Title
 		collector.bindNodes(node.Children, node.ID, node.path, node.HPath)
 	}
 }
@@ -322,7 +322,7 @@ func (collector *templateDocTreeCollector) buildTree(node *TemplateDocTreeNode, 
 	renderedTree.HPath = node.HPath
 	renderedTree.ID = node.ID
 	renderedTree.Root.ID = node.ID
-	renderedTree.Root.Spec = treenode.CurrentSpec
+	renderedTree.Root.Spec = treenode.BaseSpec
 	templateIALs := parse.IAL2Map(renderedTree.Root.KramdownIAL)
 	renderedTree.Root.KramdownIAL = [][]string{
 		{"id", node.ID},
@@ -509,7 +509,7 @@ func AttachTemplateDocTreePlans(transactions []*Transaction) (attached bool, err
 		plan.rootRevision == "" {
 		return false, errors.New("the document used to render the template has changed")
 	}
-	location, locationErr := treenode.GetDocumentPath(plan.boxID, plan.rootID, plan.boxID, 1)
+	location, locationErr := getDocumentPath(plan.boxID, plan.rootID)
 	if locationErr != nil || location.Revision != plan.rootRevision {
 		return false, errors.New("the document used to render the template has changed")
 	}

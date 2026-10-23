@@ -134,9 +134,10 @@ var (
 	OpenNotebook = define[OpenNotebookRequest, Null]("openNotebook", "/api/notebook/openNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// GetNotebookConf preserves existing configuration and permission filtering. Administrator
 	// responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-	// not permission to open a closed or locked notebook. literalSlash remains false until structured
-	// title mode is implemented and enabled; minimumReaderVersion is null until a protective release
-	// is verified. Revision covers configuration and confirmed capability records, not a document path.
+	// not permission to open a closed or locked notebook. The feature release migrates to mode 2
+	// automatically without a user setting. literalSlash requires consistent mode records and ready
+	// indexes; minimumReaderVersion remains null while protective-release verification is pending.
+	// Revision covers configuration, confirmed capability and recovery records, not a document path.
 	// Malformed capability records fail the request; authentication, locking and network failures must
 	// never be interpreted as an absent capability object or as permission to retry a legacy write.
 	GetNotebookConf = define[CloseNotebookRequest, NotebookConfData]("getNotebookConf", "/api/notebook/getNotebookConf", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1068,7 +1069,7 @@ var GetDocPaths = define[GetDocPathsRequest, DocumentPathsResult]("getDocPaths",
 // 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
 // candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
 // 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
-// 索引未就绪返回 indexUnavailable；普通标题仍遵守兼容模式限制，不隐式启用新字符。
+// 索引未就绪返回 indexUnavailable；功能版本默认保留段内 /，保护版本仍遵守兼容模式限制。
 var ResolveDocPath = define[ResolveDocPathRequest, ResolveDocPathResult]("resolveDocPath", "/api/filetree/resolveDocPath", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 // CreateDocByParent 在显式父文档 ID 或 null 根位置创建固定 ID 文档，不接收 path/hPath 或名称回退。
@@ -1076,7 +1077,8 @@ var ResolveDocPath = define[ResolveDocPathRequest, ResolveDocPathResult]("resolv
 // 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
 // ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
 // 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
-// 当前兼容阶段仍不允许标题包含 /，不提升已有文档 Spec；加密笔记本使用原有认证写入与响应租约。
+// 功能版本默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，保护版本仍拒绝 /。
+// 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
 var CreateDocByParent = define[CreateDocByParentRequest, CreateDocByParentResult]("createDocByParent", "/api/filetree/createDocByParent", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 // GetDocCreateTarget 返回指定用途的有效目标及正文模板，不渲染模板、不猜测上下文或日期。
@@ -1092,7 +1094,9 @@ var GetDocCreateTarget = define[GetDocCreateTargetRequest, DocumentCreateTargetD
 var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFullHPathByID = define[FileTreeOptionalIDRequest, *string]("getFullHPathByID", "/api/filetree/getFullHPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-var GetIDsByHPath = define[FileTreeOptionalPathRequest, []string]("getIDsByHPath", "/api/filetree/getIDsByHPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetIDsByHPath 在兼容模式保留旧名称路径查询；模式 2 整本返回 legacyPathUnsupported，改用 resolveDocPath。
+var GetIDsByHPath = define[FileTreeOptionalPathRequest, LegacyPathIDsResult]("getIDsByHPath", "/api/filetree/getIDsByHPath", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var MoveDocs = define[FileTreeMoveRequest, Null]("moveDocs", "/api/filetree/moveDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var MoveDocsByID = define[FileTreeMoveIDsRequest, Null]("moveDocsByID", "/api/filetree/moveDocsByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDoc = define[FileTreePathRequest, Null]("removeDoc", "/api/filetree/removeDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1109,7 +1113,8 @@ var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNot
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
 // 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
-var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+// 模式 2 对整个笔记本返回 legacyPathUnsupported，即使提供 parentID；改用 createDocByParent。
+var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, LegacyPathDocumentResult]("createDocWithMd", "/api/filetree/createDocWithMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 // 旧模板保持既有渲染及回退；对应的新目标对象生效时返回 structuredTemplateRequired，不读取历史路径。
 var GetDocCreateSavePath = define[FileTreeNotebookRequest, FileTreeCreateSavePathResult]("getDocCreateSavePath", "/api/filetree/getDocCreateSavePath", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")

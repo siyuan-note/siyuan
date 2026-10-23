@@ -479,7 +479,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 	ReloadFiletree()
 	ReloadProtyle(rootID)
 
-	msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+	msg := fmt.Sprintf(Conf.Language(286), box.Name+tree.HPath)
 	util.PushMsg(msg, 7000)
 	IncSync()
 

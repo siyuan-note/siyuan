@@ -242,6 +242,10 @@ jobs:
         env:
           SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models
           SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so
+      - name: Test structured title migration behind the release gate
+        continue-on-error: true
+        run: go test -tags "fts5 sqlcipher" -ldflags "-X github.com/siyuan-note/siyuan/kernel/documentaddressing.minimumReaderVersion=0.0.0-test" ./documentaddressing ./filesys ./model ./api ./cli/cmd -run '^TestStructuredTitles' -count=1
+        working-directory: kernel
       - name: Test path fixtures with custom temporary directories
         id: test_path_fixtures_with_custom_temporary_directories
         # 测试失败只记录结果，不阻塞后续发布构建。
@@ -319,6 +323,15 @@ jobs:
         continue-on-error: true
         shell: msys2 {0}
         run: node ../scripts/test-kernel.mjs --shards 4 --output "${{ runner.temp }}/kernel-test-results"
+        working-directory: kernel
+        env:
+          CGO_ENABLED: 1
+          CC: gcc
+
+      - name: Test Windows structured title migration behind the release gate
+        continue-on-error: true
+        shell: msys2 {0}
+        run: go test -tags "fts5 sqlcipher" -ldflags "-X github.com/siyuan-note/siyuan/kernel/documentaddressing.minimumReaderVersion=0.0.0-test" ./documentaddressing ./filesys ./model ./api ./cli/cmd -run '^TestStructuredTitles' -count=1
         working-directory: kernel
         env:
           CGO_ENABLED: 1

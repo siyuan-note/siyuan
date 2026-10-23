@@ -5,7 +5,6 @@
 package filesys
 
 import (
-	"bytes"
 	"path/filepath"
 
 	"github.com/88250/lute"
@@ -30,7 +29,7 @@ func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (size uint64, err e
 	if err != nil {
 		return 0, err
 	}
-	if err = treenode.CheckSpecJSON(bytes.TrimPrefix(plain, []byte("\xef\xbb\xbf"))); err != nil {
+	if err = CheckDocumentSpecJSON(tree.Box, plain); err != nil {
 		return 0, err
 	}
 	data, filePath, err := prepareWriteTree(tree)

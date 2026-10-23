@@ -87,13 +87,15 @@ func checkDocumentAddressingLocalFile(absPath string, ancestors bool) error {
 	if !filepath.IsAbs(confDir) {
 		return nil
 	}
-	record := util.NormalizeAndResolve(util.ResolveLongestExistingParent(filepath.Join(confDir, "document-addressing.json")))
 	name := util.NormalizeAndResolve(util.ResolveLongestExistingParent(absPath))
-	if _, inside := dataRelativePath(record, name); inside {
-		return documentaddressing.ErrInvalid
-	}
-	if _, ancestor := dataRelativePath(name, record); ancestors && ancestor {
-		return documentaddressing.ErrInvalid
+	for _, relative := range []string{"document-addressing.json", "document-addressing-recovery"} {
+		record := util.NormalizeAndResolve(util.ResolveLongestExistingParent(filepath.Join(confDir, relative)))
+		if _, inside := dataRelativePath(record, name); inside {
+			return documentaddressing.ErrInvalid
+		}
+		if _, ancestor := dataRelativePath(name, record); ancestors && ancestor {
+			return documentaddressing.ErrInvalid
+		}
 	}
 	return nil
 }

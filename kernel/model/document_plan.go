@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -48,7 +49,7 @@ func documentParentLocation(boxID string, id *string) (*string, error) {
 	if id == nil || IsBoxDoc(boxID, *id) {
 		return nil, nil
 	}
-	document, err := treenode.GetDocumentPath(boxID, *id, boxID, 1)
+	document, err := getDocumentPath(boxID, *id)
 	if err != nil {
 		return nil, documentAddressingError("parentUnavailable", err)
 	}
@@ -57,7 +58,7 @@ func documentParentLocation(boxID string, id *string) (*string, error) {
 
 // renderDocumentTarget 只对旧模板拆分渲染结果；版本 2 的每一段在同一时间快照独立求值。
 func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanRequest) (ret renderedDocumentTarget, err error) {
-	ret.missing, ret.legacy = "create", target.Structured == nil
+	ret.missing, ret.legacy = "create", target.Structured == nil && documentaddressing.DefaultMode() == 1
 	if request.Now.IsZero() {
 		request.Now = time.Now()
 	}
@@ -127,7 +128,7 @@ func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanR
 		if request.Title != nil {
 			ret.title = *request.Title
 		}
-		ret.title = normalizeDocTitle(ret.title)
+		ret.title = normalizeDocumentTitle(ret.title)
 		if request.Placement == "child" {
 			ret.parentID, ret.parents = request.ContextID, nil
 			return
@@ -149,7 +150,7 @@ func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanR
 	}
 	// 兼容旧 parentID 优先规则：相同展示位置仍使用调用方的实际父身份。
 	if ret.legacy && request.ContextID != nil && target.Notebook == request.Notebook && ret.parentID == nil {
-		if current, readErr := treenode.GetDocumentPath(target.Notebook, *request.ContextID, target.Notebook, 1); readErr == nil &&
+		if current, readErr := getDocumentPath(target.Notebook, *request.ContextID); readErr == nil &&
 			current.DisplayPath == "/"+strings.Join(ret.parents, "/") {
 			ret.parentID, ret.parents = request.ContextID, nil
 		}
@@ -216,7 +217,7 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 	parentID, revision, depth := rendered.parentID, documentRootRevision(target.Notebook), 0
 	displayParents := []string{}
 	if parentID != nil {
-		parent, readErr := treenode.GetDocumentPath(target.Notebook, *parentID, target.Notebook, 1)
+		parent, readErr := getDocumentPath(target.Notebook, *parentID)
 		if readErr != nil {
 			return nil, documentAddressingError("parentUnavailable", readErr)
 		}
@@ -249,7 +250,7 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 	for _, title := range rendered.parents {
 		depth++
 		if !missing {
-			resolved, resolveErr := treenode.ResolveDocumentPath(target.Notebook, parentID, []string{title}, target.Notebook, documentRootRevision(target.Notebook), 1)
+			resolved, resolveErr := resolveDocumentPath(target.Notebook, parentID, []string{title})
 			if resolveErr != nil {
 				return nil, resolveErr
 			}
@@ -281,7 +282,7 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 		return nil, errors.New(Conf.Language(118))
 	}
 	if request.Reuse && !missing && rendered.title != "" {
-		resolved, resolveErr := treenode.ResolveDocumentPath(target.Notebook, parentID, []string{rendered.title}, target.Notebook, documentRootRevision(target.Notebook), 1)
+		resolved, resolveErr := resolveDocumentPath(target.Notebook, parentID, []string{rendered.title})
 		if resolveErr != nil {
 			return nil, resolveErr
 		}
@@ -351,7 +352,7 @@ func legacyDocumentCandidate(boxID string, candidates []*treenode.DocumentPath) 
 // executeDocumentCreationPlan 保留已完成文档，下一步使用实际提交后的父版本，不重放正文副作用。
 func executeDocumentCreationPlan(plan *DocumentCreatePlan, creationLocked bool) (*treenode.DocumentPath, error) {
 	if plan.ExistingID != "" {
-		return treenode.GetDocumentPath(plan.Notebook, plan.ExistingID, plan.Notebook, 1)
+		return getDocumentPath(plan.Notebook, plan.ExistingID)
 	}
 	var last *treenode.DocumentPath
 	for _, step := range plan.Steps {

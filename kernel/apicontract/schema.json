@@ -32147,6 +32147,51 @@
       ],
       "additionalProperties": false
     },
+    "LegacyPathDocumentResult": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/LegacyPathUnsupported"
+        }
+      ]
+    },
+    "LegacyPathIDsResult": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "$ref": "#/$defs/LegacyPathUnsupported"
+        }
+      ]
+    },
+    "LegacyPathUnsupported": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "legacyPathUnsupported"
+          ]
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false
+    },
     "ListNotebooksData": {
       "type": "object",
       "properties": {
@@ -53640,6 +53685,9 @@
             }
           ]
         },
+        "documentAddressingVersion": {
+          "type": "integer"
+        },
         "isPublish": {
           "type": "boolean"
         },
@@ -53655,6 +53703,7 @@
       },
       "required": [
         "conf",
+        "documentAddressingVersion",
         "isPublish",
         "revision",
         "start"
@@ -148016,7 +148065,7 @@
                 ]
               },
               "data": {
-                "type": "string"
+                "$ref": "#/$defs/LegacyPathDocumentResult"
               },
               "msg": {
                 "type": "string"
@@ -148054,6 +148103,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/LegacyPathDocumentResult"
                   }
                 ]
               },
@@ -149072,17 +149124,7 @@
                 ]
               },
               "data": {
-                "anyOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "$ref": "#/$defs/LegacyPathIDsResult"
               },
               "msg": {
                 "type": "string"
@@ -149120,6 +149162,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/LegacyPathIDsResult"
                   }
                 ]
               },

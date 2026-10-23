@@ -81,7 +81,7 @@ func documentCreateParent(request *DocumentCreateRequest) (folder, revision stri
 		err = documentAddressingError("parentUnavailable", errors.New("invalid parent document ID"))
 		return
 	}
-	parent, readErr := treenode.GetDocumentPath(request.Notebook, parentID, request.Notebook, 1)
+	parent, readErr := getDocumentPath(request.Notebook, parentID)
 	if readErr != nil {
 		err = documentAddressingError("parentUnavailable", readErr)
 		return
@@ -283,7 +283,7 @@ func createDocByParent(request DocumentCreateRequest, creationLocked bool) (docu
 			}
 			return err
 		}
-		document, err = treenode.GetDocumentPath(tree.Box, tree.ID, tree.Box, 1)
+		document, err = getDocumentPath(tree.Box, tree.ID)
 		return err
 	}()
 	if err != nil {

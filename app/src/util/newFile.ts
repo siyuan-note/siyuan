@@ -9,7 +9,7 @@ import {getActiveTab, getDockByType} from "../layout/tabUtil";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {getOpenNotebookCount, isMoveTargetAllowed, movePathTo} from "./pathName";
 import {Constants} from "../constants";
-import {replaceFileName, validateName} from "../editor/rename";
+import {normalizeDocumentTitle, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
@@ -68,7 +68,7 @@ export const newFile = (app: App, name?: string) => {
             notebookId,
             currentPath,
             hasFocusTarget,
-            name: replaceFileName(name.trim()),
+            name: normalizeDocumentTitle(name.trim()),
             onCreated: () => hideElements(["dialog"]),
         });
     }
@@ -168,7 +168,7 @@ export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "s
     }
     const fileName = name === undefined ? (selectText.trim() ||
         protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim()) : name.trim();
-    const newFileName = replaceFileName(fileName);
+    const newFileName = normalizeDocumentTitle(fileName);
     newFileBySelect(protyle, newFileName, selectionContext, target === "subDoc" ? "child" : "configured", refSubtype);
     hideElements(["toolbar"], protyle);
 };
@@ -282,7 +282,7 @@ export const newFileByRefHint = (
 ) => {
     void createConfiguredDocument({
         notebook: protyle.notebookId, contextID: documentParentID(protyle.path), purpose: "reference",
-        title: replaceFileName(name.trim()), id: presetId,
+        title: normalizeDocumentTitle(name.trim()), id: presetId,
     }, {onCreated: (id, title) => onCreated?.(id, title)});
 };
 
@@ -314,8 +314,8 @@ export const newFileAtPath = (options: {
     restoreFocus?: () => void;
     onCreated: (id: string, title: string) => void;
 }) => {
-    const title = replaceFileName(options.name.trim());
-    if (!options.isValid() || (title && !validateName(title))) {
+    const title = normalizeDocumentTitle(options.name.trim());
+    if (!options.isValid() || (title && !validateName(title, undefined, true))) {
         return;
     }
     let submitted = false;
@@ -357,7 +357,7 @@ export const newSubDocByRefHint = (
 ) => {
     createRefDocAsSubDoc({
         kind: "subDoc", targetNotebookId: protyle.notebookId, parentPath: protyle.path,
-        title: replaceFileName(name.trim()),
+        title: normalizeDocumentTitle(name.trim()),
     }, onCreated, presetId);
 };
 

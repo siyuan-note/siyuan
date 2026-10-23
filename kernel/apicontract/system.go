@@ -53,9 +53,11 @@ type SystemMessageData struct {
 	Msg string `json:"msg"`
 }
 type SystemConfData struct {
-	Conf      *SystemAppConf `json:"conf"`
-	Start     bool           `json:"start"`
-	IsPublish bool           `json:"isPublish"`
+	// DocumentAddressingVersion 是当前内核的只读能力，不是持久化配置或可写开关。
+	DocumentAddressingVersion int            `json:"documentAddressingVersion"`
+	Conf                      *SystemAppConf `json:"conf"`
+	Start                     bool           `json:"start"`
+	IsPublish                 bool           `json:"isPublish"`
 	// SettingTasks 为当前仍执行的设置维护任务，前端初始化和重连时恢复任务阻塞。
 	SettingTasks *SettingTaskState `json:"settingTasks,omitempty"`
 	// Revision 是读取开始前的配置提交序号，客户端据此丢弃已包含在本次读取中的通知。

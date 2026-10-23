@@ -42,6 +42,13 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 		if err != nil {
 			return nil, err
 		}
+		mode, modeErr := filesys.DocumentAddressingMode(toBox)
+		if modeErr != nil {
+			return nil, modeErr
+		}
+		if err = treenode.CheckSpecForMode(tree, mode); err != nil {
+			return nil, documentAddressingError("targetModeUnsupported", err)
+		}
 		relative := strings.TrimPrefix(sourcePath, path.Dir(fromPath)+"/")
 		if path.Dir(fromPath) == "/" {
 			relative = strings.TrimPrefix(sourcePath, "/")

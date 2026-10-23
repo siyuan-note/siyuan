@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	ErrModeConflict = errors.New("document title requires structured addressing")
-	ErrInvalidTitle = errors.New("invalid document title source")
+	ErrModeConflict          = errors.New("document title requires structured addressing")
+	ErrInvalidTitle          = errors.New("invalid document title source")
+	ErrLegacyPathUnsupported = errors.New("legacy document paths are unsupported; use structured document addressing")
 )
 
 // CheckLegacyTitle 检查已经解码的兼容模式标题，不清洗内容，也不将冲突视为已确认的模式启用。
@@ -26,6 +27,11 @@ func CheckLegacyTitle(title string) error {
 
 // CheckLegacyTitleProperties 在属性解码和修复前检查每个标题值，重复字段不能遮盖冲突源。
 func CheckLegacyTitleProperties(data []byte) error {
+	return CheckTitleProperties(data, 1)
+}
+
+// CheckTitleProperties 保留原始字符；模式只决定是否允许新字符，不能清洗冲突源。
+func CheckTitleProperties(data []byte, mode int) error {
 	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
 		return nil
 	}
@@ -52,7 +58,7 @@ func CheckLegacyTitleProperties(data []byte) error {
 			if titleErr == nil {
 				titleErr = ErrInvalidTitle
 			}
-		} else if err = CheckLegacyTitle(html.UnescapeAttrVal(title)); err != nil {
+		} else if err = CheckLegacyTitle(html.UnescapeAttrVal(title)); mode < 2 && err != nil {
 			titleErr = err
 		}
 	}

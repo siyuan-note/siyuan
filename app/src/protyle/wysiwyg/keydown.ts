@@ -108,7 +108,7 @@ import {
     shouldIgnoreListShortcut,
     type TListSubtype
 } from "./listContext";
-import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
+import {newFileContentBySelect, rename, normalizeDocumentTitle} from "../../editor/rename";
 import {cancelSB, insertEmptyBlock, insertEmptySuperBlockColumn, jumpToParent} from "../../block/util";
 import {isEncryptedBox, isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
@@ -1817,7 +1817,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 fetchPost("/api/filetree/renameDoc", {
                     notebook: protyle.notebookId,
                     path: protyle.path,
-                    title: replaceFileName(selectText),
+                    title: normalizeDocumentTitle(selectText),
                 });
             }
             event.preventDefault();

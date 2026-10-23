@@ -604,6 +604,20 @@ func TestFromFTSAndHPathMatchSQLBlockMarksMatchSource(t *testing.T) {
 	}
 }
 
+func TestTrimDocumentTitleHPath(t *testing.T) {
+	for _, test := range []struct{ path, title, want string }{
+		{"Notebook/A/B", "A/B", "Notebook/"},
+		{"Notebook/Parent//A//B/", "A//B/", "Notebook/Parent//"},
+		{"Notebook/<mark>Parent/A</mark>/B", "A/B", "Notebook/<mark>Parent/</mark>"},
+		{"Notebook/<mark>Parent</mark>/A/<mark>B</mark>", "A/B", "Notebook/<mark>Parent</mark>/"},
+		{"Notebook/Parent/A&amp;B/&lt;C&gt;", "A&B/<C>", "Notebook/Parent/"},
+	} {
+		if got := trimDocumentTitleHPath(test.path, test.title); got != test.want {
+			t.Errorf("%q with %q: got %q, want %q", test.path, test.title, got, test.want)
+		}
+	}
+}
+
 func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	multipleKeywords := fromHPathSearchSQLBlock(&sql.Block{

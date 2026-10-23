@@ -297,6 +297,11 @@ var documentInfoCmd = &cobra.Command{
 }
 
 func resolvePath(boxID, userPath, hpath string) (string, error) {
+	if userPath == "" && hpath != "" {
+		if err := model.CheckLegacyDocumentPath(boxID); err != nil {
+			return "", err
+		}
+	}
 	return resolvePathWithLookup(userPath, hpath, func(targetHPath string) (string, bool) {
 		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
 		if nil == bt {
@@ -325,6 +330,11 @@ func resolvePathWithLookup(userPath, hpath string, lookup func(string) (string, 
 }
 
 func resolveDocumentMovePath(boxID, userPath, hpath, sourceTitle string) (string, error) {
+	if userPath == "" && hpath != "" {
+		if err := model.CheckLegacyDocumentPath(boxID); err != nil {
+			return "", err
+		}
+	}
 	return resolveDocumentMovePathWithLookup(userPath, hpath, sourceTitle, func(targetHPath string) (string, bool) {
 		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
 		if nil == bt {

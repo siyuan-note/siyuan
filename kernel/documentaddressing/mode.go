@@ -22,9 +22,8 @@ import (
 )
 
 const (
-	ConfigPath    = ".siyuan/conf.json"
-	FloorPath     = ".siyuan/document-addressing.json"
-	supportedMode = 1
+	ConfigPath = ".siyuan/conf.json"
+	FloorPath  = ".siyuan/document-addressing.json"
 )
 
 var (
@@ -97,29 +96,56 @@ func CheckImport(dataDir, confDir, boxID, directory string) error {
 	if err != nil {
 		return err
 	}
+	if ast.IsNodeIDPattern(boxID) {
+		record, readErr := readMigration(store, boxID)
+		if readErr != nil {
+			return readErr
+		}
+		if record != nil {
+			mode = max(mode, 2)
+		}
+	}
 	return checkSupported(boxID, max(mode, store.Notebooks[boxID]))
 }
 
 // CheckBox 在任何源数据修复、索引和读写前确认能力下界。合法的较高要求只升不降。
 func CheckBox(dataDir, confDir, boxID string) error {
-	if !ast.IsNodeIDPattern(boxID) {
-		return ErrInvalid
-	}
+	_, err := BoxMode(dataDir, confDir, boxID)
+	return err
+}
+
+// BoxMode 在确认能力下界和完成自动迁移后返回可用模式，避免调用者重复读取元数据。
+func BoxMode(dataDir, confDir, boxID string) (int, error) {
 	storeLock.Lock()
 	defer storeLock.Unlock()
-	store, err := loadStore(dataDir, confDir)
+	snapshot, store, err := inspectBox(dataDir, confDir, boxID)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	mode, err := ReadMode(boxID, directoryReader(filepath.Join(dataDir, boxID)))
-	if err != nil {
-		return fmt.Errorf("notebook [%s]: %w", boxID, err)
+	if err = checkSupported(boxID, snapshot.Mode); err != nil {
+		return 0, err
 	}
-	mode = store.confirm(boxID, mode)
-	if err = store.save(); err != nil {
-		return err
+	if DefaultMode() == 2 && (snapshot.Mode == 1 || snapshot.State == "recovering") {
+		// 新笔记本尚未创建配置时不生成目录；恢复旧身份时也不能重建已删除的笔记本。
+		_, statErr := os.Stat(filepath.Join(dataDir, boxID, ConfigPath))
+		if errors.Is(statErr, os.ErrNotExist) && snapshot.Mode == 1 {
+			return 1, nil
+		}
+		if statErr != nil {
+			return 0, statErr
+		}
+		if err = migrateBoxRecords(dataDir, boxID, store, filelock.WriteFile); err != nil {
+			return 0, err
+		}
+		return 2, nil
 	}
-	return checkSupported(boxID, mode)
+	if snapshot.State == "conflict" {
+		return 0, ErrModeConflict
+	}
+	if snapshot.State == "recovering" {
+		return 0, ErrRecovering
+	}
+	return snapshot.Mode, nil
 }
 
 // CheckBatch 校验一次同步或恢复的完整替换计划；调用者必须在任何源文件变动前调用。
@@ -165,6 +191,11 @@ func CheckBatch(dataDir, confDir string, upserts, removes []string, read Reader)
 	for _, boxID := range ids {
 		current := directoryReader(filepath.Join(dataDir, boxID))
 		mode, currentErr := ReadMode(boxID, current)
+		record, recoveryErr := readMigration(store, boxID)
+		if record != nil {
+			mode = max(mode, 2)
+		}
+		currentErr = errors.Join(currentErr, recoveryErr)
 		if currentErr == nil {
 			mode = store.confirm(boxID, mode)
 		}
@@ -203,7 +234,7 @@ func CheckBatch(dataDir, confDir string, upserts, removes []string, read Reader)
 }
 
 func checkSupported(boxID string, mode int) error {
-	if mode > supportedMode {
+	if mode > DefaultMode() {
 		return fmt.Errorf("%w [%s, mode=%d]", ErrUnsupported, boxID, mode)
 	}
 	return nil
@@ -369,6 +400,10 @@ func (store *localStore) confirm(boxID string, mode int) int {
 }
 
 func (store *localStore) save() error {
+	return store.saveUsing(filelock.WriteFile)
+}
+
+func (store *localStore) saveUsing(write func(string, []byte) error) error {
 	if !store.dirty {
 		return nil
 	}
@@ -379,5 +414,5 @@ func (store *localStore) save() error {
 	if err = os.MkdirAll(filepath.Dir(store.path), 0755); err != nil {
 		return err
 	}
-	return filelock.WriteFile(store.path, data)
+	return write(store.path, data)
 }

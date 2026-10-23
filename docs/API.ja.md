@@ -298,6 +298,8 @@ if (response.code === 0 && response.data) {
 
 ### ノートブック設定を取得
 
+管理者向けレスポンスには、読み取り専用の `documentCapabilities` オブジェクトが含まれる場合があります。アドレス指定モード、構造化 API、タイトル機能、インデックス状態、検証済みの最低読み取りバージョンを示します。機能リリースでは設定の切り替えなしに自動移行されます。`literalSlash` にはモード `2`、整合したモード記録、準備済みインデックスが必要です。保護リリースの検証が完了するまで `minimumReaderVersion` は `null` です。既存の権限によるフィルタリングは維持されます。
+
 * `/api/notebook/getNotebookConf`
 * パラメータ
 
@@ -371,6 +373,8 @@ if (response.code === 0 && response.data) {
 ## ドキュメント
 
 ### Markdownでドキュメントを作成
+
+この旧名称パス API は互換モードでのみ利用できます。構造化タイトルに対応する機能リリースではノートブックが自動移行され、通常のタイトルや `parentID` を指定した場合も、ノートブック全体で `code: -1`、`data: {reason: "legacyPathUnsupported"}` を返します。`/api/filetree/createDocByParent` に親の識別情報とタイトルを別々に渡してください。以下の例は互換モードの動作を示します。
 
 * `/api/filetree/createDocWithMd`
 * パラメータ
@@ -753,6 +757,8 @@ if (response.code === 0 && response.data) {
   ```
 
 ### 人間が読めるパスからIDを取得
+
+構造化タイトルに対応する機能リリースではノートブックが自動移行され、この旧 API はノートブック全体で `code: -1`、`data: {reason: "legacyPathUnsupported"}` を返します。既知のドキュメント ID はそのまま使用し、不明な場所は `/api/filetree/resolveDocPath` にタイトルの配列を渡して解決してください。表示パスだけでは、単一のタイトル `A/B` と 2 階層の `A`、`B` を区別できません。以下の例は互換モード用です。
 
 * `/api/filetree/getIDsByHPath`
 * パラメータ

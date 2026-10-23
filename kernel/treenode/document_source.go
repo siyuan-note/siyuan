@@ -11,7 +11,7 @@ import (
 )
 
 // checkDocumentSourceJSON 保留重复字段中遇到的兼容错误，在容错解析前确定标题和源版本能否处理。
-func checkDocumentSourceJSON(data []byte) (string, error) {
+func checkDocumentSourceJSON(data []byte, mode int) (string, error) {
 	if !bytes.HasPrefix(bytes.TrimSpace(data), []byte("{")) {
 		return "", errors.New("invalid document source")
 	}
@@ -19,6 +19,7 @@ func checkDocumentSourceJSON(data []byte) (string, error) {
 		Spec       documentSourceSpec
 		Properties documentSourceProperties
 	}
+	root.Properties.mode = mode
 	if err := json.Unmarshal(data, &root); err != nil {
 		return "", err
 	}
@@ -52,11 +53,12 @@ func (spec *documentSourceSpec) UnmarshalJSON(data []byte) error {
 }
 
 type documentSourceProperties struct {
-	err error
+	err  error
+	mode int
 }
 
 func (properties *documentSourceProperties) UnmarshalJSON(data []byte) error {
-	if err := documentaddressing.CheckLegacyTitleProperties(data); err != nil {
+	if err := documentaddressing.CheckTitleProperties(data, properties.mode); err != nil {
 		if properties.err == nil || errors.Is(err, documentaddressing.ErrModeConflict) {
 			properties.err = err
 		}

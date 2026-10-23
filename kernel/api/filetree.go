@@ -32,6 +32,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -444,19 +445,26 @@ func getFullHPathByIDContract(c *gin.Context, request apicontract.FileTreeOption
 
 var getIDsByHPath = contractHandler(apicontract.GetIDsByHPath, getIDsByHPathContract)
 
-func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalPathRequest) apicontract.Response[[]string] {
+func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalPathRequest) apicontract.Response[apicontract.LegacyPathIDsResult] {
 	ret := gulu.Ret.NewResult()
 
 	if request.Path == nil {
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 	if request.Notebook == nil {
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 
 	notebook := *request.Notebook
 	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
+	}
+
+	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
+		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
+			return apicontract.GetIDsByHPath.FailureWithData(-1, err.Error(), apicontract.UnsupportedLegacyPathIDs())
+		}
+		return apicontract.Failure[apicontract.LegacyPathIDsResult](-1, err.Error())
 	}
 
 	p := *request.Path
@@ -464,10 +472,10 @@ func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalP
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 	ids = filterFileTreeBlockIDsByPublishDiscoverability(c, ids, notebook)
-	return apicontract.Success(ids)
+	return apicontract.Success(apicontract.NewLegacyPathIDs(ids))
 }
 
 func filterFileTreePathsByPublishMetadataAccess(c *gin.Context, paths []string) (ret []string) {
@@ -821,12 +829,19 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 
 var createDocWithMd = contractHandler(apicontract.CreateDocWithMd, createDocWithMdContract)
 
-func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateMarkdownRequest) apicontract.Response[string] {
+func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateMarkdownRequest) apicontract.Response[apicontract.LegacyPathDocumentResult] {
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[string](ret)
+		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
+	}
+
+	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
+		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
+			return apicontract.CreateDocWithMd.FailureWithData(-1, err.Error(), apicontract.UnsupportedLegacyPathDocument())
+		}
+		return apicontract.Failure[apicontract.LegacyPathDocumentResult](-1, err.Error())
 	}
 
 	tags, parentID := request.Tags, request.ParentID
@@ -855,9 +870,9 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[string](ret)
+		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
 	}
-	return apicontract.Success(id)
+	return apicontract.Success(apicontract.NewLegacyPathDocument(id))
 }
 
 var getDocCreateSavePath = contractHandler(apicontract.GetDocCreateSavePath, getDocCreateSavePathContract)

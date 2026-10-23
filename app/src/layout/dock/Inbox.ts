@@ -11,7 +11,7 @@ import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {replaceFileName} from "../../editor/rename";
+import {normalizeDocumentTitle} from "../../editor/rename";
 import {movePathTo} from "../../util/pathName";
 import {documentCreateRequest} from "../../util/documentCreate";
 import {createConfiguredDocument} from "../../util/configuredDocument";
@@ -436,7 +436,7 @@ ${data.shorthandContent}
                             this.moveTargets.set(idItem, target);
                         }
                         const request = documentCreateRequest(target.notebook, target.path, target.id,
-                            replaceFileName(response.data.shorthandTitle), md);
+                            normalizeDocumentTitle(response.data.shorthandTitle), md);
                         let completed = false;
                         await createConfiguredDocument({
                             notebook: target.notebook, contextID: request.parentID, purpose: "document",

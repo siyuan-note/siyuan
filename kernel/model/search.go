@@ -46,6 +46,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -574,8 +575,14 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 	if !isDatabase {
 		// 如果非数据库中搜索块引，则不允许新建重名文档
 		if block := treenode.GetBlockTreeInBox(id, boxID); nil != block {
-			p := path.Join(block.HPath, keyword)
-			newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
+			if documentaddressing.DefaultMode() == 2 {
+				parentID := block.RootID
+				resolved, resolveErr := ResolveDocPath(block.BoxID, "document", &parentID, []string{keyword})
+				newDoc = resolveErr == nil && resolved.Status == "missing"
+			} else {
+				p := path.Join(block.HPath, keyword)
+				newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
+			}
 		}
 	} else { // 如果是数据库中搜索绑定块，则允许新建重名文档 https://github.com/siyuan-note/siyuan/issues/11713
 		newDoc = true
@@ -592,14 +599,24 @@ func filterSelfHPath(blocks []*Block) {
 
 	for _, b := range blocks {
 		if b.IsDoc() {
-			b.HPath = trimSelfHPath(b.HPath)
+			if documentaddressing.DefaultMode() == 2 {
+				if metadata, err := treenode.GetDocumentMetadata(b.Box, b.RootID); err == nil {
+					b.HPath = trimDocumentTitleHPath(b.HPath, metadata.Title.Text)
+				}
+			} else {
+				b.HPath = trimSelfHPath(b.HPath)
+			}
 		}
 	}
 }
 
 func trimSelfHPath(hPath string) string {
+	return trimDocumentTitleHPath(hPath, "")
+}
+
+func trimDocumentTitleHPath(hPath, title string) string {
 	inTag := false
-	lastSlash := -1
+	var separators []int
 	for i, r := range hPath {
 		switch r {
 		case '<':
@@ -608,14 +625,19 @@ func trimSelfHPath(hPath string) string {
 			inTag = false
 		case '/':
 			if !inTag {
-				lastSlash = i
+				separators = append(separators, i)
 			}
 		}
 	}
-	if 0 > lastSlash {
+	position := len(separators) - strings.Count(title, "/") - 1
+	if position < 0 {
 		return hPath
 	}
-	return hPath[:lastSlash+1]
+	prefix := hPath[:separators[position]+1]
+	if strings.Count(prefix, "<mark>") > strings.Count(prefix, "</mark>") {
+		prefix += "</mark>"
+	}
+	return prefix
 }
 
 func prependNotebookNameInHPath(blocks []*Block) {

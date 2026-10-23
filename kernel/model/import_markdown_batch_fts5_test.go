@@ -14,6 +14,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -21,6 +22,18 @@ import (
 )
 
 func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
+	testMarkdownImportBatches(t, "Renamed parent")
+}
+
+func TestStructuredTitlesMarkdownImport(t *testing.T) {
+	if documentaddressing.DefaultMode() != 2 {
+		t.Skip("covered by the structured-title release-gate CI run")
+	}
+	testMarkdownImportBatches(t, "Renamed/../parent%2F")
+}
+
+func testMarkdownImportBatches(t *testing.T, parentTitle string) {
+	t.Helper()
 	for _, encrypted := range []bool{false, true} {
 		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
 			const boxID = "20261010000000-batch01"
@@ -80,7 +93,7 @@ func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
 			if err := os.MkdirAll(filepath.Join(source, "parent"), 0755); err != nil {
 				t.Fatal(err)
 			}
-			if err := os.WriteFile(filepath.Join(source, "parent.md"), []byte("---\ndate: 2020-01-02\ntitle: Renamed parent\n---\n\n[[parent/child|child]]"), 0600); err != nil {
+			if err := os.WriteFile(filepath.Join(source, "parent.md"), []byte(fmt.Sprintf("---\ndate: 2020-01-02\ntitle: %s\n---\n\n[[parent/child|child]]", parentTitle)), 0600); err != nil {
 				t.Fatal(err)
 			}
 			if err := os.WriteFile(filepath.Join(source, "parent", "child.markdown"), []byte("child content"), 0600); err != nil {
@@ -141,10 +154,13 @@ func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
 					t.Fatal("encrypted import wrote a plaintext document")
 				}
 			}
-			parent := treenode.GetBlockTreeRootByHPath(boxID, "/Renamed parent")
-			child := treenode.GetBlockTreeRootByHPath(boxID, "/parent/child")
+			parent := treenode.GetBlockTreeRootByHPath(boxID, "/"+parentTitle)
+			child := treenode.GetBlockTreeRootByHPath(boxID, "/"+parentTitle+"/child")
 			if parent == nil || child == nil || !strings.HasPrefix(child.Path, "/"+parent.ID+"/") {
 				t.Fatal("front matter root ID did not relocate child documents")
+			}
+			if old := treenode.GetBlockTreeRootByHPath(boxID, "/parent/child"); old != nil {
+				t.Fatal("child display path retained the external filename instead of the parent title")
 			}
 			if _, err := os.Stat(filepath.Join(source, "doc-000.md")); err != nil {
 				t.Fatal("import altered source Markdown")

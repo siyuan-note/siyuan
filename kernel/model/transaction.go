@@ -2900,7 +2900,7 @@ func (tx *Transaction) begin() (err error) {
 				return errors.New("the document used to render the template has changed")
 			}
 			if expectedTemplateDocTreeRevision != "" {
-				location, err := treenode.GetDocumentPath(snapshot.Box, snapshot.ID, snapshot.Box, 1)
+				location, err := getDocumentPath(snapshot.Box, snapshot.ID)
 				if err != nil || location.Revision != expectedTemplateDocTreeRevision {
 					return errors.New("the document used to render the template has changed")
 				}
@@ -3026,7 +3026,7 @@ func (tx *Transaction) commit() (err error) {
 					if root == nil {
 						return errors.New("template document tree parent snapshot is missing")
 					}
-					location, err := treenode.GetDocumentPath(root.Box, root.ID, root.Box, 1)
+					location, err := getDocumentPath(root.Box, root.ID)
 					if err != nil || location.Revision != tx.templateDocTreeCommitRevision {
 						return errors.New("the document used to render the template has changed")
 					}

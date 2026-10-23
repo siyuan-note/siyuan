@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261017174053"
+		"updated": "20261023112115"
 	},
 	"Children": [
 		{
@@ -3328,6 +3328,48 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-ewf6xvh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-ewf6xvh",
+				"updated": "20261023112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Versions supporting structured document titles allow ASCII / in titles by default, without a setting to enable it. For example, A/B can be one document title and is different from a document B inside A. Existing titles and document links stay unchanged; ／ and %2F remain literal text."
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-ntigpv2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-ntigpv2",
+				"updated": "20261023112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A displayed path is for reading. Use document links or block references to navigate to the intended document. Plugins that locate documents by splitting title paths need to support structured addressing."
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-9dsprn2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-9dsprn2",
+				"updated": "20261023112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before using this title capability, upgrade all sync devices to supported versions and check plugin compatibility. Migration runs automatically and resumes after interruption. Do not reopen the same workspace with an older version that lacks compatibility protection."
 				}
 			]
 		},

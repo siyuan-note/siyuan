@@ -1039,7 +1039,7 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 			return
 		}
 		var location *treenode.DocumentPath
-		location, err = treenode.GetDocumentPath(sourceTree.Box, sourceTree.ID, sourceTree.Box, 1)
+		location, err = getDocumentPath(sourceTree.Box, sourceTree.ID)
 		if err != nil {
 			return
 		}

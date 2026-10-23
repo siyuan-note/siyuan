@@ -274,6 +274,10 @@ func documentAddressingSchema(b *schemaBuilder, t reflect.Type, input bool) (*Sc
 	var valueType reflect.Type
 	failureType := reflect.TypeFor[DocumentAddressingFailure]()
 	switch t {
+	case reflect.TypeFor[LegacyPathIDsResult]():
+		valueType, failureType = reflect.TypeFor[[]string](), reflect.TypeFor[LegacyPathUnsupported]()
+	case reflect.TypeFor[LegacyPathDocumentResult]():
+		valueType, failureType = reflect.TypeFor[string](), reflect.TypeFor[LegacyPathUnsupported]()
 	case reflect.TypeFor[FileTreeCreateSavePathResult]():
 		valueType, failureType = reflect.TypeFor[FileTreeCreateSavePathData](), reflect.TypeFor[StructuredTemplateRequired]()
 	case reflect.TypeFor[FileTreeSavePathResult]():

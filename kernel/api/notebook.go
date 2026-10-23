@@ -322,13 +322,14 @@ var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.C
 		if err != nil {
 			return apicontract.Failure[apicontract.NotebookConfData](-1, err.Error())
 		}
-		modeState := "legacy"
-		if snapshot.Mode != 1 {
-			modeState = "conflict"
+		modeState := snapshot.State
+		indexState := treenode.DocumentMetadataState(notebook)
+		if modeState == "structured" && indexState != "ready" {
+			modeState = "recovering"
 		}
 		capabilities = &apicontract.DocumentCapabilities{AddressingVersion: snapshot.Mode,
-			ModeState: modeState, StructuredPaths: true, LiteralSlash: false, TitleFormats: []string{"plain"},
-			IndexState: treenode.DocumentMetadataState(notebook), Revision: snapshot.Revision}
+			ModeState: modeState, StructuredPaths: true, LiteralSlash: modeState == "structured", TitleFormats: []string{"plain"},
+			IndexState: indexState, MinimumReaderVersion: documentaddressing.MinimumReaderVersion(), Revision: snapshot.Revision}
 	}
 
 	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name,

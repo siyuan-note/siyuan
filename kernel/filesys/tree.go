@@ -251,7 +251,7 @@ func NormalizeTreeForRead(tree *parse.Tree) (err error) {
 	if nil == tree || nil == tree.Root {
 		return errors.New("tree is empty")
 	}
-	if err = treenode.CheckSpec(tree); nil != err {
+	if err = checkDocumentTreeSpec(tree); nil != err {
 		return
 	}
 	if err = treenode.RefreshTableCellRichProjection(tree.Root); nil != err {
@@ -394,7 +394,7 @@ func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
 		return nil, err
 	}
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
-	if err = treenode.CheckSpecJSON(data); err != nil {
+	if err = CheckDocumentSpecJSON(boxID, data); err != nil {
 		return nil, err
 	}
 	var doc documentHeader
@@ -419,10 +419,9 @@ func DocIAL(absPath string) (ret map[string]string, err error) {
 	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
 	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密笔记本走原流式逻辑。
 	boxID := docIALBoxID(absPath)
-	if boxID != "" {
-		if err = CheckDocumentAddressing(boxID); err != nil {
-			return nil, err
-		}
+	mode, err := DocumentAddressingMode(boxID)
+	if err != nil {
+		return nil, err
 	}
 	if boxID != "" && DEKProvider != nil {
 		dek, encrypted, releaseCryptoLease, leaseErr := acquireCryptoLease(boxID)
@@ -447,7 +446,7 @@ func DocIAL(absPath string) (ret map[string]string, err error) {
 				logging.LogErrorf("decrypt doc [%s] for IAL failed: %s", absPath, decErr)
 				return nil, decErr
 			}
-			return parseDocIAL(bytes.NewReader(plain))
+			return parseDocIALForMode(bytes.NewReader(plain), mode)
 		}
 	}
 
@@ -461,7 +460,7 @@ func DocIAL(absPath string) (ret map[string]string, err error) {
 		return nil, err
 	}
 	defer file.Close()
-	return parseDocIAL(file)
+	return parseDocIALForMode(file, mode)
 }
 
 // docIALReader 保留底层读取错误，避免将临时 I/O 失败当成 JSON 损坏。
@@ -479,6 +478,10 @@ func (r *docIALReader) Read(p []byte) (int, error) {
 }
 
 func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
+	return parseDocIALForMode(reader, 1)
+}
+
+func parseDocIALForMode(reader io.Reader, mode int) (ret map[string]string, err error) {
 	r := &docIALReader{Reader: reader}
 	buffered := bufio.NewReaderSize(r, 512)
 	if prefix, _ := buffered.Peek(3); bytes.Equal(prefix, []byte("\xef\xbb\xbf")) {
@@ -499,7 +502,7 @@ func parseDocIAL(reader io.Reader) (ret map[string]string, err error) {
 			}
 		case field == "Properties":
 			properties = iter.SkipAndReturnBytes()
-			if checkErr := documentaddressing.CheckLegacyTitleProperties(properties); checkErr != nil &&
+			if checkErr := documentaddressing.CheckTitleProperties(properties, mode); checkErr != nil &&
 				(titleErr == nil || errors.Is(checkErr, documentaddressing.ErrModeConflict)) {
 				titleErr = checkErr
 			}
@@ -617,7 +620,7 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 		if validatedSource != nil && bytes.Equal(plain, validatedSource) {
 			return nil
 		}
-		return treenode.CheckSpecJSON(bytes.TrimPrefix(plain, []byte("\xef\xbb\xbf")))
+		return CheckDocumentSpecJSON(tree.Box, plain)
 	})
 	if err != nil {
 		return
@@ -643,7 +646,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
 		return
 	}
-	if err = treenode.CheckSpec(tree); nil != err {
+	if err = checkDocumentTreeSpec(tree); nil != err {
 		return
 	}
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
@@ -745,7 +748,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	withoutBOM := bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
 	needFix = len(withoutBOM) != len(jsonData)
 	jsonData = withoutBOM
-	if err = treenode.CheckSpecJSON(jsonData); nil != err {
+	if err = CheckDocumentSpecJSON(boxID, jsonData); nil != err {
 		return
 	}
 	jsonData, removedNull := removeUnescapedUnicodeNull(jsonData)
@@ -763,7 +766,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	ret.Box = boxID
 	ret.Path = p
 
-	if err = treenode.CheckSpec(ret); nil != err {
+	if err = checkDocumentTreeSpec(ret); nil != err {
 		return
 	}
 	if err = treenode.RefreshTableCellRichProjection(ret.Root); nil != err {
@@ -849,7 +852,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	jsonData = bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
-	if err = treenode.CheckSpecJSON(jsonData); nil != err {
+	if err = CheckDocumentSpecJSON(boxID, jsonData); nil != err {
 		return
 	}
 	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
@@ -862,7 +865,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	ret.Box = boxID
 	ret.Path = p
 
-	if err = treenode.CheckSpec(ret); nil != err {
+	if err = checkDocumentTreeSpec(ret); nil != err {
 		return
 	}
 	err = treenode.RefreshTableCellRichProjection(ret.Root)

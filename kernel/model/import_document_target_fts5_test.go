@@ -6,10 +6,25 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestImportNotebookDocumentTargets(t *testing.T) {
+	testImportNotebookDocumentTargets(t, "Anchor")
+}
+
+func TestStructuredTitlesNativeImport(t *testing.T) {
+	if documentaddressing.DefaultMode() != 2 {
+		t.Skip("covered by the structured-title release-gate CI run")
+	}
+	testImportNotebookDocumentTargets(t, "Anchor/../literal")
+}
+
+func testImportNotebookDocumentTargets(t *testing.T, title string) {
+	t.Helper()
 	const sourceBoxID, targetBoxID = "20261023092000-source1", "20261023092001-target1"
 	const docID = "20261023092002-documen"
 	setupExportRelatedTest(t, sourceBoxID, targetBoxID)
@@ -22,7 +37,9 @@ func TestImportNotebookDocumentTargets(t *testing.T) {
 	if err := source.SaveConf(sourceConf); err != nil {
 		t.Fatal(err)
 	}
-	writeExportRelatedTestTree(t, treenode.NewTree(sourceBoxID, "/"+docID+".sy", "/Anchor", "Anchor"))
+	tree := treenode.NewTree(sourceBoxID, "/"+docID+".sy", "/"+title, title)
+	treenode.UpgradeSpec(tree)
+	writeExportRelatedTestTree(t, tree)
 	if err := writeBoxDocID(sourceBoxID); err != nil {
 		t.Fatal(err)
 	}
@@ -35,6 +52,10 @@ func TestImportNotebookDocumentTargets(t *testing.T) {
 		t.Fatal(err)
 	}
 	imported := (&Box{ID: targetBoxID}).GetConf()
+	loaded, err := filesys.LoadTree(targetBoxID, "/"+ids[docID]+".sy", util.NewLute())
+	if err != nil || treenode.ReadDocumentTitle(loaded.Root).Text != title || loaded.Root.Spec != tree.Root.Spec {
+		t.Fatal("native import changed the title or source specification", err)
+	}
 	for _, target := range []*conf.DocumentTarget{imported.DocCreateTarget, imported.RefCreateTarget, imported.DailyNoteTarget} {
 		if target == nil || target.Notebook != targetBoxID || target.Anchor.ID != ids[docID] || target.Anchor.ID == docID ||
 			target.Title != "Literal template" {

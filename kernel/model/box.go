@@ -40,6 +40,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -358,6 +359,11 @@ func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
 	if err != nil {
 		return fmt.Errorf("prepare box conf [%s] failed: %w", confPath, err)
 	}
+	mode, err := filesys.DocumentAddressingMode(box.ID)
+	if err != nil {
+		return err
+	}
+	persisted.DocumentAddressingVersion = max(mode, documentaddressing.DefaultMode())
 	newData, err := gulu.JSON.MarshalIndentJSON(persisted, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)

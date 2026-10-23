@@ -53,6 +53,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -1494,8 +1495,8 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 	}
 	defer spool.close()
 	stagedCount, stagedBytes := 0, 0
-	stageTree := func(tree *parse.Tree) error {
-		if err := spool.add(tree); err != nil {
+	stageTree := func(tree *parse.Tree, sourcePath string) error {
+		if err := spool.addSource(tree, sourcePath); err != nil {
 			return err
 		}
 		stagedCount++
@@ -1571,11 +1572,11 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			if skipRoot {
 				hPathRoot = ""
 			}
-			hPath := path.Join(baseHPath, hPathRoot, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
-			hPath = strings.TrimSuffix(hPath, ext)
+			externalPath := strings.TrimSuffix(path.Join("/", hPathRoot, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath))), ext)
+			hPath := appendDocumentHPath(baseHPath, strings.TrimPrefix(externalPath, "/"))
 			if "" == curRelPath {
 				curRelPath = "/"
-				hPath = path.Join(baseHPath, title)
+				hPath = appendDocumentHPath(baseHPath, title)
 			} else {
 				dirPath := targetPaths[path.Dir(curRelPath)]
 				targetPath = path.Join(dirPath, id)
@@ -1608,7 +1609,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				}
 
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
-				if err := stageTree(tree); err != nil {
+				if err := stageTree(tree, externalPath); err != nil {
 					return err
 				}
 				return nil
@@ -1636,11 +1637,16 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			if "" != yfmTitle {
 				title = yfmTitle
 			}
-			unescapedTitle, unescapeErr := url.PathUnescape(title)
-			if nil == unescapeErr {
-				title = unescapedTitle
+			if documentaddressing.DefaultMode() == 1 {
+				if unescapedTitle, unescapeErr := url.PathUnescape(title); unescapeErr == nil {
+					title = unescapedTitle
+				}
 			}
-			hPath = path.Join(path.Dir(hPath), title)
+			parentDisplay := baseHPath
+			if curRelPath != "/" {
+				parentDisplay = appendDocumentHPath(baseHPath, strings.TrimPrefix(path.Dir(externalPath), "/"))
+			}
+			hPath = appendDocumentHPath(parentDisplay, title)
 			updated := yfmUpdated
 			fname := path.Base(targetPath)
 			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
@@ -1655,7 +1661,8 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			tree.Path = targetPath
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
-			tree.Root.Spec = treenode.CurrentSpec
+			tree.Root.Spec = treenode.BaseSpec
+			treenode.UpgradeSpec(tree)
 
 			currentDir := filepath.Dir(currentPath)
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1744,11 +1751,11 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			})
 
 			reassignIDUpdated(tree, id, updated)
-			if err := stageTree(tree); err != nil {
+			if err := stageTree(tree, externalPath); err != nil {
 				return err
 			}
 
-			hPathsIDs[tree.HPath] = tree.ID
+			hPathsIDs[externalPath] = tree.ID
 			idPaths[tree.ID] = tree.Path
 
 			count++
@@ -1788,9 +1795,10 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		if "" != yfmTitle {
 			title = yfmTitle
 		}
-		unescapedTitle, unescapeErr := url.PathUnescape(title)
-		if nil == unescapeErr {
-			title = unescapedTitle
+		if documentaddressing.DefaultMode() == 1 {
+			if unescapedTitle, unescapeErr := url.PathUnescape(title); unescapeErr == nil {
+				title = unescapedTitle
+			}
 		}
 		updated := yfmUpdated
 		fname := path.Base(targetPath)
@@ -1802,8 +1810,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		tree.Root.SetIALAttr("title", title)
 		tree.Box = boxID
 		tree.Path = targetPath
-		tree.HPath = path.Join(baseHPath, title)
-		tree.Root.Spec = treenode.CurrentSpec
+		tree.HPath = appendDocumentHPath(baseHPath, title)
+		tree.Root.Spec = treenode.BaseSpec
+		treenode.UpgradeSpec(tree)
 
 		localPathParentDir := filepath.Dir(localPath)
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1886,7 +1895,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		reassignIDUpdated(tree, id, updated)
 		// 兜底校验：禁止跨加密边界块引（导入的 Markdown 可能含跨边界引用）
 		degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
-		if err := stageTree(tree); err != nil {
+		if err := stageTree(tree, "/"+strings.TrimSuffix(fileName, util.Ext(fileName))); err != nil {
 			return err
 		}
 	}
@@ -1894,6 +1903,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 	var importedRootIDs []string
 	if len(spool.entries) > 0 {
 		spool.movePaths(moveIDs)
+		if err = spool.refreshDisplayPaths(baseTargetPath, baseHPath); err != nil {
+			return err
+		}
 		for _, entry := range spool.entries {
 			if _, ok := idPaths[entry.id]; ok {
 				idPaths[entry.id] = entry.path

@@ -303,6 +303,8 @@ if (response.code === 0 && response.data) {
 
 ### 获取笔记本配置
 
+管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告寻址模式、结构化接口支持、标题能力、索引状态及已验证的最低读取版本。功能版本自动迁移笔记本，无需设置开关；`literalSlash` 要求模式 `2`、模式记录一致且索引就绪。保护版本尚未验证时，`minimumReaderVersion` 为 `null`。既有权限过滤保持不变。
+
 * `/api/notebook/getNotebookConf`
 * 参数
 
@@ -376,6 +378,8 @@ if (response.code === 0 && response.data) {
 ## 文档
 
 ### 通过 Markdown 创建文档
+
+这是仅在兼容模式可用的旧名称路径接口。结构化标题功能版本会自动迁移笔记本，该接口对整个笔记本返回 `code: -1`、`data: {reason: "legacyPathUnsupported"}`，即使标题普通或提供了 `parentID`。请改用 `/api/filetree/createDocByParent`，分别传入父身份和标题。下面的示例描述兼容模式行为。
 
 * `/api/filetree/createDocWithMd`
 * 参数
@@ -758,6 +762,8 @@ if (response.code === 0 && response.data) {
   ```
 
 ### 根据人类可读路径获取 IDs
+
+结构化标题功能版本会自动迁移笔记本，该旧接口对整个笔记本返回 `code: -1`、`data: {reason: "legacyPathUnsupported"}`。已知文档 ID 时直接使用；未知位置请通过 `/api/filetree/resolveDocPath` 传入明确的标题段。显示路径无法区分单标题 `A/B` 与两级 `A`、`B`。下面的示例适用于兼容模式。
 
 * `/api/filetree/getIDsByHPath`
 * 参数

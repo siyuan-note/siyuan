@@ -1373,6 +1373,9 @@ func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 }
 
 func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool, clippingHref string, arg map[string]any) (retID string, err error) {
+	if err = CheckLegacyDocumentPath(boxID); err != nil {
+		return
+	}
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1625,6 +1628,9 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 }
 
 func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
+	if err = CheckLegacyDocumentPath(boxID); err != nil {
+		return
+	}
 	ret = []string{}
 	if IsBoxDocEnabled() && "/" == hpath {
 		if box := Conf.Box(boxID); nil != box {
@@ -2323,7 +2329,7 @@ func renameDoc0(boxID, p, title string) (err error) {
 
 // 规范化标题及空标题标记，由调用方选择普通写入或基于扫描源的条件写入。
 func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUpdated bool, err error) {
-	title = normalizeDocTitle(title)
+	title = normalizeDocumentTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
@@ -2407,7 +2413,7 @@ func ValidateCreateDoc(boxID, p, title string) error {
 
 func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocValidation, err error) {
 	p = normalizeBoxDocPath(boxID, p)
-	title = normalizeDocTitle(title)
+	title = normalizeDocumentTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return nil, errors.New(Conf.Language(106))
@@ -2448,7 +2454,7 @@ func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocV
 			logging.LogErrorf("parent tree [%s] does not match box [%s] and folder [%s]", parentID, boxID, folder)
 			return nil, ErrBlockNotFound
 		}
-		hPath = path.Join(parentTree.HPath, title)
+		hPath = parentTree.HPath + "/" + title
 	}
 
 	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.Load().AllowCreateDeeper {
@@ -2588,6 +2594,10 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 
 func normalizeDocTitle(title string) string {
 	title = strings.ReplaceAll(title, "/", "")
+	return normalizeTitleText(title)
+}
+
+func normalizeTitleText(title string) string {
 	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
 	title = util.RemoveInvalid(title)

@@ -303,7 +303,7 @@ test("Title flushes debounce once, captures composition, and can cancel pending 
         exports,
         require: (name: string) => {
             if (name === "../../util/fetch") return {fetchPost: (_url: string, data: unknown) => requests.push(data)};
-            if (name === "../../editor/rename") return {validateName: () => true, replaceFileName: (name: string) => name};
+            if (name === "../../editor/rename") return {validateName: () => true, normalizeDocumentTitle: (name: string) => name};
             if (name === "../../dialog/tooltip") return {hideTooltip: () => {}};
             if (name === "../../constants") return {Constants: {TIMEOUT_INPUT: 400}};
             return {};

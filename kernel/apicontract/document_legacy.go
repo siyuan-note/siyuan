@@ -9,6 +9,44 @@ type StructuredTemplateRequired struct {
 	Reason string `json:"reason" api:"enum=structuredTemplateRequired"`
 }
 
+type LegacyPathUnsupported struct {
+	Reason string `json:"reason" api:"enum=legacyPathUnsupported"`
+}
+
+type LegacyPathIDsResult struct {
+	value   []string
+	failure *LegacyPathUnsupported
+}
+
+func NewLegacyPathIDs(value []string) LegacyPathIDsResult { return LegacyPathIDsResult{value: value} }
+func UnsupportedLegacyPathIDs() LegacyPathIDsResult {
+	return LegacyPathIDsResult{failure: &LegacyPathUnsupported{Reason: "legacyPathUnsupported"}}
+}
+func (result LegacyPathIDsResult) MarshalJSON() ([]byte, error) {
+	if result.failure != nil {
+		return json.Marshal(result.failure)
+	}
+	return json.Marshal(result.value)
+}
+
+type LegacyPathDocumentResult struct {
+	value   string
+	failure *LegacyPathUnsupported
+}
+
+func NewLegacyPathDocument(value string) LegacyPathDocumentResult {
+	return LegacyPathDocumentResult{value: value}
+}
+func UnsupportedLegacyPathDocument() LegacyPathDocumentResult {
+	return LegacyPathDocumentResult{failure: &LegacyPathUnsupported{Reason: "legacyPathUnsupported"}}
+}
+func (result LegacyPathDocumentResult) MarshalJSON() ([]byte, error) {
+	if result.failure != nil {
+		return json.Marshal(result.failure)
+	}
+	return json.Marshal(result.value)
+}
+
 type FileTreeCreateSavePathResult struct {
 	value   *FileTreeCreateSavePathData
 	failure *StructuredTemplateRequired

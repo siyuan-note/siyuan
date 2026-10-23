@@ -73,7 +73,7 @@ func TestDecisionNativeJSONPrecision(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		if len(payload.Input) != 1 || len(payload.Input[0].Content) != 2 || string(payload.Input[0].Content[1].Data) != evidence {
+		if len(payload.Input) != 1 || len(payload.Input[0].Content) != 1 || string(payload.Input[0].Content[0].Data) != evidence {
 			t.Errorf("native JSON evidence changed: %+v", payload)
 		}
 		io.WriteString(w, `{"model":"gpt-6-luna","answers":[{"name":"q","type":"predicate","probability":0.8}],"usage":{"input_tokens":20,"output_tokens":0}}`)

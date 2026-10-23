@@ -144,3 +144,45 @@ func TestDecisionImageValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestDecisionOpenAIMultimodalInputOmitsEmptyState(t *testing.T) {
+	image := DecisionImage{URL: "https://example.com/explicit.png"}
+	for _, tc := range []struct {
+		name  string
+		state DecisionState
+		types []string
+	}{
+		{"image only", DecisionState{Images: []DecisionImage{image}}, []string{"input_image"}},
+		{"JSON only", DecisionState{Data: json.RawMessage(`{}`)}, []string{"input_json"}},
+		{"JSON and image", DecisionState{Data: json.RawMessage(`{"id":9007199254740993}`), Images: []DecisionImage{image}}, []string{"input_image", "input_json"}},
+		{"explicit text", DecisionState{Text: "{}", Images: []DecisionImage{image}}, []string{"input_text", "input_image"}},
+		{"shared context", DecisionState{Context: "Reference image", Images: []DecisionImage{image}}, []string{"input_text", "input_image"}},
+		{"blocks", DecisionState{Blocks: []DecisionBlock{{ID: "block", Markdown: "Evidence"}}, Images: []DecisionImage{image}}, []string{"input_text", "input_image"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			input, err := openAIDecisionInput(tc.state)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var messages []struct {
+				Content []openAIDecisionPart `json:"content"`
+			}
+			if err := json.Unmarshal(input, &messages); err != nil || len(messages) != 1 {
+				t.Fatalf("invalid input envelope: %s: %v", input, err)
+			}
+			var types []string
+			for _, part := range messages[0].Content {
+				types = append(types, part.Type)
+				if part.Type == "input_text" && part.Text == "{}" {
+					t.Fatal("synthetic empty-state text was sent as evidence")
+				}
+				if part.Type == "input_json" && string(part.Data) != string(tc.state.Data) {
+					t.Fatal("explicit JSON evidence changed")
+				}
+			}
+			if !reflect.DeepEqual(types, tc.types) {
+				t.Fatalf("content types: got %v want %v", types, tc.types)
+			}
+		})
+	}
+}

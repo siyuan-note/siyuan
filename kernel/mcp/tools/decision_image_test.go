@@ -108,7 +108,7 @@ func TestDecisionOpenAIToolJSONAndQuestionImages(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		if len(payload.Input) != 1 || len(payload.Input[0].Content) != 3 || string(payload.Input[0].Content[2].Data) != `{"priority":2}` || !strings.HasPrefix(payload.Input[0].Content[1].ImageURL, "data:image/png;base64,") || !strings.Contains(string(payload.Questions[0].Instructions), "https://example.com/candidate.png") {
+		if len(payload.Input) != 1 || len(payload.Input[0].Content) != 2 || string(payload.Input[0].Content[1].Data) != `{"priority":2}` || !strings.HasPrefix(payload.Input[0].Content[0].ImageURL, "data:image/png;base64,") || !strings.Contains(string(payload.Questions[0].Instructions), "https://example.com/candidate.png") {
 			t.Errorf("native tool input lost: %+v", payload)
 		}
 		io.WriteString(w, `{"model":"gpt-6-luna","answers":[{"name":"q","type":"predicate","probability":0.9}],"usage":{"input_tokens":100,"output_tokens":0,"input_tokens_details":{"cached_tokens":40,"cache_write_tokens":60}}}`)

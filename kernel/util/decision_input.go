@@ -147,6 +147,11 @@ func openAIDecisionInput(state DecisionState) (json.RawMessage, error) {
 	if len(data) == 0 && len(state.Images) == 0 {
 		return json.Marshal(string(text))
 	}
+	// JSON 或图片单独作为证据时，不附加表示空状态的 "{}" 文本。
+	// 这不是用户输入，可能干扰图片判断；显式提供的文本或 JSON 仍完整保留。
+	if state.Context == "" && state.Text == "" && len(state.Blocks) == 0 {
+		text = nil
+	}
 	parts, err := openAIDecisionContent(string(text), state.Images)
 	if err != nil {
 		return nil, err

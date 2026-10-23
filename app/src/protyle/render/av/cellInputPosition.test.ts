@@ -13,7 +13,7 @@ const rect = (left: number, top: number, width: number, height: number) => ({
     left, top, width, height, right: left + width, bottom: top + height,
 });
 
-const setup = (fitContent = false) => {
+const setup = (fitContent = false, mobile = false) => {
     const frames = new Map<number, FrameRequestCallback>();
     let nextFrame = 0;
     class TestWindow extends EventTarget {
@@ -56,10 +56,12 @@ const setup = (fitContent = false) => {
     const content = {rect: rect(16, 90, 328, 710), getBoundingClientRect() {return this.rect;}};
     const input = Object.assign(new EventTarget(), {parentElement: mask, style: {} as Record<string, string>,
         value: "draft", scrollHeight: 400});
+    const document = {body: {}, activeElement: input as unknown};
     const exports: {bindAnchoredInputPosition?: (input: unknown, anchor: () => unknown, content?: unknown,
         fitContent?: boolean) => () => void} = {};
     runInNewContext(compiled, {
-        exports, window, document: {body: {}}, MutationObserver: TestObserver, ResizeObserver: TestObserver,
+        exports, window, document, MutationObserver: TestObserver, ResizeObserver: TestObserver,
+        require: () => ({isMobile: () => mobile}),
     });
     const dispose = exports.bindAnchoredInputPosition(input, () => anchor, content, fitContent);
     const flush = () => {
@@ -67,7 +69,7 @@ const setup = (fitContent = false) => {
         frames.clear();
         pending.forEach(callback => callback(0));
     };
-    return {window, observers, mask, content, input, frames, dispose, flush,
+    return {window, document, observers, mask, content, input, frames, dispose, flush,
         get anchor() {return anchor;}, set anchor(value) {anchor = value;}};
 };
 
@@ -117,6 +119,59 @@ test("cell input follows native keyboard opening and closing without replacing t
     assert.equal(fixture.input.style.top, "500px");
     assert.equal(fixture.input.value, "draft");
     fixture.dispose();
+});
+
+test("focused mobile cell stays visible throughout keyboard viewport transitions", () => {
+    const f = setup(false, true);
+    f.anchor.rect = rect(55, 167, 141, 33);
+    f.window.innerHeight = 476;
+    for (const height of [145, 476]) {
+        f.window.visualViewport.height = height;
+        f.window.visualViewport.dispatchEvent(new Event("resize"));
+        f.flush();
+        assert.equal(f.input.style.visibility, "");
+        assert.equal(f.input.style.height, "33px");
+        assert.ok(parseFloat(f.input.style.top) + 33 <= height);
+        assert.equal(f.input.value, "draft");
+    }
+    assert.equal(f.input.style.top, "167px");
+    f.dispose();
+});
+
+test("focused mobile cell fits above the keyboard and restores manually requested dimensions", () => {
+    const f = setup(false, true);
+    f.input.style.width = "300px";
+    f.input.style.height = "120px";
+    Object.assign(f.window.visualViewport, {offsetLeft: 20, offsetTop: 100, width: 240, height: 80});
+    f.mask.rect = rect(8, 120, 360, 800);
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.visibility, "");
+    assert.equal(f.input.style.left, "12px");
+    assert.equal(f.input.style.top, "-20px");
+    assert.equal(f.input.style.width, "240px");
+    assert.equal(f.input.style.height, "80px");
+    f.observers[0].notify();
+    f.flush();
+    Object.assign(f.window.visualViewport, {offsetLeft: 0, offsetTop: 0, width: 360, height: 800});
+    f.mask.rect = rect(0, 0, 360, 800);
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.width, "300px");
+    assert.equal(f.input.style.height, "120px");
+    assert.equal(f.input.style.top, "500px");
+    // 失去焦点或锚点被移除时仍沿用裁剪/隐藏规则，不能保留失效的编辑入口。
+    f.document.activeElement = f.document.body;
+    f.anchor.rect = rect(40, 810, 220, 36);
+    f.window.dispatchEvent(new Event("scroll"));
+    f.flush();
+    assert.equal(f.input.style.visibility, "hidden");
+    f.document.activeElement = f.input;
+    f.anchor.isConnected = false;
+    f.observers[1].notify();
+    f.flush();
+    assert.equal(f.input.style.visibility, "hidden");
+    f.dispose();
 });
 
 test("visual viewport changes keep the input aligned when the fixed mask origin moves", () => {

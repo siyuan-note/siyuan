@@ -1,3 +1,5 @@
+import {isMobile} from "../util/functions";
+
 export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: () => HTMLElement,
                                          contentElement?: HTMLElement, fitContent = false) => {
     const maskElement = inputElement.parentElement;
@@ -64,6 +66,22 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
             const top = Math.max(viewportTop + 8, Math.min(cellRect.top, viewportTop + viewportHeight - height - 8));
             inputElement.style.left = `${left - maskRect.left}px`;
             inputElement.style.top = `${top - maskRect.top}px`;
+            inputElement.style.visibility = "";
+            return;
+        }
+        if (isMobile() && document.activeElement === inputElement) {
+            // 键盘动画期间视觉视口可能先缩小再恢复；隐藏聚焦控件会使 WebView 失焦并收起键盘。
+            // 保留同一个输入框和草稿，将其移入可见视口，空间恢复后重新对齐单元格。
+            if (viewportWidth <= 0 || viewportHeight <= 0) {
+                return;
+            }
+            const width = Math.min(preferredSize?.width ?? Math.max(cellRect.width, 25), viewportWidth);
+            const height = Math.min(preferredSize?.height ?? cellRect.height, viewportHeight);
+            const left = Math.max(viewportLeft, Math.min(cellRect.left, viewportLeft + viewportWidth - width));
+            const top = Math.max(viewportTop, Math.min(cellRect.top, viewportTop + viewportHeight - height));
+            inputElement.style.left = `${left - maskRect.left}px`;
+            inputElement.style.top = `${top - maskRect.top}px`;
+            applySize(width, height);
             inputElement.style.visibility = "";
             return;
         }

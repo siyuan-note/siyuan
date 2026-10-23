@@ -38,6 +38,7 @@ export class MobileOutline extends Model {
     public tree: Tree;
     public element: HTMLElement;
     public blockId: string;
+    private notebookId: string;
     public isPreview: boolean;
     private preFilterExpandIds: string[] | null = null;
     private reloadId = 0;
@@ -423,6 +424,17 @@ export class MobileOutline extends Model {
                         }, data.data.title, data.data.empty, Constants.CUSTOM_SY_TITLE_EMPTY), -1);
                     }
                     break;
+                case "closeBox":
+                case "removeBox":
+                    if (this.notebookId === data.data.box) {
+                        this.clear();
+                    }
+                    break;
+                case "removeDoc":
+                    if (data.data.ids.includes(this.blockId)) {
+                        this.clear();
+                    }
+                    break;
             }
         }
     }
@@ -531,17 +543,23 @@ export class MobileOutline extends Model {
         }
     }
 
+    private clear() {
+        // 关闭后清除隐藏面板的内容，并使在途响应失效。
+        this.reloadId++;
+        this.currentRequestID++;
+        this.blockId = "";
+        this.notebookId = "";
+        this.isPreview = false;
+        this.preFilterExpandIds = null;
+        this.tree.updateData(null);
+        this.tree.element.scrollTop = 0;
+        this.updateDocTitle();
+        this.element.removeAttribute("data-loading");
+    }
+
     public reload(callback?: () => void) {
         if (document.getElementById("editor").classList.contains("fn__none")) {
-            this.reloadId++;
-            this.currentRequestID++;
-            this.blockId = "";
-            this.isPreview = false;
-            this.preFilterExpandIds = null;
-            this.tree.updateData(null);
-            this.tree.element.scrollTop = 0;
-            this.updateDocTitle();
-            this.element.removeAttribute("data-loading");
+            this.clear();
             return;
         }
         const protyle = window.siyuan.mobile.editor?.protyle;
@@ -556,6 +574,7 @@ export class MobileOutline extends Model {
             this.tree.element.scrollTop = 0;
         }
         this.blockId = blockId;
+        this.notebookId = protyle?.notebookId || "";
         this.isPreview = isPreview;
         const reloadId = ++this.reloadId;
         const outlineParam: IObject = {
@@ -607,6 +626,8 @@ export class MobileOutline extends Model {
     private updateDocTitle(ial?: Record<string, string>, count?: number) {
         const docTitleElement = this.element.querySelector('[data-type="doc-title"]') as HTMLElement;
         if (this.isPreview || !ial) {
+            docTitleElement.innerHTML = "";
+            docTitleElement.removeAttribute("title");
             docTitleElement.classList.add("fn__none");
             return;
         }

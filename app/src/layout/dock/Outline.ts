@@ -504,6 +504,8 @@ export class Outline extends Model {
         const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
             if (!ial && typeof count === "undefined") {
+                docTitleElement.innerHTML = "";
+                docTitleElement.removeAttribute("title");
                 docTitleElement.classList.add("fn__none");
                 return;
             }

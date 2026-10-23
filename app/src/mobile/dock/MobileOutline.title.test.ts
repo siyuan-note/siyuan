@@ -19,7 +19,7 @@ const source = ts.createSourceFile("MobileOutline.ts", readFileSync("src/mobile/
     ts.ScriptTarget.Latest, true);
 const declaration = source.statements.find(ts.isClassDeclaration);
 const method = declaration.members.find(member => member.name?.getText(source) === "updateDocTitle") as ts.MethodDeclaration;
-const renderer = {} as {render: (this: unknown, ial: Record<string, string>, count: number) => void};
+const renderer = {} as {render: (this: unknown, ial?: Record<string, string>, count?: number) => void};
 runInNewContext(compile(`exports.render = function(ial, count) ${method.body.getText(source)};`), {
     exports: renderer,
     getDocDisplayName: names.getDocDisplayName,
@@ -28,7 +28,7 @@ runInNewContext(compile(`exports.render = function(ial, count) ${method.body.get
     Constants: {ZWSP: "\u200b", CUSTOM_SY_TITLE_EMPTY: "custom-sy-title-empty"},
 });
 
-test("mobile outline preserves full titles after reload and rename, including literal .sy suffixes", () => {
+test("mobile outline preserves complete literal titles and removes hidden title content", () => {
     let visible = false;
     const attributes = new Map<string, string>();
     const element = {
@@ -36,6 +36,7 @@ test("mobile outline preserves full titles after reload and rename, including li
         classList: {add: () => visible = false, remove: () => visible = true},
         querySelector: (): null => null,
         setAttribute: (key: string, value: string) => attributes.set(key, value),
+        removeAttribute: (key: string) => attributes.delete(key),
     };
     const outline = {isPreview: false, element: {querySelector: () => element}};
     for (const title of ["加密/QA19938//%2F/renamed", 'A/<tag> & "B".sy']) {
@@ -49,4 +50,12 @@ test("mobile outline preserves full titles after reload and rename, including li
     outline.isPreview = true;
     renderer.render.call(outline, {title: "Hidden"}, 0);
     assert.equal(visible, false);
+    assert.equal(element.innerHTML, "");
+    assert.equal(attributes.has("title"), false);
+    outline.isPreview = false;
+    renderer.render.call(outline, {title: "Secret/title.sy"}, 0);
+    renderer.render.call(outline);
+    assert.equal(visible, false);
+    assert.equal(element.innerHTML, "");
+    assert.equal(attributes.has("title"), false);
 });

@@ -35,3 +35,18 @@ test("physical file display names retain their separate basename and extension b
     assert.equal(names.getDisplayName("folder/note.sy", false), "folder/note.sy");
     assert.equal(names.getDisplayName("assets/image.png"), "image.png");
 });
+
+test("asset names and extensions ignore query strings and fragments", () => {
+    for (const [assetPath, extension, name] of [
+        ["assets/image.png", ".png", "image"],
+        ["assets/image.png#preview", ".png", "image"],
+        ["assets/image.png?box=notebook#preview", ".png", "image"],
+        ["assets/image.png#preview?download=true", ".png", "image"],
+        ["assets/folder.with.dots/video.mp4#t=10", ".mp4", "video"],
+        ["assets/image-20261024000000-abcdefg.PNG#preview", ".PNG", "image"],
+        ["assets/image%23copy%3F1.png#preview", ".png", "image%23copy%3F1"],
+    ]) {
+        assert.equal(names.getAssetExtension(assetPath), extension, assetPath);
+        assert.equal(names.getAssetName(assetPath), name, assetPath);
+    }
+});

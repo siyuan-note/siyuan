@@ -5,7 +5,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {isMobile} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {uploadFiles, uploadLocalFiles} from "../../upload";
-import {getAssetExtension} from "../../../util/pathName";
+import {pathPosix} from "../../../util/pathName";
 import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
@@ -534,7 +534,7 @@ const getUploadedAssetValues = (result: Omit<IAssetUploadResult, "requestId" | "
         successes.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}) || a.index - b.index);
     }
     successes.forEach(success => {
-        const type = getAssetExtension(success.name).toLowerCase();
+        const type = pathPosix().extname(success.name).toLowerCase();
         const filename = formatName(success.name);
         values.push({
             type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",

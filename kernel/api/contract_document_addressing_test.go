@@ -182,6 +182,136 @@ func TestAPIContractDocumentAddressingIncomingBatch(t *testing.T) {
 	}
 }
 
+func TestAPIContractDocumentAddressingDocumentSources(t *testing.T) {
+	addressingAPIWorkspace(t)
+	const document = "20261022130000-rawdoc1.sy"
+	name := "data/" + addressingAPIBox + "/" + document
+	abs := filepath.Join(util.WorkspaceDir, name)
+	ordinary := `{"Spec":"2","Properties":{"title":"Ordinary"}}`
+	for _, unsupported := range []string{
+		`{"Spec":"999","Properties":{"title":"Future"}}`,
+		`{"Spec":"2","Properties":{"title":"A/B"}}`,
+		`{"Spec":"2","Properties":{"title":{"format":"future"}}}`,
+		`{"Spec":"999","Spec":"2","Properties":{"title":"Future"}}`,
+		`null`,
+	} {
+		addressingAPIWrite(t, abs, ordinary)
+		before, _ := os.Stat(abs)
+		if code := addressingAPIPut(t, name, unsupported, false); code != -1 {
+			t.Fatalf("put accepted an incompatible document source: %d", code)
+		}
+		after, _ := os.Stat(abs)
+		data, _ := os.ReadFile(abs)
+		if string(data) != ordinary || !before.ModTime().Equal(after.ModTime()) {
+			t.Fatal("rejected source changed the existing document")
+		}
+		addressingAPIWrite(t, abs, unsupported)
+		before, _ = os.Stat(abs)
+		if code := addressingAPIPut(t, name, ordinary, false); code != -1 {
+			t.Fatalf("put overwrote an incompatible existing source: %d", code)
+		}
+		after, _ = os.Stat(abs)
+		data, _ = os.ReadFile(abs)
+		if string(data) != unsupported || !before.ModTime().Equal(after.ModTime()) {
+			t.Fatal("existing incompatible source was modified")
+		}
+	}
+	addressingAPIWrite(t, abs, ordinary)
+	for _, title := range []string{"A&amp;#47;B", "A%2FB", "A／B", "**literal**"} {
+		source := `{"Spec":"2","Properties":{"title":"` + title + `"}}`
+		if code := addressingAPIPut(t, name, source, false); code != 0 {
+			t.Fatalf("compatible title was rejected: %d", code)
+		}
+		data, _ := os.ReadFile(abs)
+		if string(data) != source {
+			t.Fatal("raw document write normalized source bytes")
+		}
+	}
+	if code := addressingAPIPut(t, "data/assets/"+document, "arbitrary attachment", false); code != 0 {
+		t.Fatalf("attachment was treated as a document: %d", code)
+	}
+}
+
+func TestAPIContractDocumentAddressingDocumentCopies(t *testing.T) {
+	addressingAPIWorkspace(t)
+	const document = "20261022130000-rawdoc1.sy"
+	name := "data/" + addressingAPIBox + "/" + document
+	abs := filepath.Join(util.WorkspaceDir, name)
+	ordinary := `{"Spec":"2","Properties":{"title":"Ordinary"}}`
+	future := `{"Spec":"999","Properties":{"title":"Future"}}`
+	source := filepath.Join(util.DataDir, "assets", document)
+	addressingAPIWrite(t, source, future)
+	addressingAPIWrite(t, abs, ordinary)
+	if code := addressingAPIRequest(t, "copyFile", copyFile,
+		apicontract.CopyFileRequest{Src: "assets/" + document, Dest: abs}); code != -1 {
+		t.Fatalf("copy accepted an incompatible incoming source: %d", code)
+	}
+	addressingAPIWrite(t, source, ordinary)
+	addressingAPIWrite(t, abs, future)
+	if code := addressingAPIRequest(t, "copyFile", copyFile,
+		apicontract.CopyFileRequest{Src: "assets/" + document, Dest: abs}); code != -1 {
+		t.Fatalf("copy overwrote an incompatible existing source: %d", code)
+	}
+	if data, _ := os.ReadFile(abs); string(data) != future {
+		t.Fatal("copy changed the protected destination")
+	}
+	addressingAPIWrite(t, source, future)
+	first := filepath.Join(util.DataDir, "assets", "first.txt")
+	addressingAPIWrite(t, first, "ordinary attachment")
+	for _, request := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		sources []string
+	}{
+		{"globalCopyFiles", globalCopyFiles, []string{first, source}},
+		{"workspaceCopyFiles", workspaceCopyFiles, []string{"data/assets/first.txt", "data/assets/" + document}},
+	} {
+		if code := addressingAPIRequest(t, request.name, request.handler,
+			apicontract.CopyFilesRequest{Srcs: request.sources, DestDir: "data/" + addressingAPIBox}); code != -1 {
+			t.Fatalf("%s accepted an incompatible batch: %d", request.name, code)
+		}
+		if _, err := os.Stat(filepath.Join(util.DataDir, addressingAPIBox, "first.txt")); !os.IsNotExist(err) {
+			t.Fatal("batch copied an earlier file before checking all sources", err)
+		}
+	}
+	destination := "data/" + addressingAPIBox + "/20261022130000-parent1/" + document
+	if code := addressingAPIRequest(t, "renameFile", renameFile,
+		apicontract.RenameFileRequest{Path: "data/assets/" + document, NewPath: destination}); code != -1 {
+		t.Fatalf("rename installed an incompatible source as a document: %d", code)
+	}
+	if data, _ := os.ReadFile(source); string(data) != future {
+		t.Fatal("rejected rename changed the source")
+	}
+	if _, err := os.Stat(filepath.Dir(filepath.Join(util.WorkspaceDir, destination))); !os.IsNotExist(err) {
+		t.Fatal("rejected rename created the destination parent", err)
+	}
+	addressingAPIWrite(t, source, ordinary)
+	addressingAPIWrite(t, abs, ordinary)
+	for _, request := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		body    interface{}
+	}{
+		{"copyFile", copyFile, apicontract.CopyFileRequest{Src: "assets/" + document, Dest: abs}},
+		{"globalCopyFiles", globalCopyFiles, apicontract.CopyFilesRequest{Srcs: []string{source}, DestDir: "data/" + addressingAPIBox}},
+		{"workspaceCopyFiles", workspaceCopyFiles, apicontract.CopyFilesRequest{Srcs: []string{"data/assets/" + document}, DestDir: "data/" + addressingAPIBox}},
+	} {
+		if code := addressingAPIRequest(t, request.name, request.handler, request.body); code != 0 {
+			t.Fatalf("%s rejected a compatible document: %d", request.name, code)
+		}
+		if data, _ := os.ReadFile(abs); string(data) != ordinary {
+			t.Fatal("compatible document copy changed source bytes")
+		}
+	}
+	if code := addressingAPIRequest(t, "renameFile", renameFile,
+		apicontract.RenameFileRequest{Path: "data/assets/" + document, NewPath: destination}); code != 0 {
+		t.Fatalf("compatible document move failed: %d", code)
+	}
+	if data, _ := os.ReadFile(filepath.Join(util.WorkspaceDir, destination)); string(data) != ordinary {
+		t.Fatal("compatible document move changed source bytes")
+	}
+}
+
 func TestAPIContractDocumentAddressingSettingsBackup(t *testing.T) {
 	addressingAPIWorkspace(t)
 	addressingAPIWrite(t, filepath.Join(util.DataDir, addressingAPIBox, ".siyuan", "conf.json"), `{"documentAddressingVersion":2}`)

@@ -758,7 +758,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				continue
 			}
 
-			title := node.IALAttr("title")
+			title := treenode.ReadDocumentTitle(node).Text
 			tags := node.IALAttr("tags")
 			if 0 == method {
 				if newTitle, matched := replaceSearchText(title, method, keyword, strings.ReplaceAll(replacement, "/", "／"), r); matched {
@@ -1121,7 +1121,7 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	if rename && IsBoxDocPath(tree.Box, tree.Path) {
 		box := Conf.Box(tree.Box)
 		boxConf := box.GetConf()
-		boxConf.Name = tree.Root.IALAttr("title")
+		boxConf.Name = treenode.ReadDocumentTitle(tree.Root).Text
 		if err = box.SaveConf(boxConf); err != nil {
 			return err
 		}

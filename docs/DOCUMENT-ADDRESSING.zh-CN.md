@@ -6,6 +6,16 @@
 
 本文为实施设计草案，规定文档标题、层级定位、可读路径、接口及迁移的目标行为。下文新增的字段、接口和版本机制均为拟实现契约，不表示当前版本已经支持。当前重命名与路径索引的更新机制见 [文档重命名与路径索引](DOCUMENT-HPATH.md)。
 
+### 当前实现范围
+
+开发分支已实现统一标题读取、按身份组织的文档元数据及源提交恢复标记，并提供 `getDocPaths`、`resolveDocPath`、`getDocCreateTarget`、`planDocCreate` 和 `createDocByParent` 契约。内置新建、引用新建、日记、数据库新建和速记使用身份创建或共享创建计划；导出先按文档身份分配文件名，再使用同一映射生成内部链接。源文档仍保留原有 ID、标题表示及适用的 `.sy` 规格，不在升级时批量改写。
+
+创建计划采用固定 ID，已确认提交的祖先不会再次创建。桌面与移动端共用失败处理：响应不明或后续处理失败时保留计划，用户确认并按身份核对后才继续；关闭或锁定笔记本清除相应标题和模板缓存。本地速记使用仅含身份和摘要的恢复记录，核对实际源中的块身份后才清理输入，未确认的结果保留原速记并停止自动重放。
+
+管理员读取笔记本配置时可获取 `documentCapabilities`，区分结构化接口、实际寻址模式和索引状态。未验证真实保护版本时，`minimumReaderVersion` 返回 `null`，不会伪造最低版本；能力记录损坏时明确报错。原生整本导入会同步重映射目标配置中的笔记本和锚点 ID，部分文档导入保留目标笔记本配置。加密目标载荷保持锁定保存、改密及备份恢复的认证边界。
+
+目前只开放兼容模式 `1`，仍拒绝标题中的 ASCII `/`，版本 `2` 目标配置的公开写入仍受模式门槛限制。显式启用入口、模式 `2` 的源格式与冲突恢复、旧字符串接口的整本拒绝以及相应启用界面尚未交付；不能把这些工作视为仅待发布开关。阶段 D 还需结合真实保护版本的验证结果确定最低读取版本和 `DocumentTitleSpec`，完成混合版本、性能及各端验收后开放。行级标题扩展约束保持不变。
+
 ## 目标与范围
 
 文档使用 ID 确定身份和所属层级，标题用于表达内容，可读路径用于展示。创建、移动和引用不得依赖从展示文本反向解析文档身份。完成相关入口迁移与兼容验证后，文档标题可以包含半角斜杠 `/`，并与原有全角斜杠 `／` 保持区别。
@@ -315,9 +325,15 @@
 
 旧 `/api/filetree/getDocCreateSavePath` 与 `/api/filetree/getRefCreateSavePath` 在各自生效配置仍为旧模板时保持原响应；对应的新对象生效时均返回 `code: -1`、`data: {reason: "structuredTemplateRequired"}`，不返回已经失效的旧路径。判断依据是配置来源及对应业务，不取决于旧路径或新目标指向哪个笔记本；旧目标仍为模式 `1` 也不能放行历史配置。两个错误变体分别在旧契约中声明。新增读取入口同时服务内置调用方和插件，避免各自重复实现配置继承规则。
 
+### 规划配置中的创建目标
+
+`/api/filetree/planDocCreate` 接收 `notebook`、`purpose` 和最终文档的固定 `id`；可选 `contextID` 提供当前文档，省略或 `null` 表示没有当前文档；可选 `title` 覆盖最终标题，`placement` 为 `configured` 或 `child`，`reuse` 控制是否允许复用已有最终文档。它只求值和校验，不写入文档。一次计划中的时间模板使用同一时间快照，返回最终标题、目标笔记本、可选的 `existingID`，以及包含固定 ID、父身份、名称条件和配置版本的有序 `steps`。
+
+调用方依次提交每个 `createDocByParent` 请求，用上一项成功响应的路径版本更新下一项的父版本。提交后以返回 ID 为准；错误按提交状态处理，不能重新生成一组 ID 并盲目重放。单次计划不是跨文件事务，计划期间的成功校验也不代替每次提交时的复核。
+
 ### 能力探测与启用
 
-在 `/api/notebook/getNotebookConf` 的 `data` 中增加可选只读对象 `documentCapabilities`，保留现有 `box`、`name`、`conf` 和权限过滤。对象包含 `addressingVersion`、`modeState`、`structuredPaths`、`literalSlash`、`titleFormats`、`indexState`、`minimumReaderVersion` 和 `revision`。`modeState` 为 `legacy`、`structured`、`conflict` 或 `recovering`；`structuredPaths` 表示服务端实现了新协议，`indexState` 表示派生索引状态，均不代替模式状态。首版 `titleFormats` 为 `["plain"]`，`literalSlash` 仅在模式 `2`、`modeState: "structured"` 且索引就绪时为 `true`。
+在 `/api/notebook/getNotebookConf` 的 `data` 中增加可选只读对象 `documentCapabilities`，保留现有 `box`、`name`、`conf` 和权限过滤。对象包含 `addressingVersion`、`modeState`、`structuredPaths`、`literalSlash`、`titleFormats`、`indexState`、`minimumReaderVersion` 和 `revision`。`modeState` 为 `legacy`、`structured`、`conflict` 或 `recovering`；`structuredPaths` 表示服务端实现了新协议，`indexState` 表示派生索引状态，均不代替模式状态。管理员响应包含该对象，其他角色保持原有配置过滤。保护版本尚未验证时 `minimumReaderVersion` 为 `null`；确认真实最低版本后才返回版本字符串。首版 `titleFormats` 为 `["plain"]`，`literalSlash` 仅在模式 `2`、`modeState: "structured"` 且索引就绪时为 `true`。
 
 `revision` 是启用流程相关的配置版本；它不等同于某篇文档的路径版本。能力声明不授予访问权限，关闭或锁定笔记本时仍执行原有访问限制；状态读取不得暴露标题或受保护的模板内容。旧服务端没有该对象时，插件只能使用旧能力。鉴权、锁定或网络请求失败不能被当作“服务端不支持”，更不能据此回退后继续写入。
 
@@ -367,6 +383,8 @@
 兼容模式在容错解析、规范化及修复前检查解码后的根标题是否包含 ASCII `/`。存储属性的转义只解码一次，保留 HTML 实体、`／`、`%2F` 和 Markdown 的字面内容；重复的根属性或版本字段不能遮盖此前遇到的不兼容值。未知标题表示保留源格式错误，不进入属性修复。原生导入在安装资源、创建笔记本或重新分配 ID 前检查全部源文档；仅发现冲突不会启用模式或生成已确认的能力下界。
 
 文档写入同时校验待写内容及磁盘上的当前源文件。加密源先认证再解释，在同一文件锁内完成当前源校验和落盘，避免旧缓存覆盖后来出现的不兼容源。自动修复还要求当前源与最初检查的字节一致；校验失败不能继续回退写入或截断文件。普通文档保留按页写入方式，加密文档保留密文原子替换。
+
+原始文件接口中的笔记本及文档 ID 路径同样受源格式检查保护，不能通过上传、复制或移入文件绕过。整批预检在创建目标目录及首次复制前完成，实际文档复制使用已经校验的读取字节，并在文件锁内重新检查目标源；检查后的并发变化或 I/O 失败仍可能留下已完成的复制，不承诺整批回滚。普通附件和插件目录下的 `.sy` 文件保持原始文件语义，加密笔记本仍禁止通过原始文件接口读写。
 
 最低兼容版本由真实发布版本的读写及拒绝测试确定。保护版本之前忽略能力标记的客户端无法由新字段自动约束，不在安全混用承诺内。启用前要求所有同步设备升级；系统无法证明离线设备状态，应明确说明这一限制。如果已支持版本仍存在会改写数据的路径，保持新能力关闭，不能以文档提示代替必要保护。
 
@@ -489,7 +507,7 @@
 | 源文档与只读路径恢复 | [`filesys/tree.go`](../kernel/filesys/tree.go)、[`filesys/hpath.go`](../kernel/filesys/hpath.go) |
 | 路径刷新、恢复队列与文档索引 | [`treenode/blocktree.go`](../kernel/treenode/blocktree.go)、[`treenode/hpath.go`](../kernel/treenode/hpath.go)、[`model/hpath_refresh.go`](../kernel/model/hpath_refresh.go)、[`sql/queue.go`](../kernel/sql/queue.go) |
 | 搜索及层级计算 | [`model/search.go`](../kernel/model/search.go)、[`sql/block_query.go`](../kernel/sql/block_query.go)、[`search/config.ts`](../app/src/search/config.ts) |
-| 新建入口与保存路径解析 | [`util/newFile.ts`](../app/src/util/newFile.ts)、[`util/parseNewDocTarget.ts`](../app/src/util/parseNewDocTarget.ts)、[`mobile/util/initFramework.ts`](../app/src/mobile/util/initFramework.ts) |
+| 新建入口与保存路径解析 | [`util/newFile.ts`](../app/src/util/newFile.ts)、[`util/configuredDocument.ts`](../app/src/util/configuredDocument.ts)、[`mobile/util/initFramework.ts`](../app/src/mobile/util/initFramework.ts) |
 | 模板、数据库新建及速记 | [`model/template_doc_tree.go`](../kernel/model/template_doc_tree.go)、[`model/attribute_view_new_item.go`](../kernel/model/attribute_view_new_item.go)、[`model/shortcuts.go`](../kernel/model/shortcuts.go) |
 | 日记复用及旧创建回归 | [`model/daily_note.go`](../kernel/model/daily_note.go)、[`model/file_test.go`](../kernel/model/file_test.go) |
 | 导入与导出 | [`model/import.go`](../kernel/model/import.go)、[`model/import_obsidian.go`](../kernel/model/import_obsidian.go)、[`model/export.go`](../kernel/model/export.go) |

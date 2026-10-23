@@ -334,6 +334,8 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。目前 `literalSlash` 为 `false`；保护版本验证完成前，`minimumReaderVersion` 为 `null`。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
+
 ### 保存笔记本配置
 
 * `/api/notebook/setNotebookConf`
@@ -1483,6 +1485,9 @@ if (response.code === 0 && response.data) {
 * `/api/file/putFile`
 
 笔记本寻址模式不受支持时返回 `code: -1`，不会创建目录、写入内容或更新时间。此接口不能覆盖本机 `conf/document-addressing.json` 能力记录。
+
+写入由笔记本及文档 ID 组成的 `.sy` 文档路径时，同时检查传入内容和已有文档。未知格式、损坏的文档源或标题与兼容模式冲突时返回 `code: -1`，保留原文件及修改时间；成功写入保留请求中的原始字节，不规范化标题。附件或插件目录中的 `.sy` 文件不作为文档解析。
+
 * 参数为 HTTP Multipart 表单
 
     * `path`：工作空间路径下的文件路径
@@ -1527,6 +1532,9 @@ if (response.code === 0 && response.data) {
 * `/api/file/renameFile`
 
 创建目标目录或移动文件之前会检查完整操作的笔记本寻址兼容性。不支持的模式，以及移动或覆盖 `conf/document-addressing.json` 的操作，返回 `code: -1`。
+
+目标包含由笔记本及文档 ID 组成的 `.sy` 文档路径时，也会预检全部传入文档；未知格式、损坏的文档源或标题冲突返回 `code: -1`，不创建目标目录，也不移动来源。
+
 * 参数
 
   ```json

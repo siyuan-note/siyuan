@@ -65,7 +65,7 @@ func (source *CachedTreeSource) Parse(luteEngine *lute.Lute) (*parse.Tree, error
 		return nil, err
 	}
 	tree.Root.Path = source.path
-	tree.HPath = source.parentHPathPrefix + tree.Root.IALAttr("title")
+	tree.HPath = source.parentHPathPrefix + treenode.ReadDocumentTitle(tree.Root).Text
 	tree.Hash = treenode.NodeHash(tree.Root, tree, luteEngine)
 	return tree, nil
 }

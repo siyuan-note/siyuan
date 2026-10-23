@@ -284,7 +284,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 
 	parts = parts[1 : len(parts)-1] // 去掉开头的斜杆和结尾的自己
 	if 1 > len(parts) {
-		ret.HPath = "/" + ret.Root.IALAttr("title")
+		ret.HPath = "/" + treenode.ReadDocumentTitle(ret.Root).Text
 		ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
 		return
 	}
@@ -332,7 +332,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		hPathBuilder.WriteString(title)
 		hPathBuilder.WriteString("/")
 	}
-	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
+	hPathBuilder.WriteString(treenode.ReadDocumentTitle(ret.Root).Text)
 	ret.HPath = hPathBuilder.String()
 	ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
 	return
@@ -355,6 +355,21 @@ func readParentDocIAL(absPath string) (map[string]string, error) {
 }
 
 func readDocIAL(absPath string, strict bool) (map[string]string, error) {
+	doc, err := readDocumentHeader(absPath, strict)
+	if err != nil {
+		return nil, err
+	}
+	return doc.Properties, nil
+}
+
+type documentHeader struct {
+	ID         string
+	Type       string
+	Spec       string
+	Properties map[string]string
+}
+
+func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
 	boxID := docIALBoxID(absPath)
 	if boxID != "" {
 		if err := CheckDocumentAddressing(boxID); err != nil {
@@ -382,11 +397,7 @@ func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 	if err = treenode.CheckSpecJSON(data); err != nil {
 		return nil, err
 	}
-	var doc struct {
-		ID         string
-		Type       string
-		Properties map[string]string
-	}
+	var doc documentHeader
 	if err = json.Unmarshal(data, &doc); err != nil {
 		return nil, fmt.Errorf("parse parent document [%s]: %w", absPath, err)
 	}
@@ -399,7 +410,7 @@ func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 	for key, value := range doc.Properties {
 		doc.Properties[key] = html.UnescapeAttrVal(value)
 	}
-	return doc.Properties, nil
+	return &doc, nil
 }
 
 var ErrInvalidDocIAL = errors.New("invalid document properties")
@@ -534,6 +545,18 @@ func TreeSize(tree *parse.Tree) (size uint64) {
 }
 
 func WriteTree(tree *parse.Tree) (size uint64, err error) {
+	return WriteTreeWithPreflight(tree, nil)
+}
+
+// WriteTreeWithPreflight 在源写入协调范围内检查业务条件，检查失败时不创建目录或发布缓存。
+func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint64, err error) {
+	unlock := lockDocumentSource()
+	defer unlock()
+	if preflight != nil {
+		if err = preflight(); err != nil {
+			return
+		}
+	}
 	timing := util.BeginPerformance("document.save")
 	defer timing.Finish()
 	data, filePath, err := prepareWriteTree(tree)
@@ -556,6 +579,11 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		err = encErr
 		return
 	}
+	pending, metadataErr := treenode.BeginDocumentMetadataWrite(tree)
+	if metadataErr != nil {
+		return 0, metadataErr
+	}
+	defer finishDocumentMetadataWrite(tree, pending, &err)
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
 	timing.Stage("compare")
@@ -596,7 +624,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
-		msg := fmt.Sprintf(util.Langs[util.Lang][268], tree.Root.IALAttr("title")+" "+filepath.Base(filePath), util.LargeFileWarningSize.Load())
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], treenode.ReadDocumentTitle(tree.Root).Text+" "+filepath.Base(filePath), util.LargeFileWarningSize.Load())
 		util.PushErrMsg(msg, 7000)
 	}
 
@@ -624,11 +652,11 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		newP := treenode.NewParagraph("")
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
-		treenode.UpsertBlockTree(tree)
+		treenode.UpsertBlockTreePending(tree)
 	}
 
 	if treenode.NormalizeTabs(tree.Root) {
-		treenode.UpsertBlockTree(tree)
+		treenode.UpsertBlockTreePending(tree)
 	}
 	treenode.UpgradeSpec(tree)
 

@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -554,7 +553,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		}
 
 		if merged, ok := mergedDocs[bt.RootID]; !ok {
-			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
+			doc.Title = documentTitleText(bt.BoxID, bt.RootID)
 			mergedDocs[bt.RootID] = doc
 			rootIDs = append(rootIDs, bt.RootID)
 		} else {
@@ -638,7 +637,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 				}
 			}
 			// 获取文档标题
-			title := path.Base(bt.HPath)
+			title := documentTitleText(bt.BoxID, bt.RootID)
 			doc := &RecentDoc{
 				RootID: sqlBlock.ID,
 				Icon:   icon,

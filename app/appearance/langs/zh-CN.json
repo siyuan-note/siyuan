@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "部分文档可能已创建，请先通过链接检查。继续将保留已有文档，并跳过其尚未完成的创建处理。取消会结束本次创建。",
+	"documentCreationLimit": "请先完成或取消待处理的文档创建，再开始新的创建",
 	"listMindmapRestoreWidth": "恢复原宽度",
 	"lockScreenReveal": "点击屏幕或按键以登录",
 	"loadAllAndSelectAll": "加载全文并全选",

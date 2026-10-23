@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Beberapa dokumen mungkin sudah dibuat. Periksa tautan sebelum melanjutkan. Melanjutkan akan mempertahankan dokumen yang ada dan melewati tahap pembuatan yang tersisa. Membatalkan mengakhiri percobaan ini.",
+	"documentCreationLimit": "Selesaikan atau batalkan pembuatan dokumen yang tertunda sebelum memulai yang baru",
 	"listMindmapRestoreWidth": "Pulihkan lebar semula",
 	"lockScreenReveal": "Klik atau tekan tombol untuk masuk",
 	"loadAllAndSelectAll": "Muat seluruh dokumen dan pilih semua",

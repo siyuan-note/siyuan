@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261023030419"
 	},
 	"Children": [
 		{
@@ -1821,7 +1821,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830143000-tplen01",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1944,7 +1944,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830143000-tplen07",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1954,7 +1954,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " returns a static list of planned child document descriptions; "
+					"Data": " returns the static child-document descriptors in the creation plan; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " returns a static block reference to a planned document by its ID, independent of its title or readable path; "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1963,7 +1972,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " returns static block-reference text that points to a planned document."
+					"Data": " is the legacy query by readable path."
 				}
 			]
 		},

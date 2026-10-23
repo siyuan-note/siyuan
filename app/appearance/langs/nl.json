@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Sommige documenten zijn mogelijk al aangemaakt. Controleer de links voordat u doorgaat. Doorgaan behoudt bestaande documenten en slaat hun resterende aanmaakstappen over. Annuleren beëindigt deze poging.",
+	"documentCreationLimit": "Voltooi of annuleer een lopende documentaanmaak voordat u een nieuwe start",
 	"listMindmapRestoreWidth": "Oorspronkelijke breedtes herstellen",
 	"lockScreenReveal": "Klik of druk op een toets om aan te melden",
 	"loadAllAndSelectAll": "Volledig document laden en alles selecteren",

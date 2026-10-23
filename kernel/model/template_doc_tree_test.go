@@ -334,6 +334,7 @@ func TestRenderTemplateDocumentReferencesUsePlannedIDs(t *testing.T) {
 )}
 .action{range $doc := renderDocRef "children" .id}
 - ((.action{$doc.RootID} ".action{$doc.HPath}"))
+- .action{renderDocRef "id" $doc.ID}
 .action{end}
 .action{renderDocRef "path" "/第一章/1.1 概念"}
 .action{renderDocRef "path" "/Source/第一章/1.1 概念"}`)
@@ -590,10 +591,10 @@ func TestAttachTemplateDocTreePlansValidatesTransactionBoundary(t *testing.T) {
 	if !ok {
 		t.Fatalf("document tree plan [%s] was not stored", summary.ID)
 	}
-	value.(*templateDocTreePlan).rootHPath = "/Changed"
+	value.(*templateDocTreePlan).rootRevision = "changed-ancestor-identity-or-title"
 	transaction, _ = newTemplateDocTreeInsertTransaction(summary.ID, fixture.sourceID)
 	if attached, attachErr := AttachTemplateDocTreePlans([]*Transaction{transaction}); nil == attachErr || attached {
-		t.Fatalf("plan rendered for another human-readable path was accepted: attached=%t, err=%v", attached, attachErr)
+		t.Fatalf("plan with a different ancestor revision was accepted: attached=%t, err=%v", attached, attachErr)
 	}
 
 	clearTemplateDocTreePlansForTest()

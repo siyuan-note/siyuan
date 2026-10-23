@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261023030419"
 	},
 	"Children": [
 		{
@@ -1810,7 +1810,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830143000-tpltw01",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1933,7 +1933,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830143000-tpltw07",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1943,7 +1943,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 回傳建立計劃中的靜態子文檔描述清單；"
+					"Data": " 傳回建立計畫中的靜態子文件描述清單；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 根據文件 ID 傳回指向計畫文件的靜態區塊引用文字，不依賴標題或可讀路徑；"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1952,7 +1961,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 回傳指向計劃文檔的靜態區塊引用文字。"
+					"Data": " 為依可讀路徑查詢的相容入口。"
 				}
 			]
 		},

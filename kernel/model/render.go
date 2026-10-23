@@ -44,7 +44,7 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 	}
 
 	if ast.NodeDocument == heading.Type {
-		return heading.IALAttr("title")
+		return treenode.ReadDocumentTitle(heading).Text
 	}
 
 	buf := bytes.Buffer{}

@@ -21,7 +21,10 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 		return nil
 	}
 	result := &apicontract.NotebookConf{
-		Name: value.Name, Sort: value.Sort, Icon: value.Icon, Closed: value.Closed,
+		DocCreateTarget: documentTargetContract(value.DocCreateTarget),
+		RefCreateTarget: documentTargetContract(value.RefCreateTarget),
+		DailyNoteTarget: documentTargetContract(value.DailyNoteTarget),
+		Name:            value.Name, Sort: value.Sort, Icon: value.Icon, Closed: value.Closed,
 		RefCreateSaveBox: value.RefCreateSaveBox, RefCreateSavePath: value.RefCreateSavePath,
 		DocCreateSaveBox: value.DocCreateSaveBox, DocCreateSavePath: value.DocCreateSavePath,
 		DocCreateTemplatePath: value.DocCreateTemplatePath, DailyNoteSavePath: value.DailyNoteSavePath,

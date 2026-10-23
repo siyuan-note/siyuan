@@ -20,17 +20,12 @@ test("an empty detached window creates documents using the first open notebook",
             "../layout/dock/Files": {Files: class {}},
             "../editor": {Editor: class {}},
             "./pathName": {getOpenNotebookCount: () => 1},
-            "./fetch": {fetchPost: (url: string, data: unknown, callback: (response: unknown) => void) => {
-                requests.push({url, data});
-                if (url === "/api/filetree/getDocCreateSavePath") {
-                    callback({data: {box: "open", path: "", docCreateTemplatePath: ""}});
-                }
-            }},
+            "./configuredDocument": {createConfiguredDocument: (data: unknown) => requests.push({url: "configured", data})},
         })[name] || {},
     });
     methods.newFile({} as App);
-    assert.equal(requests[0].url, "/api/filetree/getDocCreateSavePath");
-    assert.equal(JSON.stringify(requests[0].data), JSON.stringify({notebook: "open"}));
-    assert.equal(requests[1].url, "/api/filetree/getHPathByPath");
-    assert.equal(JSON.stringify(requests[1].data), JSON.stringify({notebook: "open", path: "/"}));
+    assert.equal(requests[0].url, "configured");
+    assert.equal(JSON.stringify(requests[0].data), JSON.stringify({
+        notebook: "open", contextID: null, purpose: "document", placement: "configured",
+    }));
 });

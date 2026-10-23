@@ -18,7 +18,9 @@ import (
 
 // WriteTreeIfUnchanged 仅在文档仍与扫描源的原始文件字节一致时原子替换，防止覆盖并发修改。
 // 加密源必须先通过认证，落盘沿用现有密文格式，缓存仅在条件写成功后更新。
-func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (uint64, error) {
+func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (size uint64, err error) {
+	unlock := lockDocumentSource()
+	defer unlock()
 	dek, _, release, err := acquireCryptoLease(tree.Box)
 	if err != nil {
 		return 0, err
@@ -39,6 +41,11 @@ func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	pending, err := treenode.BeginDocumentMetadataWrite(tree)
+	if err != nil {
+		return 0, err
+	}
+	defer finishDocumentMetadataWrite(tree, pending, &err)
 	if err = util.WriteFileIfUnchanged(filePath, original, diskData); err != nil {
 		return 0, err
 	}

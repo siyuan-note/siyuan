@@ -42,7 +42,7 @@ import (
 )
 
 func TestGetBlockInfoRecovery(t *testing.T) {
-	for _, name := range []string{"document", "child", "explicit", "missing", "indexing", "reader", "encrypted"} {
+	for _, name := range []string{"document", "child", "metadataOnly", "literalTitle", "explicit", "missing", "indexing", "reader", "encrypted"} {
 		t.Run(name, func(t *testing.T) {
 			if os.Getenv("SIYUAN_TEST_BLOCK_INFO_RECOVERY") == t.Name() {
 				testGetBlockInfoRecovery(t, name)
@@ -93,9 +93,17 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 	sql.InitAssetContentDatabase(true)
 	defer sql.CloseDatabase()
 	docID := ast.NewNodeID()
-	tree := treenode.NewTree(box.ID, "/"+docID+".sy", "/Recovered", "Recovered")
+	title := "Recovered"
+	if name == "literalTitle" {
+		title = "**Literal &amp; title**"
+	}
+	tree := treenode.NewTree(box.ID, "/"+docID+".sy", "/"+title, title)
 	if _, err := filesys.WriteTree(tree); err != nil {
 		t.Fatal(err)
+	}
+	if name != "metadataOnly" {
+		// 源提交会立即登记文档摘要；这些用例需要模拟索引整体缺失。
+		treenode.RemoveBlockTreesByRootID(box.ID, docID)
 	}
 	if name == "encrypted" {
 		// 加密候选即使带有可解析的明文，也不能由普通笔记本恢复路径读取或索引。
@@ -107,6 +115,8 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 	id := docID
 	switch name {
 	case "child":
+		id = tree.Root.FirstChild.ID
+	case "metadataOnly":
 		id = tree.Root.FirstChild.ID
 	case "missing":
 		id = ast.NewNodeID()
@@ -150,8 +160,8 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 		t.Fatal(err)
 	}
 	switch name {
-	case "document", "child", "explicit":
-		if response.Code != 0 || response.Data.RootID != docID || response.Data.RootTitle != "Recovered" {
+	case "document", "child", "metadataOnly", "literalTitle", "explicit":
+		if response.Code != 0 || response.Data.RootID != docID || response.Data.RootTitle != title {
 			t.Fatalf("document did not recover: %s", recorder.Body.String())
 		}
 		if treenode.GetBlockTree(id) == nil {

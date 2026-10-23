@@ -334,6 +334,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
   }
   ```
 
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `literalSlash` is currently `false`, and `minimumReaderVersion` is `null` until a protective release is verified. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
+
 ### Save notebook configuration
 
 * `/api/notebook/setNotebookConf`
@@ -1485,6 +1487,9 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 * `/api/file/putFile`
 
 Unsupported notebook addressing modes return `code: -1` before creating directories, writing content, or changing timestamps. This endpoint cannot overwrite the local `conf/document-addressing.json` capability record.
+
+For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or titles conflicting with compatibility mode return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
+
 * The parameter is an HTTP Multipart form
 
     * `path`: the file path under the workspace path
@@ -1529,6 +1534,9 @@ Partial deletion in a notebook with an unsupported addressing mode returns `code
 * `/api/file/renameFile`
 
 The complete move is checked for notebook addressing compatibility before creating the destination directory or moving files. Unsupported modes and attempts to move or overwrite `conf/document-addressing.json` return `code: -1`.
+
+When the destination includes `.sy` document paths composed of notebook and document IDs, all incoming documents are also checked. Unknown formats, invalid document sources, or conflicting titles return `code: -1` without creating the destination directory or moving the sources.
+
 * Parameters
 
   ```json

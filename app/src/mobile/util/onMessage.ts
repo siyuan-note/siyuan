@@ -1,6 +1,7 @@
 import {openMobileFileById} from "../editor";
 import {refreshSettingConfig} from "../../config/setting/sync";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
+import {clearDocumentCreationPlans} from "../../util/configuredDocument";
 import {closeNotebookLivePhotos} from "../../protyle/preview/livePhoto";
 import {
     downloadProgress,
@@ -131,6 +132,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "closeBox":
             case "removeBox": {
                 closeNotebookHistoryDialogs(data.data.box);
+                clearDocumentCreationPlans(data.data.box);
                 closeNotebookLivePhotos(data.data.box);
                 removeMobileBacklinkContent({notebookId: data.data.box});
                 removeMobileReferenceSheet({notebookId: data.data.box});

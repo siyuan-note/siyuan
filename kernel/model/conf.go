@@ -1167,6 +1167,7 @@ func InitBoxes() {
 		}
 	}
 
+	recoverOpenedDocumentMetadata()
 	recoverDocHPaths()
 	logging.LogInfof("tree/block count [%d/%d]", treenode.CountTrees(), blockCount)
 }
@@ -1270,6 +1271,7 @@ func HideConfSecret(c *AppConf) {
 func HideBoxConfSecret(c *conf.BoxConf) {
 	if nil != c {
 		c.BoxCrypt = nil
+		c.DocCreateTarget, c.RefCreateTarget, c.DailyNoteTarget = nil, nil, nil
 	}
 }
 

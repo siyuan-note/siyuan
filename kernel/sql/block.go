@@ -203,7 +203,7 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 	}
 
 	if ast.NodeDocument == node.Type {
-		return html.EscapeHTMLStr(node.IALAttr("title"))
+		return html.EscapeHTMLStr(treenode.ReadDocumentTitle(node).Text)
 	}
 
 	if ast.NodeAttributeView == node.Type {

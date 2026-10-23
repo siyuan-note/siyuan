@@ -113,8 +113,14 @@ func CheckDocumentAddressingFileWrite(absPath string, data []byte, directory boo
 	if err != nil || len(paths) == 0 {
 		return err
 	}
-	return documentaddressing.CheckBatch(util.DataDir, util.ConfDir, paths, nil,
-		func(string) ([]byte, error) { return data, nil })
+	if err = documentaddressing.CheckBatch(util.DataDir, util.ConfDir, paths, nil,
+		func(string) ([]byte, error) { return data, nil }); err != nil {
+		return err
+	}
+	if isDocumentAddressingSource(paths) {
+		return checkDocumentAddressingSourceOverwrite(absPath, data)
+	}
+	return nil
 }
 
 // CheckDocumentAddressingFileCopies 预检全部目标内容，拒绝不兼容批次时不复制任何文件。
@@ -124,6 +130,7 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 		return documentaddressing.ErrInvalid
 	}
 	upserts := map[string]string{}
+	var documents [][2]string
 	for i, source := range sources {
 		if err := CheckDocumentAddressingPath(source); err != nil {
 			return err
@@ -158,6 +165,9 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 			if pathErr != nil {
 				return pathErr
 			}
+			if isDocumentAddressingSource(paths) {
+				documents = append(documents, [2]string{name, dest})
+			}
 			for _, path := range paths {
 				if previous := upserts[path]; previous != "" && previous != name &&
 					(strings.HasSuffix(path, "/"+documentaddressing.ConfigPath) || strings.HasSuffix(path, "/"+documentaddressing.FloorPath)) {
@@ -178,8 +188,20 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 	for path := range upserts {
 		paths = append(paths, path)
 	}
-	return documentaddressing.CheckBatch(util.DataDir, util.ConfDir, paths, nil,
-		func(name string) ([]byte, error) { return filelock.ReadFile(upserts[name]) })
+	if err := documentaddressing.CheckBatch(util.DataDir, util.ConfDir, paths, nil,
+		func(name string) ([]byte, error) { return filelock.ReadFile(upserts[name]) }); err != nil {
+		return err
+	}
+	for _, document := range documents {
+		data, err := filelock.ReadFile(document[0])
+		if err != nil {
+			return err
+		}
+		if err = checkDocumentAddressingSourceOverwrite(document[1], data); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // CheckDocumentAddressingFileRemoval 保留整本删除语义；部分删除不能抹去能力记录。

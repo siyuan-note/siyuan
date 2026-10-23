@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"path"
 	"sort"
 	"strings"
 
@@ -752,7 +751,7 @@ func backlinkListPaths(blocks []*Block, boxID string) (ret []*Path) {
 			}
 			block := fromSQLBlock(root, "", 0)
 			ret = append(ret, &Path{
-				ID: block.ID, Box: block.Box, Name: path.Base(block.HPath), HPath: block.HPath,
+				ID: block.ID, Box: block.Box, Name: root.Content, HPath: block.HPath,
 				NodeType: block.Type, Type: "backlink", SubType: block.SubType,
 				Count: counts[block.ID], Updated: block.IAL["updated"], Created: block.ID[:14],
 			})
@@ -921,10 +920,11 @@ func matchBacklinkKeyword(block *Block, keywords []string) bool {
 		return true
 	}
 
+	title := documentTitleText(block.Box, block.RootID)
 	for _, k := range keywords {
 		k = strings.ToLower(k)
 		if strings.Contains(strings.ToLower(block.Content), k) ||
-			strings.Contains(strings.ToLower(path.Base(block.HPath)), k) ||
+			strings.Contains(strings.ToLower(title), k) ||
 			strings.Contains(strings.ToLower(block.Name), k) ||
 			strings.Contains(strings.ToLower(block.Alias), k) ||
 			strings.Contains(strings.ToLower(block.Memo), k) ||
@@ -1046,7 +1046,7 @@ func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keywo
 			aliases = sql.QueryBlockAliasesInBox(defSQLBlock.ID, boxID)
 		}
 		if confSearchSnapshot.BacklinkMentionDoc {
-			fName = path.Base(defSQLBlock.HPath)
+			fName = defSQLBlock.Content
 		}
 		rootID = defSQLBlock.ID
 	} else {

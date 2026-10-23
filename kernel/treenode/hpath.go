@@ -62,16 +62,45 @@ func RefreshDocHPaths(tree *parse.Tree) (err error) {
 		return err
 	}
 	defer tx.Rollback()
-	depth := strings.Count(tree.Path, "/")
+	if err = upsertDocumentMetadata(tx, tree); err != nil {
+		return err
+	}
+	prefix := strings.TrimSuffix(tree.Path, ".sy") + "/"
+	rows, err := tx.Query(`SELECT m.id, m.title_text FROM document_metadata m JOIN blocktrees b
+		ON b.box_id=m.box_id AND b.id=m.id AND b.type='d'
+		WHERE b.box_id=? AND (b.path=? OR (b.path>=? AND b.path<?))`, tree.Box, tree.Path, prefix, prefix+"\uffff")
+	if err != nil {
+		return err
+	}
+	titles := map[string]string{}
+	for rows.Next() {
+		var id, title string
+		if err = rows.Scan(&id, &title); err != nil {
+			rows.Close()
+			return err
+		}
+		titles[id] = title
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
+	paths := map[string]string{tree.Path: tree.HPath}
 	for _, doc := range docs {
 		hpath := tree.HPath
 		if doc.Path != tree.Path {
-			parts := strings.Split(doc.HPath, "/")
-			if len(parts) <= depth+1 {
-				return errors.New("invalid descendant document hpath")
+			parentHPath, found := paths[path.Dir(doc.Path)+".sy"]
+			if !found {
+				return ErrDocumentMetadataUnavailable
 			}
-			hpath += "/" + strings.Join(parts[depth+1:], "/")
+			title, found := titles[doc.ID]
+			if !found {
+				return ErrDocumentMetadataUnavailable
+			}
+			hpath = parentHPath + "/" + title
 		}
+		paths[doc.Path] = hpath
 		if _, err = tx.Exec("UPDATE blocktrees SET hpath = ? WHERE id = ? AND box_id = ? AND path = ? AND type = 'd' AND hpath != ?", hpath, doc.ID, tree.Box, doc.Path, hpath); err != nil {
 			return err
 		}
@@ -97,7 +126,7 @@ func CurrentParentHPath(tree *parse.Tree) string {
 		return tree.HPath
 	}
 	if doc := GetBlockTreeInBox(path.Base(parent), tree.Box); doc != nil && doc.BoxID == tree.Box && doc.Path == parent+".sy" {
-		return doc.HPath + "/" + tree.Root.IALAttr("title")
+		return doc.HPath + "/" + ReadDocumentTitle(tree.Root).Text
 	}
 	return tree.HPath
 }

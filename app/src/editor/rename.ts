@@ -3,7 +3,8 @@ import {openInputDialog} from "../dialog/inputDialog";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
-import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
+import {getAssetName, setNotebookName} from "../util/pathName";
+import {documentCreateRequest} from "../util/documentCreate";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
 import {showTooltip} from "../dialog/tooltip";
@@ -165,10 +166,6 @@ export const newFileContentBySelect = (protyle: IProtyle) => {
         fileNameShort = fileNameShort.substr(0, 10) + "...";
     }
     fileNameShort = replaceFileName(fileNameShort);
-    fetchPost("/api/filetree/createDoc", {
-        notebook: protyle.notebookId,
-        path: pathPosix().join(getDisplayName(protyle.path, false, true), Lute.NewNodeID() + ".sy"),
-        title: fileNameShort,
-        md: protyle.lute.BlockDOM2StdMd(html)
-    });
+    fetchPost("/api/filetree/createDocByParent", documentCreateRequest(protyle.notebookId, protyle.path,
+        Lute.NewNodeID(), fileNameShort, protyle.lute.BlockDOM2StdMd(html)));
 };

@@ -285,11 +285,10 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 }
 
 func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
-	hPath := strings.TrimSuffix(doc["hPath"], "/")
 	if doc["path"] == "/" {
-		return "NOTEBOOK", doc["box"], path.Base(hPath)
+		return "NOTEBOOK", doc["box"], doc["title"]
 	}
-	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), path.Base(hPath)
+	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), doc["title"]
 }
 
 func documentInfo(args map[string]any) (CallToolResult, error) {

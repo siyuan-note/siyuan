@@ -124,6 +124,13 @@ func TestDocumentHPathRefresh(t *testing.T) {
 		assertHPathTestDoc(t, database, child, "/Final/Leaf")
 		assertHPathTestDoc(t, database, grandchild, "/Final/Leaf/Grandchild")
 		assertHPathTestDoc(t, database, sibling, "/Parent")
+		var title string
+		if err := database.QueryRow("SELECT content FROM blocks WHERE id=? AND type='d'", child.ID).Scan(&title); err != nil || title != "Leaf" {
+			t.Fatalf("stale queued edit restored the old title: %q, %v", title, err)
+		}
+		if stale.Root.IALAttr("title") != "Child" {
+			t.Fatal("index reconciliation modified the original editing snapshot")
+		}
 	})
 
 	t.Run("interrupted source writes and restart", func(t *testing.T) {

@@ -862,10 +862,25 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 
 var getDocCreateSavePath = contractHandler(apicontract.GetDocCreateSavePath, getDocCreateSavePathContract)
 
-func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeCreateSavePathData] {
+func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeCreateSavePathResult] {
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
+	if model.Conf.Box(notebook) != nil {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, model.Conf.Language(314))
+		}
+		target, err := model.GetDocCreateTarget(notebook, "document")
+		if err != nil {
+			return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, err.Error())
+		}
+		if target.Structured != nil {
+			return apicontract.GetDocCreateSavePath.FailureWithData(-1, "use getDocCreateTarget for a structured template", apicontract.NewFileTreeCreateSavePathFailure())
+		}
+		if err = holdEncryptedBoxRequest(c, target.Notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, model.Conf.Language(314))
+		}
+	}
 	docCreateSaveBox, docCreateSavePathTpl := model.ResolveDocCreateSaveLocation(notebook)
 	docCreateTemplatePath := model.Conf.FileTree.Load().DocCreateTemplatePath
 	if box := model.Conf.Box(notebook); nil != box {
@@ -887,20 +902,35 @@ func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeCreateSavePathData](ret)
+		return contractFailure[apicontract.FileTreeCreateSavePathResult](ret)
 	}
 
-	return apicontract.Success(apicontract.FileTreeCreateSavePathData{FileTreeSavePathData: apicontract.FileTreeSavePathData{Box: docCreateSaveBox, Path: docCreateSavePath}, DocCreateTemplatePath: docCreateTemplatePath})
+	return apicontract.Success(apicontract.NewFileTreeCreateSavePathResult(apicontract.FileTreeCreateSavePathData{FileTreeSavePathData: apicontract.FileTreeSavePathData{Box: docCreateSaveBox, Path: docCreateSavePath}, DocCreateTemplatePath: docCreateTemplatePath}))
 }
 
 var getRefCreateSavePath = contractHandler(apicontract.GetRefCreateSavePath, getRefCreateSavePathContract)
 
-func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeSavePathData] {
+func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeSavePathResult] {
 	confFileTreeSnapshot := model.Conf.LoadFileTree()
 
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
+	if model.Conf.Box(notebook) != nil {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, model.Conf.Language(314))
+		}
+		target, err := model.GetDocCreateTarget(notebook, "reference")
+		if err != nil {
+			return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, err.Error())
+		}
+		if target.Structured != nil {
+			return apicontract.GetRefCreateSavePath.FailureWithData(-1, "use getDocCreateTarget for a structured template", apicontract.NewFileTreeSavePathFailure())
+		}
+		if err = holdEncryptedBoxRequest(c, target.Notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, model.Conf.Language(314))
+		}
+	}
 	box := model.Conf.Box(notebook)
 	var refCreateSaveBox string
 	refCreateSavePathTpl := confFileTreeSnapshot.RefCreateSavePath
@@ -936,9 +966,9 @@ func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeSavePathData](ret)
+		return contractFailure[apicontract.FileTreeSavePathResult](ret)
 	}
-	return apicontract.Success(apicontract.FileTreeSavePathData{Box: refCreateSaveBox, Path: refCreateSavePath})
+	return apicontract.Success(apicontract.NewFileTreeSavePathResult(apicontract.FileTreeSavePathData{Box: refCreateSaveBox, Path: refCreateSavePath}))
 }
 
 var getShorthandSavePath = contractHandler(apicontract.GetShorthandSavePath, getShorthandSavePathContract)

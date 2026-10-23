@@ -47,9 +47,10 @@ import {spinListMindmapDOM} from "../render/listMindmap/create";
 import {mountNewListMindmap} from "../render/listMindmap";
 import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
-import {fetchPost} from "../../util/fetch";
+import {fetchSyncPost} from "../../util/fetch";
 import {escapeHtml, escapeSearchHighlight, stripSearchMark} from "../../util/escape";
-import {getDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
+import {isEncryptedBox} from "../../util/pathName";
+import {createdDocumentID, documentCreateRequest} from "../../util/documentCreate";
 import {
     addEmoji,
     EmojiPanelController,
@@ -1372,13 +1373,13 @@ ${genHintItemHTML(item)}
                 // 新建子文档
                 const newSubDocId = Lute.NewNodeID();
                 getDocCreateTemplatePath(protyle.notebookId, (docCreateTemplatePath) => {
-                    fetchPost("/api/filetree/createDoc", {
-                        notebook: protyle.notebookId,
-                        path: pathPosix().join(getDisplayName(protyle.path, false, true), newSubDocId + ".sy"),
-                        title: "",
-                        md: "",
+                    void fetchSyncPost("/api/filetree/createDocByParent", {
+                        ...documentCreateRequest(protyle.notebookId, protyle.path, newSubDocId, ""),
                         docCreateTemplatePath,
-                    }, () => {
+                    }).then(response => {
+                        if (!createdDocumentID(response.data)) {
+                            return;
+                        }
                         insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${getBlockRefAnchorText("")}</span>`, protyle);
                         /// #if MOBILE
                         openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
@@ -1389,7 +1390,7 @@ ${genHintItemHTML(item)}
                             action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
                         });
                         /// #endif
-                    });
+                    }).catch(error => showMessage(error.message));
                 });
                 return;
             } else if (value === Constants.ZWSP + 5) {

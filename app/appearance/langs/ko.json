@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "일부 문서가 이미 생성되었을 수 있습니다. 계속하기 전에 링크를 확인하세요. 계속하면 기존 문서를 유지하고 남은 생성 단계를 건너뜁니다. 취소하면 이번 생성을 종료합니다.",
+	"documentCreationLimit": "새로 시작하기 전에 대기 중인 문서 생성을 완료하거나 취소하세요",
 	"listMindmapRestoreWidth": "원래 너비 복원",
 	"lockScreenReveal": "화면을 클릭하거나 키를 눌러 로그인",
 	"loadAllAndSelectAll": "전체 문서를 불러오고 모두 선택",

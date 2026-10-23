@@ -916,6 +916,12 @@ export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string |
 
 export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; "useInputName"?: boolean | null; };
 
+export type CreateDocByParentRequest = { "clippingHref"?: string; "docCreateTemplatePath"?: string; "expectedParentRevision"?: string; "expectedTarget"?: DocumentTargetRevision; "id": string; "listDocTree"?: boolean; "markdown": string; "nameConditions"?: Array<DocumentNameCondition>; "notebook": string; "parentID": string | null; "sortPosition"?: "before" | "after"; "sortTargetID"?: string; "sorts"?: Array<string>; "tags"?: string; "title": DocumentCreateTitle; "withMath"?: boolean; };
+
+export type CreateDocByParentRequestInput = { "clippingHref"?: string; "docCreateTemplatePath"?: string; "expectedParentRevision"?: string; "expectedTarget"?: DocumentTargetRevisionInput; "id": string; "listDocTree"?: boolean; "markdown": string; "nameConditions"?: Array<DocumentNameConditionInput>; "notebook": string; "parentID": string | null; "sortPosition"?: "before" | "after"; "sortTargetID"?: string; "sorts"?: Array<string>; "tags"?: string; "title": DocumentCreateTitleInput; "withMath"?: boolean; };
+
+export type CreateDocByParentResult = (CreatedDocumentData & { "commitState"?: never; "completed"?: never; "reason"?: never; "stage"?: never; }) | (DocumentCreateFailure & { "document"?: never; });
+
 export type CreateDocHistoryRequestInput = { "id": string; };
 
 export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
@@ -929,6 +935,8 @@ export type CreateRiffDeckRequestInput = { "name": string; };
 export type CreateSnapshotData = { "created": boolean; "id": string; };
 
 export type CreateSnapshotRequestInput = { "memo"?: string; };
+
+export type CreatedDocumentData = { "document": DocumentPath; "id": string; };
 
 export type Criterion = { "group": number; "hPath": string; "hasReplace": boolean; "idPath": Array<string> | null; "k": string; "method": number; "name": string; "r": string; "replaceTypes": CriterionReplaceTypes | null; "sort": number; "subTypes": SearchSubTypes; "types": CriterionTypes | null; };
 
@@ -998,7 +1006,49 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
+export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
+
+export type DocumentCapabilities = { "addressingVersion": number; "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "minimumReaderVersion": string | null; "modeState": "legacy" | "structured" | "conflict" | "recovering"; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
+
+export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "modeConflict" | "writeFailed"; "stage": string; };
+
+export type DocumentCreatePlan = { "existingID"?: string; "notebook": string; "steps": Array<CreateDocByParentRequest>; "title": string; };
+
+export type DocumentCreateTarget = (LegacyDocumentTarget & { "anchor"?: never; "onMissingParent"?: never; "parents"?: never; "title"?: never; "up"?: never; }) | (StructuredDocumentTarget & { "path"?: never; });
+
+export type DocumentCreateTargetData = { "docCreateTemplatePath": string; "revision": string; "target": DocumentCreateTarget; };
+
+export type DocumentCreateTitle = { "format": string; "text": string; };
+
+export type DocumentCreateTitleInput = { "format": string; "text": string; };
+
+export type DocumentLocation = { "id": string | null; "notebook": string; "revision": string; };
+
+export type DocumentNameCondition = { "expectedID": string | null; "parentID": string | null; "title": string; };
+
+export type DocumentNameConditionInput = { "expectedID": string | null; "parentID": string | null; "title": string; };
+
+export type DocumentPath = { "addressingVersion": number; "depth": number; "displayPath": string; "id": string; "notebook": string; "parentID": string | null; "path": string; "revision": string; "segments": Array<DocumentPathSegment> | null; "title": DocumentTitle; };
+
+export type DocumentPathSegment = { "empty": boolean; "id": string; "text": string; };
+
+export type DocumentPathStartInput = { "id"?: string; "kind": "root" | "document"; };
+
+export type DocumentPathsData = { "documents": Array<DocumentPath> | null; "missingIDs": Array<string> | null; };
+
+export type DocumentPathsResult = (DocumentPathsData & { "reason"?: never; }) | (DocumentAddressingFailure & { "documents"?: never; "missingIDs"?: never; });
+
 export type DocumentPreviewImage = { "notebook": string; "src": string; "video"?: string; };
+
+export type DocumentTargetAnchor = { "id"?: string; "kind": "notebookRoot" | "context" | "document"; };
+
+export type DocumentTargetAnchorInput = { "id"?: string; "kind": "notebookRoot" | "context" | "document"; };
+
+export type DocumentTargetRevision = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; "revision": string; };
+
+export type DocumentTargetRevisionInput = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; "revision": string; };
+
+export type DocumentTitle = { "empty": boolean; "format": "plain"; "text": string; };
 
 export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
@@ -1102,6 +1152,8 @@ export type FileTreeCreateRequestInput = { "docCreateTemplatePath"?: string | nu
 
 export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath": string; "path": string; };
 
+export type FileTreeCreateSavePathResult = (FileTreeCreateSavePathData & { "reason"?: never; }) | (StructuredTemplateRequired & { "box"?: never; "docCreateTemplatePath"?: never; "path"?: never; });
+
 export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "date"?: string | null; "notebook": string; };
 
 export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
@@ -1162,7 +1214,9 @@ export type FileTreeReorderRequestInput = { "position"?: string | null; "preview
 
 export type FileTreeSavePathData = { "box": string; "path": string; };
 
-export type FileTreeSearchDoc = { "alias"?: string; "box": string; "boxIcon": string; "dueFlashcardCount"?: string; "flashcardCount"?: string; "hPath": string; "name"?: string; "newFlashcardCount"?: string; "path": string; };
+export type FileTreeSavePathResult = (FileTreeSavePathData & { "reason"?: never; }) | (StructuredTemplateRequired & { "box"?: never; "path"?: never; });
+
+export type FileTreeSearchDoc = { "alias"?: string; "box": string; "boxIcon": string; "dueFlashcardCount"?: string; "flashcardCount"?: string; "hPath": string; "name"?: string; "newFlashcardCount"?: string; "path": string; "title"?: string; };
 
 export type FileTreeSearchRequestInput = { "excludeIDs"?: Array<string> | null; "flashcard"?: boolean | null; "k": string; };
 
@@ -1247,6 +1301,10 @@ export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
 export type GetCloudRepoSnapshotsRequestInput = { "endTime"?: number; "page": number; "startTime"?: number; };
 
 export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; "groupID"?: string | null; "id": string; "query"?: string | null; "viewID"?: string | null; };
+
+export type GetDocCreateTargetRequestInput = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; };
+
+export type GetDocPathsRequestInput = { "ids": Array<string>; "notebook": string; };
 
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
@@ -1426,6 +1484,8 @@ export type JSONValue = null | boolean | number | string | Array<JSONValue> | { 
 
 export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": string; };
 
+export type LegacyDocumentTarget = { "notebook": string; "path": string; "version": 1; };
+
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
@@ -1554,11 +1614,11 @@ export type NotebookArchiveCandidatesData = { "notebooks": Array<NotebookArchive
 
 export type NotebookArchiveData = { "file": string; "id": string; };
 
-export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "sort": number; "sortMode": number; };
+export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTarget"?: StructuredDocumentTarget; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTarget"?: StructuredDocumentTarget; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "refCreateTarget"?: StructuredDocumentTarget; "sort": number; "sortMode": number; };
 
-export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "name": string; };
+export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "documentCapabilities"?: DocumentCapabilities; "name": string; };
 
-export type NotebookConfPatchInput = { "boxCrypt"?: NotebookEncryptionPatchInput | null; "closed"?: boolean | null; "dailyNoteSavePath"?: string | null; "dailyNoteTemplatePath"?: string | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "encrypted"?: boolean | null; "icon"?: string | null; "name"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "sort"?: number | null; "sortMode"?: number | null; };
+export type NotebookConfPatchInput = { "boxCrypt"?: NotebookEncryptionPatchInput | null; "closed"?: boolean | null; "dailyNoteSavePath"?: string | null; "dailyNoteTarget"?: StructuredDocumentTargetInput | null; "dailyNoteTemplatePath"?: string | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTarget"?: StructuredDocumentTargetInput | null; "docCreateTemplatePath"?: string | null; "encrypted"?: boolean | null; "icon"?: string | null; "name"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "refCreateTarget"?: StructuredDocumentTargetInput | null; "sort"?: number | null; "sortMode"?: number | null; };
 
 export type NotebookCryptoAutoLockRequestInput = { "autoLockMinutes": number; };
 
@@ -1637,6 +1697,8 @@ export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number;
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "settingsWindow"?: boolean; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+
+export type PlanDocCreateRequestInput = { "contextID"?: string | null; "date"?: string; "id": string; "notebook": string; "placement"?: "configured" | "child"; "purpose": "document" | "reference" | "dailyNote"; "reuse"?: boolean; "title"?: string; };
 
 export type PluginPublishInfo = { "fields": Array<string>; "granted": boolean; "resources": Array<string>; };
 
@@ -1785,6 +1847,12 @@ export type ResetLocalGraphData = { "conf": LocalGraphConf; };
 export type ResetRiffCardsRequestInput = { "blockIDs"?: Array<string> | null; "deckID": string; "id": string; "type": string; };
 
 export type ResetSettingsRequestInput = { "exit"?: boolean; };
+
+export type ResolveDocPathRequestInput = { "notebook": string; "segments": Array<string>; "start": DocumentPathStartInput; };
+
+export type ResolveDocPathResult = (ResolvedDocumentPathData & { "reason"?: never; }) | (DocumentAddressingFailure & { "candidates"?: never; "candidatesTruncated"?: never; "nameConditions"?: never; "nextIndex"?: never; "resolved"?: never; "start"?: never; "status"?: never; });
+
+export type ResolvedDocumentPathData = { "candidates": Array<DocumentPath> | null; "candidatesTruncated": boolean; "nameConditions": Array<DocumentNameCondition> | null; "nextIndex": number; "resolved": DocumentPath | null; "start": DocumentLocation; "status": "resolved" | "missing" | "ambiguous"; };
 
 export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
@@ -2245,6 +2313,12 @@ export type StorageRemoveRequestInput = { "app"?: string | null; "key": string; 
 export type StorageSetKeysRequestInput = { "app"?: string | null; "keyVals": { [key: string]: JSONValue }; };
 
 export type StorageSetRequestInput = { "app"?: string | null; "key": string; "val"?: JSONValue | null; };
+
+export type StructuredDocumentTarget = { "anchor": DocumentTargetAnchor; "notebook": string; "onMissingParent": "create" | "error"; "parents": Array<string>; "title": string; "up": number; "version": 2; };
+
+export type StructuredDocumentTargetInput = { "anchor": DocumentTargetAnchorInput; "notebook": string; "onMissingParent": "create" | "error"; "parents": Array<string>; "title": string; "up": number; "version": 2; };
+
+export type StructuredTemplateRequired = { "reason": "structuredTemplateRequired"; };
 
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "originalToEmbed"?: boolean; "refID": string; };
 
@@ -3304,6 +3378,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 在隔离目录解压并预检完整输出集合的能力记录及文档源，失败时不写入目标。
+     * 实际复制仍重新检查目标；后续并发变化或 I/O 失败可能留下已完成条目，不承诺整批回滚。
+     */
     "/api/archive/unzip": {
         request: UnzipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3311,6 +3389,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 的输出位置遵守笔记本能力及原始文档保护，不能用压缩文件覆盖文档源或能力记录。
+     */
     "/api/archive/zip": {
         request: ZipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5192,6 +5273,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 在写入前检查笔记本寻址模式，不兼容或试图覆盖本机能力下界记录时返回 -1。
+     * 目标为文档 ID 路径时，未知格式和标题冲突均返回 -1；实际写入在文件锁内重新校验现有源，不规范化内容。
      * 工作空间外的加密资源解密导出仍要求既有授权和操作租约。
      */
     "/api/file/copyFile": {
@@ -5217,7 +5299,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 在创建目标目录及复制前预检整批笔记本寻址模式；不兼容时返回 -1，不写入部分目标。
+     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
      * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
      */
     "/api/file/globalCopyFiles": {
@@ -5229,6 +5312,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 在创建目录、写入内容及更新时间前校验笔记本寻址模式和待写配置；不兼容时返回 -1。
+     * 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
+     * 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
      * 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
      */
     "/api/file/putFile": {
@@ -5258,6 +5343,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 在创建目标父目录或移动源文件前预检笔记本寻址能力，不支持的模式返回 -1。
+     * 移入由笔记本及文档 ID 组成的 .sy 路径时检查全部源文档；未知格式或标题冲突返回 -1，保留来源。
      * 不能借重命名覆盖、移动或删除本机 conf/document-addressing.json；既有加密边界不变。
      */
     "/api/file/renameFile": {
@@ -5268,7 +5354,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目标目录及复制前预检整批笔记本寻址模式；不兼容时返回 -1，不写入部分目标。
+     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
      * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
      */
     "/api/file/workspaceCopyFiles": {
@@ -5304,6 +5391,21 @@ export interface APIPOSTRoutes {
         request: FileTreeCreateRequestInput;
         response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 在显式父文档 ID 或 null 根位置创建固定 ID 文档，不接收 path/hPath 或名称回退。
+     * title.format 首版只接受 plain，text 可为空；无效字符、超长标题及不支持的格式原样拒绝，不截断或清洗。
+     * 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
+     * ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
+     * 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
+     * 当前兼容阶段仍不允许标题包含 /，不提升已有文档 Spec；加密笔记本使用原有认证写入与响应租约。
+     */
+    "/api/filetree/createDocByParent": {
+        request: CreateDocByParentRequestInput;
+        response: { "code": 0; "data": CreateDocByParentResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | CreateDocByParentResult; "msg": string; };
+        body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
@@ -5353,12 +5455,40 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 旧模板保持既有渲染及回退；对应的新目标对象生效时返回 structuredTemplateRequired，不读取历史路径。
+     */
     "/api/filetree/getDocCreateSavePath": {
         request: FileTreeNotebookRequestInput;
-        response: { "code": 0; "data": FileTreeCreateSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": FileTreeCreateSavePathResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeCreateSavePathResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 返回指定用途的有效目标及正文模板，不渲染模板、不猜测上下文或日期。
+     * version=1 保留旧路径语法；version=2 独立保存祖先和标题段。revision 覆盖生效配置及继承来源，
+     * 由配置创建时传回 expectedTarget，配置变化即返回 planChanged。读取需管理员及源笔记本操作租约。
+     */
+    "/api/filetree/getDocCreateTarget": {
+        request: GetDocCreateTargetRequestInput;
+        response: { "code": 0; "data": DocumentCreateTargetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 在指定笔记本内按文档 ID 读取结构化祖先链，要求管理员权限，加密响应保留操作租约。
+     * ids 必须包含 1 至 128 项，按首次出现顺序去重；缺失、其他笔记本或内容块身份列入 missingIDs。
+     * 文档标题、segments 与 revision 来自同一快照，displayPath 仅用于显示，不能反向解析身份。
+     * 索引未就绪返回 indexUnavailable，源格式和认证错误不能伪装成缺失；批量结果不承诺全局快照。
+     */
+    "/api/filetree/getDocPaths": {
+        request: GetDocPathsRequestInput;
+        response: { "code": 0; "data": DocumentPathsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | DocumentPathsResult; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/filetree/getFullHPathByID": {
         request: FileTreeOptionalIDRequestInput;
@@ -5422,7 +5552,7 @@ export interface APIPOSTRoutes {
     };
     "/api/filetree/getRefCreateSavePath": {
         request: FileTreeNotebookRequestInput;
-        response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": FileTreeSavePathResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSavePathResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
@@ -5483,6 +5613,20 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 只读编译有效创建目标，同一次计划使用相同时间，日期可指定为 YYYY-MM-DD。
+     * contextID 是源笔记本内的文档，child 使用该位置，configured 使用配置目标；title 可显式替换最终标题。
+     * 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
+     * reuse 仅用于明确允许复用的业务。existingID 非空时不再创建；普通新建应保持 reuse=false。
+     * 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
+     */
+    "/api/filetree/planDocCreate": {
+        request: PlanDocCreateRequestInput;
+        response: { "code": 0; "data": DocumentCreatePlan; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
     "/api/filetree/removeDoc": {
         request: FileTreePathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5532,6 +5676,23 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 从显式根位置或父文档 ID 逐级精确匹配 0 至 128 个非空标题段，只解析不创建。
+     * 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
+     * candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
+     * 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
+     * 索引未就绪返回 indexUnavailable；普通标题仍遵守兼容模式限制，不隐式启用新字符。
+     */
+    "/api/filetree/resolveDocPath": {
+        request: ResolveDocPathRequestInput;
+        response: { "code": 0; "data": ResolveDocPathResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ResolveDocPathResult; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留兼容展示 hPath，并单独返回文档或笔记本的纯文本 title；客户端不能从 hPath 拆出标题或层级。
+     */
     "/api/filetree/searchDocs": {
         request: FileTreeSearchRequestInput;
         response: { "code": 0; "data": Array<FileTreeSearchDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6122,6 +6283,15 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * preserves existing configuration and permission filtering. Administrator
+     * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
+     * not permission to open a closed or locked notebook. literalSlash remains false until structured
+     * title mode is implemented and enabled; minimumReaderVersion is null until a protective release
+     * is verified. Revision covers configuration and confirmed capability records, not a document path.
+     * Malformed capability records fail the request; authentication, locking and network failures must
+     * never be interpreted as an absent capability object or as permission to retry a legacy write.
+     */
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
         response: { "code": 0; "data": NotebookConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

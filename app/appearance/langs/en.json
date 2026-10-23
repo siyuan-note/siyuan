@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Some documents may already exist. Check the links before continuing. Continuing keeps existing documents and skips their remaining creation steps. Cancel ends this creation attempt.",
+	"documentCreationLimit": "Finish or cancel a pending document creation before starting another",
 	"listMindmapRestoreWidth": "Restore original widths",
 	"lockScreenReveal": "Click or press a key to sign in",
 	"loadAllAndSelectAll": "Load full document and select all",

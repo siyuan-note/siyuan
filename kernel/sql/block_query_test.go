@@ -113,6 +113,29 @@ func TestRootBlockExactMatchCondition(t *testing.T) {
 	}
 }
 
+func TestDocumentSearchDepthUsesIdentityPath(t *testing.T) {
+	testDB := createGraphTestBlocksTable(t)
+	previousDB := db
+	db = testDB
+	t.Cleanup(func() { db = previousDB })
+	for _, doc := range []struct{ id, dataPath, displayPath string }{
+		{"nested", "/parent/nested.sy", "/Parent/Child"},
+		{"literal", "/literal.sy", "/Literal/title/with/separators"},
+	} {
+		_, err := testDB.Exec(`INSERT INTO blocks SELECT ?, '', ?, '', 'box', ?, ?, '', '', '', '',
+			'Title', '', '', 0, 'd', '', '', 0, '', ''`, doc.id, doc.id, doc.dataPath, doc.displayPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, result := range [][]*Block{QueryRootBlockByCondition("1=1", "no exact match", 10),
+		QueryRootBlockByConditionInBox("1=1", "no exact match", 10, "box")} {
+		if len(result) != 2 || result[0].ID != "literal" || result[1].ID != "nested" {
+			t.Fatalf("display title changed structural depth: %+v", result)
+		}
+	}
+}
+
 func TestQueryLikeEscape(t *testing.T) {
 	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
 	if err != nil {

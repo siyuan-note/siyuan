@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Alguns documentos podem já ter sido criados. Verifique os links antes de continuar. Continuar mantém os documentos existentes e ignora as etapas de criação restantes. Cancelar encerra esta tentativa.",
+	"documentCreationLimit": "Conclua ou cancele uma criação de documentos pendente antes de iniciar outra",
 	"listMindmapRestoreWidth": "Restaurar larguras originais",
 	"lockScreenReveal": "Clique ou pressione uma tecla para entrar",
 	"loadAllAndSelectAll": "Carregar o documento completo e selecionar tudo",

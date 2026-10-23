@@ -78,7 +78,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 		if changed {
 			generateTreeHistory(tree, historyDir)
-			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				util.ClearPushProgress(100)
 				return
@@ -151,7 +151,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 		if changed {
 			generateTreeHistory(tree, historyDir)
-			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				util.ClearPushProgress(100)
 				return

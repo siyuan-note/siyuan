@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Einige Dokumente wurden möglicherweise bereits erstellt. Prüfen Sie die Links, bevor Sie fortfahren. Beim Fortfahren bleiben vorhandene Dokumente erhalten und ihre restlichen Erstellungsschritte werden übersprungen. Abbrechen beendet diesen Vorgang.",
+	"documentCreationLimit": "Schließen Sie eine ausstehende Dokumenterstellung ab oder brechen Sie sie ab, bevor Sie eine neue beginnen",
 	"listMindmapRestoreWidth": "Ursprüngliche Breiten wiederherstellen",
 	"lockScreenReveal": "Zum Anmelden klicken oder eine Taste drücken",
 	"loadAllAndSelectAll": "Gesamtes Dokument laden und alles auswählen",

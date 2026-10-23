@@ -87,6 +87,8 @@ func ResetSettings() error {
 	if util.ReadOnly {
 		return errors.New("read-only mode")
 	}
+	unlockTarget := lockDocumentTargetConfiguration()
+	defer unlockTarget()
 	Conf.m.Lock()
 	localStorageLock.Lock()
 	bootAppearanceConfLock.Lock()

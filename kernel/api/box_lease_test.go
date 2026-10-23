@@ -89,6 +89,26 @@ func TestContractDailyNoteInfoNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
 
+func TestContractDocumentPathsNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractResolveDocumentPathNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractCreateDocumentByParentNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractDocumentCreateTargetNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractDocumentCreatePlanNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
 func TestContractGetDocNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
@@ -211,7 +231,12 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		model.Conf.Export.Store(confSectionValue1)
 		model.Conf.Search.Store(confSectionValue2)
 	}
-	if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
+	addressingTest := t.Name() == "TestContractDocumentPathsNotebookResponseLease" ||
+		t.Name() == "TestContractResolveDocumentPathNotebookResponseLease" ||
+		t.Name() == "TestContractDocumentCreateTargetNotebookResponseLease" ||
+		t.Name() == "TestContractDocumentCreatePlanNotebookResponseLease" ||
+		t.Name() == "TestContractCreateDocumentByParentNotebookResponseLease"
+	if addressingTest || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		content, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
 		if err != nil {
 			t.Fatal(err)
@@ -259,8 +284,13 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 			t.Fatal(err)
 		}
 		treenode.UpsertBlockTree(tree)
-		if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
+		if addressingTest || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 			if _, err := model.Mount(boxID); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if addressingTest {
+			if err := treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -275,6 +305,11 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getDocInfo", getDocInfo)
 	engine.POST("/api/filetree/createDailyNote", createDailyNote)
 	engine.POST("/api/filetree/getDailyNoteInfo", getDailyNoteInfo)
+	engine.POST("/api/filetree/getDocPaths", getDocPaths)
+	engine.POST("/api/filetree/resolveDocPath", resolveDocPath)
+	engine.POST("/api/filetree/createDocByParent", createDocByParent)
+	engine.POST("/api/filetree/getDocCreateTarget", getDocCreateTarget)
+	engine.POST("/api/filetree/planDocCreate", planDocCreate)
 	engine.POST("/api/filetree/getDoc", getDoc)
 	engine.POST("/api/block/getTreeStat", getTreeStat)
 	engine.POST("/api/block/getBlockBreadcrumb", getBlockBreadcrumb)
@@ -317,6 +352,22 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	typedQuery := false
 	switch t.Name() {
+	case "TestContractDocumentCreateTargetNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/getDocCreateTarget", true
+		args = map[string]any{"notebook": boxIDs[0], "purpose": "document"}
+	case "TestContractDocumentCreatePlanNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/planDocCreate", true
+		args = map[string]any{"notebook": boxIDs[0], "purpose": "document", "id": ast.NewNodeID(), "title": "REVIEW-SECRET-TITLE"}
+	case "TestContractDocumentPathsNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/getDocPaths", true
+		args = map[string]any{"notebook": boxIDs[0], "ids": []string{boxIDs[0]}}
+	case "TestContractResolveDocumentPathNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/resolveDocPath", true
+		args = map[string]any{"notebook": boxIDs[0], "start": map[string]any{"kind": "document", "id": boxIDs[0]}, "segments": []string{}}
+	case "TestContractCreateDocumentByParentNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/createDocByParent", true
+		args = map[string]any{"notebook": boxIDs[0], "parentID": nil, "id": ast.NewNodeID(),
+			"title": map[string]string{"format": "plain", "text": "REVIEW-SECRET-TITLE"}, "markdown": "REVIEW-SECRET-CONTENT"}
 	case "TestContractBlockSwapReplayNotebookResponseLease":
 		endpoint, typedQuery = "/review/blockSwapLease", true
 	case "TestContractCheckBlockRefNotebookResponseLease":

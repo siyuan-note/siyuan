@@ -333,7 +333,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 
 		tree.Box = boxID
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
-		tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+		tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 		if needResetTree {
 			resetTree(tree, "", true)
 		}
@@ -417,7 +417,7 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
-		title = snapshotTree.Root.IALAttr("title")
+		title = treenode.ReadDocumentTitle(snapshotTree.Root).Text
 
 		if !displayInText {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
@@ -709,7 +709,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 			return
 		}
 
-		title = tree.Root.IALAttr("title")
+		title = treenode.ReadDocumentTitle(tree.Root).Text
 		rootID = tree.Root.ID
 	}
 	return
@@ -921,7 +921,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 			return
 		}
 
-		docTitle = util.FilterFileName(tree.Root.IALAttr("title"))
+		docTitle = util.FilterFileName(treenode.ReadDocumentTitle(tree.Root).Text)
 		if docTitle == "" {
 			docTitle = strings.TrimSuffix(name, ".sy")
 		}

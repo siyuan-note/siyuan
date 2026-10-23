@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -49,14 +48,22 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	}
 	defer syncLock.Unlock()
 
-	entries, err := os.ReadDir(shorthandsDir)
-	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, err)
-		return
-	}
 	if !IsShorthandSaveBoxAvailable(boxID) {
 		err = errors.New(Conf.Language(375))
 		return
+	}
+	if err = AcquireEncryptedBoxOperation(boxID); err != nil {
+		return
+	}
+	defer ReleaseEncryptedBoxOperation(boxID)
+	if recovered, recoveryErr := recoverLocalShorthandCreation(boxID); recoveryErr != nil {
+		return nil, recoveryErr
+	} else if recovered != "" {
+		retIDs = append(retIDs, recovered)
+	}
+	entries, err := os.ReadDir(shorthandsDir)
+	if err != nil {
+		return retIDs, err
 	}
 
 	assetsDir := filepath.Join(util.DataDir, "assets")
@@ -93,6 +100,14 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	}
 
 	var toRemoves []string
+	// 中途失败也清理已确认写入的源条目，避免下次消费重复创建之前成功的文档。
+	defer func() {
+		for _, p := range toRemoves {
+			if removeErr := os.Remove(p); removeErr != nil && !os.IsNotExist(removeErr) {
+				logging.LogErrorf("remove file [%s] failed: %s", p, removeErr)
+			}
+		}
+	}()
 
 	if "" == hPath { // hPath 为空的话每一个速记对应创建一个文档记录
 		for _, entry := range entries {
@@ -125,7 +140,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 			dom := shorthandDOM(content, created)
 			docID := util.NodeIDByTime(created)
 			var retID string
-			retID, err = createShorthandDocByDOM(boxID, hPath, dom, docID)
+			retID, err = createShorthandDocByDOM(boxID, hPath, dom, docID, map[string][]byte{p: data})
 			if nil != err {
 				logging.LogErrorf("create doc failed: %s", err)
 				return
@@ -144,6 +159,8 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 			created time.Time
 		}
 		var shorthands []shorthand
+		var pendingRemoves []string
+		sources := map[string][]byte{}
 		for _, entry := range entries {
 			if filepath.Ext(entry.Name()) != ".md" {
 				continue
@@ -172,11 +189,16 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				created = time.UnixMilli(i)
 			}
 			shorthands = append(shorthands, shorthand{content: content, created: created})
-			toRemoves = append(toRemoves, p)
+			pendingRemoves = append(pendingRemoves, p)
+			sources[p] = data
 		}
 
 		if 0 < len(shorthands) {
-			bt := treenode.GetBlockTreeRootByHPath(boxID, hPath)
+			plan, planErr := planShorthandDocument(boxID, hPath, ast.NewNodeID(), true)
+			if planErr != nil {
+				return retIDs, planErr
+			}
+			bt := treenode.GetBlockTreeInExactBox(plan.ExistingID, boxID)
 			if nil == bt {
 				// 目标文档不存在，新建文档：根文档块 ID 取所有速记中最早的输入时刻
 				earliest := shorthands[0].created
@@ -192,7 +214,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				dom := buff.String()
 				docID := util.NodeIDByTime(earliest)
 				var retID string
-				retID, err = createShorthandDocByDOM(boxID, hPath, dom, docID)
+				retID, err = createShorthandDocByDOM(boxID, hPath, dom, docID, sources)
 				if nil != err {
 					logging.LogErrorf("create doc failed: %s", err)
 					return
@@ -223,22 +245,27 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 					}
 				}
 				slices.Reverse(nodes)
+				blockIDs := make([]string, 0, len(nodes))
 				for _, node := range nodes {
 					last.InsertAfter(node)
+					if node.IsBlock() && node.ID != "" {
+						blockIDs = append(blockIDs, node.ID)
+					}
+				}
+				if err = beginLocalShorthandCreation(boxID, tree.ID, tree.Path, blockIDs, sources); err != nil {
+					return
 				}
 
 				if err = indexWriteTreeUpsertQueue(tree); nil != err {
 					logging.LogErrorf("upsert shorthand merged tree failed: %s", err)
 					return
 				}
+				if _, err = recoverLocalShorthandCreation(boxID); err != nil {
+					return
+				}
 				util.PushReloadProtyle(tree.ID)
 			}
-		}
-	}
-
-	for _, p := range toRemoves {
-		if removeErr := os.Remove(p); nil != removeErr {
-			logging.LogErrorf("remove file [%s] failed: %s", p, removeErr)
+			toRemoves = append(toRemoves, pendingRemoves...)
 		}
 	}
 
@@ -282,7 +309,7 @@ func shorthandDOM(md string, created time.Time) string {
 
 // createShorthandDocByDOM 创建速记文档，使用指定的 DOM 和文档块 ID（均基于速记输入时刻）。
 // 速记场景无需 tags、父文档、数学公式、剪藏链接等处理，直接基于 DOM 和指定 docID 落盘。
-func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err error) {
+func createShorthandDocByDOM(boxID, hPath, dom, docID string, sources ...map[string][]byte) (retID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -293,20 +320,60 @@ func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err
 	}
 
 	FlushTxQueue()
-	retID, err = createDocsByHPathSync(box.ID, hPath, dom, "", docID, false)
+	plan, err := planShorthandDocument(boxID, hPath, docID, false)
+	if err != nil {
+		return "", err
+	}
+	plan.Steps[len(plan.Steps)-1].DOM = &dom
+	if len(sources) > 0 {
+		plannedPaths, pathErr := documentCreationPlanPaths(plan)
+		if pathErr != nil {
+			return "", pathErr
+		}
+		var blockIDs []string
+		for node := util.NewLute().BlockDOM2Tree(dom).Root.FirstChild; node != nil; node = node.Next {
+			if node.IsBlock() && node.ID != "" {
+				blockIDs = append(blockIDs, node.ID)
+			}
+		}
+		if err = beginLocalShorthandCreation(boxID, docID, plannedPaths[docID], blockIDs, sources[0]); err != nil {
+			return "", err
+		}
+	}
+	document, err := executeDocumentCreationPlan(plan, true)
 	if nil != err {
+		var failure *DocumentCreateFailure
+		if len(sources) > 0 && errors.As(err, &failure) && failure.CommitState == "none" {
+			_ = os.Remove(localShorthandCreationPath())
+		}
 		return
 	}
+	retID = document.ID
 
 	bt := treenode.GetBlockTree(retID)
 	if err = verifyShorthandDocPersisted(bt, retID); nil != err {
 		return
 	}
-	box.setSortByConf(path.Dir(bt.Path), retID)
+	if len(sources) > 0 {
+		if _, err = recoverLocalShorthandCreation(boxID); err != nil {
+			return
+		}
+	}
 
 	FlushTxQueue()
 	PushCreate(box, bt.Path, nil)
 	return
+}
+
+func planShorthandDocument(boxID, template, id string, reuse bool) (*DocumentCreatePlan, error) {
+	if treenode.DocumentMetadataState(boxID) != "ready" {
+		if err := recoverDocumentMetadata(boxID); err != nil {
+			return nil, err
+		}
+	}
+	// 调用方已按原速记规则渲染模板，不再解释其中产生的 Go 模板语法。
+	return PlanDocumentCreation(DocumentPlanRequest{Notebook: boxID, Purpose: "document", ID: id, Reuse: reuse,
+		Target: &EffectiveDocumentTarget{Notebook: boxID, Path: template, Rendered: true}})
 }
 
 func verifyShorthandDocPersisted(bt *treenode.BlockTree, expectedID string) (err error) {

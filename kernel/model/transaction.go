@@ -2754,25 +2754,27 @@ type Transaction struct {
 	mutatedRootIDs []string          // 提交后保留实际修改的文档 ID，避免为查询结果持有文档树
 	boxIcons       map[string]string // 事务提交后需要同步的笔记本图标
 
-	isGlobalAssetsInit           bool   // 是否初始化过全局资源判断
-	isGlobalAssets               bool   // 是否属于全局资源
-	assetsDir                    string // 资源目录路径
-	removedCreatedDocs           []*parse.Tree
-	removedTemplateCreatedDocs   []*parse.Tree
-	restoredCreatedDocs          []*parse.Tree
-	restoredTemplateCreatedDocs  []*parse.Tree
-	restoredCreatedDocBoxes      map[string]string
-	attemptedTemplateCreatedDocs map[string]*parse.Tree
-	templateDocTreeRootSnapshot  *parse.Tree
-	removeCreatedDoc             func(*Box, string, *lute.Lute) (*parse.Tree, error)
-	writeTransactionTree         func(*parse.Tree) error
-	blockSwapOriginalTrees       []*parse.Tree
-	attributeViewRollback        *attributeViewRollback
-	attributeViewAutomations     *attributeViewAutomationState
-	pushAutomationMessage        func(string, int) string
-	attributeViewCollections     *attributeViewCollectionState
-	attributeViewItemCreation    bool
-	invalidatedAvHistory         map[string]bool
+	isGlobalAssetsInit            bool   // 是否初始化过全局资源判断
+	isGlobalAssets                bool   // 是否属于全局资源
+	assetsDir                     string // 资源目录路径
+	removedCreatedDocs            []*parse.Tree
+	removedTemplateCreatedDocs    []*parse.Tree
+	restoredCreatedDocs           []*parse.Tree
+	restoredTemplateCreatedDocs   []*parse.Tree
+	restoredCreatedDocBoxes       map[string]string
+	attemptedTemplateCreatedDocs  map[string]*parse.Tree
+	templateDocTreeRootSnapshot   *parse.Tree
+	templateDocTreeRootRevision   string
+	templateDocTreeCommitRevision string
+	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
+	writeTransactionTree          func(*parse.Tree) error
+	blockSwapOriginalTrees        []*parse.Tree
+	attributeViewRollback         *attributeViewRollback
+	attributeViewAutomations      *attributeViewAutomationState
+	pushAutomationMessage         func(string, int) string
+	attributeViewCollections      *attributeViewCollectionState
+	attributeViewItemCreation     bool
+	invalidatedAvHistory          map[string]bool
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2848,6 +2850,9 @@ func (tx *Transaction) WaitForCommit() {
 
 func (tx *Transaction) begin() (err error) {
 	expectedTemplateDocTreeRoot := tx.templateDocTreeRootSnapshot
+	expectedTemplateDocTreeRevision := tx.templateDocTreeRootRevision
+	tx.templateDocTreeCommitRevision = expectedTemplateDocTreeRevision
+	tx.templateDocTreeRootRevision = ""
 	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
@@ -2891,8 +2896,14 @@ func (tx *Transaction) begin() (err error) {
 			}
 			if nil != expectedTemplateDocTreeRoot &&
 				(expectedTemplateDocTreeRoot.ID != snapshot.ID || expectedTemplateDocTreeRoot.Box != snapshot.Box ||
-					expectedTemplateDocTreeRoot.Path != snapshot.Path || expectedTemplateDocTreeRoot.HPath != snapshot.HPath) {
+					expectedTemplateDocTreeRoot.Path != snapshot.Path) {
 				return errors.New("the document used to render the template has changed")
+			}
+			if expectedTemplateDocTreeRevision != "" {
+				location, err := treenode.GetDocumentPath(snapshot.Box, snapshot.ID, snapshot.Box, 1)
+				if err != nil || location.Revision != expectedTemplateDocTreeRevision {
+					return errors.New("the document used to render the template has changed")
+				}
 			}
 			tx.templateDocTreeRootSnapshot = snapshot
 		}
@@ -3007,7 +3018,20 @@ func (tx *Transaction) commit() (err error) {
 		writeTransactionTree := tx.writeTransactionTree
 		if nil == writeTransactionTree {
 			writeTransactionTree = func(source *parse.Tree) error {
-				return writeTreeUpsertQueueWithChanges(source, tx.treeIndexChanges(source))
+				return writeTreeUpsertQueueWithPreflight(source, tx.treeIndexChanges(source), func() error {
+					if tx.templateDocTreeCommitRevision == "" {
+						return nil
+					}
+					root := tx.templateDocTreeRootSnapshot
+					if root == nil {
+						return errors.New("template document tree parent snapshot is missing")
+					}
+					location, err := treenode.GetDocumentPath(root.Box, root.ID, root.Box, 1)
+					if err != nil || location.Revision != tx.templateDocTreeCommitRevision {
+						return errors.New("the document used to render the template has changed")
+					}
+					return nil
+				})
 			}
 		}
 		if err = writeTransactionTree(tree); err != nil {
@@ -3299,7 +3323,7 @@ func (tx *Transaction) writeTreeWithIndexChanges(tree *parse.Tree) {
 	if err := tx.captureCollectionTree(tree); err != nil {
 		tx.collectionState().err = err
 	}
-	treenode.UpsertBlockTree(tree)
+	treenode.UpsertBlockTreePending(tree)
 }
 
 func getRefsCacheByDefNode(updateNode *ast.Node, boxID string) (ret []*sql.Ref, changedNodes []*ast.Node) {

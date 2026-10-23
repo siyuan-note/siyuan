@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Certains documents existent peut-être déjà. Vérifiez les liens avant de continuer. Continuer conserve les documents existants et ignore leurs étapes de création restantes. Annuler met fin à cette création.",
+	"documentCreationLimit": "Terminez ou annulez une création de document en attente avant d’en commencer une autre",
 	"listMindmapRestoreWidth": "Restaurer les largeurs initiales",
 	"lockScreenReveal": "Cliquez ou appuyez sur une touche pour vous connecter",
 	"loadAllAndSelectAll": "Charger le document entier et tout sélectionner",

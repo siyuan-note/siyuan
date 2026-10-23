@@ -1,4 +1,6 @@
 {
+	"documentCreationRecovery": "Niektóre dokumenty mogły już zostać utworzone. Przed kontynuowaniem sprawdź łącza. Kontynuacja zachowa istniejące dokumenty i pominie pozostałe etapy ich tworzenia. Anulowanie zakończy tę próbę.",
+	"documentCreationLimit": "Zakończ lub anuluj oczekujące tworzenie dokumentów przed rozpoczęciem kolejnego",
 	"listMindmapRestoreWidth": "Przywróć pierwotne szerokości",
 	"lockScreenReveal": "Kliknij lub naciśnij klawisz, aby się zalogować",
 	"loadAllAndSelectAll": "Wczytaj cały dokument i zaznacz wszystko",

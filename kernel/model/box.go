@@ -398,6 +398,8 @@ func syncBoxConfCryptoBackup(boxID string, boxConf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf0(data []byte) error {
+	unlock := filesys.LockDocumentConfiguration()
+	defer unlock()
 	if !ast.IsNodeIDPattern(box.ID) {
 		return fmt.Errorf("invalid box ID [%s]", box.ID)
 	}
@@ -593,6 +595,25 @@ func (box *Box) ListFiles(path string) (ret []*FileInfo) {
 	return
 }
 
+// listFilesForIndex 传播任一目录的枚举失败，避免将不完整扫描发布为已就绪索引。
+func (box *Box) listFilesForIndex(directory string) (ret []*FileInfo, err error) {
+	files, _, err := box.Ls(directory)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		if file.isdir {
+			children, walkErr := box.listFilesForIndex(file.path)
+			if walkErr != nil {
+				return nil, walkErr
+			}
+			ret = append(ret, children...)
+		}
+		ret = append(ret, file)
+	}
+	return
+}
+
 func (box *Box) listFiles(files, ret *[]*FileInfo) {
 	for _, file := range *files {
 		if file.isdir {
@@ -691,21 +712,23 @@ func isSkipFile(filename string) bool {
 	return strings.HasPrefix(filename, ".") || "node_modules" == filename || "dist" == filename || "target" == filename
 }
 
-func moveTree(tree *parse.Tree) {
+func moveTree(tree *parse.Tree) error {
 	treenode.SetBlockTreePath(tree)
 	sql.MoveTreeQueue(tree)
 
 	box := Conf.Box(tree.Box)
-	subFiles := box.ListFiles(tree.Path)
-	luteEngine := util.NewLute()
+	subFiles, err := box.listFilesForIndex(tree.Path)
+	if err != nil {
+		return err
+	}
 	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}
 
-		subTree, err := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
+		subTree, _, err := filesys.ReadTreeSnapshot(box.ID, subFile.path) // 只读源快照重新构造 HPath，避免持有源提交锁时触发修复写入
 		if err != nil {
-			continue
+			return err
 		}
 
 		treenode.SetBlockTreePath(subTree)
@@ -715,6 +738,7 @@ func moveTree(tree *parse.Tree) {
 	}
 
 	refreshDocInfoWithoutParent(tree)
+	return nil
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {

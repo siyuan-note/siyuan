@@ -84,6 +84,9 @@ func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string
 	if t.Source == "native" || t.Source == "" {
 		args["_sessionID"] = sessionID
 		args["_toolCallID"] = tc.ID
+		if t.Name == "decision" {
+			preserveDecisionJSONData(args, tc.Function.Arguments)
+		}
 	}
 	type executionResult struct {
 		result tools.CallToolResult

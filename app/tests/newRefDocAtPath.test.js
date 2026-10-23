@@ -50,7 +50,7 @@ const fixture = () => {
         fetchSyncPost: (url, data) => new Promise(resolve => requests.push({url, data, cb: resolve})),
         focusByRange: value => focused.push(value),
         getEditorRange: () => range,
-        replaceFileName: value => value,
+        normalizeDocumentTitle: value => value,
         validateName: () => true,
         hideElements: () => {},
         shouldCaptureHintUndoFocus: () => true,

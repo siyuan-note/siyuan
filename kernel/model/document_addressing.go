@@ -1,16 +1,20 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -26,16 +30,139 @@ func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) e
 		upserts := make([]string, 0, len(plan.Upserts))
 		removes := make([]string, 0, len(plan.Removes))
 		paths := map[string]string{}
+		upsertBoxes, removedPaths := map[string]bool{}, map[string]bool{}
+		seen := map[string]bool{}
+		// 仓库索引统一使用前导斜杠和正斜杠；拒绝别名及重复目标，避免覆盖计划遮盖来源。
+		checkPath := func(name string) error {
+			if !strings.HasPrefix(name, "/") || strings.Contains(name, "\\") {
+				return documentaddressing.ErrInvalid
+			}
+			key := name
+			if runtime.GOOS == "windows" {
+				for _, part := range strings.Split(name[1:], "/") {
+					if strings.TrimRight(part, ". ") != part || strings.Contains(part, ":") {
+						return documentaddressing.ErrInvalid
+					}
+				}
+				key = strings.ToLower(key)
+			}
+			if seen[key] {
+				return documentaddressing.ErrInvalid
+			}
+			seen[key] = true
+			return nil
+		}
 		for _, file := range plan.Upserts {
+			if err := checkPath(file.Path); err != nil {
+				return err
+			}
 			upserts = append(upserts, file.Path)
-			paths[strings.TrimPrefix(file.Path, "/")] = file.Path
+			name := strings.TrimPrefix(file.Path, "/")
+			paths[name] = file.Path
+			boxID, _, _ := strings.Cut(name, "/")
+			upsertBoxes[boxID] = true
 		}
 		for _, file := range plan.Removes {
+			if err := checkPath(file.Path); err != nil {
+				return err
+			}
 			removes = append(removes, file.Path)
+			removedPaths[strings.TrimPrefix(file.Path, "/")] = true
 		}
-		return documentaddressing.CheckBatch(repo.DataPath, util.ConfDir, upserts, removes,
-			func(name string) ([]byte, error) { return plan.ReadFile(paths[name]) })
+		if err := documentaddressing.CheckBatch(repo.DataPath, util.ConfDir, upserts, removes,
+			func(name string) ([]byte, error) { return plan.ReadFile(paths[name]) }); err != nil {
+			return err
+		}
+		for _, file := range plan.Upserts {
+			name := strings.TrimPrefix(file.Path, "/")
+			if !isDocumentAddressingSource([]string{name}) {
+				continue
+			}
+			data, err := plan.ReadFile(file.Path)
+			if err == nil {
+				err = checkDocumentAddressingCheckoutSource(data)
+			}
+			if err != nil {
+				return fmt.Errorf("document [%s]: %w", name, err)
+			}
+			if err = checkDocumentAddressingCheckoutCurrent(repo.DataPath, name); err != nil {
+				return err
+			}
+		}
+		deletedBoxes := map[string]bool{}
+		for _, file := range plan.Removes {
+			name := strings.TrimPrefix(file.Path, "/")
+			if !isDocumentAddressingSource([]string{name}) {
+				continue
+			}
+			boxID, _, _ := strings.Cut(name, "/")
+			deleted, checked := deletedBoxes[boxID]
+			if !checked {
+				var err error
+				if !upsertBoxes[boxID] {
+					deleted, err = documentAddressingCheckoutRemovesNotebook(repo.DataPath, boxID, removedPaths)
+				}
+				if err != nil {
+					return err
+				}
+				deletedBoxes[boxID] = deleted
+			}
+			if !deleted {
+				if err := checkDocumentAddressingCheckoutCurrent(repo.DataPath, name); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
 	}
+}
+
+func checkDocumentAddressingCheckoutCurrent(dataDir, name string) error {
+	data, err := filelock.ReadFile(filepath.Join(dataDir, filepath.FromSlash(name)))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	// 已识别的不支持版本或标题不能被覆盖或部分删除；普通损坏源仍可用合法历史恢复。
+	if err = checkDocumentAddressingCheckoutSource(data); errors.Is(err, treenode.ErrSpecTooNew) ||
+		errors.Is(err, documentaddressing.ErrModeConflict) || errors.Is(err, documentaddressing.ErrInvalidTitle) {
+		return fmt.Errorf("document [%s]: %w", name, err)
+	}
+	return nil
+}
+
+// documentAddressingCheckoutRemovesNotebook 仅在整本现存文件全部移除时保留无需解释内容的删除语义。
+func documentAddressingCheckoutRemovesNotebook(dataDir, boxID string, removes map[string]bool) (bool, error) {
+	deleted := true
+	err := filepath.WalkDir(filepath.Join(dataDir, boxID), func(name string, entry os.DirEntry, err error) error {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		if err != nil || entry.IsDir() {
+			return err
+		}
+		relative, err := filepath.Rel(dataDir, name)
+		if err != nil {
+			return err
+		}
+		if !removes[filepath.ToSlash(relative)] {
+			deleted = false
+			return filepath.SkipAll
+		}
+		return nil
+	})
+	return deleted, err
+}
+
+// checkDocumentAddressingCheckoutSource 只解释普通源；密文同步保持原字节，不要求解锁或声明内容已认证。
+// 仓库分块认证不代替笔记本认证，密文的格式及标题仍在解锁读取时检查。
+func checkDocumentAddressingCheckoutSource(data []byte) error {
+	if util.IsCiphertext(data) {
+		return nil
+	}
+	return treenode.CheckSpecJSONForMode(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")), documentaddressing.DefaultMode())
 }
 
 func documentAddressingCheckoutHooks(repo *dejavu.Repo) dejavu.CheckoutHooks {

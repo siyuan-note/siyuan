@@ -303,7 +303,7 @@ if (response.code === 0 && response.data) {
 
 ### 获取笔记本配置
 
-管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告寻址模式、结构化接口支持、标题能力、索引状态及已验证的最低读取版本。普通构建默认自动迁移笔记本，无需设置开关或额外编译参数；`literalSlash` 要求模式 `2`、模式记录一致且索引就绪。保护版本尚未验证时，`minimumReaderVersion` 为 `null`，不影响新模式默认启用。既有权限过滤保持不变。
+管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告寻址模式、结构化接口支持、标题能力、索引状态及已验证的最低兼容功能版本。普通构建默认自动迁移笔记本，无需设置开关或额外编译参数；`literalSlash` 要求模式 `2`、模式记录一致且索引就绪。最低兼容功能发行版尚未验证时，`minimumReaderVersion` 为 `null`；该字段仅提供信息，不控制功能启用，也不表示允许与旧客户端混用。使用前须将所有同步设备统一升级到支持本次功能的版本。既有权限过滤保持不变。
 
 * `/api/notebook/getNotebookConf`
 * 参数
@@ -336,7 +336,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`literalSlash` 在模式 `2`、模式记录一致且索引就绪时为 `true`；保护版本验证完成前，`minimumReaderVersion` 为 `null`，该字段不控制功能启用。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
+管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`literalSlash` 在模式 `2`、模式记录一致且索引就绪时为 `true`。最低兼容功能发行版尚未验证时，`minimumReaderVersion` 为 `null`；该字段仅提供信息，不控制功能启用，也不表示允许与旧客户端混用。使用前须将所有同步设备统一升级到支持本次功能的版本。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
 
 ### 保存笔记本配置
 

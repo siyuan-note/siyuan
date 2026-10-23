@@ -303,7 +303,7 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Get notebook configuration
 
-Administrator responses may also include the read-only `documentCapabilities` object. It reports addressing mode, structured API support, title capabilities, index state, and the verified minimum reader release. Ordinary builds migrate notebooks automatically by default, without a user setting or extra build flags; `literalSlash` requires mode `2`, consistent records, and ready indexes. `minimumReaderVersion` remains `null` until the protective release is verified; it does not disable the default mode. Existing permission filtering still applies.
+Administrator responses may also include the read-only `documentCapabilities` object. It reports addressing mode, structured API support, title capabilities, index state, and the verified minimum compatible feature release. Ordinary builds migrate notebooks automatically by default, without a user setting or extra build flags; `literalSlash` requires mode `2`, consistent records, and ready indexes. `minimumReaderVersion` remains `null` until the minimum compatible feature release is verified; this informational field neither controls activation nor permits mixing with older clients. All sync devices must upgrade to versions supporting this feature before use. Existing permission filtering still applies.
 
 * `/api/notebook/getNotebookConf`
 * Parameters
@@ -336,7 +336,7 @@ Administrator responses may also include the read-only `documentCapabilities` ob
   }
   ```
 
-Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `literalSlash` is `true` in mode `2` with consistent mode records and ready indexes. `minimumReaderVersion` is `null` until a protective release is verified and does not control feature activation. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `literalSlash` is `true` in mode `2` with consistent mode records and ready indexes. `minimumReaderVersion` remains `null` until the minimum compatible feature release is verified; this informational field neither controls activation nor permits mixing with older clients. All sync devices must upgrade to versions supporting this feature before use. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
 

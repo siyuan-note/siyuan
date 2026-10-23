@@ -5406,7 +5406,7 @@ export interface APIPOSTRoutes {
      * 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
      * ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
      * 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
-     * 功能版本默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，保护版本仍拒绝 /。
+     * 普通构建默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，内部兼容模式 1 仍拒绝 /。
      * 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
      */
     "/api/filetree/createDocByParent": {
@@ -5692,7 +5692,7 @@ export interface APIPOSTRoutes {
      * 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
      * candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
      * 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
-     * 索引未就绪返回 indexUnavailable；功能版本默认保留段内 /，保护版本仍遵守兼容模式限制。
+     * 索引未就绪返回 indexUnavailable；普通构建默认保留段内 /，内部兼容模式 1 仍遵守原有标题限制。
      */
     "/api/filetree/resolveDocPath": {
         request: ResolveDocPathRequestInput;
@@ -6299,8 +6299,8 @@ export interface APIPOSTRoutes {
      * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
      * not permission to open a closed or locked notebook. Ordinary builds migrate to mode 2
      * automatically without a user setting or special build flags. literalSlash requires consistent
-     * mode records and ready indexes. minimumReaderVersion remains null while protective-release
-     * verification is pending; this informational field does not control feature activation.
+     * mode records and ready indexes. minimumReaderVersion stays null until the minimum compatible
+     * feature release is verified; it neither controls activation nor permits mixing with older clients.
      * Revision covers configuration, confirmed capability and recovery records, not a document path.
      * Malformed capability records fail the request; authentication, locking and network failures must
      * never be interpreted as an absent capability object or as permission to retry a legacy write.

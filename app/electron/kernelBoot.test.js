@@ -72,7 +72,7 @@ const setup = (progress, options = {}) => {
         localKernelStartups: new Map(), showWindow: () => events.push("show-existing"),
         bootIndexPath: "app/electron/boot.html",
         loadBootWindow: () => events.push("resume-boot"),
-        kernelProcesses: new Map(), expectedKernelExitPorts: new Set(),
+        kernelProcesses: new Map(), expectedKernelExitPorts: new Set(), exitedKernelPorts: new Set(),
         createBootWindow: () => {
             events.push("create-boot");
             const current = windows.length ? makeWindow() : window;
@@ -137,6 +137,16 @@ const setup = (progress, options = {}) => {
 };
 
 const exits = fixture => fixture.events.filter(event => Array.isArray(event) && event[0] === "exit-kernel");
+
+test("kernel startup clears stale exit evidence and records its own process closure", async () => {
+    const state = setup(() => 100);
+    state.context.exitedKernelPorts.add("6806");
+    assert.equal(await state.run(), 6806);
+    assert.equal(state.context.exitedKernelPorts.has("6806"), false);
+    state.closeKernel(0);
+    assert.equal(state.context.exitedKernelPorts.has("6806"), true);
+    assert.equal(state.context.kernelProcesses.has("6806"), false);
+});
 
 test("repeated requests reuse startup before port allocation and during kernel boot", async () => {
     let allocate;

@@ -159,6 +159,7 @@ const expectedRendererExitIds = new Set();
 const expectedKernelExitPorts = new Set();
 const handledCrashWebContents = new Set();
 const kernelProcesses = new Map();
+const exitedKernelPorts = new Set();
 const localKernelStartups = new Map();
 const bootWindows = new Set();
 let bootWindow;
@@ -1984,6 +1985,10 @@ const getSystemShutdownPorts = () => {
 };
 
 const requestGracefulKernelExit = async (port) => {
+    const portKey = port.toString();
+    if (exitedKernelPorts.has(portKey)) {
+        return true;
+    }
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), systemShutdownExitTimeout);
     try {
@@ -1993,19 +1998,19 @@ const requestGracefulKernelExit = async (port) => {
             execInstallPkg: 1,
         }, abortController.signal);
         if (!response) {
-            return false;
+            return exitedKernelPorts.has(portKey);
         }
 
         const apiData = await response.json();
         if (apiData.code !== 0) {
             writeLog("graceful system shutdown failed [port=" + port + ", code=" + apiData.code + "]");
-            return false;
+            return exitedKernelPorts.has(portKey);
         }
         writeLog("graceful system shutdown succeeded [port=" + port + "]");
         return true;
     } catch (error) {
         writeLog("parse graceful system shutdown response failed [port=" + port + "]: " + error);
-        return false;
+        return exitedKernelPorts.has(portKey);
     } finally {
         clearTimeout(timeout);
     }
@@ -2838,6 +2843,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
 
             writeLog("spawned kernel process [" + (Date.now() - spawnStartedAt) + "ms]");
             const kernelPortKey = currentKernelPort.toString();
+            exitedKernelPorts.delete(kernelPortKey);
             kernelProcesses.set(kernelPortKey, kernelProcess);
             startup.kernelRunning = true;
             startup.process = kernelProcess;
@@ -2847,6 +2853,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
                 if (startup.process === kernelProcess) startup.kernelRunning = false;
                 if (kernelProcesses.get(kernelPortKey) === kernelProcess) {
                     kernelProcesses.delete(kernelPortKey);
+                    exitedKernelPorts.add(kernelPortKey);
                 }
                 const expectedExit = expectedKernelExitPorts.delete(kernelPortKey);
                 writeLog(`kernel [pid=${kernelProcess.pid}, port=${currentKernelPort}] exited with code [${code}], signal [${signal}], expected [${expectedExit}]`);

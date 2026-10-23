@@ -30,6 +30,10 @@
 | <a href="README.tr.md">Türkçe</a>
 </p>
 
+<p align="center">
+[![Deploy to Railyard](https://app.railyard.run/deploy/badge)](https://app.railyard.run/deploy?repo=https://github.com/siyuan-note/siyuan)
+</p>
+
 ---
 
 ## Table of Contents

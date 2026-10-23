@@ -109,21 +109,25 @@ export const windowMouseMove = (event: MouseEvent) => {
                 !hasClosestByClassName(target, "protyle-toolbar") &&
                 !hasClosestByClassName(target, "protyle-util");
             const leftDock = window.siyuan.layout.leftDock;
+            const leftBar = document.getElementById("dockLeft");
+            const leftBarWidth = leftBar.classList.contains("dock--float") ? 0 : leftBar.clientWidth;
             const leftTrigger = canTrigger && inYRange && leftDock.isFloating() && leftDock.layout.element.clientWidth > 0 &&
-                event.clientX < Math.max(document.getElementById("dockLeft").clientWidth + 1, 16) &&
+                event.clientX < Math.max(leftBarWidth + 1, 16) &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
-                (leftDock.elements[0].clientWidth > 0 || event.clientX < 8);
-            if (leftTrigger || leftDock.layout.element.contains(target)) {
+                (leftBarWidth > 0 || event.clientX < 8);
+            if (leftTrigger || leftDock.layout.element.contains(target) || leftBar.contains(target)) {
                 leftDock.showDockByHover();
             } else {
                 leftDock.hideDockByHover();
             }
 
             const rightDock = window.siyuan.layout.rightDock;
+            const rightBar = document.getElementById("dockRight");
+            const rightBarWidth = rightBar.classList.contains("dock--float") ? 0 : rightBar.clientWidth;
             const rightTrigger = canTrigger && inYRange && rightDock.isFloating() && rightDock.layout.element.clientWidth > 0 &&
-                event.clientX > window.innerWidth - Math.max(document.getElementById("dockRight").clientWidth - 2, 16) &&
-                (rightDock.elements[0].clientWidth > 0 || event.clientX > window.innerWidth - 8);
-            if (rightTrigger || rightDock.layout.element.contains(target)) {
+                event.clientX > window.innerWidth - Math.max(rightBarWidth - 2, 16) &&
+                (rightBarWidth > 0 || event.clientX > window.innerWidth - 8);
+            if (rightTrigger || rightDock.layout.element.contains(target) || rightBar.contains(target)) {
                 rightDock.showDockByHover();
             } else {
                 rightDock.hideDockByHover();

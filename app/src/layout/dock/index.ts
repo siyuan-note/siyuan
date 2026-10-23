@@ -34,6 +34,7 @@ import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
 import {isWindow} from "../../util/functions";
 import {bindPanelTransitionGuard} from "../../util/panelTransition";
 import {isTouchHoverInput} from "../../util/hoverInput";
+import {syncDockBarVisibility} from "./barVisibility";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -261,10 +262,8 @@ export class Dock {
                 event.toElement?.classList.contains("tooltip")) {
                 return;
             }
-            if (this.position === "Left" && event.clientX < 43) {
-                return;
-            }
-            if (this.position === "Right" && event.clientX > window.innerWidth - 43) {
+            if (this.position !== "Bottom" && event.relatedTarget instanceof Node &&
+                this.elements[0].parentElement.contains(event.relatedTarget)) {
                 return;
             }
             if (this.position === "Bottom" && event.clientY > window.innerHeight - 73) {
@@ -424,6 +423,7 @@ export class Dock {
             this.collapsedPanelSize = "";
             this.layout.element.classList.remove("fn__none");
             this.resizeElement.classList.add("fn__none");
+            syncDockBarVisibility();
             return false;
         }
 
@@ -475,6 +475,7 @@ export class Dock {
                 }
             }
         }
+        syncDockBarVisibility();
         resizeTabs(false);
         setTabPosition(true);
         if (resolution.visible) {
@@ -524,6 +525,7 @@ export class Dock {
         if (!hasActive && !this.isFloating()) {
             this.layout.element.style[this.position === "Bottom" ? "height" : "width"] = "0px";
         }
+        syncDockBarVisibility();
         resizeTabs(isSaveLayout);
         setTabPosition(true);
     }
@@ -616,14 +618,15 @@ export class Dock {
             this.layout.element.style.opacity = "1";
         }
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
+        syncDockBarVisibility();
         if (this.position === "Left") {
             this.layout.element.style.transform = `translateX(${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(-${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(-${document.getElementById("status").offsetHeight}px)`;
-            this.layout.element.style.left = this.elements[0].clientWidth + "px";
-            this.layout.element.style.right = this.elements[1].clientWidth + "px";
+            this.layout.element.style.left = (window.siyuan.config.uiLayout.hideDock ? 0 : this.elements[0].clientWidth) + "px";
+            this.layout.element.style.right = (window.siyuan.config.uiLayout.hideDock ? 0 : this.elements[1].clientWidth) + "px";
         }
         // 全屏面板以窗口定位，浮动位移保留到退出全屏时恢复。
         const fullscreenElement = this.layout.element.querySelector(".fullscreen");
@@ -680,6 +683,7 @@ export class Dock {
         this.elements[0].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.elements[1].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
+        syncDockBarVisibility();
     }
 
     public toggleModel(type: TDock | string, show = false, close = false, removeDock = false, isSaveLayout = true,
@@ -1012,6 +1016,7 @@ export class Dock {
             anotherWnd.element.style.height = "";
             anotherWnd.element.style.width = "";
         }
+        syncDockBarVisibility();
         resizeTabs(isSaveLayout);
         if (target.classList.contains("dock__item--active") && !removeDock && this.panelVisible) {
             this.showDockAfterResponsiveLayout();

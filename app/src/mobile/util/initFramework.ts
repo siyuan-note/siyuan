@@ -458,8 +458,12 @@ const initEditorName = () => {
             return titleSavePromise;
         }
         if (!validateName(inputElement.value, undefined, true)) {
+            const original = inputElement.value;
             inputElement.value = truncateDocumentTitle(inputElement.value);
-            return titleSavePromise;
+            if (window.siyuan.documentAddressingVersion !== 2 || inputElement.value === original ||
+                !validateName(inputElement.value, undefined, true)) {
+                return titleSavePromise;
+            }
         }
 
         titleSavePromise = fetchPost("/api/filetree/renameDoc", {

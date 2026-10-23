@@ -10,14 +10,14 @@ const compile = (file: string, suffix = "") => transpileModule(
     {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}},
 ).outputText;
 
-test("mobile toolbar saves Unicode titles and preserves full characters at the length limit", () => {
-    const listeners = new Map<string, () => void>();
+test("mobile toolbar saves truncated Unicode titles on blur and Enter without duplicate requests", async () => {
+    const listeners = new Map<string, (event?: object) => void>();
     const attributes = new Map<string, string>();
     const input = {
         value: "",
         getAttribute: (name: string) => attributes.get(name),
         setAttribute: (name: string, value: string) => attributes.set(name, value),
-        addEventListener: (name: string, handler: () => void) => listeners.set(name, handler),
+        addEventListener: (name: string, handler: (event?: object) => void) => listeners.set(name, handler),
     };
     const runtime = {siyuan: {documentAddressingVersion: 2, config: {editor: {autoDirection: false}},
         languages: {fileNameRule: "Invalid filename", _kernel: {16: "Untitled", 106: "Title too long"}},
@@ -30,6 +30,7 @@ test("mobile toolbar saves Unicode titles and preserves full characters at the l
         require: (name: string) => name === "../constants" ? {Constants: constants} : {showMessage: () => {}},
     });
     const requests: Array<{title: string}> = [];
+    const entries: Promise<void>[] = [];
     const moduleExports: {initEditorName?: () => void} = {};
     runInNewContext(compile("initFramework.ts", "\nexport {initEditorName};"), {
         exports: moduleExports,
@@ -40,6 +41,13 @@ test("mobile toolbar saves Unicode titles and preserves full characters at the l
             if (name === "../../constants") return {Constants: constants};
             if (name === "../../protyle/render/autoDirection") return {setTitleAutoDirection: () => {}};
             if (name === "../../util/processTitle") return {setTitle: () => {}};
+            if (name === "../../protyle/header/titleEnter") return {
+                enterDocumentFromTitle: (_protyle: unknown, options: {beforeLoad: Promise<unknown>}) => {
+                    const entered = options.beforeLoad.then(() => listeners.get("blur")());
+                    entries.push(entered);
+                    return entered;
+                },
+            };
             if (name === "../../util/fetch") return {fetchPost: (_url: string, data: {title: string}) => {
                 requests.push(data);
                 return Promise.resolve();
@@ -58,16 +66,41 @@ test("mobile toolbar saves Unicode titles and preserves full characters at the l
     for (const [title, expected] of [
         ["😀".repeat(513), "😀".repeat(512)],
         ["A" + "😀".repeat(512), "A" + "😀".repeat(511)],
-        ["Title\nwith/slash", "Title\nwith/slash"],
     ]) {
         input.value = title;
         blur();
-        assert.equal(requests.length, 3);
+        assert.equal(requests.at(-1)?.title, expected);
         assert.equal(input.value, expected);
+    }
+    assert.equal(requests.length, 5);
+    for (const title of ["Title\nwith/slash", "A\n" + "😀".repeat(513)]) {
+        input.value = title;
+        blur();
+        assert.equal(requests.length, 5);
+        assert.ok(input.value.includes("\n"));
     }
     runtime.siyuan.documentAddressingVersion = 1;
     input.value = "😀".repeat(512);
     blur();
-    assert.equal(requests.length, 3);
+    assert.equal(requests.length, 5);
     assert.equal(input.value, "😀".repeat(256));
+
+    runtime.siyuan.documentAddressingVersion = 2;
+    input.value = "🚀".repeat(513);
+    const keydown = listeners.get("keydown");
+    const event = {key: "Enter", preventDefault: () => {}, stopPropagation: () => {}};
+    keydown({...event, isComposing: true});
+    assert.equal(entries.length, 0);
+    assert.equal(requests.length, 5);
+    keydown(event);
+    await Promise.all(entries);
+    assert.equal(entries.length, 1);
+    assert.equal(requests.length, 6);
+    assert.equal(requests.at(-1)?.title, "🚀".repeat(512));
+    assert.equal(input.value, "🚀".repeat(512));
+
+    attributes.set("readonly", "readonly");
+    input.value = "Readonly title";
+    blur();
+    assert.equal(requests.length, 6);
 });

@@ -1752,6 +1752,9 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if err := checkPendingNotebookArchives(); err != nil {
+		return err
+	}
 
 	// 改密期间不能有已 Mount 的加密笔记本（DEK 在内存），否则新旧 KEK 切换会让缓存与磁盘不一致
 	cachedDEKsLock.RLock()

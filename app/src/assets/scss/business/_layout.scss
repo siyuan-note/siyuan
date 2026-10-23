@@ -435,20 +435,6 @@
   overscroll-behavior-y: contain;
   scrollbar-width: none;
 
-  &--float {
-    position: fixed;
-    left: 0;
-    height: auto;
-    border-radius: var(--b3-border-radius-b) 0 0 var(--b3-border-radius-b);
-    background-color: var(--b3-body-background);
-
-    &#dockRight {
-      left: auto;
-      right: 0;
-      border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
-    }
-  }
-
   &::-webkit-scrollbar {
     display: none;
   }

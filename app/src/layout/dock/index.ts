@@ -423,7 +423,7 @@ export class Dock {
             this.collapsedPanelSize = "";
             this.layout.element.classList.remove("fn__none");
             this.resizeElement.classList.add("fn__none");
-            syncDockBarVisibility();
+            this.syncDockBar();
             return false;
         }
 
@@ -475,7 +475,7 @@ export class Dock {
                 }
             }
         }
-        syncDockBarVisibility();
+        this.syncDockBar();
         resizeTabs(false);
         setTabPosition(true);
         if (resolution.visible) {
@@ -525,7 +525,7 @@ export class Dock {
         if (!hasActive && !this.isFloating()) {
             this.layout.element.style[this.position === "Bottom" ? "height" : "width"] = "0px";
         }
-        syncDockBarVisibility();
+        this.syncDockBar();
         resizeTabs(isSaveLayout);
         setTabPosition(true);
     }
@@ -587,6 +587,19 @@ export class Dock {
         this.hideDockTimeout = 0;
     }
 
+    private syncDockBar() {
+        if (!syncDockBarVisibility()) {
+            return;
+        }
+        // 临时显示停靠栏时沿用正常占位，并同步编辑区和已展开的底部面板。
+        resizeTabs(false);
+        setTabPosition(true);
+        const bottomDock = window.siyuan.layout.bottomDock;
+        if (this.position !== "Bottom" && bottomDock?.isFloating() && bottomDock.layout.element.style.opacity === "1") {
+            bottomDock.showDock(true);
+        }
+    }
+
     public showDock(reset = false) {
         this.clearDockHoverTimeout();
         if (this.initializing || !this.panelVisible || (!reset && (!this.isFloating() || this.layout.element.style.opacity === "1")) ||
@@ -618,15 +631,15 @@ export class Dock {
             this.layout.element.style.opacity = "1";
         }
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
-        syncDockBarVisibility();
+        this.syncDockBar();
         if (this.position === "Left") {
             this.layout.element.style.transform = `translateX(${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(-${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(-${document.getElementById("status").offsetHeight}px)`;
-            this.layout.element.style.left = (window.siyuan.config.uiLayout.hideDock ? 0 : this.elements[0].clientWidth) + "px";
-            this.layout.element.style.right = (window.siyuan.config.uiLayout.hideDock ? 0 : this.elements[1].clientWidth) + "px";
+            this.layout.element.style.left = this.elements[0].clientWidth + "px";
+            this.layout.element.style.right = this.elements[1].clientWidth + "px";
         }
         // 全屏面板以窗口定位，浮动位移保留到退出全屏时恢复。
         const fullscreenElement = this.layout.element.querySelector(".fullscreen");
@@ -683,7 +696,7 @@ export class Dock {
         this.elements[0].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.elements[1].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
-        syncDockBarVisibility();
+        this.syncDockBar();
     }
 
     public toggleModel(type: TDock | string, show = false, close = false, removeDock = false, isSaveLayout = true,
@@ -1016,7 +1029,7 @@ export class Dock {
             anotherWnd.element.style.height = "";
             anotherWnd.element.style.width = "";
         }
-        syncDockBarVisibility();
+        this.syncDockBar();
         resizeTabs(isSaveLayout);
         if (target.classList.contains("dock__item--active") && !removeDock && this.panelVisible) {
             this.showDockAfterResponsiveLayout();

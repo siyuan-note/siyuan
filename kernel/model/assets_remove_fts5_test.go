@@ -51,7 +51,11 @@ func TestHandleAssetsRemoveEvent(t *testing.T) {
 	assertIndexed := func(t *testing.T, p string, want bool) {
 		t.Helper()
 		rows, err := sql.QueryAssetContentNoLimitArgs("SELECT path FROM asset_contents_fts_case_insensitive WHERE path = ?", p)
-		if err != nil || (len(rows) == 1) != want {
+		wantCount := 0
+		if want {
+			wantCount = 1
+		}
+		if err != nil || len(rows) != wantCount {
 			t.Fatalf("index for %s: rows=%v err=%v, want present=%v", p, rows, err, want)
 		}
 	}

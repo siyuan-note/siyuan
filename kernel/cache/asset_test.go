@@ -47,3 +47,17 @@ func TestRemoveAssetHashByPath(t *testing.T) {
 		}
 	}
 }
+
+func TestSetAssetHashReplacesPath(t *testing.T) {
+	originalHashes, originalPaths := assetHashCache, assetPathHashCache
+	t.Cleanup(func() { assetHashCache, assetPathHashCache = originalHashes, originalPaths })
+	assetHashCache, assetPathHashCache = map[string]*AssetHash{}, map[string]*AssetHash{}
+	SetAssetHash("old-hash", "assets/replaced.png")
+	SetAssetHash("new-hash", "assets/replaced.png")
+	if _, exists := assetHashCache["old-hash"]; exists {
+		t.Fatal("replaced contents retain the old hash")
+	}
+	if asset := assetPathHashCache["assets/replaced.png"]; asset == nil || asset.Hash != "new-hash" {
+		t.Fatalf("new contents were not cached: %v", asset)
+	}
+}

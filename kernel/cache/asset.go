@@ -79,6 +79,7 @@ func SetAssetHash(hash, path string) {
 		return
 	}
 
+	removeAssetHashByPath(path)
 	assetHashCache[hash] = &AssetHash{Hash: hash, Path: path}
 	assetPathHashCache[path] = &AssetHash{Hash: hash, Path: path}
 }

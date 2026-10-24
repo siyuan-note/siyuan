@@ -18,22 +18,33 @@ const fixture = (source, passwordVisible = true) => {
     let now = Date.UTC(2026, 9, 22, 12, 59);
     const input = {type: "password", value: "", selectionStart: 0, selectionEnd: 0,
         getClientRects: () => passwordVisible ? [{}] : [],
-        focus: () => { focused = "password"; },
+        focus: () => { focused = "password"; document.activeElement = input; },
         setRangeText: text => { input.value += text; }, dispatchEvent: () => {},
     };
-    const oidc = {getClientRects: () => [{}], focus: () => { focused = "oidc"; }};
-    const panel = {inert: false, querySelectorAll: () => [oidc]};
+    const captcha = {type: "text", value: "", selectionStart: 0, selectionEnd: 0,
+        getClientRects: () => [{}], focus: () => { focused = "captcha"; document.activeElement = captcha; },
+        setRangeText: text => { captcha.value += text; }, dispatchEvent: () => {}};
+    const oidc = {getClientRects: () => [{}], focus: () => { focused = "oidc"; document.activeElement = oidc; }};
+    const panel = {inert: false, offsetTop: 0, querySelectorAll: () => [oidc],
+        contains: item => [input, captcha, oidc].includes(item)};
+    const properties = new Map();
+    const attributes = new Map();
     const cover = {hidden: true, focus: () => { focused = "cover"; },
+        style: {setProperty: (key, value) => properties.set(key, value)},
+        setAttribute: (key, value) => attributes.set(key, value),
         addEventListener: (type, callback) => listeners.set("cover:" + type, callback)};
+    const clock = {offsetHeight: 100};
     const wallpaper = {hidden: true};
     const background = {hidden: false};
     const time = {textContent: ""};
     const date = {textContent: ""};
     const elements = {lockScreenWallpaper: wallpaper, lockScreenCover: cover, authPanel: panel,
-        authCode: input, authDefaultBackground: background, lockScreenTime: time, lockScreenDate: date};
+        authCode: input, captcha, authDefaultBackground: background, lockScreenTime: time, lockScreenDate: date,
+        lockScreenClock: clock};
     const document = {
         hidden: false,
-        body: {classList: {add: key => classes.add(key), remove: key => classes.delete(key)}},
+        activeElement: undefined,
+        body: {classList: {add: key => classes.add(key), remove: (...keys) => keys.forEach(key => classes.delete(key))}},
         getElementById: id => elements[id],
         addEventListener: (type, callback) => listeners.set(type, callback),
     };
@@ -41,7 +52,7 @@ const fixture = (source, passwordVisible = true) => {
         constructor() { super(now); }
     }
     const context = {document, Date: Clock, Event: class {},
-        window: {addEventListener: (type, callback) => windowListeners.set(type, callback)},
+        window: {innerHeight: 800, addEventListener: (type, callback) => windowListeners.set(type, callback)},
         clearInterval: id => timers.delete(id),
         setInterval: callback => { timers.set(++timerID, callback); return timerID; },
     };
@@ -52,7 +63,8 @@ const fixture = (source, passwordVisible = true) => {
         listeners.get("keydown")(event);
         return event;
     };
-    return {classes, listeners, windowListeners, timers, document, input, panel, cover, wallpaper, background, time, date,
+    return {classes, listeners, windowListeners, timers, document, input, captcha, panel, cover, wallpaper, background, time, date,
+        properties, attributes,
         controller: context.controller, key, focused: () => focused, advance: () => { now += 60_000; }};
 };
 
@@ -89,7 +101,8 @@ for (const {file, source} of sources) {
         assert.ok(event.prevented && event.stopped);
         assert.equal(f.input.value, "A");
         assert.equal(f.focused(), "password");
-        assert.equal(f.cover.hidden, true);
+        assert.equal(f.cover.inert, true);
+        assert.equal(f.attributes.get("aria-hidden"), "true");
         assert.equal(f.panel.inert, false);
         assert.equal(f.timers.size, 0);
         assert.equal(f.key("b").prevented, false);
@@ -102,7 +115,7 @@ for (const {file, source} of sources) {
             f.wallpaper.onload();
             const event = f.key(key);
             assert.ok(event.prevented && event.stopped);
-            assert.equal(f.cover.hidden, true);
+            assert.equal(f.cover.inert, true);
             assert.equal(f.input.value, "");
         }
         for (const pointerType of ["mouse", "touch"]) {
@@ -112,13 +125,13 @@ for (const {file, source} of sources) {
             f.listeners.get("pointerdown")({pointerType, target: {closest: () => false},
                 preventDefault: () => { prevented = true; }});
             assert.equal(prevented, true, "native pointer focus must not override the password focus");
-            assert.equal(f.cover.hidden, true);
+            assert.equal(f.cover.inert, true);
             assert.equal(f.focused(), "password");
         }
         const f = fixture(source);
         f.wallpaper.onload();
         f.listeners.get("cover:click")();
-        assert.equal(f.cover.hidden, true);
+        assert.equal(f.cover.inert, true);
     });
 
     test(`${file} respects window controls, shortcuts, IME and OIDC-only sign-in`, () => {
@@ -129,12 +142,12 @@ for (const {file, source} of sources) {
         assert.equal(f.key("w", {ctrlKey: true}).prevented, false);
         assert.equal(f.cover.hidden, false);
         assert.equal(f.key("Process", {isComposing: true}).prevented, false);
-        assert.equal(f.cover.hidden, true);
+        assert.equal(f.cover.inert, true);
         assert.equal(f.input.value, "");
         const paste = fixture(source);
         paste.wallpaper.onload();
         assert.equal(paste.key("v", {ctrlKey: true}).prevented, false);
-        assert.equal(paste.cover.hidden, true);
+        assert.equal(paste.cover.inert, true);
         assert.equal(paste.focused(), "password");
         assert.equal(paste.input.value, "");
         const oidc = fixture(source, false);
@@ -150,13 +163,13 @@ for (const {file, source} of sources) {
         assert.equal(f.focused(), "password", "typing during image loading already targets the password input");
         f.input.value = "already typing";
         f.wallpaper.onload();
-        assert.equal(f.cover.hidden, true);
+        assert.equal(f.cover.inert, true);
         assert.equal(f.panel.inert, false);
         assert.equal(f.timers.size, 0);
         const autofill = fixture(source);
         autofill.input.value = "filled by password manager";
         autofill.wallpaper.onload();
-        assert.equal(autofill.cover.hidden, true);
+        assert.equal(autofill.cover.inert, true);
     });
 
     test(`${file} restores login after a missing or corrupt wallpaper`, () => {
@@ -195,5 +208,68 @@ for (const {file, source} of sources) {
         f.key("Enter");
         f.listeners.get("visibilitychange")();
         assert.equal(f.timers.size, 0);
+    });
+
+    test(`${file} Escape returns to the clock without clearing password, captcha or the active field`, () => {
+        const f = fixture(source);
+        f.wallpaper.onload();
+        f.key("p");
+        f.captcha.value = "12";
+        f.captcha.selectionStart = f.captcha.selectionEnd = 2;
+        f.captcha.focus();
+        const event = f.key("Escape");
+        assert.ok(event.prevented && event.stopped);
+        assert.equal(f.panel.inert, true);
+        assert.equal(f.cover.inert, false);
+        assert.equal(f.attributes.get("aria-hidden"), "false");
+        assert.equal(f.focused(), "cover");
+        assert.ok(f.classes.has("wallpaper-transition"));
+        assert.ok(f.classes.has("wallpaper-cover"));
+        assert.equal(f.input.value, "p");
+        assert.equal(f.captcha.value, "12");
+        assert.equal(f.captcha.selectionStart, 2);
+        assert.equal(f.timers.size, 1);
+        assert.equal(f.key("Escape").prevented, false, "Escape on the cover does not reopen the form");
+        f.key("3");
+        assert.equal(f.focused(), "captcha");
+        assert.equal(f.captcha.value, "123");
+        assert.equal(f.panel.inert, false);
+        for (let i = 0; i < 3; i++) { f.key("Escape"); f.key("Enter"); }
+        assert.equal(f.panel.inert, false, "rapid reversals leave the last requested state active");
+        assert.equal(f.captcha.value, "123");
+    });
+
+    test(`${file} Escape respects IME, modified shortcuts and the default login page`, () => {
+        const f = fixture(source);
+        assert.equal(f.key("Escape").prevented, false);
+        f.wallpaper.onload();
+        f.key("Enter");
+        for (const extra of [{isComposing: true}, {keyCode: 229}, {ctrlKey: true}, {altKey: true}, {metaKey: true}]) {
+            assert.equal(f.key("Escape", extra).prevented, false);
+            assert.equal(f.panel.inert, false);
+        }
+        f.listeners.get("compositionstart")();
+        assert.equal(f.key("Escape").prevented, false);
+        f.listeners.get("compositionend")();
+        assert.equal(f.key("Escape").prevented, true);
+        f.wallpaper.onerror();
+        assert.equal(f.key("Escape").prevented, false);
+        assert.equal(f.cover.hidden, true);
+    });
+
+    test(`${file} keeps the raised clock running and adapts it when the login panel has less space`, () => {
+        const f = fixture(source);
+        f.panel.offsetTop = 300;
+        f.wallpaper.onload();
+        f.key("Enter");
+        assert.equal(f.properties.get("--auth-clock-open-opacity"), "1");
+        assert.equal(f.properties.get("--auth-clock-open-y"), "-148.5px");
+        assert.equal(f.timers.size, 1);
+        f.panel.offsetTop = 40;
+        f.windowListeners.get("resize")();
+        assert.equal(f.properties.get("--auth-clock-open-opacity"), "0");
+        assert.equal(f.timers.size, 0);
+        f.key("Escape");
+        assert.equal(f.timers.size, 1);
     });
 }

@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20261022203227"
+		"updated": "20261024102323"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091447-8iiuxlt",
-				"updated": "20261016112115"
+				"updated": "20261024102323"
 			},
 			"Children": [
 				{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091447-dluat0m",
-				"updated": "20261016112115"
+				"updated": "20261024102323"
 			},
 			"Children": [
 				{
@@ -352,7 +352,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022093855-9vgq1sq",
-				"updated": "20261022203227"
+				"updated": "20261024102323"
 			},
 			"Children": [
 				{
@@ -393,7 +393,20 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", upload one JPEG, PNG or WebP image (up to 10 MiB and 16 megapixels) to customize the authentication page shown at startup and after locking. Uploading another image replaces it; click Reset to restore the default background. With a custom wallpaper, the authentication page first shows the wallpaper and local time. Click, tap, or press a key to reveal the login panel; typing your password also keeps the first character. Without a wallpaper, or if the image fails to load, the usual login page appears directly."
+					"Data": ", upload one JPEG, PNG or WebP image (up to 10 MiB and 16 megapixels) to customize the authentication page shown at startup and after locking. Uploading another image replaces it; click Reset to restore the default background. The wallpaper setting is shown when a password is configured or OIDC sign-in is enabled. With a custom wallpaper, the authentication page first shows the wallpaper and local time. Click, tap, or press a key to reveal the login panel; typing your password also keeps the first character. Without a wallpaper, or if the image fails to load, the usual login page appears directly."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to return from the login panel to the wallpaper and clock. Your password and captcha input are kept. Both directions use a short transition; the system preference to reduce motion is respected."
 				}
 			]
 		},

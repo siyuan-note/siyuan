@@ -28,6 +28,7 @@ import zxcvbn = require("zxcvbn");
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
 import {openNotebookArchiveDialog, openNotebookArchiveImportDialog} from "../notebookArchive";
 import {genLockScreenWallpaperHtml, mountLockScreenWallpaper} from "./lockScreenWallpaper";
+import {remountOpenSettingTab} from "../setting/mount";
 
 const getPasswordStrength = (password: string) => {
     const score = zxcvbn(password).score;
@@ -80,7 +81,7 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
             save: (value) => sendAppSetting("system.lockScreenMode", value),
         });
     }
-    if (!window.siyuan.config.readonly) {
+    if (!window.siyuan.config.readonly && (window.siyuan.config.accessAuthCode || window.siyuan.config.oidc.enabled)) {
         group.slot({
             key: "lockScreenWallpaper",
             keywords: [window.siyuan.languages.lockScreenWallpaper, window.siyuan.languages.lockScreenWallpaperTip],
@@ -105,6 +106,11 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
         save: (value) => sendAccessSetting("api.token", value),
         afterMount: bindApiTokenInput,
     });
+};
+
+const applyActivatedOIDC = (config: Config.IOIDC) => {
+    window.siyuan.config.oidc = config;
+    void remountOpenSettingTab("access");
 };
 
 const mountOIDCButton = (root: HTMLElement) => {
@@ -351,7 +357,7 @@ const mountOIDCButton = (root: HTMLElement) => {
                 }
                 validationPollToken = "";
                 restoreMobileCallback();
-                window.siyuan.config.oidc = activation.data.config;
+                applyActivatedOIDC(activation.data.config);
                 showMessage(window.siyuan.languages.oidcVerificationSuccess);
                 dialog.destroy();
             } catch (error) {

@@ -341,7 +341,7 @@ for (const mobile of [false, true]) {
         assert.equal(config.oidc.clientSecret, "******");
         assert.equal(config.oidc.enabled, true);
         assert.equal(config.accessAuthCode, "******");
-        assert.deepEqual(remounted, mobile ? [] : ["app", "access"]);
+        assert.deepEqual(remounted, mobile ? ["access"] : ["app", "access"]);
         remounted.length = 0;
         await exports.refreshSettingConfig("system");
         assert.deepEqual(remounted, mobile ? [] : ["app"]);
@@ -349,12 +349,12 @@ for (const mobile of [false, true]) {
         next = {...next, system: {...next.system, encryptedNotebookFollowSystemLock: true}};
         await exports.refreshSettingConfig("system");
         assert.equal(config.system.encryptedNotebookFollowSystemLock, true);
-        assert.deepEqual(remounted, mobile ? [] : ["app", "access"]);
+        assert.deepEqual(remounted, mobile ? ["access"] : ["app", "access"]);
         remounted.length = 0;
         next = {...next, api: {token: "latest-token"}};
         await exports.refreshSettingConfig();
         assert.equal(config.api.token, "latest-token");
-        assert.equal(remounted.filter(tab => tab === "access").length, mobile ? 0 : 1);
+        assert.equal(remounted.filter(tab => tab === "access").length, 1);
         failed = true;
         next = {...next, api: {token: "unconfirmed-token"}};
         await assert.rejects(exports.refreshSettingConfig("system"), /Could not refresh settings/);

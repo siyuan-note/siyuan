@@ -5,6 +5,43 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
+test("mobile authentication settings refresh after focus leaves and preserve scroll", async () => {
+    const code = transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const input = {};
+    const root = {innerHTML: "authentication", scrollTop: 123, scrollLeft: 0,
+        contains: (target: object) => target === input, querySelector: (): Element | null => null};
+    const listeners = new Map<string, () => void>();
+    const timers: Array<() => void> = [];
+    let mounted = 0;
+    const document = {activeElement: input,
+        querySelector: (selector: string) => {
+            assert.equal(selector, '#modelMain > .config[data-setting-tab="access"]');
+            return root;
+        },
+        addEventListener: (name: string, callback: () => void) => listeners.set(name, callback)};
+    const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>};
+    runInNewContext(code, {exports, document, window: {siyuan: {dialogs: []}},
+        setTimeout: (callback: () => void) => timers.push(callback),
+        require: () => ({Constants: {DIALOG_SETTING: "settings"}, getSettingsOwnerApp: () => ({}),
+            getSettingTab: (id: string) => ({mount: async (element: typeof root, _search: unknown, _app: unknown, rebuild: boolean) => {
+                assert.equal(id, "access");
+                assert.equal(rebuild, true);
+                mounted++;
+                element.scrollTop = 0;
+            }})}),
+    });
+    await exports.remountOpenSettingTab("access");
+    assert.equal(mounted, 0);
+    document.activeElement = {};
+    listeners.get("focusout")();
+    timers.splice(0).forEach(callback => callback());
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(mounted, 1);
+    assert.equal(root.scrollTop, 123);
+});
+
 for (const keywords of ["", "gradient"]) {
     test(`remount restores scroll after asynchronous initialization and search (keywords=${keywords})`, async () => {
         const source = readFileSync(resolve(process.cwd(), "src/config/setting/mount.ts"), "utf8");

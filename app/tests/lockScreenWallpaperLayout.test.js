@@ -70,13 +70,15 @@ const fixtureHTML = (file, dark, glassSupported = true) => {
         .replace(/{{if not \.accessAuthCodeEnabled}}[\s\S]*?{{end}}/g, "")
         .replace(/{{(?:if \.\w+|end)}}/g, "")
         .replace(/{{\.workspace}}/g, "Workspace")
+        .replace(/{{\.l7}}/g, 'Powered by <a href="https://example.invalid/">SiYuan</a>')
         .replace(/{{\.l\d+}}/g, "Sign in")
         .replace(/{{\.lockScreenReveal}}/g, "Click or press a key to sign in")
+        .replace('<span id="lockScreenHint"></span>', '<span id="lockScreenHint">Click or press a key to sign in</span>')
         .replace("<main hidden>", "<main>");
     if (dark) source = source.replace('<html style="height: 100%">', '<html class="dark" style="height: 100%">');
     // 仅替换能力条件，验证不支持背景模糊时的实色回退样式。
     if (!glassSupported) source = source.replace(
-        "@supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))",
+        "@supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))",
         "@supports (siyuan-unsupported: true)");
     return source.replace("</body>", `<script>${loader}\nwindow.loadLockScreenWallpaper = loadLockScreenWallpaper;</script></body>`);
 };
@@ -103,7 +105,8 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
     const cover = document.getElementById("lockScreenCover");
     if (wallpaperPresent) {
         check.equal(panel.inert, true);
-        check.equal(getComputedStyle(panel).visibility, "hidden");
+        check.equal(getComputedStyle(panel).opacity, "0");
+        check.equal(getComputedStyle(panel).pointerEvents, "none");
         check.equal(cover.hidden, false);
         check.ok(document.getElementById("lockScreenTime").textContent);
         check.ok(document.getElementById("lockScreenDate").textContent);
@@ -116,7 +119,9 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
             "clock and reveal hint fit narrow and short screens");
         check.ok(Math.abs((group.left + group.right) / 2 - innerWidth / 2) < 1 &&
             Math.abs((group.top + group.bottom) / 2 - innerHeight / 2) < 1,
-            "time and date are centered together in the viewport");
+            `time and date are centered together: ${JSON.stringify({x: group.x, y: group.y, width: group.width,
+                height: group.height, viewport: [innerWidth, innerHeight], remote, classes: document.body.className,
+                transform: getComputedStyle(document.getElementById("lockScreenClock")).transform})}`);
         check.ok(Math.abs((clock.left + clock.right) / 2 - innerWidth / 2) < 1 &&
             Math.abs((date.left + date.right) / 2 - innerWidth / 2) < 1,
             "time and date each align with the horizontal center");
@@ -127,8 +132,15 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
             "the top window drag area remains above the cover");
         cover.click();
         check.equal(panel.inert, false);
-        check.equal(cover.hidden, true);
+        check.equal(cover.inert, true);
         check.equal(getComputedStyle(panel).visibility, "visible");
+        await Promise.all(document.getAnimations().map(animation => animation.finished.catch(() => {})));
+        const raisedClock = document.getElementById("lockScreenClock");
+        if (getComputedStyle(raisedClock).opacity === "1") {
+            const raised = raisedClock.getBoundingClientRect();
+            check.ok(raised.top >= 39 && raised.bottom + 15 <= panel.getBoundingClientRect().top,
+                "the raised clock stays below the window bar and above the login card");
+        }
     }
     const rect = panel.getBoundingClientRect();
     const style = getComputedStyle(panel);
@@ -139,33 +151,41 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
         check.ok(rect.top >= 32 && rect.bottom <= innerHeight, "login panel fits below the drag area");
         check.ok(panel.scrollWidth <= panel.clientWidth, "login controls do not overflow the panel");
         check.equal(style.backgroundColor, forcedColors ? getComputedStyle(document.body).backgroundColor : (glass ?
-            (dark ? "rgba(0, 0, 0, 0.28)" : "rgba(255, 255, 255, 0.5)") :
+            (dark ? "rgba(0, 0, 0, 0.06)" : "rgba(255, 255, 255, 0.08)") :
             (dark ? "rgb(30, 30, 30)" : "rgb(255, 255, 255)")));
-        check.equal(blur, glass ? "blur(16px) saturate(1.1)" : "none");
+        check.equal(blur, glass ? "blur(8px) saturate(1.05)" : "none");
         check.equal(style.opacity, "1", "glass affects the panel background, not its text and controls");
         check.equal(getComputedStyle(document.getElementById("authCode")).opacity, "1");
-        // 更薄的玻璃使用反色细描边辅助阅读，同时检查壁纸合成色与描边的对比度。
+        // 更薄的玻璃使用反色文字阴影辅助阅读，同时检查壁纸合成色与阴影颜色的对比度。
         const luminance = rgb => rgb.map(value => value / 255).map(value =>
             value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
             .reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+        if (!forcedColors) {
+            const field = getComputedStyle(document.getElementById("authCode"));
+            const levels = [field.color, field.backgroundColor].map(color => luminance(color.match(/[\d.]+/g).map(Number).slice(0, 3)));
+            check.ok((Math.max(...levels) + .05) / (Math.min(...levels) + .05) >= 4.5,
+                "glass text colors do not reduce password input contrast");
+        }
         const panelColor = style.backgroundColor.match(/[\d.]+/g).map(Number);
         const panelAlpha = panelColor[3] ?? 1;
         const brightness = Number(/brightness\(([\d.]+)\)/.exec(blur)?.[1] ?? 1);
-        const selectors = remote ? ["h1", "label", ...(glass ? ["#origin"] : [])] : [".ft__on-surface", "label", "h1"];
+        const selectors = remote ? ["h1", "label", ...(glass ? ["#origin"] : [])] :
+            [".ft__on-surface", "label", "h1", ...(glass ? [".ft__on-surface a"] : [])];
         for (const selector of forcedColors ? [] : selectors) {
             const textStyle = getComputedStyle(panel.querySelector(selector));
             const foreground = textStyle.color.match(/[\d.]+/g).map(Number);
             const alpha = (foreground[3] ?? 1) * Number(textStyle.opacity);
             let outlineContrast = 0;
-            if (glass && dark) {
-                const outline = dark ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)";
-                check.equal(textStyle.textShadow, ["-0.35px 0px 0px", "0.35px 0px 0px",
-                    "0px -0.35px 0px", "0px 0.35px 0px"].map(offset => `${outline} ${offset}`).join(", "));
-                const outlineLight = dark ? 0 : 1;
+            if (glass) {
+                const outline = "rgb(0, 0, 0)";
+                check.equal(textStyle.textShadow, `${outline} 0px 1px 3px`);
+                const outlineLight = 0;
+                check.ok(luminance(foreground.slice(0, 3)) > .8,
+                    "transparent panels use clear light text in both application themes");
                 const foregroundLight = luminance(foreground.slice(0, 3));
                 outlineContrast = (Math.max(outlineLight, foregroundLight) + .05) /
                     (Math.min(outlineLight, foregroundLight) + .05);
-                check.ok(outlineContrast >= 4.5, "the text outline remains distinct from its fill");
+                check.ok(outlineContrast >= 4.5, "the text shadow color remains distinct from its fill");
             }
             for (const wallpaperColor of [0, 255]) {
                 const background = panelColor.slice(0, 3).map(value =>
@@ -209,10 +229,78 @@ const prepareKeyboardCase = async () => {
 const assertKeyboardState = async (value, submits) => {
     await new Promise(resolve => requestAnimationFrame(resolve));
     const check = require("node:assert/strict");
-    check.equal(document.getElementById("lockScreenCover").hidden, true);
+    check.equal(document.getElementById("lockScreenCover").inert, true);
     check.equal(document.getElementById("authCode").value, value);
-    check.equal(document.activeElement, document.getElementById("authCode"));
+    check.equal(document.activeElement, document.getElementById("authCode"),
+        `password focus after native input (value=${value}, submits=${submits})`);
     check.equal(window.testSubmits, submits, "native Enter events reach the revealed login form");
+};
+
+const checkTransition = async (remote, reduced) => {
+    const check = require("node:assert/strict");
+    const panel = document.querySelector(remote ? "main" : "#authPanel");
+    const cover = document.getElementById("lockScreenCover");
+    const clock = document.getElementById("lockScreenClock");
+    const hint = document.getElementById("lockScreenHint");
+    const targets = [panel, clock, hint];
+    const animations = () => targets.flatMap(target => target.getAnimations());
+    const centered = clock.getBoundingClientRect();
+    cover.click();
+    check.equal(panel.inert, false, "login is available before the transition ends");
+    check.equal(document.activeElement, document.getElementById("authCode"));
+    const entering = animations();
+    if (reduced) {
+        check.equal(entering.length, 0, "reduced motion switches directly without transitions");
+        check.equal(getComputedStyle(panel).opacity, "1");
+    } else {
+        check.ok(entering.length >= 3);
+        for (const animation of entering) {
+            check.equal(animation.effect.getTiming().duration, animation.transitionProperty === "visibility" ? 0 : 200);
+            animation.pause();
+            animation.currentTime = 100;
+        }
+        const opacity = Number(getComputedStyle(panel).opacity);
+        check.ok(opacity > 0 && opacity < 1, "the card fades in while moving upward");
+        const y = new DOMMatrix(getComputedStyle(panel).transform).m42;
+        check.ok(y > 0 && y < 20);
+        check.ok(clock.getBoundingClientRect().top < centered.top, "time and date move upward together");
+        check.ok(clock.getBoundingClientRect().bottom < panel.getBoundingClientRect().top,
+            "the clock moves clear before the entering card becomes prominent");
+        entering.forEach(animation => animation.finish());
+    }
+    const input = document.getElementById("authCode");
+    input.value = "retained password";
+    input.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    check.equal(panel.inert, true);
+    check.equal(cover.inert, false);
+    const leaving = animations();
+    if (reduced) {
+        check.equal(leaving.length, 0);
+    } else {
+        check.ok(leaving.length >= 3);
+        leaving.forEach(animation => { animation.pause(); animation.currentTime = 100; });
+        const opacity = Number(getComputedStyle(panel).opacity);
+        check.ok(opacity > 0 && opacity < 1, "Escape fades the card out rather than hiding it immediately");
+        check.equal(getComputedStyle(panel).visibility, "visible");
+        check.ok(new DOMMatrix(getComputedStyle(panel).transform).m42 > 0);
+        check.ok(clock.getBoundingClientRect().bottom < panel.getBoundingClientRect().top,
+            "the returning clock waits for the card to fade before crossing its position");
+        leaving.forEach(animation => animation.finish());
+    }
+    check.equal(input.value, "retained password");
+    check.equal(getComputedStyle(panel).opacity, "0");
+    check.equal(getComputedStyle(panel).pointerEvents, "none");
+    const restored = clock.getBoundingClientRect();
+    check.ok(Math.abs((restored.top + restored.bottom) / 2 - innerHeight / 2) < 1);
+    // 动画尚未完成时反向切换，最终状态和输入内容仍以最后一次操作为准。
+    cover.click();
+    input.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    cover.click();
+    await Promise.all(animations().map(animation => animation.finished.catch(() => {})));
+    check.equal(panel.inert, false);
+    check.equal(cover.inert, true);
+    check.equal(getComputedStyle(panel).opacity, "1");
+    check.equal(input.value, "retained password");
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -252,6 +340,16 @@ if (process.versions.electron && process.type === "browser") {
                     }
                 }
                 await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features: []});
+                for (const reduced of [false, true]) {
+                    await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                        features: [{name: "prefers-reduced-motion", value: reduced ? "reduce" : "no-preference"}],
+                    });
+                    win.setContentSize(1200, 900);
+                    await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, false)));
+                    await win.webContents.executeJavaScript(`(${prepareKeyboardCase.toString()})()`);
+                    await win.webContents.executeJavaScript(`(${checkTransition.toString()})(${file.startsWith("electron")}, ${reduced})`);
+                }
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features: []});
                 win.webContents.debugger.detach();
                 win.setContentSize(1000, 700);
                 const start = async () => {
@@ -264,6 +362,29 @@ if (process.versions.electron && process.type === "browser") {
                     win.webContents.sendInputEvent({type, keyCode});
                 }
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("ab", 0)`);
+                await win.webContents.executeJavaScript(`{
+                    const captcha = document.getElementById("captcha");
+                    captcha.parentElement.style.display = "block";
+                    captcha.value = "42"; captcha.focus(); captcha.setSelectionRange(2, 2);
+                }`);
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "Escape"});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "Escape"});
+                await win.webContents.executeJavaScript(`{
+                    const check = require("node:assert/strict");
+                    check.equal(document.getElementById("lockScreenCover").inert, false);
+                    check.equal(document.getElementById("authCode").value, "ab");
+                    check.equal(document.getElementById("captcha").value, "42");
+                }`);
+                for (const [type, keyCode] of [["keyDown", "3"], ["char", "3"], ["keyUp", "3"]]) {
+                    win.webContents.sendInputEvent({type, keyCode});
+                }
+                await win.webContents.executeJavaScript(`{
+                    const check = require("node:assert/strict");
+                    const captcha = document.getElementById("captcha");
+                    check.equal(document.activeElement, captcha);
+                    check.equal(captcha.value, "423");
+                    check.equal(document.getElementById("authCode").value, "ab");
+                }`);
                 await start();
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});

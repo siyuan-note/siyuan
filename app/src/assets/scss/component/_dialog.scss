@@ -79,6 +79,27 @@
     height: 100%;
     opacity: 0;
     transition: opacity 150ms linear;
+
+    &--progress {
+      @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+        background-color: rgba(255, 255, 255, .08);
+        -webkit-backdrop-filter: blur(8px) saturate(105%);
+        backdrop-filter: blur(8px) saturate(105%);
+
+        :root[data-theme-mode="dark"] & {
+          background-color: rgba(0, 0, 0, .06);
+        }
+      }
+
+      @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+        &,
+        :root[data-theme-mode="dark"] & {
+          background-color: var(--b3-mask-background);
+          -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+        }
+      }
+    }
   }
 
   &__container {

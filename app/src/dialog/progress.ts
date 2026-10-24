@@ -34,14 +34,14 @@ export const progressLoading = (data: IWebSocketData, id = "progress") => {
     }
     // code 0: 有进度；1: 无进度；2: 关闭
     if (data.code === 0) {
-        progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
+        progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
 <div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
         updateProgressContent(progressElement.lastElementChild, data.msg, data.data.current, data.data.total);
     } else if (data.code === 1) {
         if (progressElement.lastElementChild) {
             progressElement.lastElementChild.lastElementChild.textContent = data.msg;
         } else {
-            progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
+            progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
 <div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
             updateProgressContent(progressElement.lastElementChild, data.msg);
         }

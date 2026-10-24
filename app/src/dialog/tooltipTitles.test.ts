@@ -51,13 +51,13 @@ const browserCases = async (sources: Record<string, string>) => {
     const escape = modules.escape as typeof import("../util/escape");
     for (const title of ["A%2FB", "A%3Ctag%3E.sy", "100%25/Incomplete%2", "A&copy;B", "A&amp;B",
         "A&lt;tag&gt;", 'A<tag> & "quotes"', "A&#47;B", "A&#x2f;B"]) {
-        // hPath is derived from escaped IAL attributes; outline content is BlockDOM.
+        // Search result/tree paths are rendered HTML; search scopes from getFullHPathByID are plain text.
         hPath = escape.escapeHtmlTextAndAttr(title);
         const fragments = [
             tree.genHTML([{id: "doc", type: "backlink", depth: 0, name: title, hPath}]),
             tree.genHTML([{id: "doc", type: "outline", depth: 0, name: hPath}]),
             tree.genBlockHTML([{id: "doc", depth: 0, content: hPath}], true, "outline"),
-            search.render({hPath}),
+            search.render({hPath: title}),
             ...search.results(hPath),
         ];
         carrier.innerHTML = '<div id="searchUnRefResult"></div><div id="searchUnRefList"></div>' +
@@ -75,7 +75,7 @@ const browserCases = async (sources: Record<string, string>) => {
             check.equal(tip.querySelector("tag"), null);
             if (target.id === "searchPathInput") {
                 await searchPath.refreshCurrentSearchPath({element: carrier, config: {idPath: ["doc"]} as Config.IUILayoutTabSearchConfig,
-                    resolveHPath: async () => hPath});
+                    resolveHPath: async () => title});
                 target.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
                 check.equal(tip.textContent, title, "refreshed search path matches the initial tooltip");
             }
@@ -109,7 +109,7 @@ test("document and heading tooltips preserve percent escapes and entities across
         /<span class="b3-list-item__(?:text|meta)[^\n]*aria-label="\$\{escapeHtmlTextAndAttr\(title\)}"[^\n]*<\/span>/g,
     )];
     assert.equal(resultTemplates.length, 2);
-    sources.search = compile('const {escapeHtml, escapeHtmlTextAndAttr} = require("escape"); exports.render = config => `' +
+    sources.search = compile('const {escapeHtml, escapeHtmlTextAndAttr, escapeTooltipTextAttr} = require("escape"); exports.render = config => `' +
         searchSource.slice(start, end) + "`; exports.results = title => [" +
         resultTemplates.map(match => "`" + match[0] + "`").join(",") + "];");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-tooltip-test-"));

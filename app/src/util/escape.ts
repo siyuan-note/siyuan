@@ -4,7 +4,8 @@ export const escapeHtmlTextAndAttr = (html: unknown) => {
 };
 
 // 纯文本写入 HTML 模板中的提示属性，需分别保护属性解析及提示框的 innerHTML 解析。
-// 已转义的 hPath 只需 escapeHtmlTextAndAttr；setAttribute 接受的提示 HTML 不再转义属性层。
+// 已渲染为 HTML 的路径只需 escapeHtmlTextAndAttr；纯文本搜索范围仍需两层。
+// setAttribute 接受的提示 HTML 不再转义属性层。
 export const escapeTooltipTextAttr = (text: string) => escapeHtmlTextAndAttr(escapeHtmlTextAndAttr(text));
 
 export const escapeHtml = (html: string) => {

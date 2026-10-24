@@ -16,6 +16,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -54,6 +55,18 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 		return ret
 	}
 	literal := create(nil, "A/B")
+	t.Run("plain scope paths and rendered result paths", func(t *testing.T) {
+		const title = "A&amp;B<tag>"
+		doc := create(nil, title)
+		hPath, err := GetFullHPathByID(doc.ID)
+		if err != nil || hPath != boxConf.Name+"/"+title {
+			t.Fatalf("search scope path is not literal text: %q, %v", hPath, err)
+		}
+		result := fromSQLBlock(&sql.Block{ID: doc.ID, RootID: doc.ID, Box: box.ID, Type: "d", HPath: "/" + title}, "", 0)
+		if result.HPath != util.EscapeHTML("/"+title) {
+			t.Fatalf("search result path is not escaped HTML: %q", result.HPath)
+		}
+	})
 	parent := create(nil, "A")
 	child := create(&parent.ID, "B")
 	if literal.DisplayPath != child.DisplayPath || literal.Depth != 1 || child.Depth != 2 {

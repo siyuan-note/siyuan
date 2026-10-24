@@ -9,7 +9,7 @@ import {getAllModels} from "../layout/getAll";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr, escapeTooltipTextAttr} from "../util/escape";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
@@ -157,7 +157,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1${closeCB ? " resize__move" : ""}" style="min-height: 100%"></span>
-        <span id="searchPathInput" data-position="9south" data-tooltip-encoding="none" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeHtmlTextAndAttr(config.hPath)}">
+        <span id="searchPathInput" data-position="9south" data-tooltip-encoding="none" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeTooltipTextAttr(config.hPath)}">
             ${escapeHtml(config.hPath)}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
         </span>
@@ -549,7 +549,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             config.hPath = hPathList.join(" ");
                             config.page = 1;
                             searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-                            searchPathInputElement.setAttribute("aria-label", config.hPath);
+                            searchPathInputElement.setAttribute("aria-label", escapeHtmlTextAndAttr(config.hPath));
                             const includeElement = element.querySelector("#searchInclude");
                             includeElement.firstElementChild.classList.add("ft__primary");
                             if (enableIncludeChild) {
@@ -1174,7 +1174,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (runtimeConfig.hPath) {
         searchPathInputElement.innerHTML = `${escapeHtml(runtimeConfig.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-        searchPathInputElement.setAttribute("aria-label", runtimeConfig.hPath);
+        searchPathInputElement.setAttribute("aria-label", escapeHtmlTextAndAttr(runtimeConfig.hPath));
     } else {
         searchPathInputElement.innerHTML = "";
         searchPathInputElement.setAttribute("aria-label", "");

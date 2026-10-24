@@ -4,7 +4,8 @@ export interface ListMindmapAppearance {
     version: 1;
     palette: string[];
     rootColor?: string;
-    nodeStyle?: "layered" | "branch";
+    nodeStyle?: "layered" | "branch" | "lines";
+    fontHierarchy?: boolean;
     backgroundColor?: string;
 }
 
@@ -105,8 +106,6 @@ export const LIST_MINDMAP_PALETTES: {id: string, label: string, rootColor: strin
         colors: ["#5100dc", "#33daca", "#0a5aff", "#fdb311", "#fc1c17", "#fc364f", "#f44f1f", "#2d39f5", "#67deff"]},
 ];
 
-export const LIST_MINDMAP_CANVAS_COLORS = ["#bfdbfe", "#fecaca", "#bbf7d0", "#e9d5ff", "#fed7aa", "#a5f3fc"];
-
 export const isMindmapColor = (value: unknown): value is string =>
     typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
 
@@ -118,7 +117,8 @@ export const isListMindmapAppearance = (value: unknown): value is ListMindmapApp
     return data.version === 1 && Array.isArray(data.palette) && data.palette.length <= 24 &&
         data.palette.every(isMindmapColor) &&
         (data.rootColor === undefined || isMindmapColor(data.rootColor)) &&
-        (data.nodeStyle === undefined || data.nodeStyle === "layered" || data.nodeStyle === "branch") &&
+        (data.nodeStyle === undefined || data.nodeStyle === "layered" || data.nodeStyle === "branch" || data.nodeStyle === "lines") &&
+        (data.fontHierarchy === undefined || typeof data.fontHierarchy === "boolean") &&
         (data.backgroundColor === undefined || data.backgroundColor === "" || isMindmapColor(data.backgroundColor));
 };
 
@@ -199,18 +199,21 @@ export const getMindmapLineColor = (color: string, background: string) => getMin
 
 export const resolveListMindmapColors = (model: ListMindmapModel, canvasColor?: string) => {
     const result = new Map<string, ListMindmapNodeStyle>();
-    const palette = model.metadata.appearance?.palette;
-    if (!palette?.length) {
+    const appearance = model.metadata.appearance;
+    const palette = appearance?.palette;
+    if (!palette?.length && !(appearance?.nodeStyle === "lines" && appearance.fontHierarchy)) {
         return result;
     }
     // 缺少独立根节点色的导图沿用色卡首色，读取时不改写已有外观。
-    const appearance = model.metadata.appearance;
     const background = getMindmapHexColor(appearance.backgroundColor || canvasColor || "#ffffff") || "#ffffff";
     const foreground = getMindmapContrastColor(getMindmapLuminance(background) > .179 ? "#334155" : "#e2e8f0", background, 4.5);
     const pending = [{node: model.root, color: appearance.rootColor || palette[0], level: 0}];
     while (pending.length) {
         const {node, color, level} = pending.pop();
-        if (appearance.nodeStyle === "branch") {
+        if (appearance.nodeStyle === "lines") {
+            result.set(node.id, {lineColor: color, lineWidth: 1.5,
+                ...(appearance.fontHierarchy ? {fontSize: level === 0 ? 20 : level === 1 ? 16 : 14, bold: level < 2} : {})});
+        } else if (appearance.nodeStyle === "branch") {
             result.set(node.id, {backgroundColor: level < 2 ? color : "transparent",
                 textColor: getMindmapTextColor(level < 2 ? color : background), lineColor: color,
                 fontSize: level === 0 ? 20 : level === 1 ? 16 : 14, bold: level < 2, lineWidth: 1.5});
@@ -228,6 +231,16 @@ export const resolveListMindmapColors = (model: ListMindmapModel, canvasColor?: 
     return result;
 };
 
+// 新外观只影响连线和可选字号；仅在用户操作时退出旧主题，不改写读取到的旧配置。
+const useListMindmapLineAppearance = (metadata: ListMindmapMetadata) => {
+    const appearance = {...metadata.appearance, version: 1 as const, palette: metadata.appearance?.palette || [],
+        nodeStyle: "lines" as const};
+    delete appearance.rootColor;
+    delete appearance.backgroundColor;
+    metadata.appearance = appearance;
+    return appearance;
+};
+
 export const clearListMindmapManualColors = (metadata: ListMindmapMetadata) => {
     Object.values(metadata.nodes).forEach(style => {
         delete style.textColor;
@@ -242,51 +255,40 @@ export const getListMindmapAppearanceMenu = (metadata: ListMindmapMetadata,
                                             change: (update: (data: ListMindmapMetadata) => void) => void,
                                             labels: Record<string, string>, connector: IMenu): IMenu => {
     const palette = metadata.appearance?.palette || [];
-    const background = metadata.appearance?.backgroundColor || "";
+    const fontHierarchy = metadata.appearance?.nodeStyle === "lines" ? !!metadata.appearance.fontHierarchy :
+        !!palette.length && !!metadata.appearance?.nodeStyle;
     return {
         id: "appearance", icon: "iconTheme", label: labels.appearance,
         submenu: [
-            {id: "theme", iconHTML: "", label: labels.theme,
+            {id: "lineColors", iconHTML: "", label: labels.listMindmapLineColors,
                 bind: element => element.style.setProperty("--b3-menu-items-max-height", "min(480px, 60vh)"),
                 submenu: [
                     {id: "default", iconHTML: '<span class="b3-menu__icon mindmap-view__theme-preview" aria-hidden="true"></span>',
                         label: labels.default, checked: !palette.length,
                         click: () => change(data => {
-                            data.appearance = {...data.appearance, version: 1, palette: []};
-                            delete data.appearance.rootColor;
-                            delete data.appearance.nodeStyle;
+                            useListMindmapLineAppearance(data).palette = [];
                         })},
                     ...LIST_MINDMAP_PALETTES.map(preset => {
-                        const colors = [preset.rootColor, ...preset.colors.filter((_color, index) => index % 2 === 0)];
+                        const colors = preset.colors.filter((_color, index) => index % 2 === 0);
                         const gradient = colors.map((color, index) =>
                             `${color} ${index * 100 / colors.length}% ${(index + 1) * 100 / colors.length}%`).join(",");
                         return {
                             id: preset.id,
                             iconHTML: `<span class="b3-menu__icon b3-menu__icon--color mindmap-view__theme-preview" aria-hidden="true" style="background:linear-gradient(90deg,${gradient})"></span>`,
                             label: labels[preset.label],
-                            checked: metadata.appearance?.nodeStyle === "branch" &&
-                                metadata.appearance.rootColor === preset.rootColor &&
+                            checked: metadata.appearance?.nodeStyle === "lines" &&
                                 JSON.stringify(palette) === JSON.stringify(preset.colors),
                             click: () => change(data => {
-                                data.appearance = {...data.appearance, version: 1, palette: [...preset.colors],
-                                    rootColor: preset.rootColor, nodeStyle: "branch"};
+                                useListMindmapLineAppearance(data).palette = [...preset.colors];
                             }),
                         };
                     }),
                 ]},
-            {id: "canvasBackground", iconHTML: "", label: labels.listMindmapCanvasBackground, submenu: [
-                {id: "default", color: "", label: labels.default},
-                {id: "light", color: "#ffffff", label: labels.themeLight},
-                {id: "dark", color: "#1e1e1e", label: labels.themeDark},
-                ...LIST_MINDMAP_CANVAS_COLORS.map(color => ({id: color, color, label: color})),
-            ].map(item => ({id: item.id,
-                iconHTML: item.color ? `<span class="b3-menu__icon b3-menu__icon--color" style="background-color:${item.color}"></span>` : "",
-                label: item.label, checked: background === item.color,
-                click: () => change(data => {
-                    data.appearance = {...data.appearance, version: 1, palette: data.appearance?.palette || [],
-                        backgroundColor: item.color};
-                })}))},
             connector,
+            {id: "fontHierarchy", iconHTML: "", label: labels.listMindmapFontHierarchy, checked: fontHierarchy,
+                click: () => change(data => {
+                    useListMindmapLineAppearance(data).fontHierarchy = !fontHierarchy;
+                })},
             {id: "clearManualColors", iconHTML: "", label: labels.listMindmapClearManualColors,
                 click: () => change(clearListMindmapManualColors)},
         ],

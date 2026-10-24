@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "ألوان الخطوط",
+	"listMindmapFontHierarchy": "تدرج أحجام الخط حسب المستوى",
 	"listMindmapDocumentLayout": "تخطيط المستند",
 	"fullCheckSnapshot": "فحص المحتوى بالكامل",
 	"fullCheckSnapshotTip": "قراءة جميع الملفات المحلية لاكتشاف تغييرات المحتوى حتى مع ثبات الحجم ووقت التعديل، وإنشاء لقطة عند الحاجة؛ لن تُنزّل الموارد لهذا الفحص، وقد تستغرق مساحات العمل الكبيرة وقتًا أطول",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "تحميل المستند بالكامل وتحديد الكل",
 	"autoFitRowHeight": "ملاءمة ارتفاع الصف تلقائيًا",
 	"backlinkDatabaseFields": "حقول قاعدة البيانات",
-	"listMindmapCanvasBackground": "خلفية اللوحة",
 	"listMindmapClearManualColors": "مسح الألوان اليدوية",
 	"listMindmapLineColor": "لون خطوط الفروع",
 	"lockScreenWallpaper": "خلفية شاشة القفل",

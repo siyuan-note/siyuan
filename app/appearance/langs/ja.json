@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "接続線の色",
+	"listMindmapFontHierarchy": "階層に応じた文字サイズ",
 	"listMindmapDocumentLayout": "ドキュメントのレイアウト",
 	"fullCheckSnapshot": "内容の完全チェック",
 	"fullCheckSnapshotTip": "ローカルの全ファイルを読み取り、サイズと更新日時が変わらない内容の変更も検出し、必要ならスナップショットを作成します。チェックのためのリソースのダウンロードは行わず、大きなワークスペースでは時間がかかる場合があります",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "全文を読み込んですべて選択",
 	"autoFitRowHeight": "行の高さを自動調整",
 	"backlinkDatabaseFields": "データベースのフィールド",
-	"listMindmapCanvasBackground": "キャンバスの背景",
 	"listMindmapClearManualColors": "手動の配色をクリア",
 	"listMindmapLineColor": "枝線の色",
 	"lockScreenWallpaper": "ロック画面の壁紙",

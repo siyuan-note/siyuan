@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "连线配色",
+	"listMindmapFontHierarchy": "字体层级",
 	"listMindmapDocumentLayout": "文档布局",
 	"fullCheckSnapshot": "完整校验",
 	"fullCheckSnapshotTip": "读取所有本地文件，检查大小和修改时间未变的内容变化，必要时创建快照；不会为校验主动下载资源，大型工作空间可能耗时较长",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "加载全文并全选",
 	"autoFitRowHeight": "自适应行高",
 	"backlinkDatabaseFields": "数据库字段",
-	"listMindmapCanvasBackground": "画布背景",
 	"listMindmapClearManualColors": "清除手工配色",
 	"listMindmapLineColor": "分支连线颜色",
 	"lockScreenWallpaper": "锁屏壁纸",

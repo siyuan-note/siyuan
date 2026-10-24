@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "Цвета линий",
+	"listMindmapFontHierarchy": "Размер шрифта по уровням",
 	"listMindmapDocumentLayout": "Макет документа",
 	"fullCheckSnapshot": "Полная проверка содержимого",
 	"fullCheckSnapshotTip": "Прочитать все локальные файлы, чтобы найти изменения содержимого даже при неизменных размере и времени изменения, и при необходимости создать снимок; ресурсы для проверки не загружаются, а большие рабочие пространства могут потребовать больше времени",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "Загрузить весь документ и выделить всё",
 	"autoFitRowHeight": "Автоподбор высоты строки",
 	"backlinkDatabaseFields": "Поля базы данных",
-	"listMindmapCanvasBackground": "Фон холста",
 	"listMindmapClearManualColors": "Сбросить ручные цвета",
 	"listMindmapLineColor": "Цвет линий ветвей",
 	"lockScreenWallpaper": "Обои экрана блокировки",

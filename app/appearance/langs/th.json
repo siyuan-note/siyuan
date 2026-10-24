@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "สีเส้น",
+	"listMindmapFontHierarchy": "ขนาดตัวอักษรตามลำดับชั้น",
 	"listMindmapDocumentLayout": "เค้าโครงเอกสาร",
 	"fullCheckSnapshot": "ตรวจสอบเนื้อหาทั้งหมด",
 	"fullCheckSnapshotTip": "อ่านไฟล์ภายในเครื่องทั้งหมดเพื่อตรวจหาการเปลี่ยนแปลงของเนื้อหา แม้ขนาดและเวลาแก้ไขจะเท่าเดิม และสร้างสแนปช็อตเมื่อจำเป็น โดยจะไม่ดาวน์โหลดทรัพยากรเพื่อการตรวจสอบนี้ และพื้นที่ทำงานขนาดใหญ่อาจใช้เวลานานขึ้น",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "โหลดเอกสารทั้งหมดและเลือกทั้งหมด",
 	"autoFitRowHeight": "ปรับความสูงของแถวโดยอัตโนมัติ",
 	"backlinkDatabaseFields": "ฟิลด์ฐานข้อมูล",
-	"listMindmapCanvasBackground": "พื้นหลังผืนผ้าใบ",
 	"listMindmapClearManualColors": "ล้างสีที่กำหนดเอง",
 	"listMindmapLineColor": "สีเส้นกิ่ง",
 	"lockScreenWallpaper": "ภาพพื้นหลังหน้าจอล็อก",

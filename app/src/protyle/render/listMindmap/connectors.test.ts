@@ -106,6 +106,24 @@ test("reference themes overlay root trunks in branch order and keep their shared
     }
 });
 
+test("line-only palettes overlay root trunks while keeping first-level connections below the text", () => {
+    for (const style of LIST_MINDMAP_CONNECTOR_STYLES) {
+        const result = buildListMindmapConnectors("root", positions, edges, style, () => new PathFixture(), false, true);
+        assert.equal(result.branches[0].path.commands.at(-1).at(-1), 40);
+        assert.equal(result.branches[2].path.commands[0].at(-1), 240);
+        if (style === "orthogonal" || style === "rounded") {
+            assert.deepEqual(result.trunkParents, ["b"]);
+            assert.ok(result.branches[0].trunk && result.branches[1].trunk);
+            const reordered = buildListMindmapConnectors("root", positions, [edges[1], edges[0], edges[2]],
+                style, () => new PathFixture(), false, true);
+            assert.deepEqual(reordered.branches.map(branch => branch.id), ["b", "a", "c"]);
+            assert.deepEqual(reordered.branches[0].trunk.commands, result.branches[1].trunk.commands);
+        } else {
+            assert.ok(result.branches.every(branch => !branch.trunk));
+        }
+    }
+});
+
 test("the connector submenu checks the saved preset and selects exactly one whole-map style", () => {
     const labels = {listMindmapConnectorStyle: "Connectors", listMindmapConnectorSpline: "Fork",
         listMindmapConnectorOrthogonal: "Elbow", listMindmapConnectorBezier: "Fan", listMindmapConnectorRounded: "Rounded"};

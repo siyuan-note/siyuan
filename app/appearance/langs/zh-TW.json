@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "連線配色",
+	"listMindmapFontHierarchy": "字型層級",
 	"listMindmapDocumentLayout": "文件版面配置",
 	"fullCheckSnapshot": "完整校驗",
 	"fullCheckSnapshotTip": "讀取所有本機檔案，檢查大小與修改時間未變的內容變更，必要時建立快照；不會為校驗主動下載資源，大型工作空間可能耗時較長",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "載入全文並全選",
 	"autoFitRowHeight": "自動調整列高",
 	"backlinkDatabaseFields": "資料庫欄位",
-	"listMindmapCanvasBackground": "畫布背景",
 	"listMindmapClearManualColors": "清除手動配色",
 	"listMindmapLineColor": "分支連線顏色",
 	"lockScreenWallpaper": "鎖定畫面桌布",

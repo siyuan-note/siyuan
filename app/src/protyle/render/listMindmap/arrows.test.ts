@@ -163,15 +163,16 @@ test("palette colors reach hierarchy paths and parent trunks while manual line c
     }
 });
 
-test("reference themes paint root overlaps with branch colors in display order at one width in editing and print", () => {
-    for (const connectorStyle of ["orthogonal", "rounded"]) {
+test("reference and line-only palettes paint root overlaps in display order at one width in editing and print", () => {
+    for (const {connectorStyle, nodeStyle} of ["orthogonal", "rounded"].flatMap(connectorStyle =>
+        ["branch", "lines"].map(nodeStyle => ({connectorStyle, nodeStyle})))) {
         for (const printLayout of [false, true]) {
             const {target, strokes, strokeStyles, strokeAlphas, strokeWidths} = setup();
             target.model.root = {id: "root", children: [{id: "a", children: []},
                 {id: "b", children: [{id: "c", children: []}]}]};
             Object.assign(target.model.metadata, {connectorStyle, relations: [],
                 nodes: {a: {branchColor: 0, lineColor: "#abcdef"}, b: {branchColor: 1}},
-                appearance: {version: 1, palette: ["#ff0000", "#0000ff"], rootColor: "#111111", nodeStyle: "branch"}});
+                appearance: {version: 1, palette: ["#ff0000", "#0000ff"], rootColor: "#111111", nodeStyle}});
             target.themeColors = resolveListMindmapColors(target.model);
             target.options.printLayout = printLayout;
             target.readOnly = printLayout;

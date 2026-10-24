@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "Linienfarben",
+	"listMindmapFontHierarchy": "Schriftgröße nach Ebene",
 	"listMindmapDocumentLayout": "Dokumentlayout",
 	"fullCheckSnapshot": "Vollständige Inhaltsprüfung",
 	"fullCheckSnapshotTip": "Alle lokalen Dateien lesen, um Inhaltsänderungen auch bei unveränderter Größe und Änderungszeit zu erkennen und bei Bedarf einen Schnappschuss zu erstellen; Ressourcen werden dafür nicht heruntergeladen, große Arbeitsbereiche können mehr Zeit benötigen",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "Gesamtes Dokument laden und alles auswählen",
 	"autoFitRowHeight": "Zeilenhöhe automatisch anpassen",
 	"backlinkDatabaseFields": "Datenbankfelder",
-	"listMindmapCanvasBackground": "Hintergrund der Zeichenfläche",
 	"listMindmapClearManualColors": "Manuelle Farben löschen",
 	"listMindmapLineColor": "Farbe der Zweiglinien",
 	"lockScreenWallpaper": "Sperrbildschirm-Hintergrund",

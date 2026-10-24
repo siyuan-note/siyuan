@@ -136,7 +136,7 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         choose("bezier");
         assert.equal(Object.hasOwn(data, "connectorStyle"), false, "restoring the default removes the optional field");
         target.onSettingsMenu(anchor);
-        const theme = (appearanceItem.submenu as IMenu[]).find(entry => entry.id === "theme");
+        const theme = (appearanceItem.submenu as IMenu[]).find(entry => entry.id === "lineColors");
         const beforeTheme = list.outerHTML;
         const beforeCount = transactions.length;
         (theme.submenu as IMenu[]).find(entry => entry.id === "waves").click(undefined, undefined);
@@ -144,10 +144,10 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         assert.equal(transactions.at(-1).before, beforeTheme);
         assert.equal(JSON.parse(list.outerHTML).nodes.child.lineColor, "red", "theme changes retain manual overrides");
         assert.equal(JSON.parse(list.outerHTML).nodes.child.branchColor, 0, "branch slots are saved with the same snapshot");
-        assert.equal(JSON.parse(list.outerHTML).appearance.rootColor, "#849695",
-            "the root theme color is saved in the same document transaction on desktop and mobile");
-        assert.equal(JSON.parse(list.outerHTML).appearance.nodeStyle, "branch",
-            "the reference style is saved with the root and branch palette on both platforms");
+        assert.equal(JSON.parse(list.outerHTML).appearance.rootColor, undefined, "line colors do not set a root fill");
+        assert.equal(JSON.parse(list.outerHTML).appearance.nodeStyle, "lines",
+            "the line-only style is saved with its palette on both platforms");
+        assert.equal(JSON.parse(list.outerHTML).appearance.fontHierarchy, undefined, "font hierarchy defaults to off");
         const themed = list.outerHTML;
         data = JSON.parse(beforeTheme);
         assert.equal(JSON.parse(list.outerHTML).appearance, undefined, "undo restores the unthemed document");
@@ -159,6 +159,12 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         assert.equal(updated.nodes.child.backgroundColor, "#fed7aa");
         assert.equal(updated.nodes.child.lineColor, "red");
         assert.equal(updated.nodes.deleted, undefined, "a stale selection cannot create orphan styles");
+        target.onSettingsMenu(anchor);
+        const hierarchy = (appearanceItem.submenu as IMenu[]).find(entry => entry.id === "fontHierarchy");
+        const beforeHierarchy = list.outerHTML;
+        hierarchy.click(undefined, undefined);
+        assert.equal(transactions.at(-1).before, beforeHierarchy);
+        assert.equal(JSON.parse(list.outerHTML).appearance.fontHierarchy, true);
         const count = transactions.length;
         editable = false;
         choose("spline");

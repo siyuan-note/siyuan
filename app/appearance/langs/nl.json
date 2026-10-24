@@ -1,4 +1,6 @@
 {
+	"listMindmapLineColors": "Lijnkleuren",
+	"listMindmapFontHierarchy": "Lettergrootte per niveau",
 	"listMindmapDocumentLayout": "Documentindeling",
 	"fullCheckSnapshot": "Volledige inhoudscontrole",
 	"fullCheckSnapshotTip": "Lees alle lokale bestanden om inhoudswijzigingen te vinden, ook als grootte en wijzigingstijd gelijk blijven, en maak zo nodig een momentopname; bronnen worden hiervoor niet gedownload en grote werkruimten kunnen meer tijd kosten",
@@ -58,7 +60,6 @@
 	"loadAllAndSelectAll": "Volledig document laden en alles selecteren",
 	"autoFitRowHeight": "Rijhoogte automatisch aanpassen",
 	"backlinkDatabaseFields": "Databasevelden",
-	"listMindmapCanvasBackground": "Canvasachtergrond",
 	"listMindmapClearManualColors": "Handmatige kleuren wissen",
 	"listMindmapLineColor": "Kleur van taklijnen",
 	"lockScreenWallpaper": "Achtergrond van het vergrendelscherm",

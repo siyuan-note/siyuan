@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024212002"
+		"updated": "20261025004433"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261024212002"
+				"updated": "20261025004433"
 			},
 			"Children": [
 				{
@@ -2401,7 +2401,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-ia87ag4",
-				"updated": "20261024195223"
+				"updated": "20261025004433"
 			},
 			"Children": [
 				{
@@ -2489,7 +2489,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-dz75ii8",
-				"updated": "20261024195223"
+				"updated": "20261025004433"
 			},
 			"Children": [
 				{
@@ -2517,11 +2517,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "主題"
+					"TextMarkTextContent": "連線配色"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中為目前心智圖選擇 47 種配色主題。根節點和一級節點使用色卡背景及白色文字，二級及後續節點使用透明背景，並依畫布顏色自動選擇黑色或白色文字。後代連線繼承所屬一級分支的顏色，各層級連線粗細一致。折線和圓角折線的根節點主幹依節點順序疊加繪製，後繪製的分支顏色覆蓋重疊部分。"
+					"Data": " 中為目前心智圖選擇 47 種連線配色。連線配色不修改節點文字和背景，畫布跟隨應用程式主題。後代連線繼承所屬一級分支的顏色，各層級連線粗細一致。折線和圓角折線的根節點主幹依節點順序疊加繪製，後繪製的分支顏色覆蓋重疊部分。"
 				}
 			]
 		},
@@ -2530,12 +2530,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-b6c6nnw",
-				"updated": "20261024164212"
+				"updated": "20261025004433"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "主題文字與連線會配合畫布明暗調整。調整分支順序會保留原有配色，新增節點自動跟隨心智圖配色。手動設定的顏色、字級和字重優先於主題。選擇預設可移除色卡，並保留手動配色和畫布背景。既有心智圖保留原有配色，重新選擇主題後套用新的分層樣式。主題不會改變節點內容、結構或摺疊狀態。"
+					"Data": "連線顏色會配合畫布明暗調整。調整分支順序會保留原有配色，新增節點自動跟隨分支配色。字型層級預設關閉，可在外觀中獨立開啟，依層級調整字級和字重；手動顏色和格式優先。連線配色選擇預設可移除色卡，並保留手動格式和字型層級設定。既有心智圖保留已儲存的外觀；主動選擇連線配色或調整字型層級後，才切換到新外觀，移除舊的自動節點和畫布配色，保留手動格式。節點內容、結構和摺疊狀態保持不變。"
 				}
 			]
 		},
@@ -2544,39 +2544,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-z2ij065",
-				"updated": "20261022102848"
+				"updated": "20261025004433"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "更多"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "外觀"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "畫布背景"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中選擇純色背景，選擇預設則跟隨應用程式主題。在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2603,7 +2576,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中清除節點、階層連線、關係線和概要的手動配色，恢復使用色卡或預設顏色；畫布背景和其他格式保持不變。外觀隨文件儲存，支援復原和重做，並用於思源格式的 HTML 與 PDF 預覽。"
+					"Data": " 中清除節點、階層連線、關係線和概要的手動配色，恢復使用色卡或預設顏色，其他格式和字型層級設定保持不變。外觀隨文件儲存，支援復原和重做，並用於思源格式的 HTML 與 PDF 預覽。"
 				}
 			]
 		},

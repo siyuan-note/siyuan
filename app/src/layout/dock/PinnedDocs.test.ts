@@ -1,13 +1,13 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {readFileSync} from "node:fs";
-import {join, posix} from "node:path";
+import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {getPinnedDropPosition} from "../../util/pinnedDocsDrop";
 import {ParentDocClick} from "./parentDocClick";
 import {setTimeout as delay} from "node:timers/promises";
-import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr, escapeTooltipTextAttr} from "../../util/escape";
 
 interface IPanelHarness {
     parentDocClick: ParentDocClick;
@@ -66,19 +66,14 @@ const loadPanel = (fetchCode = 0) => {
         return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
-    const pathName = {};
     const tooltip = {};
-    const escape = {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr};
-    for (const [file, target] of [["pathName", pathName], ["fileTreeTooltip", tooltip]] as const) {
-        runInNewContext(ts.transpileModule(readFileSync(join(__dirname, `../../util/${file}.ts`), "utf8"), {
-            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
-        }).outputText, {exports: target, window: {siyuan: runtime}, require: (name: string) => {
-            if (name === "path") { return {posix}; }
-            if (name.endsWith("/escape")) { return escape; }
-            if (name.endsWith("/pathName")) { return pathName; }
-            return {};
-        }});
-    }
+    const escape = {escapeHtml, escapeHtmlTextAndAttr, escapeTooltipTextAttr};
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "../../util/fileTreeTooltip.ts"), "utf8"), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+    }).outputText, {exports: tooltip, window: {siyuan: runtime}, require: (name: string) => {
+        if (name.endsWith("/escape")) { return escape; }
+        return {};
+    }});
     const menuToggle = {};
     runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "../../menus/menuToggle.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
@@ -707,10 +702,10 @@ test("document info updates every available pinned copy without scheduling anoth
         querySelector() { return {setAttribute: (_name: string, value: string) => { this.label = value; }}; },
     }));
     panel.list = {querySelectorAll: () => rows};
-    const info = {rootID: "document", name: 'A "title" <tag>', hSize: "2 KB", hMtime: "updated", hCtime: "created",
+    const info = {rootID: "document", name: 'A "title" <tag> &copy;', hSize: "2 KB", hMtime: "updated", hCtime: "created",
         bookmark: "bookmark <text>", name1: "named", alias: "alias", memo: "memo", subFileCount: 2};
     panel.onFileTreeMessage({cmd: "reloadDocInfo", data: info});
-    const expected = 'A "title" &lt;tag> <small class=\'ft__on-surface\'>2 KB</small><br>Bookmark bookmark &lt;text>' +
+    const expected = "A &quot;title&quot; &lt;tag&gt; &amp;copy; <small class='ft__on-surface'>2 KB</small><br>Bookmark bookmark &lt;text&gt;" +
         "<br>Name named<br>Alias alias<br>Memo memo (2 children)<br>Modified updated<br>Created created";
     assert.equal(rows[0].label, expected);
     assert.equal(rows[1].label, expected);

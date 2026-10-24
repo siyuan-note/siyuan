@@ -1,5 +1,5 @@
 import {config as configApi} from "../../config/util/configApi";
-import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {genFileTreeDocAriaLabel} from "../../util/fileTreeTooltip";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -1323,7 +1323,7 @@ export class Files extends Model {
         );
         if (liElement) {
             if (liElement.getAttribute("data-type") === "navigation-file") {
-                liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", genFileTreeDocAriaLabel(data.data, escapeLessThans));
+                liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", genFileTreeDocAriaLabel(data.data));
             }
             this.updateSubFileCount(liElement as HTMLElement, subFileCount);
         }
@@ -2155,7 +2155,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (item.count && item.count > 0) {
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
-        const ariaLabel = genFileTreeDocAriaLabel(item, escapeAriaLabel);
+        const ariaLabel = genFileTreeDocAriaLabel(item, true);
         const paddingLeft = (item.path.split("/").length - 1) * 18;
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         const iconExpands = window.siyuan.config.fileTree.docIconClickMode === 1;

@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import * as ts from "typescript";
 
-const browserCases = (sources: Record<string, string>) => {
+const browserCases = async (sources: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     document.body.innerHTML = "<style>#carrier{width:200px}span{display:inline-block;min-height:20px}</style>" +
         '<div id="carrier"></div><div id="tooltip" class="fn__none"></div>';
@@ -27,7 +27,11 @@ const browserCases = (sources: Record<string, string>) => {
                 getArticle() {}, fetchPost: (_url: string, _data: unknown, callback: (value: unknown) => void) => callback({
                     data: {pageCount: 1, blocks: [{id: "doc", rootID: "doc", type: "d", hPath, content: "", ial: {}}]},
                 })};
-        }, {BlockDOM2Content: (value: string) => value});
+        }, {BlockDOM2Content: (value: string) => {
+            const content = document.createElement("div");
+            content.innerHTML = value;
+            return content.textContent;
+        }});
         modules[name] = exports;
         return exports;
     };
@@ -37,18 +41,24 @@ const browserCases = (sources: Record<string, string>) => {
     const treeModule = load("Tree") as unknown as {Tree: {prototype: object}};
     const tree = Object.create(treeModule.Tree.prototype);
     tree.titleTooltipPosition = "parentE";
-    const search = load("search") as {render: (config: {hPath: string}) => string};
+    const search = load("search") as {render: (config: {hPath: string}) => string, results: (title: string) => string[]};
+    load("config");
+    const searchPath = load("path") as typeof import("../search/path");
     const unRef = load("unRef") as typeof import("../search/unRef");
     const carrier = document.getElementById("carrier");
     const tip = document.getElementById("tooltip");
     tooltip.initTooltips();
-    for (const title of ["A%2FB", "A%3Ctag%3E.sy", "100%25/Incomplete%2"]) {
-        hPath = title;
+    const escape = modules.escape as typeof import("../util/escape");
+    for (const title of ["A%2FB", "A%3Ctag%3E.sy", "100%25/Incomplete%2", "A&copy;B", "A&amp;B",
+        "A&lt;tag&gt;", 'A<tag> & "quotes"', "A&#47;B", "A&#x2f;B"]) {
+        // hPath is derived from escaped IAL attributes; outline content is BlockDOM.
+        hPath = escape.escapeHtmlTextAndAttr(title);
         const fragments = [
             tree.genHTML([{id: "doc", type: "backlink", depth: 0, name: title, hPath}]),
-            tree.genHTML([{id: "doc", type: "outline", depth: 0, name: title}]),
-            tree.genBlockHTML([{id: "doc", depth: 0, content: title}], true, "outline"),
+            tree.genHTML([{id: "doc", type: "outline", depth: 0, name: hPath}]),
+            tree.genBlockHTML([{id: "doc", depth: 0, content: hPath}], true, "outline"),
             search.render({hPath}),
+            ...search.results(hPath),
         ];
         carrier.innerHTML = '<div id="searchUnRefResult"></div><div id="searchUnRefList"></div>' +
             '<div data-type="unRefPrevious"></div><div data-type="unRefNext"></div><div class="fn__loading"></div>';
@@ -58,15 +68,21 @@ const browserCases = (sources: Record<string, string>) => {
             carrier.innerHTML = fragment;
             const target = carrier.querySelector(".ariaLabel");
             check.equal(target.getAttribute("data-tooltip-encoding"), "none");
-            check.equal(target.getAttribute("aria-label"), title);
+            check.equal(target.getAttribute("aria-label"), escape.escapeHtmlTextAndAttr(title));
             target.dispatchEvent(new PointerEvent("pointerover", {bubbles: true, pointerType: "mouse"}));
             target.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
             check.equal(tip.textContent, title, fragment);
             check.equal(tip.querySelector("tag"), null);
+            if (target.id === "searchPathInput") {
+                await searchPath.refreshCurrentSearchPath({element: carrier, config: {idPath: ["doc"]} as Config.IUILayoutTabSearchConfig,
+                    resolveHPath: async () => hPath});
+                target.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+                check.equal(tip.textContent, title, "refreshed search path matches the initial tooltip");
+            }
         }
         mobile = true;
         carrier.innerHTML = tree.genHTML([{id: "doc", type: "backlink", depth: 0, name: title, hPath}]);
-        check.equal(carrier.querySelector(".ariaLabel").getAttribute("aria-label"), title);
+        check.equal(carrier.querySelector(".ariaLabel").getAttribute("aria-label"), escape.escapeHtmlTextAndAttr(title));
         mobile = false;
     }
     carrier.innerHTML = '<span class="ariaLabel" aria-label="A%2FB">Legacy encoded tooltip</span>';
@@ -75,7 +91,7 @@ const browserCases = (sources: Record<string, string>) => {
     return "Title tooltip cases passed";
 };
 
-test("document and heading tooltips preserve percent escapes across trees and search", {
+test("document and heading tooltips preserve percent escapes and entities across trees and search", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -83,14 +99,19 @@ test("document and heading tooltips preserve percent escapes across trees and se
     const compile = (source: string) => ts.transpileModule(source, {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
     }).outputText;
-    for (const file of ["util/escape", "util/hoverInput", "dialog/tooltip", "util/Tree", "search/unRef"]) {
+    for (const file of ["util/escape", "util/hoverInput", "dialog/tooltip", "util/Tree", "search/unRef", "search/config", "search/path"]) {
         sources[file.split("/").pop()] = compile(readFileSync(`src/${file}.ts`, "utf8"));
     }
     const searchSource = readFileSync("src/search/util.ts", "utf8");
     const start = searchSource.indexOf('<span id="searchPathInput"');
     const end = searchSource.indexOf("</span>", start) + "</span>".length;
-    sources.search = compile('const {escapeAriaLabel, escapeHtml} = require("escape"); exports.render = config => `' +
-        searchSource.slice(start, end) + "`;");
+    const resultTemplates = [...searchSource.matchAll(
+        /<span class="b3-list-item__(?:text|meta)[^\n]*aria-label="\$\{escapeHtmlTextAndAttr\(title\)}"[^\n]*<\/span>/g,
+    )];
+    assert.equal(resultTemplates.length, 2);
+    sources.search = compile('const {escapeHtml, escapeHtmlTextAndAttr} = require("escape"); exports.render = config => `' +
+        searchSource.slice(start, end) + "`; exports.results = title => [" +
+        resultTemplates.map(match => "`" + match[0] + "`").join(",") + "];");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-tooltip-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app,BrowserWindow}=require("electron");

@@ -4,11 +4,49 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 )
+
+var ErrDocumentTitleSpec = errors.New("document title requires spec " + DocumentTitleSpec)
+
+func documentTitleSpecUpgradeRequired(spec string) bool {
+	version, err := strconv.Atoi(spec)
+	required, _ := strconv.Atoi(DocumentTitleSpec)
+	return spec == "" || err == nil && version < required
+}
+
+// CheckDocumentTitleWriteSpecJSON 仅用于已通过源格式检查的原始文件写入，不收紧既有源的读取及恢复。
+// 不改写请求字节；含斜杠标题必须声明足够的 Spec，重复属性不能遮盖版本要求。
+func CheckDocumentTitleWriteSpecJSON(data []byte) error {
+	var root struct {
+		Spec       string
+		Properties documentTitleSpecProperties
+	}
+	if err := json.Unmarshal(data, &root); err != nil {
+		return err
+	}
+	if root.Properties.requiresStructured && documentTitleSpecUpgradeRequired(root.Spec) {
+		return ErrDocumentTitleSpec
+	}
+	return nil
+}
+
+type documentTitleSpecProperties struct {
+	requiresStructured bool
+}
+
+func (properties *documentTitleSpecProperties) UnmarshalJSON(data []byte) error {
+	err := documentaddressing.CheckTitleProperties(data, 1)
+	if errors.Is(err, documentaddressing.ErrModeConflict) {
+		properties.requiresStructured = true
+		return nil
+	}
+	return err
+}
 
 // checkDocumentSourceJSON 保留重复字段中遇到的兼容错误，在容错解析前确定标题和源版本能否处理。
 func checkDocumentSourceJSON(data []byte, mode int) (string, error) {

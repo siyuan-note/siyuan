@@ -236,8 +236,8 @@ func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
 			return ast.WalkContinue
 		})
 	}
-	if version, err := strconv.Atoi(tree.Root.Spec); err == nil && version < 6 &&
-		strings.Contains(tree.Root.IALAttr("title"), "/") {
+	if documentTitleSpecUpgradeRequired(tree.Root.Spec) &&
+		documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")) != nil {
 		tree.Root.Spec = DocumentTitleSpec
 	}
 	return oldSpec != tree.Root.Spec

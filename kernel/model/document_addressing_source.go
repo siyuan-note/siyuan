@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"io/fs"
 	"os"
@@ -54,6 +55,15 @@ func checkDocumentAddressingSource(absPath string, data []byte) error {
 func checkDocumentAddressingSourceOverwrite(absPath string, data []byte) error {
 	if err := checkDocumentAddressingSource(absPath, data); err != nil {
 		return err
+	}
+	paths, err := documentAddressingDataPaths(absPath)
+	if err != nil {
+		return err
+	}
+	if isDocumentAddressingSource(paths) {
+		if err = treenode.CheckDocumentTitleWriteSpecJSON(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))); err != nil {
+			return err
+		}
 	}
 	current, err := filelock.ReadFile(absPath)
 	if errors.Is(err, os.ErrNotExist) {

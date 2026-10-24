@@ -66,7 +66,17 @@ func addressingAPIRequest(t *testing.T, route string, handler gin.HandlerFunc, p
 	return response.Code
 }
 
+type addressingAPIPutResponse struct {
+	Code int
+	Msg  string
+}
+
 func addressingAPIPut(t *testing.T, name, value string, directory bool) int {
+	t.Helper()
+	return addressingAPIPutResult(t, name, value, directory).Code
+}
+
+func addressingAPIPutResult(t *testing.T, name, value string, directory bool) addressingAPIPutResponse {
 	t.Helper()
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
@@ -87,11 +97,74 @@ func addressingAPIPut(t *testing.T, name, value string, directory bool) int {
 	c.Request.Header.Set("Content-Type", writer.FormDataContentType())
 	putFile(c)
 	requireAPIContract(t, "POST", "/api/file/putFile", recorder)
-	var response struct{ Code int }
+	var response addressingAPIPutResponse
 	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 		t.Fatal(err)
 	}
-	return response.Code
+	return response
+}
+
+func TestAPIContractDocumentAddressingRawTitleSpec(t *testing.T) {
+	addressingAPIWorkspace(t)
+	addressingAPIWrite(t, filepath.Join(util.DataDir, addressingAPIBox, documentaddressing.ConfigPath), `{"documentAddressingVersion":2}`)
+	const document = "20261022130000-rawdoc1.sy"
+	name := "data/" + addressingAPIBox + "/" + document
+	abs := filepath.Join(util.WorkspaceDir, name)
+	ordinary := `{"Spec":"2","Properties":{"title":"Ordinary"}}`
+	underVersioned := `{"Spec":"2","Properties":{"title":"A/B"}}`
+	valid := "\xef\xbb\xbf" + "{\n  \"Spec\":\"6\",\"Properties\":{\"title\":\"A/B\"}\n}\n"
+	addressingAPIWrite(t, abs, ordinary)
+	before, _ := os.Stat(abs)
+	result := addressingAPIPutResult(t, name, underVersioned, false)
+	if result.Code != -1 || result.Msg != "document title requires spec 6" {
+		t.Fatalf("put did not expose the title spec requirement: %+v", result)
+	}
+	after, _ := os.Stat(abs)
+	if data, _ := os.ReadFile(abs); string(data) != ordinary || !before.ModTime().Equal(after.ModTime()) {
+		t.Fatal("rejected title changed the destination")
+	}
+	source := filepath.Join(util.DataDir, "assets", document)
+	addressingAPIWrite(t, source, underVersioned)
+	first := filepath.Join(util.DataDir, "assets", "first.txt")
+	addressingAPIWrite(t, first, "attachment")
+	renamed := "data/" + addressingAPIBox + "/20261022130000-parent1/" + document
+	for _, request := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		body    interface{}
+	}{
+		{"copyFile", copyFile, apicontract.CopyFileRequest{Src: "assets/" + document, Dest: abs}},
+		{"renameFile", renameFile, apicontract.RenameFileRequest{Path: "data/assets/" + document, NewPath: renamed}},
+		{"globalCopyFiles", globalCopyFiles, apicontract.CopyFilesRequest{Srcs: []string{first, source}, DestDir: "data/" + addressingAPIBox}},
+		{"workspaceCopyFiles", workspaceCopyFiles, apicontract.CopyFilesRequest{Srcs: []string{"data/assets/first.txt", "data/assets/" + document}, DestDir: "data/" + addressingAPIBox}},
+	} {
+		if code := addressingAPIRequest(t, request.name, request.handler, request.body); code != -1 {
+			t.Fatalf("%s accepted a low-spec slash title: %d", request.name, code)
+		}
+	}
+	if data, _ := os.ReadFile(source); string(data) != underVersioned {
+		t.Fatal("rejected rename changed the original source")
+	}
+	for _, path := range []string{filepath.Join(util.DataDir, addressingAPIBox, "first.txt"), filepath.Dir(filepath.Join(util.WorkspaceDir, renamed))} {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Fatal("rejected batch created destination entries", path, err)
+		}
+	}
+	// 已有低 Spec 源仍可读取，合法替换可以修复版本，原始字节不被重新序列化。
+	addressingAPIWrite(t, abs, underVersioned)
+	if code := addressingAPIPut(t, name, valid, false); code != 0 {
+		t.Fatalf("valid replacement could not repair an existing source: %d", code)
+	}
+	if data, _ := os.ReadFile(abs); string(data) != valid {
+		t.Fatal("valid title write changed request bytes")
+	}
+	addressingAPIWrite(t, source, valid)
+	if code := addressingAPIRequest(t, "copyFile", copyFile, apicontract.CopyFileRequest{Src: "assets/" + document, Dest: abs}); code != 0 {
+		t.Fatalf("valid title copy failed: %d", code)
+	}
+	if data, _ := os.ReadFile(abs); string(data) != valid {
+		t.Fatal("valid title copy changed source bytes")
+	}
 }
 
 func TestAPIContractDocumentAddressingRawWrites(t *testing.T) {

@@ -1497,6 +1497,8 @@ if (response.code === 0 && response.data) {
 
 写入由笔记本及文档 ID 组成的 `.sy` 文档路径时，同时检查传入内容和已有文档。未知格式、损坏的文档源或标题与兼容模式冲突时返回 `code: -1`，保留原文件及修改时间；成功写入保留请求中的原始字节，不规范化标题。附件或插件目录中的 `.sy` 文件不作为文档解析。
 
+新传入的标题含 ASCII `/` 时，必须声明 `Spec` 至少为 `6`，否则返回 `code: -1`、`msg: "document title requires spec 6"`，不自动改写内容。已有低 Spec 源仍可读取，也可以由版本标记合法的内容替换。
+
 * 参数为 HTTP Multipart 表单
 
     * `path`：工作空间路径下的文件路径
@@ -1543,6 +1545,8 @@ if (response.code === 0 && response.data) {
 创建目标目录或移动文件之前会检查完整操作的笔记本寻址兼容性。不支持的模式，以及移动或覆盖 `conf/document-addressing.json` 的操作，返回 `code: -1`。
 
 目标包含由笔记本及文档 ID 组成的 `.sy` 文档路径时，也会预检全部传入文档；未知格式、损坏的文档源或标题冲突返回 `code: -1`，不创建目标目录，也不移动来源。
+
+新移入的标题含 ASCII `/` 时，必须声明 `Spec` 至少为 `6`，否则返回 `code: -1`、`msg: "document title requires spec 6"`，保留来源和目标。
 
 * 参数
 

@@ -71,3 +71,49 @@ func TestDocumentSourceVersionCannotBeShadowed(t *testing.T) {
 		}
 	}
 }
+
+func TestDocumentTitleWriteSpec(t *testing.T) {
+	for _, source := range []string{
+		`{"Spec":"2","Properties":{"title":"A/B"}}`,
+		`{"Spec":"5","Properties":{"title":"A\u002fB"}}`,
+		`{"Properties":{"title":"A&#47;B"}}`,
+		`{"Spec":"2","Properties":{"title":"A&#x2F;B"}}`,
+		`{"Spec":"2","Properties":{"title":"A/B","title":"Ordinary"}}`,
+		`{"Spec":"2","Properties":{"title":"A/B"},"Properties":{"title":"Ordinary"}}`,
+		`{"Spec":"6","Spec":"2","Properties":{"title":"A/B"}}`,
+	} {
+		if err := CheckSpecJSONForMode([]byte(source), 2); err != nil {
+			t.Fatalf("existing low-spec source is no longer readable: %v", err)
+		}
+		if err := CheckDocumentTitleWriteSpecJSON([]byte(source)); !errors.Is(err, ErrDocumentTitleSpec) {
+			t.Fatalf("raw write accepted an under-versioned title: %s, %v", source, err)
+		}
+	}
+	for _, source := range []string{
+		`{"Spec":"6","Properties":{"title":"A/B"}}`,
+		`{"Spec":"6","Properties":{"title":"A&#47;B"}}`,
+		`{"Spec":"2","Spec":"6","Properties":{"title":"A/B"}}`,
+		`{"Spec":"2","Properties":{"title":"A%2FB A／B A&amp;#47;B"}}`,
+		`{"Spec":"2","Properties":{"title":"Ordinary"},"Children":[{"Properties":{"title":"A/B"}}]}`,
+	} {
+		if err := CheckDocumentTitleWriteSpecJSON([]byte(source)); err != nil {
+			t.Fatalf("compatible raw title was rejected: %s, %v", source, err)
+		}
+	}
+}
+
+func TestDocumentTitleSpecUpgrade(t *testing.T) {
+	for _, test := range []struct {
+		title string
+		want  string
+	}{
+		{"A/B", DocumentTitleSpec}, {"A&#47;B", DocumentTitleSpec}, {"A&#x2F;B", DocumentTitleSpec},
+		{"A&amp;#47;B", BaseSpec}, {"A%2FB", BaseSpec}, {"A／B", BaseSpec},
+	} {
+		root := &ast.Node{Type: ast.NodeDocument, Spec: BaseSpec, KramdownIAL: [][]string{{"title", test.title}}}
+		UpgradeSpec(&parse.Tree{Root: root})
+		if root.Spec != test.want || root.KramdownIAL[0][1] != test.title {
+			t.Fatalf("title spec upgrade changed source semantics: %q, %q", root.Spec, root.KramdownIAL[0][1])
+		}
+	}
+}

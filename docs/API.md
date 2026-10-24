@@ -1499,6 +1499,8 @@ Unsupported notebook addressing modes return `code: -1` before creating director
 
 For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or titles conflicting with compatibility mode return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
 
+An incoming title containing ASCII `/` must declare `Spec` at least `6`; otherwise the endpoint returns `code: -1` and `msg: "document title requires spec 6"` without rewriting the input. Existing lower-spec sources remain readable and can be replaced with valid versioned content.
+
 * The parameter is an HTTP Multipart form
 
     * `path`: the file path under the workspace path
@@ -1545,6 +1547,8 @@ Partial deletion in a notebook with an unsupported addressing mode returns `code
 The complete move is checked for notebook addressing compatibility before creating the destination directory or moving files. Unsupported modes and attempts to move or overwrite `conf/document-addressing.json` return `code: -1`.
 
 When the destination includes `.sy` document paths composed of notebook and document IDs, all incoming documents are also checked. Unknown formats, invalid document sources, or conflicting titles return `code: -1` without creating the destination directory or moving the sources.
+
+Incoming titles containing ASCII `/` must declare `Spec` at least `6`; otherwise the endpoint returns `code: -1` and `msg: "document title requires spec 6"`, preserving the sources and destination.
 
 * Parameters
 

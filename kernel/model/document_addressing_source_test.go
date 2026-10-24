@@ -87,6 +87,55 @@ func TestDocumentAddressingRawSourceChanges(t *testing.T) {
 	}
 }
 
+func TestDocumentAddressingRawTitleWriteSpec(t *testing.T) {
+	box := documentAddressingSourceWorkspace(t)
+	writeDocumentAddressingSource(t, filepath.Join(box, documentaddressing.ConfigPath), []byte(`{"documentAddressingVersion":2}`))
+	destination := filepath.Join(box, "20261022130000-target1.sy")
+	underVersioned := []byte(`{"Spec":"2","Properties":{"title":"A/B"}}`)
+	valid := []byte("\xef\xbb\xbf" + "{\n  \"Spec\": \"6\", \"Properties\": {\"title\": \"A/B\"}\n}\n")
+	writeDocumentAddressingSource(t, destination, underVersioned)
+	if err := checkDocumentAddressingSource(destination, underVersioned); err != nil {
+		t.Fatal("existing source can no longer be read or recovered", err)
+	}
+	before, _ := os.Stat(destination)
+	if err := WriteFileWithDocumentAddressing(destination, underVersioned); !errors.Is(err, treenode.ErrDocumentTitleSpec) {
+		t.Fatal("under-versioned raw write was accepted", err)
+	}
+	after, _ := os.Stat(destination)
+	if data, _ := os.ReadFile(destination); !bytes.Equal(data, underVersioned) || !before.ModTime().Equal(after.ModTime()) {
+		t.Fatal("rejected write changed existing source bytes or timestamp")
+	}
+	missing := filepath.Join(box, "20261022130000-parent1", "20261022130000-child01.sy")
+	if err := CheckDocumentAddressingFileWrite(missing, underVersioned, false); !errors.Is(err, treenode.ErrDocumentTitleSpec) {
+		t.Fatal("new document did not require title spec", err)
+	}
+	if _, err := os.Stat(filepath.Dir(missing)); !os.IsNotExist(err) {
+		t.Fatal("preflight created a directory", err)
+	}
+	if err := WriteFileWithDocumentAddressing(destination, valid); err != nil {
+		t.Fatal("a valid raw replacement could not repair an existing low-spec source", err)
+	}
+	if data, _ := os.ReadFile(destination); !bytes.Equal(data, valid) {
+		t.Fatal("valid raw write changed request bytes")
+	}
+	source := filepath.Join(t.TempDir(), "incoming")
+	writeDocumentAddressingSource(t, filepath.Join(source, "000-first.txt"), []byte("attachment"))
+	writeDocumentAddressingSource(t, filepath.Join(source, "20261022130000-other01.sy"), underVersioned)
+	if err := CopyFileWithDocumentAddressing(source, box); !errors.Is(err, treenode.ErrDocumentTitleSpec) {
+		t.Fatal("directory copy accepted an under-versioned descendant", err)
+	}
+	if _, err := os.Stat(filepath.Join(box, "000-first.txt")); !os.IsNotExist(err) {
+		t.Fatal("directory copy wrote an earlier attachment before rejecting", err)
+	}
+	writeDocumentAddressingSource(t, filepath.Join(source, "20261022130000-other01.sy"), valid)
+	if err := CopyFileWithDocumentAddressing(source, box); err != nil {
+		t.Fatal("valid versioned copy was rejected", err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(box, "20261022130000-other01.sy")); !bytes.Equal(data, valid) {
+		t.Fatal("valid copy changed source bytes")
+	}
+}
+
 func TestDocumentAddressingRawSourceDirectoryCopy(t *testing.T) {
 	box := documentAddressingSourceWorkspace(t)
 	source := t.TempDir()

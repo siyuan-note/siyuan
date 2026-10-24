@@ -75,6 +75,26 @@ const runCases = async () => {
         }
     }
 
+    // 图片表情位于首尾时，内容工具栏先选中完整正文，再按编辑器能力进入块多选或保留文字选区。
+    for (const table of [false, true]) {
+        for (const gutter of [false, true]) {
+            const state = createEditor(gutter, table);
+            state.editable.insertAdjacentHTML("afterbegin", '<img class="emoji" alt="custom">');
+            state.editable.insertAdjacentHTML("beforeend", '<img class="emoji" alt="custom">');
+            await click(state, "select");
+            assertTextSelection(state);
+            assert.equal(getSelection().getRangeAt(0).cloneContents().querySelectorAll(".emoji").length, 2);
+            await click(state, "select");
+            if (gutter) {
+                assert.equal(state.toolbar.isMultiSelectMode(), true);
+                assert.equal(state.element.querySelectorAll(".protyle-wysiwyg--select").length, 2);
+            } else {
+                assertTextSelection(state);
+                assert.equal(getSelection().getRangeAt(0).cloneContents().querySelectorAll(".emoji").length, 2);
+            }
+        }
+    }
+
     // 从光标位置全选后也应补齐复制和剪切按钮。
     const caret = createEditor(false);
     caret.range.collapse(true);

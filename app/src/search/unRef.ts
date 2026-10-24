@@ -114,7 +114,7 @@ export const getUnRefList = (element: Element, edit: Protyle, page = 1) => {
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
 ${getAttr(item)}
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeLessThans(title)}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" data-tooltip-encoding="none" aria-label="${escapeAriaLabel(title)}">${escapeLessThans(title)}</span>
 </div>`;
         });
         if (response.data.blocks.length > 0) {

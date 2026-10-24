@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261025004433"
+		"updated": "20261024212002"
 	},
 	"Children": [
 		{
@@ -2177,7 +2177,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261025004433"
+				"updated": "20261024212002"
 			},
 			"Children": [
 				{
@@ -2604,7 +2604,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-fjkvky7",
-				"updated": "20261025004433"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2702,7 +2702,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-sbqeaum",
-				"updated": "20261025004433"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2726,11 +2726,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "接続線の色"
+					"TextMarkTextContent": "テーマ"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で、現在のマップに 47 種類の接続線の配色を選択できます。接続線の配色はノードの文字色や背景色を変更せず、キャンバスはアプリのテーマに従います。子孫の接続線は所属する第 1 階層の色を継承し、すべての階層で同じ太さを使います。直角と角丸の接続線では、ルートの幹線をノード順に重ねて描画し、後のブランチの色で重なる部分を上書きします。"
+					"Data": " で、現在のマップに 47 種類の配色テーマを選択できます。ルートと第 1 階層のノードは色付きの背景に白い文字を使い、第 2 階層以降は透明な背景を使い、キャンバスの色に応じて黒または白の文字を自動で選びます。子孫の接続線は所属する第 1 階層の色を継承し、すべての階層で同じ太さを使います。直角と角丸の接続線では、ルートの幹線をノード順に重ねて描画し、後のブランチの色で重なる部分を上書きします。"
 				}
 			]
 		},
@@ -2739,12 +2739,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-tbwn1pt",
-				"updated": "20261025004433"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "接続線の色はキャンバスの明暗に合わせて調整されます。並べ替えても割り当てた色は保持され、新しいノードも所属するブランチの配色に従います。手動で設定した色や書式が優先されます。デフォルトを選ぶと接続線のパレットを解除し、手動の書式と階層別文字サイズの設定を保持します。"
+					"Data": "ブランチの接続線はパレットで色分けし、幹の線を太く、深い階層の線を細くします。テーマの文字色と接続線はキャンバスの明暗に合わせて調整されます。並べ替えても割り当てた色は保持され、新しいノードも配色に従います。手動で設定した色、文字サイズ、文字の太さはテーマより優先されます。デフォルトを選ぶとパレットを解除し、手動の色と背景は保持します。"
 				}
 			]
 		},
@@ -2753,12 +2753,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-1utc3wo",
-				"updated": "20261025004433"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "階層に応じた文字サイズは既定で無効です。スタイルで独立して有効にすると、階層に応じて文字の大きさと太さを変えられます。既存のマップは保存済みの外観を保持します。接続線の配色を選ぶか階層別文字サイズを切り替えると、新しい外観に移行し、以前の自動的なノード色とキャンバス色を解除します。手動の書式、ノードの内容、構造、折りたたみ状態は保持されます。"
+					"Data": "既存のマップは保存済みの配色を保持します。新しい階層別スタイルを適用するには、テーマを選び直してください。テーマはノードの内容、構造、折りたたみ状態を変更しません。"
 				}
 			]
 		},
@@ -2767,9 +2767,36 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-lteviyd",
-				"updated": "20261025004433"
+				"updated": "20261022102848"
 			},
 			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "キャンバスの背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で単色の背景を選択できます。デフォルトではアプリのテーマに従います。"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
@@ -2795,7 +2822,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で、ノード、階層の接続線、関連線、要約の手動配色を解除し、パレットまたは既定の色に戻せます。その他の書式と階層別文字サイズの設定は保持されます。外観は文書とともに保存され、取り消しとやり直しに対応し、SiYuan 形式の HTML と PDF プレビューにも反映されます。"
+					"Data": " で、ノード、階層の接続線、関連線、要約の手動配色を解除し、パレットまたは既定の色に戻せます。背景とその他の書式は保持されます。外観は文書とともに保存され、取り消しとやり直しに対応し、SiYuan 形式の HTML と PDF プレビューにも反映されます。"
 				}
 			]
 		},

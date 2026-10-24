@@ -1026,28 +1026,23 @@ export class ListMindmapView {
         if (this.destroyed) {
             return;
         }
-        const appearance = this.model.metadata.appearance;
-        const lineAppearance = appearance?.nodeStyle === "lines";
-        this.viewport.style.backgroundColor = !lineAppearance && appearance?.backgroundColor || "";
-        const canvasForeground = !lineAppearance && appearance?.backgroundColor ?
-            getMindmapTextColor(appearance.backgroundColor) : undefined;
+        this.viewport.style.backgroundColor = this.model.metadata.appearance?.backgroundColor || "";
+        const canvasForeground = this.model.metadata.appearance?.backgroundColor ?
+            getMindmapTextColor(this.model.metadata.appearance.backgroundColor) : undefined;
         this.themeColors = resolveListMindmapColors(this.model, getComputedStyle(this.options.host).backgroundColor);
         this.nodeElements.forEach((element, id) => {
             const style = this.model.metadata.nodes[id];
             const themed = this.themeColors.get(id);
             const background = style?.backgroundColor || themed?.backgroundColor || "";
-            const adaptForeground = !!themed && !lineAppearance || !!canvasForeground ||
-                lineAppearance && !!(style?.textColor || style?.backgroundColor);
+            const adaptForeground = !!themed || !!canvasForeground;
             element.classList.toggle("mindmap-view__node--colored", adaptForeground);
             element.style.backgroundColor = background;
-            element.style.color = style?.textColor || ((adaptForeground || lineAppearance) && style?.backgroundColor && isMindmapColor(background) ?
+            element.style.color = style?.textColor || (adaptForeground && style?.backgroundColor && isMindmapColor(background) ?
                 getMindmapTextColor(background) : themed?.textColor || canvasForeground) || "";
-            const inheritFont = lineAppearance || !!themed?.fontSize;
-            const fontSize = inheritFont ? style?.fontSize ?? themed?.fontSize : undefined;
-            element.style.fontSize = fontSize ? `${fontSize}px` : "";
-            const bold = inheritFont ? style?.bold ?? themed?.bold : undefined;
-            element.style.fontWeight = bold === undefined ? "" : bold ? (style?.bold ? "700" : "600") : "400";
-            element.style.fontStyle = inheritFont && style?.italic !== undefined ? (style.italic ? "italic" : "normal") : "";
+            element.style.fontSize = themed?.fontSize ? `${style?.fontSize ?? themed.fontSize}px` : "";
+            element.style.fontWeight = themed?.fontSize ? (style?.bold === undefined ? (themed.bold ? "600" : "400") :
+                style.bold ? "700" : "400") : "";
+            element.style.fontStyle = themed?.fontSize && style?.italic !== undefined ? (style.italic ? "italic" : "normal") : "";
             if (adaptForeground) {
                 element.style.setProperty("--mindmap-node-text-color", element.style.color);
             } else {
@@ -2069,9 +2064,8 @@ export class ListMindmapView {
                 baseWidth,
             };
         };
-        const canvasColor = this.themeColors?.size ? resolveColor(this.model.metadata.appearance?.nodeStyle === "lines" ?
-            getComputedStyle(this.options.host).backgroundColor : this.model.metadata.appearance?.backgroundColor ||
-                theme.getPropertyValue("--b3-theme-background").trim(), "#ffffff") : "";
+        const canvasColor = this.themeColors?.size ? resolveColor(this.model.metadata.appearance?.backgroundColor ||
+            theme.getPropertyValue("--b3-theme-background").trim(), "#ffffff") : "";
         const paletteLines = new Map<string, string>();
         const themeLineColor = (id: string) => {
             const color = this.themeColors?.get(id)?.lineColor;
@@ -2083,7 +2077,7 @@ export class ListMindmapView {
         };
         const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
             this.model.metadata.connectorStyle || "bezier", () => new Path2D(),
-            this.model.metadata.appearance?.nodeStyle === "branch", this.model.metadata.appearance?.nodeStyle === "lines");
+            this.model.metadata.appearance?.nodeStyle === "branch");
         const trunkOpacities = new Map<string, number>();
         if (this.foldOpacities) {
             this.edges.forEach(edge => {

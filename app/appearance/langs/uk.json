@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "Кольори ліній",
-	"listMindmapFontHierarchy": "Розмір шрифту за рівнями",
 	"listMindmapDocumentLayout": "Макет документа",
 	"fullCheckSnapshot": "Повна перевірка вмісту",
 	"fullCheckSnapshotTip": "Прочитати всі локальні файли, щоб виявити зміни вмісту навіть за незмінних розміру та часу зміни, і за потреби створити знімок; ресурси для перевірки не завантажуються, а великі робочі простори можуть потребувати більше часу",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "Завантажити весь документ і виділити все",
 	"autoFitRowHeight": "Автоматично підібрати висоту рядка",
 	"backlinkDatabaseFields": "Поля бази даних",
+	"listMindmapCanvasBackground": "Тло полотна",
 	"listMindmapClearManualColors": "Скинути ручні кольори",
 	"listMindmapLineColor": "Колір ліній гілок",
 	"lockScreenWallpaper": "Шпалери екрана блокування",

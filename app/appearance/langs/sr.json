@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "Boje linija",
-	"listMindmapFontHierarchy": "Veličina fonta po nivoima",
 	"listMindmapDocumentLayout": "Распоред документа",
 	"fullCheckSnapshot": "Потпуна провера садржаја",
 	"fullCheckSnapshotTip": "Прочитајте све локалне датотеке да бисте открили промене садржаја и када су величина и време измене исти и по потреби направите снимак; ресурси се не преузимају ради ове провере, а велики радни простори могу захтевати више времена",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "Учитај цео документ и изабери све",
 	"autoFitRowHeight": "Аутоматски прилагоди висину реда",
 	"backlinkDatabaseFields": "Поља базе података",
+	"listMindmapCanvasBackground": "Позадина платна",
 	"listMindmapClearManualColors": "Обриши ручно подешене боје",
 	"listMindmapLineColor": "Боја линија грана",
 	"lockScreenWallpaper": "Позадина закључаног екрана",

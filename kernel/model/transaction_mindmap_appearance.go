@@ -26,13 +26,8 @@ func validListMindmapAppearance(value any) bool {
 			return false
 		}
 	}
-	if value, exists := data["nodeStyle"]; exists && value != "layered" && value != "branch" && value != "lines" {
+	if value, exists := data["nodeStyle"]; exists && value != "layered" && value != "branch" {
 		return false
-	}
-	if value, exists := data["fontHierarchy"]; exists {
-		if _, ok := value.(bool); !ok {
-			return false
-		}
 	}
 	if value, exists := data["backgroundColor"]; exists {
 		color, ok := value.(string)

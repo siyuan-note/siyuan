@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "Couleurs des lignes",
-	"listMindmapFontHierarchy": "Hiérarchie typographique",
 	"listMindmapDocumentLayout": "Disposition du document",
 	"fullCheckSnapshot": "Vérification complète du contenu",
 	"fullCheckSnapshotTip": "Lire tous les fichiers locaux pour détecter les changements de contenu même si leur taille et leur date de modification restent identiques, puis créer un instantané si nécessaire ; aucune ressource n’est téléchargée pour cette vérification et les grands espaces de travail peuvent demander plus de temps",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "Charger le document entier et tout sélectionner",
 	"autoFitRowHeight": "Ajuster automatiquement la hauteur de ligne",
 	"backlinkDatabaseFields": "Champs de la base de données",
+	"listMindmapCanvasBackground": "Arrière-plan du canevas",
 	"listMindmapClearManualColors": "Effacer les couleurs manuelles",
 	"listMindmapLineColor": "Couleur des lignes de branche",
 	"lockScreenWallpaper": "Fond d’écran de verrouillage",

@@ -192,15 +192,12 @@ test("appearance metadata is additive and rejects invalid palettes and branch sl
         const appearance = {version: 1, palette: ["#123456", "#abcdef"], backgroundColor: "#ffffff", extension: "keep"};
         const source = JSON.stringify({...base, appearance});
         assert.equal(JSON.stringify(parseListMindmapMetadata(source)), source);
-        for (const nodeStyle of ["layered", "branch", "lines"]) {
-            for (const fontHierarchy of [undefined, false, true]) {
-                const withRootColor = JSON.stringify({...base, appearance: {...appearance, rootColor: "#112233", nodeStyle, fontHierarchy}});
-                assert.equal(JSON.stringify(parseListMindmapMetadata(withRootColor)), withRootColor);
-            }
+        for (const nodeStyle of ["layered", "branch"]) {
+            const withRootColor = JSON.stringify({...base, appearance: {...appearance, rootColor: "#112233", nodeStyle}});
+            assert.equal(JSON.stringify(parseListMindmapMetadata(withRootColor)), withRootColor);
         }
         for (const invalid of [null, [], {}, {...appearance, version: 2}, {...appearance, palette: ["red"]},
             {...appearance, backgroundColor: "url(x)"},
-            ...[null, "true", 0, [], {}].map(fontHierarchy => ({...appearance, fontHierarchy})),
             ...[null, "", "red", "url(x)", 123].map(rootColor => ({...appearance, rootColor})),
             ...[null, "", "flat", "unknown", 123].map(nodeStyle => ({...appearance, nodeStyle}))]) {
             const value = JSON.stringify({...base, appearance: invalid});
@@ -3152,18 +3149,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const persistedBeforeFold = list.outerHTML;
     pressDelete();
     check.deepEqual(deletions, [beta]);
-    const settleFoldFrame = async () => {
-        await settle();
-        const deadline = performance.now() + 1000;
-        // 布局回调与首个动画帧可能共享时间戳，等待真实中间帧而不是假定两帧后已开始淡出。
-        while (readonly.stopFoldAnimation && performance.now() < deadline) {
-            const opacity = Number(nodeElement(alpha).style.opacity);
-            if (opacity > 0 && opacity < 1) {
-                break;
-            }
-            await frame();
-        }
-    };
     const beforeCollapse = nodeElement(model.root.id).getBoundingClientRect();
     const foldContext = readonly.canvas.getContext("2d");
     const originalStroke = foldContext.stroke.bind(foldContext);
@@ -3177,7 +3162,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }
     };
     nodeElement(model.root.id).querySelector<HTMLButtonElement>(".mindmap-view__fold").click();
-    await settleFoldFrame();
+    await settle();
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         check.ok(readonly.stopFoldAnimation, "a user fold starts a visible transition");
         check.equal(nodeElement(alpha).hidden, false, "outgoing children remain visible during the transition");
@@ -3196,7 +3181,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(foldedButton.querySelector("span").textContent, String(model.nodes.size - 1));
     check.equal(getComputedStyle(foldedButton).visibility, "visible");
     foldedButton.click();
-    await settleFoldFrame();
+    await settle();
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         check.ok(readonly.stopFoldAnimation,
             "showing folded children must not let size observers end the expansion early");

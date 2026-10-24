@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "Line colors",
-	"listMindmapFontHierarchy": "Font hierarchy",
 	"listMindmapDocumentLayout": "Document layout",
 	"fullCheckSnapshot": "Full content check",
 	"fullCheckSnapshotTip": "Read all local files to detect content changes even when size and modification time are unchanged, and create a snapshot if needed; resources are not downloaded for this check, and large workspaces may take longer",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "Load full document and select all",
 	"autoFitRowHeight": "Auto-fit row height",
 	"backlinkDatabaseFields": "Database fields",
+	"listMindmapCanvasBackground": "Canvas background",
 	"listMindmapClearManualColors": "Clear manual colors",
 	"listMindmapLineColor": "Branch line color",
 	"lockScreenWallpaper": "Lock screen wallpaper",

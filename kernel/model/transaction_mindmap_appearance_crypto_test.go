@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"html"
 	"io"
 	"os"
 	"os/exec"
@@ -92,13 +91,7 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 	styled, _ := json.Marshal(data)
 	appearance["nodeStyle"] = "branch"
 	referenceStyled, _ := json.Marshal(data)
-	appearance["nodeStyle"] = "lines"
-	appearance["fontHierarchy"] = true
-	delete(appearance, "rootColor")
-	delete(appearance, "backgroundColor")
-	lineStyled, _ := json.Marshal(data)
-	for _, value := range []string{string(legacyStyled), string(styled), string(referenceStyled), string(lineStyled),
-		string(referenceStyled), string(styled), original, string(lineStyled)} {
+	for _, value := range []string{string(legacyStyled), string(styled), string(referenceStyled), string(styled), original, string(referenceStyled)} {
 		attrs, _ := json.Marshal(map[string]string{listMindmapMetadataAttr: value})
 		tx := &Transaction{DoOperations: []*Operation{{Action: "setAttrs", ID: list.ID, Data: string(attrs)}}}
 		if err = PerformTxSync(tx); err != nil {
@@ -133,31 +126,10 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 	}
 	exported, err := io.ReadAll(reader)
 	_ = reader.Close()
-	if err != nil || !json.Valid(exported) || !bytes.Contains(exported, []byte("Legacy summary")) {
+	if err != nil || !json.Valid(exported) || !bytes.Contains(exported, []byte("#2563eb")) ||
+		!bytes.Contains(exported, []byte("#1e293b")) || !bytes.Contains(exported, []byte("branch")) ||
+		!bytes.Contains(exported, []byte("Legacy summary")) {
 		t.Fatalf("export lost the appearance or legacy content: %v", err)
-	}
-	type exportedBlock struct {
-		ID         string            `json:"ID"`
-		Properties map[string]string `json:"Properties"`
-		Children   []*exportedBlock  `json:"Children"`
-	}
-	var exportedRoot exportedBlock
-	if err = json.Unmarshal(exported, &exportedRoot); err != nil {
-		t.Fatal(err)
-	}
-	exportedMetadata := ""
-	var findMetadata func(*exportedBlock)
-	findMetadata = func(node *exportedBlock) {
-		if node.ID == list.ID {
-			exportedMetadata = html.UnescapeString(node.Properties[listMindmapMetadataAttr])
-		}
-		for _, child := range node.Children {
-			findMetadata(child)
-		}
-	}
-	findMetadata(&exportedRoot)
-	if exportedMetadata != string(lineStyled) {
-		t.Fatalf("export lost line colors, typography or unrelated metadata: got %q, want %q", exportedMetadata, lineStyled)
 	}
 	if err = RollbackDocHistory(relative); err != nil {
 		t.Fatal(err)

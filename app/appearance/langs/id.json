@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "Warna garis",
-	"listMindmapFontHierarchy": "Hierarki ukuran huruf",
 	"listMindmapDocumentLayout": "Tata letak dokumen",
 	"fullCheckSnapshot": "Pemeriksaan isi menyeluruh",
 	"fullCheckSnapshotTip": "Baca semua berkas lokal untuk mendeteksi perubahan isi meskipun ukuran dan waktu modifikasi tetap sama, lalu buat snapshot jika diperlukan; sumber daya tidak diunduh untuk pemeriksaan ini dan ruang kerja besar dapat memerlukan waktu lebih lama",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "Muat seluruh dokumen dan pilih semua",
 	"autoFitRowHeight": "Sesuaikan tinggi baris secara otomatis",
 	"backlinkDatabaseFields": "Bidang basis data",
+	"listMindmapCanvasBackground": "Latar belakang kanvas",
 	"listMindmapClearManualColors": "Hapus warna manual",
 	"listMindmapLineColor": "Warna garis cabang",
 	"lockScreenWallpaper": "Wallpaper layar kunci",

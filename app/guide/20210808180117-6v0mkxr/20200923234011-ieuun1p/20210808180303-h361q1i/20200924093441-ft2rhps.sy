@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261025004433"
+		"updated": "20261024212002"
 	},
 	"Children": [
 		{
@@ -2052,7 +2052,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261025004433"
+				"updated": "20261024212002"
 			},
 			"Children": [
 				{
@@ -2503,7 +2503,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-kuq9j6z",
-				"updated": "20261025004433"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2605,7 +2605,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-11epv5y",
-				"updated": "20261025004433"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2633,11 +2633,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Line colors"
+					"TextMarkTextContent": "Theme"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose from 47 line palettes for the current map. Line coloring does not change node text or backgrounds; the canvas follows the application theme. Descendants inherit their first-level branch color and all levels use the same line width. In orthogonal and rounded styles, overlapping root trunk segments are painted in node order, with later branches covering earlier ones."
+					"Data": " to choose from 47 color themes for the current map. Root and first-level nodes use colored backgrounds with white text; deeper nodes use transparent backgrounds, with black or white text chosen automatically for the canvas color. Branch lines inherit their first-level color and use a consistent width. In orthogonal and rounded styles, overlapping root trunk segments are painted in node order, with later branches covering earlier ones."
 				}
 			]
 		},
@@ -2646,12 +2646,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-gukhw19",
-				"updated": "20261025004433"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Line colors adapt to the canvas brightness. Reordering branches preserves their assigned colors, and new nodes follow their branch palette. Manual colors and formatting take precedence. Choosing Default removes the line palette while preserving manual formatting and the font hierarchy setting."
+					"Data": "Theme text and lines adapt to the canvas brightness. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual colors, font sizes, and font weights take precedence. Choosing Default removes the palette while preserving manual colors and the canvas background."
 				}
 			]
 		},
@@ -2660,12 +2660,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-89rv8gd",
-				"updated": "20261025004433"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Font hierarchy is off by default and can be enabled independently in Appearance to vary font sizes and emphasis by level. Existing maps keep their saved appearance until you choose a line palette or change Font hierarchy. That action switches to the new appearance, removes the previous automatic node and canvas colors, and preserves manual formatting. Node content, structure, and folding states remain unchanged."
+					"Data": "Existing maps keep their saved colors; select the theme again to apply the new layered style. The theme does not change node content, structure, or folding states."
 				}
 			]
 		},
@@ -2674,12 +2674,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-3decujr",
-				"updated": "20261025004433"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Canvas background"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose a solid canvas background, or Default to follow the application theme. Use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2715,12 +2742,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-colf627",
-				"updated": "20261025004433"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Clearing manual colors keeps other formatting and the font hierarchy setting. Appearance is saved with the document, supports undo and redo, and is included in SiYuan-format HTML and PDF previews."
+					"Data": "This does not reset the canvas background or other formatting. Appearance changes are saved with the document, support undo and redo, and are included in SiYuan-format HTML and PDF previews."
 				}
 			]
 		},

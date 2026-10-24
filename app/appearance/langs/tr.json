@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "Çizgi renkleri",
-	"listMindmapFontHierarchy": "Düzeye göre yazı tipi boyutu",
 	"listMindmapDocumentLayout": "Belge düzeni",
 	"fullCheckSnapshot": "Tam içerik denetimi",
 	"fullCheckSnapshotTip": "Boyut ve değiştirilme zamanı aynı kalsa bile içerik değişikliklerini bulmak için tüm yerel dosyaları okuyun ve gerekirse anlık görüntü oluşturun; bu denetim için kaynaklar indirilmez ve büyük çalışma alanlarında daha uzun sürebilir",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "Belgenin tamamını yükle ve tümünü seç",
 	"autoFitRowHeight": "Satır yüksekliğini otomatik sığdır",
 	"backlinkDatabaseFields": "Veritabanı alanları",
+	"listMindmapCanvasBackground": "Tuval arka planı",
 	"listMindmapClearManualColors": "Elle ayarlanan renkleri temizle",
 	"listMindmapLineColor": "Dal çizgisi rengi",
 	"lockScreenWallpaper": "Kilit ekranı duvar kâğıdı",

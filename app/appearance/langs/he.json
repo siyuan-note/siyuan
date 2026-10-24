@@ -1,6 +1,4 @@
 {
-	"listMindmapLineColors": "צבעי קווים",
-	"listMindmapFontHierarchy": "גודל גופן לפי רמה",
 	"listMindmapDocumentLayout": "פריסת המסמך",
 	"fullCheckSnapshot": "בדיקת תוכן מלאה",
 	"fullCheckSnapshotTip": "קריאת כל הקבצים המקומיים לזיהוי שינויי תוכן גם כשהגודל וזמן השינוי נשארו זהים, ויצירת תמונת מצב לפי הצורך; משאבים לא יורדו לצורך הבדיקה, וסביבות עבודה גדולות עשויות לדרוש זמן רב יותר",
@@ -60,6 +58,7 @@
 	"loadAllAndSelectAll": "טעינת המסמך המלא ובחירת הכול",
 	"autoFitRowHeight": "התאמה אוטומטית של גובה השורה",
 	"backlinkDatabaseFields": "שדות מסד נתונים",
+	"listMindmapCanvasBackground": "רקע הקנבס",
 	"listMindmapClearManualColors": "ניקוי צבעים ידניים",
 	"listMindmapLineColor": "צבע קווי הענפים",
 	"lockScreenWallpaper": "טפט מסך הנעילה",

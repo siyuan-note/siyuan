@@ -9,8 +9,7 @@ import (
 func TestPruneListMindmapAppearance(t *testing.T) {
 	for _, version := range []string{"1", "2"} {
 		for _, rootColor := range []string{"", `"rootColor":"#112233",`, `"rootColor":"#112233","nodeStyle":"layered",`,
-			`"rootColor":"#112233","nodeStyle":"branch",`, `"nodeStyle":"lines","fontHierarchy":false,`,
-			`"nodeStyle":"lines","fontHierarchy":true,`} {
+			`"rootColor":"#112233","nodeStyle":"branch",`} {
 			_, list, _ := mindmapTestTree()
 			appearance := `{"version":1,` + rootColor + `"palette":["#123456","#abcdef"],"backgroundColor":"#ffffff","extension":9007199254740993}`
 			original := `{"version":` + version + `,"appearance":` + appearance +
@@ -30,9 +29,7 @@ func TestPruneListMindmapAppearance(t *testing.T) {
 				`{"version":1,"palette":[],"rootColor":null}`, `{"version":1,"palette":[],"rootColor":""}`,
 				`{"version":1,"palette":[],"rootColor":"red"}`, `{"version":1,"palette":[],"rootColor":"url(x)"}`,
 				`{"version":1,"palette":[],"rootColor":123}`, `{"version":1,"palette":[],"nodeStyle":null}`,
-				`{"version":1,"palette":[],"nodeStyle":"unknown"}`, `{"version":1,"palette":[],"nodeStyle":[]}`,
-				`{"version":1,"palette":[],"fontHierarchy":null}`, `{"version":1,"palette":[],"fontHierarchy":"true"}`,
-				`{"version":1,"palette":[],"fontHierarchy":0}`, `{"version":1,"palette":[],"fontHierarchy":[]}`} {
+				`{"version":1,"palette":[],"nodeStyle":"unknown"}`, `{"version":1,"palette":[],"nodeStyle":[]}`} {
 				data := strings.Replace(original, appearance, invalid, 1)
 				list.SetIALAttr(listMindmapMetadataAttr, data)
 				if next, changed := pruneListMindmapMetadata(list); changed || next != data {
@@ -54,9 +51,7 @@ func TestValidListMindmapAppearance(t *testing.T) {
 	for _, source := range []string{`{"version":1,"palette":[]}`, `{"version":1,"palette":["#AbCdEf"],"backgroundColor":""}`,
 		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233"}`, `{"version":1,"palette":[],"rootColor":"#AABBCC"}`,
 		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233","nodeStyle":"layered"}`,
-		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233","nodeStyle":"branch"}`,
-		`{"version":1,"palette":["#AbCdEf"],"nodeStyle":"lines","fontHierarchy":false}`,
-		`{"version":1,"palette":[],"nodeStyle":"lines","fontHierarchy":true}`} {
+		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233","nodeStyle":"branch"}`} {
 		var value any
 		_ = json.Unmarshal([]byte(source), &value)
 		if !validListMindmapAppearance(value) {

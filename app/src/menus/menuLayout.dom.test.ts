@@ -291,7 +291,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     dispose(submenus);
 
     const appearance: typeof import("../protyle/render/listMindmap/appearance") = load("protyle/render/listMindmap/appearance");
-    const labels: Record<string, string> = {listMindmapLineColors: "Line colors", default: "Default", ...Object.fromEntries(appearance.LIST_MINDMAP_PALETTES
+    const labels: Record<string, string> = {theme: "Theme", default: "Default", ...Object.fromEntries(appearance.LIST_MINDMAP_PALETTES
         .map(preset => [preset.label, preset.id]))};
     for (const touch of [false, true]) {
         mobile = touch;
@@ -305,13 +305,13 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             let changes = 0;
             const menu = appearance.getListMindmapAppearanceMenu(metadata, update => { update(metadata); changes++; },
                 labels, {id: "connectorStyle"});
-            instance.addItem((menu.submenu as IMenu[]).find(item => item.id === "lineColors"));
+            instance.addItem((menu.submenu as IMenu[]).find(item => item.id === "theme"));
             if (touch) {
                 instance.fullscreen("bottom");
             } else {
                 instance.popup({x: 280, y: 90});
             }
-            const parent = instance.element.querySelector<HTMLElement>('[data-id="lineColors"]');
+            const parent = instance.element.querySelector<HTMLElement>('[data-id="theme"]');
             parent.dispatchEvent(new MouseEvent(touch ? "click" : "mouseover", {bubbles: true}));
             await settle();
             if (touch) {

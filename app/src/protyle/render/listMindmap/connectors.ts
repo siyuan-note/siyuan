@@ -42,7 +42,7 @@ export const buildListMindmapSummaryConnector = <T extends ConnectorPath>(
 // 连线路径只使用已完成的节点布局，共享主干不进入分支的命中路径。
 export const buildListMindmapConnectors = <T extends ConnectorPath>(
     rootID: string, positions: Map<string, ListMindmapPosition>, edges: {from: string, to: string}[],
-    style: ListMindmapConnectorStyle, makePath: () => T, branchTheme = false, lineAppearance = false,
+    style: ListMindmapConnectorStyle, makePath: () => T, branchTheme = false,
 ) => {
     const trunks: T[] = [];
     const trunkParents: string[] = [];
@@ -95,7 +95,7 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
                 path.quadraticCurveTo(trunkX, endY, trunkX + corner, endY);
             }
             path.lineTo(to.x + to.width, endY);
-            if ((branchTheme || lineAppearance) && parentID === rootID) {
+            if (branchTheme && parentID === rootID) {
                 const trunk = makePath();
                 trunk.moveTo(startX, startY);
                 trunk.lineTo(trunkX, startY);
@@ -105,7 +105,7 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
                 branches.push({id: to.id, path});
             }
         });
-        if ((branchTheme || lineAppearance) && parentID === rootID) {
+        if (branchTheme && parentID === rootID) {
             return;
         }
         const trunk = makePath();

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261025004433"
+		"updated": "20261024212002"
 	},
 	"Children": [
 		{
@@ -2055,7 +2055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261025004433"
+				"updated": "20261024212002"
 			},
 			"Children": [
 				{
@@ -2403,7 +2403,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-ucbq2tw",
-				"updated": "20261025004433"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2491,7 +2491,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-idam1p2",
-				"updated": "20261025004433"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2519,11 +2519,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "连线配色"
+					"TextMarkTextContent": "主题"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中为当前导图选择 47 种连线配色。连线配色不修改节点文字和背景，画布跟随应用主题。后代连线继承所属一级分支的颜色，各层级连线粗细一致。折线和圆角折线的根节点主干按节点顺序叠加绘制，后绘制的分支颜色覆盖重叠部分。"
+					"Data": " 中为当前导图选择 47 种配色主题。根节点和一级节点使用色卡背景及白色文字，二级及后续节点使用透明背景，并根据画布颜色自动选择黑色或白色文字。后代连线继承所属一级分支的颜色，各层级连线粗细一致。折线和圆角折线的根节点主干按节点顺序叠加绘制，后绘制的分支颜色覆盖重叠部分。"
 				}
 			]
 		},
@@ -2532,12 +2532,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-wzhmiwn",
-				"updated": "20261025004433"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "连线颜色会适配画布明暗。调整分支顺序会保留原有配色，新增节点自动跟随分支配色。字体层级默认关闭，可在外观中独立开启，按层级调整字号和字重；手工颜色和格式优先。连线配色选择默认可移除色卡，并保留手工格式和字体层级设置。旧导图保留已保存的外观；主动选择连线配色或调整字体层级后，才切换到新外观，移除旧的自动节点和画布配色，保留手工格式。节点内容、结构和折叠状态保持不变。"
+					"Data": "主题文字和连线会适配画布明暗。调整分支顺序会保留原有配色，新增节点自动跟随导图配色。手工设置的颜色、字号和字重优先于主题。选择默认可移除色卡，并保留手工配色和画布背景。旧导图保留原有配色，重新选择主题后应用新的分层样式。主题不会改变节点内容、结构或折叠状态。"
 				}
 			]
 		},
@@ -2546,12 +2546,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-m1dh0tw",
-				"updated": "20261025004433"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画布背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择纯色背景，选择默认则跟随应用主题。在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2578,7 +2605,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中清除节点、层级连线、关系线和概要的手工配色，恢复使用色卡或默认颜色，其他格式和字体层级设置保持不变。外观随文档保存，支持撤销和重做，并用于思源格式的 HTML 和 PDF 预览。"
+					"Data": " 中清除节点、层级连线、关系线和概要的手工配色，恢复使用色卡或默认颜色；画布背景和其他格式保持不变。外观随文档保存，支持撤销和重做，并用于思源格式的 HTML 和 PDF 预览。"
 				}
 			]
 		},

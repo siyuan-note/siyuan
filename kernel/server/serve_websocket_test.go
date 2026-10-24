@@ -100,18 +100,28 @@ func dialWebSocket(t *testing.T, srv *httptest.Server, name string, header http.
 	return conn
 }
 
-func waitWebSocketSession(t *testing.T, id string) {
+func waitWebSocketSession(t *testing.T, connection *websocket.Conn, id string) {
 	t.Helper()
 
-	deadline := time.Now().Add(2 * time.Second)
-	for time.Now().Before(deadline) {
-		sessions, _ := util.WebSocketServer.Sessions()
-		for _, session := range sessions {
-			if value, _ := session.Get("id"); value == id {
-				return
-			}
+	// 消息处理在连接回调返回后启动，往返响应保证认证及推送通道注册均已完成。
+	if err := connection.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if err := connection.WriteMessage(websocket.TextMessage, []byte(`{"cmd":"unknown","reqId":1,"param":{}}`)); err != nil {
+		t.Fatal(err)
+	}
+	var result util.Result
+	if err := connection.ReadJSON(&result); err != nil {
+		t.Fatalf("wait for websocket session %q: %v", id, err)
+	}
+	if result.Code != -1 || result.Msg != "can not find command [unknown]" {
+		t.Fatalf("unexpected registration response: %#v", result)
+	}
+	sessions, _ := util.WebSocketServer.Sessions()
+	for _, session := range sessions {
+		if value, _ := session.Get("id"); value == id {
+			return
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatalf("websocket session %q is not registered", id)
 }
@@ -154,7 +164,7 @@ func TestWebSocketAdmitsOnlyLocalClientWithoutAccessAuth(t *testing.T) {
 	srv := newWebSocketTestServer(t)
 
 	local := dialWebSocket(t, srv, "local", nil)
-	waitWebSocketSession(t, "local")
+	waitWebSocketSession(t, local, "local")
 	util.BroadcastByType("main", "admission", 0, "", nil)
 	if err := local.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
 		t.Fatal(err)
@@ -192,7 +202,7 @@ func TestWebSocketAdmitsPublishReaderWithForwardedAddress(t *testing.T) {
 		model.XAuthTokenKey: []string{token},
 		"X-Forwarded-For":   []string{"203.0.113.9"},
 	})
-	waitWebSocketSession(t, "reader")
+	waitWebSocketSession(t, reader, "reader")
 
 	sessions, _ := util.WebSocketServer.Sessions()
 	for _, session := range sessions {

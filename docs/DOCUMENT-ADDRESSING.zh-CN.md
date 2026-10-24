@@ -212,6 +212,7 @@
 | 速记 | 明确追加目标或新建目标；目标持久化成功后才清理来源 |
 | 数据库新建条目 | 保留属性值、绑定关系和排序；创建计划保存最终文档 ID |
 | 模板文档树 | 保留预览、ID 重映射、插入顺序及整组撤销和重做；提交校验路径、名称与配置条件并展示部分完成结果 |
+| MCP 与内置 Agent | `document.create/list/move` 和 `inbox.convert` 使用笔记本及 `parentID`；空字符串显式表示根位置，创建接受独立的标题原文。模式 `2` 在查询前拒绝旧 `path=hPath`，工具与 Agent 提示词保持相同契约 |
 | 桌面、浏览器和移动端 | 分别检查菜单、快捷键、对话框及事件处理；共享工具函数迁移不能代替各端验证 |
 
 日记的既有复用策略是明确的业务规则，不因通用解析器拒绝歧义而改成所有同日期情况均报错；模板目标优先匹配改为结构化身份链比较。
@@ -518,6 +519,7 @@
 | 新建入口与保存路径解析 | [`util/newFile.ts`](../app/src/util/newFile.ts)、[`util/configuredDocument.ts`](../app/src/util/configuredDocument.ts)、[`mobile/util/initFramework.ts`](../app/src/mobile/util/initFramework.ts) |
 | 模板、数据库新建及速记 | [`model/template_doc_tree.go`](../kernel/model/template_doc_tree.go)、[`model/attribute_view_new_item.go`](../kernel/model/attribute_view_new_item.go)、[`model/shortcuts.go`](../kernel/model/shortcuts.go) |
 | 日记复用及旧创建回归 | [`model/daily_note.go`](../kernel/model/daily_note.go)、[`model/file_test.go`](../kernel/model/file_test.go) |
+| MCP 与内置 Agent 文档目标 | [`mcp/tools/document.go`](../kernel/mcp/tools/document.go)、[`mcp/tools/inbox.go`](../kernel/mcp/tools/inbox.go)、[`agent/agent.go`](../kernel/agent/agent.go) |
 | 导入与导出 | [`model/import.go`](../kernel/model/import.go)、[`model/import_obsidian.go`](../kernel/model/import_obsidian.go)、[`model/export.go`](../kernel/model/export.go) |
 | 可复用的富文本来源校验模式 | [`treenode/table_cell_rich.go`](../kernel/treenode/table_cell_rich.go) |
 | 标题块与文档转换 | [`model/heading.go`](../kernel/model/heading.go)、[`model/heading_doc_test.go`](../kernel/model/heading_doc_test.go) |

@@ -212,6 +212,7 @@ Configuration-derived previews retain the source notebook, workflow purpose, eff
 | Shorthands | Distinguish appending to an explicit target from creating a new target; clear the source only after destination persistence succeeds |
 | New database items | Preserve attribute values, bindings, and sorting; retain the final document ID in the creation plan |
 | Template document trees | Preserve previews, ID remapping, insertion order, and grouped undo and redo; validate path, name, and configuration conditions on commit and expose partial completion |
+| MCP and built-in Agent | `document.create/list/move` and `inbox.convert` use notebook + `parentID`; an empty string explicitly selects root, and creation accepts an independent literal title. Mode `2` rejects legacy `path=hPath` before lookup; tools and Agent instructions share this contract |
 | Desktop, browser, and mobile | Inspect menus, shortcuts, dialogs, and handlers separately; shared utility migration does not replace platform verification |
 
 Daily-note reuse is an explicit existing business rule. The generic resolver's ambiguity policy must not turn every multiple-date match into an error; template-target preference compares structured identity chains instead.
@@ -518,6 +519,7 @@ CI runs `go test -tags "fts5 sqlcipher" ./documentaddressing ./filesys ./model .
 | Creation entry points and save path parsing | [`util/newFile.ts`](../app/src/util/newFile.ts), [`util/configuredDocument.ts`](../app/src/util/configuredDocument.ts), [`mobile/util/initFramework.ts`](../app/src/mobile/util/initFramework.ts) |
 | Templates, new database items, and shorthands | [`model/template_doc_tree.go`](../kernel/model/template_doc_tree.go), [`model/attribute_view_new_item.go`](../kernel/model/attribute_view_new_item.go), [`model/shortcuts.go`](../kernel/model/shortcuts.go) |
 | Daily-note reuse and legacy creation regressions | [`model/daily_note.go`](../kernel/model/daily_note.go), [`model/file_test.go`](../kernel/model/file_test.go) |
+| MCP and built-in Agent document targets | [`mcp/tools/document.go`](../kernel/mcp/tools/document.go), [`mcp/tools/inbox.go`](../kernel/mcp/tools/inbox.go), [`agent/agent.go`](../kernel/agent/agent.go) |
 | Import and export | [`model/import.go`](../kernel/model/import.go), [`model/import_obsidian.go`](../kernel/model/import_obsidian.go), [`model/export.go`](../kernel/model/export.go) |
 | Reusable rich-source validation pattern | [`treenode/table_cell_rich.go`](../kernel/treenode/table_cell_rich.go) |
 | Heading/document conversion | [`model/heading.go`](../kernel/model/heading.go), [`model/heading_doc_test.go`](../kernel/model/heading_doc_test.go) |

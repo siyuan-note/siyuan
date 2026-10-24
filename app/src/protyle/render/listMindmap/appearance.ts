@@ -240,9 +240,21 @@ export const clearListMindmapManualColors = (metadata: ListMindmapMetadata) => {
 
 export const getListMindmapAppearanceMenu = (metadata: ListMindmapMetadata,
                                             change: (update: (data: ListMindmapMetadata) => void) => void,
-                                            labels: Record<string, string>, connector: IMenu): IMenu => {
+                                            labels: Record<string, string>, connector: IMenu,
+                                            preview?: (update?: (data: ListMindmapMetadata) => void) => void): IMenu => {
     const palette = metadata.appearance?.palette || [];
     const background = metadata.appearance?.backgroundColor || "";
+    const themeItem = (item: IMenu, update: (data: ListMindmapMetadata) => void): IMenu => ({...item,
+        click: () => change(update),
+        bind: preview ? element => {
+            element.addEventListener("pointerenter", (event: PointerEvent) => {
+                if (event.pointerType === "mouse") {
+                    preview(update);
+                }
+            });
+            element.addEventListener("pointerleave", () => preview());
+        } : undefined,
+    });
     return {
         id: "appearance", icon: "iconTheme", label: labels.appearance,
         submenu: [
@@ -252,29 +264,26 @@ export const getListMindmapAppearanceMenu = (metadata: ListMindmapMetadata,
                     element.style.setProperty("--b3-menu-items-max-height", "min(480px, 60vh)");
                 },
                 submenu: [
-                    {id: "default", iconHTML: '<span class="b3-menu__icon mindmap-view__theme-preview" aria-hidden="true"></span>',
-                        label: labels.default, checked: !palette.length,
-                        click: () => change(data => {
+                    themeItem({id: "default", iconHTML: '<span class="b3-menu__icon mindmap-view__theme-preview" aria-hidden="true"></span>',
+                        label: labels.default, checked: !palette.length}, data => {
                             data.appearance = {...data.appearance, version: 1, palette: []};
                             delete data.appearance.rootColor;
                             delete data.appearance.nodeStyle;
-                        })},
+                        }),
                     ...LIST_MINDMAP_PALETTES.map(preset => {
                         const colors = [preset.rootColor, ...preset.colors.filter((_color, index) => index % 2 === 0)];
                         const gradient = colors.map((color, index) =>
                             `${color} ${index * 100 / colors.length}% ${(index + 1) * 100 / colors.length}%`).join(",");
-                        return {
+                        return themeItem({
                             id: preset.id,
                             iconHTML: `<span class="b3-menu__icon b3-menu__icon--color mindmap-view__theme-preview" aria-hidden="true" style="background:linear-gradient(90deg,${gradient})"></span>`,
                             label: labels[preset.label],
                             checked: metadata.appearance?.nodeStyle === "branch" &&
                                 metadata.appearance.rootColor === preset.rootColor &&
-                                JSON.stringify(palette) === JSON.stringify(preset.colors),
-                            click: () => change(data => {
+                                JSON.stringify(palette) === JSON.stringify(preset.colors)}, data => {
                                 data.appearance = {...data.appearance, version: 1, palette: [...preset.colors],
                                     rootColor: preset.rootColor, nodeStyle: "branch"};
-                            }),
-                        };
+                            });
                     }),
                 ]},
             {id: "canvasBackground", iconHTML: "", label: labels.listMindmapCanvasBackground, submenu: [

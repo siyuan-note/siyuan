@@ -254,7 +254,36 @@ class ListMindmapController {
                 toggleMenu({
                     target: anchor,
                     build: (_menu, session) => {
-                        const menu = new Menu();
+                        let previewing = false;
+                        let closed = false;
+                        const preview = (update?: (metadata: ListMindmapMetadata) => void) => {
+                            if (this.disposed || closed) {
+                                return;
+                            }
+                            if (update) {
+                                // 预览只替换视图模型，源块和撤销记录仍使用已保存的数据。
+                                const metadata = JSON.parse(JSON.stringify(this.model.metadata)) as ListMindmapMetadata;
+                                update(metadata);
+                                previewing = true;
+                                this.view.update({...this.model, metadata});
+                            } else if (previewing) {
+                                previewing = false;
+                                this.view.update(this.model);
+                            }
+                        };
+                        const cancelPreview = (event: KeyboardEvent) => {
+                            if (event.key === "Escape") {
+                                preview();
+                            }
+                        };
+                        const menu = new Menu(undefined, () => {
+                            window.removeEventListener("keydown", cancelPreview, true);
+                            preview();
+                            closed = true;
+                        });
+                        if (!isMobile()) {
+                            window.addEventListener("keydown", cancelPreview, true);
+                        }
                         if (pan) {
                             menu.addItem({
                                 id: "pan", icon: "iconPan", label: window.siyuan.languages.cursorHand,
@@ -277,7 +306,7 @@ class ListMindmapController {
                                             metadata.connectorStyle = style;
                                         }
                                     });
-                                }, window.siyuan.languages)));
+                                }, window.siyuan.languages), isMobile() ? undefined : preview));
                             menu.addItem(getListMindmapConnectorMenuItem(getDefaultListMindmapConnectorStyle(), style => {
                                 if (canEdit(owner, list)) {
                                     setDefaultListMindmapConnectorStyle(style);

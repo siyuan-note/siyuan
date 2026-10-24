@@ -1238,6 +1238,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             panMenu = pan;
         },
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
+        onNodesStyle: (...args: unknown[]) => nodeStyles.push(args),
         onNodeWidths: async (widths: {id: string, width: number}[], expected: string) => {
             check.equal(expected, JSON.stringify(widths.map(({id}) => ({id, width: model.metadata.nodes[id]?.width || 0}))));
             widths.forEach(({id, width}) => {
@@ -2204,7 +2205,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const palette = popup.querySelector<HTMLElement>(".mindmap-view__palette");
         check.equal(palette.children.length, 31);
         const popupBounds = popup.getBoundingClientRect();
-        check.ok(popupBounds.width <= host.offsetWidth - 16, "long palettes wrap within the canvas");
+        check.ok(popupBounds.width <= host.offsetWidth - 16, "long palettes stay within the canvas");
         check.ok(popupBounds.bottom <= inspector.getBoundingClientRect().top, "node settings open above the bottom bar");
         const bounds = inspector.getBoundingClientRect();
         for (const key of ["connect", "listMindmapSummary", "delete"]) {
@@ -2213,6 +2214,36 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 `node action ${key} stays visible at width ${width} while the palette scrolls`);
         }
     }
+    const originalLineColors = options.colors;
+    options.colors = () => Array.from({length: 15}, (_, i) => ({label: `Line ${i}`, value: `rgb(${i}, 0, 0)`}));
+    view.selectNode(alpha, true);
+    for (const width of [240, 320, 760]) {
+        host.style.width = `${width}px`;
+        view.renderInspector();
+        inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+        await settle();
+        const popup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
+        const palettes = popup.querySelectorAll<HTMLElement>(".mindmap-view__palette");
+        check.equal(palettes.length, 2);
+        check.equal(palettes[0].previousElementSibling.textContent, "listMindmapNodeColor");
+        check.equal(palettes[1].previousElementSibling.textContent, "listMindmapLineColor");
+        for (const palette of palettes) {
+            const buttons = Array.from(palette.children) as HTMLElement[];
+            check.equal(new Set(buttons.map(button => button.offsetTop)).size, 1, "each palette keeps one row");
+            check.ok(palette.getBoundingClientRect().right <= popup.getBoundingClientRect().right);
+            if (width < 760) {
+                check.ok(palette.scrollWidth > palette.clientWidth, "narrow palettes scroll horizontally");
+            }
+        }
+        if (width === 760) {
+            check.equal(palettes[1].scrollWidth, palettes[1].clientWidth,
+                "the normal line palette fits one row on a wide canvas");
+        }
+        palettes[1].querySelector<HTMLButtonElement>('[aria-label="Line 14"]').click();
+        check.deepEqual(nodeStyles.at(-1), [view.getSelectedIds(), {lineColor: "rgb(14, 0, 0)"}]);
+    }
+    options.colors = originalLineColors;
+    view.focusNode(beta);
     host.style.cssText = originalHostStyle;
     options.nodeColors = originalNodeColors;
     view.renderInspector();

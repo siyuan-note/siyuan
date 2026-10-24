@@ -3696,7 +3696,9 @@ export class ListMindmapView {
             if (this.options.onManageNodeColors) {
                 palette.append(button("manageColors", "iconSettings", this.options.onManageNodeColors));
             }
-            this.inspectorPopover.append(palette);
+            const title = createElement("div", "ft__smaller ft__on-surface");
+            title.textContent = this.label("listMindmapNodeColor");
+            this.inspectorPopover.append(title, palette);
             if (panel.ids.length > 1) {
                 const lines = createElement("div", "mindmap-view__palette");
                 lines.setAttribute("role", "group");
@@ -3710,7 +3712,9 @@ export class ListMindmapView {
                 if (this.options.onManageLineColors) {
                     lines.append(button("manageColors", "iconSettings", this.options.onManageLineColors));
                 }
-                this.inspectorPopover.append(lines);
+                const lineTitle = createElement("div", "ft__smaller ft__on-surface");
+                lineTitle.textContent = this.label("listMindmapLineColor");
+                this.inspectorPopover.append(lineTitle, lines);
             }
         } else {
             const row = createElement("div", "mindmap-view__node-width");

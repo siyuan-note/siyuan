@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024124505"
+		"updated": "20261024134401"
 	},
 	"Children": [
 		{
@@ -2249,7 +2249,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-idam1p2",
-				"updated": "20261022122318"
+				"updated": "20261024134401"
 			},
 			"Children": [
 				{
@@ -2281,7 +2281,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中为当前导图选择缤纷、柔和、森林、海洋、日落、薰衣草或黑白配色。一级分支按色卡分配颜色，后代节点继承所属分支的颜色；调整分支顺序会保留原有配色，新增节点自动跟随导图配色。已有的节点和线条手工配色会保留。选择默认可移除色卡，并保留手工配色和画布背景。主题不会改变节点内容、结构或折叠状态。"
+					"Data": " 中为当前导图选择缤纷、柔和、森林、海洋、日落、薰衣草或黑白配色。主题为所有层级使用透明背景和统一的文字色。根节点字号更大，与一级分支一起采用较粗字重。分支连线按色卡配色，主干较粗，深层连线较细。主题文字和连线会适配画布明暗。调整分支顺序会保留原有配色，新增节点自动跟随导图配色。手工设置的颜色、字号和字重优先于主题。选择默认可移除色卡，并保留手工配色和画布背景。旧导图保留原有配色，重新选择主题后应用新的分层样式。主题不会改变节点内容、结构或折叠状态。"
 				}
 			]
 		},
@@ -2372,7 +2372,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003225941-hge6x3e",
-				"updated": "20261003225941"
+				"updated": "20261024133605"
 			},
 			"Children": [
 				{
@@ -2395,7 +2395,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）并点击节点的折叠按钮，可统一折叠或展开同一父节点下的兄弟分支。只要还有兄弟分支展开，就统一折叠；全部折叠时，则统一展开。更深层节点的折叠状态保持不变。普通点击只切换当前节点。"
+					"Data": "）并点击节点的折叠按钮，可统一折叠或展开同一父节点下的兄弟分支。只要还有兄弟分支展开，就统一折叠；全部折叠时，则统一展开。更深层节点的折叠状态保持不变。普通点击只切换当前节点。展开和折叠时，节点与连线会短暂过渡；系统开启减少动态效果时不播放动画。"
 				}
 			]
 		},

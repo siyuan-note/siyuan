@@ -20,6 +20,15 @@ func validListMindmapAppearance(value any) bool {
 			return false
 		}
 	}
+	if value, exists := data["rootColor"]; exists {
+		color, ok := value.(string)
+		if !ok || !listMindmapColorPattern.MatchString(color) {
+			return false
+		}
+	}
+	if value, exists := data["nodeStyle"]; exists && value != "layered" {
+		return false
+	}
 	if value, exists := data["backgroundColor"]; exists {
 		color, ok := value.(string)
 		if !ok || color != "" && !listMindmapColorPattern.MatchString(color) {

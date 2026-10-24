@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024124505"
+		"updated": "20261024134401"
 	},
 	"Children": [
 		{
@@ -2247,7 +2247,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-dz75ii8",
-				"updated": "20261022122318"
+				"updated": "20261024134401"
 			},
 			"Children": [
 				{
@@ -2279,7 +2279,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中為目前心智圖選擇繽紛、柔和、森林、海洋、日落、薰衣草或黑白配色。一級分支依色卡分配顏色，後代節點繼承所屬分支的顏色；調整分支順序會保留原有配色，新增節點自動跟隨心智圖配色。既有的節點和線條手動配色會保留。選擇預設可移除色卡，並保留手動配色和畫布背景。主題不會改變節點內容、結構或摺疊狀態。"
+					"Data": " 中為目前心智圖選擇繽紛、柔和、森林、海洋、日落、薰衣草或黑白配色。主題為所有層級使用透明背景和統一的文字色。根節點字級較大，與一級分支一同採用較粗字重。分支連線依色卡配色，主幹較粗，深層連線較細。主題文字與連線會配合畫布明暗調整。調整分支順序會保留原有配色，新增節點自動跟隨心智圖配色。手動設定的顏色、字級和字重優先於主題。選擇預設可移除色卡，並保留手動配色和畫布背景。既有心智圖保留原有配色，重新選擇主題後套用新的分層樣式。主題不會改變節點內容、結構或摺疊狀態。"
 				}
 			]
 		},
@@ -2370,7 +2370,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003225941-6yr63oi",
-				"updated": "20261003225941"
+				"updated": "20261024133605"
 			},
 			"Children": [
 				{
@@ -2393,7 +2393,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）並點擊節點的摺疊按鈕，可統一摺疊或展開同一父節點下的兄弟分支。只要還有兄弟分支展開，就統一摺疊；全部摺疊時，則統一展開。更深層節點的摺疊狀態保持不變。一般點擊只切換目前節點。"
+					"Data": "）並點擊節點的摺疊按鈕，可統一摺疊或展開同一父節點下的兄弟分支。只要還有兄弟分支展開，就統一摺疊；全部摺疊時，則統一展開。更深層節點的摺疊狀態保持不變。一般點擊只切換目前節點。展開與摺疊時，節點與連線會短暫過渡；系統啟用減少動態效果時不播放動畫。"
 				}
 			]
 		},

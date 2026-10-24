@@ -52,7 +52,7 @@ const browserCases = async (source: string, css: string) => {
         const model = api.readListMindmap(list);
         const [a, b, c] = model.root.children;
         model.metadata.nodes[a.id] = {backgroundColor: "red"};
-        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], backgroundColor: "#1e1e1e"};
+        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", nodeStyle: "layered", backgroundColor: "#1e1e1e"};
         api.assignListMindmapBranchColors(model);
         model.metadata.relations = [
             {id: Lute.NewNodeID(), from: a.id, to: b.id, label: "Inside"},
@@ -75,7 +75,7 @@ const browserCases = async (source: string, css: string) => {
         for (const placement of ["child", "after"]) {
             const destination = list.cloneNode(true) as HTMLElement;
             const destinationModel = api.readListMindmap(destination);
-            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], backgroundColor: "#ffffff"};
+            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], rootColor: "#14532d", nodeStyle: "layered", backgroundColor: "#ffffff"};
             api.writeListMindmapMetadata(destination, destinationModel.metadata);
             const pasted = api.pasteMindmapBranches(destination, payload, c.id, placement, lute);
             check.ok(pasted);
@@ -131,7 +131,7 @@ const browserCases = async (source: string, css: string) => {
     document.body.append(list);
     const model = api.readListMindmap(list);
     const [a, b] = model.root.children;
-    model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], backgroundColor: "#1e1e1e"};
+    model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", backgroundColor: "#1e1e1e"};
     api.assignListMindmapBranchColors(model);
     model.metadata.nodes[a.id].backgroundColor = "red";
     model.metadata.nodes[a.id].textColor = "white";
@@ -243,6 +243,8 @@ const browserCases = async (source: string, css: string) => {
         check.equal(preview.viewport.style.backgroundColor, "rgb(30, 30, 30)");
         check.equal(preview.nodeElements.get(a.id).style.backgroundColor, "rgb(37, 99, 235)",
             "read-only HTML and PDF layout render the saved palette");
+        check.equal(preview.nodeElements.get(model.root.id).style.backgroundColor, "rgb(30, 41, 59)",
+            "read-only HTML and PDF layout retain the independent root color");
         preview.destroy();
         previewHost.remove();
     }

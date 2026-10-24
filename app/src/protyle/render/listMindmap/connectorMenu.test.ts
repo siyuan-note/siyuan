@@ -144,6 +144,10 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         assert.equal(transactions.at(-1).before, beforeTheme);
         assert.equal(JSON.parse(list.outerHTML).nodes.child.lineColor, "red", "theme changes retain manual overrides");
         assert.equal(JSON.parse(list.outerHTML).nodes.child.branchColor, 0, "branch slots are saved with the same snapshot");
+        assert.equal(JSON.parse(list.outerHTML).appearance.rootColor, "#1e293b",
+            "the root theme color is saved in the same document transaction on desktop and mobile");
+        assert.equal(JSON.parse(list.outerHTML).appearance.nodeStyle, "layered",
+            "the layered style is saved with the root and branch palette on both platforms");
         const themed = list.outerHTML;
         data = JSON.parse(beforeTheme);
         assert.equal(JSON.parse(list.outerHTML).appearance, undefined, "undo restores the unthemed document");

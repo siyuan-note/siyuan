@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 import type {ListMindmapRelation} from "./model";
 import {buildListMindmapConnectors} from "./connectors";
-import {getMindmapLineColor} from "./appearance";
+import {getMindmapLineColor, resolveListMindmapColors} from "./appearance";
 
 // 执行实际绘制和命中方法，画布替身仅记录路径与箭头，避免依赖图形显示环境。
 const source = createSourceFile("view.ts", readFileSync("src/protyle/render/listMindmap/view.ts", "utf8"),
@@ -34,8 +34,10 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
     const polygons: Point[][] = [];
     const strokes: TestPath[] = [];
     const strokeStyles: string[] = [];
+    const strokeAlphas: number[] = [];
     const context = {
         strokeStyle: "",
+        globalAlpha: 1,
         strokeHit: false,
         setTransform: () => {}, clearRect: () => {}, translate: () => {}, scale: () => {},
         setLineDash: () => {}, closePath: () => {}, save: () => {}, restore: () => {}, resetTransform: () => {},
@@ -46,6 +48,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         stroke: (path: TestPath) => {
             strokes.push(path);
             strokeStyles.push(context.strokeStyle);
+            strokeAlphas.push(context.globalAlpha);
         },
         isPointInStroke: () => context.strokeHit,
     };
@@ -79,8 +82,30 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         relationRoutes: new Map([["r", [{x: 100, y: 10}, {x: 0, y: 10}]]]),
         routingObstacles: (): unknown[] => [], drawRelationPreview: () => {}, drawSummaries: () => {}, renderRouteControls: () => {},
     });
-    return {target, context, polygons, strokes, strokeStyles, element};
+    return {target, context, polygons, strokes, strokeStyles, strokeAlphas, element};
 };
+
+test("opening branches fade with their shared trunk while already visible siblings keep their trunk opaque", () => {
+    for (const connectorStyle of ["spline", "bezier", "orthogonal", "rounded"]) {
+        const {target, strokeAlphas} = setup();
+        target.model.root.id = "root";
+        Object.assign(target.model.metadata, {connectorStyle, relations: []});
+        target.positions = new Map([
+            ["root", {id: "root", x: 20, y: 100, width: 100, height: 40}],
+            ["a", {id: "a", x: 160, y: 0, width: 100, height: 40}],
+            ["b", {id: "b", x: 160, y: 200, width: 100, height: 40}],
+        ]);
+        target.edges = [{from: "root", to: "a"}, {from: "root", to: "b"}];
+        target.foldOpacities = new Map([["a", .4], ["b", .4]]);
+        target.draw();
+        assert.ok(strokeAlphas.length >= 2 && strokeAlphas.every(alpha => alpha === .4),
+            "the common trunk does not jump to full opacity before its branches appear");
+        strokeAlphas.length = 0;
+        target.foldOpacities.delete("b");
+        target.draw();
+        assert.deepEqual(strokeAlphas, ["orthogonal", "rounded"].includes(connectorStyle) ? [1, .4, 1] : [.4, 1]);
+    }
+});
 
 test("shared orthogonal trunks keep the default color and stay outside branch selection in every renderer", () => {
     for (const connectorStyle of ["orthogonal", "rounded"]) {
@@ -112,12 +137,11 @@ test("palette colors reach hierarchy paths and parent trunks while manual line c
     for (const connectorStyle of ["spline", "bezier", "orthogonal", "rounded"]) {
         for (const printLayout of [false, true]) {
             const {target, strokeStyles} = setup();
-            target.model.root.id = "root";
-            Object.assign(target.model.metadata, {connectorStyle, relations: [], nodes: {a: {lineColor: "#abcdef"}}});
-            target.themeColors = new Map([
-                ["root", {lineColor: "#111111"}], ["a", {lineColor: "#222222"}],
-                ["b", {lineColor: "#333333"}], ["c", {lineColor: "#333333"}],
-            ]);
+            target.model.root = {id: "root", children: [{id: "a", children: []},
+                {id: "b", children: [{id: "c", children: []}]}]};
+            Object.assign(target.model.metadata, {connectorStyle, relations: [], nodes: {a: {lineColor: "#abcdef"}},
+                appearance: {version: 1, palette: ["#222222", "#333333"], rootColor: "#111111"}});
+            target.themeColors = resolveListMindmapColors(target.model);
             target.options.printLayout = printLayout;
             target.readOnly = printLayout;
             target.positions = new Map([

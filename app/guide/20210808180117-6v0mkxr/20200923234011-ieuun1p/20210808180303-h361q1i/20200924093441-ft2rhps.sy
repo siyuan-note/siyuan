@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024124505"
+		"updated": "20261024134401"
 	},
 	"Children": [
 		{
@@ -2279,7 +2279,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-11epv5y",
-				"updated": "20261022122318"
+				"updated": "20261024134401"
 			},
 			"Children": [
 				{
@@ -2311,7 +2311,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose Colorful, Soft, Forest, Ocean, Sunset, Lavender, or Monochrome for the current map. First-level branches receive colors from the palette, and descendants inherit their branch color. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual node and line colors are retained. Choosing Default removes the palette while preserving manual colors and the canvas background. The theme does not change node content, structure, or folding states."
+					"Data": " to choose Colorful, Soft, Forest, Ocean, Sunset, Lavender, or Monochrome for the current map. The theme uses transparent backgrounds and a consistent text color at every level. The root is larger, and the root and first-level branches use a stronger font weight. Colors distinguish branch lines, with a heavier main trunk and finer lines at deeper levels. Theme text and lines adapt to the canvas brightness. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual colors, font sizes, and font weights take precedence. Choosing Default removes the palette while preserving manual colors and the canvas background. Existing maps keep their saved colors; select the theme again to apply the new layered style. The theme does not change node content, structure, or folding states."
 				}
 			]
 		},
@@ -2402,7 +2402,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003225941-mxlfdrn",
-				"updated": "20261003225941"
+				"updated": "20261024133605"
 			},
 			"Children": [
 				{
@@ -2425,7 +2425,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " on macOS) and click a node's fold button to fold or expand sibling branches under the same parent. If any sibling branch is expanded, all are folded; otherwise, all are expanded. Deeper folding states are preserved. A normal click only toggles the current node."
+					"Data": " on macOS) and click a node's fold button to fold or expand sibling branches under the same parent. If any sibling branch is expanded, all are folded; otherwise, all are expanded. Deeper folding states are preserved. A normal click only toggles the current node. Expansion and folding use a short transition for nodes and lines. The animation follows the system's reduced motion preference."
 				}
 			]
 		},

@@ -1,7 +1,7 @@
 {
+	"listMindmapDocumentLayout": "Rozloženie dokumentu",
 	"fullCheckSnapshot": "Úplná kontrola obsahu",
 	"fullCheckSnapshotTip": "Prečítať všetky lokálne súbory na zistenie zmien obsahu aj pri nezmenenej veľkosti a čase úpravy a podľa potreby vytvoriť snímku; zdroje sa na túto kontrolu nesťahujú a veľké pracovné priestory môžu vyžadovať viac času",
-	"listMindmapDocumentViewport": "Oblasť zobrazenia dokumentu",
 	"listMindmapNodeColor": "Farba uzla",
 	"listMindmapPaletteWaves": "Vlny",
 	"listMindmapPaletteDream": "Sen",

@@ -1,7 +1,7 @@
 {
+	"listMindmapDocumentLayout": "تخطيط المستند",
 	"fullCheckSnapshot": "فحص المحتوى بالكامل",
 	"fullCheckSnapshotTip": "قراءة جميع الملفات المحلية لاكتشاف تغييرات المحتوى حتى مع ثبات الحجم ووقت التعديل، وإنشاء لقطة عند الحاجة؛ لن تُنزّل الموارد لهذا الفحص، وقد تستغرق مساحات العمل الكبيرة وقتًا أطول",
-	"listMindmapDocumentViewport": "نافذة عرض المستند",
 	"listMindmapNodeColor": "لون العقدة",
 	"listMindmapPaletteWaves": "أمواج",
 	"listMindmapPaletteDream": "حلم",

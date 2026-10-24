@@ -1,7 +1,7 @@
 {
+	"listMindmapDocumentLayout": "Layout do documento",
 	"fullCheckSnapshot": "Verificação completa do conteúdo",
 	"fullCheckSnapshotTip": "Ler todos os arquivos locais para detectar alterações no conteúdo mesmo com tamanho e data de modificação inalterados, e criar um instantâneo se necessário; recursos não são baixados para esta verificação e espaços de trabalho grandes podem demorar mais",
-	"listMindmapDocumentViewport": "Área visível do documento",
 	"listMindmapNodeColor": "Cor do nó",
 	"listMindmapPaletteWaves": "Ondas",
 	"listMindmapPaletteDream": "Sonho",

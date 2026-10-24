@@ -562,6 +562,9 @@ export class ListMindmapView {
 
     private setLocked(value: boolean) {
         this.locked = value;
+        if (value) {
+            this.documentViewport.hidden = true;
+        }
         this.setInteractionActive(false);
         this.pinching = false;
         this.pinch = undefined;
@@ -608,15 +611,19 @@ export class ListMindmapView {
             }
         };
         const addFullscreen = () => {
-            add("documentViewport", "listMindmapDocumentViewport", "iconSelectAll", () => {
+            add("documentLayout", "listMindmapDocumentLayout", "iconSelectAll", () => {
+                if (!this.fullscreenMarker || !this.documentView || this.locked) {
+                    return;
+                }
+                this.stopFoldAnimation?.();
                 this.documentViewport.hidden = !this.documentViewport.hidden;
-                const button = this.buttons.get("documentViewport");
+                const button = this.buttons.get("documentLayout");
                 button.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
                 button.classList.toggle("block__icon--active", !this.documentViewport.hidden);
                 this.updateDocumentViewport();
             });
-            const preview = this.buttons.get("documentViewport");
-            preview.hidden = !this.fullscreenMarker || !this.documentView;
+            const preview = this.buttons.get("documentLayout");
+            preview.hidden = !this.fullscreenMarker || !this.documentView || this.locked;
             preview.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
             preview.classList.toggle("block__icon--active", !this.documentViewport.hidden);
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
@@ -3997,8 +4004,17 @@ export class ListMindmapView {
             return;
         }
         if (this.documentView) {
-            this.scale = this.documentView.scale;
-            this.viewportCenter = this.documentView.center;
+            if (!this.documentViewport.hidden && !this.destroyed && !this.locked) {
+                // 主动布局时，将固定取景框内的视角应用到文档；关闭布局模式则保留原快照。
+                this.resizeViewport();
+                this.viewportCenter ||= {
+                    x: (this.viewport.clientWidth / 2 - this.offsetX) / this.scale,
+                    y: (this.getViewportAnchorY(this.viewport.clientHeight) - this.offsetY) / this.scale,
+                };
+            } else {
+                this.scale = this.documentView.scale;
+                this.viewportCenter = this.documentView.center;
+            }
             this.documentView = undefined;
         }
         this.options.onFullscreen?.(false, this.buttons.get("fullscreen"));
@@ -4024,8 +4040,8 @@ export class ListMindmapView {
         if (!active) {
             this.documentViewport.hidden = true;
         }
-        const preview = this.buttons.get("documentViewport");
-        preview.hidden = !active || !this.documentView;
+        const preview = this.buttons.get("documentLayout");
+        preview.hidden = !active || !this.documentView || this.locked;
         preview.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
         preview.classList.toggle("block__icon--active", !this.documentViewport.hidden);
         const button = this.buttons.get("fullscreen");
@@ -4039,11 +4055,11 @@ export class ListMindmapView {
         if (!saved || this.documentViewport.hidden) {
             return;
         }
-        // 文档视口映射到当前全屏坐标，仅作预览，不改变退出时恢复的视角。
-        const width = saved.width * this.scale / saved.scale;
-        const height = saved.height * this.scale / saved.scale;
-        const x = this.offsetX + saved.center.x * this.scale - width / 2;
-        const y = this.offsetY + saved.center.y * this.scale - height / 2;
+        // 取景框与进入全屏前的文档视口等大，平移缩放只调整框下的导图。
+        const width = saved.width;
+        const height = saved.height;
+        const x = (this.viewport.clientWidth - width) / 2;
+        const y = Math.max(0, (this.viewport.clientHeight - height) / 2);
         this.documentViewport.style.width = `${width}px`;
         this.documentViewport.style.height = `${height}px`;
         this.documentViewport.style.transform = `translate(${x}px, ${y}px)`;

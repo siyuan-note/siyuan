@@ -54,7 +54,7 @@ const browserCases = async (source: string, css: string) => {
             const button = (label: string) => host.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
             const preview = host.querySelector<HTMLElement>(".mindmap-view__document-viewport");
             check.ok(preview.hidden);
-            check.ok(button("listMindmapDocumentViewport").hidden, "the preview control is fullscreen-only");
+            check.ok(button("listMindmapDocumentLayout").hidden, "the layout control is fullscreen-only");
             const initialStyle = host.style.cssText;
             for (const scale of [.75, 1.25]) {
                 view.zoomAt(scale);
@@ -122,65 +122,148 @@ const browserCases = async (source: string, css: string) => {
                 equalDocumentView();
             }
 
-            // 指示框标记原文档范围，平移缩放时跟随内容，不将预览变成布局编辑。
-            const previewCenter = center();
-            const previewScale = view.scale;
+            // 只有主动开启文档布局，才将固定取景框内的视角应用到文档。
+            const layoutCenter = center();
+            const layoutScale = view.scale;
             const root = host.querySelector<HTMLElement>(".mindmap-view__node");
-            const documentRect = viewport.getBoundingClientRect();
-            const nodeRect = root.getBoundingClientRect();
-            const relativeNode = [(nodeRect.left - documentRect.left) / viewport.clientWidth,
-                (nodeRect.top - documentRect.top) / viewport.clientHeight];
-            const sourceSize = [viewport.clientWidth, viewport.clientHeight];
-            const checkPreview = () => {
+            const checkFrame = () => {
                 const rect = preview.getBoundingClientRect();
-                const node = root.getBoundingClientRect();
-                check.ok(Math.abs(rect.width - sourceSize[0] * view.scale / previewScale) < .1);
-                check.ok(Math.abs(rect.height - sourceSize[1] * view.scale / previewScale) < .1);
-                [(node.left - rect.left) / rect.width, (node.top - rect.top) / rect.height]
-                    .forEach((value, index) => check.ok(Math.abs(value - relativeNode[index]) < .001,
-                        "the same document content remains at the same relative position within the preview"));
+                const viewportRect = viewport.getBoundingClientRect();
+                check.ok(Math.abs(rect.width - view.documentView.width) < .1);
+                check.ok(Math.abs(rect.height - view.documentView.height) < .1);
+                check.ok(Math.abs(rect.left - viewportRect.left -
+                    (viewport.clientWidth - rect.width) / 2) < .1);
+                check.ok(Math.abs(rect.top - viewportRect.top -
+                    Math.max(0, (viewport.clientHeight - rect.height) / 2)) < .1);
                 check.equal(getComputedStyle(preview).pointerEvents, "none", "the frame does not intercept gestures");
                 check.equal(getComputedStyle(preview).borderTopStyle, "dashed");
-                check.equal(button("listMindmapDocumentViewport").getAttribute("aria-pressed"), "true");
+                check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
+            };
+            const captureLayout = () => {
+                const rect = preview.getBoundingClientRect();
+                const node = root.getBoundingClientRect();
+                return {scale: view.scale, width: rect.width, height: rect.height,
+                    x: node.left - rect.left, y: node.top - rect.top};
+            };
+            const checkApplied = (expected: ReturnType<typeof captureLayout>) => {
+                const rect = viewport.getBoundingClientRect();
+                const node = root.getBoundingClientRect();
+                check.equal(view.scale, expected.scale);
+                check.ok(Math.abs(node.left - rect.left - expected.x -
+                    (viewport.clientWidth - expected.width) / 2) < .2,
+                "the document shows the horizontal position framed in fullscreen");
+                check.ok(Math.abs(node.top - rect.top - expected.y -
+                    (viewport.clientHeight - expected.height) / 2) < .2,
+                "the document shows the vertical position framed in fullscreen");
+                check.ok(preview.hidden);
+                check.ok(button("listMindmapDocumentLayout").hidden);
             };
             button("fullscreen").click();
             await settle();
-            check.equal(button("listMindmapDocumentViewport").hidden, false);
-            check.equal(button("listMindmapDocumentViewport").getAttribute("aria-pressed"), "false");
-            button("listMindmapDocumentViewport").click();
+            check.equal(button("listMindmapDocumentLayout").hidden, false);
+            check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "false");
+            button("listMindmapDocumentLayout").click();
             check.equal(preview.hidden, false);
-            checkPreview();
-            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "print");
-            check.equal(getComputedStyle(preview).display, "none", "viewport guides are excluded from printing");
-            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "");
-            checkPreview();
-            const savedPreview = JSON.stringify(view.documentView);
+            checkFrame();
+            const savedLayout = JSON.stringify(view.documentView);
+            const fixedFrame = preview.getBoundingClientRect().toJSON();
             view.zoomAt(1.9);
             viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 90, deltaY: 40, bubbles: true, cancelable: true}));
             await settle();
-            checkPreview();
-            button("listMindmapDocumentViewport").click();
-            check.ok(preview.hidden);
-            check.equal(button("listMindmapDocumentViewport").getAttribute("aria-pressed"), "false");
-            button("listMindmapDocumentViewport").click();
+            checkFrame();
+            check.deepEqual(preview.getBoundingClientRect().toJSON(), fixedFrame,
+                "panning and zooming move the map beneath a fixed, unscaled frame");
             view.setReadOnly(true);
-            checkPreview();
-            view.setLocked(true);
-            checkPreview();
-            view.setLocked(false);
+            checkFrame();
             view.setReadOnly(false);
-            check.equal(JSON.stringify(view.documentView), savedPreview, "preview operations never replace the saved view");
+            check.equal(JSON.stringify(view.documentView), savedLayout,
+                "layout edits keep the original snapshot available for cancellation");
+            button("listMindmapDocumentLayout").click();
+            check.ok(preview.hidden);
+            check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "false");
             button("exitFullscreen").click();
             await settle();
-            equalCenter(previewCenter);
-            check.equal(view.scale, previewScale);
-            check.ok(preview.hidden);
-            check.ok(button("listMindmapDocumentViewport").hidden);
+            equalCenter(layoutCenter);
+            check.equal(view.scale, layoutScale, "closing the layout toggle cancels its pending view change");
+            check.equal(list.outerHTML, originalSource);
+
+            // 开启后无需继续移动，也能主动采用开启时的全屏取景。
             button("fullscreen").click();
             await settle();
-            check.ok(preview.hidden, "each fullscreen session starts without the optional frame");
+            check.ok(preview.hidden, "each fullscreen session starts with layout editing off");
+            view.zoomAt(1.7);
+            viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 24, deltaY: 16, bubbles: true, cancelable: true}));
+            await settle();
+            const positionBeforeEnable = root.getBoundingClientRect().toJSON();
+            button("listMindmapDocumentLayout").click();
+            check.deepEqual(root.getBoundingClientRect().toJSON(), positionBeforeEnable,
+                "enabling layout editing does not jump the canvas");
+            const immediateLayout = captureLayout();
+            host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+            await settle();
+            checkApplied(immediateLayout);
+            const appliedCenter = center();
+            button("fullscreen").click();
+            await settle();
+            view.zoomAt(.8);
             button("exitFullscreen").click();
             await settle();
+            equalCenter(appliedCenter);
+            check.equal(view.scale, immediateLayout.scale, "ordinary fullscreen restores the most recently applied view");
+
+            // 实际桌面缩放与双指手势修改框内取景，内容更新和打印不丢失布局状态。
+            button("fullscreen").click();
+            await settle();
+            button("listMindmapDocumentLayout").click();
+            if (mobile) {
+                const full = viewport.getBoundingClientRect();
+                const touches = (distance: number) => [0, 1].map(index => new Touch({identifier: index,
+                    target: viewport, clientX: full.left + full.width / 2 + (index ? distance : -distance),
+                    clientY: full.top + full.height / 2}));
+                viewport.dispatchEvent(new TouchEvent("touchstart", {touches: touches(50), cancelable: true}));
+                viewport.dispatchEvent(new TouchEvent("touchmove", {touches: touches(60), cancelable: true}));
+                viewport.dispatchEvent(new TouchEvent("touchend", {touches: [], cancelable: true}));
+            } else {
+                const slider = host.querySelector<HTMLInputElement>(".mindmap-view__zoom-actions input");
+                slider.value = "180";
+                slider.dispatchEvent(new Event("input", {bubbles: true}));
+            }
+            viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: -50, deltaY: 30, bubbles: true, cancelable: true}));
+            const layoutContent = view.model.root.contentBlocks[0].querySelector('[contenteditable="true"]');
+            layoutContent.textContent = "Edited in document layout";
+            view.update(api.readListMindmap(list));
+            await settle();
+            checkFrame();
+            const beforePrint = [view.scale, view.offsetX, view.offsetY];
+            window.dispatchEvent(new Event("beforeprint"));
+            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "print");
+            check.equal(getComputedStyle(preview).display, "none", "layout guides are excluded from printing");
+            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "");
+            window.dispatchEvent(new Event("afterprint"));
+            await settle();
+            check.deepEqual([view.scale, view.offsetX, view.offsetY], beforePrint);
+            checkFrame();
+            const editedLayout = captureLayout();
+            button("exitFullscreen").click();
+            await settle();
+            checkApplied(editedLayout);
+            check.equal(view.getContentHost(view.model.root.id).textContent, "Edited in document layout");
+
+            // 画布锁定会取消未应用的布局，不能借助模式切换改写锁定视角。
+            const beforeLockLayout = center();
+            const beforeLockLayoutScale = view.scale;
+            button("fullscreen").click();
+            await settle();
+            button("listMindmapDocumentLayout").click();
+            view.zoomAt(.7);
+            view.setLocked(true);
+            check.ok(preview.hidden);
+            check.ok(button("listMindmapDocumentLayout").hidden);
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(beforeLockLayout);
+            check.equal(view.scale, beforeLockLayoutScale);
+            view.setLocked(false);
 
             const rapid = center();
             button("fullscreen").click();
@@ -254,8 +337,6 @@ const browserCases = async (source: string, css: string) => {
             const reference = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
                 (Math.max(viewport.clientHeight, documentHeight) / 2 - view.offsetY) / view.scale];
             const fullReference = reference();
-            button("listMindmapDocumentViewport").click();
-            const savedWidth = view.documentView.width;
             for (const height of [520, 480, 479, 320, 479, 480, 520, 700]) {
                 const oldHeight = viewport.clientHeight;
                 const oldOffset = view.offsetY;
@@ -271,14 +352,37 @@ const browserCases = async (source: string, css: string) => {
                 check.equal(view.scale, 1.6);
                 check.equal(view.documentView.scale, savedScale);
                 check.deepEqual([view.documentView.center.x, view.documentView.center.y], beforeHeightChanges);
-                check.ok(Math.abs(preview.getBoundingClientRect().width - savedWidth * 1.6 / savedScale) < .1);
-                check.ok(Math.abs(preview.getBoundingClientRect().height - documentHeight * 1.6 / savedScale) < .1,
-                    "height anchor changes do not stretch or rebase the document frame");
             }
             button("exitFullscreen").click();
             await settle();
             equalCenter(beforeHeightChanges);
             check.equal(view.scale, savedScale);
+
+            // 布局模式下跨越高矮视口边界，框固定尺寸并实时切换中心或顶部对齐。
+            button("fullscreen").click();
+            await settle();
+            button("listMindmapDocumentLayout").click();
+            view.zoomAt(1.3);
+            for (const height of [520, 480, 479, 320, 479, 480, 700]) {
+                await resizeWindow(900, height);
+                checkFrame();
+            }
+            const afterHeightLayout = captureLayout();
+            button("exitFullscreen").click();
+            await settle();
+            checkApplied(afterHeightLayout);
+
+            // 全屏窗口宽度改变后，应用取景中心并适应返回文档的实际宽度。
+            button("fullscreen").click();
+            await settle();
+            button("listMindmapDocumentLayout").click();
+            await resizeWindow(780, 700);
+            checkFrame();
+            const afterWidthLayout = captureLayout();
+            button("exitFullscreen").click();
+            await settle();
+            checkApplied(afterWidthLayout);
+            await resizeWindow(900, 700);
 
             // 滚动容器只露出高画布的一部分时，把正在看的节点保留在全屏顶部内。
             await resizeWindow(900, 600);
@@ -384,9 +488,9 @@ const browserCases = async (source: string, css: string) => {
     return "Mindmap fullscreen cases passed";
 };
 
-test("fullscreen preserves entry focus across viewport resizing and clipping without reverting content updates", {
+test("fullscreen restores entry focus or applies explicit document layout across resizing, clipping and content updates", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 30000,
+    timeout: 45000,
 }, async () => {
     const source = ["../av/richTextValue.ts", "summary.ts", "connectors.ts", "appearance.ts", "model.ts", "fold.ts", "routing.ts", "pan.ts", "view.ts"]
         .map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
@@ -430,7 +534,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script], {
-            env, timeout: 25000, windowsHide: true,
+            env, timeout: 40000, windowsHide: true,
         });
         assert.match(result.stdout, /Mindmap fullscreen cases passed/);
     } finally {

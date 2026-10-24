@@ -1,7 +1,7 @@
 {
+	"listMindmapDocumentLayout": "Dokumentlayout",
 	"fullCheckSnapshot": "Vollständige Inhaltsprüfung",
 	"fullCheckSnapshotTip": "Alle lokalen Dateien lesen, um Inhaltsänderungen auch bei unveränderter Größe und Änderungszeit zu erkennen und bei Bedarf einen Schnappschuss zu erstellen; Ressourcen werden dafür nicht heruntergeladen, große Arbeitsbereiche können mehr Zeit benötigen",
-	"listMindmapDocumentViewport": "Dokumentausschnitt",
 	"listMindmapNodeColor": "Knotenfarbe",
 	"listMindmapPaletteWaves": "Wellen",
 	"listMindmapPaletteDream": "Traum",

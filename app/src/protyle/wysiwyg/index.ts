@@ -577,7 +577,16 @@ export class WYSIWYG {
         if (isIOSDevice()) {
             this.disposeTouchCaret = bindIOSTouchCaret(this.element, () => !protyle.disabled &&
                 !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
-                !getBlockSelectionModeElement(this.element));
+                !getBlockSelectionModeElement(this.element), (target, point) => {
+                const cell = target.closest("td, th");
+                if (!cell || cell.closest(".protyle-wysiwyg") !== this.element) {
+                    return false;
+                }
+                // 在短按结束时进入单元格编辑，避免键盘动画后的延迟点击重新命中其他内容。
+                target.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+                    clientX: point.x, clientY: point.y, button: 0, detail: 1}));
+                return true;
+            });
         }
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {

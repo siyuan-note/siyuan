@@ -31,6 +31,8 @@ import {bindLiteCodeActions} from "../lite/codeActions";
 import {setTaskListItemMarker} from "../wysiwyg/list";
 import {nextTaskListMarker} from "../wysiwyg/taskListMarker";
 import {getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
+import {isIOSDevice} from "../util/compatibility";
+import {isNativeTextSelectionHandleTouch} from "../wysiwyg/nativeTextMenu";
 
 let activeEditor: {cell: Element, finish: () => void, prepareSwitch: () => boolean} | undefined;
 let openingEditor: object | undefined;
@@ -443,7 +445,8 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#keyboardToolbar, #commonMenu, .b3-dialog"));
     document.addEventListener("pointerdown", event => {
-        if (belongsToEditor(event.target as Node)) {
+        if (belongsToEditor(event.target as Node) ||
+            (isIOSDevice() && isNativeTextSelectionHandleTouch(event, fragment.wysiwyg))) {
             return;
         }
         const target = event.target instanceof Element ? event.target : undefined;

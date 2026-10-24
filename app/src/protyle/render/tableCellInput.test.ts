@@ -31,7 +31,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     }});
     const dependencies = {
         Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"},
-        dayjs: () => ({format: () => "20260924120000"}), isMobile: () => mobile,
+        dayjs: () => ({format: () => "20260924120000"}), isMobile: () => mobile, isIOSDevice: () => mobile,
         normalizeSemanticInlineElements: noop, removeEmptySemanticInlineElement: noop,
         getSemanticMarkerPrefixLengthForNode: () => 0, getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         turnIntoTaskList: () => false, headingTurnIntoList: () => false, isProtyleListItemFirstParagraph: () => false,
@@ -60,7 +60,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
-        "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, " +
+        "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, isNativeTextSelectionHandleTouch, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
         "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
@@ -68,7 +68,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
         typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
-        typeof import("../util/hasClosest") & typeof import("../wysiwyg/getBlock") & typeof import("../wysiwyg/list") & typeof import("../wysiwyg/taskListMarker");
+        typeof import("../util/hasClosest") & typeof import("../wysiwyg/getBlock") & typeof import("../wysiwyg/list") &
+        typeof import("../wysiwyg/taskListMarker") & typeof import("../wysiwyg/nativeTextMenu");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -657,6 +658,31 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         await finish(element);
     }
 
+    // 系统选区手柄可落在内嵌编辑器外的单元格留白中，按下时不能关闭编辑器。
+    for (const endpoint of ["start", "end"]) {
+        const {owner, element, table} = fixture();
+        const cell = table.querySelector("th");
+        await open(owner, cell);
+        const host = cell.querySelector(".table__cell-editor");
+        const editable = host.querySelector('[contenteditable="true"]');
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        focusByRange(range);
+        const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+        const rect = endpoint === "start" ? rects[0] : rects[rects.length - 1];
+        const pointer = new PointerEvent("pointerdown", {bubbles: true, cancelable: true, pointerType: "touch",
+            clientX: endpoint === "start" ? rect.left : rect.right,
+            clientY: endpoint === "start" ? rect.top - 5 : rect.bottom + 5});
+        cell.dispatchEvent(pointer);
+        check.equal(host.isConnected, true, `${endpoint} handle outside the inner editor retains its host`);
+        check.equal(pointer.defaultPrevented, false, "the native handle gesture remains available");
+        check.equal(getSelection().toString(), "Hello");
+        element.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch",
+            clientX: rect.right + 100, clientY: rect.bottom + 100}));
+        check.equal(host.isConnected, false, "an ordinary outside tap still closes the cell editor");
+        await finish(element);
+    }
+
     let tableImageOwner: IProtyle;
     let imageMenus = 0;
     {
@@ -1050,7 +1076,7 @@ test("table cell editors preserve input and alignment, and consume table menu En
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
         "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../wysiwyg/tableVirtualization.ts",
-        "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts"]
+        "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts"]
         .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const members = wysiwyg.statements.find(isClassDeclaration).members.filter(member =>

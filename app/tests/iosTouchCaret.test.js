@@ -19,15 +19,20 @@ const rendererSource = () => {
         }).join("\n");
     const wysiwyg = ts.createSourceFile("index.ts", read("wysiwyg/index"), ts.ScriptTarget.Latest, true);
     let doubleClick;
+    let tableTap;
     const visit = node => {
         if (ts.isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
             node.arguments[0]?.getText(wysiwyg) === '"dblclick"') {
             doubleClick = node.getText(wysiwyg);
         }
+        if (ts.isCallExpression(node) && node.expression.getText(wysiwyg) === "bindIOSTouchCaret") {
+            tableTap = node.arguments[2]?.getText(wysiwyg);
+        }
         ts.forEachChild(node, visit);
     };
     visit(wysiwyg);
     assert.ok(doubleClick);
+    assert.ok(tableTap);
     const menus = ts.createSourceFile("protyle.ts", readFileSync(path.join(__dirname, "../src/menus/protyle.ts"), "utf8"),
         ts.ScriptTarget.Latest, true);
     const contentMenu = menus.statements.find(statement => ts.isVariableStatement(statement) &&
@@ -38,6 +43,9 @@ const rendererSource = () => {
         const isIOSDevice = () => true;
         const getAVTemplateInteractiveElement = () => undefined;
         (function() { ${doubleClick}; }).call({element});
+    };
+    exports.createNativeTableTap = function(element) {
+        return (function() { return ${tableTap}; }).call({element});
     };
     exports.callNativeContentMenu = function(protyle, nodeElement) {
         const getEditorRange = () => document.getSelection().getRangeAt(0);
@@ -63,7 +71,7 @@ const runCases = async () => {
     const onError = event => errors.push(event.message);
     window.addEventListener("error", onError);
     let cases = 0;
-    const fixture = (focused = true) => {
+    const fixture = (focused = true, tableTap = false) => {
         document.body.innerHTML = `<div class="protyle-wysiwyg" contenteditable="false" style="font: 20px monospace">
             <div data-node-id="one"><div contenteditable="true">97997974949464649</div></div>
             <div data-node-id="two"><div contenteditable="true">点击定位文字</div></div>
@@ -72,7 +80,8 @@ const runCases = async () => {
         const editable = root.querySelector('[contenteditable="true"]');
         const text = editable.firstChild;
         let enabled = true;
-        const dispose = bindIOSTouchCaret(root, () => enabled);
+        const dispose = bindIOSTouchCaret(root, () => enabled,
+            tableTap ? window.touchCaret.createNativeTableTap(root) : undefined);
         const place = (offset, node = text, end = offset) => {
             const range = document.createRange();
             range.setStart(node, offset);
@@ -141,6 +150,164 @@ const runCases = async () => {
                 window.webkit = originalWebkit;
             }
         });
+        for (const kind of ["pointerdown", "touchstart", "drag"]) {
+            await run(async f => {
+                const originalWebkit = window.webkit;
+                const messages = [];
+                window.webkit = {messageHandlers: {showTextMenu: {postMessage: async text => {
+                    messages.push(text);
+                    return true;
+                }}}};
+                try {
+                    f.place(2, f.text, 6);
+                    const selected = selection.toString();
+                    window.touchCaret.requestNativeTextMenu(f.root, selection.getRangeAt(0));
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    const point = f.pointAt(5);
+                    if (kind === "pointerdown") {
+                        f.editable.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch", ...point}));
+                    } else {
+                        f.send("touchstart", point);
+                    }
+                    if (kind === "drag") {
+                        f.send("touchmove", {...point, clientX: point.clientX + 40});
+                        f.place(2, f.text, 10);
+                        document.dispatchEvent(new Event("selectionchange"));
+                        f.send("touchend", {...point, clientX: point.clientX + 40});
+                    }
+                    await nextFrame();
+                    check.deepEqual(messages, [selected], "selection handle gestures do not dismiss the native menu");
+                    check.equal(selection.toString(), f.text.textContent.slice(2, kind === "drag" ? 10 : 6));
+                } finally {
+                    f.dispose();
+                    window.webkit = originalWebkit;
+                }
+            });
+        }
+        for (const endpoint of ["start", "end"]) {
+            await run(async f => {
+                const originalWebkit = window.webkit;
+                const messages = [];
+                window.webkit = {messageHandlers: {showTextMenu: {postMessage: async text => {
+                    messages.push(text);
+                    return true;
+                }}}};
+                try {
+                    const table = document.createElement("table");
+                    table.innerHTML = '<tbody><tr><td style="padding:24px"></td></tr></tbody>';
+                    f.root.replaceWith(table);
+                    const cell = table.querySelector("td");
+                    cell.appendChild(f.root);
+                    f.editable.focus();
+                    f.place(2, f.text, 6);
+                    const selected = selection.toString();
+                    window.touchCaret.requestNativeTextMenu(f.root, selection.getRangeAt(0));
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    const rect = selection.getRangeAt(0).getBoundingClientRect();
+                    const point = {clientX: endpoint === "start" ? rect.left : rect.right,
+                        clientY: endpoint === "start" ? rect.top - 5 : rect.bottom + 5};
+                    cell.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch", ...point}));
+                    f.send("touchstart", point, cell);
+                    check.deepEqual(messages, [selected], `${endpoint} handle outside the editor retains its native menu`);
+                    document.querySelector("#outside").dispatchEvent(new PointerEvent("pointerdown", {
+                        bubbles: true, pointerType: "touch", clientX: rect.right + 100, clientY: rect.bottom + 100,
+                    }));
+                    check.deepEqual(messages, [selected, ""], "an unrelated outside tap still dismisses the menu");
+                } finally {
+                    f.dispose();
+                    window.webkit = originalWebkit;
+                }
+            });
+        }
+        await run(async f => {
+            const originalWebkit = window.webkit;
+            const messages = [];
+            let rejectOldSelection;
+            window.webkit = {messageHandlers: {showTextMenu: {postMessage: text => {
+                messages.push(text);
+                return text ? new Promise(resolve => { rejectOldSelection = resolve; }) : Promise.resolve(true);
+            }}}};
+            try {
+                f.place(2, f.text, 6);
+                const selected = selection.toString();
+                window.touchCaret.requestNativeTextMenu(f.root, selection.getRangeAt(0));
+                await new Promise(resolve => setTimeout(resolve, 150));
+                f.place(2, f.text, 10);
+                document.dispatchEvent(new Event("selectionchange"));
+                rejectOldSelection(false);
+                await nextFrame();
+                check.deepEqual(messages, [selected], "a late response for the previous selection does not cancel a handle drag");
+            } finally {
+                f.dispose();
+                window.webkit = originalWebkit;
+            }
+        });
+        await run(async f => {
+            f.root.innerHTML = '<div class="table" data-node-id="table" data-type="NodeTable">' +
+                '<div contenteditable="false"><table contenteditable="true"><tbody><tr><td>table text</td></tr>' +
+                "</tbody></table></div></div>";
+            const cell = f.root.querySelector("td");
+            check.equal(window.touchCaret.usesNativeTextMenu(cell, f.root), true, "table text uses the native menu");
+            cell.innerHTML = '<div class="table__cell-editor" contenteditable="false">' +
+                '<div class="protyle-wysiwyg" contenteditable="false"><div contenteditable="true">nested cell</div></div></div>';
+            const inner = cell.querySelector(".protyle-wysiwyg");
+            const target = inner.firstElementChild;
+            check.equal(window.touchCaret.usesNativeTextMenu(target, inner), true, "the cell editor owns its text menu");
+            check.equal(window.touchCaret.usesNativeTextMenu(target, f.root), false, "the outer editor ignores nested text menus");
+        });
+        for (const empty of [false, true]) {
+            await run(async f => {
+                f.root.innerHTML = '<div class="table" data-node-id="table" data-type="NodeTable">' +
+                    '<div contenteditable="false"><table contenteditable="true"><tbody><tr>' +
+                    '<td style="width:12px"></td><td>neighbor</td></tr></tbody></table></div></div>';
+                const table = f.root.querySelector("table");
+                const cell = table.querySelector("td");
+                if (!empty) cell.textContent = "x";
+                const neighbor = cell.nextElementSibling.firstChild;
+                table.focus();
+                f.place(0, neighbor);
+                const originalCaret = document.caretRangeFromPoint;
+                document.caretRangeFromPoint = () => {
+                    const range = document.createRange();
+                    range.setStart(neighbor, 0);
+                    range.collapse(true);
+                    return range;
+                };
+                try {
+                    const rect = cell.getBoundingClientRect();
+                    const point = {clientX: (rect.left + rect.right) / 2, clientY: (rect.top + rect.bottom) / 2};
+                    f.send("touchstart", point, cell);
+                    f.send("touchend", point, cell);
+                    await nextFrame();
+                    check.equal(selection.isCollapsed, true);
+                    check.equal(cell.contains(selection.anchorNode), true, "a tap stays in its narrow or empty table cell");
+                } finally {
+                    document.caretRangeFromPoint = originalCaret;
+                }
+            });
+        }
+        {
+            const clicks = [];
+            const f = fixture(true, true);
+            try {
+                f.root.innerHTML = '<div class="table" data-node-id="table"><div contenteditable="false">' +
+                    '<table contenteditable="true"><tbody><tr><td>cell</td></tr></tbody></table></div></div>';
+                const cell = f.root.querySelector("td");
+                cell.addEventListener("click", event => clicks.push({target: event.target, x: event.clientX, y: event.clientY}));
+                const point = f.pointAt(1, cell.firstChild);
+                f.send("touchstart", point, cell);
+                const end = f.send("touchend", point, cell);
+                await nextFrame();
+                check.equal(end.defaultPrevented, true, "the delayed compatibility click is suppressed after table activation");
+                check.equal(clicks.length, 1, "a cell activates even when WebKit never dispatches click");
+                check.equal(clicks[0].target, cell);
+                check.ok(Math.abs(clicks[0].x - point.clientX) < 1);
+                check.ok(Math.abs(clicks[0].y - point.clientY) < 1);
+                cases++;
+            } finally {
+                f.dispose();
+            }
+        }
         for (const kind of ["selected", "native", "changed", "scroll"]) {
             await run(async f => {
                 let calls = 0;
@@ -199,7 +366,8 @@ const runCases = async () => {
                         f.dispose();
                     }
                     await new Promise(resolve => setTimeout(resolve, 150));
-                    check.deepEqual(messages, kind === "unrelatedScroll" || kind === "duplicate" ? [text] : [text, ""], kind);
+                    check.deepEqual(messages, kind === "unrelatedScroll" || kind === "duplicate" || kind === "changed" ?
+                        [text] : [text, ""], kind);
                 } finally {
                     window.webkit = originalWebkit;
                 }
@@ -677,7 +845,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /iOS touch caret: 65 DOM cases passed/);
+            assert.match(stdout, /iOS touch caret: 75 DOM cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-ios-touch-caret-"));

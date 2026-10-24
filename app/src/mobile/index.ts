@@ -26,6 +26,7 @@ import {
     handleTouchSelectionChange,
     handleTouchStart,
     handleTouchUp,
+    handleTouchEditing,
     handleTouchFocusOut,
 } from "./util/touch";
 import {fetchPost} from "../util/fetch";
@@ -285,6 +286,9 @@ class App {
             document.addEventListener("focusout", handleTouchFocusOut, true);
             document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
+            window.addEventListener("nativeTextMenuWillPresent", handleTouchEditing, false);
+            document.addEventListener("beforeinput", handleTouchEditing, true);
+            document.addEventListener("paste", handleTouchEditing, true);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;

@@ -878,10 +878,10 @@ export const isEncryptedBox = (boxId: string): boolean => {
 /**
  * 规范化并校验相对路径：允许子目录，但禁止通过 ".." 穿越到根外。
  * 用于插件存储，确保路径不逃出指定根目录。
- * @returns 规范化后的相对路径（使用 /），若路径非法则返回替换后的合法路径
+ * @returns 规范化后的相对路径（使用 /）；不含有效文件段（如 ".."、"."、空串）时返回 null，避免指向根目录自身或其上级
  */
 export const normalizeStoragePath = (storageName: string): string | null => {
     const segments = storageName.replace(/\\/g, "/").split("/");
     const merged = mergePathSegments([], segments);
-    return merged.length > 0 ? merged.join("/") : storageName.replace(/[\/\\]+/g, "");
+    return merged.length > 0 ? merged.join("/") : null;
 };

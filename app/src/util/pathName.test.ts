@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as escape from "./escape";
+import * as mergePathSegments from "./mergePathSegments";
 
 const names = {} as typeof import("./pathName");
 runInNewContext(transpileModule(readFileSync("src/util/pathName.ts", "utf8"), {
@@ -12,7 +13,8 @@ runInNewContext(transpileModule(readFileSync("src/util/pathName.ts", "utf8"), {
 }).outputText, {
     exports: names,
     window: {siyuan: {languages: {_kernel: {16: "Untitled"}}}},
-    require: (id: string) => id === "path" ? path : id === "./escape" ? escape : {},
+    require: (id: string) => id === "path" ? path : id === "./escape" ? escape :
+        id === "./mergePathSegments" ? mergePathSegments : {},
 });
 
 test("document display names preserve complete literal titles", () => {
@@ -48,5 +50,26 @@ test("asset names and extensions ignore query strings and fragments", () => {
     ]) {
         assert.equal(names.getAssetExtension(assetPath), extension, assetPath);
         assert.equal(names.getAssetName(assetPath), name, assetPath);
+    }
+});
+
+test("storage paths keep valid segments inside the root", () => {
+    for (const [storageName, expected] of [
+        ["config.json", "config.json"],
+        ["folder/config.json", "folder/config.json"],
+        ["folder\\config.json", "folder/config.json"],
+        ["./folder//config.json", "folder/config.json"],
+        ["a/../b.json", "b.json"],
+        ["../x.json", "x.json"],
+        ["../../a/../b/c.json", "b/c.json"],
+        ["...", "..."],
+    ]) {
+        assert.equal(names.normalizeStoragePath(storageName), expected, storageName);
+    }
+});
+
+test("storage paths without a file segment are rejected instead of addressing the root or its parent", () => {
+    for (const storageName of ["", ".", "..", "../", "..\\", "./..", "../..", "a/..", "/", "\\", "./"]) {
+        assert.equal(names.normalizeStoragePath(storageName), null, JSON.stringify(storageName));
     }
 });

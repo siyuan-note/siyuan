@@ -8,7 +8,8 @@ import (
 
 func TestPruneListMindmapAppearance(t *testing.T) {
 	for _, version := range []string{"1", "2"} {
-		for _, rootColor := range []string{"", `"rootColor":"#112233",`, `"rootColor":"#112233","nodeStyle":"layered",`} {
+		for _, rootColor := range []string{"", `"rootColor":"#112233",`, `"rootColor":"#112233","nodeStyle":"layered",`,
+			`"rootColor":"#112233","nodeStyle":"branch",`} {
 			_, list, _ := mindmapTestTree()
 			appearance := `{"version":1,` + rootColor + `"palette":["#123456","#abcdef"],"backgroundColor":"#ffffff","extension":9007199254740993}`
 			original := `{"version":` + version + `,"appearance":` + appearance +
@@ -49,7 +50,8 @@ func TestPruneListMindmapAppearance(t *testing.T) {
 func TestValidListMindmapAppearance(t *testing.T) {
 	for _, source := range []string{`{"version":1,"palette":[]}`, `{"version":1,"palette":["#AbCdEf"],"backgroundColor":""}`,
 		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233"}`, `{"version":1,"palette":[],"rootColor":"#AABBCC"}`,
-		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233","nodeStyle":"layered"}`} {
+		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233","nodeStyle":"layered"}`,
+		`{"version":1,"palette":["#AbCdEf"],"rootColor":"#112233","nodeStyle":"branch"}`} {
 		var value any
 		_ = json.Unmarshal([]byte(source), &value)
 		if !validListMindmapAppearance(value) {

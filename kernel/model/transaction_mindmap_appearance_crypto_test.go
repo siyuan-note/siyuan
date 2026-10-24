@@ -89,7 +89,9 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 	appearance["nodeStyle"] = "layered"
 	data["nodes"].(map[string]any)[ids[1]].(map[string]any)["branchColor"] = 0
 	styled, _ := json.Marshal(data)
-	for _, value := range []string{string(legacyStyled), string(styled), string(legacyStyled), original, string(styled)} {
+	appearance["nodeStyle"] = "branch"
+	referenceStyled, _ := json.Marshal(data)
+	for _, value := range []string{string(legacyStyled), string(styled), string(referenceStyled), string(styled), original, string(referenceStyled)} {
 		attrs, _ := json.Marshal(map[string]string{listMindmapMetadataAttr: value})
 		tx := &Transaction{DoOperations: []*Operation{{Action: "setAttrs", ID: list.ID, Data: string(attrs)}}}
 		if err = PerformTxSync(tx); err != nil {
@@ -125,7 +127,7 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 	exported, err := io.ReadAll(reader)
 	_ = reader.Close()
 	if err != nil || !json.Valid(exported) || !bytes.Contains(exported, []byte("#2563eb")) ||
-		!bytes.Contains(exported, []byte("#1e293b")) || !bytes.Contains(exported, []byte("layered")) ||
+		!bytes.Contains(exported, []byte("#1e293b")) || !bytes.Contains(exported, []byte("branch")) ||
 		!bytes.Contains(exported, []byte("Legacy summary")) {
 		t.Fatalf("export lost the appearance or legacy content: %v", err)
 	}

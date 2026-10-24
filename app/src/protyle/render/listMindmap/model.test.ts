@@ -192,8 +192,10 @@ test("appearance metadata is additive and rejects invalid palettes and branch sl
         const appearance = {version: 1, palette: ["#123456", "#abcdef"], backgroundColor: "#ffffff", extension: "keep"};
         const source = JSON.stringify({...base, appearance});
         assert.equal(JSON.stringify(parseListMindmapMetadata(source)), source);
-        const withRootColor = JSON.stringify({...base, appearance: {...appearance, rootColor: "#112233", nodeStyle: "layered"}});
-        assert.equal(JSON.stringify(parseListMindmapMetadata(withRootColor)), withRootColor);
+        for (const nodeStyle of ["layered", "branch"]) {
+            const withRootColor = JSON.stringify({...base, appearance: {...appearance, rootColor: "#112233", nodeStyle}});
+            assert.equal(JSON.stringify(parseListMindmapMetadata(withRootColor)), withRootColor);
+        }
         for (const invalid of [null, [], {}, {...appearance, version: 2}, {...appearance, palette: ["red"]},
             {...appearance, backgroundColor: "url(x)"},
             ...[null, "", "red", "url(x)", 123].map(rootColor => ({...appearance, rootColor})),

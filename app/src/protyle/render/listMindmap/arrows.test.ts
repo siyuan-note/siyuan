@@ -35,8 +35,10 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
     const strokes: TestPath[] = [];
     const strokeStyles: string[] = [];
     const strokeAlphas: number[] = [];
+    const strokeWidths: number[] = [];
     const context = {
         strokeStyle: "",
+        lineWidth: 0,
         globalAlpha: 1,
         strokeHit: false,
         setTransform: () => {}, clearRect: () => {}, translate: () => {}, scale: () => {},
@@ -49,6 +51,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
             strokes.push(path);
             strokeStyles.push(context.strokeStyle);
             strokeAlphas.push(context.globalAlpha);
+            strokeWidths.push(context.lineWidth);
         },
         isPointInStroke: () => context.strokeHit,
     };
@@ -82,7 +85,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         relationRoutes: new Map([["r", [{x: 100, y: 10}, {x: 0, y: 10}]]]),
         routingObstacles: (): unknown[] => [], drawRelationPreview: () => {}, drawSummaries: () => {}, renderRouteControls: () => {},
     });
-    return {target, context, polygons, strokes, strokeStyles, strokeAlphas, element};
+    return {target, context, polygons, strokes, strokeStyles, strokeAlphas, strokeWidths, element};
 };
 
 test("opening branches fade with their shared trunk while already visible siblings keep their trunk opaque", () => {
@@ -155,6 +158,48 @@ test("palette colors reach hierarchy paths and parent trunks while manual line c
             const trunks = connectorStyle === "orthogonal" || connectorStyle === "rounded" ? ["#111111", "#333333"] : [];
             assert.deepEqual(strokeStyles, [...trunks, "#abcdef", "#333333", "#333333"]);
             assert.equal(target.linePaths.length, 3, "shared trunks never become selectable branch paths");
+        }
+    }
+});
+
+test("reference themes paint root overlaps with branch colors in display order at one width in editing and print", () => {
+    for (const connectorStyle of ["orthogonal", "rounded"]) {
+        for (const printLayout of [false, true]) {
+            const {target, strokes, strokeStyles, strokeAlphas, strokeWidths} = setup();
+            target.model.root = {id: "root", children: [{id: "a", children: []},
+                {id: "b", children: [{id: "c", children: []}]}]};
+            Object.assign(target.model.metadata, {connectorStyle, relations: [],
+                nodes: {a: {branchColor: 0, lineColor: "#abcdef"}, b: {branchColor: 1}},
+                appearance: {version: 1, palette: ["#ff0000", "#0000ff"], rootColor: "#111111", nodeStyle: "branch"}});
+            target.themeColors = resolveListMindmapColors(target.model);
+            target.options.printLayout = printLayout;
+            target.readOnly = printLayout;
+            target.positions = new Map([
+                ["root", {id: "root", x: 20, y: 100, width: 100, height: 40}],
+                ["a", {id: "a", x: 160, y: 0, width: 100, height: 40}],
+                ["b", {id: "b", x: 160, y: 200, width: 100, height: 40}],
+                ["c", {id: "c", x: 300, y: 200, width: 100, height: 40}],
+            ]);
+            target.edges = [{from: "root", to: "a"}, {from: "root", to: "b"}, {from: "b", to: "c"}];
+            target.draw();
+            assert.deepEqual(strokeStyles, ["#0000ff", "#abcdef", "#abcdef", "#0000ff", "#0000ff", "#0000ff"]);
+            assert.ok(strokeWidths.every(width => width === 1.5));
+            assert.equal(target.linePaths.length, 3);
+            for (const index of [0, 1, 3]) {
+                assert.ok(target.linePaths.every((line: {path: TestPath}) => line.path !== strokes[index]),
+                    "colored common trunks remain outside selectable branch paths");
+            }
+            target.model.root.children.reverse();
+            target.edges = [target.edges[1], target.edges[0], target.edges[2]];
+            target.themeColors = resolveListMindmapColors(target.model);
+            strokeStyles.length = 0;
+            strokeWidths.length = 0;
+            strokeAlphas.length = 0;
+            target.foldOpacities = new Map([["a", .4]]);
+            target.draw();
+            assert.deepEqual(strokeStyles, ["#0000ff", "#0000ff", "#0000ff", "#abcdef", "#abcdef", "#0000ff"]);
+            assert.deepEqual(strokeAlphas, [1, 1, 1, .4, .4, 1], "a branch and its root overlay fade together");
+            assert.ok(strokeWidths.every(width => width === 1.5));
         }
     }
 });

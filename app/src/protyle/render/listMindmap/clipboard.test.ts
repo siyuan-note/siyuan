@@ -47,12 +47,13 @@ const browserCases = async (source: string, css: string) => {
         }
         return list;
     };
-    for (const native of [true, false]) {
+    for (const {native, nodeStyle} of [true, false].flatMap(native =>
+        ["layered", "branch"].map(nodeStyle => ({native, nodeStyle})))) {
         const list = makeList(native);
         const model = api.readListMindmap(list);
         const [a, b, c] = model.root.children;
         model.metadata.nodes[a.id] = {backgroundColor: "red"};
-        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", nodeStyle: "layered", backgroundColor: "#1e1e1e"};
+        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", nodeStyle, backgroundColor: "#1e1e1e"};
         api.assignListMindmapBranchColors(model);
         model.metadata.relations = [
             {id: Lute.NewNodeID(), from: a.id, to: b.id, label: "Inside"},
@@ -72,10 +73,11 @@ const browserCases = async (source: string, css: string) => {
         check.equal(selected.nodes.size, 4);
         check.equal(selected.metadata.relations.length, 1);
         check.equal(selected.metadata.summaries[0].parentId, payload.dataset.nodeId);
-        for (const placement of ["child", "after"]) {
+        for (const {placement, destinationStyle} of ["child", "after"].flatMap(placement =>
+            ["layered", "branch"].map(destinationStyle => ({placement, destinationStyle})))) {
             const destination = list.cloneNode(true) as HTMLElement;
             const destinationModel = api.readListMindmap(destination);
-            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], rootColor: "#14532d", nodeStyle: "layered", backgroundColor: "#ffffff"};
+            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], rootColor: "#14532d", nodeStyle: destinationStyle, backgroundColor: "#ffffff"};
             api.writeListMindmapMetadata(destination, destinationModel.metadata);
             const pasted = api.pasteMindmapBranches(destination, payload, c.id, placement, lute);
             check.ok(pasted);

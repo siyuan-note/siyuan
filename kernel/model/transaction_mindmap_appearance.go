@@ -26,7 +26,7 @@ func validListMindmapAppearance(value any) bool {
 			return false
 		}
 	}
-	if value, exists := data["nodeStyle"]; exists && value != "layered" {
+	if value, exists := data["nodeStyle"]; exists && value != "layered" && value != "branch" {
 		return false
 	}
 	if value, exists := data["backgroundColor"]; exists {

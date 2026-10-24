@@ -1,14 +1,18 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {assignListMindmapBranchColors, clearListMindmapManualColors, getListMindmapAppearanceMenu,
-    getMindmapLineColor, getMindmapTextColor, isListMindmapAppearance, LIST_MINDMAP_PALETTES, resolveListMindmapColors} from "./appearance";
+    getMindmapLineColor, getMindmapTextColor, isListMindmapAppearance, LIST_MINDMAP_CANVAS_COLORS,
+    LIST_MINDMAP_PALETTES, resolveListMindmapColors} from "./appearance";
 import type {ListMindmapModel, ListMindmapNode} from "./model";
 import {execFile} from "node:child_process";
-import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
+
+const legacyPalettes: {id: string, rootColor: string, colors: string[]}[] = JSON.parse(readFileSync(
+    path.join(__dirname, "../../../../tests/fixtures/list-mindmap-appearance-palettes.json"), "utf8"));
 
 const makeModel = (): ListMindmapModel => {
     const node = (id: string, children: ListMindmapNode[] = []): ListMindmapNode =>
@@ -37,18 +41,13 @@ test("appearance validates optional colors and rejects unsupported formats", () 
     }
 });
 
-test("all seven built-in palettes remain selectable after reload and provide readable foregrounds", () => {
-    assert.equal(LIST_MINDMAP_PALETTES.length, 7);
-    assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => preset.id)).size, 7);
-    assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => JSON.stringify(preset.colors))).size, 7);
+test("all 47 reference palettes remain selectable after reload with their fixed level foregrounds", () => {
+    assert.equal(LIST_MINDMAP_PALETTES.length, 47);
+    assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => preset.id)).size, 47);
+    assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => JSON.stringify(preset.colors))).size, 47);
     const model = makeModel();
     model.metadata.appearance = {version: 1, palette: [], backgroundColor: "#ffffff"};
     model.metadata.nodes.a = {textColor: "red"};
-    const luminance = (color: string) => {
-        const rgb = color.match(/[a-f\d]{2}/gi).map(channel => parseInt(channel, 16) / 255);
-        const linear = rgb.map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4);
-        return linear.reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
-    };
     const themes = () => {
         const menu = getListMindmapAppearanceMenu(model.metadata, update => update(model.metadata), {},
             {id: "connectorStyle", label: "Connectors"});
@@ -60,20 +59,33 @@ test("all seven built-in palettes remain selectable after reload and provide rea
         assert.deepEqual(themes().filter(item => item.checked).map(item => item.id), [preset.id]);
         assert.deepEqual(model.metadata.appearance.palette, preset.colors);
         assert.equal(model.metadata.appearance.rootColor, preset.rootColor);
-        assert.equal(model.metadata.appearance.nodeStyle, "layered");
-        assert.ok(!preset.colors.includes(preset.rootColor), "root colors remain separate from every branch color");
+        assert.equal(model.metadata.appearance.nodeStyle, "branch");
+        assert.equal(preset.colors.length, 9, "the first reference swatch belongs to the root and the next nine to branches");
         assert.equal(model.metadata.appearance.backgroundColor, "#ffffff");
         assert.equal(model.metadata.nodes.a.textColor, "red");
-        for (const [index, color] of [...preset.colors, preset.rootColor].entries()) {
-            const lightFill = preset.id === "soft" ||
-                (["lavender", "monochrome"].includes(preset.id) && index >= 4);
-            assert.equal(getMindmapTextColor(color), lightFill && index < preset.colors.length ? "#000000" : "#ffffff",
-                `${preset.id} branch ${index + 1} retains its intended foreground`);
-            const foreground = luminance(getMindmapTextColor(color));
-            const background = luminance(color);
-            const contrast = (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
-            assert.ok(contrast >= 4.5, `${preset.id} ${color} must retain readable text contrast`);
+        for (const canvas of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_CANVAS_COLORS]) {
+            const styles = resolveListMindmapColors(model, canvas);
+            assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).textColor), ["#ffffff", "#ffffff", "#000000"]);
+            assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).backgroundColor),
+                [preset.rootColor, preset.colors[0], "transparent"]);
+            assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).lineWidth), [1.5, 1.5, 1.5]);
+            assert.equal(styles.get("a1").lineColor, preset.colors[0]);
         }
+    }
+});
+
+test("all reference theme names are translated in every bundled language and old presets leave the menu", () => {
+    const directory = path.join(__dirname, "../../../../appearance/langs");
+    for (const file of readdirSync(directory).filter(file => file.endsWith(".json"))) {
+        const labels = JSON.parse(readFileSync(path.join(directory, file), "utf8"));
+        const menu = getListMindmapAppearanceMenu(makeModel().metadata, () => {}, labels, {id: "connectorStyle"});
+        const themes = (menu.submenu as IMenu[]).find(item => item.id === "theme").submenu as IMenu[];
+        for (const preset of LIST_MINDMAP_PALETTES) {
+            assert.ok(labels[preset.label]?.trim(), `${file} translates ${preset.id}`);
+            assert.equal(themes.find(item => item.id === preset.id).label, labels[preset.label]);
+        }
+        assert.ok(legacyPalettes.every(preset => !themes.some(item => item.id === preset.id)),
+            "removed presets are not offered while their saved palettes remain readable");
     }
 });
 
@@ -82,9 +94,9 @@ for (const fixture of [
     {id: "sunset", colors: ["#9a3412", "#c2410c", "#ea580c", "#be123c", "#9f1239", "#7e22ce"]},
     {id: "lavender", colors: ["#4c1d95", "#6d28d9", "#7c3aed", "#a855f7", "#c084fc", "#e9d5ff"]},
 ]) {
-    test(`previous ${fixture.id} palettes retain saved colors and selection until explicitly reapplied`, () => {
+    test(`previous ${fixture.id} palettes retain saved colors until a new reference theme is explicitly applied`, () => {
         const model = makeModel();
-        const preset = LIST_MINDMAP_PALETTES.find(preset => preset.id === fixture.id);
+        const preset = LIST_MINDMAP_PALETTES[0];
         const previous = fixture.colors;
         model.metadata.appearance = {version: 1, palette: previous, backgroundColor: "#ffffff"};
         model.metadata.nodes.a = {branchColor: 2, textColor: "#ff0000"};
@@ -92,10 +104,10 @@ for (const fixture of [
         const menu = getListMindmapAppearanceMenu(model.metadata, update => update(model.metadata), {},
             {id: "connectorStyle", label: "Connectors"});
         const themes = (menu.submenu as IMenu[]).find(item => item.id === "theme").submenu as IMenu[];
-        assert.deepEqual(themes.filter(item => item.checked).map(item => item.id), [fixture.id]);
+        assert.deepEqual(themes.filter(item => item.checked).map(item => item.id), []);
         assert.equal(resolveListMindmapColors(model).get("a").backgroundColor, previous[2]);
         assert.equal(JSON.stringify(model.metadata), before, "opening the menu never migrates document colors");
-        themes.find(item => item.id === fixture.id).click(undefined, undefined);
+        themes.find(item => item.id === preset.id).click(undefined, undefined);
         assert.deepEqual(model.metadata.appearance.palette, preset.colors);
         assert.equal(model.metadata.appearance.rootColor, preset.rootColor);
         assert.equal(model.metadata.appearance.backgroundColor, "#ffffff");
@@ -115,16 +127,17 @@ test("root colors are opt-in for every existing palette and preserve branch slot
         const themes = () => getListMindmapAppearanceMenu(model.metadata, update => update(model.metadata), {},
             {id: "connectorStyle", label: "Connectors"}).submenu as IMenu[];
         const paletteMenu = () => themes().find(item => item.id === "theme").submenu as IMenu[];
-        assert.equal(paletteMenu().find(item => item.id === preset.id).checked, true);
+        assert.equal(paletteMenu().find(item => item.id === preset.id).checked, false);
         assert.equal(JSON.stringify(model.metadata), before, "reading and opening a menu never migrate old colors");
         paletteMenu().find(item => item.id === preset.id).click(undefined, undefined);
         const after = JSON.stringify(model.metadata);
         const styled = resolveListMindmapColors(model);
-        assert.equal(styled.get("root").backgroundColor, "transparent");
+        assert.equal(styled.get("root").backgroundColor, preset.rootColor);
         assert.equal(styled.get("root").lineColor, preset.rootColor);
-        assert.notEqual(styled.get("a").backgroundColor, legacy.get("a").backgroundColor);
+        assert.equal(styled.get("a").backgroundColor, legacy.get("a").backgroundColor,
+            "the first level retains the branch fill while deeper nodes become transparent");
         assert.equal(styled.get("a1").backgroundColor, "transparent");
-        assert.deepEqual(model.metadata.appearance.palette, preset.colors, "layered styling retains the saved branch palette");
+        assert.deepEqual(model.metadata.appearance.palette, preset.colors, "branch styling retains the saved branch palette");
         assert.deepEqual(model.metadata.nodes.root, {backgroundColor: "#fed7aa", bold: true});
         model.metadata = JSON.parse(before);
         assert.deepEqual(resolveListMindmapColors(model), legacy, "undo restores the exact legacy root and branch colors");
@@ -135,7 +148,7 @@ test("root colors are opt-in for every existing palette and preserve branch slot
         assert.equal(model.metadata.appearance.rootColor, preset.rootColor, "clearing manual colors retains the root theme");
         assert.equal(model.metadata.nodes.a.branchColor, 0);
         assert.equal(model.metadata.nodes.b.branchColor, 1);
-        model.metadata.appearance.rootColor = "#ff0000";
+        model.metadata.appearance.rootColor = "#010203";
         assert.equal(paletteMenu().some(item => item.checked), false, "a different root color is not the built-in preset");
         paletteMenu().find(item => item.id === "default").click(undefined, undefined);
         assert.equal(model.metadata.appearance.rootColor, undefined);
@@ -150,8 +163,8 @@ test("layered palettes combine transparent nodes, neutral text, hierarchical typ
         .reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
     const contrast = (a: string, b: string) => (Math.max(luminance(a), luminance(b)) + .05) /
         (Math.min(luminance(a), luminance(b)) + .05);
-    for (const preset of LIST_MINDMAP_PALETTES) {
-        for (const canvas of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_PALETTES[1].colors]) {
+    for (const preset of legacyPalettes) {
+        for (const canvas of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_CANVAS_COLORS]) {
             const model = makeModel();
             model.metadata.appearance = {version: 1, palette: [...preset.colors], rootColor: preset.rootColor, nodeStyle: "layered"};
             assignListMindmapBranchColors(model);
@@ -177,6 +190,29 @@ test("layered palettes combine transparent nodes, neutral text, hierarchical typ
             assert.equal(JSON.stringify(model.metadata), before);
             model.metadata.appearance.backgroundColor = canvas;
             assert.deepEqual(resolveListMindmapColors(model, "#123456"), colors, "saved canvas colors override application colors");
+        }
+    }
+});
+
+test("removed preset fixtures preserve solid and layered rendering without rewriting saved appearance", () => {
+    for (const preset of legacyPalettes) {
+        for (const nodeStyle of [undefined, "layered"] as const) {
+            const model = makeModel();
+            model.metadata.appearance = {version: 1, palette: [...preset.colors], rootColor: preset.rootColor,
+                ...(nodeStyle ? {nodeStyle} : {})};
+            assignListMindmapBranchColors(model);
+            const before = JSON.stringify(model.metadata);
+            const colors = resolveListMindmapColors(model);
+            assert.equal(colors.get("root").backgroundColor, nodeStyle ? "transparent" : preset.rootColor);
+            assert.equal(colors.get("a").backgroundColor, nodeStyle ? "transparent" : preset.colors[0]);
+            assert.equal(colors.get("a1").backgroundColor, colors.get("a").backgroundColor);
+            if (!nodeStyle) {
+                assert.equal(colors.get("a").textColor, getMindmapTextColor(preset.colors[0]));
+            }
+            getListMindmapAppearanceMenu(model.metadata, () => assert.fail("reading cannot restyle saved maps"), {}, {});
+            assert.equal(JSON.stringify(model.metadata), before);
+            model.metadata = JSON.parse(before);
+            assert.deepEqual(resolveListMindmapColors(model), colors);
         }
     }
 });
@@ -226,7 +262,7 @@ test("theme lines contrast with every canvas preset while retaining sufficiently
         const values = [luminance(line), luminance(background)];
         return (Math.max(...values) + .05) / (Math.min(...values) + .05);
     };
-    for (const background of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_PALETTES[1].colors]) {
+    for (const background of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_CANVAS_COLORS]) {
         for (const preset of LIST_MINDMAP_PALETTES) {
             for (const color of [...preset.colors, preset.rootColor]) {
                 const adjusted = getMindmapLineColor(color, background);
@@ -255,11 +291,11 @@ test("appearance menu preserves manual colors and non-color metadata until expli
         const entries = (build().submenu as IMenu[]).find(item => item.id === group).submenu as IMenu[];
         entries.find(item => item.id === id).click(undefined, undefined);
     };
-    choose("theme", "forest");
+    choose("theme", "waves");
     assert.equal(JSON.stringify(model.metadata.nodes), old);
     choose("canvasBackground", "dark");
     assert.equal(model.metadata.appearance.backgroundColor, "#1e1e1e");
-    choose("theme", "soft");
+    choose("theme", "dream");
     assert.equal(model.metadata.appearance.backgroundColor, "#1e1e1e");
     assert.equal(model.metadata.appearance.rootColor, LIST_MINDMAP_PALETTES[1].rootColor);
     choose("theme", "default");
@@ -273,7 +309,7 @@ test("appearance menu preserves manual colors and non-color metadata until expli
     assert.equal(model.metadata.appearance.backgroundColor, "#1e1e1e");
 });
 
-const contrastCases = async (source: string, css: string) => {
+const contrastCases = async (source: string, css: string, legacyPresets: typeof legacyPalettes) => {
     const check = require("node:assert/strict");
     const api = new Function("Constants", "mathRender", "tabsRender", "destroyTabsRender", source +
         "; return {ListMindmapView, readListMindmap, retagMindmapBranch, getMindmapLineColor, resolveListMindmapColors, LIST_MINDMAP_PALETTES};")({
@@ -367,7 +403,7 @@ const contrastCases = async (source: string, css: string) => {
     view.edges = [emptyNode, quoteNode].map(node => ({from: model.root.id, to: node.id}));
     view.positions.set(deepNode.id, {id: deepNode.id, x: 340, y: 80, width: 120, height: 40});
     view.edges.push({from: emptyNode.id, to: deepNode.id});
-    for (const preset of api.LIST_MINDMAP_PALETTES) {
+    for (const preset of legacyPresets) {
         for (const background of ["#ffffff", "#1e1e1e"]) {
             for (const printLayout of [false, true]) {
                 view.options.printLayout = printLayout;
@@ -397,6 +433,38 @@ const contrastCases = async (source: string, css: string) => {
         }
     }
     for (const preset of api.LIST_MINDMAP_PALETTES) {
+        model.metadata.appearance = {version: 1, palette: preset.colors, rootColor: preset.rootColor, nodeStyle: "branch"};
+        model.metadata.connectorStyle = "rounded";
+        delete model.metadata.nodes[quoteNode.id];
+        for (const printLayout of [false, true]) {
+            view.options.printLayout = printLayout;
+            view.readOnly = printLayout;
+            for (const background of ["#ffffff", "#1e1e1e"]) {
+                document.documentElement.style.setProperty("--b3-theme-background", background);
+                view.update(model);
+                check.equal(getComputedStyle(view.nodeElements.get(model.root.id)).backgroundColor, computedColor(preset.rootColor));
+                for (const node of [model.root, emptyNode, quoteNode]) {
+                    check.equal(getComputedStyle(view.nodeElements.get(node.id)).color, "rgb(255, 255, 255)",
+                        "root and first-level foregrounds follow the fixed white reference style");
+                }
+                const deep = view.nodeElements.get(deepNode.id);
+                check.equal(getComputedStyle(deep).backgroundColor, "rgba(0, 0, 0, 0)");
+                check.equal(getComputedStyle(deep).color, "rgb(0, 0, 0)");
+                check.equal(getComputedStyle(view.getContentHost(emptyNode.id), "::before").color, "rgb(255, 255, 255)");
+                check.equal(getComputedStyle(view.nodeElements.get(quoteNode.id).querySelector(".bq .p")).color,
+                    "rgb(255, 255, 255)");
+                check.equal(getComputedStyle(view.nodeElements.get(quoteNode.id).querySelector(".bq span")).color,
+                    "rgb(194, 65, 12)", "explicit inline text colors remain authoritative");
+                widths.length = 0;
+                lines.length = 0;
+                view.draw();
+                check.ok(widths.length > 0 && widths.every(width => width === 1.5),
+                    "new reference themes use the same width for every hierarchy line");
+                check.ok(lines.includes(computedColor(preset.colors[0])), "reference swatch values reach the canvas unchanged");
+            }
+        }
+    }
+    for (const preset of legacyPresets) {
         model.metadata.appearance = {version: 1, palette: preset.colors, rootColor: preset.rootColor, nodeStyle: "layered"};
         for (const printLayout of [false, true]) {
             view.options.printLayout = printLayout;
@@ -484,7 +552,7 @@ const contrastCases = async (source: string, css: string) => {
     return "mindmap-contrast-ok";
 };
 
-test("palette text and canvas connectors stay readable while manual colors and legacy styles survive", {
+test("reference and legacy palettes preserve their foreground rules, hierarchy paths and manual overrides", {
     timeout: 20000,
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
@@ -510,7 +578,7 @@ app.whenReady().then(async () => {
         await win.webContents.executeJavaScript(require("fs").readFileSync(${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
         `const __name = value => value; (async () => { try { return await (${contrastCases.toString()})` +
-        `(${JSON.stringify(source)}, ${JSON.stringify(css)}); } catch (error) { return error.stack; } })()`)}));
+        `(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(legacyPalettes)}); } catch (error) { return error.stack; } })()`)}));
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }
 });`, "utf8");

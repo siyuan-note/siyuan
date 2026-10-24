@@ -2042,12 +2042,14 @@ export class ListMindmapView {
         const themeLineColor = (id: string) => {
             const color = this.themeColors?.get(id)?.lineColor;
             if (color && !paletteLines.has(color)) {
-                paletteLines.set(color, getMindmapLineColor(color, canvasColor));
+                paletteLines.set(color, this.model.metadata.appearance?.nodeStyle === "branch" ?
+                    color : getMindmapLineColor(color, canvasColor));
             }
             return paletteLines.get(color);
         };
         const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
-            this.model.metadata.connectorStyle || "bezier", () => new Path2D());
+            this.model.metadata.connectorStyle || "bezier", () => new Path2D(),
+            this.model.metadata.appearance?.nodeStyle === "branch");
         const trunkOpacities = new Map<string, number>();
         if (this.foldOpacities) {
             this.edges.forEach(edge => {
@@ -2069,7 +2071,7 @@ export class ListMindmapView {
             context.setLineDash(style.lineDash ? [6, 4] : []);
             context.stroke(path);
         });
-        connectors.branches.forEach(({id, path}) => {
+        connectors.branches.forEach(({id, path, trunk}) => {
             const style = {...rootStyle, ...this.model.metadata.nodes[id]};
             this.linePaths.push({id, relation: false, path});
             context.beginPath();
@@ -2077,10 +2079,17 @@ export class ListMindmapView {
             const hovered = this.hoveredLine === `edge:${id}`;
             const lineStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
                 style.lineWidth, defaultLine, selected, hovered, this.themeColors?.get(id)?.lineWidth);
-            context.strokeStyle = lineStyle.color;
-            context.lineWidth = lineStyle.width;
             context.globalAlpha = this.foldOpacities?.get(id) ?? 1;
             context.setLineDash(style.lineDash ? [6, 4] : []);
+            if (trunk) {
+                const trunkStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
+                    style.lineWidth, defaultLine, false, false, this.themeColors?.get(id)?.lineWidth);
+                context.strokeStyle = trunkStyle.color;
+                context.lineWidth = trunkStyle.width;
+                context.stroke(trunk);
+            }
+            context.strokeStyle = lineStyle.color;
+            context.lineWidth = lineStyle.width;
             context.stroke(path);
         });
         this.model.metadata.relations.forEach((relation) => {

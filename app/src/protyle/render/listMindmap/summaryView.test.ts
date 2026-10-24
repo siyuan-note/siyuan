@@ -90,11 +90,25 @@ test("summary creation consumes the current selection once and retains the snaps
     assert.equal(calls.length, 1, "identical ranges do not submit again");
 });
 
-test("single, invalid, crossing, duplicate and read-only summary selections never submit", async () => {
-    for (const mode of ["single", "empty", "virtual", "crossing", "duplicate", "readonly", "locked", "export"]) {
+test("a single node creates an editable summary and cannot create the same range twice", async () => {
+    const {view, model, calls, frames, edited, select} = create();
+    select(["a"]);
+    const expected = getListMindmapSummarySnapshot(model);
+    await view.createSummary();
+    assert.deepEqual(calls, [{ranges: [{parentId: "root", nodeIds: ["a"]}], expected}]);
+    assert.equal(model.metadata.version, 1, "a single-node summary retains the existing format");
+    assert.deepEqual(model.metadata.summaries[0].nodeIds, ["a"]);
+    frames.forEach(action => action());
+    assert.deepEqual(edited, ["new"]);
+    await view.createSummary();
+    assert.equal(calls.length, 1, "duplicate single-node ranges are rejected");
+});
+
+test("invalid, crossing, duplicate and read-only summary selections never submit", async () => {
+    for (const mode of ["empty", "missing", "virtual", "crossing", "duplicate", "readonly", "locked", "export"]) {
         const {view, model, calls, select} = create();
-        if (mode === "single") { select(["a"]); }
         if (mode === "empty") { select([]); }
+        if (mode === "missing") { select(["missing"]); }
         if (mode === "virtual") { select(["root"]); }
         if (mode === "crossing" || mode === "duplicate") {
             addListMindmapSummaryRanges(model, [{parentId: "root", nodeIds: ["a", "b"]}], () => "old", "Old");

@@ -46,7 +46,7 @@ import {hideElements} from "../ui/hideElements";
 import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
-import {EMBED_BREADCRUMB_PARENT_PATH} from "../render/embedBreadcrumb";
+import {embedBreadcrumbMenu} from "./embedBreadcrumbMenu";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
@@ -2501,7 +2501,6 @@ export class Gutter {
             }).element);
         } else if (type === "NodeBlockQueryEmbed" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_blockEmbed", type: "separator"}).element);
-            const breadcrumb = nodeElement.getAttribute("breadcrumb");
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "blockEmbed",
                 type: "submenu",
@@ -2525,41 +2524,7 @@ export class Gutter {
                 }, {
                     id: "separator_breadcrumb",
                     type: "separator"
-                }, {
-                    id: "embedBlockBreadcrumb",
-                    label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.embedBlockBreadcrumb}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${breadcrumb === "true" ? " checked" : ((window.siyuan.config.editor.embedBlockBreadcrumb && breadcrumb !== "false") ? " checked" : "")}></div>`,
-                    bind(element) {
-                        element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-                            const inputElement = element.querySelector("input");
-                            if (event.target.tagName !== "INPUT") {
-                                inputElement.checked = !inputElement.checked;
-                            }
-                            nodeElement.setAttribute("breadcrumb", inputElement.checked.toString());
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id,
-                                attrs: {breadcrumb: inputElement.checked.toString()}
-                            });
-                            nodeElement.removeAttribute("data-render");
-                            blockRender(protyle, nodeElement);
-                            window.siyuan.menus.menu.remove();
-                        });
-                    }
-                }, {
-                    id: "embedBlockBreadcrumbParentPath",
-                    label: window.siyuan.languages.embedBlockBreadcrumbParentPath,
-                    iconHTML: "",
-                    checked: nodeElement.getAttribute(EMBED_BREADCRUMB_PARENT_PATH) !== "false",
-                    click() {
-                        const value = (nodeElement.getAttribute(EMBED_BREADCRUMB_PARENT_PATH) === "false").toString();
-                        nodeElement.setAttribute(EMBED_BREADCRUMB_PARENT_PATH, value);
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id, attrs: {[EMBED_BREADCRUMB_PARENT_PATH]: value}
-                        });
-                        nodeElement.removeAttribute("data-render");
-                        blockRender(protyle, nodeElement);
-                    }
-                }, {
+                }, ...embedBreadcrumbMenu(protyle, nodeElement), {
                     id: "headingEmbedMode",
                     label: window.siyuan.languages.headingEmbedMode,
                     type: "submenu",

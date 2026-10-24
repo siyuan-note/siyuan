@@ -185,7 +185,7 @@ const cases = async (source: string, css: string, formulas: string[]) => {
         nodes: {} as Record<string, {width?: number}>, relations: [] as {id: string}[],
     }};
     const view = Object.assign(new api.MindmapPreviewView(), {
-        options: {}, viewport: document.createElement("div"), persistedLocked: false,
+        options: {host: map}, viewport: document.createElement("div"), persistedLocked: false,
         nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
         renderTask: () => {}, destroyContentViews: () => {},
         label: (key: string) => key, updateRelations: () => {}, updateSummaries: () => {},
@@ -288,8 +288,8 @@ test("special block previews cannot acquire document writes or lose unsupported 
     assert.equal(methods.length, 2);
     const viewSource = createSourceFile("view.ts", readFileSync(path.join(__dirname, "view.ts"), "utf8"), ScriptTarget.Latest, true);
     const viewClass = viewSource.statements.find(isClassDeclaration);
-    const viewMethods = viewClass.members.filter(member => ["update", "getContentHost"].includes(member.name?.getText(viewSource)));
-    assert.equal(viewMethods.length, 2);
+    const viewMethods = viewClass.members.filter(member => ["update", "updateColors", "getContentHost"].includes(member.name?.getText(viewSource)));
+    assert.equal(viewMethods.length, 3);
     const katexDirectory = path.resolve(__dirname, "../../../../stage/protyle/js/katex");
     const katex = require(path.join(katexDirectory, "katex.min.js"));
     const formulas = ["x", "\\frac{y}{x}", "AAA=" + "A".repeat(40)].map(value =>
@@ -298,7 +298,8 @@ test("special block previews cannot acquire document writes or lose unsupported 
         logger: require("sass").Logger.silent,
     }).css;
     const source = compile(readFileSync(path.join(__dirname, "../../../plugin/customBlockRender.ts"), "utf8")) +
-        extract("../htmlRender.ts", ["htmlRender"]) + extract("../blockRender.ts", ["blockRender"]) +
+        extract("../htmlRender.ts", ["htmlRender"]) + compile(readFileSync(path.join(__dirname, "../embedBreadcrumb.ts"), "utf8")) +
+        extract("../blockRender.ts", ["blockRender"]) +
         extract("../chartRender.ts", ["refreshChartTheme"]) +
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +

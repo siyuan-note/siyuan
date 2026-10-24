@@ -6,7 +6,7 @@
 		"id": "20230422120504-ns837kr",
 		"title": "Data Availability Guarantee",
 		"type": "doc",
-		"updated": "20261016111431"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422120505-6clcdod",
-				"updated": "20261016111431"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230422120505-fbpi1wh",
-				"updated": "20230422120505"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "We've put a lot of effort into improving data availability on local devices:"
+					"Data": "Automatic saving, file history, and data snapshots provide different levels of local recovery:"
 				}
 			]
 		},
@@ -223,7 +223,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422120505-kest28r",
-				"updated": "20261016111431"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -279,7 +279,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422120505-g2ke8sd",
-				"updated": "20261016111431"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -319,7 +319,7 @@
 					},
 					"Properties": {
 						"id": "20230422120505-5ca5hhc",
-						"updated": "20261016111431"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -342,7 +342,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230422120505-hxty2gi",
-								"updated": "20261016111431"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -382,7 +382,7 @@
 									},
 									"Properties": {
 										"id": "20230422120505-68rfrop",
-										"updated": "20261016111431"
+										"updated": "20261024163013"
 									},
 									"Children": [
 										{
@@ -390,7 +390,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230422120505-5n9yyyk",
-												"updated": "20261016111431"
+												"updated": "20261024163013"
 											},
 											"Children": [
 												{
@@ -404,7 +404,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -413,7 +413,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -422,7 +422,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​"
+													"Data": ""
 												}
 											]
 										}
@@ -441,7 +441,7 @@
 					},
 					"Properties": {
 						"id": "20230422120505-48cniaa",
-						"updated": "20261016111431"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -449,7 +449,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422120505-9w5jgvm",
-								"updated": "20261016111431"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -463,7 +463,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -472,7 +472,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​; use the cloud pane in a wide window or "
+									"Data": "; use the cloud pane in a wide window or "
 								},
 								{
 									"Type": "NodeTextMark",

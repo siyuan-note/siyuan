@@ -19,15 +19,26 @@ const sources = () => {
     };
     const source = read("protyle/util/editorCommonEvent.ts");
     const dropBranches = [];
+    const externalDropBranches = [];
     const visit = node => {
         if (ts.isIfStatement(node) && node.expression.getText(source) === "sourceElements.length > 0") {
             dropBranches.push(node.thenStatement.getText(source));
+        }
+        if (ts.isIfStatement(node) && node.expression.getText(source).startsWith("!window.siyuan.dragElement &&")) {
+            externalDropBranches.push(node.thenStatement.getText(source));
         }
         ts.forEachChild(node, visit);
     };
     visit(source);
     assert.equal(dropBranches.length, 1);
+    assert.equal(externalDropBranches.length, 1);
     return {
+        externalDrop: compile(`async function externalDrop(protyle, event) ${externalDropBranches[0]}`),
+        uploadCapture: [
+            extract("protyle/upload/index.ts", ["captureUploadInsertPosition"]),
+            extract("protyle/upload/insertPosition.ts", ["captureUploadDocument", "createUploadInsertPosition"]),
+        ].join("\n"),
+        rangeByPoint: extract("protyle/util/selection.ts", ["getRangeByPoint"]),
         drop: compile(`async function drop(protyle, sourceElements, targetElement, targetClass, gutterTypes, event, isCopyDrag) {
             const editorElement = protyle.wysiwyg.element;
             let dragoverElement;
@@ -178,8 +189,51 @@ const cases = async source => {
         check.deepEqual(route.sources, [moving]);
         check.equal(route.target, target);
     }
+    // 拖入位置和原光标位于不同段落，上传异步完成前再次移动光标也不能改变落点。
+    for (const altKey of [false, true]) {
+        root.innerHTML = '<div contenteditable="true">11111111</div><div contenteditable="true">22222222</div>';
+        const [first, second] = root.children;
+        const oldRange = document.createRange();
+        oldRange.setStart(second.firstChild, 8);
+        oldRange.collapse(true);
+        protyle.toolbar = {range: oldRange};
+        const pointRange = document.createRange();
+        pointRange.setStart(first.firstChild, 4);
+        pointRange.collapse(true);
+        const rect = pointRange.getBoundingClientRect();
+        let captured;
+        let isUpload;
+        const getEditorRange = () => document.getSelection().getRangeAt(0);
+        const focusByRange = range => {
+            document.getSelection().removeAllRanges();
+            document.getSelection().addRange(range);
+        };
+        focusByRange(oldRange);
+        const capture = new Function("getEditorRange", "getUndoFocusContext", source.uploadCapture +
+            "; return captureUploadInsertPosition;")(getEditorRange, () => ({}));
+        const getRangeByPoint = new Function("hasClosestByAttribute", "hasClosestByClassName", source.rangeByPoint +
+            "; return getRangeByPoint;")(() => false, () => false);
+        const externalDrop = new Function("hasClosestByClassName", "focusByRange", "getRangeByPoint", "isBrowser",
+            "getHostCapabilities", "getLocalDropFiles", "webUtils", "uploadLocalFiles", "clearSelect", "window",
+            source.externalDrop + "; return externalDrop;")(
+            () => false, focusByRange, getRangeByPoint, () => false, () => ({localFileSystem: true}),
+            () => [{path: "/attachment.md", size: 1}], {}, (_files, owner, upload, options) => {
+                isUpload = upload;
+                captured = capture(owner, options);
+            }, () => {}, {siyuan: {config: {editor: {dragHTMLFileToIframe: false}}}});
+        await externalDrop(protyle, {clientX: rect.left, clientY: rect.top + rect.height / 2, altKey,
+            dataTransfer: {types: ["Files"], files: []}, preventDefault() {}});
+        check.equal(isUpload, !altKey);
+        check.equal(captured.source, "drop");
+        check.equal(captured.insertPosition.range.startContainer, first.firstChild,
+            "file uploads must capture the mouse drop location instead of the toolbar's old range");
+        check.equal(captured.insertPosition.range.startOffset, 4);
+        focusByRange(oldRange);
+        check.equal(captured.insertPosition.range.startContainer, first.firstChild);
+        check.equal(captured.insertPosition.range.startOffset, 4);
+    }
     root.remove();
-    return "List drop cases passed";
+    return "List and external file drop cases passed";
 };
 
 const run = async () => {
@@ -198,7 +252,7 @@ const run = async () => {
         const result = await win.webContents.executeJavaScript(`(async () => { try {
             return await (${cases.toString()})(${JSON.stringify(sources())});
         } catch (error) { return error.stack; } })()`);
-        assert.equal(result, "List drop cases passed");
+        assert.equal(result, "List and external file drop cases passed");
         console.log(result);
     } catch (error) {
         console.error(error);
@@ -212,7 +266,7 @@ const run = async () => {
 if (process.versions.electron && process.type === "browser") {
     run().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").test("editor list drops preserve block boundaries, list item routing, and move undo/redo", {
+    require("node:test").test("editor drops preserve list boundaries, undo/redo, and external file insertion positions", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {
@@ -222,7 +276,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /List drop cases passed/);
+            assert.match(stdout, /List and external file drop cases passed/);
         } finally {
             assert.ok(path.resolve(profile).startsWith(path.resolve(os.tmpdir()) + path.sep));
             rmSync(profile, {recursive: true, force: true});

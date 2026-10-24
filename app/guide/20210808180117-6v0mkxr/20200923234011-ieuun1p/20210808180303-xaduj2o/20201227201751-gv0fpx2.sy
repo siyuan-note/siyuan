@@ -6,20 +6,36 @@
 		"id": "20201227201751-gv0fpx2",
 		"title": "Kernel API",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20261024163429"
 	},
 	"Children": [
+		{
+			"ID": "20261024161816-ckc5ft1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-ckc5ft1",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The kernel API exposes operations on documents, blocks, assets, and other data over HTTP for scripts and external tools. Start the SiYuan kernel before making requests and use an API token where required. See the API documentation below for parameters and examples."
+				}
+			]
+		},
 		{
 			"ID": "20210822164043-6gvv84p",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210822164043-6gvv84p",
-				"updated": "20260804235500"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
-					"Type": "NodeText",
-					"Data": "Please refer to API Doc (GitHub repo: siyuan-note/siyuan)."
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "API documentation",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/dev/docs/API.md"
 				}
 			]
 		},

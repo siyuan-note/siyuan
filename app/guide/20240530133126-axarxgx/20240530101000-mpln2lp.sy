@@ -8,7 +8,7 @@
 		"id": "20240530101000-mpln2lp",
 		"title": "用語集",
 		"type": "doc",
-		"updated": "20260930224728"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"Properties": {
 				"ID": "20240530101000-jq8jkpa",
 				"id": "20240530101000-jvis6t0",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -33,12 +33,12 @@
 			"Properties": {
 				"ID": "20240530101000-0czawoj",
 				"id": "20240530101000-dsq1inp",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan では一部に複雑な専門用語が使用されているため、分かりにくい箇所があるかもしれません。本章ではこれらの用語をひとつずつ解説し、SiYuan の理解と活用を深めていただくことを目指します。"
+					"Data": "この用語集では、ガイドで使う主な用語と、SiYuan における意味を説明します。"
 				}
 			]
 		},
@@ -73,7 +73,7 @@
 			"Properties": {
 				"ID": "20240530101000-232agxh",
 				"id": "20240530101000-fidycup",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -89,7 +89,7 @@
 			"Properties": {
 				"ID": "20240530101000-7h710cb",
 				"id": "20240530101000-xrjohag",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -104,7 +104,7 @@
 			"Properties": {
 				"ID": "20240530101000-2b9mh4i",
 				"id": "20240530101000-6wzp9bk",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -117,12 +117,12 @@
 					"Properties": {
 						"ID": "20240530101000-i4qhols",
 						"id": "20240530101000-0fplbka",
-						"updated": "20240530101000"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "パンくずリストは、アプリケーションのナビゲーションを補助する要素で、通常ページ上部の水平列に表示されます。ユーザーの現在位置までのパスを示し、ナビゲーション中の便利な手がかりと方向感を提供します。これにより、ユーザーはサイトの構造をより把握しやすくなり、前のページや上位ページへの素早い移動が可能になり、無駄なクリックや迷子になる可能性が減ります。パンくずリストはユーザーエクスペリエンス設計の一部として、アプリケーションの使いやすさと操作性を向上させる役割を果たします。"
+							"Data": "パンくずリストは、現在の位置と上位の構造を示すナビゲーションです。上位の内容へ戻るときに使えます。"
 						}
 					]
 				}
@@ -150,7 +150,7 @@
 			"Properties": {
 				"ID": "20240530101000-7x1rsjj",
 				"id": "20240530101000-qgxgqf9",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -165,7 +165,7 @@
 			"Properties": {
 				"ID": "20240530101000-8err3nm",
 				"id": "20240530101000-ep8q9yc",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -178,12 +178,12 @@
 					"Properties": {
 						"ID": "20240530101000-m7ss1sf",
 						"id": "20240530101000-cb9gqhn",
-						"updated": "20240530101000"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "アンカーテキストは、ハイパーリンク内でクリックされるテキスト部分のことを指し、通常は青色で表示されます。アンカーテキストは、ハイパーリンクの URL アドレスと関連付けられており、ユーザーがアンカーテキストをクリックすると、対応する Web ページやファイルに自動的に移動します。アンカーテキストは任意の文字やフレーズを使用できますが、通常はリンク先のコンテンツに関連するもので、一般的には移動先のコンテンツのタイトルが使われます。"
+							"Data": "アンカーテキストは、リンク先の内容を示す、画面に表示されるリンクの文字列です。"
 						}
 					]
 				}
@@ -594,7 +594,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111408-8a0yvi6",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -636,7 +636,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111408-guewqrn",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -650,7 +650,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -659,7 +659,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -668,7 +668,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -677,7 +677,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ でオン/オフを切り替えられます。"
+					"Data": " でオン/オフを切り替えられます。"
 				}
 			]
 		},
@@ -863,268 +863,13 @@
 			]
 		},
 		{
-			"ID": "20260614111431-taubi38",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260614111431-taubi38",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "バザール"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-9qypo5g",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20260614111431-9qypo5g",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20260614111431-0es045w",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20260614111431-0es045w",
-						"updated": "20260614111431"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "バザール（Bazaar）はペルシャ語に由来し、商品取引が行われる場所を指します。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-f1sre8s",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260614111431-f1sre8s",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "SiYuan のバザールは、プラグイン、テーマ、アイコン、テンプレート、ウィジェットを含むコミュニティ拡張機能を閲覧してインストールするための入口です。アプリ内で検索、インストール、更新を行えます。"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-lt22acr",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260614111431-lt22acr",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "受信トレイ"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-hf09vm3",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20260614111431-hf09vm3",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20260614111431-xhi7168",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20260614111431-xhi7168",
-						"updated": "20260614111431"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "受信トレイ（Inbox）は、処理待ちの情報を一時的に保管するコンテナです。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-rtrcw9g",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260614111431-rtrcw9g",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "思源では、受信トレイはクラウドベースのクイックキャプチャ機能です。WeChat送信やAPI呼び出しでテキストをクラウドに一時保存し、後で受信トレイパネルからドキュメントに移動して整理できます。この機能にはサブスクリプションが必要です。"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-4r2ugxx",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260614111431-4r2ugxx",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "フラッシュカード"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-nhrve6j",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20260614111431-nhrve6j",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20260614111431-56kdl5g",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20260614111431-56kdl5g",
-						"updated": "20260614111431"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "フラッシュカード（Flashcard）は、記憶トレーニングに使用されるカードで、表面に問題、裏面に答えが書かれ、間隔反復アルゴリズムで復習スケジュールが決められます。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-elxwoq9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260614111431-elxwoq9",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "思源では、フラッシュカードはコンテンツブロックに基づく間隔反復復習機能です。コンテンツブロックをフラッシュカードとして作成でき、システムは復習のパフォーマンスに基づいて次回の復習時間を自動的にスケジュールします。"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-r7qhatv",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260614111431-r7qhatv",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "コマンドパレット"
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-qmhrbd1",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20260614111431-qmhrbd1",
-				"updated": "20260614111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20260614111431-657nzag",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20260614111431-657nzag",
-						"updated": "20260614111431"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "コマンドパレット（Command Palette）は、キーボードからアプリケーション機能にすばやくアクセスする入り口で、ユーザーがキーワードを入力してコマンドを検索・実行できます。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260614111431-0jjd1x6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260614111431-0jjd1x6",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "思源では、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "P"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ でコマンドパレットを呼び出し、パネルの開く、機能の切り替え、ドキュメントのナビゲーションなどの操作をメニューをたどることなくすばやく実行できます。"
-				}
-			]
-		},
-		{
 			"ID": "20240530101000-cuzmq47",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"ID": "20240530101000-3p714h4",
 				"id": "20240530101000-cuzmq47",
-				"updated": "20260930224728"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1509,13 +1254,295 @@
 			]
 		},
 		{
+			"ID": "20260614111431-taubi38",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-taubi38",
+				"updated": "20261024161440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "バザール"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-9qypo5g",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-9qypo5g",
+				"updated": "20261024161440"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-0es045w",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-0es045w",
+						"updated": "20261024161440"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "マーケットプレイスは、コミュニティの拡張機能を探して管理する場所です。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-f1sre8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-f1sre8s",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan のバザールは、プラグイン、テーマ、アイコン、テンプレート、ウィジェットを含むコミュニティ拡張機能を閲覧してインストールするための入口です。アプリ内で検索、インストール、更新を行えます。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-lt22acr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-lt22acr",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "受信トレイ"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-hf09vm3",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-hf09vm3",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-xhi7168",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-xhi7168",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "受信トレイ（Inbox）は、処理待ちの情報を一時的に保管するコンテナです。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-rtrcw9g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-rtrcw9g",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、受信トレイはクラウドベースのクイックキャプチャ機能です。WeChat送信やAPI呼び出しでテキストをクラウドに一時保存し、後で受信トレイパネルからドキュメントに移動して整理できます。この機能にはサブスクリプションが必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-4r2ugxx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-4r2ugxx",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フラッシュカード"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-nhrve6j",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-nhrve6j",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-56kdl5g",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-56kdl5g",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "フラッシュカード（Flashcard）は、記憶トレーニングに使用されるカードで、表面に問題、裏面に答えが書かれ、間隔反復アルゴリズムで復習スケジュールが決められます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-elxwoq9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-elxwoq9",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、フラッシュカードはコンテンツブロックに基づく間隔反復復習機能です。コンテンツブロックをフラッシュカードとして作成でき、システムは復習のパフォーマンスに基づいて次回の復習時間を自動的にスケジュールします。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-r7qhatv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-r7qhatv",
+				"updated": "20261024161440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コマンドパレット"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-qmhrbd1",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-qmhrbd1",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-657nzag",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-657nzag",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "コマンドパレット（Command Palette）は、キーボードからアプリケーション機能にすばやくアクセスする入り口で、ユーザーがキーワードを入力してコマンドを検索・実行できます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-0jjd1x6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-0jjd1x6",
+				"updated": "20261024161440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デフォルトでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Option"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）でコマンドパレットを開き、キーワードでコマンドを検索して実行します。利用できるコマンドは、現在の画面とフォーカス位置によって変わります。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-9mcnl5p",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"ID": "20240530101000-3m9drx0",
 				"id": "20240530101000-9mcnl5p",
-				"updated": "20260614111442"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1572,7 +1599,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111442-uzd7ap4",
-				"updated": "20260614111442"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1586,7 +1613,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111442-r76ira9",
-				"updated": "20260614111442"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1598,12 +1625,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111442-t5qeayt",
-						"updated": "20260614111442"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "カーネルはオペレーティングシステムの中核コンポーネントであり、プロセス、メモリ、デバイスドライバ、ファイルシステム、ネットワークなどを管理し、システムのパフォーマンスと安定性を決定します。"
+							"Data": "このガイドの「カーネル」は、SiYuan でデータを処理するバックエンドプログラムを指します。"
 						}
 					]
 				}

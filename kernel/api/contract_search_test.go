@@ -172,6 +172,12 @@ func TestAPIContractSearchEmbedConversion(t *testing.T) {
 			t.Fatalf("embed serialization changed: %s != %s, %v", actual, expected, err)
 		}
 	}
+	value := []*model.EmbedBlock{{Block: &model.Block{ID: "child", RootID: "document"},
+		BlockPaths: []*model.BlockPath{{ID: "document", Name: "Notebook/Parent/Title / Section", DocumentTitle: "Title / Section"}}}}
+	converted := embedBlockContracts(value)
+	if converted[0].BlockPaths[0].DocumentTitle != "Title / Section" || converted[0].BlockPaths[0].Name != value[0].BlockPaths[0].Name {
+		t.Fatalf("embed document title conversion lost data: %+v", converted[0].BlockPaths[0])
+	}
 }
 
 func TestAPIContractSearchPathAndSubtypeCompatibility(t *testing.T) {

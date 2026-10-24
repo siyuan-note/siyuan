@@ -48,6 +48,14 @@ const disposedPlugins = new WeakSet<Plugin>();
 
 const isPluginDisposed = (plugin: Plugin) => disposedPlugins.has(plugin);
 
+// 存储名不含有效文件段时返回 null，调用方据此拒绝，避免操作插件目录自身或其上级。
+const getPluginStoragePath = (plugin: Plugin, storageName: string) => {
+    const storagePath = normalizeStoragePath(storageName);
+    return storagePath === null ? null : `/data/storage/petal/${plugin.name}/${storagePath}`;
+};
+
+const getInvalidStorageNameError = (): IWebSocketData => ({code: 400, msg: "Invalid storage name", data: null});
+
 export const markPluginDisposed = (plugin: Plugin) => {
     disposedPlugins.add(plugin);
     clearPluginToolbarItems(plugin);
@@ -462,18 +470,23 @@ export class Plugin {
      * 负数错误码被请求层拦截等未触发回调的情况会使 Promise 持续等待，需要调用方自行设置超时。
      * 只读或发布会话不会在此方法中直接拒绝，但私有文件读取仍受内核权限限制；公开快照应使用 loadPublishData。
      * @returns 文件内容（解析后的 JSON 值或文本），或读取失败时的缓存值，不是统一的内核响应封装。
-     * @throws 调用时插件实例已销毁则拒绝 Promise，值为 {code: 410, msg, data: null}。
+     * @throws 调用时插件实例已销毁为 410，存储名不含有效文件段（如 ".."、"."、空串）为 400；
+     * 拒绝值均为 {code, msg, data: null}，生命周期检查优先于存储名检查。
      */
     public loadData(storageName: string): Promise<any> {
         if (isPluginDisposed(this)) {
             return Promise.reject({code: 410, msg: "Plugin lifecycle has ended", data: null});
+        }
+        const storagePath = getPluginStoragePath(this, storageName);
+        if (storagePath === null) {
+            return Promise.reject(getInvalidStorageNameError());
         }
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
         return new Promise((resolve) => {
             fetchPost("/api/file/getFile", {
-                path: `/data/storage/petal/${this.name}/${normalizeStoragePath(storageName)}`
+                path: storagePath
             }, (response) => {
                 this.data[storageName] = response;
                 resolve(this.data[storageName]);
@@ -489,8 +502,8 @@ export class Plugin {
      * 未设置请求失败回调，网络异常或内核负数错误码（如 -1、-3）可能使 Promise 持续等待；
      * 调用方需要自行设置超时，不能仅依赖捕获拒绝来处理写入失败。
      * @returns 内核响应 {code, msg, data}，调用方仍需检查 code，不能将兑现视为写入成功。
-     * @throws 调用时插件实例已销毁为 410，只读或发布会话为 403，序列化或创建文件失败为 400；
-     * 拒绝值均为 {code, msg, data: null}，生命周期检查优先于只读或发布会话检查。
+     * @throws 调用时插件实例已销毁为 410，只读或发布会话为 403，存储名不含有效文件段、序列化或创建文件失败为 400；
+     * 拒绝值均为 {code, msg, data: null}，检查顺序为生命周期、只读或发布会话、存储名。
      */
     public saveData(storageName: string, data: any): Promise<any | IWebSocketData> {
         if (isPluginDisposed(this)) {
@@ -503,8 +516,11 @@ export class Plugin {
                 data: null
             });
         }
+        const pathString = getPluginStoragePath(this, storageName);
+        if (pathString === null) {
+            return Promise.reject(getInvalidStorageNameError());
+        }
         return new Promise((resolve, reject) => {
-            const pathString = `/data/storage/petal/${this.name}/${normalizeStoragePath(storageName)}`;
             let file: File;
             try {
                 const fileName = pathString.split("/").pop();
@@ -542,8 +558,8 @@ export class Plugin {
      * 不会直接清除其他前端实例的缓存，这些实例再次 loadData 时可能回退到旧内容。
      * 未设置请求失败回调，网络异常或内核负数错误码可能使 Promise 持续等待，调用方需要自行设置超时。
      * @returns 内核响应 {code, msg, data}，调用方仍需检查 code，不能将兑现视为删除成功。
-     * @throws 调用时插件实例已销毁为 410，只读或发布会话为 403，拒绝值为 {code, msg, data: null}；
-     * 生命周期检查优先于只读或发布会话检查。
+     * @throws 调用时插件实例已销毁为 410，只读或发布会话为 403，存储名不含有效文件段为 400，拒绝值为 {code, msg, data: null}；
+     * 检查顺序为生命周期、只读或发布会话、存储名。
      */
     public removeData(storageName: string): Promise<IWebSocketData> {
         if (isPluginDisposed(this)) {
@@ -556,12 +572,16 @@ export class Plugin {
                 data: null
             } as IWebSocketData);
         }
+        const storagePath = getPluginStoragePath(this, storageName);
+        if (storagePath === null) {
+            return Promise.reject(getInvalidStorageNameError());
+        }
         return new Promise((resolve) => {
             if (!this.data) {
                 this.data = {};
             }
             fetchPost("/api/file/removeFile", {
-                path: `/data/storage/petal/${this.name}/${normalizeStoragePath(storageName)}`,
+                path: storagePath,
                 app: Constants.SIYUAN_APPID,
             }, (response) => {
                 delete this.data[storageName];

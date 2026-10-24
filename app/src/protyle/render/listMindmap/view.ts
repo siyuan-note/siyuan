@@ -148,6 +148,7 @@ export class ListMindmapView {
     private selectedSummary?: string;
     private summaryPending = false;
     private readonly selectionBox = createElement("div", "mindmap-view__selection-box");
+    private readonly documentViewport = createElement("div", "mindmap-view__document-viewport");
     private finishSummaryEdit?: (save: boolean) => void;
     private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -157,6 +158,8 @@ export class ListMindmapView {
     private tooltipButton?: HTMLButtonElement;
     private readonly colorProbe = createElement("span", "mindmap-view__color-probe");
     private positions = new Map<string, ListMindmapPosition>();
+    private foldOpacities?: Map<string, number>;
+    private stopFoldAnimation?: () => void;
     private edges: {from: string, to: string}[] = [];
     private bounds = {width: 1, height: 1};
     private selectedId?: string;
@@ -200,8 +203,10 @@ export class ListMindmapView {
     private destroyed = false;
     private readonly resizeObserver: ResizeObserver;
     private fullscreenMarker?: Comment;
-    private documentView?: {scale: number, center: {x: number, y: number}};
+    private documentView?: {scale: number, center: {x: number, y: number}, width: number, height: number};
+    private documentScroll?: {element: HTMLElement, left: number, top: number}[];
     private viewportCenter?: {x: number, y: number};
+    private viewportSize?: {width: number, height: number};
     private readonly disposers: (() => void)[] = [];
     private printTransform?: {scale: number, offsetX: number, offsetY: number};
 
@@ -231,7 +236,9 @@ export class ListMindmapView {
         this.inspectorPopover.setAttribute("role", "group");
         this.inspectorPopover.setAttribute("data-prevent-swipe", "true");
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
-        this.viewport.append(this.canvas, this.world);
+        this.documentViewport.hidden = true;
+        this.documentViewport.setAttribute("aria-hidden", "true");
+        this.viewport.append(this.canvas, this.world, this.documentViewport);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -270,11 +277,19 @@ export class ListMindmapView {
         this.listen(options.host, "focusin", this.showButtonTooltip);
         ["pointerout", "focusout"].forEach(type => this.listen(options.host, type, this.hideButtonTooltip));
         this.listen(options.host, "wheel", () => this.tooltip.hidden = true);
-        const themeObserver = new MutationObserver(() => this.refreshLayout());
+        ["pointerdown", "keydown"].forEach(type =>
+            this.listen(options.host, type, () => this.stopFoldAnimation?.(), {capture: true}));
+        const refreshTheme = () => {
+            if (this.model.metadata.appearance?.nodeStyle) {
+                this.updateColors();
+            }
+            this.refreshLayout();
+        };
+        const themeObserver = new MutationObserver(refreshTheme);
         themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme-mode", "style"]});
         themeObserver.observe(document.head, {childList: true, subtree: true, characterData: true, attributes: true});
         this.disposers.push(() => themeObserver.disconnect());
-        this.listen(document.head, "load", () => this.refreshLayout(), {capture: true});
+        this.listen(document.head, "load", refreshTheme, {capture: true});
         this.listen(this.viewport, "pointerdown", this.pointerDown);
         this.listen(this.viewport, "pointermove", this.pointerMove);
         this.listen(this.viewport, "pointerleave", () => this.setHoveredLine());
@@ -337,6 +352,7 @@ export class ListMindmapView {
                 event.stopPropagation();
             }));
         this.listen(window, "beforeprint", () => {
+            this.stopFoldAnimation?.();
             if (this.pointer?.relation) {
                 this.cancelPointer();
             }
@@ -355,9 +371,22 @@ export class ListMindmapView {
                 }
             }
         });
-        this.resizeObserver = new ResizeObserver(() => {
+        this.resizeObserver = new ResizeObserver(entries => {
             this.updateToolbarLayout();
-            this.refreshLayout();
+            // 展开会让隐藏节点恢复尺寸；布局已测量这些节点，不应被同一尺寸的通知中断动画。
+            const resized = !this.stopFoldAnimation || entries.some(({target}) => {
+                if (target === this.viewport) {
+                    return true;
+                }
+                const element = target as HTMLElement;
+                const position = this.positions.get(element.dataset.mindmapId) ||
+                    this.summaryPositions.get(element.dataset.summaryId);
+                return !element.hidden && position &&
+                    (element.offsetWidth !== position.width || element.offsetHeight !== position.height);
+            });
+            if (resized) {
+                this.refreshLayout();
+            }
             this.positionInspectorPanel();
         });
         this.resizeObserver.observe(this.viewport);
@@ -533,6 +562,9 @@ export class ListMindmapView {
 
     private setLocked(value: boolean) {
         this.locked = value;
+        if (value) {
+            this.documentViewport.hidden = true;
+        }
         this.setInteractionActive(false);
         this.pinching = false;
         this.pinch = undefined;
@@ -578,6 +610,24 @@ export class ListMindmapView {
                 controls.append(button);
             }
         };
+        const addFullscreen = () => {
+            add("documentLayout", "listMindmapDocumentLayout", "iconSelectAll", () => {
+                if (!this.fullscreenMarker || !this.documentView || this.locked) {
+                    return;
+                }
+                this.stopFoldAnimation?.();
+                this.documentViewport.hidden = !this.documentViewport.hidden;
+                const button = this.buttons.get("documentLayout");
+                button.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
+                button.classList.toggle("block__icon--active", !this.documentViewport.hidden);
+                this.updateDocumentViewport();
+            });
+            const preview = this.buttons.get("documentLayout");
+            preview.hidden = !this.fullscreenMarker || !this.documentView || this.locked;
+            preview.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
+            preview.classList.toggle("block__icon--active", !this.documentViewport.hidden);
+            add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+        };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
         this.levelSelect = undefined;
         this.options.host.classList.toggle("mindmap-view--locked", this.locked);
@@ -597,7 +647,7 @@ export class ListMindmapView {
         this.buttons.get("lock").classList.toggle("block__icon--active", this.locked);
         this.buttons.get("lock").setAttribute("data-subtype", this.locked ? "lock" : "unlock");
         if (this.locked) {
-            add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+            addFullscreen();
             return;
         }
         if (!this.readOnly) {
@@ -667,7 +717,7 @@ export class ListMindmapView {
         zoomActions.append(this.zoomSlider, reset, fit);
         zoomControl.append(this.zoomLabel, zoomActions);
         controls.append(zoomControl);
-        add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+        addFullscreen();
         if (this.options.onSettingsMenu) {
             add("settings", "more", "iconMore", () => {
                 const selectedId = this.selectedId;
@@ -724,6 +774,7 @@ export class ListMindmapView {
     }
 
     public update(model: ListMindmapModel) {
+        this.stopFoldAnimation?.();
         if (this.pointer?.relation || this.pointer?.selection || this.pointer?.touchNode) {
             this.cancelPointer();
         }
@@ -731,8 +782,6 @@ export class ListMindmapView {
             return;
         }
         this.model = model;
-        this.themeColors = resolveListMindmapColors(model);
-        this.viewport.style.backgroundColor = model.metadata.appearance?.backgroundColor || "";
         this.selectedIds.forEach(id => {
             if (!model.nodes.has(id)) {
                 this.selectedIds.delete(id);
@@ -810,19 +859,9 @@ export class ListMindmapView {
             element.classList.toggle("mindmap-view__node--root", id === model.root.id);
             this.renderTask(element, id);
             element.classList.toggle("mindmap-view__node--branch", node.children.length > 0);
-            element.classList.toggle("mindmap-view__node--colored", this.themeColors.has(id));
             const style = model.metadata.nodes[id];
             element.style.width = style?.width ? `${Math.max(32, style.width)}px` : "";
             element.style.maxWidth = style?.width ? "none" : "";
-            const background = style?.backgroundColor || this.themeColors.get(id)?.backgroundColor || "";
-            element.style.backgroundColor = background;
-            element.style.color = style?.textColor || (this.themeColors.has(id) && isMindmapColor(background) ?
-                getMindmapTextColor(background) : this.themeColors.get(id)?.textColor) || "";
-            if (this.themeColors.has(id)) {
-                element.style.setProperty("--mindmap-node-text-color", element.style.color);
-            } else {
-                element.style.removeProperty("--mindmap-node-text-color");
-            }
             const collapsed = this.folded.get(id) ?? node.collapsed;
             element.setAttribute("aria-expanded", String(!collapsed));
             const fold = element.querySelector<HTMLButtonElement>(".mindmap-view__fold");
@@ -974,11 +1013,39 @@ export class ListMindmapView {
             this.selectedSummary = undefined;
             this.inspector.hidden = true;
         }
+        this.updateColors();
         this.updateRelations();
         this.updateSummaries();
         this.updateSelection();
         this.renderInspector();
         this.refreshLayout();
+    }
+
+    // 主题变更只刷新节点外观，保留正在编辑的正文和画布状态。
+    private updateColors() {
+        if (this.destroyed) {
+            return;
+        }
+        this.viewport.style.backgroundColor = this.model.metadata.appearance?.backgroundColor || "";
+        this.themeColors = resolveListMindmapColors(this.model, getComputedStyle(this.options.host).backgroundColor);
+        this.nodeElements.forEach((element, id) => {
+            const style = this.model.metadata.nodes[id];
+            const themed = this.themeColors.get(id);
+            const background = style?.backgroundColor || themed?.backgroundColor || "";
+            element.classList.toggle("mindmap-view__node--colored", !!themed);
+            element.style.backgroundColor = background;
+            element.style.color = style?.textColor || (themed && style?.backgroundColor && isMindmapColor(background) ?
+                getMindmapTextColor(background) : themed?.textColor) || "";
+            element.style.fontSize = themed?.fontSize ? `${style?.fontSize ?? themed.fontSize}px` : "";
+            element.style.fontWeight = themed?.fontSize ? (style?.bold === undefined ? (themed.bold ? "600" : "400") :
+                style.bold ? "700" : "400") : "";
+            element.style.fontStyle = themed?.fontSize && style?.italic !== undefined ? (style.italic ? "italic" : "normal") : "";
+            if (themed) {
+                element.style.setProperty("--mindmap-node-text-color", element.style.color);
+            } else {
+                element.style.removeProperty("--mindmap-node-text-color");
+            }
+        });
     }
 
     public getContentHost(id: string): HTMLElement | undefined {
@@ -1108,14 +1175,19 @@ export class ListMindmapView {
         }
         this.frame = requestAnimationFrame(() => {
             this.frame = 0;
+            this.stopFoldAnimation?.();
             if (this.pointer?.relation) {
                 return;
             }
             if (!this.viewport.clientWidth || !this.viewport.clientHeight) {
                 return;
             }
+            this.resizeViewport();
             const previousPositions = this.positions;
             const previousSummaries = this.summaryPositions;
+            const previousEdges = this.edges;
+            const previousOffset = {x: this.offsetX, y: this.offsetY};
+            const animateFold = !!this.foldAnchor && !this.initialFit;
             // 同一帧内先恢复测量，布局完成后再隐藏折叠后代，避免展开时读取到零尺寸。
             this.nodeElements.forEach(element => element.hidden = false);
             const makeLayoutNode = (id: string): ListMindmapLayoutNode => {
@@ -1232,14 +1304,7 @@ export class ListMindmapView {
                 this.bounds.height -= top;
                 this.bounds.width -= left;
             }
-            this.nodeElements.forEach((element, id) => {
-                const position = this.positions.get(id);
-                element.hidden = !position;
-                if (position) {
-                    element.style.left = `${position.x}px`;
-                    element.style.top = `${position.y - (id === this.model.root.id ? 1 : 3)}px`;
-                }
-            });
+            this.positionNodes();
             // 编辑、折叠或调整路径时固定操作节点，避免整棵树随布局边界跳动。
             const current = anchorId ? this.positions.get(anchorId) : undefined;
             if (previous && current) {
@@ -1254,7 +1319,7 @@ export class ListMindmapView {
             this.viewportCenter = undefined;
             if (center && !this.initialFit) {
                 this.offsetX = this.viewport.clientWidth / 2 - center.x * this.scale;
-                this.offsetY = this.viewport.clientHeight / 2 - center.y * this.scale;
+                this.offsetY = this.getViewportAnchorY(this.viewport.clientHeight) - center.y * this.scale;
             }
             if (this.printTransform || this.options.printLayout) {
                 this.fitPrint();
@@ -1284,7 +1349,118 @@ export class ListMindmapView {
                 }
                 this.draw();
             }
+            if (animateFold && (previousPositions.size !== this.positions.size ||
+                [...previousPositions.keys()].some(id => !this.positions.has(id)))) {
+                this.animateFold(previousPositions, previousEdges, previousOffset, summarySizes);
+            }
         });
+    }
+
+    private positionNodes() {
+        this.nodeElements.forEach((element, id) => {
+            const position = this.positions.get(id);
+            element.hidden = !position;
+            element.inert = !!this.foldOpacities?.has(id);
+            element.style.opacity = this.foldOpacities?.has(id) ? String(this.foldOpacities.get(id)) : "";
+            if (position) {
+                element.style.left = `${position.x}px`;
+                element.style.top = `${position.y - (id === this.model.root.id ? 1 : 3)}px`;
+            }
+        });
+    }
+
+    private animateFold(previous: Map<string, ListMindmapPosition>, previousEdges: {from: string, to: string}[],
+                        previousOffset: {x: number, y: number}, summarySizes: Map<string, {width: number, height: number}>) {
+        if (this.destroyed || this.printTransform || this.options.printLayout || !previous.size ||
+            !previous.has(this.model.root.id) ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            return;
+        }
+        const target = this.positions;
+        const targetEdges = this.edges;
+        const targetSummaries = this.summaryPositions;
+        const targetOffset = {x: this.offsetX, y: this.offsetY};
+        const expanding = [...target.keys()].some(id => !previous.has(id));
+        const duration = expanding ? 280 : 180;
+        const changed = new Set([...previous.keys(), ...target.keys()]);
+        const endpoints = new Map<string, {from: ListMindmapPosition, to: ListMindmapPosition}>();
+        const attachment = (id: string, positions: Map<string, ListMindmapPosition>, size: ListMindmapPosition) => {
+            let parent = this.model.nodes.get(id)?.parentId;
+            while (parent && !positions.has(parent)) {
+                parent = this.model.nodes.get(parent)?.parentId;
+            }
+            const anchor = positions.get(parent) || positions.get(this.model.root.id);
+            return {...size, x: anchor.x + anchor.width, y: anchor.y + (anchor.height - size.height) / 2};
+        };
+        // 新分支保留内部排版，仅随可见祖先滑入，避免展开中途把多行正文挤到一起。
+        const entrance = (id: string) => {
+            let parent = this.model.nodes.get(id)?.parentId;
+            while (parent && (!previous.has(parent) || !target.has(parent))) {
+                parent = this.model.nodes.get(parent)?.parentId;
+            }
+            const from = previous.get(parent) || previous.get(this.model.root.id);
+            const to = target.get(parent) || target.get(this.model.root.id);
+            const position = target.get(id);
+            return {...position, x: position.x + from.x - to.x - 36, y: position.y + from.y - to.y};
+        };
+        changed.forEach(id => endpoints.set(id, {
+            from: previous.get(id) || entrance(id),
+            to: target.get(id) || attachment(id, target, previous.get(id)),
+        }));
+        const targetChildren = new Set(targetEdges.map(edge => edge.to));
+        this.edges = [...targetEdges, ...previousEdges.filter(edge => !targetChildren.has(edge.to))];
+        let frame = 0;
+        let active = true;
+        const finish = () => {
+            if (!active) {
+                return;
+            }
+            active = false;
+            cancelAnimationFrame(frame);
+            this.stopFoldAnimation = undefined;
+            this.foldOpacities = undefined;
+            this.positions = target;
+            this.edges = targetEdges;
+            this.summaryPositions = targetSummaries;
+            this.offsetX = targetOffset.x;
+            this.offsetY = targetOffset.y;
+            this.relationRoutes.clear();
+            this.positionNodes();
+            if (!this.destroyed) {
+                this.draw();
+            }
+        };
+        this.stopFoldAnimation = finish;
+        const started = performance.now();
+        const step = (now: number) => {
+            if (!active) {
+                return;
+            }
+            const progress = Math.min(1, Math.max(0, (now - started) / duration));
+            if (progress === 1 || this.destroyed || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                finish();
+                return;
+            }
+            const eased = expanding ? (progress < .5 ? 2 * progress ** 2 : 1 - (-2 * progress + 2) ** 2 / 2) :
+                1 - (1 - progress) ** 3;
+            this.positions = new Map();
+            this.foldOpacities = new Map();
+            endpoints.forEach(({from, to}, id) => {
+                this.positions.set(id, {...to, x: from.x + (to.x - from.x) * eased,
+                    y: from.y + (to.y - from.y) * eased});
+                if (!previous.has(id) || !target.has(id)) {
+                    this.foldOpacities.set(id, target.has(id) ? eased : 1 - eased);
+                }
+            });
+            this.offsetX = previousOffset.x + (targetOffset.x - previousOffset.x) * eased;
+            this.offsetY = previousOffset.y + (targetOffset.y - previousOffset.y) * eased;
+            this.summaryPositions = layoutListMindmapSummaries(this.model, this.positions, summarySizes);
+            this.relationRoutes.clear();
+            this.positionNodes();
+            this.draw();
+            frame = requestAnimationFrame(step);
+        };
+        step(started);
     }
 
     private updateSummaries() {
@@ -1345,7 +1521,7 @@ export class ListMindmapView {
             return;
         }
         const selected = this.getSelectedIds();
-        if (selected.length < 2) {
+        if (!selected.length) {
             return;
         }
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(selected));
@@ -1432,6 +1608,9 @@ export class ListMindmapView {
             if (!element) {
                 return;
             }
+            const opacity = Math.min(...summary.nodeIds.map(id => this.foldOpacities?.get(id) ?? 1));
+            element.style.opacity = this.foldOpacities ? String(opacity) : "";
+            element.inert = summary.nodeIds.some(id => this.foldOpacities?.has(id));
             element.hidden = !position;
             if (!position) {
                 return;
@@ -1444,6 +1623,7 @@ export class ListMindmapView {
             const style = resolveStyle(summary.color, selected, hovered);
             context.strokeStyle = style.color;
             context.lineWidth = style.width;
+            context.globalAlpha = opacity;
             context.setLineDash([]);
             context.stroke(path);
             this.linePaths.push({id: summary.id, relation: false, summary: true, path});
@@ -1454,6 +1634,7 @@ export class ListMindmapView {
             element.classList.toggle("mindmap-view__node--selected", selected);
             element.setAttribute("aria-pressed", String(selected));
         });
+        context.globalAlpha = 1;
     }
 
     private updateRelations() {
@@ -1821,11 +2002,13 @@ export class ListMindmapView {
         if (this.destroyed) {
             return;
         }
-        this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
-        this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
-        this.zoomSlider.value = String(Math.round(this.scale * 100));
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
+        this.resizeViewport(width, height);
+        this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.updateDocumentViewport();
+        this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
+        this.zoomSlider.value = String(Math.round(this.scale * 100));
         const ratio = window.devicePixelRatio || 1;
         if (this.canvas.width !== Math.round(width * ratio) || this.canvas.height !== Math.round(height * ratio)) {
             this.canvas.width = Math.round(width * ratio);
@@ -1867,9 +2050,9 @@ export class ListMindmapView {
             return colors.get(key);
         };
         const resolveLineStyle = (styles: typeof lineStyles, color: string, width: number, fallback: string,
-                                  selected: boolean, hovered: boolean) => {
+                                  selected: boolean, hovered: boolean, themeWidth = 1.5) => {
             const baseColor = resolveColor(styles[0].color, fallback);
-            const baseWidth = width || styles[0].width || 1.5;
+            const baseWidth = width || (styles[0].width || 1.5) / 1.5 * themeWidth;
             const stateStyle = selected ? styles[2] : hovered ? styles[1] : undefined;
             return {
                 // 显式颜色始终优先，状态颜色缺省时沿用普通主题色。
@@ -1884,40 +2067,63 @@ export class ListMindmapView {
         const themeLineColor = (id: string) => {
             const color = this.themeColors?.get(id)?.lineColor;
             if (color && !paletteLines.has(color)) {
-                paletteLines.set(color, getMindmapLineColor(color, canvasColor));
+                paletteLines.set(color, this.model.metadata.appearance?.nodeStyle === "branch" ?
+                    color : getMindmapLineColor(color, canvasColor));
             }
             return paletteLines.get(color);
         };
         const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
-            this.model.metadata.connectorStyle || "bezier", () => new Path2D());
+            this.model.metadata.connectorStyle || "bezier", () => new Path2D(),
+            this.model.metadata.appearance?.nodeStyle === "branch");
+        const trunkOpacities = new Map<string, number>();
+        if (this.foldOpacities) {
+            this.edges.forEach(edge => {
+                if (this.positions.has(edge.to)) {
+                    trunkOpacities.set(edge.from, Math.max(trunkOpacities.get(edge.from) ?? 0,
+                        this.foldOpacities.get(edge.to) ?? 1));
+                }
+            });
+        }
         const rootStyle = this.model.metadata.nodes[this.model.root.id] || {};
         connectors.trunks.forEach((path, index) => {
             const id = connectors.trunkParents[index];
             const style = this.themeColors?.size ? {...rootStyle, ...this.model.metadata.nodes[id]} : rootStyle;
             const trunkStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
-                style.lineWidth, defaultLine, false, false);
+                style.lineWidth, defaultLine, false, false, this.themeColors?.get(id)?.lineWidth);
             context.strokeStyle = trunkStyle.color;
             context.lineWidth = trunkStyle.width;
+            context.globalAlpha = Math.min(this.foldOpacities?.get(id) ?? 1, trunkOpacities.get(id) ?? 1);
             context.setLineDash(style.lineDash ? [6, 4] : []);
             context.stroke(path);
         });
-        connectors.branches.forEach(({id, path}) => {
+        connectors.branches.forEach(({id, path, trunk}) => {
             const style = {...rootStyle, ...this.model.metadata.nodes[id]};
             this.linePaths.push({id, relation: false, path});
             context.beginPath();
             const selected = this.selectedEdge === id;
             const hovered = this.hoveredLine === `edge:${id}`;
             const lineStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
-                style.lineWidth, defaultLine, selected, hovered);
+                style.lineWidth, defaultLine, selected, hovered, this.themeColors?.get(id)?.lineWidth);
+            context.globalAlpha = this.foldOpacities?.get(id) ?? 1;
+            context.setLineDash(style.lineDash ? [6, 4] : []);
+            if (trunk) {
+                const trunkStyle = resolveLineStyle(lineStyles, style.lineColor || themeLineColor(id),
+                    style.lineWidth, defaultLine, false, false, this.themeColors?.get(id)?.lineWidth);
+                context.strokeStyle = trunkStyle.color;
+                context.lineWidth = trunkStyle.width;
+                context.stroke(trunk);
+            }
             context.strokeStyle = lineStyle.color;
             context.lineWidth = lineStyle.width;
-            context.setLineDash(style.lineDash ? [6, 4] : []);
             context.stroke(path);
         });
         this.model.metadata.relations.forEach((relation) => {
             const from = this.positions.get(relation.from);
             const to = this.positions.get(relation.to);
             const element = this.relationElements.get(relation.id);
+            const opacity = Math.min(this.foldOpacities?.get(relation.from) ?? 1, this.foldOpacities?.get(relation.to) ?? 1);
+            element.style.opacity = this.foldOpacities ? String(opacity) : "";
+            element.inert = !!(this.foldOpacities?.has(relation.from) || this.foldOpacities?.has(relation.to));
             element.hidden = !from || !to || !relation.label?.trim();
             if (!from || !to) {
                 return;
@@ -1944,6 +2150,7 @@ export class ListMindmapView {
             const baseWidth = lineStyle.baseWidth;
             context.strokeStyle = lineStyle.color;
             context.lineWidth = lineStyle.width;
+            context.globalAlpha = opacity;
             const emphasis = Math.max(0, context.lineWidth - baseWidth);
             element.classList.toggle("mindmap-view__relation--hover", hovered);
             context.setLineDash(relation.dash === false ? [] : [5, 4]);
@@ -1970,6 +2177,7 @@ export class ListMindmapView {
                 element.style.top = `${labelPoint.y}px`;
             }
         });
+        context.globalAlpha = 1;
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
         this.drawSummaries(context, (color, selected, hovered) =>
             resolveLineStyle(summaryStyles, color, undefined, defaultLine, selected, hovered));
@@ -2091,7 +2299,7 @@ export class ListMindmapView {
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(this.getSelectedIds()));
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual || this.getSelectedIds().length > 1,
-            summary: this.readOnly || this.summaryPending || this.getSelectedIds().length < 2 ||
+            summary: this.readOnly || this.summaryPending ||
                 conflict || !ranges.length || !this.options.onSummaryBatchAdd,
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };
@@ -2987,6 +3195,7 @@ export class ListMindmapView {
     }
 
     private wheel = (event: WheelEvent) => {
+        this.stopFoldAnimation?.();
         if (this.locked || this.viewport.contains((event.target as HTMLElement).closest(".mindmap-view__node--editing"))) {
             return;
         }
@@ -3101,6 +3310,7 @@ export class ListMindmapView {
     }
 
     public fit(maxScale = 1) {
+        this.stopFoldAnimation?.();
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
         if (!this.positions.size || !width || !height) {
@@ -3511,7 +3721,9 @@ export class ListMindmapView {
             if (this.options.onManageNodeColors) {
                 palette.append(button("manageColors", "iconSettings", this.options.onManageNodeColors));
             }
-            this.inspectorPopover.append(palette);
+            const title = createElement("div", "ft__smaller ft__on-surface");
+            title.textContent = this.label("listMindmapNodeColor");
+            this.inspectorPopover.append(title, palette);
             if (panel.ids.length > 1) {
                 const lines = createElement("div", "mindmap-view__palette");
                 lines.setAttribute("role", "group");
@@ -3525,7 +3737,9 @@ export class ListMindmapView {
                 if (this.options.onManageLineColors) {
                     lines.append(button("manageColors", "iconSettings", this.options.onManageLineColors));
                 }
-                this.inspectorPopover.append(lines);
+                const lineTitle = createElement("div", "ft__smaller ft__on-surface");
+                lineTitle.textContent = this.label("listMindmapLineColor");
+                this.inspectorPopover.append(lineTitle, lines);
             }
         } else {
             const row = createElement("div", "mindmap-view__node-width");
@@ -3751,13 +3965,27 @@ export class ListMindmapView {
     }
 
     private enterFullscreen() {
+        this.stopFoldAnimation?.();
         if (this.destroyed || this.fullscreenMarker) {
             return;
         }
+        this.resizeViewport();
         this.captureViewportCenter();
         if (this.viewportCenter) {
             // 文档视角只在本次全屏期间暂存，全屏内的平移和缩放独立生效。
-            this.documentView = {scale: this.scale, center: this.viewportCenter};
+            this.documentView = {scale: this.scale, center: this.viewportCenter,
+                width: this.viewport.clientWidth, height: this.viewport.clientHeight};
+            const visible = this.getVisibleViewportAnchor();
+            this.viewportCenter = {
+                x: this.viewportCenter.x + (visible.x - this.viewport.clientWidth / 2) / this.scale,
+                y: this.viewportCenter.y + visible.y / this.scale,
+            };
+        }
+        this.documentScroll = [];
+        for (let parent = this.options.host.parentElement; parent; parent = parent.parentElement) {
+            if (parent.scrollHeight > parent.clientHeight || parent.scrollWidth > parent.clientWidth) {
+                this.documentScroll.push({element: parent, left: parent.scrollLeft, top: parent.scrollTop});
+            }
         }
         // 移到独立容器，避免编辑器祖先的变换和裁剪改变全屏覆盖范围。
         this.fullscreenMarker = document.createComment("mindmap-view");
@@ -3771,12 +3999,22 @@ export class ListMindmapView {
     }
 
     private exitFullscreen() {
+        this.stopFoldAnimation?.();
         if (!this.fullscreenMarker) {
             return;
         }
         if (this.documentView) {
-            this.scale = this.documentView.scale;
-            this.viewportCenter = this.documentView.center;
+            if (!this.documentViewport.hidden && !this.destroyed && !this.locked) {
+                // 主动布局时，将固定取景框内的视角应用到文档；关闭布局模式则保留原快照。
+                this.resizeViewport();
+                this.viewportCenter ||= {
+                    x: (this.viewport.clientWidth / 2 - this.offsetX) / this.scale,
+                    y: (this.getViewportAnchorY(this.viewport.clientHeight) - this.offsetY) / this.scale,
+                };
+            } else {
+                this.scale = this.documentView.scale;
+                this.viewportCenter = this.documentView.center;
+            }
             this.documentView = undefined;
         }
         this.options.onFullscreen?.(false, this.buttons.get("fullscreen"));
@@ -3784,6 +4022,12 @@ export class ListMindmapView {
         this.fullscreenMarker.replaceWith(this.options.host);
         this.fullscreenMarker = undefined;
         this.fullscreenChange();
+        // 重新插入高画布可能触发浏览器滚动锚定，恢复文档阅读位置而非跟随下方内容。
+        this.documentScroll?.forEach(({element, left, top}) => {
+            element.scrollLeft = left;
+            element.scrollTop = top;
+        });
+        this.documentScroll = undefined;
         if (!this.destroyed) {
             this.options.host.focus({preventScroll: true});
         }
@@ -3793,11 +4037,33 @@ export class ListMindmapView {
         const active = !!this.fullscreenMarker;
         this.setInteractionActive(active);
         this.tooltip.hidden = true;
+        if (!active) {
+            this.documentViewport.hidden = true;
+        }
+        const preview = this.buttons.get("documentLayout");
+        preview.hidden = !active || !this.documentView || this.locked;
+        preview.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
+        preview.classList.toggle("block__icon--active", !this.documentViewport.hidden);
         const button = this.buttons.get("fullscreen");
         button.setAttribute("aria-label", this.label(active ? "exitFullscreen" : "fullscreen"));
         button.querySelector("use").setAttribute("xlink:href", active ? "#iconFullscreenExit" : "#iconFullscreen");
         this.refreshLayout();
     };
+
+    private updateDocumentViewport() {
+        const saved = this.documentView;
+        if (!saved || this.documentViewport.hidden) {
+            return;
+        }
+        // 取景框与进入全屏前的文档视口等大，平移缩放只调整框下的导图。
+        const width = saved.width;
+        const height = saved.height;
+        const x = (this.viewport.clientWidth - width) / 2;
+        const y = Math.max(0, (this.viewport.clientHeight - height) / 2);
+        this.documentViewport.style.width = `${width}px`;
+        this.documentViewport.style.height = `${height}px`;
+        this.documentViewport.style.transform = `translate(${x}px, ${y}px)`;
+    }
 
     private captureViewportCenter() {
         if (!this.initialFit && !this.viewportCenter) {
@@ -3808,6 +4074,64 @@ export class ListMindmapView {
         }
     }
 
+    private getViewportAnchorY(height: number) {
+        // 高画布全屏时固定顶部；高度相等处两种取景方式连续衔接。
+        return Math.max(height, this.fullscreenMarker ? this.documentView?.height || 0 : 0) / 2;
+    }
+
+    private resizeViewport(width = this.viewport.clientWidth, height = this.viewport.clientHeight) {
+        if (!width || !height || this.printTransform || this.options.printLayout) {
+            return;
+        }
+        const previous = this.viewportSize;
+        if (previous?.width === width && previous.height === height) {
+            return;
+        }
+        this.viewportSize = {width, height};
+        if (!previous || this.initialFit || this.viewportCenter) {
+            return;
+        }
+        const x = (width - previous.width) / 2;
+        const y = this.getViewportAnchorY(height) - this.getViewportAnchorY(previous.height);
+        this.offsetX += x;
+        this.offsetY += y;
+        if (this.pointer?.pan && !this.pointer.id) {
+            this.pointer.x += x;
+            this.pointer.y += y;
+        }
+    }
+
+    private getVisibleViewportAnchor() {
+        const bounds = this.viewport.getBoundingClientRect();
+        const scaleX = bounds.width ? this.viewport.clientWidth / bounds.width : 1;
+        const scaleY = bounds.height ? this.viewport.clientHeight / bounds.height : 1;
+        let left = Math.max(0, bounds.left);
+        let right = Math.min(window.innerWidth, bounds.right);
+        let top = Math.max(0, bounds.top);
+        let bottom = Math.min(window.innerHeight, bounds.bottom);
+        // 文档滚动容器可能只露出画布的一部分，进入全屏前保留实际正在阅读的区域。
+        for (let parent = this.viewport.parentElement; parent; parent = parent.parentElement) {
+            const style = getComputedStyle(parent);
+            const rect = parent.getBoundingClientRect();
+            const ratioX = parent.offsetWidth ? rect.width / parent.offsetWidth : 1;
+            const ratioY = parent.offsetHeight ? rect.height / parent.offsetHeight : 1;
+            if (style.overflowX !== "visible") {
+                const start = rect.left + parent.clientLeft * ratioX;
+                left = Math.max(left, start);
+                right = Math.min(right, start + parent.clientWidth * ratioX);
+            }
+            if (style.overflowY !== "visible") {
+                const start = rect.top + parent.clientTop * ratioY;
+                top = Math.max(top, start);
+                bottom = Math.min(bottom, start + parent.clientHeight * ratioY);
+            }
+        }
+        return right > left && bottom > top ? {
+            x: ((left + right) / 2 - bounds.left) * scaleX,
+            y: (top - bounds.top) * scaleY,
+        } : {x: this.viewport.clientWidth / 2, y: 0};
+    }
+
     public destroy() {
         this.finishSummaryEdit?.(false);
         this.finishRelationEdit?.(false);
@@ -3815,6 +4139,7 @@ export class ListMindmapView {
             return;
         }
         this.destroyed = true;
+        this.stopFoldAnimation?.();
         cancelAnimationFrame(this.drawFrame);
         this.drawFrame = 0;
         clearTimeout(this.linkTimer);

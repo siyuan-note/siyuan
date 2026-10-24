@@ -247,6 +247,16 @@
     pointer-events: none;
   }
 
+  &__document-viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    border: 1px dashed var(--b3-theme-primary);
+    box-sizing: border-box;
+    z-index: 4;
+  }
+
   &__selection-box {
     position: absolute;
     pointer-events: none;
@@ -954,14 +964,13 @@
     display: flex;
     flex-direction: column;
     max-width: calc(100% - 16px);
+    gap: 4px;
     padding: 8px;
     box-sizing: border-box;
     overflow: auto;
 
     .mindmap-view__palette {
-      flex-wrap: wrap;
-      overflow: visible;
-      max-width: 320px;
+      max-width: 100%;
     }
 
     .mindmap-view__node-width {
@@ -995,6 +1004,7 @@
     &__route-handle,
     &__route-status,
     &__selection-box,
+    &__document-viewport,
     &__inspector-popover,
     &__add-bridge,
     &__fold,

@@ -120,6 +120,7 @@ type KernelPlugin struct {
 	bus EventBus.Bus // Event bus for plugin events and RPC request/response dispatch
 
 	rpcMethods        sync.Map // string -> *RpcMethod, registered JSON-RPC methods
+	rpcWriteLeases    sync.Map // *rpcWriteLease -> struct{}, pending RPC executions
 	agentCapabilities sync.Map // string -> *tools.Tool, Agent capabilities registered by this plugin
 
 	socketsMu sync.RWMutex       // mutex for gwsSockets map
@@ -240,6 +241,8 @@ func (p *KernelPlugin) close() (err error) {
 		runtime.Stop() // Stops the event loop and waits for it to finish.
 		// p.runtime.Terminate() // Interrupts the runtime and causes all executing code to throw an exception.
 	}
+	// Promise 可能永不完成；运行时停止后已无法继续写入，释放其剩余租约。
+	p.releaseRPCWrites()
 	return
 }
 
@@ -687,10 +690,16 @@ func (p *KernelPlugin) callRpcMethod(ctx context.Context, method string, params 
 	}
 
 	done := make(chan *TaskResult, 1)
+	var lease *rpcWriteLease
 	var completeOnce sync.Once
 	complete := func(result *TaskResult) {
 		// 仅接收首次结果，等待者退出后的回调也不会阻塞事件循环。
-		completeOnce.Do(func() { done <- result })
+		completeOnce.Do(func() {
+			if lease != nil {
+				lease.release()
+			}
+			done <- result
+		})
 	}
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -701,6 +710,11 @@ func (p *KernelPlugin) callRpcMethod(ctx context.Context, method string, params 
 		case <-p.context.Done():
 			return nil, p.context.Err()
 		default:
+		}
+		var admissionErr error
+		lease, admissionErr = p.acquireRPCWrite()
+		if admissionErr != nil {
+			return nil, admissionErr
 		}
 
 		rpcParams := []goja.Value{}

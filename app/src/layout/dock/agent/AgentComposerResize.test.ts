@@ -17,12 +17,13 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     document.body.innerHTML = `<div class="sy__agentChat fn__flex-column file-tree dockPanel${mobile ? " sy__agentChat--mobile" : ""}" ` +
         'style="width:360px;height:760px;min-height:0;box-sizing:border-box">' +
         '<div class="block__icons" style="height:48px">Agent</div>' +
+        '<div class="agent-chat fn__flex-column fn__flex-1">' +
         '<div class="agent-chat__messages-wrap"><div class="agent-chat__messages">Messages</div></div>' +
         '<div class="agent-chat__input-area"><div class="agent-chat__input-resize" data-prevent-swipe="true">' +
         '<span class="protyle-block-resize" data-resize-axis="height" tabindex="0" role="separator"></span></div>' +
         '<div class="agent-chat__composer-host protyle protyle-lite-fragment" data-protyle-lite="true">' +
         '<div class="protyle-content"><div class="protyle-wysiwyg" spellcheck="false"></div></div></div>' +
-        '<div class="agent-chat__buttons"><button class="b3-button">Send</button></div></div></div>';
+        '<div class="agent-chat__buttons"><button class="b3-button">Send</button></div></div></div></div>';
     const panel = document.querySelector<HTMLElement>(".sy__agentChat");
     // 原生窗口可能受运行器屏幕尺寸限制，面板必须完全位于实际视口内。
     const panelHeight = Math.min(760, window.innerHeight);
@@ -37,6 +38,14 @@ const cases = async (source: string, css: string, mobile: boolean) => {
         await tick();
     };
     const moveMouse = (x: number, y: number) => input("Input.dispatchMouseEvent", {type: "mouseMoved", x, y});
+    const dragBy = async (dy: number, options: {touch?: boolean, touchEnd?: boolean, escape?: boolean} = {}) => {
+        const rect = handle.getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("composer-drag", {
+            x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2), dy, ...options,
+        });
+        await tick();
+    };
+    const key = (name: string) => handle.dispatchEvent(new KeyboardEvent("keydown", {key: name, bubbles: true, cancelable: true}));
     const paragraph = (text: string) => '<div class="p" data-node-id="20261022000000-abcdefg" data-type="NodeParagraph">' +
         `<div contenteditable="true" spellcheck="false">${text}</div></div>`;
     const short = () => editor.innerHTML = paragraph("Short input");
@@ -62,6 +71,52 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     check.equal(matchMedia("(hover: none) and (pointer: coarse)").matches, true);
     check.equal(getComputedStyle(handle).opacity, "1", "touch devices retain a visible handle without hover");
     await input("Emulation.setTouchEmulationEnabled", {enabled: false});
+    editor.innerHTML = paragraph("");
+    await tick();
+    const emptyHeight = composer.clientHeight;
+    await dragBy(-120);
+    check.equal(composer.clientHeight, emptyHeight + 120, "dragging an empty composer sets its actual height");
+    check.equal(content.clientHeight, composer.clientHeight, "the editable scroll area fills a manually enlarged composer");
+    const maximum = handle.getAttribute("aria-valuemax");
+    await dragBy(-1000);
+    check.equal(composer.clientHeight, Number(maximum), "dragging stops at the upper bound");
+    await dragBy(-100);
+    check.equal(composer.clientHeight, Number(maximum), "repeated drags cannot increase the upper bound");
+    check.equal(handle.getAttribute("aria-valuemax"), maximum);
+    await dragBy(Number(maximum) - emptyHeight - 120);
+    short();
+    await tick();
+    check.equal(composer.clientHeight, emptyHeight + 120, "typing one line preserves the chosen height");
+    await dragBy(1000);
+    check.equal(content.scrollHeight, content.clientHeight, "shrinking a single line does not create a scrollbar");
+    check.equal(composer.clientHeight, Number(handle.getAttribute("aria-valuemin")), "dragging stops at the minimum height");
+    for (const fontSize of [16, 32]) {
+        panel.style.setProperty("--b3-font-size", `${fontSize}px`);
+        for (const text of ["", "Short input"]) {
+            editor.innerHTML = paragraph(text);
+            await tick();
+            key("Home");
+            await tick();
+            check.equal(content.scrollHeight, content.clientHeight, `minimum height fits one line at ${fontSize}px`);
+            check.equal(composer.clientHeight, Number(handle.getAttribute("aria-valuemin")));
+        }
+    }
+    panel.style.removeProperty("--b3-font-size");
+    handle.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    await tick();
+    check.equal(composer.style.height, "", "double click restores automatic sizing after resizing empty content");
+    await dragBy(-100, {escape: true});
+    check.equal(composer.style.height, "", "canceling the first drag restores automatic sizing");
+    await dragBy(-100, {touch: true});
+    check.equal(composer.style.height, "", "canceling a touch drag restores automatic sizing");
+    const automaticHeight = composer.clientHeight;
+    key("ArrowUp");
+    check.equal(composer.clientHeight, automaticHeight + 24, "keyboard resizing starts from the visible height");
+    key("Home");
+    const touchHeight = composer.clientHeight;
+    await dragBy(-100, {touch: true, touchEnd: true});
+    check.equal(composer.clientHeight, touchHeight + 100, "touch dragging sets the height even with one line");
+    handle.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const image = '<span class="img"><span></span><span><img alt="Image" ' +
         'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></span></span>';
     editor.innerHTML = paragraph(image) + paragraph("After image") + paragraph("Last line");
@@ -81,7 +136,6 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     content.scrollTop = 0;
     check.ok(editor.firstElementChild.getBoundingClientRect().top - content.getBoundingClientRect().top >= 7);
 
-    const key = (name: string) => handle.dispatchEvent(new KeyboardEvent("keydown", {key: name, bubbles: true, cancelable: true}));
     handle.focus();
     key("ArrowUp");
     check.equal(composer.style.maxHeight, "264px");
@@ -102,13 +156,13 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     const x = Math.round(rect.left + rect.width / 2);
     const y = Math.round(rect.top + rect.height / 2);
     await require("electron").ipcRenderer.invoke("composer-drag", {x, y, dy: -100, touch: false});
-    check.ok(composer.clientHeight >= 338 && composer.clientHeight <= 342, "mouse dragging raises the height cap");
+    check.ok(composer.clientHeight >= 338 && composer.clientHeight <= 342, "mouse dragging raises the actual height");
     check.equal(handle.classList.contains("touch-resize-active"), false);
     check.equal(document.activeElement, editable, "mouse dragging keeps focus in the composer");
     check.equal(getComputedStyle(handle).outlineStyle, "none", "mouse dragging does not leave a keyboard focus box");
     await moveMouse(900, 10);
     check.equal(getComputedStyle(handle).opacity, "0", "the handle hides after dragging and leaving the input");
-    const preferred = composer.style.maxHeight;
+    const preferred = composer.style.height;
     const escapeRect = handle.getBoundingClientRect();
     let escapedEditor = false;
     editable.addEventListener("keydown", event => escapedEditor ||= event.key === "Escape");
@@ -116,7 +170,7 @@ const cases = async (source: string, css: string, mobile: boolean) => {
         x: Math.round(escapeRect.left + escapeRect.width / 2), y: Math.round(escapeRect.top + escapeRect.height / 2),
         dy: -50, touch: false, escape: true,
     });
-    check.equal(composer.style.maxHeight, preferred, "Escape cancels dragging while focus stays in the editor");
+    check.equal(composer.style.height, preferred, "Escape cancels dragging while focus stays in the editor");
     check.equal(escapedEditor, false, "canceling a drag does not trigger editor Escape actions");
     check.equal(handle.classList.contains("touch-resize-active"), false);
     const touchRect = handle.getBoundingClientRect();
@@ -124,7 +178,7 @@ const cases = async (source: string, css: string, mobile: boolean) => {
         x: Math.round(touchRect.left + touchRect.width / 2), y: Math.round(touchRect.top + touchRect.height / 2),
         dy: -50, touch: true,
     });
-    check.equal(composer.style.maxHeight, preferred, "touch cancellation restores the previous cap");
+    check.equal(composer.style.height, preferred, "touch cancellation restores the previous height");
     check.equal(handle.classList.contains("touch-resize-active"), false);
 
     for (const fontSize of [16, 32]) {
@@ -133,7 +187,7 @@ const cases = async (source: string, css: string, mobile: boolean) => {
             panel.style.width = `${width}px`;
             panel.style.height = "400px";
             await tick();
-            check.equal(composer.style.maxHeight, "240px", "smaller panels clamp an expanded composer");
+            check.equal(composer.style.height, "240px", "smaller panels clamp an expanded composer");
             check.ok(panel.querySelector(".agent-chat__buttons").getBoundingClientRect().bottom <= panel.getBoundingClientRect().bottom + 1);
             check.ok(content.clientWidth <= composer.clientWidth);
             content.scrollTop = content.scrollHeight;
@@ -143,33 +197,39 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     panel.style.height = "760px";
     panel.style.paddingBottom = "400px";
     await tick();
-    check.equal(composer.style.maxHeight, "200px", "mobile keyboard padding reduces available content height");
+    check.equal(composer.style.height, "200px", "mobile keyboard padding reduces available content height");
     panel.style.paddingBottom = "0";
     await tick();
-    check.equal(composer.style.maxHeight, preferred, "reopening the available space restores the chosen cap");
+    check.equal(composer.style.height, preferred, "reopening the available space restores the chosen height");
     short();
     await tick();
-    check.ok(composer.clientHeight < 120, "clearing long content returns to intrinsic height");
+    check.equal(composer.style.height, preferred, "clearing long content retains a manually chosen height");
+    check.equal(composer.clientHeight, parseFloat(preferred));
     const clickRect = handle.getBoundingClientRect();
     await require("electron").ipcRenderer.invoke("composer-drag", {
         x: Math.round(clickRect.left + clickRect.width / 2), y: Math.round(clickRect.top + clickRect.height / 2),
         dy: 0, touch: false,
     });
-    check.equal(composer.style.maxHeight, preferred, "clicking without dragging does not shrink the automatic growth limit");
+    check.equal(composer.style.height, preferred, "clicking without dragging does not change the chosen height");
     handle.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(composer.style.maxHeight, "240px", "double click restores the automatic cap");
+    await tick();
+    check.ok(composer.clientHeight < 120, "resetting returns short content to intrinsic height");
     long();
     await tick();
+    key("End");
+    check.notEqual(composer.style.height, "");
     destroy();
     key("End");
     check.equal(composer.style.maxHeight, "", "destroy removes listeners and the temporary geometry");
+    check.equal(composer.style.height, "");
     const escape = new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true});
     panel.dispatchEvent(escape);
     check.equal(escape.defaultPrevented, false, "Escape is not intercepted after disposal");
     return "Composer resize and scrolling passed";
 };
 
-test("composer grows, resizes and preserves focus, handle visibility and scroll space on desktop and mobile", {
+test("composer preserves automatic growth and bounded manual heights on desktop and mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {
@@ -188,7 +248,7 @@ app.whenReady().then(async () => {
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
     win.webContents.debugger.attach("1.3");
     ipcMain.handle("composer-input", (_event, method, params) => win.webContents.debugger.sendCommand(method, params));
-    ipcMain.handle("composer-drag", async (_event, {x, y, dy, touch, escape}) => {
+    ipcMain.handle("composer-drag", async (_event, {x, y, dy, touch, touchEnd, escape}) => {
         const send = async (method, params) => {
             await win.webContents.debugger.sendCommand(method, params);
             await new Promise(resolve => setTimeout(resolve, 40));
@@ -197,7 +257,7 @@ app.whenReady().then(async () => {
             await send("Emulation.setTouchEmulationEnabled", {enabled: true});
             await send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{x, y}]});
             await send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{x, y: y + dy}]});
-            await send("Input.dispatchTouchEvent", {type: "touchCancel", touchPoints: []});
+            await send("Input.dispatchTouchEvent", {type: touchEnd ? "touchEnd" : "touchCancel", touchPoints: []});
             await send("Emulation.setTouchEmulationEnabled", {enabled: false});
         } else {
             await send("Input.dispatchMouseEvent", {type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1});

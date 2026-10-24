@@ -1,7 +1,8 @@
-// 上方把手调节输入框的最大高度，正文仍按实际内容自动增高或收缩。
+// 输入框默认随内容增高；手动调节后保持所选高度，双击把手恢复自动尺寸。
 export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElement, handle: HTMLElement) => {
     const windowSelf = panel.ownerDocument.defaultView;
     let preferred: number | undefined;
+    let minimum = 40;
     let maximum = 240;
     let value = 240;
     let drag: {id: number, y: number, height: number, previous?: number, moved?: boolean} | undefined;
@@ -9,14 +10,17 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         const style = windowSelf.getComputedStyle(panel);
         const height = Math.min(panel.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom),
             windowSelf.visualViewport?.height || windowSelf.innerHeight);
-        if (!height) {
+        if (height <= 0) {
             return;
         }
+        minimum = Math.max(40, Math.ceil(parseFloat(windowSelf.getComputedStyle(composer).minHeight)) || 0);
         // 给标题、操作栏和会话正文留出空间，软键盘弹出时也不能把发送按钮挤出面板。
-        maximum = Math.max(40, Math.floor(height - 160));
-        value = Math.round(Math.max(40, Math.min(maximum, preferred ?? Math.min(240, height * .4))));
-        composer.style.maxHeight = `${value}px`;
-        handle.setAttribute("aria-valuemin", "40");
+        maximum = Math.max(minimum, Math.floor(height - 160));
+        const limit = Math.round(Math.max(minimum, Math.min(maximum, preferred ?? Math.min(240, height * .4))));
+        composer.style.maxHeight = `${limit}px`;
+        composer.style.height = preferred === undefined ? "" : `${limit}px`;
+        value = composer.clientHeight;
+        handle.setAttribute("aria-valuemin", String(minimum));
         handle.setAttribute("aria-valuemax", String(maximum));
         handle.setAttribute("aria-valuenow", String(value));
     };
@@ -41,6 +45,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         }
         event.preventDefault();
         event.stopPropagation();
+        update();
         drag = {id: event.pointerId, y: event.clientY, height: composer.clientHeight, previous: preferred};
         handle.setPointerCapture(event.pointerId);
         handle.classList.add("touch-resize-active");
@@ -54,7 +59,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         }
         event.preventDefault();
         drag.moved = true;
-        preferred = Math.max(40, Math.min(maximum, drag.height + drag.y - event.clientY));
+        preferred = Math.max(minimum, Math.min(maximum, drag.height + drag.y - event.clientY));
         update();
     };
     const up = (event: PointerEvent) => {
@@ -72,11 +77,12 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         }
     };
     const keydown = (event: KeyboardEvent) => {
+        update();
         if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-            preferred = Math.max(40, Math.min(maximum, value + (event.key === "ArrowUp" ? 24 : -24)));
+            preferred = Math.max(minimum, Math.min(maximum, value + (event.key === "ArrowUp" ? 24 : -24)));
             update();
         } else if (event.key === "Home" || event.key === "End") {
-            preferred = event.key === "Home" ? 40 : maximum;
+            preferred = event.key === "Home" ? minimum : maximum;
             update();
         } else {
             return;
@@ -102,6 +108,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
     windowSelf.visualViewport?.addEventListener("resize", update);
     const observer = new ResizeObserver(update);
     observer.observe(panel);
+    observer.observe(composer);
     update();
     return () => {
         finish(true);
@@ -118,5 +125,6 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         windowSelf.removeEventListener("resize", update);
         windowSelf.visualViewport?.removeEventListener("resize", update);
         composer.style.maxHeight = "";
+        composer.style.height = "";
     };
 };

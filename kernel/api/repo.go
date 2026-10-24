@@ -299,7 +299,7 @@ var removeRepoTagSnapshot = contractHandler(apicontract.RemoveRepoTagSnapshot, f
 })
 
 var createSnapshot = contractHandler(apicontract.CreateSnapshot, func(c *gin.Context, request apicontract.CreateSnapshotRequest) apicontract.Response[apicontract.CreateSnapshotData] {
-	id, created, err := model.CreateRepoSnapshot(request.Memo)
+	id, created, err := model.CreateRepoSnapshotWithFullCheck(request.Memo, request.FullCheck)
 	if err != nil {
 		return apicontract.Failure[apicontract.CreateSnapshotData](-1, fmt.Sprintf(model.Conf.Language(140), err))
 	}

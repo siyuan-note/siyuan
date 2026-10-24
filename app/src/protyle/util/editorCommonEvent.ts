@@ -2251,7 +2251,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // https://github.com/siyuan-note/siyuan/issues/9544
             const avElement = hasClosestByClassName(event.target, "av");
             if (!avElement) {
-                focusByRange(getRangeByPoint(event.clientX, event.clientY));
+                const range = getRangeByPoint(event.clientX, event.clientY);
+                protyle.toolbar.range = range;
+                focusByRange(range);
                 if (event.dataTransfer.types.includes("Files") && !isBrowser() &&
                     getHostCapabilities().localFileSystem) {
                     const files = getLocalDropFiles(event.dataTransfer.files, file => webUtils.getPathForFile(file));

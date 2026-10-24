@@ -2767,6 +2767,9 @@ func createEncryptedBox(name, password string, initializeBoxDoc func(string) (st
 	if _, err = initializeBoxDoc(id); err != nil {
 		return "", fmt.Errorf("initialize encrypted notebook document failed: %w", err)
 	}
+	if err = treenode.SetDocumentMetadataState(id, "ready"); err != nil {
+		return "", fmt.Errorf("initialize encrypted notebook document metadata failed: %w", err)
+	}
 
 	setEncryptedBoxState(id, EncryptedBoxStateUnlocked)
 	IncSync()

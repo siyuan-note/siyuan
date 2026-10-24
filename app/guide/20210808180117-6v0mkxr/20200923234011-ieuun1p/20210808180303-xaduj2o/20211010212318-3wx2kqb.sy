@@ -6,7 +6,7 @@
 		"id": "20211010212318-3wx2kqb",
 		"title": "Virtual reference",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010212319-jz4ue2g",
-				"updated": "20261016202856"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211010212319-b0948bh",
-				"updated": "20261016202856"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Virtual reference is a kind of \"block ref\" that is automatically detected based on the anchor text of the existing block ref or the name of the block, but it is not actually linked to the block, but only marked in the editor, and supports floating window preview."
+					"Data": "Virtual references mark potentially related text in the editor using existing reference anchor text, block names, and similar information. They support floating previews but do not automatically create actual block references."
 				}
 			]
 		},
@@ -109,7 +109,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010212319-oy401ib",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240228164044-aohxrm3",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -151,7 +151,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -160,7 +160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -169,7 +169,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": "."
 				}
 			]
 		},

@@ -6,20 +6,36 @@
 		"id": "20211226121329-c5v3dto",
 		"title": "Kernel API",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20261024163429"
 	},
 	"Children": [
+		{
+			"ID": "20261024161816-66bm2wc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-66bm2wc",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內核 API 透過 HTTP 提供文檔、內容區塊、資源檔案等資料操作，適合腳本和外部工具整合。呼叫前需啟動思源內核，並依介面要求使用 API Token。具體參數和範例見下方 API 文件。"
+				}
+			]
+		},
 		{
 			"ID": "20211226121329-6wf1aig",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121329-6wf1aig",
-				"updated": "20260804235500"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
-					"Type": "NodeText",
-					"Data": "請瀏覽 API 文檔 (GitHub repo: siyuan-note/siyuan)。"
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "API 文件",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/dev/docs/API.md"
 				}
 			]
 		},

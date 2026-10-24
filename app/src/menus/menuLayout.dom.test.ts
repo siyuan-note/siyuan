@@ -25,7 +25,9 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         "util/functions": {isMobile: () => mobile},
         "util/zIndex": {isScrollAboveMenu: () => false},
         "layout/getTopBarHeight": {getTopBarHeight: () => 32},
-        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap"}},
+        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
+            CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: "custom-sy-embed-breadcrumb-parent-path"}},
+        "protyle/render/blockRender": {blockRender() {}},
         "protyle/undo": {electronUndo() {}},
         "util/escape": {escapeAttr: (value: string) => value || "", escapeHtml: (value: string) => value || ""},
         "menus/menuKeyboard": {setMenuInputCurrent() {}},
@@ -46,7 +48,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         "protyle/render/av/panels/inputs": {bindAVPanelInputs() {}},
         "protyle/render/av/viewType": {},
         "protyle/wysiwyg/transaction": {},
-        "util/fetch": {fetchSyncPost: async (url: string) => {
+        "util/fetch": {fetchPost: (_url: string, _data: unknown, callback: () => void) => callback(),
+            fetchSyncPost: async (url: string) => {
             check.equal(url, "/api/av/getAttributeViewCalendarUndated");
             return {code: 0, data: {rows: calendarRows, total: calendarRows.length}};
         }},
@@ -154,6 +157,36 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         menu.remove();
         menu.element.remove();
     };
+
+    const {embedBreadcrumbMenu}: typeof import("../protyle/gutter/embedBreadcrumbMenu") = load("protyle/gutter/embedBreadcrumbMenu");
+    Object.assign(window.siyuan.languages, {embedBlockBreadcrumb: "Breadcrumb", embedBlockBreadcrumbParentPath: "Parent path",
+        enable: "Enable", disable: "Disable", default: "Default"});
+    for (const touch of [false, true]) {
+        mobile = touch;
+        const embed = document.createElement("div");
+        embed.dataset.nodeId = "embed";
+        for (const [index, attribute] of ["breadcrumb", "custom-sy-embed-breadcrumb-parent-path"].entries()) {
+            for (const [choice, value] of [[0, "true"], [1, "false"], [2, null]] as const) {
+                const instance = createMenu();
+                instance.addItem(embedBreadcrumbMenu({} as IProtyle, embed)[index]);
+                instance.popup({x: 40, y: 40});
+                const parent = instance.element.querySelector<HTMLElement>(".b3-menu__item");
+                check.equal(parent.querySelector(":scope > svg:not(.b3-menu__icon--small)"), null,
+                    "breadcrumb menus have no empty leading icon");
+                check.equal(parent.querySelector(":scope > .b3-menu__icon--small use")?.getAttribute("xlink:href"), "#iconRight",
+                    "breadcrumb submenu retains the standard arrow");
+                parent.dispatchEvent(new MouseEvent(touch ? "click" : "mouseover", {bubbles: true}));
+                await settle();
+                check.ok(parent.classList.contains("b3-menu__item--show"), "desktop hover and mobile tap open the submenu");
+                const options = parent.querySelectorAll<HTMLElement>(".b3-menu__submenu .b3-menu__item");
+                check.equal(options.length, 3);
+                options[choice].click();
+                check.equal(embed.getAttribute(attribute), value);
+                dispose(instance);
+            }
+        }
+    }
+    mobile = false;
 
     const menu = createMenu();
     addItems(menu, 2);
@@ -692,7 +725,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
         "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel",
-        "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated",
+        "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},

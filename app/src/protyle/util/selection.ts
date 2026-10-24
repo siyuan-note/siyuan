@@ -67,9 +67,9 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range,
             const cellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
             if (cellElement) {
                 position = getSelectionOffset(cellElement, nodeElement, range);
-                if (position.start !== 0 || position.end !== cellElement.textContent.length) {
-                    range.setStart(cellElement.firstChild, 0);
-                    range.setEndAfter(cellElement.lastChild);
+                const contentLength = cellElement.textContent.length + cellElement.querySelectorAll("br, .emoji").length;
+                if (position.start !== 0 || position.end !== contentLength) {
+                    range.selectNodeContents(cellElement);
                     protyle.toolbar.render(protyle, range);
                     countSelectWord(range, protyle);
                     return true;
@@ -77,7 +77,8 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range,
             }
         } else {
             position = getSelectionOffset(editElement, nodeElement, range);
-            if (position.start !== 0 || position.end !== editElement.textContent.length) {
+            const contentLength = editElement.textContent.length + editElement.querySelectorAll("br, .emoji").length;
+            if (position.start !== 0 || position.end !== contentLength) {
                 // 全选后 rang 不对 https://ld246.com/article/1654848722251
                 let firstChild = editElement.firstChild;
                 while (firstChild) {
@@ -89,6 +90,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range,
                         firstChild = firstChild.nextSibling;
                     } else {
                         if ((firstChild as HTMLElement).classList.contains("render-node") ||
+                            (firstChild as HTMLElement).classList.contains("emoji") ||
                             (firstChild as HTMLElement).classList.contains("img")) {
                             range.setStartBefore(firstChild);
                             break;
@@ -106,6 +108,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range,
                         lastChild = lastChild.previousSibling as HTMLElement;
                     } else {
                         if (lastChild.classList.contains("render-node") ||
+                            lastChild.classList.contains("emoji") ||
                             lastChild.classList.contains("img") ||
                             lastChild.tagName === "BR") {
                             range.setEndAfter(lastChild);

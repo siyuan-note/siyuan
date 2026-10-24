@@ -719,6 +719,7 @@ declare namespace Config {
          * Whether the embedded block displays breadcrumbs
          */
         embedBlockBreadcrumb: boolean;
+        embedBlockBreadcrumbParentPath: boolean;
         /**
          * Whether to display automatic heading numbers
          */

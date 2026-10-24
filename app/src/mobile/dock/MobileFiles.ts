@@ -1437,25 +1437,17 @@ export class MobileFiles extends Model {
     }
 
     private async onLsSelect(data: IFileTreeList, filePath: string, setStorage: boolean, isSetCurrent: boolean) {
-        let fileHTML = "";
-        data.files.forEach((item: IFile) => {
-            fileHTML += this.genFileHTML(item);
-        });
-        if (fileHTML === "") {
+        if (data.files.length === 0) {
             return;
         }
         const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
-        if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
-            // 文件展开时，刷新
-            liElement.nextElementSibling.remove();
+        if (!liElement) {
+            return;
         }
         const arrowElement = liElement.querySelector(".b3-list-item__arrow");
-        arrowElement.classList.add("b3-list-item__arrow--open");
         arrowElement.parentElement.classList.remove("fn__hidden");
         syncFileTreeItemDefaultIcon(liElement as HTMLElement);
-        const effectiveSortMode = getResponseEffectiveSortMode(data, data.box);
-        liElement.insertAdjacentHTML("afterend", `<ul ${FILE_TREE_EFFECTIVE_SORT_MODE}="${effectiveSortMode}">${fileHTML}</ul>`);
-        this.restoreMovedExpandedItems(liElement.nextElementSibling, data.box);
+        this.onLsHTML(data);
         let newLiElement;
         for (let i = 0; i < data.files.length; i++) {
             const item = data.files[i];

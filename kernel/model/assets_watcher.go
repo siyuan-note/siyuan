@@ -26,7 +26,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -61,47 +60,40 @@ func watchAssets() {
 		return
 	}
 
-	go func() {
-		defer logging.Recover()
+	go watchAssetEvents(assetsWatcher)
+}
 
-		var (
-			timer     *time.Timer
-			lastEvent fsnotify.Event
-		)
-		timer = time.NewTimer(100 * time.Millisecond)
-		<-timer.C // timer should be expired at first
+func (batch assetWatchBatch) addFSNotifyEvent(event fsnotify.Event) {
+	const changes = fsnotify.Create | fsnotify.Write | fsnotify.Remove | fsnotify.Rename
+	if event.Op&(changes|fsnotify.Chmod) != 0 {
+		batch.add(event.Name, event.Op&changes != 0)
+	}
+}
 
-		for {
-			select {
-			case event, ok := <-assetsWatcher.Events:
-				if !ok {
-					return
-				}
-
-				lastEvent = event
-				timer.Reset(time.Millisecond * 100)
-			case err, ok := <-assetsWatcher.Errors:
-				if !ok {
-					return
-				}
-				logging.LogErrorf("watch assets failed: %s", err)
-			case <-timer.C:
-				//logging.LogInfof("assets changed: %s", lastEvent)
-				if lastEvent.Op&fsnotify.Write == fsnotify.Write {
-					IncSync()
-				}
-
-				// 重新缓存资源文件，以便使用 /资源 搜索
-				go cache.LoadAssets()
-
-				if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
-					HandleAssetsRemoveEvent(lastEvent.Name)
-				} else {
-					HandleAssetsChangeEvent(lastEvent.Name)
-				}
+func watchAssetEvents(watcher *fsnotify.Watcher) {
+	defer logging.Recover()
+	timer := time.NewTimer(100 * time.Millisecond)
+	timer.Stop()
+	defer timer.Stop()
+	batch := assetWatchBatch{}
+	for {
+		select {
+		case event, ok := <-watcher.Events:
+			if !ok {
+				return
 			}
+			batch.addFSNotifyEvent(event)
+			timer.Reset(100 * time.Millisecond)
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				return
+			}
+			logging.LogErrorf("watch assets failed: %s", err)
+		case <-timer.C:
+			batch.flush()
+			batch = assetWatchBatch{}
 		}
-	}()
+	}
 }
 
 func CloseWatchAssets() {

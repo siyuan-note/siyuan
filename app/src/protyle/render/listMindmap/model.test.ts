@@ -88,8 +88,10 @@ test("compact view spacing retains draggable relations without expanding unrelat
     const source = typescript.createSourceFile("view.ts", readFileSync(path.join(__dirname, "view.ts"), "utf8"),
         typescript.ScriptTarget.ES2021, true);
     const declaration = source.statements.find(typescript.isClassDeclaration);
-    const refresh = declaration.members.find(member => member.name?.getText(source) === "refreshLayout");
-    const compiled = typescript.transpileModule(`class View {${refresh.getText(source)}} globalThis.View = View;`, {
+    const methods = declaration.members.filter(member =>
+        ["refreshLayout", "positionNodes", "resizeViewport", "getViewportAnchorY"].includes(member.name?.getText(source)));
+    assert.equal(methods.length, 4);
+    const compiled = typescript.transpileModule(`class View {${methods.map(member => member.getText(source)).join("\n")}} globalThis.View = View;`, {
         compilerOptions: {target: typescript.ScriptTarget.ES2021},
     }).outputText;
     let frame: () => void;
@@ -190,8 +192,14 @@ test("appearance metadata is additive and rejects invalid palettes and branch sl
         const appearance = {version: 1, palette: ["#123456", "#abcdef"], backgroundColor: "#ffffff", extension: "keep"};
         const source = JSON.stringify({...base, appearance});
         assert.equal(JSON.stringify(parseListMindmapMetadata(source)), source);
+        for (const nodeStyle of ["layered", "branch"]) {
+            const withRootColor = JSON.stringify({...base, appearance: {...appearance, rootColor: "#112233", nodeStyle}});
+            assert.equal(JSON.stringify(parseListMindmapMetadata(withRootColor)), withRootColor);
+        }
         for (const invalid of [null, [], {}, {...appearance, version: 2}, {...appearance, palette: ["red"]},
-            {...appearance, backgroundColor: "url(x)"}]) {
+            {...appearance, backgroundColor: "url(x)"},
+            ...[null, "", "red", "url(x)", 123].map(rootColor => ({...appearance, rootColor})),
+            ...[null, "", "flat", "unknown", 123].map(nodeStyle => ({...appearance, nodeStyle}))]) {
             const value = JSON.stringify({...base, appearance: invalid});
             assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
         }
@@ -1230,6 +1238,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             panMenu = pan;
         },
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
+        onNodesStyle: (...args: unknown[]) => nodeStyles.push(args),
         onNodeWidths: async (widths: {id: string, width: number}[], expected: string) => {
             check.equal(expected, JSON.stringify(widths.map(({id}) => ({id, width: model.metadata.nodes[id]?.width || 0}))));
             widths.forEach(({id, width}) => {
@@ -1246,6 +1255,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); };
+    const settleFold = async (current: {stopFoldAnimation?: () => void}) => {
+        await settle();
+        const deadline = performance.now() + 1000;
+        while (current.stopFoldAnimation && performance.now() < deadline) {
+            await frame();
+        }
+        check.equal(current.stopFoldAnimation, undefined, "fold transitions finish without leaving a pending frame");
+    };
     const enableHand = (targetHost: HTMLElement) => {
         targetHost.querySelector<HTMLButtonElement>('[aria-label="more"]').click();
         check.ok(panMenu);
@@ -2188,7 +2205,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const palette = popup.querySelector<HTMLElement>(".mindmap-view__palette");
         check.equal(palette.children.length, 31);
         const popupBounds = popup.getBoundingClientRect();
-        check.ok(popupBounds.width <= host.offsetWidth - 16, "long palettes wrap within the canvas");
+        check.ok(popupBounds.width <= host.offsetWidth - 16, "long palettes stay within the canvas");
         check.ok(popupBounds.bottom <= inspector.getBoundingClientRect().top, "node settings open above the bottom bar");
         const bounds = inspector.getBoundingClientRect();
         for (const key of ["connect", "listMindmapSummary", "delete"]) {
@@ -2197,6 +2214,36 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 `node action ${key} stays visible at width ${width} while the palette scrolls`);
         }
     }
+    const originalLineColors = options.colors;
+    options.colors = () => Array.from({length: 15}, (_, i) => ({label: `Line ${i}`, value: `rgb(${i}, 0, 0)`}));
+    view.selectNode(alpha, true);
+    for (const width of [240, 320, 760]) {
+        host.style.width = `${width}px`;
+        view.renderInspector();
+        inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+        await settle();
+        const popup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
+        const palettes = popup.querySelectorAll<HTMLElement>(".mindmap-view__palette");
+        check.equal(palettes.length, 2);
+        check.equal(palettes[0].previousElementSibling.textContent, "listMindmapNodeColor");
+        check.equal(palettes[1].previousElementSibling.textContent, "listMindmapLineColor");
+        for (const palette of palettes) {
+            const buttons = Array.from(palette.children) as HTMLElement[];
+            check.equal(new Set(buttons.map(button => button.offsetTop)).size, 1, "each palette keeps one row");
+            check.ok(palette.getBoundingClientRect().right <= popup.getBoundingClientRect().right);
+            if (width < 760) {
+                check.ok(palette.scrollWidth > palette.clientWidth, "narrow palettes scroll horizontally");
+            }
+        }
+        if (width === 760) {
+            check.equal(palettes[1].scrollWidth, palettes[1].clientWidth,
+                "the normal line palette fits one row on a wide canvas");
+        }
+        palettes[1].querySelector<HTMLButtonElement>('[aria-label="Line 14"]').click();
+        check.deepEqual(nodeStyles.at(-1), [view.getSelectedIds(), {lineColor: "rgb(14, 0, 0)"}]);
+    }
+    options.colors = originalLineColors;
+    view.focusNode(beta);
     host.style.cssText = originalHostStyle;
     options.nodeColors = originalNodeColors;
     view.renderInspector();
@@ -3103,8 +3150,30 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     pressDelete();
     check.deepEqual(deletions, [beta]);
     const beforeCollapse = nodeElement(model.root.id).getBoundingClientRect();
+    const foldContext = readonly.canvas.getContext("2d");
+    const originalStroke = foldContext.stroke.bind(foldContext);
+    const foldAlphas: number[] = [];
+    foldContext.stroke = (path?: Path2D) => {
+        foldAlphas.push(foldContext.globalAlpha);
+        if (path) {
+            originalStroke(path);
+        } else {
+            originalStroke();
+        }
+    };
     nodeElement(model.root.id).querySelector<HTMLButtonElement>(".mindmap-view__fold").click();
     await settle();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        check.ok(readonly.stopFoldAnimation, "a user fold starts a visible transition");
+        check.equal(nodeElement(alpha).hidden, false, "outgoing children remain visible during the transition");
+        check.equal(nodeElement(alpha).inert, true, "outgoing children cannot receive pointer or keyboard input");
+        check.ok(Number(nodeElement(alpha).style.opacity) > 0 && Number(nodeElement(alpha).style.opacity) < 1);
+        check.ok(foldAlphas.some(alpha => alpha > 0 && alpha < 1), "real canvas connectors fade together with their nodes");
+        check.ok(Math.abs(nodeElement(model.root.id).getBoundingClientRect().y - beforeCollapse.y) < 1,
+            "the root stays anchored throughout the animation");
+    }
+    await settleFold(readonly);
+    foldContext.stroke = originalStroke;
     const afterCollapse = nodeElement(model.root.id).getBoundingClientRect();
     check.ok(Math.abs(afterCollapse.y - beforeCollapse.y) < 1, "collapse keeps the root at its screen position");
     check.equal(nodeElement(alpha).hidden, true);
@@ -3113,11 +3182,38 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(getComputedStyle(foldedButton).visibility, "visible");
     foldedButton.click();
     await settle();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        check.ok(readonly.stopFoldAnimation,
+            "showing folded children must not let size observers end the expansion early");
+        check.ok(Number(nodeElement(alpha).style.opacity) > 0 && Number(nodeElement(alpha).style.opacity) < 1,
+            "newly visible children retain an intermediate expansion frame after size notifications");
+    }
+    await settleFold(readonly);
     check.equal(nodeElement(alpha).hidden, false);
     const afterExpand = nodeElement(model.root.id).getBoundingClientRect();
     check.ok(Math.abs(afterExpand.y - afterCollapse.y) < 1, "expansion keeps the root stable after size observers settle");
     check.ok(Math.abs(afterExpand.x - afterCollapse.x) < 1, "expansion preserves horizontal position");
     check.equal(list.outerHTML, persistedBeforeFold);
+    foldedButton.click();
+    await settle();
+    foldedButton.click();
+    await settleFold(readonly);
+    check.equal(nodeElement(alpha).hidden, false, "rapid fold reversals finish in the latest requested state");
+    check.equal(nodeElement(alpha).style.opacity, "");
+    check.equal(nodeElement(alpha).inert, false);
+    foldedButton.click();
+    await settleFold(readonly);
+    foldedButton.click();
+    await settle();
+    const measuredWidth = nodeElement(alpha).offsetWidth;
+    nodeElement(alpha).style.minWidth = `${measuredWidth + 40}px`;
+    await settle();
+    check.equal(readonly.stopFoldAnimation, undefined,
+        "a genuine node size change still ends the transition and lays out its new dimensions");
+    check.equal(readonly.positions.get(alpha).width, nodeElement(alpha).offsetWidth);
+    check.ok(readonly.positions.get(alpha).width > measuredWidth);
+    nodeElement(alpha).style.minWidth = "";
+    await settle();
     const levelSelect = host.querySelector<HTMLSelectElement>(".mindmap-view__level-select");
     check.deepEqual(Array.from(levelSelect.options).map(option => option.value),
         ["", "expandAll", "foldAll", "1", "2", "3", "4", "5", "6"]);
@@ -3127,7 +3223,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const beforeLevel = nodeElement(alpha).getBoundingClientRect();
     levelSelect.value = "1";
     levelSelect.dispatchEvent(new Event("change", {bubbles: true}));
-    await settle();
+    await settleFold(readonly);
     check.equal(nodeElement(levelChild).hidden, true);
     check.equal(nodeElement(alpha).hidden, false);
     check.equal(readonly.selectedId, alpha, "a hidden selection moves to its visible ancestor");
@@ -3136,12 +3232,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(list.outerHTML, persistedBeforeFold, "exported and read-only level changes never write the list");
     levelSelect.value = "foldAll";
     levelSelect.dispatchEvent(new Event("change", {bubbles: true}));
-    await settle();
+    await settleFold(readonly);
     check.equal(nodeElement(alpha).hidden, true);
     check.equal(readonly.selectedId, model.root.id);
     levelSelect.value = "expandAll";
     levelSelect.dispatchEvent(new Event("change", {bubbles: true}));
-    await settle();
+    await settleFold(readonly);
     check.equal(nodeElement(levelChild).hidden, false);
     check.equal(list.outerHTML, persistedBeforeFold);
     readonly.destroy();
@@ -3186,7 +3282,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await clickMouse(levelButton);
     levelView.clearSelection();
     chooseLevel(1);
-    await settle();
+    await settleFold(levelView);
     check.equal(levelSaves, 1);
     check.equal(levelView.selectedId, alpha, "menu clicks retain the selection anchor despite outside-pointer dismissal");
     check.equal(nodeElement(levelChild).hidden, true);
@@ -3194,20 +3290,20 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     levelSaveAllowed = false;
     levelButton.click();
     chooseLevel("expandAll");
-    await settle();
+    await settleFold(levelView);
     check.equal(nodeElement(levelChild).hidden, true, "failed saves do not apply optimistic folding overrides");
     levelSaveAllowed = true;
     levelButton.click();
     chooseLevel("expandAll");
-    await settle();
+    await settleFold(levelView);
     check.equal(nodeElement(levelChild).hidden, false);
     levelButton.click();
     chooseLevel("foldAll");
-    await settle();
+    await settleFold(levelView);
     check.equal(nodeElement(alpha).hidden, true, "the virtual center participates in batch folding");
     levelButton.click();
     chooseLevel(1);
-    await settle();
+    await settleFold(levelView);
     check.equal(nodeElement(alpha).hidden, false, "level selection expands a previously folded virtual center");
     levelView.destroy();
 
@@ -3248,7 +3344,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         siblingElement(id).querySelector(".mindmap-view__fold").dispatchEvent(new MouseEvent("click", {
             bubbles: true, altKey,
         }));
-        await settle();
+        await settleFold(siblingView);
     };
     await settle();
     const navigateSibling = (key: string, expected: string) => {
@@ -4759,13 +4855,53 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     summaryView.focusNode(summaryIds[0]);
     const summaryButton = summaryHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
-    for (const id of [summaryModel.root.id, summaryIds[0]]) {
+    for (const id of [summaryModel.root.id, summaryIds[0], summaryIds[1]]) {
         summaryView.focusNode(id);
         check.equal(summaryButton.hidden, false, "the node menu keeps the summary action in a stable position");
-        check.equal(summaryButton.disabled, true, "a single selected node cannot create a summary");
+        check.equal(summaryButton.disabled, false, "a single real node can create a summary");
+        check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0,
+            "selecting a single node does not create a summary automatically");
+        if (id === summaryIds[0]) {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                {type: "touchStart", touchPoints: [{id: 1, ...centerPoint(summaryButton)}]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+            await settle();
+        } else {
+            await clickMouse(summaryButton);
+        }
+        check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, [id]);
+        const editor = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+        check.ok(editor, "single-node creation opens summary text editing");
+        check.equal(document.activeElement, editor);
+        editor.value = "Single node summary";
+        editor.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+        await settle();
+        check.equal(api.readListMindmap(summaryList).metadata.summaries[0].label, "Single node summary");
+        summaryView.focusNode(id);
+        check.equal(summaryButton.disabled, true, "an identical single-node summary cannot be created twice");
         summaryButton.click();
-        check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0);
+        check.equal(api.readListMindmap(summaryList).metadata.summaries.length, 1);
+        const resetSingleSummary = api.readListMindmap(summaryList);
+        resetSingleSummary.metadata.summaries = [];
+        api.writeListMindmapMetadata(summaryList, resetSingleSummary.metadata);
+        summaryView.update(api.readListMindmap(summaryList));
     }
+    const virtualSummaryList = reset("- First\n- Second\n");
+    const virtualSummaryModel = api.readListMindmap(virtualSummaryList);
+    const virtualSummaryHost = document.createElement("div");
+    document.body.append(virtualSummaryHost);
+    const virtualSummaryView = new api.ListMindmapView({host: virtualSummaryHost, model: virtualSummaryModel,
+        labels: new Proxy({}, {get: (_target, key) => String(key)}), onExit: () => {},
+        onSummaryBatchAdd: async (): Promise<string[]> => { check.fail("virtual centers cannot create summaries"); return []; }});
+    await settle();
+    virtualSummaryView.focusNode(virtualSummaryModel.root.id);
+    const virtualSummaryButton = virtualSummaryHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
+    check.equal(virtualSummaryButton.disabled, true, "virtual centers retain their existing restriction");
+    virtualSummaryButton.click();
+    virtualSummaryView.destroy();
+    virtualSummaryHost.remove();
+    summaryView.focusNode(summaryIds[0]);
     summaryView.draw();
     const singleSelectionCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas").toDataURL();
     for (const id of summaryIds.slice(1)) {
@@ -5220,7 +5356,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
 
 test("list mindmap mutations preserve block data in the real DOM and Lute", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    timeout: 90000,
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-view-test-"));
     const script = path.join(temporary, "run.cjs");

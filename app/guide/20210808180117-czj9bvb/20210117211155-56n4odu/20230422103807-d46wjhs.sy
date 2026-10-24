@@ -6,7 +6,7 @@
 		"id": "20230422103807-d46wjhs",
 		"title": "数据可用性保障",
 		"type": "doc",
-		"updated": "20261016111431"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422112334-gs95gig",
-				"updated": "20261016111431"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230422103807-3y0po58",
-				"updated": "20230422112614"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在提升本地设备上的数据可用性方面我们做了大量努力："
+					"Data": "思源通过自动保存、文件历史和数据快照提供不同层次的本地恢复能力："
 				}
 			]
 		},
@@ -223,7 +223,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422112342-lf07rux",
-				"updated": "20261016111431"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -263,7 +263,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422105530-t203zzx",
-				"updated": "20261016111431"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -303,7 +303,7 @@
 					},
 					"Properties": {
 						"id": "20230422111101-87ev2o5",
-						"updated": "20261016111431"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -326,7 +326,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230422111237-jl4ylxp",
-								"updated": "20261016111431"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -365,7 +365,7 @@
 									},
 									"Properties": {
 										"id": "20230422111247-182j3sj",
-										"updated": "20261016111431"
+										"updated": "20261024163013"
 									},
 									"Children": [
 										{
@@ -373,7 +373,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230422111247-djwfifo",
-												"updated": "20261016111431"
+												"updated": "20261024163013"
 											},
 											"Children": [
 												{
@@ -387,7 +387,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -396,7 +396,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -405,7 +405,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​"
+													"Data": ""
 												}
 											]
 										}
@@ -424,7 +424,7 @@
 					},
 					"Properties": {
 						"id": "20230422111357-fljcvsw",
-						"updated": "20261016111431"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -432,7 +432,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422111357-nzhi5p1",
-								"updated": "20261016111431"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -446,7 +446,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -455,7 +455,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中浏览和下载云端快照；宽窗口使用云端栏，窄窗口切换到 "
+									"Data": " 中浏览和下载云端快照；宽窗口使用云端栏，窄窗口切换到 "
 								},
 								{
 									"Type": "NodeTextMark",

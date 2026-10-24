@@ -6,7 +6,7 @@
 		"id": "20220415232129-shpzg6r",
 		"title": "查詢語法",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-xmz5ru1",
-				"updated": "20250115150350"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -29,48 +29,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-5qj6u53",
-				"updated": "20250115150350"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "全域搜索 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "P"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 支持通過查詢語法（Query Syntax）進行高級搜索，以便實現一些邏輯操作，比如包含關鍵字 "
+					"Data": "在全域搜尋中選擇「查詢語法」，可以透過 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "foo"
+					"TextMarkTextContent": "AND"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 並且不包含關鍵字 "
+					"Data": "、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "bar"
+					"TextMarkTextContent": "OR"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 的查詢語法為 "
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "NOT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 組合條件。例如，"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -79,7 +70,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": " 用於尋找包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 且不包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的內容。"
 				}
 			]
 		},
@@ -88,12 +97,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-53umaqt",
-				"updated": "20220415232130"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在使用查詢語法之前，我們先大致了解一下該語法的構成："
+					"Data": "查詢語法由以下三部分組成："
 				}
 			]
 		},
@@ -224,12 +233,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-rvoj3hc",
-				"updated": "20220415232130"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "下面我們分別介紹它們的細節。"
+					"Data": "下面先介紹字串和短語，再說明如何組合成查詢。"
 				}
 			]
 		},
@@ -239,7 +248,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-9kj1wuk",
-				"updated": "20220415232130"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -253,12 +262,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-vagd1i0",
-				"updated": "20220415232130"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "字符串可由兩種方式指定："
+					"Data": "字串有兩種寫法："
 				}
 			]
 		},
@@ -268,7 +277,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220415232130-yakp8k5",
-				"updated": "20220415232540"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -280,7 +289,7 @@
 					},
 					"Properties": {
 						"id": "20220415232130-8hskkz0",
-						"updated": "20220415232130"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -288,12 +297,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220415232130-0vqgg1n",
-								"updated": "20220415232130"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通過英文雙引號 "
+									"Data": "用半形雙引號 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -302,25 +311,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 包裹起來的字符。其中如果需要使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\""
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 本身，則可通過 SQL 風格轉義（再加一個"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\""
-								},
-								{
-									"Type": "NodeText",
-									"Data": "），例如 "
+									"Data": " 包圍字串；字串中的雙引號寫成兩個連續的雙引號。例如，"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -329,7 +320,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 將搜索命中 "
+									"Data": " 表示 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -349,7 +340,7 @@
 					},
 					"Properties": {
 						"id": "20220415232130-bcu3zgh",
-						"updated": "20220415232540"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -357,12 +348,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220415232130-uww9hbt",
-								"updated": "20220415232540"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "由非 "
+									"Data": "不加引號的字串不能是保留字 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -380,7 +371,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 和 "
+									"Data": "、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -389,7 +380,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 字符組成，並且這些字符必須是："
+									"Data": "，且只能包含以下字元："
 								}
 							]
 						},
@@ -399,7 +390,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20220415232130-wpjyda1",
-								"updated": "20220415232130"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
@@ -550,7 +541,7 @@
 									},
 									"Properties": {
 										"id": "20220415232130-w7gxvjj",
-										"updated": "20220415232130"
+										"updated": "20261024163828"
 									},
 									"Children": [
 										{
@@ -558,12 +549,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220415232130-4y6q8k3",
-												"updated": "20220415232130"
+												"updated": "20261024163828"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "是替換符（ASCII 26）"
+													"Data": "控制字元 U+001A（SUB）"
 												}
 											]
 										}
@@ -580,21 +571,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-epl1ak1",
-				"updated": "20220415232130"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "對於非上述的其他字符構成的字符串，必須使用 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "\""
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 包裹起來，比如包含了 "
+					"Data": "要將包含空格、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -603,7 +585,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": " 等字元的內容作為字串使用，須用雙引號包圍。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -612,7 +594,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 等符號的字符串。"
+					"Data": " 等符號還可能具有查詢語法含義，使用時請區分字串與運算子。"
 				}
 			]
 		},
@@ -622,7 +604,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-oob09dq",
-				"updated": "20220415232130"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -636,12 +618,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-go31ixg",
-				"updated": "20230820184809"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "短語由字符串構成，可由 "
+					"Data": "短語由字串組成，可用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -650,25 +632,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 進行連接。一個短語是由一些記號（Token）有序構成，這些記號由用戶的輸入文字通過分詞器處理得到。思源使用的分詞器為了讓中文搜索好用（支持單字搜索），所以實現方式是按照字分詞的，也就是說每個漢字或者英文字母都會被拆分為一個記號。這對 "
+					"Data": " 連接。分詞器會將輸入轉為詞元，短語要求這些詞元依序相鄰匹配。如果只需要多個關鍵字同時出現，而不要求相鄰，請使用 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "+"
+					"TextMarkTextContent": "AND"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 連接會產生一些影響，所以如果不確定的話，建議不要使用 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "+"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 組合多個短語。"
+					"Data": " 組合查詢。"
 				}
 			]
 		},
@@ -962,7 +935,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-1juhjxd",
-				"updated": "20260803163402"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1000,49 +973,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-kdii2n4",
-				"updated": "20260803163402"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "系統生成的查詢語句關鍵部分大致是 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "MATCH '{content name alias memo}:&quot; + query"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​，"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "query"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 即用戶輸入部分，對於"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.sqlite.org/fts5.html#fts5_column_filters",
-					"TextMarkTextContent": "列過濾器"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{content name alias memo}:"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 是通過 "
+					"Data": "搜尋屬性由 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1051,25 +987,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "搜索"
+					"TextMarkTextContent": "搜尋"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " 中的屬性選項決定。FTS5 使用欄位篩選指定範圍，例如 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "屬性"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{content name alias memo}:foo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 生成的。"
+					"Data": " 表示在正文、命名、別名和備註中搜尋 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。在 SQL 中，完整寫法如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SELECT * FROM blocks_fts WHERE blocks_fts MATCH '{content name alias memo}:foo'"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

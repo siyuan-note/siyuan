@@ -158,8 +158,11 @@ body {
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      height: calc(100% - var(--b3-ui-panel-height, 42px));
       margin-top: var(--b3-ui-panel-height, 42px);
+
+      &:not(.dock--float) {
+        height: calc(100% - var(--b3-ui-panel-height, 42px));
+      }
     }
 
     .toolbar {

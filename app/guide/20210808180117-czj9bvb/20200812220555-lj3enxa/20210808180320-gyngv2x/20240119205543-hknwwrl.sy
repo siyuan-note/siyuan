@@ -6,7 +6,7 @@
 		"id": "20240119205543-hknwwrl",
 		"title": "忽略搜索",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024162311"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119211553-6upakii",
-				"updated": "20261016111305"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -172,7 +172,7 @@
 			"Properties": {
 				"id": "20240119211847-z4gfqvm",
 				"style": "line-height: 23px;",
-				"updated": "20240930232841"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'\n"
+					"Data": "path NOT LIKE '/20200923234011-ieuun1p%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -198,7 +198,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241001005929-9mim2k7",
-				"updated": "20241001011736"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -210,7 +210,7 @@
 					},
 					"Properties": {
 						"id": "20241001005929-wi0c464",
-						"updated": "20241001011643"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -218,21 +218,26 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001005929-l3trb25",
-								"updated": "20241001011643"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20200923234011-ieuun1p%'"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "：忽略该文档及其子文档中的内容块。"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+									"TextMarkTextContent": "path"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：忽略所在文档路径以 ​/20210808180117-6v0mkxr 开头的内容块搜索"
+									"Data": " 使用文档 ID 路径，不包含笔记本 ID；请替换为实际的文档路径前缀"
 								}
 							]
 						}

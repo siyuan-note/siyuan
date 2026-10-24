@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20261016112108"
+		"updated": "20261024203645"
 	},
 	"Children": [
 		{
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120326-oxyzckb",
-				"updated": "20261016112108"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -533,10 +533,10 @@
 		{
 			"ID": "20220501135308-2rn9rgb",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220501135308-2rn9rgb",
-				"updated": "20261016111431"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -669,10 +669,10 @@
 		{
 			"ID": "20210104091559-kgrtuyh",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091559-kgrtuyh",
-				"updated": "20261016112108"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -1160,7 +1160,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120602-drz9hwc",
-				"updated": "20261016111710"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1374,7 +1374,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-wp2lnbq",
-				"updated": "20261016111431"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1551,12 +1551,53 @@
 			]
 		},
 		{
+			"ID": "20261024203645-1uu50u4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024203645-1uu50u4",
+				"updated": "20261024203645"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an external program changes content while preserving both file size and modification time, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data History"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Full content check"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", enter a memo, and confirm. The check reads all local files included in snapshots and creates a snapshot when changes are found. Resources that have not been downloaded retain their existing versions and are not downloaded for the check. Large workspaces may take longer."
+				}
+			]
+		},
+		{
 			"ID": "20220615120602-nzrp6gt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nzrp6gt",
-				"updated": "20260927191121"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1652,12 +1693,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927191121-n45rqtj",
-				"updated": "20260927191121"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Enter a file name or snapshot ID directly in the search box to search local snapshots. A hexadecimal ID of 7 to 40 characters is matched against snapshot ID prefixes, ignoring case. If multiple snapshots match, all matches are listed from newest to oldest. If no snapshot ID matches, the same text is used to search file names. Results retain the usual snapshot actions, including rollback. Clear the search text to return to the full list."
+					"Data": "Enter a file name or snapshot ID directly in the search box to search local snapshots. A hexadecimal ID of 7 to 40 characters is matched against snapshot ID prefixes, ignoring case. If multiple snapshots match, all matches are listed from newest to oldest."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-stfrsgs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-stfrsgs",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If no snapshot ID matches, the same text is used to search file names. Results retain the usual snapshot actions, including rollback. Clear the search text to return to the full list."
 				}
 			]
 		},
@@ -1921,7 +1976,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nhnnujh",
-				"updated": "20261016111710"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1935,7 +1990,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261016111431-bfqnv4v",
-				"updated": "20261016111710"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1967,7 +2022,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". The defaults are 180 retention days and 2 snapshots per day. Within that retention window, earlier days are thinned to the daily limit, while today’s snapshots and referenced snapshots, including tags, are retained by automatic cleanup. These are local retention rules, not a promise to keep every snapshot for 180 days or a cloud-backup policy. Manual purge below removes all unreferenced snapshots regardless of this retention window."
+					"Data": ". The defaults are 180 retention days and 2 snapshots per day. Within that retention window, earlier days are thinned to the daily limit, while today’s snapshots and referenced snapshots, including tags, are retained by automatic cleanup."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-raor55s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-raor55s",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "These are local retention rules, not a promise to keep every snapshot for 180 days or a cloud-backup policy. Manual purge below removes all unreferenced snapshots regardless of this retention window."
 				}
 			]
 		},

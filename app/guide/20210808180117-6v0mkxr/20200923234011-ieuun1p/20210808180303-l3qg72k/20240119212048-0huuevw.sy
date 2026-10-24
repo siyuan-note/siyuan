@@ -6,7 +6,7 @@
 		"id": "20240119212048-0huuevw",
 		"title": "Ignore search",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024162311"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119212104-9fehl3c",
-				"updated": "20261016111305"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -172,7 +172,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20240119212104-tepuwbm",
-				"updated": "20241001011008"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
+					"Data": "path NOT LIKE '/20200923234011-ieuun1p%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -198,7 +198,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241001011027-qi6o51q",
-				"updated": "20241001011905"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -210,7 +210,7 @@
 					},
 					"Properties": {
 						"id": "20241001011027-2kgpqv7",
-						"updated": "20241001011838"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -218,21 +218,26 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001011027-rc5tn93",
-								"updated": "20241001011838"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20200923234011-ieuun1p%'"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": ": Excludes blocks in that document and its descendants. A "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+									"TextMarkTextContent": "path"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Ignore content block searches where the document path begins with ​/20210808180117-6v0mkxr"
+									"Data": " uses document IDs and does not include the notebook ID; replace the prefix with your document’s actual path"
 								}
 							]
 						}

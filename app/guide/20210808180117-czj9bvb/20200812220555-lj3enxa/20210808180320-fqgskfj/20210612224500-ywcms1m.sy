@@ -6,7 +6,7 @@
 		"id": "20210612224500-ywcms1m",
 		"title": "内容块属性",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210612224500-ftupo06",
-				"updated": "20210613000110"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613000111-kj7vhlk",
-				"updated": "20210613105556"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "属性以键值对（key-value）的形式存在，我们可以通过对内容块设置属性来丰富内容块的内涵。属性分为内置属性和自定义属性。"
+					"Data": "属性以键值对（key-value）的形式保存内容块的附加信息，便于命名、分类和查询。属性分为内置属性和自定义属性。"
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613004126-79loyta",
-				"updated": "20261012014930"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -213,7 +213,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-sfcl392",
-				"updated": "20261012014859"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -228,12 +228,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261012014537-q7fxlnn",
-				"updated": "20261012014859"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在属性面板中，多个别名分别显示为标签。点击「新增别名」添加，点击已有别名编辑，点击其关闭图标删除。输入时可用英文逗号分隔，批量添加多个别名。按 "
+					"Data": "在属性面板中，多个别名分别显示为标签。点击「新增别名」添加，点击已有别名编辑，点击其关闭图标删除。输入时可用英文逗号分隔，批量添加多个别名。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-n0477b6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-n0477b6",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -252,7 +266,17 @@
 				{
 					"Type": "NodeText",
 					"Data": " 取消本次输入。新输入会去除首尾空白、过滤空项和完全相同的重复项。"
-				},
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-x8bkwsu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-x8bkwsu",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "拖动别名可调整顺序，松开后保存；触屏也支持拖动。拖动时按 "
@@ -274,7 +298,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613004117-1jnl9m0",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -288,30 +312,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613004135-7td7u1o",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自定义属性由用户通过 "
+					"Data": "通过 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code kbd",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "块标菜单"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code kbd",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "属性"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 进行设置，属性名须以小写英文字母开头，可包含小写英文字母、数字和连字符（-）；输入的大写字母会自动转为小写（例如 "
+					"Data": " 设置自定义属性。属性名须以小写英文字母开头，可包含小写英文字母、数字和连字符（-），例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -320,7 +344,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -338,7 +362,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）。设置后，思源会自动在属性名前加上前缀 "
+					"Data": "。输入的大写字母会自动转为小写。保存后，思源会在属性名前自动添加 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -347,7 +371,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，以区分内置属性和自定义属性。"
+					"Data": " 前缀，以区别于内置属性。"
 				}
 			]
 		},

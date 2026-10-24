@@ -86,7 +86,7 @@ func WriteFileWithDocumentAddressing(absPath string, data []byte) error {
 		return err
 	}
 	if !isDocumentAddressingSource(paths) {
-		return filelock.WriteFile(absPath, data)
+		return util.WriteFileWithChangeTracking(absPath, data)
 	}
 	return filesys.MutateDocumentSources(documentSourcesFromPaths(paths), func() error {
 		return util.WriteFileWithPreflight(absPath, data, false, func(current []byte) error {
@@ -167,24 +167,6 @@ func CopyFileWithDocumentAddressing(source, destination string) error {
 	if !info.IsDir() {
 		return copyDocumentAddressingFile(source, destination)
 	}
-	paths, err := documentAddressingDataPaths(destination)
-	if err != nil {
-		return err
-	}
-	containsDocuments := false
-	for _, name := range paths {
-		if runtime.GOOS == "windows" {
-			name = strings.ToLower(name)
-		}
-		valid := true
-		for _, part := range strings.Split(name, "/") {
-			valid = valid && (name == "" || ast.IsNodeIDPattern(part))
-		}
-		containsDocuments = containsDocuments || valid
-	}
-	if !containsDocuments {
-		return filelock.Copy(source, destination)
-	}
 	if gulu.File.IsSubPath(source, destination) {
 		return gulu.ErrCopyToSub
 	}
@@ -229,7 +211,7 @@ func copyDocumentAddressingFile(source, destination string) error {
 		return err
 	}
 	if !isDocumentAddressingSource(paths) {
-		return filelock.Copy(source, destination)
+		return util.CopyFileWithChangeTracking(source, destination)
 	}
 	data, err := filelock.ReadFile(source)
 	if err != nil {

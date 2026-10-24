@@ -705,14 +705,15 @@
 }
 
 .agent-chat__composer-host {
-  min-height: 40px;
+  // 一行正文、段落边距与上下滚动留白。
+  min-height: calc(var(--b3-font-size) * 1.625 + 44px);
   max-height: min(240px, 40vh);
   overflow: hidden;
   cursor: text;
 
   .protyle-content {
     min-height: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     padding: 8px 0 24px;
     scroll-padding-block: 8px 24px;
     box-sizing: border-box;

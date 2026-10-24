@@ -239,6 +239,10 @@ const registerEditorEmbedsGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
     });
+    group.switch("editor.embedBlockBreadcrumbParentPath", {
+        title: window.siyuan.languages.embedBlockBreadcrumbParentPath,
+        desc: window.siyuan.languages.embedBlockBreadcrumbParentPathTip,
+    });
 };
 
 const registerEditorImagesGroup = (tab: SettingTabBuilder) => {

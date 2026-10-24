@@ -6,7 +6,7 @@
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
 		"type": "doc",
-		"updated": "20261016112108"
+		"updated": "20261024203645"
 	},
 	"Children": [
 		{
@@ -1144,7 +1144,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615112531-5yos96d",
-				"updated": "20261016111710"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1357,7 +1357,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615112535-k8n73hd",
-				"updated": "20261016111431"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1529,6 +1529,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "填写详细备注便于以后识别快照，但备注不会阻止清理。需要长期保留的快照应添加标记，并另行独立备份。"
+				}
+			]
+		},
+		{
+			"ID": "20261024203645-jje7alu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024203645-jje7alu",
+				"updated": "20261024203645"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果外部程序修改内容却保留文件大小和修改时间，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "完整校验"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中填写备注并确认。该操作读取快照范围内所有本地已落盘文件，发现变化时创建快照；未下载的资源保留原版本，不会为校验主动下载。大型工作空间可能耗时较长。"
 				}
 			]
 		},

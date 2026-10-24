@@ -137,6 +137,7 @@ const runCase = async (sources, options) => {
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow} = require("electron");
     const {createServer} = require("node:http");
+    const {once} = require("node:events");
     app.on("window-all-closed", () => {});
     app.disableHardwareAcceleration();
     app.setPath("userData", process.argv[2]);
@@ -158,7 +159,11 @@ if (process.versions.electron && process.type === "browser") {
         const pending = [];
         const server = createServer((request, response) => {
             const pathname = new URL(request.url, "http://localhost").pathname;
-            if (pathname === "/theme.css") { pending.push(response); return; }
+            if (pathname === "/theme.css") {
+                pending.push(response);
+                server.emit("theme-request");
+                return;
+            }
             if (pathname === "/base.css") {
                 response.setHeader("Content-Type", "text/css");
                 response.end(css);
@@ -180,7 +185,12 @@ if (process.versions.electron && process.type === "browser") {
                 win = new BrowserWindow({show: false, width: 640, height: 480,
                     webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
                 await win.loadURL(`http://127.0.0.1:${server.address().port}/stage/build/${options.browser ? "desktop" : "app"}/index.html`);
-                await win.webContents.executeJavaScript(`(${runCase.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(options)})`);
+                // 渲染进程插入样式后，请求仍需异步到达主进程中的测试服务器。
+                const themeRequested = once(server, "theme-request", {signal: AbortSignal.timeout(10000)});
+                await Promise.all([
+                    win.webContents.executeJavaScript(`(${runCase.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(options)})`),
+                    themeRequested,
+                ]);
                 assert.equal(pending.length, 1);
                 pending.pop().writeHead(200, {"Content-Type": "text/css"}).end(
                     ":root{--b3-font-size:14px;--b3-toolbar-left-mac:5px;--b3-body-background:#234567;--b3-theme-background:#234567;}");

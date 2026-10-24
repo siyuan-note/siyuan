@@ -20123,6 +20123,9 @@
             }
           ]
         },
+        "documentTitle": {
+          "type": "string"
+        },
         "hasChildren": {
           "type": "boolean"
         },
@@ -22191,6 +22194,9 @@
     "CreateSnapshotRequestInput": {
       "type": "object",
       "properties": {
+        "fullCheck": {
+          "type": "boolean"
+        },
         "memo": {
           "type": "string"
         }
@@ -42523,6 +42529,16 @@
             }
           ]
         },
+        "embedBlockBreadcrumbParentPath": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "emoji": {
           "anyOf": [
             {
@@ -46732,6 +46748,16 @@
         "embedBlockBreadcrumb": {
           "type": "boolean"
         },
+        "embedBlockBreadcrumbParentPath": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "emoji": {
           "anyOf": [
             {
@@ -46927,6 +46953,7 @@
         "dragHTMLFileToIframe",
         "dynamicLoadBlocks",
         "embedBlockBreadcrumb",
+        "embedBlockBreadcrumbParentPath",
         "emoji",
         "floatWindowDelay",
         "floatWindowMode",
@@ -47383,6 +47410,16 @@
           ]
         },
         "embedBlockBreadcrumb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedBlockBreadcrumbParentPath": {
           "anyOf": [
             {
               "type": "boolean"

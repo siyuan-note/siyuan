@@ -6,7 +6,7 @@
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232239-abvrkg2",
-				"updated": "20250115150346"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -29,48 +29,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-xvsiw7v",
-				"updated": "20250115150346"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Global search  "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "P"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ supports advanced search through query syntax, in order to implement some logical operations, such as the query syntax that contains the keyword "
+					"Data": "Choose Query syntax in global search to combine conditions with "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "foo"
+					"TextMarkTextContent": "AND"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ and does not contain the keyword "
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "bar"
+					"TextMarkTextContent": "OR"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ is "
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "NOT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For example, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -79,7 +70,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": " finds content containing "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " but not "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -88,12 +97,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-bf83mru",
-				"updated": "20220415232239"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before using the query syntax, let's have a general understanding of its composition:"
+					"Data": "Query syntax has three building blocks:"
 				}
 			]
 		},
@@ -103,7 +112,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220415232239-2eww0wd",
-				"updated": "20220415232402"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -115,7 +124,7 @@
 					},
 					"Properties": {
 						"id": "20220415232239-pt2gqk2",
-						"updated": "20220415232402"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -123,12 +132,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220415232239-o9y45xb",
-								"updated": "20220415232402"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "String: composed of letters, numbers, etc."
+									"Data": "String: composed of letters, numbers, etc"
 								}
 							]
 						}
@@ -220,12 +229,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-91we456",
-				"updated": "20220415232239"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Below we introduce their details respectively."
+					"Data": "The following sections explain strings and phrases, then show how to combine them into queries."
 				}
 			]
 		},
@@ -235,7 +244,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232239-9x4gcsx",
-				"updated": "20220415232431"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -249,12 +258,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-iffq145",
-				"updated": "20220415232239"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Strings can be specified in two ways:"
+					"Data": "Strings can be written in two ways:"
 				}
 			]
 		},
@@ -264,7 +273,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220415232239-bf52gq4",
-				"updated": "20220415232616"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -276,7 +285,7 @@
 					},
 					"Properties": {
 						"id": "20220415232239-9obi3e2",
-						"updated": "20220415232500"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -284,12 +293,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220415232239-o7glmzf",
-								"updated": "20220415232500"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Characters enclosed in English double quotes "
+									"Data": "Enclose a string in double quotes ("
 								},
 								{
 									"Type": "NodeTextMark",
@@ -298,25 +307,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ". If "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\""
-								},
-								{
-									"Type": "NodeText",
-									"Data": " itself needs to be used, it can be escaped by SQL-style (plus a "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\""
-								},
-								{
-									"Type": "NodeText",
-									"Data": "), for example "
+									"Data": "). Write a double quote inside the string twice. For example, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -325,12 +316,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " will hits "
+									"Data": " represents "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "foo \"bar\""
+									"TextMarkTextContent": "foo\"bar\""
 								}
 							]
 						}
@@ -345,7 +336,7 @@
 					},
 					"Properties": {
 						"id": "20220415232239-7znuuq7",
-						"updated": "20220415232616"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -353,12 +344,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220415232239-21ckvvg",
-								"updated": "20220415232537"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Consists of non "
+									"Data": "An unquoted string must not be a reserved word ("
 								},
 								{
 									"Type": "NodeTextMark",
@@ -376,7 +367,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and "
+									"Data": ", or "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -385,7 +376,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " characters, and these characters must be:"
+									"Data": ") and may contain only the following characters:"
 								}
 							]
 						},
@@ -395,7 +386,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20220415232239-yrossym",
-								"updated": "20220415232616"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
@@ -546,7 +537,7 @@
 									},
 									"Properties": {
 										"id": "20220415232239-gtmvftf",
-										"updated": "20220415232616"
+										"updated": "20261024163828"
 									},
 									"Children": [
 										{
@@ -554,12 +545,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220415232239-lalwhj7",
-												"updated": "20220415232616"
+												"updated": "20261024163828"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Is the replacement character (ASCII 26)"
+													"Data": "The control character U+001A (SUB)"
 												}
 											]
 										}
@@ -576,21 +567,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-3nnn6m9",
-				"updated": "20220415232239"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For strings that are not composed of other characters mentioned above, they must be wrapped with "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "\""
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", such as strings containing "
+					"Data": "Enclose strings containing spaces, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -599,7 +581,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": ", or other characters outside this set in double quotes. Symbols such as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -608,7 +590,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and other symbols."
+					"Data": " can also be query operators, so distinguish literal strings from query syntax."
 				}
 			]
 		},
@@ -618,7 +600,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232239-nln4l9x",
-				"updated": "20220415232239"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -632,12 +614,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-eewj58z",
-				"updated": "20230820184820"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Phrases consist of strings, which can be concatenated by "
+					"Data": "A phrase consists of strings joined with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -646,25 +628,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​. A phrase is composed of some tokens in order, and these tokens are processed by the user's input text through the tokenizer. The tokenizer used by SiYuan is to make Chinese search easy to use (supports single-word search), so the implementation is based on word segmentation, which means that each Chinese character or English letter will be split into a token. This has some effect on "
+					"Data": ". The tokenizer turns the input into tokens, and a phrase requires those tokens to match next to each other in order. Use "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "+"
+					"TextMarkTextContent": "AND"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ concatenation, so it is recommended not to use "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "+"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ to combine multiple phrases if unsure."
+					"Data": " when several keywords must appear but do not need to be adjacent."
 				}
 			]
 		},
@@ -958,7 +931,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415233433-mnuypxn",
-				"updated": "20260803171606"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -996,49 +969,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415233433-63nplm9",
-				"updated": "20260803171606"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The key part of the query statement generated by the system is roughly "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "MATCH '{content name alias memo}:\" + query"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "query"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " is the user input part, for "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.sqlite.org/fts5 .html#fts5_column_filters",
-					"TextMarkTextContent": "column filter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{content name alias memo}:"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " is generated by "
+					"Data": "The attribute options in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1056,12 +992,30 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": " determine which properties are searched. FTS5 column filters specify that scope: "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Attribute"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{content name alias memo}:foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " searches for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in content, names, aliases, and memos. A complete SQL example is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SELECT * FROM blocks_fts WHERE blocks_fts MATCH '{content name alias memo}:foo'"
 				},
 				{
 					"Type": "NodeText",

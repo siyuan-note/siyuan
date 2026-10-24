@@ -7,7 +7,7 @@
 		"id": "20230405155631-leo4vc6",
 		"title": "性能优化",
 		"type": "doc",
-		"updated": "20261016191102"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405155631-0xw341e",
-				"updated": "20261016191102"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -30,22 +30,22 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230405155721-ljxfaat",
-				"updated": "20230405165112"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "不同硬件配置、不同操作系统平台上性能表现是不一样的。另外，随着数据增多，性能下降无法避免。所以我们可能需要改变使用方式并调整一些配置项来提升性能，以获得更流畅的使用体验。"
+					"Data": "性能取决于硬件、系统负载、数据规模和内容结构。遇到卡顿时，先确定是启动、搜索、编辑还是网络访问较慢，再按下面对应的项目调整。"
 				}
 			]
 		},
 		{
 			"ID": "20230405171357-3f1dyix",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405171357-3f1dyix",
-				"updated": "20260426175521"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405161606-12co6vz",
-				"updated": "20260426175521"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 					},
 					"Properties": {
 						"id": "20230405165154-mwfival",
-						"updated": "20260426175521"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
@@ -80,12 +80,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405165154-d502q9w",
-								"updated": "20260426175521"
+								"updated": "20261024161440"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "内容块数量：内容块数量对性能影响范围较大，比如展开文档、搜索、数据写入等。但也不必太过担心，通常情况下内容块数量在百万这个量级下不会产生太大影响，除非每个块的大小较大"
+									"Data": "内容块数量与大小：会影响文档展开、搜索和数据写入等操作，实际影响还取决于硬件和内容结构，不宜仅凭块数量判断"
 								}
 							]
 						}
@@ -176,7 +176,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405164011-8ne0vie",
-				"updated": "20230405172057"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -348,7 +348,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230405170559-t1q23kt"
+						"id": "20230405170559-t1q23kt",
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -356,12 +357,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405170559-azo1ee4",
-								"updated": "20230405170603"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "升级硬件，这是提升性能最快的方式"
+									"Data": "硬件资源不足时，再根据瓶颈考虑升级内存、处理器或存储设备"
 								}
 							]
 						}
@@ -372,10 +373,10 @@
 		{
 			"ID": "20230405171407-ltaakx8",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405171407-ltaakx8",
-				"updated": "20260916173158"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -527,7 +528,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405171539-llfg8mm",
-				"updated": "20260916173158"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -604,7 +605,7 @@
 					},
 					"Properties": {
 						"id": "20230406155101-uk1h843",
-						"updated": "20230406155342"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -612,21 +613,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406155101-n6ptkcm",
-								"updated": "20230406155342"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通过 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "聚焦"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 减少元素从而提升编辑器性能"
+									"Data": "通过聚焦内容块，减少编辑器中同时显示的内容"
 								}
 							]
 						}
@@ -701,10 +693,10 @@
 		{
 			"ID": "20250825114421-fq73tbi",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250825114421-fq73tbi",
-				"updated": "20261016191102"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{

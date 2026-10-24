@@ -42,7 +42,7 @@ const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLa
                 return {bindPanelTransitionGuard() {}};
             }
             if (name.endsWith("/barVisibility")) {
-                return {syncDockBarVisibility() {}};
+                return {syncDockBarVisibility() {}, setDockBarHover() {}};
             }
             return {};
         },

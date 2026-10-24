@@ -50,6 +50,26 @@ func RemoveAssetHash(hash string) {
 	}
 }
 
+// RemoveAssetHashByPath 按资源路径清理缓存，不读取可能已删除的文件。
+func RemoveAssetHashByPath(path string) {
+	assetHashLock.Lock()
+	defer assetHashLock.Unlock()
+
+	removeAssetHashByPath(path)
+}
+
+func removeAssetHashByPath(path string) {
+	asset := assetPathHashCache[path]
+	if asset == nil {
+		return
+	}
+	delete(assetPathHashCache, path)
+	// 相同内容可能对应多个路径，保留指向其他资源的去重记录。
+	if cached := assetHashCache[asset.Hash]; cached != nil && cached.Path == path {
+		delete(assetHashCache, asset.Hash)
+	}
+}
+
 func SetAssetHash(hash, path string) {
 	assetHashLock.Lock()
 	defer assetHashLock.Unlock()
@@ -59,6 +79,7 @@ func SetAssetHash(hash, path string) {
 		return
 	}
 
+	removeAssetHashByPath(path)
 	assetHashCache[hash] = &AssetHash{Hash: hash, Path: path}
 	assetPathHashCache[path] = &AssetHash{Hash: hash, Path: path}
 }
@@ -73,8 +94,7 @@ func GetAssetHashByPath(path string) *AssetHash {
 			return asset
 		}
 
-		delete(assetHashCache, asset.Hash)
-		delete(assetPathHashCache, path)
+		removeAssetHashByPath(path)
 		return nil
 	}
 	return nil

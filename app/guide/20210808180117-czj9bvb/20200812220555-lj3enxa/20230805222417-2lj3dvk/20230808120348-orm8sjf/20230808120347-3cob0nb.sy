@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20261021104922"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -48,167 +48,12 @@
 			]
 		},
 		{
-			"ID": "20260905184908-5o1vhpi",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20260905184908-5o1vhpi",
-				"updated": "20260905191024"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "资源文件下载"
-				}
-			]
-		},
-		{
-			"ID": "20260905184908-hlr159c",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905184908-hlr159c",
-				"updated": "20260905184908"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "账号与同步"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "资源文件下载"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中选择全部下载或按需下载，设置仅作用于当前设备。"
-				}
-			]
-		},
-		{
-			"ID": "20260905184908-9m2nksl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905184908-9m2nksl",
-				"updated": "20260905184908"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "全部下载是默认模式。按需下载仍会完整同步文档、数据库定义和资源文件清单，在展示图片、音视频、PDF 等内容或打开资源链接时下载所需资源文件。加密笔记本资源仍需解锁后访问。"
-				}
-			]
-		},
-		{
-			"ID": "20260905184908-88bc5es",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905184908-88bc5es",
-				"updated": "20260905184908"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "已下载的资源文件会保留在本机，并在后续同步时继续更新。启用按需下载不会清理已有文件，也不会立即释放已有占用。"
-				}
-			]
-		},
-		{
-			"ID": "20260905184908-k9wkzqk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905184908-k9wkzqk",
-				"updated": "20260905191024"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "未下载的资源文件离线不可用，无法获取时会报错。切换为全部下载会先补齐当前资源文件及所有保留的本地快照所需内容，因此也可能下载历史版本；下载失败时保留原模式，可以恢复连接后重试。"
-				}
-			]
-		},
-		{
-			"ID": "20260905184908-cv88hsn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905184908-cv88hsn",
-				"updated": "20260905184908"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "按需模式的本地快照可能依赖云端，不能视为完整离线备份。完整快照下载，以及需要资源文件内容的导出和恢复操作，会先补齐对应资源文件，无法取得时明确报错。"
-				}
-			]
-		},
-		{
-			"ID": "20260905184908-84gaare",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905184908-84gaare",
-				"updated": "20260905184908"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更换同步目标、重置数据仓库或使用旧版本打开此工作空间前，请先切换为全部下载并完成下载，避免失去未下载资源文件的获取途径。"
-				}
-			]
-		},
-		{
-			"ID": "20261012014537-e8z1u63",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20261012014537-e8z1u63",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "主题和图标"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20260917190844-x6jwutu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260917190844-x6jwutu",
-				"updated": "20260918195936"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "主题和图标包的文件、更新和卸载会在设备间同步，各设备独立选择使用的主题和图标。包内图片、字体等资源始终完整下载。同步、删除和冲突与插件、挂件、模板共用文件级规则。恢复的快照中没有某个包时，该包会被删除。"
-				}
-			]
-		},
-		{
 			"ID": "20230808120347-qbr56bx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-qbr56bx",
-				"updated": "20261016111950"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -222,9 +67,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230808120347-2p4bc49",
-				"updated": "20220821170632"
+				"updated": "20261024161816"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "先 "
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
@@ -234,7 +83,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "后如果一切正常就已经配置好同步了。如果你不太熟悉同步配置，建议通过点击同步按钮打开同步配置向导，通过向导进行配置会更简便一些。"
+					"Data": "，再选择云端存储、配置同步目标并启用同步。不熟悉配置时，可点击同步按钮打开向导，按提示完成设置。"
 				}
 			]
 		},
@@ -360,7 +209,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230808120347-y41kxh2",
-				"updated": "20261016111950"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -400,7 +249,7 @@
 					},
 					"Properties": {
 						"id": "20230808120347-3l72g5v",
-						"updated": "20261016111950"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -408,7 +257,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230808120347-4mlag9e",
-								"updated": "20261016111950"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -449,7 +298,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 导出数据包，传输到新设备后，在该设备的同一设置页面使用 "
+									"Data": " 导出数据包，传输到新设备后，在该设备的同一设置页面使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -638,12 +487,167 @@
 			]
 		},
 		{
+			"ID": "20260905184908-5o1vhpi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260905184908-5o1vhpi",
+				"updated": "20260905191024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "资源文件下载"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-hlr159c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-hlr159c",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "账号与同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "资源文件下载"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择全部下载或按需下载，设置仅作用于当前设备。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-9m2nksl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-9m2nksl",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全部下载是默认模式。按需下载仍会完整同步文档、数据库定义和资源文件清单，在展示图片、音视频、PDF 等内容或打开资源链接时下载所需资源文件。加密笔记本资源仍需解锁后访问。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-88bc5es",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-88bc5es",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "已下载的资源文件会保留在本机，并在后续同步时继续更新。启用按需下载不会清理已有文件，也不会立即释放已有占用。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-k9wkzqk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-k9wkzqk",
+				"updated": "20260905191024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未下载的资源文件离线不可用，无法获取时会报错。切换为全部下载会先补齐当前资源文件及所有保留的本地快照所需内容，因此也可能下载历史版本；下载失败时保留原模式，可以恢复连接后重试。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-cv88hsn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-cv88hsn",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按需模式的本地快照可能依赖云端，不能视为完整离线备份。完整快照下载，以及需要资源文件内容的导出和恢复操作，会先补齐对应资源文件，无法取得时明确报错。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-84gaare",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-84gaare",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更换同步目标、重置数据仓库或使用旧版本打开此工作空间前，请先切换为全部下载并完成下载，避免失去未下载资源文件的获取途径。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-e8z1u63",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-e8z1u63",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主题和图标"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260917190844-x6jwutu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260917190844-x6jwutu",
+				"updated": "20260918195936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主题和图标包的文件、更新和卸载会在设备间同步，各设备独立选择使用的主题和图标。包内图片、字体等资源始终完整下载。同步、删除和冲突与插件、挂件、模板共用文件级规则。恢复的快照中没有某个包时，该包会被删除。"
+				}
+			]
+		},
+		{
 			"ID": "20230808120347-buiv5yn",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-buiv5yn",
-				"updated": "20261016111431"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -657,7 +661,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230808120347-fwrmpx3",
-				"updated": "20261016111431"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -671,7 +675,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -680,7 +684,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -689,7 +693,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中支持三种同步模式："
+					"Data": " 中支持三种同步模式："
 				}
 			]
 		},

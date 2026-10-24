@@ -8,7 +8,94 @@ import (
 	"time"
 
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestCheckoutRepoSnapshotBacksUpPreservedAttributes(t *testing.T) {
+	for _, scope := range []string{"repository", "file"} {
+		t.Run(scope, func(t *testing.T) {
+			_, repo, _ := prepareAssetDownloadRepoTest(t)
+			file := filepath.Join(util.DataDir, "assets", "probe.txt")
+			if err := os.MkdirAll(filepath.Dir(file), 0755); err != nil {
+				t.Fatal(err)
+			}
+			stamp := time.Unix(1700000100, 100000000)
+			write := func(content string) {
+				t.Helper()
+				if err := os.WriteFile(file, []byte(content), 0644); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Chtimes(file, stamp, stamp); err != nil {
+					t.Fatal(err)
+				}
+			}
+			write("before")
+			id, _, err := CreateRepoSnapshot("original")
+			if err != nil {
+				t.Fatal(err)
+			}
+			original, err := repo.GetIndex(id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			files, err := repo.GetFiles(original)
+			if err != nil {
+				t.Fatal(err)
+			}
+			write("AFTER!")
+			if scope == "repository" {
+				err = checkoutRepoSnapshot(repo, id, func(error) {})
+			} else {
+				fileID := ""
+				for _, item := range files {
+					if item.Path == "/assets/probe.txt" {
+						fileID = item.ID
+					}
+				}
+				if fileID == "" {
+					t.Fatal("original asset missing")
+				}
+				err = RollbackRepoSnapshotFile(fileID)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			backup, err := repo.Latest()
+			if err != nil || backup.ID == id || backup.Memo != "Backup before checkout" {
+				t.Fatalf("current content was not backed up: %v %v", backup, err)
+			}
+			if content := repoSnapshotTestContent(t, repo, backup.ID, "/assets/probe.txt"); content != "AFTER!" {
+				t.Fatalf("backup omitted overwritten content: %q", content)
+			}
+			if content, readErr := os.ReadFile(file); readErr != nil || string(content) != "before" {
+				t.Fatalf("snapshot was not restored: %q %v", content, readErr)
+			}
+		})
+	}
+}
+
+func TestCheckoutRepoSnapshotStopsWhenBackupFails(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	id, _, err := CreateRepoSnapshot("original")
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(util.DataDir, "seed.txt")
+	if err = os.WriteFile(file, []byte("current"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(repo.Path, "refs", "latest"), []byte("invalid"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	refreshed := false
+	err = checkoutRepoSnapshot(repo, id, func(error) { refreshed = true })
+	if err == nil || refreshed {
+		t.Fatalf("checkout continued after backup failure: refreshed=%v err=%v", refreshed, err)
+	}
+	if content, readErr := os.ReadFile(file); readErr != nil || string(content) != "current" {
+		t.Fatalf("failed backup allowed content replacement: %q %v", content, readErr)
+	}
+}
 
 func TestCheckoutRepoSnapshotRefreshesPartialFailure(t *testing.T) {
 	previousConf := Conf

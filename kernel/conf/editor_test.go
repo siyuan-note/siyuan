@@ -16,7 +16,27 @@
 
 package conf
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
+
+func TestEditorEmbedBreadcrumbParentPathDefaults(t *testing.T) {
+	for _, input := range []string{`{}`, `{"embedBlockBreadcrumbParentPath":null}`, `{"embedBlockBreadcrumbParentPath":true}`, `{"embedBlockBreadcrumbParentPath":false}`} {
+		var editor Editor
+		if err := json.Unmarshal([]byte(input), &editor); err != nil {
+			t.Fatal(err)
+		}
+		NormalizeEditor(&editor)
+		want := input != `{"embedBlockBreadcrumbParentPath":false}`
+		if editor.EmbedBlockBreadcrumbParentPath == nil || *editor.EmbedBlockBreadcrumbParentPath != want {
+			t.Fatalf("unexpected parent path default for %s: %+v", input, editor.EmbedBlockBreadcrumbParentPath)
+		}
+	}
+	if value := NewEditor().EmbedBlockBreadcrumbParentPath; value == nil || !*value {
+		t.Fatal("new editors must retain full paths")
+	}
+}
 
 func TestNewEditorEnablesBlockRefCheck(t *testing.T) {
 	editor := NewEditor()

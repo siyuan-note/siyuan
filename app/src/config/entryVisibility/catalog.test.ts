@@ -109,6 +109,14 @@ test("embedded heading levels follow display modes and expose all levels in Simp
     const levelPath = `${path}.embedHeadingLevel`;
     assert.equal(getEntryCatalogNode(`${path}.embedBlockBreadcrumbParentPath`)?.simple, true);
     assert.equal(getEntryParentPath(`${path}.embedBlockBreadcrumbParentPath`), path);
+    for (const key of ["embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath"]) {
+        const parent = `${path}.${key}`;
+        assert.deepEqual(getEntryCatalogChildren(parent).map(item => item.key), ["enable", "disable", "default"]);
+        getEntryCatalogChildren(parent).forEach(item => {
+            assert.equal(item.simple, true);
+            assert.equal(getEntryParentPath(`${parent}.${item.key}`), parent);
+        });
+    }
     assert.equal(getEntryCatalogNode(levelPath)?.simple, true);
     assert.deepEqual(getEntryCatalogChildren(levelPath).map(entry => entry.key), [
         "auto", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6",

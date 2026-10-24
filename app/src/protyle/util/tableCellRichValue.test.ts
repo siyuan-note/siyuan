@@ -4,6 +4,37 @@ import {decodeTableCellRich, encodeTableCellRich} from "./tableCellRichValue";
 import {configureAVRichTextLute} from "../render/av/richTextValue";
 
 describe("table cell rich text wire format", () => {
+    for (const [name, content, source] of [
+        ["single break", "first<br>second", "first\nsecond\n"],
+        ["formatted breaks", "a. <strong>first</strong><br>b. <strong>second</strong><br>c. <strong>third</strong>",
+            "a. **first**\nb. **second**\nc. **third**\n"],
+    ]) {
+        it(`pastes paragraph-wrapped cells with ${name} without changing the table grid or rich source`, () => {
+            if (typeof Lute === "undefined") {
+                require("../../../stage/protyle/js/lute/lute.min.js");
+            }
+            const lute = Lute.New();
+            lute.SetTextMark(true);
+            lute.SetHTMLTag2TextMark(true);
+            lute.SetKramdownIAL(true);
+            lute.SetProtyleWYSIWYG(true);
+            let dom = lute.HTML2BlockDOM("<table><thead><tr><th><p>title</p></th><th><p>details</p></th></tr></thead>" +
+                `<tbody><tr><td><p>value</p></td><td><p>${content}</p></td></tr></tbody></table>`);
+            for (let round = 0; round < 3; round++) {
+                assert.equal((dom.match(/<tr>/g) || []).length, 2);
+                assert.equal((dom.match(/<t[dh][\s>]/g) || []).length, 4);
+                assert.doesNotMatch(dom, /\{: table-cell-rich/);
+                const cells = Array.from(dom.matchAll(/data-sy-table-cell-rich="([^"]+)"/g));
+                assert.equal(cells.length, 4);
+                assert.equal(decodeTableCellRich(cells[3][1]).content, source);
+                dom = lute.SpinBlockDOM(dom);
+            }
+            const markdown = lute.BlockDOM2StdMd(dom);
+            assert.doesNotMatch(markdown, /table-cell-rich/);
+            assert.equal((lute.Md2BlockDOM(markdown).match(/<tr>/g) || []).length, 2);
+        });
+    }
+
     it("copies styled table cells as standard Markdown without internal attributes", () => {
         if (typeof Lute === "undefined") {
             require("../../../stage/protyle/js/lute/lute.min.js");

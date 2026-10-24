@@ -298,7 +298,8 @@ test("special block previews cannot acquire document writes or lose unsupported 
         logger: require("sass").Logger.silent,
     }).css;
     const source = compile(readFileSync(path.join(__dirname, "../../../plugin/customBlockRender.ts"), "utf8")) +
-        extract("../htmlRender.ts", ["htmlRender"]) + extract("../blockRender.ts", ["blockRender"]) +
+        extract("../htmlRender.ts", ["htmlRender"]) + compile(readFileSync(path.join(__dirname, "../embedBreadcrumb.ts"), "utf8")) +
+        extract("../blockRender.ts", ["blockRender"]) +
         extract("../chartRender.ts", ["refreshChartTheme"]) +
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +

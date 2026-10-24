@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Afficher le chemin au-dessus du document dans le fil d’Ariane des blocs intégrés ; chaque bloc hérite de ce réglage avec l’option Par défaut",
 	"documentCreationRecovery": "Certains documents existent peut-être déjà. Vérifiez les liens avant de continuer. Continuer conserve les documents existants et ignore leurs étapes de création restantes. Annuler met fin à cette création.",
 	"documentCreationLimit": "Terminez ou annulez une création de document en attente avant d’en commencer une autre",
 	"listMindmapRestoreWidth": "Restaurer les largeurs initiales",

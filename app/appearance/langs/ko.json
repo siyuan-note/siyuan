@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "임베드 블록의 탐색 경로에 문서 상위 경로를 표시하며, 각 블록에서 기본값을 선택하면 이 설정을 따릅니다",
 	"documentCreationRecovery": "일부 문서가 이미 생성되었을 수 있습니다. 계속하기 전에 링크를 확인하세요. 계속하면 기존 문서를 유지하고 남은 생성 단계를 건너뜁니다. 취소하면 이번 생성을 종료합니다.",
 	"documentCreationLimit": "새로 시작하기 전에 대기 중인 문서 생성을 완료하거나 취소하세요",
 	"listMindmapRestoreWidth": "원래 너비 복원",

@@ -611,12 +611,13 @@ func getDocBlocksOrdersInTree(tree *parse.Tree) (ret []string) {
 }
 
 type BlockPath struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Type        string       `json:"type"`
-	SubType     string       `json:"subType"`
-	Children    []*BlockPath `json:"children"`
-	HasChildren bool         `json:"hasChildren,omitempty"`
+	ID            string       `json:"id"`
+	Name          string       `json:"name"`
+	DocumentTitle string       `json:"documentTitle,omitempty"`
+	Type          string       `json:"type"`
+	SubType       string       `json:"subType"`
+	Children      []*BlockPath `json:"children"`
+	HasChildren   bool         `json:"hasChildren,omitempty"`
 }
 
 type BlockBreadcrumbChildren struct {
@@ -881,11 +882,16 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 
 		if add {
+			documentTitle := ""
+			if isEmbedBlock && ast.NodeDocument == parent.Type {
+				documentTitle = util.EscapeHTML(strings.ReplaceAll(treenode.ReadDocumentTitle(parent).Text, editor.Caret, ""))
+			}
 			ret = append([]*BlockPath{{
-				ID:      id,
-				Name:    name,
-				Type:    parent.Type.String(),
-				SubType: treenode.SubTypeAbbr(parent),
+				ID:            id,
+				Name:          name,
+				DocumentTitle: documentTitle,
+				Type:          parent.Type.String(),
+				SubType:       treenode.SubTypeAbbr(parent),
 			}}, ret...)
 		}
 

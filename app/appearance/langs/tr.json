@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Gömülü blokların içerik haritasında belgenin üst yolunu göster; Varsayılan seçildiğinde her blok bu ayarı devralır",
 	"documentCreationRecovery": "Bazı belgeler zaten oluşturulmuş olabilir. Devam etmeden önce bağlantıları kontrol edin. Devam etmek mevcut belgeleri korur ve kalan oluşturma adımlarını atlar. İptal, bu denemeyi sonlandırır.",
 	"documentCreationLimit": "Yeni bir belge oluşturma işlemine başlamadan önce bekleyen işlemi tamamlayın veya iptal edin",
 	"listMindmapRestoreWidth": "Özgün genişlikleri geri yükle",

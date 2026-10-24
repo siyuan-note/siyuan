@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261024171629"
 	},
 	"Children": [
 		{
@@ -1032,7 +1032,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-ju18gnz",
-				"updated": "20260730184353"
+				"updated": "20261024171629"
 			},
 			"Children": [
 				{
@@ -1065,6 +1065,97 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261024171629-c82rywv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171629-c82rywv",
+				"updated": "20261024171629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中，可設定嵌入區塊是否顯示麵包屑，以及是否包含文件上層路徑。隱藏上層路徑後，保留文件名稱和文件內部結構。"
+				}
+			]
+		},
+		{
+			"ID": "20261024171629-v4rxlyd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171629-v4rxlyd",
+				"updated": "20261024171629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "區塊標選單中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入區塊導覽路徑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "麵包屑顯示文件上層路徑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 均提供「啟用」「禁用」「預設」選項。選擇「預設」會移除區塊屬性，繼承全域設定。"
 				}
 			]
 		},

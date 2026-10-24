@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Show the path above the document in embedded block breadcrumbs; each block follows this setting when set to Default",
 	"documentCreationRecovery": "Some documents may already exist. Check the links before continuing. Continuing keeps existing documents and skips their remaining creation steps. Cancel ends this creation attempt.",
 	"documentCreationLimit": "Finish or cancel a pending document creation before starting another",
 	"listMindmapRestoreWidth": "Restore original widths",

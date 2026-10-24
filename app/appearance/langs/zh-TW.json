@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "顯示嵌入區塊所在文件的上層路徑；區塊選項選擇「預設」時繼承此設定",
 	"documentCreationRecovery": "部分文件可能已建立，請先透過連結檢查。繼續將保留既有文件，並略過其尚未完成的建立處理。取消會結束本次建立。",
 	"documentCreationLimit": "請先完成或取消待處理的文件建立，再開始新的建立",
 	"listMindmapRestoreWidth": "還原原始寬度",

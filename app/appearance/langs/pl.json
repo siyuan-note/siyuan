@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Pokazuj ścieżkę nadrzędną dokumentu w nawigacji osadzonych bloków; wybranie opcji Domyślne powoduje dziedziczenie tego ustawienia",
 	"documentCreationRecovery": "Niektóre dokumenty mogły już zostać utworzone. Przed kontynuowaniem sprawdź łącza. Kontynuacja zachowa istniejące dokumenty i pominie pozostałe etapy ich tworzenia. Anulowanie zakończy tę próbę.",
 	"documentCreationLimit": "Zakończ lub anuluj oczekujące tworzenie dokumentów przed rozpoczęciem kolejnego",
 	"listMindmapRestoreWidth": "Przywróć pierwotne szerokości",

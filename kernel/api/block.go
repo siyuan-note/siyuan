@@ -1197,7 +1197,7 @@ func blockPathContracts(values []*model.BlockPath) []*apicontract.BlockPath {
 	result := make([]*apicontract.BlockPath, len(values))
 	for i, value := range values {
 		if value != nil {
-			result[i] = &apicontract.BlockPath{ID: value.ID, Name: value.Name, Type: value.Type, SubType: value.SubType, Children: blockPathContracts(value.Children), HasChildren: value.HasChildren}
+			result[i] = &apicontract.BlockPath{ID: value.ID, Name: value.Name, DocumentTitle: value.DocumentTitle, Type: value.Type, SubType: value.SubType, Children: blockPathContracts(value.Children), HasChildren: value.HasChildren}
 		}
 	}
 	return result

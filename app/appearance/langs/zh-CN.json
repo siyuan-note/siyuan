@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "显示嵌入块所在文档的上层路径；块级选项选择“默认”时继承此设置",
 	"documentCreationRecovery": "部分文档可能已创建，请先通过链接检查。继续将保留已有文档，并跳过其尚未完成的创建处理。取消会结束本次创建。",
 	"documentCreationLimit": "请先完成或取消待处理的文档创建，再开始新的创建",
 	"listMindmapRestoreWidth": "恢复原宽度",

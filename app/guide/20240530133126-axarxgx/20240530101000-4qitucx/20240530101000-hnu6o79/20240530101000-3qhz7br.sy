@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261024171629"
 	},
 	"Children": [
 		{
@@ -1109,7 +1109,7 @@
 			"Properties": {
 				"ID": "20240530101000-9o5xpb4",
 				"id": "20240530101000-69e5xnn",
-				"updated": "20240530101000"
+				"updated": "20261024171629"
 			},
 			"Children": [
 				{
@@ -1142,6 +1142,93 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261024171629-7jfvtsh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171629-7jfvtsh",
+				"updated": "20261024171629"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、埋め込みブロックのパンくずの表示と、文書より上のパスを含めるかを設定できます。上位パスを隠しても、文書名と文書内の構造は表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024171629-mnsfr9m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171629-mnsfr9m",
+				"updated": "20261024171629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックアイコンのメニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みブロックのパンくずリスト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "パンくずリストに文書の上位パスを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " では、有効、無効、デフォルトを選べます。デフォルトに戻すとブロックの属性が削除され、全体設定に従います。"
 				}
 			]
 		},

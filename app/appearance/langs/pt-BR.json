@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Mostrar o caminho acima do documento na navegação de blocos incorporados; cada bloco herda esta configuração ao escolher Padrão",
 	"documentCreationRecovery": "Alguns documentos podem já ter sido criados. Verifique os links antes de continuar. Continuar mantém os documentos existentes e ignora as etapas de criação restantes. Cancelar encerra esta tentativa.",
 	"documentCreationLimit": "Conclua ou cancele uma criação de documentos pendente antes de iniciar outra",
 	"listMindmapRestoreWidth": "Restaurar larguras originais",

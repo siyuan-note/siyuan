@@ -451,8 +451,11 @@ const gutterSingle = () => [
         node("refresh", lang("refresh")),
         node("update", lang("update")),
         separator("separator_breadcrumb"),
-        node("embedBlockBreadcrumb", lang("embedBlockBreadcrumb")),
-        node("embedBlockBreadcrumbParentPath", lang("embedBlockBreadcrumbParentPath")),
+        ...["embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath"].map(key => node(key, lang(key), true, [
+            node("enable", lang("enable")),
+            node("disable", lang("disable")),
+            node("default", lang("default")),
+        ])),
         node("headingEmbedMode", lang("headingEmbedMode"), true, [
             node("showHeadingWithBlocks", lang("showHeadingWithBlocks")),
             node("showHeadingOnlyTitle", lang("showHeadingOnlyTitle")),

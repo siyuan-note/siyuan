@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Zobraziť cestu nad dokumentom v navigácii vložených blokov; pri voľbe Predvolené blok zdedí toto nastavenie",
 	"documentCreationRecovery": "Niektoré dokumenty už možno boli vytvorené. Pred pokračovaním skontrolujte odkazy. Pokračovanie zachová existujúce dokumenty a preskočí zostávajúce kroky ich vytvárania. Zrušenie ukončí tento pokus.",
 	"documentCreationLimit": "Pred začatím ďalšieho vytvárania dokumentov dokončite alebo zrušte čakajúce vytváranie",
 	"listMindmapRestoreWidth": "Obnoviť pôvodné šírky",

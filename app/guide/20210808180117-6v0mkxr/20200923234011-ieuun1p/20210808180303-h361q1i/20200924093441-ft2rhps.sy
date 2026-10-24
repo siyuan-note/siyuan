@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261024171608"
 	},
 	"Children": [
 		{
@@ -1025,7 +1025,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604225457-7lq09oe",
-				"updated": "20220312123239"
+				"updated": "20261024171608"
 			},
 			"Children": [
 				{
@@ -1057,6 +1057,97 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261024171608-ctwgnun",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171608-ctwgnun",
+				"updated": "20261024171608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", choose whether embedded blocks show breadcrumbs and include the path above the document. Hiding the parent path keeps the document title and its internal structure."
+				}
+			]
+		},
+		{
+			"ID": "20261024171608-9eg0kvq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171608-9eg0kvq",
+				"updated": "20261024171608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The block menu entries "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed Block Breadcrumb"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show parent path in breadcrumbs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " each offer Enable, Disable and Default. Default removes the block override and follows the global setting."
 				}
 			]
 		},

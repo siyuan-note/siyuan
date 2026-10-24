@@ -12,7 +12,8 @@ import {finishCustomEmbedRender, finishEmptyEmbedRender, IEmbedRenderLoadingStat
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isDirectHeadingEmbed} from "./embedHeading";
 import {isFoldedRenderContent} from "./foldedContent";
-import {EMBED_BREADCRUMB_PARENT_PATH, getEmbedBreadcrumbPaths} from "./embedBreadcrumb";
+import {getEmbedBreadcrumbPaths, resolveEmbedBreadcrumbPreference} from "./embedBreadcrumb";
+import {Constants} from "../../constants";
 
 /**
  * 渲染嵌入块
@@ -54,8 +55,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
                 }
             }
         }
-        const breadcrumbAttribute = item.getAttribute("breadcrumb");
-        const breadcrumb = breadcrumbAttribute ? breadcrumbAttribute === "true" : window.siyuan.config.editor.embedBlockBreadcrumb;
+        const breadcrumb = resolveEmbedBreadcrumbPreference(item.getAttribute("breadcrumb"), window.siyuan.config.editor.embedBlockBreadcrumb);
 
         if (content.startsWith("//!js")) {
             // 安全模式下禁用 JS 查询嵌入块，与代码片段（CSS/JS snippet）的处理保持一致
@@ -123,7 +123,8 @@ const renderEmbed = (blocks: {
         let breadcrumbHTML = "";
         if (blocksItem.blockPaths.length !== 0) {
             breadcrumbHTML = genBreadcrumb(getEmbedBreadcrumbPaths(blocksItem.blockPaths, blocksItem.block.rootID,
-                item.getAttribute(EMBED_BREADCRUMB_PARENT_PATH)), true);
+                resolveEmbedBreadcrumbPreference(item.getAttribute(Constants.CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH),
+                    window.siyuan.config.editor.embedBlockBreadcrumbParentPath ?? true)), true);
         }
         let popover = "";
         if (index !== 0) {

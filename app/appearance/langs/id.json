@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Tampilkan jalur di atas dokumen pada breadcrumb blok tersemat; setiap blok mengikuti pengaturan ini saat memilih Bawaan",
 	"documentCreationRecovery": "Beberapa dokumen mungkin sudah dibuat. Periksa tautan sebelum melanjutkan. Melanjutkan akan mempertahankan dokumen yang ada dan melewati tahap pembuatan yang tersisa. Membatalkan mengakhiri percobaan ini.",
 	"documentCreationLimit": "Selesaikan atau batalkan pembuatan dokumen yang tertunda sebelum memulai yang baru",
 	"listMindmapRestoreWidth": "Pulihkan lebar semula",

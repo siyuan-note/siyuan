@@ -121,6 +121,7 @@ interface ILuteRender {
 interface IBreadcrumb {
     id: string,
     name: string,
+    documentTitle?: string,
     type: string,
     subType: string,
     children: IBreadcrumb[],

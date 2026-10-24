@@ -819,8 +819,10 @@ var UpdateEmbedBlock = define[UpdateEmbedBlockRequest, Null]("updateEmbedBlock",
 
 var FullTextSearchAssetContent = define[SearchAssetContentRequest, SearchAssetContentData]("fullTextSearchAssetContent", "/api/search/fullTextSearchAssetContent", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// GetEmbedBlock 返回的文档面包屑项可附带 documentTitle，name 保留完整路径；标题不受路径分隔符影响。
 var GetEmbedBlock = define[GetEmbedBlockRequest, EmbedBlocksData]("getEmbedBlock", "/api/search/getEmbedBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// SearchEmbedBlock 返回的文档面包屑项可附带 documentTitle，供客户端按偏好显示独立标题或完整 name 路径。
 var SearchEmbedBlock = define[SearchEmbedBlockRequest, EmbedBlocksData]("searchEmbedBlock", "/api/search/searchEmbedBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // method 缺省或为 null 时使用文本替换，支持文本（0）、查询语法（1）和正则表达式（3）。

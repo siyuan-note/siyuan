@@ -1,4 +1,5 @@
 {
+	"embedBlockBreadcrumbParentPathTip": "Toon het pad boven het document in broodkruimels van ingesloten blokken; elk blok volgt deze instelling bij Standaard",
 	"documentCreationRecovery": "Sommige documenten zijn mogelijk al aangemaakt. Controleer de links voordat u doorgaat. Doorgaan behoudt bestaande documenten en slaat hun resterende aanmaakstappen over. Annuleren beëindigt deze poging.",
 	"documentCreationLimit": "Voltooi of annuleer een lopende documentaanmaak voordat u een nieuwe start",
 	"listMindmapRestoreWidth": "Oorspronkelijke breedtes herstellen",

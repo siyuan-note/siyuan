@@ -348,11 +348,15 @@ export class Title {
         clearTimeout(this.timeout);
         this.pendingRename = undefined;
         if (!validateName(this.editElement.textContent, this.editElement, true)) {
+            const original = this.editElement.textContent;
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
             this.setTitle(truncateDocumentTitle(this.editElement.textContent));
             focusByOffset(this.editElement, offset.start, offset.end);
-            return false;
+            if (window.siyuan.documentAddressingVersion !== 2 || this.editElement.textContent === original ||
+                !validateName(this.editElement.textContent, this.editElement, true)) {
+                return false;
+            }
         }
         hideTooltip();
         this.pendingRename = () => {

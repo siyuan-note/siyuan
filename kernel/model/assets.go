@@ -161,14 +161,23 @@ func GetAssetPathByHash(hash, boxID string) string {
 }
 
 func HandleAssetsRemoveEvent(assetAbsPath string) {
-	if !filelock.IsExist(assetAbsPath) {
+	relativePath, err := filepath.Rel(util.DataDir, assetAbsPath)
+	if err != nil {
 		return
 	}
-	if gulu.File.IsDir(assetAbsPath) {
+	relativePath = filepath.ToSlash(relativePath)
+	if _, _, ok := AssetPathFromDataRelativePath(relativePath); !ok {
 		return
 	}
-	// 跳过隐藏文件，如 WPS 的临时文件、Mac 的 .DS_Store
-	if filelock.IsHidden(assetAbsPath) {
+	info, err := os.Stat(assetAbsPath)
+	if err != nil && !os.IsNotExist(err) {
+		return
+	}
+	if info != nil && (info.IsDir() || filelock.IsHidden(assetAbsPath)) {
+		return
+	}
+	// 删除后无法读取文件属性，仍按文件名过滤 WPS 临时文件和 .DS_Store 等隐藏文件。
+	if strings.HasPrefix(filepath.Base(assetAbsPath), ".") {
 		return
 	}
 	if util.IsOfficeTempFile(assetAbsPath) {
@@ -187,12 +196,7 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
 
-	hash, err := util.GetEtag(assetAbsPath)
-	if nil != err {
-		logging.LogErrorf("calc asset [%s] hash failed: %s", assetAbsPath, err)
-	} else {
-		cache.RemoveAssetHash(hash)
-	}
+	cache.RemoveAssetHashByPath(relativePath)
 }
 
 func HandleAssetsChangeEvent(assetAbsPath string) {
@@ -1663,7 +1667,7 @@ func RemoveUnusedAssets() (ret []string, err error) {
 
 			hash, _ := util.GetEtag(p)
 			hashes = append(hashes, hash)
-			cache.RemoveAssetHash(hash)
+			cache.RemoveAssetHashByPath(unusedAsset.Item)
 		}
 	}
 
@@ -1728,7 +1732,7 @@ func RemoveUnusedAsset(p string) (ret string, err error) {
 
 	hash, _ := util.GetEtag(absPath)
 	sql.BatchRemoveAssetsQueue([]string{hash})
-	cache.RemoveAssetHash(hash)
+	cache.RemoveAssetHashByPath(relativePath)
 
 	if util.IsMobileContainer() {
 		HandleAssetsRemoveEvent(absPath)

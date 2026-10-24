@@ -200,8 +200,10 @@ export class ListMindmapView {
     private destroyed = false;
     private readonly resizeObserver: ResizeObserver;
     private fullscreenMarker?: Comment;
-    private documentView?: {scale: number, center: {x: number, y: number}};
+    private documentView?: {scale: number, center: {x: number, y: number}, height: number};
+    private documentScroll?: {element: HTMLElement, left: number, top: number}[];
     private viewportCenter?: {x: number, y: number};
+    private viewportSize?: {width: number, height: number};
     private readonly disposers: (() => void)[] = [];
     private printTransform?: {scale: number, offsetX: number, offsetY: number};
 
@@ -1114,6 +1116,7 @@ export class ListMindmapView {
             if (!this.viewport.clientWidth || !this.viewport.clientHeight) {
                 return;
             }
+            this.resizeViewport();
             const previousPositions = this.positions;
             const previousSummaries = this.summaryPositions;
             // 同一帧内先恢复测量，布局完成后再隐藏折叠后代，避免展开时读取到零尺寸。
@@ -1254,7 +1257,7 @@ export class ListMindmapView {
             this.viewportCenter = undefined;
             if (center && !this.initialFit) {
                 this.offsetX = this.viewport.clientWidth / 2 - center.x * this.scale;
-                this.offsetY = this.viewport.clientHeight / 2 - center.y * this.scale;
+                this.offsetY = this.getViewportAnchorY(this.viewport.clientHeight) - center.y * this.scale;
             }
             if (this.printTransform || this.options.printLayout) {
                 this.fitPrint();
@@ -1821,11 +1824,12 @@ export class ListMindmapView {
         if (this.destroyed) {
             return;
         }
+        const width = this.viewport.clientWidth;
+        const height = this.viewport.clientHeight;
+        this.resizeViewport(width, height);
         this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
         this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
         this.zoomSlider.value = String(Math.round(this.scale * 100));
-        const width = this.viewport.clientWidth;
-        const height = this.viewport.clientHeight;
         const ratio = window.devicePixelRatio || 1;
         if (this.canvas.width !== Math.round(width * ratio) || this.canvas.height !== Math.round(height * ratio)) {
             this.canvas.width = Math.round(width * ratio);
@@ -3754,10 +3758,22 @@ export class ListMindmapView {
         if (this.destroyed || this.fullscreenMarker) {
             return;
         }
+        this.resizeViewport();
         this.captureViewportCenter();
         if (this.viewportCenter) {
             // 文档视角只在本次全屏期间暂存，全屏内的平移和缩放独立生效。
-            this.documentView = {scale: this.scale, center: this.viewportCenter};
+            this.documentView = {scale: this.scale, center: this.viewportCenter, height: this.viewport.clientHeight};
+            const visible = this.getVisibleViewportAnchor();
+            this.viewportCenter = {
+                x: this.viewportCenter.x + (visible.x - this.viewport.clientWidth / 2) / this.scale,
+                y: this.viewportCenter.y + visible.y / this.scale,
+            };
+        }
+        this.documentScroll = [];
+        for (let parent = this.options.host.parentElement; parent; parent = parent.parentElement) {
+            if (parent.scrollHeight > parent.clientHeight || parent.scrollWidth > parent.clientWidth) {
+                this.documentScroll.push({element: parent, left: parent.scrollLeft, top: parent.scrollTop});
+            }
         }
         // 移到独立容器，避免编辑器祖先的变换和裁剪改变全屏覆盖范围。
         this.fullscreenMarker = document.createComment("mindmap-view");
@@ -3784,6 +3800,12 @@ export class ListMindmapView {
         this.fullscreenMarker.replaceWith(this.options.host);
         this.fullscreenMarker = undefined;
         this.fullscreenChange();
+        // 重新插入高画布可能触发浏览器滚动锚定，恢复文档阅读位置而非跟随下方内容。
+        this.documentScroll?.forEach(({element, left, top}) => {
+            element.scrollLeft = left;
+            element.scrollTop = top;
+        });
+        this.documentScroll = undefined;
         if (!this.destroyed) {
             this.options.host.focus({preventScroll: true});
         }
@@ -3806,6 +3828,64 @@ export class ListMindmapView {
                 y: (this.viewport.clientHeight / 2 - this.offsetY) / this.scale,
             };
         }
+    }
+
+    private getViewportAnchorY(height: number) {
+        // 高画布全屏时固定顶部；高度相等处两种取景方式连续衔接。
+        return Math.max(height, this.fullscreenMarker ? this.documentView?.height || 0 : 0) / 2;
+    }
+
+    private resizeViewport(width = this.viewport.clientWidth, height = this.viewport.clientHeight) {
+        if (!width || !height || this.printTransform || this.options.printLayout) {
+            return;
+        }
+        const previous = this.viewportSize;
+        if (previous?.width === width && previous.height === height) {
+            return;
+        }
+        this.viewportSize = {width, height};
+        if (!previous || this.initialFit || this.viewportCenter) {
+            return;
+        }
+        const x = (width - previous.width) / 2;
+        const y = this.getViewportAnchorY(height) - this.getViewportAnchorY(previous.height);
+        this.offsetX += x;
+        this.offsetY += y;
+        if (this.pointer?.pan && !this.pointer.id) {
+            this.pointer.x += x;
+            this.pointer.y += y;
+        }
+    }
+
+    private getVisibleViewportAnchor() {
+        const bounds = this.viewport.getBoundingClientRect();
+        const scaleX = bounds.width ? this.viewport.clientWidth / bounds.width : 1;
+        const scaleY = bounds.height ? this.viewport.clientHeight / bounds.height : 1;
+        let left = Math.max(0, bounds.left);
+        let right = Math.min(window.innerWidth, bounds.right);
+        let top = Math.max(0, bounds.top);
+        let bottom = Math.min(window.innerHeight, bounds.bottom);
+        // 文档滚动容器可能只露出画布的一部分，进入全屏前保留实际正在阅读的区域。
+        for (let parent = this.viewport.parentElement; parent; parent = parent.parentElement) {
+            const style = getComputedStyle(parent);
+            const rect = parent.getBoundingClientRect();
+            const ratioX = parent.offsetWidth ? rect.width / parent.offsetWidth : 1;
+            const ratioY = parent.offsetHeight ? rect.height / parent.offsetHeight : 1;
+            if (style.overflowX !== "visible") {
+                const start = rect.left + parent.clientLeft * ratioX;
+                left = Math.max(left, start);
+                right = Math.min(right, start + parent.clientWidth * ratioX);
+            }
+            if (style.overflowY !== "visible") {
+                const start = rect.top + parent.clientTop * ratioY;
+                top = Math.max(top, start);
+                bottom = Math.min(bottom, start + parent.clientHeight * ratioY);
+            }
+        }
+        return right > left && bottom > top ? {
+            x: ((left + right) / 2 - bounds.left) * scaleX,
+            y: (top - bounds.top) * scaleY,
+        } : {x: this.viewport.clientWidth / 2, y: 0};
     }
 
     public destroy() {

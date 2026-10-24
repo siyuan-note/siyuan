@@ -19,6 +19,11 @@ const browserCases = async (source: string, css: string) => {
     lute.SetProtyleWYSIWYG(true);
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); await frame(); };
+    const resizeWindow = async (width: number, height: number) => {
+        await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
+        await settle();
+    };
+    const originalWindow = {width: innerWidth, height: innerHeight};
     for (const mobile of [false, true]) {
         for (const dark of [false, true]) {
             document.body.className = mobile ? "body--android" : "body--windows";
@@ -137,6 +142,123 @@ const browserCases = async (source: string, css: string) => {
             equalCenter(beforeResize);
             check.equal(view.scale, beforeResizeScale, "resizing the document restores its logical center and zoom");
 
+            const originalParentStyle = parent.style.cssText;
+            const originalHeight = host.style.getPropertyValue("--mindmap-view-height");
+            const beforeDocumentResize = center();
+            parent.style.width = `${mobile ? 400 : 620}px`;
+            host.style.setProperty("--mindmap-view-height", `${mobile ? 340 : 500}px`);
+            await settle();
+            equalCenter(beforeDocumentResize);
+            parent.style.cssText = originalParentStyle;
+            host.style.setProperty("--mindmap-view-height", originalHeight);
+            await settle();
+            equalCenter(beforeDocumentResize);
+
+            // 原生窗口宽度变化保留全屏取景，退出仍恢复独立保存的文档视角。
+            parent.style.width = "calc(100vw - 80px)";
+            await settle();
+            const documentBeforeWindowResize = center();
+            button("fullscreen").click();
+            await settle();
+            viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 24, deltaY: 16, bubbles: true, cancelable: true}));
+            const fullBeforeWindowResize = center();
+            await resizeWindow(originalWindow.width - 120, originalWindow.height);
+            equalCenter(fullBeforeWindowResize);
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(documentBeforeWindowResize);
+            await resizeWindow(originalWindow.width, originalWindow.height);
+            equalCenter(documentBeforeWindowResize);
+
+            // 在临界高度两侧往返，中心与顶部锚点连续衔接，全屏的缩放和平移不回写文档。
+            await resizeWindow(900, 700);
+            host.style.setProperty("--mindmap-view-height", "480px");
+            await settle();
+            const beforeHeightChanges = center();
+            const savedScale = view.scale;
+            const documentHeight = viewport.clientHeight;
+            button("fullscreen").click();
+            await settle();
+            equalCenter(beforeHeightChanges);
+            view.zoomAt(1.6);
+            viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 20, deltaY: 10, bubbles: true, cancelable: true}));
+            const reference = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
+                (Math.max(viewport.clientHeight, documentHeight) / 2 - view.offsetY) / view.scale];
+            const fullReference = reference();
+            for (const height of [520, 480, 479, 320, 479, 480, 520, 700]) {
+                const oldHeight = viewport.clientHeight;
+                const oldOffset = view.offsetY;
+                await resizeWindow(900, height);
+                reference().forEach((value, index) => check.ok(Math.abs(value - fullReference[index]) < 1e-8,
+                    "live height changes preserve the fullscreen reference without resetting its pan or zoom"));
+                if (oldHeight <= documentHeight && viewport.clientHeight <= documentHeight) {
+                    check.equal(view.offsetY, oldOffset, "short fullscreen viewports retain their top reference");
+                }
+                check.equal(view.scale, 1.6);
+                check.equal(view.documentView.scale, savedScale);
+                check.deepEqual([view.documentView.center.x, view.documentView.center.y], beforeHeightChanges);
+            }
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(beforeHeightChanges);
+            check.equal(view.scale, savedScale);
+
+            // 滚动容器只露出高画布的一部分时，把正在看的节点保留在全屏顶部内。
+            await resizeWindow(900, 600);
+            host.style.setProperty("--mindmap-view-height", "1100px");
+            await settle();
+            {
+                const id = view.model.root.children[0].id;
+                const node = host.querySelector<HTMLElement>(`[data-mindmap-id="${id}"]`);
+                view.offsetY = 24 - view.positions.get(id).y * view.scale;
+                view.draw();
+                const tallCenter = center();
+                const top = node.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+                button("fullscreen").click();
+                await settle();
+                check.ok(Math.abs(node.getBoundingClientRect().top - top) < 1,
+                    "a tall canvas keeps its visible top content when entering a shorter fullscreen viewport");
+                button("exitFullscreen").click();
+                await settle();
+                equalCenter(tallCenter);
+            }
+            parent.style.height = "260px";
+            parent.style.overflow = "auto";
+            const following = document.createElement("div");
+            following.style.height = "1800px";
+            parent.append(following);
+            await settle();
+            parent.scrollTop = 180;
+            const firstId = view.model.root.children[0].id;
+            const first = host.querySelector<HTMLElement>(`[data-mindmap-id="${firstId}"]`);
+            const visibleTop = parent.getBoundingClientRect().top + parent.clientTop;
+            const clippedTop = visibleTop - viewport.getBoundingClientRect().top;
+            view.offsetY = clippedTop + 24 - view.positions.get(firstId).y * view.scale;
+            view.draw();
+            const scrolledCenter = center();
+            const scrolledScale = view.scale;
+            const nodeBeforeFullscreen = first.getBoundingClientRect();
+            check.ok(nodeBeforeFullscreen.top >= visibleTop && nodeBeforeFullscreen.bottom <= visibleTop + parent.clientHeight);
+            button("fullscreen").click();
+            await settle();
+            const fullNode = first.getBoundingClientRect();
+            check.ok(fullNode.top >= viewport.getBoundingClientRect().top && fullNode.bottom <= viewport.getBoundingClientRect().bottom,
+                "a node visible in a clipped tall document remains visible after entering fullscreen");
+            check.ok(Math.abs(fullNode.top - (nodeBeforeFullscreen.top - visibleTop)) < 1,
+                "tall fullscreen entry aligns the visible document top rather than its hidden center");
+            view.zoomAt(1.8);
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(scrolledCenter);
+            check.equal(view.scale, scrolledScale);
+            check.ok(Math.abs(first.getBoundingClientRect().top - nodeBeforeFullscreen.top) < 1,
+                JSON.stringify({scrollTop: parent.scrollTop, before: nodeBeforeFullscreen.top,
+                    after: first.getBoundingClientRect().top, viewportTop: viewport.getBoundingClientRect().top}));
+            following.remove();
+            parent.style.cssText = originalParentStyle;
+            host.style.setProperty("--mindmap-view-height", originalHeight);
+            await resizeWindow(originalWindow.width, originalWindow.height);
+
             const beforeEdit = center();
             const beforeEditScale = view.scale;
             button("fullscreen").click();
@@ -185,7 +307,7 @@ const browserCases = async (source: string, css: string) => {
     return "Mindmap fullscreen cases passed";
 };
 
-test("fullscreen preserves entry focus and restores the document viewport without reverting content updates", {
+test("fullscreen preserves entry focus across viewport resizing and clipping without reverting content updates", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -199,16 +321,20 @@ test("fullscreen preserves entry focus and restores the document viewport withou
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-fullscreen-"));
     const script = path.join(temporary, "run.cjs");
     const lute = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");
+    const browserSource = transpileModule(`(${browserCases.toString()})`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText.trim().replace(/^"use strict";\s*/, "").replace(/;$/, "");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    require("electron").ipcMain.handle("mindmap-fullscreen-size", (_event, width, height) => win.setContentSize(width, height));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
+        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
         win.destroy();
         app.exit(0);
     } catch (error) {

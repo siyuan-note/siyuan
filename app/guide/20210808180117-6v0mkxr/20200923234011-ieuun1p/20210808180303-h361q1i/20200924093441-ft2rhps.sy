@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024124323"
+		"updated": "20261024124505"
 	},
 	"Children": [
 		{
@@ -1961,7 +1961,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261024124323"
+				"updated": "20261024124505"
 			},
 			"Children": [
 				{
@@ -2132,12 +2132,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261019142953-4rt40w7",
-				"updated": "20261021132218"
+				"updated": "20261024124505"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Entering full screen preserves the mind map's current center and zoom. Panning and zooming in full screen affect only that full-screen view. Exiting full screen restores the document view's previous center and zoom. Node edits still take effect."
+					"Data": "Resizing the document canvas preserves its center and zoom. Full-screen entry keeps the zoom and centers the view when the document canvas is shorter than the full-screen viewport; otherwise it preserves the visible top edge, accounting for document scrolling. The alignment updates as the window height changes. Full-screen panning and zooming remain temporary; exiting restores the previous document view and reading position. Node edits still take effect."
 				}
 			]
 		},

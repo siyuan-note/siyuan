@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024124323"
+		"updated": "20261024124505"
 	},
 	"Children": [
 		{
@@ -1962,7 +1962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261024124323"
+				"updated": "20261024124505"
 			},
 			"Children": [
 				{
@@ -2100,12 +2100,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261019142953-9ypjmtz",
-				"updated": "20261021132218"
+				"updated": "20261024124505"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "進入全螢幕時會保留心智圖目前的中心點和縮放比例。全螢幕中的平移和縮放僅影響本次全螢幕瀏覽，離開全螢幕後恢復進入前的文件視角。節點內容編輯仍正常生效。"
+					"Data": "調整文件內畫布尺寸時保留中心點和縮放比例。進入全螢幕時保留縮放比例：文件畫布低於全螢幕視口時置中，否則依目前可見區域的頂邊對齊，並隨視窗高度變化即時調整。全螢幕中的平移和縮放僅影響本次全螢幕瀏覽，離開後恢復進入前的文件視角和閱讀位置。節點內容編輯仍正常生效。"
 				}
 			]
 		},

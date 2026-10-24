@@ -88,8 +88,10 @@ test("compact view spacing retains draggable relations without expanding unrelat
     const source = typescript.createSourceFile("view.ts", readFileSync(path.join(__dirname, "view.ts"), "utf8"),
         typescript.ScriptTarget.ES2021, true);
     const declaration = source.statements.find(typescript.isClassDeclaration);
-    const refresh = declaration.members.find(member => member.name?.getText(source) === "refreshLayout");
-    const compiled = typescript.transpileModule(`class View {${refresh.getText(source)}} globalThis.View = View;`, {
+    const methods = declaration.members.filter(member =>
+        ["refreshLayout", "resizeViewport", "getViewportAnchorY"].includes(member.name?.getText(source)));
+    assert.equal(methods.length, 3);
+    const compiled = typescript.transpileModule(`class View {${methods.map(member => member.getText(source)).join("\n")}} globalThis.View = View;`, {
         compilerOptions: {target: typescript.ScriptTarget.ES2021},
     }).outputText;
     let frame: () => void;

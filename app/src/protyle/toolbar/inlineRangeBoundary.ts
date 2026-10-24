@@ -1,5 +1,33 @@
 const INLINE_RANGE_ROOT_TAGS = ["DIV", "TD", "TH", "TR"];
 
+export const normalizeInlineMarkRange = (range: Range, editableElement: Element) => {
+    const element = range.startContainer as HTMLElement;
+    if (!range.collapsed && element === range.endContainer && element !== editableElement &&
+        element.nodeType === 1 && element.tagName === "SPAN" && element.hasAttribute("data-type") &&
+        range.startOffset === 0 && range.endOffset === element.childNodes.length) {
+        range.selectNode(element);
+    }
+};
+
+export const getSelectedInlineCodeElement = (range: Range): HTMLElement | undefined => {
+    if (range.collapsed) {
+        return;
+    }
+    const startElement = range.startContainer.nodeType === 3 ?
+        range.startContainer.parentElement : range.startContainer as Element;
+    const codeElement = startElement.closest<HTMLElement>('span[data-type~="code"]');
+    if (codeElement?.contains(range.endContainer)) {
+        return codeElement;
+    }
+    if (range.startContainer === range.endContainer && range.endOffset === range.startOffset + 1) {
+        const selectedElement = range.startContainer.childNodes[range.startOffset] as HTMLElement;
+        if (selectedElement?.nodeType === 1 && selectedElement.tagName === "SPAN" &&
+            (selectedElement.getAttribute("data-type") || "").split(" ").includes("code")) {
+            return selectedElement;
+        }
+    }
+};
+
 export const getInlineRangeElement = (container: Node, editableElement: Element) => {
     const parentElement = container.parentElement;
     if (container.nodeType !== 3 || !parentElement || parentElement === editableElement ||

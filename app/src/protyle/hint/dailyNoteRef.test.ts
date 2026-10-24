@@ -24,7 +24,7 @@ test("typing a slash in reference search does not run title replacement or show 
         Constants: {ZWSP: "\u200b"}, Lute: {Caret: "caret", UnEscapeHTMLStr: (text: string) => text},
         getEditorRange: () => ({startContainer: block}), hasClosestBlock: () => block,
         isEncryptedBox: () => false, getDailyNoteHints: async (): Promise<IHintData[]> => [],
-        replaceFileName: () => assert.fail("typing a query sanitized a document title"),
+        normalizeDocumentTitle: () => assert.fail("typing a query sanitized a document title"),
         fetchPost: (path: string, request: {k: string}, callback: (response: unknown) => void) => {
             assert.equal(path, "/api/search/searchRefBlock");
             assert.equal(request.k, "10/");

@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"maps"
+	"os"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -179,6 +180,39 @@ func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 			}
 			t.Fatalf("document [%s] was not listed", fixture.sourceID)
 		})
+	}
+}
+
+func TestDocIALPreservesUnsupportedSpec(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	originalWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = originalWorkspace })
+	absPath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	for _, source := range []string{
+		`{"Spec":"999","Properties":{"title":"Future"}}`,
+		`{"Properties":{"title":"Future"},"Spec":"999"}`,
+		`{"Spec":"999","Properties":{}}`,
+		`{"Properties":{"title":{"text":"Future"}},"Spec":"999"}`,
+		`{"Properties":{"title":"Invalid version"},"Spec":{}}`,
+	} {
+		cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
+		if err := os.WriteFile(absPath, []byte(source), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if properties := fixture.box.docIAL(fixture.sourcePath); properties != nil {
+			t.Fatalf("unsupported source returned properties: %v", properties)
+		}
+		retained, err := os.ReadFile(absPath)
+		if err != nil || string(retained) != source {
+			t.Fatalf("unsupported source was changed or quarantined: %v", err)
+		}
+		if properties := cache.GetDocIALInBox(fixture.sourcePath, fixture.box.ID); properties != nil {
+			t.Fatalf("unsupported source published cached properties: %v", properties)
+		}
+		if _, err = os.Stat(filepath.Join(util.WorkspaceDir, "corrupted")); !os.IsNotExist(err) {
+			t.Fatalf("version error entered corruption recovery: %v", err)
+		}
 	}
 }
 

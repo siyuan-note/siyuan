@@ -17,18 +17,34 @@ const compiled = transpileModule(`class View {
 globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const setup = () => {
-    const context: any = {clearTimeout};
+    class Element {
+        isContentEditable = false;
+        input = false;
+        inside = false;
+        matches() { return this.input; }
+    }
+    const document = {activeElement: new Element()};
+    const host = {
+        ownerDocument: document,
+        contains: (element: Element) => element.inside,
+        focus: (options: {preventScroll: boolean}) => {
+            assert.equal(options.preventScroll, true);
+            document.activeElement = Object.assign(new Element(), {inside: true});
+        },
+    };
+    const context: any = {clearTimeout, HTMLElement: Element};
     runInNewContext(compiled, context);
     const target = new context.View();
     let cancelled = 0;
     Object.assign(target, {
         scale: 1, offsetX: 0, offsetY: 0, pinching: false, interactionActive: false,
+        options: {host},
         viewport: {contains: (element: {outside?: boolean} | null) => !!element && !element.outside,
             getBoundingClientRect: () => ({left: 10, top: 20})},
         cancelPointer: () => { cancelled++; target.pendingPointerId = undefined; },
         boundedPan: (x: number, y: number) => ({x, y}), draw: () => {},
     });
-    return {target, cancelled: () => cancelled};
+    return {target, document, cancelled: () => cancelled};
 };
 
 const touch = (clientX: number, clientY = 120, excluded = false, outside = false) => ({
@@ -80,6 +96,27 @@ test("saved view locks prohibit two-finger gestures", () => {
     assert.equal(cancelled(), 0);
 });
 
+test("two-finger panning ignores small distance jitter until a deliberate pinch starts", () => {
+    for (const [distance, jitter] of [[100, 6], [400, 12]]) {
+        const {target} = setup();
+        target.pinchStart(event(touch(60), touch(60 + distance)));
+        target.pinchMove(event(touch(80), touch(80 + distance + jitter)));
+        assert.equal(target.scale, 1);
+        assert.equal(target.offsetX, 20 + jitter / 2);
+        target.pinchMove(event(touch(90), touch(90 + distance - jitter)));
+        assert.equal(target.scale, 1);
+        target.pinchMove(event(touch(90), touch(90 + distance * 1.5)));
+        assert.equal(target.scale, 1.5);
+        target.pinchMove(event(touch(90), touch(90 + distance + jitter)));
+        assert.equal(target.scale, (distance + jitter) / distance);
+        target.pinchEnd(event());
+        const scale = target.scale;
+        target.pinchStart(event(touch(60), touch(60 + distance)));
+        target.pinchMove(event(touch(80), touch(80 + distance + jitter)));
+        assert.equal(target.scale, scale);
+    }
+});
+
 test("remaining fingers cannot start a drag and a new gesture starts at the current scale", () => {
     const {target} = setup();
     target.pinchStart(event(touch(60), touch(160)));
@@ -113,4 +150,55 @@ test("editing controls and touches outside the map do not activate pinch", () =>
     assert.equal(target.scale, 1);
     target.pinchEnd(event());
     assert.equal(target.pinching, false);
+});
+
+test("additional contacts cancel a pending node hold even when a control or third finger prevents pinch", () => {
+    for (const contacts of [[touch(60), touch(160, 120, true)], [touch(60), touch(160), touch(260)]]) {
+        const {target, cancelled} = setup();
+        target.pointer = {touchNode: "child"};
+        target.pinchStart(event(...contacts));
+        assert.equal(cancelled(), 1);
+        assert.equal(target.pinching, false);
+    }
+});
+
+test("a valid pinch transfers external editing focus to the canvas without restoring it on release", () => {
+    for (const property of ["isContentEditable", "input"] as const) {
+        const {target, document} = setup();
+        const editor = document.activeElement;
+        editor[property] = true;
+        target.pinchStart(event(touch(60), touch(160)));
+        assert.notEqual(document.activeElement, editor);
+        assert.equal(document.activeElement.inside, true);
+        target.pinchEnd(event(touch(60)));
+        target.pinchEnd(event());
+        assert.equal(document.activeElement.inside, true);
+    }
+});
+
+test("pinches preserve internal editing and non-editable focus", () => {
+    for (const editing of [false, true]) {
+        const {target, document} = setup();
+        const active = document.activeElement;
+        active.inside = editing;
+        active.isContentEditable = editing;
+        target.pinchStart(event(touch(60), touch(160)));
+        assert.equal(document.activeElement, active);
+    }
+});
+
+test("single touches, excluded controls, outside contacts and locked maps preserve external editing focus", () => {
+    for (const {locked, contacts} of [
+        {locked: false, contacts: [touch(60)]},
+        {locked: false, contacts: [touch(60), touch(160, 120, true)]},
+        {locked: false, contacts: [touch(60), touch(160, 120, false, true)]},
+        {locked: true, contacts: [touch(60), touch(160)]},
+    ]) {
+        const {target, document} = setup();
+        const active = document.activeElement;
+        active.isContentEditable = true;
+        target.locked = locked;
+        target.pinchStart(event(...contacts));
+        assert.equal(document.activeElement, active);
+    }
 });

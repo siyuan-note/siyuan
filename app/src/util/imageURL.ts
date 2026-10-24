@@ -1,4 +1,4 @@
-const THUMBNAIL_EXTENSIONS = [".png", ".jpg", ".jpeg", ".heic", ".heif"];
+const THUMBNAIL_EXTENSIONS = [".png", ".jpg", ".jpeg", ".heic", ".heif", ".tif", ".tiff"];
 const HEIF_EXTENSIONS = [".heic", ".heif"];
 const FALLBACK_ORIGIN = "http://siyuan.invalid";
 
@@ -76,12 +76,20 @@ export const isInternalHEIFPath = (url: string, origin?: string) => {
 };
 
 export const isBrowserRenderableImagePath = (url: string, origin?: string) => {
-    if (!isHEIFPath(url)) {
+    const path = getDecodedPath(url);
+    if (!isHEIFPath(url) && !path.endsWith(".tif") && !path.endsWith(".tiff")) {
         return true;
     }
     const resolvedURL = resolveHTTPURL(url, origin);
-    return isInternalHEIFPath(url, origin) &&
-        !resolvedURL?.searchParams.getAll("download").some(value => value.toLowerCase() === "true");
+    if (!resolvedURL) {
+        return false;
+    }
+    try {
+        return decodeURIComponent(resolvedURL.pathname).startsWith("/assets/") &&
+            !resolvedURL.searchParams.getAll("download").some(value => value.toLowerCase() === "true");
+    } catch {
+        return false;
+    }
 };
 
 export const getDownloadURL = (url: string) => {

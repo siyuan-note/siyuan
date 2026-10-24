@@ -22,6 +22,20 @@ func TestStagedImportRequestCompatibility(t *testing.T) {
 	}
 }
 
+func TestDataImportContractRequiresExplicitConflictChoice(t *testing.T) {
+	for _, mode := range []string{"skip", "overwrite"} {
+		request, err := CommitDataImport.Decode(strings.NewReader(`{"id":" plan ","mode":"` + mode + `","password":" secret "}`))
+		if err != nil || request.ID != "plan" || string(request.Mode) != mode || request.Password != "secret" {
+			t.Fatalf("invalid commit decoding: %+v %v", request, err)
+		}
+	}
+	for _, body := range []string{`{}`, `{"id":"plan"}`, `{"id":"plan","mode":"silent"}`, `{"id":"plan","mode":null}`, `{"id":"plan","mode":"skip","password":true}`} {
+		if _, err := CommitDataImport.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid import choice accepted: %s", body)
+		}
+	}
+}
+
 func TestImportMarkdownRequestCompatibility(t *testing.T) {
 	for _, flag := range []string{`true`, `false`, `null`, `"ignored"`, `1`, `{}`} {
 		request, err := ImportStdMd.Decode(strings.NewReader(`{"notebook":" box ","localPath":" path ","toPath":"","skipRoot":` + flag + `}`))

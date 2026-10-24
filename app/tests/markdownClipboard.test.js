@@ -127,6 +127,7 @@ const runCases = async source => {
                 isUploadDocumentAvailable: () => !switched,
             },
             "./selection": {getEditorRange: () => range},
+            "./tableCellRichContext": {getTableCellRichContext: () => undefined},
             "./hasClosest": {hasClosestBlock: () => block},
             "./wpsPresentation": {extractWPSPresentationClipboard: () => undefined},
             "./compatibility": {isInHarmony: () => false,

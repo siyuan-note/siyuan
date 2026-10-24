@@ -14,7 +14,7 @@ import (
 
 // BenchmarkDocumentReadBoundarySource 测量完整来源树的加载，包含缓存解压、解析及读取锁成本。
 func BenchmarkDocumentReadBoundarySource(b *testing.B) {
-	for _, size := range []int{1000, 5000, 20000} {
+	for _, size := range []int{20, 1000, 5000, 20000} {
 		b.Run(fmt.Sprint(size), func(b *testing.B) {
 			fixture := setupFileOperationTest(b)
 			tree := treenode.NewTree(fixture.box.ID, fixture.sourcePath, "/Source", "Source")

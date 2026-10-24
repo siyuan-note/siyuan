@@ -1008,7 +1008,7 @@ func buildBlockFromNodeWithHeadingParent(n *ast.Node, tree *parse.Tree, headingP
 	hash := treenode.NodeHashWithHeadingParent(n, tree, luteEngine, headingParent)
 	var length int
 	if ast.NodeDocument == n.Type {
-		content = n.IALAttr("title")
+		content = treenode.ReadDocumentTitle(n).Text
 		fcontent = content
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {

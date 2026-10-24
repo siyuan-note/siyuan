@@ -34,7 +34,7 @@ export class MobileBookmarks {
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
 </div>
 <div class="fn__flex-1 bookmarkList"></div>
-<img style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 30vw;box-sizing: border-box;" src="/stage/loading-pure.svg">`;
+<div class="fn__loading" style="left:0"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         bindPanelSearch(inputElement,
             this.element.querySelector('[data-type="search"]'), () => this.filter(), {

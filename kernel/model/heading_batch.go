@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 type DocHeadingLevelResult struct {
@@ -21,7 +22,7 @@ func GetDocHeadingLevelTransaction(id, notebook string, source, target int, with
 	if tree.Root.ID != id {
 		return nil, ErrTreeNotFound
 	}
-	result := &DocHeadingLevelResult{Title: tree.Root.IALAttr("title")}
+	result := &DocHeadingLevelResult{Title: treenode.ReadDocumentTitle(tree.Root).Text}
 	headings, counts := collectDocHeadingLevelNodes(tree.Root, source)
 	result.Counts = counts
 	for level, count := range counts {

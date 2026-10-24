@@ -166,19 +166,35 @@ func privateCacheMiddleware() mcpsdk.Middleware {
 	return func(next mcpsdk.MethodHandler) mcpsdk.MethodHandler {
 		return func(ctx context.Context, method string, request mcpsdk.Request) (mcpsdk.Result, error) {
 			result, err := next(ctx, method, request)
+			if err != nil {
+				return result, err
+			}
+			// SDK results may hold typed nil pointers, which still match the type switch.
 			switch cacheable := result.(type) {
 			case *mcpsdk.DiscoverResult:
-				cacheable.CacheScope = "private"
+				if cacheable != nil {
+					cacheable.CacheScope = "private"
+				}
 			case *mcpsdk.ListToolsResult:
-				cacheable.CacheScope = "private"
+				if cacheable != nil {
+					cacheable.CacheScope = "private"
+				}
 			case *mcpsdk.ListPromptsResult:
-				cacheable.CacheScope = "private"
+				if cacheable != nil {
+					cacheable.CacheScope = "private"
+				}
 			case *mcpsdk.ListResourcesResult:
-				cacheable.CacheScope = "private"
+				if cacheable != nil {
+					cacheable.CacheScope = "private"
+				}
 			case *mcpsdk.ListResourceTemplatesResult:
-				cacheable.CacheScope = "private"
+				if cacheable != nil {
+					cacheable.CacheScope = "private"
+				}
 			case *mcpsdk.ReadResourceResult:
-				cacheable.CacheScope = "private"
+				if cacheable != nil {
+					cacheable.CacheScope = "private"
+				}
 			}
 			return result, err
 		}

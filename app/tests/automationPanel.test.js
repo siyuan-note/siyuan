@@ -675,6 +675,23 @@ const runCases = async (sources, css, mobile) => {
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
     await click('[data-remove-filter="attribute"]');
     assert.equal(latest().blockSource.attributes.length, 0);
+    for (const [nameOperator, label, name] of [
+        ["contains", lang.filterOperatorContains, "dailynote"],
+        ["regex", lang.regex, "^custom-\\D+-[0-9]{8}$"],
+    ]) {
+        await click("[data-add-attribute]");
+        await click("[data-attr-name-operator]");
+        assert.equal(fieldMenu.items.find(item => item.label === lang.filterOperatorIs).checked, true);
+        fieldMenu.items.find(item => item.label === label).click();
+        await change("[data-attr-name]", name);
+        await click("[data-confirm-attribute]");
+        assert.deepEqual(latest().blockSource.attributes, [{name, nameOperator, operator: "exists"}]);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 6);
+        await click("[data-edit-attribute]");
+        assert.equal(get("[data-attr-name]").value, name, "regex escapes retain their case");
+        await click("[data-cancel-attribute]");
+        await click('[data-remove-filter="attribute"]');
+    }
     await click('[data-match="tagMatch"]');
     fieldMenu.items.find(item => item.label === lang.filterMatchAny).click();
     assert.equal(latest().blockSource.tagMatch, "or");
@@ -689,7 +706,7 @@ const runCases = async (sources, css, mobile) => {
         assert.equal(targetOption.checked, true, "the current target is checked in the shared menu");
         fieldMenu.items.find(item => item.label === label).click();
         assert.equal(latest().blockSource.tagTarget, value || undefined);
-        assert.equal(transactions.at(-1).perform[0].data.spec, 4);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 6);
         assert.equal(get("[data-tag-target] span").textContent, label);
         assert.ok(get("[data-tag-target]").scrollWidth <= get("[data-tag-target]").clientWidth + 1, "all target labels wrap at narrow widths and large fonts");
         assert.equal(get("[data-tag-target-change-tip]").classList.contains("fn__none"), false);
@@ -721,6 +738,15 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(window.siyuan.dialogs.length, 1, "collection review uses the shared dialog on desktop and mobile");
     const reviewDialog = window.siyuan.dialogs[0];
     await waitForDialogLayout(reviewDialog);
+    const reviewBody = reviewDialog.element.querySelector(".b3-dialog__body");
+    const reviewContent = reviewDialog.element.querySelector(".av__collection-manager");
+    const reviewTabs = reviewDialog.element.querySelector("[data-collection-view]").parentElement;
+    assert.equal(reviewTabs.parentElement, reviewBody, "view navigation sits above the padded scrolling content");
+    reviewTabs.style.setProperty("--b3-ui-tab-min-height", "35px");
+    await Promise.all(reviewTabs.firstElementChild.getAnimations().map(animation => animation.finished));
+    assert.equal(getComputedStyle(reviewTabs.firstElementChild).minHeight, "35px", "view tabs respect shared tab sizing");
+    reviewTabs.style.removeProperty("--b3-ui-tab-min-height");
+    await Promise.all(reviewTabs.firstElementChild.getAnimations().map(animation => animation.finished));
     assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "source text is escaped");
     assert.equal(transactions.length, writesBeforeReview, "reviewing entries does not mutate the database");
     const reviewTheme = document.createElement("style");
@@ -733,12 +759,20 @@ const runCases = async (sources, css, mobile) => {
                 reviewTheme.textContent = sources[name];
                 await tick();
                 await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-review`);
-                for (const element of reviewDialog.element.querySelectorAll(".b3-dialog__body, .b3-dialog__action, [data-results], button")) {
+                for (const element of reviewDialog.element.querySelectorAll(".b3-dialog__body, .b3-dialog__action, .av__collection-tabs, .item__text, [data-results], button")) {
                     assert.ok(element.scrollWidth <= element.clientWidth + 1,
                         `${mobile}/${width}/${fontSize}: review content overflows ${element.className}: ${element.scrollWidth}/${element.clientWidth}`);
                     const rect = element.getBoundingClientRect();
                     assert.ok(rect.left >= -1 && rect.right <= window.innerWidth + 1, "review controls stay within the viewport");
                 }
+                const tabsRect = reviewTabs.getBoundingClientRect();
+                const bodyRect = reviewBody.getBoundingClientRect();
+                assert.ok(Math.abs(tabsRect.left - bodyRect.left) < 1 && Math.abs(tabsRect.right - bodyRect.right) < 1,
+                    "view navigation spans the dialog without a padded inset");
+                reviewContent.scrollTop = reviewContent.scrollHeight;
+                assert.equal(reviewTabs.getBoundingClientRect().top, tabsRect.top, "scrolling results keeps view navigation in place");
+                assert.equal(reviewBody.scrollTop, 0, "content scrolling does not scroll the dialog body");
+                reviewContent.scrollTop = 0;
                 const previous = reviewDialog.element.querySelector("[data-prev]").getBoundingClientRect();
                 const cleanup = reviewDialog.element.querySelector("[data-cleanup]").getBoundingClientRect();
                 if (cleanup.top > previous.bottom) {

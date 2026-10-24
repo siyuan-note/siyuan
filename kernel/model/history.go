@@ -411,7 +411,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 
 	tree.Box = boxID
 	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
-	tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+	tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 
 	if needResetTree {
 		resetTree(tree, "", true)
@@ -479,7 +479,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 	ReloadFiletree()
 	ReloadProtyle(rootID)
 
-	msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+	msg := fmt.Sprintf(Conf.Language(286), box.Name+tree.HPath)
 	util.PushMsg(msg, 7000)
 	IncSync()
 
@@ -505,7 +505,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 			"box":     boxID,
 			"id":      tree.Root.ID,
 			"path":    tree.Path,
-			"title":   tree.Root.IALAttr("title"),
+			"title":   treenode.ReadDocumentTitle(tree.Root).Text,
 			"empty":   "" != tree.Root.IALAttr(NodeAttrTitleEmpty),
 			"refText": refText,
 		}
@@ -686,6 +686,9 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	to := filepath.Join(util.DataDir, boxID)
 	if filelock.IsExist(to) {
 		return errors.New(Conf.Language(371))
+	}
+	if err = checkDocumentAddressingCopy(from, boxID); err != nil {
+		return
 	}
 	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
 	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
@@ -1375,7 +1378,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 			continue
 		}
 
-		title := tree.Root.IALAttr("title")
+		title := treenode.ReadDocumentTitle(tree.Root).Text
 		if "" == title {
 			title = Conf.language(16)
 		}

@@ -26,6 +26,7 @@
 }
 
 .mindmap-view {
+  --mindmap-node-text-color: initial;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -93,6 +94,8 @@
   }
 
   &.fullscreen &__toolbar,
+  &--locked &__toolbar,
+  &--pan &__toolbar,
   &--active &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
@@ -100,10 +103,14 @@
   }
 
   &.fullscreen &__toolbar .block__icon,
+  &--locked &__toolbar .block__icon,
+  &--pan &__toolbar .block__icon,
   &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
   &__toolbar:focus-within .block__icon,
   &.fullscreen &__toolbar-group,
+  &--locked &__toolbar-group,
+  &--pan &__toolbar-group,
   &--active &__toolbar-group,
   &:hover &__toolbar-group,
   &__toolbar:focus-within &__toolbar-group {
@@ -112,6 +119,7 @@
 
   &__toolbar-group {
     @include protyle-toolbar-surface($shadow: none);
+    position: relative;
     align-items: center;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -174,9 +182,9 @@
   }
 
   &__zoom-control {
-    position: relative;
     display: flex;
     align-items: center;
+    align-self: stretch;
     flex-shrink: 0;
     pointer-events: auto;
 
@@ -189,8 +197,8 @@
   &__zoom-actions {
     @include protyle-toolbar-surface;
     position: absolute;
-    top: 100%;
-    right: 0;
+    top: calc(100% - 4px);
+    right: 4px;
     display: none;
     align-items: center;
     gap: 8px;
@@ -239,22 +247,6 @@
     pointer-events: none;
   }
 
-  &__document-frame {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    box-sizing: border-box;
-    border: 2px dashed var(--b3-theme-primary);
-    color: var(--b3-theme-primary);
-    pointer-events: none;
-    z-index: 4;
-  }
-
-  &__viewport--summary {
-    cursor: crosshair;
-  }
-
   &__selection-box {
     position: absolute;
     pointer-events: none;
@@ -262,26 +254,6 @@
     background: var(--b3-theme-primary-lightest);
     box-sizing: border-box;
     z-index: 5;
-  }
-
-  &__summary-controls {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-
-    > span {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-  }
-
-  &__summary-actions {
-    display: flex;
-    flex-shrink: 0;
-    gap: 8px;
-    margin-left: auto;
   }
 
   &__viewport--pan {
@@ -385,6 +357,11 @@
       box-shadow: inset 0 0 0 2px var(--b3-theme-primary);
     }
 
+    &--drag-ready {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: 2px;
+    }
+
     &--dragging {
       opacity: .35;
       cursor: grabbing;
@@ -430,6 +407,18 @@
     min-height: 24px;
     overflow-wrap: anywhere;
 
+    // 公式整体换行，节点加宽后可恢复为一行，不拆开 KaTeX 内部的排版单元。
+    .mindmap-view & span[data-type~="inline-math"] {
+      display: inline-block;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
     .mindmap-view__node:not(.mindmap-view__node--editing) > &--empty:not(.mindmap-view__editor) {
       > * {
         display: none;
@@ -437,7 +426,7 @@
 
       &::before {
         content: attr(data-placeholder);
-        color: var(--b3-theme-on-surface-light);
+        color: var(--mindmap-node-text-color, var(--b3-theme-on-surface-light));
       }
     }
 
@@ -493,6 +482,17 @@
     }
   }
 
+  &__node--colored > .mindmap-view__content {
+    .bq,
+    .callout {
+      color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
+    }
+
+    .protyle-wysiwyg--empty:empty::before {
+      color: var(--mindmap-node-text-color, var(--b3-empty-color));
+    }
+  }
+
   &__node[data-task] {
     display: grid;
     // 空任务正文也保留输入宽度，确保光标能落入编辑器。
@@ -519,7 +519,7 @@
     border: 0;
     border-radius: var(--b3-border-radius);
     background: transparent;
-    color: var(--b3-theme-on-surface);
+    color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
     font: inherit;
     cursor: pointer;
     transition: var(--b3-transition);
@@ -859,6 +859,13 @@
     box-sizing: border-box;
     overflow-x: auto;
     overflow-y: hidden;
+    align-items: center;
+    flex-wrap: nowrap;
+
+    > button,
+    > select {
+      flex-shrink: 0;
+    }
   }
 
   &__relation-editor {
@@ -882,13 +889,11 @@
 
     .mindmap-view__palette {
       margin: 0;
-      flex-shrink: 0;
     }
+  }
 
-    > button,
-    > select {
-      flex-shrink: 0;
-    }
+  &__node-more {
+    order: 2;
   }
 
   &__tooltip {
@@ -911,6 +916,59 @@
   &__palette {
     display: flex;
     flex-wrap: nowrap;
+    order: 1;
+    min-width: 0;
+    overflow-x: auto;
+    flex-shrink: 1;
+
+    .color__square {
+      flex-shrink: 0;
+    }
+  }
+
+  &__node-width {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+
+    .b3-text-field {
+      width: 80px;
+    }
+
+    .b3-slider {
+      width: 100px;
+      min-width: 48px;
+      flex: 1;
+    }
+
+    .color__square {
+      flex-shrink: 0;
+    }
+  }
+
+  &__inspector-popover {
+    @include protyle-toolbar-surface;
+    position: absolute;
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100% - 16px);
+    padding: 8px;
+    box-sizing: border-box;
+    overflow: auto;
+
+    .mindmap-view__palette {
+      flex-wrap: wrap;
+      overflow: visible;
+      max-width: 320px;
+    }
+
+    .mindmap-view__node-width {
+      min-width: 0;
+      flex-shrink: 1;
+      flex-wrap: wrap;
+    }
   }
 
 }
@@ -931,13 +989,13 @@
     min-height: 0;
 
     &__toolbar,
-    &__document-frame,
     &__resize,
     &__inspector,
     &__tooltip,
     &__route-handle,
     &__route-status,
     &__selection-box,
+    &__inspector-popover,
     &__add-bridge,
     &__fold,
     &__add-child {

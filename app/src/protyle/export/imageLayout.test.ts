@@ -138,18 +138,25 @@ size-adjust: 85%;
     };
     const exported: {exportImage: (id: string, copyOnly?: boolean) => void} = new Function("exports", "require",
         `${exportSource}; return exports;`)({}, (name: string) => dependencies[name] || {});
-    const waitForActions = async (phase: string, timeout = 5000) => {
+    const waitForActions = async (phase: string, timeout = 15000) => {
         const started = Date.now();
-        while (Date.now() - started < timeout) {
+        while (true) {
             if (!document.body.contains(dialog.element) ||
                 !(dialog.element.querySelector('[data-type="copy"]') as HTMLButtonElement).disabled) {
                 return;
+            }
+            // 布局和字体处理可能阻塞计时器，恢复后先检查实际状态，再判断是否超时。
+            if (Date.now() - started >= timeout) {
+                break;
             }
             await new Promise(resolve => setTimeout(resolve, 10));
         }
         check.fail("Export actions did not become available: " + JSON.stringify({
             phase, elapsedMs: Date.now() - started, engine, mobile,
             visibility: document.visibilityState, messages, captured: !!captured,
+            copyDisabled: (dialog.element.querySelector('[data-type="copy"]') as HTMLButtonElement).disabled,
+            loading: !!dialog.element.querySelector(".fn__loading"),
+            fonts: document.fonts.status,
             table: dialog.element.querySelector("table")?.getBoundingClientRect().toJSON(),
         }));
     };
@@ -163,7 +170,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         captured = undefined;
         messages.length = 0;
         exported.exportImage("root", copyOnly);
-        await waitForActions(copyOnly ? "automatic copy" : "preview", copyOnly ? 15000 : 5000);
+        await waitForActions(copyOnly ? "automatic copy" : "preview");
         return dialog.element.querySelector<HTMLElement>(".b3-dialog__content");
     };
     const verifyCaptured = async () => {

@@ -190,6 +190,11 @@ let touchResizeHandle: HTMLElement | null = null;
 let touchResizeEdges: HTMLElement[] = [];
 let touchResizeInput = false;
 
+/// #if !MOBILE
+const blockPanelResizeSelector = ["rd", "ld", "rt", "lt", "r", "l", "t", "d"]
+    .map(direction => `.block__popover > .resize__${direction}`).join(", ");
+/// #endif
+
 const setTouchResizeInput = (touch: boolean) => {
     if (touchResizeInput === touch) {
         return;
@@ -210,6 +215,9 @@ const handleTouchStart = (e: TouchEvent) => {
         if (dragState?.gutterLongPress) {
             completeBridgeDrag(undefined, true);
         }
+        if (touchResizeHandle) {
+            cancelManualTouch();
+        }
         return;
     }
 
@@ -226,6 +234,19 @@ const handleTouchStart = (e: TouchEvent) => {
             target = resizeTarget;
         }
     }
+
+    let blockPanelHandle: HTMLElement | null = null;
+    /// #if !MOBILE
+    if (!isMouseInput(touch) && !target.closest(".block__popover")) {
+        // 首次触摸扩大外侧把手后重新命中，浮窗内部的正文和按钮仍使用原始目标。
+        target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest<HTMLElement>(
+            blockPanelResizeSelector,
+        ) || target;
+    }
+    blockPanelHandle = target.closest<HTMLElement>(
+        blockPanelResizeSelector + ", .block__popover > .block__icons > .resize__move",
+    );
+    /// #endif
 
     // 部分 Android WebView 会在鼠标 Pointer 事件后继续合成 Touch 事件，此时沿用候选状态并切换为 Touch 驱动。
     if (dragState?.inputType === "pointer" && isMouseInput(touch)) {
@@ -276,7 +297,7 @@ const handleTouchStart = (e: TouchEvent) => {
         return;
     }
     // 手动 mousedown 路径：dock / outline / resize 把手等自实现拖拽的区域
-    if (!target.closest(".dock") &&
+    if (!blockPanelHandle && !target.closest(".dock") &&
         // 弹窗内不能按整个 .b3-dialog 匹配，否则导致闪卡文本扩选失效 https://github.com/siyuan-note/siyuan/issues/18055
         !(target.closest(".b3-dialog") &&  ["resize__move", "resize__rd", "resize__r", "resize__rt",
             "resize__d", "resize__l", "resize__ld", "resize__lt", "resize__t"].some(cls => target.closest("." + cls))) &&
@@ -307,7 +328,7 @@ const handleTouchStart = (e: TouchEvent) => {
     target.dispatchEvent(mouseEvent);
     // 仅在触摸命中可操作边界后提示，不改变鼠标反馈或内容区的长按行为。
     if (!isMouseInput(touch) && document.onmousemove) {
-        touchResizeHandle = target.closest<HTMLElement>(
+        touchResizeHandle = blockPanelHandle || target.closest<HTMLElement>(
             ".layout__resize, .layout__dockresize, " +
             ".b3-dialog .resize__rd, .b3-dialog .resize__ld, .b3-dialog .resize__rt, " +
             ".b3-dialog .resize__lt, .b3-dialog .resize__r, .b3-dialog .resize__l, " +
@@ -1183,6 +1204,9 @@ const handleVisibilityChange = () => {
     }
     completeBridgeDrag(undefined, true);
     cleanupForeignDrag("end");
+    if (touchResizeHandle) {
+        cancelManualTouch();
+    }
 };
 
 const handleCancel = () => {

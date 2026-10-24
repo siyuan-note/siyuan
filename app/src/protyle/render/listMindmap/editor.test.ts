@@ -139,13 +139,12 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                 };
             },
             bindLiteCodeActions: noop,
-            uploadFiles: (target: typeof protyle, files: File[], _element: unknown, _success: unknown,
-                          _complete: unknown, options: {source: string}) => {
+            paste: (target: typeof protyle, data: {files?: File[], target: HTMLElement}) => {
                 check.equal(target, protyle);
-                check.equal(options.source, "paste");
+                check.equal(data.target, wysiwyg);
                 check.equal(target.block.rootID, rootID);
                 check.equal(target.toolbar.range, undefined);
-                state.uploads.push(files);
+                state.uploads.push(data.files);
             },
             setMobileToolbarUndo: noop,
             getDefaultToolbar: (): unknown[] => [],
@@ -315,7 +314,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
 
     const imageEditor = create(paragraph("body", "Keep text"));
     const images = [new File(["image"], "image.png", {type: "image/png"})];
-    imageEditor.editor.pasteImages(images);
+    imageEditor.editor.pasteClipboard({files: images});
     check.equal(imageEditor.state.focusedText, "Keep text");
     check.deepEqual(imageEditor.state.uploads, [images]);
     check.equal(imageEditor.wysiwyg.textContent, "Keep text");
@@ -328,7 +327,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     imageEditor.protyle.upload.isUploading = false;
     check.equal(await imageEditor.editor.finish(), true);
     check.equal(imageEditor.element.querySelector("img").getAttribute("src"), "assets/image.png");
-    imageEditor.editor.pasteImages(images);
+    imageEditor.editor.pasteClipboard({files: images});
     check.equal(imageEditor.state.uploads.length, 1, "closed editors do not accept another upload");
     await imageEditor.remove();
     for (const resized of [false, true]) {

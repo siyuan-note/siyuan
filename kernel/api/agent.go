@@ -267,6 +267,18 @@ func agentChatConfirmContract(c *gin.Context, req apicontract.AIConfirmRequest) 
 
 var setAgentSessionPermission = contractHandler(apicontract.AIAgentSetPermission, setAgentSessionPermissionContract)
 
+var setAgentSessionPinned = contractHandler(apicontract.AISetSessionPinned, setAgentSessionPinnedContract)
+
+func setAgentSessionPinnedContract(c *gin.Context, req apicontract.AISessionPinnedRequest) apicontract.Response[apicontract.AISessionPinnedData] {
+	pinnedAt, err := agent.SetSessionPinned(req.ID, req.Pinned)
+	if err != nil {
+		return apicontract.Failure[apicontract.AISessionPinnedData](-1, err.Error())
+	}
+	return apicontract.WithAfterWrite(apicontract.Success(apicontract.AISessionPinnedData{PinnedAt: pinnedAt}), func() {
+		broadcastAgentSessionChanged(c.GetHeader("X-SiYuan-App-ID"), req.ID, "pin")
+	})
+}
+
 func setAgentSessionPermissionContract(c *gin.Context, req apicontract.AIPermissionRequest) apicontract.Response[apicontract.AIPermissionData] {
 	ret := gulu.Ret.NewResult()
 	if err := agent.SetSessionPermissionMode(req.SessionID, req.PermissionMode); err != nil {

@@ -19,6 +19,7 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
+	LockScreenWallpaper      bool                `json:"lockScreenWallpaper"`      // 使用本工作空间的单张锁屏壁纸
 	CompactMode              bool                `json:"compactMode"`              // 桌面端紧凑模式
 	MenuMouseScroll          bool                `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
 	PDFTheme                 *PDFTheme           `json:"pdfTheme"`                 // PDF 阅读主题与标注颜色
@@ -86,6 +87,7 @@ func NewAppearance() *Appearance {
 // NewAppearanceForContainer 使用显式容器参数选择状态栏默认项。
 func NewAppearanceForContainer(mobile bool) *Appearance {
 	return &Appearance{
+		LockScreenWallpaper: false,
 		MenuMouseScroll:     true,
 		PDFTheme:            NewPDFTheme(),
 		MobileBars:          NewMobileBars(),

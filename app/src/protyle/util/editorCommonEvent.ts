@@ -1986,12 +1986,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    // 列表块横向拖拽或在横排超级块内重排时，目标列表本身是列单元，需保留完整列表。
+                    // 完整列表的边界指示表示块间插入；列表项的同级、子级指示才表示合并到列表内。
                     const isColSbChildList = targetElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement?.getAttribute("data-sb-layout") === "col";
-                    const isHorizontalDrop = targetClass.includes("dragover__left") ||
-                        targetClass.includes("dragover__right");
-                    const keepListBlockTarget = shouldKeepListBlockDragTarget(gutterTypes[0], isHorizontalDrop,
+                    const keepListBlockTarget = shouldKeepListBlockDragTarget(gutterTypes[0], targetClass,
                         isColSbChildList);
                     if (isListItemSource && targetElement.classList.contains("list") &&
                         !keepListBlockTarget) {

@@ -50,6 +50,7 @@ import {beginPerformance} from "./performance";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 import {pauseMobileBarsScroll} from "../../mobile/util/mobileBars";
+import {updateMobileBottomBacklinkPanel} from "../../mobile/util/bottomBacklink";
 /// #endif
 
 export const onGet = (options: {
@@ -69,6 +70,7 @@ export const onGet = (options: {
     suppressFocus?: boolean,
 }) => {
     if (options.isValid && !options.isValid()) {
+        options.onAVRenderError?.();
         return;
     }
     if (!options.action) {
@@ -200,6 +202,7 @@ export const onGet = (options: {
 
     const renderDoc = (response: IWebSocketData) => {
         if (options.isValid && !options.isValid()) {
+            options.onAVRenderError?.();
             return;
         }
         if (options.protyle.options.render.title) {
@@ -266,6 +269,7 @@ const setHTML = (options: {
     isValid?: () => boolean,
 }, protyle: IProtyle) => {
     if (options.isValid && !options.isValid()) {
+        options.onAVRenderError?.();
         return;
     }
     if (!options.isSyncing && migrateLegacyMindmapsBeforeRender(protyle, options.content, options.action || [], content => {
@@ -274,6 +278,7 @@ const setHTML = (options: {
         return;
     }
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
+        options.onAVRenderError?.();
         return;
     }
     const timing = beginPerformance("editor.content");
@@ -414,6 +419,7 @@ const setHTML = (options: {
             if (rendered && (!options.isValid || options.isValid())) {
                 return options.afterAVRender?.();
             }
+            options.onAVRenderError?.();
         }).catch(error => {
             console.error(error);
             options.onAVRenderError?.();
@@ -495,6 +501,11 @@ const setHTML = (options: {
             protyle.breadcrumb.toggleExit(!options.action.includes(Constants.CB_GET_ALL));
             protyle.breadcrumb.render(protyle);
         }
+        /// #if MOBILE
+        if (window.siyuan.mobile?.editor?.protyle === protyle) {
+            void updateMobileBottomBacklinkPanel(protyle).catch(error => console.error(error));
+        }
+        /// #endif
         if (options.afterCB) {
             options.afterCB();
         }

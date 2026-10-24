@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20261018005815"
+		"updated": "20261021111316"
 	},
 	"Children": [
 		{
@@ -1350,12 +1350,40 @@
 			"Properties": {
 				"ID": "20240530101000-xkwaw8d",
 				"id": "20240530101000-r8dsete",
-				"updated": "20261016202856"
+				"updated": "20261021111316"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "データリポジトリキーをなくしたら？"
+				}
+			]
+		},
+		{
+			"ID": "20261021111316-0db9udw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021111316-0db9udw",
+				"updated": "20261021111316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データリポジトリキーはスナップショットと同期データを保護するもので、暗号化ノートブックのマスターパスワードやキーバックアップとは別のものです。データリポジトリをリセットしても、紛失したマスターパスワードを復元したり、対応する暗号化キーのバックアップを代替したりすることはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20261021111316-4azknzb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021111316-4azknzb",
+				"updated": "20261021111316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リセット前に思源を正常に終了し、ワークスペース全体をバックアップしてください。暗号化ノートブックがある場合は、対応する暗号化キーのバックアップを別途保存し、マスターパスワードが使えることを確認してください。古い同期ディレクトリとクラウドスナップショットは、新しい同期の完了、データの完全性、復元に必要な情報の保管を確認してから、必要に応じて削除してください。"
 				}
 			]
 		},
@@ -1371,7 +1399,7 @@
 			"Properties": {
 				"ID": "20240530101000-86x5uzc",
 				"id": "20240530101000-uqxlw8g",
-				"updated": "20261016202856"
+				"updated": "20261021111316"
 			},
 			"Children": [
 				{
@@ -1387,7 +1415,7 @@
 					"Properties": {
 						"ID": "20240530101000-19bohb0",
 						"id": "20240530101000-qwvljpb",
-						"updated": "20261016202856"
+						"updated": "20261021111316"
 					},
 					"Children": [
 						{
@@ -1396,7 +1424,7 @@
 							"Properties": {
 								"ID": "20240530101000-l1h5udu",
 								"id": "20240530101000-sa4zw1a",
-								"updated": "20261016202856"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1410,16 +1438,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "情報"
+									"TextMarkTextContent": "アカウントと同期"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データリポジトリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1428,7 +1465,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1457,7 +1494,7 @@
 					"Properties": {
 						"ID": "20240530101000-508zmqc",
 						"id": "20240530101000-idjxzo9",
-						"updated": "20261016202856"
+						"updated": "20261021111316"
 					},
 					"Children": [
 						{
@@ -1466,7 +1503,7 @@
 							"Properties": {
 								"ID": "20240530101000-tspwa80",
 								"id": "20240530101000-z69cpib",
-								"updated": "20240530101000"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1490,7 +1527,7 @@
 							"Properties": {
 								"ID": "20240530101000-kiyyp29",
 								"id": "20240530101000-bkcq3ah",
-								"updated": "20261016202856"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1509,7 +1546,7 @@
 									"Properties": {
 										"ID": "20240530101000-m67unc5",
 										"id": "20240530101000-j626kwo",
-										"updated": "20261016191102"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1518,53 +1555,12 @@
 											"Properties": {
 												"ID": "20240530101000-l0xrhri",
 												"id": "20240530101000-f7nk7ay",
-												"updated": "20261016191102"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "設定"
-												},
-												{
 													"Type": "NodeText",
-													"Data": " - "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "アプリ"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " - "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "データ"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " - "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "エクスポート Data"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " からデータをバックアップするか、ファイルシステムの "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "workspace/data/"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " フォルダをコピーします"
+													"Data": "思源を正常に終了してワークスペース全体をバックアップし、暗号化ノートブックがある場合は対応する暗号化キーのバックアップとマスターパスワードも保管する"
 												}
 											]
 										}
@@ -1586,7 +1582,7 @@
 									"Properties": {
 										"ID": "20240530101000-y8ykhvp",
 										"id": "20240530101000-nbh4zn7",
-										"updated": "20261016202856"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1595,7 +1591,7 @@
 											"Properties": {
 												"ID": "20240530101000-zl7ne0h",
 												"id": "20240530101000-2bzatij",
-												"updated": "20261016202856"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
@@ -1609,21 +1605,39 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "情報"
+													"TextMarkTextContent": "アカウントと同期"
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ - "
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "データリポジトリ"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
 													"TextMarkTextContent": "データリポジトリキー"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "データリポジトリのリセット"
 												},
 												{
 													"Type": "NodeText",
@@ -1649,7 +1663,7 @@
 									"Properties": {
 										"ID": "20240530101000-ziowgm5",
 										"id": "20240530101000-shu4th0",
-										"updated": "20261016202856"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1658,7 +1672,7 @@
 											"Properties": {
 												"ID": "20240530101000-glsf17c",
 												"id": "20240530101000-au0mf5v",
-												"updated": "20261016202856"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
@@ -1685,7 +1699,7 @@
 									"Properties": {
 										"ID": "20240530101000-725q7r8",
 										"id": "20240530101000-fl0ix0m",
-										"updated": "20261016202856"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1694,12 +1708,12 @@
 											"Properties": {
 												"ID": "20240530101000-cv34uf4",
 												"id": "20240530101000-91zw5g6",
-												"updated": "20261016202856"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "クラウドでは新しい同期ディレクトリが使用され、古い同期ディレクトリは削除できます"
+													"Data": "クラウドで新しい同期ディレクトリを使用し、新しい同期の完了、データの完全性、復元に必要な情報の保管を確認してから、必要に応じて古いディレクトリを削除する"
 												}
 											]
 										}
@@ -1721,7 +1735,7 @@
 									"Properties": {
 										"ID": "20240530101000-42rthkp",
 										"id": "20240530101000-lcrcoyt",
-										"updated": "20261016202856"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1730,12 +1744,12 @@
 											"Properties": {
 												"ID": "20240530101000-qmq7x4y",
 												"id": "20240530101000-rhl7rel",
-												"updated": "20261016202856"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "クラウドでは新しいクラウドスナップショットが使用され、古いクラウドスナップショットは削除できます"
+													"Data": "新しい同期の完了、データの完全性、復元に必要な情報の保管を確認してから、必要に応じて古いクラウドスナップショットを削除する"
 												}
 											]
 										}

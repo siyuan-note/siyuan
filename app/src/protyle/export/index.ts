@@ -540,7 +540,7 @@ const renderPDF = async (id: string) => {
 </div>
 <div id="previewContainer">
     <div style="zoom:${localData.scale || 1}" id="preview">
-        <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>
+        <div class="fn__loading" style="left:0;height:100vh"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>
     </div>
 </div>
 ${getIconScript(servePath)}
@@ -840,7 +840,7 @@ ${getIconScript(servePath)}
         const refreshPreview = () => {
             const revision = ++previewRevision;
             actionElement.querySelector('.b3-button--text').disabled = true;
-            previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>'
+            previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>'
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
                 keepJSEmbed: true,

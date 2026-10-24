@@ -1,5 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
-import {copyBlockSelection} from "../util/blockClipboard";
+import {copyBlockSelection, cutBlockSelection} from "../util/blockClipboard";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -46,6 +46,7 @@ import {hideElements} from "../ui/hideElements";
 import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
+import {EMBED_BREADCRUMB_PARENT_PATH} from "../render/embedBreadcrumb";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
@@ -1391,7 +1392,7 @@ export class Gutter {
                 icon: "iconCut",
                 click: () => {
                     focusBlock(selectsElement[0]);
-                    document.execCommand("cut");
+                    cutBlockSelection(selectsElement[0]);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2051,7 +2052,7 @@ export class Gutter {
                 accelerator: "⌘X",
                 click: () => {
                     focusBlock(nodeElement);
-                    document.execCommand("cut");
+                    cutBlockSelection(nodeElement);
                 }
             }).element);
         }
@@ -2545,6 +2546,20 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                             window.siyuan.menus.menu.remove();
                         });
+                    }
+                }, {
+                    id: "embedBlockBreadcrumbParentPath",
+                    label: window.siyuan.languages.embedBlockBreadcrumbParentPath,
+                    iconHTML: "",
+                    checked: nodeElement.getAttribute(EMBED_BREADCRUMB_PARENT_PATH) !== "false",
+                    click() {
+                        const value = (nodeElement.getAttribute(EMBED_BREADCRUMB_PARENT_PATH) === "false").toString();
+                        nodeElement.setAttribute(EMBED_BREADCRUMB_PARENT_PATH, value);
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id, attrs: {[EMBED_BREADCRUMB_PARENT_PATH]: value}
+                        });
+                        nodeElement.removeAttribute("data-render");
+                        blockRender(protyle, nodeElement);
                     }
                 }, {
                     id: "headingEmbedMode",
@@ -4014,8 +4029,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 horizontalAnchorLeft = action.getBoundingClientRect().left;
                 space = 0;
             }
-        }
-        if (listItem && element.classList.contains("protyle-action") &&
+        } else if (listItem && element.classList.contains("protyle-action") &&
             element.parentElement.getAttribute("data-type") === "NodeListItem") {
             const listItemElement = element.parentElement;
             const contentElement = listItemElement.querySelector<HTMLElement>(":scope > [data-node-id]");

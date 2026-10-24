@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261019222954"
+		"updated": "20261023005737"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-0kg9iaq",
-				"updated": "20261019222954"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260926163337-jwclkdq",
-				"updated": "20261019222954"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
@@ -232,12 +232,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-kr7adcx",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "指令保存在工作空间的 data/ai/AGENTS.md 中，支持最多 32 KiB 的 UTF-8 文本。启用数据同步且未被同步忽略规则排除时，该文件随工作空间同步。也可以使用文本编辑器直接编辑文件；文件不存在或为空时不添加自定义指令。"
+					"Data": "指令保存在工作空间的 data/storage/ai/AGENTS.md 中，支持最多 32 KiB 的 UTF-8 文本。启用数据同步且未被同步忽略规则排除时，该文件随工作空间同步。也可以使用文本编辑器直接编辑文件；文件不存在或为空时不添加自定义指令。旧路径 data/ai/AGENTS.md 仍可读取，在设置中保存时迁移到新位置；如有针对旧路径的同步忽略规则，请在保存前更新。若两处文件内容不同，请将内容合并到新文件并移除旧文件后再继续。"
 				}
 			]
 		},
@@ -496,7 +496,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20260820190627"
+				"updated": "20261023005737"
 			},
 			"Children": [
 				{
@@ -547,6 +547,79 @@
 				{
 					"Type": "NodeText",
 					"Data": "智能体运行时可以点击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-g6vs2ax",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-g6vs2ax",
+				"updated": "20261023005737"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入框随文字和图片自动增高，达到高度上限后滚动。桌面端将鼠标移入输入区域后显示顶部的小把手，触屏设备上保持显示。向上或向下拖动把手可调整上限，双击把手可恢复自动上限。内容首尾保留滚动余量，便于完整查看首行和末行。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-hm91uco",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-hm91uco",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高度把手获得键盘焦点后，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 增大或减小上限，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调至最小高度，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调至当前可用的最大高度；拖动过程中按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可取消调整。"
 				}
 			]
 		},

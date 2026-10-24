@@ -303,6 +303,8 @@ if (response.code === 0 && response.data) {
 
 ### 获取笔记本配置
 
+管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告寻址模式、结构化接口支持、标题能力、索引状态及已验证的最低兼容功能版本。普通构建默认自动迁移笔记本，无需设置开关或额外编译参数；`literalSlash` 要求模式 `2`、模式记录一致且索引就绪。最低兼容功能发行版尚未验证时，`minimumReaderVersion` 为 `null`；该字段仅提供信息，不控制功能启用，也不表示允许与旧客户端混用。使用前须将所有同步设备统一升级到支持本次功能的版本。既有权限过滤保持不变。
+
 * `/api/notebook/getNotebookConf`
 * 参数
 
@@ -333,6 +335,8 @@ if (response.code === 0 && response.data) {
     }
   }
   ```
+
+管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`literalSlash` 在模式 `2`、模式记录一致且索引就绪时为 `true`。最低兼容功能发行版尚未验证时，`minimumReaderVersion` 为 `null`；该字段仅提供信息，不控制功能启用，也不表示允许与旧客户端混用。使用前须将所有同步设备统一升级到支持本次功能的版本。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
 
 ### 保存笔记本配置
 
@@ -374,6 +378,8 @@ if (response.code === 0 && response.data) {
 ## 文档
 
 ### 通过 Markdown 创建文档
+
+这是仅在兼容模式可用的旧名称路径接口。普通构建默认自动迁移笔记本到结构化标题模式，该接口对整个笔记本返回 `code: -1`、`data: {reason: "legacyPathUnsupported"}`，即使标题普通或提供了 `parentID`。请改用 `/api/filetree/createDocByParent`，分别传入父身份和标题。下面的示例描述兼容模式行为。
 
 * `/api/filetree/createDocWithMd`
 * 参数
@@ -756,6 +762,8 @@ if (response.code === 0 && response.data) {
   ```
 
 ### 根据人类可读路径获取 IDs
+
+普通构建默认自动迁移笔记本到结构化标题模式，该旧接口对整个笔记本返回 `code: -1`、`data: {reason: "legacyPathUnsupported"}`。已知文档 ID 时直接使用；未知位置请通过 `/api/filetree/resolveDocPath` 传入明确的标题段。显示路径无法区分单标题 `A/B` 与两级 `A`、`B`。下面的示例适用于兼容模式。
 
 * `/api/filetree/getIDsByHPath`
 * 参数
@@ -1294,6 +1302,9 @@ if (response.code === 0 && response.data) {
   ```
 
     * `stmt`：SQL 脚本
+    * `mode`：可选模式，省略、`null` 或 `""` 允许单条读写语句；`"readonly"` 仅允许单条只读 `SELECT` 或 `WITH` 查询；`"multiple"` 按顺序执行多条语句并返回最后一条的结果
+
+没有结果列的语句（包括 `INSERT`、`UPDATE`、`DELETE` 和 DDL）也会执行，成功时返回 `data: []`；`RETURNING` 保留结果行。校验失败返回 `code: -1`，执行失败返回 `code: 1`。多语句在首次失败时停止，已完成的写入不会自动回滚。直接 SQL 写入作用于派生索引库，不会更新源文档，也不维护全文索引和块缓存；编辑文档内容请使用块接口。
 
 未显式指定外层 `LIMIT` 时，默认最多返回 `search.limit` 行，即设置中的搜索结果条数。因此，请使用显式的 `LIMIT` 和 `OFFSET` 分页，并采用稳定且唯一的排序，例如 `ORDER BY hpath, id`。显式外层 `LIMIT` 会覆盖默认限制，可以大于 `search.limit`。
 
@@ -1481,6 +1492,13 @@ if (response.code === 0 && response.data) {
 ### 写入文件
 
 * `/api/file/putFile`
+
+笔记本寻址模式不受支持时返回 `code: -1`，不会创建目录、写入内容或更新时间。此接口不能覆盖本机 `conf/document-addressing.json` 能力记录。
+
+写入由笔记本及文档 ID 组成的 `.sy` 文档路径时，同时检查传入内容和已有文档。未知格式、损坏的文档源或标题与兼容模式冲突时返回 `code: -1`，保留原文件及修改时间；成功写入保留请求中的原始字节，不规范化标题。附件或插件目录中的 `.sy` 文件不作为文档解析。
+
+新传入的标题含 ASCII `/` 时，必须声明 `Spec` 至少为 `6`，否则返回 `code: -1`、`msg: "document title requires spec 6"`，不自动改写内容。已有低 Spec 源仍可读取，也可以由版本标记合法的内容替换。
+
 * 参数为 HTTP Multipart 表单
 
     * `path`：工作空间路径下的文件路径
@@ -1500,6 +1518,8 @@ if (response.code === 0 && response.data) {
 ### 删除文件
 
 * `/api/file/removeFile`
+
+笔记本寻址模式不受支持时，部分删除返回 `code: -1`；整本删除保留本机已确认的能力要求。禁止删除 `conf/document-addressing.json` 或其父目录，既有加密笔记本限制继续生效。
 * 参数
 
   ```json
@@ -1521,6 +1541,13 @@ if (response.code === 0 && response.data) {
 ### 重命名文件
 
 * `/api/file/renameFile`
+
+创建目标目录或移动文件之前会检查完整操作的笔记本寻址兼容性。不支持的模式，以及移动或覆盖 `conf/document-addressing.json` 的操作，返回 `code: -1`。
+
+目标包含由笔记本及文档 ID 组成的 `.sy` 文档路径时，也会预检全部传入文档；未知格式、损坏的文档源或标题冲突返回 `code: -1`，不创建目标目录，也不移动来源。
+
+新移入的标题含 ASCII `/` 时，必须声明 `Spec` 至少为 `6`，否则返回 `code: -1`、`msg: "document title requires spec 6"`，保留来源和目标。
+
 * 参数
 
   ```json
@@ -2219,7 +2246,7 @@ if (response.code === 0 && response.data) {
 
     * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
 
-    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1` 至 `4`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。自动收集只添加条目，原文变化及规则条件、范围、对象或启用状态变化均保留已有条目和字段，再次匹配仍使用原条目。主动清理按全部启用的收集规则统一检查手动和自动绑定条目，保留匹配或无法判断的条目，执行前复查后仅移出确认不匹配的条目；撤销恢复原条目及全部字段。 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。 每条规则的可选 `notifyOnSuccess` 缺省或 `null` 为 `true`，实际变更在事务提交成功后合并通知；关闭不影响错误提示。无变化、手动收集、撤销重做及回滚事务不发送成功通知。 格式 4 增加可选的 `blockSource.tagTarget`：缺省或空字符串使用默认选择，优先收集合格列表项而非其首个内容块，`block` 收集标签所在块，`container` 选择最近的符合类型和属性条件的容器并按块 ID 去重；文档需显式选择 `d`。全部标签须在同一个来源块中，无标签条件时此选项不影响筛选。预览与实际收集对象一致，切换保留已有条目及字段。
+    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1` 至 `7`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。自动收集只添加条目，原文变化及规则条件、范围、对象或启用状态变化均保留已有条目和字段，再次匹配仍使用原条目。主动清理按全部启用的收集规则统一检查手动和自动绑定条目，保留匹配或无法判断的条目，执行前复查后仅移出确认不匹配的条目；撤销恢复原条目及全部字段。 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。 每条规则的可选 `notifyOnSuccess` 缺省或 `null` 为 `true`，实际变更在事务提交成功后合并通知；关闭不影响错误提示。无变化、手动收集、撤销重做及回滚事务不发送成功通知。 格式 4 增加可选的 `blockSource.tagTarget`：缺省或空字符串使用默认选择，优先收集合格列表项而非其首个内容块，`block` 收集标签所在块，`container` 选择最近的符合类型和属性条件的容器并按块 ID 去重；文档需显式选择 `d`。全部标签须在同一个来源块中，无标签条件时此选项不影响筛选。预览与实际收集对象一致，切换保留已有条目及字段。 格式 5 增加可选的 `blockSource.documentDepth`：缺省或 `null` 表示不限，`0` 仅包含每个选中文档本身，`1` 还包含一级子文档，其他非负整数指定最大相对后代深度。该设置统一限制文档范围，不影响笔记本范围，各范围仍取并集。修改深度保留已有条目和字段，不自动补收存量内容。 格式 6 为每条属性条件增加可选的 `nameOperator`：缺省、空字符串或 `equals` 保持完整名称精确匹配，`contains` 按字面子串匹配且无需输入 `custom-` 前缀，`regex` 使用 Go 正则语法匹配包含该前缀的完整名称。仅匹配自定义属性，名称和值区分大小写，且必须由同一条属性同时满足；`exists` 要求至少一个名称匹配，`notExists` 要求没有名称匹配，两者忽略属性值。名称模式最多 256 字节，非法正则拒绝保存。既有格式 1–5 的行为保持不变，旧读取器拒绝格式 6 且不改写数据库。 格式 7 增加可选的 `blockSource.includeSelectedDocuments`：缺省、`null` 或 `true` 包含每个所选文档自身；`false` 排除该文档及其内部所有块，子文档仍按 `documentDepth` 匹配。该设置由所有文档范围共用，不影响笔记本范围或其他重叠文档范围，各范围仍取并集。`false` 与深度 `0` 组合时，对应文档范围为空。修改后保留已有条目和字段，不自动补收或移出。格式 1–6 仍可读取，旧读取器拒绝格式 7 且不改写数据库。
 
 ### 获取主键值
 

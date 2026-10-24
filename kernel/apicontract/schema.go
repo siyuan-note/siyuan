@@ -162,6 +162,9 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 	if schema, err := avPayloadSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
 	}
+	if schema, err := documentAddressingSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
 	if t == reflect.TypeFor[PluginRPCMessage]() {
 		response, err := b.schema(reflect.TypeFor[PluginRPCResponse](), false)
 		if err != nil {

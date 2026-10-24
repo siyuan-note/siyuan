@@ -325,7 +325,7 @@ func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 	// Virtual references exclude the name and aliases from the current document https://github.com/siyuan-note/siyuan/issues/9204
-	title := root.IALAttr("title")
+	title := treenode.ReadDocumentTitle(root).Text
 	ret = gulu.Str.ExcludeElem(ret, []string{title})
 	if name := root.IALAttr("name"); "" != name {
 		ret = gulu.Str.ExcludeElem(ret, []string{name})

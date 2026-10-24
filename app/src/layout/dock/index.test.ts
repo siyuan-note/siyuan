@@ -41,6 +41,9 @@ const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLa
             if (name.endsWith("/panelTransition")) {
                 return {bindPanelTransitionGuard() {}};
             }
+            if (name.endsWith("/barVisibility")) {
+                return {syncDockBarVisibility() {}};
+            }
             return {};
         },
     });

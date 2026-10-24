@@ -30,7 +30,7 @@ func SearchExactRefDocTitle(id, rootID, title, boxID string) (blocks []*Block, n
 	if err != nil {
 		return nil, false, err
 	}
-	if tree == nil || !strings.EqualFold(tree.Root.IALAttr("title"), title) {
+	if tree == nil || !strings.EqualFold(treenode.ReadDocumentTitle(tree.Root).Text, title) {
 		return nil, false, fmt.Errorf("document [%s] title index is outdated", targetID)
 	}
 	block := fromSQLBlock(sql.BuildBlockFromNode(tree.Root, tree), "", 0)

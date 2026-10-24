@@ -16,9 +16,9 @@ import (
 )
 
 func TestAPIContractSystemExportSecrets(t *testing.T) {
-	previousConf, previousTemp := model.Conf, util.TempDir
-	t.Cleanup(func() { model.Conf, util.TempDir = previousConf, previousTemp })
-	util.TempDir = t.TempDir()
+	previousConf, previousTemp, previousConfDir := model.Conf, util.TempDir, util.ConfDir
+	t.Cleanup(func() { model.Conf, util.TempDir, util.ConfDir = previousConf, previousTemp, previousConfDir })
+	util.TempDir, util.ConfDir = t.TempDir(), t.TempDir()
 	for _, populated := range []bool{true, false} {
 		model.Conf = model.NewAppConf()
 		if populated {

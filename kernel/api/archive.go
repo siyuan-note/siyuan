@@ -145,6 +145,9 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.Null](ret)
 	}
+	if err = model.CheckDocumentAddressingFileWrite(resolvedZipPath, nil, false); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
 	zipFile, err := gulu.Zip.Create(resolvedZipPath)
 	if err != nil {
 		logging.LogErrorf("create zip [%s] failed: %s", zipAbsFilePath, err)
@@ -244,13 +247,53 @@ func unzipWorkspaceArchive(zipPath, destination string) error {
 		if err = validateArchiveEntryPath(destination, paths[i]); err != nil {
 			return err
 		}
+		if entry.FileInfo().IsDir() {
+			if err = model.CheckDocumentAddressingFileWrite(paths[i], nil, true); err != nil {
+				return err
+			}
+		}
+	}
+	// 解压到隔离目录后预检整个写入集合，拒绝未知模式或源格式时不创建目标目录。
+	staging, err := os.MkdirTemp("", "siyuan-archive-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(staging)
+	sources := make([]string, len(reader.File))
+	var copySources, copyDestinations []string
+	for i, entry := range reader.File {
+		if entry.FileInfo().IsDir() {
+			continue
+		}
+		sources[i] = filepath.Join(staging, fmt.Sprint(i))
+		if err = extractWorkspaceArchiveEntry(entry, sources[i]); err != nil {
+			return err
+		}
+		copySources = append(copySources, sources[i])
+		copyDestinations = append(copyDestinations, paths[i])
+	}
+	if err = model.CheckDocumentAddressingFileCopies(copySources, copyDestinations); err != nil {
+		return err
 	}
 	for i, entry := range reader.File {
 		// 解压前再次检查已有符号链接和加密身份，不复用预检阶段的路径判定结果。
 		if err = validateArchiveEntryPath(destination, paths[i]); err != nil {
 			return err
 		}
-		if err = extractWorkspaceArchiveEntry(entry, paths[i]); err != nil {
+		if entry.FileInfo().IsDir() {
+			err = model.CheckDocumentAddressingFileWrite(paths[i], nil, true)
+			if err == nil {
+				err = os.MkdirAll(paths[i], 0755)
+			}
+		} else {
+			if err = model.CheckDocumentAddressingFileCopies([]string{sources[i]}, []string{paths[i]}); err == nil {
+				err = os.MkdirAll(filepath.Dir(paths[i]), 0755)
+			}
+			if err == nil {
+				err = model.CopyFileWithDocumentAddressing(sources[i], paths[i])
+			}
+		}
+		if err != nil {
 			return err
 		}
 	}

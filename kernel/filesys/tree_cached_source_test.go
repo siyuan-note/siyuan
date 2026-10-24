@@ -2,13 +2,16 @@ package filesys
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -107,5 +110,71 @@ func TestCachedTreeSourceRetainsFallbackAndAuthorization(t *testing.T) {
 	DEKProvider = func(string) ([]byte, error) { return nil, locked }
 	if _, err := CaptureCachedTreeSource(boxID, p); !errors.Is(err, locked) {
 		t.Fatalf("cache capture bypassed authorization: %v", err)
+	}
+}
+
+func TestCachedTreeSourceCapturesModeWithoutReusingItForNewAccess(t *testing.T) {
+	boxID, id, _, _ := setupStalePathTest(t)
+	previousConfDir := util.ConfDir
+	util.ConfDir = t.TempDir()
+	t.Cleanup(func() { util.ConfDir = previousConfDir })
+	writeStalePathFixture(t, boxID, documentaddressing.ConfigPath, []byte(`{"documentAddressingVersion":2}`))
+	p := "/" + id + ".sy"
+	tree := treenode.NewTree(boxID, p, "/Captured/title", "Captured/title")
+	if _, err := WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	waitForCachedSource(t, boxID, id)
+	source, err := CaptureCachedTreeSource(boxID, p)
+	if err != nil || source == nil {
+		t.Fatalf("could not capture mode 2 source: %v", err)
+	}
+	filePath := filepath.Join(util.DataDir, boxID, p)
+	original, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 已捕获的来源只按捕获时的能力解析，下一次来源访问仍检查当前能力。
+	writeStalePathFixture(t, boxID, documentaddressing.ConfigPath, []byte(`{"documentAddressingVersion":3}`))
+	luteEngine := util.NewLute()
+	captured, err := source.Parse(luteEngine)
+	if err != nil || captured.Root.Spec != treenode.DocumentTitleSpec || captured.Root.IALAttr("title") != "Captured/title" {
+		t.Fatalf("captured source changed with later notebook metadata: %v", err)
+	}
+	for _, access := range []struct {
+		name string
+		run  func() error
+	}{
+		{"capture", func() error { _, err := CaptureCachedTreeSource(boxID, p); return err }},
+		{"cached load", func() error { _, err := LoadTree(boxID, p, luteEngine); return err }},
+		{"data load", func() error { _, err := LoadTreeByData(source.data, boxID, p, luteEngine); return err }},
+		{"snapshot load", func() error { _, _, err := LoadTreeSnapshot(boxID, p, luteEngine); return err }},
+		{"header load", func() error { _, err := DocIAL(filePath); return err }},
+		{"write", func() error { _, err := WriteTree(captured); return err }},
+	} {
+		t.Run(access.name, func(t *testing.T) {
+			if err := access.run(); !errors.Is(err, documentaddressing.ErrUnsupported) {
+				t.Fatalf("new access reused an earlier addressing check: %v", err)
+			}
+		})
+	}
+	if got, err := os.ReadFile(filePath); err != nil || !bytes.Equal(got, original) {
+		t.Fatalf("rejected access changed source bytes: %v", err)
+	}
+
+	// 捕获能力不会绕过源格式校验。
+	var document map[string]any
+	if err = json.Unmarshal(source.data, &document); err != nil {
+		t.Fatal(err)
+	}
+	document["Spec"] = "999"
+	unsupported := *source
+	unsupported.data, err = json.Marshal(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = unsupported.Parse(luteEngine); !errors.Is(err, treenode.ErrSpecTooNew) {
+		t.Fatalf("captured mode bypassed source format validation: %v", err)
 	}
 }

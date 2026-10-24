@@ -26,6 +26,7 @@ import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
 import {setModelsHash} from "../window/setHeader";
+import {closeWindowAfterLastTab, flushClosingWindowTab} from "../window/closeWin";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
@@ -998,10 +999,17 @@ export class Wnd {
     }
 
     private removeTabAction = (id: string, isBatchClose = false, animate = true, isSaveLayout = true) => {
+        let removedTab = false;
         this.children.find((item, index) => {
             if (item.id !== id) {
                 return;
             }
+            removedTab = !!item.headElement;
+            /// #if !BROWSER
+            if (removedTab && item.model instanceof Editor && item.model.editor) {
+                flushClosingWindowTab(item.model.editor);
+            }
+            /// #endif
             window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
                 sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (item.headElement && !isSensitiveTab(item)) {
@@ -1107,6 +1115,9 @@ export class Wnd {
         webFrame.clearCache();
         ipcRenderer.send(Constants.SIYUAN_CMD, "clearCache");
         setModelsHash();
+        if (removedTab) {
+            void closeWindowAfterLastTab(this.app);
+        }
         /// #endif
     };
 

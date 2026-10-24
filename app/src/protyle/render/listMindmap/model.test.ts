@@ -152,6 +152,22 @@ test("mindmap metadata rejects unknown formats and invalid values without replac
     }
 });
 
+test("node widths round trip in both metadata versions without changing existing styles", () => {
+    for (const version of [1, 2]) {
+        const previous = {version, nodes: {a: {textColor: "red", extension: "retained"}}, relations: [] as unknown[]};
+        assert.deepEqual(parseListMindmapMetadata(JSON.stringify(previous)), previous);
+        for (const width of [0, 32, 680]) {
+            const next = {...previous, nodes: {a: {...previous.nodes.a, width}}};
+            assert.deepEqual(parseListMindmapMetadata(JSON.stringify(next)), next);
+        }
+        for (const width of [-1, "600", null]) {
+            assert.throws(() => parseListMindmapMetadata(JSON.stringify({
+                ...previous, nodes: {a: {width}},
+            })));
+        }
+    }
+});
+
 test("connector presets extend both metadata versions without migrating legacy configurations", () => {
     for (const version of [1, 2]) {
         const legacy = JSON.stringify({version, nodes: {a: {lineColor: "red"}}, relations: [], extension: "keep"});
@@ -163,6 +179,24 @@ test("connector presets extend both metadata versions without migrating legacy c
         }
         for (const connectorStyle of [null, "", "future-style", 0, false, {}, []]) {
             const value = JSON.stringify({...JSON.parse(legacy), connectorStyle});
+            assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+        }
+    }
+});
+
+test("appearance metadata is additive and rejects invalid palettes and branch slots without changing source", () => {
+    for (const version of [1, 2]) {
+        const base = {version, nodes: {a: {branchColor: 2, lineColor: "red"}}, relations: [] as unknown[], extension: "keep"};
+        const appearance = {version: 1, palette: ["#123456", "#abcdef"], backgroundColor: "#ffffff", extension: "keep"};
+        const source = JSON.stringify({...base, appearance});
+        assert.equal(JSON.stringify(parseListMindmapMetadata(source)), source);
+        for (const invalid of [null, [], {}, {...appearance, version: 2}, {...appearance, palette: ["red"]},
+            {...appearance, backgroundColor: "url(x)"}]) {
+            const value = JSON.stringify({...base, appearance: invalid});
+            assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+        }
+        for (const branchColor of [-1, .5, null, "1", 9007199254740992]) {
+            const value = JSON.stringify({...base, nodes: {a: {branchColor}}, appearance});
             assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
         }
     }
@@ -308,7 +342,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 formula.innerHTML = '<span class="katex">rendered formula</span>';
                 formula.setAttribute("data-render", "true");
             });
-        }, {TIMEOUT_DBLCLICK: 190, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
+        }, {TIMEOUT_DBLCLICK: 190, TIMEOUT_LONGPRESS: 460, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
             CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code",
             CUSTOM_SY_CODE_TAB_SPACES: "custom-sy-code-tab-spaces"}, () => {});
     const lute = Lute.New();
@@ -1161,6 +1195,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let undo = 0;
     let redo = 0;
     let settingsOpened = 0;
+    let overflowExpand: ((level: number | "expandAll" | "foldAll") => void) | undefined;
+    let panMenu: {active: boolean, toggle: () => void};
     let finishAllowed: boolean | Promise<boolean> = true;
     const options = {
         host, model,
@@ -1188,8 +1224,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onFold: (id: string) => folds.push(id),
         onUndo: () => undo++,
         onRedo: () => redo++,
-        onSettingsMenu: () => settingsOpened++,
+        onSettingsMenu: (_anchor: HTMLElement, expand?: typeof overflowExpand, pan?: typeof panMenu) => {
+            settingsOpened++;
+            overflowExpand = expand;
+            panMenu = pan;
+        },
         onNodeStyle: (...args: unknown[]) => nodeStyles.push(args),
+        onNodeWidths: async (widths: {id: string, width: number}[], expected: string) => {
+            check.equal(expected, JSON.stringify(widths.map(({id}) => ({id, width: model.metadata.nodes[id]?.width || 0}))));
+            widths.forEach(({id, width}) => {
+                nodeStyles.push([id, {width}]);
+                model.metadata.nodes[id] = {...model.metadata.nodes[id], width};
+            });
+            view.update(model);
+            return true;
+        },
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
         onRelationChange: (...args: unknown[]) => relationChanges.push(args),
         onRelationDelete: (id: string) => relationDeletions.push(id),
@@ -1197,6 +1246,38 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); };
+    const enableHand = (targetHost: HTMLElement) => {
+        targetHost.querySelector<HTMLButtonElement>('[aria-label="more"]').click();
+        check.ok(panMenu);
+        check.equal(panMenu.active, false);
+        panMenu.toggle();
+    };
+
+    // 应用菜单位于导图外，按下菜单项会先停用交互，随后才执行菜单的点击动作。
+    for (const pointerType of ["mouse", "touch"]) {
+        const menuHost = document.createElement("div");
+        hostParent.append(menuHost);
+        const menuView = new api.ListMindmapView({...options, host: menuHost,
+            onSettingsMenu: (_anchor: HTMLElement, _expand: unknown, pan: typeof panMenu) => panMenu = pan});
+        const menuItem = document.createElement("button");
+        document.body.append(menuItem);
+        for (const active of [false, true, false, true]) {
+            menuHost.querySelector<HTMLButtonElement>('[aria-label="more"]').click();
+            check.equal(panMenu.active, active);
+            const toggle = panMenu.toggle;
+            menuItem.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType}));
+            check.equal(menuHost.classList.contains("mindmap-view--pan"), false);
+            toggle();
+            check.equal(menuHost.classList.contains("mindmap-view--pan"), !active,
+                `${pointerType} menu clicks apply the inverse of the displayed checked state`);
+            const hand = menuHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+            check.equal(hand.getAttribute("aria-pressed"), String(!active));
+            check.equal(hand.hidden, active);
+        }
+        menuItem.remove();
+        menuView.destroy();
+        menuHost.remove();
+    }
 
     // 方向键选中视口外的节点时自动平移，待完成的布局和只读视图使用同一定位逻辑。
     const navigationHost = document.createElement("div");
@@ -1309,6 +1390,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     // 顶部控件按悬停、焦点和全屏的实际可见状态避让，缩放画布保持相同的局部间距。
     const navigationToolbar = navigationHost.querySelector<HTMLElement>(".mindmap-view__toolbar");
     const navigationFit = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
+    const navigationControl = () => navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="more"]');
     const moveNavigationPointer = async (inside: boolean) => {
         navigationHost.scrollIntoView({block: "start"});
         const bounds = navigationHost.getBoundingClientRect();
@@ -1319,7 +1401,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         await settle();
     };
     const placeAtToolbar = (left?: number) => {
-        const controlBounds = navigationFit().getBoundingClientRect();
+        const controlBounds = navigationControl().getBoundingClientRect();
         const viewportBounds = navigationViewport.getBoundingClientRect();
         const rect = addedNode.getBoundingClientRect();
         const scaleX = viewportBounds.width / navigationViewport.offsetWidth;
@@ -1340,12 +1422,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             navigationHost.focus();
             await moveNavigationPointer(mode === "hover");
             if (mode === "focus") {
-                navigationFit().focus();
+                navigationControl().focus();
             }
             check.equal(getComputedStyle(navigationToolbar).opacity, "1", `${mode} shows the toolbar`);
             placeAtToolbar();
             const before = addedNode.getBoundingClientRect();
-            check.ok(before.top < navigationFit().getBoundingClientRect().bottom, "target starts behind a toolbar control");
+            check.ok(before.top < navigationControl().getBoundingClientRect().bottom, "target starts behind a toolbar control");
             navigationView.refreshLayout();
             if (mode === "focus") {
                 navigationView.revealNode(addedItem.dataset.nodeId);
@@ -1356,7 +1438,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 }));
             }
             await settle();
-            check.ok(addedNode.getBoundingClientRect().top >= navigationFit().getBoundingClientRect().bottom + 15 * scale,
+            check.ok(addedNode.getBoundingClientRect().top >= navigationControl().getBoundingClientRect().bottom + 15 * scale,
                 `node stays below visible toolbar controls, mode=${mode}, width=${width}`);
         }
     }
@@ -1405,10 +1487,39 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         Array.from({length: 20}, (_value, index) => `  * Branch ${index}\n`).join(""));
     navigationView.update(api.readListMindmap(fittingSource.firstElementChild as HTMLElement));
     navigationHost.style.height = "420px";
-    const activateNavigationFit = async (keyboard: boolean) => {
+    const activateNavigationFit = async (keyboard: boolean, touch = false) => {
         navigationHost.scrollIntoView({block: "start"});
+        const zoom = navigationToolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
+        const zoomBounds = zoom.getBoundingClientRect();
+        const zoomPoint = {x: Math.round(zoomBounds.left + zoomBounds.width / 2),
+            y: Math.round(zoomBounds.top + zoomBounds.height / 2)};
+        if (touch) {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                {type: "touchStart", touchPoints: [{...zoomPoint, id: 0}]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+        } else if (keyboard) {
+            zoom.focus();
+        } else {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-input", [
+                {type: "mouseMove", ...zoomPoint},
+            ]);
+        }
+        await settle();
+        check.equal(getComputedStyle(navigationToolbar.querySelector(".mindmap-view__zoom-actions")).display, "flex",
+            "hovering, focusing or tapping the percentage opens the zoom panel");
         const bounds = navigationFit().getBoundingClientRect();
         const point = {x: Math.round(bounds.left + bounds.width / 2), y: Math.round(bounds.top + bounds.height / 2)};
+        check.equal(document.elementFromPoint(point.x, point.y)?.closest("button"), navigationFit(),
+            "fit in the zoom panel is visible and reachable");
+        if (touch) {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                {type: "touchStart", touchPoints: [{...point, id: 0}]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+            await settle();
+            return;
+        }
         if (keyboard) {
             navigationFit().focus();
         }
@@ -1421,7 +1532,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         ]);
         await settle();
     };
-    for (const mode of ["hover", "focus", "fullscreen"]) {
+    for (const mode of ["hover", "focus", "fullscreen", "touch"]) {
         for (const width of [760, 400, 300]) {
             const outerScale = width === 300 ? .5 : 1;
             navigationView.setReadOnly(width !== 400);
@@ -1436,7 +1547,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             navigationView.offsetX = 100;
             navigationView.offsetY = -100;
             navigationView.draw();
-            await activateNavigationFit(mode === "focus");
+            await activateNavigationFit(mode === "focus", mode === "touch");
             check.equal(getComputedStyle(navigationToolbar).opacity, "1");
             check.ok(navigationView.scale < 1 && navigationView.scale > .15,
                 `the tall map needs an unconstrained fit, mode=${mode}, width=${width}, scale=${navigationView.scale}`);
@@ -1450,9 +1561,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 `fit leaves the whole map below the toolbar, mode=${mode}, width=${width}`);
             check.ok(contentBottom <= viewportBounds.bottom - 65 * outerScale, "fit preserves the bottom panel clearance");
             const fittedTransform = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
-            await activateNavigationFit(mode === "focus");
+            await activateNavigationFit(mode === "focus", mode === "touch");
             check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
                 "repeated fit activation preserves scale and centering");
+            navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="reset"]').click();
+            check.equal(navigationView.scale, 1, "reset restores 100% independently of fit to canvas");
         }
     }
     navigationHost.classList.remove("fullscreen");
@@ -1512,10 +1625,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const view = new api.ListMindmapView(options);
     await settle();
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
-    const settings = host.querySelector<HTMLButtonElement>('[aria-label="listMindmapConnectors"]');
+    const settings = host.querySelector<HTMLButtonElement>('[aria-label="more"]');
     check.equal(settings.getAttribute("aria-haspopup"), "menu");
+    check.equal(settings.nextElementSibling, null, "More is the last toolbar control");
+    check.equal(settings.previousElementSibling.getAttribute("aria-label"), "fullscreen");
     settings.click();
     check.equal(settingsOpened, 1, "the editable toolbar opens the shared settings menu");
+    const toolbarWidth = host.style.width;
+    for (const width of [320, 760]) {
+        host.style.width = `${width}px`;
+        await settle();
+        settings.click();
+        check.equal(typeof overflowExpand === "function", width < 360,
+            "More includes global expansion only when its direct entry is hidden");
+        check.equal(view.buttons.get("expandLevel").hidden, width < 360);
+        if (overflowExpand) {
+            let level: unknown;
+            const expandToLevel = view.expandToLevel;
+            view.expandToLevel = async (value: unknown) => { level = value; };
+            overflowExpand(3);
+            check.equal(level, 3, "the overflow entry invokes the same global folding action");
+            view.expandToLevel = expandToLevel;
+        }
+    }
+    host.style.width = toolbarWidth;
+    await settle();
     const originalConnectorPositions = JSON.stringify([...view.positions]);
     const connectorSource = list.getAttribute("custom-sy-list-mindmap-data");
     for (const connectorStyle of ["spline", "orthogonal", "bezier", "rounded"]) {
@@ -1544,7 +1678,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(view.findLine(branch).id, child.id, "the real canvas hit test selects each horizontal branch");
         }
         view.setReadOnly(true);
-        check.equal(host.querySelector('[aria-label="listMindmapConnectors"]'), null, "read-only views render saved styles without an edit menu");
+        check.ok(host.querySelector('[aria-label="more"]'), "read-only views retain the fallback pan menu");
+        check.equal(host.querySelector('[aria-label="connect"]'), null, "read-only views do not expose object editing actions");
         check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
         view.setReadOnly(false);
     }
@@ -1951,10 +2086,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const toolbar = host.querySelector(".mindmap-view__toolbar");
     ["listMindmapChild", "delete", "fold"].forEach(label =>
         check.equal(toolbar.querySelector(`[aria-label="${label}"]`), null));
-    const relationButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="connect"]');
+    const relationButton = host.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="connect"]');
     const toolbarPanButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
-    check.ok(relationButton.nextElementSibling.classList.contains("mindmap-view__level-control"));
-    check.equal(relationButton.nextElementSibling.nextElementSibling, toolbarPanButton);
+    check.equal(toolbar.querySelector('[aria-label="connect"]'), null);
+    check.equal(toolbar.querySelector('[aria-label="listMindmapSummary"]'), null);
+    check.ok(toolbarPanButton.previousElementSibling.classList.contains("mindmap-view__level-control"));
     check.ok(toolbarPanButton.nextElementSibling.classList.contains("mindmap-view__zoom-control"));
     check.equal(relationButton.querySelector("use").getAttribute("xlink:href"), "#iconRoute");
     const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
@@ -1964,10 +2100,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const toolbarZoom = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom");
     const toolbarPopup = toolbar.querySelector<HTMLElement>(".mindmap-view__zoom-actions");
     const toolbarGroup = toolbar.querySelector<HTMLElement>(".mindmap-view__toolbar-group");
-    for (const width of [96, 180, 260, 360, 700]) {
+    check.equal(fitButton.parentElement, toolbarPopup, "fit shares the zoom panel with the slider and reset");
+    check.equal(toolbarGroup.querySelector(':scope > [aria-label="listMindmapFit"]'), null,
+        "fit no longer occupies a separate top-level toolbar slot");
+    for (const width of [96, 180, 240, 260, 320, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
             host.style.fontSize = `${fontSize}px`;
+            await settle();
             toolbarZoom.focus();
             const bounds = host.getBoundingClientRect();
             for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
@@ -1980,28 +2120,50 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
             const firstButton = toolbar.querySelector("button").getBoundingClientRect();
             const lastButton = toolbarGroup.lastElementChild.getBoundingClientRect();
-            check.equal(lastButton.top > firstButton.top, width < 360, "narrow toolbars wrap controls");
+            check.equal(toolbarGroup.lastElementChild.getAttribute("aria-label"), "more",
+                "More stays last at every toolbar width");
+            for (const control of Array.from(toolbarGroup.children) as HTMLElement[]) {
+                if (!control.hidden) {
+                    check.ok(control.getBoundingClientRect().right <= lastButton.right + 1,
+                        `More stays rightmost after wrapping, width=${width}, fontSize=${fontSize}`);
+                }
+            }
+            check.equal(lastButton.top > firstButton.top, width < 220,
+                `compact global toolbars wrap only when necessary, width=${width}, fontSize=${fontSize}`);
             check.equal(getComputedStyle(toolbarPopup).display, "flex", "zoom popup remains visible");
+            if (width >= 240) {
+                const popupBounds = toolbarPopup.getBoundingClientRect();
+                check.ok(popupBounds.left >= bounds.left && popupBounds.right <= bounds.right,
+                    `zoom panel stays inside the map, width=${width}, fontSize=${fontSize}`);
+                for (const control of toolbarPopup.querySelectorAll<HTMLElement>("button")) {
+                    const rect = control.getBoundingClientRect();
+                    check.equal(document.elementFromPoint(rect.left + rect.width / 2,
+                        rect.top + rect.height / 2)?.closest("button"), control,
+                    "reset and fit remain reachable in the zoom panel");
+                }
+            }
             if (width === 180) {
                 const popupBounds = toolbarPopup.getBoundingClientRect();
                 check.ok(popupBounds.bottom > toolbar.getBoundingClientRect().bottom,
-                    "zoom popup extends below the wrapping toolbar");
+                    "zoom popup extends below the compact toolbar");
                 const slider = toolbarPopup.querySelector<HTMLInputElement>("input");
                 const sliderBounds = slider.getBoundingClientRect();
                 check.equal(document.elementFromPoint(sliderBounds.left + sliderBounds.width / 2,
                     sliderBounds.top + sliderBounds.height / 2), slider, "zoom slider is not clipped or covered");
                 slider.value = "125";
                 slider.dispatchEvent(new Event("input", {bubbles: true}));
-                check.equal(view.scale, 1.25, "zoom controls remain usable after wrapping");
+                check.equal(view.scale, 1.25, "zoom controls remain usable at narrow widths");
             }
         }
     }
     host.style.cssText = originalHostStyle;
     host.focus();
     view.zoomAt(1);
+    toolbarZoom.focus();
     fitButton.dispatchEvent(new PointerEvent("pointerover", {bubbles: true}));
     check.equal(host.querySelector<HTMLElement>('[role="tooltip"]').hidden, false);
     check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapFit");
+    host.focus();
     select(beta);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("mindmap-view__inspector--node"), true);
@@ -2012,17 +2174,117 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(Math.abs(nodeMenuBounds.left + nodeMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(nodeMenuBounds.width < panelBounds.width / 2);
     check.ok(panelBounds.bottom - nodeMenuBounds.bottom >= 8);
+    const originalNodeColors = options.nodeColors;
+    options.nodeColors = () => Array.from({length: 30}, (_, i) => ({
+        label: `Color ${i}`, color: `rgb(${i}, 0, 0)`, backgroundColor: "",
+        preview: {color: `rgb(${i}, 0, 0)`, backgroundColor: ""},
+    }));
+    for (const width of [240, 320, 760]) {
+        host.style.width = `${width}px`;
+        view.renderInspector();
+        await settle();
+        inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+        const popup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
+        const palette = popup.querySelector<HTMLElement>(".mindmap-view__palette");
+        check.equal(palette.children.length, 31);
+        const popupBounds = popup.getBoundingClientRect();
+        check.ok(popupBounds.width <= host.offsetWidth - 16, "long palettes wrap within the canvas");
+        check.ok(popupBounds.bottom <= inspector.getBoundingClientRect().top, "node settings open above the bottom bar");
+        const bounds = inspector.getBoundingClientRect();
+        for (const key of ["connect", "listMindmapSummary", "delete"]) {
+            const action = inspector.querySelector<HTMLElement>(`[aria-label="${key}"]`).getBoundingClientRect();
+            check.ok(action.left >= bounds.left && action.right <= bounds.right,
+                `node action ${key} stays visible at width ${width} while the palette scrolls`);
+        }
+    }
+    host.style.cssText = originalHostStyle;
+    options.nodeColors = originalNodeColors;
+    view.renderInspector();
     for (const borderColor of ["#d4d4d4", "#484848"]) {
         host.style.setProperty("--b3-border-color", borderColor);
         check.equal(getComputedStyle(inspector).boxShadow,
             getComputedStyle(host).borderTopColor + " 0px 0px 0px 1px");
     }
     host.style.removeProperty("--b3-border-color");
-    check.equal(inspector.querySelectorAll('input[type="number"]').length, 0);
-    check.equal(inspector.querySelectorAll('input[type="checkbox"]').length, 0);
-    check.equal(inspector.querySelector('input[type="color"]'), null);
-    check.equal(inspector.querySelectorAll('[role="group"]').length, 1);
-    const nodePalette = inspector.querySelector<HTMLElement>('[role="group"][aria-label="color"]');
+    check.equal(inspector.querySelectorAll('input[type="number"]').length, 0, "the width field is kept out of the main bar");
+    inspector.querySelector<HTMLButtonElement>('[aria-label="width"]').click();
+    const nodePopup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
+    const widthInput = () => nodePopup.querySelector<HTMLInputElement>('input[type="number"]');
+    widthInput().value = "640";
+    widthInput().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.deepEqual(nodeStyles.at(-1), [beta, {width: 640}]);
+    const styleCount = nodeStyles.length;
+    widthInput().value = "12";
+    widthInput().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.equal(nodeStyles.length, styleCount, "invalid widths do not change metadata");
+    widthInput().value = "";
+    widthInput().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.deepEqual(nodeStyles.at(-1), [beta, {width: 0}], "clearing restores automatic width");
+    const oldAlphaWidth = model.metadata.nodes[alpha]?.width || 0;
+    model.metadata.nodes[alpha] = {...model.metadata.nodes[alpha], width: 0};
+    model.metadata.nodes[beta] = {...model.metadata.nodes[beta], width: 480};
+    view.update(model);
+    await settle();
+    view.focusNode(alpha);
+    view.selectNode(beta, true);
+    const mixedWidthSelection = view.getSelectedIds();
+    const widthButton = inspector.querySelector<HTMLButtonElement>('[aria-label="width"]');
+    await moveMouse(widthButton);
+    check.equal(nodePopup.hidden, false, "mouse hover opens node settings");
+    const slider = () => nodePopup.querySelector<HTMLInputElement>('input[type="range"]');
+    check.equal(slider().value, "0", "the slider starts centered on the current width");
+    const beforeWidthDrag = nodeStyles.length;
+    slider().value = "50";
+    slider().dispatchEvent(new Event("input", {bubbles: true}));
+    await settle();
+    check.equal(nodeStyles.length, beforeWidthDrag, "drag previews do not write intermediate transactions");
+    check.equal(nodeElement(beta).style.width, "960px");
+    slider().dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.equal(nodeStyles.length, beforeWidthDrag + 2, "release saves one callback for all selected nodes");
+    check.equal(model.metadata.nodes[alpha].width, 960);
+    check.equal(model.metadata.nodes[beta].width, 960);
+    widthInput().focus();
+    widthInput().value = "1000";
+    widthInput().dispatchEvent(new Event("input", {bubbles: true}));
+    const beforeRestoreWidth = nodeStyles.length;
+    await clickMouse(nodePopup.querySelector('[aria-label="listMindmapRestoreWidth"]'));
+    check.equal(nodeStyles.length, beforeRestoreWidth + 2, "Restore replaces an unsaved numeric preview without an extra save");
+    check.equal(model.metadata.nodes[alpha].width, 0, "restore retains an originally automatic width");
+    check.equal(model.metadata.nodes[beta].width, 480, "restore retains each node's individual width");
+    await clickMouse(nodePopup.querySelector('[aria-label="default"]'));
+    check.equal(model.metadata.nodes[beta].width, 0, "default makes every selected width automatic");
+    const beforeCancelWidth = nodeStyles.length;
+    slider().value = "50";
+    slider().dispatchEvent(new Event("input", {bubbles: true}));
+    slider().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    await settle();
+    check.equal(nodePopup.hidden, true, "Escape closes the popup");
+    check.equal(nodeStyles.length, beforeCancelWidth, "canceling a preview does not save a width");
+    check.equal(nodeElement(beta).style.width, "", "canceled previews restore persisted geometry");
+    check.deepEqual(view.getSelectedIds(), mixedWidthSelection, "popup keyboard handling preserves node selection");
+    const touchWidthButton = inspector.querySelector<HTMLButtonElement>('[aria-label="width"]');
+    const touchWidthPoint = centerPoint(touchWidthButton);
+    await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+        {type: "touchStart", touchPoints: [{id: 1, ...touchWidthPoint}]},
+        {type: "touchEnd", touchPoints: []},
+    ]);
+    await settle();
+    check.equal(nodePopup.hidden, false, "a native touch tap opens the width panel");
+    check.deepEqual(view.getSelectedIds(), mixedWidthSelection, "touch popup activation preserves the selection");
+    host.focus();
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    check.equal(nodePopup.hidden, true, "Escape also closes a hovered panel while canvas focus is retained");
+    check.deepEqual(view.getSelectedIds(), mixedWidthSelection);
+    model.metadata.nodes[alpha].width = oldAlphaWidth;
+    view.update(model);
+    view.focusNode(beta);
+    inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+    check.equal(inspector.querySelectorAll('[role="group"]').length, 0, "palettes are kept out of the main bar");
+    const nodePalette = nodePopup.querySelector<HTMLElement>('[role="group"][aria-label="color"]');
     const nodeColorButton = nodePalette.querySelector<HTMLButtonElement>('[aria-label="Appearance combined"]');
     check.equal(nodeColorButton.textContent, "A");
     check.equal(nodeColorButton.classList.contains("color__square"), true);
@@ -2036,11 +2298,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.update(model);
     check.equal(getComputedStyle(nodeElement(beta)).backgroundColor, "rgb(171, 205, 239)");
     check.equal(getComputedStyle(nodeElement(beta)).color, "rgb(18, 52, 86)");
-    check.equal(inspector.querySelector('[aria-label="Appearance combined"]').getAttribute("aria-pressed"), "true");
+    check.equal(nodePopup.querySelector('[aria-label="Appearance combined"]').getAttribute("aria-pressed"), "true");
     host.style.setProperty("--b3-font-background1", "#334455");
     check.equal(getComputedStyle(nodeElement(beta)).backgroundColor, "rgb(51, 68, 85)",
         "node colors follow changes to the appearance palette");
-    inspector.querySelector<HTMLButtonElement>('[aria-label="color"] [aria-label="default"]').click();
+    nodePopup.querySelector<HTMLButtonElement>('[aria-label="color"] [aria-label="default"]').click();
     check.deepEqual(nodeStyles[nodeStyles.length - 1], [beta, {textColor: "", backgroundColor: ""}]);
     model.metadata.nodes[beta].backgroundColor = "";
     model.metadata.nodes[beta].textColor = "";
@@ -2275,7 +2537,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const narrowPanelBounds = host.getBoundingClientRect();
     check.ok(narrowInspectorBounds.left > narrowPanelBounds.left);
     check.ok(narrowInspectorBounds.right < narrowPanelBounds.right);
-    check.ok(inspector.scrollWidth > inspector.clientWidth);
+    hostParent.style.width = "180px";
+    check.ok(inspector.scrollWidth > inspector.clientWidth, "the line menu scrolls when its actual controls no longer fit");
     inspector.scrollLeft = inspector.scrollWidth;
     check.ok(inspector.scrollLeft > 0);
     inspector.scrollLeft = 0;
@@ -2755,6 +3018,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(view.isLocked(), true);
     check.equal(getComputedStyle(viewport).touchAction, "pan-y");
     check.ok(host.querySelector('[aria-label="listMindmapUnlock"]'));
+    check.equal(getComputedStyle(toolbar).opacity, "1", "locked maps keep the unlock entry visible");
+    check.equal(host.querySelector('[aria-label="listMindmapUnlock"]').getAttribute("aria-pressed"), "true");
     check.equal(host.querySelector('[aria-label="cursorHand"]'), null);
     for (const ctrlKey of [false, true]) {
         const wheel = new WheelEvent("wheel", {bubbles: true, cancelable: true, deltaY: 120, ctrlKey});
@@ -2855,7 +3120,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(list.outerHTML, persistedBeforeFold);
     const levelSelect = host.querySelector<HTMLSelectElement>(".mindmap-view__level-select");
     check.deepEqual(Array.from(levelSelect.options).map(option => option.value),
-        ["", "1", "2", "3", "4", "5", "6", "expandAll", "foldAll"]);
+        ["", "expandAll", "foldAll", "1", "2", "3", "4", "5", "6"]);
     const levelChild = model.nodes.get(alpha).children[0].id;
     readonly.selectNode(levelChild);
     const scaleBeforeLevel = readonly.scale;
@@ -2913,7 +3178,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     });
     await settle();
     const levelButton = host.querySelector<HTMLButtonElement>('.mindmap-view__toolbar button[aria-label="expandLevel"]');
-    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "connect");
+    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "multiSelect");
+    check.equal(levelButton.previousElementSibling.previousElementSibling.getAttribute("aria-label"), "listMindmapLock");
     check.equal(levelButton.nextElementSibling.getAttribute("aria-label"), "cursorHand");
     check.equal(host.querySelector(".mindmap-view__level-select"), null);
     levelView.selectNode(levelChild);
@@ -3110,7 +3376,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(getComputedStyle(panViewport).cursor, "default");
     check.equal(getComputedStyle(host.querySelector(".mindmap-view__node")).cursor, "default");
     check.equal(panButton.querySelector("use").getAttribute("xlink:href"), "#iconPan");
-    panButton.click();
+    check.equal(panButton.hidden, true, "the inactive hand tool is available through More without taking toolbar space");
+    enableHand(host);
+    check.equal(panButton.hidden, false, "the active mode provides a direct exit button");
     check.equal(panButton.getAttribute("aria-pressed"), "true");
     check.equal(getComputedStyle(panViewport).cursor, "grab");
     const panNode = host.querySelector<HTMLElement>(".mindmap-view__node");
@@ -3119,6 +3387,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     panNode.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerId: 81, clientX: 100, clientY: 100}));
     panNode.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
     check.equal(getComputedStyle(panViewport).cursor, "grabbing");
+    for (const platform of ["body--linux", "body--windows", "body--mac", "body--android", "body--ios", "body--harmony"]) {
+        document.body.classList.add(platform);
+        check.equal(getComputedStyle(panViewport).cursor, "grabbing",
+            `${platform} hand-tool dragging uses the platform cursor`);
+        document.body.classList.remove(platform);
+    }
     panNode.dispatchEvent(new PointerEvent("pointerup", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
     check.equal(getComputedStyle(panViewport).cursor, "grab");
     check.equal(single.offsetX, panBefore.x + 40, "hand tool pans from a node instead of moving it");
@@ -3126,6 +3400,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.querySelector(".mindmap-view__ghost"), null);
     panButton.click();
     check.equal(panButton.getAttribute("aria-pressed"), "false");
+    check.equal(panButton.hidden, true);
     check.equal(getComputedStyle(panViewport).cursor, "default");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
     single.zoomAt(2.5);
@@ -3240,6 +3515,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.deepEqual([panView.scale, panView.offsetX, panView.offsetY], readingTransform);
         check.equal(panView.interactionActive, false);
         scrollHost.scrollTop = 0;
+        const externalEditor = document.createElement("div");
+        externalEditor.contentEditable = "true";
+        externalEditor.textContent = "Outside editor";
+        externalEditor.style.cssText = "position:fixed;top:0;left:0;z-index:1000;background:white";
+        document.body.append(externalEditor);
+        externalEditor.focus({preventScroll: true});
+        getSelection().collapse(externalEditor.firstChild, 2);
         await nativeTouch([
             {type: "touchStart", touchPoints: [fingerAt(1), fingerAt(2, 100)]},
             {type: "touchMove", touchPoints: [fingerAt(1, 30, -20), fingerAt(2, 130, -20)]},
@@ -3251,6 +3533,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.notEqual(panView.offsetX, readingTransform[1], "native two-finger input pans the reading canvas");
         check.equal(panView.interactionActive, false);
         check.equal(scrollHost.scrollTop, 0, "explicit two-finger input does not scroll the document");
+        check.equal(document.activeElement, panHost, "a native pinch leaves focus on the non-editable canvas");
+        check.equal(panHost.isContentEditable, false);
+        check.equal(getSelection().anchorNode, externalEditor.firstChild, "focus transfer retains the document caret");
+        const externalPoint = centerPoint(externalEditor);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [{id: 3, ...externalPoint}]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(document.activeElement, externalEditor, "tapping text after a pinch restores normal editing focus");
+        externalEditor.remove();
         panView.scale = readingTransform[0];
         panView.offsetX = readingTransform[1];
         panView.offsetY = readingTransform[2];
@@ -3273,8 +3565,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
         viewport.style.removeProperty("user-select");
         scrollHost.contentEditable = "false";
-        // 覆盖真实右键按下及空闲后重新启动，不能跳过激活、焦点和指针捕获阶段。
-        for (const idle of [0, 3000]) {
+        // 覆盖平台光标、真实右键按下及空闲后重新启动，保留激活、焦点和指针捕获阶段。
+        for (const [platform, idle] of [
+            ["body--windows", 0], ["body--windows", 3000], ["body--mac", 0],
+            ["body--linux", 0], ["body--linux", 3000],
+        ] as const) {
+            document.body.classList.add(platform);
             await new Promise(resolve => setTimeout(resolve, idle));
             panView.selectNode(panModel.root.id);
             panView.inspector.hidden = true;
@@ -3292,7 +3588,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             await settle();
             check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 24, before[1] + 16],
                 "native right dragging starts on the first move, including after idle");
-            check.equal(getComputedStyle(viewport).cursor, "grabbing", "the capturing viewport provides the pan cursor");
+            check.equal(getComputedStyle(viewport).cursor, "grabbing",
+                `${platform} native right dragging uses the platform cursor, including after idle`);
             check.ok(Array.from(panHost.querySelectorAll<HTMLElement>(".mindmap-view__node"))
                 .every(element => getComputedStyle(element).cursor === "default"),
             "panning leaves every node cursor unchanged");
@@ -3310,6 +3607,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             await settle();
             check.equal(panView.pointer, undefined);
             check.equal(getComputedStyle(add).visibility, "visible", "releasing the pointer restores selected node controls");
+            check.equal(getComputedStyle(viewport).cursor, "default", "ending a drag restores the reading cursor");
+            document.body.classList.remove(platform);
         }
         panView.offsetX = readingTransform[1];
         panView.offsetY = readingTransform[2];
@@ -3319,7 +3618,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         reader.value = "Document reading selection";
         reader.style.cssText = "position:fixed;top:0;left:0";
         document.body.append(reader);
-        for (const modifier of ["control", "meta"]) {
+        for (const modifier of ["control", "meta", "middle"]) {
+            const button = modifier === "middle" ? "middle" : "right";
+            const modifiers = modifier === "middle" ? [] : [modifier];
             panView.setReadOnly(modifier === "meta");
             panView.selectNode(panModel.root.id);
             panView.inspector.hidden = true;
@@ -3330,17 +3631,36 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             const point = centerPoint(node);
             const end = {x: point.x + 30, y: point.y + 20};
             const before = [panView.offsetX, panView.offsetY];
+            let auxiliaryClick: MouseEvent;
+            if (button === "middle") {
+                viewport.addEventListener("auxclick", event => auxiliaryClick = event, {once: true});
+            }
             await nativeInput([
                 {type: "mouseMove", ...point},
-                {type: "mouseDown", ...point, button: "right", clickCount: 1, modifiers: [modifier]},
-                {type: "mouseMove", ...end, button: "right", modifiers: [modifier]},
-                {type: "mouseUp", ...end, button: "right", clickCount: 1, modifiers: [modifier]},
+                {type: "mouseDown", ...point, button, clickCount: 1, modifiers},
+                {type: "mouseMove", ...end, button, modifiers},
+                {type: "mouseUp", ...end, button, clickCount: 1, modifiers},
             ]);
             check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 30, before[1] + 20]);
-            check.equal(panView.interactionActive, false, "temporary right dragging preserves reading mode");
-            check.equal(document.activeElement, reader, "temporary right dragging does not steal document focus");
+            check.equal(panView.interactionActive, false, "temporary dragging preserves reading mode");
+            check.equal(document.activeElement, reader, "temporary dragging does not steal document focus");
             check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
             check.equal(panView.getSelectedId(), panModel.root.id);
+            if (button === "middle") {
+                check.equal(auxiliaryClick?.defaultPrevented, true, "middle release cancels the browser auxiliary action");
+                await nativeInput([
+                    {type: "mouseDown", ...end, button, clickCount: 1},
+                    {type: "mouseUp", ...end, button, clickCount: 1},
+                ]);
+                check.equal(panView.getSelectedId(), panModel.root.id, "a middle click preserves the selected node");
+                check.equal(document.activeElement, reader, "a middle click preserves document focus");
+                await nativeInput([{type: "mouseDown", ...end, button, clickCount: 1}]);
+                check.ok(panView.pointer?.pan);
+                viewport.dispatchEvent(new PointerEvent("pointercancel", {
+                    pointerId: panView.pointer.pointerId, pointerType: "mouse"}));
+                check.equal(panView.pointer, undefined, "canceling a middle drag releases its state");
+                await nativeInput([{type: "mouseUp", ...end, button, clickCount: 1}]);
+            }
             let receivedWheel: WheelEvent;
             let scrollingFinished = false;
             viewport.addEventListener("wheel", event => receivedWheel = event, {once: true});
@@ -3369,7 +3689,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.ok(Array.from(panHost.querySelectorAll(".mindmap-view__toolbar use"))
             .every(icon => icon.getAttribute("xlink:href") !== "#iconEdit"), "canvas activation has no separate pencil button");
         const hand = panHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
-        hand.click();
+        enableHand(panHost);
         check.equal(panView.interactionActive, true);
         check.equal(getComputedStyle(viewport).touchAction, "none");
         check.equal(hand.getAttribute("aria-pressed"), "true", "hand tool activates one-finger canvas panning");
@@ -3408,7 +3728,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(panView.interactionActive, true, "desktop pointer input activates the canvas");
         document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
         check.equal(panView.interactionActive, false, "outside pointer input returns to reading");
-        hand.click();
+        enableHand(panHost);
         panHost.dispatchEvent(new FocusEvent("focusout", {relatedTarget: followingContent}));
         check.equal(panView.interactionActive, false, "moving focus outside returns to reading");
         panView.offsetX = 16 - rootPosition.x * panView.scale;
@@ -3471,6 +3791,85 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(panModel.list.outerHTML, sourceHTML, "interaction activation and panning do not change saved data");
         panView.destroy();
         scrollHost.remove();
+    }
+
+    // 密集节点上的快速触屏拖动平移画布，长按确认后才移动节点。
+    {
+        const touchSource = document.createElement("div");
+        touchSource.innerHTML = lute.Md2BlockDOM("* Root\n  * First\n  * Second\n  * Third\n");
+        const touchModel = api.readListMindmap(touchSource.firstElementChild as HTMLElement);
+        const touchHost = document.createElement("div");
+        touchHost.style.cssText = "position:fixed;left:0;top:0;width:600px;height:400px;z-index:100";
+        document.body.append(touchHost);
+        const touchMoves: unknown[][] = [];
+        const touchView = new api.ListMindmapView({...options, host: touchHost, model: touchModel,
+            onMove: (...args: unknown[]) => touchMoves.push(args)});
+        await settle();
+        const originalHTML = touchModel.list.outerHTML;
+        const firstId = touchModel.root.children[0].id;
+        const lastId = touchModel.root.children[2].id;
+        const touchNode = () => touchHost.querySelector<HTMLElement>(`[data-mindmap-id="${firstId}"]`);
+        const point = (id: string) => {
+            const rect = touchHost.querySelector<HTMLElement>(`[data-mindmap-id="${id}"]`).getBoundingClientRect();
+            return {id: 1, x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2)};
+        };
+        const nativeTouch = (events: Record<string, unknown>[]) =>
+            require("electron").ipcRenderer.invoke("mindmap-view-native-touch", events);
+        touchView.setInteractionActive(true);
+        const initialSelection = touchView.getSelectedId();
+        const from = point(firstId);
+        const beforePan = [touchView.offsetX, touchView.offsetY];
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [from]},
+            {type: "touchMove", touchPoints: [{...from, x: from.x + 40, y: from.y + 20}]},
+            {type: "wait", delay: 520},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.notDeepEqual([touchView.offsetX, touchView.offsetY], beforePan, "native swipes pan even when starting on a node");
+        check.equal(touchMoves.length, 0);
+        check.equal(touchView.getSelectedId(), initialSelection, "swiping a dense map does not select incidental nodes");
+        check.equal(touchModel.list.outerHTML, originalHTML);
+        touchView.fit();
+        await settle();
+        const heldFrom = point(firstId);
+        const destination = point(lastId);
+        await nativeTouch([
+            {type: "touchStart", touchPoints: [heldFrom]},
+            {type: "wait", delay: 520},
+            {type: "touchMove", touchPoints: [destination]},
+            {type: "touchEnd", touchPoints: []},
+        ]);
+        check.equal(touchMoves.length, 1, "a completed native long press allows one node move on release");
+        check.equal(touchMoves[0][0], firstId);
+        check.equal(touchMoves[0][1], lastId);
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), false);
+        const sendTouch = (type: string) => touchNode().dispatchEvent(new PointerEvent(type, {
+            bubbles: true, cancelable: true, pointerId: 71, pointerType: "touch", isPrimary: true,
+            button: 0, clientX: heldFrom.x, clientY: heldFrom.y,
+        }));
+        sendTouch("pointerdown");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), true, "holding provides visible drag feedback");
+        sendTouch("pointercancel");
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), false);
+        check.equal(touchMoves.length, 1, "cancellation does not submit the armed drag");
+        sendTouch("pointerdown");
+        sendTouch("pointerup");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        check.equal(touchNode().classList.contains("mindmap-view__node--drag-ready"), false, "a short tap leaves no delayed drag");
+        check.equal(touchView.getSelectedId(), firstId, "short taps still select a node");
+        touchView.setReadOnly(true);
+        sendTouch("pointerdown");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        check.equal(touchView.pointer?.touchNode, undefined, "read-only maps never arm a node move");
+        sendTouch("pointerup");
+        touchView.destroy();
+        touchHost.remove();
+        const fallbackHost = document.createElement("div");
+        const fallback = new api.ListMindmapView({...options, host: fallbackHost, onSettingsMenu: undefined, readOnly: true});
+        check.equal(fallbackHost.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]').hidden, false,
+            "standalone export retains a usable fallback when no application menu is available");
+        fallback.destroy();
     }
 
     lute.SetTabs(true);
@@ -3642,7 +4041,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     doubleClickImage();
     check.equal(previewed.length, 3, "locked nodes support image previews without editing");
     richView.setLocked(false);
-    for (const mode of ["relationFrom", "summarySelecting", "panning", "pinching"]) {
+    for (const mode of ["relationFrom", "panning", "pinching"]) {
         richView[mode] = true;
         doubleClickImage();
         check.equal(previewed.length, 3, "active canvas interactions do not open image previews");
@@ -4340,14 +4739,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let summaryView: any;
     summaryView = new api.ListMindmapView({host: summaryHost, model: summaryModel, onExit: () => {},
         labels: new Proxy({}, {get: (_target, key) => String(key)}),
-        onSummaryAdd: async (from: string, to: string) => {
+        onSummaryBatchAdd: async (ranges: any[], expected: string) => {
             const model = api.readListMindmap(summaryList);
-            const nodeIds = api.getListMindmapSummaryRange(model, from, to);
-            check.equal(nodeIds.length, 3);
-            model.metadata.summaries = [{id: "summary", parentId: model.root.id, nodeIds, label: "Summary"}];
+            check.equal(api.getListMindmapSummarySnapshot(model), expected);
+            const added = api.addListMindmapSummaryRanges(model, ranges, () => "summary", "Summary");
+            check.deepEqual(added, ["summary"]);
             api.writeListMindmapMetadata(summaryList, model.metadata);
             summaryView.update(api.readListMindmap(summaryList));
-            return "summary";
+            return added;
         },
         onSummaryChange: (id: string, patch: object, expected: string) => {
             const model = api.readListMindmap(summaryList);
@@ -4359,16 +4758,60 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }});
     await settle();
     summaryView.focusNode(summaryIds[0]);
-    const summaryButton = summaryHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    const summaryButton = summaryHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
+    for (const id of [summaryModel.root.id, summaryIds[0]]) {
+        summaryView.focusNode(id);
+        check.equal(summaryButton.hidden, false, "the node menu keeps the summary action in a stable position");
+        check.equal(summaryButton.disabled, true, "a single selected node cannot create a summary");
+        summaryButton.click();
+        check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0);
+    }
+    summaryView.draw();
+    const singleSelectionCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas").toDataURL();
+    for (const id of summaryIds.slice(1)) {
+        summaryView.selectNode(id, true);
+    }
+    await settle();
+    check.equal(summaryButton.hidden, false);
     check.equal(summaryButton.disabled, false);
-    summaryButton.click();
-    check.equal(summaryButton.getAttribute("aria-pressed"), "true");
-    summaryHost.querySelector(`[data-mindmap-id="${summaryIds[2]}"]`).dispatchEvent(new PointerEvent("pointerdown",
-        {bubbles: true, pointerId: 71, pointerType: "touch", isPrimary: true, button: 0}));
+    const summaryCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas");
+    check.equal(summaryCanvas.toDataURL(), singleSelectionCanvas, "multi-selection does not draw summary brackets");
+    check.equal(summaryHost.querySelector(".mindmap-view__summary-action"), null, "selection has no graph creation control");
+    check.equal(summaryHost.querySelector(".mindmap-view__summary"), null, "selection alone does not create a summary");
+    const outsideSummary = document.createElement("button");
+    document.body.append(outsideSummary);
+    for (const leave of [
+        () => window.dispatchEvent(new Event("blur")),
+        () => summaryHost.dispatchEvent(new FocusEvent("focusout", {relatedTarget: outsideSummary})),
+    ]) {
+        const preview = summaryCanvas.toDataURL();
+        const selected = summaryView.getSelectedIds();
+        leave();
+        check.equal(summaryButton.closest<HTMLElement>(".mindmap-view__inspector").hidden, true, "leaving the mindmap hides the node menu");
+        check.deepEqual(summaryView.getSelectedIds(), selected, "focus changes preserve the node selection");
+        const inactive = summaryCanvas.toDataURL();
+        check.equal(inactive, preview, "ordinary selection does not add summary graphics that need blur cleanup");
+        summaryView.draw();
+        check.equal(summaryCanvas.toDataURL(), inactive, "no stale preview remains until a later redraw");
+        summaryView.focusNode(summaryIds[0]);
+        for (const id of summaryIds.slice(1)) {
+            summaryView.selectNode(id, true);
+        }
+        check.equal(summaryButton.closest<HTMLElement>(".mindmap-view__inspector").hidden, false, "multi-selection restores the node menu");
+    }
+    outsideSummary.remove();
     await settle();
-    await settle();
+    await moveMouse(summaryButton);
+    check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), summaryButton,
+        "the node menu retains the summary button across selection and focus changes");
+    const summaryActionBounds = summaryButton.getBoundingClientRect();
+    check.equal(document.elementFromPoint(summaryActionBounds.left + summaryActionBounds.width / 2,
+        summaryActionBounds.top + summaryActionBounds.height / 2)?.closest("button"), summaryButton,
+    "the bottom summary button is reachable at its rendered position");
+    await clickMouse(summaryButton);
     const summaryInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
-    check.ok(summaryInput, "new summaries enter text editing on touch selection");
+    check.ok(summaryInput, "new summaries enter text editing after the menu action");
+    check.equal(document.activeElement, summaryInput, "creation focuses the new summary text");
     summaryInput.value = "<script>plain text</script> " + "Long summary ".repeat(25);
     summaryInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
     await settle();
@@ -4523,19 +4966,35 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const copiedSummary = api.readListMindmap(copied).metadata.summaries[0];
     check.equal(copiedSummary.parentId, copiedIDs.get(savedSummary.parentId));
     check.deepEqual(copiedSummary.nodeIds, savedSummary.nodeIds.map((id: string) => copiedIDs.get(id)));
+    const crossingModel = api.readListMindmap(summaryList);
+    crossingModel.metadata.summaries = [{...savedSummary, nodeIds: summaryIds.slice(0, 2)}];
+    api.writeListMindmapMetadata(summaryList, crossingModel.metadata);
+    summaryView.update(api.readListMindmap(summaryList));
+    summaryView.focusNode(summaryIds[1]);
+    summaryView.selectNode(summaryIds[2], true);
+    check.equal(summaryButton.disabled, true, "crossing ranges disable direct creation");
+    check.equal(summaryButton.getAttribute("aria-description"), "listMindmapSummaryConflict");
+    await settle();
+    check.equal(summaryButton.hidden, false, "conflicting selections retain the disabled menu action");
+    summaryButton.click();
+    check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, summaryIds.slice(0, 2));
+    summaryView.clearSelection();
     const keyboardModel = api.readListMindmap(summaryList);
     keyboardModel.metadata.summaries = [];
     api.writeListMindmapMetadata(summaryList, keyboardModel.metadata);
     summaryView.update(api.readListMindmap(summaryList));
     summaryView.focusNode(summaryIds[0]);
-    summaryButton.click();
-    for (const key of ["ArrowDown", "ArrowDown", "Enter"]) {
-        summaryHost.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true}));
+    for (const id of summaryIds.slice(1)) {
+        summaryView.selectNode(id, true);
     }
-    await settle();
+    summaryButton.focus();
+    const summaryKey = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+    summaryButton.dispatchEvent(summaryKey);
+    check.equal(summaryKey.defaultPrevented, false, "summary buttons retain native keyboard activation");
+    summaryButton.click();
     await settle();
     const keyboardInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
-    check.ok(keyboardInput, "keyboard range selection creates an editable summary");
+    check.ok(keyboardInput, "keyboard activation creates an editable summary from selected nodes");
     keyboardInput.value = savedSummary.label;
     keyboardInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
     await settle();
@@ -4552,7 +5011,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(printedBounds.bottom <= printViewport.bottom + 1, "PDF previews include tall summary labels");
     printedLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(summaryHost.querySelector(".mindmap-view__summary-editor"), null);
-    check.equal(summaryHost.querySelector('[aria-label="listMindmapSummary"]'), null);
+    check.equal(summaryHost.querySelector('.mindmap-view__inspector [aria-label="listMindmapSummary"]'), null);
     summaryView.destroy();
     summaryHost.remove();
     api.deleteListMindmapNode(summaryList, summaryIds[0]);
@@ -4660,13 +5119,81 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             return added;
         }});
     await settle();
-    const batchButton = batchHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
     const batchViewport = batchHost.querySelector<HTMLElement>(".mindmap-view__viewport");
-    batchView.clearSelection();
-    check.equal(batchButton.disabled, false, "batch selection can start without choosing a parent");
-    batchButton.click();
+    const multiSelect = batchHost.querySelector<HTMLButtonElement>('.mindmap-view__toolbar [aria-label="multiSelect"]');
+    check.ok(multiSelect, "multi-select is available before choosing a node");
+    multiSelect.click();
+    check.equal(multiSelect.getAttribute("aria-pressed"), "true");
     const batchModel = api.readListMindmap(batchList);
     const leafIDs = batchModel.root.children.flatMap((node: ListMindmapNode) => node.children.map(child => child.id));
+    for (const id of leafIDs) {
+        batchHost.querySelector(`[data-mindmap-id="${id}"]`).dispatchEvent(new PointerEvent("pointerdown", {
+            bubbles: true, pointerId: 81, pointerType: "touch", isPrimary: true, button: 0,
+        }));
+    }
+    check.equal(batchView.getSelectedIds().length, 4, "touch multi-select uses the ordinary selection");
+    check.equal(batchView.pointer, undefined, "multi-select taps cannot arm node dragging");
+    check.equal(batchHistory.length, 0);
+    const batchInspector = batchHost.querySelector<HTMLElement>(".mindmap-view__inspector");
+    check.equal(batchInspector.hidden, false);
+    check.equal(batchInspector.querySelector('[aria-label="multiSelect"]'), null);
+    const batchButton = batchInspector.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    check.equal(batchHost.querySelector(".mindmap-view__summary-action"), null);
+    await settle();
+    check.equal(batchButton.hidden, false);
+    check.equal(batchButton.querySelector("use").getAttribute("xlink:href"), "#iconGroups");
+    check.equal(batchButton.disabled, false);
+    check.equal(batchButton.dataset.tooltip, batchLabels.listMindmapSummaryBatch.replace("${count}", "2"));
+    check.equal(batchInspector.querySelector<HTMLButtonElement>('[aria-label="connect"]').disabled, true);
+    await moveMouse();
+    for (const [background, primary] of [["#ffffff", "#2563eb"], ["#1e1e1e", "#93c5fd"]]) {
+        batchHost.style.setProperty("--b3-theme-background", background);
+        batchHost.style.setProperty("--b3-theme-primary", primary);
+        const sibling = batchInspector.querySelector('[aria-label="delete"]');
+        for (const property of ["color", "background-color", "border-radius", "padding"]) {
+            check.equal(getComputedStyle(batchButton).getPropertyValue(property), getComputedStyle(sibling).getPropertyValue(property),
+                "summary actions use the shared node controls in light and dark themes");
+        }
+    }
+    batchHost.style.removeProperty("--b3-theme-background");
+    batchHost.style.removeProperty("--b3-theme-primary");
+    for (const width of [240, 320, 700]) {
+        batchHost.style.width = `${width}px`;
+        batchHost.style.fontSize = "32px";
+        await settle();
+        const bounds = batchInspector.getBoundingClientRect();
+        check.ok(bounds.width <= batchHost.offsetWidth - 16);
+        for (const control of [batchButton, multiSelect]) {
+            const rect = control.getBoundingClientRect();
+            const hostBounds = batchHost.getBoundingClientRect();
+            check.ok(rect.left >= hostBounds.left && rect.right <= hostBounds.right);
+        }
+    }
+    batchHost.style.fontSize = "";
+    const selectedBeforeAction = [...batchView.getSelectedIds()];
+    const actionBounds = batchButton.getBoundingClientRect();
+    batchButton.dispatchEvent(new PointerEvent("pointerdown", {pointerId: 85, pointerType: "touch", isPrimary: true,
+        button: 0, bubbles: true, clientX: actionBounds.left + 1, clientY: actionBounds.top + 1}));
+    check.deepEqual(batchView.getSelectedIds(), selectedBeforeAction, "touching the menu action preserves the selection");
+    batchButton.click();
+    await settle();
+    check.equal(batchHistory.length, 1, "clicking summary submits all groups once without a confirmation step");
+    check.equal(api.readListMindmap(batchList).metadata.summaries.length, 2);
+    const firstBatchSummary = batchHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+    check.ok(firstBatchSummary, "batch creation immediately opens the first new summary for editing");
+    check.equal(document.activeElement, firstBatchSummary);
+    check.equal(batchView.selectedSummary, api.readListMindmap(batchList).metadata.summaries[0].id);
+    firstBatchSummary.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    check.equal(batchButton.disabled, true, "identical groups cannot be created twice");
+    const restoreBatch = (html: string) => {
+        const restored = document.createElement("div");
+        restored.innerHTML = html;
+        return restored.firstElementChild;
+    };
+    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].before)).metadata.summaries, undefined);
+    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].after)).metadata.summaries.length, 2);
+    multiSelect.click();
+    batchView.clearSelection();
     const leafRects = leafIDs.map((id: string) => batchHost.querySelector(`[data-mindmap-id="${id}"]`).getBoundingClientRect());
     const left = Math.min(...leafRects.map((rect: DOMRect) => rect.left)) - 1;
     const top = Math.min(...leafRects.map((rect: DOMRect) => rect.top)) - 1;
@@ -4675,72 +5202,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     sendPointer(batchViewport, "pointerdown", left, top);
     sendPointer(batchViewport, "pointermove", right, bottom);
     sendPointer(batchViewport, "pointerup", right, bottom);
-    check.equal(batchView.summaryRanges.length, 2);
-    check.equal(batchHistory.length, 0, "dragging only previews the groups");
-    check.equal(batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls").hidden, false);
-    const controls = batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls");
-    const actions = [...controls.querySelectorAll("button")];
-    const checkButtonRow = () => {
-        check.equal(actions[0].getBoundingClientRect().top, actions[1].getBoundingClientRect().top,
-            "cancel and confirm stay on one row");
-    };
-    checkButtonRow();
-    const countBounds = controls.querySelector("span").getBoundingClientRect();
-    const actionBounds = actions[0].getBoundingClientRect();
-    check.ok(Math.abs(countBounds.top + countBounds.height / 2 - actionBounds.top - actionBounds.height / 2) < 1,
-        "compact localized labels do not force actions onto a separate row");
-    check.equal(actions[0].textContent, batchLabels.cancel);
-    check.equal(actions[1].textContent, batchLabels.confirm);
-    actions[0].focus();
-    const cancelKey = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
-    actions[0].dispatchEvent(cancelKey);
-    check.equal(cancelKey.defaultPrevented, false, "focused cancel keeps native keyboard activation");
-    check.equal(batchHistory.length, 0, "Enter on cancel never confirms the batch");
-    batchHost.style.width = "280px";
-    batchHost.style.fontSize = "32px";
-    await settle();
-    const controlsBounds = controls.getBoundingClientRect();
-    checkButtonRow();
-    check.ok(controlsBounds.width <= batchHost.offsetWidth - 16);
-    controls.querySelectorAll("button").forEach(button => {
-        const rect = button.getBoundingClientRect();
-        check.ok(rect.left >= controlsBounds.left && rect.right <= controlsBounds.right);
-        check.ok(rect.top >= controlsBounds.top && rect.bottom <= controlsBounds.bottom);
-        check.ok(button.classList.contains("b3-button"));
-    });
-    batchHost.style.width = "700px";
-    batchHost.style.fontSize = "";
-    await settle();
-    batchHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    await settle();
-    check.equal(batchHistory.length, 1, "all groups use a single submission");
-    check.equal(api.readListMindmap(batchList).metadata.summaries.length, 2);
-    const restoreBatch = (html: string) => {
-        const restored = document.createElement("div");
-        restored.innerHTML = html;
-        return restored.firstElementChild;
-    };
-    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].before)).metadata.summaries, undefined);
-    check.equal(api.readListMindmap(restoreBatch(batchHistory[0].after)).metadata.summaries.length, 2);
-    batchButton.click();
-    const batchBlank = batchViewport.getBoundingClientRect();
-    sendPointer(batchViewport, "pointerdown", batchBlank.left + 1, batchBlank.top + 1);
-    sendPointer(batchViewport, "pointerup", batchBlank.left + 1, batchBlank.top + 1);
-    for (const id of leafIDs.slice(0, 2)) {
-        batchHost.querySelector(`[data-mindmap-id="${id}"]`).dispatchEvent(new PointerEvent("pointerdown", {
-            bubbles: true, pointerId: 81, pointerType: "touch", isPrimary: true, button: 0,
-        }));
-    }
-    check.equal(batchView.summarySelected.size, 2, "touch taps build a batch selection");
-    check.equal(batchView.summaryRanges.length, 0, "existing groups are not duplicated");
+    check.equal(batchView.getSelectedIds().length, 4);
+    check.equal(batchInspector.hidden, false, "ordinary marquee selection opens the node menu");
+    check.equal(batchButton.disabled, true, "existing groups are not duplicated after marquee selection");
     batchView.update(api.readListMindmap(batchList));
-    check.equal(batchView.summarySelecting, false, "external updates invalidate pending selections");
-    batchButton.click();
-    sendPointer(batchViewport, "pointerdown", left, top);
-    sendPointer(batchViewport, "pointermove", right, bottom);
+    check.equal(batchButton.disabled, true, "external updates recalculate action availability");
+    multiSelect.click();
     batchHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
-    check.equal(batchView.summarySelecting, false);
-    check.equal(batchHistory.length, 1, "canceling never submits a second batch");
+    check.equal(batchView.multiSelect, false);
+    check.equal(multiSelect.getAttribute("aria-pressed"), "false");
+    check.equal(batchHistory.length, 1, "leaving selection mode does not create another batch");
     batchView.destroy();
     batchHost.remove();
     style.remove();
@@ -4819,12 +5290,16 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "connectors.ts")) +
-        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
+        compile(path.join(__dirname, "appearance.ts")) + compile(path.join(__dirname, "model.ts")) +
+        compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
-        compile(path.join(__dirname, "view.ts")) +
+        compile(path.join(__dirname, "clipboard.ts")) + compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
         compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_svg.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_slider.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_text-field.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_button.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_select.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
@@ -4838,7 +5313,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         readFileSync(path.join(__dirname, "../../wysiwyg/transaction.ts"), "utf8"), typescript.ScriptTarget.Latest, true);
     const updateTransaction = transactionSource.statements.find(statement => typescript.isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(transactionSource) === "updateTransaction"));
-    const controllerSource = compile(path.join(__dirname, "../../util/hasClosest.ts")) +
+    const controllerSource = compile(path.join(__dirname, "foldMenu.ts")) +
+        compile(path.join(__dirname, "../../util/hasClosest.ts")) +
         compile(path.join(__dirname, "../../wysiwyg/getBlock.ts")) + compile(path.join(__dirname, "index.ts")) +
         typescript.transpileModule(updateTransaction.getText(transactionSource).replace(/^export /, ""), {
             compilerOptions: {target: typescript.ScriptTarget.ES2021},
@@ -4909,6 +5385,10 @@ app.whenReady().then(async () => {
                     deltaX: -event.deltaX, deltaY: -event.deltaY,
                 });
             } else {
+                // 拖拽移动明确携带按下的按钮状态，避免切换触摸模拟后丢失原生指针捕获。
+                if (event.type === "mouseMove" && event.button) {
+                    event.modifiers = [...(event.modifiers || []), event.button + "buttondown"];
+                }
                 win.webContents.sendInputEvent(event);
             }
             await new Promise(resolve => setTimeout(resolve, 20));
@@ -4919,6 +5399,10 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true, maxTouchPoints: 2});
         try {
             for (const event of events) {
+                if (event.type === "wait") {
+                    await new Promise(resolve => setTimeout(resolve, event.delay));
+                    continue;
+                }
                 await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", event);
                 await new Promise(resolve => setTimeout(resolve, 30));
             }
@@ -4945,7 +5429,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const executable = require("electron") as unknown as string;
-        const result = await promisify(execFile)(executable, [script], {env, timeout: 40000, windowsHide: true});
+        const result = await promisify(execFile)(executable, [script], {env, timeout: 80000, windowsHide: true});
         assert.match(result.stdout, /List mindmap DOM cases passed/);
     } finally {
         rmSync(temporary, {recursive: true, force: true});

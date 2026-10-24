@@ -1,0 +1,3 @@
+# 保留历史写入器生成的原始字节，与清单中的 SHA-256 保持一致。
+data/** -text
+notebook-crypto.json -text

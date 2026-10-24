@@ -93,6 +93,7 @@ const loadMethods = (names, dependencies = {}) => {
     const exports = {};
     runInNewContext(compile(`export const bazaar = {${methods.join(",")}};`), {
         exports, BAZAAR_PACKAGE_CONFIG: config.BAZAAR_PACKAGE_CONFIG,
+        renderBazaarInstall() {},
         window: {siyuan: {config: {bazaar: {trust: true}}}}, ...dependencies,
     });
     return exports.bazaar;

@@ -32,6 +32,7 @@ func TestAttributeViewDeletedBlockEncryptedReplay(t *testing.T) {
 	markRuntimeEncryptedBox(boxID)
 	dek := bytes.Repeat([]byte{0x63}, 32)
 	prepareUnlockedEncryptedBoxTest(t, boxID, dek)
+	encryptDocumentTestSources(t, dek, trees...)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = &conf.BoxEncryption{Spec: boxEncryptionSpec}

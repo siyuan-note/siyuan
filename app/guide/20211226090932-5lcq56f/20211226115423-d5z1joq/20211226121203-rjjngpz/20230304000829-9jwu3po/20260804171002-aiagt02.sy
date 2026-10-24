@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261018104335"
+		"updated": "20261023005737"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-arr6px9",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260926163337-a9sacr9",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
@@ -232,12 +232,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-zznm7nc",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "指令儲存於工作空間的 data/ai/AGENTS.md，支援最多 32 KiB 的 UTF-8 文字。啟用資料同步且未被同步忽略規則排除時，此檔案會隨工作空間同步。也可以使用文字編輯器直接編輯檔案；檔案不存在或為空時不加入自訂指令。"
+					"Data": "指令儲存於工作空間的 data/storage/ai/AGENTS.md，支援最多 32 KiB 的 UTF-8 文字。啟用資料同步且未被同步忽略規則排除時，此檔案會隨工作空間同步。也可以使用文字編輯器直接編輯檔案；檔案不存在或為空時不加入自訂指令。舊路徑 data/ai/AGENTS.md 仍可讀取，在設定中儲存時遷移至新位置；如有針對舊路徑的同步忽略規則，請在儲存前更新。若兩處檔案內容不同，請將內容合併至新檔案並移除舊檔案後再繼續。"
 				}
 			]
 		},
@@ -496,7 +496,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-1z57i1s",
-				"updated": "20260816114944"
+				"updated": "20261023005737"
 			},
 			"Children": [
 				{
@@ -547,6 +547,79 @@
 				{
 					"Type": "NodeText",
 					"Data": "智能體執行時可以點選停止按鈕中止目前任務。描述目標、範圍和預期輸出位置越明確，執行結果通常越穩定。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-zoui51x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-zoui51x",
+				"updated": "20261023005737"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入框會隨文字和圖片自動增高，達到高度上限後捲動。桌面端將滑鼠移入輸入區域後會顯示頂部的小控制點，觸控裝置上則保持顯示。向上或向下拖曳控制點可調整上限，按兩下控制點可恢復自動上限。內容首尾保留捲動空間，方便完整查看首行和末行。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-72jon51",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-72jon51",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高度控制點取得鍵盤焦點後，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 增大或減小上限，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 調至最小高度，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 調至目前可用的最大高度；拖曳時按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可取消調整。"
 				}
 			]
 		},

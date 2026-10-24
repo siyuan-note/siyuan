@@ -7,7 +7,7 @@
 		"id": "20210808180303-axh6q1d",
 		"title": "Custom Appearance",
 		"type": "doc",
-		"updated": "20261013113128"
+		"updated": "20261021001451"
 	},
 	"Children": [
 		{
@@ -50,7 +50,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261013113128-1if2gvn",
-				"updated": "20261013113128"
+				"updated": "20261021001451"
 			},
 			"Children": [
 				{
@@ -64,7 +64,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261013113128-l0hhnte",
-				"updated": "20261013113128"
+				"updated": "20261021001451"
 			},
 			"Children": [
 				{
@@ -105,7 +105,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to reduce spacing in desktop toolbars, tabs, navigation lists, menus and dialogs. The change takes effect immediately and is off by default. Editor text size, document and database content, exports and the mobile interface are unchanged."
+					"Data": " to reduce spacing in desktop toolbars, tabs, navigation lists, menus and dialogs, including when using the desktop interface in the tablet app. The change takes effect immediately and is off by default. Editor text size, document and database content, exports and the mobile interface are unchanged."
 				}
 			]
 		},

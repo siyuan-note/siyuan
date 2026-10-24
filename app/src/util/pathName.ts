@@ -3,6 +3,7 @@ import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
+import {genFileTreeDocAriaLabel} from "./fileTreeTooltip";
 import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
@@ -161,15 +162,15 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     if (titleEmpty) {
         return window.siyuan.languages["_kernel"][16];
     }
-    const displayName = getDisplayName(name, true, true);
+    // 文档接口返回原始标题，斜杠和 .sy 都是标题内容，不能按文件路径处理。
     if (escape) {
-        return escapeHtmlTextAndAttr(displayName);
+        return escapeHtmlTextAndAttr(name);
     }
-    return displayName;
+    return name;
 };
 
 export const getAssetPathWithoutQuery = (assetPath: string) => {
-    return assetPath.split("?", 1)[0];
+    return assetPath.split(/[?#]/, 1)[0];
 };
 
 export const getAssetExtension = (assetPath: string) => {
@@ -789,7 +790,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${getFileTreeIconHTML(item.icon, defaultIcon, "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDocDisplayName(item.name, item.titleEmpty, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + escapeAriaLabel(item.bookmark) : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + escapeAriaLabel(item.name1) : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + escapeAriaLabel(item.alias) : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + escapeAriaLabel(item.memo) : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE" data-tooltip-encoding="none" aria-label="${genFileTreeDocAriaLabel(item, true)}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     ${countHTML}
 </li>`;
         });

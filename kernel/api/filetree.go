@@ -32,6 +32,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -444,19 +445,26 @@ func getFullHPathByIDContract(c *gin.Context, request apicontract.FileTreeOption
 
 var getIDsByHPath = contractHandler(apicontract.GetIDsByHPath, getIDsByHPathContract)
 
-func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalPathRequest) apicontract.Response[[]string] {
+func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalPathRequest) apicontract.Response[apicontract.LegacyPathIDsResult] {
 	ret := gulu.Ret.NewResult()
 
 	if request.Path == nil {
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 	if request.Notebook == nil {
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 
 	notebook := *request.Notebook
 	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
+	}
+
+	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
+		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
+			return apicontract.GetIDsByHPath.FailureWithData(-1, err.Error(), apicontract.UnsupportedLegacyPathIDs())
+		}
+		return apicontract.Failure[apicontract.LegacyPathIDsResult](-1, err.Error())
 	}
 
 	p := *request.Path
@@ -464,10 +472,10 @@ func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalP
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[[]string](ret)
+		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 	ids = filterFileTreeBlockIDsByPublishDiscoverability(c, ids, notebook)
-	return apicontract.Success(ids)
+	return apicontract.Success(apicontract.NewLegacyPathIDs(ids))
 }
 
 func filterFileTreePathsByPublishMetadataAccess(c *gin.Context, paths []string) (ret []string) {
@@ -821,12 +829,19 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 
 var createDocWithMd = contractHandler(apicontract.CreateDocWithMd, createDocWithMdContract)
 
-func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateMarkdownRequest) apicontract.Response[string] {
+func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateMarkdownRequest) apicontract.Response[apicontract.LegacyPathDocumentResult] {
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[string](ret)
+		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
+	}
+
+	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
+		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
+			return apicontract.CreateDocWithMd.FailureWithData(-1, err.Error(), apicontract.UnsupportedLegacyPathDocument())
+		}
+		return apicontract.Failure[apicontract.LegacyPathDocumentResult](-1, err.Error())
 	}
 
 	tags, parentID := request.Tags, request.ParentID
@@ -855,17 +870,32 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[string](ret)
+		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
 	}
-	return apicontract.Success(id)
+	return apicontract.Success(apicontract.NewLegacyPathDocument(id))
 }
 
 var getDocCreateSavePath = contractHandler(apicontract.GetDocCreateSavePath, getDocCreateSavePathContract)
 
-func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeCreateSavePathData] {
+func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeCreateSavePathResult] {
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
+	if model.Conf.Box(notebook) != nil {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, model.Conf.Language(314))
+		}
+		target, err := model.GetDocCreateTarget(notebook, "document")
+		if err != nil {
+			return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, err.Error())
+		}
+		if target.Structured != nil {
+			return apicontract.GetDocCreateSavePath.FailureWithData(-1, "use getDocCreateTarget for a structured template", apicontract.NewFileTreeCreateSavePathFailure())
+		}
+		if err = holdEncryptedBoxRequest(c, target.Notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, model.Conf.Language(314))
+		}
+	}
 	docCreateSaveBox, docCreateSavePathTpl := model.ResolveDocCreateSaveLocation(notebook)
 	docCreateTemplatePath := model.Conf.FileTree.Load().DocCreateTemplatePath
 	if box := model.Conf.Box(notebook); nil != box {
@@ -887,20 +917,35 @@ func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeCreateSavePathData](ret)
+		return contractFailure[apicontract.FileTreeCreateSavePathResult](ret)
 	}
 
-	return apicontract.Success(apicontract.FileTreeCreateSavePathData{FileTreeSavePathData: apicontract.FileTreeSavePathData{Box: docCreateSaveBox, Path: docCreateSavePath}, DocCreateTemplatePath: docCreateTemplatePath})
+	return apicontract.Success(apicontract.NewFileTreeCreateSavePathResult(apicontract.FileTreeCreateSavePathData{FileTreeSavePathData: apicontract.FileTreeSavePathData{Box: docCreateSaveBox, Path: docCreateSavePath}, DocCreateTemplatePath: docCreateTemplatePath}))
 }
 
 var getRefCreateSavePath = contractHandler(apicontract.GetRefCreateSavePath, getRefCreateSavePathContract)
 
-func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeSavePathData] {
+func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeSavePathResult] {
 	confFileTreeSnapshot := model.Conf.LoadFileTree()
 
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
+	if model.Conf.Box(notebook) != nil {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, model.Conf.Language(314))
+		}
+		target, err := model.GetDocCreateTarget(notebook, "reference")
+		if err != nil {
+			return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, err.Error())
+		}
+		if target.Structured != nil {
+			return apicontract.GetRefCreateSavePath.FailureWithData(-1, "use getDocCreateTarget for a structured template", apicontract.NewFileTreeSavePathFailure())
+		}
+		if err = holdEncryptedBoxRequest(c, target.Notebook); err != nil {
+			return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, model.Conf.Language(314))
+		}
+	}
 	box := model.Conf.Box(notebook)
 	var refCreateSaveBox string
 	refCreateSavePathTpl := confFileTreeSnapshot.RefCreateSavePath
@@ -936,9 +981,9 @@ func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeSavePathData](ret)
+		return contractFailure[apicontract.FileTreeSavePathResult](ret)
 	}
-	return apicontract.Success(apicontract.FileTreeSavePathData{Box: refCreateSaveBox, Path: refCreateSavePath})
+	return apicontract.Success(apicontract.NewFileTreeSavePathResult(apicontract.FileTreeSavePathData{Box: refCreateSaveBox, Path: refCreateSavePath}))
 }
 
 var getShorthandSavePath = contractHandler(apicontract.GetShorthandSavePath, getShorthandSavePathContract)

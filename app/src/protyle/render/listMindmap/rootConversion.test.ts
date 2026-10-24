@@ -146,7 +146,7 @@ const getUpdateOperations = (element: ElementFixture, before: string) => {
             operations = {doOperations, undoOperations};
         }};
     new Function(...Object.keys(dependencies), updateSource + "; return updateTransaction;")(
-        ...Object.values(dependencies))({}, element, before);
+        ...Object.values(dependencies))({wysiwyg: {element: element.parentElement}}, element, before);
     element.removeAttribute("data-editing");
     return operations;
 };

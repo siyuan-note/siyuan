@@ -52,8 +52,8 @@ const browserCases = async (renderSource: string, onGetSource: string) => {
     document.body.append(content);
     const protyle = {contentElement: content, wysiwyg: {element: container, prepareBlockVirtualization: noop},
         block: {rootID: "root", showAll: true}, scroll: {shouldKeepLoadedContent: () => true}} as unknown as IProtyle;
-    const load = (action: string[], html: string) => setHTML({action: [...action, "history"], content: html,
-        eof: true, isSyncing: false, expand: false}, protyle);
+    const load = (action: string[], html: string, callbacks: Record<string, unknown> = {}) => setHTML({
+        action: [...action, "history"], content: html, eof: true, isSyncing: false, expand: false, ...callbacks}, protyle);
     const settle = async () => { for (let i = 0; i < 20; i++) { await Promise.resolve(); } };
     const oldHTML = Array.from({length: 100}, (_v, index) =>
         `<div data-node-id="old-${index}" style="height: 20px"><span contenteditable="true">Old ${index}</span></div>`).join("");
@@ -112,6 +112,32 @@ const browserCases = async (renderSource: string, onGetSource: string) => {
     await renderContent(protyle, [b, c]);
     check.equal(calls.some(call => call.root === b), false, "removed nodes do not render");
     check.equal(calls.some(call => call.root === c), true);
+
+    // 完成与失效通知必须覆盖真实数据库渲染的等待区间。
+    let completed = 0;
+    let failures = 0;
+    holdDatabase = true;
+    load([], '<div data-node-id="pending-av"></div>', {
+        afterAVRender: () => completed++, onAVRenderError: () => failures++,
+    });
+    await settle();
+    check.equal(completed, 0);
+    releaseDatabase();
+    await settle();
+    check.equal(completed, 1);
+    check.equal(failures, 0);
+    holdDatabase = true;
+    valid = true;
+    load([], '<div data-node-id="invalidated-av"></div>', {
+        isValid: () => valid, afterAVRender: () => completed++, onAVRenderError: () => failures++,
+    });
+    valid = false;
+    releaseDatabase();
+    await settle();
+    check.equal(completed, 1);
+    check.equal(failures, 1, "an invalidated render settles its reload as a failure");
+    load([], "", {isValid: () => false, onAVRenderError: () => failures++});
+    check.equal(failures, 2, "a render invalidated before insertion also settles");
 
     // 大文档追加的扫描规模由新块数决定；这里只比较遍历工作量，不代表整页耗时。
     container.innerHTML = Array.from({length: 20000}, () => '<div><span class="target"></span></div>').join("");

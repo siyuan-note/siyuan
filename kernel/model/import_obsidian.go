@@ -772,7 +772,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 			dirDoc := dirDocs[obsidianPathKey(dir)]
 			dirDoc.Title = uniqueObsidianTitle(parentTarget, dirDoc.Title, titleUses, vault.Analysis)
 			dirDoc.TargetPath = path.Join(parentTarget, dirDoc.ID+".sy")
-			dirDoc.HPath = path.Join(parentHPath, dirDoc.Title)
+			dirDoc.HPath = appendDocumentHPath(parentHPath, dirDoc.Title)
 			contentTarget = path.Join(parentTarget, dirDoc.ID)
 			contentHPath = dirDoc.HPath
 		}
@@ -797,7 +797,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 		for _, doc := range directDocs {
 			doc.Title = uniqueObsidianTitle(contentTarget, doc.Title, titleUses, vault.Analysis)
 			doc.TargetPath = path.Join(contentTarget, doc.ID+".sy")
-			doc.HPath = path.Join(contentHPath, doc.Title)
+			doc.HPath = appendDocumentHPath(contentHPath, doc.Title)
 		}
 
 		var childDirs []string
@@ -2344,7 +2344,8 @@ func assignObsidianTreeIDs(tree *parse.Tree, doc *obsidianDocPlan, reservedIDs m
 	tree.HPath = doc.HPath
 	tree.Root.Box = ""
 	tree.Root.Path = doc.TargetPath
-	tree.Root.Spec = treenode.CurrentSpec
+	tree.Root.Spec = treenode.BaseSpec
+	treenode.UpgradeSpec(tree)
 	tree.Root.SetIALAttr("id", doc.ID)
 	tree.Root.SetIALAttr("title", doc.Title)
 	tree.Root.SetIALAttr("updated", util.TimeFromID(doc.ID))

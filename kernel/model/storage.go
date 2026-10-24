@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -333,6 +332,13 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	return getRecentDocs(sortBy)
 }
 
+// ClearRecentDocs 清空当前工作区的浏览、打开和关闭记录，后续访问继续记录。
+func ClearRecentDocs() error {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+	return setRecentDocs([]*RecentDoc{})
+}
+
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
 	if !canPersistRecentDoc(rootID) {
@@ -547,7 +553,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		}
 
 		if merged, ok := mergedDocs[bt.RootID]; !ok {
-			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
+			doc.Title = documentTitleText(bt.BoxID, bt.RootID)
 			mergedDocs[bt.RootID] = doc
 			rootIDs = append(rootIDs, bt.RootID)
 		} else {
@@ -631,7 +637,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 				}
 			}
 			// 获取文档标题
-			title := path.Base(bt.HPath)
+			title := documentTitleText(bt.BoxID, bt.RootID)
 			doc := &RecentDoc{
 				RootID: sqlBlock.ID,
 				Icon:   icon,

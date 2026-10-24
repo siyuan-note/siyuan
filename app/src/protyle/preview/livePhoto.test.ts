@@ -79,7 +79,7 @@ test("application-page playback reaches conversion and displays waiting and fail
             status.style.color="#eeeeee";
             const large={size:parseFloat(getComputedStyle(status).fontSize),height:status.getBoundingClientRect().height};
             const toolbar=document.createElement("div");toolbar.className="viewer-toolbar";
-            toolbar.innerHTML='<ul><li class="viewer-live-photo"><svg><use href="#iconVideo"></use></svg></li></ul>';
+            toolbar.innerHTML='<ul><li class="viewer-live-photo"><svg><use href="#iconImagePlay"></use></svg></li></ul>';
             host.append(toolbar);
             const svg=toolbar.querySelector("svg").getBoundingClientRect();
             const icon={width:svg.width,height:svg.height};

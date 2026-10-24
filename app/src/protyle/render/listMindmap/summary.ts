@@ -120,6 +120,7 @@ export const getListMindmapSummaryRange = (model: ListMindmapModel, from: string
 
 // 框选只保留最外层的选中节点，并按父节点及连续范围分组。
 export const getListMindmapSummarySelection = (model: ListMindmapModel, selected: Set<string>) => {
+    selected = new Set([...selected].filter(id => model.nodes.has(id) && !model.nodes.get(id).virtual));
     const groups: ListMindmapSummaryRange[] = [];
     getListMindmapSiblingIDs(model).forEach((ids, parentId) => {
         let group: string[] = [];

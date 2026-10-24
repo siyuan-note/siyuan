@@ -16,6 +16,25 @@ const runCases = async (sources, css, mobile, dark) => {
     const menu = document.createElement("div");
     window.siyuan = {languages: JSON.parse(sources.languages), dialogs: [], storage: {}, zIndex: 100,
         menus: {menu: {element: menu, remove() {}}}};
+    const toolbar = document.createElement("div");
+    toolbar.className = `history__snapshots${mobile ? " history__snapshots--mobile" : ""}`;
+    toolbar.innerHTML = `<button class="b3-button b3-button--text history__snapshot-mobile-control" data-action="filters">Filter</button>
+<div class="history__snapshot-date-controls"><button class="b3-button b3-button--outline" type="submit">Filter</button></div>
+<button class="b3-button b3-button--text" data-action="purge">Purge</button>
+<button class="block__icon block__icon--show history__snapshot-mobile-control" data-action="source-more">More</button>`;
+    document.body.append(toolbar);
+    const visible = selector => getComputedStyle(toolbar.querySelector(selector)).display !== "none";
+    for (const narrow of [false, true]) {
+        toolbar.classList.toggle("history__snapshots--narrow", narrow);
+        assert.equal(visible('[data-action="filters"]'), mobile, "filter toggle belongs only to mobile");
+        assert.equal(visible('[data-action="source-more"]'), mobile, "purge menu belongs only to mobile");
+        assert.equal(visible('[data-action="purge"]'), !mobile, "desktop provides the direct purge action");
+        assert.equal(visible(".history__snapshot-date-controls"), !mobile, "mobile filters start collapsed");
+        toolbar.classList.add("history__snapshots--filters");
+        assert.equal(visible(".history__snapshot-date-controls"), true, "expanded mobile filters remain usable");
+        toolbar.classList.remove("history__snapshots--filters");
+    }
+    toolbar.remove();
     const snapshots = [
         {id: "a".repeat(40), fileID: "doc-file", tags: ["发布版本", "阶段归档"], memo: "功能验收完成\n保留此版本用于后续对照", created: 1790557200000},
         {id: "b".repeat(40), fileID: "doc-file", tags: ["周五备份"], memo: "包含相同文档版本", created: 1790470800000},
@@ -191,7 +210,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("history snapshot details preserve selection, display files and handle missing snapshots, locks and responsive themes", async () => {
+    test("history snapshots preserve selection, details and platform toolbar visibility in responsive themes", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-history-snapshots-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

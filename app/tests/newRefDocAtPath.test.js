@@ -47,9 +47,10 @@ const fixture = () => {
         hasClosestBlock: node => node.block,
         Constants: {ZWSP: "\u200b", BLOCK_HINT_KEYS: ["((", "[[", "（（", "【【"]},
         fetchPost: (url, data, cb) => requests.push({url, data, cb}),
+        fetchSyncPost: (url, data) => new Promise(resolve => requests.push({url, data, cb: resolve})),
         focusByRange: value => focused.push(value),
         getEditorRange: () => range,
-        replaceFileName: value => value,
+        normalizeDocumentTitle: value => value,
         validateName: () => true,
         hideElements: () => {},
         shouldCaptureHintUndoFocus: () => true,
@@ -65,6 +66,7 @@ const fixture = () => {
         pathPosix: () => path.posix,
         movePathTo: options => { picker = options; },
     });
+    Object.assign(deps, load("util/documentCreate", deps, window, Lute));
     const api = load("util/newFile", deps, window, Lute);
     Object.assign(deps, api);
     const hintAPI = load("protyle/hint/index", deps, window, Lute);
@@ -83,8 +85,9 @@ const fixture = () => {
     };
 };
 
-test("selected ID paths create at notebook root or the exact parent, without changing preferences", () => {
-    for (const parent of ["/", "/same-name-one.sy", "/same-name-two.sy", "/ancestor/parent.sy"]) {
+test("selected ID paths create at notebook root or the exact parent, without changing preferences", async () => {
+    for (const parent of ["/", "/20260927110000-parent1.sy", "/20260927110001-parent2.sy",
+        "/20260927110000-parent1/20260927110002-parent3.sy"]) {
         const f = fixture();
         const config = JSON.stringify(f.window.siyuan.config);
         f.open();
@@ -92,12 +95,13 @@ test("selected ID paths create at notebook root or the exact parent, without cha
         f.picker.cb([parent], ["other"]);
         assert.equal(f.requests.length, 1);
         assert.deepEqual(f.requests[0].data, {
-            notebook: "other", path: path.posix.join(parent.replace(/\.sy$/, ""), "20260927120000-newdoc1.sy"),
-            title: "New title", md: "",
+            notebook: "other", parentID: parent === "/" ? null : path.posix.basename(parent, ".sy"),
+            id: "20260927120000-newdoc1", title: {format: "plain", text: "New title"}, markdown: "",
         });
-        assert.equal(f.requests[0].url, "/api/filetree/createDoc");
+        assert.equal(f.requests[0].url, "/api/filetree/createDocByParent");
         assert.equal(f.inserted.length, 0);
-        f.requests[0].cb({code: 0});
+        f.requests[0].cb({code: 0, data: {id: "20260927120000-newdoc1", document: {}}});
+        await Promise.resolve();
         assert.equal(f.inserted[0][0], "20260927120000-newdoc1");
         assert.notEqual(f.inserted[0][1], f.range);
         assert.equal(JSON.stringify(f.window.siyuan.config), config);
@@ -133,12 +137,13 @@ test("changed, detached or navigated source contexts prevent creation and focus 
     }
 });
 
-test("an invalidated source after creation starts does not receive a reference", () => {
+test("an invalidated source after creation starts does not receive a reference", async () => {
     const f = fixture();
     f.open();
     f.picker.cb(["/"], ["other"]);
     f.protyle.block.rootID = "different";
-    f.requests[0].cb({code: 0});
+    f.requests[0].cb({code: 0, data: {id: "20260927120000-newdoc1", document: {}}});
+    await Promise.resolve();
     assert.equal(f.inserted.length, 0);
 });
 
@@ -163,7 +168,7 @@ test("encrypted notebook boundaries apply to explicitly selected destinations", 
     }
 });
 
-test("hint selection preserves reference subtype, anchor text and undo context", () => {
+test("hint selection preserves reference subtype, anchor text and undo context", async () => {
     for (const trigger of ["((", "[[", "（（", "【【"]) {
         for (const staticRef of [true, false]) {
             const f = fixture();
@@ -171,7 +176,8 @@ test("hint selection preserves reference subtype, anchor text and undo context",
             f.hint.fill(`((newFileAtPath "Original anchor"\u200b'New title${f.Lute.Caret}'))`, f.protyle, false, staticRef);
             assert.equal(f.inserted.length, 0);
             f.picker.cb(["/"], ["other"]);
-            f.requests[0].cb({code: 0});
+            f.requests[0].cb({code: 0, data: {id: "20260927120000-newdoc1", document: {}}});
+            await Promise.resolve();
             assert.equal(f.inserted.length, 1);
             const args = f.inserted[0];
             assert.equal(args[3].color, `20260927120000-newdoc1\u200b${staticRef ? "s" : "d"}\u200b${staticRef ? "Original anchor" : "New title"}`);
@@ -246,12 +252,12 @@ test("database creation binds only after success and preserves item identity and
         for (const isDetached of [false, true]) {
             const f = databaseFixture(view, isDetached);
             f.openDatabase();
-            f.picker.cb(["/chosen-parent.sy"], ["other"]);
+            f.picker.cb(["/20260927110000-parent1.sy"], ["other"]);
             assert.equal(f.operations.length, 0);
             assert.equal(f.animations.length, 0);
-            assert.equal(f.requests[0].data.path, "/chosen-parent/20260927120000-newdoc1.sy");
-            f.requests[0].cb({code: 0});
-            await Promise.resolve();
+            assert.equal(f.requests[0].data.parentID, "20260927110000-parent1");
+            f.requests[0].cb({code: 0, data: {id: "20260927120000-newdoc1", document: {}}});
+            await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.operations.length, 1);
             const {doOperations, undoOperations} = f.operations[0];
             assert.equal(doOperations[0].previousID, "original-item");
@@ -299,8 +305,8 @@ test("database context changes before confirmation or after creation starts cann
             }
             change(f);
             if (afterCreate) {
-                f.requests[0].cb({code: 0});
-                await Promise.resolve();
+                f.requests[0].cb({code: 0, data: {id: "20260927120000-newdoc1", document: {}}});
+                await new Promise(resolve => setImmediate(resolve));
             } else {
                 f.picker.cb(["/"], ["other"]);
                 assert.equal(f.requests.length, 0);

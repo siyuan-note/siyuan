@@ -74,6 +74,9 @@ func initDatabase(forceRebuild bool) {
 		}
 	}
 	if !forceRebuild {
+		if err := ensureDocumentMetadata(db); err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document metadata failed: %s", err)
+		}
 		if err := ensureHPathIndexes(db); err != nil {
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create hpath indexes failed: %s", err)
 		}
@@ -96,6 +99,15 @@ func initDatabase(forceRebuild bool) {
 }
 
 func initDBTables() {
+	if _, err := db.Exec("DROP TABLE IF EXISTS document_metadata_pending"); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop document metadata pending failed: %s", err)
+	}
+	if _, err := db.Exec("DROP TABLE IF EXISTS document_metadata_state"); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop document metadata state failed: %s", err)
+	}
+	if _, err := db.Exec("DROP TABLE IF EXISTS document_metadata"); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop document metadata failed: %s", err)
+	}
 	_, err := db.Exec("DROP TABLE IF EXISTS blocktrees")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [blocks] failed: %s", err)
@@ -124,6 +136,9 @@ func initDBTables() {
 	}
 	if err = ensureBlockTreeTypeIndex(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree type index failed: %s", err)
+	}
+	if err = ensureDocumentMetadata(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document metadata failed: %s", err)
 	}
 }
 
@@ -534,8 +549,7 @@ func CheckListItemNesting(parentID, childID string) error {
 }
 
 func SetBlockTreePath(tree *parse.Tree) {
-	RemoveBlockTreesByRootID(tree.Box, tree.ID)
-	IndexBlockTree(tree)
+	indexBlockTree(tree, true)
 }
 
 func RemoveBlockTreesByRootID(boxID, rootID string) {
@@ -683,6 +697,10 @@ func RemoveBlockTree(boxID, id string) {
 var indexBlockTreeLock = sync.Mutex{}
 
 func IndexBlockTree(tree *parse.Tree) {
+	indexBlockTree(tree, false)
+}
+
+func indexBlockTree(tree *parse.Tree, replace bool) {
 	tree.HPath = CurrentParentHPath(tree)
 	var changedNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -713,6 +731,14 @@ func IndexBlockTree(tree *parse.Tree) {
 		return
 	}
 
+	if replace {
+		// 文档行与摘要的删除、重建处于同一事务，不向并发读取暴露短暂的缺失身份。
+		if _, err = tx.Exec("DELETE FROM blocktrees WHERE root_id = ?", tree.ID); err != nil {
+			tx.Rollback()
+			logging.LogErrorf("replace document block tree failed: %s", err)
+			return
+		}
+	}
 	execInsertBlocktrees(tx, tree, changedNodes)
 
 	if err = tx.Commit(); err != nil {
@@ -721,7 +747,18 @@ func IndexBlockTree(tree *parse.Tree) {
 }
 
 func UpsertBlockTree(tree *parse.Tree) {
+	upsertBlockTree(tree, true)
+}
+
+// UpsertBlockTreePending 供尚未落盘的编辑事务定位块；标题摘要仍保留已提交的源状态。
+func UpsertBlockTreePending(tree *parse.Tree) {
+	upsertBlockTree(tree, false)
+}
+
+func upsertBlockTree(tree *parse.Tree, publishMetadata bool) {
 	tree.HPath = CurrentParentHPath(tree)
+	metadata, metadataErr := GetDocumentMetadata(tree.Box, tree.ID)
+	metadataChanged := metadataErr != nil || metadata.Revision != documentMetadataFromTree(tree).Revision
 	oldBts := map[string]*BlockTree{}
 	bts := GetBlockTreesByRootIDInBox(tree.ID, tree.Box)
 	for _, bt := range bts {
@@ -735,7 +772,7 @@ func UpsertBlockTree(tree *parse.Tree) {
 		}
 
 		if oldBt, found := oldBts[n.ID]; found {
-			if oldBt.Updated != n.IALAttr("updated") || oldBt.Type != TypeAbbr(n.Type.String()) || oldBt.Path != tree.Path || oldBt.BoxID != tree.Box || oldBt.HPath != tree.HPath {
+			if (n == tree.Root && metadataChanged) || oldBt.Updated != n.IALAttr("updated") || oldBt.Type != TypeAbbr(n.Type.String()) || oldBt.Path != tree.Path || oldBt.BoxID != tree.Box || oldBt.HPath != tree.HPath {
 				children := ChildBlockNodes(n) // 需要考虑子块，因为一些操作（比如移动块）后需要同时更新子块
 				changedNodes = append(changedNodes, children...)
 				if n.IsContainerBlock() && n.Type != ast.NodeDocument {
@@ -780,7 +817,8 @@ func UpsertBlockTree(tree *parse.Tree) {
 		return
 	}
 
-	sqlStmt := "DELETE FROM blocktrees WHERE id IN (" + ids.String() + ")"
+	// 文档行原地更新，避免未提交事务触发摘要删除。
+	sqlStmt := "DELETE FROM blocktrees WHERE type != 'd' AND id IN (" + ids.String() + ")"
 	_, err = tx.Exec(sqlStmt)
 	if err != nil {
 		tx.Rollback()
@@ -788,7 +826,7 @@ func UpsertBlockTree(tree *parse.Tree) {
 		return
 	}
 
-	execInsertBlocktrees(tx, tree, changedNodes)
+	execInsertBlocktreesWithMetadata(tx, tree, changedNodes, publishMetadata)
 
 	if err = tx.Commit(); err != nil {
 		logging.LogErrorf("commit transaction failed: %s", err)
@@ -796,6 +834,21 @@ func UpsertBlockTree(tree *parse.Tree) {
 }
 
 func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node) {
+	execInsertBlocktreesWithMetadata(tx, tree, changedNodes, true)
+}
+
+// 既有文档按 ID 定位；初始化索引时不能为每个待插入文档扫描此前所有文档行。
+const documentBlockTreeUpdateQuery = `UPDATE blocktrees INDEXED BY idx_blocktrees_id SET root_id=?, parent_id=?, path=?, hpath=?, updated=?
+	WHERE box_id=? AND id=? AND type='d'`
+
+func execInsertBlocktreesWithMetadata(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node, publishMetadata bool) {
+	if publishMetadata {
+		if err := upsertDocumentMetadata(tx, tree); err != nil {
+			tx.Rollback()
+			logging.LogErrorf("update document metadata failed: %s", err)
+			return
+		}
+	}
 	sqlStmt := "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := tx.Prepare(sqlStmt)
 	if err != nil {
@@ -819,6 +872,18 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		var parentID string
 		if nil != n.Parent {
 			parentID = n.Parent.ID
+		}
+		if n.Type == ast.NodeDocument {
+			result, updateErr := tx.Exec(documentBlockTreeUpdateQuery, tree.ID, parentID, tree.Path, tree.HPath,
+				n.IALAttr("updated"), tree.Box, n.ID)
+			if updateErr != nil {
+				tx.Rollback()
+				logging.LogErrorf("update document blocktree failed: %s", updateErr)
+				return
+			}
+			if count, _ := result.RowsAffected(); count > 0 {
+				continue
+			}
 		}
 		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
 			tx.Rollback()
@@ -1031,6 +1096,7 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 	if err = cleanupInvalidBlockTrees(boxDB); err != nil {
 		return
 	}
+	err = ensureDocumentMetadata(boxDB)
 	return
 }
 
@@ -1073,6 +1139,9 @@ func beginTxForBox(box string) (tx *sql.Tx, err error) {
 	}
 	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(box) {
 		return nil, errors.New("encrypted blocktree db not opened for box " + box)
+	}
+	if db == nil {
+		return nil, errBlockTreeDBUnavailable
 	}
 	return db.Begin()
 }

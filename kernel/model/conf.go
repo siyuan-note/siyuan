@@ -290,6 +290,10 @@ func InitConf() {
 	}
 
 	Conf = NewAppConf()
+	if err := recoverDataImports(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover Data.zip import failed: %s", err)
+		return
+	}
 	// 先回滚未提交的目录移动，即使配置文件丢失也必须在挂载和同步之前恢复。
 	if err := recoverNotebookArchiveOperations(); err != nil {
 		logging.LogErrorf("recover notebook archive operations failed: %s", err)
@@ -1150,6 +1154,7 @@ func (conf *AppConf) language(num int) (ret string) {
 }
 
 func InitBoxes() {
+	cleanupInterruptedCheckout()
 	blockCount := treenode.CountBlocks()
 	initialized := 0 < blockCount
 	for _, box := range Conf.GetOpenedBoxes() {
@@ -1163,6 +1168,7 @@ func InitBoxes() {
 		}
 	}
 
+	recoverOpenedDocumentMetadata()
 	recoverDocHPaths()
 	logging.LogInfof("tree/block count [%d/%d]", treenode.CountTrees(), blockCount)
 }
@@ -1266,6 +1272,7 @@ func HideConfSecret(c *AppConf) {
 func HideBoxConfSecret(c *conf.BoxConf) {
 	if nil != c {
 		c.BoxCrypt = nil
+		c.DocCreateTarget, c.RefCreateTarget, c.DailyNoteTarget = nil, nil, nil
 	}
 }
 

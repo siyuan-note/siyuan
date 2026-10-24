@@ -37,6 +37,64 @@ func setupAssetContractWorkspace(t *testing.T) string {
 	return dir
 }
 
+func TestMissingAssetsContract(t *testing.T) {
+	for _, mode := range []string{"empty", "missing", "unreadable document", "source failure", "panic"} {
+		t.Run(mode, func(t *testing.T) {
+			setupAssetContractWorkspace(t)
+			model.Conf.FileTree.Store(conf.NewFileTree())
+			if mode == "source failure" {
+				util.DataDir = filepath.Join(util.WorkspaceDir, "missing")
+			} else if mode == "panic" {
+				model.Conf = nil
+			} else if mode != "empty" {
+				boxID := "20260918000000-abcdefg"
+				boxConf := conf.NewBoxConf()
+				boxConf.Closed = false
+				if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+					t.Fatal(err)
+				}
+				data := `{"Type":"NodeDocument","ID":"20260918000001-abcdefg","Properties":{"title-img":"background-image: url(assets/missing.png)"}}`
+				if mode == "unreadable document" {
+					if err := os.WriteFile(filepath.Join(util.DataDir, boxID, "20260918000002-abcdefg.sy"), []byte(data), 0644); err != nil {
+						t.Fatal(err)
+					}
+					data = `{"Type":`
+				}
+				if err := os.WriteFile(filepath.Join(util.DataDir, boxID, "20260918000001-abcdefg.sy"), []byte(data), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			engine := gin.New()
+			engine.POST("/api/asset/getMissingAssets", getMissingAssets)
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/getMissingAssets", strings.NewReader(`{}`)))
+			requireAPIContract(t, "POST", "/api/asset/getMissingAssets", recorder)
+			var response struct {
+				Code int
+				Msg  string
+				Data []*apicontract.AssetUnusedItem
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+				t.Fatal(err)
+			}
+			if mode == "empty" || mode == "missing" {
+				want := 0
+				if mode == "missing" {
+					want = 1
+				}
+				if response.Code != 0 || response.Data == nil || len(response.Data) != want {
+					t.Fatalf("invalid successful list: %s", recorder.Body.String())
+				}
+			} else if response.Code != -1 || response.Msg == "" || response.Data != nil {
+				t.Fatalf("failed scan must not publish a successful list: %s", recorder.Body.String())
+			}
+			if mode == "unreadable document" && !strings.Contains(response.Msg, "incomplete") {
+				t.Fatalf("skipped documents must be identified as an incomplete scan: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
 func TestAssetUploadContractAdapter(t *testing.T) {
 	assets := setupAssetContractWorkspace(t)
 	content := []byte("upload fixture")

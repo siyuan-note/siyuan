@@ -7,6 +7,7 @@ import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
+import {openSyncCheckoutProgress} from "./checkoutProgress";
 /// #if !MOBILE
 import {openSetting} from "../config";
 /// #endif
@@ -33,7 +34,7 @@ export const addCloudName = (cloudListElement: Element) => {
         value: "main",
         description: window.siyuan.languages.reposTip,
         onConfirm: (value, dialog) => {
-            cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+            cloudListElement.innerHTML = '<div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
             fetchPost("/api/sync/createCloudSyncDir", {name: value}, () => {
                 dialog.destroy();
                 renderSyncCloudList(cloudListElement, true);
@@ -58,7 +59,7 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: b
                         break;
                     case "removeCloud":
                         confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDeleteCloudDir} <i>${target.parentElement.getAttribute("data-name")}</i>`, () => {
-                            cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+                            cloudListElement.innerHTML = '<div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
                             fetchPost("/api/sync/removeCloudSyncDir", {name: target.parentElement.getAttribute("data-name")}, (response) => {
                                 window.siyuan.config.sync.cloudName = response.data;
                                 renderSyncCloudList(cloudListElement, true, cb);
@@ -66,7 +67,7 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: b
                         }, undefined, true);
                         break;
                     case "selectCloud":
-                        cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+                        cloudListElement.innerHTML = '<div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
                         configApi.set("sync.cloudName", target.getAttribute("data-name"), () => {
                             window.siyuan.config.sync.cloudName = target.getAttribute("data-name");
                             renderSyncCloudList(cloudListElement, true, cb);
@@ -103,7 +104,7 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
     }
     const canManage = provider === 0 || provider === 4;
     cb?.(false);
-    cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+    cloudListElement.innerHTML = '<div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
     fetchPost("/api/sync/listCloudSyncDir", {}, (response) => {
         if (provider !== window.siyuan.config.sync.provider) {
             return;
@@ -193,6 +194,7 @@ export const refreshSyncCloudDirBlock = (root: Element) => {
 };
 
 export const syncGuide = (app?: App) => {
+    if (openSyncCheckoutProgress()) return;
     if (window.siyuan.config.readonly) {
         return;
     }
@@ -278,7 +280,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
         const listHTML = `<div class="b3-dialog__content">
     <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide3}</div>
     <div style="display: flex;flex-direction: column;height: 40vh;">
-        <img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">
+        <div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>
 </div>
 <div class="b3-dialog__action">

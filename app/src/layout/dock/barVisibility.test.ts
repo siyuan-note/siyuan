@@ -60,9 +60,15 @@ describe("dock bar visibility", () => {
         assert.equal(shouldShowDockBar(false, false), false);
     });
 
-    it("keeps dock bars hidden when they are globally disabled", () => {
+    it("keeps dock bars hidden without an expanded floating panel when they are globally disabled", () => {
         assert.equal(shouldShowDockBar(true, true), false);
         assert.equal(shouldShowDockBar(true, false), false);
+    });
+
+    it("temporarily shows a non-empty dock bar for an expanded floating panel", () => {
+        assert.equal(shouldShowDockBar(true, true, true), true);
+        assert.equal(shouldShowDockBar(true, false, true), false);
+        assert.equal(shouldShowDockBar(false, true, true), true);
     });
 });
 

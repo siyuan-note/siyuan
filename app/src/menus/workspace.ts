@@ -204,7 +204,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                         id: "newOrOpenBy",
                         label: getHostCapabilities().workspaces
                             ? `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}` : window.siyuan.languages.openBy,
-                        iconHTML: "",
+                        icon: "iconFolder",
                         click: async () => {
                             const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                                 cmd: "showOpenDialog",
@@ -246,7 +246,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                     workspaceSubMenu = [{
                         id: "new",
                         label: window.siyuan.languages.new,
-                        iconHTML: "",
+                        icon: "iconFolder",
                         click() {
                             const createWorkspaceDialog = openInputDialog({
                                 title: window.siyuan.languages.new,
@@ -264,7 +264,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                     }, {
                         id: "openBy",
                         label: `${window.siyuan.languages.openBy}...`,
-                        iconHTML: "",
+                        icon: "iconFolder",
                         click() {
                             fetchPost("/api/system/getMobileWorkspaces", {}, (response) => {
                                 let selectHTML = "";
@@ -303,7 +303,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                     workspaceSubMenu.push({id: "separator_1", type: "separator"});
                     workspaces.forEach((item: IWorkspace) => {
                         workspaceSubMenu.push({
-                            iconHTML: "",
+                            icon: "iconFolder",
                             action: "iconCloseRound",
                             current: window.siyuan.config.system.workspaceDir === item.path,
                             label: pathPosix().basename(item.path),
@@ -605,7 +605,7 @@ const workspaceItem = (item: IWorkspace) => {
     ${originalPath().basename(item.path)}
 </div>`,
         current: !item.closed,
-        iconHTML: "",
+        icon: "iconFolder",
         type: "submenu",
         submenu,
         click() {

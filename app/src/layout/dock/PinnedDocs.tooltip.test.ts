@@ -37,24 +37,30 @@ const browserCases = async (sources: Record<string, string>) => {
     const Pinned = load("PinnedDocs") as unknown as {PinnedDocs: {prototype: object}};
     const panel = Object.create(Pinned.PinnedDocs.prototype);
     panel.expanded = new Set();
-    const regular: {render?: (item: unknown) => string} = {};
+    const regular: {render?: (item: unknown) => string, renderExpanded?: (item: unknown) => string} = {};
     const dependencies = {...modules.escape, ...helper, getDocDisplayName: names.getDocDisplayName,
         FILE_TREE_CHILDREN_SORT_MODE: "data-children-sort-mode", getFileTreeDefaultIconAttr: () => "",
         getFileTreeIconHTML: () => "", getPublishAccessOptionByLevel: () => ({iconHTML: ""})};
     new Function("exports", ...Object.keys(dependencies), sources.regular)(regular, ...Object.values(dependencies));
     const pinned = document.getElementById("pinned");
     const ordinary = document.getElementById("ordinary");
+    const expanded = document.createElement("ul");
+    document.body.append(expanded);
     const tip = document.getElementById("tooltip");
     tooltip.initTooltips();
-    const doc = {id: "doc", notebook: "box", name: 'Title "quotes" <tag> & text', path: "/doc.sy", subFileCount: 2,
+    const doc = {id: "doc", notebook: "box", name: 'A//%2F/%3Ctag%3E/Title "quotes" <tag> & text &amp; &copy; &lt;tag&gt;.sy', path: "/doc.sy", subFileCount: 2,
         hSize: "2 KB", hMtime: "2026-10-17 11:00:00", hCtime: "2026-09-01 10:00:00",
         bookmark: 'Mark "quoted"', name1: "Named <tag>", alias: "Alias & text", memo: "Memo <img src=x>"};
     for (const depth of [0, 1]) {
         pinned.replaceChildren();
         await panel.appendDoc(pinned, doc, "doc", depth, 0);
         ordinary.innerHTML = regular.render.call({element: ordinary}, doc);
+        expanded.innerHTML = regular.renderExpanded(doc);
         const title = pinned.querySelector(".b3-list-item__text");
+        check.equal(title.textContent, doc.name);
+        check.equal(ordinary.querySelector(".b3-list-item__text").textContent, doc.name);
         check.equal(title.getAttribute("aria-label"), ordinary.querySelector(".b3-list-item__text").getAttribute("aria-label"));
+        check.equal(title.getAttribute("aria-label"), expanded.querySelector(".b3-list-item__text").getAttribute("aria-label"));
         title.dispatchEvent(new PointerEvent("pointerover", {bubbles: true, pointerType: "mouse"}));
         title.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
         await new Promise(resolve => setTimeout(resolve, 260));
@@ -63,6 +69,11 @@ const browserCases = async (sources: Record<string, string>) => {
             check.ok(tip.textContent.includes(value), `missing tooltip detail: ${value}`);
         }
         check.equal(tip.querySelector("img, tag"), null, "metadata remains plain text");
+        expanded.querySelector(".b3-list-item__text").dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+        check.ok(tip.textContent.includes(doc.name), "expanded documents preserve the same title");
+        title.setAttribute("aria-label", (helper as typeof import("../../util/fileTreeTooltip")).genFileTreeDocAriaLabel(doc));
+        title.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+        check.ok(tip.textContent.includes(doc.name), "dynamic tooltip updates preserve literal entities");
         tooltip.hideTooltip();
     }
     pinned.replaceChildren();
@@ -96,7 +107,11 @@ test("pinned roots and children show the same complete escaped tooltip as ordina
     const source = ts.createSourceFile("Files.ts", readFileSync("src/layout/dock/Files.ts", "utf8"), ts.ScriptTarget.Latest, true);
     const declaration = source.statements.find(ts.isClassDeclaration);
     const method = declaration.members.find(member => member.name?.getText(source) === "genFileHTML") as ts.MethodDeclaration;
-    sources.regular = compile(`exports.render = function(item) ${method.body.getText(source)};`);
+    const pathNameSource = readFileSync("src/util/pathName.ts", "utf8");
+    const start = pathNameSource.indexOf('<span class="b3-list-item__text ariaLabel" data-position="parentE" data-tooltip-encoding');
+    const end = pathNameSource.indexOf("</span>", start) + "</span>".length;
+    sources.regular = compile(`exports.render = function(item) ${method.body.getText(source)};` +
+        "exports.renderExpanded = item => `" + pathNameSource.slice(start, end) + "`;");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-pinned-tooltip-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app,BrowserWindow}=require("electron");

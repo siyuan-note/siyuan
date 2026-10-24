@@ -1885,7 +1885,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
+				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
 			}
 		}
 	}
@@ -2318,32 +2318,48 @@ func unusedAssetRelativePath(dataAssetsAbsPath, assetAbsPath string) (string, bo
 	return "", false
 }
 
-func MissingAssets() (ret []*UnusedItem) {
-	defer logging.Recover()
+func MissingAssets() (ret []*UnusedItem, err error) {
+	return missingAssets(allAssetAbsPaths, ListNotebooks)
+}
+
+func missingAssets(assetPaths func() (map[string]string, error), notebooks func() ([]*Box, error)) (ret []*UnusedItem, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			ret = nil
+			err = fmt.Errorf("scan missing asset references failed: %v", recovered)
+			logging.LogErrorf("%s", err)
+		}
+	}()
 	ret = []*UnusedItem{}
 
-	assetsPathMap, err := allAssetAbsPaths()
+	assetsPathMap, err := assetPaths()
 	if err != nil {
 		return
 	}
-	notebooks, err := ListNotebooks()
+	boxes, err := notebooks()
 	if err != nil {
 		return
 	}
 	luteEngine := util.NewLute()
 	referenceBlockIDs := map[missingAssetReference]map[string]bool{}
-	for _, notebook := range notebooks {
+	var skippedErr error
+	for _, notebook := range boxes {
 		if notebook.Closed {
 			continue
 		}
 		encrypted := IsEncryptedBox(notebook.ID)
 
-		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
+		pages, walkErr := pagedPathsWithError(filepath.Join(util.DataDir, notebook.ID), 32)
+		if walkErr != nil {
+			return nil, fmt.Errorf("scan missing asset references failed: %w", walkErr)
+		}
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {
 				tree, loadTreeErr := loadTree(localPath, luteEngine)
 				if nil != loadTreeErr {
+					// 保留逐篇跳过的行为，但不能将不完整的扫描报告为成功。
+					skippedErr = errors.Join(skippedErr, fmt.Errorf("read asset references [%s] failed: %w", localPath, loadTreeErr))
 					continue
 				}
 				trees = append(trees, tree)
@@ -2373,7 +2389,10 @@ func MissingAssets() (ret []*UnusedItem) {
 		}
 	}
 
-	return missingAssetItems(referenceBlockIDs, assetsPathMap)
+	if skippedErr != nil {
+		return missingAssetItems(referenceBlockIDs, assetsPathMap), fmt.Errorf("missing asset scan incomplete: %w", skippedErr)
+	}
+	return missingAssetItems(referenceBlockIDs, assetsPathMap), nil
 }
 
 func missingAssetItems(referenceBlockIDs map[missingAssetReference]map[string]bool, assetsPathMap map[string]string) (ret []*UnusedItem) {

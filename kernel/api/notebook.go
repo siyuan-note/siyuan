@@ -25,6 +25,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -313,11 +314,26 @@ var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.C
 	}
 
 	boxConf := box.GetConf()
+	var capabilities *apicontract.DocumentCapabilities
 	if !model.IsAdminRoleContext(c) {
 		model.HideBoxConfSecret(boxConf)
+	} else {
+		snapshot, err := documentaddressing.InspectBox(util.DataDir, util.ConfDir, notebook)
+		if err != nil {
+			return apicontract.Failure[apicontract.NotebookConfData](-1, err.Error())
+		}
+		modeState := snapshot.State
+		indexState := treenode.DocumentMetadataState(notebook)
+		if modeState == "structured" && indexState != "ready" {
+			modeState = "recovering"
+		}
+		capabilities = &apicontract.DocumentCapabilities{AddressingVersion: snapshot.Mode,
+			ModeState: modeState, StructuredPaths: true, LiteralSlash: modeState == "structured", TitleFormats: []string{"plain"},
+			IndexState: indexState, MinimumReaderVersion: documentaddressing.MinimumReaderVersion(), Revision: snapshot.Revision}
 	}
 
-	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name, Conf: notebookConfContract(boxConf)})
+	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name,
+		Conf: notebookConfContract(boxConf), DocumentCapabilities: capabilities})
 })
 
 var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.Context, request apicontract.SetNotebookConfRequest) apicontract.Response[*apicontract.NotebookConf] {
@@ -344,6 +360,9 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 
 	boxConf := box.GetConf()
 	oldSortMode := boxConf.SortMode
+	if err := applyNotebookDocumentTargetPatch(notebook, boxConf, request.Conf); err != nil {
+		return apicontract.Failure[*apicontract.NotebookConf](-1, err.Error())
+	}
 	applyNotebookConfPatch(boxConf, request.Conf)
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)

@@ -6,7 +6,7 @@
 		"id": "20260614104322-shrqj15",
 		"title": "網路代理",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261022120655"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104332-ojj5e46",
-				"updated": "20261016112115"
+				"updated": "20261022120655"
 			},
 			"Children": [
 				{
@@ -109,7 +109,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614104332-3skahri",
-				"updated": "20261016112115"
+				"updated": "20261022120655"
 			},
 			"Children": [
 				{
@@ -145,7 +145,7 @@
 					"Type": "NodeListItem",
 					"Properties": {
 						"id": "20261016112115-rt8undd",
-						"updated": "20261016112115"
+						"updated": "20261022120655"
 					},
 					"ListData": {
 						"BulletChar": 42,
@@ -157,12 +157,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261016112115-6yyf4an",
-								"updated": "20261016112115"
+								"updated": "20261022120655"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "系統模式使用支援的系統設定，或核心啟動時繼承的代理環境變數。核心支援讀取 Windows 手動代理和 Linux GNOME 手動代理，Linux 上明確設定的代理環境變數優先。這些讀取器不支援自動 PAC 設定，Windows 自動偵測也不受支援；其他平台的核心保留啟動時的代理環境，不讀取作業系統代理設定"
+									"Data": "系統模式使用支援的系統設定，或核心啟動時繼承的代理環境變數。核心支援讀取 Windows、Linux GNOME 和 macOS 的手動代理，Linux 和 macOS 上明確設定的代理環境變數優先。這些讀取器不支援自動 PAC 設定，Windows 和 macOS 自動偵測也不受支援；其他平台的核心保留啟動時的代理環境，不讀取作業系統代理設定"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261022120655-wdl5gm4",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261022120655-wdl5gm4",
+						"updated": "20261022120655"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261022120655-sjevvj7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261022120655-sjevvj7",
+								"updated": "20261022120655"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "macOS 支援手動 HTTP、HTTPS 和 SOCKS5 代理。例外清單轉換為 NO_PROXY 規則，支援 IP 位址、CIDR 網段（包括 169.254/16）、網域、以 *. 開頭的網域模式，以及 10.* 等 IPv4 尾端萬用字元。不支援「排除簡單主機名稱」和其他萬用字元模式，請改用明確的例外項目。讀取或轉換失敗時，核心記錄警告並保留啟動時的代理環境。修改 macOS 系統代理後，需重新啟動核心，或先切換至其他代理模式再切回系統模式"
 								}
 							]
 						}

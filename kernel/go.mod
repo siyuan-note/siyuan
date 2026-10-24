@@ -1,6 +1,6 @@
 module github.com/siyuan-note/siyuan/kernel
 
-go 1.26.5
+go 1.26.10
 
 require (
 	code.sajari.com/docconv v1.3.8
@@ -75,7 +75,7 @@ require (
 	github.com/sashabaranov/go-openai v1.42.0
 	github.com/shirou/gopsutil/v4 v4.26.7
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
-	github.com/siyuan-note/dejavu v0.0.0-20261019140134-d0b1127c4adf
+	github.com/siyuan-note/dejavu v0.0.0-20261022130950-71be2217abb3
 	github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044
 	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20260831011452-393425122aaa
@@ -103,7 +103,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20261018152725-ab704845b936
+require github.com/88250/lute v1.7.9-0.20261022110200-b120bcbdbc47
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect
@@ -242,7 +242,7 @@ require (
 	modernc.org/fileutil v1.4.0 // indirect
 )
 
-replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20260704101239-6ddb6e555a1e
+replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20261023044249-ae36e402e11a
 
 replace github.com/pdfcpu/pdfcpu => github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46
 

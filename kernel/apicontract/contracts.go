@@ -140,7 +140,16 @@ var SetNotebookConf = define[SetNotebookConfRequest, *NotebookConf]("setNotebook
 var ReorderNotebooks = define[ReorderNotebooksRequest, *ReorderData]("reorderNotebooks", "/api/notebook/reorder", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 var (
-	OpenNotebook    = define[OpenNotebookRequest, Null]("openNotebook", "/api/notebook/openNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	OpenNotebook = define[OpenNotebookRequest, Null]("openNotebook", "/api/notebook/openNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// GetNotebookConf preserves existing configuration and permission filtering. Administrator
+	// responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
+	// not permission to open a closed or locked notebook. Ordinary builds migrate to mode 2
+	// automatically without a user setting or special build flags. literalSlash requires consistent
+	// mode records and ready indexes. minimumReaderVersion stays null until the minimum compatible
+	// feature release is verified; it neither controls activation nor permits mixing with older clients.
+	// Revision covers configuration, confirmed capability and recovery records, not a document path.
+	// Malformed capability records fail the request; authentication, locking and network failures must
+	// never be interpreted as an absent capability object or as permission to retry a legacy write.
 	GetNotebookConf = define[CloseNotebookRequest, NotebookConfData]("getNotebookConf", "/api/notebook/getNotebookConf", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
@@ -356,26 +365,32 @@ var (
 	EnableEncryptedNotebooks  = define[NotebookPasswordRequest, Null]("enableEncryptedNotebooks", "/api/notebook/enableEncryptedNotebooks", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	DisableEncryptedNotebooks = define[EmptyRequest, Null]("disableEncryptedNotebooks", "/api/notebook/disableEncryptedNotebooks", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	CreateEncryptedNotebook   = define[CreateEncryptedNotebookRequest, CreateNotebookData]("createEncryptedNotebook", "/api/notebook/createEncryptedNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	UnlockNotebook            = define[UnlockNotebookRequest, Null]("unlockNotebook", "/api/notebook/unlockNotebook", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
-	UnlockAndOpenNotebook     = define[UnlockNotebookRequest, Null]("unlockAndOpenNotebook", "/api/notebook/unlockAndOpenNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	LockNotebook              = define[NotebookIDRequest, Null]("lockNotebook", "/api/notebook/lockNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// 在密钥恢复和解锁转换前拒绝不支持的笔记本寻址模式，保留原密文和恢复材料。
+	UnlockNotebook = define[UnlockNotebookRequest, Null]("unlockNotebook", "/api/notebook/unlockNotebook", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+	// 解锁及挂载均检查笔记本寻址能力；不支持的模式不会发布解锁状态或修复源数据。
+	UnlockAndOpenNotebook = define[UnlockNotebookRequest, Null]("unlockAndOpenNotebook", "/api/notebook/unlockAndOpenNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	LockNotebook          = define[NotebookIDRequest, Null]("lockNotebook", "/api/notebook/lockNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// 保存本机加密笔记本锁屏策略，成功后广播 system 设置变更通知，供其他客户端重新读取配置。
 	SetEncryptedNotebookFollowSystemLock = define[EncryptedNotebookFollowSystemLockRequest, Null]("setEncryptedNotebookFollowSystemLock", "/api/notebook/setEncryptedNotebookFollowSystemLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	LockEncryptedNotebooksOnSystemLock   = define[EmptyRequest, Null]("lockEncryptedNotebooksOnSystemLock", "/api/notebook/lockEncryptedNotebooksOnSystemLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// 自动锁定分钟数由内核内存值驱动锁定行为，写入后无需广播供其他客户端重读。
-	SetNotebookCryptoAutoLock    = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "notebookCrypto", Mode: SettingSilent}}, "POST")
+	SetNotebookCryptoAutoLock = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "notebookCrypto", Mode: SettingSilent}}, "POST")
+	// 在改密恢复、密钥切换及迁移记录写入前预检全部现存加密笔记本，不支持的寻址模式返回 -1。
 	ChangeMasterPassword         = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	ExportNotebookCryptoBackup   = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	TouchEncryptedNotebooks      = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 	GetNotebookArchiveCandidates = define[EmptyRequest, NotebookArchiveCandidatesData]("getNotebookArchiveCandidates", "/api/notebook/getNotebookArchiveCandidates", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	// 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
 	// 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
+	// 不支持笔记本寻址模式时返回 -1，保留源目录及密钥材料。
 	PrepareNotebookArchive = define[PrepareNotebookArchiveRequest, NotebookArchiveData]("prepareNotebookArchive", "/api/notebook/prepareNotebookArchive", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// 移出已导出的加密笔记本，要求管理员权限并禁止只读模式；saved: true 表示用户确认已保存归档。
 	// 提交前重新检查源文件，内容变化需重新导出；重复提交同一归档不会重复移出，未选择的笔记本不受影响。
+	// 移出前重新检查笔记本寻址能力，不支持的模式返回 -1，保留原归档及源目录。
 	CommitNotebookArchive = define[CommitNotebookArchiveRequest, Null]("commitNotebookArchive", "/api/notebook/commitNotebookArchive", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// 接收 multipart 的 file、旧 password 和可选密钥备份 key，要求管理员权限并禁止只读模式。
 	// 恢复目标必须关闭同步，且没有加密密钥配置或加密数据；密文全部通过认证后才发布，恢复后保持锁定。
+	// 认证后、安装任何数据或密钥前检查全部源身份的寻址能力；不能通过旧归档降低本机已确认的要求。
 	ImportNotebookArchive = define[ImportNotebookArchiveRequest, Null]("importNotebookArchive", "/api/notebook/importNotebookArchive", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 )
 
@@ -483,7 +498,11 @@ var GetDocHeadingLevelTransaction = define[DocHeadingLevelRequest, *DocHeadingLe
 
 var GetRecentUpdatedBlocks = define[EmptyRequest, []*SearchBlock]("getRecentUpdatedBlocks", "/api/block/getRecentUpdatedBlocks", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 
+// Zip 的输出位置遵守笔记本能力及原始文档保护，不能用压缩文件覆盖文档源或能力记录。
 var Zip = define[ZipRequest, Null]("zip", "/api/archive/zip", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// Unzip 在隔离目录解压并预检完整输出集合的能力记录及文档源，失败时不写入目标。
+// 实际复制仍重新检查目标；后续并发变化或 I/O 失败可能留下已完成条目，不承诺整批回滚。
 var Unzip = define[UnzipRequest, Null]("unzip", "/api/archive/unzip", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 格式化成功写盘后清理文档及关联跨文档撤销记录，并广播更新后的撤销状态。
@@ -538,6 +557,11 @@ var GetViewState = define[StorageKeyRequest, map[string]JSONValue]("getViewState
 var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var GetRecentDocs = define[RecentDocsRequest, []*RecentDoc]("getRecentDocs", "/api/storage/getRecentDocs", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
+
+// 清空当前工作区的全部最近浏览、打开和关闭记录，不删除文档，也不修改文档创建和修改时间。
+// 记录不参与数据同步；后续浏览、打开或关闭文档会重新产生记录。最近创建和最近修改列表不受影响。
+// 仅允许可写工作区的管理员调用，无需请求参数；重复清空仍返回成功。
+var ClearRecentDocs = define[EmptyRequest, Null]("clearRecentDocs", "/api/storage/clearRecentDocs", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
 var GetCriteria = define[EmptyRequest, []*Criterion]("getCriteria", "/api/storage/getCriteria", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
@@ -615,21 +639,49 @@ var GetUniqueFilename = define[FilePathRequest, FilePathData]("getUniqueFilename
 
 var ReadDirectory = define[ReadDirectoryRequest, []DirectoryEntry]("readDir", "/api/file/readDir", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}, NonNullable: true}, "POST")
 
+// RenameFile 在创建目标父目录或移动源文件前预检笔记本寻址能力，不支持的模式返回 -1。
+// 移入由笔记本及文档 ID 组成的 .sy 路径时检查全部源文档；未知格式或标题冲突返回 -1，保留来源。
+// 新移入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
+// 不能借重命名覆盖、移动或删除本机 conf/document-addressing.json；既有加密边界不变。
 var RenameFile = define[RenameFileRequest, Null]("renameFile", "/api/file/renameFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}}, "POST")
 
+// RemoveFile 对不支持寻址模式的笔记本拒绝部分删除，返回 -1；整本删除保留已确认的本机能力下界。
+// 不能删除本机 conf/document-addressing.json 或其父目录，既有加密笔记本删除限制不变。
 var RemoveFile = define[RemoveFileRequest, Null]("removeFile", "/api/file/removeFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 500}}, "POST")
 
+// GlobalCopyFiles 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+// 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
+// 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
+// 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
 var GlobalCopyFiles = define[CopyFilesRequest, Null]("globalCopyFiles", "/api/file/globalCopyFiles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-2, -3, 403}}, "POST")
 
+// WorkspaceCopyFiles 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+// 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
+// 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
+// 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
 var WorkspaceCopyFiles = define[CopyFilesRequest, Null]("workspaceCopyFiles", "/api/file/workspaceCopyFiles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-2, -3, 403}}, "POST")
 
+// CopyFile 在写入前检查笔记本寻址模式，不兼容或试图覆盖本机能力下界记录时返回 -1。
+// 目标为文档 ID 路径时，未知格式和标题冲突均返回 -1；实际写入在文件锁内重新校验现有源，不规范化内容。
+// 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有源的读取和恢复不受此写入检查影响。
+// 工作空间外的加密资源解密导出仍要求既有授权和操作租约。
 var CopyFile = define[CopyFileRequest, Null]("copyFile", "/api/file/copyFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-2}}, "POST")
 
+// PutFile 在创建目录、写入内容及更新时间前校验笔记本寻址模式和待写配置；不兼容时返回 -1。
+// 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
+// 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
+// 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
+// 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
 var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", AuthenticatedAccess|AdminAccess|WritableAccess, FormBody, ResponseOptions{AdditionalCodes: []int{-3, 400, 403, 500}}, "POST")
 
 var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", AuthenticatedAccess, JSONBody,
 	ResponseOptions{Output: BinaryOutput, ErrorStatus: 202, AdditionalCodes: []int{-3, 403, 404, 409, 500, 503}}, "POST")
 
+// QuerySQL 执行全局派生索引库 SQL，要求管理员身份及可写运行环境。
+// mode 省略、null 或空字符串时允许单条读写语句；readonly 仅允许单条只读 SELECT 或 WITH 查询。
+// multiple 按顺序执行多条读写语句，返回最后一条的结果；失败后停止，已完成的写入不自动回滚。
+// 无结果列的语句成功时返回空数组，RETURNING 保留结果行；校验失败返回 -1，执行失败返回 1。
+// 返回行数沿用搜索上限及显式外层 LIMIT 规则；直接修改索引不更新源文档、全文索引和块缓存。
 var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, NonNullable: true}, "POST")
 
 var RenderSprig = define[RenderSprigRequest, string]("renderSprig", "/api/template/renderSprig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -661,11 +713,22 @@ var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/
 // 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
 var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData]("getBackmentionDoc", "/api/ref/getBackmentionDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+// sourceFilter.database 在父块合并前按来源块的数据库字段筛选，不修改原数据库视图。
+// 无条件仅筛数据库成员，失效字段不放宽结果；原来源筛选、排序及加密笔记本租约保持不变。
 var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
+// 可选 sourceFilter.database 按单个数据库的字段筛选反链及数量，不影响提及或数据库原视图。
 var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+
+// 返回实际绑定反链来源的数据库名称及字段元数据，不返回条目值。
+// 忽略当前数据库条件并应用其他来源限制；发布读者不可查询，保持加密笔记本隔离及请求租约。
+var GetBacklinkDatabases = define[BacklinkDatabasesRequest, []*BacklinkDatabase]("getBacklinkDatabases", "/api/ref/getBacklinkDatabases", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// sourceFilter.database 在完整结果分页前求值，快照绑定全部筛选条件；原分页、排序和访问检查保持不变。
 var GetGlobalBacklinks = define[GlobalBacklinkListRequest, GlobalBacklinkListData]("getGlobalBacklinks", "/api/ref/getGlobalBacklinks", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 数据库条件与列表快照一致，不修改来源数据或原数据库视图。
 var GetGlobalBacklinkContexts = define[GlobalBacklinkContextRequest, GlobalBacklinkContextData]("getGlobalBacklinkContexts", "/api/ref/getGlobalBacklinkContexts", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var ContinueImportSY = define[ContinueImportSYRequest, ImportDocumentData]("continueImportSY", "/api/import/continueImportSY", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -685,7 +748,24 @@ var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("c
 // 未定义的脚注不生成块引用，代码和转义的脚注文本保持原样；反链复用块引用索引。
 var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 旧 Data.zip 入口仍拒绝覆盖已有加密笔记本，也拒绝加密来源覆盖同 ID 的普通笔记本。
+// 不会隐式选择冲突策略；交互式冲突处理使用 prepareDataImport、commitDataImport 和 cancelDataImport。
 var ImportData = define[ImportDataRequest, Null]("importData", "/api/import/importData", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 预检 Data.zip 并保存原件，返回加密冲突及需要认证的笔记本 ID，不修改活动数据。
+// 预检有效期为 30 分钟；提交前必须显式选择 skip 或 overwrite，取消会移除尚未提交的暂存文件。
+// 过期且未提交的预检在启动或下一次导入时清理；预检失败时也清理本次暂存副本。
+// 存在未完成批次时，先在独占访问下恢复；恢复失败会继续阻断其他写入、笔记本操作和同步。
+var PrepareDataImport = define[ImportDataRequest, DataImportPlan]("prepareDataImport", "/api/import/prepareDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 按路径覆盖并保留目标独有文件，skip 保留冲突目录及其密钥材料，返回明确的跳过清单。
+// 导入加密内容必须提供可认证兼容密钥的主密码；不同数据密钥或加密状态不能直接合并。
+// 旧备份不回退当前密码或丢弃历史密钥；完整预检后提交，失败和中断可回滚，加密笔记本保持锁定。
+// 成功批次的原件、旧密文和密钥材料保留在工作空间 conf/data-imports 下。
+var CommitDataImport = define[CommitDataImportRequest, DataImportResult]("commitDataImport", "/api/import/commitDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 取消尚未提交的 Data.zip 预检，包括过期预检；不能删除已提交批次的恢复材料。
+var CancelDataImport = define[DataImportRequest, Null]("cancelDataImport", "/api/import/cancelDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 压缩包中的 Markdown 使用与 `/api/import/importStdMd` 相同的标准脚注转换规则。
 var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
@@ -791,10 +871,13 @@ var PluginRPCWebSocket = define[EmptyRequest, PluginRPCFailure]("pluginJsonRpcWe
 var PluginRPCWebSocketByName = define[EmptyRequest, PluginRPCFailure]("pluginJsonRpcWebSocketByName", "/ws/plugin/rpc/:name", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, WebSocketOptions[PluginRPCBatchRequest, PluginRPCMessage](404), "GET")
 
 var InstallLocalBazaarPackage = define[InstallLocalBazaarPackageRequest, BazaarLocalInstallResult]("installLocalBazaarPackage", "/api/bazaar/installLocalBazaarPackage", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+
+// 取消请求会停止当前下载及后续更新；已提交的包会保留并完成运行时刷新。
 var BatchUpdatePackage = define[BatchUpdatePackageRequest, Null]("batchUpdatePackage", "/api/bazaar/batchUpdatePackage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetUpdatedPackage = define[GetUpdatedPackageRequest, BazaarUpdatedData]("getUpdatedPackage", "/api/bazaar/getUpdatedPackage", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+// 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+// 请求取消会中止下载、解压及尚未提交的替换；已提交的更新不会回滚。
 var UpdateBazaarPackage = define[UpdateBazaarPackageRequest, BazaarPackagesData]("updateBazaarPackage", "/api/bazaar/updateBazaarPackage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPackageSize = define[GetInstalledPackageSizeRequest, BazaarPackageSizeData]("getInstalledPackageSize", "/api/bazaar/getInstalledPackageSize", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPackage = define[GetBazaarPackageRequest, BazaarPackageDetail]("getBazaarPackage", "/api/bazaar/getBazaarPackage", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
@@ -806,35 +889,35 @@ var GetBazaarPackageREADME = define[GetBazaarPackageREADMERequest, BazaarREADMED
 var GetBazaarPlugin = define[GetBazaarPluginRequest, BazaarPackagesData]("getBazaarPlugin", "/api/bazaar/getBazaarPlugin", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPlugin = define[GetInstalledPluginRequest, BazaarPackagesData]("getInstalledPlugin", "/api/bazaar/getInstalledPlugin", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+// 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarPlugin = define[InstallBazaarPluginRequest, BazaarPackagesData]("installBazaarPlugin", "/api/bazaar/installBazaarPlugin", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarPlugin = define[UninstallBazaarPluginRequest, BazaarPackagesData]("uninstallBazaarPlugin", "/api/bazaar/uninstallBazaarPlugin", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarWidget = define[GetBazaarWidgetRequest, BazaarPackagesData]("getBazaarWidget", "/api/bazaar/getBazaarWidget", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledWidget = define[GetInstalledWidgetRequest, BazaarPackagesData]("getInstalledWidget", "/api/bazaar/getInstalledWidget", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+// 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarWidget = define[InstallBazaarWidgetRequest, BazaarPackagesData]("installBazaarWidget", "/api/bazaar/installBazaarWidget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarWidget = define[UninstallBazaarWidgetRequest, BazaarPackagesData]("uninstallBazaarWidget", "/api/bazaar/uninstallBazaarWidget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarIcon = define[GetBazaarIconRequest, BazaarPackagesData]("getBazaarIcon", "/api/bazaar/getBazaarIcon", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledIcon = define[GetInstalledIconRequest, BazaarPackagesData]("getInstalledIcon", "/api/bazaar/getInstalledIcon", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+// 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarIcon = define[InstallBazaarIconRequest, BazaarAppearancePackagesData]("installBazaarIcon", "/api/bazaar/installBazaarIcon", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarIcon = define[UninstallBazaarIconRequest, BazaarAppearancePackagesData]("uninstallBazaarIcon", "/api/bazaar/uninstallBazaarIcon", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarTemplate = define[GetBazaarTemplateRequest, BazaarPackagesData]("getBazaarTemplate", "/api/bazaar/getBazaarTemplate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledTemplate = define[GetInstalledTemplateRequest, BazaarPackagesData]("getInstalledTemplate", "/api/bazaar/getInstalledTemplate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+// 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarTemplate = define[InstallBazaarTemplateRequest, BazaarPackagesData]("installBazaarTemplate", "/api/bazaar/installBazaarTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarTemplate = define[UninstallBazaarTemplateRequest, BazaarPackagesData]("uninstallBazaarTemplate", "/api/bazaar/uninstallBazaarTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarTheme = define[GetBazaarThemeRequest, BazaarPackagesData]("getBazaarTheme", "/api/bazaar/getBazaarTheme", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledTheme = define[GetInstalledThemeRequest, BazaarPackagesData]("getInstalledTheme", "/api/bazaar/getInstalledTheme", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+// 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
 var InstallBazaarTheme = define[InstallBazaarThemeRequest, BazaarAppearancePackagesData]("installBazaarTheme", "/api/bazaar/installBazaarTheme", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarTheme = define[UninstallBazaarThemeRequest, BazaarAppearancePackagesData]("uninstallBazaarTheme", "/api/bazaar/uninstallBazaarTheme", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
@@ -875,12 +958,41 @@ var GetSyncProviderConfigRules = define[SyncProviderConfigRulesRequest, SyncProv
 // 只读模式下也可调用，不修改已有快照或同步开关。
 var TestSyncProviderS3 = define[TestSyncProviderS3Request, TestSyncProviderS3Data]("testSyncProviderS3", "/api/sync/testSyncProviderS3", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
+// TestSyncProviderWebDAV 只探测候选配置：验证端点为集合，创建独占探针目录并写入、读回比对，最后尽力删除。
+// 不读取或保存同步配置，不修改快照或同步开关；只读模式可调用。kind 沿用 S3 的 ok/config/network 语义。
+// cloudName 可省略；指定时在该云端目录的 siyuan/repo 下探测，省略时使用独占的随机云端目录并尽力删除。
+// 上传失败后同样尝试清理；删除失败只记脱敏日志，不改变探测结果。需要集合查询、目录创建、读写和删除权限。
+var TestSyncProviderWebDAV = define[TestSyncProviderWebDAVRequest, TestSyncProviderS3Data]("testSyncProviderWebDAV", "/api/sync/testSyncProviderWebDAV", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// TestSyncProviderLocal 只探测候选配置：端点必须是已有目录且不能与工作空间重叠。
+// 在独占临时目录中写入、读回比对并尽力删除探针，不读取或保存同步配置；kind 沿用 S3 的 ok/config/network 语义。
+// 只读模式可调用，不修改快照或同步开关。删除失败只记脱敏日志，不改变探测结果。
+var TestSyncProviderLocal = define[TestSyncProviderLocalRequest, TestSyncProviderS3Data]("testSyncProviderLocal", "/api/sync/testSyncProviderLocal", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
 var SetCloudSyncDir = define[SyncNameRequest, Null]("setCloudSyncDir", "/api/sync/setCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData]("setSyncAssetDownloadMode", "/api/sync/setSyncAssetDownloadMode", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var CreateCloudSyncDir = define[SyncNameRequest, Null]("createCloudSyncDir", "/api/sync/createCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveCloudSyncDir = define[SyncNameRequest, string]("removeCloudSyncDir", "/api/sync/removeCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync", Mode: SettingSelfManaged}}, "POST")
 var ListCloudSyncDir = define[EmptyRequest, CloudSyncDirsData]("listCloudSyncDir", "/api/sync/listCloudSyncDir", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// CancelSyncCheckout 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
+// requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。
+// 取消同时传递到准备、云端请求和文件替换边界，保留已完成文件并清理当前临时文件。
+// 解除界面编辑阻挡前同步已落盘变更的索引；不回滚已完成文件，不改变全部下载或按需下载设置。
+// 只读模式可请求取消，不会更改同步配置；调用要求登录和管理员权限。
+var CancelSyncCheckout = define[CancelSyncCheckoutRequest, CancelSyncCheckoutData]("cancelSyncCheckout", "/api/sync/cancelSyncCheckout", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetSyncCheckout 查询当前同步任务及单调递增版本，空任务表示当前没有同步任务。
+// 普通后台同步不阻断编辑；准备落盘、应用改动和恢复索引期间 blocking 为 true。
+// 前端启动和重连时查询，以恢复错过的开始、取消或结束通知；appID 和 clientID 用于匹配当前主连接的准备令牌。
+// phase 为 preparing 时先阻止新输入、提交既有编辑，再使用 token 确认保存结果；取消不计入自动同步失败。
+var GetSyncCheckout = define[SyncCheckoutClientRequest, SyncCheckoutSnapshot]("getSyncCheckout", "/api/sync/getSyncCheckout", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// ConfirmSyncCheckout 确认当前连接已停止新输入并提交既有编辑，saved 为 false 时本轮应用中止。
+// token 仅来自该连接的 syncProgress 消息或状态查询，重复确认幂等，旧任务和未知令牌返回 requested 为 false。
+// 必须确认全部既有连接，且等待期间没有新接入的连接，内核才会应用本地改动。
+var ConfirmSyncCheckout = define[ConfirmSyncCheckoutRequest, CancelSyncCheckoutData]("confirmSyncCheckout", "/api/sync/confirmSyncCheckout", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformBootSync = define[EmptyRequest, Null]("performBootSync", "/api/sync/performBootSync", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBootSync = define[EmptyRequest, Null]("getBootSync", "/api/sync/getBootSync", AuthenticatedAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetSyncInfo = define[EmptyRequest, SyncInfoData]("getSyncInfo", "/api/sync/getSyncInfo", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -966,9 +1078,45 @@ var Li2Doc = define[FileTreeListItemDocRequest, Null]("li2Doc", "/api/filetree/l
 var GetHPathByPath = define[FileTreePathRequest, string]("getHPathByPath", "/api/filetree/getHPathByPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetHPathsByPaths = define[FileTreePathsRequest, []string]("getHPathsByPaths", "/api/filetree/getHPathsByPaths", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetHPathByID = define[FileTreeIDRequest, string]("getHPathByID", "/api/filetree/getHPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetDocPaths 在指定笔记本内按文档 ID 读取结构化祖先链，要求管理员权限，加密响应保留操作租约。
+// ids 必须包含 1 至 128 项，按首次出现顺序去重；缺失、其他笔记本或内容块身份列入 missingIDs。
+// 文档标题、segments 与 revision 来自同一快照，displayPath 仅用于显示，不能反向解析身份。
+// 索引未就绪返回 indexUnavailable，源格式和认证错误不能伪装成缺失；批量结果不承诺全局快照。
+var GetDocPaths = define[GetDocPathsRequest, DocumentPathsResult]("getDocPaths", "/api/filetree/getDocPaths", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// ResolveDocPath 从显式根位置或父文档 ID 逐级精确匹配 0 至 128 个非空标题段，只解析不创建。
+// 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
+// candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
+// 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
+// 索引未就绪返回 indexUnavailable；普通构建默认保留段内 /，内部兼容模式 1 仍遵守原有标题限制。
+var ResolveDocPath = define[ResolveDocPathRequest, ResolveDocPathResult]("resolveDocPath", "/api/filetree/resolveDocPath", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// CreateDocByParent 在显式父文档 ID 或 null 根位置创建固定 ID 文档，不接收 path/hPath 或名称回退。
+// title.format 首版只接受 plain，text 可为空；无效字符、超长标题及不支持的格式原样拒绝，不截断或清洗。
+// 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
+// ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
+// 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
+// 普通构建默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，内部兼容模式 1 仍拒绝 /。
+// 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
+var CreateDocByParent = define[CreateDocByParentRequest, CreateDocByParentResult]("createDocByParent", "/api/filetree/createDocByParent", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// GetDocCreateTarget 返回指定用途的有效目标及正文模板，不渲染模板、不猜测上下文或日期。
+// version=1 保留旧路径语法；version=2 独立保存祖先和标题段。revision 覆盖生效配置及继承来源，
+// 由配置创建时传回 expectedTarget，配置变化即返回 planChanged。读取需管理员及源笔记本操作租约。
+var GetDocCreateTarget = define[GetDocCreateTargetRequest, DocumentCreateTargetData]("getDocCreateTarget", "/api/filetree/getDocCreateTarget", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// PlanDocCreate 只读编译有效创建目标，同一次计划使用相同时间，日期可指定为 YYYY-MM-DD。
+// contextID 是源笔记本内的文档，child 使用该位置，configured 使用配置目标；title 可显式替换最终标题。
+// 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
+// reuse 仅用于明确允许复用的业务。existingID 非空时不再创建；普通新建应保持 reuse=false。
+// 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
+var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFullHPathByID = define[FileTreeOptionalIDRequest, *string]("getFullHPathByID", "/api/filetree/getFullHPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-var GetIDsByHPath = define[FileTreeOptionalPathRequest, []string]("getIDsByHPath", "/api/filetree/getIDsByHPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetIDsByHPath 在兼容模式保留旧名称路径查询；模式 2 整本返回 legacyPathUnsupported，改用 resolveDocPath。
+var GetIDsByHPath = define[FileTreeOptionalPathRequest, LegacyPathIDsResult]("getIDsByHPath", "/api/filetree/getIDsByHPath", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var MoveDocs = define[FileTreeMoveRequest, Null]("moveDocs", "/api/filetree/moveDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var MoveDocsByID = define[FileTreeMoveIDsRequest, Null]("moveDocsByID", "/api/filetree/moveDocsByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDoc = define[FileTreePathRequest, Null]("removeDoc", "/api/filetree/removeDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -985,14 +1133,19 @@ var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNot
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
 // 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
-var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-var GetDocCreateSavePath = define[FileTreeNotebookRequest, FileTreeCreateSavePathData]("getDocCreateSavePath", "/api/filetree/getDocCreateSavePath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-var GetRefCreateSavePath = define[FileTreeNotebookRequest, FileTreeSavePathData]("getRefCreateSavePath", "/api/filetree/getRefCreateSavePath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+// 模式 2 对整个笔记本返回 legacyPathUnsupported，即使提供 parentID；改用 createDocByParent。
+var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, LegacyPathDocumentResult]("createDocWithMd", "/api/filetree/createDocWithMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// 旧模板保持既有渲染及回退；对应的新目标对象生效时返回 structuredTemplateRequired，不读取历史路径。
+var GetDocCreateSavePath = define[FileTreeNotebookRequest, FileTreeCreateSavePathResult]("getDocCreateSavePath", "/api/filetree/getDocCreateSavePath", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var GetRefCreateSavePath = define[FileTreeNotebookRequest, FileTreeSavePathResult]("getRefCreateSavePath", "/api/filetree/getRefCreateSavePath", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetShorthandSavePath = define[FileTreeNotebookRequest, FileTreeSavePathData]("getShorthandSavePath", "/api/filetree/getShorthandSavePath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var ChangeSort = define[FileTreeChangeSortRequest, Null]("changeSort", "/api/filetree/changeSort", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var ReorderDocs = define[FileTreeReorderRequest, *FileTreeReorderData]("reorderDocs", "/api/filetree/reorderDocs", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
 var SetSort = define[FileTreeSetSortRequest, *FileTreeSetSortData]("setSort", "/api/filetree/setSort", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
 var SetDocSortMode = define[FileTreeSortModeRequest, *FileTreeSortModeData]("setDocSortMode", "/api/filetree/setDocSortMode", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// SearchDocs 保留兼容展示 hPath，并单独返回文档或笔记本的纯文本 title；客户端不能从 hPath 拆出标题或层级。
 var SearchDocs = define[FileTreeSearchRequest, []*FileTreeSearchDoc]("searchDocs", "/api/filetree/searchDocs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var ListDocsByPath = define[FileTreeListRequest, FileTreeListData]("listDocsByPath", "/api/filetree/listDocsByPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetDoc = define[FileTreeGetDocRequest, FileTreeGetDocData]("getDoc", "/api/filetree/getDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 3}}, "POST")
@@ -1145,6 +1298,11 @@ var GetUnusedEncryptedBoxAssets = define[EncryptedBoxAssetsRequest, []*AssetUnus
 // 失败补偿恢复源文件，未提交的中断批次在启动同步前恢复；清理历史只索引脱敏元数据。
 // 不改变现有全局清理行为，不修改加密格式，不生成全局资源索引或明文缓存。
 var RemoveUnusedEncryptedBoxAssets = define[RemoveEncryptedBoxAssetsRequest, AssetPathsData]("removeUnusedEncryptedBoxAssets", "/api/asset/removeUnusedEncryptedBoxAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetMissingAssets 扫描已打开笔记本中的丢失资源，成功时返回列表（无丢失资源时为空数组）。
+// 资源清单读取、笔记本枚举、目录遍历失败或 panic 时返回 code -1、data null。
+// 单篇文档无法读取时继续扫描其他文档，最终也返回 code -1，msg 包含被跳过的路径，不发布不完整的列表。
+// 保留管理员鉴权和加密笔记本请求租约，不改变资源存在性判定或任何持久化格式。
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
@@ -1395,10 +1553,20 @@ var AIReindexEmbedding = define[EmptyRequest, Null]("reindexEmbedding", "/api/ai
 var AIRetryFailedEmbedding = define[EmptyRequest, Null]("retryFailedEmbedding", "/api/ai/retryFailedEmbedding", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 var AIAgentConfirm = define[AIConfirmRequest, Null]("agentChatConfirm", "/api/ai/agent/confirm", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
 var AIAgentSetPermission = define[AIPermissionRequest, AIPermissionData]("setAgentSessionPermission", "/api/ai/agent/setPermission", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// Persist pinning for an existing session. Requires administrator write access.
+// pinned is a required boolean. Repeated pin requests preserve the original millisecond timestamp;
+// unpinning returns pinnedAt=0. Missing or corrupt sessions fail without replacing their data.
+// Pinning does not change conversation revisions, timestamps or active turns; stale saveSession requests cannot overwrite it.
+var AISetSessionPinned = define[AISessionPinnedRequest, AISessionPinnedData]("setAgentSessionPinned", "/api/ai/agent/setPinned", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIAgentQuestion = define[AIQuestionRequest, Null]("agentChatQuestion", "/api/ai/agent/question", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
 var AIAgentBrowserCapabilityResult = define[AIBrowserCapabilityResultRequest, Null]("agentChatBrowserCapabilityResult", "/api/ai/agent/browserCapabilityResult", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
 var AIListCapabilities = define[EmptyRequest, []AICapabilityManifest]("lsCapabilities", "/api/ai/lsCapabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/agent/title", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// Filter by title, then paginate sessions with pinned entries first, ordered by pinnedAt descending.
+// Unpinned sessions retain createdAt descending order; equal timestamps use descending session IDs.
+// Missing pinnedAt in older sessions means unpinned. Pinning survives index reconstruction.
 var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
 var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1406,12 +1574,14 @@ var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agen
 // AIListBuiltinSkills 独立于斜杠菜单的普通技能发现，只返回只读元数据，包括已禁用条目。
 var AIListBuiltinSkills = define[EmptyRequest, []AIBuiltinSkillInfo]("lsBuiltinSkills", "/api/ai/agent/lsBuiltinSkills", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
-// 返回工作空间 data/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+// 返回工作空间 data/storage/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+// 兼容读取旧路径 data/ai/AGENTS.md，读取不迁移；两处内容不同时返回 code=-1，保留两份文件并提示合并。
 // 缺失文件返回空 content 和 missing 修订，不创建文件；非 UTF-8 文本、超出 32 KiB 或读取失败返回 code=-1。
 var AIGetAgentInstructions = define[EmptyRequest, AIAgentInstructionsData]("getAgentInstructions", "/api/ai/agent/getInstructions", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // 接收 content 和读取时的 revision，要求管理员权限且禁止只读写入。
 // 内容允许为空；修订冲突返回 code=-1 并保留原文。保存采用原子替换，并按工作空间同步忽略规则通知同步。
+// 首次保存迁移旧路径 data/ai/AGENTS.md，先持久化原文到新路径再移除旧文件；旧路径的忽略规则需在保存前更新。
 // 指令在下一轮用户对话生效，同轮工具调用和压缩使用固定快照，且不能覆盖工具权限、审批或访问控制。
 var AISetAgentInstructions = define[AIAgentInstructionsSaveRequest, AIAgentInstructionsData]("setAgentInstructions", "/api/ai/agent/setInstructions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIListUserSkills = define[EmptyRequest, []AIUserSkillInfo]("lsUserSkills", "/api/ai/agent/lsUserSkills", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1428,6 +1598,9 @@ var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/ed
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
+
+// Save conversation content with revision checks. The stored pinnedAt is preserved regardless of the
+// submitted snapshot; clients must use setPinned to update list pinning independently of active turns.
 var AISaveSession = define[AISession, AISessionSaveData]("saveSession", "/api/ai/agent/saveSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true, AdditionalErrorStatuses: []int{400, 409, 500}}, "POST")
 
 // URL、TLS 和 Cookie 诊断对象包含标准库的原始 JSON。
@@ -1459,6 +1632,12 @@ var SystemGetCaptcha = define[EmptyRequest, BinaryContent]("getCaptcha", "/api/s
 var SystemOIDCCallback = define[EmptyRequest, BinaryContent]("oidcCallback", "/api/system/oidc/callback", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}), "GET")
 var SystemAddCustomEmoji = define[SystemCustomEmojiRequest, SystemPathData]("addCustomEmoji", "/api/system/addCustomEmoji", AuthenticatedAccess|AdminAccess|WritableAccess, FormBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemCheckUpdate = define[SystemCheckUpdateRequest, Null]("checkUpdate", "/api/system/checkUpdate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// SystemDownloadUpdate 异步下载当前更新通道中指定版本的桌面安装包，不修改自动下载设置。
+// version 必须与该通道当前可用的新版本完全一致；不接受下载 URL，不支持的运行环境或缺少校验值时返回 -1。
+// 成功返回 null，进度和完成状态沿用更新通知；下载包通过校验后可供退出安装，自动下载关闭时仍可使用。
+// 需要管理员和可写权限；已有下载任务时复用下载互斥保护，并通知正在下载。
+var SystemDownloadUpdate = define[SystemDownloadUpdateRequest, Null]("downloadUpdate", "/api/system/downloadUpdate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SystemCheckWorkspaceDir = define[SystemPathRequest, SystemWorkspaceCheckData]("checkWorkspaceDir", "/api/system/checkWorkspaceDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SystemCreateWorkspaceDir = define[SystemPathRequest, Null]("createWorkspaceDir", "/api/system/createWorkspaceDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SystemDismissOnboarding = define[EmptyRequest, *SystemOnboarding]("dismissOnboarding", "/api/system/dismissOnboarding", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
@@ -1470,6 +1649,9 @@ var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnbo
 // 顶层 force、execInstallPkg、setCurrentWorkspace 在接管时忽略；省略 recoverExit.force 保持正常同步。
 // 省略或传入 null 时保持原行为及数字截断规则，认证、管理员权限及加密笔记本关闭流程不变。
 var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3}, DataOnError: true}, "POST")
+
+// SystemExportConf 保持单个 JSON 文件的设置压缩包，存在本机寻址能力下界时附加 documentAddressing 记录。
+// 记录仅含版本及笔记本身份的最低模式，不导出标题、正文或密钥；无能力记录的旧设置格式不变。
 var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1487,10 +1669,25 @@ var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspace
 // 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
 // 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
 // ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
+// documentAddressing 按笔记本身份合并最高要求，缺失字段不清除本机记录；未知或损坏记录在采用设置前返回 -1。
 var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{Setting: SettingWrite{Namespace: "*"}}, "POST")
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 var SystemLoginAuth = define[SystemLoginAuthRequest, Null]("loginAuth", "/api/system/loginAuth", PublicAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// SystemUploadLockScreenWallpaper 替换本工作空间唯一的壁纸文件，需管理员写权限。
+// file 必须是 JPEG、PNG 或 WebP，最多 10 MiB、1600 万像素；重编码为 JPEG，移除元数据。
+// 图片保存在 conf/lockscreen/wallpaper.jpg，不同步、不包含在设置导出中。
+// 上传不修改 appearance.lockScreenWallpaper，客户端须通过配置 patch 启用；失败保留原文件。
+var SystemUploadLockScreenWallpaper = define[SystemWallpaperUploadRequest, Null]("uploadLockScreenWallpaper", "/api/system/uploadLockScreenWallpaper", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// SystemRemoveLockScreenWallpaper 删除本工作空间唯一的壁纸文件，需管理员写权限；文件不存在时仍成功。
+// 客户端应先通过配置 patch 关闭 appearance.lockScreenWallpaper，再删除图片。
+var SystemRemoveLockScreenWallpaper = define[EmptyRequest, Null]("removeLockScreenWallpaper", "/api/system/removeLockScreenWallpaper", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+
+// SystemGetLockScreenWallpaper 无需登录，仅返回已启用的单张壁纸，不接受文件路径或笔记本参数。
+// 成功返回 image/jpeg 且禁止缓存；未启用、文件缺失或不可读时返回无正文的 404，认证页保留默认背景。
+var SystemGetLockScreenWallpaper = define[EmptyRequest, BinaryContent]("getLockScreenWallpaper", "/api/system/getLockScreenWallpaper", PublicAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 404, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/jpeg"}}, EmptyResponseStatuses: []int{404}}, "GET")
 var SystemLogoutAuth = define[EmptyRequest, Null]("logoutAuth", "/api/system/logoutAuth", PublicAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var SystemOIDCMobileCallback = define[SystemOIDCMobileRequest, SystemOIDCMobileData]("oidcMobileCallback", "/api/system/oidc/mobileCallback", PublicAccess, StructJSONBody, ResponseOptions{}, "POST")
 var SystemOIDCPoll = define[SystemOIDCPollRequest, SystemOIDCPollData]("oidcPoll", "/api/system/oidc/poll", PublicAccess, StructJSONBody, ResponseOptions{}, "POST")
@@ -1514,10 +1711,15 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 
 // move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
 // 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 4，所有视图共享数据库级规则。
+// 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 7，所有视图共享数据库级规则。
 // blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
 // blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
 // spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
+// spec 5 的 blockSource.documentDepth 限制各文档范围的子文档深度，0 仅自身，1 包含自身及一级子文档。
+// spec 6 的属性 nameOperator 支持 contains 和 Go regex；缺省或 equals 保持精确名称匹配，值条件独立。
+// spec 7 支持 blockSource.includeSelectedDocuments=false，排除所选文档及其内部块，子文档仍按深度匹配；缺省、null 或 true 保持包含自身。
+// 排除自身不影响其他范围的并集；与 documentDepth=0 组合时对应文档范围为空。配置变更保留条目和字段，不自动补收或清理。
+// 深度缺省或 null 不限，不影响笔记本范围，各范围仍取并集；修改不自动清理或补收已有内容。
 // 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。
 // 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
 // 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。

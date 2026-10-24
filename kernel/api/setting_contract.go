@@ -511,6 +511,7 @@ func settingFileTreePayload(value *conf.FileTree) *apicontract.SettingFileTree {
 	result.AlwaysSelectOpenedFile = value.AlwaysSelectOpenedFile
 	result.OpenFilesUseCurrentTab = value.OpenFilesUseCurrentTab
 	result.CloseTabOnDoubleClick = value.CloseTabOnDoubleClick
+	result.CloseWindowOnLastTabClosed = value.CloseWindowOnLastTabClosed
 	result.DocIconClickMode = value.DocIconClickMode
 	result.ParentDocTitleClickMode = value.ParentDocTitleClickMode
 	boxDocEnabled := value.BoxDocEnabled
@@ -592,6 +593,7 @@ func settingAppearancePayload(value *conf.Appearance) *apicontract.SettingAppear
 		return nil
 	}
 	result := &apicontract.SettingAppearance{}
+	result.LockScreenWallpaper = value.LockScreenWallpaper
 	result.CompactMode = value.CompactMode
 	result.MenuMouseScroll = value.MenuMouseScroll
 	result.OutlineKeepCurrentExpand = value.OutlineKeepCurrentExpand

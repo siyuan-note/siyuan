@@ -570,6 +570,11 @@
     color: var(--b3-menu-icon-color);
     font-variant-emoji: emoji;
 
+    &--color {
+      border-radius: var(--b3-border-radius);
+      box-shadow: 0 0 0 1px var(--b3-list-hover) inset;
+    }
+
     &--custom {
       align-items: center;
       display: flex;

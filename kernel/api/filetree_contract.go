@@ -71,7 +71,8 @@ func fileTreeSearchContracts(values []map[string]string) []*apicontract.FileTree
 		}
 		result[i] = &apicontract.FileTreeSearchDoc{
 			Path: value["path"], HPath: value["hPath"], Box: value["box"], BoxIcon: value["boxIcon"],
-			Name: optional("name"), Alias: optional("alias"), NewFlashcardCount: optional("newFlashcardCount"),
+			Title: optional("title"),
+			Name:  optional("name"), Alias: optional("alias"), NewFlashcardCount: optional("newFlashcardCount"),
 			DueFlashcardCount: optional("dueFlashcardCount"), FlashcardCount: optional("flashcardCount"),
 		}
 	}

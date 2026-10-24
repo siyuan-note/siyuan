@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20261018104335"
+		"updated": "20261023005737"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-r2m4o0b",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
@@ -164,7 +164,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260926163337-49n3p0a",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
@@ -224,12 +224,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-f5ixseu",
-				"updated": "20260926163337"
+				"updated": "20261021001816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "指示はワークスペース内の data/ai/AGENTS.md に最大 32 KiB の UTF-8 テキストとして保存されます。データ同期が有効で、同期の除外ルールに該当しなければ、ワークスペースとともに同期されます。テキストエディターで直接編集することもできます。ファイルが存在しない場合や空の場合、カスタム指示は追加されません。"
+					"Data": "指示はワークスペース内の data/storage/ai/AGENTS.md に最大 32 KiB の UTF-8 テキストとして保存されます。データ同期が有効で、同期の除外ルールに該当しなければ、ワークスペースとともに同期されます。テキストエディターで直接編集することもできます。ファイルが存在しない場合や空の場合、カスタム指示は追加されません。旧パスの data/ai/AGENTS.md も引き続き読み込めます。設定で保存すると新しい場所に移行します。旧パスに対する同期の除外ルールがある場合は、保存前に更新してください。両方のファイルの内容が異なる場合は、新しいファイルに内容を統合し、古いファイルを削除してから続行してください。"
 				}
 			]
 		},
@@ -488,7 +488,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-9kcdqv4",
-				"updated": "20260816114944"
+				"updated": "20261023005737"
 			},
 			"Children": [
 				{
@@ -539,6 +539,79 @@
 				{
 					"Type": "NodeText",
 					"Data": "エージェントの実行中は停止ボタンで現在のタスクを中断できます。目的、範囲、出力先を明確に指定すると、通常はより安定した結果が得られます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-hxp98ok",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-hxp98ok",
+				"updated": "20261023005737"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "入力欄は文字や画像に合わせて自動的に高くなり、上限に達するとスクロールします。デスクトップでは入力欄にマウスポインターを合わせると上端に小さなハンドルが表示され、タッチ画面では常に表示されます。ハンドルを上下にドラッグすると上限を調整できます。ハンドルをダブルクリックすると自動の上限に戻ります。内容の前後にはスクロール用の余白があり、最初と最後の行を確認しやすくなっています。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-yecrc0p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-yecrc0p",
+				"updated": "20261022182404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高さのハンドルにキーボードフォーカスがあるときは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で上限を増減し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で最小、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で現在利用できる最大の高さに変更できます。ドラッグ中に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと調整を取り消します。"
 				}
 			]
 		},

@@ -52,7 +52,7 @@ func TestBootSyncAttributeViewIndex(t *testing.T) {
 	tree.Root.AppendChild(&ast.Node{Type: ast.NodeAttributeView, ID: "20260909170002-db00001", AttributeViewID: avID})
 	writeAssetDownloadDocumentTest(t, tree)
 
-	// 启动同步标志只能在后处理返回后清除；超时解除等待，使回归失败能够正常报告。
+	// 预取期间的索引处理不能等待自身的存储标志；超时解除等待，使回归失败能够正常报告。
 	originalBootSyncing := isBootSyncing.Swap(true)
 	var timedOut atomic.Bool
 	watchdogDone := make(chan struct{})

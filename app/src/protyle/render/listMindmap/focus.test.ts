@@ -118,7 +118,8 @@ test("text history records the edited node even when selection changes before it
     const list = {isConnected: true, dataset: {nodeId: "map"}, outerHTML: "before", closest: (): null => null};
     const operations: {undo: Record<string, string>, redo: Record<string, string>}[] = [];
     const context: any = {
-        canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root")}),
+        canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root"),
+            metadata: {version: 1, nodes: {}, relations: [] as unknown[]}}),
         cleanListMindmapHTML: (html: string) => html, getListMindmapSiblingIDs: () => new Map(),
         normalizeListMindmapSummaryMetadata: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, _before: string, undo: Record<string, string>,
@@ -156,7 +157,7 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
                 return child;
             });
         });
-        return {nodes, root: nodes.get("root")};
+        return {nodes, root: nodes.get("root"), metadata: {version: 1, nodes: {}, relations: [] as unknown[]}};
     };
     const list = {isConnected: true, dataset: {nodeId: "map"}, closest: (): null => null,
         get outerHTML() { return JSON.stringify(state); }};

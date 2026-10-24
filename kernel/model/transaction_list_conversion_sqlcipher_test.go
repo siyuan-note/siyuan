@@ -23,6 +23,7 @@ func TestListConversionEncryptedReplayAndHistory(t *testing.T) {
 	markRuntimeEncryptedBox(boxID)
 	dek := bytes.Repeat([]byte{0x63}, 32)
 	setDEKForTest(boxID, dek)
+	encryptDocumentTestSources(t, dek, tree)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = &conf.BoxEncryption{Spec: boxEncryptionSpec}

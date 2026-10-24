@@ -28,11 +28,11 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
     };
     const tab = (attribute: string, value: string, label: string) => `<div class="item item--full" ${attribute}="${value}" role="tab" tabindex="0" aria-selected="false"><span class="fn__flex-1"></span><span class="item__text">${escapeHtml(label)}</span><span class="fn__flex-1"></span></div>`;
     const dialog = new Dialog({title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
-        content: `<div class="b3-dialog__content av__collection-preview av__collection-manager">
-<div class="layout-tab-bar fn__flex" role="tablist" aria-label="${escapeAttr(lang.automationCollectionManage)}">${tab("data-collection-view", "rules", lang.automationCollectionRules)}${tab("data-collection-view", "entries", lang.automationCollectionEntries)}</div>
+        content: `<div class="layout-tab-bar fn__flex av__collection-tabs" role="tablist" aria-label="${escapeAttr(lang.automationCollectionManage)}">${tab("data-collection-view", "rules", lang.automationCollectionRules)}${tab("data-collection-view", "entries", lang.automationCollectionEntries)}</div>
+<div class="b3-dialog__content av__collection-preview av__collection-manager">
 <label class="av__automation-control fn__none" data-rule-control><span>${lang.automationRule}</span><select class="b3-select fn__block" data-collection-rule></select></label>
 <div class="ft__on-surface ft__smaller av__automation-tip" data-review-tip>${lang.automationCollectionReviewTip}</div>
-<div class="layout-tab-bar fn__flex" role="tablist" aria-label="${escapeAttr(lang.automationCollectionEntries)}" data-status-tabs>${Object.entries(statuses).map(([value, label]) => tab("data-collection-status", value, label)).join("")}</div>
+<div class="layout-tab-bar fn__flex av__collection-tabs" role="tablist" aria-label="${escapeAttr(lang.automationCollectionEntries)}" data-status-tabs>${Object.entries(statuses).map(([value, label]) => tab("data-collection-status", value, label)).join("")}</div>
 <div class="av__automation-preview-results" data-results role="status" aria-live="polite"></div>
 </div><div class="b3-dialog__action av__automation-row"><div class="av__automation-row"><button type="button" class="b3-button b3-button--cancel" data-prev>${lang.previous}</button><span data-page></span><button type="button" class="b3-button b3-button--cancel" data-next>${lang.next}</button></div><span class="fn__flex-1"></span><button type="button" class="b3-button b3-button--text b3-button--wrap fn__none" data-collect>${lang.automationCollectPage}</button><button type="button" class="b3-button b3-button--remove b3-button--wrap" data-cleanup>${lang.automationCollectionCleanup}</button></div>`});
     const root = dialog.element;

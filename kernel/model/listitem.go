@@ -22,6 +22,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -46,10 +47,14 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 
 	box := Conf.Box(targetBoxID)
 	listItemText := sql.GetContainerText(listItemNode)
-	listItemText = util.FilterFileName(listItemText)
+	if documentaddressing.DefaultMode() == 2 {
+		listItemText = normalizeDocumentTitle(listItemText)
+	} else {
+		listItemText = util.FilterFileName(listItemText)
+	}
 
 	moveToRoot := "/" == targetPath
-	toHP := path.Join("/", listItemText)
+	toHP := "/" + listItemText
 	toFolder := "/"
 
 	if "" != previousPath {
@@ -66,7 +71,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 				err = ErrBlockNotFound
 				return
 			}
-			toHP = path.Join(parentDoc.HPath, listItemText)
+			toHP = parentDoc.HPath + "/" + listItemText
 			toFolder = path.Join(path.Dir(parentPath), parentDoc.ID)
 		}
 	} else {
@@ -76,7 +81,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 				err = ErrBlockNotFound
 				return
 			}
-			toHP = path.Join(parentDoc.HPath, listItemText)
+			toHP = parentDoc.HPath + "/" + listItemText
 			toFolder = path.Join(path.Dir(targetPath), parentDoc.ID)
 		}
 	}
@@ -104,7 +109,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	newTree.Root.Spec = treenode.CurrentSpec
+	newTree.Root.Spec = treenode.BaseSpec
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else if toTop {

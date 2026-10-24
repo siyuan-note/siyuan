@@ -74,15 +74,16 @@ type TemplateDocTreePlanSummary struct {
 }
 
 type templateDocTreePlan struct {
-	id        string
-	rootID    string
-	boxID     string
-	rootPath  string
-	rootHPath string
-	nodes     []*TemplateDocTreeNode
-	trees     []*parse.Tree
-	createdAt time.Time
-	expiresAt time.Time
+	id           string
+	rootID       string
+	boxID        string
+	rootPath     string
+	rootHPath    string
+	rootRevision string
+	nodes        []*TemplateDocTreeNode
+	trees        []*parse.Tree
+	createdAt    time.Time
+	expiresAt    time.Time
 }
 
 type templateDocTreeCollector struct {
@@ -90,6 +91,7 @@ type templateDocTreeCollector struct {
 	boxID         string
 	rootPath      string
 	rootHPath     string
+	rootRevision  string
 	templatePath  string
 	nodes         []*TemplateDocTreeNode
 	enabled       bool
@@ -152,7 +154,7 @@ func (state *templateDocTreeParseState) parseNodes(value any, depth int) ([]*Tem
 		if !ok {
 			return nil, errors.New("createDocTree document title must be a string")
 		}
-		title = normalizeDocTitle(title)
+		title = normalizeDocumentTitle(title)
 		if "" == title {
 			return nil, errors.New("createDocTree document title must not be empty")
 		}
@@ -233,7 +235,7 @@ func (collector *templateDocTreeCollector) bindNodes(nodes []*TemplateDocTreeNod
 	for _, node := range nodes {
 		node.ParentID = parentID
 		node.path = strings.TrimSuffix(parentPath, ".sy") + "/" + node.ID + ".sy"
-		node.HPath = path.Join(parentHPath, node.Title)
+		node.HPath = parentHPath + "/" + node.Title
 		collector.bindNodes(node.Children, node.ID, node.path, node.HPath)
 	}
 }
@@ -243,6 +245,17 @@ func (collector *templateDocTreeCollector) renderDocRef(mode string, value any) 
 		return nil, errors.New("renderDocRef is only available when manually inserting or previewing a template")
 	}
 	switch mode {
+	case "id":
+		id, ok := value.(string)
+		if !ok || !ast.IsNodeIDPattern(id) {
+			return "", errors.New("renderDocRef id target must be a document ID")
+		}
+		for _, node := range flattenTemplateDocTreeNodes0(collector.nodes) {
+			if node.ID == id || node.RootID == id {
+				return fmt.Sprintf("((%s %q))", node.RootID, node.Title), nil
+			}
+		}
+		return "", nil
 	case "children":
 		id, ok := value.(string)
 		if !ok {
@@ -309,7 +322,7 @@ func (collector *templateDocTreeCollector) buildTree(node *TemplateDocTreeNode, 
 	renderedTree.HPath = node.HPath
 	renderedTree.ID = node.ID
 	renderedTree.Root.ID = node.ID
-	renderedTree.Root.Spec = treenode.CurrentSpec
+	renderedTree.Root.Spec = treenode.BaseSpec
 	templateIALs := parse.IAL2Map(renderedTree.Root.KramdownIAL)
 	renderedTree.Root.KramdownIAL = [][]string{
 		{"id", node.ID},
@@ -359,14 +372,15 @@ func (collector *templateDocTreeCollector) summary(id string) *TemplateDocTreePl
 func (collector *templateDocTreeCollector) storePlan() *TemplateDocTreePlanSummary {
 	id := ast.NewNodeID()
 	plan := &templateDocTreePlan{
-		id:        id,
-		rootID:    collector.rootID,
-		boxID:     collector.boxID,
-		rootPath:  collector.rootPath,
-		rootHPath: collector.rootHPath,
-		nodes:     flattenTemplateDocTreeNodes0(collector.nodes),
-		createdAt: time.Now(),
-		expiresAt: time.Now().Add(templateDocTreePlanTTL),
+		id:           id,
+		rootID:       collector.rootID,
+		boxID:        collector.boxID,
+		rootPath:     collector.rootPath,
+		rootHPath:    collector.rootHPath,
+		rootRevision: collector.rootRevision,
+		nodes:        flattenTemplateDocTreeNodes0(collector.nodes),
+		createdAt:    time.Now(),
+		expiresAt:    time.Now().Add(templateDocTreePlanTTL),
 	}
 	for _, node := range plan.nodes {
 		plan.trees = append(plan.trees, node.tree)
@@ -492,10 +506,15 @@ func AttachTemplateDocTreePlans(transactions []*Transaction) (attached bool, err
 	}
 	rootTree, loadErr := LoadTreeByBlockID(plan.rootID)
 	if nil != loadErr || nil == rootTree || rootTree.Box != plan.boxID || rootTree.Path != plan.rootPath ||
-		rootTree.HPath != plan.rootHPath {
+		plan.rootRevision == "" {
+		return false, errors.New("the document used to render the template has changed")
+	}
+	location, locationErr := getDocumentPath(plan.boxID, plan.rootID)
+	if locationErr != nil || location.Revision != plan.rootRevision {
 		return false, errors.New("the document used to render the template has changed")
 	}
 	target.templateDocTreeRootSnapshot = rootTree
+	target.templateDocTreeRootRevision = plan.rootRevision
 	box := Conf.Box(plan.boxID)
 	if nil == box {
 		return false, ErrBoxNotFound

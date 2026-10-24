@@ -184,6 +184,16 @@ Sync recovery can validate backup integrity but cannot prove that a backup is th
 
 - Publish: Unsupported. Encrypted notebooks and their documents never appear through the publish service, and unlocking or setting a publish password cannot enable them
 
+Data.zip imports can update the current workspace on desktop and mobile. The import is analyzed before any active data is written. When an encrypted notebook conflicts with an existing notebook, the dialog defaults to skipping conflicts and also offers overwrite and cancel. Skipping preserves the notebook directory and its key material; the result lists skipped notebook IDs before the interface reloads. Overwrite retains the existing path-based semantics: matching paths are replaced and destination-only files are preserved. It is not a mirror restore and does not propagate deletions.
+
+Noncanonical notebook path aliases are rejected before import. Cancel is available before submission; while committing, the dialog cannot be canceled or closed, including with Esc or the mobile back action. Unsubmitted preparations expire after 30 minutes and are reclaimed on startup or the next import; expired preparations can still be canceled. Committed recovery files remain available.
+
+Importing encrypted content requires a master password that authenticates a compatible key configuration, notebook envelopes, metadata, documents, assets and database definitions. Backups from before a password change can use authenticated historical keys without reverting the current password or discarding recovery keys. The same notebook ID or password string alone does not establish compatibility. Different encryption states or different data keys cannot be merged directly. An incomplete local key configuration must be recovered before importing encrypted content. The source archive's password-migration journal is never installed as an active operation. Existing ciphertext formats, AAD and key derivation remain unchanged.
+
+Affected notebooks stop accepting new operations and wait for existing operations before replacement; they remain locked after import. All selected content is staged and verified before commit. Replaced files and key material are retained with the uploaded archive under `<workspace>/conf/data-imports/<operation ID>/`; a persistent journal restores unfinished batches before notebook mounting or sync. Retain these recovery files until the imported data and required history have been verified. Legacy `/api/import/importData`, CLI and MCP callers do not silently overwrite encrypted conflicts; the interactive workflow uses the typed prepare, commit and cancel endpoints.
+
+If rollback itself fails, writes, new notebook operations, key adoption and sync remain blocked. Starting another import retries recovery under exclusive access before preparing the archive; admission resumes only after recovery succeeds. Recovery also runs before notebook mounting and sync at startup.
+
 #### What if I forget the password
 It cannot be recovered — by design (no backdoor). Even if the ciphertext has been synced to the cloud, it cannot be decrypted without the master password. You must remember the master password; using a password manager is recommended.
 
@@ -270,7 +280,8 @@ Recovery triggers (covering scenarios such as conf.json loss, sync to a new devi
 | Trigger scenario | Function | Password required? | Notes |
 |---|---|---|---|
 | After sync completes (backup file pulled down) | `restoreNotebookCryptoConfigFromBackup` | No | Loads the config back into the local conf.json and sets `Enabled=true`; UI shows "enabled, locked" |
-| After importing Data.zip | `restoreNotebookCryptoConfigFromBackup` | No | Same; covers "backup arrived with Data.zip but the local machine is not enabled" |
+| After a legacy Data.zip import | `restoreNotebookCryptoConfigFromBackup` | No | Same; covers "backup arrived with Data.zip but the local machine is not enabled" |
+| Interactive Data.zip import | `CommitDataImport` | Yes, when encrypted content is selected | Authenticate compatible keys and the selected ciphertext before commit; preserve current password and history recovery keys |
 | User enters master password to unlock (fallback) | `tryRestoreNotebookCryptoFromBackup` | Yes | `deriveKEK` attempts recovery when the local `Enabled=false`; returns the KEK after verifying the password |
 | User manually enables (recovery guard) | `tryRestoreNotebookCryptoFromBackup` | Yes | When encrypted notebooks already exist, refuses to regenerate salt and instead recovers from backup, verifying the password |
 

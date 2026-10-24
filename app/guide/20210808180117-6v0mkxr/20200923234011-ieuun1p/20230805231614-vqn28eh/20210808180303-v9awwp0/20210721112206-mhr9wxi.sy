@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261016111950"
+		"updated": "20261021104922"
 	},
 	"Children": [
 		{
@@ -527,6 +527,29 @@
 			]
 		},
 		{
+			"ID": "20261020224352-z87gp3i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020224352-z87gp3i",
+				"updated": "20261020224352"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Test connection"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " before saving to check the current S3, WebDAV, or local filesystem draft without saving it. WebDAV checks directory creation and probe read/write access; the local filesystem checks directory read/write access. The probe is cleaned up where possible. If the test fails, follow the diagnostic and try again; your saved configuration is retained."
+				}
+			]
+		},
+		{
 			"ID": "20261011151543-h1km9eh",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -560,6 +583,61 @@
 				{
 					"Type": "NodeText",
 					"Data": "If changing or clearing the current source is blocked because resources or historical snapshots are incomplete, restore access to the original source and finish downloading all resources before trying again. A failed save or clear keeps the effective configuration and the draft."
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-lr7z60a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-lr7z60a",
+				"updated": "20261021104922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Hide details"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " hides the details; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " reopens them. Editing pauses only while local changes are applied and affected documents are refreshed, including recovery after cancellation. Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cancel"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to request cancellation of preparation, network transfer, or file restoration."
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-kuhlekv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-kuhlekv",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Canceling keeps completed files and removes the current temporary file. Sync again to finish the remaining content. If storage is insufficient, free up space and retry. Recognizable temporary files from interrupted syncs are cleaned up on startup or before restoration, and the freed space is reported."
 				}
 			]
 		},

@@ -107,7 +107,6 @@ func TestParseTemplateDocTreeDefinitionRejectsInvalidSchema(t *testing.T) {
 		{name: "missing title", definition: []any{map[string]any{}}},
 		{name: "non-string title", definition: []any{map[string]any{"title": true}}},
 		{name: "empty title", definition: []any{map[string]any{"title": " \t\r\n"}}},
-		{name: "title empty after normalization", definition: []any{map[string]any{"title": "/"}}},
 		{name: "title is too long", definition: []any{map[string]any{"title": strings.Repeat("文", 513)}}},
 		{name: "unknown field", definition: []any{map[string]any{"title": "资料", "titel": "typo"}}},
 		{name: "non-string template", definition: []any{map[string]any{"title": "资料", "template": 1}}},
@@ -125,6 +124,15 @@ func TestParseTemplateDocTreeDefinitionRejectsInvalidSchema(t *testing.T) {
 				t.Fatalf("invalid definition was accepted: %+v", nodes)
 			}
 		})
+	}
+}
+
+func TestParseTemplateDocTreeDefinitionPreservesSlashes(t *testing.T) {
+	for _, title := range []string{"/", "Parent/Child"} {
+		nodes, err := parseTemplateDocTreeDefinition([]any{map[string]any{"title": title}})
+		if err != nil || len(nodes) != 1 || nodes[0].Title != title || nodes[0].Depth != 1 || len(nodes[0].Children) != 0 {
+			t.Fatalf("literal slash changed the title or hierarchy: %+v, %v", nodes, err)
+		}
 	}
 }
 
@@ -334,6 +342,7 @@ func TestRenderTemplateDocumentReferencesUsePlannedIDs(t *testing.T) {
 )}
 .action{range $doc := renderDocRef "children" .id}
 - ((.action{$doc.RootID} ".action{$doc.HPath}"))
+- .action{renderDocRef "id" $doc.ID}
 .action{end}
 .action{renderDocRef "path" "/第一章/1.1 概念"}
 .action{renderDocRef "path" "/Source/第一章/1.1 概念"}`)
@@ -590,10 +599,10 @@ func TestAttachTemplateDocTreePlansValidatesTransactionBoundary(t *testing.T) {
 	if !ok {
 		t.Fatalf("document tree plan [%s] was not stored", summary.ID)
 	}
-	value.(*templateDocTreePlan).rootHPath = "/Changed"
+	value.(*templateDocTreePlan).rootRevision = "changed-ancestor-identity-or-title"
 	transaction, _ = newTemplateDocTreeInsertTransaction(summary.ID, fixture.sourceID)
 	if attached, attachErr := AttachTemplateDocTreePlans([]*Transaction{transaction}); nil == attachErr || attached {
-		t.Fatalf("plan rendered for another human-readable path was accepted: attached=%t, err=%v", attached, attachErr)
+		t.Fatalf("plan with a different ancestor revision was accepted: attached=%t, err=%v", attached, attachErr)
 	}
 
 	clearTemplateDocTreePlansForTest()

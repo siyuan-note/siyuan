@@ -110,6 +110,54 @@ func TestMarkdownImportSpoolPreservesConversion(t *testing.T) {
 	}
 }
 
+func TestMarkdownImportSpoolSeparatesFilePathsFromTitles(t *testing.T) {
+	setupMarkdownSpoolTest(t)
+	spool, err := newMarkdownImportSpool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer spool.close()
+	parent := markdownSpoolFixture("[[folder/child|child]]", "Parent/../title", 1)
+	child := markdownSpoolFixture("[[../folder|parent]]", "Child//title", 2)
+	child.Path = "/" + parent.ID + "/" + child.ID + ".sy"
+	for _, fixture := range []struct {
+		tree   *parse.Tree
+		source string
+	}{
+		{parent, "/folder"}, {child, "/folder/child"},
+	} {
+		if err = spool.addSource(fixture.tree, fixture.source); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err = spool.refreshDisplayPaths("/", "/"); err != nil {
+		t.Fatal(err)
+	}
+	expected := map[string]string{parent.ID: child.ID, child.ID: parent.ID}
+	if err = spool.finish(func(tree *parse.Tree) error {
+		got := ""
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && treenode.IsBlockRef(n) {
+				got = n.TextMarkBlockRefID
+			}
+			return ast.WalkContinue
+		})
+		if got != expected[tree.ID] {
+			t.Fatalf("file link resolved through title: %s => %s", tree.ID, got)
+		}
+		wantPath := "/Parent/../title"
+		if tree.ID == child.ID {
+			wantPath += "/Child//title"
+		}
+		if tree.HPath != wantPath {
+			t.Fatalf("display path: %q", tree.HPath)
+		}
+		return nil
+	}, func() {}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestMarkdownImportSpoolBoundsQueuedTrees(t *testing.T) {
 	setupMarkdownSpoolTest(t)
 	spool, err := newMarkdownImportSpool()

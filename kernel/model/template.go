@@ -1038,6 +1038,12 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 		if err = validateTemplateCallGraph(tpl, tpl.Name()); nil != err {
 			return
 		}
+		var location *treenode.DocumentPath
+		location, err = getDocumentPath(sourceTree.Box, sourceTree.ID)
+		if err != nil {
+			return
+		}
+		collector.rootRevision = location.Revision
 	}
 
 	buf := &bytes.Buffer{}

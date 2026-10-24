@@ -12,7 +12,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 )
 
-func TestBazaarContractInstallRequestCancellation(t *testing.T) {
+func TestBazaarContractInstallAndUpdateRequestCancellation(t *testing.T) {
 	document, err := apicontract.BuildBundle()
 	if err != nil {
 		t.Fatal(err)
@@ -23,6 +23,8 @@ func TestBazaarContractInstallRequestCancellation(t *testing.T) {
 		"installBazaarIcon":     installBazaarIcon,
 		"installBazaarTemplate": installBazaarTemplate,
 		"installBazaarWidget":   installBazaarWidget,
+		"updateBazaarPackage":   updateBazaarPackage,
+		"batchUpdatePackage":    batchUpdatePackage,
 	} {
 		t.Run(name, func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
@@ -30,7 +32,7 @@ func TestBazaarContractInstallRequestCancellation(t *testing.T) {
 			path := "/api/bazaar/" + name
 			engine := gin.New()
 			engine.POST(path, handler)
-			request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{"repoURL":"https://github.com/owner/repo","repoHash":"hash","packageName":"sample","frontend":"desktop"}`)).WithContext(ctx)
+			request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{"repoURL":"https://github.com/owner/repo","repoHash":"hash","packageType":"plugins","packageName":"sample","frontend":"desktop"}`)).WithContext(ctx)
 			recorder := httptest.NewRecorder()
 			engine.ServeHTTP(recorder, request)
 			var response struct {

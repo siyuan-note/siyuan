@@ -237,6 +237,7 @@ type FileTreeSortModeData struct {
 type FileTreeSearchDoc struct {
 	Path              string  `json:"path"`
 	HPath             string  `json:"hPath"`
+	Title             *string `json:"title,omitempty"`
 	Box               string  `json:"box"`
 	BoxIcon           string  `json:"boxIcon"`
 	Name              *string `json:"name,omitempty"`

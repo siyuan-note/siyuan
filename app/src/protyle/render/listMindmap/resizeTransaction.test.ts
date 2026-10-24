@@ -33,7 +33,8 @@ test("resizing uses one source update with both dimensions and retains the exact
     const transactions: {before: string, after: string}[] = [];
     const root = {id: "root", children: [] as unknown[]};
     const context: any = {
-        canEdit: () => true, readListMindmap: () => ({root, nodes: new Map([["root", root]])}),
+        canEdit: () => true, readListMindmap: () => ({root, nodes: new Map([["root", root]]),
+            metadata: {version: 1, nodes: {}, relations: [] as unknown[]}}),
         getListMindmapSiblingIDs: () => new Map(), normalizeListMindmapSummaryMetadata: () => {},
         cleanListMindmapHTML: (html: string) => html,
         setBlockHeight: (block: typeof list, height: string) => block.style.height = height,

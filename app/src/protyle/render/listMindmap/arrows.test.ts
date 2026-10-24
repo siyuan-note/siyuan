@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 import type {ListMindmapRelation} from "./model";
 import {buildListMindmapConnectors} from "./connectors";
+import {getMindmapLineColor} from "./appearance";
 
 // 执行实际绘制和命中方法，画布替身仅记录路径与箭头，避免依赖图形显示环境。
 const source = createSourceFile("view.ts", readFileSync("src/protyle/render/listMindmap/view.ts", "utf8"),
@@ -49,6 +50,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
     };
     const sandbox: any = {
         buildListMindmapConnectors,
+        getMindmapLineColor,
         Path2D: TestPath, window: {devicePixelRatio: 1},
         // 绘制入口会取消上一帧的合并绘制请求，替身环境没有帧调度
         cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1,
@@ -68,6 +70,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         scale: 1, offsetX: 0, offsetY: 0, world: {style: {}}, zoomLabel: {}, zoomSlider: {},
         viewport: {clientWidth: 400, clientHeight: 200, getBoundingClientRect: () => ({left: 0, top: 0})},
         canvas: {getContext: () => context}, options: {host: {}}, colorProbe: {style: {}},
+        inspector: {hidden: true},
         model: {root: {id: "a"}, metadata: {nodes: {}, relations: [relation]}}, edges: [],
         positions: new Map([["a", {id: "a", x: 100, y: 0, width: 20, height: 20}],
             ["b", {id: "b", x: -20, y: 0, width: 20, height: 20}]]),
@@ -100,6 +103,33 @@ test("shared orthogonal trunks keep the default color and stay outside branch se
             assert.equal(target.linePaths.length, 2);
             assert.equal(target.linePaths.some((line: {path: TestPath}) => line.path === strokes[0]), false,
                 "the shared trunk is drawn once without becoming a selectable child line");
+        }
+    }
+});
+
+test("palette colors reach hierarchy paths and parent trunks while manual line colors remain authoritative", () => {
+    for (const connectorStyle of ["spline", "bezier", "orthogonal", "rounded"]) {
+        for (const printLayout of [false, true]) {
+            const {target, strokeStyles} = setup();
+            target.model.root.id = "root";
+            Object.assign(target.model.metadata, {connectorStyle, relations: [], nodes: {a: {lineColor: "#abcdef"}}});
+            target.themeColors = new Map([
+                ["root", {lineColor: "#111111"}], ["a", {lineColor: "#222222"}],
+                ["b", {lineColor: "#333333"}], ["c", {lineColor: "#333333"}],
+            ]);
+            target.options.printLayout = printLayout;
+            target.readOnly = printLayout;
+            target.positions = new Map([
+                ["root", {id: "root", x: 20, y: 100, width: 100, height: 40}],
+                ["a", {id: "a", x: 160, y: 0, width: 100, height: 40}],
+                ["b", {id: "b", x: 160, y: 200, width: 100, height: 40}],
+                ["c", {id: "c", x: 300, y: 200, width: 100, height: 40}],
+            ]);
+            target.edges = [{from: "root", to: "a"}, {from: "root", to: "b"}, {from: "b", to: "c"}];
+            target.draw();
+            const trunks = connectorStyle === "orthogonal" || connectorStyle === "rounded" ? ["#111111", "#333333"] : [];
+            assert.deepEqual(strokeStyles, [...trunks, "#abcdef", "#333333", "#333333"]);
+            assert.equal(target.linePaths.length, 3, "shared trunks never become selectable branch paths");
         }
     }
 });

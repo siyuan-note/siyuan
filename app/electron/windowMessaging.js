@@ -1,6 +1,6 @@
 // 窗口间消息（siyuan-send-windows）的授权与投递规则。渲染进程只能发送本表列出的命令，
 // 主进程内部通知（如 lockscreenByMode）不在此列，因此任何渲染进程都无法伪造。
-const rendererWindowCommands = new Set(["closetab", "setTabDragData", "resetTabsStyle"]);
+const rendererWindowCommands = new Set(["closetab", "setTabDragData", "resetTabsStyle", "moveTabToMainWindow"]);
 
 const isRendererWindowCommand = (data) => {
     if (!data || typeof data !== "object" || typeof data.cmd !== "string") {
@@ -8,6 +8,12 @@ const isRendererWindowCommand = (data) => {
     }
     if (!rendererWindowCommands.has(data.cmd)) {
         return false;
+    }
+    if (data.cmd === "moveTabToMainWindow") {
+        const tab = data.data;
+        return !!tab && typeof tab.id === "string" && !!tab.id && tab.children?.instance === "Editor" &&
+            typeof tab.children.blockId === "string" && !!tab.children.blockId &&
+            (tab.children.notebookId === undefined || typeof tab.children.notebookId === "string");
     }
     return data.cmd === "setTabDragData" ? !!data.data && typeof data.data === "object" : typeof data.data === "string";
 };

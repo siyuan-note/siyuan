@@ -54,16 +54,16 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Heading hierarchy: headings (h1-h6) are leaf blocks. Blocks that appear "under" a heading in the UI are its *following siblings* in the AST, not its children.
 - Native structured blocks: use native capabilities and preserve existing structure, block IDs, and metadata unless the user explicitly requests a conversion. Follow the relevant tool descriptions for block-specific syntax and operations.
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
-- hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document.create/move/list refers to hPath, not the internal ID-based filesystem path. A rename changes hPath but not the ID.
-- Document vs block move: document.move relocates an entire document (and children) to a new hPath within a notebook — needs id, notebook (from document.get field "Box"), and path. block.move repositions a single content block under a new parent block.
+- hPath (human-readable path): display text only. A literal title can contain "/", so identical hPaths can refer to different document hierarchies. Never split an hPath or use it to recover identity. Document create/list/move and inbox.convert use notebook + parentID; parentID="" explicitly selects the notebook root. Legacy path=hPath is only available in compatibility-mode notebooks and returns legacyPathUnsupported in structured-title notebooks. Obtain document IDs from document.list/search_docs/get; a rename changes display text but not ID.
+- Document vs block move: document.move relocates an entire document (and children) — needs id, notebook (from document.get field "Box"), and target parentID. block.move repositions a single content block under a new parent block.
 - Dailynote (daily note/diary/journal): a special document on the notebook's daily-note save path. For diary/daily note/journal requests, use dailynote.create (not document.create) to open today's note, then dailynote.append/prepend to add content.
 
 ## Tool Usage Patterns
 - Find: search.fulltext (keyword) → block.get (by ID). For semantic search use search.semantic.
 - Structural search: for block types, inline formats, ancestry or statistics, first fetch sql.schema, then use sql.query. To show matching blocks in the frontend, use native/frontend/open_search(query, method=2) with SELECT b.* FROM blocks b; use projections and aggregates only with sql.query.
 - Dynamic SQL in documents: reuse a complete-block query in a native {{SQL}} embed via block.insert/append/prepend. For single-line embeds, read block.get_kramdown, preserve ID and IAL, and update that block with lockType=true. For multiline SQL or -- comments, read block.dom and write dataType=dom with preserved metadata. Consult sql.schema for the workflow; never replace a dynamic embed with static results unless requested.
-- Explore structure: document.list (children under an hPath) → document.get → block.get_children → block.get. Use block breadcrumb to trace a block's location.
-- Create content: document.create (notebook + hPath) → block.append/prepend/insert.
+- Explore structure: document.list (notebook + parentID, omitted parentID lists the notebook root) → document.get → block.get_children → block.get. Use block breadcrumb to trace a block's location.
+- Create content: document.create (notebook + parentID + independent literal title) → block.append/prepend/insert. Title slashes are text, never implicit parent segments.
 - Modify: block.update replaces ONE block's content — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
 - Inbox (cloud-synced clippings, messages, and audio/video/file attachments; requires subscription): inbox.list (paged, summaries only) → inbox.get (read full content to judge how to file it) → inbox.convert (move one or many into local documents under a notebook, auto-deleting the cloud originals on success). Failed conversions are left in the inbox for retry. If a request fails with an auth/subscription error, report it honestly — do not retry.
@@ -942,10 +942,14 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				return
 			}
 			requestTools := roundCapabilities.definitions
-			if maxRounds > 0 && toolCallRounds >= maxRounds {
+			toolRoundLimitReached := maxRounds > 0 && toolCallRounds >= maxRounds
+			if toolRoundLimitReached {
 				// 工具调用达到上限后仍允许模型完成一次最终回答，但不再提供工具定义。
 				requestTools = nil
-				roundCapabilities = &capabilitySet{registrations: map[string]*capabilityRegistration{}}
+				roundCapabilities = &capabilitySet{
+					registrations:         map[string]*capabilityRegistration{},
+					toolRoundLimitReached: true,
+				}
 			}
 			capabilities = roundCapabilities
 			contextMsgs = projectCompactionContext(checkpointMsgs, coveredMessages)
@@ -1034,14 +1038,18 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					return
 				}
 				contentBuilder.WriteString(token)
-				sendEvent(ch, AgentEvent{Type: "content", Token: token})
+				if !toolRoundLimitReached {
+					sendEvent(ch, AgentEvent{Type: "content", Token: token})
+				}
 			}
 			writeReasoning := func(token string) {
 				if token == "" {
 					return
 				}
 				reasoningBuilder.WriteString(token)
-				sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+				if !toolRoundLimitReached {
+					sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+				}
 			}
 			writeTaggedContent := func(token string) {
 				if !splitTaggedReasoning {
@@ -1070,6 +1078,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 
 			firstResponsePending := true
+			outputLimitReached := false
 			for {
 				resp := firstResp
 				var recvErr error
@@ -1084,6 +1093,11 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						break
 					}
 					logging.LogErrorf("agent stream error: %s", recvErr.Error())
+					if toolRoundLimitReached {
+						// 最后一轮尚未校验，不把可能含原始工具标记的部分输出写入会话。
+						contentBuilder.Reset()
+						reasoningBuilder.Reset()
+					}
 					content := contentBuilder.String()
 					if content != "" || reasoningBuilder.String() != "" {
 						checkpointMsgs = append(checkpointMsgs, AgentMessage{
@@ -1107,8 +1121,15 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				select {
 				case <-ctx.Done():
 					flushTaggedContent()
+					if toolRoundLimitReached {
+						contentBuilder.Reset()
+						reasoningBuilder.Reset()
+					}
 					turn.DraftContent = contentBuilder.String()
 					turn.DraftRoundID = roundID
+					if toolRoundLimitReached {
+						turn.DraftRoundID = ""
+					}
 					saveTurn("interrupted")
 					stream.Close()
 					roundCancel()
@@ -1117,6 +1138,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				}
 
 				for _, choice := range resp.Choices {
+					if choice.FinishReason == openai.FinishReasonLength {
+						outputLimitReached = true
+					}
 					if choice.Delta.Content != "" {
 						writeTaggedContent(choice.Delta.Content)
 					}
@@ -1127,7 +1151,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 
 					toolCallAccumulator.Add(choice.Delta.ToolCalls)
 				}
-				if contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
+				if !toolRoundLimitReached && contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
 					turn.DraftContent = contentBuilder.String()
 					turn.DraftRoundID = roundID
 					saveTurn("running")
@@ -1157,6 +1181,59 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			roundCancel()
 			turn.DraftContent = ""
 			turn.DraftRoundID = ""
+
+			if toolRoundLimitReached {
+				// 先校验完整收尾，覆盖跨流片段的标记；既不展示，也不持久化越界调用。
+				if len(toolCallAccumulator.ToolCalls()) > 0 || containsTextToolCall(contentBuilder.String()) ||
+					containsTextToolCall(reasoningBuilder.String()) {
+					contentBuilder.Reset()
+					reasoningBuilder.Reset()
+					toolCallAccumulator = toolCallStreamAccumulator{}
+					nativeContent = nil
+					responseOutput = nil
+					responseOutputTokens = 0
+				} else {
+					if reasoningBuilder.Len() > 0 {
+						sendEvent(ch, AgentEvent{Type: "reasoning", Token: reasoningBuilder.String()})
+					}
+					if contentBuilder.Len() > 0 {
+						sendEvent(ch, AgentEvent{Type: "content", Token: contentBuilder.String()})
+					}
+				}
+			}
+
+			if outputLimitReached {
+				// 保留已收到的文本，并在执行可能被截断的工具调用前结束本轮。
+				partial := AgentMessage{
+					Role:                 "assistant",
+					Content:              contentBuilder.String(),
+					ReasoningContent:     reasoningBuilder.String(),
+					NativeContent:        nativeContent,
+					ResponseOutput:       responseOutput,
+					ResponseOutputTokens: responseOutputTokens,
+					RoundID:              roundID,
+				}
+				if len(toolCallAccumulator.ToolCalls()) > 0 {
+					// 不将缺少执行结果的工具请求带入下一轮模型上下文。
+					partial.NativeContent = nil
+					partial.ResponseOutput = nil
+					partial.ResponseOutputTokens = 0
+				}
+				if partial.Content != "" || partial.ReasoningContent != "" || partial.NativeContent != nil || len(partial.ResponseOutput) > 0 {
+					checkpointMsgs = append(checkpointMsgs, partial)
+				}
+				turn.TokenBreakdown = computeBreakdownIfNeeded(model, requestMessages, requestTools, lastPromptTokens)
+				if !saveTurn("interrupted") {
+					return
+				}
+				sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+				errMsg := kernelModel.Conf.Language(297)
+				if toolRoundLimitReached {
+					errMsg = kernelModel.Conf.Language(440)
+				}
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
+				return
+			}
 
 			aggregatedToolCalls := toolCallAccumulator.ToolCalls()
 			if len(aggregatedToolCalls) > 0 {
@@ -1598,11 +1675,19 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				ReasoningContent: reasoningBuilder.String(),
 			})
 			turn.TokenBreakdown = computeBreakdownIfNeeded(model, requestMessages, requestTools, lastPromptTokens)
-			if !saveTurn("finished") {
+			state := "finished"
+			if toolRoundLimitReached {
+				state = "interrupted"
+			}
+			if !saveTurn(state) {
 				return
 			}
 
 			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+			if toolRoundLimitReached {
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(440)})
+				return
+			}
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
@@ -2089,6 +2174,9 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 
 	var sb strings.Builder
 	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
+	if capabilities != nil && capabilities.toolRoundLimitReached {
+		sb.WriteString(toolRoundLimitPrompt)
+	}
 	if len(instructions) > 0 && strings.TrimSpace(instructions[0]) != "" {
 		sb.WriteString("\n\n## Workspace instructions\nThe following AGENTS.md contains persistent user preferences for this workspace. " +
 			"Follow them where applicable; the current user's explicit request overrides general preferences. " +

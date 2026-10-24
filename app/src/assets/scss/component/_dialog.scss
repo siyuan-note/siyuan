@@ -79,6 +79,27 @@
     height: 100%;
     opacity: 0;
     transition: opacity 150ms linear;
+
+    &--progress {
+      @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+        background-color: rgba(255, 255, 255, .08);
+        -webkit-backdrop-filter: blur(8px) saturate(105%);
+        backdrop-filter: blur(8px) saturate(105%);
+
+        :root[data-theme-mode="dark"] & {
+          background-color: rgba(0, 0, 0, .06);
+        }
+      }
+
+      @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+        &,
+        :root[data-theme-mode="dark"] & {
+          background-color: var(--b3-mask-background);
+          -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+        }
+      }
+    }
   }
 
   &__container {
@@ -164,5 +185,29 @@
     background: var(--b3-theme-background);
     padding: 10px;
     border-radius: var(--b3-border-radius-b);
+  }
+
+  &__progress-label {
+    text-align: right;
+  }
+
+  &__progress {
+    margin: 8px 0;
+    height: 8px;
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    background-color: #fff;
+  }
+
+  &__progressbar {
+    height: 100%;
+    background-color: var(--b3-theme-primary);
+    transition: var(--b3-transition);
+  }
+
+  &__progress--indeterminate > .b3-dialog__progressbar {
+    background-image: linear-gradient(-45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
+    animation: stripMove 450ms linear infinite;
+    background-size: 50px 50px;
   }
 }

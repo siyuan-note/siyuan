@@ -723,8 +723,7 @@ var getBlockInfo = contractHandler(apicontract.GetBlockInfo, func(c *gin.Context
 	if errors.Is(err, model.ErrIndexing) {
 		return apicontract.FailureWithText[apicontract.BlockInfoData](3, ret.Msg, model.Conf.Language(56))
 	}
-	rootTitle := root.IAL["title"]
-	rootTitle = html.UnescapeString(rootTitle)
+	rootTitle := treenode.ReadDocumentTitle(tree.Root).Text
 	icon := html.UnescapeString(root.IAL["icon"])
 	if publishAccessRequired {
 		return apicontract.Success[apicontract.BlockInfoData](apicontract.PublishedBlockInfo{

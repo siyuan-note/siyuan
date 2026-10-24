@@ -435,7 +435,7 @@ class NotebookStartupTests(unittest.TestCase):
     def test_startup_reset_and_early_disconnect_are_retried_until_ready(self):
         responses = [ConnectionResetError("reset before ready"), http.client.RemoteDisconnected("not ready"),
                      {"progress": 40}, {"progress": 100}, "3.8.7", {"notebook": {"id": "box"}},
-                     "block", {"kramdown": "Docker OCR smoke 123"}]
+                     {"id": "block", "document": {}}, {"kramdown": "Docker OCR smoke 123"}]
         fail_ocr = Mock()
         with patch.object(release, "run", side_effect=self.command), \
                 patch.object(release, "request", side_effect=responses) as request, patch.object(release.time, "sleep") as sleep:
@@ -446,6 +446,58 @@ class NotebookStartupTests(unittest.TestCase):
         self.assertEqual(endpoints[:4], ["/api/system/bootProgress"] * 4)
         self.assertEqual(endpoints.count("/api/notebook/createNotebook"), 1)
         self.assertFalse(self.diagnostics.exists())
+
+    def test_notebook_uses_structured_root_creation_and_reads_the_returned_id(self):
+        def respond(req, timeout):
+            endpoint = req.full_url.removeprefix("http://127.0.0.1:12345")
+            payload = None if req.data is None else json.loads(req.data)
+            if endpoint == "/api/system/bootProgress":
+                data = {"progress": 100}
+            elif endpoint == "/api/system/version":
+                data = "3.8.9-alpha.5"
+            elif endpoint == "/api/notebook/createNotebook":
+                self.assertEqual(payload, {"name": "Docker OCR smoke"})
+                data = {"notebook": {"id": "20261024010000-abcdefg"}}
+            elif endpoint == "/api/filetree/createDocByParent":
+                self.assertRegex(payload["id"], r"^[0-9]{14}-[0-9a-z]{7}$")
+                self.assertEqual(payload, {"notebook": "20261024010000-abcdefg", "parentID": None,
+                                           "id": payload["id"], "title": {"format": "plain", "text": "Docker smoke"},
+                                           "markdown": "Docker OCR smoke 123"})
+                data = {"id": payload["id"], "document": {"id": payload["id"], "parentID": None}}
+                created_ids.append(data["id"])
+            elif endpoint == "/api/block/getBlockKramdown":
+                self.assertEqual(payload, {"id": created_ids[0]})
+                data = {"kramdown": "Docker OCR smoke 123"}
+            else:
+                self.fail("Unexpected kernel endpoint: " + endpoint)
+            endpoints.append(endpoint)
+            return io.BytesIO(json.dumps({"code": 0, "data": data}).encode("utf-8"))
+
+        endpoints, created_ids = [], []
+        fail_ocr = Mock()
+        with patch.object(release, "run", side_effect=self.command), \
+                patch.object(release.urllib.request, "urlopen", side_effect=respond):
+            release.verify_notebook(IMAGE, "linux/amd64", "3.8.9-alpha.5", 240, fail_ocr, self.diagnostics)
+        self.assertEqual(endpoints, ["/api/system/bootProgress", "/api/system/version", "/api/notebook/createNotebook",
+                                     "/api/filetree/createDocByParent", "/api/block/getBlockKramdown"])
+        fail_ocr.assert_called_once()
+        self.assertFalse(self.diagnostics.exists())
+
+    def test_document_creation_failure_keeps_diagnostics_without_retry_or_readback(self):
+        responses = [{"progress": 100}, "3.8.9-alpha.5", {"notebook": {"id": "box"}},
+                     ValueError("documentIDConflict")]
+        with patch.object(release, "run", side_effect=self.command) as run, \
+                patch.object(release, "request", side_effect=responses) as request, \
+                contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(ValueError, "documentIDConflict"):
+                release.verify_notebook(IMAGE, "linux/amd64", "3.8.9-alpha.5", 240, Mock(), self.diagnostics)
+        self.assertEqual([call.args[1] for call in request.call_args_list],
+                         ["/api/system/bootProgress", "/api/system/version", "/api/notebook/createNotebook",
+                          "/api/filetree/createDocByParent"])
+        self.assertTrue(self.diagnostics.joinpath("kernel.log").is_file())
+        self.assertTrue(self.diagnostics.joinpath("kernel-state.json").is_file())
+        self.assertEqual(run.call_args_list[-2].args[0][:3], ["docker", "rm", "-f"])
+        self.assertEqual(run.call_args_list[-1].args[0][:3], ["docker", "volume", "rm"])
 
     def test_persistent_reset_times_out_with_diagnostics_and_never_writes_notebook(self):
         fail_ocr = Mock()

@@ -7,7 +7,7 @@
 		"id": "20240530101000-4p096e8",
 		"title": "ワークスペース",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261021005205"
 	},
 	"Children": [
 		{
@@ -284,6 +284,251 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-tctin10",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261021005120-tctin10",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ワークスペースの名前変更"
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-1ivo4l4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021005120-1ivo4l4",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版では、ワークスペースの名前はフォルダ名と同じです。思源を終了してから、ファイルマネージャーで変更してください。ワークスペースのフォルダ全体の名前を変更するだけでよく、中身を空にしたり、データを移行したりする必要はありません。"
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-ytt1xxx",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46
+			},
+			"Properties": {
+				"id": "20261021005120-ytt1xxx",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"ID": "20261021005120-y6biwwg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261021005120-y6biwwg",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-mwa0aki",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-mwa0aki",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "画面左上のメニューの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ワークスペース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で対象のワークスペースを見つけ、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ファイルの場所を開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を選択してフォルダの場所を確認する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-82t58c5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261021005120-82t58c5",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-gwlbsnc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-gwlbsnc",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "画面左上のメニューの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリケーションを終了"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " から思源を安全に終了し、対応するカーネルプロセスが終了するまで待つ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-mnpv5fw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261021005120-mnpv5fw",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-tswu5ve",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-tswu5ve",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ファイルマネージャーでワークスペースのフォルダ名を変更し、中のファイルとサブフォルダはすべて保持する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-hmojnda",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261021005120-hmojnda",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-8xrfoks",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-8xrfoks",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源を再起動し、ワークスペース選択ウィンドウで名前を変更したフォルダを選択する。別のワークスペースが開いている場合は、画面左上のメニューの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ワークスペース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新規作成 / 開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " からそのフォルダを選択する"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-4kuuf26",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021005120-4kuuf26",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ウィンドウを閉じたり、別のワークスペースを開いたりするだけでは、元のワークスペースが終了するとは限りません。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " パラメータでワークスペースを指定している場合は、再起動する前に起動コマンドやショートカットのパスも変更後のフォルダのパスに更新してください。"
 				}
 			]
 		},

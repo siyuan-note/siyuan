@@ -21,7 +21,7 @@ globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outp
 const setup = (overrides: Partial<ListMindmapRelation> = {}) => {
     const relation: ListMindmapRelation = {id: "r", from: "a", to: "b", label: "Keep", arrowDirection: "reverse", ...overrides};
     const changes: {id: string, patch: Partial<ListMindmapRelation>, expected: string}[] = [];
-    const sandbox: any = {...routing, cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1};
+    const sandbox: any = {...routing, clearTimeout, cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1};
     runInNewContext(compiled, sandbox);
     const view = new sandbox.View();
     const positions = new Map([
@@ -41,7 +41,7 @@ const setup = (overrides: Partial<ListMindmapRelation> = {}) => {
         routingObstacles: () => [...positions.values()], draw: () => {}, refreshLayout: () => {},
         clearDrop: () => {}, setHoveredLine: () => {}, finishThen: (action: () => void) => action(),
         routeHandles: new Map(), routeStatus: {}, label: (key: string) => key,
-        summaryBox: {hidden: true},
+        selectionBox: {hidden: true},
         getRouteHandle: () => ({style: {}}),
     });
     view.relationRoutes.set("r", view.calculateRelationRoute(relation, positions.get("a"), positions.get("b")));

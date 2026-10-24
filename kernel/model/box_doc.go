@@ -249,7 +249,7 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 	if "" == title {
 		title = Conf.Language(16)
 	}
-	titleChanged := tree.Root.IALAttr("title") != title
+	titleChanged := treenode.ReadDocumentTitle(tree.Root).Text != title
 	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(DocHiddenAttr) != "true" ||
 		tree.Root.IALAttr("icon") != boxConf.Icon
 	if !changed {

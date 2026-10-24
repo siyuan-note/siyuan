@@ -1,25 +1,21 @@
-import {Constants} from "../../constants";
-
 type TPoint = {clientX: number, clientY: number};
-type TSource = "mouse" | "touch";
 
 interface IBlockDragSelectionOptions {
-    canStart: (source: TSource) => boolean;
-    getStartBlock: (target: HTMLElement, source: TSource) => HTMLElement | undefined;
+    canStart: () => boolean;
+    getStartBlock: (target: HTMLElement) => HTMLElement | undefined;
     getBlockAtPoint: (point: TPoint) => HTMLElement | undefined;
-    isMultiSelectMode: () => boolean;
-    select: (start: HTMLElement, end: HTMLElement, source: TSource) => void;
+    select: (start: HTMLElement, end: HTMLElement) => void;
     scroll: (point?: TPoint) => void;
-    finish: (source: TSource, cancelled: boolean) => void;
+    finish: (cancelled: boolean) => void;
 }
 
-// 文字选区保留在单个编辑宿主内，跨块拖动由应用维护整块选区。
+// 鼠标文字选区保留在单个编辑宿主内，跨块拖动由应用维护整块选区。
 export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollElement: () => HTMLElement,
                                               options: IBlockDragSelectionOptions) => {
     const ownerDocument = element.ownerDocument;
     const ownerWindow = ownerDocument.defaultView;
     let gesture: {
-        source: TSource, block: HTMLElement, point: TPoint, time: number, touchID?: number,
+        block: HTMLElement,
         active: boolean, lastPoint: TPoint,
     } | undefined;
     let suppressClickUntil = 0;
@@ -32,10 +28,6 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
         gesture = undefined;
         ownerDocument.removeEventListener("mousemove", mouseMove, true);
         ownerDocument.removeEventListener("mouseup", mouseUp, true);
-        ownerDocument.removeEventListener("touchmove", touchMove, true);
-        ownerDocument.removeEventListener("touchend", touchEnd, true);
-        ownerDocument.removeEventListener("touchcancel", cancel, true);
-        ownerDocument.removeEventListener("touchstart", additionalTouch, true);
         ownerDocument.removeEventListener("keydown", keyDown, true);
         ownerDocument.removeEventListener("dragstart", dragStart, true);
         scrollElement?.removeEventListener("scroll", scroll);
@@ -44,7 +36,7 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
         if (previous?.active) {
             suppressClickUntil = Date.now() + 500;
             options.scroll();
-            options.finish(previous.source, cancelled);
+            options.finish(cancelled);
         }
     };
     const cancel = () => finish(true);
@@ -60,19 +52,19 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
             cancel();
         }
     };
-    const update = (point: TPoint, allowSingleBlock = false) => {
-        if (!gesture || composing || !element.contains(gesture.block) || !options.canStart(gesture.source)) {
+    const update = (point: TPoint) => {
+        if (!gesture || composing || !element.contains(gesture.block) || !options.canStart()) {
             cancel();
             return false;
         }
         const end = options.getBlockAtPoint(point);
-        if (!gesture.active && (!end || end === gesture.block && !allowSingleBlock)) {
+        if (!gesture.active && (!end || end === gesture.block)) {
             return false;
         }
         gesture.active = true;
         gesture.lastPoint = point;
         if (end) {
-            options.select(gesture.block, end, gesture.source);
+            options.select(gesture.block, end);
         }
         options.scroll(point);
         return true;
@@ -98,88 +90,37 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
             event.stopImmediatePropagation();
         }
     };
-    const additionalTouch = (event: TouchEvent) => {
-        if (event.touches.length !== 1) {
-            cancel();
-        }
-    };
-    const touchMove = (event: TouchEvent) => {
-        const touch = gesture && Array.from(event.touches).find(item => item.identifier === gesture.touchID);
-        if (!touch || event.touches.length !== 1 || !event.cancelable) {
-            cancel();
-            return;
-        }
-        if (!gesture.active) {
-            if (Math.abs(touch.clientX - gesture.point.clientX) < Constants.SIZE_DRAG_THRESHOLD &&
-                Math.abs(touch.clientY - gesture.point.clientY) < Constants.SIZE_DRAG_THRESHOLD) {
-                return;
-            }
-            // 普通滑动交给浏览器滚动，多选模式下也需持续长按后才尝试扩选。
-            if (Date.now() - gesture.time < Constants.TIMEOUT_MULTIPLE_SELECT) {
-                cancel();
-                return;
-            }
-        }
-        if (update(touch, options.isMultiSelectMode())) {
-            // 保留冒泡，让移动端全局手势清理自己的长按和侧栏滑动状态。
-            event.preventDefault();
-        }
-    };
-    const touchEnd = (event: TouchEvent) => {
-        lastTouchTime = Date.now();
-        if (!gesture || !Array.from(event.changedTouches).some(item => item.identifier === gesture.touchID)) {
-            return;
-        }
-        const active = gesture.active;
-        finish(false);
-        if (active) {
-            event.preventDefault();
-        }
-    };
-    const start = (target: HTMLElement, point: TPoint, source: TSource, touchID?: number) => {
+    const start = (target: HTMLElement, point: TPoint) => {
         finish(true);
         suppressClickUntil = 0;
-        if (composing || !options.canStart(source)) {
+        if (composing || !options.canStart()) {
             return;
         }
-        const block = options.getStartBlock(target, source);
+        const block = options.getStartBlock(target);
         if (!block) {
             return;
         }
-        gesture = {source, block, point, time: Date.now(), touchID, active: false, lastPoint: point};
+        gesture = {block, active: false, lastPoint: point};
         // 正文宿主先于滚动容器初始化，开始手势时再绑定实际容器。
         scrollElement = getScrollElement();
         ownerDocument.addEventListener("keydown", keyDown, true);
         ownerDocument.addEventListener("dragstart", dragStart, true);
         ownerWindow.addEventListener("blur", cancel);
         scrollElement.addEventListener("scroll", scroll);
-        if (source === "mouse") {
-            ownerDocument.addEventListener("mousemove", mouseMove, true);
-            ownerDocument.addEventListener("mouseup", mouseUp, true);
-        } else {
-            ownerDocument.addEventListener("touchmove", touchMove, {capture: true, passive: false});
-            ownerDocument.addEventListener("touchend", touchEnd, {capture: true, passive: false});
-            ownerDocument.addEventListener("touchcancel", cancel, true);
-            ownerDocument.addEventListener("touchstart", additionalTouch, true);
-        }
-        return true;
+        ownerDocument.addEventListener("mousemove", mouseMove, true);
+        ownerDocument.addEventListener("mouseup", mouseUp, true);
     };
     const mouseDown = (event: MouseEvent & {sourceCapabilities?: {firesTouchEvents: boolean}}) => {
         if (event.defaultPrevented || event.button !== 0 || event.detail > 1 ||
-            event.shiftKey || event.ctrlKey || event.metaKey || event.altKey || gesture?.source === "touch" ||
+            event.shiftKey || event.ctrlKey || event.metaKey || event.altKey ||
             event.sourceCapabilities?.firesTouchEvents || Date.now() - lastTouchTime < 500) {
             return;
         }
-        start(event.target as HTMLElement, event, "mouse");
+        start(event.target as HTMLElement, event);
     };
-    const touchStart = (event: TouchEvent) => {
+    const recordTouch = () => {
+        // 仅记录触摸时间，避免浏览器合成的兼容鼠标事件启动跨块拖选。
         lastTouchTime = Date.now();
-        if (event.defaultPrevented || event.touches.length !== 1) {
-            cancel();
-            return;
-        }
-        const touch = event.touches[0];
-        start(event.target as HTMLElement, touch, "touch", touch.identifier);
     };
     const click = (event: MouseEvent) => {
         if (Date.now() < suppressClickUntil) {
@@ -196,7 +137,9 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
         composing = false;
     };
     element.addEventListener("mousedown", mouseDown);
-    element.addEventListener("touchstart", touchStart, {passive: false});
+    element.addEventListener("touchstart", recordTouch, {passive: true});
+    element.addEventListener("touchend", recordTouch, {passive: true});
+    element.addEventListener("touchcancel", recordTouch, {passive: true});
     element.addEventListener("click", click, true);
     element.addEventListener("compositionstart", compositionStart);
     element.addEventListener("compositionend", compositionEnd);
@@ -204,7 +147,9 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollEle
     return () => {
         cancel();
         element.removeEventListener("mousedown", mouseDown);
-        element.removeEventListener("touchstart", touchStart);
+        element.removeEventListener("touchstart", recordTouch);
+        element.removeEventListener("touchend", recordTouch);
+        element.removeEventListener("touchcancel", recordTouch);
         element.removeEventListener("click", click, true);
         element.removeEventListener("compositionstart", compositionStart);
         element.removeEventListener("compositionend", compositionEnd);

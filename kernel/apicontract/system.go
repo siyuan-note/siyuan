@@ -2,6 +2,10 @@ package apicontract
 
 import "mime/multipart"
 
+type SystemWallpaperUploadRequest struct {
+	File *multipart.FileHeader `json:"file"`
+}
+
 // SystemRuntimeInfoData 提供可复制的运行诊断文本，不包含工作空间路径或设备标识。
 type SystemRuntimeInfoData struct {
 	Text string `json:"text"`
@@ -28,6 +32,10 @@ type SystemChangelogData struct {
 type SystemCheckUpdateRequest struct {
 	ShowMsg bool `json:"showMsg"`
 }
+
+type SystemDownloadUpdateRequest struct {
+	Version string `json:"version"`
+}
 type SystemZipData struct {
 	Zip string `json:"zip"`
 }
@@ -45,9 +53,11 @@ type SystemMessageData struct {
 	Msg string `json:"msg"`
 }
 type SystemConfData struct {
-	Conf      *SystemAppConf `json:"conf"`
-	Start     bool           `json:"start"`
-	IsPublish bool           `json:"isPublish"`
+	// DocumentAddressingVersion 是当前内核的只读能力，普通构建默认为 2，不是持久化配置或可写开关。
+	DocumentAddressingVersion int            `json:"documentAddressingVersion"`
+	Conf                      *SystemAppConf `json:"conf"`
+	Start                     bool           `json:"start"`
+	IsPublish                 bool           `json:"isPublish"`
 	// SettingTasks 为当前仍执行的设置维护任务，前端初始化和重连时恢复任务阻塞。
 	SettingTasks *SettingTaskState `json:"settingTasks,omitempty"`
 	// Revision 是读取开始前的配置提交序号，客户端据此丢弃已包含在本次读取中的通知。

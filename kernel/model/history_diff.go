@@ -273,7 +273,7 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 		ret.rootID = ret.tree.Root.ID
 	}
 	if nil != ret.tree && "" == ret.title {
-		ret.title = ret.tree.Root.IALAttr("title")
+		ret.title = treenode.ReadDocumentTitle(ret.tree.Root).Text
 	}
 	if "" == ret.title {
 		ret.title = ret.rootID
@@ -301,7 +301,7 @@ func loadCurrentDocVersion(id string) (ret *loadedDocVersion, err error) {
 	if nil != ret.parseErr {
 		return ret, nil
 	}
-	ret.title = ret.tree.Root.IALAttr("title")
+	ret.title = treenode.ReadDocumentTitle(ret.tree.Root).Text
 	ret.rootID = ret.tree.Root.ID
 	return
 }
@@ -385,7 +385,7 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 	}
 	return &loadedDocVersion{
 		tree:    tree,
-		title:   tree.Root.IALAttr("title"),
+		title:   treenode.ReadDocumentTitle(tree.Root).Text,
 		rootID:  tree.Root.ID,
 		raw:     data,
 		large:   1024*1024 <= len(data),
@@ -454,7 +454,7 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	}
 	return &loadedDocVersion{
 		tree:   tree,
-		title:  tree.Root.IALAttr("title"),
+		title:  treenode.ReadDocumentTitle(tree.Root).Text,
 		rootID: tree.Root.ID,
 		raw:    data,
 		large:  1024*1024 <= len(data),

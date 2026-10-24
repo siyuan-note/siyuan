@@ -162,7 +162,7 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string, tree *parse.Tree) (r
 		treeNode := &Path{
 			ID:       root.ID,
 			Box:      root.Box,
-			Name:     path.Base(root.HPath),
+			Name:     documentTitleText(root.Box, root.RootID),
 			NodeType: root.Type,
 			Type:     typ,
 			SubType:  root.SubType,

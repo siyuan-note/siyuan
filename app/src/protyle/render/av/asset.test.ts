@@ -1,7 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {join} from "node:path";
+import * as path from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import * as selectionState from "./selectionState";
@@ -10,6 +10,14 @@ import {updateAVCachedCellValue} from "./cellValue";
 import * as uploadResult from "../../upload/uploadResult";
 import * as viewType from "./viewType";
 import * as insertPosition from "../../upload/insertPosition";
+
+const pathNames = {} as typeof import("../../../util/pathName");
+runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "../../../util/pathName.ts"), "utf8"), {
+    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
+}).outputText, {
+    exports: pathNames,
+    require: (name: string) => name === "path" ? path : {},
+});
 
 // 使用完整资源消费者，控制上传完成与虚拟行移除的顺序，记录实际生成的事务。
 const createHarness = (layout = "table") => {
@@ -46,7 +54,7 @@ const createHarness = (layout = "table") => {
         "./col": {getColId: () => "assets"},
         "./row": {getFieldIdByCellElement: () => "row"},
         "./batchValue": {getAVBatchEditMode: () => "replace"},
-        "../../../util/pathName": {getAssetExtension: () => ".png"},
+        "../../../util/pathName": pathNames,
         "../../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png"]}},
         "../../../dialog/message": {showMessage: () => {}},
         "../../util/hasClosest": {hasClosestBlock: () => block},
@@ -65,7 +73,7 @@ const createHarness = (layout = "table") => {
         },
     };
     const module = {exports: {}};
-    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "asset.ts"), "utf8"), {
+    runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "asset.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
     }).outputText, {
         module, exports: module.exports, require: (name: string) => mocks[name] || {},
@@ -115,6 +123,15 @@ describe("database resource upload consumers", () => {
             harness.complete("new.png");
             assert.deepEqual(harness.cell.value.mAsset.map(value => value.content), ["original.png", "new.png"]);
             assert.deepEqual(harness.cell.value.mAsset.map(value => value.name), ["original", "new.png"]);
+        });
+        it(`${kind}: recognizes image filenames containing a literal hash`, () => {
+            for (const name of ["image#copy.png", "image#copy.PNG"]) {
+                const harness = createHarness();
+                harness.start(kind);
+                harness.complete(name);
+                assert.equal(harness.cell.value.mAsset[1].type, "image", name);
+                assert.equal(harness.cell.value.mAsset[1].name, name);
+            }
         });
         it(`${kind}: appends both uploads while the row is not rendered`, () => {
             const harness = createHarness();

@@ -37,6 +37,7 @@ func TestHeadingDocParagraph(t *testing.T) {
 		{"plain", "Test", "Test", false},
 		{"escaped text", "A & B", "A &amp; B", false},
 		{"slash", "A/B", "A_B", true},
+		{"literal slash retained in title", "A/B", "A/B", false},
 		{"truncated", strings.Repeat("标题", 20), "标题...", true},
 		{"image", "Test ![image](assets/test.png)", "Test image", true},
 		{"image only", "![](assets/test.png)", "image", true},

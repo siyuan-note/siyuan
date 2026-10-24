@@ -18,6 +18,9 @@ var sortConfRecoveryLock sync.Mutex
 
 // recoverSortConfMap 先保存损坏原文，再从同路径快照或可用整数条目恢复排序。
 func recoverSortConfMap(confPath string, data []byte) (map[string]int, error) {
+	if err := CheckDocumentAddressingPath(confPath); err != nil {
+		return nil, err
+	}
 	relPath, ok := dataRelativePath(util.DataDir, confPath)
 	if !ok {
 		return nil, fmt.Errorf("sort conf outside data directory [%s]", confPath)

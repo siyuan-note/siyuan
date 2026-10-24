@@ -24,7 +24,7 @@ async function waitForPendingSave(id: string) {
     }
 }
 
-// 标识发起者 app，后端 saveSession/removeSession 据此排除自身、向其他实例广播会话变更。
+// 标识发起者 app，后端据此排除自身、向其他实例广播会话变更。
 const APP_HEADER = {
     "Content-Type": "application/json",
     "X-SiYuan-App-ID": Constants.SIYUAN_APPID,
@@ -36,6 +36,7 @@ export interface SessionIndexItem {
     title: string;
     createdAt: number;
     updatedAt: number;
+    pinnedAt?: number;
     agentRunning?: boolean;
 }
 
@@ -49,6 +50,7 @@ export interface SessionListResult {
 export interface AgentSession {
     id: string;
     title: string;
+    pinnedAt?: number;
     titled?: boolean;
     model?: string;
     permissionMode?: AgentPermissionMode;
@@ -220,6 +222,15 @@ export const SessionStore = {
         if (!session) { return; }
         session.title = newTitle;
         await this.save(session);
+    },
+
+    async setPinned(id: string, pinned: boolean): Promise<number> {
+        await waitForPendingSave(id);
+        const resp = await fetchSyncPost("/api/ai/agent/setPinned", {id, pinned}, APP_HEADER);
+        if (!resp || resp.code !== 0 || !resp.data) {
+            throw new Error(resp?.msg || "Failed to update agent session pin");
+        }
+        return resp.data.pinnedAt;
     },
 
     async setPermission(id: string, permissionMode: AgentPermissionMode): Promise<AgentPermissionMode> {

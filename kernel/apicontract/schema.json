@@ -4405,6 +4405,16 @@
             }
           ]
         },
+        "pinnedAt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "promptTokens": {
           "anyOf": [
             {
@@ -4694,6 +4704,16 @@
             }
           ]
         },
+        "pinnedAt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "promptTokens": {
           "anyOf": [
             {
@@ -4870,6 +4890,9 @@
         },
         "permissionMode": {
           "type": "string"
+        },
+        "pinnedAt": {
+          "type": "integer"
         },
         "promptTokens": {
           "type": "integer"
@@ -5088,6 +5111,16 @@
             }
           ]
         },
+        "pinnedAt": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "promptTokens": {
           "anyOf": [
             {
@@ -5225,6 +5258,9 @@
         "id": {
           "type": "string"
         },
+        "pinnedAt": {
+          "type": "integer"
+        },
         "title": {
           "type": "string"
         },
@@ -5278,6 +5314,34 @@
         "pageSize",
         "sessions",
         "total"
+      ],
+      "additionalProperties": false
+    },
+    "AISessionPinnedData": {
+      "type": "object",
+      "properties": {
+        "pinnedAt": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pinnedAt"
+      ],
+      "additionalProperties": false
+    },
+    "AISessionPinnedRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pinned": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "pinned"
       ],
       "additionalProperties": false
     },
@@ -6608,6 +6672,15 @@
         "name": {
           "type": "string"
         },
+        "nameOperator": {
+          "type": "string",
+          "enum": [
+            "",
+            "equals",
+            "contains",
+            "regex"
+          ]
+        },
         "operator": {
           "type": "string",
           "enum": [
@@ -6632,6 +6705,15 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "nameOperator": {
+          "type": "string",
+          "enum": [
+            "",
+            "equals",
+            "contains",
+            "regex"
+          ]
         },
         "operator": {
           "type": "string",
@@ -6676,11 +6758,17 @@
             ]
           }
         },
+        "documentDepth": {
+          "type": "integer"
+        },
         "documentIDs": {
           "type": "array",
           "items": {
             "type": "string"
           }
+        },
+        "includeSelectedDocuments": {
+          "type": "boolean"
         },
         "notebookIDs": {
           "type": "array",
@@ -6743,11 +6831,31 @@
             ]
           }
         },
+        "documentDepth": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "documentIDs": {
           "type": "array",
           "items": {
             "type": "string"
           }
+        },
+        "includeSelectedDocuments": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "notebookIDs": {
           "type": "array",
@@ -16324,6 +16432,107 @@
       ],
       "additionalProperties": false
     },
+    "BacklinkDatabase": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "keys": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVKey"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "keys",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkDatabaseFilterInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVViewFilterInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "avID",
+        "filters"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkDatabasesRequestInput": {
+      "type": "object",
+      "properties": {
+        "containChildren": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
     "BacklinkDocumentRequestInput": {
       "type": "object",
       "properties": {
@@ -16734,6 +16943,16 @@
             }
           ]
         },
+        "database": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkDatabaseFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "excludeSelf": {
           "anyOf": [
             {
@@ -17095,6 +17314,9 @@
             }
           ]
         },
+        "lockScreenWallpaper": {
+          "type": "boolean"
+        },
         "menuMouseScroll": {
           "type": "boolean"
         },
@@ -17176,6 +17398,7 @@
         "icons",
         "lang",
         "lightThemes",
+        "lockScreenWallpaper",
         "menuMouseScroll",
         "mobileBars",
         "mode",
@@ -21018,6 +21241,30 @@
       ],
       "additionalProperties": false
     },
+    "CancelSyncCheckoutData": {
+      "type": "object",
+      "properties": {
+        "requested": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "requested"
+      ],
+      "additionalProperties": false
+    },
+    "CancelSyncCheckoutRequestInput": {
+      "type": "object",
+      "properties": {
+        "taskID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "taskID"
+      ],
+      "additionalProperties": false
+    },
     "ChangeAttrViewLayoutRequestInput": {
       "type": "object",
       "properties": {
@@ -21646,6 +21893,29 @@
       ],
       "additionalProperties": false
     },
+    "CommitDataImportRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "skip",
+            "overwrite"
+          ]
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
     "CommitNotebookArchiveRequestInput": {
       "type": "object",
       "properties": {
@@ -21674,6 +21944,26 @@
       },
       "required": [
         "saved",
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmSyncCheckoutRequestInput": {
+      "type": "object",
+      "properties": {
+        "saved": {
+          "type": "boolean"
+        },
+        "taskID": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "saved",
+        "taskID",
         "token"
       ],
       "additionalProperties": false
@@ -22174,6 +22464,172 @@
       ],
       "additionalProperties": false
     },
+    "CreateDocByParentRequest": {
+      "type": "object",
+      "properties": {
+        "clippingHref": {
+          "type": "string"
+        },
+        "docCreateTemplatePath": {
+          "type": "string"
+        },
+        "expectedParentRevision": {
+          "type": "string"
+        },
+        "expectedTarget": {
+          "$ref": "#/$defs/DocumentTargetRevision"
+        },
+        "id": {
+          "type": "string"
+        },
+        "listDocTree": {
+          "type": "boolean"
+        },
+        "markdown": {
+          "type": "string"
+        },
+        "nameConditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentNameCondition"
+          }
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sortPosition": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        },
+        "sortTargetID": {
+          "type": "string"
+        },
+        "sorts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "string"
+        },
+        "title": {
+          "$ref": "#/$defs/DocumentCreateTitle"
+        },
+        "withMath": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "notebook",
+        "parentID",
+        "id",
+        "title",
+        "markdown"
+      ],
+      "additionalProperties": false
+    },
+    "CreateDocByParentRequestInput": {
+      "type": "object",
+      "properties": {
+        "clippingHref": {
+          "type": "string"
+        },
+        "docCreateTemplatePath": {
+          "type": "string"
+        },
+        "expectedParentRevision": {
+          "type": "string"
+        },
+        "expectedTarget": {
+          "$ref": "#/$defs/DocumentTargetRevisionInput"
+        },
+        "id": {
+          "type": "string"
+        },
+        "listDocTree": {
+          "type": "boolean"
+        },
+        "markdown": {
+          "type": "string"
+        },
+        "nameConditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentNameConditionInput"
+          }
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sortPosition": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        },
+        "sortTargetID": {
+          "type": "string"
+        },
+        "sorts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "string"
+        },
+        "title": {
+          "$ref": "#/$defs/DocumentCreateTitleInput"
+        },
+        "withMath": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "notebook",
+        "parentID",
+        "id",
+        "title",
+        "markdown"
+      ],
+      "additionalProperties": false
+    },
+    "CreateDocByParentResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CreatedDocumentData"
+        },
+        {
+          "$ref": "#/$defs/DocumentCreateFailure"
+        }
+      ]
+    },
     "CreateDocHistoryRequestInput": {
       "type": "object",
       "properties": {
@@ -22311,6 +22767,22 @@
           "type": "string"
         }
       },
+      "additionalProperties": false
+    },
+    "CreatedDocumentData": {
+      "type": "object",
+      "properties": {
+        "document": {
+          "$ref": "#/$defs/DocumentPath"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "document",
+        "id"
+      ],
       "additionalProperties": false
     },
     "Criterion": {
@@ -23309,6 +23781,80 @@
       ],
       "additionalProperties": false
     },
+    "DataImportPlan": {
+      "type": "object",
+      "properties": {
+        "conflicts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "encrypted": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "conflicts",
+        "encrypted",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "DataImportRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "DataImportResult": {
+      "type": "object",
+      "properties": {
+        "skipped": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "skipped"
+      ],
+      "additionalProperties": false
+    },
     "DeleteBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -23943,6 +24489,484 @@
       ],
       "additionalProperties": false
     },
+    "DocumentAddressingFailure": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "invalidTitle",
+            "parentUnavailable",
+            "planChanged",
+            "documentIDConflict",
+            "legacyPathUnsupported",
+            "indexUnavailable",
+            "unsupportedTitleFormat",
+            "targetModeUnsupported",
+            "modeConflict",
+            "writeFailed"
+          ]
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentCapabilities": {
+      "type": "object",
+      "properties": {
+        "addressingVersion": {
+          "type": "integer"
+        },
+        "indexState": {
+          "type": "string",
+          "enum": [
+            "missing",
+            "building",
+            "ready",
+            "error"
+          ]
+        },
+        "literalSlash": {
+          "type": "boolean"
+        },
+        "minimumReaderVersion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modeState": {
+          "type": "string",
+          "enum": [
+            "legacy",
+            "structured",
+            "conflict",
+            "recovering"
+          ]
+        },
+        "revision": {
+          "type": "string"
+        },
+        "structuredPaths": {
+          "type": "boolean"
+        },
+        "titleFormats": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "addressingVersion",
+        "indexState",
+        "literalSlash",
+        "minimumReaderVersion",
+        "modeState",
+        "revision",
+        "structuredPaths",
+        "titleFormats"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentCreateFailure": {
+      "type": "object",
+      "properties": {
+        "commitState": {
+          "type": "string",
+          "enum": [
+            "none",
+            "committed",
+            "unknown"
+          ]
+        },
+        "completed": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "invalidTitle",
+            "parentUnavailable",
+            "planChanged",
+            "documentIDConflict",
+            "indexUnavailable",
+            "unsupportedTitleFormat",
+            "modeConflict",
+            "writeFailed"
+          ]
+        },
+        "stage": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "commitState",
+        "completed",
+        "reason",
+        "stage"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentCreatePlan": {
+      "type": "object",
+      "properties": {
+        "existingID": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CreateDocByParentRequest"
+          }
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "steps",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentCreateTarget": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LegacyDocumentTarget"
+        },
+        {
+          "$ref": "#/$defs/StructuredDocumentTarget"
+        }
+      ]
+    },
+    "DocumentCreateTargetData": {
+      "type": "object",
+      "properties": {
+        "docCreateTemplatePath": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/DocumentCreateTarget"
+        }
+      },
+      "required": [
+        "docCreateTemplatePath",
+        "revision",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentCreateTitle": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentCreateTitleInput": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentLocation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notebook",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentNameCondition": {
+      "type": "object",
+      "properties": {
+        "expectedID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "expectedID",
+        "parentID",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentNameConditionInput": {
+      "type": "object",
+      "properties": {
+        "expectedID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "expectedID",
+        "parentID",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentPath": {
+      "type": "object",
+      "properties": {
+        "addressingVersion": {
+          "type": "integer"
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "displayPath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "segments": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DocumentPathSegment"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "$ref": "#/$defs/DocumentTitle"
+        }
+      },
+      "required": [
+        "addressingVersion",
+        "depth",
+        "displayPath",
+        "id",
+        "notebook",
+        "parentID",
+        "path",
+        "revision",
+        "segments",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentPathSegment": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "empty",
+        "id",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentPathStartInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "root",
+            "document"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentPathsData": {
+      "type": "object",
+      "properties": {
+        "documents": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DocumentPath"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missingIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "documents",
+        "missingIDs"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentPathsResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DocumentPathsData"
+        },
+        {
+          "$ref": "#/$defs/DocumentAddressingFailure"
+        }
+      ]
+    },
     "DocumentPreviewImage": {
       "type": "object",
       "properties": {
@@ -23959,6 +24983,119 @@
       "required": [
         "notebook",
         "src"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentTargetAnchor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "notebookRoot",
+            "context",
+            "document"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentTargetAnchorInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "notebookRoot",
+            "context",
+            "document"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentTargetRevision": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "document",
+            "reference",
+            "dailyNote"
+          ]
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "purpose",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentTargetRevisionInput": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "document",
+            "reference",
+            "dailyNote"
+          ]
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "purpose",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentTitle": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "plain"
+          ]
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "empty",
+        "format",
+        "text"
       ],
       "additionalProperties": false
     },
@@ -25846,6 +26983,16 @@
       ],
       "additionalProperties": false
     },
+    "FileTreeCreateSavePathResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FileTreeCreateSavePathData"
+        },
+        {
+          "$ref": "#/$defs/StructuredTemplateRequired"
+        }
+      ]
+    },
     "FileTreeDailyNoteRequestInput": {
       "type": "object",
       "properties": {
@@ -26965,6 +28112,16 @@
       ],
       "additionalProperties": false
     },
+    "FileTreeSavePathResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FileTreeSavePathData"
+        },
+        {
+          "$ref": "#/$defs/StructuredTemplateRequired"
+        }
+      ]
+    },
     "FileTreeSearchDoc": {
       "type": "object",
       "properties": {
@@ -26993,6 +28150,9 @@
           "type": "string"
         },
         "path": {
+          "type": "string"
+        },
+        "title": {
           "type": "string"
         }
       },
@@ -34295,6 +35455,46 @@
       ],
       "additionalProperties": false
     },
+    "GetDocCreateTargetRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "document",
+            "reference",
+            "dailyNote"
+          ]
+        }
+      },
+      "required": [
+        "notebook",
+        "purpose"
+      ],
+      "additionalProperties": false
+    },
+    "GetDocPathsRequestInput": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ids",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
     "GetEmbedBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -37266,6 +38466,74 @@
         "existed",
         "incompatible",
         "js"
+      ],
+      "additionalProperties": false
+    },
+    "LegacyDocumentTarget": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "notebook",
+        "path",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "LegacyPathDocumentResult": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/LegacyPathUnsupported"
+        }
+      ]
+    },
+    "LegacyPathIDsResult": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "$ref": "#/$defs/LegacyPathUnsupported"
+        }
+      ]
+    },
+    "LegacyPathUnsupported": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "legacyPathUnsupported"
+          ]
+        }
+      },
+      "required": [
+        "reason"
       ],
       "additionalProperties": false
     },
@@ -40333,6 +41601,9 @@
         "dailyNoteSavePath": {
           "type": "string"
         },
+        "dailyNoteTarget": {
+          "$ref": "#/$defs/StructuredDocumentTarget"
+        },
         "dailyNoteTemplatePath": {
           "type": "string"
         },
@@ -40341,6 +41612,9 @@
         },
         "docCreateSavePath": {
           "type": "string"
+        },
+        "docCreateTarget": {
+          "$ref": "#/$defs/StructuredDocumentTarget"
         },
         "docCreateTemplatePath": {
           "type": "string"
@@ -40359,6 +41633,9 @@
         },
         "refCreateSavePath": {
           "type": "string"
+        },
+        "refCreateTarget": {
+          "$ref": "#/$defs/StructuredDocumentTarget"
         },
         "sort": {
           "type": "integer"
@@ -40400,6 +41677,9 @@
               "type": "null"
             }
           ]
+        },
+        "documentCapabilities": {
+          "$ref": "#/$defs/DocumentCapabilities"
         },
         "name": {
           "type": "string"
@@ -40445,6 +41725,16 @@
             }
           ]
         },
+        "dailyNoteTarget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StructuredDocumentTargetInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "dailyNoteTemplatePath": {
           "anyOf": [
             {
@@ -40469,6 +41759,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docCreateTarget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StructuredDocumentTargetInput"
             },
             {
               "type": "null"
@@ -40529,6 +41829,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "refCreateTarget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StructuredDocumentTargetInput"
             },
             {
               "type": "null"
@@ -42050,6 +43360,57 @@
         "path",
         "subFileCount",
         "unavailable"
+      ],
+      "additionalProperties": false
+    },
+    "PlanDocCreateRequestInput": {
+      "type": "object",
+      "properties": {
+        "contextID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "placement": {
+          "type": "string",
+          "enum": [
+            "configured",
+            "child"
+          ]
+        },
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "document",
+            "reference",
+            "dailyNote"
+          ]
+        },
+        "reuse": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notebook",
+        "purpose"
       ],
       "additionalProperties": false
     },
@@ -44316,6 +45677,107 @@
           "type": "boolean"
         }
       },
+      "additionalProperties": false
+    },
+    "ResolveDocPathRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "start": {
+          "$ref": "#/$defs/DocumentPathStartInput"
+        }
+      },
+      "required": [
+        "notebook",
+        "segments",
+        "start"
+      ],
+      "additionalProperties": false
+    },
+    "ResolveDocPathResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ResolvedDocumentPathData"
+        },
+        {
+          "$ref": "#/$defs/DocumentAddressingFailure"
+        }
+      ]
+    },
+    "ResolvedDocumentPathData": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DocumentPath"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidatesTruncated": {
+          "type": "boolean"
+        },
+        "nameConditions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DocumentNameCondition"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nextIndex": {
+          "type": "integer"
+        },
+        "resolved": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentPath"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start": {
+          "$ref": "#/$defs/DocumentLocation"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "resolved",
+            "missing",
+            "ambiguous"
+          ]
+        }
+      },
+      "required": [
+        "candidates",
+        "candidatesTruncated",
+        "nameConditions",
+        "nextIndex",
+        "resolved",
+        "start",
+        "status"
+      ],
       "additionalProperties": false
     },
     "ReviewRiffCardRequestInput": {
@@ -46656,6 +48118,16 @@
             }
           ]
         },
+        "lockScreenWallpaper": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "menuMouseScroll": {
           "anyOf": [
             {
@@ -48132,6 +49604,16 @@
           ]
         },
         "closeTabsOnStart": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeWindowOnLastTabClosed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -50059,6 +51541,9 @@
             }
           ]
         },
+        "lockScreenWallpaper": {
+          "type": "boolean"
+        },
         "menuMouseScroll": {
           "type": "boolean"
         },
@@ -50140,6 +51625,7 @@
         "icons",
         "lang",
         "lightThemes",
+        "lockScreenWallpaper",
         "menuMouseScroll",
         "mobileBars",
         "mode",
@@ -50384,6 +51870,16 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lockScreenWallpaper": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -53449,6 +54945,16 @@
         "closeTabsOnStart": {
           "type": "boolean"
         },
+        "closeWindowOnLastTabClosed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "createDocAtTop": {
           "anyOf": [
             {
@@ -53543,6 +55049,7 @@
         "boxDocEnabled",
         "closeTabOnDoubleClick",
         "closeTabsOnStart",
+        "closeWindowOnLastTabClosed",
         "createDocAtTop",
         "docCreateSaveBox",
         "docCreateSavePath",
@@ -53612,6 +55119,16 @@
           ]
         },
         "closeTabsOnStart": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeWindowOnLastTabClosed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -57366,6 +58883,113 @@
       ],
       "additionalProperties": false
     },
+    "StructuredDocumentTarget": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "$ref": "#/$defs/DocumentTargetAnchor"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "onMissingParent": {
+          "type": "string",
+          "enum": [
+            "create",
+            "error"
+          ]
+        },
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "up": {
+          "type": "integer"
+        },
+        "version": {
+          "type": "integer",
+          "enum": [
+            2
+          ]
+        }
+      },
+      "required": [
+        "version",
+        "notebook",
+        "anchor",
+        "up",
+        "parents",
+        "title",
+        "onMissingParent"
+      ],
+      "additionalProperties": false
+    },
+    "StructuredDocumentTargetInput": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "$ref": "#/$defs/DocumentTargetAnchorInput"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "onMissingParent": {
+          "type": "string",
+          "enum": [
+            "create",
+            "error"
+          ]
+        },
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "up": {
+          "type": "integer"
+        },
+        "version": {
+          "type": "integer",
+          "enum": [
+            2
+          ]
+        }
+      },
+      "required": [
+        "version",
+        "notebook",
+        "anchor",
+        "up",
+        "parents",
+        "title",
+        "onMissingParent"
+      ],
+      "additionalProperties": false
+    },
+    "StructuredTemplateRequired": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "structuredTemplateRequired"
+          ]
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false
+    },
     "SwapBlockRefRequestInput": {
       "type": "object",
       "properties": {
@@ -57398,6 +59022,103 @@
       },
       "required": [
         "assetDownloadMode"
+      ],
+      "additionalProperties": false
+    },
+    "SyncCheckoutClientRequestInput": {
+      "type": "object",
+      "properties": {
+        "appID": {
+          "type": "string"
+        },
+        "clientID": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SyncCheckoutSnapshot": {
+      "type": "object",
+      "properties": {
+        "kernelID": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "task": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncCheckoutState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kernelID",
+        "revision",
+        "task"
+      ],
+      "additionalProperties": false
+    },
+    "SyncCheckoutState": {
+      "type": "object",
+      "properties": {
+        "blocking": {
+          "type": "boolean"
+        },
+        "canceling": {
+          "type": "boolean"
+        },
+        "current": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "phase": {
+          "type": "string"
+        },
+        "removeRootIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "taskID": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "upsertRootIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "blocking",
+        "canceling",
+        "current",
+        "message",
+        "phase",
+        "removeRootIDs",
+        "revision",
+        "taskID",
+        "token",
+        "total",
+        "upsertRootIDs"
       ],
       "additionalProperties": false
     },
@@ -58516,6 +60237,9 @@
             }
           ]
         },
+        "documentAddressingVersion": {
+          "type": "integer"
+        },
         "isPublish": {
           "type": "boolean"
         },
@@ -58531,6 +60255,7 @@
       },
       "required": [
         "conf",
+        "documentAddressingVersion",
         "isPublish",
         "revision",
         "start"
@@ -58627,6 +60352,18 @@
         "linkDistance",
         "linkWidth",
         "nodeSize"
+      ],
+      "additionalProperties": false
+    },
+    "SystemDownloadUpdateRequestInput": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
       ],
       "additionalProperties": false
     },
@@ -60152,6 +61889,19 @@
       },
       "additionalProperties": false
     },
+    "SystemWallpaperUploadRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "additionalProperties": false
+    },
     "SystemWebDAV": {
       "type": "object",
       "properties": {
@@ -60521,6 +62271,18 @@
       ],
       "additionalProperties": false
     },
+    "TestSyncProviderLocalRequestInput": {
+      "type": "object",
+      "properties": {
+        "local": {
+          "$ref": "#/$defs/SyncLocalInput"
+        }
+      },
+      "required": [
+        "local"
+      ],
+      "additionalProperties": false
+    },
     "TestSyncProviderS3Data": {
       "type": "object",
       "properties": {
@@ -60546,6 +62308,21 @@
       },
       "required": [
         "s3"
+      ],
+      "additionalProperties": false
+    },
+    "TestSyncProviderWebDAVRequestInput": {
+      "type": "object",
+      "properties": {
+        "cloudName": {
+          "type": "string"
+        },
+        "webdav": {
+          "$ref": "#/$defs/SyncWebDAVInput"
+        }
+      },
+      "required": [
+        "webdav"
       ],
       "additionalProperties": false
     },
@@ -125001,6 +126778,76 @@
     },
     {
       "method": "GET",
+      "path": "/api/system/getLockScreenWallpaper",
+      "handler": "getLockScreenWallpaper",
+      "authorization": [
+        "public"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 404,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "image/jpeg"
+        }
+      ],
+      "emptyResponseStatuses": [
+        404
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/api/system/oidc/callback",
       "handler": "oidcCallback",
       "authorization": [
@@ -129544,6 +131391,86 @@
               },
               "data": {
                 "$ref": "#/$defs/AIPermissionData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/agent/setPinned",
+      "handler": "setAgentSessionPinned",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AISessionPinnedRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AISessionPinnedData"
               },
               "msg": {
                 "type": "string"
@@ -152584,16 +154511,16 @@
     },
     {
       "method": "POST",
-      "path": "/api/filetree/createDocWithMd",
-      "handler": "createDocWithMd",
+      "path": "/api/filetree/createDocByParent",
+      "handler": "createDocByParent",
       "authorization": [
         "authenticated",
         "admin",
         "writable"
       ],
-      "body": "json",
+      "body": "structJSON",
       "request": {
-        "$ref": "#/$defs/FileTreeCreateMarkdownRequestInput"
+        "$ref": "#/$defs/CreateDocByParentRequestInput"
       },
       "response": {
         "anyOf": [
@@ -152607,7 +154534,7 @@
                 ]
               },
               "data": {
-                "type": "string"
+                "$ref": "#/$defs/CreateDocByParentResult"
               },
               "msg": {
                 "type": "string"
@@ -152645,6 +154572,92 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/CreateDocByParentResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/createDocWithMd",
+      "handler": "createDocWithMd",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/FileTreeCreateMarkdownRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/LegacyPathDocumentResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/LegacyPathDocumentResult"
                   }
                 ]
               },
@@ -153092,7 +155105,7 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/FileTreeCreateSavePathData"
+                "$ref": "#/$defs/FileTreeCreateSavePathResult"
               },
               "msg": {
                 "type": "string"
@@ -153130,6 +155143,170 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/FileTreeCreateSavePathResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/getDocCreateTarget",
+      "handler": "getDocCreateTarget",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetDocCreateTargetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DocumentCreateTargetData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/getDocPaths",
+      "handler": "getDocPaths",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetDocPathsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DocumentPathsResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/DocumentPathsResult"
                   }
                 ]
               },
@@ -153499,17 +155676,7 @@
                 ]
               },
               "data": {
-                "anyOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "$ref": "#/$defs/LegacyPathIDsResult"
               },
               "msg": {
                 "type": "string"
@@ -153547,6 +155714,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/LegacyPathIDsResult"
                   }
                 ]
               },
@@ -153827,7 +155997,7 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/FileTreeSavePathData"
+                "$ref": "#/$defs/FileTreeSavePathResult"
               },
               "msg": {
                 "type": "string"
@@ -153865,6 +156035,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/FileTreeSavePathResult"
                   }
                 ]
               },
@@ -154530,6 +156703,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/filetree/planDocCreate",
+      "handler": "planDocCreate",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/PlanDocCreateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DocumentCreatePlan"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/filetree/removeDoc",
       "handler": "removeDoc",
       "authorization": [
@@ -155088,6 +157340,88 @@
                         "type": "null"
                       }
                     ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/resolveDocPath",
+      "handler": "resolveDocPath",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ResolveDocPathRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/ResolveDocPathResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/ResolveDocPathResult"
                   }
                 ]
               },
@@ -160772,6 +163106,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/import/cancelDataImport",
+      "handler": "cancelDataImport",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/DataImportRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/import/cancelImportSY",
       "handler": "cancelImportSY",
       "authorization": [
@@ -160929,6 +163343,86 @@
                         "type": "null"
                       }
                     ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/commitDataImport",
+      "handler": "commitDataImport",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CommitDataImportRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DataImportResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -161568,6 +164062,86 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/prepareDataImport",
+      "handler": "prepareDataImport",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportDataRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DataImportPlan"
               },
               "msg": {
                 "type": "string"
@@ -167051,6 +169625,103 @@
                         "type": "null"
                       }
                     ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getBacklinkDatabases",
+      "handler": "getBacklinkDatabases",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BacklinkDatabasesRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/BacklinkDatabase"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -175507,6 +178178,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/storage/clearRecentDocs",
+      "handler": "clearRecentDocs",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/storage/getCriteria",
       "handler": "getCriteria",
       "authorization": [
@@ -177432,6 +180183,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/sync/cancelSyncCheckout",
+      "handler": "cancelSyncCheckout",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CancelSyncCheckoutRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/CancelSyncCheckoutData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/sync/clearSyncProviderConfig",
       "handler": "clearSyncProviderConfig",
       "authorization": [
@@ -177456,6 +180286,84 @@
               },
               "data": {
                 "$ref": "#/$defs/ClearSyncProviderConfigData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/confirmSyncCheckout",
+      "handler": "confirmSyncCheckout",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ConfirmSyncCheckoutRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/CancelSyncCheckoutData"
               },
               "msg": {
                 "type": "string"
@@ -177792,6 +180700,84 @@
                 "enum": [
                   -1,
                   1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/getSyncCheckout",
+      "handler": "getSyncCheckout",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SyncCheckoutClientRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SyncCheckoutSnapshot"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
                 ]
               },
               "data": {
@@ -179513,6 +182499,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/sync/testSyncProviderLocal",
+      "handler": "testSyncProviderLocal",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TestSyncProviderLocalRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TestSyncProviderS3Data"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/sync/testSyncProviderS3",
       "handler": "testSyncProviderS3",
       "authorization": [
@@ -179522,6 +182587,85 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/TestSyncProviderS3RequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TestSyncProviderS3Data"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/testSyncProviderWebDAV",
+      "handler": "testSyncProviderWebDAV",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TestSyncProviderWebDAVRequestInput"
       },
       "response": {
         "anyOf": [
@@ -180260,6 +183404,86 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/downloadUpdate",
+      "handler": "downloadUpdate",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemDownloadUpdateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"
@@ -182947,6 +186171,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/removeLockScreenWallpaper",
+      "handler": "removeLockScreenWallpaper",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/removeWorkspaceDir",
       "handler": "removeWorkspaceDir",
       "authorization": [
@@ -184312,6 +187616,86 @@
       "emptyResponseStatuses": [
         200
       ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/uploadLockScreenWallpaper",
+      "handler": "uploadLockScreenWallpaper",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/SystemWallpaperUploadRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
     },
     {
       "method": "POST",

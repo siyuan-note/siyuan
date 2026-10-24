@@ -46,8 +46,14 @@ test("bound row layout restores navigation with its source view and current item
     const json: ILayoutJSON = {};
     exports.layoutToJSON(model as never, json);
     const persisted = JSON.parse(JSON.stringify(json));
-    const reopened = exports.newModelByInitData({} as never, {} as never, persisted) as unknown as Editor;
+    let ready = false;
+    const reopened = exports.newModelByInitData({} as never, {} as never, persisted, () => {
+        assert.deepEqual(restored, model.databaseRow, "transfer acknowledgment follows navigation restoration");
+        ready = true;
+    }) as unknown as Editor;
+    assert.equal(ready, false, "constructing the editor does not acknowledge a completed load");
     initialize();
+    assert.equal(ready, true);
     assert.deepEqual(restored, model.databaseRow);
     assert.equal(reopened.editor.protyle.element.dataset.databaseRowId, "bound");
     assert.equal(exports.isSensitiveTab({model} as never), false);

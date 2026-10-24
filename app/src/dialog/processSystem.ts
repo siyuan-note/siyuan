@@ -391,31 +391,6 @@ export const bootSync = () => {
 export const downloadProgress = (data: { id: string, percent: number }) => {
     if (updateBazaarInstallProgress(data)) {
         renderBazaarInstall(document);
-        return;
-    }
-    if (!Number.isFinite(data.percent)) {
-        return;
-    }
-    const bazaarReadmeElement = document.querySelector("#configBazaarReadme");
-    const bazaarSideElement = bazaarReadmeElement?.querySelector(".item__side");
-    if (!bazaarSideElement) {
-        return;
-    }
-    if (data.id !== (bazaarSideElement.getAttribute("data-progress-id") || bazaarSideElement.getAttribute("data-repourl"))) {
-        return;
-    }
-    const updateBtnElement = bazaarReadmeElement.querySelector('[data-type="install-t"]') as HTMLElement;
-    if (!updateBtnElement) {
-        return;
-    }
-    const progressHTML = `<span style="width: ${data.percent * 100}%"></span>`;
-    if (data.percent >= 1) {
-        updateBtnElement?.parentElement.classList.add("fn__none");
-    } else {
-        if (updateBtnElement) {
-            updateBtnElement.classList.add("b3-button--progress");
-            updateBtnElement.innerHTML = progressHTML;
-        }
     }
 };
 

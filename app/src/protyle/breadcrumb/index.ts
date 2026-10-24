@@ -807,7 +807,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         }
                         const uploadMenu = new MenuItem({
                             id: "insertAsset",
-                            icon: "iconDownload",
+                            icon: "iconUpload",
                             label: `${window.siyuan.languages.insertAsset}${uploadHTML}`,
                         }).element;
                         uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {

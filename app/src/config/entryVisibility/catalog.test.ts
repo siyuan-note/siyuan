@@ -103,9 +103,12 @@ test("document tree duplication follows single-document duplication in the confi
 test("embedded heading levels follow display modes and expose all levels in Simple", () => {
     const path = "gutter.single.blockEmbed";
     assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [
-        "refresh", "update", "separator_breadcrumb", "embedBlockBreadcrumb", "headingEmbedMode", "embedHeadingLevel",
+        "refresh", "update", "separator_breadcrumb", "embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath",
+        "headingEmbedMode", "embedHeadingLevel",
     ]);
     const levelPath = `${path}.embedHeadingLevel`;
+    assert.equal(getEntryCatalogNode(`${path}.embedBlockBreadcrumbParentPath`)?.simple, true);
+    assert.equal(getEntryParentPath(`${path}.embedBlockBreadcrumbParentPath`), path);
     assert.equal(getEntryCatalogNode(levelPath)?.simple, true);
     assert.deepEqual(getEntryCatalogChildren(levelPath).map(entry => entry.key), [
         "auto", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6",
@@ -1124,6 +1127,7 @@ test("tab menu catalog follows its conditional menu declarations", () => {
         "pin",
         "unpin",
         "tabToWindow",
+        "tabToMainWindow",
     ]);
     assert.deepEqual(getEntryCatalogChildren("tab.split").map((item) => item.key), [
         "splitLR",

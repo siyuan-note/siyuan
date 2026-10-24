@@ -51,6 +51,7 @@ import {
 import {escapeHtml} from "../../util/escape";
 import {ViewStateService} from "../../util/viewState";
 import {loadBacklinkRefFilterMenu} from "./backlinkRefFilterMenu";
+import {loadBacklinkDatabaseFilterMenu} from "./backlinkDatabaseFilter";
 import {BacklinkMentionCache, getBacklinkMentionQueryKey} from "./backlinkMentionCache";
 import {BottomBacklinkScroll} from "./bottomBacklinkScroll";
 import {
@@ -963,7 +964,8 @@ export class BacklinkContent extends Model {
                     countElement.textContent = total.toString();
                     countElement.classList.toggle("fn__none", total === 0 && this.type !== "bottom");
                     if (this.type === "bottom") {
-                        const hideBacklinks = total === 0 && !this.inputsElement[0].value && !this.globalList?.hasError;
+                        const hideBacklinks = total === 0 && !this.inputsElement[0].value &&
+                            !getBacklinkSourceFilterParam(this.sourceFilter) && !this.globalList?.hasError;
                         this.element.classList.toggle("sy__backlink--backlinks-empty", hideBacklinks);
                         const empty = hideBacklinks &&
                             this.element.classList.contains("sy__backlink--mentions-empty");
@@ -991,6 +993,8 @@ export class BacklinkContent extends Model {
     }
 
     private showSourceFilterMenu(target: HTMLElement) {
+        // 工具栏离开悬停后会隐藏按钮，在打开菜单前保留其位置。
+        const rect = target.getBoundingClientRect();
         toggleMenu({
             target: target,
             build: (_menu, session) => {
@@ -1117,6 +1121,24 @@ export class BacklinkContent extends Model {
                     }
                 }).element);
                 const refFilterGeneration = this.viewStateGeneration;
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.backlinkDatabaseFields,
+                    icon: "iconDatabase",
+                    checked: Boolean(this.sourceFilter.database),
+                    disabled: !this.blockId || window.siyuan.isPublish,
+                    loadSubmenu: () => loadBacklinkDatabaseFilterMenu({
+                        id: this.blockId,
+                        notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
+                        keyword: this.inputsElement[0].value,
+                        filter: this.sourceFilter,
+                        target,
+                        anchorRect: rect,
+                        protyle: this.ownerProtyle || this.editors[0]?.protyle,
+                        getSelected: () => this.sourceFilter.database,
+                        isCurrent: () => !this.destroyed && refFilterGeneration === this.viewStateGeneration,
+                        apply: database => this.applySourceFilter({...this.sourceFilter, database}),
+                    }),
+                }).element);
                 let refFilterMenuElement: HTMLElement;
                 window.siyuan.menus.menu.append(new MenuItem({
                     iconHTML: "",
@@ -1151,7 +1173,6 @@ export class BacklinkContent extends Model {
                         applyFoldTypes([]);
                     }
                 }).element);
-                const rect = target.getBoundingClientRect();
                 session.show(() => window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
 
             },
@@ -1827,7 +1848,7 @@ export class BacklinkContent extends Model {
         this.showingLoading = true;
         this.resetRenderedData(false);
         this.element.classList.remove("sy__backlink--backlinks-empty", "sy__backlink--mentions-empty");
-        const loadingHTML = '<div class="backlinkList__loading"><img width="32px" height="32px" src="/stage/loading-pure.svg"></div>';
+        const loadingHTML = '<div class="backlinkList__loading"><span class="b3-loading" aria-hidden="true"></span></div>';
         this.tree.element.innerHTML = loadingHTML;
         this.mTree.element.innerHTML = loadingHTML;
         this.element.querySelector(".listCount").textContent = "";
@@ -2229,7 +2250,8 @@ export class BacklinkContent extends Model {
             });
         }
         const bottomVisibility = this.type === "bottom" ?
-            getBottomBacklinkVisibility(data.linkRefsCount, data.mentionsCount, data.k, data.mk) : undefined;
+            getBottomBacklinkVisibility(data.linkRefsCount, data.mentionsCount, data.k, data.mk,
+                Boolean(getBacklinkSourceFilterParam(this.sourceFilter))) : undefined;
         if (bottomVisibility) {
             if (this.globalList?.hasError) {
                 bottomVisibility.hideBacklinks = false;
@@ -2422,7 +2444,7 @@ export class BacklinkContent extends Model {
         this.globalList?.markDirty();
         this.indexChangeVersion++;
         this.dirty = true;
-        this.pendingFull = this.pendingFull || Boolean(change.backlinkFull);
+        this.pendingFull = this.pendingFull || Boolean(change.backlinkFull) || Boolean(this.sourceFilter.database);
         change.rootIDs?.forEach(rootID => this.pendingRootIDs.add(rootID));
         this.itemRecords.forEach(records => records.forEach((record, rootID) => {
             if (this.pendingFull || this.pendingRootIDs.has(rootID)) {

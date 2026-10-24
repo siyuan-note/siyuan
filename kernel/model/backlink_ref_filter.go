@@ -125,7 +125,7 @@ func GetBacklinkRefDefs(id, keyword string, containChildren bool, boxID string, 
 	if keyword = strings.TrimSpace(keyword); "" != keyword {
 		keywords = strings.Split(keyword, " ")
 	}
-	entries, _, _, _ := buildLinkRefsInBox(block.RootID, refs, keywords, boxID)
+	entries, _, _, _ := buildLinkRefsInBox(block.RootID, refs, keywords, boxID, filter)
 	entries = filterBacklinkSourcesInBox(entries, block.RootID, boxID, filter)
 	entryRefs, err := backlinkEntryRefDefs(entries, boxID)
 	if nil != err {

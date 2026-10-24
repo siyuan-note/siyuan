@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261023030419"
 	},
 	"Children": [
 		{
@@ -1833,7 +1833,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830143000-tplcn01",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1960,7 +1960,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830143000-tplcn07",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1975,11 +1975,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 根据文档 ID 返回指向计划文档的静态块引用文本，不依赖标题或可读路径；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 返回指向计划文档的静态块引用文本。"
+					"Data": " 为按可读路径查询的兼容入口。"
 				}
 			]
 		},

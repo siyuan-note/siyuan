@@ -228,6 +228,13 @@ var getRecentDocs = contractHandler(apicontract.GetRecentDocs, func(c *gin.Conte
 	return apicontract.Success(recentDocContracts(data))
 })
 
+var clearRecentDocs = contractHandler(apicontract.ClearRecentDocs, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	if err := model.ClearRecentDocs(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
 var updateRecentDocOpenTime = contractHandler(apicontract.UpdateRecentDocOpenTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
 

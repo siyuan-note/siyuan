@@ -271,7 +271,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	docInfo := map[string]any{
 		"box":      tree.Box,
 		"rootID":   tree.ID,
-		"name":     tree.Root.IALAttr("title"),
+		"name":     treenode.ReadDocumentTitle(tree.Root).Text,
 		"alias":    tree.Root.IALAttr("alias"),
 		"name1":    tree.Root.IALAttr("name"),
 		"memo":     tree.Root.IALAttr("memo"),

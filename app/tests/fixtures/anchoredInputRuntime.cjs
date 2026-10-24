@@ -2,9 +2,14 @@ const {readFileSync} = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
 
-const compileAnchoredInputRuntime = () => {
-    const sources = Object.fromEntries(["anchoredInput", "anchoredInputPosition"].map(name => ["./" + name,
-        ts.transpileModule(readFileSync(path.join(__dirname, "../../src/dialog", name + ".ts"), "utf8"), {
+const compileAnchoredInputRuntime = (entry = "./anchoredInput") => {
+    const sources = Object.fromEntries([
+        ["./anchoredInput", "dialog/anchoredInput"],
+        ["./anchoredInputPosition", "dialog/anchoredInputPosition"],
+        ["../util/functions", "util/functions"],
+        ["./hostCapabilities", "util/hostCapabilities"],
+    ].map(([name, file]) => [name,
+        ts.transpileModule(readFileSync(path.join(__dirname, "../../src", file + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
         }).outputText]));
     // 保留输入层及定位实现，只隔离系统键盘桥；未知依赖立即报错。
@@ -19,7 +24,7 @@ const compileAnchoredInputRuntime = () => {
             new Function("require", "exports", sources[name])(load, exports);
             return exports;
         };
-        return load("./anchoredInput");
+        return load(${JSON.stringify(entry)});
     })()`;
 };
 

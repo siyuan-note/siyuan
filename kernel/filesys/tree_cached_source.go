@@ -16,12 +16,14 @@ type CachedTreeSource struct {
 	data              []byte
 	boxID, path       string
 	parentHPathPrefix string
+	addressingMode    int
 }
 
 // CaptureCachedTreeSource 在调用方的读取边界内复制已缓存来源。
 // 缓存缺失、加密来源和需要订正的父链返回 nil，由调用方完成完整加载。
 func CaptureCachedTreeSource(boxID, p string) (*CachedTreeSource, error) {
-	if err := validateTreePath(boxID, p); err != nil {
+	mode, err := validateTreePathMode(boxID, p)
+	if err != nil {
 		return nil, err
 	}
 	_, encrypted, release, err := acquireCryptoLease(boxID)
@@ -55,17 +57,17 @@ func CaptureCachedTreeSource(boxID, p string) (*CachedTreeSource, error) {
 		prefix.WriteString(title)
 		prefix.WriteString("/")
 	}
-	return &CachedTreeSource{data: data, boxID: boxID, path: p, parentHPathPrefix: prefix.String()}, nil
+	return &CachedTreeSource{data: data, boxID: boxID, path: p, parentHPathPrefix: prefix.String(), addressingMode: mode}, nil
 }
 
-// Parse 在调用方释放事务锁后构造独立树，保留捕获时的路径与父级标题。
+// Parse 在调用方释放事务锁后构造独立树，按捕获时的模式验证源格式，不再次访问磁盘。
 func (source *CachedTreeSource) Parse(luteEngine *lute.Lute) (*parse.Tree, error) {
-	tree, err := parseJSON2Tree(source.boxID, source.path, source.data, luteEngine)
+	tree, err := parseJSON2TreeInMode(source.boxID, source.path, source.data, luteEngine, source.addressingMode)
 	if err != nil {
 		return nil, err
 	}
 	tree.Root.Path = source.path
-	tree.HPath = source.parentHPathPrefix + tree.Root.IALAttr("title")
+	tree.HPath = source.parentHPathPrefix + treenode.ReadDocumentTitle(tree.Root).Text
 	tree.Hash = treenode.NodeHash(tree.Root, tree, luteEngine)
 	return tree, nil
 }

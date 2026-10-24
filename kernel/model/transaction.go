@@ -322,7 +322,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return ret
 	}
-	isLargeDelete := tx.processLargeDelete()
+	isLargeDelete, ret := tx.processLargeDelete()
+	if ret != nil {
+		tx.rollback()
+		return ret
+	}
 	if !isLargeInsert {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
 			op := tx.DoOperations[operationIndex]
@@ -605,17 +609,17 @@ func txErrFromPanic(state int32, recovered any) *TxErr {
 	return &TxErr{code: TxErrCodePushMsg, msg: fmt.Sprintf("transaction panic: %v", recovered)}
 }
 
-func (tx *Transaction) processLargeDelete() bool {
+func (tx *Transaction) processLargeDelete() (bool, *TxErr) {
 	opSize := len(tx.DoOperations)
 	if 32 > opSize {
-		return false
+		return false, nil
 	}
 
 	var deleteOps []*Operation
 	for i, op := range tx.DoOperations {
 		if "delete" != op.Action {
 			if i != opSize-1 {
-				return false
+				return false, nil
 			}
 
 			continue
@@ -625,12 +629,14 @@ func (tx *Transaction) processLargeDelete() bool {
 	}
 
 	if 1 > len(deleteOps) {
-		return false
+		return false, nil
 	}
 
-	tx.doLargeDelete(deleteOps)
+	if txErr := tx.doLargeDelete(deleteOps); txErr != nil {
+		return true, txErr
+	}
 	tx.flushDeletedAttributeViewBlocks()
-	return true
+	return true, nil
 }
 
 func (tx *Transaction) processLargeInsert() (bool, *TxErr) {
@@ -690,8 +696,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", id, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		return loadTreeTxErr(id, err)
 	}
 
 	srcNode := treenode.GetNodeInTree(srcTree, id)
@@ -746,8 +751,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		var targetTree *parse.Tree
 		targetTree, err = tx.loadTree(targetSiblingID)
 		if err != nil {
-			logging.LogErrorf("load tree [%s] failed: %s", targetSiblingID, err)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: targetSiblingID}
+			return loadTreeTxErr(targetSiblingID, err)
 		}
 		isSameTree := srcTree.ID == targetTree.ID
 		if isSameTree {
@@ -826,8 +830,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	targetTree, err := tx.loadTree(targetParentID)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", targetParentID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: targetParentID}
+		return loadTreeTxErr(targetParentID, err)
 	}
 	isSameTree := srcTree.ID == targetTree.ID
 	if isSameTree {
@@ -1054,9 +1057,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	}
 	tree, err := tx.loadTree(block.ID)
 	if err != nil {
-		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
-		logging.LogError(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
+		return loadTreeTxErr(block.ID, err)
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
@@ -1162,9 +1163,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	}
 	tree, err := tx.loadTree(block.ID)
 	if err != nil {
-		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
-		logging.LogError(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
+		return loadTreeTxErr(block.ID, err)
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
@@ -1277,8 +1276,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", id, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		return loadTreeTxErr(id, err)
 	}
 
 	srcNode := treenode.GetNodeInTree(srcTree, id)
@@ -1316,8 +1314,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 
 	targetTree, err := tx.loadTree(targetRootID)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", targetRootID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: targetRootID}
+		return loadTreeTxErr(targetRootID, err)
 	}
 	isSameTree := srcTree.ID == targetTree.ID
 	if isSameTree {
@@ -1368,11 +1365,13 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func (tx *Transaction) doLargeDelete(operations []*Operation) {
+func (tx *Transaction) doLargeDelete(operations []*Operation) *TxErr {
 	tree, err := tx.loadTree(operations[0].ID)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", operations[0].ID, err)
-		return
+		if errors.Is(err, ErrBlockNotFound) {
+			return nil
+		}
+		return loadTreeTxErr(operations[0].ID, err)
 	}
 
 	var ids []string
@@ -1383,6 +1382,7 @@ func (tx *Transaction) doLargeDelete(operations []*Operation) {
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	treenode.RemoveBlockTreesByIDs(tree.Box, ids)
 	tx.writeTree(tree)
+	return nil
 }
 
 func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
@@ -1395,9 +1395,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 			return
 		}
 
-		msg := fmt.Sprintf("load tree [%s] failed: %s", id, err)
-		logging.LogError(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		return loadTreeTxErr(id, err)
 	}
 
 	deletedNode := tx.doDelete0(operation, tree)
@@ -1690,14 +1688,15 @@ func removeAttributeViewBoundItems(attrView *av.AttributeView, deletedBlockIDs m
 }
 
 func (tx *Transaction) doLargeInsert(operations []*Operation) *TxErr {
-	tree, _ := tx.loadTree(operations[0].ID)
-	if nil == tree {
-		tree, _ = tx.loadTree(operations[0].PreviousID)
-		if nil == tree {
-			tree, _ = tx.loadTree(operations[0].ParentID)
+	var tree *parse.Tree
+	for _, id := range []string{operations[0].ID, operations[0].PreviousID, operations[0].ParentID, operations[0].NextID} {
+		var err error
+		tree, err = tx.loadTree(id)
+		if err != nil && !errors.Is(err, ErrBlockNotFound) {
+			return loadTreeTxErr(id, err)
 		}
-		if nil == tree {
-			tree, _ = tx.loadTree(operations[0].NextID)
+		if tree != nil {
+			break
 		}
 	}
 
@@ -1748,9 +1747,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	tree, err := tx.loadTreeByBlockTree(bt)
 	if err != nil {
-		msg := fmt.Sprintf("load tree [%s] failed: %s", bt.ID, err)
-		logging.LogError(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: bt.ID}
+		return loadTreeTxErr(bt.ID, err)
 	}
 
 	if ret = tx.doInsert0(operation, tree); nil != ret {
@@ -1999,8 +1996,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	tree, err := tx.loadTree(id)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", id, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		return loadTreeTxErr(id, err)
 	}
 
 	data := strings.ReplaceAll(updateData, editor.FrontEndCaret, "")
@@ -2375,8 +2371,7 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 			return
 		}
 
-		logging.LogErrorf("load tree [%s] failed: %s", id, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		return loadTreeTxErr(id, err)
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
@@ -2480,8 +2475,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
 	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", id, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		return loadTreeTxErr(id, err)
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
@@ -2760,25 +2754,27 @@ type Transaction struct {
 	mutatedRootIDs []string          // 提交后保留实际修改的文档 ID，避免为查询结果持有文档树
 	boxIcons       map[string]string // 事务提交后需要同步的笔记本图标
 
-	isGlobalAssetsInit           bool   // 是否初始化过全局资源判断
-	isGlobalAssets               bool   // 是否属于全局资源
-	assetsDir                    string // 资源目录路径
-	removedCreatedDocs           []*parse.Tree
-	removedTemplateCreatedDocs   []*parse.Tree
-	restoredCreatedDocs          []*parse.Tree
-	restoredTemplateCreatedDocs  []*parse.Tree
-	restoredCreatedDocBoxes      map[string]string
-	attemptedTemplateCreatedDocs map[string]*parse.Tree
-	templateDocTreeRootSnapshot  *parse.Tree
-	removeCreatedDoc             func(*Box, string, *lute.Lute) (*parse.Tree, error)
-	writeTransactionTree         func(*parse.Tree) error
-	blockSwapOriginalTrees       []*parse.Tree
-	attributeViewRollback        *attributeViewRollback
-	attributeViewAutomations     *attributeViewAutomationState
-	pushAutomationMessage        func(string, int) string
-	attributeViewCollections     *attributeViewCollectionState
-	attributeViewItemCreation    bool
-	invalidatedAvHistory         map[string]bool
+	isGlobalAssetsInit            bool   // 是否初始化过全局资源判断
+	isGlobalAssets                bool   // 是否属于全局资源
+	assetsDir                     string // 资源目录路径
+	removedCreatedDocs            []*parse.Tree
+	removedTemplateCreatedDocs    []*parse.Tree
+	restoredCreatedDocs           []*parse.Tree
+	restoredTemplateCreatedDocs   []*parse.Tree
+	restoredCreatedDocBoxes       map[string]string
+	attemptedTemplateCreatedDocs  map[string]*parse.Tree
+	templateDocTreeRootSnapshot   *parse.Tree
+	templateDocTreeRootRevision   string
+	templateDocTreeCommitRevision string
+	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
+	writeTransactionTree          func(*parse.Tree) error
+	blockSwapOriginalTrees        []*parse.Tree
+	attributeViewRollback         *attributeViewRollback
+	attributeViewAutomations      *attributeViewAutomationState
+	pushAutomationMessage         func(string, int) string
+	attributeViewCollections      *attributeViewCollectionState
+	attributeViewItemCreation     bool
+	invalidatedAvHistory          map[string]bool
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2854,6 +2850,9 @@ func (tx *Transaction) WaitForCommit() {
 
 func (tx *Transaction) begin() (err error) {
 	expectedTemplateDocTreeRoot := tx.templateDocTreeRootSnapshot
+	expectedTemplateDocTreeRevision := tx.templateDocTreeRootRevision
+	tx.templateDocTreeCommitRevision = expectedTemplateDocTreeRevision
+	tx.templateDocTreeRootRevision = ""
 	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
@@ -2897,8 +2896,14 @@ func (tx *Transaction) begin() (err error) {
 			}
 			if nil != expectedTemplateDocTreeRoot &&
 				(expectedTemplateDocTreeRoot.ID != snapshot.ID || expectedTemplateDocTreeRoot.Box != snapshot.Box ||
-					expectedTemplateDocTreeRoot.Path != snapshot.Path || expectedTemplateDocTreeRoot.HPath != snapshot.HPath) {
+					expectedTemplateDocTreeRoot.Path != snapshot.Path) {
 				return errors.New("the document used to render the template has changed")
+			}
+			if expectedTemplateDocTreeRevision != "" {
+				location, err := getDocumentPath(snapshot.Box, snapshot.ID)
+				if err != nil || location.Revision != expectedTemplateDocTreeRevision {
+					return errors.New("the document used to render the template has changed")
+				}
 			}
 			tx.templateDocTreeRootSnapshot = snapshot
 		}
@@ -3013,7 +3018,20 @@ func (tx *Transaction) commit() (err error) {
 		writeTransactionTree := tx.writeTransactionTree
 		if nil == writeTransactionTree {
 			writeTransactionTree = func(source *parse.Tree) error {
-				return writeTreeUpsertQueueWithChanges(source, tx.treeIndexChanges(source))
+				return writeTreeUpsertQueueWithPreflight(source, tx.treeIndexChanges(source), func() error {
+					if tx.templateDocTreeCommitRevision == "" {
+						return nil
+					}
+					root := tx.templateDocTreeRootSnapshot
+					if root == nil {
+						return errors.New("template document tree parent snapshot is missing")
+					}
+					location, err := getDocumentPath(root.Box, root.ID)
+					if err != nil || location.Revision != tx.templateDocTreeCommitRevision {
+						return errors.New("the document used to render the template has changed")
+					}
+					return nil
+				})
 			}
 		}
 		if err = writeTransactionTree(tree); err != nil {
@@ -3217,6 +3235,17 @@ func restoreCreatedDocTreeSnapshot(tree *parse.Tree) error {
 	return nil
 }
 
+// loadTreeTxErr 保留文档读取失败的原因，仅索引中缺失的块归类为块不存在。
+func loadTreeTxErr(id string, err error) *TxErr {
+	msg := fmt.Sprintf("load tree [%s] failed: %s", id, err)
+	logging.LogError(msg)
+	code := TxErrCodePushMsg
+	if errors.Is(err, ErrBlockNotFound) {
+		code = TxErrCodeBlockNotFound
+	}
+	return &TxErr{code: code, msg: msg, id: id}
+}
+
 func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	if nil == bt {
 		return nil, ErrBlockNotFound
@@ -3294,7 +3323,7 @@ func (tx *Transaction) writeTreeWithIndexChanges(tree *parse.Tree) {
 	if err := tx.captureCollectionTree(tree); err != nil {
 		tx.collectionState().err = err
 	}
-	treenode.UpsertBlockTree(tree)
+	treenode.UpsertBlockTreePending(tree)
 }
 
 func getRefsCacheByDefNode(updateNode *ast.Node, boxID string) (ret []*sql.Ref, changedNodes []*ast.Node) {

@@ -44,3 +44,20 @@ func TestBacklinkSourceFilterCompatibility(t *testing.T) {
 		}
 	}
 }
+
+func TestBacklinkDatabaseFilterContract(t *testing.T) {
+	request, err := GetBacklinkDoc.Decode(strings.NewReader(`{"defID":"","refTreeID":"","keyword":"","sourceFilter":{"database":{"avID":"tasks","filters":[{"combination":"and","filters":[{"column":"status","operator":"=","value":{"type":"text","text":{"content":"open"}}}]}]}}}`))
+	if err != nil || request.SourceFilter == nil || request.SourceFilter.Database == nil {
+		t.Fatalf("database filter decode: %+v %v", request, err)
+	}
+	filter := request.SourceFilter.Database
+	if filter.AvID != "tasks" || len(filter.Filters) != 1 || filter.Filters[0].Filters[0].Value.Text.Content != "open" {
+		t.Fatalf("lost database fields: %+v", filter)
+	}
+	for _, malformed := range []string{`false`, `"tasks"`, `{}`} {
+		request, err := GetBacklinkDoc.Decode(strings.NewReader(`{"defID":"","refTreeID":"","keyword":"","sourceFilter":{"database":` + malformed + `}}`))
+		if err != nil || request.SourceFilter == nil || request.SourceFilter.Database == nil {
+			t.Fatal("malformed database filters must remain enabled for fail-closed validation")
+		}
+	}
+}

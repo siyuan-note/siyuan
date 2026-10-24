@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
@@ -430,6 +431,14 @@ var checkUpdate = contractHandler(apicontract.SystemCheckUpdate, func(c *gin.Con
 	return
 })
 
+var downloadUpdate = contractHandler(apicontract.SystemDownloadUpdate, func(c *gin.Context, request apicontract.SystemDownloadUpdateRequest) apicontract.Response[apicontract.Null] {
+	if err := model.DownloadUpdate(request.Version); err != nil {
+		logging.LogWarnf("download selected update failed: %s", err)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(104))
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
 var exportLog = contractHandler(apicontract.SystemExportLog, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemZipData]) {
 	ret = apicontract.Success(apicontract.SystemZipData{})
 
@@ -459,6 +468,8 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 	}
 
 	if nil != clonedConf.Appearance.Load() {
+		// 壁纸文件仅属于本工作空间，不包含在设置导出中。
+		clonedConf.Appearance.Load().LockScreenWallpaper = false
 		clonedConf.Appearance.Load().DarkThemes = nil
 		clonedConf.Appearance.Load().LightThemes = nil
 		clonedConf.Appearance.Load().Icons = nil
@@ -557,6 +568,10 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		return
 	}
 
+	data, err = documentaddressing.ExportBackup(util.ConfDir, data)
+	if err != nil {
+		return apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
+	}
 	tmp := filepath.Join(tmpDir, name)
 	if err = os.WriteFile(tmp, data, 0644); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
@@ -708,6 +723,9 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 	if err = model.LoadChatGPTAccountBindings(importedConf.AI.Load()); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	if err = documentaddressing.RestoreBackup(util.ConfDir, data); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
 	// 旧版包缺失的新增配置段保持不变；外观资源列表仍以目标工作空间为准。
 	if importAppearance {
 		appearance := importedConf.Appearance.Load()
@@ -813,7 +831,7 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
 	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish,
-		SettingTasks: activeSettingTasks(), Revision: revision})
+		SettingTasks: activeSettingTasks(), Revision: revision, DocumentAddressingVersion: documentaddressing.DefaultMode()})
 	return
 })
 

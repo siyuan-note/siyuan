@@ -3,7 +3,7 @@ import {runSettingsMaintenance} from "./setting/maintenance";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {SIYUAN_APP_ID_HEADER} from "../util/fetchAppId";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
@@ -36,6 +36,31 @@ export const collectAssetsTabSearchStrings = (): string[] => [
 ];
 
 const pendingAssetsMounts = new WeakMap<Element, object>();
+
+const loadMissingAssets = async (panel: Element) => {
+    if (panel.getAttribute("data-loading")) {
+        return;
+    }
+    panel.setAttribute("data-loading", "true");
+    const list = panel.querySelector(".config-assets__list");
+    list.innerHTML = '<li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>';
+    try {
+        const response = await fetchSyncPost("/api/asset/getMissingAssets", {});
+        if (response.code !== 0) {
+            list.innerHTML = `<li class="b3-list--empty">${escapeHtml(response.msg)}</li>`;
+            return;
+        }
+        assets._renderList(response.data, list, "lostAssets");
+        panel.setAttribute("data-init", "true");
+    } catch (error) {
+        const message = window.siyuan.languages._kernel[258];
+        list.innerHTML = `<li class="b3-list--empty">${escapeHtml(message)}</li>`;
+        showMessage(message, 0, "error");
+        console.error(error);
+    } finally {
+        panel.removeAttribute("data-loading");
+    }
+};
 
 /** 资源 Tab 挂载（面板页，不走注册表渲染） */
 export const mountAssetsTab = async (root: HTMLElement, keywords?: string, app?: App) => {
@@ -126,7 +151,7 @@ const assets = {
             </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="config-assets__preview fn__none"></div>
         </div>
@@ -141,14 +166,14 @@ const assets = {
             </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="config-assets__preview fn__none" style="display: block;padding: 8px;"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="fn__hr"></div>
         </div>
@@ -251,12 +276,10 @@ const assets = {
                                     fetchPost("/api/av/getUnusedAttributeViews", {}, response => {
                                         assets._renderList(response.data, avListElement, "unRefAV");
                                     });
+                                    item.setAttribute("data-init", "true");
                                 } else {
-                                    fetchPost("/api/asset/getMissingAssets", {}, response => {
-                                        assets._renderList(response.data, item.querySelector(".config-assets__list"), "lostAssets");
-                                    });
+                                    void loadMissingAssets(item);
                                 }
-                                item.setAttribute("data-init", "true");
                             }
                         } else {
                             item.classList.add("fn__none");

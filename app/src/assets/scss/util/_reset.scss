@@ -87,6 +87,11 @@ body {
   &.body--windows,
   &.body--linux {
     --b3-toolbar-left-mac: 8px;
+    --b3-fullscreen-controls-width: 128.5px;
+
+    &.body--toolbar-hide {
+      --b3-fullscreen-controls-width: calc(46.5px + 6 * var(--b3-ui-window-control-padding, 13.25px));
+    }
 
     .toolbar:not(.toolbar--browser) {
       padding: 0 0 0 5px;
@@ -98,7 +103,7 @@ body {
       .fullscreen {
         & > .protyle-breadcrumb,
         & > .block__icons {
-          padding-right: 126px;
+          padding-right: calc(var(--b3-fullscreen-controls-width) + 8px);
         }
 
         & > .block__icons > .search__label {
@@ -146,7 +151,7 @@ body {
   &:not(.body--toolbar-hide):not(.body--window) {
     .fullscreen > .protyle-breadcrumb,
     .fullscreen > .block__icons {
-      min-height: 32px;
+      min-height: var(--b3-ui-toolbar-height, 32px);
     }
   }
 

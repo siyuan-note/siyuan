@@ -290,7 +290,8 @@ const promiseTransaction = (options: {
                 );
                 // updateTransaction 会在本地编辑元素上设置该属性，用于在存在同 ID 副本时保留当前 DOM 和光标。
                 const currentUpdateElement = updateElements.find(item =>
-                    item.getAttribute(Constants.ATTRIBUTE_EDITING) === "true" && getEmbedChildOperationContext(item));
+                    item.getAttribute(Constants.ATTRIBUTE_EDITING) === "true" && getEmbedChildOperationContext(item)) ||
+                    updateElements.find(item => item.getAttribute(Constants.ATTRIBUTE_EDITING) === "true");
                 const currentEmbedContext = currentUpdateElement && getEmbedChildOperationContext(currentUpdateElement);
                 const currentEmbedElement = currentEmbedContext && isInEmbedBlock(currentUpdateElement, false);
 
@@ -321,9 +322,10 @@ const promiseTransaction = (options: {
                 };
 
                 let allTempElement: HTMLTemplateElement;
+                // 拖拽列宽等操作不移动文本选区，存在明确编辑标记时不能用旧选区保护其他副本。
                 updateElements.forEach((item) => {
                     if ((currentEmbedElement && isInEmbedBlock(item, false) === currentEmbedElement) ||
-                        (range && (item === range.startContainer || item.contains(range.startContainer)))) {
+                        (!currentUpdateElement && range && (item === range.startContainer || item.contains(range.startContainer)))) {
                         // 正在编辑的块不能进行更新
                         item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                     } else {
@@ -333,7 +335,7 @@ const promiseTransaction = (options: {
                 });
                 protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg__embed").forEach(item => {
                     if (item === currentEmbedContext?.resultElement ||
-                        (range && (item === range.startContainer || item.contains(range.startContainer)))) {
+                        (!currentUpdateElement && range && (item === range.startContainer || item.contains(range.startContainer)))) {
                         // 正在编辑的块不能进行更新
                         item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                     } else {
@@ -2703,6 +2705,12 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         element.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(getHTML()))));
     }
+    // 插入相邻块等操作可能在同 ID 的其他副本上遗留编辑标记，本次更新只能保护实际修改的副本。
+    protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach(item => {
+        if (item !== element) {
+            item.removeAttribute(Constants.ATTRIBUTE_EDITING);
+        }
+    });
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     const doOperations: IOperation[] = [{
         id,

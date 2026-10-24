@@ -298,11 +298,11 @@ export const bazaar = {
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
-        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><span class="b3-loading" aria-hidden="true"></span></div>`;
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
 <div class="config-bazaar__drop fn__none">
-    <svg><use xlink:href="#iconDownload"></use></svg>
+    <svg><use xlink:href="#iconUpload"></use></svg>
     <div>${window.siyuan.languages.dropLocalBazaarPackage}</div>
 </div>
 <div class="layout-tab-bar fn__flex">
@@ -340,7 +340,7 @@ export const bazaar = {
                 <input spellcheck="false" data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
                     <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
-                        <svg class="b3-button__icon"><use xlink:href="#iconDownload"></use></svg>
+                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
@@ -662,6 +662,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
+        ${genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
         ${bazaar._genDeprecatedChipHTML(available)}
         ${bazaar._genFundingHTML(installed.preferredFunding, false)}
@@ -670,7 +671,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </span>
         ${bazaar._genOpenStorageHTML(installed, bazaarType)}
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
-        ${genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
     </div>
 </div>`;
     },
@@ -749,7 +749,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         installAllElement?.classList.add("fn__none");
         if (this._updateState === "loading" || this._updateState === "idle") {
             counterElement.classList.add("fn__none");
-            contentElement.innerHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+            contentElement.innerHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><span class="b3-loading" aria-hidden="true"></span></div>`;
+            renderBazaarInstall(bazaar.element);
             return;
         }
         if (this._updateState === "error") {
@@ -759,12 +760,14 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     <span class="fn__space"></span>
     <button class="b3-button" data-type="retry-update">${window.siyuan.languages.retry}</button>
 </div>`;
+            renderBazaarInstall(bazaar.element);
             return;
         }
         const items: Array<{type: TBazaarType, item: IUpdatedBazaarItem}> = this._getUpdatedItems();
         if (items.length === 0) {
             counterElement.classList.add("fn__none");
             contentElement.innerHTML = `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            renderBazaarInstall(bazaar.element);
             return;
         }
         counterElement.classList.remove("fn__none");
@@ -773,6 +776,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             !items.some(({item}) => !item.available.disallowUpdate));
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
         loadUpdatedRatings(this);
+        renderBazaarInstall(bazaar.element);
     },
     _syncDownloadedUpdateButtons() {
         bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card[data-package-source='downloaded']").forEach((card) => {
@@ -796,6 +800,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 sideElement.setAttribute("data-progress-id", available?.repoURL || sideElement.getAttribute("data-repourl") || "");
             }
         }
+        renderBazaarInstall(bazaar.element);
     },
     _cacheBazaarDeprecations(bazaarType: TBazaarType, packages: IBazaarItem[]) {
         const metadata = new Map<string, IBazaarItem>();
@@ -954,6 +959,7 @@ type="checkbox">
             bazaar._data.downloadedType = bazaarType;
             const scrollTop = contentElement.scrollTop;
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            renderBazaarInstall(bazaar.element);
             if (preserveOrder) contentElement.scrollTop = scrollTop;
             if (bazaarType === "plugins") {
                 bazaar._downloadedPluginsReady = true;
@@ -1177,7 +1183,7 @@ type="checkbox">
          </blockquote>
     </div>
     <div class="item__readme b3-typography b3-typography--default">
-        <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
+        <div data-type="img-loading" class="fn__flex" style="height:64px;padding:16px 0;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
         renderBazaarInstall(bazaar.element);
@@ -1862,7 +1868,9 @@ type="checkbox">
         }
         state.observer?.unobserve(card);
         card.removeAttribute("data-bazaar-index");
+        const previousCard = card.previousElementSibling;
         card.outerHTML = this._genCardHTML(state.packages[Number(index)], state.bazaarType);
+        renderBazaarInstall(previousCard?.nextElementSibling || state.cardsElement.firstElementChild);
         state.cursor++;
         if (state.cursor >= state.packages.length) {
             this._stopBazaarCardWatcher(state);
@@ -1918,6 +1926,7 @@ type="checkbox">
         };
         this._bazaarCardRenderStates.set(container, state);
         this._watchBazaarCardBatch(state);
+        renderBazaarInstall(container);
     },
     _onBazaar(response: IWebSocketData, bazaarType: TBazaarType, mount: IBazaarMountSnapshot, preserveView = false) {
         if (!bazaar._isBazaarRequestCurrent(bazaarType, mount)) {
@@ -1930,7 +1939,7 @@ type="checkbox">
         if (response.code === 1) {
             // 安装集市包 /api/bazaar/installBazaar* 失败
             showMessage(response.msg);
-            element.querySelectorAll("img[data-type='img-loading']").forEach((item) => {
+            element.querySelectorAll("[data-type='img-loading']").forEach((item) => {
                 item.remove();
             });
             return;

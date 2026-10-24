@@ -210,7 +210,11 @@ export const openAutomationMenu = async (options: {
         const usesSourceOptions = rules.some(rule => rule.blockSource?.types?.some(type => type.includes(":")) ||
             rule.blockSource?.tagMatch === "or" || rule.blockSource?.attributeMatch === "or");
         const usesTagTarget = rules.some(rule => !!rule.blockSource?.tagTarget);
-        const next = {spec: Math.max(previous.spec, usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
+        const usesDocumentDepth = rules.some(rule => rule.blockSource?.documentDepth != null);
+        const usesAttributeNameMatch = rules.some(rule => rule.blockSource?.attributes?.some(attr =>
+            attr?.nameOperator && attr.nameOperator !== "equals"));
+        const excludesSelectedDocuments = rules.some(rule => rule.blockSource?.includeSelectedDocuments === false);
+        const next = {spec: Math.max(previous.spec, excludesSelectedDocuments ? 7 : usesAttributeNameMatch ? 6 : usesDocumentDepth ? 5 : usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }

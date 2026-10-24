@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261018200107"
+		"updated": "20261023003049"
 	},
 	"Children": [
 		{
@@ -4365,7 +4365,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261018200107"
+				"updated": "20261020181700"
 			},
 			"Children": [
 				{
@@ -13115,7 +13115,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261018200107"
+				"updated": "20261023003049"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13129,12 +13129,13 @@
 			"ID": "20261018163000-tgvsr1a",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-tgvsr1a"
+				"id": "20261018163000-tgvsr1a",
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor, summary selection, or relationship-line drag is active, Esc first finishes or cancels that operation. In full screen, Esc exits full screen."
+					"Data": "Press Esc on the canvas to return to reading and let the document receive wheel input. If a node editor or relationship-line drag is active, Esc first finishes or cancels that operation. Esc also leaves multi-select mode. In full screen, Esc exits full screen."
 				}
 			]
 		},
@@ -13143,12 +13144,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018200107-p7ncdxc",
-				"updated": "20261018200107"
+				"updated": "20261020181700"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hold Ctrl (Command on macOS) and drag the canvas with the right mouse button to pan temporarily without changing keyboard focus or activating a reading canvas. Ordinary wheel input then continues scrolling the document. This gesture is unavailable while the view is locked. Ordinary left dragging on blank canvas does not pan; the Hand Tool allows left-button panning."
+					"Data": "You can also hold the middle mouse button and drag to pan temporarily without switching to the hand tool; release it to stop. Hold Ctrl (Command on macOS) and drag the canvas with the right mouse button to pan temporarily without changing keyboard focus or activating a reading canvas. Ordinary wheel input then continues scrolling the document. This gesture is unavailable while the view is locked. Ordinary left dragging on blank canvas selects nodes with a box. For left-button panning, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Hand Tool"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". While enabled, the toolbar shows a button for leaving this mode directly. On a touchscreen, tap the map to activate the canvas. A quick one-finger drag starting on a node or blank canvas pans the view; to move a node, hold it until the outline appears, then drag. Before activation, one-finger swipes still scroll the document. Two-finger zooming and panning, double-tap editing, and the selection, summary and connection modes keep their existing interactions."
 				}
 			]
 		},
@@ -13157,7 +13176,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20261017003000",
+				"updated": "20261020162345",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13680,6 +13699,200 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Copy selected node branches"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+C"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘C"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Cut selected node branches"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+X"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘X"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Paste as child nodes"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘V"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Paste as sibling nodes"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘V"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261020162345-sclp2zh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020162345-sclp2zh",
+				"updated": "20261020162345"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag with the left mouse button on blank canvas to select several nodes. Hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS) and click a node to toggle its selection. On touch screens, select a node and enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Multi-select"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " at the bottom, then tap nodes individually. Tap the button again or press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to leave this mode. Copy and cut include complete subtrees; selecting both a parent and its descendants copies the branch once. Copies retain node styles, internal connections and complete summaries. The root cannot be cut. Failed clipboard writes and systems that support only plain text leave the original nodes intact."
 				}
 			]
 		},
@@ -13688,21 +13901,57 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-5eh3gn8",
-				"updated": "20260930234403"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Paste an image with "
+					"Data": "With one node selected, "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+V / ⌘V"
+					"TextMarkTextContent": "Ctrl+V"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " while editing a node, or after selecting a node to append it to the end of its visible content. Wait for an active upload to finish before leaving node editing."
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " pastes as child nodes, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⇧⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " pastes as sibling nodes. The bottom "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " menu also provides copy, cut and both paste actions. Copied mind map nodes retain their hierarchy; ordinary text, images and content blocks are inserted through a new node's editor. While editing node text, paste uses the normal content editor behavior. Wait for an image upload to finish before leaving node editing."
 				}
 			]
 		},
@@ -13711,12 +13960,25 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-8trdt10",
-				"updated": "20260926152753"
+				"updated": "20261023003049"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the summary batch preview, Enter creates all groups in one undoable operation and Esc cancels. While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+					"Data": "Select at least two nodes, then activate "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Summary"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom node menu to create all valid groups in one undoable operation and edit the first new summary. Esc on the canvas leaves multi-select mode. While editing summary text, Enter saves and Esc cancels the text edit. Delete or Backspace removes the selected summary."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " When a color or width panel is open, Escape closes it and cancels any unsaved width preview."
 				}
 			]
 		},

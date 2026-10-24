@@ -47,7 +47,7 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	oldRootID := tree.Root.ID
 	tree.ID = ast.NewNodeID()
 	tree.Root.ID = tree.ID
-	title := tree.Root.IALAttr("title")
+	title := treenode.ReadDocumentTitle(tree.Root).Text
 	if "" != titleSuffix {
 		if t, parseErr := time.Parse("20060102150405", util.TimeFromID(tree.ID)); nil == parseErr {
 			titleSuffix += " " + t.Format("2006-01-02 15:04:05")
@@ -261,6 +261,9 @@ func loadTreeByBlockIDWithoutNotFoundLog(id string) (ret *parse.Tree, err error)
 }
 
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
+	if nil == bt {
+		return nil, ErrTreeNotFound
+	}
 	luteEngine := util.NewLute()
 	ret, needFix, err := filesys.LoadTreeWithFix(bt.BoxID, bt.Path, luteEngine)
 	if nil != err {
@@ -431,7 +434,6 @@ func findUnindexedTreePath(id string, normalOnly bool) (ret string) {
 		}
 		root := filepath.Join(util.DataDir, box.ID)
 		paths := search.FindAllMatchedPaths(root, []string{id})
-		var rootIDs []string
 		rootIDPaths := map[string]string{}
 		for _, p := range paths {
 			base := filepath.ToSlash(p)
@@ -445,17 +447,10 @@ func findUnindexedTreePath(id string, normalOnly bool) (ret string) {
 			if !ast.IsNodeIDPattern(rootID) {
 				continue
 			}
-			rootIDs = append(rootIDs, rootID)
 			rootIDPaths[rootID] = p
 		}
-
-		result := treenode.ExistBlockTrees(rootIDs)
-		for rootID, exist := range result {
-			if exist {
-				continue
-			}
-
-			matchedPath := rootIDPaths[rootID]
+		// 文档摘要已经提交不代表正文块索引完整；仍需验证匹配文件中的实际块身份。
+		for _, matchedPath := range rootIDPaths {
 			relPath, relErr := filepath.Rel(root, matchedPath)
 			if nil != relErr {
 				return matchedPath

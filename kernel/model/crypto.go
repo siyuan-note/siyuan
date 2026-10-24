@@ -41,6 +41,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -984,6 +985,12 @@ func EnableEncryptedNotebookWithSync(password string) error {
 	if err := SyncDataBeforeEnableEncryptedNotebook(); err != nil {
 		return err
 	}
+	// 同步准备需独占写接口；完成同步后再为密钥配置操作取得导入读租约。
+	dataImportAccess.RLock()
+	defer dataImportAccess.RUnlock()
+	if err := checkDataImportRecovery(); err != nil {
+		return err
+	}
 
 	// 同步可能已经从其他设备恢复了完整配置。此时校验用户输入的是原主密码，不能再创建新的密钥体系。
 	if NotebookCryptoEnabled() {
@@ -1237,6 +1244,9 @@ func deriveNotebookCryptoBackupCandidate(password string) (backup *conf.Notebook
 
 // deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
 func deriveKEK(password string) ([]byte, error) {
+	if err := checkDataImportRecovery(); err != nil {
+		return nil, err
+	}
 	if err := checkPendingNotebookArchives(); err != nil {
 		return nil, err
 	}
@@ -1340,6 +1350,9 @@ func deriveKEK(password string) ([]byte, error) {
 // 返回解密后的 DEK 和实际使用的 BoxCrypt（可能来自 backup）。
 // 若 backup 被使用会自动修复 conf.json 和刷新 backup。
 func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEncryption, err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return nil, nil, err
+	}
 	boxCrypt, err = GetBoxEncryption(boxID)
 	if err != nil || boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 		return nil, nil, fmt.Errorf("no encrypted key material for box [%s]", boxID)
@@ -1417,6 +1430,9 @@ func UnlockAndMountBox(boxID, password string, boxEnc *conf.BoxEncryption) (alre
 }
 
 func unlockBoxHeld(boxID string, password string, boxEnc *conf.BoxEncryption) (err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return
+	}
 	if _, busy := boxLock.Load(boxID); busy {
 		return errors.New(Conf.language(239))
 	}
@@ -1565,6 +1581,7 @@ func lockBoxWithPreparationHeld(boxID string, prepare func()) {
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
 func lockBoxHeld(boxID string) {
+	av.ClearBlockCollectionIndex(boxID)
 	// 此时已排空在途操作并持有 box 写锁，可以安全清除该笔记本的明文 HEIF 预览缓存。
 	heif.ClearMemoryCache(boxID)
 	LivePhotoPreviews.Clear(boxID)
@@ -1735,6 +1752,9 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if err := checkPendingNotebookArchives(); err != nil {
+		return err
+	}
 
 	// 改密期间不能有已 Mount 的加密笔记本（DEK 在内存），否则新旧 KEK 切换会让缓存与磁盘不一致
 	cachedDEKsLock.RLock()
@@ -1742,6 +1762,15 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	cachedDEKsLock.RUnlock()
 	if dekCount > 0 {
 		return errors.New("cannot change master password while encrypted notebooks are unlocked (DEKs in memory), lock them first")
+	}
+	encBoxIDs, listErr := listAllEncryptedBoxIDs()
+	if listErr != nil {
+		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
+	}
+	for _, id := range encBoxIDs {
+		if err := filesys.CheckDocumentAddressing(id); err != nil {
+			return err
+		}
 	}
 
 	oldKEK, err := deriveKEK(oldPassword)
@@ -1769,10 +1798,6 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 
 	// Phase 0: 遍历所有加密笔记本（含 conf 损坏但存在备份的），预计算新 WrappedDEK（内存操作）
 	// 允许 entries 为空：用户可能已启用加密功能但尚未创建加密笔记本，此时仍需更新全局 verifier 和 backup。
-	encBoxIDs, listErr := listAllEncryptedBoxIDs()
-	if listErr != nil {
-		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
-	}
 	var entries []migrationBoxEntry
 	for _, id := range encBoxIDs {
 		dek, boxCrypt, dErr := decryptBoxCrypt(id, oldKEK)
@@ -2567,6 +2592,9 @@ func notebookCryptoBackupPath(boxID string) string {
 func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
+	}
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		return err
 	}
 	if err := validateBoxEncryption(crypt); err != nil {
 		return err

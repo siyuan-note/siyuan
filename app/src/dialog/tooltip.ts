@@ -21,10 +21,12 @@ export const initTooltips = () => {
         const target = (event.target as Element).closest(".ariaLabel");
         if (target && !target.classList.contains("b3-tooltips")) {
             let message = target.getAttribute("aria-label") || "";
-            try {
-                message = decodeURIComponent(message);
-            } catch (error) {
-                // 保留包含不完整 URI 转义的提示文本。
+            if (target.getAttribute("data-tooltip-encoding") !== "none") {
+                try {
+                    message = decodeURIComponent(message);
+                } catch (error) {
+                    // 保留包含不完整 URI 转义的提示文本。
+                }
             }
             if (message) {
                 showTooltip(message, target, undefined, event);

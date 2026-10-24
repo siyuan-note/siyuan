@@ -163,11 +163,25 @@ func indexBox(boxID string) {
 	if nil == box {
 		return
 	}
+	if err := treenode.SetDocumentMetadataState(boxID, "building"); err != nil {
+		logging.LogErrorf("prepare document metadata [%s] failed: %s", boxID, err)
+		return
+	}
+	metadataReady := false
+	defer func() {
+		if !metadataReady {
+			_ = treenode.SetDocumentMetadataState(boxID, "error")
+		}
+	}()
 	// 全量索引使用纯 INSERT，开始前必须清理该笔记本的旧数据，避免重复任务叠加相同行。
 	sql.DeleteBoxQueue(boxID)
 
 	util.SetBootDetails(Conf.Language(303))
-	files := box.ListFiles("/")
+	files, scanErr := box.listFilesForIndex("/")
+	if scanErr != nil {
+		logging.LogErrorf("enumerate notebook [%s] failed: %s", boxID, scanErr)
+		return
+	}
 	boxLen := max(1, len(Conf.GetOpenedBoxes()))
 	bootProgressPart := int32(30.0 / float64(boxLen) / float64(len(files)))
 
@@ -176,6 +190,7 @@ func indexBox(boxID string) {
 	var treeCount int
 	var treeSize int64
 	lock := sync.Mutex{}
+	var sourceFailed bool
 	util.PushStatusBar(fmt.Sprintf("["+html.EscapeString(box.Name)+"] "+Conf.Language(64), len(files)))
 
 	poolSize := min(runtime.NumCPU(), 4)
@@ -192,6 +207,9 @@ func indexBox(boxID string) {
 		lock.Unlock()
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if err != nil {
+			lock.Lock()
+			sourceFailed = true
+			lock.Unlock()
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
 			return
 		}
@@ -203,6 +221,10 @@ func indexBox(boxID string) {
 			docIAL["updated"] = updated
 			if _, writeErr := filesys.WriteTree(tree); nil != writeErr {
 				logging.LogErrorf("write tree [%s] failed: %s", tree.Path, writeErr)
+				lock.Lock()
+				sourceFailed = true
+				lock.Unlock()
+				return
 			}
 		}
 
@@ -252,6 +274,9 @@ func indexBox(boxID string) {
 		invokeErr := p.Invoke(file)
 		if nil != invokeErr {
 			waitGroup.Done()
+			lock.Lock()
+			sourceFailed = true
+			lock.Unlock()
 			logging.LogErrorf("invoke [%s] failed: %s", file.path, invokeErr)
 			continue
 		}
@@ -259,6 +284,21 @@ func indexBox(boxID string) {
 		batchBytes += file.size
 	}
 	flushBatch()
+	if !sourceFailed {
+		pending, pendingErr := treenode.PendingDocumentMetadata(boxID)
+		for _, doc := range pending {
+			if pendingErr = filesys.RecoverDocumentMetadataWrite(doc); pendingErr != nil {
+				break
+			}
+		}
+		if pendingErr != nil {
+			logging.LogErrorf("recover document metadata [%s] failed: %s", boxID, pendingErr)
+		} else if err := treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {
+			logging.LogErrorf("complete document metadata [%s] failed: %s", boxID, err)
+		} else {
+			metadataReady = true
+		}
+	}
 
 	// 关联数据库和块
 	av.BatchUpsertBlockRel(avNodes)

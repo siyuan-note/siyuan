@@ -1,0 +1,65 @@
+// 空的 .b3-loading 元素只负责指示器，显示状态和布局由外部容器控制。
+// 主题可设置 --b3-loading-size、--b3-loading-color、--b3-loading-width、--b3-loading-duration，
+// 或覆盖 ::before、::after 自行绘制动画；启动阶段不依赖图标库或主题初始化。
+.b3-loading {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--b3-loading-size, 32px);
+  height: var(--b3-loading-size, 32px);
+  vertical-align: middle;
+  color: var(--b3-loading-color, var(--b3-theme-on-surface, #808080));
+
+  &--small {
+    width: var(--b3-loading-size, 16px);
+    height: var(--b3-loading-size, 16px);
+  }
+
+  &--large {
+    width: var(--b3-loading-size, 48px);
+    height: var(--b3-loading-size, 48px);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: var(--b3-loading-width, 2px) solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: b3-loading-spin var(--b3-loading-duration, 1s) linear infinite;
+  }
+}
+
+// 不支持渐变遮罩的 WebView 保留可见的单圆环。
+@supports (background: conic-gradient(transparent, currentColor)) and ((mask: radial-gradient(#000, transparent)) or (-webkit-mask: radial-gradient(#000, transparent))) {
+  .b3-loading::before {
+    border: 0;
+    background: conic-gradient(from -90deg, transparent 0deg, currentColor 300deg, transparent 301deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--b3-loading-width, 2px) - .3px), #000 calc(100% - var(--b3-loading-width, 2px) + .3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - var(--b3-loading-width, 2px) - .3px), #000 calc(100% - var(--b3-loading-width, 2px) + .3px));
+  }
+}
+
+@keyframes b3-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b3-loading::before {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .b3-loading::before {
+    border: var(--b3-loading-width, 2px) solid CanvasText;
+    border-right-color: transparent;
+    background: none;
+    -webkit-mask: none;
+    mask: none;
+  }
+}

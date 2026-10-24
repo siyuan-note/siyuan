@@ -1,5 +1,6 @@
 import {onWindowWorkspaceStorageChanged} from "./workspace";
 import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
+import {clearDocumentCreationPlans} from "../util/configuredDocument";
 import {closeNotebookLivePhotos} from "../protyle/preview/livePhoto";
 import {Constants} from "../constants";
 import {refreshSettingConfig} from "../config/setting/sync";
@@ -23,6 +24,7 @@ import {
     transactionError
 } from "../dialog/processSystem";
 import {progressLoading} from "../dialog/progress";
+import {syncCheckoutProgress} from "../sync/checkoutProgress";
 import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
@@ -127,6 +129,9 @@ class App {
                             case "setServerAddrs":
                                 updateServerAddresses(data.data);
                                 break;
+                            case "syncProgress":
+                                syncCheckoutProgress(data);
+                                break;
                             case "progress":
                                 progressLoading(data);
                                 break;
@@ -168,6 +173,7 @@ class App {
                             case "closeBox":
                             case "removeBox":
                                 closeNotebookHistoryDialogs(data.data.box);
+                                clearDocumentCreationPlans(data.data.box);
                                 closeNotebookLivePhotos(data.data.box);
                                 removeBlockPanelEditors({notebookId: data.data.box});
                                 getAllTabs().forEach((tab) => {
@@ -238,6 +244,7 @@ class App {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
+            window.siyuan.documentAddressingVersion = response.data.documentAddressingVersion;
             await loadDesktopHostConnection();
             ensureUILayout();
             setBodyHighlight();

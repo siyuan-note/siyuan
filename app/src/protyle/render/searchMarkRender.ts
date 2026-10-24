@@ -2,6 +2,56 @@ import {Constants} from "../../constants";
 import {isInEmbedBlock} from "../util/hasClosest";
 import {restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
+export const getSearchMarkRanges = (rootElement: HTMLElement, keys: string[], excludeSelector?: string) => {
+    const textNodes: Node[] = [];
+    const textNodesSize: number[] = [];
+    const excludedTextNodeCounts: number[] = [];
+    let currentSize = 0;
+    let excludedTextNodeCount = 0;
+    const treeWalker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT);
+    let currentNode = treeWalker.nextNode();
+    while (currentNode) {
+        textNodes.push(currentNode);
+        currentSize += currentNode.textContent.length;
+        textNodesSize.push(currentSize);
+        if (excludeSelector && currentNode.parentElement?.closest(excludeSelector)) {
+            excludedTextNodeCount++;
+        }
+        excludedTextNodeCounts.push(excludedTextNodeCount);
+        currentNode = treeWalker.nextNode();
+    }
+    const text = rootElement.textContent;
+    const matches: {range: Range, startIndex: number}[] = [];
+    keys.forEach(key => {
+        if (!key) {
+            return;
+        }
+        let startIndex = 0;
+        let currentNodeIndex = 0;
+        while ((startIndex = text.indexOf(key, startIndex)) !== -1) {
+            const endIndex = startIndex + key.length;
+            while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
+                currentNodeIndex++;
+            }
+            const startNodeIndex = currentNodeIndex;
+            while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] < endIndex) {
+                currentNodeIndex++;
+            }
+            const excludedCountBefore = startNodeIndex ? excludedTextNodeCounts[startNodeIndex - 1] : 0;
+            if (excludedTextNodeCounts[currentNodeIndex] === excludedCountBefore) {
+                const range = document.createRange();
+                range.setStart(textNodes[startNodeIndex], startIndex -
+                    (startNodeIndex ? textNodesSize[startNodeIndex - 1] : 0));
+                range.setEnd(textNodes[currentNodeIndex], endIndex -
+                    (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
+                matches.push({range, startIndex});
+            }
+            startIndex = endIndex;
+        }
+    });
+    return matches;
+};
+
 export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void,
                                  options?: {
                                      rootElement?: HTMLElement,
@@ -37,27 +87,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
             hlBlockElement = protyle.title.element;
         }
 
-        // 准备一个数组来保存所有文本节点
-        const textNodes: Node[] = [];
-        const textNodesSize: number[] = [];
-        const excludedTextNodeCounts: number[] = [];
-        let currentSize = 0;
-        let excludedTextNodeCount = 0;
         const rootElement = options?.rootElement || protyle.contentElement;
-
-        const treeWalker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT);
-        let currentNode = treeWalker.nextNode();
-        while (currentNode) {
-            textNodes.push(currentNode);
-            currentSize += currentNode.textContent.length;
-            textNodesSize.push(currentSize);
-            if (options?.excludeSelector && currentNode.parentElement?.closest(options.excludeSelector)) {
-                excludedTextNodeCount++;
-            }
-            excludedTextNodeCounts.push(excludedTextNodeCount);
-            currentNode = treeWalker.nextNode();
-        }
-
         const text = rootElement.textContent;
         const rangeIndexes: { range: Range, startIndex: number, isCurrent: boolean }[] = [];
         if (options?.ranges) {
@@ -73,48 +103,10 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
                 rangeIndexes.push({range, startIndex: prefix.toString().length, isCurrent});
             });
         } else if (keys && keys.length > 0) {
-            keys.forEach(key => {
-                if (!key) {
-                    return;
-                }
-                let startIndex = 0;
-                let endIndex = 0;
-                let currentNodeIndex = 0;
-                while ((startIndex = text.indexOf(key, startIndex)) !== -1) {
-                    const range = new Range();
-                    endIndex = startIndex + key.length;
-                    try {
-                        while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
-                            currentNodeIndex++;
-                        }
-                        const startNodeIndex = currentNodeIndex;
-                        let currentTextNode = textNodes[currentNodeIndex];
-
-                        while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] < endIndex) {
-                            currentNodeIndex++;
-                        }
-                        currentTextNode = textNodes[currentNodeIndex];
-                        const excludedCountBefore = startNodeIndex ? excludedTextNodeCounts[startNodeIndex - 1] : 0;
-                        if (excludedTextNodeCounts[currentNodeIndex] > excludedCountBefore) {
-                            startIndex = endIndex;
-                            continue;
-                        }
-                        range.setStart(textNodes[startNodeIndex], startIndex -
-                            (startNodeIndex ? textNodesSize[startNodeIndex - 1] : 0));
-                        range.setEnd(currentTextNode, endIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
-
-                        let isCurrent = false;
-                        if (!isSetHL && hlBlockElement && hlBlockElement.contains(currentTextNode)) {
-                            isSetHL = true;
-                            isCurrent = true;
-                        }
-
-                        rangeIndexes.push({range, startIndex, isCurrent});
-                    } catch (e) {
-                        console.error("searchMarkRender error:", e);
-                    }
-                    startIndex = endIndex;
-                }
+            getSearchMarkRanges(rootElement, keys, options?.excludeSelector).forEach(match => {
+                const isCurrent = !isSetHL && !!hlBlockElement?.contains(match.range.endContainer);
+                isSetHL = isSetHL || isCurrent;
+                rangeIndexes.push({...match, isCurrent});
             });
         }
 

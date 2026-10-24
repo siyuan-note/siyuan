@@ -176,6 +176,8 @@ const runCases = async source => {
         check.equal(pdfCalls.at(-1)[4], true);
         check.equal(new URL(pdfCalls.at(-1)[0]).searchParams.get("dataPath"), "box/assets/book.pdf");
         check.equal(container.firstElementChild.classList.contains("pdf-viewer--mobile"), isMobile);
+        check.equal(container.querySelector("#pdfMaximize").classList.contains("fn__none"), true,
+            "asset preview hides maximize in its initial markup");
         preview.clear();
     }
     check.equal(destroyed, 2);
@@ -242,6 +244,8 @@ const runCases = async source => {
     mobileAPI.openMobilePDF("assets/normal.pdf");
     const mobilePanel = document.createElement("div");
     mobilePanel.innerHTML = model.html;
+    check.equal(mobilePanel.querySelector("#pdfMaximize").classList.contains("fn__none"), true,
+        "standalone mobile hides maximize before loading the viewer");
     document.body.append(mobilePanel);
     model.bindEvent(mobilePanel);
     await settle();
@@ -378,6 +382,7 @@ const runCases = async source => {
         "../../constants": {Constants: {PROTYLE_CDN: "/stage/protyle"}},
         "../anno": {initAnno: () => annotations++, destroyAnno: () => cleanup++},
         "../annoRuntime": {registerPdfInstance: () => registrations++},
+        "../pdfMaximize": {bindPdfMaximize: () => () => {}},
         "./pdfjs": {AnnotationEditorType: {DISABLE: 0}},
     });
     const viewerElement = document.createElement("div");

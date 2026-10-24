@@ -339,6 +339,8 @@ declare namespace Config {
      * SiYuan appearance related configuration
      */
     export interface IAppearance {
+        /** 使用当前工作空间的单张锁屏壁纸；图片独立存储，登录前可见，不参与同步或设置导出 */
+        lockScreenWallpaper: boolean;
         /** 用户偏好保存在 conf.json；升级不读取旧 local.json 键，外观重置时恢复默认值 */
         compactMode: boolean;
         /** 默认关闭；新建空工作空间默认开启 */
@@ -1029,6 +1031,11 @@ declare namespace Config {
          * Whether to close tabs by double-clicking
          */
         closeTabOnDoubleClick: boolean;
+        /**
+         * Close a detached desktop window after its last tab is closed or moved out.
+         * Defaults to true; does not affect the main window.
+         */
+        closeWindowOnLastTabClosed: boolean;
         /**
          * The storage path of the new document created using block references
          */

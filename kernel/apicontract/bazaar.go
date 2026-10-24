@@ -297,6 +297,7 @@ type BazaarPackage struct {
 	Modes                 *[]string `json:"modes,omitempty"`                 // 主题：支持的模式列表
 }
 type BazaarAppearance struct {
+	LockScreenWallpaper      bool                     `json:"lockScreenWallpaper"`
 	CompactMode              bool                     `json:"compactMode"`              // 桌面端紧凑模式，默认关闭
 	MenuMouseScroll          bool                     `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
 	PDFTheme                 *BazaarPDFTheme          `json:"pdfTheme"`                 // PDF 阅读主题与标注颜色，响应保留空值

@@ -28,26 +28,41 @@ type NotebookEncryption struct {
 }
 
 type NotebookConf struct {
-	Name                  string              `json:"name"`
-	Sort                  int                 `json:"sort"`
-	Icon                  string              `json:"icon"`
-	Closed                bool                `json:"closed"`
-	RefCreateSaveBox      string              `json:"refCreateSaveBox"`
-	RefCreateSavePath     string              `json:"refCreateSavePath"`
-	DocCreateSaveBox      string              `json:"docCreateSaveBox"`
-	DocCreateSavePath     string              `json:"docCreateSavePath"`
-	DocCreateTemplatePath string              `json:"docCreateTemplatePath"`
-	DailyNoteSavePath     string              `json:"dailyNoteSavePath"`
-	DailyNoteTemplatePath string              `json:"dailyNoteTemplatePath"`
-	SortMode              int                 `json:"sortMode"`
-	Encrypted             bool                `json:"encrypted"`
-	BoxCrypt              *NotebookEncryption `json:"boxCrypt"`
+	DocCreateTarget       *StructuredDocumentTarget `json:"docCreateTarget,omitempty"`
+	RefCreateTarget       *StructuredDocumentTarget `json:"refCreateTarget,omitempty"`
+	DailyNoteTarget       *StructuredDocumentTarget `json:"dailyNoteTarget,omitempty"`
+	Name                  string                    `json:"name"`
+	Sort                  int                       `json:"sort"`
+	Icon                  string                    `json:"icon"`
+	Closed                bool                      `json:"closed"`
+	RefCreateSaveBox      string                    `json:"refCreateSaveBox"`
+	RefCreateSavePath     string                    `json:"refCreateSavePath"`
+	DocCreateSaveBox      string                    `json:"docCreateSaveBox"`
+	DocCreateSavePath     string                    `json:"docCreateSavePath"`
+	DocCreateTemplatePath string                    `json:"docCreateTemplatePath"`
+	DailyNoteSavePath     string                    `json:"dailyNoteSavePath"`
+	DailyNoteTemplatePath string                    `json:"dailyNoteTemplatePath"`
+	SortMode              int                       `json:"sortMode"`
+	Encrypted             bool                      `json:"encrypted"`
+	BoxCrypt              *NotebookEncryption       `json:"boxCrypt"`
 }
 
 type NotebookConfData struct {
-	Box  string        `json:"box"`
-	Name string        `json:"name"`
-	Conf *NotebookConf `json:"conf"`
+	Box                  string                `json:"box"`
+	Name                 string                `json:"name"`
+	Conf                 *NotebookConf         `json:"conf"`
+	DocumentCapabilities *DocumentCapabilities `json:"documentCapabilities,omitempty"`
+}
+
+type DocumentCapabilities struct {
+	AddressingVersion    int      `json:"addressingVersion"`
+	ModeState            string   `json:"modeState" api:"enum=legacy|structured|conflict|recovering"`
+	StructuredPaths      bool     `json:"structuredPaths"`
+	LiteralSlash         bool     `json:"literalSlash"`
+	TitleFormats         []string `json:"titleFormats"`
+	IndexState           string   `json:"indexState" api:"enum=missing|building|ready|error"`
+	MinimumReaderVersion *string  `json:"minimumReaderVersion"`
+	Revision             string   `json:"revision"`
 }
 
 type ImportNotebookCryptoBackupRequest struct {

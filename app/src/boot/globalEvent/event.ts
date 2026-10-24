@@ -223,6 +223,14 @@ export const initWindowEvent = (app: App) => {
         stopScrollAnimation();
     });
 
+    // 侧键按下时保留光标和选区，避免进入编辑器的选择或拖拽处理；松开时执行历史导航。
+    window.addEventListener("mousedown", (event) => {
+        if (event.button === 3 || event.button === 4) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }, true);
+
     window.addEventListener("mouseup", (event) => {
         if (event.button === 3) {
             event.preventDefault();

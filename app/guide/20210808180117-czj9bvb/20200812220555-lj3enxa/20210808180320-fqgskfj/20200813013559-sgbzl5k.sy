@@ -6,7 +6,7 @@
 		"id": "20200813013559-sgbzl5k",
 		"title": "引用内容块",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261022133332"
 	},
 	"Children": [
 		{
@@ -167,7 +167,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090557-841hf2w",
-				"updated": "20210512154248"
+				"updated": "20261022133332"
 			},
 			"Children": [
 				{
@@ -373,6 +373,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-njjdkzb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-njjdkzb",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按数据库字段筛选反链"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-yn53f3z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-yn53f3z",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在反链面板或底部反链中，打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "筛选反链来源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据库字段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，选择来源块已加入的数据库，再设置字段组合条件。只显示绑定到所选数据库且满足条件的反链来源；不设置字段条件时，显示所有绑定到该库的反链来源。此操作不会修改数据库原视图的筛选，也不影响提及。桌面端和移动端均支持此功能。"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-p6btymk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-p6btymk",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在数据库菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可清除数据库条件，其他来源筛选保持不变。"
 				}
 			]
 		},

@@ -1,6 +1,7 @@
 import {Constants} from "./constants";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
+import {clearDocumentCreationPlans} from "./util/configuredDocument";
 import {closeNotebookLivePhotos} from "./protyle/preview/livePhoto";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
@@ -40,6 +41,7 @@ import {
     transactionError
 } from "./dialog/processSystem";
 import {progressLoading} from "./dialog/progress";
+import {syncCheckoutProgress} from "./sync/checkoutProgress";
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllModels, getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp, isIOSDevice} from "./protyle/util/compatibility";
@@ -175,6 +177,9 @@ export class App {
                                 });
                             }
                             break;
+                        case "syncProgress":
+                            syncCheckoutProgress(data);
+                            break;
                         case "progress":
                             progressLoading(data);
                             break;
@@ -212,6 +217,7 @@ export class App {
                         case "closeBox":
                         case "removeBox":
                             closeNotebookHistoryDialogs(data.data.box);
+                            clearDocumentCreationPlans(data.data.box);
                             closeNotebookLivePhotos(data.data.box);
                             removeBlockPanelEditors({notebookId: data.data.box});
                             getAllTabs().forEach((tab) => {
@@ -333,6 +339,7 @@ export class App {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
+            window.siyuan.documentAddressingVersion = response.data.documentAddressingVersion;
             await loadDesktopHostConnection();
             ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;
@@ -348,7 +355,6 @@ export class App {
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
-                    bootSync();
                     fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
@@ -366,6 +372,7 @@ export class App {
                         /// #endif
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        bootSync();
                         exitAfterSettingsReset();
                         fetchPost("/api/setting/getCloudUser", {});
                     });

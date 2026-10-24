@@ -143,6 +143,10 @@
       display: none;
     }
 
+    &:not(&--mobile) .history__snapshot-mobile-control {
+      display: none;
+    }
+
     &--mobile {
       .history__snapshot-mobile-control {
         display: inline-flex;
@@ -161,10 +165,6 @@
   }
 
   &__snapshot {
-    &-mobile-control {
-      display: none;
-    }
-
     &-date-controls {
       display: flex;
       align-items: center;

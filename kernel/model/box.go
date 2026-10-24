@@ -40,6 +40,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -127,6 +128,12 @@ func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 		boxConf := conf.NewBoxConf()
 		boxDirPath := filepath.Join(util.DataDir, id)
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
+		if addressingErr := filesys.CheckDocumentAddressing(id); addressingErr != nil {
+			// 只展示关闭的笔记本；不能进入配置修复、解密元数据或索引流程。
+			logging.LogWarnf("notebook [%s] is unavailable: %s", id, addressingErr)
+			ret = append(ret, &Box{ID: id, Name: id, Closed: true, Encrypted: IsEncryptedBox(id)})
+			continue
+		}
 		isExistConf := filelock.IsExist(boxConfPath)
 		missingEncryptedIdentity := false
 		if !isExistConf {
@@ -344,11 +351,19 @@ func (box *Box) SaveConfAndSync(conf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
+	if err := filesys.CheckDocumentAddressing(box.ID); err != nil {
+		return err
+	}
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	persisted, err := prepareBoxConfForSave(box.ID, conf)
 	if err != nil {
 		return fmt.Errorf("prepare box conf [%s] failed: %w", confPath, err)
 	}
+	mode, err := filesys.DocumentAddressingMode(box.ID)
+	if err != nil {
+		return err
+	}
+	persisted.DocumentAddressingVersion = max(mode, documentaddressing.DefaultMode())
 	newData, err := gulu.JSON.MarshalIndentJSON(persisted, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)
@@ -389,8 +404,13 @@ func syncBoxConfCryptoBackup(boxID string, boxConf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf0(data []byte) error {
+	unlock := filesys.LockDocumentConfiguration()
+	defer unlock()
 	if !ast.IsNodeIDPattern(box.ID) {
 		return fmt.Errorf("invalid box ID [%s]", box.ID)
+	}
+	if err := checkDocumentAddressingConf(box.ID, data); err != nil {
+		return err
 	}
 
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
@@ -407,7 +427,11 @@ func (box *Box) saveConf0(data []byte) error {
 
 // validateBoxPath 校验 box 内相对路径，拒绝 .. 和绝对路径，确保最终路径在 <DataDir>/<boxID>/ 内。
 func (box *Box) validateBoxPath(p string) (string, error) {
-	return filesys.ValidateBoxRelativePath(box.ID, p)
+	rel, err := filesys.ValidateBoxRelativePath(box.ID, p)
+	if err != nil {
+		return "", err
+	}
+	return rel, filesys.CheckDocumentAddressing(box.ID)
 }
 
 func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
@@ -577,6 +601,25 @@ func (box *Box) ListFiles(path string) (ret []*FileInfo) {
 	return
 }
 
+// listFilesForIndex 传播任一目录的枚举失败，避免将不完整扫描发布为已就绪索引。
+func (box *Box) listFilesForIndex(directory string) (ret []*FileInfo, err error) {
+	files, _, err := box.Ls(directory)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		if file.isdir {
+			children, walkErr := box.listFilesForIndex(file.path)
+			if walkErr != nil {
+				return nil, walkErr
+			}
+			ret = append(ret, children...)
+		}
+		ret = append(ret, file)
+	}
+	return
+}
+
 func (box *Box) listFiles(files, ret *[]*FileInfo) {
 	for _, file := range *files {
 		if file.isdir {
@@ -675,30 +718,35 @@ func isSkipFile(filename string) bool {
 	return strings.HasPrefix(filename, ".") || "node_modules" == filename || "dist" == filename || "target" == filename
 }
 
-func moveTree(tree *parse.Tree) {
+func moveTree(tree *parse.Tree) error {
 	treenode.SetBlockTreePath(tree)
 	sql.MoveTreeQueue(tree)
 
 	box := Conf.Box(tree.Box)
-	subFiles := box.ListFiles(tree.Path)
-	luteEngine := util.NewLute()
+	subFiles, err := box.listFilesForIndex(tree.Path)
+	if err != nil {
+		return err
+	}
+	paths := make([]string, 0, len(subFiles))
 	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}
-
-		subTree, err := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
-		if err != nil {
-			continue
-		}
-
+		paths = append(paths, subFile.path)
+	}
+	// 只读源快照重新构造 HPath，避免持有源提交锁时触发修复写入。
+	if err = filesys.WalkTreeSnapshots(box.ID, paths, func(subTree *parse.Tree) error {
 		treenode.SetBlockTreePath(subTree)
 		sql.MoveTreeQueue(subTree)
 		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
 		util.PushStatusBar(msg)
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	refreshDocInfoWithoutParent(tree)
+	return nil
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {

@@ -25,6 +25,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -52,6 +53,7 @@ type SessionIndexItem struct {
 	Title        string `json:"title"`
 	CreatedAt    int64  `json:"createdAt"`
 	UpdatedAt    int64  `json:"updatedAt"`
+	PinnedAt     int64  `json:"pinnedAt,omitempty"`
 	AgentRunning bool   `json:"agentRunning,omitempty"`
 }
 
@@ -67,6 +69,7 @@ type sessionMeta struct {
 	Title               string `json:"title"`
 	CreatedAt           int64  `json:"createdAt"`
 	UpdatedAt           int64  `json:"updatedAt"`
+	PinnedAt            int64  `json:"pinnedAt,omitempty"`
 	Revision            int64  `json:"revision"`
 	ExpectedRevision    *int64 `json:"expectedRevision,omitempty"`
 	CommitTurnID        string `json:"commitTurnID,omitempty"`
@@ -136,13 +139,14 @@ func rebuildSessionIndex() map[string]*SessionIndexItem {
 			Title:     title,
 			CreatedAt: meta.CreatedAt,
 			UpdatedAt: meta.UpdatedAt,
+			PinnedAt:  meta.PinnedAt,
 		}
 	}
 	saveSessionIndex(index)
 	return index
 }
 
-func UpdateSessionIndex(id, title string, createdAt, updatedAt int64) {
+func UpdateSessionIndex(id, title string, createdAt, updatedAt, pinnedAt int64) {
 	if id == "" {
 		return
 	}
@@ -161,6 +165,7 @@ func UpdateSessionIndex(id, title string, createdAt, updatedAt int64) {
 		Title:     title,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
+		PinnedAt:  pinnedAt,
 	}
 	saveSessionIndex(index)
 }
@@ -174,12 +179,12 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 	}
 
 	indexMu.Lock()
+	defer indexMu.Unlock()
 	index := loadSessionIndex()
 	if len(index) == 0 {
 		index = rebuildSessionIndex()
 	}
 	if index == nil {
-		indexMu.Unlock()
 		return &SessionListResult{
 			Sessions: []*SessionIndexItem{},
 			Total:    0,
@@ -189,7 +194,6 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 	}
 	snapshot := make(map[string]*SessionIndexItem, len(index))
 	maps.Copy(snapshot, index)
-	indexMu.Unlock()
 
 	entries, err := os.ReadDir(sessionsDir())
 	if err == nil {
@@ -225,6 +229,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 							Title:     title,
 							CreatedAt: meta.CreatedAt,
 							UpdatedAt: meta.UpdatedAt,
+							PinnedAt:  meta.PinnedAt,
 						}
 						needsSave = true
 					}
@@ -233,9 +238,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 		}
 
 		if needsSave {
-			indexMu.Lock()
 			saveSessionIndex(snapshot)
-			indexMu.Unlock()
 		}
 	}
 
@@ -254,6 +257,12 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 	}
 
 	sort.Slice(items, func(i, j int) bool {
+		if items[i].PinnedAt != items[j].PinnedAt {
+			return items[i].PinnedAt > items[j].PinnedAt
+		}
+		if items[i].CreatedAt == items[j].CreatedAt {
+			return items[i].ID > items[j].ID
+		}
 		return items[i].CreatedAt > items[j].CreatedAt
 	})
 
@@ -336,6 +345,8 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	delete(newData, "agentRunning")
 	delete(newData, "lastCommittedTurnID")
 	delete(newData, "pluginWorkflow")
+	// 置顶属于独立的列表元数据，旧客户端快照不能覆盖 setPinned 写入的状态。
+	delete(newData, "pinnedAt")
 	commitTurnID := meta.CommitTurnID
 	if commitTurnID == "" {
 		commitTurnID = meta.RecoveryTurnID
@@ -432,9 +443,47 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	if value := numberToInt64(newData["updatedAt"]); value > 0 {
 		updatedAt = value
 	}
-	UpdateSessionIndex(meta.ID, title, createdAt, updatedAt)
+	UpdateSessionIndex(meta.ID, title, createdAt, updatedAt, numberToInt64(newData["pinnedAt"]))
 
 	return newRevision, newData, nil
+}
+
+func SetSessionPinned(id string, pinned bool) (int64, error) {
+	if !isValidSessionID(id) {
+		return 0, fmt.Errorf("invalid session id")
+	}
+	lock := sessionLock(id)
+	lock.Lock()
+	defer lock.Unlock()
+
+	path := filepath.Join(sessionsDir(), id, "session.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0, err
+	}
+	var session map[string]any
+	if err = gulu.JSON.UnmarshalJSON(data, &session); err != nil || session["id"] != id {
+		return 0, fmt.Errorf("invalid session data")
+	}
+	pinnedAt := numberToInt64(session["pinnedAt"])
+	if pinned {
+		if pinnedAt <= 0 {
+			pinnedAt = time.Now().UnixMilli()
+		}
+	} else {
+		pinnedAt = 0
+	}
+	session["pinnedAt"] = pinnedAt
+	data, err = gulu.JSON.MarshalIndentJSON(session, "", "\t")
+	if err != nil {
+		return 0, err
+	}
+	if err = filelock.WriteFile(path, data); err != nil {
+		return 0, err
+	}
+	title, _ := session["title"].(string)
+	UpdateSessionIndex(id, title, numberToInt64(session["createdAt"]), numberToInt64(session["updatedAt"]), pinnedAt)
+	return pinnedAt, nil
 }
 
 func DeleteSession(id string) error {

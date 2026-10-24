@@ -139,10 +139,10 @@ if (process.versions.electron && process.type === "browser") {
                 const waiting = await win.webContents.executeJavaScript(`(() => {
                     const container = document.querySelector("#exitProgress .b3-dialog__loading");
                     const bounds = container.getBoundingClientRect();
-                    const status = container.lastElementChild;
+                    const status = container.querySelector('[role="status"]');
                     const mask = document.querySelector(".b3-dialog__scrim");
                     const maskBounds = mask.getBoundingClientRect();
-                    const stripe = getComputedStyle(container.firstElementChild.firstElementChild);
+                    const stripe = getComputedStyle(container.querySelector(".b3-dialog__progressbar"));
                     const key = new KeyboardEvent("keydown", {key: "a", bubbles: true, cancelable: true});
                     document.body.dispatchEvent(key);
                     return {visible: bounds.width > 0 && bounds.left >= 0 && bounds.right <= innerWidth,

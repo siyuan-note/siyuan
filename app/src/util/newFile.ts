@@ -7,19 +7,12 @@ import {openFileById} from "../editor/util";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #endif
 import {fetchPost, fetchSyncPost} from "./fetch";
-import {getDisplayName, getOpenNotebookCount, isMoveTargetAllowed, movePathTo, pathPosix} from "./pathName";
+import {getOpenNotebookCount, isMoveTargetAllowed, movePathTo} from "./pathName";
 import {Constants} from "../constants";
-import {replaceFileName, validateName} from "../editor/rename";
+import {normalizeDocumentTitle, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
-import {
-    NewDocTargetByHPath,
-    NewDocTargetSubDoc,
-    getNewDocTargetFromSavePath,
-    getNewDocTargetFromTree,
-    isCurrentDocSubDocTarget
-} from "./parseNewDocTarget";
 import {selectAll} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {
@@ -31,6 +24,8 @@ import {
     NewFileSelectionContext
 } from "./newFileSelection";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
+import {createdDocumentID, documentCreateRequest, documentParentID} from "./documentCreate";
+import {createConfiguredDocument, previewConfiguredDocument} from "./configuredDocument";
 
 export const getBlockRefAnchorText = (title: string) => {
     const trimmed = (title || "").trim();
@@ -73,7 +68,7 @@ export const newFile = (app: App, name?: string) => {
             notebookId,
             currentPath,
             hasFocusTarget,
-            name: replaceFileName(name.trim()),
+            name: normalizeDocumentTitle(name.trim()),
             onCreated: () => hideElements(["dialog"]),
         });
     }
@@ -134,32 +129,16 @@ const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, i
 };
 
 export const newFileBySelect = (protyle: IProtyle, newFileName: string, context: NewFileSelectionContext,
-                                pathDir: string, targetNotebookId: string, refSubtype: "d" | "s" = "d") => {
+                                placement: "child" | "configured", refSubtype: "d" | "s" = "d") => {
     if (!isNewFileSelectionValid(protyle, context)) {
         return;
     }
-    const hPath = pathPosix().join(pathDir, newFileName || window.siyuan.languages._kernel[16]);
-    fetchPost("/api/filetree/getIDsByHPath", {
-        path: hPath,
-        notebook: targetNotebookId
-    }, (idResponse) => {
-        const refText = getBlockRefAnchorText(newFileName);
-        if (idResponse.data && idResponse.data.length > 0) {
-            insertNewFileRef(protyle, context, idResponse.data[0], refText, refSubtype);
-        } else {
-            if (!isNewFileSelectionValid(protyle, context)) {
-                return;
-            }
-            fetchPost("/api/filetree/createDocWithMd", {
-                notebook: targetNotebookId,
-                path: hPath,
-                parentID: context.notebookId === targetNotebookId ? context.rootID : "",
-                markdown: "",
-                titleEmpty: newFileName === "",
-            }, response => {
-                insertNewFileRef(protyle, context, response.data, refText, refSubtype);
-            });
-        }
+    void createConfiguredDocument({
+        notebook: context.notebookId, contextID: context.rootID, purpose: "reference",
+        title: newFileName, placement, reuse: true,
+    }, {
+        isValid: () => !!isNewFileSelectionValid(protyle, context),
+        onCreated: id => insertNewFileRef(protyle, context, id, getBlockRefAnchorText(newFileName), refSubtype),
     });
 };
 
@@ -187,55 +166,14 @@ export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "s
     if (!selectionContext) {
         return;
     }
-    const sourceNotebookId = selectionContext.notebookId;
-    const sourcePath = selectionContext.path;
     const fileName = name === undefined ? (selectText.trim() ||
         protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim()) : name.trim();
-    const newFileName = replaceFileName(fileName);
-    if (target === "subDoc") {
-        fetchPost("/api/filetree/getHPathByPath", {
-            notebook: sourceNotebookId,
-            path: sourcePath,
-        }, (response) => {
-            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId, refSubtype);
-        });
-    } else {
-        getRefCreateSavePath(sourceNotebookId, sourcePath, (targetNotebookId, hPath) => {
-            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId, refSubtype);
-        });
-    }
+    const newFileName = normalizeDocumentTitle(fileName);
+    newFileBySelect(protyle, newFileName, selectionContext, target === "subDoc" ? "child" : "configured", refSubtype);
     hideElements(["toolbar"], protyle);
 };
 
-export const getRefCreateSavePath = (notebookId: string, currentPath: string, cb: (targetNotebookId: string, hPath: string) => void) => {
-    fetchPost("/api/filetree/getRefCreateSavePath", {
-        notebook: notebookId
-    }, (data) => {
-        let targetPath = currentPath;
-        if (notebookId !== data.data.box) {
-            targetPath = data.data.path || "/";
-        }
-        if (data.data.path) {
-            if (data.data.path.startsWith("/")) {
-                cb(data.data.box, getDisplayName(data.data.path, false, true));
-            } else {
-                fetchPost("/api/filetree/getHPathByPath", {
-                    notebook: data.data.box,
-                    path: targetPath
-                }, (response) => {
-                    cb(data.data.box, getDisplayName(pathPosix().join(response.data, data.data.path), false, true));
-                });
-            }
-        } else {
-            fetchPost("/api/filetree/getHPathByPath", {
-                notebook: data.data.box,
-                path: targetPath
-            }, (response) => {
-                cb(data.data.box, getDisplayName(response.data, false, true));
-            });
-        }
-    });
-};
+
 
 function getNewFilePath(): Pick<NewDocRequest, "notebookId" | "currentPath" | "hasFocusTarget"> {
     let notebookId = "";
@@ -279,154 +217,39 @@ function getNewFilePath(): Pick<NewDocRequest, "notebookId" | "currentPath" | "h
     return {notebookId, currentPath, hasFocusTarget};
 }
 
-function runNewDoc(request: NewDocRequest) {
-    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: request.notebookId}, (savePathResponse) => {
-        const templatePath = savePathResponse.data.path as string;
-        const docCreateTemplatePath = savePathResponse.data.docCreateTemplatePath as string;
-        const targetNotebookId = savePathResponse.data.box as string;
-        getNewDocHPath(targetNotebookId, request.notebookId, request.currentPath, (hPath) => {
-            createNewDoc(request, templatePath, docCreateTemplatePath, targetNotebookId, hPath);
-        });
-    });
-}
-
-function getNewDocHPath(targetNotebookId: string, currentNotebookId: string, currentPath: string, callback: (hPath: string) => void) {
-    if (targetNotebookId !== currentNotebookId) {
-        // 跨笔记本时当前文档路径在目标笔记本中不存在，直接按目标笔记本根路径解析
-        callback("/");
-        return;
-    }
-    fetchPost("/api/filetree/getHPathByPath", {
-        notebook: targetNotebookId,
-        path: currentPath,
-    }, (hPathResponse) => {
-        callback(hPathResponse.data);
+function runNewDoc(request: NewDocRequest, placement: "configured" | "child" = "configured") {
+    void createConfiguredDocument({
+        notebook: request.notebookId,
+        contextID: request.hasFocusTarget ? documentParentID(request.currentPath || "/") : null,
+        purpose: "document", title: request.name, placement,
+    }, {
+        sortTargetID: request.sortTargetID, sortPosition: request.sortPosition, listDocTree: request.listDocTree,
+        onCreated: (id, title) => openCreatedDoc(request.app, id, request.onCreated, title),
     });
 }
 
 /** 判断配置的新建位置是否与在当前文档下直接创建子文档等价 */
-export const isConfiguredCreateTargetCurrentSubDoc = async (
-    protyle: IProtyle,
-    type: "doc" | "ref",
-) => {
+export const isConfiguredCreateTargetCurrentSubDoc = async (protyle: IProtyle, type: "doc" | "ref") => {
     if (!protyle.notebookId || !protyle.path) {
         return false;
     }
-    const savePathResponse = await fetchSyncPost(
-        type === "doc" ? "/api/filetree/getDocCreateSavePath" : "/api/filetree/getRefCreateSavePath",
-        {notebook: protyle.notebookId},
-    );
-    if (savePathResponse.code !== 0 || !savePathResponse.data) {
+    const response = await previewConfiguredDocument(protyle.notebookId, protyle.path,
+        type === "doc" ? "document" : "reference", type === "ref" ? "__siyuan_ref_target__" : undefined);
+    if (response.code !== 0 || !response.data || response.data.steps.length !== 1) {
         return false;
     }
-    const targetNotebookId = savePathResponse.data.box as string;
-    if (targetNotebookId !== protyle.notebookId) {
-        return false;
-    }
-    const templatePath = (savePathResponse.data.path as string || "").trim();
-    if (!templatePath) {
-        return true;
-    }
-    const hPathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
-        notebook: protyle.notebookId,
-        path: protyle.path,
-    });
-    if (hPathResponse.code !== 0 || typeof hPathResponse.data !== "string") {
-        return false;
-    }
-    const title = type === "ref" ? "__siyuan_ref_target__" : "";
-    const target = getNewDocTargetFromSavePath({
-        templatePath,
-        hPath: hPathResponse.data || "/",
-        targetNotebookId,
-        currentNotebookId: protyle.notebookId,
-        name: title || undefined,
-        hasFocusTarget: true,
-        currentPath: protyle.path,
-    });
-    return isCurrentDocSubDocTarget({
-        target,
-        currentNotebookId: protyle.notebookId,
-        currentPath: protyle.path,
-        currentHPath: hPathResponse.data || "/",
-        title,
-    });
+    const step = response.data.steps[0];
+    return step.notebook === protyle.notebookId && step.parentID === documentParentID(protyle.path) &&
+        (type === "ref" || step.title.text === "");
 };
 
-function createNewDoc(request: NewDocRequest, templatePath: string, docCreateTemplatePath: string,
-                      targetNotebookId: string, hPath: string) {
-    const target = getNewDocTargetFromSavePath({
-        templatePath,
-        hPath: hPath || "/",
-        targetNotebookId,
-        currentNotebookId: request.notebookId,
-        name: request.name,
-        hasFocusTarget: request.hasFocusTarget,
-        currentPath: request.currentPath,
-    });
-    if (target.kind === "hPath") {
-        createNewDocByHPath(request, target, docCreateTemplatePath);
-    } else if (target.kind === "subDoc") {
-        createNewDocAsSubDoc(request, target, docCreateTemplatePath);
-    }
-}
-
 function runNewDocInTree(request: NewDocRequest) {
-    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: request.notebookId}, (savePathResponse) => {
-        const target = getNewDocTargetFromTree({
-            templatePath: savePathResponse.data.path as string,
-            currentNotebookId: request.notebookId,
-            currentPath: request.currentPath,
-            name: request.name,
-        });
-        createNewDocAsSubDoc(request, target, savePathResponse.data.docCreateTemplatePath as string);
-    });
-}
-
-/** 同笔记本 + 有聚焦 + 非根路径 时取当前文档 ID */
-function getCreateDocParentID(hasFocusTarget: boolean, notebookId: string, currentPath: string, targetNotebookId: string): string | undefined {
-    return hasFocusTarget && notebookId === targetNotebookId && currentPath !== "/"
-        ? getDisplayName(currentPath, true, true)
-        : undefined;
-}
-
-function createNewDocByHPath(request: NewDocRequest, target: NewDocTargetByHPath, docCreateTemplatePath: string) {
-    if (target.title && !validateName(target.title)) {
-        return;
-    }
-    const parentID = getCreateDocParentID(request.hasFocusTarget, request.notebookId, request.currentPath, target.targetNotebookId);
-    fetchPost("/api/filetree/createDocWithMd", {
-        notebook: target.targetNotebookId,
-        path: target.hPath,
-        parentID,
-        markdown: "",
-        titleEmpty: !target.title,
-        docCreateTemplatePath,
-    }, (response) => {
-        openCreatedDoc(request.app, response.data, request.onCreated, target.title);
-    });
-}
-
-function createNewDocAsSubDoc(request: NewDocRequest, target: NewDocTargetSubDoc, docCreateTemplatePath: string) {
-    const id = Lute.NewNodeID();
-    const newPath = pathPosix().join(getDisplayName(target.parentPath, false, true), id + ".sy");
-    fetchPost("/api/filetree/createDoc", {
-        notebook: target.targetNotebookId,
-        path: newPath,
-        title: target.title,
-        md: "",
-        docCreateTemplatePath,
-        sortTargetID: request.sortTargetID,
-        sortPosition: request.sortPosition,
-        listDocTree: request.listDocTree,
-    }, () => {
-        openCreatedDoc(request.app, id, request.onCreated, target.title);
-    });
+    runNewDoc(request, "child");
 }
 
 export const getDocCreateTemplatePath = (notebookId: string, callback: (templatePath: string) => void) => {
-    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: notebookId}, (response) => {
-        callback(response.data.docCreateTemplatePath as string);
+    fetchPost("/api/filetree/getDocCreateTarget", {notebook: notebookId, purpose: "document"}, (response) => {
+        callback(response.data.docCreateTemplatePath);
     });
 };
 
@@ -457,27 +280,10 @@ export const newFileByRefHint = (
     onCreated?: (id: string, title: string) => void,
     presetId?: string,
 ) => {
-    const requestName = replaceFileName(name.trim());
-    fetchPost("/api/filetree/getRefCreateSavePath", {notebook: protyle.notebookId}, (savePathResponse) => {
-        const templatePath = savePathResponse.data.path as string;
-        const targetNotebookId = savePathResponse.data.box as string;
-        getNewDocHPath(targetNotebookId, protyle.notebookId, protyle.path, (hPath) => {
-            const target = getNewDocTargetFromSavePath({
-                templatePath,
-                hPath: hPath || "/",
-                targetNotebookId,
-                currentNotebookId: protyle.notebookId,
-                name: requestName,
-                hasFocusTarget: true,
-                currentPath: protyle.path,
-            });
-            if (target.kind === "hPath") {
-                createRefDocByHPath(protyle, target, onCreated, presetId);
-            } else {
-                createRefDocAsSubDoc(target, onCreated, presetId);
-            }
-        });
-    });
+    void createConfiguredDocument({
+        notebook: protyle.notebookId, contextID: documentParentID(protyle.path), purpose: "reference",
+        title: normalizeDocumentTitle(name.trim()), id: presetId,
+    }, {onCreated: (id, title) => onCreated?.(id, title)});
 };
 
 /** 选择本次块引新建位置，创建前后均校验原文档和选区 */
@@ -508,8 +314,8 @@ export const newFileAtPath = (options: {
     restoreFocus?: () => void;
     onCreated: (id: string, title: string) => void;
 }) => {
-    const title = replaceFileName(options.name.trim());
-    if (!options.isValid() || (title && !validateName(title))) {
+    const title = normalizeDocumentTitle(options.name.trim());
+    if (!options.isValid() || (title && !validateName(title, undefined, true))) {
         return;
     }
     let submitted = false;
@@ -549,50 +355,27 @@ export const newSubDocByRefHint = (
     onCreated?: (id: string, title: string) => void,
     presetId?: string,
 ) => {
-    const target = getNewDocTargetFromTree({
-        templatePath: "",
-        currentNotebookId: protyle.notebookId,
-        currentPath: protyle.path,
-        name: replaceFileName(name.trim()),
-    });
-    createRefDocAsSubDoc(target, onCreated, presetId);
+    createRefDocAsSubDoc({
+        kind: "subDoc", targetNotebookId: protyle.notebookId, parentPath: protyle.path,
+        title: normalizeDocumentTitle(name.trim()),
+    }, onCreated, presetId);
 };
 
-function createRefDocByHPath(
-    protyle: IProtyle,
-    target: NewDocTargetByHPath,
-    onCreated?: (id: string, title: string) => void,
-    presetId?: string,
-) {
-    if (target.title && !validateName(target.title)) {
-        return;
-    }
-    const parentID = getCreateDocParentID(true, protyle.notebookId, protyle.path, target.targetNotebookId);
-    fetchPost("/api/filetree/createDocWithMd", {
-        notebook: target.targetNotebookId,
-        path: target.hPath,
-        parentID,
-        markdown: "",
-        titleEmpty: !target.title,
-        id: presetId,
-    }, (response) => {
-        onCreated?.(response.data, target.title || "");
-    });
-}
+
 
 function createRefDocAsSubDoc(
-    target: NewDocTargetSubDoc,
+    target: {kind: "subDoc"; targetNotebookId: string; parentPath: string; title: string},
     onCreated?: (id: string, title: string) => void,
     presetId?: string,
 ) {
     const id = presetId || Lute.NewNodeID();
-    const newPath = pathPosix().join(getDisplayName(target.parentPath, false, true), id + ".sy");
-    fetchPost("/api/filetree/createDoc", {
-        notebook: target.targetNotebookId,
-        path: newPath,
-        title: target.title,
-        md: "",
-    }, () => {
-        onCreated?.(id, target.title || "");
+    void fetchSyncPost("/api/filetree/createDocByParent",
+        documentCreateRequest(target.targetNotebookId, target.parentPath, id, target.title)).then(response => {
+        const createdID = createdDocumentID(response.data);
+        if (createdID) {
+            onCreated?.(createdID, target.title || "");
+        }
+    }).catch(error => {
+        showMessage(error.message);
     });
 }

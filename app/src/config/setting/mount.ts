@@ -47,10 +47,8 @@ export const mountSettingTab = async (tabId: string, root: HTMLElement) => {
 /** 设置面板已打开且对应 Tab 已挂载时，重新 register 并整页替换 */
 export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     const dialogElement = window.siyuan.dialogs.find((d) => d.element.getAttribute("data-key") === Constants.DIALOG_SETTING)?.element;
-    if (!dialogElement) {
-        return;
-    }
-    const root = dialogElement.querySelector(`.config__tab-container[data-name="${tabId}"]`) as HTMLElement | null;
+    const root = (dialogElement?.querySelector(`.config__tab-container[data-name="${tabId}"]`) ||
+        document.querySelector(`#modelMain > .config[data-setting-tab="${tabId}"]`)) as HTMLElement | null;
     if (!root?.innerHTML) {
         return;
     }
@@ -69,7 +67,7 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     }
     deferredTabs.delete(tabId);
     const search: Partial<SettingTabMountContext> = {};
-    const keywords = getSearchKeywordsLower(dialogElement);
+    const keywords = dialogElement ? getSearchKeywordsLower(dialogElement) : "";
     const tab = getSettingTab(tabId);
     if (keywords) {
         const result = tab.scanSearch(keywords);

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261019201307"
+		"updated": "20261023003125"
 	},
 	"Children": [
 		{
@@ -1962,7 +1962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261019201307"
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
@@ -1997,6 +1997,91 @@
 			]
 		},
 		{
+			"ID": "20261023003125-gh1vclp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023003125-gh1vclp",
+				"updated": "20261023003125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "底部節點選單直接提供刪除、複製、剪下和貼上。貼上會新增子節點，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "保留貼上為同層節點的選項。懸停或點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顏色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可在底欄上方開啟節點樣式及樣式管理面板。不適用的操作會停用。"
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-9n8owq8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-9n8owq8",
+				"updated": "20261023003125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取一個或多個節點後，懸停或點擊底部節點選單的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "寬度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，在底欄上方開啟面板。滑桿以開啟面板時的目前寬度為中心，向左縮窄，向右加寬所選節點。拖動時預覽，放開後儲存為一次可復原的修改，也可輸入精確的像素寬度。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "還原原始寬度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "會還原各節點開啟面板時的寬度，包括原先的自動寬度；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "預設"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "或清空數值輸入框會依內容自動調整。加寬節點可讓較長的行內公式在一行中顯示。寬度隨文件儲存，支援復原和重做。"
+				}
+			]
+		},
+		{
 			"ID": "20261018163000-b7er7oa",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2015,30 +2100,44 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261019142953-9ypjmtz",
-				"updated": "20261019142953"
+				"updated": "20261021132218"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在文件與全螢幕之間切換時，會保留心智圖的中心點和縮放比例。點擊工具列中的 "
+					"Data": "進入全螢幕時會保留心智圖目前的中心點和縮放比例。全螢幕中的平移和縮放僅影響本次全螢幕瀏覽，離開全螢幕後恢復進入前的文件視角。節點內容編輯仍正常生效。"
+				}
+			]
+		},
+		{
+			"ID": "20261020165811-mubt7ro",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020165811-mubt7ro",
+				"updated": "20261020165811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將指標停留在工具列的縮放百分比上，或點擊該百分比，即可展開縮放面板。滑桿用於調整比例；點擊 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "全螢幕切換"
+					"TextMarkTextContent": "重置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": " 恢復為 100%，點擊 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "文件版面"
+					"TextMarkTextContent": "符合畫布大小"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可顯示置中的指示框，大小與文件內心智圖的可視區域相同。參照指示框平移、縮放畫布，即可預覽離開全螢幕後顯示的範圍；再次點擊按鈕可隱藏指示框。指示框不會變更心智圖區塊的寬度或高度。"
+					"Data": " 自動調整縮放並置中顯示整張心智圖。"
 				}
 			]
 		},
@@ -2052,7 +2151,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "無須進入畫布操作，也可以按住 Ctrl（macOS 為 Command）捲動滑鼠滾輪，以指標為中心縮放，或按住同一按鍵並用滑鼠右鍵拖曳畫布進行暫時平移。暫時平移保留鍵盤焦點和節點選取狀態。觸控螢幕上可用雙指縮放、平移。這些手勢保持目前的閱讀或畫布操作狀態。已儲存的檢視鎖定仍禁止編輯、縮放和平移，解鎖後可視需要進入畫布操作。"
+					"Data": "無須進入畫布操作，也可以按住 Ctrl（macOS 為 Command）捲動滑鼠滾輪，以指標為中心縮放，或按住同一按鍵並用滑鼠右鍵拖曳畫布進行暫時平移。也可直接按住滑鼠中鍵拖曳進行暫時平移，放開即結束，無須切換手形工具。暫時平移保留鍵盤焦點和節點選取狀態。觸控螢幕上可用雙指縮放、平移。這些手勢保持目前的閱讀或畫布操作狀態。已儲存的檢視鎖定仍禁止編輯、縮放和平移，解鎖後可視需要進入畫布操作。"
 				}
 			]
 		},
@@ -2075,7 +2174,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-qnsdugf",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2085,7 +2184,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "連線"
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
 				},
 				{
 					"Type": "NodeText",
@@ -2098,7 +2206,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中選擇曲線分岔、直角折線、曲線匯聚或圓角折線。選擇套用至整張心智圖，隨文件儲存，並支援復原和重做。切換只改變父子節點間的連線，不改變節點位置或關係線。直角樣式共用的垂直線沿用預設線色，不能單獨選取；水平分支仍可單獨選取和配色。思源格式的 HTML 與 PDF 預覽使用儲存的樣式。"
+					"Data": " 中選擇曲線分岔、直角折線、曲線匯聚或圓角折線。選擇套用至整張心智圖，隨文件儲存，並支援復原和重做。切換只改變父子節點間的連線，不改變節點位置或關係線。共用主幹不能單獨選取，啟用色卡後跟隨所屬父分支的顏色；水平分支仍可單獨選取和配色。思源格式的 HTML 與 PDF 預覽使用儲存的樣式。"
 				}
 			]
 		},
@@ -2107,7 +2215,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017113512-z8j1a4z",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2117,7 +2225,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "連線"
+					"TextMarkTextContent": "更多"
 				},
 				{
 					"Type": "NodeText",
@@ -2131,6 +2239,129 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中選擇新建心智圖的連線樣式，也適用於首次將清單或頁籤轉換為心智圖。此偏好儲存在目前工作空間的本機設定中，不參與雲端同步。修改它不會改變既有心智圖；複製、匯入及清單或頁籤往返轉換保留原樣式。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-dz75ii8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-dz75ii8",
+				"updated": "20261022122318"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主題"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中為目前心智圖選擇繽紛、柔和、森林、海洋、日落、薰衣草或黑白配色。一級分支依色卡分配顏色，後代節點繼承所屬分支的顏色；調整分支順序會保留原有配色，新增節點自動跟隨心智圖配色。既有的節點和線條手動配色會保留。選擇預設可移除色卡，並保留手動配色和畫布背景。主題不會改變節點內容、結構或摺疊狀態。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-z2ij065",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-z2ij065",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "畫布背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇純色背景，選擇預設則跟隨應用程式主題。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清除手動配色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中清除節點、階層連線、關係線和概要的手動配色，恢復使用色卡或預設顏色；畫布背景和其他格式保持不變。外觀隨文件儲存，支援復原和重做，並用於思源格式的 HTML 與 PDF 預覽。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-bttpd92",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-bttpd92",
+				"updated": "20261022132341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取多個節點後，可用底部色板統一修改文字和背景顏色，也可用分支連線色板修改所選節點的入線顏色。每次批次修改均可一次復原。在對應色板中選擇預設，可恢復主題或預設配色。觸控螢幕上可使用頂部工具列的多選按鈕選取多個節點。"
 				}
 			]
 		},
@@ -3501,12 +3732,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-6pycwgr",
-				"updated": "20261012014859"
+				"updated": "20261022235541"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "選取範圍的第一個節點，點選心智圖工具列中的 "
+					"Data": "選取至少兩個節點後，點選底部節點選單中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3515,7 +3746,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，再選擇末端同層節點，即可新增方括號與概要文字。範圍必須連續，支援單節點概要和範圍巢狀包含，範圍可以相互包含，但不能交叉。括號包圍可見子樹及內層概要。批次建立時，點選概要按鈕後在畫布空白處框選；也可以先點選空白處，再逐一選取節點。預覽依父節點和連續範圍分組，同時選取父子節點時以最外層節點為準。既有相同概要會略過，交叉範圍會阻止建立。點選確認按鈕或按 Enter 一次建立全部預覽概要，並可一次復原；Esc 取消。文件更新會取消待確認的選取範圍。行動端也可依相同步驟操作。選擇範圍時也可使用上下方向鍵選擇末端節點，Enter 確認範圍，Esc 取消。"
+					"Data": " 即可直接建立，無需再次選取或確認。僅選取節點時不顯示概要預覽，也不會建立概要。桌面端可在空白畫布框選，或按住 Ctrl/Command 點選節點；觸控螢幕上先開啟頂部工具列的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "多選"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再逐一點選節點。同一父節點下連續的選取節點產生一個概要，不連續或不同父節點下的選取範圍分別產生多個概要，不會納入未選節點。同時選取父子節點時以最外層節點為準。分組可只含一個節點，支援範圍巢狀包含，既有相同概要會略過；範圍交叉時概要按鈕停用，並提供原因提示。括號包圍可見子樹及內層概要。全部分組一次建立，並可一次復原；建立後自動移至第一個新概要並進入文字編輯。節點選單中不適用的操作會停用，在畫布上按 Esc 結束多選模式。"
 				}
 			]
 		},
@@ -4211,7 +4451,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-8glkpvq",
-				"updated": "20261008221006"
+				"updated": "20261022190543"
 			},
 			"Children": [
 				{
@@ -4304,6 +4544,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "內部段落和列表項目沒有獨立區塊 ID，支援引用既有區塊。圖片及原有行級格式可以保留。不支援巢狀表格、資料庫、超級區塊、頁籤、提示區塊、查詢嵌入、分隔線、可執行圖表、音訊、影片、掛件、HTML 和自訂區塊。貼上內容包含不支援的區塊時，會拒絕整次貼上並提示不支援的類型，原有內容不變。標準 Markdown 匯出為可讀的行級內容，HTML、PDF 和 Word 匯出保留富文字排版。"
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-6w6ibfu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-6w6ibfu",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖曳列下邊界可調整列高；行動端先輕點儲存格的水平分隔線，再拖曳出現的控制柄。設定的列高是最小高度，內容較多時仍會自動撐高。選取列後，在選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自動調整列高"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢復自動高度。列高隨文件儲存，標準 Markdown 匯出不保證保留列高。"
 				}
 			]
 		},

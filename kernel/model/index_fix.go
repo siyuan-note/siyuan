@@ -543,6 +543,6 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 	}
 
 	if 0 == i%64 {
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, html.EscapeString(path.Base(tree.HPath))))
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, html.EscapeString(treenode.ReadDocumentTitle(tree.Root).Text)))
 	}
 }

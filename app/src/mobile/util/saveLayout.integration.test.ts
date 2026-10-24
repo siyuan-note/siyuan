@@ -149,6 +149,7 @@ test("mobile loader distinguishes early failures from a partially changed editor
             window: {siyuan: {mobile: {editor: {protyle: {wysiwyg: {element: {childElementCount: 1}}}}}}},
             setEditor: () => { shown++; },
             onFailure: (...args: unknown[]) => failures.push(args),
+            updateMobileBottomBacklinkPanel: () => Promise.resolve(),
         });
         assert.deepEqual(failures, [[true, !titleHidden]]);
         assert.equal(shown, titleHidden ? 1 : 0);

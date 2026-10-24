@@ -111,9 +111,11 @@ def verify_notebook(image, platform, version, timeout, fail_ocr, diagnostics=Non
             raise ValueError("HTTP kernel version differs from release version")
         fail_ocr()
         notebook = request(base, "/api/notebook/createNotebook", token, {"name": "Docker OCR smoke"})
-        block = request(base, "/api/filetree/createDocWithMd", token,
-                        {"notebook": notebook["notebook"]["id"], "path": "/Docker smoke", "markdown": "Docker OCR smoke 123"})
-        data = request(base, "/api/block/getBlockKramdown", token, {"id": block})
+        block = request(base, "/api/filetree/createDocByParent", token,
+                        {"notebook": notebook["notebook"]["id"], "parentID": None,
+                         "id": time.strftime("%Y%m%d%H%M%S") + "-" + uuid.uuid4().hex[:7],
+                         "title": {"format": "plain", "text": "Docker smoke"}, "markdown": "Docker OCR smoke 123"})
+        data = request(base, "/api/block/getBlockKramdown", token, {"id": block["id"]})
         if "Docker OCR smoke 123" not in data["kramdown"]:
             raise ValueError("Notebook write/read verification failed")
     except Exception:

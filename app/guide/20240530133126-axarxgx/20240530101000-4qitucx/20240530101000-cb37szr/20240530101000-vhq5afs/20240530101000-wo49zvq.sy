@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20261016111950"
+		"updated": "20261021104922"
 	},
 	"Children": [
 		{
@@ -538,6 +538,29 @@
 			]
 		},
 		{
+			"ID": "20261020224352-291guwm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020224352-291guwm",
+				"updated": "20261020224352"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存前に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続テスト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、S3、WebDAV、ローカルファイルシステムの現在の下書きを保存せずに確認できます。WebDAV ではディレクトリ作成とテストデータの読み書き権限を、ローカルファイルシステムではディレクトリの読み書き権限を確認し、終了時にテストデータの削除を試みます。失敗した場合は診断に従って修正し、再試行してください。保存済みの設定は保持されます。"
+				}
+			]
+		},
+		{
 			"ID": "20261011151543-pf8uunp",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -571,6 +594,61 @@
 				{
 					"Type": "NodeText",
 					"Data": "現在の同期元のリソースや履歴スナップショットが完全にダウンロードされていない場合、同期元の変更や設定の消去はできません。元の同期先へのアクセスを復旧し、すべてのリソースをダウンロードしてから再試行してください。保存や消去に失敗しても、有効な設定と下書きは保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-1j1jsub",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-1j1jsub",
+				"updated": "20261021104922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動同期は通常バックグラウンドで実行され、パネルを開いたり編集を中断したりしません。同期アイコンを押すと、現在のファイル、書き込み済みバイト数、速度、推定残り時間を確認できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細を閉じる"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で詳細を閉じ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で再度開けます。ローカルの変更適用、索引の復元、関連文書の更新中のみ編集が一時停止されます。キャンセル後も復元が完了するまで待つ必要があります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "キャンセル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で準備、ネットワーク転送、ファイル復元のキャンセルを要求できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-f8dbg1y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-f8dbg1y",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンセル後も完了したファイルは保持され、現在の一時ファイルは削除されます。残りを完了するには再度同期してください。空き容量が不足している場合は、容量を確保して再試行してください。起動時またはファイル復元前に、所有を確認できる中断した同期の一時ファイルを削除し、解放した容量を表示します。"
 				}
 			]
 		},

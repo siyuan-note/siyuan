@@ -185,11 +185,15 @@ func prepareDuplicateDocTree(boxID, rootPath string) (*duplicateDocTreePlan, err
 		tree.ID = tree.Root.ID
 		tree.Root.RemoveIALAttr("scroll")
 		if i == 0 {
-			title := tree.Root.IALAttr("title") + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
+			parentHPath, pathErr := documentParentDisplayPath(tree.Box, originalPath)
+			if pathErr != nil {
+				return nil, pathErr
+			}
+			title := treenode.ReadDocumentTitle(tree.Root).Text + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
 			tree.Root.SetIALAttr("title", title)
-			tree.HPath = path.Join(path.Dir(tree.HPath), title)
+			tree.HPath = parentHPath + "/" + title
 		} else {
-			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + tree.Root.IALAttr("title")
+			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 		}
 		hpaths[originalPath] = tree.HPath
 		parts := strings.Split(strings.TrimSuffix(originalPath, ".sy"), "/")

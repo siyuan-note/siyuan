@@ -1,0 +1,90 @@
+//go:build fts5 && (sqlcipher || libsqlcipher)
+
+package model
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+func TestGenerateStructuredTitlesLegacyFixture(t *testing.T) {
+	destination := os.Getenv("SIYUAN_LEGACY_FIXTURE_DESTINATION")
+	if destination == "" {
+		t.Fatal("fixture destination is required")
+	}
+	prepareHPathRefreshTest(t)
+	t.Cleanup(backgroundRefreshWaitGroup.Wait)
+	Conf.Flashcard.Store(conf.NewFlashcard())
+	const password = "legacy-title-fixture-password"
+	if err := EnableEncryptedNotebook(password); err != nil {
+		t.Fatal(err)
+	}
+	normal := &Box{ID: "20261022000000-normal1"}
+	boxConf := conf.NewBoxConf()
+	boxConf.Name, boxConf.Closed = "Legacy title fixture", false
+	if err := normal.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	plain := newHPathTestDoc(t, normal.ID, "/", "Legacy ordinary", 2)
+	plainChild := newHPathTestDoc(t, normal.ID, plain.Path, "Literal ／ %2F **text** 😀", 2)
+	encrypted, err := CreateEncryptedBox("Legacy encrypted fixture", password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = Mount(encrypted); err != nil {
+		t.Fatal(err)
+	}
+	private := newHPathTestDoc(t, encrypted, "/", "Private legacy", 2)
+	privateChild := newHPathTestDoc(t, encrypted, private.Path, "Private literal ／ %2F 😀", 2)
+	sql.FlushQueue()
+	drainHPathRefreshTest(t)
+	type document struct {
+		Notebook  string `json:"notebook"`
+		ID        string `json:"id"`
+		ParentID  string `json:"parentID"`
+		Path      string `json:"path"`
+		Title     string `json:"title"`
+		Encrypted bool   `json:"encrypted"`
+	}
+	documents := []document{}
+	for _, tree := range []*parse.Tree{plain, plainChild, private, privateChild} {
+		parent := ""
+		directory := filepath.ToSlash(filepath.Dir(tree.Path))
+		if directory != "/" && directory != "." {
+			parent = filepath.Base(directory)
+		}
+		documents = append(documents, document{tree.Box, tree.ID, parent, tree.Path,
+			tree.Root.IALAttr("title"), tree.Box == encrypted})
+		if strings.Contains(tree.Root.IALAttr("title"), "/") {
+			t.Fatal("legacy title contains a slash")
+		}
+		if tree.Root.Spec != "2" {
+			t.Fatalf("unexpected legacy specification: %s", tree.Root.Spec)
+		}
+	}
+	LockBox(encrypted)
+	if err = os.CopyFS(filepath.Join(destination, "data"), os.DirFS(util.DataDir)); err != nil {
+		t.Fatal(err)
+	}
+	write := func(name string, value any) {
+		t.Helper()
+		data, err := json.MarshalIndent(value, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(filepath.Join(destination, name), data, 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("notebook-crypto.json", currentNotebookCrypto())
+	write("manifest.json", map[string]any{"tag": "v3.8.9-alpha.4", "commit": os.Getenv("SIYUAN_LEGACY_FIXTURE_COMMIT"),
+		"password": password, "documents": documents})
+}

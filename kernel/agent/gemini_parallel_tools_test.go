@@ -36,6 +36,7 @@ const testGeminiThoughtSignatureFallback = "skip_thought_signature_validator"
 
 func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 	useTestDataDir(t)
+	useTestToolRoundLimitLanguage(t)
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
 	kernelModel.Conf.AI.Store(kernelConf.NewAI())
@@ -126,13 +127,20 @@ func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 		testSessionID, "user-1", 1,
 		"use both tools", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
+	limitSeen := false
 	for event := range events {
 		if event.Type == "error" {
-			t.Fatalf("agent turn failed: %s", event.Error)
+			limitSeen = true
+			if event.Error != testToolRoundLimitMessage {
+				t.Fatalf("agent turn failed: %s", event.Error)
+			}
+		}
+		if event.Type == "done" {
+			t.Fatal("round limit was reported as normal completion")
 		}
 	}
-	if requests.Load() != 2 || executed.Load() != 2 {
-		t.Fatalf("unexpected request or execution count: requests=%d, executed=%d", requests.Load(), executed.Load())
+	if requests.Load() != 2 || executed.Load() != 2 || !limitSeen {
+		t.Fatalf("unexpected request or execution count: requests=%d, executed=%d, limitSeen=%v", requests.Load(), executed.Load(), limitSeen)
 	}
 }
 

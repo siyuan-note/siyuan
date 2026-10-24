@@ -40,7 +40,7 @@ const browserCases = async (source: string) => {
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
         getImageOCRResult: () => new Promise<{text: string, failed: boolean} | undefined>(resolve => ocrRequests.push(result =>
             resolve(typeof result === "string" ? {text: result, failed: false} : result))),
-        hideTooltip: () => {},
+        hideTooltip: () => { tooltip = ""; },
         showTooltip: (text: string) => { tooltip = text; },
         fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
                     _before: unknown, _after: unknown, signal: AbortSignal) => {
@@ -55,7 +55,6 @@ const browserCases = async (source: string) => {
         isTouchHoverInput: () => false,
         isInteractiveTooltipTarget: () => false,
         isEncryptedBox: () => false,
-        isListItemActionElement: () => false,
         isAbove: () => false,
     };
     const api = new Function(...Object.keys(dependencies), source +
@@ -65,7 +64,8 @@ const browserCases = async (source: string) => {
         menus: {menu: {element: document.createElement("div")}},
         blockPanels: [],
         languages: {ocrResult: "OCR text", ocrNoText: "No OCR text", ocrFailed: "OCR recognition failed",
-            emptyContent: "No related content found", modifiedAt: "Modified", createdAt: "Created"},
+            emptyContent: "No related content found", modifiedAt: "Modified", createdAt: "Created",
+            listItemActionTip: "List menu and attributes"},
     } as unknown as typeof window.siyuan;
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
@@ -293,6 +293,29 @@ const browserCases = async (source: string) => {
     document.body.append(url);
     url.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(tooltip, '<span style="word-break: break-all">https://example.com/</span><br><span>Column title</span>');
+
+    const editor = document.createElement("div");
+    editor.className = "protyle";
+    editor.innerHTML = '<div data-type="NodeListItem"><div class="protyle-action"><span>1.</span></div></div>';
+    document.body.append(editor);
+    const marker = editor.querySelector("span");
+    const hoverMarker = () => marker.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    hoverMarker();
+    check.equal(tooltip, "List menu and attributes", "ordinary editors retain the list action tooltip");
+    editor.dataset.protyleLite = "true";
+    hoverMarker();
+    check.equal(tooltip, "", "standalone Lite editors hide the unavailable list actions");
+    editor.dataset.protyleLite = "false";
+    hoverMarker();
+    check.equal(tooltip, "List menu and attributes", "reused non-Lite hosts retain the tooltip");
+    const fragment = document.createElement("div");
+    fragment.className = "protyle-lite-fragment";
+    document.body.append(fragment);
+    fragment.append(editor);
+    hoverMarker();
+    check.equal(tooltip, "", "fragment editors continue to hide the list action tooltip");
+    editor.remove();
+    fragment.remove();
     return "Popover interaction cases passed";
 };
 
@@ -300,7 +323,7 @@ test("mindmap interaction cancels pending popovers and preserves hover preferenc
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {
-    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTitle.ts", "../protyle/render/imageTooltip.ts", "panelOwnership.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
+    const source = ["../protyle/util/hasClosest.ts", "../protyle/wysiwyg/listContext.ts", "../util/escape.ts", "../protyle/render/imageTitle.ts", "../protyle/render/imageTooltip.ts", "panelOwnership.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
         readFileSync(path.join(__dirname, file), "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}},
     ).outputText).join("\n");

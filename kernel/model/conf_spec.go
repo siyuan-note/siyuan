@@ -106,10 +106,15 @@ func applySectionLockedAt[C any](spec *SectionSpec[C], next, expected C, checkSo
 	if current == nil {
 		current = Conf
 	}
+	unlockTarget := func() {}
+	if spec.Namespace == "fileTree" {
+		unlockTarget = lockDocumentTargetConfiguration()
+	}
 	current.m.Lock()
 	old := spec.Load()
 	if checkSource && !reflect.DeepEqual(old, expected) {
 		current.m.Unlock()
+		unlockTarget()
 		return nil, errConfSectionChanged
 	}
 	spec.Store(next)
@@ -118,6 +123,7 @@ func applySectionLockedAt[C any](spec *SectionSpec[C], next, expected C, checkSo
 		current.saveLocked()
 	}
 	current.m.Unlock()
+	unlockTarget()
 	for _, reaction := range spec.Reactions {
 		if !reflect.ValueOf(old).IsZero() && reaction.Changed(old, next) {
 			reaction.Apply(old, next)

@@ -316,22 +316,23 @@ func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {
 	}
 
 	docID := "20260728000001-abcdefg"
-	arg := map[string]any{"docCreateTemplatePath": "/indexed.md"}
-	createdID, err := CreateWithMarkdown("", box.ID, "/Default template", "", "", docID, false, "", arg)
+	created, err := CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ID: docID,
+		TitleFormat: "plain", Title: "Default template", DocCreateTemplatePath: "/indexed.md"})
 	if nil != err {
 		t.Fatalf("create document with default template failed: %v", err)
 	}
-	if docID != createdID {
-		t.Fatalf("unexpected created document ID: got %s, want %s", createdID, docID)
+	if docID != created.ID {
+		t.Fatalf("unexpected created document ID: got %s, want %s", created.ID, docID)
 	}
 	assertTemplateOutputIndexed(t, docID)
 
 	attributeViewDocID := "20260728000002-abcdefg"
-	createdID, err = CreateWithMarkdown("", box.ID, "/Attribute view template", "", "", attributeViewDocID, false, "", nil)
+	created, err = CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ID: attributeViewDocID,
+		TitleFormat: "plain", Title: "Attribute view template"})
 	if nil != err {
 		t.Fatalf("create attribute view item document failed: %v", err)
 	}
-	if err = applyNewItemContentTemplate("/indexed.md", createdID); nil != err {
+	if err = applyNewItemContentTemplate("/indexed.md", created.ID); nil != err {
 		t.Fatalf("apply attribute view item content template failed: %v", err)
 	}
 	assertTemplateOutputIndexed(t, attributeViewDocID)

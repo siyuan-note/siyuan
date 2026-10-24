@@ -97,6 +97,24 @@ test("Android desktop back closes the highest menu, dialog and drawer one at a t
     assert.deepEqual(state.closed, ["menu", "top-dialog", "first-dialog", "drawer", "document-back"]);
 });
 
+test("native back restores a maximized PDF after closing higher overlays and before document history", () => {
+    const state = setup();
+    state.setDrawer(false);
+    const pdf = state.element("pdf", 8);
+    const button = {click: () => {
+        state.closed.push("pdf-restored");
+        state.elements[".pdf__outer--maximized"] = [];
+    }};
+    Object.assign(pdf, {querySelector: () => button});
+    state.elements[".pdf__outer--maximized"] = [pdf];
+    state.addDialog("dialog", 100);
+    state.api.registerDesktopBackNavigation(state.app);
+    state.window.goBack();
+    state.window.goBack();
+    state.window.goBack();
+    assert.deepEqual(state.closed, ["dialog", "pdf-restored", "document-back"]);
+});
+
 test("a higher dialog closes ahead of an older menu regardless of array order", () => {
     const state = setup();
     state.siyuan.menus.menu.element = state.element("menu", 120);

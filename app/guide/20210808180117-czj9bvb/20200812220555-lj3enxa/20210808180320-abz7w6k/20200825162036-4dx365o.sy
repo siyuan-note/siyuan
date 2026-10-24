@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261019201307"
+		"updated": "20261023003125"
 	},
 	"Children": [
 		{
@@ -1964,7 +1964,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261019201307"
+				"updated": "20261023003125"
 			},
 			"Children": [
 				{
@@ -1999,6 +1999,91 @@
 			]
 		},
 		{
+			"ID": "20261023003125-br0hgmh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023003125-br0hgmh",
+				"updated": "20261023003125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "底部节点菜单直接提供删除、复制、剪切和粘贴。粘贴会添加子节点，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "保留粘贴为同级节点的选项。悬停或点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "颜色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可在底栏上方打开节点样式及样式管理面板。不适用的操作会置灰。"
+				}
+			]
+		},
+		{
+			"ID": "20261022181804-udgwd1x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-udgwd1x",
+				"updated": "20261023003125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中一个或多个节点后，悬停或点击底部节点菜单的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "宽度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，在底栏上方打开面板。滑块以打开面板时的当前宽度为中心，向左缩窄，向右加宽所选节点。拖动时预览，松手后保存为一次可撤销的修改，也可输入精确的像素宽度。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢复原宽度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "会还原各节点打开面板时的宽度，包括原先的自动宽度；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "或清空数值输入框会按内容自适应。加宽节点可让较长的行内公式在一行中显示。宽度随文档保存，支持撤销和重做。"
+				}
+			]
+		},
+		{
 			"ID": "20261018163000-vnuug6c",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2017,30 +2102,44 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261019142953-m439ybs",
-				"updated": "20261019142953"
+				"updated": "20261021132218"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文档与全屏之间切换时会保留脑图中心点和缩放比例。点击工具栏中的 "
+					"Data": "进入全屏时会保留脑图当前的中心点和缩放比例。全屏中的平移和缩放仅影响本次全屏浏览，退出全屏后恢复进入前的文档视角。节点内容编辑仍正常生效。"
+				}
+			]
+		},
+		{
+			"ID": "20261020165811-3jtw0sw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020165811-3jtw0sw",
+				"updated": "20261020165811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将指针悬停在工具栏的缩放百分比上，或点击该百分比，可展开缩放面板。滑块用于调整比例；点击 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "全屏切换"
+					"TextMarkTextContent": "重置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": " 恢复为 100%，点击 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "文档布局"
+					"TextMarkTextContent": "适应画布"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可显示居中的指示框，其大小与文档内脑图的可视区域相同。参照指示框平移、缩放画布，即可预览退出全屏后显示的范围；再次点击按钮可隐藏指示框。指示框不会改变脑图块的宽度或高度。"
+					"Data": " 自动调整缩放并居中显示整张导图。"
 				}
 			]
 		},
@@ -2054,7 +2153,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "无需进入画布操作，也可以按住 Ctrl（macOS 为 Command）滚动鼠标滚轮，以指针为中心缩放，或按住同一按键并用鼠标右键拖动画布进行临时平移。临时平移保留键盘焦点和节点选中状态。触屏上可用双指缩放、平移。这些手势保持当前的阅读或画布操作状态。已保存的视图锁定仍禁止编辑、缩放和平移，解锁后可按需进入画布操作。"
+					"Data": "无需进入画布操作，也可以按住 Ctrl（macOS 为 Command）滚动鼠标滚轮，以指针为中心缩放，或按住同一按键并用鼠标右键拖动画布进行临时平移。也可直接按住鼠标中键拖动进行临时平移，松开即结束，无需切换手型工具。临时平移保留键盘焦点和节点选中状态。触屏上可用双指缩放、平移。这些手势保持当前的阅读或画布操作状态。已保存的视图锁定仍禁止编辑、缩放和平移，解锁后可按需进入画布操作。"
 				}
 			]
 		},
@@ -2077,7 +2176,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017110432-6mghas7",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2087,7 +2186,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "连线"
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
 				},
 				{
 					"Type": "NodeText",
@@ -2100,7 +2208,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中选择曲线分叉、正交折线、曲线汇聚或圆角折线。选择应用于整张脑图，随文档保存，并支持撤销和重做。切换只改变父子节点间的连线，不改变节点位置或关系线。正交样式共用的竖线沿用默认线色，不单独选中；横向分支仍可单独选中和配色。思源格式的 HTML 和 PDF 预览使用保存的样式。"
+					"Data": " 中选择曲线分叉、正交折线、曲线汇聚或圆角折线。选择应用于整张脑图，随文档保存，并支持撤销和重做。切换只改变父子节点间的连线，不改变节点位置或关系线。共用主干不能单独选中，启用色卡后跟随所属父分支的颜色；横向分支仍可单独选中和配色。思源格式的 HTML 和 PDF 预览使用保存的样式。"
 				}
 			]
 		},
@@ -2109,7 +2217,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017113512-kojg0bw",
-				"updated": "20261017113835"
+				"updated": "20261022102848"
 			},
 			"Children": [
 				{
@@ -2119,7 +2227,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "连线"
+					"TextMarkTextContent": "更多"
 				},
 				{
 					"Type": "NodeText",
@@ -2133,6 +2241,129 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中选择新建导图的连线样式，也适用于首次将列表或页签转换为导图。此偏好保存在当前工作空间的本地配置中，不参与云同步。修改它不会改变已有导图；复制、导入及列表或页签往返转换保留原样式。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-idam1p2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-idam1p2",
+				"updated": "20261022122318"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主题"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中为当前导图选择缤纷、柔和、森林、海洋、日落、薰衣草或黑白配色。一级分支按色卡分配颜色，后代节点继承所属分支的颜色；调整分支顺序会保留原有配色，新增节点自动跟随导图配色。已有的节点和线条手工配色会保留。选择默认可移除色卡，并保留手工配色和画布背景。主题不会改变节点内容、结构或折叠状态。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-m1dh0tw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-m1dh0tw",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画布背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择纯色背景，选择默认则跟随应用主题。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清除手工配色"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中清除节点、层级连线、关系线和概要的手工配色，恢复使用色卡或默认颜色；画布背景和其他格式保持不变。外观随文档保存，支持撤销和重做，并用于思源格式的 HTML 和 PDF 预览。"
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-xfgxiox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-xfgxiox",
+				"updated": "20261022132341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中多个节点后，可用底部色板统一修改文字和背景颜色，也可用分支连线色板修改所选节点的入线颜色。每次批量修改均可一次撤销。在对应色板中选择默认，可恢复主题或默认配色。触屏上可使用顶部工具栏的多选按钮选择多个节点。"
 				}
 			]
 		},
@@ -3503,12 +3734,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-8wl1iml",
-				"updated": "20261012014859"
+				"updated": "20261022235541"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选中范围的第一个节点，点击脑图工具栏中的 "
+					"Data": "选中至少两个节点后，点击底部节点菜单中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3517,7 +3748,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，再选择末端同级节点，即可添加方括号和概要文字。范围必须连续，支持单节点概要和范围嵌套，范围可以相互包含，但不能交叉。括号包围可见子树及内层概要。批量创建时，点击概要按钮后在画布空白处框选；也可以先点击空白处，再逐个点选节点。预览按父节点和连续范围分组，父子同时选中时以最外层节点为准。已有相同概要会跳过，交叉范围会阻止创建。点击确认按钮或按 Enter 一次创建全部预览概要，并可一次撤销；Esc 取消。文档更新会取消待确认的选择。移动端也可按相同步骤操作。选择范围时也可使用上下方向键选择末端节点，Enter 确认范围，Esc 取消。"
+					"Data": " 即可直接创建，无需再次选择或确认。仅选择节点时不显示概要预览，也不会创建概要。桌面端可在空白画布框选，或按住 Ctrl/Command 点选节点；触屏上先开启顶部工具栏的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "多选"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再逐个点选节点。同一父节点下连续的选中节点生成一个概要，不连续或不同父节点下的选区分别生成多个概要，不会纳入未选节点。父子同时选中时以最外层节点为准。分组可只含一个节点，支持范围嵌套，已有相同概要会跳过；范围交叉时概要按钮置灰，并提供原因提示。括号包围可见子树及内层概要。全部分组一次创建，并可一次撤销；创建后自动定位到第一个新概要并进入文字编辑。节点菜单中不适用的操作置灰，在画布上按 Esc 退出多选模式。"
 				}
 			]
 		},
@@ -4213,7 +4453,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-1bq55o9",
-				"updated": "20261008221006"
+				"updated": "20261022190543"
 			},
 			"Children": [
 				{
@@ -4306,6 +4546,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "内部段落和列表项没有独立块 ID，支持引用已有块。图片及原有行级格式可以保留。不支持嵌套表格、数据库、超级块、页签、提示块、查询嵌入、分隔线、可执行图表、音视频、挂件、HTML 和自定义块。粘贴内容包含不支持的块时，会拒绝整次粘贴并提示不支持的类型，原有内容不变。标准 Markdown 导出为可读的行级内容，HTML、PDF 和 Word 导出保留富文本排版。"
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-t8zgv8r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-t8zgv8r",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖动行下边界可调整行高；移动端先轻点水平单元格分隔线，再拖动出现的手柄。设置的行高是最小高度，内容较多时仍会自动撑高。选中行后，在菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自适应行高"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢复自动高度。行高随文档保存，标准 Markdown 导出不保证保留行高。"
 				}
 			]
 		},

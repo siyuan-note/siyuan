@@ -6,7 +6,7 @@
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261021005205"
 	},
 	"Children": [
 		{
@@ -270,6 +270,251 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-4o8r7y2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261021005120-4o8r7y2",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rename a workspace"
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-l2mj91t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021005120-l2mj91t",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, a workspace takes its name from its folder. Exit SiYuan before renaming the folder in your file manager. Rename the entire workspace folder; there is no need to empty it or migrate its data."
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-e8orm2e",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46
+			},
+			"Properties": {
+				"id": "20261021005120-e8orm2e",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"ID": "20261021005120-h5bpf7f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261021005120-h5bpf7f",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-ihrmwfx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-ihrmwfx",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Find the workspace under "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Workspaces"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the menu on the left side of the top bar, then select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Show in Folder"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to locate its folder"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-xsa1nie",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261021005120-xsa1nie",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-09shsyp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-09shsyp",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Exit Application"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the menu on the left side of the top bar to exit SiYuan safely, and wait for the corresponding kernel process to exit"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-fmeb43q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261021005120-fmeb43q",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-xzs03hm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-xzs03hm",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Rename the workspace folder in your file manager, keeping all files and subfolders inside it"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-tdkml3m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261021005120-tdkml3m",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-unow0f9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-unow0f9",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Restart SiYuan and select the renamed folder in the workspace selection window; if another workspace is already open, select the folder through "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Workspaces"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "New / Open"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the menu on the left side of the top bar"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-ubeq0rp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021005120-ubeq0rp",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Closing a window or opening another workspace does not necessarily close the original workspace. If you specify a workspace with the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " parameter, update the path in your startup command or shortcut to the renamed folder's path before restarting."
 				}
 			]
 		},

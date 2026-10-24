@@ -70,6 +70,16 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
     hover();
     check.equal(tip.innerHTML, "More");
     check.equal(tip.classList.contains("tooltip--hover"), true);
+    more.setAttribute("aria-label", "A%2FB");
+    hover();
+    check.equal(tip.textContent, "A/B", "existing URI tooltips retain decoding");
+    more.setAttribute("data-tooltip-encoding", "none");
+    more.setAttribute("aria-label", "A%2FB/%3Ctag%3E.sy");
+    hover();
+    check.equal(tip.textContent, "A%2FB/%3Ctag%3E.sy", "document titles remain literal text");
+    check.equal(tip.querySelector("tag"), null);
+    more.removeAttribute("data-tooltip-encoding");
+    more.setAttribute("aria-label", "More");
     touch();
     assertTouch();
     check.equal(getComputedStyle(tip).display, "none", "touch immediately hides an existing hover tooltip");

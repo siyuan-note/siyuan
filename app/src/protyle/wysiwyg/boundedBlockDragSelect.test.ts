@@ -110,64 +110,63 @@ test("bounded selection resolves the scroll container after editor initializatio
 
 test("bounded mouse selection is enabled only for protected editor roots with block operations", () => {
     const f = fixture();
-    assert.equal(f.options.canStart("mouse"), true);
+    assert.equal(f.options.canStart(), true);
     f.setEditable("true");
-    assert.equal(f.options.canStart("mouse"), false);
-    assert.equal(f.options.canStart("touch"), true);
+    assert.equal(f.options.canStart(), false);
     f.setEditable("false");
     f.classes.add("fn__pointer-none");
-    assert.equal(f.options.canStart("mouse"), false, "padding drag retains ownership of its gesture");
+    assert.equal(f.options.canStart(), false, "padding drag retains ownership of its gesture");
     f.classes.clear();
     f.protyle.disabled = true;
-    assert.equal(f.options.canStart("touch"), false);
+    assert.equal(f.options.canStart(), false);
     f.protyle.disabled = false;
     f.setBacklink();
-    assert.equal(f.options.canStart("mouse"), false);
+    assert.equal(f.options.canStart(), false);
 });
 
 test("bounded selection starts in editable block content and leaves controls and nested editors alone", () => {
     const f = fixture();
-    assert.equal(f.options.getStartBlock(f.target(), "mouse"), f.blocks[0]);
-    assert.equal(f.options.getStartBlock(f.target(true), "mouse"), undefined);
-    assert.equal(f.options.getStartBlock(f.target(false, false), "mouse"), undefined);
-    assert.equal(f.options.getStartBlock(f.target(false, true, false), "mouse"), undefined);
+    assert.equal(f.options.getStartBlock(f.target()), f.blocks[0]);
+    assert.equal(f.options.getStartBlock(f.target(true)), undefined);
+    assert.equal(f.options.getStartBlock(f.target(false, false)), undefined);
+    assert.equal(f.options.getStartBlock(f.target(false, true, false)), undefined);
     f.enterMultiSelect();
-    assert.equal(f.options.getStartBlock(f.target(false, false), "touch"), f.blocks[0]);
+    assert.equal(f.options.getStartBlock(f.target(false, false)), undefined);
 });
 
 test("desktop completion uses existing block selection and a focusable block without reopening the editor root", () => {
     const f = fixture();
-    f.options.select(f.blocks[0], f.blocks[1], "mouse");
+    f.options.select(f.blocks[0], f.blocks[1]);
     assert.ok(f.states.every(state => state.has("protyle-wysiwyg--select")));
     assert.equal(f.state().selectionCleared, 1);
     assert.ok(f.classes.has("protyle-wysiwyg--hiderange"));
-    f.options.finish("mouse", false);
+    f.options.finish(false);
     assert.equal(f.state().focused, f.blocks[1]);
     assert.equal(f.state().modeElement, f.blocks[1]);
     assert.equal(f.classes.has("protyle-wysiwyg--hiderange"), false);
-    assert.equal(f.options.canStart("mouse"), true);
+    assert.equal(f.options.canStart(), true);
     assert.equal(f.state().gutterRestored, 0);
     f.flushFrames();
     assert.equal(f.state().gutterRestored, 1);
     assert.equal(f.state().gutterTarget, f.blocks[1]);
 });
 
-test("mobile completion retains the multi-select toolbar and cancellation does not steal focus", () => {
+test("mobile mouse completion retains the multi-select toolbar and cancellation does not steal focus", () => {
     const f = fixture(true);
-    f.options.select(f.blocks[0], f.blocks[1], "touch");
-    f.options.finish("touch", false);
+    f.options.select(f.blocks[0], f.blocks[1]);
+    f.options.finish(false);
     assert.equal(f.state().multiSelect, true);
     assert.equal(f.state().focused, undefined);
-    f.options.select(f.blocks[0], f.blocks[1], "touch");
+    f.options.select(f.blocks[0], f.blocks[1]);
     assert.equal(f.state().toolbarCount, 2);
-    f.options.finish("touch", true);
+    f.options.finish(true);
     f.flushFrames();
     assert.equal(f.state().gutterRestored, 0, "mobile keeps its multi-select toolbar");
     assert.equal(f.classes.has("protyle-wysiwyg--hiderange"), false);
     const removed = fixture();
-    removed.options.select(removed.blocks[0], removed.blocks[1], "mouse");
+    removed.options.select(removed.blocks[0], removed.blocks[1]);
     removed.detach();
-    removed.options.finish("mouse", false);
+    removed.options.finish(false);
     removed.flushFrames();
     assert.equal(removed.state().gutterRestored, 0);
     assert.equal(removed.state().focused, undefined);
@@ -175,8 +174,8 @@ test("mobile completion retains the multi-select toolbar and cancellation does n
 
 test("cancelled bounded selection does not restore a gutter after losing focus", () => {
     const f = fixture();
-    f.options.select(f.blocks[0], f.blocks[1], "touch");
-    f.options.finish("touch", true);
+    f.options.select(f.blocks[0], f.blocks[1]);
+    f.options.finish(true);
     f.flushFrames();
     assert.equal(f.state().gutterRestored, 0);
 });

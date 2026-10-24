@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"runtime/debug"
 	"sort"
 	"sync"
@@ -418,14 +417,10 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 	}
 	if op.indexTree != nil && op.action != "rename" {
-		tree := *op.indexTree
-		tree.HPath = treenode.CurrentTreeHPath(&tree)
-		op.indexTree = &tree
+		op.indexTree = currentDocumentIndexSnapshot(op.indexTree)
 	}
 	if op.upsertTree != nil && op.action == "upsert" {
-		tree := *op.upsertTree
-		tree.HPath = treenode.CurrentTreeHPath(&tree)
-		op.upsertTree = &tree
+		op.upsertTree = currentDocumentIndexSnapshot(op.upsertTree)
 	}
 	switch op.action {
 	case "index":
@@ -467,7 +462,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 			break
 		}
 
-		err = updateRootContent(tx, path.Base(op.indexTree.HPath), op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
+		err = updateRootContent(tx, treenode.ReadDocumentTitle(op.indexTree.Root).Text, op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
 		if nil == err {
 			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}

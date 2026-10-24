@@ -77,7 +77,7 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 
 func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 	boxID := tree.Box
-	title := tree.Root.IALAttr("title")
+	title := treenode.ReadDocumentTitle(tree.Root).Text
 	ret = &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 	scrollData := ret.IAL["scroll"]
@@ -195,7 +195,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		if nil == tree {
 			continue
 		}
-		title := tree.Root.IALAttr("title")
+		title := treenode.ReadDocumentTitle(tree.Root).Text
 		ret := &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
 		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 		scrollData := ret.IAL["scroll"]
@@ -307,18 +307,6 @@ func GetBlockRefText(id string) string {
 		return ErrBlockNotFound.Error()
 	}
 
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if n.IsTextMarkType("inline-memo") {
-			// Block ref anchor text no longer contains contents of inline-level memos https://github.com/siyuan-note/siyuan/issues/9363
-			n.TextMarkInlineMemoContent = ""
-			return ast.WalkContinue
-		}
-		return ast.WalkContinue
-	})
 	return getNodeRefText(node)
 }
 
@@ -408,11 +396,7 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 		return "Audio..."
 	case ast.NodeTabItem:
 		if title := treenode.TabTitleParagraph(node); nil != title {
-			ret := renderBlockText(title, nil, removeLineBreak)
-			if maxLen < utf8.RuneCountInString(ret) {
-				ret = gulu.Str.SubStr(ret, maxLen) + "..."
-			}
-			return ret
+			return getNodeRefText0(title, maxLen, removeLineBreak)
 		}
 	case ast.NodeAttributeView:
 		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
@@ -424,6 +408,26 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
+	}
+	if nil != node && ast.NodeDocument != node.Type {
+		hasMemo := false
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && n.IsTextMarkType("inline-memo") && "" != n.TextMarkInlineMemoContent {
+				hasMemo = true
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+		if hasMemo {
+			// 锚文本只保留可见文字，在副本上过滤备注以保留源块内容。
+			node = cloneRenderNode(node)
+			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.IsTextMarkType("inline-memo") {
+					n.TextMarkInlineMemoContent = ""
+				}
+				return ast.WalkContinue
+			})
+		}
 	}
 	ret := renderBlockText(node, nil, removeLineBreak)
 	if maxLen < utf8.RuneCountInString(ret) {

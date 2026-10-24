@@ -170,19 +170,23 @@ export type AISessionExtensionAISessionEntryStep = ({ "content"?: string | null;
 
 export type AISessionExtensionAISessionEntryStepInput = ({ "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAISessionFields = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntry> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessage> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAISessionFields = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntry> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessage> | null; "model"?: string | null; "permissionMode"?: string | null; "pinnedAt"?: number | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAISessionFieldsInput = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAISessionFieldsInput = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "pinnedAt"?: number | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
 
-export type AISessionFields = { "agentRunning"?: boolean; "alwaysAllow"?: boolean; "commitTurnID"?: string; "completionTokens"?: number; "contextCachedTokens"?: number; "contextLimit"?: number; "contextTokenBreakdown"?: Record<string, number>; "contextTokens"?: number; "createdAt"?: number; "entries"?: Array<AISessionEntry>; "expectedRevision"?: number; "id": string; "lastCommittedTurnID"?: string; "messageHistory"?: Array<string>; "messages"?: Array<AIAgentMessage>; "model"?: string; "permissionMode"?: string; "promptTokens"?: number; "recoveryRevision"?: number; "recoveryState"?: string; "recoveryTurnID"?: string; "revision"?: number; "snapshots"?: Array<string>; "title"?: string; "titled"?: boolean; "totalDuration"?: number; "updatedAt"?: number; };
+export type AISessionFields = { "agentRunning"?: boolean; "alwaysAllow"?: boolean; "commitTurnID"?: string; "completionTokens"?: number; "contextCachedTokens"?: number; "contextLimit"?: number; "contextTokenBreakdown"?: Record<string, number>; "contextTokens"?: number; "createdAt"?: number; "entries"?: Array<AISessionEntry>; "expectedRevision"?: number; "id": string; "lastCommittedTurnID"?: string; "messageHistory"?: Array<string>; "messages"?: Array<AIAgentMessage>; "model"?: string; "permissionMode"?: string; "pinnedAt"?: number; "promptTokens"?: number; "recoveryRevision"?: number; "recoveryState"?: string; "recoveryTurnID"?: string; "revision"?: number; "snapshots"?: Array<string>; "title"?: string; "titled"?: boolean; "totalDuration"?: number; "updatedAt"?: number; };
 
-export type AISessionFieldsInput = { "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; };
+export type AISessionFieldsInput = { "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "pinnedAt"?: number | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; };
 
 export type AISessionIDRequestInput = { "id"?: string | null; };
 
-export type AISessionIndex = { "agentRunning"?: boolean; "createdAt": number; "id": string; "title": string; "updatedAt": number; };
+export type AISessionIndex = { "agentRunning"?: boolean; "createdAt": number; "id": string; "pinnedAt"?: number; "title": string; "updatedAt": number; };
 
 export type AISessionList = { "page": number; "pageSize": number; "sessions": Array<AISessionIndex | null> | null; "total": number; };
+
+export type AISessionPinnedData = { "pinnedAt": number; };
+
+export type AISessionPinnedRequestInput = { "id": string; "pinned": boolean; };
 
 export type AISessionSaveData = { "revision": number; "session"?: AISessionExtensionAISessionFields; };
 
@@ -252,13 +256,13 @@ export type AVAutomationAction = { "avID"?: string; "fields": Record<string, AVA
 
 export type AVAutomationActionInput = { "avID"?: string; "fields": Record<string, AVAutomationValueInput | null>; "filters"?: Array<AVViewFilterInput | null>; "relationKeyID"?: string; "target": "current" | "related" | "filtered"; "type": "add" | "edit" | "collect"; };
 
-export type AVAutomationBlockAttribute = { "name": string; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
+export type AVAutomationBlockAttribute = { "name": string; "nameOperator"?: "" | "equals" | "contains" | "regex"; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockAttributeInput = { "name": string; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
+export type AVAutomationBlockAttributeInput = { "name": string; "nameOperator"?: "" | "equals" | "contains" | "regex"; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentDepth"?: number; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentIDs"?: Array<string>; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentDepth"?: number | null; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean | null; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
 export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
@@ -672,6 +676,12 @@ export type BacklinkContext = { "attributeViewTargets"?: Array<BacklinkAttribute
 
 export type BacklinkContextData = { "backlinks": Array<BacklinkContext | null> | null; "backmentions": Array<BacklinkContext | null> | null; "keywords": Array<string> | null; "revision": string; "unchanged": boolean; };
 
+export type BacklinkDatabase = { "id": string; "keys": Array<AVKey | null> | null; "name": string; };
+
+export type BacklinkDatabaseFilterInput = { "avID": string; "filters": Array<AVViewFilterInput | null>; };
+
+export type BacklinkDatabasesRequestInput = { "containChildren"?: boolean | null; "id": string; "keyword"?: string; "notebook"?: string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+
 export type BacklinkDocumentRequestInput = { "blockSort"?: number; "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
 
 export type BacklinkList = { "backlinks": Array<BacklinkPath | null> | null; "backmentions": Array<BacklinkPath | null> | null; "box": string; "k": string; "linkRefsCount": number; "mentionsCount": number; "mk": string; "revision": string; "unchanged": boolean; };
@@ -684,7 +694,7 @@ export type BacklinkRefDef = { "id": string; "path": string; "text": string; };
 
 export type BacklinkRefDefs = { "refDefs": Array<BacklinkRefDef | null> | null; };
 
-export type BacklinkSourceFilterInput = { "dailyNote"?: string | null; "excludeSelf"?: boolean | null; "excludedNotebookIDs"?: Array<string> | null; "excludedRefDefIDs"?: Array<string> | null; };
+export type BacklinkSourceFilterInput = { "dailyNote"?: string | null; "database"?: BacklinkDatabaseFilterInput | null; "excludeSelf"?: boolean | null; "excludedNotebookIDs"?: Array<string> | null; "excludedRefDefIDs"?: Array<string> | null; };
 
 export type BackmentionDocumentRequestInput = { "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; };
 
@@ -704,7 +714,7 @@ export type BatchUpdateBlockRequestInput = { "blocks": Array<UpdateBlockRequestI
 
 export type BatchUpdatePackageRequestInput = { "frontend": string; };
 
-export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "menuMouseScroll": boolean; "mobileBars": BazaarMobileBars | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": BazaarPDFTheme | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "lockScreenWallpaper": boolean; "menuMouseScroll": boolean; "mobileBars": BazaarMobileBars | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": BazaarPDFTheme | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type BazaarAppearanceIcon = { "label": string; "name": string; };
 
@@ -840,6 +850,10 @@ export type BroadcastPublishMessage = { "filename": string; "size": number; "typ
 
 export type BroadcastPublishResult = { "channel": BroadcastChannel; "code": number; "message": BroadcastPublishMessage; "msg": string; };
 
+export type CancelSyncCheckoutData = { "requested": boolean; };
+
+export type CancelSyncCheckoutRequestInput = { "taskID": string; };
+
 export type ChangeAttrViewLayoutRequestInput = { "avID": string; "blockID": string; "layoutType": string; };
 
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
@@ -896,9 +910,13 @@ export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": st
 
 export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
 
+export type CommitDataImportRequestInput = { "id": string; "mode": "skip" | "overwrite"; "password"?: string; };
+
 export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean; };
 
 export type ConfirmSettingsResetRequestInput = { "saved": boolean; "token": string; };
+
+export type ConfirmSyncCheckoutRequestInput = { "saved": boolean; "taskID": string; "token": string; };
 
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
@@ -922,6 +940,12 @@ export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string |
 
 export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; "useInputName"?: boolean | null; };
 
+export type CreateDocByParentRequest = { "clippingHref"?: string; "docCreateTemplatePath"?: string; "expectedParentRevision"?: string; "expectedTarget"?: DocumentTargetRevision; "id": string; "listDocTree"?: boolean; "markdown": string; "nameConditions"?: Array<DocumentNameCondition>; "notebook": string; "parentID": string | null; "sortPosition"?: "before" | "after"; "sortTargetID"?: string; "sorts"?: Array<string>; "tags"?: string; "title": DocumentCreateTitle; "withMath"?: boolean; };
+
+export type CreateDocByParentRequestInput = { "clippingHref"?: string; "docCreateTemplatePath"?: string; "expectedParentRevision"?: string; "expectedTarget"?: DocumentTargetRevisionInput; "id": string; "listDocTree"?: boolean; "markdown": string; "nameConditions"?: Array<DocumentNameConditionInput>; "notebook": string; "parentID": string | null; "sortPosition"?: "before" | "after"; "sortTargetID"?: string; "sorts"?: Array<string>; "tags"?: string; "title": DocumentCreateTitleInput; "withMath"?: boolean; };
+
+export type CreateDocByParentResult = (CreatedDocumentData & { "commitState"?: never; "completed"?: never; "reason"?: never; "stage"?: never; }) | (DocumentCreateFailure & { "document"?: never; });
+
 export type CreateDocHistoryRequestInput = { "id": string; };
 
 export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
@@ -937,6 +961,8 @@ export type CreateRiffDeckRequestInput = { "name": string; };
 export type CreateSnapshotData = { "created": boolean; "id": string; };
 
 export type CreateSnapshotRequestInput = { "memo"?: string; };
+
+export type CreatedDocumentData = { "document": DocumentPath; "id": string; };
 
 export type Criterion = { "group": number; "hPath": string; "hasReplace": boolean; "idPath": Array<string> | null; "k": string; "method": number; "name": string; "r": string; "replaceTypes": CriterionReplaceTypes | null; "sort": number; "subTypes": SearchSubTypes; "types": CriterionTypes | null; };
 
@@ -959,6 +985,12 @@ export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "
 export type DailyNoteInfo = { "existed": boolean; "hPath": string; "id": string; "title": string; };
 
 export type DailyNoteInfoRequestInput = { "date"?: string | null; "notebook": string; };
+
+export type DataImportPlan = { "conflicts": Array<string> | null; "encrypted": Array<string> | null; "id": string; };
+
+export type DataImportRequestInput = { "id": string; };
+
+export type DataImportResult = { "skipped": Array<string> | null; };
 
 export type DeleteBlockRequestInput = { "id": string; };
 
@@ -1000,7 +1032,49 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
+export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
+
+export type DocumentCapabilities = { "addressingVersion": number; "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "minimumReaderVersion": string | null; "modeState": "legacy" | "structured" | "conflict" | "recovering"; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
+
+export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "modeConflict" | "writeFailed"; "stage": string; };
+
+export type DocumentCreatePlan = { "existingID"?: string; "notebook": string; "steps": Array<CreateDocByParentRequest>; "title": string; };
+
+export type DocumentCreateTarget = (LegacyDocumentTarget & { "anchor"?: never; "onMissingParent"?: never; "parents"?: never; "title"?: never; "up"?: never; }) | (StructuredDocumentTarget & { "path"?: never; });
+
+export type DocumentCreateTargetData = { "docCreateTemplatePath": string; "revision": string; "target": DocumentCreateTarget; };
+
+export type DocumentCreateTitle = { "format": string; "text": string; };
+
+export type DocumentCreateTitleInput = { "format": string; "text": string; };
+
+export type DocumentLocation = { "id": string | null; "notebook": string; "revision": string; };
+
+export type DocumentNameCondition = { "expectedID": string | null; "parentID": string | null; "title": string; };
+
+export type DocumentNameConditionInput = { "expectedID": string | null; "parentID": string | null; "title": string; };
+
+export type DocumentPath = { "addressingVersion": number; "depth": number; "displayPath": string; "id": string; "notebook": string; "parentID": string | null; "path": string; "revision": string; "segments": Array<DocumentPathSegment> | null; "title": DocumentTitle; };
+
+export type DocumentPathSegment = { "empty": boolean; "id": string; "text": string; };
+
+export type DocumentPathStartInput = { "id"?: string; "kind": "root" | "document"; };
+
+export type DocumentPathsData = { "documents": Array<DocumentPath> | null; "missingIDs": Array<string> | null; };
+
+export type DocumentPathsResult = (DocumentPathsData & { "reason"?: never; }) | (DocumentAddressingFailure & { "documents"?: never; "missingIDs"?: never; });
+
 export type DocumentPreviewImage = { "notebook": string; "src": string; "video"?: string; };
+
+export type DocumentTargetAnchor = { "id"?: string; "kind": "notebookRoot" | "context" | "document"; };
+
+export type DocumentTargetAnchorInput = { "id"?: string; "kind": "notebookRoot" | "context" | "document"; };
+
+export type DocumentTargetRevision = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; "revision": string; };
+
+export type DocumentTargetRevisionInput = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; "revision": string; };
+
+export type DocumentTitle = { "empty": boolean; "format": "plain"; "text": string; };
 
 export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
@@ -1104,6 +1178,8 @@ export type FileTreeCreateRequestInput = { "docCreateTemplatePath"?: string | nu
 
 export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath": string; "path": string; };
 
+export type FileTreeCreateSavePathResult = (FileTreeCreateSavePathData & { "reason"?: never; }) | (StructuredTemplateRequired & { "box"?: never; "docCreateTemplatePath"?: never; "path"?: never; });
+
 export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "date"?: string | null; "notebook": string; };
 
 export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
@@ -1164,7 +1240,9 @@ export type FileTreeReorderRequestInput = { "position"?: string | null; "preview
 
 export type FileTreeSavePathData = { "box": string; "path": string; };
 
-export type FileTreeSearchDoc = { "alias"?: string; "box": string; "boxIcon": string; "dueFlashcardCount"?: string; "flashcardCount"?: string; "hPath": string; "name"?: string; "newFlashcardCount"?: string; "path": string; };
+export type FileTreeSavePathResult = (FileTreeSavePathData & { "reason"?: never; }) | (StructuredTemplateRequired & { "box"?: never; "path"?: never; });
+
+export type FileTreeSearchDoc = { "alias"?: string; "box": string; "boxIcon": string; "dueFlashcardCount"?: string; "flashcardCount"?: string; "hPath": string; "name"?: string; "newFlashcardCount"?: string; "path": string; "title"?: string; };
 
 export type FileTreeSearchRequestInput = { "excludeIDs"?: Array<string> | null; "flashcard"?: boolean | null; "k": string; };
 
@@ -1486,6 +1564,10 @@ export type GetCloudRepoSnapshotsRequestInput = { "endTime"?: number; "page": nu
 
 export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; "groupID"?: string | null; "id": string; "query"?: string | null; "viewID"?: string | null; };
 
+export type GetDocCreateTargetRequestInput = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; };
+
+export type GetDocPathsRequestInput = { "ids": Array<string>; "notebook": string; };
+
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
 export type GetInstalledIconRequestInput = { "keyword"?: string | null; };
@@ -1664,6 +1746,14 @@ export type JSONValue = null | boolean | number | string | Array<JSONValue> | { 
 
 export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": string; };
 
+export type LegacyDocumentTarget = { "notebook": string; "path": string; "version": 1; };
+
+export type LegacyPathDocumentResult = string | LegacyPathUnsupported;
+
+export type LegacyPathIDsResult = Array<string> | null | LegacyPathUnsupported;
+
+export type LegacyPathUnsupported = { "reason": "legacyPathUnsupported"; };
+
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
@@ -1792,11 +1882,11 @@ export type NotebookArchiveCandidatesData = { "notebooks": Array<NotebookArchive
 
 export type NotebookArchiveData = { "file": string; "id": string; };
 
-export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "sort": number; "sortMode": number; };
+export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTarget"?: StructuredDocumentTarget; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTarget"?: StructuredDocumentTarget; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "refCreateTarget"?: StructuredDocumentTarget; "sort": number; "sortMode": number; };
 
-export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "name": string; };
+export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "documentCapabilities"?: DocumentCapabilities; "name": string; };
 
-export type NotebookConfPatchInput = { "boxCrypt"?: NotebookEncryptionPatchInput | null; "closed"?: boolean | null; "dailyNoteSavePath"?: string | null; "dailyNoteTemplatePath"?: string | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "encrypted"?: boolean | null; "icon"?: string | null; "name"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "sort"?: number | null; "sortMode"?: number | null; };
+export type NotebookConfPatchInput = { "boxCrypt"?: NotebookEncryptionPatchInput | null; "closed"?: boolean | null; "dailyNoteSavePath"?: string | null; "dailyNoteTarget"?: StructuredDocumentTargetInput | null; "dailyNoteTemplatePath"?: string | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTarget"?: StructuredDocumentTargetInput | null; "docCreateTemplatePath"?: string | null; "encrypted"?: boolean | null; "icon"?: string | null; "name"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "refCreateTarget"?: StructuredDocumentTargetInput | null; "sort"?: number | null; "sortMode"?: number | null; };
 
 export type NotebookCryptoAutoLockRequestInput = { "autoLockMinutes": number; };
 
@@ -1875,6 +1965,8 @@ export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number;
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "settingsWindow"?: boolean; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+
+export type PlanDocCreateRequestInput = { "contextID"?: string | null; "date"?: string; "id": string; "notebook": string; "placement"?: "configured" | "child"; "purpose": "document" | "reference" | "dailyNote"; "reuse"?: boolean; "title"?: string; };
 
 export type PluginPublishInfo = { "fields": Array<string>; "granted": boolean; "resources": Array<string>; };
 
@@ -2030,6 +2122,12 @@ export type ResetRiffCardsRequestInput = { "blockIDs"?: Array<string> | null; "d
 
 export type ResetSettingsRequestInput = { "exit"?: boolean; };
 
+export type ResolveDocPathRequestInput = { "notebook": string; "segments": Array<string>; "start": DocumentPathStartInput; };
+
+export type ResolveDocPathResult = (ResolvedDocumentPathData & { "reason"?: never; }) | (DocumentAddressingFailure & { "candidates"?: never; "candidatesTruncated"?: never; "nameConditions"?: never; "nextIndex"?: never; "resolved"?: never; "start"?: never; "status"?: never; });
+
+export type ResolvedDocumentPathData = { "candidates": Array<DocumentPath> | null; "candidatesTruncated": boolean; "nameConditions": Array<DocumentNameCondition> | null; "nextIndex": number; "resolved": DocumentPath | null; "start": DocumentLocation; "status": "resolved" | "missing" | "ambiguous"; };
+
 export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "durationMS"?: number | null; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
 export type RichClipboardAssetInput = { "box"?: string; "index": number; "path": string; };
@@ -2146,7 +2244,7 @@ export type SearchWidgetResult = { "content": string; "name": string; };
 
 export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
 
-export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
+export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "lockScreenWallpaper"?: boolean | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SetAssetAnnotationRequestInput = { "data": string; "path": string; };
 
@@ -2180,7 +2278,7 @@ export type SetEntryVisibilityRequestInput = { "active"?: string | null; "profil
 
 export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
-export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
+export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "closeWindowOnLastTabClosed"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
 export type SetFlashcardEditLaterRequestInput = { "cardID": string; "changedAt": number; "enabled": boolean; "expectedRevisionID"?: string; "note"?: string; "operationID": string; };
 
@@ -2240,13 +2338,13 @@ export type SettingAgentSkills = { "builtinDisabled": Array<string> | null; "use
 
 export type SettingAgentSkillsInput = { "builtinDisabled"?: Array<string> | null; "userEnabled"?: Array<string> | null; };
 
-export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "menuMouseScroll": boolean; "mobileBars": SettingMobileBars | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": SettingPDFTheme | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "compactMode": boolean; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "lockScreenWallpaper": boolean; "menuMouseScroll": boolean; "mobileBars": SettingMobileBars | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "outlineKeepCurrentExpand": boolean; "pdfTheme": SettingPDFTheme | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type SettingAppearanceIcon = { "label": string; "name": string; };
 
 export type SettingAppearanceIconInput = { "label"?: string | null; "name"?: string | null; };
 
-export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
+export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "lockScreenWallpaper"?: boolean | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SettingAppearanceTheme = { "frontends"?: Array<string>; "label": string; "name": string; };
 
@@ -2342,9 +2440,9 @@ export type SettingExport = { "addTitle": boolean; "blockEmbedMode": number; "bl
 
 export type SettingExportInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
-export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickMode": number; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocTitleClickMode": number; "recentDocsMaxListCount": number; "recentDocsSort": string; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
+export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "closeWindowOnLastTabClosed": boolean | null; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickMode": number; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocTitleClickMode": number; "recentDocsMaxListCount": number; "recentDocsSort": string; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
 
-export type SettingFileTreeInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
+export type SettingFileTreeInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "closeWindowOnLastTabClosed"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
 export type SettingFlashcard = { "ankiConnectEnabled": boolean; "ankiConnectLocalWithoutKey": boolean; "ankiConnectNotebook": string; "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "openMode": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
 
@@ -2492,9 +2590,21 @@ export type StorageSetKeysRequestInput = { "app"?: string | null; "keyVals": { [
 
 export type StorageSetRequestInput = { "app"?: string | null; "key": string; "val"?: JSONValue | null; };
 
+export type StructuredDocumentTarget = { "anchor": DocumentTargetAnchor; "notebook": string; "onMissingParent": "create" | "error"; "parents": Array<string>; "title": string; "up": number; "version": 2; };
+
+export type StructuredDocumentTargetInput = { "anchor": DocumentTargetAnchorInput; "notebook": string; "onMissingParent": "create" | "error"; "parents": Array<string>; "title": string; "up": number; "version": 2; };
+
+export type StructuredTemplateRequired = { "reason": "structuredTemplateRequired"; };
+
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "originalToEmbed"?: boolean; "refID": string; };
 
 export type SyncAssetDownloadModeData = { "assetDownloadMode": number; };
+
+export type SyncCheckoutClientRequestInput = { "appID"?: string; "clientID"?: string; };
+
+export type SyncCheckoutSnapshot = { "kernelID": string; "revision": number; "task": SyncCheckoutState | null; };
+
+export type SyncCheckoutState = { "blocking": boolean; "canceling": boolean; "current": number; "message": string; "phase": string; "removeRootIDs": Array<string>; "revision": number; "taskID": string; "token": string; "total": number; "upsertRootIDs": Array<string>; };
 
 export type SyncEnabledRequestInput = { "enabled": boolean; };
 
@@ -2560,13 +2670,15 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "documentAddressingVersion": number; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
 export type SystemCustomFont = { "aliases"?: Array<string>; "displayName": string; "family": string; "id": string; "spacing"?: string; "url": string; "weight": number; };
 
 export type SystemD3 = { "arrow": boolean; "centerStrength": number; "collideRadius": number; "collideStrength": number; "lineOpacity": number; "linkDistance": number; "linkWidth": number; "nodeSize": number; };
+
+export type SystemDownloadUpdateRequestInput = { "version": string; };
 
 export type SystemEmoji = { "description": string; "description_ja_jp": string; "description_zh_cn": string; "keywords": string; "unicode": string; };
 
@@ -2666,6 +2778,8 @@ export type SystemTypeFilter = { "blockquote": boolean; "callout": boolean; "cod
 
 export type SystemUILayoutRequestInput = { "layout"?: { [key: string]: JSONValue } | null; };
 
+export type SystemWallpaperUploadRequestInput = { "file": Blob; };
+
 export type SystemWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
 
 export type SystemWorkspace = { "closed": boolean; "path": string; };
@@ -2698,9 +2812,13 @@ export type TemplatePlan = { "count": number; "id": string; "nodes": Array<Templ
 
 export type TemplatePlanNode = { "depth": number; "hPath": string; "id": string; "parentID": string; "title": string; };
 
+export type TestSyncProviderLocalRequestInput = { "local": SyncLocalInput; };
+
 export type TestSyncProviderS3Data = { "kind": string; "msg": string; };
 
 export type TestSyncProviderS3RequestInput = { "s3": SyncS3Input; };
+
+export type TestSyncProviderWebDAVRequestInput = { "cloudName"?: string; "webdav": SyncWebDAVInput; };
 
 export type Transaction = { "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
 
@@ -2968,6 +3086,20 @@ export interface APIGETRoutes {
         contentVariants: [{"status":200,"contentType":"image/png"}];
     };
     /**
+     * 无需登录，仅返回已启用的单张壁纸，不接受文件路径或笔记本参数。
+     * 成功返回 image/jpeg 且禁止缓存；未启用、文件缺失或不可读时返回无正文的 404，认证页保留默认背景。
+     */
+    "/api/system/getLockScreenWallpaper": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
+        output: "binary";
+        emptyResponseStatuses: [404];
+        contentVariants: [{"status":200,"contentType":"image/jpeg"}];
+    };
+    /**
      * 从 URL 查询参数读取 state、code 和 error，验证登录事务及会话绑定，不读取请求体。
      */
     "/api/system/oidc/callback": {
@@ -3127,7 +3259,8 @@ export interface APIPOSTRoutes {
         additionalErrorStatuses: [409];
     };
     /**
-     * 返回工作空间 data/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+     * 返回工作空间 data/storage/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+     * 兼容读取旧路径 data/ai/AGENTS.md，读取不迁移；两处内容不同时返回 code=-1，保留两份文件并提示合并。
      * 缺失文件返回空 content 和 missing 修订，不创建文件；非 UTF-8 文本、超出 32 KiB 或读取失败返回 code=-1。
      */
     "/api/ai/agent/getInstructions": {
@@ -3162,6 +3295,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Filter by title, then paginate sessions with pinned entries first, ordered by pinnedAt descending.
+     * Unpinned sessions retain createdAt descending order; equal timestamps use descending session IDs.
+     * Missing pinnedAt in older sessions means unpinned. Pinning survives index reconstruction.
+     */
     "/api/ai/agent/lsSessions": {
         request: AISessionsRequestInput;
         response: { "code": 0; "data": AISessionList; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3220,6 +3358,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * Save conversation content with revision checks. The stored pinnedAt is preserved regardless of the
+     * submitted snapshot; clients must use setPinned to update list pinning independently of active turns.
+     */
     "/api/ai/agent/saveSession": {
         request: AISessionExtensionAISessionFieldsInput;
         response: { "code": 0; "data": AISessionSaveData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "revision"?: never; "session"?: never; }) | null | (AISessionSaveData & { "closeTimeout"?: never; }); "msg": string; };
@@ -3238,6 +3380,7 @@ export interface APIPOSTRoutes {
     /**
      * 接收 content 和读取时的 revision，要求管理员权限且禁止只读写入。
      * 内容允许为空；修订冲突返回 code=-1 并保留原文。保存采用原子替换，并按工作空间同步忽略规则通知同步。
+     * 首次保存迁移旧路径 data/ai/AGENTS.md，先持久化原文到新路径再移除旧文件；旧路径的忽略规则需在保存前更新。
      * 指令在下一轮用户对话生效，同轮工具调用和压缩使用固定快照，且不能覆盖工具权限、审批或访问控制。
      */
     "/api/ai/agent/setInstructions": {
@@ -3251,6 +3394,19 @@ export interface APIPOSTRoutes {
         request: AIPermissionRequestInput;
         response: { "code": 0; "data": AIPermissionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * Persist pinning for an existing session. Requires administrator write access.
+     * pinned is a required boolean. Repeated pin requests preserve the original millisecond timestamp;
+     * unpinning returns pinnedAt=0. Missing or corrupt sessions fail without replacing their data.
+     * Pinning does not change conversation revisions, timestamps or active turns; stale saveSession requests cannot overwrite it.
+     */
+    "/api/ai/agent/setPinned": {
+        request: AISessionPinnedRequestInput;
+        response: { "code": 0; "data": AISessionPinnedData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
@@ -3498,6 +3654,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 在隔离目录解压并预检完整输出集合的能力记录及文档源，失败时不写入目标。
+     * 实际复制仍重新检查目标；后续并发变化或 I/O 失败可能留下已完成条目，不承诺整批回滚。
+     */
     "/api/archive/unzip": {
         request: UnzipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3505,6 +3665,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 的输出位置遵守笔记本能力及原始文档保护，不能用压缩文件覆盖文档源或能力记录。
+     */
     "/api/archive/zip": {
         request: ZipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3613,6 +3776,12 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
         output: "binary";
     };
+    /**
+     * 扫描已打开笔记本中的丢失资源，成功时返回列表（无丢失资源时为空数组）。
+     * 资源清单读取、笔记本枚举、目录遍历失败或 panic 时返回 code -1、data null。
+     * 单篇文档无法读取时继续扫描其他文档，最终也返回 code -1，msg 包含被跳过的路径，不发布不完整的列表。
+     * 保留管理员鉴权和加密笔记本请求租约，不改变资源存在性判定或任何持久化格式。
+     */
     "/api/asset/getMissingAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4271,6 +4440,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 取消请求会停止当前下载及后续更新；已提交的包会保留并完成运行时刷新。
+     */
     "/api/bazaar/batchUpdatePackage": {
         request: BatchUpdatePackageRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4398,7 +4570,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarIcon": {
@@ -4409,7 +4581,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarPlugin": {
@@ -4420,7 +4592,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTemplate": {
@@ -4431,7 +4603,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarTheme": {
@@ -4442,7 +4614,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
      * 请求取消会中止下载、解压及尚未提交的替换；已提交的安装不会回滚，仍完成运行时刷新。
      */
     "/api/bazaar/installBazaarWidget": {
@@ -4502,7 +4674,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+     * 安装完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+     * 请求取消会中止下载、解压及尚未提交的替换；已提交的更新不会回滚。
      */
     "/api/bazaar/updateBazaarPackage": {
         request: UpdateBazaarPackageRequestInput;
@@ -5374,6 +5547,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 在写入前检查笔记本寻址模式，不兼容或试图覆盖本机能力下界记录时返回 -1。
+     * 目标为文档 ID 路径时，未知格式和标题冲突均返回 -1；实际写入在文件锁内重新校验现有源，不规范化内容。
+     * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有源的读取和恢复不受此写入检查影响。
+     * 工作空间外的加密资源解密导出仍要求既有授权和操作租约。
+     */
     "/api/file/copyFile": {
         request: CopyFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5396,6 +5575,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
+     * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
+     * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
+     */
     "/api/file/globalCopyFiles": {
         request: CopyFilesRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5403,6 +5588,13 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 在创建目录、写入内容及更新时间前校验笔记本寻址模式和待写配置；不兼容时返回 -1。
+     * 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
+     * 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
+     * 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
+     * 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
+     */
     "/api/file/putFile": {
         request: PutFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5417,6 +5609,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 对不支持寻址模式的笔记本拒绝部分删除，返回 -1；整本删除保留已确认的本机能力下界。
+     * 不能删除本机 conf/document-addressing.json 或其父目录，既有加密笔记本删除限制不变。
+     */
     "/api/file/removeFile": {
         request: RemoveFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5424,6 +5620,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 在创建目标父目录或移动源文件前预检笔记本寻址能力，不支持的模式返回 -1。
+     * 移入由笔记本及文档 ID 组成的 .sy 路径时检查全部源文档；未知格式或标题冲突返回 -1，保留来源。
+     * 新移入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
+     * 不能借重命名覆盖、移动或删除本机 conf/document-addressing.json；既有加密边界不变。
+     */
     "/api/file/renameFile": {
         request: RenameFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 409 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5431,6 +5633,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
+     * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
+     * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
+     */
     "/api/file/workspaceCopyFiles": {
         request: CopyFilesRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5468,12 +5676,29 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
+     * 在显式父文档 ID 或 null 根位置创建固定 ID 文档，不接收 path/hPath 或名称回退。
+     * title.format 首版只接受 plain，text 可为空；无效字符、超长标题及不支持的格式原样拒绝，不截断或清洗。
+     * 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
+     * ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
+     * 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
+     * 普通构建默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，内部兼容模式 1 仍拒绝 /。
+     * 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
+     */
+    "/api/filetree/createDocByParent": {
+        request: CreateDocByParentRequestInput;
+        response: { "code": 0; "data": CreateDocByParentResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | CreateDocByParentResult; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
      * 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
      * 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
+     * 模式 2 对整个笔记本返回 legacyPathUnsupported，即使提供 parentID；改用 createDocByParent。
      */
     "/api/filetree/createDocWithMd": {
         request: FileTreeCreateMarkdownRequestInput;
-        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": LegacyPathDocumentResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | LegacyPathDocumentResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
@@ -5513,12 +5738,40 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 旧模板保持既有渲染及回退；对应的新目标对象生效时返回 structuredTemplateRequired，不读取历史路径。
+     */
     "/api/filetree/getDocCreateSavePath": {
         request: FileTreeNotebookRequestInput;
-        response: { "code": 0; "data": FileTreeCreateSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": FileTreeCreateSavePathResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeCreateSavePathResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 返回指定用途的有效目标及正文模板，不渲染模板、不猜测上下文或日期。
+     * version=1 保留旧路径语法；version=2 独立保存祖先和标题段。revision 覆盖生效配置及继承来源，
+     * 由配置创建时传回 expectedTarget，配置变化即返回 planChanged。读取需管理员及源笔记本操作租约。
+     */
+    "/api/filetree/getDocCreateTarget": {
+        request: GetDocCreateTargetRequestInput;
+        response: { "code": 0; "data": DocumentCreateTargetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 在指定笔记本内按文档 ID 读取结构化祖先链，要求管理员权限，加密响应保留操作租约。
+     * ids 必须包含 1 至 128 项，按首次出现顺序去重；缺失、其他笔记本或内容块身份列入 missingIDs。
+     * 文档标题、segments 与 revision 来自同一快照，displayPath 仅用于显示，不能反向解析身份。
+     * 索引未就绪返回 indexUnavailable，源格式和认证错误不能伪装成缺失；批量结果不承诺全局快照。
+     */
+    "/api/filetree/getDocPaths": {
+        request: GetDocPathsRequestInput;
+        response: { "code": 0; "data": DocumentPathsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | DocumentPathsResult; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/filetree/getFullHPathByID": {
         request: FileTreeOptionalIDRequestInput;
@@ -5548,9 +5801,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 在兼容模式保留旧名称路径查询；模式 2 整本返回 legacyPathUnsupported，改用 resolveDocPath。
+     */
     "/api/filetree/getIDsByHPath": {
         request: FileTreeOptionalPathRequestInput;
-        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": LegacyPathIDsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | LegacyPathIDsResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
@@ -5582,7 +5838,7 @@ export interface APIPOSTRoutes {
     };
     "/api/filetree/getRefCreateSavePath": {
         request: FileTreeNotebookRequestInput;
-        response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": FileTreeSavePathResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSavePathResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
@@ -5643,6 +5899,20 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 只读编译有效创建目标，同一次计划使用相同时间，日期可指定为 YYYY-MM-DD。
+     * contextID 是源笔记本内的文档，child 使用该位置，configured 使用配置目标；title 可显式替换最终标题。
+     * 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
+     * reuse 仅用于明确允许复用的业务。existingID 非空时不再创建；普通新建应保持 reuse=false。
+     * 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
+     */
+    "/api/filetree/planDocCreate": {
+        request: PlanDocCreateRequestInput;
+        response: { "code": 0; "data": DocumentCreatePlan; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
     "/api/filetree/removeDoc": {
         request: FileTreePathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5692,6 +5962,23 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 从显式根位置或父文档 ID 逐级精确匹配 0 至 128 个非空标题段，只解析不创建。
+     * 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
+     * candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
+     * 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
+     * 索引未就绪返回 indexUnavailable；普通构建默认保留段内 /，内部兼容模式 1 仍遵守原有标题限制。
+     */
+    "/api/filetree/resolveDocPath": {
+        request: ResolveDocPathRequestInput;
+        response: { "code": 0; "data": ResolveDocPathResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ResolveDocPathResult; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留兼容展示 hPath，并单独返回文档或笔记本的纯文本 title；客户端不能从 hPath 拆出标题或层级。
+     */
     "/api/filetree/searchDocs": {
         request: FileTreeSearchRequestInput;
         response: { "code": 0; "data": Array<FileTreeSearchDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6317,6 +6604,16 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 取消尚未提交的 Data.zip 预检，包括过期预检；不能删除已提交批次的恢复材料。
+     */
+    "/api/import/cancelDataImport": {
+        request: DataImportRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/import/cancelImportSY": {
         request: ImportTokenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6330,6 +6627,19 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 按路径覆盖并保留目标独有文件，skip 保留冲突目录及其密钥材料，返回明确的跳过清单。
+     * 导入加密内容必须提供可认证兼容密钥的主密码；不同数据密钥或加密状态不能直接合并。
+     * 旧备份不回退当前密码或丢弃历史密钥；完整预检后提交，失败和中断可回滚，加密笔记本保持锁定。
+     * 成功批次的原件、旧密文和密钥材料保留在工作空间 conf/data-imports 下。
+     */
+    "/api/import/commitDataImport": {
+        request: CommitDataImportRequestInput;
+        response: { "code": 0; "data": DataImportResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/continueImportSY": {
         request: ContinueImportSYRequestInput;
@@ -6345,6 +6655,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 旧 Data.zip 入口仍拒绝覆盖已有加密笔记本，也拒绝加密来源覆盖同 ID 的普通笔记本。
+     * 不会隐式选择冲突策略；交互式冲突处理使用 prepareDataImport、commitDataImport 和 cancelDataImport。
+     */
     "/api/import/importData": {
         request: ImportDataRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6403,6 +6717,19 @@ export interface APIPOSTRoutes {
     "/api/import/importZipMd": {
         request: ImportZipMarkdownRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 预检 Data.zip 并保存原件，返回加密冲突及需要认证的笔记本 ID，不修改活动数据。
+     * 预检有效期为 30 分钟；提交前必须显式选择 skip 或 overwrite，取消会移除尚未提交的暂存文件。
+     * 过期且未提交的预检在启动或下一次导入时清理；预检失败时也清理本次暂存副本。
+     * 存在未完成批次时，先在独占访问下恢复；恢复失败会继续阻断其他写入、笔记本操作和同步。
+     */
+    "/api/import/prepareDataImport": {
+        request: ImportDataRequestInput;
+        response: { "code": 0; "data": DataImportPlan; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
@@ -6566,6 +6893,9 @@ export interface APIPOSTRoutes {
         output: "proxy";
         proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
+    /**
+     * 在改密恢复、密钥切换及迁移记录写入前预检全部现存加密笔记本，不支持的寻址模式返回 -1。
+     */
     "/api/notebook/changeMasterPassword": {
         request: ChangeMasterPasswordRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6590,6 +6920,7 @@ export interface APIPOSTRoutes {
     /**
      * 移出已导出的加密笔记本，要求管理员权限并禁止只读模式；saved: true 表示用户确认已保存归档。
      * 提交前重新检查源文件，内容变化需重新导出；重复提交同一归档不会重复移出，未选择的笔记本不受影响。
+     * 移出前重新检查笔记本寻址能力，不支持的模式返回 -1，保留原归档及源目录。
      */
     "/api/notebook/commitNotebookArchive": {
         request: CommitNotebookArchiveRequestInput;
@@ -6647,6 +6978,17 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * preserves existing configuration and permission filtering. Administrator
+     * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
+     * not permission to open a closed or locked notebook. Ordinary builds migrate to mode 2
+     * automatically without a user setting or special build flags. literalSlash requires consistent
+     * mode records and ready indexes. minimumReaderVersion stays null until the minimum compatible
+     * feature release is verified; it neither controls activation nor permits mixing with older clients.
+     * Revision covers configuration, confirmed capability and recovery records, not a document path.
+     * Malformed capability records fail the request; authentication, locking and network failures must
+     * never be interpreted as an absent capability object or as permission to retry a legacy write.
+     */
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
         response: { "code": 0; "data": NotebookConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6664,6 +7006,7 @@ export interface APIPOSTRoutes {
     /**
      * 接收 multipart 的 file、旧 password 和可选密钥备份 key，要求管理员权限并禁止只读模式。
      * 恢复目标必须关闭同步，且没有加密密钥配置或加密数据；密文全部通过认证后才发布，恢复后保持锁定。
+     * 认证后、安装任何数据或密钥前检查全部源身份的寻址能力；不能通过旧归档降低本机已确认的要求。
      */
     "/api/notebook/importNotebookArchive": {
         request: ImportNotebookArchiveRequestInput;
@@ -6710,6 +7053,7 @@ export interface APIPOSTRoutes {
     /**
      * 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
      * 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
+     * 不支持笔记本寻址模式时返回 -1，保留源目录及密钥材料。
      */
     "/api/notebook/prepareNotebookArchive": {
         request: PrepareNotebookArchiveRequestInput;
@@ -6780,6 +7124,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 解锁及挂载均检查笔记本寻址能力；不支持的模式不会发布解锁状态或修复源数据。
+     */
     "/api/notebook/unlockAndOpenNotebook": {
         request: UnlockNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6787,6 +7134,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 在密钥恢复和解锁转换前拒绝不支持的笔记本寻址模式，保留原密文和恢复材料。
+     */
     "/api/notebook/unlockNotebook": {
         request: UnlockNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6903,6 +7253,13 @@ export interface APIPOSTRoutes {
         output: "directJSON";
         noContent: true;
     };
+    /**
+     * 执行全局派生索引库 SQL，要求管理员身份及可写运行环境。
+     * mode 省略、null 或空字符串时允许单条读写语句；readonly 仅允许单条只读 SELECT 或 WITH 查询。
+     * multiple 按顺序执行多条读写语句，返回最后一条的结果；失败后停止，已完成的写入不自动回滚。
+     * 无结果列的语句成功时返回空数组，RETURNING 保留结果行；校验失败返回 -1，执行失败返回 1。
+     * 返回行数沿用搜索上限及显式外层 LIMIT 规则；直接修改索引不更新源文档、全文索引和块缓存。
+     */
     "/api/query/sql": {
         request: SQLQueryRequestInput;
         response: { "code": 0; "data": Array<Record<string, null | string | number | boolean> | null>; "limit": number; "msg": string; "truncated": boolean; } | ({ "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "limit"?: never; "truncated"?: never; });
@@ -6912,6 +7269,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
+     * 可选 sourceFilter.database 按单个数据库的字段筛选反链及数量，不影响提及或数据库原视图。
      */
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
@@ -6920,6 +7278,21 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 返回实际绑定反链来源的数据库名称及字段元数据，不返回条目值。
+     * 忽略当前数据库条件并应用其他来源限制；发布读者不可查询，保持加密笔记本隔离及请求租约。
+     */
+    "/api/ref/getBacklinkDatabases": {
+        request: BacklinkDatabasesRequestInput;
+        response: { "code": 0; "data": Array<BacklinkDatabase | null> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * sourceFilter.database 在父块合并前按来源块的数据库字段筛选，不修改原数据库视图。
+     * 无条件仅筛数据库成员，失效字段不放宽结果；原来源筛选、排序及加密笔记本租约保持不变。
+     */
     "/api/ref/getBacklinkDoc": {
         request: BacklinkDocumentRequestInput;
         response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6937,6 +7310,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 数据库条件与列表快照一致，不修改来源数据或原数据库视图。
+     */
     "/api/ref/getGlobalBacklinkContexts": {
         request: GlobalBacklinkContextRequestInput;
         response: { "code": 0; "data": GlobalBacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6944,6 +7320,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * sourceFilter.database 在完整结果分页前求值，快照绑定全部筛选条件；原分页、排序和访问检查保持不变。
+     */
     "/api/ref/getGlobalBacklinks": {
         request: GlobalBacklinkListRequestInput;
         response: { "code": 0; "data": GlobalBacklinkListData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7787,6 +8166,18 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 清空当前工作区的全部最近浏览、打开和关闭记录，不删除文档，也不修改文档创建和修改时间。
+     * 记录不参与数据同步；后续浏览、打开或关闭文档会重新产生记录。最近创建和最近修改列表不受影响。
+     * 仅允许可写工作区的管理员调用，无需请求参数；重复清空仍返回成功。
+     */
+    "/api/storage/clearRecentDocs": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/storage/getCriteria": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<Criterion | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7955,6 +8346,20 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
     };
     /**
+     * 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
+     * requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。
+     * 取消同时传递到准备、云端请求和文件替换边界，保留已完成文件并清理当前临时文件。
+     * 解除界面编辑阻挡前同步已落盘变更的索引；不回滚已完成文件，不改变全部下载或按需下载设置。
+     * 只读模式可请求取消，不会更改同步配置；调用要求登录和管理员权限。
+     */
+    "/api/sync/cancelSyncCheckout": {
+        request: CancelSyncCheckoutRequestInput;
+        response: { "code": 0; "data": CancelSyncCheckoutData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
      * 清除 provider 为 2（S3）、3（WebDAV）或 4（本地文件系统）的配置并同步落盘。
      * 清除当前服务时先验证资源及历史快照完整性，再关闭同步；失败时保留原配置，不删除本地或云端数据。
      * 响应包含当前同步开关及被清除服务的默认配置；其他服务配置、仓库密钥和下载模式保持不变。
@@ -7965,6 +8370,18 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 确认当前连接已停止新输入并提交既有编辑，saved 为 false 时本轮应用中止。
+     * token 仅来自该连接的 syncProgress 消息或状态查询，重复确认幂等，旧任务和未知令牌返回 requested 为 false。
+     * 必须确认全部既有连接，且等待期间没有新接入的连接，内核才会应用本地改动。
+     */
+    "/api/sync/confirmSyncCheckout": {
+        request: ConfirmSyncCheckoutRequestInput;
+        response: { "code": 0; "data": CancelSyncCheckoutData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/sync/createCloudSyncDir": {
         request: SyncNameRequestInput;
@@ -7991,6 +8408,19 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 查询当前同步任务及单调递增版本，空任务表示当前没有同步任务。
+     * 普通后台同步不阻断编辑；准备落盘、应用改动和恢复索引期间 blocking 为 true。
+     * 前端启动和重连时查询，以恢复错过的开始、取消或结束通知；appID 和 clientID 用于匹配当前主连接的准备令牌。
+     * phase 为 preparing 时先阻止新输入、提交既有编辑，再使用 token 确认保存结果；取消不计入自动同步失败。
+     */
+    "/api/sync/getSyncCheckout": {
+        request: SyncCheckoutClientRequestInput;
+        response: { "code": 0; "data": SyncCheckoutSnapshot; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
@@ -8159,6 +8589,18 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
+     * 只探测候选配置：端点必须是已有目录且不能与工作空间重叠。
+     * 在独占临时目录中写入、读回比对并尽力删除探针，不读取或保存同步配置；kind 沿用 S3 的 ok/config/network 语义。
+     * 只读模式可调用，不修改快照或同步开关。删除失败只记脱敏日志，不改变探测结果。
+     */
+    "/api/sync/testSyncProviderLocal": {
+        request: TestSyncProviderLocalRequestInput;
+        response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
      * 使用请求中的候选配置探测云端：写入探针对象、按前缀列举并比对、尽力删除探针，不读取或保存用户配置。
      * 请求字段与保存接口一致；缺少必填项或地址无效时同样返回 code 0，由 kind 为 config 表示，避免与网络故障混淆。
      * kind 为 ok 表示写入与列举指向同一个对象键；config 表示可确定的配置错误；network 表示网络或服务端不可达，无法判定配置。
@@ -8167,6 +8609,19 @@ export interface APIPOSTRoutes {
      */
     "/api/sync/testSyncProviderS3": {
         request: TestSyncProviderS3RequestInput;
+        response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 只探测候选配置：验证端点为集合，创建独占探针目录并写入、读回比对，最后尽力删除。
+     * 不读取或保存同步配置，不修改快照或同步开关；只读模式可调用。kind 沿用 S3 的 ok/config/network 语义。
+     * cloudName 可省略；指定时在该云端目录的 siyuan/repo 下探测，省略时使用独占的随机云端目录并尽力删除。
+     * 上传失败后同样尝试清理；删除失败只记脱敏日志，不改变探测结果。需要集合查询、目录创建、读写和删除权限。
+     */
+    "/api/sync/testSyncProviderWebDAV": {
+        request: TestSyncProviderWebDAVRequestInput;
         response: { "code": 0; "data": TestSyncProviderS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
@@ -8235,6 +8690,19 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 异步下载当前更新通道中指定版本的桌面安装包，不修改自动下载设置。
+     * version 必须与该通道当前可用的新版本完全一致；不接受下载 URL，不支持的运行环境或缺少校验值时返回 -1。
+     * 成功返回 null，进度和完成状态沿用更新通知；下载包通过校验后可供退出安装，自动下载关闭时仍可使用。
+     * 需要管理员和可写权限；已有下载任务时复用下载互斥保护，并通知正在下载。
+     */
+    "/api/system/downloadUpdate": {
+        request: SystemDownloadUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/system/ensureOnboarding": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemOnboarding | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8256,6 +8724,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 保持单个 JSON 文件的设置压缩包，存在本机寻址能力下界时附加 documentAddressing 记录。
+     * 记录仅含版本及笔记本身份的最低模式，不导出标题、正文或密钥；无能力记录的旧设置格式不变。
+     */
     "/api/system/exportConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemExportConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8382,6 +8854,7 @@ export interface APIPOSTRoutes {
      * 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
      * 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
      * ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
+     * documentAddressing 按笔记本身份合并最高要求，缺失字段不清除本机记录；未知或损坏记录在采用设置前返回 -1。
      */
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;
@@ -8478,6 +8951,17 @@ export interface APIPOSTRoutes {
         request: SystemRemoveCustomFontRequestInput;
         response: { "code": 0; "data": SystemRemoveCustomFontData; "msg": string; } | { "code": -1 | 400 | 404; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 删除本工作空间唯一的壁纸文件，需管理员写权限；文件不存在时仍成功。
+     * 客户端应先通过配置 patch 关闭 appearance.lockScreenWallpaper，再删除图片。
+     */
+    "/api/system/removeLockScreenWallpaper": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
@@ -8607,6 +9091,19 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
         emptyResponseStatuses: [200];
     };
+    /**
+     * 替换本工作空间唯一的壁纸文件，需管理员写权限。
+     * file 必须是 JPEG、PNG 或 WebP，最多 10 MiB、1600 万像素；重编码为 JPEG，移除元数据。
+     * 图片保存在 conf/lockscreen/wallpaper.jpg，不同步、不包含在设置导出中。
+     * 上传不修改 appearance.lockScreenWallpaper，客户端须通过配置 patch 启用；失败保留原文件。
+     */
+    "/api/system/uploadLockScreenWallpaper": {
+        request: SystemWallpaperUploadRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/system/vacuumDataIndex": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8685,10 +9182,15 @@ export interface APIPOSTRoutes {
     /**
      * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 4，所有视图共享数据库级规则。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 7，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
      * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
      * spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
+     * spec 5 的 blockSource.documentDepth 限制各文档范围的子文档深度，0 仅自身，1 包含自身及一级子文档。
+     * spec 6 的属性 nameOperator 支持 contains 和 Go regex；缺省或 equals 保持精确名称匹配，值条件独立。
+     * spec 7 支持 blockSource.includeSelectedDocuments=false，排除所选文档及其内部块，子文档仍按深度匹配；缺省、null 或 true 保持包含自身。
+     * 排除自身不影响其他范围的并集；与 documentDepth=0 组合时对应文档范围为空。配置变更保留条目和字段，不自动补收或清理。
+     * 深度缺省或 null 不限，不影响笔记本范围，各范围仍取并集；修改不自动清理或补收已有内容。
      * 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。
      * 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
      * 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。

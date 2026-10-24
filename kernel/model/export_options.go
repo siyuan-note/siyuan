@@ -42,6 +42,7 @@ type markdownExportOptions struct {
 	DefBlockIDs                                                        []string
 	References                                                         *markdownExportReferences
 	BoxPaths                                                           map[string]string
+	DocumentPaths                                                      exportDocumentPaths
 	AVPublishFilter                                                    AVExportPublishFilter
 	AccessCheckers                                                     []EmbedBlockAccessChecker
 }

@@ -440,15 +440,31 @@ describe("getTopListDragTarget", () => {
 
 describe("shouldKeepListBlockDragTarget", () => {
     it("keeps both complete lists when forming a horizontal super block", () => {
-        assert.equal(shouldKeepListBlockDragTarget("nodelist", true, false), true);
+        for (const side of ["left", "right"]) {
+            assert.equal(shouldKeepListBlockDragTarget("nodelist", [`dragover__${side}`], false), true);
+        }
     });
 
     it("allows a list block to expand into list items for a regular list drop", () => {
-        assert.equal(shouldKeepListBlockDragTarget("nodelist", false, false), false);
+        for (const position of ["top--sibling", "bottom--sibling", "bottom--child"]) {
+            assert.equal(shouldKeepListBlockDragTarget("nodelist", [`dragover__${position}`], false), false);
+        }
     });
 
     it("keeps a list block when reordering columns", () => {
-        assert.equal(shouldKeepListBlockDragTarget("nodelist", false, true), true);
+        assert.equal(shouldKeepListBlockDragTarget("nodelist", [], true), true);
+    });
+
+    it("keeps complete lists at upper and lower block boundaries", () => {
+        for (const side of ["top", "bottom"]) {
+            assert.equal(shouldKeepListBlockDragTarget("nodelist", ["list", `dragover__${side}`], false), true);
+        }
+    });
+
+    it("preserves list item source semantics at list boundaries", () => {
+        for (const side of ["top", "bottom", "left", "right"]) {
+            assert.equal(shouldKeepListBlockDragTarget("nodelistitem", [`dragover__${side}`], false), false);
+        }
     });
 });
 

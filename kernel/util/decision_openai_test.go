@@ -47,7 +47,7 @@ func TestDecisionOpenAIProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Model != "gpt-6-luna-resolved" || result.Usage.InputTokens != 12 || result.Usage.OutputTokens != 3 || *result.Answers["condition"].Noul != .2 || *result.Answers["rating"].Score != .75 || result.Answers["rating"].Legend["1"] != "High" || *result.Answers["category"].Choice != "a" {
+	if result.Model != "gpt-6-luna-resolved" || result.Usage.InputTokens != 12 || result.Usage.OutputTokens != 3 || result.Usage.InputTokensDetails == nil || result.Usage.InputTokensDetails.CachedTokens != 0 || *result.Answers["condition"].Noul != .2 || *result.Answers["rating"].Score != .75 || result.Answers["rating"].Legend["1"] != "High" || *result.Answers["category"].Choice != "a" {
 		t.Fatalf("mapped values changed: %+v", result)
 	}
 }
@@ -78,6 +78,9 @@ func TestDecisionOpenAIRejectsInvalidAnswers(t *testing.T) {
 		"missing usage":            strings.Replace(openAIDecisionFixture, `"usage":`, `"other":`, 1),
 		"null tokens":              strings.Replace(openAIDecisionFixture, `"input_tokens":12`, `"input_tokens":null`, 1),
 		"negative tokens":          strings.Replace(openAIDecisionFixture, `"input_tokens":12`, `"input_tokens":-1`, 1),
+		"negative cached tokens":   strings.Replace(openAIDecisionFixture, `"cached_tokens":0`, `"cached_tokens":-1`, 1),
+		"excess cached tokens":     strings.Replace(openAIDecisionFixture, `"cached_tokens":0`, `"cached_tokens":13`, 1),
+		"negative cache writes":    strings.Replace(openAIDecisionFixture, `"cached_tokens":0`, `"cache_write_tokens":-1`, 1),
 		"invalid json":             `{`,
 	}
 	for name, response := range cases {

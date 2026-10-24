@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -24,20 +25,35 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 		if name == "" {
 			name = "default"
 		}
-		t.Run(name, func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target) })
+		t.Run(name, func(t *testing.T) {
+			t.Run("unlimited", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, nil, "", false) })
+			t.Run("current", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, target, new(0), "", false) })
+		})
 	}
+	for _, mode := range []string{"contains", "regex"} {
+		t.Run(mode, func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, "", nil, mode, false) })
+	}
+	t.Run("exclude selected document", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, "", new(1), "", true) })
 }
 
-func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) {
+func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, depth *int, nameOperator string, excludeSelf bool) {
 	fixture, view, keyID := setupBlockCollectionTest(t)
 	boxID := fixture.box.ID
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
 	if err != nil {
 		t.Fatal(err)
 	}
+	parent := tree
+	if excludeSelf {
+		tree, err = CreateDocByMdSync(boxID, strings.TrimSuffix(parent.Path, ".sy")+"/"+ast.NewNodeID()+".sy", "Child", "Child content", nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x58}, 32)
 	prepareUnlockedEncryptedBoxTest(t, boxID, key)
+	encryptDocumentTestSources(t, key, tree, parent)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted, boxConf.BoxCrypt = true, &conf.BoxEncryption{Spec: boxEncryptionSpec}
 	if err = encryptBoxMetadata(boxID, boxConf, key); err != nil {
@@ -89,10 +105,33 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 		t.Fatal(err)
 	}
 	treenode.UpsertBlockTree(tree)
+	if excludeSelf {
+		if _, err = filesys.WriteTree(parent); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(parent)
+	}
 	if target == "" {
 		view.Automations.Rules[0].BlockSource.Tags = nil
 	}
 	view.Automations.Rules[0].BlockSource.Attributes = []*av.AutomationBlockAttribute{{Name: "custom-state", Operator: "equals", Value: "active"}}
+	if depth != nil {
+		view.Automations.Spec = 5
+		view.Automations.Rules[0].BlockSource.DocumentDepth = depth
+	}
+	if nameOperator != "" {
+		view.Automations.Spec = 6
+		attr := view.Automations.Rules[0].BlockSource.Attributes[0]
+		attr.NameOperator = nameOperator
+		attr.Name = "state"
+		if nameOperator == "regex" {
+			attr.Name = "^custom-st(?:ate|atus)$"
+		}
+	}
+	if excludeSelf {
+		view.Automations.Spec = 7
+		view.Automations.Rules[0].BlockSource.IncludeSelectedDocuments = new(false)
+	}
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
@@ -101,6 +140,15 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string) 
 		t.Fatal(err)
 	}
 	cache.ClearAVCache()
+	if excludeSelf {
+		if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "setAttrs", ID: parent.ID, Data: `{"custom-state":"active"}`}}}); err != nil {
+			t.Fatal(err)
+		}
+		stored, readErr := av.ParseAttributeViewForIndexInBox(view.ID, boxID)
+		if readErr != nil || stored.GetBlockValueByBoundID(parent.ID) != nil {
+			t.Fatal("encrypted selected parent was collected", readErr)
+		}
+	}
 	op := &Operation{Action: "setAttrs", ID: sourceID, Data: `{"custom-state":"active"}`}
 	tx := &Transaction{fromAPI: true, DoOperations: []*Operation{op}, UndoOperations: []*Operation{{Action: "setAttrs", ID: sourceID, Data: `{"custom-state":""}`}}}
 	if err = PerformTxSync(tx); err != nil {

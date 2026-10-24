@@ -5,6 +5,7 @@ export interface IBacklinkSourceFilter {
     excludedNotebookIDs: string[];
     excludeSelf: boolean;
     excludedRefDefIDs?: string[];
+    database?: {avID: string; filters: IAVFilter[]};
 }
 
 export const createBacklinkSourceFilter = (): IBacklinkSourceFilter => ({
@@ -22,12 +23,16 @@ export const normalizeBacklinkSourceFilter = (filter: IBacklinkSourceFilter): IB
     excludedNotebookIDs: Array.from(new Set(filter.excludedNotebookIDs.filter(Boolean))).sort(),
     excludeSelf: Boolean(filter.excludeSelf),
     excludedRefDefIDs: normalizeExcludedRefDefIDs(filter.excludedRefDefIDs),
+    ...(filter.database ? {database: {
+        avID: filter.database.avID,
+        filters: JSON.parse(JSON.stringify(filter.database.filters || [])),
+    }} : {}),
 });
 
 export const getBacklinkSourceFilterParam = (filter: IBacklinkSourceFilter) => {
     const normalized = normalizeBacklinkSourceFilter(filter);
     if (normalized.dailyNote === "all" && normalized.excludedNotebookIDs.length === 0 && !normalized.excludeSelf &&
-        normalized.excludedRefDefIDs.length === 0) {
+        normalized.excludedRefDefIDs.length === 0 && !normalized.database) {
         return;
     }
     return normalized;

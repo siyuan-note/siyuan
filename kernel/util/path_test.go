@@ -45,10 +45,23 @@ func TestIsPossiblyImageWithQueryAndFragment(t *testing.T) {
 		"assets/photo.heic",
 		"assets/photo.HEIF?box=20260816000000-abcdefg",
 		"assets/photo.heic?box=20260816000000-abcdefg#preview",
+		"assets/photo.tif",
+		"assets/photo.TIFF?box=20260816000000-abcdefg#preview",
 	} {
 		if !IsPossiblyImage(assetPath) {
-			t.Fatalf("HEIF asset was not recognized as an image: %s", assetPath)
+			t.Fatalf("asset was not recognized as an image: %s", assetPath)
 		}
+	}
+}
+
+func TestIsDisplayableAssetTIFF(t *testing.T) {
+	for _, path := range []string{"assets/photo.tif", "assets/photo.TIFF", "20261021000000-tiffbox/assets/photo.tiff"} {
+		if !IsDisplayableAsset(path) {
+			t.Fatalf("TIFF snapshot asset was not displayable: %s", path)
+		}
+	}
+	if IsDisplayableAsset("assets/photo.tiff.txt") {
+		t.Fatal("a TIFF name without a TIFF extension was displayable")
 	}
 }
 

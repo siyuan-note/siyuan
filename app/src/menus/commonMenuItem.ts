@@ -627,7 +627,7 @@ export const exportMd = (id: string) => {
         id: "export",
         label: window.siyuan.languages.export,
         type: "submenu",
-        icon: "iconUpload",
+        icon: "iconDownload",
         submenu: [{
             id: "exportTemplate",
             ignore: !getHostCapabilities().importExport,

@@ -1,5 +1,5 @@
-export const shouldShowDockBar = (globallyHidden: boolean, hasVisibleEntry: boolean) =>
-    !globallyHidden && hasVisibleEntry;
+export const shouldShowDockBar = (globallyHidden: boolean, hasVisibleEntry: boolean, floatingPanelOpen = false) =>
+    (!globallyHidden || floatingPanelOpen) && hasVisibleEntry;
 
 export const shouldShowDockSplit = (hasVisibleEntryBefore: boolean, hasVisibleEntryAfter: boolean) =>
     hasVisibleEntryBefore && hasVisibleEntryAfter;
@@ -30,6 +30,7 @@ export const adjustDockPadding = () => {
 };
 
 export const syncDockBarVisibility = () => {
+    let changed = false;
     document.querySelectorAll<HTMLElement>(".dock").forEach((item) => {
         const sections = Array.from(item.querySelectorAll<HTMLElement>(":scope > .dock__items"));
         const sectionVisibility = sections.map((section) =>
@@ -39,10 +40,18 @@ export const syncDockBarVisibility = () => {
             sectionVisibility[0],
             sectionVisibility[1],
         ));
-        item.classList.toggle("fn__none", !shouldShowDockBar(
+        const dock = item.id === "dockLeft" ? window.siyuan.layout?.leftDock :
+            item.id === "dockRight" ? window.siyuan.layout?.rightDock : undefined;
+        const floatingPanelOpen = Boolean(dock?.isFloating() && dock.isPanelVisible() &&
+            !dock.layout.element.classList.contains("fn__none") && dock.layout.element.style.opacity === "1");
+        const hidden = !shouldShowDockBar(
             window.siyuan.config.uiLayout.hideDock,
             sectionVisibility.some(Boolean),
-        ));
+            floatingPanelOpen,
+        );
+        changed = item.classList.contains("fn__none") !== hidden || changed;
+        item.classList.toggle("fn__none", hidden);
     });
     adjustDockPadding();
+    return changed;
 };

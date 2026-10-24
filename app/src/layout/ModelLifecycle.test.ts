@@ -99,3 +99,60 @@ test("main socket recovery is recorded and obsolete sockets cannot finish a faul
     model.destroy();
     assert.equal(diagnoses[1](), true);
 });
+
+test("main windows query their own checkout preparation on startup and reconnect", () => {
+    const sockets: Socket[] = [];
+    const queries: {id: string, reconnect?: boolean}[] = [];
+    const messages: string[] = [];
+    class Socket {
+        static CONNECTING = 0;
+        onopen: () => void;
+        onclose: unknown;
+        onmessage: unknown;
+        onerror: unknown;
+        readyState = 1;
+        constructor(public url: string) { sockets.push(this); }
+        close() {}
+        send(message: string) { messages.push(message); }
+    }
+    const api = {} as {Model: new (options: unknown) => {
+        connect: (options: unknown) => void, flushMainMessages: () => void, destroy: () => void,
+    }};
+    const window = {location: {protocol: "https:", host: "local"}, siyuan: {isReady: false}};
+    runInNewContext(transpileModule(readFileSync("src/layout/Model.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {exports: api, WebSocket: Socket, URL, clearTimeout: () => {}, window,
+        document: {getElementById: (): null => null},
+        require: (name: string) => {
+            if (name === "../constants") return {Constants: {SIYUAN_APPID: "test"}};
+            if (name === "../sync/checkoutProgress") return {
+                reconcileSyncCheckout: (id: string, reconnect?: boolean) => queries.push({id, reconnect}),
+            };
+            if (name === "../util/kernelConnection") return {markKernelConnectionAlive: () => {}};
+            if (name === "../config/setting/reset") return {reloadSettingsResetOnReconnect: () => false};
+            if (name === "../config/setting/taskBlocker") return {resetSettingTaskRevision: () => {}};
+            if (name === "../config/setting/sync") return {refreshSettingConfig: async () => {}};
+            throw new Error(name);
+        },
+    });
+    const model = new api.Model({app: {}});
+    model.connect({id: "detached-window", type: "main"});
+    assert.equal(new URL(sockets[0].url).searchParams.get("ready"), "false");
+    sockets[0].onopen();
+    assert.equal(messages.length, 0, "a connected window must not report readiness during initialization");
+    window.siyuan.isReady = true;
+    sockets[0].readyState = Socket.CONNECTING;
+    model.flushMainMessages();
+    assert.equal(messages.length, 0, "readiness must wait for the socket to open");
+    sockets[0].readyState = 1;
+    model.flushMainMessages();
+    sockets[0].onopen();
+    assert.deepEqual(messages.map(message => JSON.parse(message).cmd), ["ready", "ready"]);
+    assert.deepEqual(queries, [{id: "detached-window", reconnect: undefined},
+        {id: "detached-window", reconnect: undefined}, {id: "detached-window", reconnect: true}]);
+    model.connect({id: "detached-window", type: "main"});
+    assert.equal(new URL(sockets[1].url).searchParams.get("ready"), "false");
+    sockets[1].onopen();
+    assert.equal(JSON.parse(messages.at(-1)).cmd, "ready");
+    model.destroy();
+});

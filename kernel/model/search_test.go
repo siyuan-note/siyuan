@@ -19,6 +19,7 @@ package model
 import (
 	"context"
 	gosql "database/sql"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -28,6 +29,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -604,9 +606,39 @@ func TestFromFTSAndHPathMatchSQLBlockMarksMatchSource(t *testing.T) {
 	}
 }
 
+func TestTrimDocumentTitleHPath(t *testing.T) {
+	for _, test := range []struct{ path, title, want string }{
+		{"Notebook/A/B", "A/B", "Notebook/"},
+		{"Notebook/Parent//A//B/", "A//B/", "Notebook/Parent//"},
+		{"Notebook/<mark>Parent/A</mark>/B", "A/B", "Notebook/<mark>Parent/</mark>"},
+		{"Notebook/<mark>Parent</mark>/A/<mark>B</mark>", "A/B", "Notebook/<mark>Parent</mark>/"},
+		{"Notebook/Parent/A&amp;B/&lt;C&gt;", "A&B/<C>", "Notebook/Parent/"},
+	} {
+		if got := trimDocumentTitleHPath(test.path, test.title); got != test.want {
+			t.Errorf("%q with %q: got %q, want %q", test.path, test.title, got, test.want)
+		}
+	}
+}
+
 func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 	setSearchCaseSensitive(t, true)
+	previousPath := util.BlockTreeDBPath
+	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.BlockTreeDBPath = previousPath
+	})
+	const boxID = "20260731120000-hpath00"
+	for id, title := range map[string]string{
+		"20260731120000-hpath01": "会员特权",
+		"20260731120001-hpath02": "会员特权",
+		"20260731120002-hpath03": "会员/特权",
+	} {
+		treenode.UpsertBlockTree(treenode.NewTree(boxID, "/"+id+".sy", "/"+title, title))
+	}
 	multipleKeywords := fromHPathSearchSQLBlock(&sql.Block{
+		Box:     boxID,
 		ID:      "20260731120000-hpath01",
 		RootID:  "20260731120000-hpath01",
 		HPath:   "/思源笔记用户指南/请/从这里开始/会员特权",
@@ -614,6 +646,7 @@ func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 		Type:    "d",
 	}, "从这里"+search.TermSep+"会员", 36)
 	singleKeyword := fromHPathSearchSQLBlock(&sql.Block{
+		Box:     boxID,
 		ID:      "20260731120001-hpath02",
 		RootID:  "20260731120001-hpath02",
 		HPath:   "/会员特权",
@@ -627,6 +660,10 @@ func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 			Type:  "NodeParagraph",
 			HPath: "/思源笔记用户指南/<mark>会员</mark>特权",
 		},
+		fromHPathSearchSQLBlock(&sql.Block{
+			Box: boxID, ID: "20260731120002-hpath03", RootID: "20260731120002-hpath03",
+			HPath: "/用户指南/会员/特权", Content: "会员/特权", Type: "d",
+		}, "会员", 36),
 	}
 
 	filterSelfHPath(blocks)
@@ -639,6 +676,9 @@ func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 	}
 	if expected := "/思源笔记用户指南/<mark>会员</mark>特权"; expected != blocks[2].HPath {
 		t.Fatalf("非文档块路径不应变化：got %q, want %q", blocks[2].HPath, expected)
+	}
+	if expected := "/用户指南/"; expected != blocks[3].HPath {
+		t.Fatalf("标题中的斜杠不应成为父路径：got %q, want %q", blocks[3].HPath, expected)
 	}
 }
 

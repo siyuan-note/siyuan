@@ -24,7 +24,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -92,14 +91,14 @@ func autoSpaceTree(tree *parse.Tree) *parse.Tree {
 	md := formatRenderer.Render()
 	newTree := parseKTree(md)
 	restoreMindmapTypes(newTree)
-	newTree.Root.Spec = treenode.CurrentSpec
+	newTree.Root.Spec = tree.Root.Spec
 	// 第二次格式化启用自动空格
 	luteEngine.SetAutoSpace(true)
 	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	md = formatRenderer.Render()
 	newTree = parseKTree(md)
 	restoreMindmapTypes(newTree)
-	newTree.Root.Spec = treenode.CurrentSpec
+	newTree.Root.Spec = tree.Root.Spec
 	newTree.Root.ID = tree.ID
 	newTree.Root.KramdownIAL = rootIAL
 	newTree.ID = tree.ID

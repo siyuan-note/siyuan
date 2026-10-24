@@ -74,7 +74,7 @@ func TestResolveDocumentMovePath(t *testing.T) {
 		name        string
 		userPath    string
 		hPath       string
-		sourceHPath string
+		sourceTitle string
 		want        string
 		wantErr     bool
 	}{
@@ -82,48 +82,48 @@ func TestResolveDocumentMovePath(t *testing.T) {
 			name:        "explicit internal path",
 			userPath:    "/20260726000000-parent1.sy",
 			hPath:       "/missing",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
-		{name: "default root", sourceHPath: "/child", want: "/"},
-		{name: "root hpath", hPath: "/", sourceHPath: "/child", want: "/"},
+		{name: "default root", sourceTitle: "child", want: "/"},
+		{name: "root hpath", hPath: "/", sourceTitle: "child", want: "/"},
 		{
 			name:        "parent hpath",
 			hPath:       "/parent",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
 		{
 			name:        "parent hpath with trailing slash",
 			hPath:       "/parent/",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
 		{
 			name:        "full destination hpath",
 			hPath:       "/parent/child",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
 		{
 			name:        "nested full destination hpath",
 			hPath:       "/grand/parent/child",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-grand01/20260726000001-parent1.sy",
 		},
 		{
 			name:        "existing target with different source title",
 			hPath:       "/existing/child",
-			sourceHPath: "/source",
+			sourceTitle: "source",
 			want:        "/20260726000002-existin/20260726000003-child01.sy",
 		},
-		{name: "missing target", hPath: "/missing", sourceHPath: "/child", wantErr: true},
-		{name: "missing destination parent", hPath: "/missing/child", sourceHPath: "/child", wantErr: true},
+		{name: "missing target", hPath: "/missing", sourceTitle: "child", wantErr: true},
+		{name: "missing destination parent", hPath: "/missing/child", sourceTitle: "child", wantErr: true},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := resolveDocumentMovePathWithLookup(test.userPath, test.hPath, test.sourceHPath, lookup)
+			got, err := resolveDocumentMovePathWithLookup(test.userPath, test.hPath, test.sourceTitle, lookup)
 			if test.wantErr {
 				if nil == err {
 					t.Fatalf("expected an error, got path %q", got)
@@ -179,17 +179,19 @@ func TestDocumentSearchDisplayFields(t *testing.T) {
 			doc: map[string]string{
 				"path":  "/20260722120000-parent1/20260722123000-child01.sy",
 				"hPath": "Notebook/Parent/Document",
+				"title": "Literal / title",
 				"box":   "20260722110000-boxid01",
 			},
 			wantType: "DOCUMENT",
 			wantID:   "20260722123000-child01",
-			wantName: "Document",
+			wantName: "Literal / title",
 		},
 		{
 			name: "notebook",
 			doc: map[string]string{
 				"path":  "/",
 				"hPath": "Notebook/",
+				"title": "Notebook",
 				"box":   "20260722110000-boxid01",
 			},
 			wantType: "NOTEBOOK",

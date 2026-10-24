@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261018200107"
+		"updated": "20261023003241"
 	},
 	"Children": [
 		{
@@ -13053,7 +13053,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20261018200107"
+				"updated": "20261023003241"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13067,12 +13067,13 @@
 			"ID": "20261018163000-3gwfc4c",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-3gwfc4c"
+				"id": "20261018163000-3gwfc4c",
+				"updated": "20261022132341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "キャンバス上で Esc を押すと閲覧に戻り、ホイールで文書をスクロールできます。ノード編集中、要約範囲の選択中、関連線のドラッグ中は、まず現在の操作を終了またはキャンセルします。全画面表示では Esc で全画面表示を終了します。"
+					"Data": "キャンバス上で Esc を押すと閲覧に戻り、ホイールで文書をスクロールできます。ノード編集中や関連線のドラッグ中は、まず現在の操作を終了またはキャンセルします。複数選択モードも終了します。全画面表示では Esc で全画面表示を終了します。"
 				}
 			]
 		},
@@ -13086,7 +13087,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Ctrl（macOS では Command）を押しながらマウスの右ボタンでキャンバスをドラッグすると、キーボードフォーカスや閲覧状態を変えずに一時的に移動できます。その後も通常のホイール操作で文書をスクロールできます。表示ロック中は使えません。通常モードでは空白部分を左ボタンでドラッグしてもキャンバスは移動しません。手のひらツールでは左ボタンでのドラッグも使えます。"
+					"Data": "マウスの中央ボタンを押しながらドラッグしても一時的に移動でき、離すと終了します。手のひらツールへの切り替えは不要です。Ctrl（macOS では Command）を押しながらマウスの右ボタンでキャンバスをドラッグすると、キーボードフォーカスや閲覧状態を変えずに一時的に移動できます。その後も通常のホイール操作で文書をスクロールできます。表示ロック中は使えません。通常モードでは空白部分を左ボタンでドラッグしてもキャンバスは移動しません。手のひらツールでは左ボタンでのドラッグも使えます。"
 				}
 			]
 		},
@@ -13095,7 +13096,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-01k7syf",
-				"updated": "20261017003000",
+				"updated": "20261020162345",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13618,6 +13619,200 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードの分岐をコピー"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+C"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘C"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードの分岐を切り取り"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+X"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘X"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "子ノードとして貼り付け"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘V"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同階層のノードとして貼り付け"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘V"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261020162345-6y84piz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020162345-6y84piz",
+				"updated": "20261020162345"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンバスの空白部分をマウスの左ボタンでドラッグすると、複数のノードを範囲選択できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）を押しながらノードをクリックすると、選択状態を切り替えられます。タッチ画面ではノードを選択し、下部の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複数選択"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にしてからノードを個別にタップします。もう一度ボタンを押すか "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、このモードを終了します。コピーと切り取りには子ツリー全体が含まれ、親と子を同時に選択しても重複しません。ノードのスタイル、分岐内の関連線、範囲全体が含まれる要約も保持します。ルートノードは切り取れません。クリップボードへの書き込みが失敗した場合やプレーンテキストしか扱えない環境では、元のノードを残します。"
 				}
 			]
 		},
@@ -13626,21 +13821,57 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-cyh3qk6",
-				"updated": "20260930234403"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ノードの編集中に "
+					"Data": "ノードを 1 つ選択して "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+V / ⌘V"
+					"TextMarkTextContent": "Ctrl+V"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で画像を貼り付けられます。ノードを選択した状態で貼り付けると、現在表示されている本文の末尾に画像が追加されます。アップロード中は完了を待ってからノードの編集を終了してください。"
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと子ノードとして、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⇧⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと同階層のノードとして貼り付けます。下部の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " メニューからもコピー、切り取り、これらの貼り付けを実行できます。マインドマップのノードは元の階層を保持し、通常のテキスト、画像、コンテンツブロックは新しいノードのエディタを通して挿入します。ノードのテキスト編集中は、通常の本文編集と同じ貼り付け動作になります。画像のアップロード中は完了を待ってからノードの編集を終了してください。"
 				}
 			]
 		},
@@ -13649,12 +13880,25 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-5vwcnw1",
-				"updated": "20260926152753"
+				"updated": "20261023003241"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "要約の一括作成プレビューでは Enter で全グループを作成し、Esc でキャンセルします。作成は一度の取り消しで元に戻せます。要約範囲の選択中は上下の矢印キーで同じ親を持つ末端のノードを選び、Enter で確定、Esc でキャンセルします。要約テキストの編集中は Enter で保存、Esc でキャンセルします。選択中の要約は Delete または Backspace で削除できます。"
+					"Data": "2 つ以上のノードを選択してから、下部のノードメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "要約"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を実行すると、有効な全グループを一度に作成し、最初の新しい要約を編集できます。作成は一度の取り消しで元に戻せます。キャンバス上で Esc を押すと複数選択モードを終了します。要約テキストの編集中は Enter で保存、Esc でテキストの編集をキャンセルします。選択中の要約は Delete または Backspace で削除できます。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "色または幅のパネルが開いているときは、Esc でパネルを閉じ、未保存の幅のプレビューを取り消します。"
 				}
 			]
 		},

@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-test("native touch scrolling preserves selected blocks while sustained dragging extends the range", {
+test("native touch swipes preserve selected blocks and scroll even after a sustained press", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -30,10 +30,10 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});
         const evaluate = code => win.webContents.executeJavaScript(code);
         await evaluate(
-            'window.gestures = {}; new Function("exports", "require", ' + ${JSON.stringify(JSON.stringify(source))} +
-            ')(window.gestures, () => ({Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_MULTIPLE_SELECT: 1500}}));'
+            'window.gestures = {}; new Function("exports", ' + ${JSON.stringify(JSON.stringify(source))} +
+            ')(window.gestures);'
         );
-        const setup = async multi => {
+        const setup = async () => {
             await evaluate(
                 'window.dispose?.(); document.body.innerHTML = ' + JSON.stringify(
                     '<style>body{margin:0}.scroll{height:400px;overflow:auto}.protyle-wysiwyg{user-select:none}' +
@@ -48,11 +48,10 @@ app.whenReady().then(async () => {
                 'window.dispose = gestures.bindBlockDragSelectionGesture(root, () => scroller, {' +
                 'canStart: () => true, getStartBlock: target => target.closest(".block"),' +
                 'getBlockAtPoint: p => document.elementFromPoint(p.clientX, p.clientY)?.closest(".block"),' +
-                'isMultiSelectMode: () => ' + multi + ',' +
                 'select: (start, end) => { selections.push([start.dataset.id, end.dataset.id]);' +
                 'const a = blocks.indexOf(start), b = blocks.indexOf(end);' +
                 'blocks.forEach((block, i) => block.classList.toggle("selected", i >= Math.min(a,b) && i <= Math.max(a,b))); },' +
-                'scroll: () => {}, finish: (source, cancelled) => ends.push({source, cancelled}) }); void 0;'
+                'scroll: () => {}, finish: cancelled => ends.push(cancelled) }); void 0;'
             );
             await delay(100);
         };
@@ -61,9 +60,10 @@ app.whenReady().then(async () => {
         });
         const state = () => evaluate('({scroll: scroller.scrollTop, selections, ends,' +
             ' selected: blocks.filter(block => block.classList.contains("selected")).map(block => block.dataset.id)})');
-        for (const multi of [false, true]) {
-            await setup(multi);
+        for (const duration of [0, 1600]) {
+            await setup();
             await touch("touchStart", 250);
+            if (duration) await delay(duration);
             for (const y of [230, 190, 150, 100]) {
                 await delay(30);
                 await touch("touchMove", y);
@@ -71,22 +71,11 @@ app.whenReady().then(async () => {
             await touch("touchEnd");
             await delay(150);
             const result = await state();
-            assert.ok(result.scroll > 50, "a short swipe scrolls the editor in either selection mode");
+            assert.ok(result.scroll > 50, "swiping scrolls the editor regardless of the press duration");
             assert.deepEqual(result.selections, []);
             assert.deepEqual(result.ends, []);
             assert.deepEqual(result.selected, ["0", "1"], "scrolling preserves the existing selection");
         }
-        await setup(true);
-        await touch("touchStart", 50);
-        await delay(1600);
-        await touch("touchMove", 150);
-        await touch("touchMove", 250);
-        await touch("touchEnd");
-        const selection = await state();
-        assert.equal(selection.scroll, 0);
-        assert.deepEqual(selection.selected, ["0", "1", "2"]);
-        assert.ok(selection.selections.length > 0);
-        assert.deepEqual(selection.ends, [{source: "touch", cancelled: false}]);
         console.log("Native block selection scrolling passed");
         win.destroy();
         app.exit(0);

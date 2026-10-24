@@ -7,6 +7,88 @@ import (
 	"testing"
 )
 
+func TestAVAutomationDocumentDepthContract(t *testing.T) {
+	endpoint := Endpoint[AVAutomationBlockSource, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, test := range []struct {
+		body  string
+		depth *int
+	}{
+		{`{}`, nil}, {`{"documentDepth":null}`, nil}, {`{"documentDepth":0}`, new(0)},
+		{`{"documentDepth":1}`, new(1)}, {`{"documentDepth":12}`, new(12)},
+	} {
+		value, err := endpoint.Decode(strings.NewReader(test.body))
+		if err != nil || (value.DocumentDepth == nil) != (test.depth == nil) ||
+			value.DocumentDepth != nil && *value.DocumentDepth != *test.depth {
+			t.Fatalf("depth input %s: %+v %v", test.body, value, err)
+		}
+		raw, err := json.Marshal(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var output map[string]json.RawMessage
+		if err = json.Unmarshal(raw, &output); err != nil {
+			t.Fatal(err)
+		}
+		if (output["documentDepth"] != nil) != (test.depth != nil) {
+			t.Fatalf("depth presence lost: %s", raw)
+		}
+	}
+	for _, body := range []string{`{"documentDepth":1.5}`, `{"documentDepth":"1"}`, `{"documentDepth":true}`} {
+		if _, err := endpoint.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid depth type accepted: %s", body)
+		}
+	}
+}
+
+func TestAVAutomationSelectedDocumentsContract(t *testing.T) {
+	endpoint := Endpoint[AVAutomationBlockSource, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, test := range []struct {
+		body    string
+		include *bool
+	}{
+		{`{}`, nil}, {`{"includeSelectedDocuments":null}`, nil},
+		{`{"includeSelectedDocuments":true}`, new(true)}, {`{"includeSelectedDocuments":false}`, new(false)},
+	} {
+		value, err := endpoint.Decode(strings.NewReader(test.body))
+		if err != nil || (value.IncludeSelectedDocuments == nil) != (test.include == nil) ||
+			value.IncludeSelectedDocuments != nil && *value.IncludeSelectedDocuments != *test.include {
+			t.Fatalf("include selected documents %s: %+v %v", test.body, value, err)
+		}
+		raw, _ := json.Marshal(value)
+		var output map[string]json.RawMessage
+		if err = json.Unmarshal(raw, &output); err != nil ||
+			(output["includeSelectedDocuments"] != nil) != (test.include != nil) {
+			t.Fatalf("include selected documents presence lost: %s %v", raw, err)
+		}
+	}
+	for _, body := range []string{`{"includeSelectedDocuments":0}`, `{"includeSelectedDocuments":"false"}`, `{"includeSelectedDocuments":[]}`} {
+		if _, err := endpoint.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid inclusion type accepted: %s", body)
+		}
+	}
+}
+
+func TestAVAutomationAttributeNameContract(t *testing.T) {
+	endpoint := Endpoint[AVAutomationBlockAttribute, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, mode := range []string{"", "equals", "contains", "regex"} {
+		raw, _ := json.Marshal(map[string]string{"name": "custom-state", "nameOperator": mode, "operator": "exists"})
+		value, err := endpoint.Decode(strings.NewReader(string(raw)))
+		if err != nil || value.NameOperator != mode {
+			t.Fatalf("name operator %q: %+v %v", mode, value, err)
+		}
+	}
+	value, err := endpoint.Decode(strings.NewReader(`{"name":"custom-state","operator":"exists"}`))
+	if err != nil || value.NameOperator != "" {
+		t.Fatalf("legacy exact default: %+v %v", value, err)
+	}
+	for _, raw := range []string{`{"name":"state","nameOperator":"glob","operator":"exists"}`,
+		`{"name":"state","nameOperator":1,"operator":"exists"}`} {
+		if _, err := endpoint.Decode(strings.NewReader(raw)); err == nil {
+			t.Fatalf("invalid name operator accepted: %s", raw)
+		}
+	}
+}
+
 func TestAVRequestCompatibility(t *testing.T) {
 	group, err := SetAttrViewGroup.Decode(strings.NewReader(`{"avID":" av ","blockID":" block ","group":{"FIELD":"key","method":2,"unknown":true},"ignoreRows":"ignored"}`))
 	if err != nil || group.AvID != " av " || group.BlockID != " block " || group.Group.Field != "key" || group.Group.Method != 2 || group.IgnoreRows {

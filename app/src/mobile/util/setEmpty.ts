@@ -9,6 +9,7 @@ import {clearMobileBarsScroll} from "./mobileBars";
 import {updateMobileTopBarLayout} from "./mobileTopBar";
 import {invalidateTrackedRanges} from "../../protyle/util/trackedRange";
 import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
+import {closeMobileBottomBacklinkPanel} from "./bottomBacklink";
 
 export const finishMobileStartup = () => {
     const loadingElement = document.getElementById("loading");
@@ -19,6 +20,7 @@ export const finishMobileStartup = () => {
 };
 
 export const setEmpty = (app: App) => {
+    void closeMobileBottomBacklinkPanel()?.catch(error => console.error(error));
     closeAVCellEditor();
     if (window.siyuan.mobile.editor?.protyle) {
         invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);

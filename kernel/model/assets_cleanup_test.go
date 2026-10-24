@@ -53,15 +53,15 @@ func TestUnusedAssetsPathPrefixes(t *testing.T) {
 			if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" {
 				t.Fatalf("unused: %+v, %v", items, err)
 			}
-			if missing := MissingAssets(); len(missing) != 0 {
-				t.Fatalf("existing assets reported missing: %+v", missing)
+			if missing, err := MissingAssets(); err != nil || len(missing) != 0 {
+				t.Fatalf("existing assets reported missing: %+v, %v", missing, err)
 			}
 			if err := os.Remove(filepath.Join(util.DataDir, "assets", "sub", "image.png")); err != nil {
 				t.Fatal(err)
 			}
-			missing := MissingAssets()
-			if len(missing) != 1 || missing[0].Item != "assets/sub/image.png" || !reflect.DeepEqual(missing[0].BlockIDs, []string{"20260918000002-abcdefg"}) {
-				t.Fatalf("missing: %+v", missing)
+			missing, err := MissingAssets()
+			if err != nil || len(missing) != 1 || missing[0].Item != "assets/sub/image.png" || !reflect.DeepEqual(missing[0].BlockIDs, []string{"20260918000002-abcdefg"}) {
+				t.Fatalf("missing: %+v, %v", missing, err)
 			}
 		})
 	}

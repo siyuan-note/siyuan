@@ -353,12 +353,10 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.backlinkHideReference,
         desc: window.siyuan.languages.backlinkHideReferenceTip,
     });
-    if (!isMobile()) {
-        group.switch("editor.backlinkShowBottom", {
-            title: window.siyuan.languages.backlinkShowBottom,
-            desc: window.siyuan.languages.backlinkShowBottomTip,
-        });
-    }
+    group.switch("editor.backlinkShowBottom", {
+        title: window.siyuan.languages.backlinkShowBottom,
+        desc: window.siyuan.languages.backlinkShowBottomTip,
+    });
     group.number("editor.backlinkExpandCount", {
         title: window.siyuan.languages.backlinkExpand,
         desc: window.siyuan.languages.backlinkExpandTip,

@@ -159,9 +159,11 @@ const expectedRendererExitIds = new Set();
 const expectedKernelExitPorts = new Set();
 const handledCrashWebContents = new Set();
 const kernelProcesses = new Map();
+const exitedKernelPorts = new Set();
+const localKernelStartups = new Map();
+const bootWindows = new Set();
 let bootWindow;
 let bootIndexPath;
-let bootAppearanceFallback = false;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
@@ -1974,13 +1976,19 @@ const getSystemShutdownPorts = () => {
             ports.add(workspaceItem.port);
         }
     });
-    if (!remoteKernelTarget && bootWindow && !bootWindow.isDestroyed() && kernelPort) {
-        ports.add(kernelPort);
+    if (!remoteKernelTarget) {
+        bootWindows.forEach(window => {
+            if (!window.isDestroyed() && window.kernelPort) ports.add(window.kernelPort);
+        });
     }
     return Array.from(ports);
 };
 
 const requestGracefulKernelExit = async (port) => {
+    const portKey = port.toString();
+    if (exitedKernelPorts.has(portKey)) {
+        return true;
+    }
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), systemShutdownExitTimeout);
     try {
@@ -1990,19 +1998,19 @@ const requestGracefulKernelExit = async (port) => {
             execInstallPkg: 1,
         }, abortController.signal);
         if (!response) {
-            return false;
+            return exitedKernelPorts.has(portKey);
         }
 
         const apiData = await response.json();
         if (apiData.code !== 0) {
             writeLog("graceful system shutdown failed [port=" + port + ", code=" + apiData.code + "]");
-            return false;
+            return exitedKernelPorts.has(portKey);
         }
         writeLog("graceful system shutdown succeeded [port=" + port + "]");
         return true;
     } catch (error) {
         writeLog("parse graceful system shutdown response failed [port=" + port + "]: " + error);
-        return false;
+        return exitedKernelPorts.has(portKey);
     } finally {
         clearTimeout(timeout);
     }
@@ -2023,9 +2031,9 @@ const resetSystemShutdown = (ports) => {
             showWindow(workspace.browserWindow);
         }
     });
-    if (bootWindow && !bootWindow.isDestroyed() && ports.includes(kernelPort)) {
-        showWindow(bootWindow);
-    }
+    bootWindows.forEach(window => {
+        if (ports.includes(window.kernelPort)) showWindow(window);
+    });
 };
 
 const beginGracefulSystemShutdown = () => {
@@ -2050,9 +2058,9 @@ const beginGracefulSystemShutdown = () => {
         const succeededPorts = results.filter((item) => item.success).map((item) => item.port);
         const failedPorts = results.filter((item) => !item.success).map((item) => item.port);
         succeededPorts.forEach((port) => exitApp(port));
-        if (bootWindow && !bootWindow.isDestroyed() && succeededPorts.includes(kernelPort)) {
-            bootWindow.destroy();
-        }
+        bootWindows.forEach(window => {
+            if (!window.isDestroyed() && succeededPorts.includes(window.kernelPort)) window.destroy();
+        });
 
         const remainingPorts = getSystemShutdownPorts();
         const incompletePorts = Array.from(new Set(failedPorts.concat(remainingPorts)));
@@ -2145,6 +2153,9 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     }
     const kernelTarget = getKernelTarget(kernel);
     const currentKernelPort = kernelTarget.port;
+    const startup = kernelTarget.mode === "remote" ? undefined : Array.from(localKernelStartups.values())
+        .find(item => item.port?.toString() === currentKernelPort.toString());
+    const currentBootWindow = startup ? startup.window : (kernelTarget.mode === "remote" ? bootWindow : undefined);
 
     // 恢复主窗体状态
     let oldWindowState = {};
@@ -2352,8 +2363,8 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         if (kernelTarget.mode === "remote") {
             if (getWindowPathname(currentWindow) === "/check-auth") {
                 currentWindow.show();
-                if (bootWindow && !bootWindow.isDestroyed()) {
-                    bootWindow.destroy();
+                if (currentBootWindow && !currentBootWindow.isDestroyed()) {
+                    currentBootWindow.destroy();
                 }
             }
             return;
@@ -2394,19 +2405,28 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         port: currentKernelPort,
         ownsKernel: kernelTarget.ownsKernel,
         kernelTarget,
+        workspaceDir: startup?.workspace,
     });
+    if (startup) localKernelStartups.delete(getWorkspaceStartupKey(startup.workspace));
+    bindMainWindowReady(currentWindow, currentBootWindow, windowState);
+};
+
+const bindMainWindowReady = (currentWindow, currentBootWindow, windowState) => {
     // loadURL 后设置超时兜底：前端 app bundle 加载或初始化异常导致 siyuan-ready-to-show 迟迟不发时，
     // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
     const readyToShowTimeout = setTimeout(() => {
-        if (bootWindow && !bootWindow.isDestroyed()) {
+        ipcMain.removeListener("siyuan-ready-to-show", readyToShow);
+        if (currentBootWindow && !currentBootWindow.isDestroyed()) {
             if (!currentWindow.isDestroyed()) {
                 writeLog("siyuan-ready-to-show timeout, force showing main window");
                 currentWindow.show();
             }
-            bootWindow.destroy();
+            currentBootWindow.destroy();
         }
     }, 60000);
-    ipcMain.once("siyuan-ready-to-show", () => {
+    const readyToShow = (event) => {
+        if (event.sender !== currentWindow.webContents) return;
+        ipcMain.removeListener("siyuan-ready-to-show", readyToShow);
         clearTimeout(readyToShowTimeout); // 正常收到信号则取消超时兜底
         if (isOpenAsHidden()) {
             if (windowState.isMaximized) {
@@ -2427,9 +2447,15 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
                 currentWindow.webContents.openDevTools(); // 保证开发者工具窗口在前
             }
         }
-        if (bootWindow && !bootWindow.isDestroyed()) {
-            bootWindow.destroy();
+        if (currentBootWindow && !currentBootWindow.isDestroyed()) {
+            currentBootWindow.destroy();
         }
+    };
+    ipcMain.on("siyuan-ready-to-show", readyToShow);
+    currentWindow.once("closed", () => {
+        clearTimeout(readyToShowTimeout);
+        ipcMain.removeListener("siyuan-ready-to-show", readyToShow);
+        if (currentBootWindow && !currentBootWindow.isDestroyed()) currentBootWindow.destroy();
     });
 };
 
@@ -2508,25 +2534,27 @@ const showAppleSiliconWarning = async (lang) => {
     return false;
 };
 
-const loadBootWindow = (disableAppearance = false) => {
-    if (!bootWindow || bootWindow.isDestroyed() || !bootIndexPath) {
+const loadBootWindow = (disableAppearance = false, currentBootWindow = bootWindow, port = kernelPort, lang = getArg("--lang")) => {
+    if (!currentBootWindow || currentBootWindow.isDestroyed() || !bootIndexPath) {
         return;
     }
     if (disableAppearance) {
-        bootAppearanceFallback = true;
+        currentBootWindow.appearanceFallback = true;
     }
-    const query = {v: appVer, port: kernelPort, lang: getArg("--lang") || resolveAppLanguage(app.getPreferredSystemLanguages())};
-    if (bootWindow.previousExitWaiting) {
-        query.previousExitWaiting = bootWindow.previousExitWaiting;
+    const query = {v: appVer, port, lang: lang || resolveAppLanguage(app.getPreferredSystemLanguages())};
+    currentBootWindow.kernelPort = port;
+    currentBootWindow.lang = lang;
+    if (currentBootWindow.previousExitWaiting) {
+        query.previousExitWaiting = currentBootWindow.previousExitWaiting;
     }
     if (remoteKernelTarget) {
         query.remote = remoteKernelTarget.origin;
         query.appearance = "0";
     }
-    if (bootAppearanceFallback) {
+    if (currentBootWindow.appearanceFallback) {
         query.appearance = "0";
     }
-    bootWindow.loadFile(bootIndexPath, {query}).catch((error) => {
+    currentBootWindow.loadFile(bootIndexPath, {query}).catch((error) => {
         writeLog("load boot window failed: " + error);
     });
 };
@@ -2546,21 +2574,24 @@ const createBootWindow = () => {
             webSecurity: false,
         },
     });
-    bootAppearanceFallback = false;
+    const currentBootWindow = bootWindow;
+    bootWindows.add(currentBootWindow);
+    currentBootWindow.once("closed", () => bootWindows.delete(currentBootWindow));
     bootIndexPath = path.join(appDir, "app", "electron", "boot.html");
     if (isDevEnv) {
         bootIndexPath = path.join(appDir, "electron", "boot.html");
     }
-    bootWindow.on("unresponsive", () => {
-        if (!bootAppearanceFallback) {
+    currentBootWindow.on("unresponsive", () => {
+        if (!currentBootWindow.appearanceFallback) {
             writeLog("boot window is unresponsive, reload without custom appearance");
-            loadBootWindow(true);
+            loadBootWindow(true, currentBootWindow, currentBootWindow.kernelPort, currentBootWindow.lang);
         }
     });
+    return currentBootWindow;
 };
 
-const getAvailablePort = (port) => {
-    if (isDevEnv && workspaces.length === 0) {
+const getAvailablePort = (port, useDevKernel = isDevEnv && workspaces.length === 0) => {
+    if (useDevKernel) {
         return Promise.resolve(kernelPort);
     }
     if (port) {
@@ -2572,29 +2603,29 @@ const getAvailablePort = (port) => {
         server.on("error", error => {
             writeLog(error);
             kernelPort = "";
-            resolve(kernelPort);
+            resolve("");
         });
         server.listen(0, () => {
-            kernelPort = server.address().port;
-            server.close(() => resolve(kernelPort));
+            const availablePort = server.address().port;
+            kernelPort = availablePort;
+            server.close(() => resolve(availablePort));
         });
     });
 };
 
-const showLocalBootWindow = () => {
+const showLocalBootWindow = (currentBootWindow = bootWindow, port = kernelPort, lang) => {
     const bootWindowCreatedAt = Date.now();
     if (!openAsHidden) {
-        const currentBootWindow = bootWindow;
         if ("win32" === process.platform) {
             currentBootWindow.setOpacity(0);
         }
         currentBootWindow.once("ready-to-show", () => {
-            if (bootWindow === currentBootWindow && !currentBootWindow.isDestroyed()) {
+            if (!currentBootWindow.isDestroyed()) {
                 currentBootWindow.show();
                 writeLog("boot window ready to show [" + (Date.now() - bootWindowCreatedAt) + "ms since load]");
                 if ("win32" === process.platform) {
                     setImmediate(() => {
-                        if (bootWindow === currentBootWindow && !currentBootWindow.isDestroyed()) {
+                        if (!currentBootWindow.isDestroyed()) {
                             currentBootWindow.setOpacity(1);
                         }
                     });
@@ -2602,33 +2633,61 @@ const showLocalBootWindow = () => {
             }
         });
     }
-    loadBootWindow();
+    loadBootWindow(false, currentBootWindow, port, lang);
     if (openAsHidden) {
-        bootWindow.minimize();
+        currentBootWindow.minimize();
     }
 };
 
+const getWorkspaceStartupKey = workspace => {
+    const resolved = path.resolve(workspace);
+    return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+};
+
 const initKernel = async (workspace, port, lang, safeMode, preparedBoot) => {
-    // 每次尝试保留独立的退出状态，避免上一轮未完成的请求干扰新内核。
-    const startup = {};
+    workspace = [workspace, process.env.SIYUAN_WORKSPACE_PATH, lastWorkspacePath]
+        .find(item => typeof item === "string" && item);
+    const key = getWorkspaceStartupKey(workspace);
+    const existing = localKernelStartups.get(key);
+    const opened = workspaces.find(item => item.workspaceDir && getWorkspaceStartupKey(item.workspaceDir) === key &&
+        item.browserWindow && !item.browserWindow.isDestroyed());
+    if (existing || opened) {
+        showWindow(existing ? existing.window : opened.browserWindow);
+        return false;
+    }
+    // 必须在首次异步等待前登记并创建窗口，避免重复启动以及无窗口时应用退出。
+    const startup = {
+        workspace,
+        window: preparedBoot ? preparedBoot.window : createBootWindow(),
+        ownsKernel: !isDevEnv || workspaces.length > 0 || localKernelStartups.size > 0,
+        devPort: kernelPort,
+    };
+    localKernelStartups.set(key, startup);
     const cancelStartup = () => {
         startup.canceled = true;
+        if (startup.kernelRunning && !startup.exitRequested) {
+            startup.exitRequested = true;
+            expectedKernelExitPorts.add(startup.port.toString());
+            requestKernelExit(startup.port, {setCurrentWorkspace: false});
+        }
         // 其他工作空间可能阻止应用退出，主动关闭本次启动页，避免留下无法继续的等待窗口。
-        if (startup.window && bootWindow === startup.window && !startup.window.isDestroyed()) {
+        if (!startup.window.isDestroyed()) {
             startup.window.destroy();
         }
     };
     app.on("before-quit", cancelStartup);
     let retryDeadline;
+    let started = false;
     try {
         for (;;) {
-            const result = await initKernelAttempt(startup.window ? startup.workspace : workspace,
+            const result = await initKernelAttempt(workspace,
                 port, lang, safeMode, preparedBoot, startup);
             if (result !== "workspace-locked") {
+                started = !!result;
                 return result;
             }
             const currentBootWindow = startup.window;
-            const canceled = () => startup.canceled || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+            const canceled = () => startup.canceled || currentBootWindow.isDestroyed();
             if (canceled()) return false;
             // 只限制锁冲突的自动重试；已进入正常退出的同步恢复仍使用原有等待期限。
             retryDeadline ??= Date.now() + 90000;
@@ -2656,6 +2715,10 @@ const initKernel = async (workspace, port, lang, safeMode, preparedBoot) => {
         }
     } finally {
         app.removeListener("before-quit", cancelStartup);
+        if (!started) {
+            cancelStartup();
+            localKernelStartups.delete(key);
+        }
     }
 };
 
@@ -2668,16 +2731,12 @@ const showWorkspaceLocked = () => {
 
 const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startup) => {
     return new Promise(async (resolve) => {
-        const currentWorkspace = [workspace, process.env.SIYUAN_WORKSPACE_PATH, lastWorkspacePath]
-            .find(item => typeof item === "string" && item);
+        const currentWorkspace = startup.workspace;
+        const currentBootWindow = startup.window;
+        const canceled = () => startup.canceled || currentBootWindow.isDestroyed();
         const workspaceLogPath = currentWorkspace ? path.resolve(currentWorkspace, "temp", "siyuan.log") : "";
         const kernelLogPath = path.join(confDir, "kernel.log");
-        // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
-        if (!startup.window && !preparedBoot) {
-            createBootWindow();
-        }
-        if (!startup.window && !await showAppleSiliconWarning(lang)) {
-            bootWindow.destroy();
+        if (!startup.port && !await showAppleSiliconWarning(lang)) {
             app.quit();
             resolve(false);
             return;
@@ -2686,40 +2745,26 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
         const kernelPath = path.join(appDir, "kernel", kernelName);
         if (!fs.existsSync(kernelPath)) {
             showErrorWindow("内核程序丢失", "Kernel program is missing", `<div>内核程序丢失，请重新安装思源，并将思源内核程序加入杀毒软件信任列表。</div><div>The kernel program is not found, please reinstall SiYuan and add SiYuan Kernel prgram into the trust list of your antivirus software.</div><div><i>${kernelPath}</i></div>`);
-            bootWindow.destroy();
             resolve(false);
             return;
         }
 
-        if (startup.window) {
-            if (startup.canceled || startup.window.isDestroyed() || bootWindow !== startup.window) {
-                resolve(false);
-                return;
-            }
-            kernelPort = startup.port;
-        } else if (preparedBoot) {
-            kernelPort = await preparedBoot.ready;
-        } else {
-            await getAvailablePort(port);
-        }
-        writeLog("got kernel port [" + kernelPort + "]");
-        if (!kernelPort) {
-            bootWindow.destroy();
+        const firstAttempt = !startup.port;
+        const currentKernelPort = startup.port || (preparedBoot ? await preparedBoot.ready :
+            startup.ownsKernel ? await getAvailablePort(port, false) : startup.devPort);
+        startup.port = currentKernelPort;
+        writeLog("got kernel port [" + currentKernelPort + "]");
+        if (!currentKernelPort || canceled()) {
             resolve(false);
             return;
         }
-        if (!startup.window && !preparedBoot) {
-            showLocalBootWindow();
+        if (firstAttempt && !preparedBoot) {
+            showLocalBootWindow(currentBootWindow, currentKernelPort, lang);
         }
-        const currentKernelPort = kernelPort;
-        const currentBootWindow = bootWindow;
-        startup.window = currentBootWindow;
-        startup.port = currentKernelPort;
-        startup.workspace = currentWorkspace;
         let kernelExited = false;
         let kernelStarted = false;
-        const bootCanceled = () => startup.canceled || kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
-        if (!isDevEnv || workspaces.length > 0) {
+        const bootCanceled = () => canceled() || kernelExited;
+        if (startup.ownsKernel) {
             let waiting = !!currentBootWindow.previousExitWaiting;
             const language = lang || resolveAppLanguage(app.getPreferredSystemLanguages());
             const languages = loadAppMenuLanguages(language);
@@ -2775,7 +2820,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
             }
         }
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
-        if (isDevEnv && workspaces.length === 0) {
+        if (!startup.ownsKernel) {
             cmds.push("--mode", "dev");
         }
         if (workspace && "" !== workspace) {
@@ -2789,7 +2834,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
         }
         let cmd = `ui version [${appVer}], booting kernel [${kernelPath} ${cmds.join(" ")}]`;
         writeLog(cmd);
-        if (!isDevEnv || workspaces.length > 0) {
+        if (startup.ownsKernel) {
             const spawnStartedAt = Date.now();
             const kernelProcess = childProcess.spawn(kernelPath, cmds, {
                 detached: false, // 桌面端内核进程不再以游离模式拉起 https://github.com/siyuan-note/siyuan/issues/6336
@@ -2798,17 +2843,26 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
 
             writeLog("spawned kernel process [" + (Date.now() - spawnStartedAt) + "ms]");
             const kernelPortKey = currentKernelPort.toString();
+            exitedKernelPorts.delete(kernelPortKey);
             kernelProcesses.set(kernelPortKey, kernelProcess);
+            startup.kernelRunning = true;
+            startup.process = kernelProcess;
             writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + currentKernelPort + "]");
             kernelProcess.on("close", (code, signal) => {
                 kernelExited = true;
+                if (startup.process === kernelProcess) startup.kernelRunning = false;
                 if (kernelProcesses.get(kernelPortKey) === kernelProcess) {
                     kernelProcesses.delete(kernelPortKey);
+                    exitedKernelPorts.add(kernelPortKey);
                 }
                 const expectedExit = expectedKernelExitPorts.delete(kernelPortKey);
                 writeLog(`kernel [pid=${kernelProcess.pid}, port=${currentKernelPort}] exited with code [${code}], signal [${signal}], expected [${expectedExit}]`);
+                if (startup.canceled) {
+                    resolve(false);
+                    return;
+                }
                 if (code === 24 && !expectedExit && !kernelStarted) {
-                    resolve(startup.canceled || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow
+                    resolve(canceled()
                         ? false : "workspace-locked");
                     return;
                 }
@@ -2871,7 +2925,6 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
                     } else {
                         showErrorWindow("获取内核服务端口失败", "Failed to Obtain Kernel Service Port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to obtain kernel service port. Please ensure SiYuan has network permissions and is not blocked by firewalls or antivirus software.</div>");
                     }
-                    requestKernelExit(currentKernelPort);
                     currentBootWindow.destroy();
                     resolve(false);
                     return;
@@ -2889,8 +2942,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
                 writeLog(`kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`);
-                requestKernelExit(currentKernelPort);
-                bootWindow.destroy();
+                currentBootWindow.destroy();
                 resolve(false);
             } else {
                 let progressing = false;
@@ -2915,8 +2967,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
                             "<div>内核启动超时，请查看 <a href=\"#\" data-log-path>工作空间/temp/siyuan.log</a> 获取详细报错信息，或尝试重启思源。</div>" +
                             "<div>Kernel boot timed out. Please check <a href=\"#\" data-log-path>workspace/temp/siyuan.log</a> for details, or try restarting SiYuan.</div>",
                             "⚠️", workspaceLogPath);
-                        requestKernelExit(currentKernelPort);
-                        bootWindow.destroy();
+                        currentBootWindow.destroy();
                         resolve(false);
                         progressing = true;
                         break;
@@ -2951,8 +3002,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
                         if (isLocalKernelRequestTimeout(e)) {
                             showKernelUnresponsiveWindow(lang);
                         }
-                        requestKernelExit(currentKernelPort);
-                        bootWindow.destroy();
+                        currentBootWindow.destroy();
                         resolve(false);
                         progressing = true;
                     }
@@ -3194,9 +3244,10 @@ app.whenReady().then(() => {
         createBootWindow();
         const currentBootWindow = bootWindow;
         preparedBoot = {
+            window: currentBootWindow,
             ready: getAvailablePort(getArg("--port")).then((port) => {
-                if (port && bootWindow === currentBootWindow && !currentBootWindow.isDestroyed()) {
-                    showLocalBootWindow();
+                if (port && !currentBootWindow.isDestroyed()) {
+                    showLocalBootWindow(currentBootWindow, port, getArg("--lang"));
                 }
                 return port;
             }),
@@ -3273,10 +3324,12 @@ app.whenReady().then(() => {
             return;
         }
 
-        if (bootWindow && !bootWindow.isDestroyed() && bootWindow.webContents.id === webContents.id) {
-            if (!bootAppearanceFallback) {
+        const crashedBootWindow = Array.from(bootWindows)
+            .find(window => window && !window.isDestroyed() && window.webContents.id === webContents.id);
+        if (crashedBootWindow) {
+            if (!crashedBootWindow.appearanceFallback) {
                 writeLog("boot renderer exited, reload without custom appearance");
-                loadBootWindow(true);
+                loadBootWindow(true, crashedBootWindow, crashedBootWindow.kernelPort, crashedBootWindow.lang);
             }
             return;
         }
@@ -4869,6 +4922,8 @@ app.on("second-instance", (event, argv) => {
 
     if (!siyuanURL && 0 < workspaces.length) {
         showWindow(workspaces[0].browserWindow);
+    } else if (!siyuanURL && localKernelStartups.size > 0) {
+        showWindow(localKernelStartups.values().next().value.window);
     }
 });
 

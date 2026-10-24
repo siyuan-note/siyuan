@@ -38,6 +38,12 @@ func WriteFileByMmap(filePath string, data []byte) (err error) {
 	}
 	defer filelock.CloseFile(f)
 
+	return writeFileByMmap(f, data)
+}
+
+// writeFileByMmap 的调用方持有文件锁，并在返回后关闭文件。
+func writeFileByMmap(f *os.File, data []byte) (err error) {
+	filePath := f.Name()
 	info, err := f.Stat()
 	if err != nil {
 		return err

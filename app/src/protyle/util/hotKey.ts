@@ -60,8 +60,13 @@ export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEve
     }
 
     // iOS 中文输入法可能将未组词的 Command 或 Option 字母键标记为 229，此时按实际字母匹配。
-    const eventKey = event.keyCode === 229 && (event.metaKey || event.altKey) && !event.isComposing &&
+    let eventKey = event.keyCode === 229 && (event.metaKey || event.altKey) && !event.isComposing &&
         /^[a-z]$/i.test(event.key) && isInIOS() ? event.key.toUpperCase() : Constants.KEYCODELIST[event.keyCode];
+    // Option 可能将字母转换为特殊字符；传统键码不可识别时，仅按字母物理键码兜底。
+    if (!eventKey && event.altKey && !event.isComposing && event.key?.length === 1 &&
+        /^Key[A-Z]$/.test(event.code) && isInIOS()) {
+        eventKey = event.code.slice(3);
+    }
 
     // []
     if (hotKey.indexOf("⇧") === -1 && hotKey.indexOf("⌘") === -1 && hotKey.indexOf("⌥") === -1 && hotKey.indexOf("⌃") === -1) {

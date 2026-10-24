@@ -405,7 +405,7 @@ test("decision cards use transparent bundled provider artwork with square view b
     assert.equal([...html.matchAll(/<img [^>]*class="config-ai-decision__icon"/g)].length, 2);
     assert.equal(html.includes("#iconBrain"), false);
     assert.match(html, /alt="TypeSafe System One"/);
-    assert.match(html, /alt="OpenAI Decisions API \(Beta\)"/);
+    assert.match(html, /alt="OpenAI Decisions API"/);
     for (const path of paths) {
         const svg = readFileSync(resolve(process.cwd(), path.slice(1)), "utf8");
         const viewBox = svg.match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
@@ -433,7 +433,7 @@ test("decision details reuse provider settings groups and compact model testing 
         assert.match(providerHTML, /data-decision-field="timeout"/);
         assert.doesNotMatch(providerHTML, /data-decision-field="name"|data-action="test"/);
         assert.match(providerHTML, provider === "typesafe" ? /TypeSafe System One<br>decisionEndpointTip/
-            : /OpenAI Decisions API \(Beta\)<br>decisionOpenAIEndpointTip/);
+            : /OpenAI Decisions API<br>decisionOpenAIEndpointTip/);
         assert.doesNotMatch(html, /apiKeyTip|apiModelTip|apiTimeoutTip/);
         assert.match(modelHTML, /class="fn__flex b3-label config-item config-ai-provider__model">\s*<input[^>]*class="b3-text-field fn__flex-1"[^>]*data-decision-field="name"[^>]*>[\s\S]*?data-action="test">\s*<svg class="b3-button__icon"><use xlink:href="#iconPlugZap"/);
         assert.match(modelHTML, /decisionTestDraftTip/);

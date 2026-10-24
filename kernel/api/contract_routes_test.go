@@ -19,6 +19,7 @@ func TestAPIContractAuthorizationHandlers(t *testing.T) {
 		{contractRouteHandlers(apicontract.GetBlockDOM, handler), []gin.HandlerFunc{model.CheckAuth, handler}},
 		{contractRouteHandlers(apicontract.NetworkForwardProxy, handler), []gin.HandlerFunc{model.CheckAuth, model.CheckAdminRole, handler}},
 		{contractRouteHandlers(apicontract.ChangeAttrViewLayout, handler), []gin.HandlerFunc{model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handler}},
+		{contractRouteHandlers(apicontract.SystemDownloadUpdate, handler), []gin.HandlerFunc{model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handler}},
 	} {
 		if len(test.actual) != len(test.want) {
 			t.Fatalf("middleware count changed: got %d want %d", len(test.actual), len(test.want))

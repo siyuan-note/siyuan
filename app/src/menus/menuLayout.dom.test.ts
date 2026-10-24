@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import {execFile} from "node:child_process";
-import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
@@ -8,7 +8,8 @@ import {promisify} from "node:util";
 import {compile, Logger} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>, css: string) => {
+const browserCases = async (sources: Record<string, string>, css: string,
+                            themeLabels: {language: string, labels: Record<string, string>}[]) => {
     const check: typeof assert = require("node:assert/strict");
     let mobile = false;
     let mobileApp = false;
@@ -291,14 +292,12 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     dispose(submenus);
 
     const appearance: typeof import("../protyle/render/listMindmap/appearance") = load("protyle/render/listMindmap/appearance");
-    const labels: Record<string, string> = {theme: "Theme", default: "Default", ...Object.fromEntries(appearance.LIST_MINDMAP_PALETTES
-        .map(preset => [preset.label, preset.id]))};
     for (const touch of [false, true]) {
         mobile = touch;
         await require("electron").ipcRenderer.invoke("resize-menu-test", touch ? 360 : 640, 520);
         await settle();
         window.siyuan.mobile.size.portrait.height1 = innerHeight;
-        for (const fontSize of [16, 24]) {
+        for (const {fontSize, language, labels} of [16, 24].flatMap(fontSize => themeLabels.map(data => ({fontSize, ...data})))) {
             document.documentElement.style.setProperty("--b3-font-size", `${fontSize}px`);
             const instance = createMenu();
             const metadata: import("../protyle/render/listMindmap/model").ListMindmapMetadata = {version: 1, nodes: {}, relations: []};
@@ -336,6 +335,20 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                     "mobile theme choices fit the visible sheet after its opening transition");
                 check.ok(bounds.left >= 0 && bounds.right <= innerWidth + 1, "mobile themes fit a narrow screen");
             }
+            const widestRow = Math.max(...Array.from(items.children, row => {
+                const label = row.querySelector<HTMLElement>(".b3-menu__label");
+                const range = document.createRange();
+                range.selectNodeContents(label);
+                const textWidth = range.getBoundingClientRect().width;
+                check.ok(textWidth <= label.getBoundingClientRect().width + 1,
+                    `${language} ${fontSize}px: localized theme names remain fully visible`);
+                const padding = getComputedStyle(row);
+                const controlsWidth = Array.from(row.children).filter(child => child !== label).reduce((sum, child) => {
+                    const style = getComputedStyle(child);
+                    return sum + child.getBoundingClientRect().width + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+                }, 0);
+                return textWidth + controlsWidth + parseFloat(padding.paddingLeft) + parseFloat(padding.paddingRight);
+            }));
             for (const [index, preset] of appearance.LIST_MINDMAP_PALETTES.entries()) {
                 const row = items.children[index + 1];
                 const preview = row.querySelector<HTMLElement>(".mindmap-view__theme-preview");
@@ -344,10 +357,20 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                 check.ok(getComputedStyle(preview).backgroundImage.startsWith("linear-gradient("));
                 check.ok(new Set(getComputedStyle(preview).backgroundImage.match(/rgb\([^)]+\)/g)).size >= 3,
                     "the preview shows multiple representative theme colors");
-                check.equal(preview.getBoundingClientRect().width, 64);
+                check.equal(preview.getBoundingClientRect().width, 48);
                 check.ok(label.getBoundingClientRect().left >= preview.getBoundingClientRect().right);
                 check.equal(label.textContent, labels[preset.label]);
             }
+            if (!touch) {
+                const padding = getComputedStyle(items);
+                const chromeWidth = panel.getBoundingClientRect().width - items.clientWidth +
+                    parseFloat(padding.paddingLeft) + parseFloat(padding.paddingRight);
+                check.ok(panel.getBoundingClientRect().width <= widestRow + chromeWidth + 1,
+                    `${language} ${fontSize}px: the menu fits its content without a fixed label spacer`);
+            }
+            const selected = items.querySelector<HTMLElement>(".b3-menu__checked");
+            const selectedLabel = selected.previousElementSibling.getBoundingClientRect();
+            check.ok(selected.getBoundingClientRect().left >= selectedLabel.right, "the checkmark does not overlap the name");
             const last = items.lastElementChild as HTMLElement;
             items.scrollTop = items.scrollHeight;
             const lastBounds = last.getBoundingClientRect();
@@ -809,7 +832,11 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
         "business/_av.scss", "business/_av-calendar.scss", "business/_ai_agent.scss", "pdf/_pdf.scss",
         "protyle/_mindmap-view.scss"].map(name =>
         compile(path.join(__dirname, "../assets/scss", name), {logger: Logger.silent}).css).join("\n");
-    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)})`;
+    const languagesPath = path.join(__dirname, "../../appearance/langs");
+    const themeLabels = readdirSync(languagesPath).filter(name => name.endsWith(".json")).map(name => ({
+        language: name.replace(".json", ""), labels: JSON.parse(readFileSync(path.join(languagesPath, name), "utf8")),
+    }));
+    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)}, ${JSON.stringify(themeLabels)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-menu-layout-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");

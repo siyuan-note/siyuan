@@ -527,8 +527,12 @@
   }
 
   &__theme-preview {
-    width: 64px;
-    flex-basis: 64px;
+    width: 48px;
+    flex-basis: 48px;
+  }
+
+  &__theme-menu .b3-menu__label {
+    min-width: 0;
   }
 
   &__node[data-task] {

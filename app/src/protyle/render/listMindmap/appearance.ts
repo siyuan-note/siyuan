@@ -247,7 +247,10 @@ export const getListMindmapAppearanceMenu = (metadata: ListMindmapMetadata,
         id: "appearance", icon: "iconTheme", label: labels.appearance,
         submenu: [
             {id: "theme", iconHTML: "", label: labels.theme,
-                bind: element => element.style.setProperty("--b3-menu-items-max-height", "min(480px, 60vh)"),
+                bind: element => {
+                    element.classList.add("mindmap-view__theme-menu");
+                    element.style.setProperty("--b3-menu-items-max-height", "min(480px, 60vh)");
+                },
                 submenu: [
                     {id: "default", iconHTML: '<span class="b3-menu__icon mindmap-view__theme-preview" aria-hidden="true"></span>',
                         label: labels.default, checked: !palette.length,

@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261023005737"
+		"updated": "20261024153700"
 	},
 	"Children": [
 		{
@@ -275,7 +275,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261016191345"
+				"updated": "20261024153700"
 			},
 			"Children": [
 				{
@@ -496,7 +496,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261023005737"
+				"updated": "20261024153700"
 			},
 			"Children": [
 				{
@@ -555,12 +555,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022182404-71cve53",
-				"updated": "20261023005737"
+				"updated": "20261024153700"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The input grows automatically as you add text and images, then scrolls when it reaches its height limit. On desktop, hover over the input to reveal the small handle at the top; it remains visible on touch screens. Drag the handle upward or downward to adjust the limit. Double-click the handle to restore the automatic limit. Space above and below the content makes the first and last lines easier to inspect."
+					"Data": "The input grows automatically as you add text and images, then scrolls when it reaches its automatic height limit. On desktop, hover over the input to reveal the small handle at the top; it remains visible on touch screens. Drag the handle upward or downward to set a fixed height, even when the input is empty. The minimum height fits a complete line of text, and the maximum depends on the available panel space. Double-click the handle to restore automatic sizing. Space above and below the content makes the first and last lines easier to inspect."
 				}
 			]
 		},
@@ -569,7 +569,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022182404-jbp15g8",
-				"updated": "20261022182404"
+				"updated": "20261024153700"
 			},
 			"Children": [
 				{
@@ -592,7 +592,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to increase or decrease the limit, "
+					"Data": " to increase or decrease the height, "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261025011511"
 	},
 	"Children": [
 		{
@@ -773,7 +773,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-xknvq29",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -802,7 +802,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-mpwyzfe",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -1046,6 +1046,52 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20261025011205-hpy47l0",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261025011205-hpy47l0",
+						"updated": "20261025011205"
+					},
+					"Children": [
+						{
+							"ID": "20261025011205-9vepwg6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261025011205-9vepwg6",
+								"updated": "20261025011205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "欄位名稱：在檢視設定中開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "佈局"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "顯示欄位名稱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，即可在非主鍵欄位值旁顯示欄位名稱，主鍵仍作為項目標題。此選項預設關閉，依日曆檢視儲存，關閉後恢復為僅顯示欄位值"
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
 				}
 			]
 		},
@@ -1055,7 +1101,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164228-rrw0f53",
-				"updated": "20261024161058"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1084,7 +1130,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164228-hqf3wj5",
-				"updated": "20261024161058"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1157,7 +1203,7 @@
 					},
 					"Properties": {
 						"id": "20260613164228-yv431bq",
-						"updated": "20260613164228"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1165,7 +1211,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164228-cosafjo",
-								"updated": "20260730184353"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1176,6 +1222,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "：每張卡片展示主鍵所繫結區塊的內容摘要，以及該視圖中所選字段的值"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。在視圖設定中開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "佈局"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "顯示欄位名稱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，可在欄位值旁顯示欄位名稱；此選項依視圖儲存，關閉後隱藏欄位名稱"
 								}
 							]
 						}
@@ -1316,7 +1384,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164228-jqu76ou",
-				"updated": "20260927112821"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1345,7 +1413,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164228-cgmduwb",
-				"updated": "20260613164228"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1390,7 +1458,7 @@
 					},
 					"Properties": {
 						"id": "20260613164228-imp49ba",
-						"updated": "20260613164228"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1398,7 +1466,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164228-4efi1s4",
-								"updated": "20260730184353"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1409,6 +1477,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "：每條記錄渲染為一張卡片，卡片中展示主鍵區塊的內容摘要和所選字段值，適合快速瀏覽和以內容為主的檢視方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。在視圖設定中開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "佈局"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "顯示欄位名稱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，可在欄位值旁顯示欄位名稱；此選項依視圖儲存，關閉後隱藏欄位名稱"
 								}
 							]
 						}

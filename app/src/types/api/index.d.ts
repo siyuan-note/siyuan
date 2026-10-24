@@ -294,9 +294,9 @@ export type AVCalendarRange = { "end": number; "start": number; "timeZone": stri
 
 export type AVCalendarRangeInput = { "end": number; "start": number; "timeZone": string; };
 
-export type AVCalendarSettings = { "colorKeyID": string; "dateKeyID": string; "rowLimit"?: number; "weekStart": number; };
+export type AVCalendarSettings = { "colorKeyID": string; "dateKeyID": string; "displayFieldName"?: boolean; "rowLimit"?: number; "weekStart": number; };
 
-export type AVCalendarSettingsInput = { "colorKeyID": string; "dateKeyID": string; "rowLimit"?: number; "weekStart": number; };
+export type AVCalendarSettingsInput = { "colorKeyID": string; "dateKeyID": string; "displayFieldName"?: boolean; "rowLimit"?: number; "weekStart": number; };
 
 export type AVCalendarUndatedData = { "rows": Array<AVTableRow | null> | null; "total": number; };
 

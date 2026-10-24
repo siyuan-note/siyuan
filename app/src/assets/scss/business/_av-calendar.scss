@@ -258,6 +258,22 @@
     pointer-events: none;
   }
 
+  .av__calendar-field-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    > .av__calendar-field {
+      flex: 1;
+    }
+  }
+
+  .av__calendar-field-name {
+    max-width: 40%;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
   .av__calendar-field {
     display: flex;
     align-items: center;

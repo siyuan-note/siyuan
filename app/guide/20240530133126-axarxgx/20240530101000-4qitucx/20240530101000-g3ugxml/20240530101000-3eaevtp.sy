@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261025011511"
 	},
 	"Children": [
 		{
@@ -774,7 +774,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-vntgfc2",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -803,7 +803,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-wh2lupo",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -1047,6 +1047,52 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20261025011205-or11gjy",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261025011205-or11gjy",
+						"updated": "20261025011205"
+					},
+					"Children": [
+						{
+							"ID": "20261025011205-1vqd168",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261025011205-1vqd168",
+								"updated": "20261025011205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "フィールド名：ビュー設定で "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "レイアウト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "フィールド名を表示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を有効にすると、主キー以外の値の横にフィールド名を表示します。主キーは引き続きエントリのタイトルになります。初期状態では無効で、カレンダービューごとに保存されます。無効にすると値だけの表示に戻ります"
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
 				}
 			]
 		},
@@ -1056,7 +1102,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164213-x497lrs",
-				"updated": "20261024161058"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1085,7 +1131,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164213-kvig09h",
-				"updated": "20261024161058"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1158,7 +1204,7 @@
 					},
 					"Properties": {
 						"id": "20260613164213-9h3zw60",
-						"updated": "20260613164213"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1166,7 +1212,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164213-nkkuyiq",
-								"updated": "20260613164213"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1177,6 +1223,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "：各カードには主キーにバインドされたコンテンツブロックの概要と、そのビューで選択したフィールドの値が表示されます"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。ビュー設定で "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "レイアウト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "フィールド名を表示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を有効にすると、値の横にフィールド名を表示します。この設定はビューごとに保存され、無効にするとフィールド名を非表示にできます"
 								}
 							]
 						}
@@ -1317,7 +1385,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164213-zanxpx0",
-				"updated": "20260927112821"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1346,7 +1414,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164213-5bpycoo",
-				"updated": "20260613164213"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1391,7 +1459,7 @@
 					},
 					"Properties": {
 						"id": "20260613164213-gwzs1xh",
-						"updated": "20260613164213"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1399,7 +1467,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164213-2ltygil",
-								"updated": "20260613164213"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1410,6 +1478,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "：各エントリがカードとしてレンダリングされ、主キーブロックのコンテンツ概要と選択したフィールド値が表示されます。クイックブラウジングやコンテンツファーストの閲覧に最適"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。ビュー設定で "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "レイアウト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "フィールド名を表示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を有効にすると、値の横にフィールド名を表示します。この設定はビューごとに保存され、無効にするとフィールド名を非表示にできます"
 								}
 							]
 						}

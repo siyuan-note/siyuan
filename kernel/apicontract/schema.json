@@ -7537,6 +7537,9 @@
         "dateKeyID": {
           "type": "string"
         },
+        "displayFieldName": {
+          "type": "boolean"
+        },
         "rowLimit": {
           "type": "integer"
         },
@@ -7559,6 +7562,9 @@
         },
         "dateKeyID": {
           "type": "string"
+        },
+        "displayFieldName": {
+          "type": "boolean"
         },
         "rowLimit": {
           "type": "integer"

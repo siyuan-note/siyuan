@@ -1781,8 +1781,10 @@ func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 	}
 
 	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	case av.LayoutTypeTable, av.LayoutTypeList:
 		return
+	case av.LayoutTypeCalendar:
+		view.Calendar.Settings.DisplayFieldName = operation.Data.(bool)
 	case av.LayoutTypeGallery:
 		view.Gallery.DisplayFieldName = operation.Data.(bool)
 	case av.LayoutTypeKanban:

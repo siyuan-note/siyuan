@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261025011511"
 	},
 	"Children": [
 		{
@@ -773,7 +773,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -802,7 +802,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -1046,6 +1046,52 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20261025011205-dbums56",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261025011205-dbums56",
+						"updated": "20261025011205"
+					},
+					"Children": [
+						{
+							"ID": "20261025011205-5ibctn0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261025011205-5ibctn0",
+								"updated": "20261025011205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Field names: Open the view settings and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Display field name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Field names appear beside non-primary field values; the primary key remains the entry title. This option is off by default and saved per calendar view. Turn it off to show only values"
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
 				}
 			]
 		},
@@ -1055,7 +1101,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-cdeorum",
-				"updated": "20261024161058"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1084,7 +1130,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162855-y67hk0x",
-				"updated": "20261024161058"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1157,7 +1203,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-i1ifv63",
-						"updated": "20260613162855"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1165,7 +1211,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-q8b0pyo",
-								"updated": "20260613162855"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1176,6 +1222,28 @@
 								{
 									"Type": "NodeText",
 									"Data": ": Each card displays a summary of the content block bound to the primary key, along with the values of fields selected in that view"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Open the view settings and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Display field name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to show field names beside their values. This option is saved per view; turn it off to hide the names"
 								}
 							]
 						}
@@ -1316,7 +1384,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-sxaxx5x",
-				"updated": "20260927112821"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1345,7 +1413,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162855-9yfcx0f",
-				"updated": "20260613162855"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1390,7 +1458,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-39vgry3",
-						"updated": "20260613162855"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1398,7 +1466,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-0c304fq",
-								"updated": "20260613162855"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1409,6 +1477,28 @@
 								{
 									"Type": "NodeText",
 									"Data": ": Each entry is rendered as a card showing a summary of the primary key block's content and the selected field values, making it ideal for quick browsing and content-first viewing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Open the view settings and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Display field name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to show field names beside their values. This option is saved per view; turn it off to hide the names"
 								}
 							]
 						}

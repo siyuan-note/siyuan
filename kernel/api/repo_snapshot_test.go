@@ -3,10 +3,12 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -91,11 +93,47 @@ func TestSnapshotFullCheckHTTP(t *testing.T) {
 	if stable.Created || stable.ID != full.ID {
 		t.Fatal("unchanged full check created a snapshot")
 	}
+	var upload bytes.Buffer
+	writer := multipart.NewWriter(&upload)
+	for _, field := range [][2]string{{"path", "data/probe.txt"}, {"isDir", "false"}, {"modTime", strconv.FormatInt(stamp.UnixMilli(), 10)}} {
+		if err := writer.WriteField(field[0], field[1]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	part, err := writer.CreateFormFile("file", "probe.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = part.Write([]byte("LATER!")); err != nil {
+		t.Fatal(err)
+	}
+	if err = writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	engine.POST("/api/file/putFile", putFile)
+	request := httptest.NewRequest(http.MethodPost, "/api/file/putFile", &upload)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+	requireAPIContract(t, http.MethodPost, "/api/file/putFile", recorder)
+	var response struct {
+		Code int `json:"code"`
+	}
+	if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
+		t.Fatalf("putFile response: %s %v", recorder.Body.String(), err)
+	}
+	if info, statErr := os.Stat(file); statErr != nil || info.Size() != 6 || !info.ModTime().Equal(stamp) {
+		t.Fatalf("putFile did not preserve file metadata: %v %v", info, statErr)
+	}
+	uploaded := create(`{"memo":"after putFile","fullCheck":false}`)
+	if !uploaded.Created || uploaded.ID == full.ID {
+		t.Fatal("normal HTTP snapshot skipped a known same-attribute upload")
+	}
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, "snapshot-test", "test", "test", model.Conf.Repo.Load().Key, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, version := range []struct{ id, content string }{{before.ID, "before"}, {full.ID, "AFTER!"}} {
+	for _, version := range []struct{ id, content string }{{before.ID, "before"}, {full.ID, "AFTER!"}, {uploaded.ID, "LATER!"}} {
 		index, err := repo.GetIndex(version.id)
 		if err != nil {
 			t.Fatal(err)

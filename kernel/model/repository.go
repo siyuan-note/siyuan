@@ -264,7 +264,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
 	FlushTxQueue()
-	_, err = IndexRepo("Backup before checkout")
+	_, _, err = CreateRepoSnapshotWithFullCheck("Backup before checkout", true)
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
 		util.PushClearProgress()
@@ -1461,14 +1461,6 @@ func checkoutRepo(id string) (err error) {
 	if err = processAssetDownloadRecovery(repo, true); err != nil {
 		return
 	}
-	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
-	if err != nil {
-		logging.LogErrorf("index repository failed: %s", err)
-		util.PushClearProgress()
-		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), err), 0)
-		return
-	}
-
 	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
 		release()
 		FullReindexDirect()
@@ -1493,6 +1485,12 @@ func checkoutRepo(id string) (err error) {
 
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
 func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
+	// 恢复会核对实际内容，备份也必须完整校验，保留随后可能被覆盖的当前数据。
+	if _, err := repo.IndexWithOptions("Backup before checkout", false,
+		map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress},
+		dejavu.IndexOptions{FullCheck: true}); err != nil {
+		return err
+	}
 	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
 	refreshAppearancePackages(themes, icons)

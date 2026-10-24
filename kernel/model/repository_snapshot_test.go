@@ -71,6 +71,94 @@ func TestSnapshotFullCheckPreservedAttributes(t *testing.T) {
 	}
 }
 
+func TestSnapshotKnownAssetChangesPreservedAttributes(t *testing.T) {
+	for _, operation := range []string{"write", "copy-file", "copy-directory"} {
+		t.Run(operation, func(t *testing.T) {
+			_, repo, _ := prepareAssetDownloadRepoTest(t)
+			assets := filepath.Join(util.DataDir, "assets")
+			if err := os.MkdirAll(assets, 0755); err != nil {
+				t.Fatal(err)
+			}
+			file := filepath.Join(assets, "probe.txt")
+			stamp := time.Unix(1700000100, 100000000)
+			if err := os.WriteFile(file, []byte("before"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Chtimes(file, stamp, stamp); err != nil {
+				t.Fatal(err)
+			}
+			before, _, err := CreateRepoSnapshot("before asset change")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if operation == "write" {
+				if err = WriteFileWithDocumentAddressing(file, []byte("AFTER!")); err == nil {
+					err = os.Chtimes(file, stamp, stamp)
+				}
+			} else {
+				sourceDir := t.TempDir()
+				source := filepath.Join(sourceDir, "probe.txt")
+				if err = os.WriteFile(source, []byte("AFTER!"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				if err = os.Chtimes(source, stamp, stamp); err != nil {
+					t.Fatal(err)
+				}
+				if operation == "copy-file" {
+					err = CopyFileWithDocumentAddressing(source, file)
+				} else {
+					err = CopyFileWithDocumentAddressing(sourceDir, assets)
+				}
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if info, statErr := os.Stat(file); statErr != nil || info.Size() != 6 || !info.ModTime().Equal(stamp) {
+				t.Fatalf("asset metadata was not preserved: %v %v", info, statErr)
+			}
+			IncSyncIfNeeded(file)
+			if changed, checkErr := CheckRepoSnapshot(); checkErr != nil || !changed {
+				t.Fatalf("known asset change was missed: changed=%v err=%v", changed, checkErr)
+			}
+			after, created, err := CreateRepoSnapshot("after asset change")
+			if err != nil || !created || before == after {
+				t.Fatalf("known asset change was not indexed: created=%v err=%v", created, err)
+			}
+			for id, expected := range map[string]string{before: "before", after: "AFTER!"} {
+				if actual := repoSnapshotTestContent(t, repo, id, "/assets/probe.txt"); actual != expected {
+					t.Fatalf("snapshot content: got %q, want %q", actual, expected)
+				}
+			}
+			if stable, created, indexErr := CreateRepoSnapshot("stable"); indexErr != nil || created || stable != after {
+				t.Fatalf("known asset change did not converge: created=%v err=%v", created, indexErr)
+			}
+		})
+	}
+}
+
+func repoSnapshotTestContent(t *testing.T, repo *dejavu.Repo, id, path string) string {
+	t.Helper()
+	index, err := repo.GetIndex(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	files, err := repo.GetFiles(index)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, file := range files {
+		if file.Path == path {
+			data, readErr := repo.OpenFile(file)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			return string(data)
+		}
+	}
+	t.Fatalf("file missing from snapshot: %s", path)
+	return ""
+}
+
 func TestSearchRepoSnapshot(t *testing.T) {
 	_, partial, _ := prepareAssetDownloadRepoTest(t)
 	index, err := partial.Latest()

@@ -226,6 +226,11 @@ func CheckReadonly(c *gin.Context) {
 			dataImportAccess.RUnlock()
 			released = true
 		}
+		// RPC 握手仍做只读及恢复检查，实际方法单独持有写入准入租约。
+		if c.FullPath() == "/ws/plugin/rpc" || c.FullPath() == "/ws/plugin/rpc/:name" {
+			dataImportAccess.RUnlock()
+			released = true
+		}
 		c.Next()
 	}
 }

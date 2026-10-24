@@ -174,7 +174,7 @@ func (task *syncCheckoutTask) prepareApply() error {
 	}
 	// 等待同步锁的写请求会持有读租约，不能反向等待；此次应用稍后重试。
 	if !dataImportAccess.TryLock() {
-		return checkoutPrepareRetry()
+		return fmt.Errorf("%w: %s", dejavu.ErrIndexFileChanged, Conf.Language(239))
 	}
 	task.Lock()
 	task.releaseWrites = dataImportAccess.Unlock

@@ -40,15 +40,21 @@ const checkSettingsLayout = async (html, css, fontSize) => {
         const group = actions.getBoundingClientRect();
         const upload = item.querySelector("[data-wallpaper-upload]");
         const reset = item.querySelector("[data-wallpaper-reset]");
+        const builtIn = item.querySelector("[data-wallpaper-built-in]");
         const uploadRect = upload.getBoundingClientRect();
         const resetRect = reset.getBoundingClientRect();
+        const builtInRect = builtIn.getBoundingClientRect();
         check.ok(item.scrollWidth <= item.clientWidth, "wallpaper setting does not overflow horizontally");
         check.ok(group.left >= rect.left && group.right <= rect.right, "actions fit the setting row");
         check.ok(resetRect.top >= uploadRect.bottom, "reset appears below upload");
+        check.ok(uploadRect.top >= builtInRect.bottom, "built-in selection appears above upload");
+        check.ok(Math.abs(builtInRect.left - uploadRect.left) < 1 && Math.abs(builtInRect.right - uploadRect.right) < 1,
+            "built-in selection aligns with upload and reset");
         check.ok(Math.abs(uploadRect.left - resetRect.left) < 1 && Math.abs(uploadRect.right - resetRect.right) < 1,
             "stacked actions share horizontal bounds");
         check.equal(upload.querySelector("use").getAttribute("xlink:href"), "#iconUpload");
         check.equal(reset.querySelector("use").getAttribute("xlink:href"), "#iconUndo");
+        check.equal(builtIn.querySelector("use").getAttribute("xlink:href"), "#iconImage");
         if (innerWidth > 750) {
             const reference = document.querySelector("[data-reference]").getBoundingClientRect();
             const main = item.querySelector(".config-item__main").getBoundingClientRect();

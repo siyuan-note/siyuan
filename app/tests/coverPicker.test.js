@@ -11,10 +11,20 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
     style.textContent = css + "body {margin:0;} .b3-dialog__container {transition:none;}";
     document.head.replaceChildren(style);
     const menu = {element: document.createElement("div"), remove() {}};
-    window.siyuan = {languages, dialogs: [], storage: {}, zIndex: 0, menus: {menu}};
+    window.siyuan = {languages, dialogs: [], storage: {}, zIndex: 0, menus: {menu},
+        config: {readonly: false, appearance: {lockScreenWallpaper: false}}};
+    const calls = [];
+    const messages = [];
+    const chosen = [];
+    let readCover;
+    const imageBlob = await (await fetch(image)).blob();
     window.fetch = async url => {
-        assert.equal(url, "/appearance/covers/manifest.json");
-        return {ok: true, json: async () => manifest};
+        if (url === "/appearance/covers/manifest.json") {
+            return {ok: true, json: async () => manifest};
+        }
+        calls.push(url);
+        await new Promise(resolve => { readCover = resolve; });
+        return {ok: true, blob: async () => imageBlob};
     };
     const stubs = {
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
@@ -24,6 +34,21 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
         "dialog/moveResize": {moveResize() {}},
         "protyle/ui/hideElements": {hideElements() {}},
         "constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
+        "dialog/message": {showMessage: text => messages.push(text)},
+        "config/tabs/appearanceRuntime": {appearanceConfigApi: {patch: async (key, value) => {
+            calls.push(`patch:${key}:${value}`);
+            window.siyuan.config.appearance[key] = value;
+        }}},
+        "util/fetch": {fetchSyncPost: async (url, form) => {
+            calls.push(url);
+            if (form) {
+                const file = form.get("file");
+                assert.equal(file.name, manifest[0].file);
+                assert.equal(file.type, "image/webp");
+                assert.equal(file.size, imageBlob.size);
+            }
+            return {code: 0};
+        }},
     };
     const cache = {};
     const load = name => {
@@ -47,6 +72,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
     const {Background} = load("protyle/header/Background");
     const owner = document.createElement("div");
     const background = new Background({element: owner, block: {rootID: "cover-document"}, disabled: false});
+    background.uploadBuiltInCover = (_protyle, name) => chosen.push(name);
     owner.append(background.element);
     owner.hidden = true;
     document.body.append(owner);
@@ -92,7 +118,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
         "the last row is reachable");
 
     const category = tabs.children[1];
-    category.click();
+    category.dispatchEvent(new KeyboardEvent("keydown", {key: " ", bubbles: true, cancelable: true}));
     await loadImages();
     assert.equal(body.querySelector(".b3-cover__tabs"), tabs);
     assert.equal(body.querySelector(".b3-cover__cards"), list);
@@ -104,8 +130,83 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
     await loadImages();
     assert.equal(list.children.length, manifest.length);
     checkGaps();
-    dialog.destroy();
+    const firstCard = list.firstElementChild;
+    firstCard.focus();
+    firstCard.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+    firstCard.click();
+    assert.deepEqual(chosen, [manifest[0].file], "keyboard selection runs the document callback only once");
     await settle();
+    assert.equal(window.siyuan.dialogs.length, 0);
+
+    const wallpaper = load("config/tabs/lockScreenWallpaper");
+    const root = document.createElement("div");
+    root.className = mobile ? "config config--mobile" : "config";
+    root.innerHTML = wallpaper.genLockScreenWallpaperHtml();
+    document.body.append(root);
+    wallpaper.mountLockScreenWallpaper(root);
+    const builtIn = root.querySelector("[data-wallpaper-built-in]");
+    builtIn.click();
+    builtIn.click();
+    await settle();
+    assert.equal(window.siyuan.dialogs.length, 1, "the setting shares one picker on repeated clicks");
+    let picker = window.siyuan.dialogs[0];
+    assert.equal(picker.element.querySelectorAll(".b3-cover__card").length, manifest.length);
+    picker.element.querySelector(".b3-dialog__scrim").click();
+    await settle();
+    assert.deepEqual(calls, [], "closing the picker does not change the wallpaper");
+    builtIn.click();
+    await settle();
+    picker = window.siyuan.dialogs[0];
+    picker.element.querySelector(".b3-cover__card img").click();
+    await settle();
+    assert.equal(window.siyuan.dialogs.length, 0);
+    assert.ok(builtIn.disabled, "selection is disabled while the file is being saved");
+    root.querySelector("[data-wallpaper-reset]").click();
+    readCover();
+    await settle();
+    assert.deepEqual(calls, [`/appearance/covers/${manifest[0].file}`,
+        "/api/system/uploadLockScreenWallpaper", "patch:lockScreenWallpaper:true"]);
+    assert.equal(window.siyuan.config.appearance.lockScreenWallpaper, true);
+    assert.match(root.querySelector("[data-wallpaper-preview]").src, /\/api\/system\/getLockScreenWallpaper\?v=/);
+    assert.equal(builtIn.disabled, false);
+    assert.deepEqual(messages, []);
+    root.querySelector("[data-wallpaper-reset]").click();
+    await settle();
+    assert.deepEqual(calls.slice(-2), ["patch:lockScreenWallpaper:false", "/api/system/removeLockScreenWallpaper"]);
+
+    // 每次重新加载共享选择器，避免成功缓存掩盖失败和取消路径。
+    const freshPicker = () => {
+        delete cache["protyle/header/coverData"];
+        delete cache["protyle/header/coverPicker"];
+        return load("protyle/header/coverPicker").openCoverPicker;
+    };
+    window.fetch = async () => { throw new Error("offline"); };
+    let fallbackCount = 0;
+    let fallbackDialog;
+    freshPicker()({select: () => assert.fail("unavailable covers cannot be selected"), fallback: d => {
+        fallbackCount++;
+        fallbackDialog = d;
+    }});
+    await settle();
+    assert.equal(fallbackCount, 1, "document covers retain their pattern fallback");
+    fallbackDialog.destroy();
+    await settle();
+    freshPicker()({select: () => assert.fail("unavailable covers cannot be selected")});
+    await settle();
+    assert.deepEqual(messages, [languages._kernel[258]], "wallpaper selection reports unavailable images");
+    assert.equal(window.siyuan.dialogs.length, 0);
+    window.fetch = async () => ({ok: true, json: async () => []});
+    freshPicker()({select: () => assert.fail("an empty gallery cannot be selected")});
+    await settle();
+    assert.equal(messages.length, 2, "an empty gallery is handled as unavailable");
+    let finishManifest;
+    window.fetch = () => new Promise(resolve => { finishManifest = resolve; });
+    const pending = freshPicker()({select: () => assert.fail("a cancelled picker cannot select"),
+        fallback: () => assert.fail("a cancelled picker cannot show fallback")});
+    pending.destroy();
+    finishManifest({ok: false});
+    await settle();
+    assert.equal(window.siyuan.dialogs.length, 0);
 };
 
 const runElectron = async () => {
@@ -127,7 +228,8 @@ const runElectron = async () => {
         const image = "data:image/webp;base64," + fs.readFileSync(path.join(root, "appearance/covers", manifest[0].file)).toString("base64");
         for (const mobile of [false, true]) {
             const sources = {};
-            for (const name of ["protyle/header/Background", "protyle/header/coverData", "dialog/index"]) {
+            for (const name of ["protyle/header/Background", "protyle/header/coverData", "protyle/header/coverPicker",
+                "dialog/index", "config/tabs/lockScreenWallpaper", "util/contractFormData", "util/escape"]) {
                 const source = preprocess(fs.readFileSync(path.join(root, "src", name + ".ts"), "utf8"),
                     {MOBILE: mobile, BROWSER: false}, false, true);
                 sources[name] = ts.transpileModule(source, {
@@ -161,7 +263,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("keeps cover rows separated and category navigation fixed on desktop and mobile", {
+    require("node:test").it("shares built-in covers between document headers and wallpapers on desktop and mobile", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {

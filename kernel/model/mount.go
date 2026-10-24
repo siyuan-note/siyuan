@@ -105,7 +105,12 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
 	}
 	if initializeBoxDoc {
-		if _, err = ensureBoxDoc0(id); err != nil {
+		_, err = ensureBoxDoc0(id)
+		if err == nil {
+			// 新笔记本已处于打开状态，Mount 会直接返回，须在创建时完成元数据初始化。
+			err = treenode.SetDocumentMetadataState(id, "ready")
+		}
+		if err != nil {
 			treenode.RemoveBlockTreesByBoxID(id)
 			sql.DeleteBoxQueue(id)
 			if removeErr := filelock.Remove(boxLocalPath); nil != removeErr {

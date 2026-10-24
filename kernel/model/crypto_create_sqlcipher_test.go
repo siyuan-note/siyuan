@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -77,6 +78,12 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	Conf.FileTree.Load().BoxDocEnabled = true
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	Conf.Sync.Store(conf.NewSync())
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Lang, util.Lang = "en", "en"
+	util.WorkingDir, _ = filepath.Abs(filepath.Join("..", "..", "app"))
+	initLang()
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
@@ -107,6 +114,33 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	if tree.ID != boxID {
 		t.Fatalf("unexpected encrypted notebook document ID: %s", tree.ID)
 	}
+	for _, enabled := range []bool{true, false} {
+		Conf.FileTree.Load().BoxDocEnabled = enabled
+		if !enabled {
+			if boxID, err = CreateEncryptedBox("Encrypted without notebook document", password); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if state := treenode.DocumentMetadataState(boxID); state != "ready" {
+			t.Fatalf("new encrypted notebook metadata state = %q, want ready (notebook document: %v)", state, enabled)
+		}
+		if _, err = Mount(boxID); err != nil {
+			t.Fatalf("mount new encrypted notebook: %v", err)
+		}
+		documentID := ast.NewNodeID()
+		if _, err = CreateDocByParent(DocumentCreateRequest{Notebook: boxID, ID: documentID,
+			TitleFormat: "plain", Title: "Encrypted document", Markdown: "Encrypted notebook creation"}); err != nil {
+			t.Fatalf("create document immediately after encrypted notebook creation: %v", err)
+		}
+		if tree, err = filesys.LoadTree(boxID, "/"+documentID+".sy", util.NewLute()); err != nil || tree.ID != documentID {
+			t.Fatalf("read new encrypted document: %+v, %v", tree, err)
+		}
+		data, readErr := os.ReadFile(filepath.Join(util.DataDir, boxID, documentID+".sy"))
+		if readErr != nil || !util.IsCiphertext(data) {
+			t.Fatalf("new encrypted document was not stored as ciphertext: %v", readErr)
+		}
+	}
+	Conf.FileTree.Load().BoxDocEnabled = true
 
 	if _, err = CreateBox("Normal"); err != nil {
 		t.Fatalf("create normal notebook after encrypted notebook failed: %v", err)

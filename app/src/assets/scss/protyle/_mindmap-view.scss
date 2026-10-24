@@ -27,6 +27,7 @@
 
 .mindmap-view {
   --mindmap-node-text-color: initial;
+  --mindmap-node-semantic-color: initial;
   --b3-task-completed-color: initial;
   position: relative;
   display: flex;
@@ -414,6 +415,15 @@
   &__content {
     @include inline.interactive-marks;
 
+    // 有独立底色的组合标记保留自身配色，普通链接和标签沿用所在内容的前景。
+    span[data-type~="a"]:not([data-type~="mark"], [data-type~="search-mark"], [data-type~="kbd"]) {
+      color: var(--mindmap-node-semantic-color, var(--b3-protyle-inline-link-color));
+    }
+
+    span[data-type~="tag"]:not([data-type~="mark"], [data-type~="search-mark"], [data-type~="kbd"]) {
+      color: var(--mindmap-node-semantic-color, var(--b3-protyle-inline-tag-color));
+    }
+
     min-width: 0;
     min-height: 24px;
     overflow-wrap: anywhere;
@@ -495,6 +505,7 @@
 
   &__node--colored {
     --b3-task-completed-color: var(--mindmap-node-text-color);
+    --mindmap-node-semantic-color: currentColor;
   }
 
   &__node--colored > .mindmap-view__content {

@@ -328,7 +328,8 @@ test("appearance menu preserves manual colors and non-color metadata until expli
     assert.equal(model.metadata.appearance.backgroundColor, "#1e1e1e");
 });
 
-const contrastCases = async (source: string, css: string, legacyPresets: typeof legacyPalettes) => {
+const contrastCases = async (source: string, css: string, legacyPresets: typeof legacyPalettes,
+                             themes: {mode: string, css: string}[]) => {
     const check = require("node:assert/strict");
     const api = new Function("Constants", "mathRender", "tabsRender", "destroyTabsRender", source +
         "; return {ListMindmapView, readListMindmap, retagMindmapBranch, getMindmapLineColor, getMindmapTextColor, resolveListMindmapColors, LIST_MINDMAP_PALETTES};")({
@@ -662,7 +663,122 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
         }
     }
     [quoteNode.taskMarker, deepNode.taskMarker] = originalTaskMarkers;
-    model.metadata.appearance.palette = [];
+    const semanticHolder = document.createElement("div");
+    semanticHolder.innerHTML = lute.Md2BlockDOM("Semantic text\n");
+    const semanticBlock = semanticHolder.firstElementChild as HTMLElement;
+    semanticBlock.dataset.semanticFixture = "true";
+    const semanticContent = semanticBlock.querySelector("[contenteditable]");
+    const addMark = (kind: string, type: string, parent: Element = semanticContent) => {
+        const element = document.createElement("span");
+        element.dataset.semanticCase = kind;
+        element.dataset.type = type;
+        element.textContent = kind;
+        parent.append(element);
+        return element;
+    };
+    addMark("link", "a");
+    addMark("tag", "tag");
+    addMark("manual-link", "a").style.color = "#c2410c";
+    addMark("manual-tag", "tag").style.color = "#c2410c";
+    for (const type of ["mark", "search-mark", "kbd"]) {
+        addMark(`combined-${type}`, `a ${type}`);
+        const parent = addMark(`parent-${type}`, type);
+        addMark(`nested-${type}`, "a", parent);
+    }
+    const manualParent = addMark("manual-parent", "text");
+    manualParent.style.color = "#c2410c";
+    addMark("nested-manual", "a", manualParent);
+    addMark("code", "code");
+    quoteNode.contentBlocks.push(semanticBlock);
+    deepNode.contentBlocks.push(semanticBlock.cloneNode(true) as HTMLElement);
+    const semanticSource = semanticBlock.outerHTML;
+    const themeSheet = document.createElement("style");
+    document.head.append(themeSheet);
+    const semanticElement = (node: ListMindmapNode, kind: string) => view.nodeElements.get(node.id)
+        .querySelector(`[data-semantic-case="${kind}"]`) as HTMLElement;
+    const elementColors = (element: HTMLElement) => {
+        const style = getComputedStyle(element);
+        return [style.color, style.backgroundColor];
+    };
+    const luminance = (color: string) => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        .map(channel => channel / 255).map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4)
+        .reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+    const contrast = (a: string, b: string) => (Math.max(luminance(a), luminance(b)) + .05) /
+        (Math.min(luminance(a), luminance(b)) + .05);
+    for (const theme of themes) {
+        themeSheet.textContent = theme.css + "\n.mindmap-view__content span { transition: none !important; }";
+        document.documentElement.dataset.themeMode = theme.mode;
+        for (const printLayout of [false, true]) {
+            view.options.printLayout = view.readOnly = printLayout;
+            delete model.metadata.appearance;
+            view.update(model);
+            const originalLink = getComputedStyle(semanticElement(quoteNode, "link")).color;
+            const originalTag = getComputedStyle(semanticElement(quoteNode, "tag")).color;
+            const originalCombined = new Map(["mark", "search-mark", "kbd"].map(type =>
+                [type, elementColors(semanticElement(quoteNode, `combined-${type}`))]));
+            const originalCodeBackground = getComputedStyle(semanticElement(quoteNode, "code")).backgroundColor;
+            for (const palette of api.LIST_MINDMAP_PALETTES) {
+                model.metadata.appearance = {version: 1, palette: palette.colors, rootColor: palette.rootColor, nodeStyle: "branch"};
+                view.update(model);
+                for (const node of [quoteNode, deepNode]) {
+                    const element = view.nodeElements.get(node.id);
+                    const foreground = getComputedStyle(element).color;
+                    const canvas = getComputedStyle(host).backgroundColor;
+                    const background = node === quoteNode ? getComputedStyle(element).backgroundColor : canvas;
+                    for (const kind of ["link", "tag"]) {
+                        const mark = semanticElement(node, kind);
+                        check.equal(getComputedStyle(mark).color, foreground,
+                            `${theme.mode} ${palette.id}: semantic text follows its actual content foreground`);
+                        check.ok(contrast(getComputedStyle(mark).color, background) >= 4.5);
+                        check.equal(getComputedStyle(mark).borderBottomStyle, "solid", "link and tag affordances remain visible");
+                    }
+                    for (const kind of ["manual-link", "manual-tag", "nested-manual"]) {
+                        check.equal(getComputedStyle(semanticElement(node, kind)).color, "rgb(194, 65, 12)",
+                            "manual text colors remain authoritative on the mark or its parent");
+                    }
+                    for (const type of ["mark", "search-mark", "kbd"]) {
+                        check.deepEqual(elementColors(semanticElement(node, `combined-${type}`)), originalCombined.get(type),
+                            "combined marks retain their existing foreground and background pair");
+                        check.equal(getComputedStyle(semanticElement(node, `nested-${type}`)).color,
+                            getComputedStyle(semanticElement(node, `parent-${type}`)).color,
+                            "nested links inherit the foreground of their immediate colored content");
+                    }
+                    check.equal(getComputedStyle(semanticElement(node, "code")).backgroundColor, originalCodeBackground);
+                }
+            }
+            for (const background of ["#ffffff", "#1e1e1e"]) {
+                model.metadata.appearance = {version: 1, palette: [], backgroundColor: background};
+                view.update(model);
+                const element = view.nodeElements.get(quoteNode.id);
+                check.equal(getComputedStyle(semanticElement(quoteNode, "link")).color, getComputedStyle(element).color);
+                check.equal(getComputedStyle(semanticElement(quoteNode, "tag")).color, getComputedStyle(element).color);
+                if (!printLayout) {
+                    view.setEditing(quoteNode.id);
+                    const editor = document.createElement("div");
+                    editor.className = "protyle-wysiwyg";
+                    editor.append(semanticBlock.cloneNode(true));
+                    const content = view.getContentHost(quoteNode.id);
+                    const originalContent = [...content.childNodes];
+                    content.classList.add("mindmap-view__editor");
+                    content.replaceChildren(editor);
+                    check.equal(getComputedStyle(semanticElement(quoteNode, "link")).color, getComputedStyle(element).color);
+                    check.equal(getComputedStyle(semanticElement(quoteNode, "manual-link")).color, "rgb(194, 65, 12)");
+                    view.setEditing(undefined);
+                    content.classList.remove("mindmap-view__editor");
+                    content.replaceChildren(...originalContent);
+                }
+            }
+            delete model.metadata.appearance;
+            view.update(model);
+            check.equal(getComputedStyle(semanticElement(quoteNode, "link")).color, originalLink,
+                "removing appearance restores the application's default link color");
+            check.equal(getComputedStyle(semanticElement(quoteNode, "tag")).color, originalTag);
+            check.equal(semanticBlock.outerHTML, semanticSource, "semantic display colors never enter source blocks");
+            check.equal(list.outerHTML, originalSource);
+        }
+    }
+    themeSheet.remove();
+    model.metadata.appearance = {version: 1, palette: []};
     view.update(model);
     view.nodeElements.forEach((element: HTMLElement) => {
         check.equal(element.style.fontSize, "", "removing the theme restores legacy font sizing");
@@ -675,7 +791,7 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
 };
 
 test("reference and legacy palettes keep readable foregrounds, hierarchy paths and manual overrides", {
-    timeout: 20000,
+    timeout: 40000,
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
     const compile = (file: string) => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
@@ -687,6 +803,8 @@ test("reference and legacy palettes keep readable foregrounds, hierarchy paths a
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,
     }).css;
+    const themes = ["daylight", "midnight"].map(name => ({mode: name === "daylight" ? "light" : "dark",
+        css: readFileSync(path.resolve(__dirname, "../../../../appearance/themes", name, "theme.css"), "utf8")}));
     const dir = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-contrast-"));
     const script = path.join(dir, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -700,7 +818,7 @@ app.whenReady().then(async () => {
         await win.webContents.executeJavaScript(require("fs").readFileSync(${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
         `const __name = value => value; (async () => { try { return await (${contrastCases.toString()})` +
-        `(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(legacyPalettes)}); } catch (error) { return error.stack; } })()`)}));
+        `(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(legacyPalettes)}, ${JSON.stringify(themes)}); } catch (error) { return error.stack; } })()`)}));
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }
 });`, "utf8");
@@ -708,7 +826,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron") as string, [script],
-            {env, windowsHide: true, timeout: 18000});
+            {env, windowsHide: true, timeout: 38000});
         assert.match(result.stdout, /mindmap-contrast-ok/);
     } finally {
         rmSync(dir, {recursive: true, force: true});

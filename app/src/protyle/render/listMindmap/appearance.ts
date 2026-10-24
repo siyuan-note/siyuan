@@ -212,7 +212,7 @@ export const resolveListMindmapColors = (model: ListMindmapModel, canvasColor?: 
         const {node, color, level} = pending.pop();
         if (appearance.nodeStyle === "branch") {
             result.set(node.id, {backgroundColor: level < 2 ? color : "transparent",
-                textColor: level < 2 ? "#ffffff" : getMindmapTextColor(background), lineColor: color,
+                textColor: getMindmapTextColor(level < 2 ? color : background), lineColor: color,
                 fontSize: level === 0 ? 20 : level === 1 ? 16 : 14, bold: level < 2, lineWidth: 1.5});
         } else if (appearance.nodeStyle === "layered") {
             result.set(node.id, {backgroundColor: "transparent",
@@ -246,25 +246,34 @@ export const getListMindmapAppearanceMenu = (metadata: ListMindmapMetadata,
     return {
         id: "appearance", icon: "iconTheme", label: labels.appearance,
         submenu: [
-            {id: "theme", iconHTML: "", label: labels.theme, submenu: [
-                {id: "default", iconHTML: "", label: labels.default, checked: !palette.length,
-                    click: () => change(data => {
-                        data.appearance = {...data.appearance, version: 1, palette: []};
-                        delete data.appearance.rootColor;
-                        delete data.appearance.nodeStyle;
-                    })},
-                ...LIST_MINDMAP_PALETTES.map(preset => ({
-                    id: preset.id, iconHTML: `<span class="b3-menu__icon b3-menu__icon--color" style="background-color:${preset.colors[0]}"></span>`,
-                    label: labels[preset.label],
-                    checked: metadata.appearance?.nodeStyle === "branch" &&
-                        metadata.appearance.rootColor === preset.rootColor &&
-                        JSON.stringify(palette) === JSON.stringify(preset.colors),
-                    click: () => change(data => {
-                        data.appearance = {...data.appearance, version: 1, palette: [...preset.colors],
-                            rootColor: preset.rootColor, nodeStyle: "branch"};
+            {id: "theme", iconHTML: "", label: labels.theme,
+                bind: element => element.style.setProperty("--b3-menu-items-max-height", "min(480px, 60vh)"),
+                submenu: [
+                    {id: "default", iconHTML: '<span class="b3-menu__icon mindmap-view__theme-preview" aria-hidden="true"></span>',
+                        label: labels.default, checked: !palette.length,
+                        click: () => change(data => {
+                            data.appearance = {...data.appearance, version: 1, palette: []};
+                            delete data.appearance.rootColor;
+                            delete data.appearance.nodeStyle;
+                        })},
+                    ...LIST_MINDMAP_PALETTES.map(preset => {
+                        const colors = [preset.rootColor, ...preset.colors.filter((_color, index) => index % 2 === 0)];
+                        const gradient = colors.map((color, index) =>
+                            `${color} ${index * 100 / colors.length}% ${(index + 1) * 100 / colors.length}%`).join(",");
+                        return {
+                            id: preset.id,
+                            iconHTML: `<span class="b3-menu__icon b3-menu__icon--color mindmap-view__theme-preview" aria-hidden="true" style="background:linear-gradient(90deg,${gradient})"></span>`,
+                            label: labels[preset.label],
+                            checked: metadata.appearance?.nodeStyle === "branch" &&
+                                metadata.appearance.rootColor === preset.rootColor &&
+                                JSON.stringify(palette) === JSON.stringify(preset.colors),
+                            click: () => change(data => {
+                                data.appearance = {...data.appearance, version: 1, palette: [...preset.colors],
+                                    rootColor: preset.rootColor, nodeStyle: "branch"};
+                            }),
+                        };
                     }),
-                })),
-            ]},
+                ]},
             {id: "canvasBackground", iconHTML: "", label: labels.listMindmapCanvasBackground, submenu: [
                 {id: "default", color: "", label: labels.default},
                 {id: "light", color: "#ffffff", label: labels.themeLight},

@@ -27,6 +27,7 @@
 
 .mindmap-view {
   --mindmap-node-text-color: initial;
+  --b3-task-completed-color: initial;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -492,7 +493,18 @@
     }
   }
 
+  &__node--colored {
+    --b3-task-completed-color: var(--mindmap-node-text-color);
+  }
+
   &__node--colored > .mindmap-view__content {
+    // 默认的列表正文和删除线沿用节点前景，手动行内颜色仍由正文自身决定。
+    .li,
+    s,
+    span[data-type~="s"] {
+      color: var(--mindmap-node-text-color);
+    }
+
     .bq,
     .callout {
       color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
@@ -501,6 +513,11 @@
     .protyle-wysiwyg--empty:empty::before {
       color: var(--mindmap-node-text-color, var(--b3-empty-color));
     }
+  }
+
+  &__theme-preview {
+    width: 64px;
+    flex-basis: 64px;
   }
 
   &__node[data-task] {

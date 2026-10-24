@@ -1027,20 +1027,23 @@ export class ListMindmapView {
             return;
         }
         this.viewport.style.backgroundColor = this.model.metadata.appearance?.backgroundColor || "";
+        const canvasForeground = this.model.metadata.appearance?.backgroundColor ?
+            getMindmapTextColor(this.model.metadata.appearance.backgroundColor) : undefined;
         this.themeColors = resolveListMindmapColors(this.model, getComputedStyle(this.options.host).backgroundColor);
         this.nodeElements.forEach((element, id) => {
             const style = this.model.metadata.nodes[id];
             const themed = this.themeColors.get(id);
             const background = style?.backgroundColor || themed?.backgroundColor || "";
-            element.classList.toggle("mindmap-view__node--colored", !!themed);
+            const adaptForeground = !!themed || !!canvasForeground;
+            element.classList.toggle("mindmap-view__node--colored", adaptForeground);
             element.style.backgroundColor = background;
-            element.style.color = style?.textColor || (themed && style?.backgroundColor && isMindmapColor(background) ?
-                getMindmapTextColor(background) : themed?.textColor) || "";
+            element.style.color = style?.textColor || (adaptForeground && style?.backgroundColor && isMindmapColor(background) ?
+                getMindmapTextColor(background) : themed?.textColor || canvasForeground) || "";
             element.style.fontSize = themed?.fontSize ? `${style?.fontSize ?? themed.fontSize}px` : "";
             element.style.fontWeight = themed?.fontSize ? (style?.bold === undefined ? (themed.bold ? "600" : "400") :
                 style.bold ? "700" : "400") : "";
             element.style.fontStyle = themed?.fontSize && style?.italic !== undefined ? (style.italic ? "italic" : "normal") : "";
-            if (themed) {
+            if (adaptForeground) {
                 element.style.setProperty("--mindmap-node-text-color", element.style.color);
             } else {
                 element.style.removeProperty("--mindmap-node-text-color");

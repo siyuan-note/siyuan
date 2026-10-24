@@ -1,7 +1,7 @@
 @use "sass:string";
 
 @mixin completed-text {
-  color: var(--b3-theme-on-surface-light);
+  color: var(--b3-task-completed-color, var(--b3-theme-on-surface-light));
   text-decoration: line-through;
 }
 

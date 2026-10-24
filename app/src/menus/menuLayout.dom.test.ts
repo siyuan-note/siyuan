@@ -290,6 +290,81 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     fitsViewport(submenu);
     dispose(submenus);
 
+    const appearance: typeof import("../protyle/render/listMindmap/appearance") = load("protyle/render/listMindmap/appearance");
+    const labels: Record<string, string> = {theme: "Theme", default: "Default", ...Object.fromEntries(appearance.LIST_MINDMAP_PALETTES
+        .map(preset => [preset.label, preset.id]))};
+    for (const touch of [false, true]) {
+        mobile = touch;
+        await require("electron").ipcRenderer.invoke("resize-menu-test", touch ? 360 : 640, 520);
+        await settle();
+        window.siyuan.mobile.size.portrait.height1 = innerHeight;
+        for (const fontSize of [16, 24]) {
+            document.documentElement.style.setProperty("--b3-font-size", `${fontSize}px`);
+            const instance = createMenu();
+            const metadata: import("../protyle/render/listMindmap/model").ListMindmapMetadata = {version: 1, nodes: {}, relations: []};
+            let changes = 0;
+            const menu = appearance.getListMindmapAppearanceMenu(metadata, update => { update(metadata); changes++; },
+                labels, {id: "connectorStyle"});
+            instance.addItem((menu.submenu as IMenu[]).find(item => item.id === "theme"));
+            if (touch) {
+                instance.fullscreen("bottom");
+            } else {
+                instance.popup({x: 280, y: 90});
+            }
+            const parent = instance.element.querySelector<HTMLElement>('[data-id="theme"]');
+            parent.dispatchEvent(new MouseEvent(touch ? "click" : "mouseover", {bubbles: true}));
+            await settle();
+            if (touch) {
+                for (let attempt = 0; attempt < 20 && instance.element.style.transform !== "translateY(0px)"; attempt++) {
+                    await settle();
+                }
+                check.equal(instance.element.style.transform, "translateY(0px)");
+                instance.element.getAnimations({subtree: true}).forEach(animation => animation.finish());
+                await settle();
+            }
+            const panel = parent.querySelector<HTMLElement>(":scope > .b3-menu__submenu");
+            const items = panel.querySelector<HTMLElement>(":scope > .b3-menu__items");
+            check.equal(items.children.length, appearance.LIST_MINDMAP_PALETTES.length + 1);
+            check.ok(items.scrollHeight > items.clientHeight, "theme choices scroll inside a bounded menu");
+            if (!touch) {
+                fitsViewport(panel);
+                check.ok(items.clientHeight <= Math.min(480, innerHeight * .6) + 1,
+                    "desktop themes keep the preferred height within viewport limits");
+            } else {
+                const bounds = panel.getBoundingClientRect();
+                check.ok(bounds.top >= 0 && bounds.bottom <= innerHeight + 1,
+                    "mobile theme choices fit the visible sheet after its opening transition");
+                check.ok(bounds.left >= 0 && bounds.right <= innerWidth + 1, "mobile themes fit a narrow screen");
+            }
+            for (const [index, preset] of appearance.LIST_MINDMAP_PALETTES.entries()) {
+                const row = items.children[index + 1];
+                const preview = row.querySelector<HTMLElement>(".mindmap-view__theme-preview");
+                const label = row.querySelector<HTMLElement>(".b3-menu__label");
+                check.equal(preview.getAttribute("aria-hidden"), "true");
+                check.ok(getComputedStyle(preview).backgroundImage.startsWith("linear-gradient("));
+                check.ok(new Set(getComputedStyle(preview).backgroundImage.match(/rgb\([^)]+\)/g)).size >= 3,
+                    "the preview shows multiple representative theme colors");
+                check.equal(preview.getBoundingClientRect().width, 64);
+                check.ok(label.getBoundingClientRect().left >= preview.getBoundingClientRect().right);
+                check.equal(label.textContent, labels[preset.label]);
+            }
+            const last = items.lastElementChild as HTMLElement;
+            items.scrollTop = items.scrollHeight;
+            const lastBounds = last.getBoundingClientRect();
+            check.ok(lastBounds.bottom <= items.getBoundingClientRect().bottom + 1,
+                "the final theme remains reachable without expanding the menu");
+            last.click();
+            check.equal(changes, 1);
+            check.deepEqual(metadata.appearance.palette, appearance.LIST_MINDMAP_PALETTES.at(-1).colors);
+            dispose(instance);
+        }
+    }
+    document.documentElement.style.setProperty("--b3-font-size", "16px");
+    mobile = false;
+    await require("electron").ipcRenderer.invoke("resize-menu-test", 1000, 800);
+    await settle();
+    window.siyuan.mobile.size.portrait.height1 = innerHeight;
+
     const shared = createMenu();
     const independent = new PluginMenu(undefined, undefined, true);
     independent.addItem({label: "First"});
@@ -726,12 +801,13 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
         "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
-        "layout/dock/agent/AgentSessionPanel"].map(name => [name,
+        "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
         }).outputText]));
     const css = ["component/_menu.scss", "component/_list.scss", "component/_text-field.scss", "util/_function.scss",
-        "business/_av.scss", "business/_av-calendar.scss", "business/_ai_agent.scss", "pdf/_pdf.scss"].map(name =>
+        "business/_av.scss", "business/_av-calendar.scss", "business/_ai_agent.scss", "pdf/_pdf.scss",
+        "protyle/_mindmap-view.scss"].map(name =>
         compile(path.join(__dirname, "../assets/scss", name), {logger: Logger.silent}).css).join("\n");
     const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-menu-layout-test-"));

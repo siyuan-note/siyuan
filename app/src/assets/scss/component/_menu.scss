@@ -401,6 +401,7 @@
   &__items {
     overflow: auto;
     padding: 0 8px;
+    max-height: var(--b3-menu-items-max-height, none);
   }
 
   &__item {

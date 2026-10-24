@@ -41,7 +41,12 @@ test("appearance validates optional colors and rejects unsupported formats", () 
     }
 });
 
-test("all 47 reference palettes retain white filled nodes and adapt transparent node text to the canvas", () => {
+test("all 47 reference palettes adapt filled and transparent node text without rewriting saved colors", () => {
+    const luminance = (color: string) => color.match(/[a-f\d]{2}/gi).map(channel => parseInt(channel, 16) / 255)
+        .map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4)
+        .reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+    const contrast = (a: string, b: string) => (Math.max(luminance(a), luminance(b)) + .05) /
+        (Math.min(luminance(a), luminance(b)) + .05);
     assert.equal(LIST_MINDMAP_PALETTES.length, 47);
     assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => preset.id)).size, 47);
     assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => JSON.stringify(preset.colors))).size, 47);
@@ -68,7 +73,11 @@ test("all 47 reference palettes retain white filled nodes and adapt transparent 
             const before = JSON.stringify(model.metadata);
             const styles = resolveListMindmapColors(model, canvas);
             assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).textColor),
-                ["#ffffff", "#ffffff", canvas === "#1e1e1e" ? "#ffffff" : "#000000"]);
+                [getMindmapTextColor(preset.rootColor), getMindmapTextColor(preset.colors[0]), getMindmapTextColor(canvas)]);
+            for (const [id, style] of styles) {
+                assert.ok(contrast(style.textColor, style.backgroundColor === "transparent" ? canvas : style.backgroundColor) >= 4.5,
+                    `${preset.id} ${id} has readable automatic text on its actual background`);
+            }
             assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).backgroundColor),
                 [preset.rootColor, preset.colors[0], "transparent"]);
             assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).lineWidth), [1.5, 1.5, 1.5]);
@@ -322,7 +331,7 @@ test("appearance menu preserves manual colors and non-color metadata until expli
 const contrastCases = async (source: string, css: string, legacyPresets: typeof legacyPalettes) => {
     const check = require("node:assert/strict");
     const api = new Function("Constants", "mathRender", "tabsRender", "destroyTabsRender", source +
-        "; return {ListMindmapView, readListMindmap, retagMindmapBranch, getMindmapLineColor, resolveListMindmapColors, LIST_MINDMAP_PALETTES};")({
+        "; return {ListMindmapView, readListMindmap, retagMindmapBranch, getMindmapLineColor, getMindmapTextColor, resolveListMindmapColors, LIST_MINDMAP_PALETTES};")({
         CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data",
     }, async () => {}, () => {}, () => {});
     const sheet = document.createElement("style");
@@ -456,8 +465,10 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
                 view.update(model);
                 check.equal(getComputedStyle(view.nodeElements.get(model.root.id)).backgroundColor, computedColor(preset.rootColor));
                 for (const node of [model.root, emptyNode, quoteNode]) {
-                    check.equal(getComputedStyle(view.nodeElements.get(node.id)).color, "rgb(255, 255, 255)",
-                        "root and first-level foregrounds follow the fixed white reference style");
+                    check.equal(getComputedStyle(view.nodeElements.get(node.id)).color,
+                        computedColor(api.getMindmapTextColor(node === model.root ? preset.rootColor :
+                            preset.colors[node === emptyNode ? 0 : 1])),
+                        "filled node foregrounds contrast with their own root or branch fill");
                 }
                 const deep = view.nodeElements.get(deepNode.id);
                 check.equal(getComputedStyle(deep).backgroundColor, "rgba(0, 0, 0, 0)");
@@ -467,9 +478,10 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
                 check.equal(getComputedStyle(deep.querySelector(".bq .p")).color, foreground);
                 check.equal(getComputedStyle(deep.querySelector(".bq span")).color, "rgb(194, 65, 12)",
                     "deep inline colors remain authoritative");
-                check.equal(getComputedStyle(view.getContentHost(emptyNode.id), "::before").color, "rgb(255, 255, 255)");
+                check.equal(getComputedStyle(view.getContentHost(emptyNode.id), "::before").color,
+                    computedColor(api.getMindmapTextColor(preset.colors[0])));
                 check.equal(getComputedStyle(view.nodeElements.get(quoteNode.id).querySelector(".bq .p")).color,
-                    "rgb(255, 255, 255)");
+                    computedColor(api.getMindmapTextColor(preset.colors[1])));
                 check.equal(getComputedStyle(view.nodeElements.get(quoteNode.id).querySelector(".bq span")).color,
                     "rgb(194, 65, 12)", "explicit inline text colors remain authoritative");
                 widths.length = 0;
@@ -586,6 +598,70 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
         }
         delete model.metadata.nodes[deepNode.id];
     }
+    const rich = document.createElement("div");
+    rich.innerHTML = lute.Md2BlockDOM("Task ~~strike~~ **bold** `code`\n\n- [x] Nested task\n");
+    const richParagraph = rich.querySelector<HTMLElement>(":scope > .p");
+    const nestedTasks = rich.querySelector<HTMLElement>(":scope > .list");
+    nestedTasks.querySelector(".li").classList.add("protyle-task--done");
+    richParagraph.dataset.contrastFixture = "true";
+    const explicit = document.createElement("span");
+    explicit.dataset.type = "s";
+    explicit.style.color = "#c2410c";
+    explicit.textContent = "Manual strike";
+    richParagraph.querySelector("[contenteditable]").append(explicit);
+    quoteNode.contentBlocks.push(richParagraph, nestedTasks);
+    deepNode.contentBlocks.push(richParagraph.cloneNode(true), nestedTasks.cloneNode(true));
+    const originalTaskMarkers = [quoteNode.taskMarker, deepNode.taskMarker];
+    const originalSource = list.outerHTML;
+    for (const printLayout of [false, true]) {
+        view.options.printLayout = printLayout;
+        view.readOnly = printLayout;
+        for (const background of ["#ffffff", "#1e1e1e"]) {
+            for (const palette of [["#670069"], ["#fec245"], []]) {
+                model.metadata.appearance = {version: 1, palette, rootColor: palette[0], nodeStyle: "branch", backgroundColor: background};
+                for (const marker of ["x", "-", "/"]) {
+                    quoteNode.taskMarker = deepNode.taskMarker = marker;
+                    const before = JSON.stringify(model.metadata);
+                    view.update(model);
+                    const checkTaskContent = (node: ListMindmapNode) => {
+                        const element = view.nodeElements.get(node.id);
+                        const foreground = getComputedStyle(element).color;
+                        const paragraph = element.querySelector('[data-contrast-fixture="true"]');
+                        check.equal(getComputedStyle(paragraph).color, foreground, "task text uses its node foreground");
+                        check.equal(getComputedStyle(paragraph).textDecorationLine, marker === "/" ? "none" : "line-through",
+                            `${marker} ${printLayout}: ${element.className}, ${paragraph.parentElement.className}`);
+                        check.equal(getComputedStyle(paragraph.querySelector('[data-type~="s"]')).color, foreground,
+                            "default strikethrough text stays readable");
+                        check.equal(getComputedStyle(paragraph.querySelector('[style*="color"]')).color, "rgb(194, 65, 12)",
+                            "manual inline colors stay authoritative");
+                        check.equal(getComputedStyle(element.querySelector(".mindmap-view__task")).color, foreground,
+                            "node task icons use the same readable foreground");
+                        check.equal(getComputedStyle(element.querySelector(".li > .p")).color, foreground,
+                            "nested completed tasks stay readable");
+                    };
+                    checkTaskContent(quoteNode);
+                    checkTaskContent(deepNode);
+                    if (!printLayout) {
+                        view.setEditing(quoteNode.id);
+                        const editor = document.createElement("div");
+                        editor.className = "protyle-wysiwyg";
+                        editor.append(richParagraph.cloneNode(true), nestedTasks.cloneNode(true));
+                        const contentHost = view.getContentHost(quoteNode.id);
+                        const preview = Array.from(contentHost.childNodes);
+                        contentHost.classList.add("mindmap-view__editor");
+                        contentHost.replaceChildren(editor);
+                        checkTaskContent(quoteNode);
+                        view.setEditing(undefined);
+                        contentHost.classList.remove("mindmap-view__editor");
+                        contentHost.replaceChildren(...preview);
+                    }
+                    check.equal(JSON.stringify(model.metadata), before, "readability changes never enter saved appearance");
+                    check.equal(list.outerHTML, originalSource, "preview and editor styles never rewrite source blocks");
+                }
+            }
+        }
+    }
+    [quoteNode.taskMarker, deepNode.taskMarker] = originalTaskMarkers;
     model.metadata.appearance.palette = [];
     view.update(model);
     view.nodeElements.forEach((element: HTMLElement) => {
@@ -598,7 +674,7 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
     return "mindmap-contrast-ok";
 };
 
-test("reference and legacy palettes preserve their foreground rules, hierarchy paths and manual overrides", {
+test("reference and legacy palettes keep readable foregrounds, hierarchy paths and manual overrides", {
     timeout: 20000,
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {

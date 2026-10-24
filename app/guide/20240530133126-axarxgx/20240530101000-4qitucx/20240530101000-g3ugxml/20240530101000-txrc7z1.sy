@@ -7,7 +7,7 @@
 		"id": "20240530101000-txrc7z1",
 		"title": "データ履歴",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261024203645"
 	},
 	"Children": [
 		{
@@ -1231,7 +1231,7 @@
 			"Properties": {
 				"ID": "20240530101000-b78egg3",
 				"id": "20240530101000-sy5cmkg",
-				"updated": "20261024164212"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1473,7 +1473,7 @@
 			"Properties": {
 				"ID": "20240530101000-bah2zqg",
 				"id": "20240530101000-16a1pk9",
-				"updated": "20261016111431"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1661,6 +1661,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261024203645-xznpz7s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024203645-xznpz7s",
+				"updated": "20261024203645"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "外部プログラムがファイルサイズと更新日時を保持したまま内容を変更した場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データ履歴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "内容の完全チェック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でメモを入力して確定してください。スナップショットの対象となるローカル保存済みの全ファイルを読み取り、変更が見つかればスナップショットを作成します。未ダウンロードのリソースは既存のバージョンを保持し、チェックのためにダウンロードすることはありません。大きなワークスペースでは時間がかかる場合があります。"
 				}
 			]
 		},

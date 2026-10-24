@@ -22194,6 +22194,9 @@
     "CreateSnapshotRequestInput": {
       "type": "object",
       "properties": {
+        "fullCheck": {
+          "type": "boolean"
+        },
         "memo": {
           "type": "string"
         }

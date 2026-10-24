@@ -1,4 +1,6 @@
 {
+	"fullCheckSnapshot": "Pemeriksaan isi menyeluruh",
+	"fullCheckSnapshotTip": "Baca semua berkas lokal untuk mendeteksi perubahan isi meskipun ukuran dan waktu modifikasi tetap sama, lalu buat snapshot jika diperlukan; sumber daya tidak diunduh untuk pemeriksaan ini dan ruang kerja besar dapat memerlukan waktu lebih lama",
 	"listMindmapDocumentViewport": "Area pandang dokumen",
 	"listMindmapNodeColor": "Warna simpul",
 	"listMindmapPaletteWaves": "Ombak",

@@ -934,7 +934,7 @@ export type CreateRiffDeckRequestInput = { "name": string; };
 
 export type CreateSnapshotData = { "created": boolean; "id": string; };
 
-export type CreateSnapshotRequestInput = { "memo"?: string; };
+export type CreateSnapshotRequestInput = { "fullCheck"?: boolean; "memo"?: string; };
 
 export type CreatedDocumentData = { "document": DocumentPath; "id": string; };
 
@@ -6673,6 +6673,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 只读检查变更，复用已确认的本机大小及精细时间，记录缺失或变化时读取内容。
+     * 不下载资源或写入缓存；大小和时间完全相同且没有本进程写入标记的外部修改需使用完整校验。
+     */
     "/api/repo/checkSnapshot": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": CheckSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6687,6 +6691,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 创建快照；fullCheck 默认为 false，为 true 时读取所有本地已落盘文件核对内容。
+     * 未下载资源沿用其逻辑版本；无变化时返回原快照并令 created 为 false。大文件较多时完整校验耗时更长。
+     */
     "/api/repo/createSnapshot": {
         request: CreateSnapshotRequestInput;
         response: { "code": 0; "data": CreateSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

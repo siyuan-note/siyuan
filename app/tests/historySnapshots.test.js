@@ -14,7 +14,7 @@ const runCases = async (sources, css, mobile, dark) => {
     document.documentElement.dataset.themeMode = dark ? "dark" : "light";
     new Function(sources.icons)();
     const menu = document.createElement("div");
-    window.siyuan = {languages: JSON.parse(sources.languages), dialogs: [], storage: {}, zIndex: 100,
+    window.siyuan = {languages: JSON.parse(sources.languages), config: {sync: {provider: 4}}, dialogs: [], storage: {}, zIndex: 100,
         menus: {menu: {element: menu, remove() {}}}};
     const toolbar = document.createElement("div");
     toolbar.className = `history__snapshots${mobile ? " history__snapshots--mobile" : ""}`;
@@ -55,6 +55,8 @@ const runCases = async (sources, css, mobile, dark) => {
         "constants": {Constants: {TIMEOUT_DBLCLICK: 0, TIMEOUT_OPENDIALOG: 0, SIYUAN_ASSETS_IMAGE: [], SIYUAN_ASSETS_AUDIO: [], SIYUAN_ASSETS_VIDEO: []}},
         "asset/renderAssets": {renderAssetsPreview: () => ""},
         "dialog/confirmDialog": {confirmDialog() {}},
+        "menus/menuToggle": {toggleMenu() {}},
+        "menus/Menu": {MenuItem: class {}},
         "protyle/util/onGet": {disabledProtyle() {}, onGet() {}},
         "util/pathName": {pathPosix: () => require("node:path").posix},
         "util/hostCapabilities": {getHostCapabilities: () => ({importExport: true})},
@@ -93,6 +95,27 @@ const runCases = async (sources, css, mobile, dark) => {
         return exports;
     };
     const {Dialog} = load("dialog");
+    const {initRepoPanel} = load("history/repoPanel");
+    const panel = document.createElement("div");
+    panel.className = "history__repo fn__block";
+    panel.innerHTML = `<div class="history__action"><div class="history__repo-pagination"></div><input class="b3-text-field"><button data-type="compare">Compare</button>${new Function("return `" + sources.snapshotButtons + "`;")()}</div><ul data-type="repoList"></ul>`;
+    document.body.append(panel);
+    const disposePanel = initRepoPanel(panel, () => {});
+    await tick();
+    const local = panel.querySelector('[data-repo-source="local"]');
+    const cloud = panel.querySelector('[data-repo-source="cloud"]');
+    assert.ok(local.querySelector('.history__snapshot-heading [data-type="fullCheckRepo"]'), "full check belongs to local snapshots");
+    assert.equal(cloud.querySelector('[data-type="fullCheckRepo"]'), null, "cloud snapshots must not expose local checks");
+    for (const font of [16, 28]) {
+        panel.style.fontSize = font + "px";
+        await tick();
+        const heading = local.querySelector(".history__snapshot-heading");
+        const button = heading.querySelector('[data-type="fullCheckRepo"]');
+        assert.ok(heading.scrollWidth <= heading.clientWidth + 1, "snapshot controls must wrap on narrow screens");
+        assert.ok(button.getBoundingClientRect().width > 0 && button.getBoundingClientRect().right <= innerWidth + 1, "full check must remain visible");
+    }
+    disposePanel();
+    panel.remove();
     const {DocHistorySnapshots} = load("history/docSnapshots");
     const {closeNotebookHistoryDialogs} = load("history/notebookDialogs");
     const history = new Dialog({title: "项目计划 - 文件历史", width: mobile ? "100vw" : "90vw", height: mobile ? "100dvh" : "80vh",
@@ -185,7 +208,8 @@ if (process.versions.electron && process.type === "browser") {
             const ts = require("typescript");
             const sass = require("sass");
             const sources = {app: path.resolve(__dirname, ".."), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"), languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8")};
-            for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/notebookDialogs", "history/repoFile"]) {
+            sources.snapshotButtons = fs.readFileSync(path.join(__dirname, "../src/history/history.ts"), "utf8").match(/<button class="b3-button b3-button--outline" data-type="genRepo">[\s\S]*?data-type="fullCheckRepo">[^<]*<\/button>/)[0];
+            for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }
             sources["dialog/index"] = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources["dialog/index"]);

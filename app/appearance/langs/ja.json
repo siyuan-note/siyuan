@@ -1,4 +1,6 @@
 {
+	"fullCheckSnapshot": "内容の完全チェック",
+	"fullCheckSnapshotTip": "ローカルの全ファイルを読み取り、サイズと更新日時が変わらない内容の変更も検出し、必要ならスナップショットを作成します。チェックのためのリソースのダウンロードは行わず、大きなワークスペースでは時間がかかる場合があります",
 	"listMindmapDocumentViewport": "ドキュメントの表示範囲",
 	"listMindmapNodeColor": "ノードの色",
 	"listMindmapPaletteWaves": "波",

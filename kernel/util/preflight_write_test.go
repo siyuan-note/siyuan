@@ -8,8 +8,65 @@ import (
 	"testing"
 	"time"
 
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/filelock"
 )
+
+func TestPreflightWriteMarksSnapshotChanges(t *testing.T) {
+	for _, mapped := range []bool{false, true} {
+		base := t.TempDir()
+		dataDir := filepath.Join(base, "data")
+		if err := os.MkdirAll(dataDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		name := filepath.Join(dataDir, "source.txt")
+		stamp := time.Unix(1700000100, 100000000)
+		if err := os.WriteFile(name, []byte("before"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chtimes(name, stamp, stamp); err != nil {
+			t.Fatal(err)
+		}
+		repo, err := dejavu.NewRepo(dataDir, filepath.Join(base, "repo"), filepath.Join(base, "history"), filepath.Join(base, "temp"),
+			"device", "device", "test", []byte("0123456789abcdef0123456789abcdef"), nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		before, err := repo.Index("before", true, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = WriteFileWithPreflight(name, []byte("AFTER!"), mapped, func([]byte) error { return nil }); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.Chtimes(name, stamp, stamp); err != nil {
+			t.Fatal(err)
+		}
+		changed, err := repo.CheckSnapshot()
+		if err != nil || !changed {
+			t.Fatalf("known same-attribute write missed: %v", err)
+		}
+		after, err := repo.Index("after", true, nil)
+		if err != nil || before.ID == after.ID {
+			t.Fatalf("known write not indexed: %v", err)
+		}
+		files, err := repo.GetFiles(after)
+		if err != nil || len(files) != 1 {
+			t.Fatalf("snapshot files: %v", err)
+		}
+		content, err := repo.OpenFile(files[0])
+		if err != nil || string(content) != "AFTER!" {
+			t.Fatalf("snapshot content %q: %v", content, err)
+		}
+		if err = WriteFileWithPreflight(name, []byte("AFTER!"), mapped, func([]byte) error { return nil }); err != nil {
+			t.Fatal(err)
+		}
+		stable, created, err := repo.IndexWithResult("unchanged", true, nil)
+		if err != nil || created || stable.ID != after.ID {
+			t.Fatalf("unchanged write made a version: %v", err)
+		}
+	}
+}
 
 func TestPreflightWritePreservesRejectedSource(t *testing.T) {
 	for _, mapped := range []bool{false, true} {

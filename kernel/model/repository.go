@@ -1880,6 +1880,11 @@ func normalizeSnapshotMemo(memo string) string {
 }
 
 func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
+	return CreateRepoSnapshotWithFullCheck(memo, false)
+}
+
+// CreateRepoSnapshotWithFullCheck 允许本次快照核对所有本地已落盘文件的内容。
+func CreateRepoSnapshotWithFullCheck(memo string, fullCheck bool) (id string, created bool, err error) {
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -1914,10 +1919,10 @@ func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 	if err = processAssetDownloadRecovery(repo, true); err != nil {
 		return
 	}
-	index, created, err := repo.IndexWithResult(memo, true, map[string]any{
+	index, created, err := repo.IndexWithResultOptions(memo, true, map[string]any{
 		eventbus.CtxPushMsg:             eventbus.CtxPushMsgToStatusBarAndProgress,
 		dejavu.CtxAssetDownloadsAllowed: checkAssetDownloadAccess() == nil,
-	})
+	}, dejavu.IndexOptions{FullCheck: fullCheck})
 	if err != nil {
 		util.PushStatusBar("Index data repo failed: " + html.EscapeString(err.Error()))
 		return

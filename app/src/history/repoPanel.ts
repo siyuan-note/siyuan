@@ -132,12 +132,13 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button class="block__icon block__icon--show history__snapshot-mobile-control" data-action="source-more" aria-label="${lang.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 </div>
 <label class="history__snapshot-toolbar fn__none"><input type="checkbox" class="history__snapshot-check" data-repo-all> ${lang.selectAll}</label>${template}`;
-        const createButton = pane.querySelector('[data-type="genRepo"]');
-        if (source === "local") {
-            pane.querySelector('[data-action="purge"]').before(createButton);
-        } else {
-            createButton.remove();
-        }
+        pane.querySelectorAll('[data-type="genRepo"], [data-type="fullCheckRepo"]').forEach(button => {
+            if (source === "local") {
+                pane.querySelector('[data-action="purge"]').before(button);
+            } else {
+                button.remove();
+            }
+        });
         const pagination = document.createElement("div");
         pagination.className = "history__snapshot-toolbar history__snapshot-footer";
         pagination.append(pane.querySelector(".history__repo-pagination"));
@@ -201,7 +202,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         state.busy = busy;
         dateForm.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(control => control.disabled = busy);
         root.setAttribute("aria-busy", String(busy));
-        root.querySelectorAll<HTMLButtonElement>("button[data-action], button[data-type=genRepo]").forEach(button => button.disabled = busy);
+        root.querySelectorAll<HTMLButtonElement>("button[data-action], button[data-type=genRepo], button[data-type=fullCheckRepo]").forEach(button => button.disabled = busy);
         updateRepoSelection(panes()[0]);
     };
     root.addEventListener("click", event => {

@@ -193,7 +193,11 @@ var (
 )
 
 var (
-	CreateSnapshot  = define[CreateSnapshotRequest, CreateSnapshotData]("createSnapshot", "/api/repo/createSnapshot", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// CreateSnapshot 创建快照；fullCheck 默认为 false，为 true 时读取所有本地已落盘文件核对内容。
+	// 未下载资源沿用其逻辑版本；无变化时返回原快照并令 created 为 false。大文件较多时完整校验耗时更长。
+	CreateSnapshot = define[CreateSnapshotRequest, CreateSnapshotData]("createSnapshot", "/api/repo/createSnapshot", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// CheckSnapshot 只读检查变更，复用已确认的本机大小及精细时间，记录缺失或变化时读取内容。
+	// 不下载资源或写入缓存；大小和时间完全相同且没有本进程写入标记的外部修改需使用完整校验。
 	CheckSnapshot   = define[EmptyRequest, CheckSnapshotData]("checkSnapshot", "/api/repo/checkSnapshot", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	SetSnapshotMemo = define[SetSnapshotMemoRequest, Null]("setSnapshotMemo", "/api/repo/setSnapshotMemo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )

@@ -1,4 +1,6 @@
 {
+	"fullCheckSnapshot": "Comprobación completa del contenido",
+	"fullCheckSnapshotTip": "Leer todos los archivos locales para detectar cambios de contenido aunque no cambien el tamaño ni la fecha de modificación, y crear una instantánea si es necesario; no se descargan recursos para esta comprobación y los espacios de trabajo grandes pueden tardar más",
 	"listMindmapDocumentViewport": "Área visible del documento",
 	"listMindmapNodeColor": "Color del nodo",
 	"listMindmapPaletteWaves": "Olas",

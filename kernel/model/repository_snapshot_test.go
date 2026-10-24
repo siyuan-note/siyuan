@@ -7,10 +7,69 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSnapshotFullCheckPreservedAttributes(t *testing.T) {
+	_, partial, _ := prepareAssetDownloadRepoTest(t)
+	file := filepath.Join(util.DataDir, "probe.txt")
+	stamp := time.Unix(1700000100, 100000000)
+	if err := os.WriteFile(file, []byte("before"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(file, stamp, stamp); err != nil {
+		t.Fatal(err)
+	}
+	before, _, err := CreateRepoSnapshot("before")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(file, []byte("AFTER!"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Chtimes(file, stamp, stamp); err != nil {
+		t.Fatal(err)
+	}
+	fast, created, err := CreateRepoSnapshot("fast")
+	if err != nil || created || fast != before {
+		t.Fatalf("fast check did not reuse file state: %v", err)
+	}
+	after, created, err := CreateRepoSnapshotWithFullCheck("full check", true)
+	if err != nil || !created || after == before {
+		t.Fatalf("full check failed: %v", err)
+	}
+	latest, err := partial.Latest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	files, err := partial.GetFiles(latest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, item := range files {
+		if item.Path == "/probe.txt" {
+			found = true
+			data, err := partial.OpenFile(item)
+			if err != nil || string(data) != "AFTER!" {
+				t.Fatalf("full check content: %q %v", data, err)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("full check omitted the changed file")
+	}
+	stable, created, err := CreateRepoSnapshotWithFullCheck("unchanged full", true)
+	if err != nil || created || stable != after {
+		t.Fatalf("full check failed to converge: %v", err)
+	}
+	if _, err = os.Stat(filepath.Join(util.DataDir, "assets", "file.bin")); !os.IsNotExist(err) {
+		t.Fatalf("full check downloaded deferred resource: %v", err)
+	}
+}
 
 func TestSearchRepoSnapshot(t *testing.T) {
 	_, partial, _ := prepareAssetDownloadRepoTest(t)

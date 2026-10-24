@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261024203645"
 	},
 	"Children": [
 		{
@@ -1160,7 +1160,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120602-drz9hwc",
-				"updated": "20261024164212"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1374,7 +1374,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-wp2lnbq",
-				"updated": "20261016111431"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1547,6 +1547,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "Use a detailed memo to identify a snapshot later. A memo does not protect it from cleanup; add a tag to snapshots you need to retain and keep an independent backup."
+				}
+			]
+		},
+		{
+			"ID": "20261024203645-1uu50u4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024203645-1uu50u4",
+				"updated": "20261024203645"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an external program changes content while preserving both file size and modification time, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data History"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Full content check"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", enter a memo, and confirm. The check reads all local files included in snapshots and creates a snapshot when changes are found. Resources that have not been downloaded retain their existing versions and are not downloaded for the check. Large workspaces may take longer."
 				}
 			]
 		},

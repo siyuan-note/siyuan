@@ -1,4 +1,6 @@
 {
+	"fullCheckSnapshot": "Volledige inhoudscontrole",
+	"fullCheckSnapshotTip": "Lees alle lokale bestanden om inhoudswijzigingen te vinden, ook als grootte en wijzigingstijd gelijk blijven, en maak zo nodig een momentopname; bronnen worden hiervoor niet gedownload en grote werkruimten kunnen meer tijd kosten",
 	"listMindmapDocumentViewport": "Documentvenster",
 	"listMindmapNodeColor": "Knooppuntkleur",
 	"listMindmapPaletteWaves": "Golven",

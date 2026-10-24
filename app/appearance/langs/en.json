@@ -3158,7 +3158,7 @@
 		"181": "The document has been shared to community, <a href=\"%s\" target=\"_blank\">click to view</a>",
 		"182": "Sharing document, please wait...",
 		"183": "Validating index document [%d/%d %s]",
-		"184": "Powered by <a href=\"https://b3log.org/siyuan/en/?lang=en\" target=\"_blank\">SiYuan</a>",
+		"184": "",
 		"185": "Index verification complete",
 		"186": "Locking cloud sync directory",
 		"187": "Unlocking cloud sync directory",

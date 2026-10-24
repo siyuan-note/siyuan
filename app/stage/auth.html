@@ -183,12 +183,6 @@
             background-color: var(--b3-protyle-code-background);
         }
 
-        .ft__on-surface {
-            color: var(--b3-theme-on-surface);
-            font-size: 12px;
-            margin: 16px 0;
-        }
-
         .auth-actions {
             display: flex;
             flex-direction: column;
@@ -237,18 +231,8 @@
                 background-color: rgba(0, 0, 0, .06);
             }
 
-            body.has-wallpaper #authPanel .ft__on-surface {
-                color: var(--auth-panel-secondary);
-            }
-
-            body.has-wallpaper #authPanel .ft__on-surface a {
-                color: inherit;
-                text-decoration: underline;
-            }
-
             body.has-wallpaper #authPanel h1,
-            body.has-wallpaper #authPanel label,
-            body.has-wallpaper #authPanel .ft__on-surface {
+            body.has-wallpaper #authPanel label {
                 text-shadow: 0 1px 3px var(--auth-text-outline);
             }
         }
@@ -394,9 +378,6 @@
             margin-top: 8px;
         }
 
-        body.has-wallpaper #authPanel .ft__on-surface {
-            margin: 8px 0 0;
-        }
     </style>
 </head>
 <body>
@@ -426,9 +407,6 @@
             <label for="rememberMe" style="color: var(--auth-panel-secondary, var(--b3-theme-on-surface)); font-size: 14px;">{{.l10}}</label>
         </div>
         <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
-    </div>
-    <div class="ft__on-surface">
-        {{.l7}}
     </div>
 </div>
 <div id="authDefaultBackground" style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">

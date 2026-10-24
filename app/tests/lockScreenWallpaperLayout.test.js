@@ -70,7 +70,6 @@ const fixtureHTML = (file, dark, glassSupported = true) => {
         .replace(/{{if not \.accessAuthCodeEnabled}}[\s\S]*?{{end}}/g, "")
         .replace(/{{(?:if \.\w+|end)}}/g, "")
         .replace(/{{\.workspace}}/g, "Workspace")
-        .replace(/{{\.l7}}/g, 'Powered by <a href="https://example.invalid/">SiYuan</a>')
         .replace(/{{\.l\d+}}/g, "Sign in")
         .replace(/{{\.lockScreenReveal}}/g, "Click or press a key to sign in")
         .replace('<span id="lockScreenHint"></span>', '<span id="lockScreenHint">Click or press a key to sign in</span>')
@@ -102,6 +101,10 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
     check.equal(document.body.classList.contains("has-wallpaper"), wallpaperPresent);
     check.equal(wallpaper.hidden, !wallpaperPresent);
     const panel = document.querySelector(remote ? "main" : "#authPanel");
+    if (!remote) {
+        check.equal(panel.querySelector(".ft__on-surface"), null, "the credits row is removed from authentication pages");
+        check.ok(panel.lastElementChild.classList.contains("auth-actions"), "the login card ends with its actions");
+    }
     const cover = document.getElementById("lockScreenCover");
     if (wallpaperPresent) {
         check.equal(panel.inert, true);
@@ -169,8 +172,7 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
         const panelColor = style.backgroundColor.match(/[\d.]+/g).map(Number);
         const panelAlpha = panelColor[3] ?? 1;
         const brightness = Number(/brightness\(([\d.]+)\)/.exec(blur)?.[1] ?? 1);
-        const selectors = remote ? ["h1", "label", ...(glass ? ["#origin"] : [])] :
-            [".ft__on-surface", "label", "h1", ...(glass ? [".ft__on-surface a"] : [])];
+        const selectors = remote ? ["h1", "label", ...(glass ? ["#origin"] : [])] : ["label", "h1"];
         for (const selector of forcedColors ? [] : selectors) {
             const textStyle = getComputedStyle(panel.querySelector(selector));
             const foreground = textStyle.color.match(/[\d.]+/g).map(Number);

@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "スキルのローカルコマンドを許可",
+	"aiClaudeCodeAllowSkillBinsTip": "有効にすると、有効なスキルが宣言したローカルコマンドラインツールを、ツール権限に関係なく claude コマンドラインの Bash ツールで実行できます",
 	"aiClaudeCodeEnv": "CLI 環境変数",
 	"aiClaudeCodeEnvTip": "claude コマンドラインの環境変数に注入されます。値では ${VAR} でシステム環境変数や SiYuan シークレットを参照できます",
 	"aiClaudeCodeEnvInvalid": "環境変数の JSON 形式が正しくありません",

@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "스킬 로컬 명령 허용",
+	"aiClaudeCodeAllowSkillBinsTip": "활성화하면 활성화된 스킬이 선언한 로컬 명령줄 도구를 도구 권한과 무관하게 claude 명령줄의 Bash 도구로 실행할 수 있습니다",
 	"aiClaudeCodeEnv": "CLI 환경 변수",
 	"aiClaudeCodeEnvTip": "claude 명령줄 환경에 주입됩니다. 값에는 ${VAR}로 시스템 환경 변수나 SiYuan 보안 암호를 참조할 수 있습니다",
 	"aiClaudeCodeEnvInvalid": "환경 변수 JSON 형식이 올바르지 않습니다",

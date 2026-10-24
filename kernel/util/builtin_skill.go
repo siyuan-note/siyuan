@@ -49,7 +49,7 @@ func BuiltinPluginSkill(disabled []string) (*BuiltinSkillInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	frontmatter, _ := parseSkillFrontmatter(content)
+	frontmatter, _, _ := parseSkillFrontmatter(content)
 	if frontmatter["name"] != PluginDevelopmentSkillName || frontmatter["description"] == "" {
 		return nil, fmt.Errorf("invalid builtin skill metadata")
 	}
@@ -115,7 +115,7 @@ func LoadBuiltinSkill(locator string, disabled []string) (*SkillLoadResult, erro
 		if readErr != nil {
 			return nil, readErr
 		}
-		_, result.Content = parseSkillFrontmatter(content)
+		_, _, result.Content = parseSkillFrontmatter(content)
 		resources, listErr := builtinSkillResources(files)
 		if listErr != nil {
 			return nil, listErr

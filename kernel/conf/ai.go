@@ -289,6 +289,8 @@ type ClaudeCodeProviderConfig struct {
 	CLIPath string `json:"cliPath"`
 	// PermissionMode 限定命令行可执行的工具范围，取值见 util.ClaudeCodePermission* 常量
 	PermissionMode string `json:"permissionMode"`
+	// AllowSkillBins 开放启用技能声明的本地命令，任何工具权限下都允许命令行通过 Bash 工具执行它们
+	AllowSkillBins bool `json:"allowSkillBins,omitempty"`
 	// Env 是注入命令行的环境变量，用于配置凭据、网关地址与代理，
 	// 值支持使用 ${变量名} 引用内核进程的环境变量
 	Env map[string]string `json:"env,omitempty"`

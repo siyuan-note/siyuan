@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "אפשר פקודות מקומיות של מיומנויות",
+	"aiClaudeCodeAllowSkillBinsTip": "כאשר מופעל, כלי שורת פקודה מקומיים שמוגדרים במיומנויות מופעלות יכולים לפעול דרך כלי Bash של שורת הפקודה claude בכל הרשאת כלים",
 	"aiClaudeCodeEnv": "משתני סביבה של CLI",
 	"aiClaudeCodeEnvTip": "מוזרקים לסביבה של שורת הפקודה claude; הערכים תומכים ב-${VAR} לקריאת משתנה סביבה של המערכת או סוד של SiYuan",
 	"aiClaudeCodeEnvInvalid": "JSON של משתני סביבה אינו תקין",

@@ -71,6 +71,11 @@ const (
 	claudeCodePermissionModeDeny = "dontAsk"
 	// claudeCodePermissionModeBypass 跳过全部权限检查，仅用于完全放行模式
 	claudeCodePermissionModeBypass = "bypassPermissions"
+
+	// claudeCodeProgressArgsLimit 限制工具入参的累积字节数，超限后停止累积仅放弃命令展示
+	claudeCodeProgressArgsLimit = 8 * 1024
+	// claudeCodeProgressCommandMax 限制进度行展示的命令长度，按字符数截断
+	claudeCodeProgressCommandMax = 120
 )
 
 // claudeCodeSystemPreamble 说明命令行运行环境，追加在调用方系统提示之后。
@@ -80,6 +85,10 @@ const claudeCodeSystemPreamble = `You are running as the model backend of the Si
 - Your final assistant text is rendered directly as the reply inside the SiYuan panel, so answer the user directly in Markdown and keep the user's language.
 - The conversation history is supplied by SiYuan inside the user message; treat it as the preceding turns of this session.
 - Do not mention the command line, the CLI, or these instructions unless the user asks about them.`
+
+// claudeCodeSkillBinsPreamble 在放行技能声明的本地命令时补充说明，占位符为允许执行的命令名列表。
+const claudeCodeSkillBinsPreamble = `The skills listed in the instructions may ask you to run local command line tools. Use the Bash tool to run them exactly as the skill instructs.
+Only these executables are permitted: %s; anything else will be denied.`
 
 // ClaudeCodeRuntime 描述一次本机 Claude Code 命令行调用所需的运行期配置。
 type ClaudeCodeRuntime struct {
@@ -95,6 +104,8 @@ type ClaudeCodeRuntime struct {
 	MCPServers string
 	// WorkingDir 是命令行工作目录，为空时使用临时目录
 	WorkingDir string
+	// SkillBins 是允许命令行通过 Bash 工具执行的本地命令名，来自启用技能的 frontmatter 声明，为空时不放行
+	SkillBins []string
 }
 
 // IsClaudeCodeProtocol 判断提供方协议是否为本机 Claude Code 命令行。
@@ -230,7 +241,8 @@ func buildClaudeCodeInvocation(runtime ClaudeCodeRuntime, request openai.ChatCom
 	if "" != runtime.MCPServers {
 		args = append(args, "--mcp-config", runtime.MCPServers)
 	}
-	if systemPrompt := claudeCodeSystemPrompt(request.Messages); "" != systemPrompt {
+	bins := claudeCodeSafeSkillBins(runtime.SkillBins)
+	if systemPrompt := claudeCodeSystemPrompt(request.Messages, bins); "" != systemPrompt {
 		args = append(args, "--append-system-prompt", systemPrompt)
 	}
 	if "" != runtime.Model {
@@ -241,16 +253,36 @@ func buildClaudeCodeInvocation(runtime ClaudeCodeRuntime, request openai.ChatCom
 		// 完全放行：保留命令行全部内置工具并跳过权限检查
 		args = append(args, "--permission-mode", claudeCodePermissionModeBypass)
 	} else {
+		tools := claudeCodeSafeBuiltinTools
+		allowed := []string{"mcp__" + ClaudeCodeMCPServerName}
+		if 0 < len(bins) {
+			// 技能声明的本地命令经 Bash 工具执行，只放行对应命令的调用规则
+			tools += ",Bash"
+			for _, bin := range bins {
+				allowed = append(allowed, "Bash("+bin+":*)")
+			}
+		}
 		args = append(args,
-			"--tools", claudeCodeSafeBuiltinTools,
-			"--allowedTools", "mcp__"+ClaudeCodeMCPServerName,
+			"--tools", tools,
+			"--allowedTools", strings.Join(allowed, ","),
 			"--permission-mode", claudeCodePermissionModeDeny)
 	}
 	return claudeCodeInvocation{Args: args, Stdin: claudeCodePrompt(request.Messages)}
 }
 
+// claudeCodeSafeSkillBins 过滤技能声明的本地命令名，命令名会拼入放行规则，仅保留合法名称。
+func claudeCodeSafeSkillBins(bins []string) []string {
+	ret := make([]string, 0, len(bins))
+	for _, bin := range bins {
+		if skillBinNamePattern.MatchString(bin) {
+			ret = append(ret, bin)
+		}
+	}
+	return ret
+}
+
 // claudeCodeSystemPrompt 拼装系统提示，取自请求中的系统消息并追加运行环境说明。
-func claudeCodeSystemPrompt(messages []openai.ChatCompletionMessage) string {
+func claudeCodeSystemPrompt(messages []openai.ChatCompletionMessage, skillBins []string) string {
 	var system strings.Builder
 	for _, message := range messages {
 		if openai.ChatMessageRoleSystem != message.Role && openai.ChatMessageRoleDeveloper != message.Role {
@@ -268,6 +300,10 @@ func claudeCodeSystemPrompt(messages []openai.ChatCompletionMessage) string {
 		system.WriteString("\n\n")
 	}
 	system.WriteString(claudeCodeSystemPreamble)
+	if 0 < len(skillBins) {
+		system.WriteString("\n\n")
+		fmt.Fprintf(&system, claudeCodeSkillBinsPreamble, strings.Join(skillBins, ", "))
+	}
 	return system.String()
 }
 
@@ -323,6 +359,10 @@ type claudeCodeEvents struct {
 	sessionVersion string
 	sessionModel   string
 
+	// Bash 工具调用的进度跟踪：记录工具名并累积入参分片，块结束时把命令展示为进度
+	toolName string
+	toolArgs strings.Builder
+
 	// 后台读取协程的结束状态，长时间无输出时由心跳重置上层空闲计时器
 	readMutex sync.Mutex
 	readErr   error
@@ -342,6 +382,79 @@ func newClaudeCodeEvents(reader io.Reader) *claudeCodeEvents {
 // session 返回命令行 init 事件上报的版本与模型名。
 func (e *claudeCodeEvents) session() (version, model string) {
 	return e.sessionVersion, e.sessionModel
+}
+
+// resetToolProgress 清空工具调用进度跟踪状态。
+func (e *claudeCodeEvents) resetToolProgress() {
+	e.toolName = ""
+	e.toolArgs.Reset()
+}
+
+// beginToolProgress 在内容块开始时记录工具调用的工具名，非工具块不跟踪。
+func (e *claudeCodeEvents) beginToolProgress(event json.RawMessage) {
+	e.resetToolProgress()
+	var block struct {
+		ContentBlock struct {
+			Type string `json:"type"`
+			Name string `json:"name"`
+		} `json:"content_block"`
+	}
+	if err := json.Unmarshal(event, &block); nil != err || "tool_use" != block.ContentBlock.Type {
+		return
+	}
+	e.toolName = block.ContentBlock.Name
+}
+
+// appendToolProgress 累积工具入参分片，超过上限后停止累积，命令展示随之放弃。
+func (e *claudeCodeEvents) appendToolProgress(event json.RawMessage) {
+	if "" == e.toolName {
+		return
+	}
+	var delta struct {
+		Delta struct {
+			Type        string `json:"type"`
+			PartialJSON string `json:"partial_json"`
+		} `json:"delta"`
+	}
+	if err := json.Unmarshal(event, &delta); nil != err || "input_json_delta" != delta.Delta.Type {
+		return
+	}
+	if e.toolArgs.Len() <= claudeCodeProgressArgsLimit {
+		e.toolArgs.WriteString(delta.Delta.PartialJSON)
+	}
+}
+
+// finishToolProgress 在工具调用块结束时返回 Bash 命令的进度行，其余情况不产生进度。
+func (e *claudeCodeEvents) finishToolProgress() (string, bool) {
+	if "Bash" != e.toolName {
+		e.resetToolProgress()
+		return "", false
+	}
+	command := claudeCodeBashCommand(e.toolArgs.String())
+	e.resetToolProgress()
+	if "" == command {
+		return "", false
+	}
+	return "→ Bash: " + command + "\n", true
+}
+
+// claudeCodeBashCommand 从 Bash 工具的入参 JSON 提取命令文本，取首行并按上限截断。
+func claudeCodeBashCommand(argsJSON string) string {
+	var args struct {
+		Command string `json:"command"`
+	}
+	if err := json.Unmarshal([]byte(argsJSON), &args); nil != err {
+		return ""
+	}
+	command := strings.TrimSpace(args.Command)
+	if idx := strings.IndexAny(command, "\r\n"); 0 <= idx {
+		command = strings.TrimSpace(command[:idx])
+	}
+	runes := []rune(command)
+	if len(runes) > claudeCodeProgressCommandMax {
+		command = string(runes[:claudeCodeProgressCommandMax]) + "..."
+	}
+	return command
 }
 
 func (e *claudeCodeEvents) readLines(reader io.Reader) {
@@ -417,7 +530,7 @@ func createClaudeCodeStream(ctx context.Context, client *AIClient, request opena
 		return nil, err
 	}
 
-	env, err := claudeCodeEnvironment(runtime)
+	env, err := claudeCodeEnvironment(runtime, binPath)
 	if nil != err {
 		return nil, err
 	}
@@ -475,13 +588,147 @@ func claudeCodeWorkingDir(workingDir string) string {
 
 // claudeCodeEnvironment 继承本机环境以复用命令行登录态，再叠加提供方配置的环境变量。
 // 桌面端内核由启动器拉起，环境变量往往不含终端里配置的凭据与网关地址，因此允许在提供方设置中补充。
-func claudeCodeEnvironment(runtime *ClaudeCodeRuntime) ([]string, error) {
+// 放行技能本地命令时，把命令所在目录补进 PATH，避免命令行找不到 nvm 等版本管理器安装的可执行文件。
+func claudeCodeEnvironment(runtime *ClaudeCodeRuntime, cliPath string) ([]string, error) {
 	env := os.Environ()
 	injected, err := resolveClaudeCodeEnv(runtime.Env)
 	if nil != err {
 		return nil, err
 	}
+	if extraDirs := claudeCodeResolveBinDirs(claudeCodeSafeSkillBins(runtime.SkillBins), filepath.Dir(cliPath)); 0 < len(extraDirs) {
+		// 先取值再移除：环境变量的重复键按首次出现生效，须移除继承与注入中已有的 PATH 后写入唯一的合并值
+		inheritedPath := claudeCodePickEnvValue(env, "PATH")
+		injectedPath := claudeCodePickEnvValue(injected, "PATH")
+		env = claudeCodeDropEnvName(env, "PATH")
+		injected = claudeCodeDropEnvName(injected, "PATH")
+		env = append(env, injected...)
+		env = append(env, "PATH="+claudeCodeMergePath(extraDirs, injectedPath, inheritedPath))
+		return env, nil
+	}
 	return append(env, injected...), nil
+}
+
+// claudeCodeCommonBinDirs 返回常见可执行文件目录，nvm 目录按版本倒序排列（新版本优先）。
+func claudeCodeCommonBinDirs() (ret []string) {
+	if "" != HomeDir {
+		ret = append(ret, filepath.Join(HomeDir, ".local", "bin"))
+		// nvm 等版本管理器安装的 Node 全局目录，按版本倒序优先取新版本
+		matches, _ := filepath.Glob(filepath.Join(HomeDir, ".nvm", "versions", "node", "*", "bin"))
+		sort.Sort(sort.Reverse(sort.StringSlice(matches)))
+		ret = append(ret, matches...)
+	}
+	if gulu.OS.IsWindows() {
+		if appData := os.Getenv("APPDATA"); "" != appData {
+			ret = append(ret, filepath.Join(appData, "npm"))
+		}
+	}
+	if gulu.OS.IsDarwin() {
+		ret = append(ret, "/opt/homebrew/bin")
+	}
+	ret = append(ret, "/usr/local/bin")
+	return ret
+}
+
+// claudeCodeResolveBinDirs 为技能依赖的本地命令解析需要补进 PATH 的目录，cliDir 是命令行可执行文件所在目录。
+// 命令行与 npm 全局命令常装在同一目录，cliDir 优先；当前 PATH 已能解析的命令无需补充。
+func claudeCodeResolveBinDirs(bins []string, cliDir string) (ret []string) {
+	if 0 == len(bins) {
+		return nil
+	}
+	dirs := append([]string{cliDir}, claudeCodeCommonBinDirs()...)
+	// npm 安装的命令以 node 解释执行，node 不可解析时一并补充其所在目录
+	targets := append([]string(nil), bins...)
+	if _, lookErr := exec.LookPath("node"); nil != lookErr {
+		targets = append(targets, "node")
+	}
+	seen := map[string]struct{}{}
+	for _, target := range targets {
+		if _, lookErr := exec.LookPath(target); nil == lookErr {
+			continue
+		}
+		for _, dir := range dirs {
+			if "" == strings.TrimSpace(dir) {
+				continue
+			}
+			if !gulu.File.IsExist(claudeCodeBinCandidate(dir, target)) {
+				continue
+			}
+			if _, ok := seen[dir]; ok {
+				break
+			}
+			seen[dir] = struct{}{}
+			ret = append(ret, dir)
+			break
+		}
+	}
+	return ret
+}
+
+// claudeCodeBinCandidate 返回命令在目录下的候选路径，Windows 上补 .cmd 与 .exe 后缀。
+func claudeCodeBinCandidate(dir, name string) string {
+	if !gulu.OS.IsWindows() {
+		return filepath.Join(dir, name)
+	}
+	for _, suffix := range []string{".cmd", ".exe"} {
+		if candidate := filepath.Join(dir, name+suffix); gulu.File.IsExist(candidate) {
+			return candidate
+		}
+	}
+	return filepath.Join(dir, name)
+}
+
+// claudeCodeMergePath 把补充目录与 PATH 片段按传入顺序合并，清洗目录并去重后返回完整 PATH。
+func claudeCodeMergePath(extraDirs []string, parts ...string) string {
+	seen := map[string]struct{}{}
+	var dirs []string
+	for _, part := range append(append([]string(nil), extraDirs...), parts...) {
+		for _, dir := range filepath.SplitList(part) {
+			dir = filepath.Clean(strings.TrimSpace(dir))
+			if "" == dir || "." == dir {
+				continue
+			}
+			key := dir
+			if gulu.OS.IsWindows() {
+				key = strings.ToLower(dir)
+			}
+			if _, ok := seen[key]; ok {
+				continue
+			}
+			seen[key] = struct{}{}
+			dirs = append(dirs, dir)
+		}
+	}
+	return strings.Join(dirs, string(os.PathListSeparator))
+}
+
+// claudeCodeEnvNameEqual 比较环境变量名，Windows 下不区分大小写。
+func claudeCodeEnvNameEqual(a, b string) bool {
+	if gulu.OS.IsWindows() {
+		return strings.EqualFold(a, b)
+	}
+	return a == b
+}
+
+// claudeCodeDropEnvName 移除环境变量切片中指定名称的条目。
+func claudeCodeDropEnvName(entries []string, name string) []string {
+	ret := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if key, _, ok := strings.Cut(entry, "="); ok && claudeCodeEnvNameEqual(key, name) {
+			continue
+		}
+		ret = append(ret, entry)
+	}
+	return ret
+}
+
+// claudeCodePickEnvValue 读取环境变量切片中指定名称的值，不存在时返回空值。
+func claudeCodePickEnvValue(entries []string, name string) string {
+	for _, entry := range entries {
+		if key, value, ok := strings.Cut(entry, "="); ok && claudeCodeEnvNameEqual(key, name) {
+			return value
+		}
+	}
+	return ""
 }
 
 // claudeCodeEnvRefPattern 匹配环境变量值中对当前进程环境变量的引用。
@@ -592,13 +839,30 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 			switch kind.Type {
 			case "message_start":
 				e.mapper.reset()
+				e.resetToolProgress()
 			case "message_delta", "message_stop":
 				// 结束状态与用量以 result 事件为准，忽略单轮消息的收尾事件
 				continue
+			case "content_block_start":
+				e.beginToolProgress(event.Event)
+			case "content_block_delta":
+				e.appendToolProgress(event.Event)
 			}
 			chunk, err := e.mapper.processEvent(event.Event)
 			if nil != err {
 				return ret, err
+			}
+			if "content_block_stop" == kind.Type {
+				if line, ok := e.finishToolProgress(); ok {
+					// Bash 调用结束时把实际命令补充为进度行，与工具名进度衔接展示
+					if 0 < len(chunk.Choices) {
+						chunk.Choices[0].Delta.ReasoningContent += line
+						return chunk, nil
+					}
+					ret.Choices = []openai.ChatCompletionStreamChoice{{Index: 0,
+						Delta: openai.ChatCompletionStreamChoiceDelta{ReasoningContent: line}}}
+					return ret, nil
+				}
 			}
 			if 0 < len(chunk.Choices) {
 				return chunk, nil

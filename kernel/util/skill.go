@@ -55,6 +55,7 @@ type skillRecord struct {
 	Root    string
 	Content string
 	Body    string
+	Bins    []string
 }
 
 // SkillLoadResult 描述技能正文激活或单个资源读取的结果。
@@ -110,7 +111,7 @@ func readSkillRecords(root string) []skillRecord {
 			continue
 		}
 		content := string(b)
-		fm, body := parseSkillFrontmatter(content)
+		fm, bins, body := parseSkillFrontmatter(content)
 		name := fm["name"]
 		if name == "" {
 			name = dirName
@@ -128,6 +129,7 @@ func readSkillRecords(root string) []skillRecord {
 			Root:    root,
 			Content: content,
 			Body:    body,
+			Bins:    bins,
 		})
 	}
 	return records
@@ -482,34 +484,107 @@ func RenameSkill(oldName, newName string) error {
 	return os.Rename(oldDir, newDir)
 }
 
-func parseSkillFrontmatter(text string) (fm map[string]string, body string) {
+// skillBinNamePattern 校验技能声明的本地命令名，命令名会拼入命令行的放行规则，禁止空白与特殊字符。
+var skillBinNamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._+-]*$`)
+
+// parseSkillFrontmatter 解析 SKILL.md 顶部的 frontmatter，提取顶层键与 metadata.requires.bins 声明的本地命令名。
+// 解析保持行级实现：顶层仅取 name 与 description，嵌套仅支持 metadata 下的 requires.bins 流式列表，其余嵌套内容忽略。
+func parseSkillFrontmatter(text string) (fm map[string]string, bins []string, body string) {
 	fm = map[string]string{}
 	text = strings.TrimSpace(text)
 	if !strings.HasPrefix(text, "---") {
-		return fm, text
+		return fm, nil, text
 	}
 	end := strings.Index(text[3:], "\n---")
 	if end < 0 {
-		return fm, text
+		return fm, nil, text
 	}
 	raw := text[3 : 3+end]
 	body = strings.TrimSpace(text[3+end+4:])
+	inMetadata := false
+	requiresIndent := -1
 	for line := range strings.SplitSeq(raw, "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
+		if line == "" || strings.HasPrefix(strings.TrimLeft(line, " \t"), "#") {
 			continue
 		}
+		indent := len(line) - len(strings.TrimLeft(line, " \t"))
+		line = strings.TrimSpace(line)
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) != 2 {
 			continue
 		}
 		key := strings.TrimSpace(parts[0])
 		val := strings.TrimSpace(parts[1])
-		if key == "name" || key == "description" {
-			fm[key] = val
+		if 0 == indent {
+			// 回到顶层：结束 metadata 上下文，顶层仅认 name 与 description
+			inMetadata = false
+			requiresIndent = -1
+			if key == "name" || key == "description" {
+				fm[key] = val
+			}
+			if key == "metadata" {
+				inMetadata = true
+			}
+			continue
+		}
+		if !inMetadata {
+			continue
+		}
+		if requiresIndent < 0 {
+			if key == "requires" {
+				requiresIndent = indent
+			}
+			continue
+		}
+		if indent <= requiresIndent {
+			// 缩进回到 requires 同级，requires 块结束
+			requiresIndent = -1
+			continue
+		}
+		if key == "bins" {
+			bins = append(bins, parseSkillBinList(val)...)
 		}
 	}
-	return fm, body
+	return fm, bins, body
+}
+
+// parseSkillBinList 解析 bins 字段的流式列表或单值形式，仅去引号与空白，不做字符集校验。
+func parseSkillBinList(value string) []string {
+	value = strings.TrimSpace(value)
+	if "" == value {
+		return nil
+	}
+	value = strings.TrimPrefix(value, "[")
+	value = strings.TrimSuffix(value, "]")
+	var ret []string
+	for _, item := range strings.Split(value, ",") {
+		item = strings.TrimSpace(item)
+		item = strings.Trim(item, `"'`)
+		if "" != item {
+			ret = append(ret, item)
+		}
+	}
+	return ret
+}
+
+// EnabledSkillBins 返回启用技能声明且名称合法的本地命令名，去重后按字典序输出。
+func EnabledSkillBins(enabledUserSkills []string) []string {
+	seen := map[string]struct{}{}
+	var ret []string
+	for _, record := range resolveSkillRecords(enabledUserSkills) {
+		for _, bin := range record.Bins {
+			if !skillBinNamePattern.MatchString(bin) {
+				continue
+			}
+			if _, ok := seen[bin]; ok {
+				continue
+			}
+			seen[bin] = struct{}{}
+			ret = append(ret, bin)
+		}
+	}
+	sort.Strings(ret)
+	return ret
 }
 
 func firstLine(text string) string {
@@ -812,7 +887,7 @@ func installSkillDirs(relDirs []string, root string) (*InstallSkillResult, error
 			logging.LogWarnf("read SKILL.md [%s] failed: %s", skillMdPath, err)
 			continue
 		}
-		fm, body := parseSkillFrontmatter(string(b))
+		fm, _, body := parseSkillFrontmatter(string(b))
 		name := fm["name"]
 		if name == "" {
 			// frontmatter 缺 name 字段：根目录场景无法用目录名兜底（root 是临时目录），
@@ -855,7 +930,7 @@ func installSkillDirs(relDirs []string, root string) (*InstallSkillResult, error
 // installFromSingleSkillMD 把单个 SKILL.md 文本内容落地为一个 skill
 func installFromSingleSkillMD(data []byte) (*InstallSkillResult, error) {
 	content := string(data)
-	fm, body := parseSkillFrontmatter(content)
+	fm, _, body := parseSkillFrontmatter(content)
 	name := fm["name"]
 	if name == "" {
 		return nil, errors.New("SKILL.md frontmatter missing 'name' field")

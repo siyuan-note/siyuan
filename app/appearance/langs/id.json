@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Izinkan perintah lokal skill",
+	"aiClaudeCodeAllowSkillBinsTip": "Saat diaktifkan, alat baris perintah lokal yang dideklarasikan oleh skill yang diaktifkan dapat dijalankan melalui alat Bash baris perintah claude pada semua izin alat",
 	"aiClaudeCodeEnv": "Variabel lingkungan CLI",
 	"aiClaudeCodeEnvTip": "Disuntikkan ke lingkungan baris perintah claude; nilai mendukung ${VAR} untuk membaca variabel lingkungan sistem atau rahasia SiYuan",
 	"aiClaudeCodeEnvInvalid": "JSON variabel lingkungan tidak valid",

@@ -1974,9 +1974,9 @@ export type SettingCapabilityPolicy = { "default": string; "overrides": Record<s
 
 export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrides"?: Record<string, string> | null; };
 
-export type SettingClaudeCodeProvider = { "cliPath": string; "env"?: Record<string, string>; "permissionMode": string; };
+export type SettingClaudeCodeProvider = { "allowSkillBins"?: boolean; "cliPath": string; "env"?: Record<string, string>; "permissionMode": string; };
 
-export type SettingClaudeCodeProviderInput = { "cliPath"?: string | null; "env"?: Record<string, string> | null; "permissionMode"?: string | null; };
+export type SettingClaudeCodeProviderInput = { "allowSkillBins"?: boolean | null; "cliPath"?: string | null; "env"?: Record<string, string> | null; "permissionMode"?: string | null; };
 
 export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 

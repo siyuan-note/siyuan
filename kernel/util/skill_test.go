@@ -81,6 +81,18 @@ func writeSkill(t *testing.T, root, id, name, description, body string) {
 	}
 }
 
+// writeSkillMd 在 root 下写入指定 frontmatter 与正文的 SKILL.md。
+func writeSkillMd(t *testing.T, root, id, content string) {
+	t.Helper()
+	dir := filepath.Join(root, id)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func writeSkillResource(t *testing.T, root, id, resource string, content []byte) {
 	t.Helper()
 	file := filepath.Join(root, id, filepath.FromSlash(resource))
@@ -515,7 +527,7 @@ func TestNormalizeSkillURLOwnerRepoValid(t *testing.T) {
 	}
 }
 
-// TestParseSkillFrontmatter 验证 frontmatter 解析提取 name/description，正文正确剥离。
+// TestParseSkillFrontmatter 验证 frontmatter 解析提取 name/description 与 metadata.requires.bins，正文正确剥离。
 func TestParseSkillFrontmatter(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -523,6 +535,7 @@ func TestParseSkillFrontmatter(t *testing.T) {
 		wantName string
 		wantDesc string
 		wantBody string
+		wantBins []string
 	}{
 		{
 			name:     "standard",
@@ -551,10 +564,54 @@ func TestParseSkillFrontmatter(t *testing.T) {
 			wantName: "cr",
 			wantDesc: "crlf",
 		},
+		{
+			name:     "lark style bins",
+			text:     "---\nname: lark-doc\ndescription: \"d\"\nmetadata:\n  requires:\n    bins: [\"lark-cli\"]\n    skills: [\"lark-shared\"]\n  cliHelp: \"lark-cli docs --help\"\n---\nbody",
+			wantName: "lark-doc",
+			wantDesc: "\"d\"",
+			wantBody: "body",
+			wantBins: []string{"lark-cli"},
+		},
+		{
+			name:     "bins flow list multiple",
+			text:     "---\nname: a\nmetadata:\n  requires:\n    bins: [\"x-cli\", 'y-cli', z-cli]\n---\nb",
+			wantName: "a",
+			wantBins: []string{"x-cli", "y-cli", "z-cli"},
+		},
+		{
+			name:     "bins single value",
+			text:     "---\nname: a\nmetadata:\n  requires:\n    bins: lark-cli\n---\nb",
+			wantName: "a",
+			wantBins: []string{"lark-cli"},
+		},
+		{
+			name:     "metadata without requires",
+			text:     "---\nname: a\nmetadata:\n  cliHelp: x\n---\nb",
+			wantName: "a",
+		},
+		{
+			name:     "requires sibling ends block",
+			text:     "---\nname: a\nmetadata:\n  requires:\n    bins: [\"one\"]\n  other:\n    bins: [\"two\"]\n---\nb",
+			wantName: "a",
+			wantBins: []string{"one"},
+		},
+		{
+			name:     "nested name description ignored",
+			text:     "---\nname: top\nmetadata:\n  name: nested\n  requires:\n    bins: [\"b\"]\n  description: nested-desc\ndescription: top-desc\n---\nbody",
+			wantName: "top",
+			wantDesc: "top-desc",
+			wantBody: "body",
+			wantBins: []string{"b"},
+		},
+		{
+			name:     "bins outside metadata ignored",
+			text:     "---\nname: a\nother:\n  requires:\n    bins: [\"x\"]\n---\nb",
+			wantName: "a",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			fm, body := parseSkillFrontmatter(c.text)
+			fm, bins, body := parseSkillFrontmatter(c.text)
 			if fm["name"] != c.wantName {
 				t.Errorf("name = %q, want %q", fm["name"], c.wantName)
 			}
@@ -564,7 +621,28 @@ func TestParseSkillFrontmatter(t *testing.T) {
 			if c.wantBody != "" && body != c.wantBody {
 				t.Errorf("body = %q, want %q", body, c.wantBody)
 			}
+			if !reflect.DeepEqual(bins, c.wantBins) {
+				t.Errorf("bins = %v, want %v", bins, c.wantBins)
+			}
 		})
+	}
+}
+
+// TestEnabledSkillBins 验证启用技能声明的本地命令名合并、过滤与排序。
+func TestEnabledSkillBins(t *testing.T) {
+	workspaceRoot, userRoot := setSkillTestRoots(t)
+	writeSkillMd(t, workspaceRoot, "ws-a", "---\nname: ws-a\nmetadata:\n  requires:\n    bins: [\"tool-b\", \"tool-a\"]\n---\nb")
+	writeSkillMd(t, userRoot, "user-on", "---\nname: user-on\nmetadata:\n  requires:\n    bins: [\"lark-cli\"]\n---\nb")
+	writeSkillMd(t, userRoot, "user-off", "---\nname: user-off\nmetadata:\n  requires:\n    bins: [\"off-cli\"]\n---\nb")
+	writeSkillMd(t, userRoot, "user-bad", "---\nname: user-bad\nmetadata:\n  requires:\n    bins: [\"../evil\", \"a b\", \"a;b\", \"tool-a\"]\n---\nb")
+
+	got := EnabledSkillBins([]string{"user-on", "user-bad"})
+	want := []string{"lark-cli", "tool-a", "tool-b"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("EnabledSkillBins() = %v, want %v", got, want)
+	}
+	if got = EnabledSkillBins(nil); len(got) != 2 || got[0] != "tool-a" || got[1] != "tool-b" {
+		t.Errorf("EnabledSkillBins(nil) = %v, want [tool-a tool-b]", got)
 	}
 }
 

@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Consenti i comandi locali delle abilità",
+	"aiClaudeCodeAllowSkillBinsTip": "Quando attivato, gli strumenti da riga di comando locali dichiarati dalle abilità abilitate possono essere eseguiti tramite lo strumento Bash della riga di comando claude con qualsiasi permesso degli strumenti",
 	"aiClaudeCodeEnv": "Variabili d’ambiente della CLI",
 	"aiClaudeCodeEnvTip": "Iniettato nell’ambiente della riga di comando claude; i valori supportano ${VAR} per leggere una variabile d’ambiente di sistema o un segreto di SiYuan",
 	"aiClaudeCodeEnvInvalid": "JSON delle variabili d’ambiente non valido",

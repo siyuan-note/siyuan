@@ -43778,6 +43778,9 @@
     "SettingClaudeCodeProvider": {
       "type": "object",
       "properties": {
+        "allowSkillBins": {
+          "type": "boolean"
+        },
         "cliPath": {
           "type": "string"
         },
@@ -43800,6 +43803,16 @@
     "SettingClaudeCodeProviderInput": {
       "type": "object",
       "properties": {
+        "allowSkillBins": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "cliPath": {
           "anyOf": [
             {

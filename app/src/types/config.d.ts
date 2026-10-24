@@ -275,6 +275,8 @@ declare namespace Config {
         cliPath: string;
         /** 工具权限：readonly 只读、notebook 读写笔记本、full 完全放行 */
         permissionMode: string;
+        /** 允许已启用技能声明的本地命令行工具在任何工具权限下经命令行的 Bash 工具执行，默认关闭 */
+        allowSkillBins?: boolean;
         /** 注入命令行的环境变量，值中的 ${变量名} 引用系统环境变量或 SiYuan 密钥 */
         env?: Record<string, string>;
     }

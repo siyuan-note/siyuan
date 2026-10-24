@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "允許技能本地命令",
+	"aiClaudeCodeAllowSkillBinsTip": "開啟後，已啟用技能宣告的本機命令列工具可在任何工具權限下透過 claude 命令列的 Bash 工具執行",
 	"aiClaudeCodeEnv": "命令列環境變數",
 	"aiClaudeCodeEnvTip": "注入 claude 命令列的環境變數，值支援 ${變數名稱} 引用系統環境變數或 SiYuan 密鑰",
 	"aiClaudeCodeEnvInvalid": "環境變數 JSON 格式不正確",

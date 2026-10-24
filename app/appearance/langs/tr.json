@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Yetenek yerel komutlarına izin ver",
+	"aiClaudeCodeAllowSkillBinsTip": "Etkinleştirildiğinde, etkin yetenekler tarafından bildirilen yerel komut satırı araçları, her araç izninde claude komut satırının Bash aracıyla çalıştırılabilir",
 	"aiClaudeCodeEnv": "CLI ortam değişkenleri",
 	"aiClaudeCodeEnvTip": "claude komut satırı ortamına eklenir; değerler sistem ortam değişkenini veya SiYuan gizli anahtarını okumak için ${VAR} destekler",
 	"aiClaudeCodeEnvInvalid": "Ortam değişkenleri JSON’u geçersiz",

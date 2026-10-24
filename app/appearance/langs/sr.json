@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Dozvoli lokalne komande veština",
+	"aiClaudeCodeAllowSkillBinsTip": "Kada je omogućeno, lokalne alate komandne linije koje su deklarisale omogućene veštine mogu se izvršavati kroz Bash alat claude komandne linije uz bilo koju dozvolu alata",
 	"aiClaudeCodeEnv": "Променљиве окружења CLI",
 	"aiClaudeCodeEnvTip": "Убацују се у окружење командне линије claude; вредности подржавају ${VAR} за читање системске променљиве окружења или SiYuan тајне",
 	"aiClaudeCodeEnvInvalid": "Неисправан JSON променљивих окружења",

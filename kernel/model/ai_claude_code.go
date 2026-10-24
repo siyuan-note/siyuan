@@ -32,6 +32,10 @@ func claudeCodeRuntime(provider *conf.Provider, model string) util.ClaudeCodeRun
 		// 完全放行模式下允许命令行直接处理工作空间文件
 		runtime.WorkingDir = util.WorkspaceDir
 	}
+	if nil != provider && nil != provider.ClaudeCode && provider.ClaudeCode.AllowSkillBins {
+		// 开放技能声明的本地命令：任何工具权限模式下都允许命令行通过 Bash 工具执行
+		runtime.SkillBins = util.EnabledSkillBins(EnabledUserSkills())
+	}
 	return runtime
 }
 

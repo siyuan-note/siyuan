@@ -19,6 +19,8 @@ package util
 import (
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -347,6 +349,36 @@ func TestBuildClaudeCodeInvocation(t *testing.T) {
 	if containsArg(withoutMCP.Args, "--mcp-config") {
 		t.Fatalf("empty MCP configuration must be omitted: %#v", withoutMCP.Args)
 	}
+
+	// 放行技能本地命令：非法命令名被过滤，只保留合法命令的放行规则
+	readonlyBins := buildClaudeCodeInvocation(ClaudeCodeRuntime{PermissionMode: ClaudeCodePermissionReadOnly,
+		SkillBins: []string{"lark-cli", "../evil"}}, request)
+	if !containsArgPair(readonlyBins.Args, "--tools", claudeCodeSafeBuiltinTools+",Bash") {
+		t.Fatalf("skill bins must enable the Bash tool: %#v", readonlyBins.Args)
+	}
+	if !containsArgPair(readonlyBins.Args, "--allowedTools", "mcp__siyuan,Bash(lark-cli:*)") {
+		t.Fatalf("skill bins must allow their own commands only: %#v", readonlyBins.Args)
+	}
+	systemPrompt = argValue(readonlyBins.Args, "--append-system-prompt")
+	if !strings.Contains(systemPrompt, "lark-cli") || !strings.Contains(systemPrompt, "Only these executables are permitted") {
+		t.Fatalf("system prompt must name the allowed executables: %q", systemPrompt)
+	}
+
+	notebookBins := buildClaudeCodeInvocation(ClaudeCodeRuntime{PermissionMode: ClaudeCodePermissionNotebook,
+		SkillBins: []string{"lark-cli"}}, request)
+	if !containsArgPair(notebookBins.Args, "--tools", claudeCodeSafeBuiltinTools+",Bash") ||
+		!containsArgPair(notebookBins.Args, "--allowedTools", "mcp__siyuan,Bash(lark-cli:*)") {
+		t.Fatalf("notebook mode must allow skill bins too: %#v", notebookBins.Args)
+	}
+
+	fullBins := buildClaudeCodeInvocation(ClaudeCodeRuntime{PermissionMode: ClaudeCodePermissionFull,
+		SkillBins: []string{"lark-cli"}}, request)
+	if containsArg(fullBins.Args, "--tools") || containsArg(fullBins.Args, "--allowedTools") {
+		t.Fatalf("full mode must not restrict tools: %#v", fullBins.Args)
+	}
+	if !strings.Contains(argValue(fullBins.Args, "--append-system-prompt"), "lark-cli") {
+		t.Fatalf("full mode system prompt must name the allowed executables: %#v", fullBins.Args)
+	}
 }
 
 // TestClaudeCodePromptFlattensHistory 会话历史拼入提示词，最新用户消息单独成段。
@@ -404,6 +436,138 @@ func TestClaudeCodeUsageAndFinishReason(t *testing.T) {
 func TestIsClaudeCodeProtocol(t *testing.T) {
 	if !IsClaudeCodeProtocol(" claude-code ") || IsClaudeCodeProtocol("openai") || IsClaudeCodeProtocol("") {
 		t.Fatal("unexpected protocol detection")
+	}
+}
+
+// TestClaudeCodeEnvironmentSkillBinsPath 放行技能本地命令时补全 PATH：唯一 PATH 条目、发现目录在前、注入与继承 PATH 居后。
+func TestClaudeCodeEnvironmentSkillBinsPath(t *testing.T) {
+	root := t.TempDir()
+	originalHome := HomeDir
+	HomeDir = filepath.Join(root, "home")
+	defer func() { HomeDir = originalHome }()
+
+	binDir := filepath.Join(HomeDir, ".nvm", "versions", "node", "v24.21.0", "bin")
+	if err := os.MkdirAll(binDir, 0755); nil != err {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(binDir, "lark-cli"), []byte("#!/bin/sh\n"), 0644); nil != err {
+		t.Fatal(err)
+	}
+	cliPath := filepath.Join(root, "cli", "claude")
+
+	t.Setenv("PATH", "/usr/bin")
+	env, err := claudeCodeEnvironment(&ClaudeCodeRuntime{SkillBins: []string{"lark-cli"}}, cliPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	pathCount, pathValue := 0, ""
+	for _, entry := range env {
+		if key, value, ok := strings.Cut(entry, "="); ok && "PATH" == key {
+			pathCount++
+			pathValue = value
+		}
+	}
+	if 1 != pathCount {
+		t.Fatalf("expected a single PATH entry, got %d: %#v", pathCount, env)
+	}
+	dirs := filepath.SplitList(pathValue)
+	if 2 != len(dirs) || binDir != dirs[0] || "/usr/bin" != dirs[1] {
+		t.Fatalf("unexpected merged PATH: %q", pathValue)
+	}
+
+	// 用户注入的 PATH 位于发现目录与继承 PATH 之间，其余注入变量保留
+	t.Setenv("PATH", "/usr/bin")
+	env, err = claudeCodeEnvironment(&ClaudeCodeRuntime{
+		SkillBins: []string{"lark-cli"},
+		Env:       map[string]string{"PATH": "/opt/custom", "OTHER": "v"},
+	}, cliPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	pathCount, pathValue = 0, ""
+	hasOther := false
+	for _, entry := range env {
+		key, value, ok := strings.Cut(entry, "=")
+		if !ok {
+			continue
+		}
+		if "PATH" == key {
+			pathCount++
+			pathValue = value
+		}
+		if "OTHER" == key && "v" == value {
+			hasOther = true
+		}
+	}
+	if 1 != pathCount || !hasOther {
+		t.Fatalf("unexpected environment: %#v", env)
+	}
+	if want := binDir + string(os.PathListSeparator) + "/opt/custom" + string(os.PathListSeparator) + "/usr/bin"; want != pathValue {
+		t.Fatalf("unexpected merged PATH: %q, want %q", pathValue, want)
+	}
+
+	// 未放行技能本地命令时不改写 PATH，保持原有继承行为
+	t.Setenv("PATH", "/usr/bin")
+	plain, err := claudeCodeEnvironment(&ClaudeCodeRuntime{}, cliPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if pathValue = claudeCodePickEnvValue(plain, "PATH"); "/usr/bin" != pathValue {
+		t.Fatalf("plain PATH must stay inherited: %q", pathValue)
+	}
+}
+
+// TestClaudeCodeEventsBashProgress Bash 工具调用结束时把实际命令展示为进度行，工具调用本身仍透出。
+func TestClaudeCodeEventsBashProgress(t *testing.T) {
+	fixture := `{"type":"stream_event","event":{"type":"message_start","message":{"id":"m1","type":"message","role":"assistant","model":"claude-test","content":[],"usage":{"input_tokens":10,"output_tokens":0}}}}
+{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_1","name":"Bash"}}}
+{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"command\":\"lark-cli docs"}}}
+{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" list\",\"description\":\"x\"}"}}}
+{"type":"stream_event","event":{"type":"content_block_stop","index":0}}
+{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"tool_use"}}}
+{"type":"stream_event","event":{"type":"message_stop"}}
+{"type":"result","subtype":"success","is_error":false,"stop_reason":"end_turn","result":"done"}`
+	events := newClaudeCodeEvents(strings.NewReader(fixture))
+
+	var progress strings.Builder
+	toolCalls := 0
+	for {
+		chunk, err := events.recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if nil != err {
+			t.Fatal(err)
+		}
+		for _, choice := range chunk.Choices {
+			progress.WriteString(choice.Delta.ReasoningContent)
+			for _, call := range choice.Delta.ToolCalls {
+				if "" != call.Function.Name {
+					toolCalls++
+				}
+			}
+		}
+	}
+	if 1 != toolCalls {
+		t.Fatalf("unexpected tool call count: %d", toolCalls)
+	}
+	if "→ Bash: lark-cli docs list\n" != progress.String() {
+		t.Fatalf("unexpected progress: %q", progress.String())
+	}
+}
+
+// TestClaudeCodeBashCommand 覆盖命令提取：多行取首行、超长截断、异常入参返回空值。
+func TestClaudeCodeBashCommand(t *testing.T) {
+	if got := claudeCodeBashCommand(`{"command":"lark-cli x\nsecond line"}`); "lark-cli x" != got {
+		t.Fatalf("multiline command must use the first line: %q", got)
+	}
+	long := strings.Repeat("a", 130)
+	want := strings.Repeat("a", claudeCodeProgressCommandMax) + "..."
+	if got := claudeCodeBashCommand(`{"command":"` + long + `"}`); want != got {
+		t.Fatalf("long command must be truncated: %q", got)
+	}
+	if "" != claudeCodeBashCommand("not json") || "" != claudeCodeBashCommand(`{"command":""}`) || "" != claudeCodeBashCommand(`{"other":1}`) {
+		t.Fatal("invalid or empty command must yield an empty string")
 	}
 }
 

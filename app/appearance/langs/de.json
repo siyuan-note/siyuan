@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Lokale Skill-Befehle erlauben",
+	"aiClaudeCodeAllowSkillBinsTip": "Wenn aktiviert, können von aktivierten Skills deklarierte lokale Befehlszeilenwerkzeuge unabhängig von der Werkzeugberechtigung über das Bash-Werkzeug der claude-Befehlszeile ausgeführt werden",
 	"aiClaudeCodeEnv": "CLI-Umgebungsvariablen",
 	"aiClaudeCodeEnvTip": "Wird in die Umgebung der claude-Befehlszeile eingefügt; Werte unterstützen ${VAR} zum Lesen einer Systemumgebungsvariablen oder eines SiYuan-Geheimnisses",
 	"aiClaudeCodeEnvInvalid": "Ungültiges JSON für Umgebungsvariablen",

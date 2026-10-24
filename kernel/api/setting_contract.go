@@ -251,6 +251,7 @@ func settingProviderPayload(value *conf.Provider) *apicontract.SettingProvider {
 		result.ClaudeCode = &apicontract.SettingClaudeCodeProvider{
 			CLIPath:        value.ClaudeCode.CLIPath,
 			PermissionMode: value.ClaudeCode.PermissionMode,
+			AllowSkillBins: value.ClaudeCode.AllowSkillBins,
 			Env:            value.ClaudeCode.Env,
 		}
 	}

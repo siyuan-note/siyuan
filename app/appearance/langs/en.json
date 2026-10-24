@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Allow skill commands",
+	"aiClaudeCodeAllowSkillBinsTip": "When enabled, local command line tools declared by enabled skills can run through the Bash tool of the claude command line in any tool permission",
 	"aiClaudeCodeEnv": "CLI environment variables",
 	"aiClaudeCodeEnvTip": "Injected into the environment of the claude command line; values support ${VAR} to read a system environment variable or a SiYuan secret",
 	"aiClaudeCodeEnvInvalid": "Invalid environment variables JSON",

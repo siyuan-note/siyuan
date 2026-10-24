@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Zezwalaj na lokalne polecenia umiejętności",
+	"aiClaudeCodeAllowSkillBinsTip": "Po włączeniu lokalne narzędzia wiersza poleceń zadeklarowane przez włączone umiejętności mogą być uruchamiane przez narzędzie Bash wiersza poleceń claude przy każdym uprawnieniu narzędzi",
 	"aiClaudeCodeEnv": "Zmienne środowiskowe CLI",
 	"aiClaudeCodeEnvTip": "Wstrzykiwane do środowiska wiersza poleceń claude; wartości obsługują ${VAR} do odczytu zmiennej środowiskowej systemu lub sekretu SiYuan",
 	"aiClaudeCodeEnvInvalid": "Nieprawidłowy JSON zmiennych środowiskowych",

@@ -149,11 +149,14 @@ type SettingProvider struct {
 // SettingClaudeCodeProvider 描述本机 Claude Code 命令行提供方的执行配置，仅在 protocol 为 claude-code 时生效。
 // cliPath 留空时由内核按常见安装位置探测；permissionMode 取 readonly（默认）、notebook 或 full，
 // readonly 由内核的 MCP 服务拒绝写入动作，full 会放行命令行内置工具。
+// allowSkillBins 开启后，启用技能通过 frontmatter metadata.requires.bins 声明的本地命令
+// 可在任何工具权限下经命令行的 Bash 工具执行，执行范围仅限这些声明的命令。
 // env 写入命令行的环境变量，用于配置凭据、网关地址与网络代理，值中的 ${变量名} 引用系统环境变量或 SiYuan 密钥；
 // 桌面端内核由启动器拉起，其进程环境通常不含终端中配置的凭据与代理，因此提供方可以在此补充。
 type SettingClaudeCodeProvider struct {
 	CLIPath        string            `json:"cliPath" api:"optional,nullable"`
 	PermissionMode string            `json:"permissionMode" api:"optional,nullable"`
+	AllowSkillBins bool              `json:"allowSkillBins,omitempty" api:"optional,nullable"`
 	Env            map[string]string `json:"env,omitempty" api:"optional,nullable"`
 }
 

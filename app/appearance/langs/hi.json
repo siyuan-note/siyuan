@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "स्किल स्थानीय कमांड अनुमति दें",
+	"aiClaudeCodeAllowSkillBinsTip": "सक्षम होने पर, सक्षम स्किल्स द्वारा घोषित स्थानीय कमांड लाइन टूल, किसी भी टूल अनुमति में claude कमांड लाइन के Bash टूल से चल सकते हैं",
 	"aiClaudeCodeEnv": "CLI पर्यावरण चर",
 	"aiClaudeCodeEnvTip": "claude कमांड लाइन के पर्यावरण में जोड़े जाते हैं; मान ${VAR} से सिस्टम पर्यावरण चर या SiYuan गुप्त मान पढ़ सकते हैं",
 	"aiClaudeCodeEnvInvalid": "पर्यावरण चर JSON अमान्य है",

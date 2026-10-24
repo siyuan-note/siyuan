@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Povoliť lokálne príkazy zručností",
+	"aiClaudeCodeAllowSkillBinsTip": "Pri zapnutí možno lokálne nástroje príkazového riadku deklarované zapnutými zručnosťami spúšťať nástrojom Bash príkazového riadka claude pri akomkoľvek povolení nástrojov",
 	"aiClaudeCodeEnv": "Premenné prostredia CLI",
 	"aiClaudeCodeEnvTip": "Vstrekuje sa do prostredia príkazového riadka claude; hodnoty podporujú ${VAR} na čítanie systémovej premennej prostredia alebo tajomstva SiYuan",
 	"aiClaudeCodeEnvInvalid": "Neplatný JSON premenných prostredia",

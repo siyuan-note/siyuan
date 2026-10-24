@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Autoriser les commandes locales des compétences",
+	"aiClaudeCodeAllowSkillBinsTip": "Lorsqu'il est activé, les outils en ligne de commande locaux déclarés par les compétences activées peuvent s'exécuter via l'outil Bash de la ligne de commande claude, quel que soit le mode d'autorisation des outils",
 	"aiClaudeCodeEnv": "Variables d’environnement de la CLI",
 	"aiClaudeCodeEnvTip": "Injecté dans l’environnement de la ligne de commande claude ; les valeurs acceptent ${VAR} pour lire une variable d’environnement système ou un secret SiYuan",
 	"aiClaudeCodeEnvInvalid": "JSON des variables d’environnement non valide",

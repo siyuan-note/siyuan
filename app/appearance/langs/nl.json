@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "Lokale vaardigheidsopdrachten toestaan",
+	"aiClaudeCodeAllowSkillBinsTip": "Indien ingeschakeld, kunnen lokale opdrachtregeltools die door ingeschakelde vaardigheden zijn gedeclareerd worden uitgevoerd via de Bash-tool van de claude-opdrachtregel bij elke toolmachtiging",
 	"aiClaudeCodeEnv": "Omgevingsvariabelen van de CLI",
 	"aiClaudeCodeEnvTip": "Wordt in de omgeving van de claude-opdrachtregel geplaatst; waarden ondersteunen ${VAR} om een systeemomgevingsvariabele of een SiYuan-geheim te lezen",
 	"aiClaudeCodeEnvInvalid": "Ongeldige JSON voor omgevingsvariabelen",

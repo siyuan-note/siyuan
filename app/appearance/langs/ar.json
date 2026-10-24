@@ -1,4 +1,6 @@
 {
+	"aiClaudeCodeAllowSkillBins": "السماح بأوامر المهارات المحلية",
+	"aiClaudeCodeAllowSkillBinsTip": "عند التمكين، يمكن للأدوات المحلية لسطر الأوامر التي تعلن عنها المهارات الممكّنة التنفيذ عبر أداة Bash في سطر أوامر claude بأي صلاحية أدوات",
 	"aiClaudeCodeEnv": "متغيرات بيئة CLI",
 	"aiClaudeCodeEnvTip": "تُضاف إلى بيئة سطر أوامر claude؛ تدعم القيم ${VAR} لقراءة متغيّر بيئة النظام أو سر SiYuan",
 	"aiClaudeCodeEnvInvalid": "بنية JSON لمتغيرات البيئة غير صحيحة",

@@ -489,6 +489,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <option value="full"${draft.claudeCode?.permissionMode === "full" ? " selected" : ""}>${window.siyuan.languages.aiClaudeCodePermissionFull}</option>
                 </select>
             </label>
+            <label class="fn__flex b3-label config-item fn__none" data-type="claudeCodeAllowSkillBins">
+                ${genConfigItemMainHtml(window.siyuan.languages.aiClaudeCodeAllowSkillBins, window.siyuan.languages.aiClaudeCodeAllowSkillBinsTip)}
+                <span class="fn__space"></span>
+                <input class="b3-switch fn__flex-center fn__size200" data-provider-field="claudeCodeAllowSkillBins" type="checkbox" aria-label="${window.siyuan.languages.aiClaudeCodeAllowSkillBins}"${draft.claudeCode?.allowSkillBins ? " checked" : ""}>
+            </label>
             <div class="b3-label config-item fn__none" data-type="claudeCodeEnv">
                 ${genConfigItemMainHtml(window.siyuan.languages.aiClaudeCodeEnv, window.siyuan.languages.aiClaudeCodeEnvTip)}
                 <div class="fn__hr"></div>
@@ -629,7 +634,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const updateClaudeCodeFields = () => {
         const claudeCode = isClaudeCodeProtocol(draft.protocol);
         view.querySelectorAll<HTMLElement>(
-            "[data-type='claudeCodeCLIPath'], [data-type='claudeCodePermission'], [data-type='claudeCodeEnv']",
+            "[data-type='claudeCodeCLIPath'], [data-type='claudeCodePermission'], [data-type='claudeCodeAllowSkillBins'], [data-type='claudeCodeEnv']",
         ).forEach((element) => element.classList.toggle("fn__none", !claudeCode));
         view.querySelector<HTMLElement>("[data-type='providerBaseURL']")?.classList.toggle("fn__none", claudeCode);
         view.querySelector<HTMLElement>("[data-type='providerApiKey']")?.classList.toggle("fn__none", claudeCode);
@@ -890,15 +895,22 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         leaveDetail();
     };
 
-    // 命令行路径与工具权限存放于嵌套配置，单独处理
+    // 命令行路径、工具权限与技能本地命令开关存放于嵌套配置，单独处理
     const applyClaudeCodeField = (target: HTMLInputElement) => {
         const providerField = target.dataset.providerField;
-        if (providerField !== "claudeCodeCLIPath" && providerField !== "claudeCodePermission") {
+        if (providerField !== "claudeCodeCLIPath" && providerField !== "claudeCodePermission" &&
+            providerField !== "claudeCodeAllowSkillBins") {
             return false;
         }
         draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
         if (providerField === "claudeCodeCLIPath") {
             draft.claudeCode.cliPath = target.value;
+        } else if (providerField === "claudeCodeAllowSkillBins") {
+            if (target.checked) {
+                draft.claudeCode.allowSkillBins = true;
+            } else {
+                delete draft.claudeCode.allowSkillBins;
+            }
         } else {
             draft.claudeCode.permissionMode = target.value;
         }

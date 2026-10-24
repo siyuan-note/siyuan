@@ -25,18 +25,20 @@ import (
 
 func TestDuplicateDocHPath(t *testing.T) {
 	const helper = "SIYUAN_TEST_DUPLICATE_DOC_HPATH"
-	if os.Getenv(helper) != "1" {
+	workspace := os.Getenv(helper)
+	if workspace == "" {
 		// 隔离数据库、密钥和异步任务，使用临时工作空间验证路径寻址。
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
 		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestDuplicateDocHPath$", "-test.v")
-		command.Env = append(os.Environ(), helper+"=1")
+		// 子进程退出后由父测试删除工作空间，避免临时目录清理与后台写入竞争。
+		command.Env = append(os.Environ(), helper+"="+t.TempDir())
 		if output, err := command.CombinedOutput(); err != nil {
 			t.Fatalf("duplicate hpath subprocess failed: %v\n%s", err, output)
 		}
 		return
 	}
-	prepareHPathRefreshTest(t)
+	prepareHPathRefreshTestAt(t, workspace)
 	Conf.Flashcard.Store(conf.NewFlashcard())
 	const password = "duplicate-hpath-test-password"
 	if err := EnableEncryptedNotebook(password); err != nil {

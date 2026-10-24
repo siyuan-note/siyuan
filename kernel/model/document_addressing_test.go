@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -447,6 +448,54 @@ func TestDocumentAddressingImportRemapsOnlyWholeNotebookFloor(t *testing.T) {
 	}
 }
 
+func TestDocumentAddressingImportFloorIdentity(t *testing.T) {
+	oldData, oldConfDir := util.DataDir, util.ConfDir
+	util.DataDir, util.ConfDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() { util.DataDir, util.ConfDir = oldData, oldConfDir })
+	const sourceID, otherID = "20260101120000-abcdefg", "20260101120001-hijklmn"
+	valid := `{"version":1,"notebook":"` + sourceID + `","minimumMode":2}`
+	for _, test := range []struct {
+		name, directory, boxDocID, floor string
+		wantErr                          error
+	}{
+		{name: "named export", directory: "Named notebook", floor: valid},
+		{name: "ID directory", directory: sourceID, floor: valid},
+		{name: "directory identity conflict", directory: otherID, floor: valid, wantErr: documentaddressing.ErrInvalid},
+		{name: "box document identity conflict", directory: "Named notebook", boxDocID: otherID, floor: valid, wantErr: documentaddressing.ErrInvalid},
+		{name: "invalid JSON", directory: "Named notebook", floor: `{`, wantErr: documentaddressing.ErrInvalid},
+		{name: "invalid identity", directory: "Named notebook", floor: strings.ReplaceAll(valid, sourceID, "invalid"), wantErr: documentaddressing.ErrInvalid},
+		{name: "unknown format", directory: "Named notebook", floor: strings.Replace(valid, `"version":1`, `"version":2`, 1), wantErr: documentaddressing.ErrInvalid},
+		{name: "unsupported mode", directory: "Named notebook", floor: strings.Replace(valid, `"minimumMode":2`, `"minimumMode":3`, 1), wantErr: documentaddressing.ErrUnsupported},
+		{name: "duplicate identity", directory: "Named notebook", floor: strings.Replace(valid, `"version":1`, `"version":1,"notebook":"`+otherID+`"`, 1), wantErr: documentaddressing.ErrInvalid},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			root := filepath.Join(t.TempDir(), test.directory)
+			if err := os.MkdirAll(filepath.Join(root, ".siyuan"), 0755); err != nil {
+				t.Fatal(err)
+			}
+			floorPath := filepath.Join(root, documentaddressing.FloorPath)
+			if err := os.WriteFile(floorPath, []byte(test.floor), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if test.boxDocID != "" {
+				data, err := json.Marshal(boxDocMeta{Spec: boxDocMetaSpec, BoxDocID: test.boxDocID})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = os.WriteFile(filepath.Join(root, ".siyuan", boxDocMetaName), data, 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := checkImportedDocumentAddressing(root); !errors.Is(err, test.wantErr) {
+				t.Fatalf("import identity: got %v, want %v", err, test.wantErr)
+			}
+			if data, err := os.ReadFile(floorPath); err != nil || string(data) != test.floor {
+				t.Fatalf("source metadata changed: %q, %v", data, err)
+			}
+		})
+	}
+}
+
 func TestDocumentAddressingDataImportRejectsBeforeAnyWrite(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	oldConfDir := util.ConfDir
@@ -502,9 +551,25 @@ func TestDocumentAddressingNativeExportPreservesFloor(t *testing.T) {
 	if err := os.WriteFile(name, source, 0644); err != nil {
 		t.Fatal(err)
 	}
-	archive := openExportArchive(t, ExportNotebookSY(boxID))
-	data := readArchiveFile(t, archive, boxID+"/"+documentaddressing.FloorPath)
-	if data != string(source) {
-		t.Fatal("export lost capability floor")
+	for _, name := range []string{boxID, "Named-notebook"} {
+		box := &Box{ID: boxID}
+		boxConf := box.GetConf()
+		boxConf.Name = name
+		if err := box.SaveConf(boxConf); err != nil {
+			t.Fatal(err)
+		}
+		exported := ExportNotebookSY(boxID)
+		archive := openExportArchive(t, exported)
+		data := readArchiveFile(t, archive, name+"/"+documentaddressing.FloorPath)
+		if data != string(source) {
+			t.Fatal("export lost capability floor")
+		}
+		archivePath, err := exportedFilePath(exported)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = inspectSYNotebookArchive(archivePath); err != nil {
+			t.Fatalf("exported notebook %q cannot be imported: %v", name, err)
+		}
 	}
 }

@@ -179,6 +179,9 @@ if (process.versions.electron && process.type === "browser") {
                 fs.writeFileSync(path.join(process.env.SIYUAN_LOADING_SCREENSHOTS, `${name}.png`), (await win.webContents.capturePage()).toPNG());
             });
             await win.loadURL("about:blank");
+            await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+            });
             await win.webContents.executeJavaScript(`(${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(entries)}, ${JSON.stringify(themes)})`);
             console.log("Verified loading themes, customization, accessibility, editor timing, mobile refresh and marketplace failure");
             win.destroy();

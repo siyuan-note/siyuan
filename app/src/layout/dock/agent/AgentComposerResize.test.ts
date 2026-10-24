@@ -24,6 +24,9 @@ const cases = async (source: string, css: string, mobile: boolean) => {
         '<div class="protyle-content"><div class="protyle-wysiwyg" spellcheck="false"></div></div></div>' +
         '<div class="agent-chat__buttons"><button class="b3-button">Send</button></div></div></div>';
     const panel = document.querySelector<HTMLElement>(".sy__agentChat");
+    // 原生窗口可能受运行器屏幕尺寸限制，面板必须完全位于实际视口内。
+    const panelHeight = Math.min(760, window.innerHeight);
+    panel.style.height = `${panelHeight}px`;
     const composer = panel.querySelector<HTMLElement>(".agent-chat__composer-host");
     const content = composer.querySelector<HTMLElement>(".protyle-content");
     const editor = composer.querySelector<HTMLElement>(".protyle-wysiwyg");
@@ -85,7 +88,7 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     key("ArrowDown");
     check.equal(composer.style.maxHeight, "240px");
     key("End");
-    check.equal(composer.style.maxHeight, "600px", `panel ${panel.clientHeight} ${getComputedStyle(panel).display} ${getComputedStyle(panel).minHeight}`);
+    check.equal(composer.style.maxHeight, `${panelHeight - 160}px`, "End uses the available panel height");
     await tick();
     check.ok(panel.querySelector(".agent-chat__buttons").getBoundingClientRect().bottom <= panel.getBoundingClientRect().bottom);
     check.ok(panel.querySelector(".agent-chat__messages-wrap").clientHeight > 30);
@@ -182,7 +185,7 @@ test("composer grows, resizes and preserves focus, handle visibility and scroll 
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 1000, height: 900,
-        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
     win.webContents.debugger.attach("1.3");
     ipcMain.handle("composer-input", (_event, method, params) => win.webContents.debugger.sendCommand(method, params));
     ipcMain.handle("composer-drag", async (_event, {x, y, dy, touch, escape}) => {

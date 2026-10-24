@@ -243,6 +243,7 @@ jobs:
           SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models
           SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so
       - name: Test default structured title migration
+        id: test_default_structured_title_migration
         continue-on-error: true
         run: go test -tags "fts5 sqlcipher" ./documentaddressing ./filesys ./model ./api ./cli/cmd -run '^TestStructuredTitles' -count=1
         working-directory: kernel
@@ -329,6 +330,7 @@ jobs:
           CC: gcc
 
       - name: Test Windows default structured title migration
+        id: test_windows_default_structured_title_migration
         continue-on-error: true
         shell: msys2 {0}
         run: go test -tags "fts5 sqlcipher" ./documentaddressing ./filesys ./model ./api ./cli/cmd -run '^TestStructuredTitles' -count=1

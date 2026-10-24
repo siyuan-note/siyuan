@@ -186,6 +186,22 @@ func checkImportedDocumentAddressing(directory string) error {
 		}
 		boxID = meta.BoxDocID
 	}
+	if boxID == "" {
+		// 按名称导出的笔记本可能没有笔记本文档；从寻址记录取得身份后仍校验完整源记录。
+		data, err = filelock.ReadFile(filepath.Join(directory, documentaddressing.FloorPath))
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+		if err == nil {
+			var record struct {
+				Notebook string `json:"notebook"`
+			}
+			if json.Unmarshal(data, &record) != nil || !ast.IsNodeIDPattern(record.Notebook) {
+				return documentaddressing.ErrInvalid
+			}
+			boxID = record.Notebook
+		}
+	}
 	return documentaddressing.CheckImport(util.DataDir, util.ConfDir, boxID, directory)
 }
 

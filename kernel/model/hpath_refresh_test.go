@@ -299,7 +299,12 @@ func TestDocumentHPathRefresh(t *testing.T) {
 }
 
 func prepareHPathRefreshTest(t *testing.T) {
-	root := t.TempDir()
+	t.Helper()
+	prepareHPathRefreshTestAt(t, t.TempDir())
+}
+
+func prepareHPathRefreshTestAt(t *testing.T, root string) {
+	t.Helper()
 	util.WorkspaceDir = root
 	util.DataDir, util.TempDir, util.ConfDir = filepath.Join(root, "data"), filepath.Join(root, "temp"), filepath.Join(root, "conf")
 	util.HistoryDir, util.QueueDir = filepath.Join(root, "history"), filepath.Join(util.TempDir, "queue")

@@ -219,13 +219,17 @@ if (process.versions.electron && process.type === "browser") {
                 {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)", gate: "state", document: "timeout"},
             ]) {
                 win = new BrowserWindow({show: false, backgroundColor: expected.hex, width: 640, height: 480,
-                    webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+                    webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
+                win.webContents.debugger.attach("1.3");
                 assert.equal(win.getBackgroundColor(), expected.hex.toUpperCase());
                 const url = new URL(`http://127.0.0.1:${server.address().port}/stage/build/app/window.html`);
                 url.searchParams.set("windowThemeMode", expected.mode);
                 url.searchParams.set("windowBackground", expected.hex);
                 url.searchParams.set("windowForeground", "#abcdef");
                 await win.loadURL(url.href);
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                    features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+                });
                 await win.webContents.executeJavaScript(`(${runRendererCase.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(expected)})`);
                 const first = await win.webContents.capturePage();
                 const bitmap = first.toBitmap();

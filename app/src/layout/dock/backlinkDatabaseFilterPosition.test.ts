@@ -23,6 +23,8 @@ const browserCases = async (sources: string[], css: string) => {
     toolbar.innerHTML = '<button style="position:fixed;left:1420px;top:430px;width:24px;height:24px">Filter</button>';
     document.body.append(toolbar);
     const target = toolbar.firstElementChild as HTMLElement;
+    // 保留右侧空间，避免运行器屏幕限制原生窗口后把锚点放在视口外。
+    target.style.left = `${window.innerWidth - 380}px`;
     const originalRect = target.getBoundingClientRect();
     type Selection = {avID: string, filters: IAVFilter[]};
     let finishFields: () => void;
@@ -122,7 +124,8 @@ test("backlink database filters stay anchored during source refresh, field loadi
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, width: 1800, height: 760, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    const win = new BrowserWindow({show: false, width: 1800, height: 760,
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(expression)}));

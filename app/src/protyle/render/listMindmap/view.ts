@@ -368,9 +368,22 @@ export class ListMindmapView {
                 }
             }
         });
-        this.resizeObserver = new ResizeObserver(() => {
+        this.resizeObserver = new ResizeObserver(entries => {
             this.updateToolbarLayout();
-            this.refreshLayout();
+            // 展开会让隐藏节点恢复尺寸；布局已测量这些节点，不应被同一尺寸的通知中断动画。
+            const resized = !this.stopFoldAnimation || entries.some(({target}) => {
+                if (target === this.viewport) {
+                    return true;
+                }
+                const element = target as HTMLElement;
+                const position = this.positions.get(element.dataset.mindmapId) ||
+                    this.summaryPositions.get(element.dataset.summaryId);
+                return !element.hidden && position &&
+                    (element.offsetWidth !== position.width || element.offsetHeight !== position.height);
+            });
+            if (resized) {
+                this.refreshLayout();
+            }
             this.positionInspectorPanel();
         });
         this.resizeObserver.observe(this.viewport);

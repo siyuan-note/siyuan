@@ -3148,6 +3148,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(foldedButton.querySelector("span").textContent, String(model.nodes.size - 1));
     check.equal(getComputedStyle(foldedButton).visibility, "visible");
     foldedButton.click();
+    await settle();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        check.ok(readonly.stopFoldAnimation,
+            "showing folded children must not let size observers end the expansion early");
+        check.ok(Number(nodeElement(alpha).style.opacity) > 0 && Number(nodeElement(alpha).style.opacity) < 1,
+            "newly visible children retain an intermediate expansion frame after size notifications");
+    }
     await settleFold(readonly);
     check.equal(nodeElement(alpha).hidden, false);
     const afterExpand = nodeElement(model.root.id).getBoundingClientRect();
@@ -3161,6 +3168,19 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(nodeElement(alpha).hidden, false, "rapid fold reversals finish in the latest requested state");
     check.equal(nodeElement(alpha).style.opacity, "");
     check.equal(nodeElement(alpha).inert, false);
+    foldedButton.click();
+    await settleFold(readonly);
+    foldedButton.click();
+    await settle();
+    const measuredWidth = nodeElement(alpha).offsetWidth;
+    nodeElement(alpha).style.minWidth = `${measuredWidth + 40}px`;
+    await settle();
+    check.equal(readonly.stopFoldAnimation, undefined,
+        "a genuine node size change still ends the transition and lays out its new dimensions");
+    check.equal(readonly.positions.get(alpha).width, nodeElement(alpha).offsetWidth);
+    check.ok(readonly.positions.get(alpha).width > measuredWidth);
+    nodeElement(alpha).style.minWidth = "";
+    await settle();
     const levelSelect = host.querySelector<HTMLSelectElement>(".mindmap-view__level-select");
     check.deepEqual(Array.from(levelSelect.options).map(option => option.value),
         ["", "expandAll", "foldAll", "1", "2", "3", "4", "5", "6"]);

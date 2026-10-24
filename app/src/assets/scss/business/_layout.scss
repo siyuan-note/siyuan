@@ -435,6 +435,18 @@
   overscroll-behavior-y: contain;
   scrollbar-width: none;
 
+  &--float {
+    position: fixed;
+    left: 0;
+    height: auto;
+    background-color: var(--b3-body-background);
+
+    &#dockRight {
+      left: auto;
+      right: 0;
+    }
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }

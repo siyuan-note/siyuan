@@ -49,6 +49,18 @@ describe("dock padding", () => {
         loadBarVisibility(layout).adjustDockPadding();
         assert.deepEqual(style, {marginLeft: "", marginRight: "", marginBottom: ""});
     });
+
+    it("preserves hidden-dock padding while a temporary dock bar overlays the editor", () => {
+        const style = {marginLeft: "", marginRight: "", marginBottom: ""};
+        const floatingBar = {classList: {contains: (name: string) => name === "dock--float"}};
+        const layout = {
+            layout: {children: [{element: {style}}]},
+            leftDock: {elements: [{parentElement: floatingBar}]},
+            rightDock: {elements: [{parentElement: floatingBar}]},
+        };
+        loadBarVisibility(layout).adjustDockPadding();
+        assert.deepEqual(style, {marginLeft: "var(--b3-layout-space)", marginRight: "var(--b3-layout-space)", marginBottom: ""});
+    });
 });
 
 describe("dock bar visibility", () => {
@@ -65,7 +77,7 @@ describe("dock bar visibility", () => {
         assert.equal(shouldShowDockBar(true, false), false);
     });
 
-    it("temporarily shows a non-empty dock bar for an expanded floating panel", () => {
+    it("temporarily shows non-empty dock bars for a floating panel or edge hover", () => {
         assert.equal(shouldShowDockBar(true, true, true), true);
         assert.equal(shouldShowDockBar(true, false, true), false);
         assert.equal(shouldShowDockBar(false, true, true), true);

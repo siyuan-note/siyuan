@@ -1526,7 +1526,14 @@ body.mobile-topbar--merged {
     }
 
     &-text {
+      flex: 1;
+      min-width: 0;
       margin-left: 6px;
+
+      .b3-list-item__first {
+        display: flex;
+        align-items: center;
+      }
     }
 
     &-description {

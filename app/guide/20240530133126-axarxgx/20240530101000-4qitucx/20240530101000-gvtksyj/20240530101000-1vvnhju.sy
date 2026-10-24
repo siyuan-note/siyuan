@@ -7,7 +7,7 @@
 		"id": "20240530101000-1vvnhju",
 		"title": "埋め込みコンテンツブロック",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-1ws77tk",
 				"id": "20240530101000-c8571y7",
-				"updated": "20240530101000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -32,12 +32,41 @@
 			"Properties": {
 				"ID": "20240530101000-f1ikbpj",
 				"id": "20240530101000-s50yfpn",
-				"updated": "20240530101000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "埋め込みコンテンツブロックは、主にコンテンツブロックを集約するために使用します。SQL スクリプトを "
+					"Data": "埋め込みブロックは、クエリで選んだブロックを現在の位置に表示します。タスクやテーマ別の内容をまとめたり、複数の場所にあるノートを一緒に確認したりするときに使えます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-e6xse5k",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-e6xse5k",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL 埋め込みの挿入"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-82wq5b2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-82wq5b2",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL クエリを "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -46,7 +75,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ と "
+					"Data": " と "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -55,7 +84,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で囲み、ワンライナーで "
+					"Data": " で囲み、独立した行に記述します。例は "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -64,27 +93,33 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ のように記述します。フィールドの詳細は、"
+					"Data": " です。利用できるテーブルとフィールドは、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20240530101000-dgjyf1m",
+					"TextMarkBlockRefID": "20240530101000-58z6rjh",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "こちら"
+					"TextMarkTextContent": "SQL インデックステーブル"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "を参照してください。"
-				},
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-ts7hngu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-ts7hngu",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "コンテンツブロック/埋め込み"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
 				}
 			]
 		},
@@ -625,7 +660,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202513-yhlrbpu",
-				"updated": "20261016202856"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1004,7 +1039,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202513-x2r5w1f",
-				"updated": "20261016202856"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1060,7 +1095,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202513-wlx9c05",
-				"updated": "20260612202513"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1073,7 +1108,48 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "// 同期的に返す\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// 非同期的に返す（Promiseは自動的にawaitされる）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"TODO\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
+					"Data": "//!js\n// 同期的に返す\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-61bwy1b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024162311-61bwy1b",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Promise を返すこともできます。次のコードは、上の同期処理の例とは別の選択肢として使ってください。"
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-7r7dweu",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261024162311-7r7dweu",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "//!js\n// 非同期的に返す（Promiseは自動的にawaitされる）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"TODO\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

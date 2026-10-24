@@ -7,7 +7,7 @@
 		"id": "20230429115206-ob8nl8t",
 		"title": "術語表",
 		"type": "doc",
-		"updated": "20260930224728"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115316-48ryx5o",
-				"updated": "20230429115316"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115316-846m72w",
-				"updated": "20230429115316"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，涉及到了一些相對複雜的術語，這些術語可能會讓人感到困惑。在本章節中，我們會逐一對這些術語進行解釋，希望能夠幫助你更好地理解和使用思源。"
+					"Data": "本章解釋指南中常見的術語，並說明它們在思源中的具體含義。"
 				}
 			]
 		},
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115345-lqayfnx",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -83,7 +83,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115345-gdsi5kp",
-				"updated": "20230429115345"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -97,7 +97,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20230429115345-9t42vsu",
-				"updated": "20230429115345"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -109,12 +109,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20230429115345-sudqmid",
-						"updated": "20230429115345"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "通常情況下，導覽路徑是應用程序導航中的一種輔助元素，通常位於頂部或頁面頂部下方的水平序列中。它顯示了用戶當前所在位置的路徑，在用戶導航過程中提供了便利的記憶和方向感。導覽路徑可以讓用戶更容易地瀏覽網站結構、快速返回到前一個頁面或更高級別的頁面，並減少無效點擊和迷路的可能性。它可以作為用戶體驗設計的一部分，提高應用的可用性和易用性。"
+							"Data": "麵包屑是顯示目前位置及其上層結構的導覽路徑，可以用於返回上層內容。"
 						}
 					]
 				}
@@ -140,7 +140,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115345-c4656ol",
-				"updated": "20230429115345"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -154,7 +154,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20230429115345-ywgrvsd",
-				"updated": "20230429115345"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -166,12 +166,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20230429115345-rz1ooou",
-						"updated": "20230429115345"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "通常情況下，錨文字是指在超連結中被點擊的文字部分，它通常是藍色的。錨文字可以與超連結的 URL 地址相連接，當用戶點擊錨文字時，就會自動跳轉到相應的網頁或文件。錨文字可以是任何文字或短語，但通常應與所連結的內容相關聯，一般是目標跳轉內容的標題。"
+							"Data": "錨文字是連結中顯示給讀者的文字，用於說明連結所指向的內容。"
 						}
 					]
 				}
@@ -380,12 +380,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111457-7uftgv5",
-				"updated": "20260614111457"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "區塊參照"
+					"Data": "區塊引用"
 				}
 			]
 		},
@@ -422,12 +422,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111457-el5qnm3",
-				"updated": "20260730184353"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，區塊參照是透過 "
+					"Data": "在思源中，區塊引用是透過 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -436,7 +436,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 觸發的指向另一個內容區塊的連結，支援靜態錨文字和動態錨文字兩種方式。點擊區塊參照可跳轉到被參照的區塊，懸浮可預覽。"
+					"Data": "​ 觸發的指向另一個內容區塊的連結，支援靜態錨文字和動態錨文字兩種方式。點擊區塊引用可跳轉到被參照的區塊，懸浮可預覽。"
 				}
 			]
 		},
@@ -446,7 +446,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111457-nf8wq3v",
-				"updated": "20260614111457"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -488,12 +488,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111457-rizqw9m",
-				"updated": "20260730184353"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，反鏈面板展示了所有參照了當前區塊的區塊。反鏈分為兩部分：連結（透過區塊參照直接關聯）和提及（透過文字匹配的潛在關聯）。"
+					"Data": "在思源中，反鏈面板展示了所有參照了當前區塊的區塊。反鏈分為兩部分：連結（透過區塊引用直接關聯）和提及（透過文字匹配的潛在關聯）。"
 				}
 			]
 		},
@@ -503,7 +503,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111457-wh2unuw",
-				"updated": "20260614111457"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -545,12 +545,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111457-6pg0dna",
-				"updated": "20260730184353"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，提及類似反鏈中的連結部分，但不是透過區塊參照建立的，而是透過搜尋內容區塊名稱、別名和參照錨文字來自動匹配的文字內容。提及可一鍵轉換為區塊參照。"
+					"Data": "在思源中，提及類似反鏈中的連結部分，但不是透過區塊引用建立的，而是透過搜尋內容區塊名稱、別名和參照錨文字來自動匹配的文字內容。提及可一鍵轉換為區塊引用。"
 				}
 			]
 		},
@@ -560,12 +560,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111457-xqubcvr",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "虛擬參照"
+					"Data": "虛擬引用"
 				}
 			]
 		},
@@ -574,7 +574,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111457-8yf6tx8",
-				"updated": "20260614111457"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -586,12 +586,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111457-javkesq",
-						"updated": "20260730184353"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "虛擬參照是一種自動發現潛在參照關係的技術，無需使用者手動建立即可在文字中標識可能存在關聯的內容區塊。"
+							"Data": "虛擬引用是一種自動發現潛在參照關係的技術，無需使用者手動建立即可在文字中標識可能存在關聯的內容區塊。"
 						}
 					]
 				}
@@ -602,12 +602,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111457-xntm6ad",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，虛擬參照基於內容區塊的命名、別名和錨文字進行自動探測，在編輯器中以虛線底線標識。滑鼠懸浮可預覽對應的內容區塊，點擊可轉換為正式的區塊參照。可在 "
+					"Data": "在思源中，虛擬引用基於內容區塊的命名、別名和錨文字進行自動探測，在編輯器中以虛線底線標識。滑鼠懸浮可預覽對應的內容區塊，點擊可轉換為正式的區塊引用。可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -616,7 +616,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -625,7 +625,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -634,7 +634,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -643,7 +643,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中開啟或關閉。"
+					"Data": " 中開啟或關閉。"
 				}
 			]
 		},
@@ -824,7 +824,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115527-imhpeay",
-				"updated": "20260930224728"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -1114,7 +1114,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115527-jjq4vik",
-				"updated": "20260730184353"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -1128,12 +1128,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115527-1ghs629",
-				"updated": "20260730184353"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "出現在區塊前面的感測器，面板中出現的區塊標在大部分情況下都支持通過鼠標懸浮打開預覽浮窗，比如大綱面板、反連面板中的區塊標。"
+					"Data": "出現在區塊前面的圖示，面板中出現的區塊標在大部分情況下都支持通過鼠標懸浮打開預覽浮窗，比如大綱面板、反連面板中的區塊標。"
 				}
 			]
 		},
@@ -1175,7 +1175,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111508-hyrjbqs",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1189,7 +1189,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111508-fegr1zs",
-				"updated": "20260614111508"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1201,12 +1201,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111508-qr2z8cv",
-						"updated": "20260614111508"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "集市（Bazaar）源自波斯語，指集中進行商品交易的場所。"
+							"Data": "集市是集中瀏覽和管理社群擴充的地方。"
 						}
 					]
 				}
@@ -1346,7 +1346,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111508-gqxf0f5",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1388,17 +1388,17 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111508-3gu2eju",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，透過 "
+					"Data": "預設透過 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Alt"
 				},
 				{
 					"Type": "NodeText",
@@ -1406,7 +1406,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Shift"
 				},
 				{
@@ -1415,12 +1415,39 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 呼叫命令面板，可快速執行開啟面板、切換功能、導航文件等操作，無需透過選單逐級尋找。"
+					"Data": "（macOS 為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Option"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）開啟命令面板，輸入關鍵字尋找並執行命令。可用命令取決於目前介面和焦點位置。"
 				}
 			]
 		},
@@ -1430,7 +1457,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115527-roo52g3",
-				"updated": "20260614111516"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1485,7 +1512,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111516-8op2j24",
-				"updated": "20260614111516"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1499,7 +1526,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111516-ms7zh4q",
-				"updated": "20260614111516"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1511,12 +1538,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111516-guzmn5l",
-						"updated": "20260614111516"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "內核是作業系統的核心元件，負責管理系統的進程、記憶體、裝置驅動程式、檔案和網路系統等，決定著系統的效能和穩定性。"
+							"Data": "本指南中的「內核」指思源負責處理資料的後端程式。"
 						}
 					]
 				}

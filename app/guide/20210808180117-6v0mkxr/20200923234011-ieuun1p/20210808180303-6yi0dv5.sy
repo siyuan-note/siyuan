@@ -7,7 +7,7 @@
 		"id": "20210808180303-6yi0dv5",
 		"title": "Content Block",
 		"type": "doc",
-		"updated": "20240508004133"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -49,7 +49,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004133-qii4jdf",
-				"updated": "20240508004133"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -57,7 +57,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20200924101256-f8b1sbi",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Ref Content Block"
+					"TextMarkTextContent": "Reference content blocks"
 				}
 			]
 		},
@@ -66,7 +66,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004133-5dhbqvk",
-				"updated": "20240508004133"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20200924101200-gss5vee",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Navigate in the Content Block"
+					"TextMarkTextContent": "Navigate between content blocks"
 				}
 			]
 		},
@@ -100,7 +100,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004133-uqr0mi8",
-				"updated": "20240508004133"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -108,7 +108,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20201117112518-dott91x",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Embed Content Block"
+					"TextMarkTextContent": "Embed content blocks"
 				}
 			]
 		},
@@ -117,7 +117,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004133-vmv4jyo",
-				"updated": "20240508004133"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -125,7 +125,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20210613191509-cbkxcbz",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Content Block Attribute"
+					"TextMarkTextContent": "Content block attributes"
 				}
 			]
 		}

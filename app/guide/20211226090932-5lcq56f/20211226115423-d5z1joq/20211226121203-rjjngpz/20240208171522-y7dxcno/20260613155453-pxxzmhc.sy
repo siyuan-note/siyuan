@@ -6,7 +6,7 @@
 		"id": "20260613155453-pxxzmhc",
 		"title": "字段類型",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-5mfqt52",
-				"updated": "20261016191345"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -45,7 +45,6 @@
 		{
 			"ID": "20260613155453-19iw9k8",
 			"Type": "NodeTable",
-			"Data": "| 字段類型 | 適用場景 | 可排序 | 可過濾 | 表格計算 | 特殊範本後綴 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 標題、描述、任意文字 | √ | √ | √ | — |\n| 數字 | 金額、數量、評分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、創建日 | √ | √ | √ | `_end` |\n| 單選 | 狀態、分類、優先級 | √ | √ | √ | — |\n| 多選 | 標籤、多分類 | √ | √ | √ | `_str` |\n| 網址 | 外部連結、參考來源 | √ | √ | √ | — |\n| 郵箱 | 聯繫人郵箱 | √ | √ | √ | — |\n| 電話 | 聯繫人電話 | √ | √ | √ | — |\n| 覈取方塊 | 是否完成、是否啟用 | √ | √ | √ | — |\n| 主鍵（繫結區塊） | 記錄的唯一標識，可繫結內容區塊 | √ | √ | √ | `_created` |\n| 資源 | 附件、圖片、檔案 | √ | √ | √ | — |\n| 關聯 | 跨資料庫關聯記錄 | √ | √ | √ | — |\n| 彙總 | 基於關聯字段的統計計算 | √ | √ | √ | — |\n| 範本 | 依範本計算同一條目的欄位值 | √ | √ | √ | — |\n| 創建時間 | 記錄創建時間（自動） | √ | √ | √ | — |\n| 更新時間 | 記錄更新時間（自動） | √ | √ | √ | — |\n| 行號 | 目前視圖中的行位置 | × | × | × | — |\n| 位置 | 地點名稱和經緯度 | √ | √ | √ | — |",
 			"TableAligns": [
 				0,
 				0,
@@ -56,7 +55,7 @@
 			],
 			"Properties": {
 				"id": "20260613155453-19iw9k8",
-				"updated": "20261016191345"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -753,7 +752,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "記錄的唯一標識，可繫結內容區塊"
+									"Data": "條目的主體內容，可綁定內容區塊"
 								}
 							]
 						},
@@ -1669,7 +1668,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-vtftazl",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1708,7 +1707,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-hq9a0up",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1724,7 +1723,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-x483xja",
-						"updated": "20260613155453"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1732,17 +1731,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-5pzvpxu",
-								"updated": "20260613155453"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "配置項"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：創建時可勾選「多行」切換爲多行文本框"
+									"Data": "設定項目：在欄位設定中調整換行顯示，以便檢視較長文字"
 								}
 							]
 						}
@@ -1761,7 +1755,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-9c1296c",
-						"updated": "20260809232000"
+						"updated": "20261024164212"
 					},
 					"Children": [
 						{
@@ -1769,21 +1763,16 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-zgs0m2q",
-								"updated": "20260809232000"
+								"updated": "20261024164212"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "編輯方式"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：在儲存格中直接輸入；多行模式下 "
+									"Data": "編輯方式：在儲存格中輸入文字，使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "Shift"
 								},
 								{
@@ -1792,8 +1781,8 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "回車"
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -1885,7 +1874,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-g18hoxk",
-				"updated": "20260613155453"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1924,7 +1913,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-r57ai6w",
-				"updated": "20260613155453"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1940,7 +1929,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-6mcyvep",
-						"updated": "20260613155453"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1948,17 +1937,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-zqqgp8k",
-								"updated": "20260613155453"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "配置項"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：創建時可選擇數字格式——整數、小數、百分比、貨幣"
+									"Data": "設定項目：在欄位設定中選擇數字顯示格式，例如一般數字、百分比或貨幣"
 								}
 							]
 						}
@@ -3450,7 +3434,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-hihxn09",
-				"updated": "20260730184353"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3468,12 +3452,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-llv32f4",
-				"updated": "20260730184353"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "資料庫每條記錄的唯一標識。在內容區塊類型的記錄中，主鍵繫結到對應的內容區塊，從而實現結構化資料與非結構化內容的連接。每張表必須且僅有一個主鍵字段。"
+					"Data": "主鍵欄位顯示條目的主體內容，也可綁定一個內容區塊，將結構化欄位與筆記正文連接起來。每個資料庫只有一個主鍵欄位，但其顯示文字可以重複，不能把顯示文字當作唯一 ID。"
 				}
 			]
 		},
@@ -3489,7 +3473,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-aww9utd",
-				"updated": "20260613155453"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3542,7 +3526,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-z9mjw7z",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -3576,7 +3560,7 @@
 							},
 							"Properties": {
 								"id": "20260613155453-xty8ydi",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
@@ -3624,7 +3608,7 @@
 									},
 									"Properties": {
 										"id": "20260613155453-pqm3evu",
-										"updated": "20260613155453"
+										"updated": "20261024162311"
 									},
 									"Children": [
 										{
@@ -3632,12 +3616,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613155453-81nxm5r",
-												"updated": "20260730184353"
+												"updated": "20261024162311"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "非內容區塊記錄：直接在視圖中添加條目，主鍵由系統自動生成"
+													"Data": "未綁定條目：直接在視圖中新增，可以編輯主鍵文字；條目 ID 由系統自動產生"
 												}
 											]
 										}
@@ -3697,7 +3681,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-w5hwnlb",
-						"updated": "20260613155453"
+						"updated": "20261024164212"
 					},
 					"Children": [
 						{
@@ -3705,17 +3689,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-k56boov",
-								"updated": "20260730184353"
+								"updated": "20261024164212"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "注意事項"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：不支援通過儲存格直接修改繫結關係；若內容區塊被刪除，對應記錄也隨之刪除"
+									"Data": "綁定管理：可在條目屬性面板中使用綁定或重新綁定按鈕更改關聯的內容區塊；刪除綁定區塊時，對應的資料庫條目也會移除"
 								}
 							]
 						}
@@ -4040,7 +4019,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-8j0t0hl",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4079,7 +4058,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-wtmlshi",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4287,7 +4266,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-k8kf2lq",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -4295,17 +4274,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-fudy9li",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "過濾行爲"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：支援有值/無值篩選"
+									"Data": "篩選行為：支援依關聯條目進行包含、不包含，以及有值、無值等篩選"
 								}
 							]
 						}
@@ -5028,7 +5002,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-ru5nzha",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5046,12 +5020,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-08fob5j",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自動記錄條目的創建時間。"
+					"Data": "顯示條目的建立時間；綁定內容區塊後使用該區塊的建立時間。"
 				}
 			]
 		},
@@ -5067,7 +5041,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-ewnfems",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5194,7 +5168,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-8w7crss",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -5202,17 +5176,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-uccrpec",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "注意事項"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：每條記錄創建後此值固定不變"
+									"Data": "注意事項：綁定或重新綁定內容區塊後，顯示時間隨綁定區塊變化"
 								}
 							]
 						}
@@ -5226,7 +5195,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-jrr3c4t",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5244,12 +5213,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-aht8vi0",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自動記錄條目最後一次修改的時間。"
+					"Data": "顯示條目的更新時間；綁定內容區塊後使用該區塊的更新時間。"
 				}
 			]
 		},
@@ -5622,7 +5591,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-5oq6h7a",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -5664,7 +5633,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-g7jsd2p",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -5705,7 +5674,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 格式，未填寫名稱時省略名稱及分號。可將該文字或 WGS84 的 "
+					"Data": " 格式，未填寫名稱時省略名稱及分號。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-27ajooc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-27ajooc",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可將該文字或 WGS84 的 "
 				},
 				{
 					"Type": "NodeTextMark",

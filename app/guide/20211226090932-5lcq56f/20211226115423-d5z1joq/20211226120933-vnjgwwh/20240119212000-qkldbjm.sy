@@ -6,7 +6,7 @@
 		"id": "20240119212000-qkldbjm",
 		"title": "忽略搜尋",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024162311"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119212033-a0oemkx",
-				"updated": "20261016111305"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -172,7 +172,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20240119212033-1xy7a3a",
-				"updated": "20241001010603"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
+					"Data": "path NOT LIKE '/20200923234011-ieuun1p%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -198,7 +198,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241001010716-fqaer08",
-				"updated": "20241001011824"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -210,7 +210,7 @@
 					},
 					"Properties": {
 						"id": "20241001010716-q1lumgt",
-						"updated": "20241001011821"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -218,21 +218,26 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001010716-h04et95",
-								"updated": "20260730184353"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20200923234011-ieuun1p%'"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "：忽略該文檔及其子文檔中的內容區塊。"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+									"TextMarkTextContent": "path"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：忽略所在文件路徑以 ​/20210808180117-6v0mkxr 開頭的內容區塊搜尋"
+									"Data": " 使用文檔 ID 路徑，不包含筆記本 ID；請替換為實際的文檔路徑前綴"
 								}
 							]
 						}

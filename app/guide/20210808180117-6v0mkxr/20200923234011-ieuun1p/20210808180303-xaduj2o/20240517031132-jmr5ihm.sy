@@ -6,7 +6,7 @@
 		"id": "20240517031132-jmr5ihm",
 		"title": "Publish service",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160303-vbqukj8",
-				"updated": "20260918190000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160303-5spvi7o",
-				"updated": "20260918190000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260315160303-g9yfha5",
-						"updated": "20260803163440"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160303-mosilo4",
-								"updated": "20260803163440"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -93,7 +93,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -102,7 +102,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ to access the publishing service configuration panel"
+									"Data": " to access the publishing service configuration panel"
 								}
 							]
 						}

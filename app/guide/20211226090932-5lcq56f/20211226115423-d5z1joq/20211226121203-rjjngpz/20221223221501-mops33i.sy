@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20261009153000"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-k7n1m8a",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-ffn21hi",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "將內容區塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（GitHub repo: open-spaced-repetition/go-fsrs）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
+					"Data": "將內容區塊製作為閃卡後，思源使用間隔重複演算法 FSRS，根據每次複習的評分安排下次複習時間。可以直接重複使用筆記中的內容，無需另寫一份卡片。"
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-91xd3o2",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194439-33ewrfo",
-				"updated": "20261009153000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -276,7 +276,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-xknxlzy",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -290,7 +290,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -299,7 +299,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中調整。"
+					"Data": " 中調整。"
 				}
 			]
 		},
@@ -849,7 +849,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-dfoesdf",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -863,7 +863,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-02gn3hw",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -877,7 +877,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -886,7 +886,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中可以調整閃卡相關的全域設定，其中"
+					"Data": " 中可以調整閃卡相關的全域設定，其中"
 				},
 				{
 					"Type": "NodeTextMark",

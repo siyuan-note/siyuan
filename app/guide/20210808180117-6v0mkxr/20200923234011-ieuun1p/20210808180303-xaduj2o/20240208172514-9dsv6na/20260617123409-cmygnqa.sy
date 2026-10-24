@@ -6,7 +6,7 @@
 		"id": "20260617123409-cmygnqa",
 		"title": "Table Calculation",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161816"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617123606-hmer6rw",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123606-099e9jn",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -696,12 +696,12 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617123606-a1r19o6",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20260617123606-lynr37v",
@@ -723,6 +723,47 @@
 						{
 							"Type": "NodeText",
 							"Data": "​ depends on the column type: empty cells are skipped, and single-value columns such as number and text count one value per nonempty cell; multi-value columns such as multi-select and asset count each option separately (consistent with the native \"Count values\" semantics)."
+						}
+					]
+				},
+				{
+					"ID": "20261024161816-6a7yzqg",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20261024161816-6a7yzqg",
+						"updated": "20261024161816"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Values in "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " come from numeric conversion; non-empty text and other values that cannot be converted may contribute 0. Use the numeric comparison examples with number columns. Use "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".strings"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " or "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".raw"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " to compare original text or options. Ratios range from 0 to 1 and can be displayed with a percentage format."
 						}
 					]
 				}

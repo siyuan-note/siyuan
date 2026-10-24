@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20261021111316"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -123,7 +123,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428222532-nfvnq4d",
-				"updated": "20261016191102"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -167,7 +167,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428222603-moih9fe",
-				"updated": "20261016191102"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -297,7 +297,7 @@
 					},
 					"Properties": {
 						"id": "20221202214811-2s26txl",
-						"updated": "20230622164122"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -305,7 +305,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214811-p1eevpi",
-								"updated": "20230622164122"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
@@ -330,7 +330,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", etc."
+									"Data": ", etc"
 								}
 							]
 						}
@@ -871,7 +871,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909100946-x94gyft",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1007,7 +1007,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1030,7 +1030,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1039,7 +1039,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1048,7 +1048,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, or pay attention to "
+					"Data": ", or pay attention to "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1201,7 +1201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260807094000-a1s2e3n",
-				"updated": "20260807094000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1229,12 +1229,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260807094000-faqen02",
-				"updated": "20260807094000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Determining whether an asset is completely unused requires scanning the entire workspace. Performing this check every time a reference is deleted would affect editing performance. Automatically deleting assets would also make undo and multi-device synchronization unreliable and could cause accidental data loss. Therefore, SiYuan does not automatically delete assets when content references are removed and does not provide an option to enable this behavior."
+					"Data": "Determining whether an asset is completely unused requires scanning the entire workspace. Performing this check every time a reference is deleted would affect editing performance. Automatically deleting assets would also make undo and multi-device synchronization unreliable and could cause accidental data loss."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-67csx38",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-67csx38",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Therefore, SiYuan does not automatically delete assets when content references are removed and does not provide an option to enable this behavior."
 				}
 			]
 		},

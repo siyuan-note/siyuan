@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261024124323"
+		"updated": "20261024164629"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-a3qlogr",
-				"updated": "20261015193140"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -26,11 +26,25 @@
 			]
 		},
 		{
+			"ID": "20261024161440-yr4nuky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161440-yr4nuky",
+				"updated": "20261024161440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "下表列出預設快捷鍵；設定過自訂快捷鍵後，請以設定介面為準。斜線兩側分別表示 Windows/Linux 和 macOS 按鍵，行動端使用外接鍵盤時以支援的操作為準。"
+				}
+			]
+		},
+		{
 			"ID": "20260908092714-e1q4nu2",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908092714-e1q4nu2",
-				"updated": "20260921111101"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -49,7 +63,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "快捷鍵"
+					"TextMarkTextContent": "快速鍵"
 				},
 				{
 					"Type": "NodeText",
@@ -71,7 +85,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015193140-98at8pv",
-				"updated": "20261015193140"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -90,7 +104,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "快捷鍵"
+					"TextMarkTextContent": "快速鍵"
 				},
 				{
 					"Type": "NodeText",
@@ -213,7 +227,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20261016111305"
+				"updated": "20261024164629"
 			},
 			"Children": [
 				{
@@ -233,7 +247,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-4e9hm9i",
-				"updated": "20261016111305"
+				"updated": "20261024164629"
 			},
 			"Children": [
 				{
@@ -322,7 +336,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -405,6 +419,65 @@
 									"Data": "{: colspan=\"1\"}"
 								}
 							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "命令面板"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥⇧P"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": []
 						}
 					]
 				},
@@ -949,7 +1022,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳到上一個編輯分頁"
+									"Data": "跳到下一個編輯分頁"
 								}
 							]
 						},
@@ -1746,16 +1819,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1800,16 +1873,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1854,16 +1927,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1908,16 +1981,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1962,16 +2035,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -2016,16 +2089,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -2070,16 +2143,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中分別配置"
+									"Data": " 中分別配置"
 								}
 							]
 						}
@@ -2927,7 +3000,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -3189,16 +3262,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -3243,16 +3316,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -3297,16 +3370,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -3524,7 +3597,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-3q2xsbj",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -3544,7 +3617,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-eu9085n",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -4280,16 +4353,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -4334,16 +4407,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -4357,7 +4430,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261024124323"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -4372,7 +4445,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20261009184321"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -4392,7 +4465,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20261009181520"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -9201,16 +9274,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置，游標需停留在引用元素內"
+									"Data": " 中配置，游標需停留在引用元素內"
 								}
 							]
 						}
@@ -9255,16 +9328,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9309,16 +9382,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9363,16 +9436,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9431,16 +9504,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9485,16 +9558,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9539,16 +9612,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9602,16 +9675,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9656,16 +9729,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9710,16 +9783,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9764,16 +9837,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9818,16 +9891,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9872,16 +9945,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9926,16 +9999,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9980,16 +10053,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10034,16 +10107,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10088,16 +10161,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10142,16 +10215,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10196,16 +10269,70 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複製格式化文字/HTML"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中設定"
 								}
 							]
 						}
@@ -11879,7 +12006,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20260926131843"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -11898,7 +12025,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-ws33j83",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12406,7 +12533,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12415,7 +12542,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12424,7 +12551,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​中設定"
+									"Data": " 中設定"
 								}
 							]
 						}
@@ -12459,7 +12586,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12468,7 +12595,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12477,7 +12604,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​中設定"
+									"Data": " 中設定"
 								}
 							]
 						}
@@ -12552,7 +12679,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-11vvysw",
-				"updated": "20260926131843"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12584,7 +12711,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（或其他標題層級），會移除所選列表項的項目符號或覈取方塊，並將首個區塊轉換為獨立標題。後續段落和子列表保持順序，未選項仍保留為列表。選取整個列表時只處理直屬列表項。要將首個區塊轉換為一般段落，請使用段落快捷鍵，或選擇 "
+					"Data": " （或其他標題層級），會移除所選列表項的項目符號或覈取方塊，並將首個區塊轉換為獨立標題。後續段落和子列表保持順序，未選項仍保留為列表。選取整個列表時只處理直屬列表項。要將首個區塊轉換為一般段落，請使用段落快捷鍵，或選擇 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -12652,7 +12779,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-td76oes",
-				"updated": "20260923083553"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12672,7 +12799,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-qj1o02k",
-				"updated": "20260923221935"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12832,17 +12959,9 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Delete"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"TextMarkTextContent": "Backspace"
 								}
 							]
 						},
@@ -14008,7 +14127,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-x2dmpab",
-				"updated": "20261010201951"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -14068,7 +14187,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-n2r88dm",
-				"updated": "20261008221006"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -14132,16 +14251,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -14176,16 +14295,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -14220,16 +14339,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -14264,16 +14383,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快捷鍵"
+									"TextMarkTextContent": "快速鍵"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -16835,7 +16954,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002039-klsrtup",
-				"updated": "20261016202635"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -17304,7 +17423,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221105230801-t6pdes8",
-				"updated": "20260811122156"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -17324,7 +17443,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20221105230755-x4ktugr",
-				"updated": "20260811122156"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -17408,7 +17527,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項感測器 / 圓點"
+									"Data": "列表項圖示 / 圓點"
 								}
 							]
 						}
@@ -17453,7 +17572,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項感測器 / 圓點"
+									"Data": "列表項圖示 / 圓點"
 								}
 							]
 						}
@@ -17516,7 +17635,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項感測器 / 圓點"
+									"Data": "列表項圖示 / 圓點"
 								}
 							]
 						}
@@ -17583,7 +17702,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項感測器 / 圓點"
+									"Data": "列表項圖示 / 圓點"
 								}
 							]
 						}
@@ -17650,7 +17769,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項感測器 / 圓點"
+									"Data": "列表項圖示 / 圓點"
 								}
 							]
 						}
@@ -17695,7 +17814,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "折疊感測器"
+									"Data": "折疊圖示"
 								}
 							]
 						}
@@ -17758,7 +17877,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "折疊感測器"
+									"Data": "折疊圖示"
 								}
 							]
 						}
@@ -17772,7 +17891,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-dz6tv7l",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -17792,7 +17911,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002223-k6apxvm",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -17894,11 +18013,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "靜默打開"
-								},
-								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Data": "區塊引用：背景分頁；關係圖節點：浮窗預覽"
 								}
 							]
 						},

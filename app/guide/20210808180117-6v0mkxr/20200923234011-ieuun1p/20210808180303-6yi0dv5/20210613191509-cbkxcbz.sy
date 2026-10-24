@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210613191509-cbkxcbz",
-		"title": "Content Block Attribute",
+		"title": "Content block attributes",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-b394bll",
-				"updated": "20210613191548"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613191548-o34mmas",
-				"updated": "20210613191548"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Attributes exist in the form of key-value pairs. We can enrich the connotation of the content block by setting attributes on the content block. Attributes are divided into built-in attributes and custom attributes."
+					"Data": "Attributes store additional information about a block as key-value pairs. Use them to name, organize, and query blocks. Attributes can be built-in or custom."
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-ckua3q3",
-				"updated": "20261012014930"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -213,7 +213,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-d763t09",
-				"updated": "20261012014859"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -228,12 +228,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261012014537-a0f03gx",
-				"updated": "20261012014859"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the attribute panel, aliases appear as separate chips. Click Add alias to add one or click an existing alias to edit it; click its close icon to remove it. Separate multiple aliases with English commas to add them together. Press "
+					"Data": "In the attribute panel, aliases appear as separate chips. Click Add alias to add one or click an existing alias to edit it; click its close icon to remove it. Separate multiple aliases with English commas to add them together. "
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-0gax1k2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-0gax1k2",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -255,7 +269,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Drag aliases to reorder them; the order is saved when you release. Touchscreens also support dragging. Press "
+					"Data": " "
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-86vg1pz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-86vg1pz",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag aliases to reorder them; the order is saved when you release. Touchscreens also support dragging. Press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -274,7 +302,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-65gd8yo",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -288,30 +316,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251201102224-5uvilvm",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Custom attributes are set by the user through the "
+					"Data": "Set custom attributes through "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code kbd",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Block icon menu"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code kbd",
-					"TextMarkTextContent": "Attribute"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Attributes"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, attribute names must begin with a lowercase English letter and may contain lowercase English letters, digits, and hyphens (-). Uppercase input is converted to lowercase (e.g., "
+					"Data": ". Names must start with a lowercase English letter and may contain lowercase English letters, digits, and hyphens (-), such as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -320,7 +348,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, "
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -329,7 +357,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": ", or "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -338,7 +366,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​). After setting, SiYuan will automatically add the prefix "
+					"Data": ". Uppercase input is converted to lowercase. SiYuan adds the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -347,7 +375,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ to the attribute name to distinguish it from built-in attributes."
+					"Data": " prefix when saving to distinguish custom attributes from built-in ones."
 				}
 			]
 		},

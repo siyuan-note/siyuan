@@ -7,7 +7,7 @@
 		"id": "20240530101000-xq26o73",
 		"title": "カーネルパラメータ",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-p4a4sqs",
 				"id": "20240530101000-pmhprwt",
-				"updated": "20261016112115"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -37,7 +37,7 @@
 			"Properties": {
 				"ID": "20240530101000-jnec75x",
 				"id": "20240530101000-v0bquxf",
-				"updated": "20261016112115"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -65,7 +65,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、最後に登録されたワークスペース、OS のデフォルトディレクトリの順で選択します。デフォルトは macOS では "
+					"Data": "、最後に登録されたワークスペース、OS のデフォルトディレクトリの順で選択します。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-pl8k20i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-pl8k20i",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デフォルトは macOS では "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -580,7 +594,7 @@
 			"Properties": {
 				"ID": "20240530101000-jc2iusi",
 				"id": "20240530101000-au2afuj",
-				"updated": "20260917190844"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -638,7 +652,7 @@
 			"Properties": {
 				"ID": "20240530101000-tgko9uw",
 				"id": "20240530101000-ykliek4",
-				"updated": "20260917190844"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -670,7 +684,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ が使用されます。この外観フォルダには内蔵リソースを保存します。サードパーティのテーマとアイコンパッケージは、実行モードに関係なく workspace/data/themes/ と workspace/data/icons/ を使用します。"
+					"Data": "​ が使用されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-1rxms26",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-1rxms26",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この外観フォルダには内蔵リソースを保存します。サードパーティのテーマとアイコンパッケージは、実行モードに関係なく workspace/data/themes/ と workspace/data/icons/ を使用します。"
 				}
 			]
 		},

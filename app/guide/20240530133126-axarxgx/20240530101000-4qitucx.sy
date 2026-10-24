@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"Type": "NodeCallout",
 			"Properties": {
 				"id": "20251209212928-rssk7d0",
-				"updated": "20261016202856"
+				"updated": "20261024163013"
 			},
 			"CalloutType": "TIP",
 			"CalloutTitle": "Tip",
@@ -27,7 +27,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20251209213003-emp13kh",
-						"updated": "20261016202856"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -41,7 +41,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ - "
+							"Data": " - "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -50,7 +50,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " ​ をクリックすると、再度表示できます。"
+							"Data": " をクリックすると、再度表示できます。"
 						}
 					]
 				}
@@ -76,7 +76,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-ocvz556",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-jrj1ipn",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -104,7 +104,7 @@
 					"Properties": {
 						"ID": "20240530101000-a3cojva",
 						"id": "20240530101000-kocadwy",
-						"updated": "20260803170332"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -112,7 +112,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-ohhb34s",
-								"updated": "20260803170332"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -135,7 +135,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -144,7 +144,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ から新規ノートブックを作成します。その後、ノートブック内に新しいドキュメントを作成します"
+									"Data": " から新規ノートブックを作成します。その後、ノートブック内に新しいドキュメントを作成します"
 								}
 							]
 						}
@@ -160,7 +160,7 @@
 					"Properties": {
 						"ID": "20240530101000-i6qlqe2",
 						"id": "20240530101000-61u9nnt",
-						"updated": "20240530101000"
+						"updated": "20261024160716"
 					},
 					"Children": [
 						{
@@ -168,21 +168,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-425cyzz",
-								"updated": "20260729215152"
+								"updated": "20261024160716"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "エディタで "
+									"Data": "デスクトップではエディタに "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "/"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ と入力して機能メニューを開きます"
+									"Data": " を入力して機能メニューを開く。モバイルでは編集ツールバーを使うか、設定でスラッシュメニューを有効にする"
 								}
 							]
 						}
@@ -198,7 +198,7 @@
 					"Properties": {
 						"ID": "20240530101000-m0js63w",
 						"id": "20240530101000-8v1heve",
-						"updated": "20240530101000"
+						"updated": "20261024160716"
 					},
 					"Children": [
 						{
@@ -206,23 +206,19 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-xhkw4lc",
-								"updated": "20260729215152"
+								"updated": "20261024160716"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "「"
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20240530101000-boiita2",
+									"TextMarkBlockRefID": "20260830213256-014vk79",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "コンテンツブロックのナビゲーション"
+									"TextMarkTextContent": "ブロックの選択・移動・編集"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "」を読み、コンテンツブロックの選択、移動、編集方法を確認します"
+									"Data": "で基本的な編集操作を確認する"
 								}
 							]
 						}
@@ -675,12 +671,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-9k8r87v",
-				"updated": "20260729215152"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🔍 検索とデータベース"
+					"Data": "🔍 検索とクエリ"
 				}
 			]
 		},
@@ -690,9 +686,71 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-3o3hdva",
-				"updated": "20260729215152"
+				"updated": "20261024163828"
 			},
 			"Children": [
+				{
+					"ID": "20261024161816-f20v32o",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261024161816-f20v32o",
+						"updated": "20261024161816"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261024161816-rzw01r1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261024161816-rzw01r1",
+								"updated": "20261024161816"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-a91lmk2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "高度な検索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261024161816-zf3p47b",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261024161816-zf3p47b",
+						"updated": "20261024161816"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261024161816-7xyio2c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261024161816-7xyio2c",
+								"updated": "20261024161816"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804171007-semnt04",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "意味検索"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20260729215152-34y71sm",
 					"Type": "NodeListItem",
@@ -734,7 +792,7 @@
 					},
 					"Properties": {
 						"id": "20260729215152-24dssym",
-						"updated": "20260729215152"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -743,7 +801,7 @@
 							"Properties": {
 								"ID": "20240530101000-lw6td91",
 								"id": "20240530101000-h57odvc",
-								"updated": "20240530101000"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
@@ -751,7 +809,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20240530101000-58z6rjh",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "データベーステーブル"
+									"TextMarkTextContent": "SQL インデックステーブル"
 								}
 							]
 						}
@@ -1433,7 +1491,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-9nw0o7t",
-				"updated": "20260729225925"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1448,7 +1506,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-35z7rvj",
-				"updated": "20260729215152"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1478,6 +1536,37 @@
 									"TextMarkBlockRefID": "20240530101000-hq9sn3k",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "アイコン"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261024161816-638k1ha",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261024161816-638k1ha",
+						"updated": "20261024161816"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261024161816-9izna8t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261024161816-9izna8t",
+								"updated": "20261024161816"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-xr22qn8",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "外観のカスタマイズ"
 								}
 							]
 						}
@@ -1587,7 +1676,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-390ratq",
-				"updated": "20260809232000"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1602,9 +1691,40 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1quwm31",
-				"updated": "20260809232000"
+				"updated": "20261024161816"
 			},
 			"Children": [
+				{
+					"ID": "20261024161816-vwv10d5",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261024161816-vwv10d5",
+						"updated": "20261024161816"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261024161816-q4as1xq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261024161816-q4as1xq",
+								"updated": "20261024161816"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "リモートカーネルへの接続"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20260729215152-1o9juu6",
 					"Type": "NodeListItem",

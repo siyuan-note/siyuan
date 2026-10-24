@@ -7,27 +7,37 @@
 		"id": "20240530101000-dytmky4",
 		"title": "カーネル API",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20261024163429"
 	},
 	"Children": [
+		{
+			"ID": "20261024161816-i8dn76n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-i8dn76n",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カーネル API は、HTTP 経由でドキュメント、ブロック、アセットなどを操作するためのインターフェースです。スクリプトや外部ツールとの連携に使えます。呼び出す前に SiYuan カーネルを起動し、必要な API トークンを指定してください。パラメータと例は、以下の API ドキュメントを参照してください。"
+				}
+			]
+		},
 		{
 			"ID": "20240530101000-33dv38y",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"ID": "20240530101000-eh1yj9i",
 				"id": "20240530101000-33dv38y",
-				"updated": "20240530101000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md",
-					"TextMarkTextContent": "API ドキュメント"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "を参照してください。"
+					"TextMarkTextContent": "API ドキュメント",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/dev/docs/API.ja.md"
 				}
 			]
 		},

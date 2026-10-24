@@ -6,7 +6,7 @@
 		"id": "20211226123101-qjw03ab",
 		"title": "小工具",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123118-0v3r4kb",
-				"updated": "20211226005327"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,21 +29,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123118-jglr3dm",
-				"updated": "20211228141612"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "小工具是思源Kernel伺服的靜態網頁，它通過 API 存取資料，通過 "
+					"Data": "小工具是在文檔中執行的工具，以網頁形式嵌入編輯器。小工具檔案由思源內核提供，透過 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "iframe"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 進行渲染展現。"
+					"Data": " 顯示，也可以透過 API 讀寫資料。"
 				}
 			]
 		},

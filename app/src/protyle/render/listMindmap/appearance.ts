@@ -212,7 +212,7 @@ export const resolveListMindmapColors = (model: ListMindmapModel, canvasColor?: 
         const {node, color, level} = pending.pop();
         if (appearance.nodeStyle === "branch") {
             result.set(node.id, {backgroundColor: level < 2 ? color : "transparent",
-                textColor: level < 2 ? "#ffffff" : "#000000", lineColor: color,
+                textColor: level < 2 ? "#ffffff" : getMindmapTextColor(background), lineColor: color,
                 fontSize: level === 0 ? 20 : level === 1 ? 16 : 14, bold: level < 2, lineWidth: 1.5});
         } else if (appearance.nodeStyle === "layered") {
             result.set(node.id, {backgroundColor: "transparent",

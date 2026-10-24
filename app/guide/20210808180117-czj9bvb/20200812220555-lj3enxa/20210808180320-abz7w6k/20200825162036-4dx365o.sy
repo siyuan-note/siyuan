@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024194010"
+		"updated": "20261024195223"
 	},
 	"Children": [
 		{
@@ -2055,7 +2055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261024194010"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2403,7 +2403,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-ucbq2tw",
-				"updated": "20261024174551"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2491,7 +2491,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-idam1p2",
-				"updated": "20261024174551"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2523,7 +2523,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中为当前导图选择 47 种配色主题。根节点和一级节点使用色卡背景及白色文字，二级及后续节点使用透明背景及黑色文字。后代连线继承所属一级分支的颜色，各层级连线粗细一致。折线和圆角折线的根节点主干按节点顺序叠加绘制，后绘制的分支颜色覆盖重叠部分。"
+					"Data": " 中为当前导图选择 47 种配色主题。根节点和一级节点使用色卡背景及白色文字，二级及后续节点使用透明背景，并根据画布颜色自动选择黑色或白色文字。后代连线继承所属一级分支的颜色，各层级连线粗细一致。折线和圆角折线的根节点主干按节点顺序叠加绘制，后绘制的分支颜色覆盖重叠部分。"
 				}
 			]
 		},

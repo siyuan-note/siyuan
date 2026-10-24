@@ -41,7 +41,7 @@ test("appearance validates optional colors and rejects unsupported formats", () 
     }
 });
 
-test("all 47 reference palettes remain selectable after reload with their fixed level foregrounds", () => {
+test("all 47 reference palettes retain white filled nodes and adapt transparent node text to the canvas", () => {
     assert.equal(LIST_MINDMAP_PALETTES.length, 47);
     assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => preset.id)).size, 47);
     assert.equal(new Set(LIST_MINDMAP_PALETTES.map(preset => JSON.stringify(preset.colors))).size, 47);
@@ -64,13 +64,23 @@ test("all 47 reference palettes remain selectable after reload with their fixed 
         assert.equal(model.metadata.appearance.backgroundColor, "#ffffff");
         assert.equal(model.metadata.nodes.a.textColor, "red");
         for (const canvas of ["#ffffff", "#1e1e1e", ...LIST_MINDMAP_CANVAS_COLORS]) {
+            delete model.metadata.appearance.backgroundColor;
+            const before = JSON.stringify(model.metadata);
             const styles = resolveListMindmapColors(model, canvas);
-            assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).textColor), ["#ffffff", "#ffffff", "#000000"]);
+            assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).textColor),
+                ["#ffffff", "#ffffff", canvas === "#1e1e1e" ? "#ffffff" : "#000000"]);
             assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).backgroundColor),
                 [preset.rootColor, preset.colors[0], "transparent"]);
             assert.deepEqual(["root", "a", "a1"].map(id => styles.get(id).lineWidth), [1.5, 1.5, 1.5]);
             assert.equal(styles.get("a1").lineColor, preset.colors[0]);
+            assert.equal(JSON.stringify(model.metadata), before, "canvas adaptation never rewrites saved colors");
+            model.metadata.appearance.backgroundColor = "";
+            assert.deepEqual(resolveListMindmapColors(model, canvas), styles, "default canvas follows the application");
+            model.metadata.appearance.backgroundColor = canvas;
+            assert.deepEqual(resolveListMindmapColors(model, canvas === "#1e1e1e" ? "#ffffff" : "#1e1e1e"), styles,
+                "explicit canvas colors take precedence over the application theme");
         }
+        model.metadata.appearance.backgroundColor = "#ffffff";
     }
 });
 
@@ -432,6 +442,8 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
             }
         }
     }
+    const deepQuote = quote.cloneNode(true) as HTMLElement;
+    deepNode.contentBlocks.push(deepQuote);
     for (const preset of api.LIST_MINDMAP_PALETTES) {
         model.metadata.appearance = {version: 1, palette: preset.colors, rootColor: preset.rootColor, nodeStyle: "branch"};
         model.metadata.connectorStyle = "rounded";
@@ -449,7 +461,12 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
                 }
                 const deep = view.nodeElements.get(deepNode.id);
                 check.equal(getComputedStyle(deep).backgroundColor, "rgba(0, 0, 0, 0)");
-                check.equal(getComputedStyle(deep).color, "rgb(0, 0, 0)");
+                const foreground = background === "#1e1e1e" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)";
+                check.equal(getComputedStyle(deep).color, foreground,
+                    "transparent node text contrasts with the current canvas in editing and print views");
+                check.equal(getComputedStyle(deep.querySelector(".bq .p")).color, foreground);
+                check.equal(getComputedStyle(deep.querySelector(".bq span")).color, "rgb(194, 65, 12)",
+                    "deep inline colors remain authoritative");
                 check.equal(getComputedStyle(view.getContentHost(emptyNode.id), "::before").color, "rgb(255, 255, 255)");
                 check.equal(getComputedStyle(view.nodeElements.get(quoteNode.id).querySelector(".bq .p")).color,
                     "rgb(255, 255, 255)");
@@ -461,6 +478,16 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
                 check.ok(widths.length > 0 && widths.every(width => width === 1.5),
                     "new reference themes use the same width for every hierarchy line");
                 check.ok(lines.includes(computedColor(preset.colors[0])), "reference swatch values reach the canvas unchanged");
+                for (const savedBackground of ["#ffffff", "#1e1e1e"]) {
+                    model.metadata.appearance.backgroundColor = savedBackground;
+                    const before = JSON.stringify(model.metadata);
+                    view.update(model);
+                    check.equal(getComputedStyle(view.nodeElements.get(deepNode.id)).color,
+                        savedBackground === "#1e1e1e" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)",
+                        "explicit canvas color controls the foreground regardless of application mode");
+                    check.equal(JSON.stringify(model.metadata), before);
+                }
+                delete model.metadata.appearance.backgroundColor;
             }
         }
     }
@@ -525,21 +552,40 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
     host.style.removeProperty("--b3-mindmap-line-width");
     view.options.printLayout = false;
     view.readOnly = false;
-    view.update(model);
-    view.setEditing(deepNode.id);
-    const editorHost = view.getContentHost(deepNode.id);
-    const editorContent = document.createElement("div");
-    editorContent.textContent = "Unsaved editor content";
-    editorHost.replaceChildren(editorContent);
-    const metadataBeforeThemeChange = JSON.stringify(model.metadata);
-    document.documentElement.style.setProperty("--b3-theme-background", "#ffffff");
-    await new Promise(resolve => setTimeout(resolve, 0));
-    check.equal(getComputedStyle(view.nodeElements.get(deepNode.id)).color,
-        computedColor(api.resolveListMindmapColors(model, "#ffffff").get(deepNode.id).textColor),
-        "application theme changes refresh layered foregrounds without a document reload");
-    check.equal(editorHost.firstElementChild, editorContent, "theme changes preserve the active editor DOM");
-    check.equal(view.editingId, deepNode.id);
-    check.equal(JSON.stringify(model.metadata), metadataBeforeThemeChange);
+    for (const nodeStyle of ["layered", "branch"]) {
+        model.metadata.appearance.nodeStyle = nodeStyle;
+        view.update(model);
+        view.setEditing(deepNode.id);
+        const editorHost = view.getContentHost(deepNode.id);
+        const editorContent = document.createElement("div");
+        editorContent.className = "protyle-wysiwyg protyle-wysiwyg--empty";
+        editorContent.setAttribute("placeholder", "Enter text");
+        editorHost.replaceChildren(editorContent);
+        const metadataBeforeThemeChange = JSON.stringify(model.metadata);
+        for (const background of ["#ffffff", "#1e1e1e", "#ffffff"]) {
+            document.documentElement.style.setProperty("--b3-theme-background", background);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            const foreground = nodeStyle === "branch" ?
+                (background === "#1e1e1e" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)") :
+                computedColor(api.resolveListMindmapColors(model, background).get(deepNode.id).textColor);
+            check.equal(getComputedStyle(view.nodeElements.get(deepNode.id)).color, foreground,
+                `${nodeStyle} text adapts to application theme changes without a document reload`);
+            check.equal(getComputedStyle(editorContent, "::before").color, foreground,
+                "the active editor placeholder follows the adapted text color");
+            check.equal(editorHost.firstElementChild, editorContent, "theme changes preserve the active editor DOM");
+            check.equal(view.editingId, deepNode.id);
+            check.equal(JSON.stringify(model.metadata), metadataBeforeThemeChange);
+        }
+        view.setEditing(undefined);
+        for (const style of [{textColor: "#ff00ff"}, {backgroundColor: "#1e1e1e"}]) {
+            model.metadata.nodes[deepNode.id] = style;
+            view.update(model);
+            check.equal(getComputedStyle(view.nodeElements.get(deepNode.id)).color,
+                style.textColor ? "rgb(255, 0, 255)" : "rgb(255, 255, 255)",
+                "manual text colors and solid backgrounds take precedence over canvas adaptation");
+        }
+        delete model.metadata.nodes[deepNode.id];
+    }
     model.metadata.appearance.palette = [];
     view.update(model);
     view.nodeElements.forEach((element: HTMLElement) => {

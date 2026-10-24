@@ -280,7 +280,7 @@ export class ListMindmapView {
         ["pointerdown", "keydown"].forEach(type =>
             this.listen(options.host, type, () => this.stopFoldAnimation?.(), {capture: true}));
         const refreshTheme = () => {
-            if (this.model.metadata.appearance?.nodeStyle === "layered") {
+            if (this.model.metadata.appearance?.nodeStyle) {
                 this.updateColors();
             }
             this.refreshLayout();

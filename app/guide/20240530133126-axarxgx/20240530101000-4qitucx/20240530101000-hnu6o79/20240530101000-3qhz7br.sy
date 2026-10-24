@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024194010"
+		"updated": "20261024195223"
 	},
 	"Children": [
 		{
@@ -2177,7 +2177,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261024194010"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2604,7 +2604,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-fjkvky7",
-				"updated": "20261024174551"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2702,7 +2702,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-sbqeaum",
-				"updated": "20261024174551"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2730,7 +2730,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で、現在のマップに 47 種類の配色テーマを選択できます。ルートと第 1 階層のノードは色付きの背景に白い文字を使い、第 2 階層以降は透明な背景に黒い文字を使います。子孫の接続線は所属する第 1 階層の色を継承し、すべての階層で同じ太さを使います。直角と角丸の接続線では、ルートの幹線をノード順に重ねて描画し、後のブランチの色で重なる部分を上書きします。"
+					"Data": " で、現在のマップに 47 種類の配色テーマを選択できます。ルートと第 1 階層のノードは色付きの背景に白い文字を使い、第 2 階層以降は透明な背景を使い、キャンバスの色に応じて黒または白の文字を自動で選びます。子孫の接続線は所属する第 1 階層の色を継承し、すべての階層で同じ太さを使います。直角と角丸の接続線では、ルートの幹線をノード順に重ねて描画し、後のブランチの色で重なる部分を上書きします。"
 				}
 			]
 		},

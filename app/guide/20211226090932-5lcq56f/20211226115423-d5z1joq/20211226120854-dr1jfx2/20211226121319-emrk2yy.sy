@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024194010"
+		"updated": "20261024195223"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261024194010"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2401,7 +2401,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-ia87ag4",
-				"updated": "20261024174551"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2489,7 +2489,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022102848-dz75ii8",
-				"updated": "20261024174551"
+				"updated": "20261024195223"
 			},
 			"Children": [
 				{
@@ -2521,7 +2521,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中為目前心智圖選擇 47 種配色主題。根節點和一級節點使用色卡背景及白色文字，二級及後續節點使用透明背景及黑色文字。後代連線繼承所屬一級分支的顏色，各層級連線粗細一致。折線和圓角折線的根節點主幹依節點順序疊加繪製，後繪製的分支顏色覆蓋重疊部分。"
+					"Data": " 中為目前心智圖選擇 47 種配色主題。根節點和一級節點使用色卡背景及白色文字，二級及後續節點使用透明背景，並依畫布顏色自動選擇黑色或白色文字。後代連線繼承所屬一級分支的顏色，各層級連線粗細一致。折線和圓角折線的根節點主幹依節點順序疊加繪製，後繪製的分支顏色覆蓋重疊部分。"
 				}
 			]
 		},

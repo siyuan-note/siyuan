@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261023003241"
+		"updated": "20261024124323"
 	},
 	"Children": [
 		{
@@ -4311,7 +4311,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20261018200107"
+				"updated": "20261024124323"
 			},
 			"Children": [
 				{
@@ -13053,7 +13053,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20261023003241"
+				"updated": "20261024124323"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13880,12 +13880,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-5vwcnw1",
-				"updated": "20261023003241"
+				"updated": "20261024124323"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "2 つ以上のノードを選択してから、下部のノードメニューで "
+					"Data": "1 つ以上のノードを選択してから、下部のノードメニューで "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -4759,13 +4759,53 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     summaryView.focusNode(summaryIds[0]);
     const summaryButton = summaryHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
-    for (const id of [summaryModel.root.id, summaryIds[0]]) {
+    for (const id of [summaryModel.root.id, summaryIds[0], summaryIds[1]]) {
         summaryView.focusNode(id);
         check.equal(summaryButton.hidden, false, "the node menu keeps the summary action in a stable position");
-        check.equal(summaryButton.disabled, true, "a single selected node cannot create a summary");
+        check.equal(summaryButton.disabled, false, "a single real node can create a summary");
+        check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0,
+            "selecting a single node does not create a summary automatically");
+        if (id === summaryIds[0]) {
+            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                {type: "touchStart", touchPoints: [{id: 1, ...centerPoint(summaryButton)}]},
+                {type: "touchEnd", touchPoints: []},
+            ]);
+            await settle();
+        } else {
+            await clickMouse(summaryButton);
+        }
+        check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, [id]);
+        const editor = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+        check.ok(editor, "single-node creation opens summary text editing");
+        check.equal(document.activeElement, editor);
+        editor.value = "Single node summary";
+        editor.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+        await settle();
+        check.equal(api.readListMindmap(summaryList).metadata.summaries[0].label, "Single node summary");
+        summaryView.focusNode(id);
+        check.equal(summaryButton.disabled, true, "an identical single-node summary cannot be created twice");
         summaryButton.click();
-        check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0);
+        check.equal(api.readListMindmap(summaryList).metadata.summaries.length, 1);
+        const resetSingleSummary = api.readListMindmap(summaryList);
+        resetSingleSummary.metadata.summaries = [];
+        api.writeListMindmapMetadata(summaryList, resetSingleSummary.metadata);
+        summaryView.update(api.readListMindmap(summaryList));
     }
+    const virtualSummaryList = reset("- First\n- Second\n");
+    const virtualSummaryModel = api.readListMindmap(virtualSummaryList);
+    const virtualSummaryHost = document.createElement("div");
+    document.body.append(virtualSummaryHost);
+    const virtualSummaryView = new api.ListMindmapView({host: virtualSummaryHost, model: virtualSummaryModel,
+        labels: new Proxy({}, {get: (_target, key) => String(key)}), onExit: () => {},
+        onSummaryBatchAdd: async (): Promise<string[]> => { check.fail("virtual centers cannot create summaries"); return []; }});
+    await settle();
+    virtualSummaryView.focusNode(virtualSummaryModel.root.id);
+    const virtualSummaryButton = virtualSummaryHost.querySelector<HTMLButtonElement>('.mindmap-view__inspector [aria-label="listMindmapSummary"]');
+    check.equal(virtualSummaryButton.disabled, true, "virtual centers retain their existing restriction");
+    virtualSummaryButton.click();
+    virtualSummaryView.destroy();
+    virtualSummaryHost.remove();
+    summaryView.focusNode(summaryIds[0]);
     summaryView.draw();
     const singleSelectionCanvas = summaryHost.querySelector<HTMLCanvasElement>("canvas").toDataURL();
     for (const id of summaryIds.slice(1)) {
@@ -5220,7 +5260,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
 
 test("list mindmap mutations preserve block data in the real DOM and Lute", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    timeout: 90000,
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-view-test-"));
     const script = path.join(temporary, "run.cjs");

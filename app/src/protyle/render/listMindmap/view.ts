@@ -1345,7 +1345,7 @@ export class ListMindmapView {
             return;
         }
         const selected = this.getSelectedIds();
-        if (selected.length < 2) {
+        if (!selected.length) {
             return;
         }
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(selected));
@@ -2091,7 +2091,7 @@ export class ListMindmapView {
         const {ranges, conflict} = getListMindmapSummarySelection(this.model, new Set(this.getSelectedIds()));
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual || this.getSelectedIds().length > 1,
-            summary: this.readOnly || this.summaryPending || this.getSelectedIds().length < 2 ||
+            summary: this.readOnly || this.summaryPending ||
                 conflict || !ranges.length || !this.options.onSummaryBatchAdd,
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };

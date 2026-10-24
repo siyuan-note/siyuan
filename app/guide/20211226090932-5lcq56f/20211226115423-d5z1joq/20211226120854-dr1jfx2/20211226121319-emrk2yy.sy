@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024174551"
+		"updated": "20261024194010"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261024174551"
+				"updated": "20261024194010"
 			},
 			"Children": [
 				{
@@ -2092,7 +2092,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-xvhal7o",
-				"updated": "20261024164212"
+				"updated": "20261024194010"
 			},
 			"Children": [
 				{
@@ -2155,6 +2155,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "調整文件內畫布尺寸時保留中心點和縮放比例。進入全螢幕時保留縮放比例：文件畫布低於全螢幕視口時置中，否則依目前可見區域的頂邊對齊，並隨視窗高度變化即時調整。全螢幕中的平移和縮放僅影響本次全螢幕瀏覽，離開後恢復進入前的文件視角和閱讀位置。節點內容編輯仍正常生效。"
+				}
+			]
+		},
+		{
+			"ID": "20261024194010-jykxx0r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024194010-jykxx0r",
+				"updated": "20261024194010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全螢幕時點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件視口"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可顯示或隱藏進入全螢幕前的文件視口範圍。指示框隨全螢幕平移和縮放更新，僅用於預覽；退出全螢幕仍恢復原文件視角。"
 				}
 			]
 		},

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024174551"
+		"updated": "20261024194010"
 	},
 	"Children": [
 		{
@@ -2055,7 +2055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261024174551"
+				"updated": "20261024194010"
 			},
 			"Children": [
 				{
@@ -2094,7 +2094,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-k1vwtue",
-				"updated": "20261024164212"
+				"updated": "20261024194010"
 			},
 			"Children": [
 				{
@@ -2157,6 +2157,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "调整文档内画布尺寸时保留中心点和缩放比例。进入全屏时保留缩放比例：文档画布低于全屏视口时居中，否则按当前可见区域的顶边对齐，并随窗口高度变化实时调整。全屏中的平移和缩放仅影响本次全屏浏览，退出后恢复进入前的文档视角和阅读位置。节点内容编辑仍正常生效。"
+				}
+			]
+		},
+		{
+			"ID": "20261024194010-bf2m0k7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024194010-bf2m0k7",
+				"updated": "20261024194010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全屏时点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档视口"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可显示或隐藏进入全屏前的文档视口范围。指示框随全屏平移和缩放更新，仅用于预览；退出全屏仍恢复原文档视角。"
 				}
 			]
 		},

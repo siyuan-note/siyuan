@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024174551"
+		"updated": "20261024194010"
 	},
 	"Children": [
 		{
@@ -2052,7 +2052,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261024174551"
+				"updated": "20261024194010"
 			},
 			"Children": [
 				{
@@ -2168,7 +2168,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-f51bzy4",
-				"updated": "20261024164212"
+				"updated": "20261024194010"
 			},
 			"Children": [
 				{
@@ -2231,6 +2231,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "Resizing the document canvas preserves its center and zoom. Full-screen entry keeps the zoom and centers the view when the document canvas is shorter than the full-screen viewport; otherwise it preserves the visible top edge, accounting for document scrolling."
+				}
+			]
+		},
+		{
+			"ID": "20261024194010-0bhyie7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024194010-0bhyie7",
+				"updated": "20261024194010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In fullscreen, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document viewport"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to show or hide the document viewport area saved on entry. The frame follows fullscreen panning and zooming as a preview; exiting fullscreen still restores the original document view."
 				}
 			]
 		},

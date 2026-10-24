@@ -12,9 +12,10 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const methods = view.members.filter(item => ["relationPath", "draw", "resizeViewport", "getViewportAnchorY", "findLine", "renderInspector"]
+const methods = view.members.filter(item => ["relationPath", "draw", "resizeViewport", "getViewportAnchorY",
+    "updateDocumentViewport", "findLine", "renderInspector"]
     .includes(item.name?.getText(source)));
-assert.equal(methods.length, 6);
+assert.equal(methods.length, 7);
 const compiled = transpileModule(`class View {
     ${methods.map(item => item.getText(source)).join("\n")}
 }

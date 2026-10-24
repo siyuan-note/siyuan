@@ -148,6 +148,7 @@ export class ListMindmapView {
     private selectedSummary?: string;
     private summaryPending = false;
     private readonly selectionBox = createElement("div", "mindmap-view__selection-box");
+    private readonly documentViewport = createElement("div", "mindmap-view__document-viewport");
     private finishSummaryEdit?: (save: boolean) => void;
     private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -202,7 +203,7 @@ export class ListMindmapView {
     private destroyed = false;
     private readonly resizeObserver: ResizeObserver;
     private fullscreenMarker?: Comment;
-    private documentView?: {scale: number, center: {x: number, y: number}, height: number};
+    private documentView?: {scale: number, center: {x: number, y: number}, width: number, height: number};
     private documentScroll?: {element: HTMLElement, left: number, top: number}[];
     private viewportCenter?: {x: number, y: number};
     private viewportSize?: {width: number, height: number};
@@ -235,7 +236,9 @@ export class ListMindmapView {
         this.inspectorPopover.setAttribute("role", "group");
         this.inspectorPopover.setAttribute("data-prevent-swipe", "true");
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
-        this.viewport.append(this.canvas, this.world);
+        this.documentViewport.hidden = true;
+        this.documentViewport.setAttribute("aria-hidden", "true");
+        this.viewport.append(this.canvas, this.world, this.documentViewport);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -604,6 +607,20 @@ export class ListMindmapView {
                 controls.append(button);
             }
         };
+        const addFullscreen = () => {
+            add("documentViewport", "listMindmapDocumentViewport", "iconSelectAll", () => {
+                this.documentViewport.hidden = !this.documentViewport.hidden;
+                const button = this.buttons.get("documentViewport");
+                button.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
+                button.classList.toggle("block__icon--active", !this.documentViewport.hidden);
+                this.updateDocumentViewport();
+            });
+            const preview = this.buttons.get("documentViewport");
+            preview.hidden = !this.fullscreenMarker || !this.documentView;
+            preview.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
+            preview.classList.toggle("block__icon--active", !this.documentViewport.hidden);
+            add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+        };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
         this.levelSelect = undefined;
         this.options.host.classList.toggle("mindmap-view--locked", this.locked);
@@ -623,7 +640,7 @@ export class ListMindmapView {
         this.buttons.get("lock").classList.toggle("block__icon--active", this.locked);
         this.buttons.get("lock").setAttribute("data-subtype", this.locked ? "lock" : "unlock");
         if (this.locked) {
-            add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+            addFullscreen();
             return;
         }
         if (!this.readOnly) {
@@ -693,7 +710,7 @@ export class ListMindmapView {
         zoomActions.append(this.zoomSlider, reset, fit);
         zoomControl.append(this.zoomLabel, zoomActions);
         controls.append(zoomControl);
-        add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+        addFullscreen();
         if (this.options.onSettingsMenu) {
             add("settings", "more", "iconMore", () => {
                 const selectedId = this.selectedId;
@@ -1982,6 +1999,7 @@ export class ListMindmapView {
         const height = this.viewport.clientHeight;
         this.resizeViewport(width, height);
         this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.updateDocumentViewport();
         this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
         this.zoomSlider.value = String(Math.round(this.scale * 100));
         const ratio = window.devicePixelRatio || 1;
@@ -3948,7 +3966,8 @@ export class ListMindmapView {
         this.captureViewportCenter();
         if (this.viewportCenter) {
             // 文档视角只在本次全屏期间暂存，全屏内的平移和缩放独立生效。
-            this.documentView = {scale: this.scale, center: this.viewportCenter, height: this.viewport.clientHeight};
+            this.documentView = {scale: this.scale, center: this.viewportCenter,
+                width: this.viewport.clientWidth, height: this.viewport.clientHeight};
             const visible = this.getVisibleViewportAnchor();
             this.viewportCenter = {
                 x: this.viewportCenter.x + (visible.x - this.viewport.clientWidth / 2) / this.scale,
@@ -4002,11 +4021,33 @@ export class ListMindmapView {
         const active = !!this.fullscreenMarker;
         this.setInteractionActive(active);
         this.tooltip.hidden = true;
+        if (!active) {
+            this.documentViewport.hidden = true;
+        }
+        const preview = this.buttons.get("documentViewport");
+        preview.hidden = !active || !this.documentView;
+        preview.setAttribute("aria-pressed", String(!this.documentViewport.hidden));
+        preview.classList.toggle("block__icon--active", !this.documentViewport.hidden);
         const button = this.buttons.get("fullscreen");
         button.setAttribute("aria-label", this.label(active ? "exitFullscreen" : "fullscreen"));
         button.querySelector("use").setAttribute("xlink:href", active ? "#iconFullscreenExit" : "#iconFullscreen");
         this.refreshLayout();
     };
+
+    private updateDocumentViewport() {
+        const saved = this.documentView;
+        if (!saved || this.documentViewport.hidden) {
+            return;
+        }
+        // 文档视口映射到当前全屏坐标，仅作预览，不改变退出时恢复的视角。
+        const width = saved.width * this.scale / saved.scale;
+        const height = saved.height * this.scale / saved.scale;
+        const x = this.offsetX + saved.center.x * this.scale - width / 2;
+        const y = this.offsetY + saved.center.y * this.scale - height / 2;
+        this.documentViewport.style.width = `${width}px`;
+        this.documentViewport.style.height = `${height}px`;
+        this.documentViewport.style.transform = `translate(${x}px, ${y}px)`;
+    }
 
     private captureViewportCenter() {
         if (!this.initialFit && !this.viewportCenter) {

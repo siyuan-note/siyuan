@@ -21,6 +21,11 @@ const browserCases = async (source: string, css: string) => {
     const settle = async () => { await frame(); await frame(); await frame(); };
     const resizeWindow = async (width: number, height: number) => {
         await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
+        // 原生窗口调用返回时，渲染进程可能尚未收到新的视口尺寸。
+        for (let count = 0; count < 120 && (innerWidth !== width || innerHeight !== height); count++) {
+            await frame();
+        }
+        check.deepEqual([innerWidth, innerHeight], [width, height]);
         await settle();
     };
     const originalWindow = {width: innerWidth, height: innerHeight};
@@ -47,6 +52,9 @@ const browserCases = async (source: string, css: string) => {
             const equalCenter = (expected: number[]) => center().forEach((value, index) =>
                 check.ok(Math.abs(value - expected[index]) < 1e-8, "mode changes preserve the logical center"));
             const button = (label: string) => host.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
+            const preview = host.querySelector<HTMLElement>(".mindmap-view__document-viewport");
+            check.ok(preview.hidden);
+            check.ok(button("listMindmapDocumentViewport").hidden, "the preview control is fullscreen-only");
             const initialStyle = host.style.cssText;
             for (const scale of [.75, 1.25]) {
                 view.zoomAt(scale);
@@ -113,6 +121,67 @@ const browserCases = async (source: string, css: string) => {
                 await settle();
                 equalDocumentView();
             }
+
+            // 指示框标记原文档范围，平移缩放时跟随内容，不将预览变成布局编辑。
+            const previewCenter = center();
+            const previewScale = view.scale;
+            const root = host.querySelector<HTMLElement>(".mindmap-view__node");
+            const documentRect = viewport.getBoundingClientRect();
+            const nodeRect = root.getBoundingClientRect();
+            const relativeNode = [(nodeRect.left - documentRect.left) / viewport.clientWidth,
+                (nodeRect.top - documentRect.top) / viewport.clientHeight];
+            const sourceSize = [viewport.clientWidth, viewport.clientHeight];
+            const checkPreview = () => {
+                const rect = preview.getBoundingClientRect();
+                const node = root.getBoundingClientRect();
+                check.ok(Math.abs(rect.width - sourceSize[0] * view.scale / previewScale) < .1);
+                check.ok(Math.abs(rect.height - sourceSize[1] * view.scale / previewScale) < .1);
+                [(node.left - rect.left) / rect.width, (node.top - rect.top) / rect.height]
+                    .forEach((value, index) => check.ok(Math.abs(value - relativeNode[index]) < .001,
+                        "the same document content remains at the same relative position within the preview"));
+                check.equal(getComputedStyle(preview).pointerEvents, "none", "the frame does not intercept gestures");
+                check.equal(getComputedStyle(preview).borderTopStyle, "dashed");
+                check.equal(button("listMindmapDocumentViewport").getAttribute("aria-pressed"), "true");
+            };
+            button("fullscreen").click();
+            await settle();
+            check.equal(button("listMindmapDocumentViewport").hidden, false);
+            check.equal(button("listMindmapDocumentViewport").getAttribute("aria-pressed"), "false");
+            button("listMindmapDocumentViewport").click();
+            check.equal(preview.hidden, false);
+            checkPreview();
+            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "print");
+            check.equal(getComputedStyle(preview).display, "none", "viewport guides are excluded from printing");
+            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "");
+            checkPreview();
+            const savedPreview = JSON.stringify(view.documentView);
+            view.zoomAt(1.9);
+            viewport.dispatchEvent(new WheelEvent("wheel", {deltaX: 90, deltaY: 40, bubbles: true, cancelable: true}));
+            await settle();
+            checkPreview();
+            button("listMindmapDocumentViewport").click();
+            check.ok(preview.hidden);
+            check.equal(button("listMindmapDocumentViewport").getAttribute("aria-pressed"), "false");
+            button("listMindmapDocumentViewport").click();
+            view.setReadOnly(true);
+            checkPreview();
+            view.setLocked(true);
+            checkPreview();
+            view.setLocked(false);
+            view.setReadOnly(false);
+            check.equal(JSON.stringify(view.documentView), savedPreview, "preview operations never replace the saved view");
+            button("exitFullscreen").click();
+            await settle();
+            equalCenter(previewCenter);
+            check.equal(view.scale, previewScale);
+            check.ok(preview.hidden);
+            check.ok(button("listMindmapDocumentViewport").hidden);
+            button("fullscreen").click();
+            await settle();
+            check.ok(preview.hidden, "each fullscreen session starts without the optional frame");
+            button("exitFullscreen").click();
+            await settle();
+
             const rapid = center();
             button("fullscreen").click();
             button("exitFullscreen").click();
@@ -185,18 +254,26 @@ const browserCases = async (source: string, css: string) => {
             const reference = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
                 (Math.max(viewport.clientHeight, documentHeight) / 2 - view.offsetY) / view.scale];
             const fullReference = reference();
+            button("listMindmapDocumentViewport").click();
+            const savedWidth = view.documentView.width;
             for (const height of [520, 480, 479, 320, 479, 480, 520, 700]) {
                 const oldHeight = viewport.clientHeight;
                 const oldOffset = view.offsetY;
                 await resizeWindow(900, height);
                 reference().forEach((value, index) => check.ok(Math.abs(value - fullReference[index]) < 1e-8,
-                    "live height changes preserve the fullscreen reference without resetting its pan or zoom"));
+                    "live height changes preserve the fullscreen reference without resetting its pan or zoom: " +
+                    JSON.stringify({height, index, value, expected: fullReference[index],
+                        size: view.viewportSize, actual: [viewport.clientWidth, viewport.clientHeight],
+                        scale: view.scale, offset: [view.offsetX, view.offsetY]})));
                 if (oldHeight <= documentHeight && viewport.clientHeight <= documentHeight) {
                     check.equal(view.offsetY, oldOffset, "short fullscreen viewports retain their top reference");
                 }
                 check.equal(view.scale, 1.6);
                 check.equal(view.documentView.scale, savedScale);
                 check.deepEqual([view.documentView.center.x, view.documentView.center.y], beforeHeightChanges);
+                check.ok(Math.abs(preview.getBoundingClientRect().width - savedWidth * 1.6 / savedScale) < .1);
+                check.ok(Math.abs(preview.getBoundingClientRect().height - documentHeight * 1.6 / savedScale) < .1,
+                    "height anchor changes do not stretch or rebase the document frame");
             }
             button("exitFullscreen").click();
             await settle();
@@ -330,6 +407,12 @@ app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     require("electron").ipcMain.handle("mindmap-fullscreen-size", (_event, width, height) => win.setContentSize(width, height));
+    require("electron").ipcMain.handle("mindmap-fullscreen-media", async (_event, media) => {
+        if (!win.webContents.debugger.isAttached()) {
+            win.webContents.debugger.attach("1.3");
+        }
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));

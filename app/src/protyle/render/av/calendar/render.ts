@@ -224,8 +224,11 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
         };
     };
     root.addEventListener("pointerdown", event => {
-        event.stopPropagation();
         const target = event.target as HTMLElement;
+        if (target.closest(".av__celltext--ref[data-id]")) {
+            return;
+        }
+        event.stopPropagation();
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         const entry = item && events.get(item.dataset.calendarItem);
         const endpoint = target.closest<HTMLElement>("[data-calendar-resize]")?.dataset.calendarResize as "start" | "end" | undefined;
@@ -280,7 +283,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             return;
         }
         const target = event.target as HTMLElement;
-        if (target.closest('[data-calendar-resize], [role="checkbox"]')) {
+        if (target.closest('[data-calendar-resize], [role="checkbox"], .av__celltext--ref[data-id]')) {
             return;
         }
         const item = target.closest<HTMLElement>("[data-calendar-item]");
@@ -508,9 +511,13 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         return true;
     };
     root.addEventListener("click", event => {
+        const target = event.target as HTMLElement;
+        // 主键引用交给编辑器处理，保留普通跳转、分屏修饰键和移动端的引用交互。
+        if (target.closest(".av__celltext--ref[data-id]")) {
+            return;
+        }
         event.stopPropagation();
         window.siyuan.menus.menu.remove();
-        const target = event.target as HTMLElement;
         if (toggleCheckbox(target)) {
             return;
         }

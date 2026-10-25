@@ -335,13 +335,22 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
         assert.match(html, new RegExp(`role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="false" aria-disabled="${!editable}"`));
         const item = {dataset: {calendarItem: "row"}};
         const field = {dataset: {colId: "second"}, closest: () => item};
-        const target = {closest: (selector: string) => selector.includes("checkbox") ? field : item};
+        const target = {closest: (selector: string) => selector.includes("checkbox") ? field :
+            selector === "[data-calendar-item]" ? item : null};
         handlers.click({target, stopPropagation() {}});
         handlers.keydown({target, key: " ", preventDefault() {}, stopPropagation() {}});
         handlers.pointerdown({target, button: 0, pointerType: "mouse", stopPropagation() {}});
         handlers.touchstart({target, touches: [{}]});
         assert.equal(opens, 0);
         assert.equal(updates.length, editable ? 2 : 0);
+        let referenceStopped = false;
+        const referenceTarget = {closest: (selector: string) => selector.includes(".av__celltext--ref[data-id]") ? {} : null};
+        handlers.click({target: referenceTarget, stopPropagation() { referenceStopped = true; }});
+        handlers.pointerdown({target: referenceTarget, stopPropagation() { referenceStopped = true; }});
+        handlers.touchstart({target: referenceTarget, touches: [{}]});
+        assert.equal(referenceStopped, false, "primary references bubble to the shared editor navigation on desktop and mobile");
+        assert.equal(startDrag, undefined, "primary references never start calendar dragging");
+        assert.equal(opens, 0, "primary references do not also open the row preview");
         for (const args of updates as Parameters<typeof import("../cell").updateCellsValue>[]) {
             assert.deepEqual(JSON.parse(JSON.stringify(args[2])), {checked: true});
             assert.equal(args[9][0].cell, cells[2]);

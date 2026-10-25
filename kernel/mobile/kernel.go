@@ -29,7 +29,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -332,10 +331,6 @@ func ShowMsg(msg string, timeout int) {
 
 func IsHttpServing() bool {
 	return util.HttpServing
-}
-
-func SetHttpServerPort(port int) {
-	filelock.AndroidServerPort = port
 }
 
 func GetCurrentWorkspacePath() string {

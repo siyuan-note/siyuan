@@ -26,7 +26,6 @@ import (
 
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -37,7 +36,6 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	initHttpClient()
 	ServerPort = FixedPort
 	Container = container
-	filelock.Container = Container
 	UserAgent = UserAgent + " " + Container + "/" + runtime.GOOS
 	httpclient.SetUserAgent(UserAgent)
 	Lang = lang

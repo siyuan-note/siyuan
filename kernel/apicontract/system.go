@@ -11,6 +11,11 @@ type SystemRuntimeInfoData struct {
 	Text string `json:"text"`
 }
 
+// SystemFileTraversalData contains a bounded JSON-lines metadata diagnostic.
+type SystemFileTraversalData struct {
+	Text string `json:"text"`
+}
+
 type SystemPathRequest struct {
 	Path string `json:"path"`
 }

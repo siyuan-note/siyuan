@@ -2420,6 +2420,8 @@ export type SystemExitRequestInput = { "execInstallPkg"?: number | null; "force"
 
 export type SystemExportConfData = { "name": string; "zip": string; };
 
+export type SystemFileTraversalData = { "text": string; };
+
 export type SystemFont = { "aliases"?: Array<string>; "displayName": string; "family": string; "spacing"?: string; "weight": number; };
 
 export type SystemGlobalGraph = { "d3": SystemD3 | null; "dailyNote": boolean; "minRefs": number; "type": SystemTypeFilter | null; };
@@ -7997,6 +7999,22 @@ export interface APIPOSTRoutes {
         body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["public"];
+    };
+    /**
+     * 无需参数，要求管理员权限并允许只读模式，以当前内核进程身份诊断 data 目录的遍历。
+     * text 为 JSON Lines，比较标准库和原始目录项，不读取正文、不写入工作空间、不下载或解密资源。
+     * 首行包含思源版本、容器和移动端提供的系统版本，便于关联 Android/SDK 及具体内核版本。
+     * Android/Linux 使用 4/8/32 KiB 缓冲区执行三轮；每轮至多 20000 个目录、100000 个目录项及 100 条详情。
+     * 包含运行版本、UID、文件系统类型、零 inode、路径差异、目录变化及读取错误；路径相对于 data。
+     * 不支持原始目录读取的平台返回 rawSupported=false，不将未执行的比较视为通过。
+     * 并发诊断返回 code=-1；请求取消或 60 秒超时会停止后续扫描，不保证并发编辑时的原子快照。
+     */
+    "/api/system/checkFileTraversal": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemFileTraversalData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/checkUpdate": {
         request: SystemCheckUpdateRequestInput;

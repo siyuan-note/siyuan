@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "Düğüm renklerini yönet",
+	"listMindmapManageLineColors": "Çizgi renklerini yönet",
 	"listMindmapDocumentLayout": "Belge düzeni",
 	"fullCheckSnapshot": "Tam içerik denetimi",
 	"fullCheckSnapshotTip": "Boyut ve değiştirilme zamanı aynı kalsa bile içerik değişikliklerini bulmak için tüm yerel dosyaları okuyun ve gerekirse anlık görüntü oluşturun; bu denetim için kaynaklar indirilmez ve büyük çalışma alanlarında daha uzun sürebilir",

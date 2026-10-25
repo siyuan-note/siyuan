@@ -40,7 +40,7 @@ export interface ListMindmapViewOptions {
         label: string, color: string, backgroundColor: string,
         preview?: {color: string, backgroundColor: string},
     }[];
-    onManageNodeColors?: () => void;
+    onManageNodeColors?: (anchor: HTMLButtonElement) => void;
     onManageLineColors?: () => void;
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onInteractionStart?: (event: PointerEvent) => () => void;
@@ -3705,7 +3705,7 @@ export class ListMindmapView {
             };
             const palette = createElement("div", "mindmap-view__palette");
             palette.setAttribute("role", "group");
-            palette.setAttribute("aria-label", this.label("color"));
+            palette.setAttribute("aria-label", this.label("listMindmapNodeColor"));
             [{label: this.label("default"), color: "", backgroundColor: "", preview: undefined},
                 ...(this.options.nodeColors?.() || [])].forEach(item => {
                 const selected = panel.ids.every(id => {
@@ -3721,12 +3721,14 @@ export class ListMindmapView {
                 control.style.backgroundColor = item.preview?.backgroundColor ?? item.backgroundColor;
                 palette.append(control);
             });
+            const row = createElement("div", "mindmap-view__palette-row");
+            row.append(palette);
             if (this.options.onManageNodeColors) {
-                palette.append(button("manageColors", "iconSettings", this.options.onManageNodeColors));
+                const manage = button("listMindmapManageNodeColors", "iconFont", () => this.options.onManageNodeColors(manage));
+                manage.setAttribute("aria-haspopup", "menu");
+                row.append(manage);
             }
-            const title = createElement("div", "ft__smaller ft__on-surface");
-            title.textContent = this.label("listMindmapNodeColor");
-            this.inspectorPopover.append(title, palette);
+            this.inspectorPopover.append(row);
             if (panel.ids.length > 1) {
                 const lines = createElement("div", "mindmap-view__palette");
                 lines.setAttribute("role", "group");
@@ -3737,12 +3739,12 @@ export class ListMindmapView {
                     control.style.backgroundColor = item.value || "var(--b3-theme-background)";
                     lines.append(control);
                 });
+                const lineRow = createElement("div", "mindmap-view__palette-row");
+                lineRow.append(lines);
                 if (this.options.onManageLineColors) {
-                    lines.append(button("manageColors", "iconSettings", this.options.onManageLineColors));
+                    lineRow.append(button("listMindmapManageLineColors", "iconLine", this.options.onManageLineColors));
                 }
-                const lineTitle = createElement("div", "ft__smaller ft__on-surface");
-                lineTitle.textContent = this.label("listMindmapLineColor");
-                this.inspectorPopover.append(lineTitle, lines);
+                this.inspectorPopover.append(lineRow);
             }
         } else {
             const row = createElement("div", "mindmap-view__node-width");
@@ -3839,7 +3841,7 @@ export class ListMindmapView {
                 palette.append(button);
             });
             if (this.options.onManageLineColors) {
-                palette.append(squareButton("manageColors", "iconSettings", this.options.onManageLineColors));
+                palette.append(squareButton("listMindmapManageLineColors", "iconLine", this.options.onManageLineColors));
             }
             this.inspector.append(palette);
         };

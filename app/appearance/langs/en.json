@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "Manage node colors",
+	"listMindmapManageLineColors": "Manage line colors",
 	"listMindmapDocumentLayout": "Document layout",
 	"fullCheckSnapshot": "Full content check",
 	"fullCheckSnapshotTip": "Read all local files to detect content changes even when size and modification time are unchanged, and create a snapshot if needed; resources are not downloaded for this check, and large workspaces may take longer",

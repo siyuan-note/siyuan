@@ -21,12 +21,7 @@ import {previewDocImage} from "../../preview/image";
 import {suspendBlockPopover} from "../../../block/popover";
 import {matchHotKey} from "../../util/hotKey";
 import {setFullscreen} from "../../breadcrumb/action";
-import {
-    getBuiltinColorPropertyValue, getBuiltinInlineStylePreview, getBuiltinInlineStylePropertyValue,
-    getInlineStyleByID, getInlineStylePreview, getInlineStylePropertyValue,
-    getInlineStylesCache, getVisibleOrderedStyleKeys, isBuiltinOrderKey,
-    TBuiltinInlineStyleID,
-} from "../../toolbar/inlineStyle";
+import {getCurrentInlineStyleMode, getInlineStylesCache} from "../../toolbar/inlineStyle";
 import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
@@ -41,6 +36,7 @@ import {syncListMindmapHeight} from "./height";
 import {bindListMindmapResize} from "./resize";
 import {setBlockHeight} from "../../gutter/height";
 import {ListMindmapView} from "./view";
+import {getListMindmapLineColors, getListMindmapNodeColors, getListMindmapNodeColorMenu} from "./colors";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
@@ -373,32 +369,19 @@ class ListMindmapController {
                     restoreFullscreenChrome = undefined;
                 }
             },
-            colors: () => {
-                const type = "color";
-                const data = getInlineStylesCache();
-                return getVisibleOrderedStyleKeys(type, data).map(key => {
-                    if (isBuiltinOrderKey(type, key)) {
-                        return {label: `${window.siyuan.languages.color} ${key}`,
-                            value: getBuiltinColorPropertyValue(Number(key), type)};
-                    }
-                    const style = getInlineStyleByID(key, data);
-                    return {label: style.name, value: getInlineStylePropertyValue(style, type)};
-                });
-            },
-            nodeColors: () => {
-                const data = getInlineStylesCache();
-                return getVisibleOrderedStyleKeys("style1", data).map(key => {
-                    if (isBuiltinOrderKey("style1", key)) {
-                        return {label: window.siyuan.languages[`${key}Style`],
-                            color: getBuiltinInlineStylePropertyValue(key as TBuiltinInlineStyleID, "color"),
-                            backgroundColor: getBuiltinInlineStylePropertyValue(key as TBuiltinInlineStyleID, "backgroundColor"),
-                            preview: getBuiltinInlineStylePreview(key as TBuiltinInlineStyleID)};
-                    }
-                    const style = getInlineStyleByID(key, data);
-                    return {label: style.name, ...getInlineStylePreview(style)};
-                });
-            },
-            onManageNodeColors: () => openInlineStyleDialog("style1"),
+            colors: () => getListMindmapLineColors(getInlineStylesCache(), window.siyuan.languages, getCurrentInlineStyleMode()),
+            nodeColors: () => getListMindmapNodeColors(getInlineStylesCache(), window.siyuan.languages, getCurrentInlineStyleMode()),
+            onManageNodeColors: anchor => toggleMenu({target: anchor, build: (_menu, session) => {
+                const menu = new Menu();
+                getListMindmapNodeColorMenu(window.siyuan.languages, type => openInlineStyleDialog(type))
+                    .forEach(item => menu.addItem(item));
+                if (isMobile()) {
+                    session.show(() => menu.fullscreen("bottom"));
+                } else {
+                    const rect = anchor.getBoundingClientRect();
+                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                }
+            }}),
             onManageLineColors: () => openInlineStyleDialog("color"),
             finishEdit: () => this.activeEditor?.finish(),
             onExit: async () => {

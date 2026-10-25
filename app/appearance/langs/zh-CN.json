@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "管理节点配色",
+	"listMindmapManageLineColors": "管理连线颜色",
 	"listMindmapDocumentLayout": "文档布局",
 	"fullCheckSnapshot": "完整校验",
 	"fullCheckSnapshotTip": "读取所有本地文件，检查大小和修改时间未变的内容变化，必要时创建快照；不会为校验主动下载资源，大型工作空间可能耗时较长",

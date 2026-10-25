@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "ノードの色を管理",
+	"listMindmapManageLineColors": "線の色を管理",
 	"listMindmapDocumentLayout": "ドキュメントのレイアウト",
 	"fullCheckSnapshot": "内容の完全チェック",
 	"fullCheckSnapshotTip": "ローカルの全ファイルを読み取り、サイズと更新日時が変わらない内容の変更も検出し、必要ならスナップショットを作成します。チェックのためのリソースのダウンロードは行わず、大きなワークスペースでは時間がかかる場合があります",

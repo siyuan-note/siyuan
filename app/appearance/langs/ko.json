@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "노드 색상 관리",
+	"listMindmapManageLineColors": "선 색상 관리",
 	"listMindmapDocumentLayout": "문서 레이아웃",
 	"fullCheckSnapshot": "전체 내용 검사",
 	"fullCheckSnapshotTip": "모든 로컬 파일을 읽어 크기와 수정 시간이 같아도 내용 변경을 감지하고 필요하면 스냅샷을 만듭니다. 검사를 위해 리소스를 다운로드하지 않으며 큰 작업 공간에서는 시간이 더 걸릴 수 있습니다",

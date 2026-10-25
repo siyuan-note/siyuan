@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "管理節點配色",
+	"listMindmapManageLineColors": "管理連線顏色",
 	"listMindmapDocumentLayout": "文件版面配置",
 	"fullCheckSnapshot": "完整校驗",
 	"fullCheckSnapshotTip": "讀取所有本機檔案，檢查大小與修改時間未變的內容變更，必要時建立快照；不會為校驗主動下載資源，大型工作空間可能耗時較長",

@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "إدارة ألوان العقد",
+	"listMindmapManageLineColors": "إدارة ألوان الخطوط",
 	"listMindmapDocumentLayout": "تخطيط المستند",
 	"fullCheckSnapshot": "فحص المحتوى بالكامل",
 	"fullCheckSnapshotTip": "قراءة جميع الملفات المحلية لاكتشاف تغييرات المحتوى حتى مع ثبات الحجم ووقت التعديل، وإنشاء لقطة عند الحاجة؛ لن تُنزّل الموارد لهذا الفحص، وقد تستغرق مساحات العمل الكبيرة وقتًا أطول",

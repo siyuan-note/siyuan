@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "ניהול צבעי צמתים",
+	"listMindmapManageLineColors": "ניהול צבעי קווים",
 	"listMindmapDocumentLayout": "פריסת המסמך",
 	"fullCheckSnapshot": "בדיקת תוכן מלאה",
 	"fullCheckSnapshotTip": "קריאת כל הקבצים המקומיים לזיהוי שינויי תוכן גם כשהגודל וזמן השינוי נשארו זהים, ויצירת תמונת מצב לפי הצורך; משאבים לא יורדו לצורך הבדיקה, וסביבות עבודה גדולות עשויות לדרוש זמן רב יותר",

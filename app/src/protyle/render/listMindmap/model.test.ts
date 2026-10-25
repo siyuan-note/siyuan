@@ -1203,6 +1203,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let undo = 0;
     let redo = 0;
     let settingsOpened = 0;
+    const colorSettings: {kind: string, anchor?: HTMLButtonElement}[] = [];
     let overflowExpand: ((level: number | "expandAll" | "foldAll") => void) | undefined;
     let panMenu: {active: boolean, toggle: () => void};
     let finishAllowed: boolean | Promise<boolean> = true;
@@ -1212,6 +1213,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         colors: () => [{label: "Appearance background", value: "var(--b3-font-background1)"}],
         nodeColors: () => [{label: "Appearance combined", color: "var(--b3-font-color1)",
             backgroundColor: "var(--b3-font-background1)", preview: {color: "#112233", backgroundColor: "#ddeeff"}}],
+        onManageNodeColors: (anchor: HTMLButtonElement) => colorSettings.push({kind: "node", anchor}),
+        onManageLineColors: () => colorSettings.push({kind: "line"}),
         onFullscreen: (enter: boolean) => fullscreenChanges.push(enter),
         onInteractionStart: () => {
             interactions++;
@@ -2225,12 +2228,24 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const popup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
         const palettes = popup.querySelectorAll<HTMLElement>(".mindmap-view__palette");
         check.equal(palettes.length, 2);
-        check.equal(palettes[0].previousElementSibling.textContent, "listMindmapNodeColor");
-        check.equal(palettes[1].previousElementSibling.textContent, "listMindmapLineColor");
+        check.equal(palettes[0].getAttribute("aria-label"), "listMindmapNodeColor");
+        check.equal(palettes[1].getAttribute("aria-label"), "listMindmapLineColor");
+        check.equal(popup.children.length, 2, "the popup has only two compact rows without visible headings");
+        const managers = ["listMindmapManageNodeColors", "listMindmapManageLineColors"]
+            .map(key => popup.querySelector<HTMLButtonElement>(`[aria-label="${key}"]`));
+        check.deepEqual(managers.map(control => control.querySelector("use").getAttribute("xlink:href")),
+            ["#iconFont", "#iconLine"], "distinct icons identify the two settings controls");
+        check.equal(managers[0].getBoundingClientRect().right, managers[1].getBoundingClientRect().right,
+            "settings stay in one fixed right-hand column with unequal custom palette sizes");
+        check.ok(palettes[1].getBoundingClientRect().top >= palettes[0].getBoundingClientRect().bottom,
+            "node colors are visually above line colors");
+        const rowsHeight = Array.from(popup.children).reduce((height, row) => height + row.getBoundingClientRect().height, 0);
+        check.ok(popup.offsetHeight <= Math.ceil(rowsHeight + 20),
+            "the popup contains only the two rows, padding and their gap, including native scrollbars");
         for (const palette of palettes) {
             const buttons = Array.from(palette.children) as HTMLElement[];
             check.equal(new Set(buttons.map(button => button.offsetTop)).size, 1, "each palette keeps one row");
-            check.ok(palette.getBoundingClientRect().right <= popup.getBoundingClientRect().right);
+            check.ok(palette.getBoundingClientRect().right <= palette.nextElementSibling.getBoundingClientRect().left);
             if (width < 760) {
                 check.ok(palette.scrollWidth > palette.clientWidth, "narrow palettes scroll horizontally");
             }
@@ -2239,9 +2254,46 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(palettes[1].scrollWidth, palettes[1].clientWidth,
                 "the normal line palette fits one row on a wide canvas");
         }
+        const beforeSettings = nodeStyles.length;
+        managers[0].focus();
+        check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapManageNodeColors");
+        managers[0].click();
+        managers[1].click();
+        check.deepEqual(colorSettings.slice(-2), [{kind: "node", anchor: managers[0]}, {kind: "line"}]);
+        check.equal(nodeStyles.length, beforeSettings, "opening settings does not apply colors");
+        const managerLeft = managers[1].getBoundingClientRect().left;
+        palettes[1].scrollLeft = palettes[1].scrollWidth;
+        check.equal(managers[1].getBoundingClientRect().left, managerLeft, "scrolling colors never scrolls the settings button");
         palettes[1].querySelector<HTMLButtonElement>('[aria-label="Line 14"]').click();
         check.deepEqual(nodeStyles.at(-1), [view.getSelectedIds(), {lineColor: "rgb(14, 0, 0)"}]);
     }
+    options.nodeColors = () => Array.from({length: 13}, (_, i) => ({label: `Color ${i}`, color: `rgb(${i}, 0, 0)`, backgroundColor: "",
+        preview: {color: `rgb(${i}, 0, 0)`, backgroundColor: ""}}));
+    options.colors = () => Array.from({length: 13}, (_, i) => ({label: `Line ${i}`, value: `rgb(${i}, 0, 0)`}));
+    view.renderInspector();
+    inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+    const equalPalettes = host.querySelectorAll<HTMLElement>(".mindmap-view__inspector-popover .mindmap-view__palette");
+    check.equal(equalPalettes[0].children.length, 14, "default and thirteen color cells occupy each row");
+    check.equal(equalPalettes[1].children.length, 14);
+    Array.from(equalPalettes[0].children).forEach((control, i) => {
+        const nodeCell = control.getBoundingClientRect();
+        const lineCell = equalPalettes[1].children[i].getBoundingClientRect();
+        check.equal(nodeCell.left, lineCell.left, "equal default palettes align every column");
+        check.equal(nodeCell.width, lineCell.width);
+        check.equal(nodeCell.height, lineCell.height);
+    });
+    host.focus();
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    const paletteSelection = view.getSelectedIds();
+    const touchColorPoint = centerPoint(inspector.querySelector('[aria-label="color"]'));
+    await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+        {type: "touchStart", touchPoints: [{id: 1, ...touchColorPoint}]},
+        {type: "touchEnd", touchPoints: []},
+    ]);
+    await settle();
+    check.equal(host.querySelector<HTMLElement>(".mindmap-view__inspector-popover").hidden, false,
+        "a native touch tap opens the same compact two-row palette");
+    check.deepEqual(view.getSelectedIds(), paletteSelection, "opening the palette by touch preserves the selected nodes");
     options.colors = originalLineColors;
     view.focusNode(beta);
     host.style.cssText = originalHostStyle;
@@ -2331,7 +2383,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.focusNode(beta);
     inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
     check.equal(inspector.querySelectorAll('[role="group"]').length, 0, "palettes are kept out of the main bar");
-    const nodePalette = nodePopup.querySelector<HTMLElement>('[role="group"][aria-label="color"]');
+    const nodePalette = nodePopup.querySelector<HTMLElement>('[role="group"][aria-label="listMindmapNodeColor"]');
     const nodeColorButton = nodePalette.querySelector<HTMLButtonElement>('[aria-label="Appearance combined"]');
     check.equal(nodeColorButton.textContent, "A");
     check.equal(nodeColorButton.classList.contains("color__square"), true);
@@ -2349,7 +2401,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     host.style.setProperty("--b3-font-background1", "#334455");
     check.equal(getComputedStyle(nodeElement(beta)).backgroundColor, "rgb(51, 68, 85)",
         "node colors follow changes to the appearance palette");
-    nodePopup.querySelector<HTMLButtonElement>('[aria-label="color"] [aria-label="default"]').click();
+    nodePopup.querySelector<HTMLButtonElement>('[aria-label="listMindmapNodeColor"] [aria-label="default"]').click();
     check.deepEqual(nodeStyles[nodeStyles.length - 1], [beta, {textColor: "", backgroundColor: ""}]);
     model.metadata.nodes[beta].backgroundColor = "";
     model.metadata.nodes[beta].textColor = "";

@@ -955,6 +955,21 @@
     pointer-events: none;
   }
 
+  &__palette-row {
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+
+    .mindmap-view__palette {
+      flex: 1;
+      order: 0;
+    }
+
+    > .color__square {
+      flex-shrink: 0;
+    }
+  }
+
   &__palette {
     display: flex;
     flex-wrap: nowrap;

@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "Gestisci i colori dei nodi",
+	"listMindmapManageLineColors": "Gestisci i colori delle linee",
 	"listMindmapDocumentLayout": "Layout del documento",
 	"fullCheckSnapshot": "Verifica completa del contenuto",
 	"fullCheckSnapshotTip": "Legge tutti i file locali per rilevare modifiche al contenuto anche se dimensioni e data di modifica restano invariate, creando un’istantanea se necessario; non vengono scaricate risorse per questa verifica e gli spazi di lavoro grandi possono richiedere più tempo",

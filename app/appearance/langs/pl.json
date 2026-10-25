@@ -1,4 +1,6 @@
 {
+	"listMindmapManageNodeColors": "Zarządzaj kolorami węzłów",
+	"listMindmapManageLineColors": "Zarządzaj kolorami linii",
 	"listMindmapDocumentLayout": "Układ dokumentu",
 	"fullCheckSnapshot": "Pełna kontrola zawartości",
 	"fullCheckSnapshotTip": "Odczytaj wszystkie pliki lokalne, aby wykryć zmiany zawartości mimo niezmienionego rozmiaru i czasu modyfikacji, i w razie potrzeby utwórz migawkę; zasoby nie są pobierane na potrzeby tej kontroli, a duże obszary robocze mogą wymagać więcej czasu",

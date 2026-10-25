@@ -1704,19 +1704,14 @@ type="checkbox">
         const dropTarget = mount.element.firstElementChild as HTMLElement;
         const dropElement = dropTarget.querySelector(".config-bazaar__drop");
         let dragDepth = 0;
-        // 集市内部拖拽（如 README 图片）也可能携带 Files 类型，因此按拖拽发起位置区分本地文件
-        let internalDrag = false;
-        const endInternalDrag = () => {
-            internalDrag = false;
-        };
-        dropTarget.addEventListener("dragstart", () => {
-            internalDrag = true;
+        // 内部拖拽标记随本次数据传递，拖拽源被移除也不会影响后续本地文件拖入
+        const internalDragType = "application/siyuan-bazaar-internal";
+        dropTarget.addEventListener("dragstart", (event: DragEvent) => {
+            event.dataTransfer?.setData(internalDragType, "1");
         });
-        dropTarget.addEventListener("dragend", endInternalDrag);
-        // 拖拽源被移除时不会派发 dragend，用鼠标抬起兜底清除标记
-        dropTarget.addEventListener("mouseup", endInternalDrag);
         const isFileDrag = (event: DragEvent) =>
-            !internalDrag && hasDataTransferFiles(event.dataTransfer?.types || []);
+            !Array.from(event.dataTransfer?.types || []).includes(internalDragType) &&
+            hasDataTransferFiles(event.dataTransfer?.types || []);
         // 系统拖入已知非 ZIP 文件（如图片）时不显示安装遮罩，但拖拽数据里的类型可能缺失，缺失时按未知处理
         const localPackageMimeTypes = ["application/zip", "application/x-zip-compressed", "multipart/x-zip"];
         const isLocalPackageDrag = (event: DragEvent) => {

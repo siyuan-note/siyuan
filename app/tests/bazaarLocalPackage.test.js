@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
+const {readFileSync, writeFileSync, mkdtempSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const ts = require("typescript");
@@ -132,13 +132,24 @@ const runCases = compiled => {
             assert.equal(installed.length, 0);
         }
 
-        // 拖拽源被移除时不会派发 dragend，鼠标抬起后本地文件拖拽需恢复
+        // 拖拽源移除后在集市外结束拖拽，不影响下一次本地文件拖入
         dispatch(refreshed, "dragstart", imageTransfer);
-        assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, false);
-        dispatch(overlay, "mouseup", zip);
+        refreshed.remove();
+        dispatch(refreshed, "dragend", imageTransfer);
+        document.body.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+        assert.equal(dispatch(readme, "dragenter", imageTransfer).defaultPrevented, false,
+            "The removed source's transfer remains internal");
+        assert.equal(hidden(), true);
         assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, true,
-            "Mouse release clears a drag whose dragend never arrived");
-        dispatch(overlay, "drop", zip);
+            "A new file drag is independent of the removed source's lifecycle");
+        assert.equal(hidden(), false);
+        assert.equal(dispatch(overlay, "drop", zip).defaultPrevented, true);
+        assert.equal(installed.pop(), "package.ZIP");
+
+        // 即使内部拖拽没有任何结束事件，新的拖拽数据也应独立判断
+        dispatch(readme, "dragstart", imageTransfer);
+        assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, true);
+        assert.equal(dispatch(overlay, "drop", zip).defaultPrevented, true);
         assert.equal(installed.pop(), "package.ZIP");
     }
     frontend = "mobile";
@@ -153,6 +164,73 @@ const runCases = compiled => {
     assert.equal(input.value, "");
     assert.equal(errors.length, 0);
     return "Bazaar local package drag cases passed";
+};
+
+const runRemovedSourceDragCase = async (win, compiled, profile) => {
+    const setup = compiled => {
+        document.body.innerHTML = '<div id="mount"><div id="target" style="width:400px;height:250px">' +
+            '<div class="config-bazaar__drop fn__none"></div><div id="source" draggable="true" ' +
+            'style="width:100px;height:100px">Drag source</div></div></div>';
+        const installed = [];
+        const bazaar = new Function("getFrontend", "showMessage", "hasDataTransferFiles", compiled)(
+            () => "desktop", message => { throw new Error(message); }, types => Array.from(types).includes("Files"));
+        bazaar._installLocalPackage = file => installed.push(file.name);
+        bazaar._bindLocalPackageEvent({}, {element: document.getElementById("mount")});
+        document.getElementById("source").addEventListener("dragstart", event => {
+            event.dataTransfer.setData("text/plain", "Internal content");
+        });
+        const fileEvents = [];
+        for (const type of ["dragenter", "drop"]) {
+            document.getElementById("target").addEventListener(type, event => {
+                fileEvents.push({type, trusted: event.isTrusted, prevented: event.defaultPrevented});
+            });
+        }
+        window.getDragState = () => ({installed, fileEvents,
+            hidden: document.querySelector(".config-bazaar__drop").classList.contains("fn__none")});
+    };
+    await win.webContents.executeJavaScript(`(${setup.toString()})(${JSON.stringify(compiled)})`);
+    win.webContents.debugger.attach("1.3");
+    const send = (method, params) => win.webContents.debugger.sendCommand(method, params);
+    let intercepted;
+    const onMessage = (event, method, params) => {
+        if (method === "Input.dragIntercepted") intercepted = params.data;
+    };
+    win.webContents.debugger.on("message", onMessage);
+    try {
+        await send("Input.setInterceptDrags", {enabled: true});
+        await send("Input.dispatchMouseEvent", {type: "mouseMoved", x: 40, y: 40});
+        await send("Input.dispatchMouseEvent", {type: "mousePressed", x: 40, y: 40,
+            button: "left", buttons: 1, clickCount: 1});
+        await send("Input.dispatchMouseEvent", {type: "mouseMoved", x: 70, y: 70, button: "left", buttons: 1});
+        await send("Input.dispatchMouseEvent", {type: "mouseMoved", x: 200, y: 200, button: "left", buttons: 1});
+        await require("node:timers/promises").setTimeout(100);
+        assert.ok(intercepted, "Chromium starts a native internal drag");
+        assert.ok(intercepted.items.some(item => item.mimeType === "text/plain" && item.data === "Internal content"),
+            "Origin tracking preserves native drag data");
+        await win.webContents.executeJavaScript('document.getElementById("source").remove()');
+        for (const type of ["dragEnter", "dragOver", "drop"]) {
+            await send("Input.dispatchDragEvent", {type, x: 600, y: 400, data: intercepted});
+        }
+        await send("Input.dispatchMouseEvent", {type: "mouseReleased", x: 600, y: 400,
+            button: "left", buttons: 0, clickCount: 1});
+
+        const zipPath = path.join(profile, "native-package.zip");
+        writeFileSync(zipPath, "test");
+        const data = {items: [], files: [zipPath], dragOperationsMask: 1};
+        await send("Input.dispatchDragEvent", {type: "dragEnter", x: 250, y: 200, data});
+        const entered = await win.webContents.executeJavaScript("getDragState()");
+        assert.equal(entered.hidden, false, "A native ZIP drag shows the overlay after the source was removed");
+        assert.deepEqual(entered.fileEvents, [{type: "dragenter", trusted: true, prevented: true}]);
+        await send("Input.dispatchDragEvent", {type: "dragOver", x: 250, y: 200, data});
+        await send("Input.dispatchDragEvent", {type: "drop", x: 250, y: 200, data});
+        const dropped = await win.webContents.executeJavaScript("getDragState()");
+        assert.equal(dropped.hidden, true);
+        assert.deepEqual(dropped.installed, ["native-package.zip"]);
+        assert.deepEqual(dropped.fileEvents.at(-1), {type: "drop", trusted: true, prevented: true});
+    } finally {
+        win.webContents.debugger.removeListener("message", onMessage);
+        win.webContents.debugger.detach();
+    }
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -170,6 +248,7 @@ if (process.versions.electron && process.type === "browser") {
                 return (${runCases.toString()})(${JSON.stringify(compiled)});
             } catch (error) { return error.stack; } })()`);
             assert.equal(result, "Bazaar local package drag cases passed");
+            await runRemovedSourceDragCase(win, compiled, process.argv[2]);
             console.log(result);
         } catch (error) {
             console.error(error);

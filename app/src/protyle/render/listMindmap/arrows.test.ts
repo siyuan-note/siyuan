@@ -317,6 +317,7 @@ test("the shared direction selector preserves focus and only patches arrow direc
     Object.assign(target, {
         inspector: new Control("div"), selectedRelation: "r", model: {metadata: {relations: [relation]}},
         label: (key: string) => key,
+        queueInspectorLayout: () => {},
         makeButton: () => {
             const button = new Control("button");
             button.append(new Control("svg"));

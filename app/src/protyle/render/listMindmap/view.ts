@@ -137,6 +137,8 @@ export class ListMindmapView {
         widths: {id: string, width: number}[], baseWidth: number, slider: number, preview: boolean,
     };
     private widthPending = false;
+    private inspectorFrame = 0;
+    private revealInspectorHost = false;
     private readonly zoomLabel: HTMLSpanElement;
     private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
@@ -268,6 +270,26 @@ export class ListMindmapView {
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
         this.listen(options.host, "pointerdown", this.activatePointer, {capture: true});
         this.listen(options.host, "click", this.activatePointer, {capture: true});
+        this.listen(options.host, "click", (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            // 点击完成后再滚动文档，避免节点拖动、双指缩放和控件操作改变阅读位置。
+            if (!this.panning && !this.pinching && !this.suppressLinkClick &&
+                target.closest(".mindmap-view") === options.host && this.viewport.contains(target) &&
+                !target.closest("input, select, textarea, a, audio, video, iframe, .mindmap-view__node--editing") &&
+                (!target.closest("button") || target.closest(".mindmap-view__relation"))) {
+                this.queueInspectorLayout(true);
+            }
+        }, {capture: true});
+        this.listen(document, "scroll", (event: Event) => {
+            if (event.target === document || event.target instanceof Element && event.target.contains(options.host)) {
+                this.queueInspectorLayout();
+            }
+        }, {capture: true, passive: true});
+        this.listen(window, "resize", () => this.queueInspectorLayout());
+        if (window.visualViewport) {
+            this.listen(window.visualViewport, "resize", () => this.queueInspectorLayout());
+            this.listen(window.visualViewport, "scroll", () => this.queueInspectorLayout());
+        }
         this.listen(options.host, "focusout", (event: FocusEvent) => {
             if (event.relatedTarget instanceof Node && !options.host.contains(event.relatedTarget)) {
                 this.setInteractionActive(false);
@@ -374,22 +396,26 @@ export class ListMindmapView {
         this.resizeObserver = new ResizeObserver(entries => {
             this.updateToolbarLayout();
             // 展开会让隐藏节点恢复尺寸；布局已测量这些节点，不应被同一尺寸的通知中断动画。
-            const resized = !this.stopFoldAnimation || entries.some(({target}) => {
+            const resized = entries.some(({target}) => {
                 if (target === this.viewport) {
                     return true;
                 }
                 const element = target as HTMLElement;
                 const position = this.positions.get(element.dataset.mindmapId) ||
                     this.summaryPositions.get(element.dataset.summaryId);
-                return !element.hidden && position &&
-                    (element.offsetWidth !== position.width || element.offsetHeight !== position.height);
+                return !element.hidden && position && (!this.stopFoldAnimation ||
+                    element.offsetWidth !== position.width || element.offsetHeight !== position.height);
             });
             if (resized) {
                 this.refreshLayout();
             }
-            this.positionInspectorPanel();
+            this.queueInspectorLayout();
         });
         this.resizeObserver.observe(this.viewport);
+        // 分屏和面板调整会改变外层裁剪范围，即使画布自身尺寸没有变化也要更新浮层。
+        for (let parent = options.host.parentElement; parent; parent = parent.parentElement) {
+            this.resizeObserver.observe(parent);
+        }
         this.update(this.model);
     }
 
@@ -1155,6 +1181,7 @@ export class ListMindmapView {
         this.setInteractionActive(true);
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
+        this.queueInspectorLayout(true);
         this.revealNode(id);
     }
 
@@ -3620,20 +3647,101 @@ export class ListMindmapView {
         this.renderInspectorPanel();
     }
 
+    private queueInspectorLayout(reveal = false) {
+        if (this.destroyed || this.inspector.hidden && !reveal) {
+            return;
+        }
+        this.revealInspectorHost ||= reveal;
+        if (this.inspectorFrame) {
+            return;
+        }
+        this.inspectorFrame = requestAnimationFrame(() => {
+            this.inspectorFrame = 0;
+            const revealHost = this.revealInspectorHost;
+            this.revealInspectorHost = false;
+            if (this.destroyed || this.inspector.hidden || this.readOnly) {
+                return;
+            }
+            if (revealHost && !this.pointer && !this.pinching && !this.fullscreenMarker) {
+                this.revealInspectorContainer();
+            }
+            this.positionInspector();
+        });
+    }
+
+    private revealInspectorContainer() {
+        // 只有能完整放入编辑区的脑图才滚动文档；高画布保持当前位置并让操作栏跟随可见区域。
+        for (let parent = this.options.host.parentElement; parent; parent = parent.parentElement) {
+            const host = this.options.host.getBoundingClientRect();
+            const clip = this.getViewportClip();
+            if (!host.height || host.height > clip.bottom - clip.top) {
+                return;
+            }
+            const delta = host.top < clip.top ? host.top - clip.top : Math.max(0, host.bottom - clip.bottom);
+            if (Math.abs(delta) < 1) {
+                return;
+            }
+            if (parent.scrollHeight > parent.clientHeight &&
+                /^(auto|scroll|overlay)$/.test(getComputedStyle(parent).overflowY)) {
+                const scale = parent.getBoundingClientRect().height / parent.offsetHeight || 1;
+                parent.scrollBy({top: delta / scale, behavior: "instant"});
+            }
+        }
+    }
+
+    private getVisibleViewportBounds() {
+        const bounds = this.viewport.getBoundingClientRect();
+        const clip = this.getViewportClip();
+        return {left: Math.max(bounds.left, clip.left), right: Math.min(bounds.right, clip.right),
+            top: Math.max(bounds.top, clip.top), bottom: Math.min(bounds.bottom, clip.bottom)};
+    }
+
+    private positionInspector() {
+        const host = this.options.host.getBoundingClientRect();
+        const visible = this.getVisibleViewportBounds();
+        const scaleX = host.width / this.options.host.offsetWidth || 1;
+        const scaleY = host.height / this.options.host.offsetHeight || 1;
+        const width = (visible.right - visible.left) / scaleX - 16;
+        this.inspector.style.maxWidth = `${Math.max(0, width)}px`;
+        this.inspector.style.left = `${((visible.left + visible.right) / 2 - host.left) / scaleX -
+            this.options.host.clientLeft}px`;
+        this.inspector.style.bottom = `${this.options.host.clientTop + this.options.host.clientHeight -
+            (visible.bottom - host.top) / scaleY + 8}px`;
+        // 可见条带放不下操作栏时保留选择，滚动回足够的空间后恢复显示。
+        this.inspector.style.visibility = width <= 0 ||
+            (visible.bottom - visible.top) / scaleY < this.inspector.offsetHeight + 16 ? "hidden" : "";
+        this.positionInspectorPanel();
+    }
+
     private positionInspectorPanel() {
-        if (this.inspectorPopover.hidden || !this.inspectorPanel) {
+        if (this.destroyed || this.inspectorPopover.hidden || !this.inspectorPanel) {
             return;
         }
         const host = this.options.host.getBoundingClientRect();
+        const visible = this.getVisibleViewportBounds();
         const anchor = this.inspectorPanel.anchor.getBoundingClientRect();
         const scaleX = host.width / this.options.host.offsetWidth || 1;
         const scaleY = host.height / this.options.host.offsetHeight || 1;
-        const bottom = (host.bottom - this.inspector.getBoundingClientRect().top) / scaleY + 4;
-        const left = (anchor.left + anchor.width / 2 - host.left) / scaleX - this.inspectorPopover.offsetWidth / 2;
-        this.inspectorPopover.style.left = `${Math.max(8,
-            Math.min(left, this.options.host.offsetWidth - this.inspectorPopover.offsetWidth - 8))}px`;
-        this.inspectorPopover.style.bottom = `${bottom}px`;
-        this.inspectorPopover.style.maxHeight = `${Math.max(48, this.options.host.offsetHeight - bottom - 8)}px`;
+        const bar = this.inspector.getBoundingClientRect();
+        const above = (bar.top - visible.top) / scaleY - 12;
+        const below = (visible.bottom - bar.bottom) / scaleY - 12;
+        const width = Math.max(0, (visible.right - visible.left) / scaleX - 16);
+        this.inspectorPopover.style.maxWidth = `${width}px`;
+        const height = this.inspectorPopover.scrollHeight +
+            this.inspectorPopover.offsetHeight - this.inspectorPopover.clientHeight;
+        const placeAbove = above >= height || above >= below;
+        const available = Math.max(0, placeAbove ? above : below);
+        this.inspectorPopover.style.maxHeight = `${available}px`;
+        this.inspectorPopover.style.visibility = this.inspector.style.visibility === "hidden" ||
+            !width || !available ? "hidden" : "";
+        const left = (anchor.left + anchor.width / 2 - host.left) / scaleX -
+            this.options.host.clientLeft - this.inspectorPopover.offsetWidth / 2;
+        const minLeft = (visible.left - host.left) / scaleX - this.options.host.clientLeft + 8;
+        this.inspectorPopover.style.left = `${Math.max(minLeft,
+            Math.min(left, minLeft + width - this.inspectorPopover.offsetWidth))}px`;
+        this.inspectorPopover.style.bottom = "";
+        this.inspectorPopover.style.top = `${(placeAbove ? bar.top - host.top : bar.bottom - host.top) / scaleY -
+            this.options.host.clientTop + (placeAbove ? -4 - this.inspectorPopover.offsetHeight : 4)}px`;
     }
 
     private previewNodeWidths(widths: {id: string, width: number}[]) {
@@ -3813,6 +3921,7 @@ export class ListMindmapView {
         if (this.inspector.hidden || this.readOnly) {
             return;
         }
+        this.queueInspectorLayout();
         const focusArrowDirection = this.inspector.querySelector("select") === document.activeElement;
         this.inspector.replaceChildren();
         const lineSelected = !!this.selectedRelation || !!this.selectedEdge || !!this.selectedSummary;
@@ -4106,15 +4215,13 @@ export class ListMindmapView {
         }
     }
 
-    private getVisibleViewportAnchor() {
-        const bounds = this.viewport.getBoundingClientRect();
-        const scaleX = bounds.width ? this.viewport.clientWidth / bounds.width : 1;
-        const scaleY = bounds.height ? this.viewport.clientHeight / bounds.height : 1;
-        let left = Math.max(0, bounds.left);
-        let right = Math.min(window.innerWidth, bounds.right);
-        let top = Math.max(0, bounds.top);
-        let bottom = Math.min(window.innerHeight, bounds.bottom);
-        // 文档滚动容器可能只露出画布的一部分，进入全屏前保留实际正在阅读的区域。
+    private getViewportClip() {
+        const visual = window.visualViewport;
+        let left = visual?.offsetLeft || 0;
+        let right = Math.min(window.innerWidth, left + (visual?.width || window.innerWidth));
+        let top = visual?.offsetTop || 0;
+        let bottom = Math.min(window.innerHeight, top + (visual?.height || window.innerHeight));
+        // 文档滚动容器可能只露出画布的一部分，浮层和全屏取景共用实际可见边界。
         for (let parent = this.viewport.parentElement; parent; parent = parent.parentElement) {
             const style = getComputedStyle(parent);
             const rect = parent.getBoundingClientRect();
@@ -4131,6 +4238,14 @@ export class ListMindmapView {
                 bottom = Math.min(bottom, start + parent.clientHeight * ratioY);
             }
         }
+        return {left, right, top, bottom};
+    }
+
+    private getVisibleViewportAnchor() {
+        const bounds = this.viewport.getBoundingClientRect();
+        const scaleX = bounds.width ? this.viewport.clientWidth / bounds.width : 1;
+        const scaleY = bounds.height ? this.viewport.clientHeight / bounds.height : 1;
+        const {left, right, top, bottom} = this.getVisibleViewportBounds();
         return right > left && bottom > top ? {
             x: ((left + right) / 2 - bounds.left) * scaleX,
             y: (top - bounds.top) * scaleY,
@@ -4144,6 +4259,7 @@ export class ListMindmapView {
             return;
         }
         this.destroyed = true;
+        cancelAnimationFrame(this.inspectorFrame);
         this.stopFoldAnimation?.();
         cancelAnimationFrame(this.drawFrame);
         this.drawFrame = 0;

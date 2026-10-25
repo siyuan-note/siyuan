@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -467,7 +466,7 @@ func parseDocVersionTree(data []byte, rootID string) (ret *parse.Tree, err error
 		return
 	}
 	luteEngine := NewLute()
-	ret, _, err = dataparser.ParseJSON(data, luteEngine.ParseOptions)
+	ret, _, err = treenode.ParseJSON(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
 	}

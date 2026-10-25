@@ -328,7 +328,7 @@ var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.C
 			modeState = "recovering"
 		}
 		capabilities = &apicontract.DocumentCapabilities{AddressingVersion: snapshot.Mode,
-			ModeState: modeState, StructuredPaths: true, LiteralSlash: modeState == "structured", TitleFormats: []string{"plain"},
+			ModeState: modeState, StructuredPaths: true, LiteralSlash: modeState == "structured", TitleFormats: []string{"plain", "inline-ast"},
 			IndexState: indexState, MinimumReaderVersion: documentaddressing.MinimumReaderVersion(), Revision: snapshot.Revision}
 	}
 

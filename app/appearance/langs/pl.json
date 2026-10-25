@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Zapisz mój tytuł",
+	"documentTitleLatest": "Najnowszy tytuł",
+	"documentTitleInlineOnly": "Tytuły dokumentów obsługują tylko elementy liniowe",
+	"documentTitleConflict": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
+	"documentTitleCopyReload": "Skopiuj szkic i wczytaj najnowszy tytuł",
 	"listMindmapManageNodeColors": "Zarządzaj kolorami węzłów",
 	"listMindmapManageLineColors": "Zarządzaj kolorami linii",
 	"listMindmapDocumentLayout": "Układ dokumentu",
@@ -3460,6 +3465,9 @@
 		"437": "Pobierz tę wersję",
 		"438": "Wybierz prawidłowy obraz JPEG, PNG lub WebP o rozmiarze do 10 MiB i 16 megapikseli",
 		"439": "Nie można zapisać tapety ekranu blokady; sprawdź uprawnienia do zapisu w przestrzeni roboczej",
-		"440": "Osiągnięto limit rund wywołań narzędzi. Pozostałe wywołania nie zostały wykonane; wyślij kolejną wiadomość, aby kontynuować"
+		"440": "Osiągnięto limit rund wywołań narzędzi. Pozostałe wywołania nie zostały wykonane; wyślij kolejną wiadomość, aby kontynuować",
+		"441": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
+		"442": "Zmień ten sformatowany tytuł w edytorze tytułów",
+		"443": "Nie można zapisać tytułu; sprawdź zawartość liniową, rozmiar i kontekst edycji"
 	}
 }

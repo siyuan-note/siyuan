@@ -40,8 +40,12 @@ func buildBacklinkParentMappings(refBlocks []*Block, boxID string) (ret []*backl
 
 func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID string, groupDocuments bool) (ret []*backlinkParentMapping) {
 	parentRefParagraphs := map[string][]*Block{}
+	titleRefIDs := map[string]bool{}
 	var paragraphParentIDs []string
 	for _, refBlock := range refBlocks {
+		if refBlock != nil && refBlock.Type == "NodeDocument" {
+			titleRefIDs[refBlock.ID] = true
+		}
 		if nil == refBlock || "NodeParagraph" != refBlock.Type {
 			continue
 		}
@@ -58,6 +62,10 @@ func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID s
 	var mappings []*backlinkParentMapping
 	for _, parent := range paragraphParents {
 		if nil == parent || !groupDocuments && "NodeDocument" == parent.Type {
+			continue
+		}
+		// 标题引用使用文档根 ID，正文不能再合并到同一条目而覆盖其独立来源。
+		if parent.Type == "NodeDocument" && titleRefIDs[parent.ID] {
 			continue
 		}
 

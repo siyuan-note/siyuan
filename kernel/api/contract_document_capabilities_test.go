@@ -43,7 +43,8 @@ func TestAPIContractDocumentCapabilities(t *testing.T) {
 	}
 	if !capabilities.StructuredPaths || capabilities.LiteralSlash || capabilities.AddressingVersion != 2 ||
 		capabilities.ModeState != "recovering" || capabilities.IndexState != "missing" || capabilities.MinimumReaderVersion != nil ||
-		len(capabilities.TitleFormats) != 1 || capabilities.TitleFormats[0] != "plain" || capabilities.Revision == "" {
+		len(capabilities.TitleFormats) != 2 || capabilities.TitleFormats[0] != "plain" ||
+		capabilities.TitleFormats[1] != "inline-ast" || capabilities.Revision == "" {
 		t.Fatalf("capabilities claimed an unimplemented or unverified feature: %+v", capabilities)
 	}
 	if err := treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {

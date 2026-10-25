@@ -21,6 +21,7 @@ export const destroy = (protyle: IProtyle) => {
         return;
     }
     protyle.title?.cancelPendingInput();
+    protyle.title?.destroy?.();
     disposeSyncEditorSave(protyle);
     destroyFoldedRender(protyle);
     destroyListMindmaps(protyle);

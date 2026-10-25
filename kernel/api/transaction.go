@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -48,15 +49,25 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 	timestamp := int64(request.ReqID)
 	var err error
 	convertList := false
+	setDocTitle := false
 	for _, transaction := range transactions {
 		if transaction == nil {
 			continue
 		}
 		for _, operation := range transaction.DoOperations {
+			if operation != nil && operation.Action == "setDocTitle" {
+				setDocTitle = true
+			}
 			if operation != nil && operation.Action == "convertList" {
 				convertList = true
 			}
 		}
+	}
+	if setDocTitle {
+		if len(transactions) != 1 || len(transactions[0].DoOperations) != 1 {
+			return apicontract.Failure[[]*apicontract.Transaction](-1, "document title requires a separate transaction")
+		}
+		model.FlushTxQueue()
 	}
 	if convertList {
 		if len(transactions) != 1 || len(transactions[0].DoOperations) != 1 {
@@ -86,8 +97,11 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
 	}
 
-	if templateDocTreeAttached || convertList {
+	if templateDocTreeAttached || convertList || setDocTitle {
 		if err = model.PerformTxSync(transactions[0]); nil != err {
+			if errors.Is(err, model.ErrDocumentTitleConflict) {
+				return apicontract.Failure[[]*apicontract.Transaction](-409, util.EscapeHTML(err.Error()))
+			}
 			return apicontract.Failure[[]*apicontract.Transaction](-1, util.EscapeHTML(err.Error()))
 		}
 	} else {
@@ -412,7 +426,7 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 
 func holdBlockSwapReplayRequests(c *gin.Context, tx *model.Transaction, rootIDs []string) error {
 	for _, operation := range tx.DoOperations {
-		if operation != nil && (operation.Action == "swapBlockRef" || operation.Action == "convertList") {
+		if operation != nil && (operation.Action == "swapBlockRef" || operation.Action == "convertList" || operation.Action == "setDocTitle") {
 			return holdEncryptedBlockRequests(c, "", rootIDs, false)
 		}
 	}

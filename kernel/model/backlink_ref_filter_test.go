@@ -24,16 +24,18 @@ func TestBacklinkEntryBlockIDs(t *testing.T) {
 	doc.AppendChild(list)
 	doc.AppendChild(next)
 	for _, test := range []struct {
-		node *ast.Node
-		ids  []string
+		node            *ast.Node
+		documentContext bool
+		ids             []string
 	}{
-		{paragraph, []string{"paragraph"}},
-		{item, []string{"item", "paragraph", "child"}},
-		{heading, []string{"heading", "list", "item", "paragraph", "child"}},
-		{doc, []string{"doc", "heading", "list", "item", "paragraph", "child", "next"}},
+		{paragraph, false, []string{"paragraph"}},
+		{item, false, []string{"item", "paragraph", "child"}},
+		{heading, false, []string{"heading", "list", "item", "paragraph", "child"}},
+		{doc, false, []string{"doc"}},
+		{doc, true, []string{"doc", "heading", "list", "item", "paragraph", "child", "next"}},
 	} {
-		if ids := backlinkEntryBlockIDs(test.node); !reflect.DeepEqual(ids, test.ids) {
-			t.Fatalf("%s: got %v, expected %v", test.node.ID, ids, test.ids)
+		if ids := backlinkEntryBlockIDs(test.node, test.documentContext); !reflect.DeepEqual(ids, test.ids) {
+			t.Fatalf("%s (document context %v): got %v, expected %v", test.node.ID, test.documentContext, ids, test.ids)
 		}
 	}
 }

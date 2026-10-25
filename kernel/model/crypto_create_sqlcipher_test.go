@@ -93,7 +93,7 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 		t.Fatalf("enable encrypted notebooks failed: %v", err)
 	}
 
-	boxID, err := CreateEncryptedBox("Encrypted", password)
+	boxID, err := CreateEncryptedBox("Encrypted/2026／Notes", password)
 	if err != nil {
 		t.Fatalf("create encrypted notebook failed: %v", err)
 	}
@@ -113,6 +113,37 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	}
 	if tree.ID != boxID {
 		t.Fatalf("unexpected encrypted notebook document ID: %s", tree.ID)
+	}
+	if _, err = Mount(boxID); err != nil {
+		t.Fatal(err)
+	}
+	assertNotebookName := func(id, expected string) {
+		t.Helper()
+		if got := Conf.Box(id).GetConf().Name; got != expected {
+			t.Fatalf("notebook configuration name = %q, want %q", got, expected)
+		}
+		titleTree, loadErr := filesys.LoadTree(id, boxDocPath(id), util.NewLute())
+		if loadErr != nil || titleTree.Root.IALAttr("title") != expected {
+			t.Fatalf("notebook root title does not match %q: %+v, %v", expected, titleTree, loadErr)
+		}
+	}
+	assertNotebookName(boxID, "Encrypted/2026／Notes")
+	if err = RenameBox(boxID, "Encrypted/Renamed／Notes"); err != nil {
+		t.Fatal(err)
+	}
+	assertNotebookName(boxID, "Encrypted/Renamed／Notes")
+	box := Conf.Box(boxID)
+	boxConf := box.GetConf()
+	boxConf.Name = "Encrypted/Synced／Notes"
+	if err = box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	if err = reconcileBoxDoc(box, boxID); err != nil {
+		t.Fatal(err)
+	}
+	assertNotebookName(boxID, "Encrypted/Synced／Notes")
+	if data, readErr := os.ReadFile(filepath.Join(util.DataDir, boxID, boxDocPath(boxID))); readErr != nil || !util.IsCiphertext(data) {
+		t.Fatalf("renaming and reconciling the notebook root did not retain encryption: %v", readErr)
 	}
 	for _, enabled := range []bool{true, false} {
 		Conf.FileTree.Load().BoxDocEnabled = enabled
@@ -142,9 +173,18 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	}
 	Conf.FileTree.Load().BoxDocEnabled = true
 
-	if _, err = CreateBox("Normal"); err != nil {
+	var normalBoxID string
+	if normalBoxID, err = CreateBox("Normal/2026／Notes"); err != nil {
 		t.Fatalf("create normal notebook after encrypted notebook failed: %v", err)
 	}
+	if _, err = Mount(normalBoxID); err != nil {
+		t.Fatal(err)
+	}
+	assertNotebookName(normalBoxID, "Normal/2026／Notes")
+	if err = RenameBox(normalBoxID, "Normal/Renamed／Notes"); err != nil {
+		t.Fatal(err)
+	}
+	assertNotebookName(normalBoxID, "Normal/Renamed／Notes")
 
 	expectedInitializationError := errors.New("injected notebook document initialization failure")
 	failedBoxID := ""

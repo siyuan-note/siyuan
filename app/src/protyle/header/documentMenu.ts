@@ -160,7 +160,7 @@ export const openDocumentMenu = (options: {
                 rootId: id,
                 notebookId,
                 title: protyle ? (protyle.options.render.title ?
-                    (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "") : docInfo.name,
+                    (protyle.title.getText() || window.siyuan.languages.untitled) : "") : docInfo.name,
                 isPreview: protyle ? !protyle.preview.element.classList.contains("fn__none") : false,
             });
         }
@@ -178,7 +178,7 @@ export const openDocumentMenu = (options: {
                 notebookId,
                 useBlockId: showAll,
                 title: protyle ? (protyle.title ?
-                    (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null) : docInfo.name,
+                    (protyle.title.getText() || window.siyuan.languages.untitled) : null) : docInfo.name,
             });
         }
     }).element);
@@ -195,7 +195,7 @@ export const openDocumentMenu = (options: {
                 notebookId,
                 useBlockId: showAll,
                 title: protyle ? (protyle.title ?
-                    (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null) : docInfo.name,
+                    (protyle.title.getText() || window.siyuan.languages.untitled) : null) : docInfo.name,
             });
         }
     }).element);

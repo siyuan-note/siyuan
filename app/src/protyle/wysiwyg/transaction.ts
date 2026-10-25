@@ -901,6 +901,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (operation.action === "setDocTitle") {
+            if (operation.id === protyle.block.rootID) {
+                void protyle.title?.refresh().catch(error => console.error(error));
+            }
+            return;
+        }
         if (operation.action === "convertList") {
             refreshListConversion(protyle, operation.retData, isUndo);
             return;

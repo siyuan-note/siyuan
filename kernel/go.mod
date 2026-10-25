@@ -103,7 +103,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20261024142257-43235da776fd
+require github.com/88250/lute v1.7.9-0.20261025062049-3ec5dc4c491c
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

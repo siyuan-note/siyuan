@@ -10,7 +10,7 @@ const compile = (file: string, suffix = "") => transpileModule(
     {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}},
 ).outputText;
 
-test("mobile toolbar saves truncated Unicode titles on blur and Enter without duplicate requests", async () => {
+test("mobile notebook root title retains the plain toolbar save and Unicode handling", async () => {
     const listeners = new Map<string, (event?: object) => void>();
     const attributes = new Map<string, string>();
     const input = {
@@ -21,7 +21,7 @@ test("mobile toolbar saves truncated Unicode titles on blur and Enter without du
     };
     const runtime = {siyuan: {documentAddressingVersion: 2, config: {editor: {autoDirection: false}},
         languages: {fileNameRule: "Invalid filename", _kernel: {16: "Untitled", 106: "Title too long"}},
-        mobile: {editor: {protyle: {notebookId: "box", path: "/root.sy", block: {rootID: "root"}}}}}};
+        mobile: {editor: {protyle: {notebookId: "box", path: "/box.sy", block: {rootID: "box"}}}}}};
     const constants = {SIZE_TITLE: 512};
     const rename = {};
     runInNewContext(compile("../../editor/rename.ts"), {
@@ -103,4 +103,37 @@ test("mobile toolbar saves truncated Unicode titles on blur and Enter without du
     input.value = "Readonly title";
     blur();
     assert.equal(requests.length, 6);
+});
+
+test("mobile document summaries open the complete title source and never rename from the compact label", () => {
+    const listeners = new Map<string, (event?: object) => void>();
+    let opened = 0;
+    let requests = 0;
+    const input = {
+        value: "Summary", blur: () => listeners.get("blur")(), getAttribute: (): undefined => undefined, setAttribute: () => {},
+        addEventListener: (name: string, handler: (event?: object) => void) => listeners.set(name, handler),
+    };
+    const protyle = {notebookId: "box", block: {rootID: "document"}, disabled: false,
+        title: {openEditor: () => opened++}};
+    const runtime = {siyuan: {documentAddressingVersion: 2, config: {editor: {autoDirection: false}},
+        languages: {_kernel: {16: "Untitled"}}, mobile: {editor: {protyle}}}};
+    const moduleExports: {initEditorName?: () => void} = {};
+    runInNewContext(compile("initFramework.ts", "\nexport {initEditorName};"), {
+        exports: moduleExports, window: runtime, document: {getElementById: () => input},
+        require: (name: string) => {
+            if (name === "../../util/fetch") return {fetchPost: () => requests++};
+            if (name === "../../protyle/render/autoDirection") return {setTitleAutoDirection: () => {}};
+            return {};
+        },
+    });
+    moduleExports.initEditorName();
+    input.value = "A derived summary must not replace rich source";
+    listeners.get("blur")();
+    listeners.get("click")();
+    listeners.get("keydown")({key: "Enter", preventDefault: () => {}, stopPropagation: () => {}});
+    assert.equal(opened, 2);
+    assert.equal(requests, 0);
+    protyle.disabled = true;
+    listeners.get("click")();
+    assert.equal(opened, 2);
 });

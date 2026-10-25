@@ -109,7 +109,7 @@ func retryDynamicRefText(key dynamicRefTextRetryKey) bool {
 		return true
 	}
 	_, failed := refreshDynamicRefTextsWithWriter(map[string]*ast.Node{node.ID: node},
-		map[string]*parse.Tree{tree.ID: tree}, writeTreeUpsertQueue)
+		map[string]*parse.Tree{tree.ID: tree}, writeDynamicRefTree)
 	if !failed {
 		IncSync()
 	}

@@ -154,7 +154,7 @@ const BaseSpec = "2"
 
 const DocumentTitleSpec = "6"
 
-var CurrentSpec = DocumentTitleSpec
+var CurrentSpec = RichDocumentTitleSpec
 
 var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
 
@@ -181,6 +181,9 @@ func CheckSpecForMode(tree *parse.Tree, mode int) (err error) {
 		return
 	}
 	err = nil
+	if err = ValidateDocumentTitle(tree.Root); err != nil {
+		return
+	}
 	if err = ValidateTableCellRich(tree.Root); nil != err {
 		return
 	}
@@ -239,6 +242,11 @@ func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
 	if documentTitleSpecUpgradeRequired(tree.Root.Spec) &&
 		documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")) != nil {
 		tree.Root.Spec = DocumentTitleSpec
+	}
+	if tree.Root.DocumentTitle != nil {
+		if spec, err := strconv.Atoi(tree.Root.Spec); err == nil && spec < 7 {
+			tree.Root.Spec = RichDocumentTitleSpec
+		}
 	}
 	return oldSpec != tree.Root.Spec
 }

@@ -140,8 +140,12 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 			t.Fatal(convertErr)
 		}
 		converted, loadErr := filesys.LoadTree(box.ID, convertedPath, util.NewLute())
+		expectedSpec := treenode.DocumentTitleSpec
+		if test.typeOf == ast.NodeHeading {
+			expectedSpec = treenode.RichDocumentTitleSpec
+		}
 		if loadErr != nil || treenode.ReadDocumentTitle(converted.Root).Text != test.title ||
-			converted.Root.Spec != treenode.DocumentTitleSpec {
+			converted.Root.Spec != expectedSpec {
 			t.Fatal("conversion changed literal title or source spec", test.title, loadErr)
 		}
 	}

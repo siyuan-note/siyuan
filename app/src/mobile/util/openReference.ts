@@ -187,7 +187,7 @@ export const openMobileReference = async (protyle: IProtyle, blockId: string) =>
                     return;
                 }
                 closeAVCellEditor(editor.protyle.element);
-                editor.protyle.title?.flushPendingInput();
+                await editor.protyle.title?.flushPendingInput();
                 await flushMobileSecondaryEditor(editor);
                 await saveGuard.flush();
             },

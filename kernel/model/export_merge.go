@@ -145,13 +145,38 @@ func loadTreeNodes(box string, p string, level int, options MergeHeadingOptions,
 		demoteMergedContentHeadings(tree, hLevel)
 	}
 
-	heading := &ast.Node{ID: tree.Root.ID, Type: ast.NodeHeading, HeadingLevel: hLevel}
-	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(treenode.ReadDocumentTitle(tree.Root).Text)})
+	heading, err := exportDocumentHeading(tree.Root, hLevel, "")
+	if err != nil {
+		return nil, err
+	}
 	tree.Root.PrependChild(heading)
 	for c := tree.Root.FirstChild; nil != c; c = c.Next {
 		ret = append(ret, c)
 	}
 	return
+}
+
+func exportDocumentHeading(root *ast.Node, level int, customTitle string) (*ast.Node, error) {
+	paragraph, err := treenode.DocumentTitleParagraph(root)
+	if err != nil {
+		return nil, err
+	}
+	heading := &ast.Node{ID: root.ID, Box: root.Box, Path: root.Path, Type: ast.NodeHeading, HeadingLevel: level}
+	for _, attr := range root.KramdownIAL {
+		if len(attr) == 2 && attr[0] != "type" && attr[0] != "style" {
+			heading.SetIALAttr(attr[0], attr[1])
+		}
+	}
+	if customTitle != "" {
+		heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(customTitle)})
+	} else {
+		for child := paragraph.FirstChild; child != nil; {
+			next := child.Next
+			heading.AppendChild(child)
+			child = next
+		}
+	}
+	return heading, nil
 }
 
 func mergedDocHeadingLevel(depth int, mode string, addRootTitle bool) int {

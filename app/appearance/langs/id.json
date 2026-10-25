@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Simpan judul saya",
+	"documentTitleLatest": "Judul terbaru",
+	"documentTitleInlineOnly": "Judul dokumen hanya mendukung elemen sebaris",
+	"documentTitleConflict": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
+	"documentTitleCopyReload": "Salin draf dan muat judul terbaru",
 	"listMindmapManageNodeColors": "Kelola warna simpul",
 	"listMindmapManageLineColors": "Kelola warna garis",
 	"listMindmapDocumentLayout": "Tata letak dokumen",
@@ -3460,6 +3465,9 @@
 		"437": "Unduh versi ini",
 		"438": "Pilih gambar JPEG, PNG, atau WebP yang valid, maksimal 10 MiB dan 16 megapiksel",
 		"439": "Tidak dapat menyimpan wallpaper layar kunci; periksa izin tulis ruang kerja",
-		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan"
+		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan",
+		"441": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
+		"442": "Edit judul berformat ini melalui editor judul",
+		"443": "Judul tidak dapat disimpan; periksa konten sebaris, ukuran, dan konteks pengeditan"
 	}
 }

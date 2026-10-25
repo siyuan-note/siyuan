@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Salva il mio titolo",
+	"documentTitleLatest": "Titolo più recente",
+	"documentTitleInlineOnly": "I titoli dei documenti supportano solo elementi in linea",
+	"documentTitleConflict": "Questo titolo è stato modificato in un altro editor. La bozza è conservata",
+	"documentTitleCopyReload": "Copia la bozza e carica il titolo più recente",
 	"listMindmapManageNodeColors": "Gestisci i colori dei nodi",
 	"listMindmapManageLineColors": "Gestisci i colori delle linee",
 	"listMindmapDocumentLayout": "Layout del documento",
@@ -3460,6 +3465,9 @@
 		"437": "Scarica questa versione",
 		"438": "Scegli un’immagine JPEG, PNG o WebP valida fino a 10 MiB e 16 megapixel",
 		"439": "Impossibile salvare lo sfondo della schermata di blocco; controlla i permessi di scrittura dello spazio di lavoro",
-		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare"
+		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare",
+		"441": "Questo titolo è stato modificato in un altro editor. La bozza è conservata",
+		"442": "Modifica questo titolo formattato nell’editor dei titoli",
+		"443": "Impossibile salvare il titolo; verifica contenuto in linea, dimensioni e contesto di modifica"
 	}
 }

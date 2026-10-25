@@ -46,7 +46,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/emirpasic/gods/sets/hashset"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
@@ -703,7 +702,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		if err = treenode.CheckSpecJSON(data); nil != err {
 			return
 		}
-		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		tree, err = treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
 			return
@@ -775,7 +774,7 @@ func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, t
 	if err = treenode.CheckSpecJSON(data); nil != err {
 		return
 	}
-	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	tree, err = treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
 	}
@@ -915,7 +914,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 		if err = treenode.CheckSpecJSON(data); nil != err {
 			return
 		}
-		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		tree, err = treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", id, err)
 			return

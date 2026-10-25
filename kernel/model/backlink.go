@@ -502,6 +502,9 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	}
 
 	renderNodes, expand := getBacklinkRenderNodes(node, originalRefBlockIDs)
+	if len(renderNodes) == 0 {
+		return nil
+	}
 	referenceBlockID := getBacklinkReferenceBlockID(node, renderNodes, originalRefBlockIDs[node.ID])
 	var blockPaths []*BlockPath
 	if (nil != node.Parent && ast.NodeDocument != node.Parent.Type) || (ast.NodeHeading != node.Type && 0 < treenode.HeadingLevel(node)) {
@@ -538,6 +541,11 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	fillBlockRefCount(renderNodes, refTree.Box)
 
 	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
+	if node.Type == ast.NodeDocument && originalRefBlockIDs[node.ID] == "" {
+		// 仅标记临时预览，前端通过文档标题事务编辑，不能作为正文段落写回。
+		dom = strings.ReplaceAll(dom, `contenteditable="true"`, `contenteditable="false"`)
+		dom = strings.Replace(dom, "<div ", `<div data-document-title="true" contenteditable="false" `, 1)
+	}
 	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, ReferenceBlockID: referenceBlockID, node: node}
 	ret.Type = node.Type.String()
 	if 0 < len(avTargets) {
@@ -547,6 +555,17 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 }
 
 func getBacklinkRenderNodes(n *ast.Node, originalRefBlockIDs map[string]string) (ret []*ast.Node, expand bool) {
+	if n.Type == ast.NodeDocument && originalRefBlockIDs[n.ID] == "" {
+		paragraph, err := treenode.DocumentTitleParagraph(n)
+		if err != nil {
+			logging.LogErrorf("render backlink document title [%s] failed: %s", n.ID, err)
+			return nil, false
+		}
+		paragraph.ID, paragraph.Box, paragraph.Path = n.ID, n.Box, n.Path
+		paragraph.SetIALAttr("id", n.ID)
+		paragraph.SetIALAttr("updated", n.IALAttr("updated"))
+		return []*ast.Node{paragraph}, false
+	}
 	expand = true
 	if ast.NodeListItem == n.Type {
 		if nil == n.FirstChild {
@@ -843,6 +862,7 @@ func buildLinkRefsInBoxWithDocumentGrouping(defRootID string, refs []*sql.Ref, k
 	coveredRefIDs := map[string]bool{}
 	for _, mapping := range buildBacklinkParentMappingsWithDocumentGrouping(backlinkRefBlocks, boxID, groupDocuments) {
 		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
+		mapping.parent.backlinkDocumentContext = mapping.parent.Type == "NodeDocument"
 		for refID := range mapping.coveredRefIDs {
 			coveredRefIDs[refID] = true
 		}

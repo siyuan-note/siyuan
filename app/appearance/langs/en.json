@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Save my title",
+	"documentTitleLatest": "Latest title",
+	"documentTitleInlineOnly": "Document titles support inline elements only",
+	"documentTitleConflict": "This title changed in another editor. Your draft is preserved",
+	"documentTitleCopyReload": "Copy draft and load latest title",
 	"listMindmapManageNodeColors": "Manage node colors",
 	"listMindmapManageLineColors": "Manage line colors",
 	"listMindmapDocumentLayout": "Document layout",
@@ -3460,6 +3465,9 @@
 		"437": "Download this version",
 		"438": "Choose a valid JPEG, PNG or WebP image up to 10 MiB and 16 megapixels",
 		"439": "Could not save the lock screen wallpaper; check workspace write permissions",
-		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue"
+		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue",
+		"441": "This title changed in another editor. Your draft is preserved",
+		"442": "Edit this rich title with the title editor",
+		"443": "Unable to save this title; check its inline content, size and editing context"
 	}
 }

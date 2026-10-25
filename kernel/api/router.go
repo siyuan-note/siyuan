@@ -459,6 +459,7 @@ func registerBlockRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getContentWordCount", contractRouteHandlers(apicontract.GetContentWordCount, getContentWordCount)...)
 	ginServer.Handle("POST", "/api/block/getRecentUpdatedBlocks", contractRouteHandlers(apicontract.GetRecentUpdatedBlocks, getRecentUpdatedBlocks)...)
 	ginServer.Handle("POST", "/api/block/getDocInfo", contractRouteHandlers(apicontract.GetDocInfo, getDocInfo)...)
+	ginServer.Handle("POST", "/api/block/getDocTitle", contractRouteHandlers(apicontract.GetDocTitle, getDocTitle)...)
 	ginServer.Handle("POST", "/api/block/getDocsInfo", contractRouteHandlers(apicontract.GetDocsInfo, getDocsInfo)...)
 	ginServer.Handle("POST", "/api/block/checkBlockExist", contractRouteHandlers(apicontract.CheckBlockExist, checkBlockExist)...)
 	ginServer.Handle("POST", "/api/block/checkBlocksExist", contractRouteHandlers(apicontract.CheckBlocksExist, checkBlocksExist)...)

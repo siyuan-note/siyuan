@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Guardar mi título",
+	"documentTitleLatest": "Título más reciente",
+	"documentTitleInlineOnly": "Los títulos de documentos solo admiten elementos en línea",
+	"documentTitleConflict": "Este título cambió en otro editor. Tu borrador se conserva",
+	"documentTitleCopyReload": "Copiar borrador y cargar el título más reciente",
 	"listMindmapManageNodeColors": "Gestionar colores de nodos",
 	"listMindmapManageLineColors": "Gestionar colores de líneas",
 	"listMindmapDocumentLayout": "Diseño del documento",
@@ -3460,6 +3465,9 @@
 		"437": "Descargar esta versión",
 		"438": "Selecciona una imagen JPEG, PNG o WebP válida de hasta 10 MiB y 16 megapíxeles",
 		"439": "No se pudo guardar el fondo de bloqueo; comprueba los permisos de escritura del espacio de trabajo",
-		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar"
+		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar",
+		"441": "Este título cambió en otro editor. Tu borrador se conserva",
+		"442": "Edita este título con formato en el editor de títulos",
+		"443": "No se puede guardar el título; revisa el contenido en línea, el tamaño y el contexto de edición"
 	}
 }

@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Başlığımı kaydet",
+	"documentTitleLatest": "En son başlık",
+	"documentTitleInlineOnly": "Belge başlıkları yalnızca satır içi öğeleri destekler",
+	"documentTitleConflict": "Bu başlık başka bir düzenleyicide değiştirildi. Taslağınız korundu",
+	"documentTitleCopyReload": "Taslağı kopyala ve en son başlığı yükle",
 	"listMindmapManageNodeColors": "Düğüm renklerini yönet",
 	"listMindmapManageLineColors": "Çizgi renklerini yönet",
 	"listMindmapDocumentLayout": "Belge düzeni",
@@ -3460,6 +3465,9 @@
 		"437": "Bu sürümü indir",
 		"438": "En fazla 10 MiB ve 16 megapiksel boyutunda geçerli bir JPEG, PNG veya WebP görüntüsü seçin",
 		"439": "Kilit ekranı duvar kâğıdı kaydedilemedi; çalışma alanının yazma izinlerini kontrol edin",
-		"440": "Araç çağrısı tur sınırına ulaşıldı. Kalan araç çağrıları yürütülmedi; devam etmek için başka bir mesaj gönderin"
+		"440": "Araç çağrısı tur sınırına ulaşıldı. Kalan araç çağrıları yürütülmedi; devam etmek için başka bir mesaj gönderin",
+		"441": "Bu başlık başka bir düzenleyicide değiştirildi. Taslağınız korundu",
+		"442": "Bu biçimlendirilmiş başlığı başlık düzenleyicisinde düzenleyin",
+		"443": "Başlık kaydedilemiyor; satır içi içeriği, boyutu ve düzenleme bağlamını kontrol edin"
 	}
 }

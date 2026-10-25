@@ -417,10 +417,14 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 	}
 	if op.indexTree != nil && op.action != "rename" {
-		op.indexTree = currentDocumentIndexSnapshot(op.indexTree)
+		if op.indexTree, err = currentDocumentIndexSnapshot(op.indexTree); err != nil {
+			return err
+		}
 	}
 	if op.upsertTree != nil && op.action == "upsert" {
-		op.upsertTree = currentDocumentIndexSnapshot(op.upsertTree)
+		if op.upsertTree, err = currentDocumentIndexSnapshot(op.upsertTree); err != nil {
+			return err
+		}
 	}
 	switch op.action {
 	case "index":

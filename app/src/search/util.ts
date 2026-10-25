@@ -1333,22 +1333,30 @@ export const getArticle = (options: {
                 if (!isCurrent()) {
                     return;
                 }
-                options.edit.protyle.query = {
-                    key: options.value || null,
-                    method: options.config?.method || null,
-                    types: options.config?.types || null,
-                    subTypes: options.config?.subTypes || null,
-                };
-                // https://ld246.com/article/1770132984152
-                if (options.edit.protyle.options.render.title) {
-                    options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
-                }
                 onGet({
                     updateReadonly: true,
                     isValid: isCurrent,
                     data: getResponse,
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
+                    beforeAVRender: () => {
+                        options.edit.protyle.query = {
+                            key: options.value || null,
+                            method: options.config?.method || null,
+                            types: options.config?.types || null,
+                            subTypes: options.config?.subTypes || null,
+                        };
+                        // https://ld246.com/article/1770132984152
+                        if (options.edit.protyle.options.render.title) {
+                            options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
+                        }
+                    },
+                    afterCB: () => {
+                        // Title metadata belongs to the document applied by onGet, which may wait for an unsaved title.
+                        if (options.edit.protyle.options.render.title) {
+                            options.edit.protyle.title.render(options.edit.protyle, response);
+                        }
+                    },
                     afterAVRender: async () => {
                         if (getResponse.code !== 0) {
                             return;
@@ -1427,10 +1435,6 @@ export const getArticle = (options: {
                         }
                     }
                 });
-                // 只能放在 onGet 后，否则 title 不会更新 https://github.com/siyuan-note/siyuan/issues/16739
-                if (options.edit.protyle.options.render.title) {
-                    options.edit.protyle.title.render(options.edit.protyle, response);
-                }
             });
         });
     });

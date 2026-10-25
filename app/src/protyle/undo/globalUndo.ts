@@ -252,6 +252,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
     // 尽早置锁，阻止确认对话框期间触发新的撤销/重做（含 peek 与确认阶段）
     isUndoing = true;
     try {
+        await protyle.title?.flushPendingInput();
         await waitForPendingTransactions(protyle);
 
         // 等待输入事务提交后读取权威状态，避免本地镜像尚未更新时吞掉立即撤销。
@@ -344,6 +345,7 @@ export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
 
     isUndoing = true;
     try {
+        await protyle.title?.flushPendingInput();
         await waitForPendingTransactions(protyle);
         const state = await fetchUndoState(rootID);
         if (!state) {

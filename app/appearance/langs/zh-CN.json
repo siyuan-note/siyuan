@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "保存我的标题",
+	"documentTitleLatest": "最新标题",
+	"documentTitleInlineOnly": "文档标题仅支持行级元素",
+	"documentTitleConflict": "标题已在其他编辑器中修改，当前输入已保留",
+	"documentTitleCopyReload": "复制当前输入并加载最新标题",
 	"listMindmapManageNodeColors": "管理节点配色",
 	"listMindmapManageLineColors": "管理连线颜色",
 	"listMindmapDocumentLayout": "文档布局",
@@ -3460,6 +3465,9 @@
 		"437": "下载此版本",
 		"438": "请选择有效的 JPEG、PNG 或 WebP 图片，最大 10 MiB、1600 万像素",
 		"439": "无法保存锁屏壁纸，请检查工作空间写入权限",
-		"440": "已达到工具调用轮数上限，剩余工具调用未执行；请发送新消息继续"
+		"440": "已达到工具调用轮数上限，剩余工具调用未执行；请发送新消息继续",
+		"441": "标题已在其他编辑器中修改，当前输入已保留",
+		"442": "请通过标题编辑器修改此富文本标题",
+		"443": "无法保存标题，请检查行级内容、大小和编辑位置"
 	}
 }

@@ -21,13 +21,14 @@ var ErrDocumentMetadataUnavailable = errors.New("document metadata is not ready"
 
 // DocumentMetadata 仅是可重建的内部索引；父身份来自 ID 数据路径，不来自展示文字。
 type DocumentMetadata struct {
-	BoxID      string
-	ID         string
-	ParentID   *string
-	Path       string
-	Title      DocumentTitle
-	SourceSpec string
-	Revision   string
+	BoxID          string
+	ID             string
+	ParentID       *string
+	Path           string
+	Title          DocumentTitle
+	SourceSpec     string
+	SourceRevision string
+	Revision       string
 }
 
 type DocumentPathSegment struct {
@@ -71,7 +72,30 @@ func ensureDocumentMetadata(database *sql.DB) error {
 			return err
 		}
 	}
-	return nil
+	rows, err := database.Query(`PRAGMA table_info(document_metadata)`)
+	if err != nil {
+		return err
+	}
+	found := false
+	for rows.Next() {
+		var cid, required, primary int
+		var name, typ string
+		var defaultValue sql.NullString
+		if err = rows.Scan(&cid, &name, &typ, &required, &defaultValue, &primary); err != nil {
+			rows.Close()
+			return err
+		}
+		found = found || name == "title_source_revision"
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
+	if !found {
+		_, err = database.Exec(`ALTER TABLE document_metadata ADD COLUMN title_source_revision TEXT NOT NULL DEFAULT ''`)
+	}
+	return err
 }
 
 // DocumentRevision 使用版本化 JSON 字段边界，避免拼接碰撞及秒级时间戳遗漏连续更改。
@@ -88,23 +112,34 @@ func documentMetadataFromTree(tree *parse.Tree) *DocumentMetadata {
 		id := path.Base(parent)
 		ret.ParentID = &id
 	}
-	ret.Revision = DocumentRevision([]interface{}{1, ret.BoxID, ret.ID, ret.Path, ret.Title, ret.SourceSpec})
+	if tree.Root.DocumentTitle != nil {
+		ret.SourceRevision = DocumentTitleRevision(tree.Root)
+	}
+	ret.Revision = documentMetadataRevision(ret)
 	return ret
+}
+
+func documentMetadataRevision(meta *DocumentMetadata) string {
+	if meta.Title.Format == "plain" {
+		return DocumentRevision([]interface{}{1, meta.BoxID, meta.ID, meta.Path, meta.Title, meta.SourceSpec})
+	}
+	return DocumentRevision([]interface{}{2, meta.BoxID, meta.ID, meta.Path, meta.Title, meta.SourceSpec, meta.SourceRevision})
 }
 
 func upsertDocumentMetadata(tx *sql.Tx, tree *parse.Tree) error {
 	meta := documentMetadataFromTree(tree)
 	_, err := tx.Exec(`INSERT INTO document_metadata
-		(box_id, id, parent_id, title_text, title_empty, title_format, source_spec, revision)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(box_id, id) DO UPDATE SET
+		(box_id, id, parent_id, title_text, title_empty, title_format, source_spec, revision, title_source_revision)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(box_id, id) DO UPDATE SET
 		parent_id=excluded.parent_id, title_text=excluded.title_text, title_empty=excluded.title_empty,
-		title_format=excluded.title_format, source_spec=excluded.source_spec, revision=excluded.revision`,
-		meta.BoxID, meta.ID, meta.ParentID, meta.Title.Text, meta.Title.Empty, meta.Title.Format, meta.SourceSpec, meta.Revision)
+		title_format=excluded.title_format, source_spec=excluded.source_spec, revision=excluded.revision,
+		title_source_revision=excluded.title_source_revision`,
+		meta.BoxID, meta.ID, meta.ParentID, meta.Title.Text, meta.Title.Empty, meta.Title.Format, meta.SourceSpec, meta.Revision, meta.SourceRevision)
 	return err
 }
 
 const documentMetadataColumns = `m.box_id, m.id, m.parent_id, b.path,
-	m.title_text, m.title_empty, m.title_format, m.source_spec, m.revision`
+	m.title_text, m.title_empty, m.title_format, m.source_spec, m.revision, m.title_source_revision`
 const documentMetadataJoin = `document_metadata m JOIN blocktrees b INDEXED BY idx_blocktrees_id ON
 	b.box_id=m.box_id AND b.id=m.id AND b.type='d'`
 
@@ -114,10 +149,11 @@ const documentMetadataByIDQuery = "SELECT " + documentMetadataColumns + " FROM "
 func scanDocumentMetadata(row interface{ Scan(...interface{}) error }) (*DocumentMetadata, error) {
 	ret := &DocumentMetadata{}
 	if err := row.Scan(&ret.BoxID, &ret.ID, &ret.ParentID, &ret.Path,
-		&ret.Title.Text, &ret.Title.Empty, &ret.Title.Format, &ret.SourceSpec, &ret.Revision); err != nil {
+		&ret.Title.Text, &ret.Title.Empty, &ret.Title.Format, &ret.SourceSpec, &ret.Revision, &ret.SourceRevision); err != nil {
 		return nil, err
 	}
-	if ret.Title.Format != "plain" || ret.Revision != DocumentRevision([]interface{}{1, ret.BoxID, ret.ID, ret.Path, ret.Title, ret.SourceSpec}) {
+	if (ret.Title.Format != "plain" && ret.Title.Format != "inline-ast") ||
+		(ret.Title.Format == "inline-ast" && ret.SourceRevision == "") || ret.Revision != documentMetadataRevision(ret) {
 		return nil, ErrDocumentMetadataUnavailable
 	}
 	return ret, nil

@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Meinen Titel speichern",
+	"documentTitleLatest": "Aktueller Titel",
+	"documentTitleInlineOnly": "Dokumenttitel unterstützen nur Inline-Elemente",
+	"documentTitleConflict": "Dieser Titel wurde in einem anderen Editor geändert. Ihr Entwurf bleibt erhalten",
+	"documentTitleCopyReload": "Entwurf kopieren und aktuellen Titel laden",
 	"listMindmapManageNodeColors": "Knotenfarben verwalten",
 	"listMindmapManageLineColors": "Linienfarben verwalten",
 	"listMindmapDocumentLayout": "Dokumentlayout",
@@ -3460,6 +3465,9 @@
 		"437": "Diese Version herunterladen",
 		"438": "Wähle ein gültiges JPEG-, PNG- oder WebP-Bild mit maximal 10 MiB und 16 Megapixeln",
 		"439": "Der Sperrbildschirm-Hintergrund konnte nicht gespeichert werden; prüfe die Schreibrechte des Arbeitsbereichs",
-		"440": "Das Rundenlimit für Werkzeugaufrufe wurde erreicht. Verbleibende Werkzeugaufrufe wurden nicht ausgeführt; sende eine weitere Nachricht, um fortzufahren"
+		"440": "Das Rundenlimit für Werkzeugaufrufe wurde erreicht. Verbleibende Werkzeugaufrufe wurden nicht ausgeführt; sende eine weitere Nachricht, um fortzufahren",
+		"441": "Dieser Titel wurde in einem anderen Editor geändert. Ihr Entwurf bleibt erhalten",
+		"442": "Bearbeiten Sie diesen formatierten Titel im Titeleditor",
+		"443": "Der Titel kann nicht gespeichert werden; prüfen Sie Inline-Inhalt, Größe und Bearbeitungskontext"
 	}
 }

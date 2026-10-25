@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Enregistrer mon titre",
+	"documentTitleLatest": "Dernier titre",
+	"documentTitleInlineOnly": "Les titres de document acceptent uniquement les éléments en ligne",
+	"documentTitleConflict": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
+	"documentTitleCopyReload": "Copier le brouillon et charger le dernier titre",
 	"listMindmapManageNodeColors": "Gérer les couleurs des nœuds",
 	"listMindmapManageLineColors": "Gérer les couleurs des lignes",
 	"listMindmapDocumentLayout": "Disposition du document",
@@ -3460,6 +3465,9 @@
 		"437": "Télécharger cette version",
 		"438": "Choisissez une image JPEG, PNG ou WebP valide, de 10 MiB et 16 mégapixels maximum",
 		"439": "Impossible d’enregistrer le fond d’écran de verrouillage ; vérifiez les droits d’écriture de l’espace de travail",
-		"440": "La limite de tours d’appels d’outils est atteinte. Les appels restants n’ont pas été exécutés ; envoyez un autre message pour continuer"
+		"440": "La limite de tours d’appels d’outils est atteinte. Les appels restants n’ont pas été exécutés ; envoyez un autre message pour continuer",
+		"441": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
+		"442": "Modifiez ce titre enrichi dans l’éditeur de titres",
+		"443": "Impossible d’enregistrer ce titre ; vérifiez son contenu en ligne, sa taille et le contexte de modification"
 	}
 }

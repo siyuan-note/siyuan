@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Mijn titel opslaan",
+	"documentTitleLatest": "Nieuwste titel",
+	"documentTitleInlineOnly": "Documenttitels ondersteunen alleen inline-elementen",
+	"documentTitleConflict": "Deze titel is in een andere editor gewijzigd. Je concept blijft behouden",
+	"documentTitleCopyReload": "Concept kopiëren en nieuwste titel laden",
 	"listMindmapManageNodeColors": "Knoopkleuren beheren",
 	"listMindmapManageLineColors": "Lijnkleuren beheren",
 	"listMindmapDocumentLayout": "Documentindeling",
@@ -3460,6 +3465,9 @@
 		"437": "Deze versie downloaden",
 		"438": "Kies een geldige JPEG-, PNG- of WebP-afbeelding van maximaal 10 MiB en 16 megapixel",
 		"439": "De vergrendelachtergrond kon niet worden opgeslagen; controleer de schrijfrechten van de werkruimte",
-		"440": "De limiet voor rondes met toolaanroepen is bereikt. De resterende toolaanroepen zijn niet uitgevoerd; stuur nog een bericht om door te gaan"
+		"440": "De limiet voor rondes met toolaanroepen is bereikt. De resterende toolaanroepen zijn niet uitgevoerd; stuur nog een bericht om door te gaan",
+		"441": "Deze titel is in een andere editor gewijzigd. Je concept blijft behouden",
+		"442": "Bewerk deze opgemaakte titel in de titeleditor",
+		"443": "Deze titel kan niet worden opgeslagen; controleer de inline-inhoud, grootte en bewerkingscontext"
 	}
 }

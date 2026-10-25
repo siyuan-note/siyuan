@@ -230,6 +230,8 @@ if (response.code === 0 && response.data) {
 
 ### 重命名笔记本
 
+`name` 是纯文本显示名称，保留半角 `/` 并与 `／` 区分，不会因此创建目录；笔记本身份仍由 ID 确定。
+
 * `/api/notebook/renameNotebook`
 * 参数
 
@@ -252,6 +254,8 @@ if (response.code === 0 && response.data) {
   ```
 
 ### 创建笔记本
+
+`name` 中的半角 `/` 属于同一个纯文本显示名称，不作为 Markdown、富文本或文件系统路径解释。
 
 * `/api/notebook/createNotebook`
 * 参数
@@ -412,6 +416,8 @@ if (response.code === 0 && response.data) {
     * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档
 
 ### 重命名文档
+
+以下两个重命名接口接受普通标题。对于富文本标题，原样回传当前纯文本摘要不产生修改，传入不同摘要则拒绝写入以保护完整源内容。编辑富文本标题应使用生成的 API 契约中声明的标题源事务。
 
 * `/api/filetree/renameDoc`
 * 参数

@@ -691,6 +691,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	renameRootTitles := map[string]string{}
+	richRootTitles := map[string]treenode.DocumentTitle{}
 	cachedTrees := map[string]*parse.Tree{}
 	originals := map[string][]byte{}
 
@@ -782,8 +783,18 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 
 			title := treenode.ReadDocumentTitle(node).Text
 			tags := node.IALAttr("tags")
+			if node.DocumentTitle != nil {
+				previous := treenode.ReadDocumentTitle(node)
+				changed, replaceErr := replaceDocumentTitleText(node, method, keyword, replacement, r)
+				if replaceErr != nil {
+					return replaceErr
+				}
+				if changed {
+					richRootTitles[node.ID] = previous
+				}
+			}
 			if 0 == method {
-				if newTitle, matched := replaceSearchText(title, method, keyword, strings.ReplaceAll(replacement, "/", "／"), r); matched {
+				if newTitle, matched := replaceSearchText(title, method, keyword, replacement, r); matched && node.DocumentTitle == nil {
 					renameRootTitles[node.ID] = newTitle
 				}
 
@@ -794,9 +805,8 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 					ReloadTag()
 				}
 			} else if 3 == method {
-				if nil != r && r.MatchString(title) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
-					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
+				if nil != r && r.MatchString(title) && node.DocumentTitle == nil {
+					renameRootTitles[node.ID] = r.ReplaceAllString(title, replacement)
 				}
 
 				if nil != r && r.MatchString(tags) {
@@ -1103,7 +1113,11 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	for _, rootID := range changedRoots {
 		tree := cachedTrees[rootID]
 		title, rename := renameRootTitles[rootID]
-		if err = writeReplacementTree(tree, originals[rootID], title, rename); err != nil {
+		var richTitleBefore *treenode.DocumentTitle
+		if previous, changed := richRootTitles[rootID]; changed {
+			richTitleBefore = &previous
+		}
+		if err = writeReplacementTree(tree, originals[rootID], title, rename, richTitleBefore); err != nil {
 			return
 		}
 		reloadTreeIDs = append(reloadTreeIDs, rootID)
@@ -1113,14 +1127,25 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 }
 
 // 每个文档只提交一次；文件、缓存、索引及撤销失效与编辑器事务串行，标题也使用同一份扫描基线。
-func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool) error {
+func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool, richTitleBefore *treenode.DocumentTitle) error {
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
 	var size uint64
 	var err error
 	var titleChanged, emptyAttrUpdated bool
-	if rename {
+	if richTitleBefore != nil {
+		current := treenode.ReadDocumentTitle(tree.Root)
+		titleChanged, emptyAttrUpdated = current.Text != richTitleBefore.Text, current.Empty != richTitleBefore.Empty
+		if titleChanged {
+			parentHPath, pathErr := documentParentDisplayPath(tree.Box, tree.Path)
+			if pathErr != nil {
+				return pathErr
+			}
+			tree.HPath = parentHPath + "/" + current.Text
+		}
+		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	} else if rename {
 		if IsBoxDocPath(tree.Box, tree.Path) {
 			title = normalizeBoxName(title)
 		}
@@ -1140,6 +1165,9 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	refreshDocInfoWithSize(tree, size)
 	invalidateDocumentHistory(tree.ID)
 	publishDocRename(tree, titleChanged, emptyAttrUpdated)
+	if richTitleBefore != nil && !titleChanged && !emptyAttrUpdated {
+		IncSync()
+	}
 	if rename && IsBoxDocPath(tree.Box, tree.Path) {
 		box := Conf.Box(tree.Box)
 		boxConf := box.GetConf()

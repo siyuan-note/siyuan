@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Uložiť môj názov",
+	"documentTitleLatest": "Najnovší názov",
+	"documentTitleInlineOnly": "Názvy dokumentov podporujú iba riadkové prvky",
+	"documentTitleConflict": "Tento názov bol zmenený v inom editore. Váš koncept zostal zachovaný",
+	"documentTitleCopyReload": "Skopírovať koncept a načítať najnovší názov",
 	"listMindmapManageNodeColors": "Spravovať farby uzlov",
 	"listMindmapManageLineColors": "Spravovať farby čiar",
 	"listMindmapDocumentLayout": "Rozloženie dokumentu",
@@ -3460,6 +3465,9 @@
 		"437": "Stiahnuť túto verziu",
 		"438": "Vyberte platný obrázok JPEG, PNG alebo WebP s veľkosťou najviac 10 MiB a 16 megapixelov",
 		"439": "Tapetu zamknutej obrazovky sa nepodarilo uložiť; skontrolujte oprávnenia na zápis do pracovného priestoru",
-		"440": "Bol dosiahnutý limit kôl volaní nástrojov. Zostávajúce volania sa nevykonali; na pokračovanie odošlite ďalšiu správu"
+		"440": "Bol dosiahnutý limit kôl volaní nástrojov. Zostávajúce volania sa nevykonali; na pokračovanie odošlite ďalšiu správu",
+		"441": "Tento názov bol zmenený v inom editore. Váš koncept zostal zachovaný",
+		"442": "Tento formátovaný názov upravte v editore názvov",
+		"443": "Názov sa nedá uložiť; skontrolujte riadkový obsah, veľkosť a kontext úprav"
 	}
 }

@@ -22,7 +22,7 @@ export const validateName = (name: string, targetElement?: HTMLElement, document
         }
         return false;
     }
-    const length = documentTitle && window.siyuan.documentAddressingVersion === 2 ? Array.from(name).length : name.length;
+    const length = !documentTitle || window.siyuan.documentAddressingVersion === 2 ? Array.from(name).length : name.length;
     if (length > Constants.SIZE_TITLE) {
         if (targetElement) {
             showTooltip(window.siyuan.languages["_kernel"]["106"], targetElement, "error");
@@ -40,6 +40,12 @@ export const replaceFileName = (name: string) => {
         name = name.replace(/\//g, "／");
     }
     return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|/g, "").substring(0, Constants.SIZE_TITLE);
+};
+
+// 笔记本名称独立于物理目录，按 Unicode 字符限制长度并保留两种斜杠。
+export const normalizeNotebookName = (name: string) => {
+    return Array.from(name.replace(/\r\n|\r|\n|\u2028|\u2029|\t/g, "").trim())
+        .slice(0, Constants.SIZE_TITLE).join("");
 };
 
 export const truncateDocumentTitle = (name: string) => {
@@ -70,6 +76,14 @@ export const rename = (options: {
     if (window.siyuan.config.readonly) {
         return;
     }
+    const rootID = options.path?.split("/").pop()?.replace(/\.sy$/, "");
+    if (options.type === "file" && rootID && rootID !== options.notebookId &&
+        window.siyuan.documentAddressingVersion === 2) {
+        void import("../protyle/header/documentTitleDialog").then(({openDocumentTitleDialog}) => {
+            openDocumentTitleDialog({id: rootID, notebook: options.notebookId});
+        });
+        return;
+    }
     const initialName = options.empty ? "" : options.name;
     const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
@@ -88,7 +102,7 @@ export const rename = (options: {
                 dialog.destroy();
                 return;
             }
-            name = options.type === "notebook" ? replaceFileName(name) : normalizeDocumentTitle(name);
+            name = options.type === "notebook" ? normalizeNotebookName(name) : normalizeDocumentTitle(name);
             if (options.type === "notebook") {
                 if (!name) {
                     name = window.siyuan.languages.untitled;

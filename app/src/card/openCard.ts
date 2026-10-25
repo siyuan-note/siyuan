@@ -206,7 +206,6 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
         if (!isCurrentFlashcardLoad(revealState, generation)) {
             return;
         }
-        protyle.wysiwyg.renderCustom(docResponse.data.ial);
         fetchPost("/api/filetree/getDoc", {
             id,
             mode: 0,
@@ -220,6 +219,8 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 data: response,
                 protyle,
                 action: response.code === 0 && response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
+                isValid: () => isCurrentFlashcardLoad(revealState, generation),
+                beforeAVRender: () => protyle.wysiwyg.renderCustom(docResponse.data.ial),
                 afterCB: () => {
                     if (!isCurrentFlashcardLoad(revealState, generation) ||
                         protyle.element.classList.contains("fn__none")) {

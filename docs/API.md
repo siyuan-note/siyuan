@@ -230,6 +230,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Rename a notebook
 
+`name` is a plain display label. ASCII `/` remains distinct from `／` and does not create a directory. Notebook identity remains its ID.
+
 * `/api/notebook/renameNotebook`
 * Parameters
 
@@ -252,6 +254,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
   ```
 
 ### Create a notebook
+
+`name` accepts literal ASCII `/` as part of one plain display label; it is not Markdown, rich text, or a filesystem path.
 
 * `/api/notebook/createNotebook`
 * Parameters
@@ -412,6 +416,8 @@ This legacy name-path endpoint is available only in compatibility mode. In ordin
     * If you use the same `path` to call this interface repeatedly, the existing document will not be overwritten
 
 ### Rename a document
+
+The two rename endpoints below accept plain titles. For a rich title, returning its current plain-text summary is a no-op; a different summary is rejected to preserve the full source. Use the source-aware title transaction declared in the generated API contracts when editing rich titles.
 
 * `/api/filetree/renameDoc`
 * Parameters

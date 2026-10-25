@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "儲存我的標題",
+	"documentTitleLatest": "最新標題",
+	"documentTitleInlineOnly": "文件標題僅支援行內元素",
+	"documentTitleConflict": "標題已在其他編輯器中修改，目前輸入已保留",
+	"documentTitleCopyReload": "複製目前輸入並載入最新標題",
 	"listMindmapManageNodeColors": "管理節點配色",
 	"listMindmapManageLineColors": "管理連線顏色",
 	"listMindmapDocumentLayout": "文件版面配置",
@@ -3460,6 +3465,9 @@
 		"437": "下載此版本",
 		"438": "請選擇有效的 JPEG、PNG 或 WebP 圖片，最大 10 MiB、1600 萬像素",
 		"439": "無法儲存鎖定畫面桌布，請檢查工作空間寫入權限",
-		"440": "已達到工具呼叫回合數上限，剩餘工具呼叫未執行；請傳送新訊息繼續"
+		"440": "已達到工具呼叫回合數上限，剩餘工具呼叫未執行；請傳送新訊息繼續",
+		"441": "標題已在其他編輯器中修改，目前輸入已保留",
+		"442": "請透過標題編輯器修改此富文字標題",
+		"443": "無法儲存標題，請檢查行內內容、大小和編輯位置"
 	}
 }

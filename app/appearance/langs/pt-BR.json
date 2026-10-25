@@ -1,4 +1,9 @@
 {
+	"documentTitleKeepLocal": "Salvar meu título",
+	"documentTitleLatest": "Título mais recente",
+	"documentTitleInlineOnly": "Os títulos de documentos aceitam apenas elementos em linha",
+	"documentTitleConflict": "Este título foi alterado em outro editor. Seu rascunho foi preservado",
+	"documentTitleCopyReload": "Copiar rascunho e carregar o título mais recente",
 	"listMindmapManageNodeColors": "Gerenciar cores dos nós",
 	"listMindmapManageLineColors": "Gerenciar cores das linhas",
 	"listMindmapDocumentLayout": "Layout do documento",
@@ -3460,6 +3465,9 @@
 		"437": "Baixar esta versão",
 		"438": "Selecione uma imagem JPEG, PNG ou WebP válida de até 10 MiB e 16 megapixels",
 		"439": "Não foi possível salvar o papel de parede da tela de bloqueio; verifique as permissões de gravação do espaço de trabalho",
-		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar"
+		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar",
+		"441": "Este título foi alterado em outro editor. Seu rascunho foi preservado",
+		"442": "Edite este título formatado no editor de títulos",
+		"443": "Não foi possível salvar o título; verifique o conteúdo em linha, o tamanho e o contexto de edição"
 	}
 }

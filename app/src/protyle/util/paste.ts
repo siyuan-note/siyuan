@@ -82,6 +82,7 @@ import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
     getProtyleUnsupportedPasteBlocks,
+    getProtyleUnsupportedPasteMessage,
     getProtyleRestrictedPlainTextHTML,
     isProtyleRichHTMLPasteEnabled,
     isProtyleUploadDisabled,
@@ -861,7 +862,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             const unsupported = getUnsupportedBlocks(source);
             if (unsupported.length > 0) {
-                showMessage(window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
+                showMessage(getProtyleUnsupportedPasteMessage(protyle)?.(unsupported) ||
+                    window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
                 return;
             }
             if (initialBlockElement) {

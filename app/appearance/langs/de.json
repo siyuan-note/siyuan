@@ -3452,7 +3452,7 @@
 		"429": "Cloud-Verzeichnis kann nicht erstellt werden; prüfen, ob das übergeordnete Element ein Verzeichnis ist und keine gleichnamige Datei existiert",
 		"430": "Der WebDAV-Endpunkt hat weder ein Verzeichnis noch Synchronisationsdaten geliefert; Adresse und WebDAV-Dienst prüfen",
 		"431": "Die automatische Synchronisation versucht es um %s erneut; manuelle Synchronisation ist ebenfalls möglich",
-		"432": "Wiederherstellung von %s (%d/%d): %s / %s, %s/s, noch %s",
+		"432": "Wiederherstellung von %s\n(%d/%d): %s / %s, %s/s, noch %s",
 		"433": "Synchronisation abgebrochen; fertige Dateien bleiben erhalten. Zum Abschließen erneut synchronisieren",
 		"434": "Nicht genügend Speicherplatz für diese Datei: benötigt %s, verfügbar %s",
 		"435": "Temporäre Dateien der unterbrochenen Synchronisation entfernt, %s freigegeben",

@@ -3452,7 +3452,7 @@
 		"429": "Bulut dizini oluşturulamıyor; üst öğenin bir dizin olduğunu ve aynı adlı bir dosya bulunmadığını kontrol edin",
 		"430": "WebDAV uç noktası bir dizin veya eşitleme verisi döndürmedi; adresi ve WebDAV hizmetini kontrol edin",
 		"431": "Otomatik eşitleme %s saatinde yeniden denenecek; elle de eşitleyebilirsiniz",
-		"432": "%s geri yükleniyor (%d/%d): %s / %s, %s/sn, kalan %s",
+		"432": "%s geri yükleniyor\n(%d/%d): %s / %s, %s/sn, kalan %s",
 		"433": "Eşitleme iptal edildi; tamamlanan dosyalar korundu. Bitirmek için yeniden eşitleyin",
 		"434": "Bu dosyayı geri yüklemek için disk alanı yetersiz: gereken %s, kullanılabilir %s",
 		"435": "Kesilen eşitlemenin geçici dosyaları kaldırıldı, %s alan boşaltıldı",

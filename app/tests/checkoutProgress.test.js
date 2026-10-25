@@ -151,10 +151,21 @@ const run = async () => {
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"collapsed sync notice should use the normal progress text color");
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
-                progress("first",0,3,"applying",{current:9,message:"Still restoring"});
+                const restoringMessage = "Restoring 20231013134532-9doj565.sy\\n(3192/3192): 407 B / 407 B, 44 B/s, 00:00:00 remaining";
+                progress("first",0,3,"applying",{current:9,message:restoringMessage});
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 root.querySelector('[data-action="toggle"]').click();
                 assert.equal(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"90");
+                const message = root.querySelector('[data-type="message"]');
+                assert.equal(message.textContent,restoringMessage);
+                const fileRange = document.createRange();
+                fileRange.setStart(message.firstChild,0);
+                fileRange.setEnd(message.firstChild,restoringMessage.indexOf("\\n"));
+                const statsRange = document.createRange();
+                statsRange.setStart(message.firstChild,restoringMessage.indexOf("\\n")+1);
+                statsRange.setEnd(message.firstChild,restoringMessage.indexOf(")")+1);
+                assert.ok(statsRange.getBoundingClientRect().top >= fileRange.getBoundingClientRect().bottom,
+                    "progress statistics must start on a separate line at every viewport size");
                 const panel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
                 assert.ok(panel.left>=0 && panel.right<=innerWidth && panel.top>=0 && panel.bottom<=innerHeight,JSON.stringify(panel));
                 if (innerWidth <= 600) assert.ok(panel.width >= innerWidth - 40,"narrow progress view wastes available width");
@@ -215,7 +226,7 @@ const run = async () => {
                 progress("restarted",2,2,"done");
                 progress("stale",0,1);
                 assert.equal(document.getElementById("sync-checkout-progress"),null);
-                progress("second",0,3,"applying",{current:999,message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
+                progress("second",0,3,"applying",{current:999,message:"Restoring long-resource-file-name.bin\\n(1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
                 runtime.openSyncCheckoutProgress();
                 assert.equal(document.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"100");
                 assert.equal(document.querySelector(".b3-dialog__progressbar").style.width,"100%");
@@ -224,7 +235,7 @@ const run = async () => {
                 assert.equal(document.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
                 assert.ok(document.querySelector(".b3-dialog__progress--indeterminate"));
                 progress("second",0,3,"applying",{current:460,total:1050,
-                    message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
+                    message:"Restoring long-resource-file-name.bin\\n(1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
                 assert.equal(document.querySelector(".b3-dialog__progress--indeterminate"),null);
                 return "passed";
             })()`);

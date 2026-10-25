@@ -3452,7 +3452,7 @@
 		"429": "No se puede crear el directorio en la nube; compruebe que el elemento superior sea un directorio y que no exista un archivo con el mismo nombre",
 		"430": "El destino WebDAV no devolvió un directorio ni datos de sincronización; compruebe la dirección y el servicio WebDAV",
 		"431": "La sincronización automática se reintentará a las %s; también puede sincronizar manualmente",
-		"432": "Restaurando %s (%d/%d): %s / %s, %s/s, tiempo restante %s",
+		"432": "Restaurando %s\n(%d/%d): %s / %s, %s/s, tiempo restante %s",
 		"433": "Sincronización cancelada; se conservaron los archivos completados. Sincronice de nuevo para terminar",
 		"434": "No hay espacio suficiente para restaurar este archivo: necesario %s, disponible %s",
 		"435": "Se eliminaron los archivos temporales de la sincronización interrumpida, liberando %s",

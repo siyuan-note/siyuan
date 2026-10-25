@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
 	"sync"
 	"time"
 
@@ -154,7 +155,7 @@ func (task *syncCheckoutTask) push() {
 	if rate > 0 {
 		remaining = formatCheckoutDuration(time.Duration(float64(max(p.Size-p.Written, 0))/rate) * time.Second)
 	}
-	msg := fmt.Sprintf(Conf.Language(432), p.Path, p.Count, p.Total, checkoutBytes(p.Written), checkoutBytes(p.Size), checkoutBytes(int64(rate)), remaining)
+	msg := fmt.Sprintf(Conf.Language(432), path.Base(p.Path), p.Count, p.Total, checkoutBytes(p.Written), checkoutBytes(p.Size), checkoutBytes(int64(rate)), remaining)
 	task.message = msg
 	util.SetBootDetails(msg)
 	pushSyncStatusBar(msg)

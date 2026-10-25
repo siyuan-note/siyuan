@@ -18,6 +18,10 @@
 
   &__details {
     margin-bottom: 12px;
+
+    [data-type="message"] {
+      white-space: pre-line;
+    }
   }
 
   &__notice {

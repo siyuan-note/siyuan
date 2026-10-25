@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024212002"
+		"updated": "20261025114801"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2092,7 +2092,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-xvhal7o",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2163,7 +2163,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024194010-jykxx0r",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2177,7 +2177,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 開啟版面配置調整。取景框與進入全螢幕前的文件視口等大，全螢幕視口較高時置中，否則依頂部中點對齊，並隨視窗尺寸變化更新位置。參照固定取景框平移或縮放導圖，保持此模式開啟並離開全螢幕，即可將框內視角套用至文件；再次點擊按鈕關閉則取消本次視角調整。鎖定畫布也會取消尚未套用的視角調整。"
+					"Data": " 開啟版面配置調整。實線取景框內的橫縱中心虛線和低對比度點狀網格可輔助判斷位置與比例。取景框與進入全螢幕前的文件視口等大，全螢幕視口較高時置中，否則依頂部中點對齊，並隨視窗尺寸變化更新位置。參照固定取景框平移或縮放導圖，保持此模式開啟並離開全螢幕，即可將框內視角套用至文件；再次點擊按鈕關閉則取消本次視角調整。鎖定畫布也會取消尚未套用的視角調整。"
 				}
 			]
 		},

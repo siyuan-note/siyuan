@@ -254,9 +254,36 @@
     top: 0;
     left: 0;
     pointer-events: none;
-    border: 1px dashed var(--b3-theme-primary);
+    color: var(--b3-theme-primary);
+    border: 1px solid currentColor;
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center;
     box-sizing: border-box;
     z-index: 4;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      opacity: .5;
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      border-left: 1px dashed currentColor;
+    }
+
+    &::after {
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 1px dashed currentColor;
+    }
   }
 
   &__selection-box {

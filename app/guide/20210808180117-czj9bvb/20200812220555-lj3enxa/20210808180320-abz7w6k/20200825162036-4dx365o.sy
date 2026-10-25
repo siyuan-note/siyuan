@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261024212002"
+		"updated": "20261025114801"
 	},
 	"Children": [
 		{
@@ -2055,7 +2055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2094,7 +2094,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-k1vwtue",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2165,7 +2165,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024194010-bf2m0k7",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2179,7 +2179,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 开启布局调整。取景框与进入全屏前的文档视口等大，全屏视口更高时居中，否则按顶部中点对齐，并随窗口尺寸变化更新位置。参照固定取景框平移或缩放导图，保持此模式开启并退出全屏，即可将框内视角应用到文档；再次点击按钮关闭则取消本次视角调整。锁定画布也会取消尚未应用的视角调整。"
+					"Data": " 开启布局调整。实线取景框内的横纵中心虚线和低对比度点状网格可辅助判断位置与比例。取景框与进入全屏前的文档视口等大，全屏视口更高时居中，否则按顶部中点对齐，并随窗口尺寸变化更新位置。参照固定取景框平移或缩放导图，保持此模式开启并退出全屏，即可将框内视角应用到文档；再次点击按钮关闭则取消本次视角调整。锁定画布也会取消尚未应用的视角调整。"
 				}
 			]
 		},

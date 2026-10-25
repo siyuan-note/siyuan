@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261024212002"
+		"updated": "20261025114801"
 	},
 	"Children": [
 		{
@@ -2052,7 +2052,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2168,7 +2168,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-f51bzy4",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2239,7 +2239,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024194010-0bhyie7",
-				"updated": "20261024212002"
+				"updated": "20261025114801"
 			},
 			"Children": [
 				{
@@ -2253,7 +2253,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to edit the document view. The fixed frame has the same size as the document viewport on entry. It is centered when the fullscreen viewport is taller, or aligned to the top center otherwise, and follows window resizing. Pan and zoom the map beneath the frame, then exit fullscreen with this mode still enabled to apply the framed view to the document. Click the button again to cancel the pending view change. Locking the canvas also cancels an unapplied view change."
+					"Data": " to edit the document view. The solid frame includes dashed horizontal and vertical center guides and a faint dot grid to help judge position and scale. The fixed frame has the same size as the document viewport on entry. It is centered when the fullscreen viewport is taller, or aligned to the top center otherwise, and follows window resizing. Pan and zoom the map beneath the frame, then exit fullscreen with this mode still enabled to apply the framed view to the document. Click the button again to cancel the pending view change. Locking the canvas also cancels an unapplied view change."
 				}
 			]
 		},

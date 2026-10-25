@@ -36,7 +36,8 @@ const browserCases = async (source: string, css: string) => {
             parent.style.cssText = `width:${mobile ? 320 : 760}px;transform:translateX(5px);overflow:hidden`;
             const host = document.createElement("div");
             host.style.cssText = `--mindmap-view-height:${mobile ? 300 : 460}px;` +
-                `--b3-theme-background:${dark ? "#222" : "#fff"};--b3-theme-primary:#3574f0;--b3-border-color:#888`;
+                `--b3-theme-background:${dark ? "#222" : "#fff"};` +
+                `--b3-theme-primary:${dark ? "#8ab4f8" : "#3574f0"};--b3-border-color:#888;--b3-border-radius:8px`;
             parent.append(host);
             document.body.append(parent);
             const holder = document.createElement("div");
@@ -56,6 +57,7 @@ const browserCases = async (source: string, css: string) => {
             check.ok(preview.hidden);
             check.ok(button("listMindmapDocumentLayout").hidden, "the layout control is fullscreen-only");
             const initialStyle = host.style.cssText;
+            const documentRadius = getComputedStyle(host).borderTopLeftRadius;
             for (const scale of [.75, 1.25]) {
                 view.zoomAt(scale);
                 const documentCenter = center();
@@ -135,8 +137,29 @@ const browserCases = async (source: string, css: string) => {
                     (viewport.clientWidth - rect.width) / 2) < .1);
                 check.ok(Math.abs(rect.top - viewportRect.top -
                     Math.max(0, (viewport.clientHeight - rect.height) / 2)) < .1);
-                check.equal(getComputedStyle(preview).pointerEvents, "none", "the frame does not intercept gestures");
-                check.equal(getComputedStyle(preview).borderTopStyle, "dashed");
+                const style = getComputedStyle(preview);
+                const canvasStyle = getComputedStyle(host);
+                check.equal(style.pointerEvents, "none", "the frame does not intercept gestures");
+                check.equal(style.borderTopStyle, "solid");
+                check.equal(style.borderTopColor, canvasStyle.outlineColor, "the frame follows the active canvas color");
+                check.equal(style.borderTopWidth, canvasStyle.outlineWidth);
+                check.equal(style.borderTopLeftRadius, documentRadius, "the frame keeps the document canvas radius");
+                check.match(style.backgroundImage, /radial-gradient/);
+                check.equal(style.backgroundSize, "24px 24px");
+                check.equal(style.backgroundPosition, "50% 50%");
+                check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
+                const vertical = getComputedStyle(preview, "::before");
+                const horizontal = getComputedStyle(preview, "::after");
+                check.equal(vertical.borderLeftStyle, "dashed");
+                check.equal(horizontal.borderTopStyle, "dashed");
+                check.equal(vertical.borderLeftColor, style.borderTopColor);
+                check.equal(horizontal.borderTopColor, style.borderTopColor);
+                check.ok(Math.abs(parseFloat(vertical.left) - preview.clientWidth / 2) < .1);
+                check.ok(Math.abs(parseFloat(horizontal.top) - preview.clientHeight / 2) < .1);
+                for (const guide of [vertical, horizontal]) {
+                    check.ok(Number(guide.opacity) > 0 && Number(guide.opacity) < 1);
+                    check.equal(guide.pointerEvents, "none");
+                }
                 check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
             };
             const captureLayout = () => {

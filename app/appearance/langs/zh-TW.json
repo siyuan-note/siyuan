@@ -1,4 +1,5 @@
 {
+	"deleteAll": "全部刪除",
 	"listMindmapManageNodeColors": "管理節點配色",
 	"listMindmapManageLineColors": "管理連線顏色",
 	"listMindmapDocumentLayout": "文件版面配置",

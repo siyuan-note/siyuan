@@ -2638,6 +2638,8 @@ export type UnknownTransactionAction = string & { readonly __unknownTransactionA
 
 export type UnlockNotebookRequestInput = { "notebook": string; "password": string; };
 
+export type UnusedAssetsRequestInput = { "all"?: boolean | null; "keyword"?: string | null; };
+
 export type UnzipRequestInput = { "path": string; "zipPath": string; };
 
 export type UpdateBazaarPackageRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "packageType": string; };
@@ -3538,12 +3540,15 @@ export interface APIPOSTRoutes {
     };
     /**
      * 扫描失败返回标准错误，不将失败表示为成功的空列表。
+     * keyword 可省略、为 null 或空白；非空时按完整文件名进行不区分大小写的字面量包含匹配。
+     * 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体及旧调用保留原有行为。
+     * all 为 true 时返回完整清单且不发送截断提示，供前端在当前面板内过滤；省略、null 或 false 保留截断行为。
      * 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
      */
     "/api/asset/getUnusedAssets": {
-        request: EmptyRequestInput;
+        request: UnusedAssetsRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
-        body: "none";
+        body: "legacyOptional";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };

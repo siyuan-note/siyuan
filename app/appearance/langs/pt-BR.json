@@ -1,4 +1,5 @@
 {
+	"deleteAll": "Excluir tudo",
 	"listMindmapManageNodeColors": "Gerenciar cores dos nós",
 	"listMindmapManageLineColors": "Gerenciar cores das linhas",
 	"listMindmapDocumentLayout": "Layout do documento",

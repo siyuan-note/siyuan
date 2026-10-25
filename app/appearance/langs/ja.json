@@ -1,4 +1,5 @@
 {
+	"deleteAll": "すべて削除",
 	"listMindmapManageNodeColors": "ノードの色を管理",
 	"listMindmapManageLineColors": "線の色を管理",
 	"listMindmapDocumentLayout": "ドキュメントのレイアウト",

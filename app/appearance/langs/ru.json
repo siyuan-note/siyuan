@@ -1,4 +1,5 @@
 {
+	"deleteAll": "Удалить всё",
 	"listMindmapManageNodeColors": "Управление цветами узлов",
 	"listMindmapManageLineColors": "Управление цветами линий",
 	"listMindmapDocumentLayout": "Макет документа",

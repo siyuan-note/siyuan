@@ -117560,6 +117560,32 @@
       ],
       "additionalProperties": false
     },
+    "UnusedAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "UnzipRequestInput": {
       "type": "object",
       "properties": {
@@ -128599,9 +128625,9 @@
         "authenticated",
         "admin"
       ],
-      "body": "none",
+      "body": "legacyOptional",
       "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
+        "$ref": "#/$defs/UnusedAssetsRequestInput"
       },
       "response": {
         "anyOf": [

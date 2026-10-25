@@ -1298,8 +1298,11 @@ var RemoveUnusedAsset = define[AssetPathRequest, AssetPathData]("removeUnusedAss
 var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAssets", "/api/asset/removeUnusedAssets", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
+// keyword 可省略、为 null 或空白；非空时按完整文件名进行不区分大小写的字面量包含匹配。
+// 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体及旧调用保留原有行为。
+// all 为 true 时返回完整清单且不发送截断提示，供前端在当前面板内过滤；省略、null 或 false 保留截断行为。
 // 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
-var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+var GetUnusedAssets = define[UnusedAssetsRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
 
 // GetUnusedEncryptedBoxAssets 扫描单个已解锁加密笔记本的文档、全部数据库定义及智能体会话引用。
 // 任意扫描失败返回 -1，不返回不完整候选。锁定目标使用既有 314 语言消息；结果不截断。

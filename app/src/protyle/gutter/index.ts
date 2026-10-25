@@ -2527,6 +2527,7 @@ export class Gutter {
                 }, ...embedBreadcrumbMenu(protyle, nodeElement), {
                     id: "headingEmbedMode",
                     label: window.siyuan.languages.headingEmbedMode,
+                    iconHTML: "",
                     type: "submenu",
                     submenu: [{
                         id: "showHeadingWithBlocks",

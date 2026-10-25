@@ -16,11 +16,12 @@
   }
 
   &s {
+    --b3-snackbar-top: max(22px, calc(var(--b3-window-controls-height, 0px) + 16px));
     position: fixed;
     right: 30px;
-    top: 22px;
+    top: var(--b3-snackbar-top);
     // 不能设置死，否则右键菜单会被遮盖 z-index: 999999;
-    max-height: calc(100vh - 32px);
+    max-height: calc(100vh - var(--b3-snackbar-top) - 16px);
     display: flex;
     flex-direction: column;
     transform: translate3d(calc(20vw + 48px), 0, 0);
@@ -101,7 +102,7 @@
 
 @media screen and (max-width: 520px) {
   .b3-snackbars {
-    top: 35px;
+    --b3-snackbar-top: max(35px, calc(var(--b3-window-controls-height, 0px) + 16px));
     right: calc(10vw - 18px);
   }
 

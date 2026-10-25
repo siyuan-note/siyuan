@@ -2037,7 +2037,7 @@ body.mobile-topbar--merged {
 }
 
 .b3-snackbars {
-  top: calc(var(--mobile-top-safe-area) + 35px);
+  --b3-snackbar-top: calc(var(--mobile-top-safe-area) + 35px);
 }
 
 .b3-menu--fullscreen:not(.b3-menu--sheet) {

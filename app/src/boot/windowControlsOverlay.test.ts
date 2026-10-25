@@ -18,7 +18,7 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     .toolbar{padding:0}body{margin:0}#tooltip{--b3-tooltips-background:black;--b3-tooltips-color:white}
     </style><div id="toolbar" class="toolbar fn__flex"><div id="captionColor" class="toolbar__item"></div><div id="drag" class="fn__flex-1"></div>
     <div id="windowControls" class="fn__flex"></div></div>
-    <div><div class="layout-tab-bar"></div></div><div id="tooltip" class="tooltip fn__none"></div>`;
+    <div id="tooltip" class="tooltip fn__none"></div>`;
     window.siyuan = {isReady: true, languages: {min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
         storage: {zoom: 1}} as unknown as typeof window.siyuan;
     window.DOMPurify = {sanitize: (value: string) => value} as typeof window.DOMPurify;
@@ -26,6 +26,7 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     const overlay = {} as typeof import("./windowControlsOverlay");
     const controls = {} as typeof import("./windowControls");
     const tooltip = {} as typeof import("../dialog/tooltip");
+    const color = {} as typeof import("../util/color");
     const dependencies = {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"},
         resizeTopBar: () => { resizeCalls++; }, setToolbarLeftMac() {},
         isMobile: () => false, isTouchHoverInput: () => false, emitToPlugins() {}, forEachPluginSubscriber() {}};
@@ -35,8 +36,10 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
             ipcRenderer.send(channel, data);
         }}};
         if (id === "./windowControlsOverlay") return overlay;
+        if (id === "../util/color") return color;
         return dependencies;
     });
+    load(sources[3], color);
     load(sources[0], overlay);
     load(sources[1], controls);
     load(sources[2], tooltip);
@@ -104,6 +107,33 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
         tooltip.hideTooltip();
         target.remove();
     }
+    // 原生按钮跟随界面密度和缩放，不能被初始化时的系统默认高度抬高。
+    const densities = [["comfortable", 32, 42], ["compact", 28, 34]] as const;
+    for (const [density, toolbarHeight, panelHeight] of densities) {
+        if (density === "compact") {
+            document.documentElement.setAttribute("data-ui-density", "compact");
+        } else {
+            document.documentElement.removeAttribute("data-ui-density");
+        }
+        document.documentElement.style.setProperty("--b3-ui-toolbar-height", toolbarHeight + "px");
+        document.documentElement.style.setProperty("--b3-ui-panel-height", panelHeight + "px");
+        for (const fused of [false, true]) for (const zoom of [0.67, 1, 1.5]) {
+            document.body.classList.toggle("body--toolbar-hide", fused);
+            webFrame.setZoomFactor(zoom);
+            overlay.updateWindowControlsOverlay();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const expected = fused ? panelHeight : toolbarHeight;
+            const label = `${density} ${fused ? "fused" : "toolbar"} at zoom ${zoom}`;
+            check.equal(sent.at(-1).height, Math.round(expected * zoom), `${label} caption height`);
+            check.ok(Math.abs(api.getTitlebarAreaRect().height - expected) < 1.5,
+                `${label} caption keeps ${expected}px`);
+            check.ok(Math.abs(document.getElementById("toolbar").getBoundingClientRect().height - expected) < 1.5,
+                `${label} toolbar keeps ${expected}px`);
+        }
+        document.documentElement.style.removeProperty("--b3-ui-toolbar-height");
+        document.documentElement.style.removeProperty("--b3-ui-panel-height");
+    }
+    document.documentElement.removeAttribute("data-ui-density");
     const icon = document.getElementById("captionColor");
     icon.style.color = "#aabbcc";
     await ipcRenderer.invoke("overlay-test-reject-color");
@@ -155,7 +185,8 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
 test("native Windows captions reserve geometry, preserve legacy controls and keep tooltips clear", {
     skip: process.platform !== "win32", timeout: 30000,
 }, async () => {
-    const sources = ["src/boot/windowControlsOverlay.ts", "src/boot/windowControls.ts", "src/dialog/tooltip.ts"].map(file =>
+    const sources = ["src/boot/windowControlsOverlay.ts", "src/boot/windowControls.ts", "src/dialog/tooltip.ts",
+        "src/util/color.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {
             module: ModuleKind.CommonJS, target: ScriptTarget.ES2021,
         }}).outputText);
@@ -192,10 +223,18 @@ app.whenReady().then(async()=>{
  legacy.destroy();
  await win.loadFile(${JSON.stringify(html)});
  if(updateTitleBarOverlay(win,{height:55,symbolColor:"oklch(0.7 0.15 150)"})!==false)throw new Error("native parser unexpectedly accepted oklch");
- await new Promise(resolve=>setTimeout(resolve,100));
- if(await win.webContents.executeJavaScript("navigator.windowControlsOverlay.getTitlebarAreaRect().height")!==55)throw new Error("color rejection blocked native height");
+ const captionHeight=()=>win.webContents.executeJavaScript("navigator.windowControlsOverlay.getTitlebarAreaRect().height");
+ const waitCaption=async expected=>{
+  let height=0;
+  for(let index=0;index<40&&height!==expected;index++){
+   await new Promise(resolve=>setTimeout(resolve,50));
+   height=await captionHeight();
+  }
+  if(height!==expected)throw new Error("native caption height stayed "+height+" instead of "+expected);
+ };
+ await waitCaption(55);
  updateTitleBarOverlay(win,{height:32,symbolColor:"#808080"});
- await new Promise(resolve=>setTimeout(resolve,100));
+ await waitCaption(32);
  const result=await win.webContents.executeJavaScript(${JSON.stringify("const __name=value=>value;(" +
         browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ")")});
  console.log(result);win.destroy();app.exit(0);

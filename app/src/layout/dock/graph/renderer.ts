@@ -1,3 +1,4 @@
+import {parseCanvasColor} from "../../../util/color";
 import {IGraphCamera, IGraphData, IGraphOptions, IGraphPalette} from "./types";
 
 export interface IGraphRenderState {
@@ -52,19 +53,8 @@ export const getGraphNodeColor = (type: string, palette: IGraphPalette) => {
     }
 };
 
-const colorCanvas = document.createElement("canvas");
-colorCanvas.width = 1;
-colorCanvas.height = 1;
-const colorContext = colorCanvas.getContext("2d", {willReadFrequently: true});
-
+// WebGL 需要 0-1 浮点通道；无法解析的颜色按不透明黑色处理，与调色板缺省值一致。
 export const parseGraphColor = (color: string): [number, number, number, number] => {
-    if (!colorContext) {
-        return [0, 0, 0, 1];
-    }
-    colorContext.clearRect(0, 0, 1, 1);
-    colorContext.fillStyle = "#000000";
-    colorContext.fillStyle = color;
-    colorContext.fillRect(0, 0, 1, 1);
-    const value = colorContext.getImageData(0, 0, 1, 1).data;
-    return [value[0] / 255, value[1] / 255, value[2] / 255, value[3] / 255];
+    const value = parseCanvasColor(color);
+    return value ? [value[0] / 255, value[1] / 255, value[2] / 255, value[3] / 255] : [0, 0, 0, 1];
 };

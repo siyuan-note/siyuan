@@ -1,4 +1,5 @@
 const {normalizeWindowGeometry, captureWindowGeometry} = require("./windowGeometry");
+const {getTitleBarOverlayOptions} = require("./windowControlsOverlay");
 
 const settingsPath = "/stage/build/app/settings.html";
 
@@ -260,6 +261,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, getWindows, initiali
                 title: approved.data.title || "SiYuan",
                 frame: platform === "darwin",
                 titleBarStyle: "hidden",
+                titleBarOverlay: getTitleBarOverlayOptions(platform),
                 trafficLightPosition: {x: 8, y: 8},
                 autoHideMenuBar: true,
                 fullscreenable: true,

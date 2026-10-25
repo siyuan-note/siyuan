@@ -136,6 +136,7 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(allowed.overrideBrowserWindowOptions.show, false);
     assert.equal(allowed.overrideBrowserWindowOptions.frame, false);
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarStyle, "hidden");
+    assert.deepEqual(allowed.overrideBrowserWindowOptions.titleBarOverlay, {color: "#00000000", symbolColor: "#808080"});
     assert.equal(allowed.overrideBrowserWindowOptions.autoHideMenuBar, true);
     assert.equal(allowed.overrideBrowserWindowOptions.parent, undefined);
     assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.webSecurity, true);
@@ -254,6 +255,14 @@ test("macOS settings windows retain native traffic lights with the main window t
     assert.equal(allowed.overrideBrowserWindowOptions.frame, true);
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarStyle, "hidden");
     assert.deepEqual(allowed.overrideBrowserWindowOptions.trafficLightPosition, {x: 8, y: 8});
+    assert.equal(allowed.overrideBrowserWindowOptions.titleBarOverlay, false);
+});
+
+test("Linux settings windows retain the page window controls", () => {
+    const {policy, owner, open} = setup("linux");
+    const allowed = policy(owner, open());
+    assert.equal(allowed.overrideBrowserWindowOptions.frame, false);
+    assert.equal(allowed.overrideBrowserWindowOptions.titleBarOverlay, false);
 });
 
 for (const platform of ["win32", "linux", "darwin"]) {

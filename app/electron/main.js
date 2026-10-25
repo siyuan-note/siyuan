@@ -88,6 +88,7 @@ const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
 const {createSettingsWindows} = require("./settingsWindows");
+const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
 const {createSettingsTaskBridge} = require("./settingsTasks");
 const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
 const {createWebPageFetcher, installWebPageFetchIPC} = require("./webPageFetch");
@@ -2251,6 +2252,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         },
         frame: "darwin" === process.platform,
         titleBarStyle: "hidden",
+        titleBarOverlay: getTitleBarOverlayOptions(),
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
     remote.enable(currentWindow.webContents);
@@ -3992,6 +3994,11 @@ app.whenReady().then(() => {
                 }
                 break;
             }
+            case "setTitleBarOverlay":
+                if (event.senderFrame === event.sender.mainFrame && webContentsId === event.sender.id) {
+                    updateTitleBarOverlay(currentWindow, data);
+                }
+                break;
             case "setTrafficLightPosition":
                 if (!currentWindow || !currentWindow.setWindowButtonPosition) {
                     return;
@@ -4226,6 +4233,7 @@ app.whenReady().then(() => {
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
+            titleBarOverlay: getTitleBarOverlayOptions(),
             webPreferences: {
                 contextIsolation: false,
                 nodeIntegration: true,

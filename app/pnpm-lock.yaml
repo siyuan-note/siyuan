@@ -186,8 +186,8 @@ importers:
         specifier: ^10.0.0
         version: 10.0.1(eslint@10.13.0(jiti@2.7.0)(supports-color@8.1.1))
       '@types/node':
-        specifier: ^24.0.0
-        version: 24.12.3
+        specifier: ^24.19.2
+        version: 24.19.2
       '@types/zxcvbn':
         specifier: 4.4.5
         version: 4.4.5
@@ -274,7 +274,7 @@ importers:
         version: 16.0.8(sass@1.105.2)(webpack@5.106.2)
       sharp:
         specifier: ^0.35.5
-        version: 0.35.5(@types/node@24.12.3)
+        version: 0.35.5(@types/node@24.19.2)
       stylelint:
         specifier: ^17.16.0
         version: 17.16.0(@typescript/typescript6@6.0.2)(supports-color@8.1.1)
@@ -999,8 +999,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@24.12.3':
-    resolution: {integrity: sha512-8oljBDGun9cIsZRJR6fkihn0TSXJI0UDOOhncYaERq6M0JMDoPLxyscwruJcb4GKS6dvK/d8xebYBg27h/duaQ==}
+  '@types/node@24.19.2':
+    resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
 
   '@types/zxcvbn@4.4.5':
     resolution: {integrity: sha512-FZJgC5Bxuqg7Rhsm/bx6gAruHHhDQ55r+s0JhDh8CQ16fD7NsJJ+p8YMMQDhSQoIrSmjpqqYWA96oQVMNkjRyA==}
@@ -3126,8 +3126,8 @@ packages:
     engines: {node: '>=16.20.0'}
     hasBin: true
 
-  undici-types@7.16.0:
-    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
 
   undici@6.27.0:
     resolution: {integrity: sha512-YmfV3YnEDzXRC5lZ2jWtWWHKGUm1zIt8AhesR1tens+HTNv+YZlN/dp6G727LOvMJ8xjP9Be7Y2Sdr96LDm+pg==}
@@ -3867,7 +3867,7 @@ snapshots:
 
   '@types/fs-extra@9.0.13':
     dependencies:
-      '@types/node': 24.12.3
+      '@types/node': 24.19.2
 
   '@types/html-minifier-terser@6.1.0': {}
 
@@ -3877,9 +3877,9 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@24.12.3':
+  '@types/node@24.19.2':
     dependencies:
-      undici-types: 7.16.0
+      undici-types: 7.24.6
 
   '@types/zxcvbn@4.4.5': {}
 
@@ -4654,7 +4654,7 @@ snapshots:
     dependencies:
       '@electron-internal/extract-zip': 1.0.3
       '@electron/get': 4.0.3(supports-color@8.1.1)
-      '@types/node': 24.12.3
+      '@types/node': 24.19.2
     transitivePeerDependencies:
       - supports-color
 
@@ -5255,7 +5255,7 @@ snapshots:
 
   jest-worker@27.4.5:
     dependencies:
-      '@types/node': 24.12.3
+      '@types/node': 24.19.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -5808,7 +5808,7 @@ snapshots:
     dependencies:
       kind-of: 6.0.3
 
-  sharp@0.35.5(@types/node@24.12.3):
+  sharp@0.35.5(@types/node@24.19.2):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -5839,7 +5839,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.5
       '@img/sharp-win32-ia32': 0.35.5
       '@img/sharp-win32-x64': 0.35.5
-      '@types/node': 24.12.3
+      '@types/node': 24.19.2
 
   shebang-command@2.0.0:
     dependencies:
@@ -6105,7 +6105,7 @@ snapshots:
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
 
-  undici-types@7.16.0: {}
+  undici-types@7.24.6: {}
 
   undici@6.27.0: {}
 

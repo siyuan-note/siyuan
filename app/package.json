@@ -66,7 +66,7 @@
     "@breezystack/lamejs": "1.2.7",
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.0",
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.19.2",
     "@types/zxcvbn": "4.4.5",
     "@typescript-eslint/eslint-plugin": "^8.71.2",
     "@typescript-eslint/parser": "^8.71.2",

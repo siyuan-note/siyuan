@@ -2371,17 +2371,6 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
             }
             return;
         }
-        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        if (siyuanOpenURL) {
-            if (currentWindow.isMinimized()) {
-                currentWindow.restore();
-            }
-            currentWindow.show();
-            setTimeout(() => { // 等待界面js执行完毕
-                writeLog(siyuanOpenURL);
-                currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
-            }, 2000);
-        }
     });
 
     if ("darwin" !== process.platform) {
@@ -2410,10 +2399,17 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         workspaceDir: startup?.workspace,
     });
     if (startup) localKernelStartups.delete(getWorkspaceStartupKey(startup.workspace));
-    bindMainWindowReady(currentWindow, currentBootWindow, windowState);
+    bindMainWindowReady(currentWindow, currentBootWindow, windowState, () => {
+        if (kernelTarget.mode === "remote") return;
+        const siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
+        if (siyuanOpenURL) {
+            writeLog(siyuanOpenURL);
+            currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
+        }
+    });
 };
 
-const bindMainWindowReady = (currentWindow, currentBootWindow, windowState) => {
+const bindMainWindowReady = (currentWindow, currentBootWindow, windowState, onReady) => {
     // loadURL 后设置超时兜底：前端 app bundle 加载或初始化异常导致 siyuan-ready-to-show 迟迟不发时，
     // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
     const readyToShowTimeout = setTimeout(() => {
@@ -2452,6 +2448,7 @@ const bindMainWindowReady = (currentWindow, currentBootWindow, windowState) => {
         if (currentBootWindow && !currentBootWindow.isDestroyed()) {
             currentBootWindow.destroy();
         }
+        onReady?.();
     };
     ipcMain.on("siyuan-ready-to-show", readyToShow);
     currentWindow.once("closed", () => {

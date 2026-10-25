@@ -347,7 +347,7 @@ Docker 部署的限制同样适用：仅支持浏览器访问，不支持桌面�
 ```
 Web UI: 6806
 Container Port: 6806
-Container Path: /home/siyuan
+Container Path: /siyuan/workspace
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000

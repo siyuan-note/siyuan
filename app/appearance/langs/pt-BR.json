@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Abrir o item em visualização dividida após a criação",
 	"deleteAll": "Excluir tudo",
 	"listMindmapManageNodeColors": "Gerenciar cores dos nós",
 	"listMindmapManageLineColors": "Gerenciar cores das linhas",

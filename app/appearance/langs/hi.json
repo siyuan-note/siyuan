@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "बनाने के बाद आइटम को विभाजित दृश्य में खोलें",
 	"deleteAll": "सभी हटाएँ",
 	"listMindmapManageNodeColors": "नोड के रंग प्रबंधित करें",
 	"listMindmapManageLineColors": "रेखाओं के रंग प्रबंधित करें",

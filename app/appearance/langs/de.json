@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Eintrag nach dem Erstellen automatisch in geteilter Ansicht öffnen",
 	"deleteAll": "Alle löschen",
 	"listMindmapManageNodeColors": "Knotenfarben verwalten",
 	"listMindmapManageLineColors": "Linienfarben verwalten",

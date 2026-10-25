@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "เปิดรายการในมุมมองแบบแบ่งหลังจากสร้าง",
 	"deleteAll": "ลบทั้งหมด",
 	"listMindmapManageNodeColors": "จัดการสีโหนด",
 	"listMindmapManageLineColors": "จัดการสีเส้น",

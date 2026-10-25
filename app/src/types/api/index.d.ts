@@ -328,11 +328,11 @@ export type AVContextFilterData = { "contextFilter": AVAttributeViewContextFilte
 
 export type AVCreateAttributeViewItemDocsResult = { "blockIDs": Array<string> | null; "itemIDs": Array<string> | null; "skippedItemIDs"?: Array<string>; "warnings"?: Array<string>; };
 
-export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "warnings"?: Array<string>; };
+export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "openAfterCreate"?: boolean; "warnings"?: Array<string>; };
 
 export type AVCreateItemDocsResult = (AVCreateAttributeViewItemDocsResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockIDs"?: never; "itemIDs"?: never; "skippedItemIDs"?: never; "warnings"?: never; });
 
-export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "warnings"?: never; });
+export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "openAfterCreate"?: never; "warnings"?: never; });
 
 export type AVCreated = { "includeTime": boolean; };
 
@@ -400,9 +400,9 @@ export type AVNewItemSaveLocation = { "boxID"?: string; "pathTemplate": string; 
 
 export type AVNewItemSaveLocationInput = { "boxID"?: string | null; "pathTemplate"?: string | null; };
 
-export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
+export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "openAfterCreate"?: boolean; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
 
-export type AVNewItemTemplateInput = { "contentTemplatePath"?: string | null; "fieldValues"?: Record<string, AVNewItemFieldValueInput | null> | null; "hideInFileTree"?: boolean | null; "icon"?: string | null; "id"?: string | null; "name"?: string | null; "primaryKeyTemplate"?: string | null; "saveLocation"?: AVNewItemSaveLocationInput | null; "targetType"?: "detached" | "document"; };
+export type AVNewItemTemplateInput = { "contentTemplatePath"?: string | null; "fieldValues"?: Record<string, AVNewItemFieldValueInput | null> | null; "hideInFileTree"?: boolean | null; "icon"?: string | null; "id"?: string | null; "name"?: string | null; "openAfterCreate"?: boolean | null; "primaryKeyTemplate"?: string | null; "saveLocation"?: AVNewItemSaveLocationInput | null; "targetType"?: "detached" | "document"; };
 
 export type AVPasteRowsData = { "inferableKeyIDs": Array<string> | null; "view": AVTable | null; };
 
@@ -3812,6 +3812,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
+     * true 表示创建后分屏打开，false 表示不打开，省略时保留旧行为（仅日历自动打开）。API 本身不触发界面操作。
+     */
     "/api/av/createAttributeViewItem": {
         request: CreateAttributeViewItemRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };

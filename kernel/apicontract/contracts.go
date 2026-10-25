@@ -1495,6 +1495,9 @@ var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollect
 var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
+// true 表示创建后分屏打开，false 表示不打开，省略时保留旧行为（仅日历自动打开）。API 本身不触发界面操作。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")

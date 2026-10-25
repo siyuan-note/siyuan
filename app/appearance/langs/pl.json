@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Otwórz element w podzielonym widoku po utworzeniu",
 	"deleteAll": "Usuń wszystko",
 	"listMindmapManageNodeColors": "Zarządzaj kolorami węzłów",
 	"listMindmapManageLineColors": "Zarządzaj kolorami linii",

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261025011511"
+		"updated": "20261025205717"
 	},
 	"Children": [
 		{
@@ -3276,6 +3276,43 @@
 				{
 					"Type": "NodeText",
 					"Data": "Entry templates fill content at creation time. Template fields calculate values for existing entries when a view is rendered. Date fields in an entry template can use a fixed time or the current time at creation."
+				}
+			]
+		},
+		{
+			"ID": "20261025205717-wu88xyc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025205717-wu88xyc",
+				"updated": "20261025205717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In an entry template, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open item in split view after creation"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to open each new bound or unbound entry on the right after creating it from a database view. A bound document focuses its title when available; otherwise, the primary key is focused. Unbound entries focus the primary key. Mobile uses the existing page or dialog."
+				}
+			]
+		},
+		{
+			"ID": "20261025205717-d3xd5xk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025205717-d3xd5xk",
+				"updated": "20261025205717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New templates have this option off. Turn it off to stop automatic opening. Existing templates retain their previous behavior until you change this switch, including automatic opening in calendars. Empty entries created without a template keep the view’s existing behavior; to configure them, create an empty unbound-entry template and make it the default."
 				}
 			]
 		},

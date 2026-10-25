@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Відкривати елемент у розділеному поданні після створення",
 	"deleteAll": "Видалити все",
 	"listMindmapManageNodeColors": "Керувати кольорами вузлів",
 	"listMindmapManageLineColors": "Керувати кольорами ліній",

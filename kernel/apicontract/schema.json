@@ -8133,6 +8133,9 @@
         "itemID": {
           "type": "string"
         },
+        "openAfterCreate": {
+          "type": "boolean"
+        },
         "warnings": {
           "type": "array",
           "items": {
@@ -10420,6 +10423,9 @@
         "name": {
           "type": "string"
         },
+        "openAfterCreate": {
+          "type": "boolean"
+        },
         "primaryKeyTemplate": {
           "type": "string"
         },
@@ -10508,6 +10514,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "openAfterCreate": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

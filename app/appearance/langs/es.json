@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Abrir el elemento en vista dividida después de crearlo",
 	"deleteAll": "Eliminar todo",
 	"listMindmapManageNodeColors": "Gestionar colores de nodos",
 	"listMindmapManageLineColors": "Gestionar colores de líneas",

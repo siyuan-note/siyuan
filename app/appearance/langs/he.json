@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "פתיחת הפריט בתצוגה מפוצלת לאחר יצירתו",
 	"deleteAll": "מחיקת הכול",
 	"listMindmapManageNodeColors": "ניהול צבעי צמתים",
 	"listMindmapManageLineColors": "ניהול צבעי קווים",

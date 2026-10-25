@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Open item in split view after creation",
 	"deleteAll": "Delete all",
 	"listMindmapManageNodeColors": "Manage node colors",
 	"listMindmapManageLineColors": "Manage line colors",

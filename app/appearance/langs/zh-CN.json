@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "创建后分屏打开条目",
 	"deleteAll": "全部删除",
 	"listMindmapManageNodeColors": "管理节点配色",
 	"listMindmapManageLineColors": "管理连线颜色",

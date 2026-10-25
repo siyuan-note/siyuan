@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "فتح العنصر في عرض مقسّم بعد إنشائه",
 	"deleteAll": "حذف الكل",
 	"listMindmapManageNodeColors": "إدارة ألوان العقد",
 	"listMindmapManageLineColors": "إدارة ألوان الخطوط",

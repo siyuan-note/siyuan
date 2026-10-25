@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Öğeyi oluşturduktan sonra bölünmüş görünümde aç",
 	"deleteAll": "Tümünü sil",
 	"listMindmapManageNodeColors": "Düğüm renklerini yönet",
 	"listMindmapManageLineColors": "Çizgi renklerini yönet",

@@ -7,6 +7,33 @@ import (
 	"testing"
 )
 
+func TestAVNewItemTemplateOpenAfterCreateContract(t *testing.T) {
+	endpoint := Endpoint[AVNewItemTemplate, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, test := range []struct {
+		body string
+		want *bool
+	}{
+		{`{}`, nil}, {`{"openAfterCreate":null}`, nil},
+		{`{"openAfterCreate":false}`, new(false)}, {`{"openAfterCreate":true}`, new(true)},
+	} {
+		value, err := endpoint.Decode(strings.NewReader(test.body))
+		if err != nil || (value.OpenAfterCreate == nil) != (test.want == nil) ||
+			test.want != nil && *value.OpenAfterCreate != *test.want {
+			t.Fatalf("opening preference %s: %+v %v", test.body, value, err)
+		}
+		raw, _ := json.Marshal(value)
+		var output map[string]json.RawMessage
+		if err = json.Unmarshal(raw, &output); err != nil || (output["openAfterCreate"] != nil) != (test.want != nil) {
+			t.Fatalf("opening preference presence lost: %s %v", raw, err)
+		}
+	}
+	for _, body := range []string{`{"openAfterCreate":0}`, `{"openAfterCreate":"false"}`, `{"openAfterCreate":[]}`} {
+		if _, err := endpoint.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid opening preference accepted: %s", body)
+		}
+	}
+}
+
 func TestAVAutomationDocumentDepthContract(t *testing.T) {
 	endpoint := Endpoint[AVAutomationBlockSource, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
 	for _, test := range []struct {

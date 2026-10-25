@@ -1,4 +1,5 @@
 {
+	"newItemTemplateOpenAfterCreate": "Buka item dalam tampilan terbagi setelah dibuat",
 	"deleteAll": "Hapus semua",
 	"listMindmapManageNodeColors": "Kelola warna simpul",
 	"listMindmapManageLineColors": "Kelola warna garis",

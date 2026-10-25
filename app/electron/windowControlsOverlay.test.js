@@ -1,11 +1,41 @@
 const assert = require("node:assert/strict");
+const {readFileSync} = require("node:fs");
+const path = require("node:path");
 const {test} = require("node:test");
-const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
+const {getCaptionHeight, getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
 
 test("caption overlays are Windows-only and keep the page background visible", () => {
-    assert.deepEqual(getTitleBarOverlayOptions("win32"), {color: "#00000000", symbolColor: "#808080"});
+    assert.deepEqual(getTitleBarOverlayOptions("win32"), {color: "#00000000", symbolColor: "#808080", height: 32});
+    assert.deepEqual(getTitleBarOverlayOptions("win32", getCaptionHeight(false, true)),
+        {color: "#00000000", symbolColor: "#808080", height: 42});
     assert.equal(getTitleBarOverlayOptions("darwin"), false);
     assert.equal(getTitleBarOverlayOptions("linux"), false);
+    assert.equal(getTitleBarOverlayOptions("linux", getCaptionHeight(false, true)), false);
+});
+
+test("first-frame caption heights cover every window and density combination", () => {
+    // 工具栏高度：普通顶栏与设置窗口；面板高度：融合页签与独立文档窗口。
+    assert.equal(getCaptionHeight(false, false), 32);
+    assert.equal(getCaptionHeight(false, true), 42);
+    assert.equal(getCaptionHeight(true, false), 28);
+    assert.equal(getCaptionHeight(true, true), 34);
+    // 非布尔输入按舒适密度处理，避免外部传入字符串时算出非法高度。
+    assert.equal(getCaptionHeight(undefined, undefined), 32);
+    assert.equal(getCaptionHeight("compact", "panel"), 32);
+    assert.equal(getTitleBarOverlayOptions("win32", getCaptionHeight(true, false)).height, 28);
+    assert.equal(getTitleBarOverlayOptions("win32", getCaptionHeight(true, true)).height, 34);
+});
+
+// 首帧高度与界面密度的顶栏尺寸共用同一组数字，避免渲染进程加载前按钮区与顶栏错位。
+test("first-frame caption heights follow the density toolbar and panel heights", () => {
+    const main = readFileSync(path.resolve(__dirname, "../src/assets/scss/main/_main.scss"), "utf8");
+    const density = readFileSync(path.resolve(__dirname, "../src/assets/scss/util/_density.scss"), "utf8");
+    const declared = (source, name) => Number(new RegExp(`var\\(--b3-ui-${name}, (\\d+)px\\)`).exec(source)[1]);
+    const compactSize = name => Number(new RegExp(`"${name}": (\\d+)px`).exec(density)[1]);
+    assert.equal(getCaptionHeight(false, false), declared(main, "toolbar-height"));
+    assert.equal(getCaptionHeight(false, true), declared(main, "panel-height"));
+    assert.equal(getCaptionHeight(true, false), compactSize("toolbar-height"));
+    assert.equal(getCaptionHeight(true, true), compactSize("panel-height"));
 });
 
 test("caption height and color updates deduplicate independently per window and preserve transparent backgrounds", () => {

@@ -1,4 +1,5 @@
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
+import {parseCanvasColor} from "../../util/color";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {
     getBuiltinColorPropertyValue,
@@ -53,11 +54,6 @@ const getEntryLabel = (type: TBuiltinColorType, key: number | TBuiltinInlineStyl
     return `${getTypeLabel(type)} ${key}`;
 };
 
-const colorCanvas = document.createElement("canvas");
-colorCanvas.width = 1;
-colorCanvas.height = 1;
-const colorContext = colorCanvas.getContext("2d", {willReadFrequently: true});
-
 const colorToHex = (value: string, fallback: string) => {
     const normalized = value.trim();
     if (/^#[0-9a-f]{6}$/i.test(normalized)) {
@@ -68,14 +64,11 @@ const colorToHex = (value: string, fallback: string) => {
         return `#${match.slice(1, 4).map(item => Math.max(0, Math.min(255, Math.round(Number(item))))
             .toString(16).padStart(2, "0")).join("")}`;
     }
-    if (!colorContext || !CSS.supports("color", normalized)) {
+    const color = parseCanvasColor(normalized);
+    if (!color) {
         return fallback;
     }
-    colorContext.clearRect(0, 0, 1, 1);
-    colorContext.fillStyle = normalized;
-    colorContext.fillRect(0, 0, 1, 1);
-    const color = colorContext.getImageData(0, 0, 1, 1).data;
-    return `#${Array.from(color.slice(0, 3)).map(item => item.toString(16).padStart(2, "0")).join("")}`;
+    return `#${color.slice(0, 3).map(item => item.toString(16).padStart(2, "0")).join("")}`;
 };
 
 const withThemeDefaults = <T>(fn: () => T) => {

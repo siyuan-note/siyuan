@@ -19,7 +19,9 @@ const runCases = compiled => {
     const errors = [];
     const installed = [];
     let frontend = "desktop";
-    const bazaar = new Function("getFrontend", "showMessage", compiled)(() => frontend, message => errors.push(message));
+    const bazaar = new Function("getFrontend", "showMessage", "hasDataTransferFiles", compiled)(
+        () => frontend, message => errors.push(message),
+        types => Array.from(types).includes("Files"));
     window.siyuan = {languages: {localBazaarPackageFileError: "Expected one ZIP file"}};
     bazaar._installLocalPackage = file => installed.push(file.name);
     const mount = () => {
@@ -42,24 +44,37 @@ const runCases = compiled => {
         names.forEach(name => transfer.items.add(new File(["test"], name)));
         return transfer;
     };
+    const typedFiles = (...entries) => {
+        const transfer = new DataTransfer();
+        entries.forEach(([name, type]) => transfer.items.add(new File(["test"], name, {type})));
+        return transfer;
+    };
     for (frontend of ["desktop", "desktop-window", "browser-desktop", "browser-mobile"]) {
         const root = mount();
         const overlay = root.querySelector(".config-bazaar__drop");
         const readme = root.querySelector("#configBazaarReadme");
         const hidden = () => overlay.classList.contains("fn__none");
-        // Chromium image drags can contain both a file and HTML/URL data.
+        // Chromium 中拖动页面内图片时，拖拽数据仍会携带 Files 类型
         const imageTransfer = files("image.png");
         imageTransfer.setData("text/html", '<img src="https://example.com/image.png">');
         imageTransfer.setData("text/uri-list", "https://example.com/image.png");
-        assert.equal(dispatch(readme.querySelector("img"), "dragstart", imageTransfer).defaultPrevented, true,
-            `${frontend}: linked README image must not start a native drag`);
-        const image = document.createElement("img");
-        readme.replaceChildren(image);
-        assert.equal(dispatch(image, "dragstart", imageTransfer).defaultPrevented, true,
-            "Images added by a README refresh are also protected");
+        const image = readme.querySelector("img");
+        assert.equal(dispatch(image, "dragstart", imageTransfer).defaultPrevented, false,
+            `${frontend}: internal content keeps its native drag`);
+        assert.equal(dispatch(image, "dragenter", imageTransfer).defaultPrevented, false,
+            "Internal drags are not treated as local files");
+        assert.equal(hidden(), true, "Internal drags do not show the drop overlay");
+        assert.equal(dispatch(overlay, "drop", imageTransfer).defaultPrevented, false);
         assert.equal(hidden(), true);
-        assert.equal(dispatch(readme, "dragstart").defaultPrevented, false,
-            "Non-image content keeps its existing drag behavior");
+        assert.equal(errors.length, 0);
+        assert.equal(installed.length, 0, "Internal drags never install a package");
+
+        dispatch(image, "dragend", imageTransfer);
+        readme.replaceChildren(document.createElement("img"));
+        const refreshed = readme.querySelector("img");
+        dispatch(refreshed, "dragstart", imageTransfer);
+        dispatch(refreshed, "dragend", imageTransfer);
+        assert.equal(hidden(), true);
 
         const textTransfer = new DataTransfer();
         textTransfer.setData("text/plain", "Selected text");
@@ -68,8 +83,9 @@ const runCases = compiled => {
         assert.equal(hidden(), true);
         assert.equal(errors.length, 0);
 
-        const zip = files("package.ZIP");
-        assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, true);
+        const zip = typedFiles(["package.ZIP", "application/zip"]);
+        assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, true,
+            "Local files still install after an internal drag finished");
         assert.equal(hidden(), false);
         dispatch(overlay, "dragenter", zip);
         dispatch(readme, "dragleave", zip);
@@ -82,13 +98,48 @@ const runCases = compiled => {
         assert.equal(hidden(), true);
         assert.equal(installed.pop(), "package.ZIP");
 
-        for (const invalid of [files("image.png"), files("one.zip", "two.zip")]) {
+        // 系统拖入已知非 ZIP 文件时不显示安装遮罩，但仍接管拖拽，避免浏览器直接打开该文件
+        const photo = typedFiles(["photo.png", "image/png"]);
+        assert.equal(dispatch(readme, "dragenter", photo).defaultPrevented, true,
+            "Known non-ZIP files are still intercepted");
+        assert.equal(hidden(), true, "Known non-ZIP files do not show the overlay");
+        assert.equal(dispatch(overlay, "dragover", photo).defaultPrevented, true);
+        assert.equal(dispatch(overlay, "drop", photo).defaultPrevented, true);
+        assert.equal(errors.pop(), "Expected one ZIP file");
+        assert.equal(installed.length, 0);
+
+        // 拖拽数据中的文件类型可能缺失，此时按未知处理并保留遮罩
+        const unknown = typedFiles(["archive", ""]);
+        assert.equal(dispatch(readme, "dragenter", unknown).defaultPrevented, true);
+        assert.equal(hidden(), false, "Unknown file types keep the overlay");
+        assert.equal(dispatch(overlay, "drop", unknown).defaultPrevented, true);
+        assert.equal(hidden(), true);
+        assert.equal(errors.pop(), "Expected one ZIP file");
+        assert.equal(installed.length, 0);
+
+        const unknownZip = files("package.zip");
+        assert.equal(dispatch(readme, "dragenter", unknownZip).defaultPrevented, true);
+        assert.equal(hidden(), false, "A ZIP without a readable type keeps the overlay");
+        assert.equal(dispatch(overlay, "drop", unknownZip).defaultPrevented, true);
+        assert.equal(installed.pop(), "package.zip");
+
+        for (const invalid of [typedFiles(["image.png", "image/png"]),
+            typedFiles(["one.zip", "application/zip"], ["two.zip", "application/zip"])]) {
             dispatch(readme, "dragenter", invalid);
             dispatch(overlay, "drop", invalid);
             assert.equal(hidden(), true);
             assert.equal(errors.pop(), "Expected one ZIP file");
             assert.equal(installed.length, 0);
         }
+
+        // 拖拽源被移除时不会派发 dragend，鼠标抬起后本地文件拖拽需恢复
+        dispatch(refreshed, "dragstart", imageTransfer);
+        assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, false);
+        dispatch(overlay, "mouseup", zip);
+        assert.equal(dispatch(readme, "dragenter", zip).defaultPrevented, true,
+            "Mouse release clears a drag whose dragend never arrived");
+        dispatch(overlay, "drop", zip);
+        assert.equal(installed.pop(), "package.ZIP");
     }
     frontend = "mobile";
     const root = mount();
@@ -129,7 +180,7 @@ if (process.versions.electron && process.type === "browser") {
         }
     }).catch(error => { console.error(error); app.exit(1); });
 } else {
-    require("node:test").test("bazaar blocks internal image drags and preserves external ZIP drops and mobile file selection", {
+    require("node:test").test("bazaar ignores internal drags, filters known non-ZIP files and preserves external ZIP drops and mobile file selection", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

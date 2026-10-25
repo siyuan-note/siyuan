@@ -507,10 +507,10 @@ const resolveClickContext = (
     };
 };
 
-const handleCardClick = (context: IBazaarClickContext, eventTarget: HTMLElement) => {
+const handleCardClick = (context: IBazaarClickContext) => {
     const {controller, pkgItem, pkgType, packageSource} = context;
-    if (!hasClosestByClassName(eventTarget, "b3-card__actions--right") && pkgItem && !pkgItem.invalidReason &&
-        pkgType && packageSource) {
+    // 操作区内的图标、按钮、开关、标签都带有 data-type 并在循环中先行处理，走到卡片这一层说明点击落在操作区的空白处
+    if (pkgItem && !pkgItem.invalidReason && pkgType && packageSource) {
         controller._renderReadme(pkgType, packageSource, pkgItem);
     }
     return HANDLED;
@@ -580,7 +580,7 @@ const bindBazaarClickEvent = (
             }
             let fallbackResult: IBazaarActionResult | undefined;
             if (target.classList.contains("b3-card")) {
-                fallbackResult = handleCardClick(context, eventTarget);
+                fallbackResult = handleCardClick(context);
             } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
                 fallbackResult = handleLayoutTabClick(context, target);
             } else if (target.classList.contains("item__preview")) {

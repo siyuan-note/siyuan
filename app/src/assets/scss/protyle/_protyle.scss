@@ -149,7 +149,6 @@
 
   &--full {
     display: flex;
-    flex-wrap: wrap;
     width: max-content;
     scrollbar-width: none;
     overscroll-behavior: contain;
@@ -220,6 +219,7 @@
     height: calc(var(--b3-font-size-editor) * 1.625);
     width: 16px;
     float: left;
+    pointer-events: none;
     transition: var(--b3-color-transition);
   }
 }

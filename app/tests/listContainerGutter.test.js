@@ -413,6 +413,35 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
     check.equal(gutter.element.querySelectorAll('[draggable="true"]').length, 0, "read-only icons remain non-draggable");
     protyle.disabled = false;
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+
+    const checkFullLayout = vertical => {
+        const buttons = Array.from(gutter.element.querySelectorAll("button[data-node-id], button[data-type='fold']"));
+        const rects = buttons.map(button => button.getBoundingClientRect());
+        check.equal(new Set(rects.map(rect => vertical ? rect.left : rect.top)).size, 1,
+            "complete indicators occupy one whole row or one whole column");
+        for (const [index, button] of buttons.entries()) {
+            const rect = rects[index];
+            for (const x of [rect.left + 1, rect.right - 1]) {
+                const y = rect.top + rect.height / 2;
+                const target = document.elementFromPoint(x, y);
+                check.equal(target?.closest("button"), button,
+                    `stable pointer target: ${button.dataset.nodeId || button.dataset.type} at ${x},${y}`);
+                const before = state();
+                check.deepEqual(hover(target, x, y), before, "moving across indicators preserves the whole chain");
+            }
+        }
+    };
+    checkFullLayout(false);
+    root.style.paddingLeft = "24px";
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+    checkFullLayout(true);
+    const firstRect = gutter.element.querySelector("button[data-node-id]").getBoundingClientRect();
+    check.ok(Math.abs(firstRect.top - root.querySelector('[data-node-id="leaf"]').getBoundingClientRect().top) <= 8,
+        "a vertical chain starts at the content's first line");
+    root.style.paddingLeft = "180px";
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+    checkFullLayout(false);
 
     pane.style.cssText = "width:320px;height:200px";
     root.style.cssText = "padding:20px 24px;width:250px";

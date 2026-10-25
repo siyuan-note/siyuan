@@ -3940,6 +3940,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const wasCompressed = this.element.style.width === "24px";
         const previousScrollTop = this.element.scrollTop;
         this.element.classList.toggle("protyle-gutters--full", fullGutter);
+        this.element.style.flexDirection = "";
         this.element.style.maxHeight = "";
         this.element.style.overflowY = "";
         delete this.element.dataset.scrollable;
@@ -4045,11 +4046,13 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const viewportRight = Math.min(viewportRect.right, paneRect.right);
         const viewportBottom = Math.min(viewportRect.bottom, paneRect.bottom);
         if (fullGutter) {
-            // 完整层级按左侧可用宽度换行，超出视口的层级可滚动访问。
+            // 完整层级在空间不足时整列排列，超出视口的层级可滚动访问。
             const buttons = Array.from(this.element.querySelectorAll<HTMLElement>("button[data-node-id], button[data-type='fold']"));
             const buttonWidth = Math.max(24, ...buttons.map(button => button.getBoundingClientRect().width));
             const availableWidth = Math.max(buttonWidth, horizontalAnchorLeft - space - gutterGap - viewportLeft);
-            this.element.style.width = `${Math.min(this.naturalWidth, availableWidth, viewportRight - viewportLeft)}px`;
+            const vertical = this.naturalWidth > availableWidth;
+            this.element.style.flexDirection = vertical ? "column" : "";
+            this.element.style.width = `${Math.min(vertical ? buttonWidth : this.naturalWidth, viewportRight - viewportLeft)}px`;
             this.element.style.maxHeight = `${Math.max(0, viewportBottom - Math.max(contentTop, paneRect.top))}px`;
             if (this.element.scrollHeight > this.element.clientHeight) {
                 this.element.style.overflowY = "auto";
@@ -4060,8 +4063,9 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             }
         }
         if (!element.classList.contains("av__row")) {
+            const firstButtonHeight = fullGutter ? (this.element.firstElementChild as HTMLElement)?.offsetHeight : 0;
             const gutterMarginHeight = getGutterMarginHeight(
-                rect.height, this.element.clientHeight, fullGutter ? this.element.clientHeight : this.naturalHeight,
+                rect.height, firstButtonHeight || this.element.clientHeight, fullGutter ? firstButtonHeight : this.naturalHeight,
                 window.siyuan.config.editor.fontSize);
             if (typeof gutterMarginHeight === "number") {
                 marginHeight = gutterMarginHeight;

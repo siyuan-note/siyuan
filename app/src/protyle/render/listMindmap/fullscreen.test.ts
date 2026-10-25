@@ -7,7 +7,7 @@ import {promisify} from "node:util";
 import test from "node:test";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, css: string) => {
+const browserCases = async (source: string, css: string, contentCSS: string, themes: string[]) => {
     const check = require("node:assert/strict");
     const style = document.createElement("style");
     style.textContent = css;
@@ -526,6 +526,60 @@ const browserCases = async (source: string, css: string) => {
             parent.remove();
         }
     }
+    // 使用完整排版、内置主题及代码高亮样式，检查移出编辑器祖先后的实际配色。
+    style.textContent = contentCSS;
+    const themeStyle = document.createElement("style");
+    document.head.append(themeStyle);
+    for (const mobile of [false, true]) {
+        document.body.className = mobile ? "body--android" : "body--windows";
+        for (const theme of themes) {
+            themeStyle.textContent = theme;
+            const parent = document.createElement("div");
+            parent.className = "protyle-wysiwyg";
+            const host = document.createElement("div");
+            parent.append(host);
+            document.body.append(parent);
+            const holder = document.createElement("div");
+            holder.innerHTML = lute.Md2BlockDOM("- Root\n  - Child\n");
+            const list = holder.firstElementChild;
+            const rich = document.createElement("div");
+            rich.innerHTML = lute.Md2BlockDOM("`inline`\n\n```js\ncode\n```\n\n> Quote\n\n| Header |\n| --- |\n| Cell |\n");
+            rich.querySelector("[contenteditable]").insertAdjacentHTML("beforeend",
+                '<span data-type="mark">Mark</span><span data-type="search-mark">Search</span>' +
+                '<span data-type="kbd">Ctrl</span>' +
+                '<span data-type="text" style="background-color:var(--b3-font-background1)">Color</span>');
+            const callout = rich.querySelector(".bq").cloneNode(true) as HTMLElement;
+            callout.className = "callout";
+            callout.dataset.type = "NodeCallout";
+            callout.dataset.nodeId = Lute.NewNodeID();
+            rich.append(callout);
+            list.firstElementChild.append(...rich.children);
+            const originalSource = list.outerHTML;
+            const view = new api.ListMindmapView({host, model: api.readListMindmap(list), onExit: () => {}});
+            await settle();
+            const backgrounds = () => Array.from(host.querySelectorAll<HTMLElement>(
+                '.mindmap-view__content .code-block, .mindmap-view__content [data-type~="code"], ' +
+                '.mindmap-view__content [data-type~="mark"], .mindmap-view__content [data-type~="search-mark"], ' +
+                '.mindmap-view__content [data-type~="kbd"], .mindmap-view__content [data-type="text"], ' +
+                ".mindmap-view__content .bq, .mindmap-view__content .callout, " +
+                ".mindmap-view__content th, .mindmap-view__content td"),
+            element => ({type: element.dataset.type || element.className || element.tagName,
+                background: getComputedStyle(element).backgroundColor}));
+            const documentBackgrounds = backgrounds();
+            check.equal(documentBackgrounds.length, 10, "all rich content background fixtures are rendered");
+            for (let round = 0; round < 2; round++) {
+                host.querySelector<HTMLButtonElement>('[aria-label="fullscreen"]').click();
+                await settle();
+                check.deepEqual(backgrounds(), documentBackgrounds, "fullscreen retains every rich content background");
+                host.querySelector<HTMLButtonElement>('[aria-label="exitFullscreen"]').click();
+                await settle();
+                check.deepEqual(backgrounds(), documentBackgrounds, "returning to the document retains backgrounds");
+            }
+            check.equal(list.outerHTML, originalSource, "fullscreen styling never rewrites source blocks");
+            view.destroy();
+            parent.remove();
+        }
+    }
     return "Mindmap fullscreen cases passed";
 };
 
@@ -540,6 +594,11 @@ test("fullscreen restores entry focus or applies explicit document layout across
         }).outputText).join("\n");
     const css = ["business/_block.scss", "protyle/_mindmap-view.scss"].map(file => require("sass").compile(
         path.resolve(__dirname, "../../../assets/scss", file), {logger: require("sass").Logger.silent}).css).join("\n");
+    const contentCSS = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"),
+        {logger: require("sass").Logger.silent}).css;
+    const themes = ["daylight", "midnight"].map((name, index) => readFileSync(
+        path.resolve(__dirname, "../../../../appearance/themes", name, "theme.css"), "utf8") + "\n" + readFileSync(
+        path.resolve(__dirname, "../../../../stage/protyle/js/highlight.js/styles", index ? "github-dark.min.css" : "github.min.css"), "utf8"));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-fullscreen-"));
     const script = path.join(temporary, "run.cjs");
     const lute = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");
@@ -562,7 +621,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
+        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(contentCSS)}, ${JSON.stringify(themes)})`)}));
         win.destroy();
         app.exit(0);
     } catch (error) {

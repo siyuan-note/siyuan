@@ -38,7 +38,9 @@ const runRendererCase = async (sources, expected) => {
         webFrame: {setZoomFactor() {}}};
     const functions = {isWindow: () => true, setToolbarLeftMac() {}};
     const compatibility = {isMac: () => false, applyPlatformClasses() {}};
-    const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions});
+    const overlay = load(sources.overlay, {electron, "../constants": {Constants: constants}});
+    const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions,
+        "./windowControlsOverlay": overlay});
     const {initWindow} = load(sources.host, {
         electron, "../constants": {Constants: constants}, "../util/functions": functions,
         "../protyle/util/compatibility": compatibility, "./windowControls": controls,
@@ -176,7 +178,8 @@ if (process.versions.electron && process.type === "browser") {
         const ts = require("typescript");
         for (const [key, file] of Object.entries({assets: "util/assets.ts", appearance: "window/appearance.ts",
             paint: "util/windowPaint.ts", loading: "boot/loading.ts", init: "window/init.ts",
-            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", tabs: "layout/tabUtil.ts"})) {
+            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", overlay: "boot/windowControlsOverlay.ts",
+            tabs: "layout/tabUtil.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {MOBILE: false, BROWSER: false}, false, true);
             sources[key] = ts.transpileModule(source, {

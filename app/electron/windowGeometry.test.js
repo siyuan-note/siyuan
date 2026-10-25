@@ -4,6 +4,7 @@ const {test} = require("node:test");
 const {readFileSync} = require("node:fs");
 const {runInNewContext} = require("node:vm");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
+const {getTitleBarOverlayOptions} = require("./windowControlsOverlay");
 
 const state = (values = {}) => ({version: 1, x: 100, y: 80, width: 900, height: 700,
     maximized: false, fullscreen: false, ...values});
@@ -140,6 +141,7 @@ const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
     runInNewContext(source.slice(start, end), {
         ipcMain, initializedWindowIds,
         BrowserWindow: Window, URL, process: {platform: "win32"},
+        getTitleBarOverlayOptions: () => getTitleBarOverlayOptions("win32"),
         getWindowKernelTarget: () => ({origin: "http://127.0.0.1:6806", mode}),
         getRemoteSession: () => ({}),
         windowWorkspaces: {get: () => windows[0], associate: () => {}},

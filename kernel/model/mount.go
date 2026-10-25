@@ -107,7 +107,7 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	if initializeBoxDoc {
 		_, err = ensureBoxDoc0(id)
 		if err == nil {
-			// 新笔记本已处于打开状态，Mount 会直接返回，须在创建时完成元数据初始化。
+			// 新笔记本的源摘要已补齐，后续挂载重建会在排队时撤销就绪状态。
 			err = treenode.SetDocumentMetadataState(id, "ready")
 		}
 		if err != nil {

@@ -101,10 +101,13 @@ const cases = async compiled => {
         const eventErrors = [];
         const recordEventError = event => { eventErrors.push(event.error); event.preventDefault(); };
         window.addEventListener("error", recordEventError);
-        bind.call({element: {contains: node => root.contains(node), addEventListener: (name, callback) => {
+        const addEventListener = root.addEventListener.bind(root);
+        root.addEventListener = (name, callback) => {
             callbacks[name] = callback;
-            if (name === "pointerdown") root.addEventListener(name, callback);
-        }}}, protyle);
+            if (name === "pointerdown") addEventListener(name, callback);
+        };
+        bind.call({element: root}, protyle);
+        delete root.addEventListener;
         const pointerdown = (target, pointerType = "mouse") => {
             target.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType, button: 0}));
             check.deepEqual(eventErrors, [], "pointerdown completes without renderer exceptions");

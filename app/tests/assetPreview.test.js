@@ -277,9 +277,11 @@ const runCases = async source => {
             }},
             "../protyle/util/onGet": {disabledProtyle: () => {}},
             "../protyle/ui/initUI": {removeLoading: () => {}},
-            "../util/fetch": {fetchPost: (url, _data, callback) => {
-                if (url.endsWith("getUnusedAssets")) callback({data: ["note.txt", "other.txt", "audio.mp3", "book.pdf"].map(name =>
-                    ({item: "assets/" + name, path: "assets/" + name}))});
+            "../util/fetch": {fetchSyncPost: async (url, data) => {
+                check.equal(url, "/api/asset/getUnusedAssets");
+                check.deepEqual(data, {all: true});
+                return {code: 0, data: ["note.txt", "other.txt", "audio.mp3", "book.pdf"].map(name =>
+                    ({name, item: "assets/" + name, path: "assets/" + name}))};
             }},
         });
         const root = document.createElement("div");
@@ -288,6 +290,7 @@ const runCases = async source => {
         style.textContent = source.styles[isMobile ? 1 : 0];
         document.body.append(root);
         await assetsAPI.mountAssetsTab(root, undefined, {});
+        await settle();
         const item = root.querySelector('[data-tab-type="unrefAssets"]');
         const panel = root.querySelector(".config-assets__preview");
         item.dispatchEvent(new MouseEvent(isMobile ? "click" : "mouseover", {bubbles: true}));

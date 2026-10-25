@@ -349,7 +349,7 @@ Docker ホスティングの制限も適用されます。ブラウザーでの�
 ```
 Web UI: 6806
 Container Port: 6806
-Container Path: /home/siyuan
+Container Path: /siyuan/workspace
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000

@@ -9,7 +9,8 @@ import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
-import {finishMobileStartup, setEmpty} from "./setEmpty";
+import {setEmpty} from "./setEmpty";
+import {finishMobileStartup} from "./startup";
 import {getOpenNotebookCount, parseSiYuanUriInfo, parseUriInfo} from "../../util/pathName";
 import {processMobileSystemUri} from "./systemUri";
 import {popMenu} from "../menu";

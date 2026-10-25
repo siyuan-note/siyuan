@@ -10,11 +10,37 @@ export interface IWindowControlsOverlay extends EventTarget {
 let initialized = false;
 let scheduled = false;
 let minimumHeight = 31;
-let lastStyle = "";
 let lastLayout = "";
 let sizeObserver: ResizeObserver;
+let colorContext: CanvasRenderingContext2D | null | undefined;
+let lastComputedColor = "";
+let lastSymbolColor: string;
 
 const getOverlay = () => (navigator as Navigator & {windowControlsOverlay?: IWindowControlsOverlay}).windowControlsOverlay;
+
+// 用浏览器解析主题颜色并转成 sRGB，避免把原生解析器不支持的颜色格式直接传入 Electron。
+const getSymbolColor = (color: string) => {
+    if (lastComputedColor === color) return lastSymbolColor;
+    try {
+        if (!CSS.supports("color", color)) return;
+        if (!colorContext) {
+            const canvas = document.createElement("canvas");
+            canvas.width = canvas.height = 1;
+            colorContext = canvas.getContext("2d", {willReadFrequently: true});
+        }
+        if (!colorContext) return;
+        colorContext.clearRect(0, 0, 1, 1);
+        colorContext.fillStyle = color;
+        colorContext.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = colorContext.getImageData(0, 0, 1, 1).data;
+        lastComputedColor = color;
+        lastSymbolColor = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+        return lastSymbolColor;
+    } catch {
+        // 无法转换时仅同步高度，保留原有按钮颜色。
+        colorContext = undefined;
+    }
+};
 
 export const updateWindowControlsOverlay = () => {
     scheduled = false;
@@ -30,14 +56,11 @@ export const updateWindowControlsOverlay = () => {
     const height = parseFloat(rootStyle.getPropertyValue(standalone || fused ?
         "--b3-ui-panel-height" : "--b3-ui-toolbar-height")) || (standalone || fused ? 42 : 32);
     const icon = toolbar.querySelector<HTMLElement>(".toolbar__item");
-    const symbolColor = getComputedStyle(icon || toolbar).color;
+    const symbolColor = getSymbolColor(getComputedStyle(icon || toolbar).color);
     const style = {cmd: "setTitleBarOverlay", symbolColor,
         height: Math.max(minimumHeight, Math.round(height * webFrame.getZoomFactor()))};
-    const styleKey = JSON.stringify(style);
-    if (lastStyle !== styleKey) {
-        lastStyle = styleKey;
-        ipcRenderer.send(Constants.SIYUAN_CMD, style);
-    }
+    // 主进程按实际应用成功的状态去重，同一请求在失败后仍可重试。
+    ipcRenderer.send(Constants.SIYUAN_CMD, style);
 
     const topRows = new Set<Element>();
     if (standalone || fused) {

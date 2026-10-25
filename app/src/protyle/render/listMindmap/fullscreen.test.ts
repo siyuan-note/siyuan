@@ -45,7 +45,12 @@ const browserCases = async (source: string, css: string) => {
                 Array.from({length: 12}, (_, index) => `  - Node ${index}\n`).join(""));
             const list = holder.firstElementChild;
             const originalSource = list.outerHTML;
-            const view = new api.ListMindmapView({host, model: api.readListMindmap(list), onExit: () => {}});
+            let remembered: {scale: number, center: {x: number, y: number}};
+            const remember = (state: typeof remembered) => {
+                remembered = {scale: state.scale, center: {...state.center}};
+            };
+            const view = new api.ListMindmapView({host, model: api.readListMindmap(list),
+                onViewportChange: remember, onExit: () => {}});
             await settle();
             const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
             const center = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
@@ -258,9 +263,11 @@ const browserCases = async (source: string, css: string) => {
             await settle();
             checkFrame();
             const beforePrint = [view.scale, view.offsetX, view.offsetY];
+            const rememberedBeforePrint = JSON.stringify(remembered);
             window.dispatchEvent(new Event("beforeprint"));
             await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "print");
             check.equal(getComputedStyle(preview).display, "none", "layout guides are excluded from printing");
+            check.equal(JSON.stringify(remembered), rememberedBeforePrint, "print fitting does not overwrite the saved view");
             await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "");
             window.dispatchEvent(new Event("afterprint"));
             await settle();
@@ -270,6 +277,8 @@ const browserCases = async (source: string, css: string) => {
             button("exitFullscreen").click();
             await settle();
             checkApplied(editedLayout);
+            check.equal(remembered.scale, view.scale, "explicit fullscreen layout saves the applied document zoom");
+            check.deepEqual([remembered.center.x, remembered.center.y], center());
             check.equal(view.getContentHost(view.model.root.id).textContent, "Edited in document layout");
 
             // 画布锁定会取消未应用的布局，不能借助模式切换改写锁定视角。
@@ -491,19 +500,28 @@ const browserCases = async (source: string, css: string) => {
             await settle();
             equalCenter(beforeLock);
             check.equal(view.scale, beforeLockScale, "locking in fullscreen does not replace the saved document view");
+            check.equal(remembered.scale, beforeLockScale);
+            check.deepEqual([remembered.center.x, remembered.center.y], beforeLock);
             button("fullscreen").click();
             await settle();
             view.destroy();
             check.equal(host.parentElement, parent);
             check.equal(host.classList.contains("fullscreen"), false);
             check.equal(Array.from(parent.childNodes).some(node => node.nodeType === Node.COMMENT_NODE), false);
-            const initializing = new api.ListMindmapView({host, model: api.readListMindmap(list), onExit: () => {}});
+            const initializing = new api.ListMindmapView({host, model: api.readListMindmap(list),
+                viewport: remembered, onViewportChange: remember, onExit: () => {}});
             button("fullscreen").click();
             button("exitFullscreen").click();
             await settle();
             check.equal(initializing.initialFit, false, "an early round trip still completes the initial document layout");
             check.equal(host.parentElement, parent);
             check.ok(Number.isFinite(initializing.offsetX) && Number.isFinite(initializing.offsetY));
+            check.equal(initializing.scale, beforeLockScale, "reopening restores zoom instead of fitting");
+            const reopenedViewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
+            const reopenedCenter = [(reopenedViewport.clientWidth / 2 - initializing.offsetX) / initializing.scale,
+                (reopenedViewport.clientHeight / 2 - initializing.offsetY) / initializing.scale];
+            reopenedCenter.forEach((value, index) => check.ok(Math.abs(value - beforeLock[index]) < 1e-8,
+                "reopening restores the document center"));
             initializing.destroy();
             parent.remove();
         }

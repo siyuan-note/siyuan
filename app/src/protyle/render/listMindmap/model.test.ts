@@ -389,6 +389,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
+            isEncryptedBox: () => false,
+            setStorageVal: () => check.fail("Embedded previews cannot persist viewport positions"),
             fetchSyncPost: async () => ({code: 0, data: {dom: full}}),
             normalizeHTMLAssetIFrameBlockDOM: (html: string) => html,
             cleanHeadingNumberHTML: (html: string) => html, cleanTableCellRichHTML: (html: string) => html,
@@ -5504,7 +5506,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         readFileSync(path.join(__dirname, "../../wysiwyg/transaction.ts"), "utf8"), typescript.ScriptTarget.Latest, true);
     const updateTransaction = transactionSource.statements.find(statement => typescript.isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(transactionSource) === "updateTransaction"));
-    const controllerSource = compile(path.join(__dirname, "foldMenu.ts")) +
+    const controllerSource = compile(path.join(__dirname, "viewport.ts")) + compile(path.join(__dirname, "foldMenu.ts")) +
         compile(path.join(__dirname, "../../util/hasClosest.ts")) +
         compile(path.join(__dirname, "../../wysiwyg/getBlock.ts")) + compile(path.join(__dirname, "index.ts")) +
         typescript.transpileModule(updateTransaction.getText(transactionSource).replace(/^export /, ""), {

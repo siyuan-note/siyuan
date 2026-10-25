@@ -857,6 +857,7 @@ export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => vo
         defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
         defaultStorage[Constants.LOCAL_AV_CALENDAR_MODES] = {};
         defaultStorage[Constants.LOCAL_TABS_READING] = {};
+        defaultStorage[Constants.LOCAL_MINDMAP_VIEWPORTS] = {};
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
@@ -867,7 +868,8 @@ export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => vo
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
             Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH,
-            Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES, Constants.LOCAL_TABS_READING].forEach((key) => {
+            Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES, Constants.LOCAL_TABS_READING,
+            Constants.LOCAL_MINDMAP_VIEWPORTS].forEach((key) => {
             const value = response.data[key];
             if (typeof value === "string") {
                 try {

@@ -36,6 +36,7 @@ import {syncListMindmapHeight} from "./height";
 import {bindListMindmapResize} from "./resize";
 import {setBlockHeight} from "../../gutter/height";
 import {ListMindmapView} from "./view";
+import {flushListMindmapViewports, getListMindmapViewport, saveListMindmapViewport} from "./viewport";
 import {getListMindmapLineColors, getListMindmapNodeColors, getListMindmapNodeColorMenu} from "./colors";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
@@ -238,6 +239,8 @@ class ListMindmapController {
         list.appendChild(this.host);
         let restoreFullscreenChrome: () => void;
         this.view = new ListMindmapView({
+            viewport: getListMindmapViewport(owner, list),
+            onViewportChange: state => saveListMindmapViewport(owner, list, state),
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
             onPreviewImage: (src, video) => previewDocImage(src, owner.block.rootID, video),
@@ -1055,6 +1058,7 @@ class ListMindmapController {
         this.resize.destroy();
         this.unregisterVisible?.();
         this.view.destroy();
+        flushListMindmapViewports();
         this.host.remove();
         this.list.removeAttribute("data-mindmap-view-rendered");
         if (restoreFocus) {

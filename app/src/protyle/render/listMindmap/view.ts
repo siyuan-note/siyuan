@@ -24,10 +24,13 @@ import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryR
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
 import {getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
 import {canCutMindmapBranches} from "./clipboard";
+import type {ListMindmapViewport} from "./viewport";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
     model: ListMindmapModel;
+    viewport?: ListMindmapViewport;
+    onViewportChange?: (state: ListMindmapViewport) => void;
     readOnly?: boolean;
     onLockChange?: (locked: boolean) => Promise<boolean>;
     printLayout?: boolean;
@@ -1355,7 +1358,9 @@ export class ListMindmapView {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
-                this.fit();
+                if (!this.restoreViewport()) {
+                    this.fit();
+                }
             } else if (center) {
                 this.draw();
             } else {
@@ -2036,6 +2041,7 @@ export class ListMindmapView {
         const height = this.viewport.clientHeight;
         this.resizeViewport(width, height);
         this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.rememberViewport();
         this.updateDocumentViewport();
         this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
         this.zoomSlider.value = String(Math.round(this.scale * 100));
@@ -4177,6 +4183,33 @@ export class ListMindmapView {
         this.documentViewport.style.width = `${width}px`;
         this.documentViewport.style.height = `${height}px`;
         this.documentViewport.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    private restoreViewport() {
+        const state = this.options.viewport;
+        if (!state) {
+            return false;
+        }
+        this.scale = state.scale;
+        this.offsetX = this.viewport.clientWidth / 2 - state.center.x * this.scale;
+        this.offsetY = this.getViewportAnchorY(this.viewport.clientHeight) - state.center.y * this.scale;
+        this.draw();
+        return true;
+    }
+
+    private rememberViewport() {
+        if (!this.options.onViewportChange || this.initialFit || this.printTransform || this.options.printLayout ||
+            !this.viewport.clientWidth || !this.viewport.clientHeight) {
+            return;
+        }
+        // 全屏中的临时浏览不覆盖文档视角；显式应用布局后由文档视图的下一次绘制保存。
+        this.options.onViewportChange(this.documentView || {
+            scale: this.scale,
+            center: {
+                x: (this.viewport.clientWidth / 2 - this.offsetX) / this.scale,
+                y: (this.getViewportAnchorY(this.viewport.clientHeight) - this.offsetY) / this.scale,
+            },
+        });
     }
 
     private captureViewportCenter() {

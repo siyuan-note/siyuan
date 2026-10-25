@@ -35,6 +35,7 @@ import {
     sortBazaarPackages,
 } from "../util/bazaarPackage";
 import {BAZAAR_README_SANITIZE_OPTIONS} from "./bazaarReadmeSanitize";
+import {hasDataTransferFiles} from "../protyle/upload/localDropFiles";
 import {
     BAZAAR_PACKAGE_CONFIG,
     BAZAAR_PACKAGE_TYPES,
@@ -1701,21 +1702,37 @@ type="checkbox">
         }
 
         const dropTarget = mount.element.firstElementChild as HTMLElement;
-        dropTarget.addEventListener("dragstart", (event: DragEvent) => {
-            // Internal images can expose Files too; they are not local package uploads.
-            if (event.target instanceof HTMLImageElement) {
-                event.preventDefault();
-            }
-        });
         const dropElement = dropTarget.querySelector(".config-bazaar__drop");
         let dragDepth = 0;
-        const isFileDrag = (event: DragEvent) => Array.from(event.dataTransfer?.types || []).includes("Files");
+        // 集市内部拖拽（如 README 图片）也可能携带 Files 类型，因此按拖拽发起位置区分本地文件
+        let internalDrag = false;
+        const endInternalDrag = () => {
+            internalDrag = false;
+        };
+        dropTarget.addEventListener("dragstart", () => {
+            internalDrag = true;
+        });
+        dropTarget.addEventListener("dragend", endInternalDrag);
+        // 拖拽源被移除时不会派发 dragend，用鼠标抬起兜底清除标记
+        dropTarget.addEventListener("mouseup", endInternalDrag);
+        const isFileDrag = (event: DragEvent) =>
+            !internalDrag && hasDataTransferFiles(event.dataTransfer?.types || []);
+        // 系统拖入已知非 ZIP 文件（如图片）时不显示安装遮罩，但拖拽数据里的类型可能缺失，缺失时按未知处理
+        const localPackageMimeTypes = ["application/zip", "application/x-zip-compressed", "multipart/x-zip"];
+        const isLocalPackageDrag = (event: DragEvent) => {
+            const mimes = Array.from(event.dataTransfer?.items || [])
+                .filter(item => item.kind === "file")
+                .map(item => item.type.toLowerCase());
+            return mimes.length === 0 || mimes.some(mime => mime === "" || localPackageMimeTypes.includes(mime));
+        };
         dropTarget.addEventListener("dragenter", (event: DragEvent) => {
             if (!isFileDrag(event)) {
                 return;
             }
-            dragDepth++;
-            dropElement.classList.remove("fn__none");
+            if (isLocalPackageDrag(event)) {
+                dragDepth++;
+                dropElement.classList.remove("fn__none");
+            }
             event.preventDefault();
             event.stopPropagation();
         });
